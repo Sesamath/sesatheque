@@ -2,12 +2,7 @@
 module.exports = {
   root : __dirname+'/..',
   entities : {
-    database : {
-      client: 'sqlite3',
-      connection: {
-        filename : __dirname+'/../../data/mydb.sqlite'
-      }
-    },
+    database : require(root + "/../../_private/dbconfig"),
   },
   renderer : {
     cache : false

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>{title} - Artisan Numérique</title>
+    <title>{title}</title>
 
     <script type="text/javascript" src="/vendors/jquery.min.js"></script>
     <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.min.js"></script>
@@ -19,10 +19,10 @@
   </div>
   <div id="body" class="container">
     <div class="row">
-          <div class="col-md-3">
-            <p>This is column one.</p>
+          <div class="col-md-2">
+            <p>On mettra le menu ici</p>
           </div>
-          <div id="content" class="col-md-9">
+          <div id="content" class="col-md-7">
             {layoutBody|s}
           </div>
       </div>

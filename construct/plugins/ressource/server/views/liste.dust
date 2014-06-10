@@ -1,0 +1,7 @@
+<ul class="liste">
+{#ressources}
+<li>{id} : {titre}</li>
+{:else}
+<p>Aucune ressource</p>
+{/ressources}
+</ul>

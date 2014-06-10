@@ -22,7 +22,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-exports.images = {
+exports.hello = {
   path: 'hello/:who',
   template: 'hello',
   get: function(request, response) {
