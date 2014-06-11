@@ -22,9 +22,8 @@ exports.add = {
     // @todo vérif d'intégrité
     Ressource
         .create({
-          titre  : request.params.titre,
-          resume : request.params.resume,
-          datecrea : new Date()
+          titre  : request.query.titre,
+          resume : request.query.resume
         })
         .store(function(err, ressource) {
            if (err) {

@@ -8,6 +8,7 @@ function Main() {}
  * On ajoute un dust.helper à l'initialisation du framework
  */
 Main.prototype.onInitialize = function(application) {
+  console.log("event onInitialize");
   /**
    * context contient les propriétés stack,global,blocks,templateName,
    *     on peut récupérer les paramètres passés à la vue avec context.get('param')
@@ -28,12 +29,41 @@ Main.prototype.onInitialize = function(application) {
     return chunk.write(bodies.block.toString()); // chunk.write(bodies.toJSON);
   });
   // ajout du panneau de debug, qui plante
-  /*
+  /* * /
   var express = require('express');
   var app = express();
   if (app.get('env') === 'development') {
     require('express-debug')(app, {extra_panels: ['nav']});
-  } */
+  } /* */
+  //console.log('env : ' + application.get('env'));
 }
+
+/**
+ *
+ * @param render une objet qui contient notamment
+ * application
+ * body : le corp du post (sinon vide)
+ * headers
+ * method
+ * next (fct)
+ * originalUrl
+ * params
+ * query
+ * res, res.req
+ * route.path, route.stack, route.methods
+ * session.cookie
+ * sessionID
+ * statusCode
+ * url
+ * /
+Main.prototype.onRender = function(render) {
+  console.log("event onRender");
+  return this;
+  render.next();
+  //return render.res;
+  //console.log(render.res.req);
+  //render.res.write("on ajoute ça au onRender");
+};
+/* */
 
 module.exports = Main;
