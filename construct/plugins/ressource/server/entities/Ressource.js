@@ -1,9 +1,16 @@
 "use strict";
 
 function Ressource(init) {
+  /**
+   * si on met pas ça le request.application.entity('Ressource').create({objet rempli}) déclenche
+   * Cannot read property 'titre' of undefined
+   */
+  if (typeof init === 'undefined') {
+    init = {};
+  } /* */
   this.titre = init.titre || '';
   this.resume = init.resume || '';
-  this.datecrea = init.datecrea || new Date;
+  this.datecrea = init.datecrea || new Date();
   this.datemaj = init.datemaj || null;
 }
 
