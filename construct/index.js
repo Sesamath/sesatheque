@@ -3,12 +3,16 @@
  */
 'use strict';
 
-// Chargement de la configuration
+// Récupération du module lassi
+var lassi = require('lassi');
+
+// Récupération de la configuration du projet
 var config = require('./config');
 
-// Création de l'application
-var lassi = require('lassi');
-var application = lassi(config);
+// Construction de l'application
+var application = lassi.application(config);
 
 // Démarrage de l'application
-application.boot(function() {});
+application.boot(function() {
+  console.log("Boot de l'application Bibliothèque");
+});

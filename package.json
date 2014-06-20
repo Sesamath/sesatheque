@@ -16,6 +16,7 @@
     "sass-tools": "git+ssh://git@arnumeral.fr:sass-tools"
   },
   "devDependencies": {
+    "arpm": "git+ssh://git@arnumeral.fr:node-arpm",
     "express-debug": "*",
     "gulp": "*",
     "gulp-concat": "*",
@@ -25,8 +26,8 @@
     "gulp-path-rework": "git+ssh://git@arnumeral.fr:gulp-path-rework",
     "gulp-sass": "0.7.1",
     "gulp-util": "^2.2.16",
+    "js-beautify": "^1.5.1",
     "launcher": "git+ssh://git@arnumeral.fr:gulp-launcher",
-    "arpm": "git+ssh://git@arnumeral.fr:node-arpm",
     "merge-stream": "^0.1.1",
     "through2": "^0.4.2"
   },

@@ -1,8 +1,0 @@
-<h1>Bibliothèque</h1>
-<p>On verra plus tard pour raconter notre vie ici.</p>
-{?debug}
-<div class="debug">contextDump : {@contextDump to="output"}{debug}{/contextDump}</div>
-<div class="debug">debug : {@debug}{debug}{/debug}</div>
-<div class="debug">debugStr : {debugStr}</div>
-<div class="debug">debugList : {@debugList}{debug}{/debugList}</div>
-{/debug}

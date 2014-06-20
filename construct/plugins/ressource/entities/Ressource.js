@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * Constructeur de l'objet Ressource, qui initialise les propriétés non fournies à leur valeurs par défaut
+ * @param init
+ * @constructor
+ */
 function Ressource(init) {
   /**
    * si on met pas ça le request.application.entity('Ressource').create({objet rempli}) déclenche
@@ -10,25 +15,26 @@ function Ressource(init) {
   } /* */
   this.titre = init.titre || '';
   this.resume = init.resume || '';
-  this.datecrea = init.datecrea || new Date();
-  this.datemaj = init.datemaj || null;
+  this.dateCreation = init.dateCreation || new Date();
+  this.dateUpdate = init.dateUpdate || null;
+  /* */
 }
 
 Ressource.prototype.describe = function(models) {
   return {
     indexes: {
-      datecrea: models.Types.Date,
-      datemaj: models.Types.Date,
+      dateCreation: models.Types.Date,
+      dateUpdate: models.Types.Date,
     },
-    table: 'ress'
+    table: 'ressources'
   }
 }
 
 Ressource.prototype.preSave = function(next) {
   // this.datemaj = (new Date()).getTime();
-  this.datemaj = new Date();
-  if (!this.oid && !this.datecrea) {
-    this.datecrea = this.datemaj;
+  this.dateUpdate = new Date();
+  if (!this.oid && !this.dateCreation) {
+    this.dateCreation = this.dateUpdate;
   }
   next();
 }

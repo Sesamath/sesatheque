@@ -1,14 +1,24 @@
-// Configuration de la base de données
+/**
+ * Configuration de l'application
+ */
+
+/** le dossier build/application */
+var appdir = __dirname + '/..';
+/** Le dossier build */
+var builddir = appdir + '/..';
+
+/** La config exportée */
 module.exports = {
-  root : __dirname+'/..',
+  root : appdir,
   entities : {
-    database : require(root + "/../../_private/dbconfig"),
+    // Configuration de la base de données
+    database : require(builddir + '/../_private/dbconfig')
   },
   renderer : {
     cache : false
   },
   layout : {
-    data: __dirname+'/../../data',
-    cache: __dirname+'/../../data/cache'
+    data: builddir + '/data',
+    cache: builddir + '/data/cache'
   }
 }
