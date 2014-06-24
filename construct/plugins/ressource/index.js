@@ -5,8 +5,9 @@
  * @extends {Lassi.Plugin}
  * @constructor
  */
-function Ressource() {
-  console.log('constructeur du module ressource');
-}
+var Ressource = lassi.Plugin()
+  .initialize(function() {
+    console.log('constructeur du module ressource');
+  });
 
 module.exports = Ressource;

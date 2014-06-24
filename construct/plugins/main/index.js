@@ -1,12 +1,16 @@
+'use strict';
+/*global lassi*/
+
 /**
- * Notre plugin principal qui déclare le layout et surcharge le rendu
+ * Notre plugin principal (qui exporte le layout et surcharge le rendu)
  * @constructor
  */
-function Main(application) {
-  application.on('initialize', function () {
+var Main = lassi.Plugin()
+  .initialize(function() {
+
     // On se met en écoute de l'évènement qui précède le rendu (dust)
     // des données sur le gestionnaire de vues.
-    application.views.on('render', function (request, data) {
+    this.application.controllers.on('renderLayout', function(data) {
       // On peut ici ajouter des trucs à data pour tous les rendus
       if (!data.debug) data.debug = {};
     });
@@ -21,25 +25,18 @@ function Main(application) {
      * params liste les attributs passé au helper avec {@helper attrName1=...}
      * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
      */
-    application.engine.helper('dump', function (chunk, context, bodies, params) {
+    this.application.engine.helper('dump', function (chunk, context, bodies, params) {
       var js_beautify = require('js-beautify').js_beautify;
       return chunk.write('<pre class="debug">' + js_beautify(JSON.stringify(params)) + '</pre>');
     });
-    // ajout du panneau de debug, qui plante
-    /* * /
-     var express = require('express');
-     var app = express();
-     if (app.get('env') === 'development') {
-     require('express-debug')(app, {extra_panels: ['nav']});
-     } /* */
-    //console.log('env : ' + application.get('env'));
   });
-}
 
 Main.debug = function(args) {
   console.log('fct debug');
   console.log(args);
 };
+
+module.exports = Main;
 
 /**
  *

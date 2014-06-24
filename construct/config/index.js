@@ -20,5 +20,14 @@ module.exports = {
   layout : {
     data: builddir + '/data',
     cache: builddir + '/data/cache'
+  },
+  rail : {
+    favicon : '/assets/images/favicon.ico',
+    public : true,
+    authentication: true
+  },
+  // Configuration des plugins
+  plugins : {
+    session: false
   }
 }

@@ -2,26 +2,25 @@
 
 var lassi = require('lassi');
 
-module.exports.liste = lassi.controller('/liste')
-    .renderWith('liste')
+module.exports.liste = lassi.Controller()
+    .action('liste')
     .do(function (request, response) {
-      var ressource = this.application.entity('Ressource');
-      ressource
-          .find({})
-          .limit(10)
-          .orderBy('id', 'asc')
-          .execute(function (error, ressources) {
-              if (!response.data) response.data = {};
-              response.data.ressources = ressources;
-              if (error) {
-                response.data.error = error;
-              }
-          });
+      this.application.entity('Ressource')
+      .find({})
+      .limit(10)
+      .orderBy('id', 'asc')
+      .execute(function (error, ressources) {
+        if (!response.data) response.data = {};
+        response.data.ressources = ressources;
+        if (error) {
+          response.data.error = error;
+        }
       })
-    .render();
+    })
+    .render('liste');
 
-module.exports.add = lassi.controller('/api/ressource/add')
-    .renderWith('result')
+module.exports.add = lassi.Controller()
+    .action('/api/ressource/add')
     .do(function(request, response) {
         var ressource = this.application.entity('Ressource');
         // @todo vérif d'intégrité
@@ -37,4 +36,5 @@ module.exports.add = lassi.controller('/api/ressource/add')
                }
                response.send({result: 'ok', oid:ressource.oid});
             })
-      });
+    })
+    .render('result');

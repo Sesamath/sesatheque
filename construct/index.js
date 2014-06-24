@@ -10,7 +10,7 @@ var lassi = require('lassi');
 var config = require('./config');
 
 // Construction de l'application
-var application = lassi.application(config);
+var application = lassi.Application(config);
 
 // Démarrage de l'application
 application.boot(function() {
