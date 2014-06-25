@@ -47,10 +47,13 @@
     "loopfunc": false,
     "validthis": false,
     "globals": {
-      "module" : false,
-      "require" : false,
-      "lassi": false,
-      "_": false
+      "module"    : false,
+      "require"   : false,
+      "_dirname"  : false,
+      "_filename" : false,
+      "console"   : false,
+      "lassi"     : false,
+      "_"         : false
     }
   }
 }

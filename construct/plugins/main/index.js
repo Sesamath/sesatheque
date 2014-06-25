@@ -11,13 +11,13 @@ var mainPlugin = lassi.Plugin()
     // Définition du layout "page" pour les réponses "html".
     this.defineLayout('page', 'html', 'layout-page');
 
-    // On se met en écoute de l'évènement qui précède le rendu (dust)
-    // des données sur le gestionnaire de vues.
+    /* On se met en écoute de l'évènement qui précède le rendu (dust)
+     * des données sur le gestionnaire de vues.
     this.application.controllers.on('renderLayout', function(data) {
       // On peut ici ajouter des trucs à data pour tous les rendus
       // mais data vaut undefined...
       // if (!data.debug) data.debug = {};
-    });
+    }); /* */
 
     /**
      * On ajoute un dust.helper à l'initialisation du framework
@@ -35,9 +35,9 @@ var mainPlugin = lassi.Plugin()
     });
   });
 
-mainPlugin.debug = function(args) {
-  console.log('fct debug');
-  console.log(args);
+mainPlugin.dump = function(title, obj) {
+  console.log(title);
+  if (obj) console.log(obj);
 };
 
 module.exports = mainPlugin;

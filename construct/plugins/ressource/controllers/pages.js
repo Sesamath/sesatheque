@@ -10,17 +10,17 @@ controller.action()
     .match('liste')
     .view('liste')
     .do(function (request, response) {
-      this.application.entity('Ressource')
-      .find({})
-      .limit(10)
-      .orderBy('id', 'asc')
-      .execute(function (error, ressources) {
-        if (!response.data) response.data = {};
-        response.data.ressources = ressources;
-        if (error) {
-          response.data.error = error;
-        }
-      })
+      lassi.entity.Ressource
+        .find({})
+        .limit(10)
+        .orderBy('id', 'asc')
+        .execute(function (error, ressources) {
+          if (!response.data) response.data = {};
+          response.data.ressources = ressources;
+          if (error) {
+            response.data.error = error;
+          }
+        })
     });
 
 module.exports = controller;

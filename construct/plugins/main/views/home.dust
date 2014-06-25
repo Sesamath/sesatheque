@@ -1,9 +1,2 @@
-<h1>Bibliothèque</h1>
+<h1>{?title}{title}{:else}Bibliothèque{/title}</h1>
 <p>{content|s}</p>
-{?debug}
-<div class="debug">contextDump : {@contextDump to="output" key="full" /}</div>
-<div class="debug">debug : {debug|s}</div>
-<div class="debug">debugStr : {debugStr}</div>
-{@dump}{titre}{/dump}
-{@debugList}{titre}{/debugList}
-{/debug}

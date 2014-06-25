@@ -1,22 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>{title}</title>
+    <title>{?title}{title}{:else}Bibliothèque Sésamath{/title}</title>
 
     <script type="text/javascript" src="/vendors/jquery.min.js"></script>
     <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.min.js"></script>
     <!--script type="text/javascript" src="/main.js"></script-->
-    <link type="text/css" rel="stylesheet" href="/vendors/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/vendors/normalize.css">
+    <link type="text/css" rel="stylesheet" href="/vendors/bootstrap/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="/vendors/normalize.css" />
     <link type="text/css" rel="stylesheet" href="/main.css" media="all" />
 </head>
 <body>
+
   <div id="header">
     <div class="container">
       {>header/}
     </div>
   </div>
+
   <div id="body" class="container">
     <div class="row">
           <div class="col-md-3" id="sidebar">
@@ -27,7 +29,16 @@
           </div>
       </div>
   </div>
+
+{!
+  {?debug}
+  <div class="debug">contextDump : {@contextDump to="output" key="full" /}</div>
+  <div class="debug">debug : {debug|s}</div>
+  <div class="debug">debugStr : {debugStr}</div>
+  {@dump}{titre}{/dump}
+  {@debugList}{titre}{/debugList}
+  {/debug}
+!}
+
 </body>
 </html>
-
-

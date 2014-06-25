@@ -7,7 +7,7 @@ var homeController = lassi.Controller('/');
 
 homeController.baseAction()
   .layout('page')
-  .respond('html');
+ // .respond('html');
 
 homeController.action()
   .registeredAs('home')
