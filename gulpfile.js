@@ -55,27 +55,15 @@ var launcher = launcherM('./build/application/index.js');
 /**
  * La construction des sources côté serveur sont juste
  * une recopie du contenu de "construct" en excluant les sous-dossiers
- * public. On supprime aussi "server" et "shared" des chemins cible.
+ * public.
  */
 gulp.task('build-server-sources', function () {
   gulp
-    .src(['construct/**/*.js', '!construct/**/public/**/*'])
+    .src(['construct/**/*', '!construct/**/public/**/*'])
     .pipe(gulp.dest('build/application'))
     .pipe(launcher.changed())
 })
 
-/**
- * La construction des vues serveur se fait en gros comme pour les sources
- * à la différence près que l'on fusionne les dossiers views de chaques plugins
- * ce qui peut induire des collisions.
- */
-gulp.task('build-server-views', function () {
-  gulp
-    .src(['construct/**/*.dust'])
-    .pipe(rework.rebase('views'))
-    .pipe(gulp.dest('build/application'))
-    .pipe(launcher.changed())
-})
 
 /**
  * Construction des sources public en fusionnant le flux non modifié des sources
@@ -147,7 +135,7 @@ gulp.task('build-public', ['build-public-sources', 'build-public-styles', 'build
 /**
  * Tâche de construction globale de l'application
  */
-gulp.task('build', [ 'build-server-sources', 'build-server-views', 'build-public' ], function () {});
+gulp.task('build', [ 'build-server-sources', 'build-public' ], function () {});
 
 /**
  * Tâche qui efface build
@@ -185,10 +173,9 @@ gulp.task('rebuild', [ 'clean', 'build' ], function () {});
  */
 gulp.task('watch', function () {
   gulp.watch('construct/**/public/styles/**/*.scss', ['build-public-styles']);
-  gulp.watch(['construct/**/*.js', '!construct/**/public/**/*.js'], ['build-server-sources']);
+  gulp.watch(['construct/**/*', '!construct/**/public/**/*.js'], ['build-server-sources']);
   gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
   gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources'])
-  gulp.watch('construct/**/views/**/*.dust', ['build-server-views'])
   launcher.start();
 })
 
