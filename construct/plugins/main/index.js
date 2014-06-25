@@ -15,7 +15,8 @@ var plugin = lassi.Plugin()
     // des données sur le gestionnaire de vues.
     this.application.controllers.on('renderLayout', function(data) {
       // On peut ici ajouter des trucs à data pour tous les rendus
-      if (!data.debug) data.debug = {};
+      // mais data vaut undefined...
+      // if (!data.debug) data.debug = {};
     });
 
     /**
