@@ -1,6 +1,6 @@
 "use strict";
 /*
- * This file is part of "Collection".
+ * This file is part of "node-lassi-example".
  *    Copyright 2009-2012, arNuméral
  *    Author : Yoran Brault
  *    eMail  : yoran.brault@arnumeral.fr
@@ -44,14 +44,14 @@ var
   concat     = require('gulp-concat'),
   jsdoc      = require("gulp-jsdoc"),
   rework     = require('gulp-path-rework'),
-  launcher   = require('launcher'),
+  launcherM  = require('launcher'),
   fs         = require('fs');
 
 
 /**
  * L'instance de notre (re)démarreur de serveur (incluant un serveur livereload)
  */
-var launcher = launcher('./build/application/index.js');
+var launcher = launcherM('./build/application/index.js');
 
 /**
  * La construction des sources côté serveur sont juste
@@ -60,11 +60,23 @@ var launcher = launcher('./build/application/index.js');
  */
 gulp.task('build-server-sources', function () {
   gulp
-    .src(['construct/**/*', '!construct/**/public/**/*'])
+    .src(['construct/**/*.js', '!construct/**/public/**/*'])
     .pipe(gulp.dest('build/application'))
     .pipe(launcher.changed())
 })
 
+/**
+ * La construction des vues serveur se fait en gros comme pour les sources
+ * à la différence près que l'on fusionne les dossiers views de chaques plugins
+ * ce qui peut induire des collisions.
+ */
+gulp.task('build-server-views', function () {
+  gulp
+    .src(['construct/**/*.dust'])
+    .pipe(rework.rebase('views'))
+    .pipe(gulp.dest('build/application'))
+    .pipe(launcher.changed())
+})
 
 /**
  * Construction des sources public en fusionnant le flux non modifié des sources
@@ -136,7 +148,7 @@ gulp.task('build-public', ['build-public-sources', 'build-public-styles', 'build
 /**
  * Tâche de construction globale de l'application
  */
-gulp.task('build', [ 'build-server-sources', 'build-public' ], function () {});
+gulp.task('build', [ 'build-server-sources', 'build-server-views', 'build-public' ], function () {});
 
 /**
  * Tâche qui efface build
@@ -174,9 +186,10 @@ gulp.task('rebuild', [ 'clean', 'build' ], function () {});
  */
 gulp.task('watch', function () {
   gulp.watch('construct/**/public/styles/**/*.scss', ['build-public-styles']);
-  gulp.watch(['construct/**/*', '!construct/**/public/**/*.js'], ['build-server-sources']);
+  gulp.watch(['construct/**/*.js', '!construct/**/public/**/*.js'], ['build-server-sources']);
   gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
   gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources'])
+  gulp.watch('construct/**/views/**/*.dust', ['build-server-views'])
   launcher.start();
 })
 

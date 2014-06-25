@@ -3,13 +3,13 @@
 /**
  * Le controleur de la home
  */
-var controller = lassi.Controller();
+var homeController = lassi.Controller('/');
 
-controller.baseAction()
+homeController.baseAction()
   .layout('page')
   .respond('html');
 
-controller.action()
+homeController.action()
   .registeredAs('home')
   .view('home')
   .do(function () {
@@ -21,4 +21,4 @@ controller.action()
     }
   })
 
-module.exports = controller;
+module.exports = homeController;

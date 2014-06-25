@@ -1,11 +1,11 @@
 'use strict';
 
-var controller = lassi.Controller().namespace('api/ressource');
+var apiController = lassi.Controller().namespace('api/ressource');
 
-controller.baseAction()
+apiController.baseAction()
   .respond('json');
 
-controller.action()
+apiController.action()
     .match('add')
     .do(function(request, response) {
         var ressource = this.application.entity('Ressource');
@@ -24,5 +24,4 @@ controller.action()
             })
     })
 
-module.exports = controller;
-
+module.exports = apiController;

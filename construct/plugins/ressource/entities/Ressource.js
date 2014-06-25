@@ -1,6 +1,6 @@
 "use strict";
 
-var entity = lassi.Entity('Ressource')
+var entityRessource = lassi.Entity('Ressource')
   .initialize(function() {
     this.titre = '';
     this.resume = '';
@@ -13,4 +13,4 @@ var entity = lassi.Entity('Ressource')
     this.dateUpdate = new Date();
   });
 
-module.exports = entity;
+module.exports = entityRessource;

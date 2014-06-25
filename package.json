@@ -47,8 +47,10 @@
     "loopfunc": false,
     "validthis": false,
     "globals": {
-      "jQuery": false,
-      "lassi": false
+      "module" : false,
+      "require" : false,
+      "lassi": false,
+      "_": false
     }
   }
 }
