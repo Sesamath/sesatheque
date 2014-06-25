@@ -175,7 +175,7 @@ gulp.task('watch', function () {
   gulp.watch('construct/**/public/styles/**/*.scss', ['build-public-styles']);
   gulp.watch(['construct/**/*', '!construct/**/public/**/*.js'], ['build-server-sources']);
   gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
-  gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources'])
+  gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources']);
   launcher.start();
 })
 
@@ -185,3 +185,18 @@ gulp.task('doc', function() {
 });
 
 gulp.task('default', ['build', 'watch'])
+
+/**
+ * On ajoute toutes les tâches du dossier gulptasks s'il existe
+ * Chaque fichier doit exporter une fonction qui sera exécutée à l'appel de la tâche
+ */
+var taskDir = './gulptasks';
+if (fs.existsSync(taskDir)) {
+  fs.readdirSync(taskDir).forEach(function (file, index) {
+    var name;
+    if (file.substr(-3) === '.js') {
+      name = file.substr(0, file.length -3);
+      gulp.task(name, require(taskDir + '/' + file));
+    }
+  })
+}
