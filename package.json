@@ -47,8 +47,8 @@
     "loopfunc": false,
     "validthis": false,
     "globals": {
-      "isObject": false,
-      "_": false
+      "jQuery": false,
+      "lassi": false
     }
   }
 }

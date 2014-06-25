@@ -1,6 +1,6 @@
 "use strict";
 /*
- * This file is part of "node-lassi-example".
+ * This file is part of "Collection".
  *    Copyright 2009-2012, arNuméral
  *    Author : Yoran Brault
  *    eMail  : yoran.brault@arnumeral.fr
@@ -51,7 +51,7 @@ var
 /**
  * L'instance de notre (re)démarreur de serveur (incluant un serveur livereload)
  */
-var appLauncher = launcher('./build/application/index.js');
+var launcher = launcher('./build/application/index.js');
 
 /**
  * La construction des sources côté serveur sont juste
@@ -60,23 +60,11 @@ var appLauncher = launcher('./build/application/index.js');
  */
 gulp.task('build-server-sources', function () {
   gulp
-    .src(['construct/**/*.js', '!construct/**/public/**/*'])
+    .src(['construct/**/*', '!construct/**/public/**/*'])
     .pipe(gulp.dest('build/application'))
-    .pipe(appLauncher.changed())
+    .pipe(launcher.changed())
 })
 
-/**
- * La construction des vues serveur se fait en gros comme pour les sources
- * à la différence près que l'on fusionne les dossiers views de chaques plugins
- * ce qui peut induire des collisions.
- */
-gulp.task('build-server-views', function () {
-  gulp
-    .src(['construct/**/*.dust'])
-    .pipe(rework.rebase('views'))
-    .pipe(gulp.dest('build/application'))
-    .pipe(appLauncher.changed())
-})
 
 /**
  * Construction des sources public en fusionnant le flux non modifié des sources
@@ -93,7 +81,7 @@ gulp.task('build-public-sources', function () {
       )
   .pipe(concat('main.js'))
   .pipe(gulp.dest('build/public'))
-  .pipe(appLauncher.livereload())
+  .pipe(launcher.livereload())
 });
 
 /**
@@ -110,7 +98,7 @@ gulp.task('build-public-styles', function () {
       sourceComments: 'map'}))
     .pipe(concat('main.css'))
     .pipe(gulp.dest('build/public'))
-    .pipe(appLauncher.livereload())
+    .pipe(launcher.livereload())
 })
 
 
@@ -123,7 +111,7 @@ gulp.task('build-public-assets', function () {
     .src(['construct/plugins/**/public/assets/**/*'])
     .pipe(rework.rebase('assets'))
     .pipe(gulp.dest('build/public'))
-    .pipe(appLauncher.livereload())
+    .pipe(launcher.livereload())
 })
 
 /**
@@ -135,7 +123,7 @@ gulp.task('build-public-vendors', function () {
     .src(['construct/plugins/**/public/vendors/**/*'])
     .pipe(rework.rebase('vendors'))
     .pipe(gulp.dest('build/public'))
-    .pipe(appLauncher.livereload())
+    .pipe(launcher.livereload())
 })
 
 /**
@@ -148,7 +136,7 @@ gulp.task('build-public', ['build-public-sources', 'build-public-styles', 'build
 /**
  * Tâche de construction globale de l'application
  */
-gulp.task('build', [ 'build-server-sources', 'build-server-views', 'build-public' ], function () {});
+gulp.task('build', [ 'build-server-sources', 'build-public' ], function () {});
 
 /**
  * Tâche qui efface build
@@ -186,11 +174,10 @@ gulp.task('rebuild', [ 'clean', 'build' ], function () {});
  */
 gulp.task('watch', function () {
   gulp.watch('construct/**/public/styles/**/*.scss', ['build-public-styles']);
-  gulp.watch(['construct/**/*.js', '!construct/**/public/**/*.js'], ['build-server-sources']);
-  gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { appLauncher.restart(); });
+  gulp.watch(['construct/**/*', '!construct/**/public/**/*.js'], ['build-server-sources']);
+  gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
   gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources'])
-  gulp.watch('construct/**/views/**/*.dust', ['build-server-views'])
-  appLauncher.start();
+  launcher.start();
 })
 
 gulp.task('doc', function() {
