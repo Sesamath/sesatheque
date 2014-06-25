@@ -47,7 +47,6 @@ var
   launcherM  = require('launcher'),
   fs         = require('fs');
 
-
 /**
  * L'instance de notre (re)démarreur de serveur (incluant un serveur livereload)
  */
