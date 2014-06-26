@@ -32,28 +32,18 @@
     "through2": "^0.4.2"
   },
   "jshintConfig": {
-    "asi": true,
-    "boss": true,
-    "jquery": true,
     "node": true,
-    "strict": true,
-    "maxlen": 256,
-    "newcap": false,
+    "asi": true,
+    "bitwise": true,
+    "camelcase": true,
+    "forin": true,
+    "freeze": true,
+    "immed": true,
+    "maxlen": 120,
+    "newcap": true,
     "undef": true,
     "unused": true,
-    "onecase": true,
-    "lastsemic": true,
     "indent": 2,
-    "loopfunc": false,
-    "validthis": false,
-    "globals": {
-      "module"    : false,
-      "require"   : false,
-      "_dirname"  : false,
-      "_filename" : false,
-      "console"   : false,
-      "lassi"     : false,
-      "_"         : false
-    }
+    "predef": ["lassi", "_"]
   }
 }

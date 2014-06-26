@@ -2,12 +2,12 @@
 
 /**
  * Plugin de gestion des types de contenu "Ressource".
- * @extends {Lassi.Plugin}
+ * @extends {lassi.Plugin}
  * @constructor
  */
 var ressourcePlugin = lassi.Plugin()
-  .initialize(function() {
-    console.log('constructeur du module ressource');
-  });
+    .initialize(function() {
+      this.application.config.ressource = require('./config.js');
+    });
 
 module.exports = ressourcePlugin;

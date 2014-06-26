@@ -3,8 +3,8 @@
  */
 'use strict';
 
-// Récupération du module lassi
-var lassi = require('lassi');
+// Récupération du module lassi (pas encore en var globale car c'est son 1er appel)
+var lassi = require('lassi'); // jshint ignore:line
 
 // Récupération de la configuration du projet
 var config = require('./config');

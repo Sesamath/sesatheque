@@ -1,5 +1,4 @@
 'use strict';
-/*global lassi*/
 
 /**
  * Notre plugin principal (qui exporte le layout et surcharge le rendu)
