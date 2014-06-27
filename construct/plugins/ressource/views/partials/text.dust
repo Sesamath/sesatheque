@@ -1,0 +1,29 @@
+{! Ce bloc partiel rend un input text, il prend (dans un objet o) les variables :
+        name  : la valeur à mettre dans l'attribut name
+        value : le texte qui initialisera le champ
+et facultativement
+        error : un message d'erreur à afficher au dessus de l'input
+        required (booléen)
+    avec aussi les attributs éventuels
+        titre : texte à afficher au dessus de l'input
+        readonly (booléen)
+        hidden (booléen)
+    et ces autres attributs éventuels passé par le template parent (pas dans l'objet)
+        class : classes css qui remplaceront la classe par défaut
+        maxlength
+        size
+!}
+
+<div class="control-group  {?o.errors}has-error{/o.errors}">
+    {#o.errors}<div class="help-block">{.}</div>{/o.errors}
+    <div class="input-group">
+        <input type="{?o.hidden}hidden{:else}text{/o.hidden}"
+               name="name"
+               {?maxlength}maxlength="{maxlength}"{/maxlength}
+               {?size}size = "{size}"{/size}
+               class="{?o.class}{o.class}{:else}form-control{/o.class}"
+               {?o.titre}placeholder="{o.titre}"{/o.titre}
+               value="{o.value}" />
+    </div>
+</div>
+dump dans text : {@dump}{o}{/dump}

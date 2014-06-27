@@ -28,5 +28,6 @@ module.exports = {
   },
   // Configuration des plugins
   plugins : {
-    session  : false,
+    session: false
   }
+}

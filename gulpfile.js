@@ -43,6 +43,7 @@ var
   dust       = require('gulp-dust'),
   concat     = require('gulp-concat'),
   jsdoc      = require("gulp-jsdoc"),
+  jshint     = require("gulp-jshint"),
   rework     = require('gulp-path-rework'),
   launcherM  = require('launcher'),
   fs         = require('fs');
@@ -184,7 +185,38 @@ gulp.task('doc', function() {
     .pipe(jsdoc('./documentation-output'))
 });
 
-gulp.task('default', ['build', 'watch'])
+/**
+ * Lance l'analyse de notre code serveur
+ */
+gulp.task('hintServer', function() {
+  var config = require('./package.json').jshintConfig;
+  gulp.src(['construct/**/*.js', '!construct/**/public/**/*'])
+  .pipe(jshint(config))
+  .pipe(jshint.reporter('jshint-stylish'))
+});
+
+/**
+ * Lance l'analyse de notre code client
+ */
+gulp.task('hintClient', function() {
+  var config = require('./package.json').jshintConfig;
+  // faut changer le contexte
+  config.node = false;
+  config.browser = true;
+  gulp.src(['construct/**/public/**/*.js', '!construct/**/public/vendors/**/*'])
+  .pipe(jshint(config))
+  .pipe(jshint.reporter('jshint-stylish'))
+});
+
+/**
+ * Lance l'analyse de notre code avec jsHint
+ */
+gulp.task('hint', ['hintServer', 'hintClient']);
+
+/**
+ * La tâche par défaut relance un build puis l'appli
+ */
+gulp.task('default', ['build', 'watch']);
 
 /**
  * On ajoute toutes les tâches du dossier gulptasks s'il existe

@@ -1,44 +1,31 @@
 <div class="block edit ressource">
+    {#errors}
+    <div class="control-group has-error">
+        <div class="help-block">{.}</div>
+    </div>
+
+    {:else}
     <form method="POST" action="{url}" id="formRessource">
 
-        {! id !}
-        <label for="ress_id" class="required">Id</label>
-        <span class="required" title="Ce champ est obligatoire">*</span>
-        <input type="text" id="ress_id" name="ress[id]" readonly="readonly" required="required"    size="6" value="{ressource.id}" />
-
-        {! catégorie !}
-        <div id="ressFormTypeSesa" class="ressFormCbx">
-            <div>
-                <label class="required">Catégorie</label>
-                <span class="required" title="Ce champ est obligatoire">*</span>
-                <div id="ress_typeSesa">
-                    <input type="checkbox" id="ress_typeSesa_1" name="ress[typeSesa][]" value="1" />
-                    <label for="ress_typeSesa_1">Activité fixe</label>
-                    <input type="checkbox" id="ress_typeSesa_2" name="ress[typeSesa][]" value="2" />
-                    <label for="ress_typeSesa_2">Activité animée</label><input type="checkbox" id="ress_typeSesa_3" name="ress[typeSesa][]" value="3" /><label for="ress_typeSesa_3">Cours fixe</label><input type="checkbox" id="ress_typeSesa_4" name="ress[typeSesa][]" value="4" /><label for="ress_typeSesa_4">Cours avec animation</label><input type="checkbox" id="ress_typeSesa_5" name="ress[typeSesa][]" value="5" /><label for="ress_typeSesa_5">Exercice fixe</label><input type="checkbox" id="ress_typeSesa_6" name="ress[typeSesa][]" value="6" /><label for="ress_typeSesa_6">Exercice avec animation</label><input type="checkbox" id="ress_typeSesa_7" name="ress[typeSesa][]" value="7" checked="checked" /><label for="ress_typeSesa_7">Exercice interactif</label></div></div>
+        <div class="form-group">
+            {?oid}{>text o=oid size=6 /}{/oid} {! n'existe pas encore à l'affichage du add !}
+            {>text o=titre /}
+            {>checkboxes o=categories }
+            {>select o=langue default="fre" }
         </div>
 
         <div class="form-group">
-            <div class="control-group  {?errors.titre}has-error{/errors.titre}">
-                {?errors.titre}<div class="help-block">{errors.titre}</div>{/errors.titre}
-                <div class="input-group">
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
-                    <input type="text" name="titre" id="id_homepage" class="form-control" placeholder="Titre" value="{fields.titre}">
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="control-group  {?errors.titre}has-error{/errors.titre}">
-                {?errors.titre}<div class="help-block">{errors.titre}</div>{/errors.titre}
-                <div class="input-group">
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
-                    <input type="text" name="titre" id="id_homepage" class="form-control" placeholder="Titre" value="{fields.titre}">
-                </div>
-            </div>
+            {>textarea o=resume /}
+            {>textarea o=description /}
+            {>textarea o=commentaires /}
         </div>
 
+        Dump global {@dump}{.}{/dump}
+
+        {! submit !}
         <div class="form-group buttons">
-            <input class="btn btn-primary" type="submit" value="Enregistrer">
+            <input class="btn btn-primary" type="submit" value="Enregistrer" />
         </div>
     </form>
+    {/errors}
 </div>

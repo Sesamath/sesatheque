@@ -1,0 +1,18 @@
+{?o.errors}
+<div class="control-group  {?o.errors}has-error{/o.errors}">
+    {#o.errors}
+    <div class="help-block">{.}</div>
+    {/o.errors}
+{/o.errors}
+    <div class="input-group">
+        <label {?o.required}class="required"{/o.required}>{titre}</label>
+        {?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{?o.required}
+        {#o.choices}
+        <label for="{id}">{label}</label>
+        <input id="{id}" type="checkbox" name="{name}" value="{value}" />
+        {/o.choices}
+    </div>
+{?o.errors}
+</div>
+{/o.errors}
+

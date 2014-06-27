@@ -6,14 +6,16 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "mysql": "^2.3.0",
     "exfs": "git+ssh://git@arnumeral.fr:node-exfs",
     "filters": "git+ssh://git@arnumeral.fr:node-filters",
     "gravatars": "git+ssh://git@arnumeral.fr:node-gravatars",
     "knex": "^0.5.14",
     "lassi": "git+ssh://git@arnumeral.fr:node-lassi",
     "moment": "^2.6.0",
-    "sass-tools": "git+ssh://git@arnumeral.fr:sass-tools"
+    "mysql": "^2.3.0",
+    "sass-tools": "git+ssh://git@arnumeral.fr:sass-tools",
+    "seq": "^0.3.5",
+    "underscore": "^1.6.0"
   },
   "devDependencies": {
     "arpm": "git+ssh://git@arnumeral.fr:node-arpm",
@@ -23,10 +25,12 @@
     "gulp-debug": "^0.3.0",
     "gulp-dust": "^0.3.0",
     "gulp-jsdoc": "^0.1.4",
+    "gulp-jshint": "*",
     "gulp-path-rework": "git+ssh://git@arnumeral.fr:gulp-path-rework",
     "gulp-sass": "0.7.1",
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
+    "jshint-stylish": "*",
     "launcher": "git+ssh://git@arnumeral.fr:gulp-launcher",
     "merge-stream": "^0.1.1",
     "through2": "^0.4.2"
@@ -35,7 +39,6 @@
     "node": true,
     "asi": true,
     "bitwise": true,
-    "camelcase": true,
     "forin": true,
     "freeze": true,
     "immed": true,
@@ -44,6 +47,9 @@
     "undef": true,
     "unused": true,
     "indent": 2,
-    "predef": ["lassi", "_"]
+    "predef": [
+      "lassi",
+      "_"
+    ]
   }
 }

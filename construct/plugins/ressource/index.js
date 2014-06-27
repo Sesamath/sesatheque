@@ -7,7 +7,7 @@
  */
 var ressourcePlugin = lassi.Plugin()
     .initialize(function() {
-      this.application.config.ressource = require('./config.js');
+      this.application.settings.ressource = require('./config.js');
     });
 
 module.exports = ressourcePlugin;

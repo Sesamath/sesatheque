@@ -76,5 +76,45 @@ module.exports = {
     21 : "a pour vignette",
     51 : "a pour corrigé",
     52 : "est la correction de"
+  },
+  langue : {
+    'deu' : 'allemand',
+    'eng' : 'anglais',
+    'ara' : 'arabe',
+    'eus' : 'basque',
+    'bre' : 'breton',
+    'cat' : 'catalan',
+    'spa' : 'espagnol',
+    'fra' : 'français',
+    'ita' : 'italien',
+    'por' : 'portugais'
+  },
+  // les propriétés qui doivent être uniques
+  uniques : {
+    'codeTechnique': true,
+    'langue'       : true,
+    'restriction'  : true
+  },
+  // les libellés que l'on affiche pour chaque champ
+  labels : {
+    oid:"Identifiant",
+    titre:"Titre",
+    codeTechnique : "Code technique",
+    resume :"Résumé",
+    description : "Description",
+    commentaires : "Commentaires",
+    niveaux : "Niveau",
+    categories : "Catégorie",
+    typePedagogiques : "Type pédagogique",
+    typeDocumentaires : "Type documentaire",
+    relations : "Ressources liées",
+    contenu : "Options",
+    auteurs : "Auteurs",
+    contributeurs : "Contributeurs",
+    langue : "Langue",
+    publie : "Publié",
+    restriction : "Restriction",
+    dateCreation : "Date de création",
+    dateMiseAJour : "Date de mise à jour"
   }
 };
