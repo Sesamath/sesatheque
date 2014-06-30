@@ -1,20 +1,20 @@
-{! Ce bloc partiel rend un input text, il prend (dans un objet o) les variables :
-        name  : la valeur à mettre dans l'attribut name
-        value : le texte qui initialisera le champ
-et facultativement
-        error : un message d'erreur à afficher au dessus de l'input
-        required (booléen)
+{! Ce bloc partiel rend un input textarea, il prend (dans un objet o) les variables :
+        o.name  : la valeur à mettre dans l'attribut name
+        o.id    : id html
+        o.value : le texte qui initialisera le contenu du textarea
+    et facultativement
+        o.errors : une liste de messages d'erreur à afficher au dessus de l'input
+        o.required (booléen)
     avec aussi les attributs éventuels
-        titre : texte à afficher au dessus de l'input
-        readonly (booléen)
-        hidden (booléen)
+        o.titre : texte à afficher au dessus du textarea
+        o.readonly (booléen)
+        o.hidden (booléen)
     et ces autres attributs éventuels passé par le template parent (pas dans l'objet)
         class : classes css qui remplaceront la classe par défaut
         maxlength
         cols
         rows
 !}
-
 <div class="control-group  {?o.errors}has-error{/o.errors}">
     {#o.errors}<div class="help-block">{.}</div>{/o.errors}
     <div class="input-group">

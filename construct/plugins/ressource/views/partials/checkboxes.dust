@@ -5,7 +5,7 @@
     {/o.errors}
 {/o.errors}
     <div class="input-group">
-        <label {?o.required}class="required"{/o.required}>{titre}</label>
+        <span>{o.titre}</span>
         {?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{?o.required}
         {#o.choices}
         <label for="{id}">{label}</label>

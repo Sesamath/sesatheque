@@ -16,13 +16,13 @@ var configRessource = require('../config.js');
  * @param ressource
  * @returns {Object} L'objet qui sera retourné à la vue
  */
-function ressourceToDust(ressource) {
+function ressourceToDustForm(ressource) {
   var data, isUnique;
   // on commence par récupérer toutes les propriétés scalaires telles quelles
   _.each(ressource, function (value, key) {
     data[key] = {
-      id:key,
-      titre:configRessource.labels[key]
+      id   : key,
+      title: configRessource.labels[key]
     };
     if (_.isArray(value)) {
       // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
@@ -34,7 +34,7 @@ function ressourceToDust(ressource) {
         data[key].name = key;
       }
     } else {
-      // propriété scalaire (boolean aussi) => input
+      // propriété scalaire (boolean compris) => input
       data[key].name = key;
       data[key].value = value;
     }
@@ -83,39 +83,151 @@ function arrayToDust(key, selectedValues, isUnique) {
   return choices;
 }
 
-editController.baseAction()
-  .layout('page')
-  .respond('html');
+/**
+ * Idem, mais sans les ids ni tous les possibles, seulement les valeurs des champs selectionnés
+ * @param ressource
+ * @returns {Object} La ressource, avec pour chaque champ les propriétés title et value
+ */
+function ressourceToDustPage(ressource) {
+  var data;
+  // on commence par récupérer toutes les propriétés scalaires telles quelles
+  _.each(ressource, function (value, key) {
+    data[key] = {
+      title: configRessource.labels[key]
+    };
+    if (_.isArray(value) && configRessource[key]) {
+      data[key].value = [];
+      // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
+      // et la liste des possibles dans configRessource.prop
+      // on remplace juste les id par leur valeur
+      value.forEach(function (id) {
+        if (configRessource[key][id]) {
+          data[key].value.push(configRessource[key][id]);
+        } else {
+          // @todo gérer un app.error.log
+          console.log("La ressource " + ressource.oid + " a une valeur " + val + " pour la propriété " + key + " qui n'est pas dans la liste autorisée.");
+        }
+      });
+    } else if (_.isBoolean(value)) {
+      data[key].value = value ? 'oui' : 'non';
+    } else {
+      data[key].value = value;
+    }
+  }); // fin each propriété
 
+  return data;
+}
+
+/**
+ * Récupère une ressource d'après son oid
+ * @param {int} oid
+ * @param {String} format form|page|...
+ * @returns {Ressource} La ressource, préparée ou pas pour dust suivant format
+ */
+function getRessource(oid, format) {
+  // oid est une fonction ???
+  var data;
+  var ressource = lassi.entity.Ressource.find({oid: oid});
+  //configRessource = this.application.settings.ressource;
+  if (!ressource || ressource.oid !== oid) {
+    data = {
+      error: 'La ressource ' + oid + " n'existe pas."
+    };
+  } else {
+    if (format === 'form') {
+      data = ressourceToDustForm(ressource);
+    } else if (format === 'page') {
+      data = ressourceToDustPage(ressource);
+    } else {
+      data = ressource;
+    }
+  }
+
+  return data;
+}
+
+editController.baseAction()
+    .layout('page')
+    .respond('html');
+
+/**
+ * On ajoute nos 4 méthodes CRUD (Create, Read, Update, Delete), avec 2 méthodes read suivant que
+ * l'on veut voir la ressource (display ou embed) ou sa description (describe)
+ */
+
+/**
+ * describe : Voir les propriétés de la ressource
+ */
+editController.action()
+    .match('describe/:oid')
+    .view('describe')
+    .do(function (oid) {
+      return getRessource(oid, 'page');
+    });
+
+/**
+ * display : Voir la ressource
+ */
+editController.action()
+    .match('display/:oid')
+    .view('display')
+    .do(function (oid) {
+      return getRessource(oid, 'page');
+    });
+
+/**
+ * embed : Voir la ressource sans fioriture autour (pour insertion en iframe)
+ * @todo à implémenter, dans un controleur séparé si trop compliqué de changer le template de base ici
+ */
+
+/**
+ * Create, le form de saisie
+ */
 editController.action()
     .match('add')
+    .via('get')
     .view('edit')
+  // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
     .do(function () {
       //configRessource = this.application.settings.ressource;
       var Ressource = lassi.entity.Ressource;
       var newRessource = Ressource.create();
-      var data = ressourceToDust(newRessource);
+      var data = ressourceToDustForm(newRessource);
       console.log(data);
       return data;
     });
 
+/**
+ * Create, validation du form et insert
+ */
 editController.action()
-    .match('edit/:id')
-    .view('edit')
-    .do(function (id) {
-      // id est une fonction ???
-      var data;
-      var ressource = lassi.entity.Ressource.find({id: id});
-      //configRessource = this.application.settings.ressource;
-      if (!ressource || ressource.id !== id) {
-        data = {
-          error : 'La ressource ' + id + " n'existe pas."
-        };
-      } else {
-        data = ressourceToDust(ressource);
-      }
+    .match('add')
+    .via('post')
+    .do(function () {
+      // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+      // et rediriger vers le describe ou vers le form avec les erreurs
+    });
 
-      return data;
-    }); // do
+/**
+ * Uptate, le form
+ */
+editController.action()
+    .match('edit/:oid')
+    .via('get')
+    .view('edit')
+    .do(function (oid) {
+      return getRessource(oid, 'form');
+    });
+
+/**
+ * Update, validation du form et insert
+ */
+editController.action()
+    .match('update')
+    .via('post')
+    .do(function () {
+      // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+      // et rediriger vers le describe
+    });
 
 module.exports = editController;

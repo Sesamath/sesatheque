@@ -1,0 +1,56 @@
+<div class="block edit ressource">
+    {#errors}
+    <div class="control-group has-error">
+        <div class="help-block">{.}</div>
+    </div>
+
+    {:else}
+    <form method="post" id="formRessource">
+
+        <div class="form-group">
+            {?oid}{>text o=oid size=6 /}{/oid} {! n'existe pas encore à l'affichage du add !}
+            {>text o=titre /}
+            {>text o=codeTechnique /}
+            {>checkboxes o=publie /}
+            {>checkboxes o=categories /}
+            {>select o=langue /}
+        </div>
+
+        <div class="form-group">
+            {>textarea o=resume /}
+            {>textarea o=description /}
+            {>textarea o=commentaires /}
+        </div>
+
+        <div class="form-group">
+            {>checkboxes o=niveaux /}
+            {>checkboxes o=typePedagogiques /}
+            {>checkboxes o=typeDocumentaires /}
+        </div>
+
+        {! todo widget relations !}
+
+        <div class="form-group">
+            {>textearea o=contenu}
+        </div>
+
+        {! todo widget auteurs et contributeurs !}
+
+         <div class="form-group">
+            {>text o=version /}
+            {>text o=restriction /}
+            {>text o=dateCreation /}
+        </div>
+
+
+        {! Les types, devraient disparaitrent car conditionnés par la catégorie !}
+
+        Dump global {@dump}{.}{/dump}
+
+        {! submit !}
+        <div class="form-group buttons">
+            <input class="btn btn-primary" type="submit" value="Enregistrer" />
+        </div>
+    </form>
+    {/errors}
+</div>
