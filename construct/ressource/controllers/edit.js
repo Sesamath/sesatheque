@@ -1,6 +1,7 @@
 'use strict';
 
-var editController = lassi.Controller().namespace('ressource');
+var controller = lassi.Controller('ressource');
+controller.defineBaseAction().respond('html');
 
 // console.log(lassi.application); // undefined
 var configRessource = require('../config.js');
@@ -146,9 +147,6 @@ function getRessource(oid, format) {
   return data;
 }
 
-editController.baseAction()
-    .layout('page')
-    .respond('html');
 
 /**
  * On ajoute nos 4 méthodes CRUD (Create, Read, Update, Delete), avec 2 méthodes read suivant que
@@ -158,22 +156,22 @@ editController.baseAction()
 /**
  * describe : Voir les propriétés de la ressource
  */
-editController.action()
-    .match('describe/:oid')
-    .view('describe')
-    .do(function (oid) {
-      return getRessource(oid, 'page');
-    });
+controller
+  .Action('describe/:oid')
+  .view('describe')
+  .do(function (oid) {
+    return getRessource(oid, 'page');
+  });
 
 /**
  * display : Voir la ressource
  */
-editController.action()
-    .match('display/:oid')
-    .view('display')
-    .do(function (oid) {
-      return getRessource(oid, 'page');
-    });
+controller
+  .Action('display/:oid')
+  .view('display')
+  .do(function (oid) {
+    return getRessource(oid, 'page');
+  });
 
 /**
  * embed : Voir la ressource sans fioriture autour (pour insertion en iframe)
@@ -183,51 +181,51 @@ editController.action()
 /**
  * Create, le form de saisie
  */
-editController.action()
-    .match('add')
-    .via('get')
-    .view('edit')
-  // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
-    .do(function () {
-      //configRessource = this.application.settings.ressource;
-      var Ressource = lassi.entity.Ressource;
-      var newRessource = Ressource.create();
-      var data = ressourceToDustForm(newRessource);
-      console.log(data);
-      return data;
-    });
+controller
+  .Action('add')
+  .via('get')
+  .view('edit')
+// ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
+  .do(function () {
+    //configRessource = this.application.settings.ressource;
+    var Ressource = lassi.entity.Ressource;
+    var newRessource = Ressource.create();
+    var data = ressourceToDustForm(newRessource);
+    console.log(data);
+    return data;
+  });
 
 /**
  * Create, validation du form et insert
  */
-editController.action()
-    .match('add')
-    .via('post')
-    .do(function () {
-      // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-      // et rediriger vers le describe ou vers le form avec les erreurs
-    });
+controller
+  .Action('add')
+  .via('post')
+  .do(function () {
+    // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+    // et rediriger vers le describe ou vers le form avec les erreurs
+  });
 
 /**
  * Uptate, le form
  */
-editController.action()
-    .match('edit/:oid')
-    .via('get')
-    .view('edit')
-    .do(function (oid) {
-      return getRessource(oid, 'form');
-    });
+controller
+  .Action('edit/:oid')
+  .via('get')
+  .view('edit')
+  .do(function (oid) {
+    return getRessource(oid, 'form');
+  });
 
 /**
  * Update, validation du form et insert
  */
-editController.action()
-    .match('update')
-    .via('post')
-    .do(function () {
-      // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-      // et rediriger vers le describe
-    });
+controller
+  .Action('update')
+  .via('post')
+  .do(function () {
+    // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+    // et rediriger vers le describe
+  });
 
-module.exports = editController;
+module.exports = controller;

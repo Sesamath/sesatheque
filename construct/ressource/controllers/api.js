@@ -1,6 +1,7 @@
 'use strict';
 
-var apiController = lassi.Controller().namespace('api/ressource');
+var controller = lassi.Controller('api/ressource');
+controller.defineBaseAction().respond('json');
 
 var configRessource = require('../config.js');
 
@@ -70,14 +71,12 @@ function valideRessource(ressource) {
   return ressource;
 }
 
-apiController.baseAction()
-  .respond('json');
 
 /**
  * Create
  */
-apiController.action()
-    .match('add')
+controller
+    .Action('add')
     .via('post')
     .do(function() {
       var ressourcePosted, ressourcePlausible, Ressource;
@@ -112,8 +111,8 @@ apiController.action()
 /**
  * Read (get)
  */
-apiController.action()
-    .match('get/:oid')
+controller
+    .Action('get/:oid')
     .do(function(oid) {
       var Ressource = this.application.entity('Ressource');
       Ressource
@@ -131,9 +130,8 @@ apiController.action()
 /**
  * Update
  */
-apiController.action()
-    .match('update')
-    .via('post')
+controller
+    .Action('update').via('post')
     .do(function() {
       // @todo vérif droits
       var ressourcePosted, ressourcePlausible, ressource;
@@ -169,12 +167,11 @@ apiController.action()
 /**
  * Delete
  */
-apiController.action()
-    .match('delete/:oid')
-    .do(function(oid) {
-      // @todo vérif droits
-      var Ressource = this.application.entity('Ressource');
-      Ressource.delete({oid:oid});
-    });
+controller.Action('delete/:oid')
+  .do(function(oid) {
+    // @todo vérif droits
+    var Ressource = this.application.entity('Ressource');
+    Ressource.delete({oid:oid});
+  });
 
-module.exports = apiController;
+module.exports = controller;
