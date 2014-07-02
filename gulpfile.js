@@ -1,6 +1,6 @@
 "use strict";
 /*
- * This file is part of "node-lassi-example".
+ * This file is part of "Collection".
  *    Copyright 2009-2012, arNuméral
  *    Author : Yoran Brault
  *    eMail  : yoran.brault@arnumeral.fr
@@ -43,20 +43,20 @@ var
   dust       = require('gulp-dust'),
   concat     = require('gulp-concat'),
   jsdoc      = require("gulp-jsdoc"),
-  jshint     = require("gulp-jshint"),
   rework     = require('gulp-path-rework'),
-  launcherM  = require('launcher'),
+  launcher   = require('launcher'),
   fs         = require('fs');
+
 
 /**
  * L'instance de notre (re)démarreur de serveur (incluant un serveur livereload)
  */
-var launcher = launcherM('./build/application/index.js');
+var launcher = launcher('./build/application/index.js');
 
 /**
  * La construction des sources côté serveur sont juste
  * une recopie du contenu de "construct" en excluant les sous-dossiers
- * public.
+ * public. On supprime aussi "server" et "shared" des chemins cible.
  */
 gulp.task('build-server-sources', function () {
   gulp
@@ -176,7 +176,7 @@ gulp.task('watch', function () {
   gulp.watch('construct/**/public/styles/**/*.scss', ['build-public-styles']);
   gulp.watch(['construct/**/*', '!construct/**/public/**/*.js'], ['build-server-sources']);
   gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
-  gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources']);
+  gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources'])
   launcher.start();
 })
 
@@ -185,50 +185,4 @@ gulp.task('doc', function() {
     .pipe(jsdoc('./documentation-output'))
 });
 
-/**
- * Lance l'analyse de notre code serveur
- */
-gulp.task('hintServer', function() {
-  var config = require('./package.json').jshintConfig;
-  gulp.src(['construct/**/*.js', '!construct/**/public/**/*'])
-  .pipe(jshint(config))
-  .pipe(jshint.reporter('jshint-stylish'))
-});
-
-/**
- * Lance l'analyse de notre code client
- */
-gulp.task('hintClient', function() {
-  var config = require('./package.json').jshintConfig;
-  // faut changer le contexte
-  config.node = false;
-  config.browser = true;
-  gulp.src(['construct/**/public/**/*.js', '!construct/**/public/vendors/**/*'])
-  .pipe(jshint(config))
-  .pipe(jshint.reporter('jshint-stylish'))
-});
-
-/**
- * Lance l'analyse de notre code avec jsHint
- */
-gulp.task('hint', ['hintServer', 'hintClient']);
-
-/**
- * La tâche par défaut relance un build puis l'appli
- */
-gulp.task('default', ['build', 'watch']);
-
-/**
- * On ajoute toutes les tâches du dossier gulptasks s'il existe
- * Chaque fichier doit exporter une fonction qui sera exécutée à l'appel de la tâche
- */
-var taskDir = './gulptasks';
-if (fs.existsSync(taskDir)) {
-  fs.readdirSync(taskDir).forEach(function (file, index) {
-    var name;
-    if (file.substr(-3) === '.js') {
-      name = file.substr(0, file.length -3);
-      gulp.task(name, require(taskDir + '/' + file));
-    }
-  })
-}
+gulp.task('default', ['build', 'watch'])

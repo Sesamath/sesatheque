@@ -3,15 +3,9 @@
 /**
  * Le controleur de la home
  */
-var homeController = lassi.Controller('/');
+var controller = lassi.Controller();
 
-homeController.baseAction()
-  .layout('page')
- // .respond('html');
-
-homeController.action()
-  .registeredAs('home')
-  .view('home')
+controller.Action('/', 'home').respond('html')
   .do(function () {
     // On envoie les données à la vue
     /* (idem qu'ajouter ces propriétés à response.data et ne rien retourner) */
@@ -21,4 +15,4 @@ homeController.action()
     }
   })
 
-module.exports = homeController;
+module.exports = controller;
