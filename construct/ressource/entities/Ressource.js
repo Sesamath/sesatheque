@@ -95,7 +95,7 @@ function Ressource() {
    *   ...
    * ces restrictions peuvent se combiner (masque binaire)
    */
-  this.restriction = 1;
+this.restriction = 0;
   /**
    * Date de création
    * @type {Date}

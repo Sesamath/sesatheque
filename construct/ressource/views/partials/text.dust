@@ -6,7 +6,7 @@
         o.errors : une liste de messages d'erreur à afficher au dessus de l'input
         o.required (booléen)
     avec aussi les attributs éventuels
-        o.titre : texte à afficher au dessus de l'input
+        o.label : texte à afficher au dessus de l'input
         o.readonly (booléen)
         o.hidden (booléen)
     et ces autres attributs éventuels passé par le template parent (pas dans l'objet)
@@ -17,13 +17,13 @@
 <div class="control-group  {?o.errors}has-error{/o.errors}">
     {#o.errors}<div class="help-block">{.}</div>{/o.errors}
     <div class="input-group">
+        {?o.label}<label for="{o.name}">{o.label}</label>{/o.label}
         <input type="{?o.hidden}hidden{:else}text{/o.hidden}"
                name="{o.name}"
                {?maxlength}maxlength="{maxlength}"{/maxlength}
                {?size}size = "{size}"{/size}
                class="{?class}{class}{:else}form-control{/class}"
-               {?o.titre}placeholder="{o.titre}"{/o.titre}
+               {?o.label}placeholder="{o.label}"{/o.label}
                value="{o.value}" />
     </div>
 </div>
-dump dans text : {@dump}{o}{/dump}

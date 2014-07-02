@@ -6,7 +6,7 @@
         o.errors : une liste de messages d'erreur à afficher au dessus de l'input
         o.required (booléen)
     avec aussi les attributs éventuels
-        o.titre : texte à afficher au dessus du textarea
+        o.label : texte à afficher au dessus du textarea
         o.readonly (booléen)
         o.hidden (booléen)
     et ces autres attributs éventuels passé par le template parent (pas dans l'objet)
@@ -24,7 +24,7 @@
                   {?maxlength}maxlength="{maxlength}"{/maxlength}
                   {?cols}cols = "{cols}"{/cols}
                   {?raws}raws = "{raws}"{/raws}
-                  {?o.titre}placeholder="{o.titre}"{/o.titre}>{o.value}</textarea>
+                  {?o.label}placeholder="{o.label}"{/o.label}>{o.value}</textarea>
     </div>
 </div>
-dump dans text : {@dump}{o}{/dump}
+

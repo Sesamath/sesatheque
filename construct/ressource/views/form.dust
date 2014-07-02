@@ -5,7 +5,7 @@
     </div>
 
     {:else}
-    <form method="post" id="formRessource">
+    <form method="post" id="formRessource" action="{postUrl}">
 
         <div class="form-group">
             {?oid}{>text o=oid size=6 /}{/oid} {! n'existe pas encore à l'affichage du add !}
@@ -31,7 +31,7 @@
         {! todo widget relations !}
 
         <div class="form-group">
-            {>textearea o=contenu}
+            {>textarea o=contenu /}
         </div>
 
         {! todo widget auteurs et contributeurs !}
@@ -39,11 +39,11 @@
          <div class="form-group">
             {>text o=version /}
             {>text o=restriction /}
-            {>text o=dateCreation /}
+            {>text o=dateCreation filter="jour" /}
         </div>
 
 
-        {! Les types, devraient disparaitrent car conditionnés par la catégorie !}
+        {! Les types, devraient disparaitrent car conditionnés par la catégorie ! }
 
         Dump global {@dump}{.}{/dump}
 

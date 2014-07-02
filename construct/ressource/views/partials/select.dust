@@ -6,8 +6,8 @@
 {/o.errors}
 
     <div class="input-group">
-        <label {?o.required}class="required"{/o.required}>{titre}</label>
-        {?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{?o.required}
+        <label {?o.required}class="required"{/o.required}>{o.label}</label>
+        {?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{/o.required}
         <select id="{o.id}" name="{o.name}">
             {#o.choices}
             <option value="{value}" {?selected}selected="selected"{/selected} />{label}</option>
