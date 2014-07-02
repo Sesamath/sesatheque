@@ -1,5 +1,5 @@
 {
-  "name": "MyLassiApplication",
+  "name": "Bibliotheque",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -12,6 +12,7 @@
     "knex": "^0.5.14",
     "lassi": "git+ssh://git@arnumeral.fr:node-lassi",
     "moment": "^2.6.0",
+    "morgan": "^1.1.1",
     "mysql": "^2.3.0",
     "sass-tools": "git+ssh://git@arnumeral.fr:sass-tools",
     "seq": "^0.3.5",
@@ -49,7 +50,8 @@
     "indent": 2,
     "predef": [
       "lassi",
-      "_"
+      "_",
+      "log"
     ]
   }
 }

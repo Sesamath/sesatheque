@@ -1,0 +1,86 @@
+/**
+ * Nos loggers maison
+ */
+'use strict';
+
+var fs = require('fs');
+var moment = require('moment');
+var config = require('../../config');
+
+// les streams vers nos logs, celui de dev est ouvert plus loin si besoin
+var devOutputStream;
+// ces logs dans tous les cas
+var errorOutputStream = fs.createWriteStream(config.logs.error, {'flags': 'a'});
+var errorDataOutputStream = fs.createWriteStream(config.logs.errorData, {'flags': 'a'});
+
+var env = process.env.NODE_ENV || 'dev';
+
+var logDev;
+
+/** Nos filtres possibles, qui seront ajoutés si besoin par setFilter */
+var filters = {}
+
+/**
+ * Active un filtre (le créé si besoin)
+ */
+function setFilterOn(filter) {
+  filters[filter] = true;
+}
+
+/**
+ * Désactive un filtre (le créé si besoin)
+ */
+function setFilterOff(filter) {
+  filters[filter] = false;
+}
+
+function addToLog(message, stream) {
+  var prefix = '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] ';
+  stream.write(prefix + message + "\n");
+}
+
+function logError(message, filter) {
+  if (!filter || filters[filter]) {
+    addToLog(message, errorOutputStream);
+  }
+}
+
+function logErrorData(message, filter) {
+  if (!filter || filters[filter]) {
+    addToLog(message, errorDataOutputStream);
+  }
+}
+
+// le log de dev pour raconter sa vie ou envoyer des objets
+if (env === 'dev') {
+  // (attention, on sera dans build/application/index.js au runtime) */
+  var devOutputStream = fs.createWriteStream(config.logs.dev, {'flags': 'a'});
+  var js_beautify = require('js-beautify').js_beautify;
+  var buffer;
+  logDev = function(message, objectToDump, filter) {
+    if (!filter || filters[filter]) {
+      var suffix = "\n";
+      if (objectToDump) {
+        // ça peut planter en cas de ref circulaire
+        try {
+          buffer = js_beautify(JSON.stringify(objectToDump));
+        } catch (error) {
+          // @todo tenter un dump au 1er niveau
+          buffer = "Impossible d'assurer le rendu de l'objet : " + error.toString();
+        }
+        suffix += buffer + "\n";
+      }
+      addToLog(message + suffix, devOutputStream);
+    }
+  };
+} else {
+  logDev = function() {};
+}
+
+module.exports = {
+  dev : logDev,
+  error : logError,
+  errorData : logErrorData,
+  setFilterOn : setFilterOn,
+  setFilterOff : setFilterOff
+};
