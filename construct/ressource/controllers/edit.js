@@ -162,7 +162,6 @@ controller.defineBaseAction().respond('html');
  */
 controller
   .Action('describe/:oid')
-  .view('describe')
   .do(function (oid) {
     return getRessource(oid, 'page');
   });
@@ -172,7 +171,6 @@ controller
  */
 controller
   .Action('display/:oid')
-  .view('display')
   .do(function (oid) {
     return getRessource(oid, 'page');
   });
@@ -188,7 +186,7 @@ controller
 controller
   .Action('add')
   .via('get')
-  .view('form')
+  //.view('form')
 // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
   .do(function () {
     //configRessource = this.application.settings.ressource;
@@ -218,7 +216,6 @@ controller
 controller
   .Action('edit/:oid')
   .via('get')
-  .view('edit')
   .do(function (oid) {
     return getRessource(oid, 'form');
   });
