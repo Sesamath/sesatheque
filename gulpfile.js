@@ -74,9 +74,9 @@ gulp.task('build-public-sources', function () {
   var merge = require('merge-stream');
   return merge(
     gulp
-      .src(['construct/plugins/**/public/**/*.js', '!construct/**/vendors/**']),
+      .src(['construct/**/public/**/*.js', '!construct/**/vendors/**']),
     gulp
-      .src(['construct/plugins/**/public/**/*.dust', '!construct/**/vendors/**'])
+      .src(['construct/**/public/**/*.dust', '!construct/**/vendors/**'])
       .pipe(dust())
       )
   .pipe(concat('main.js'))
@@ -108,7 +108,7 @@ gulp.task('build-public-styles', function () {
  */
 gulp.task('build-public-assets', function () {
   gulp
-    .src(['construct/plugins/**/public/assets/**/*'])
+    .src(['construct/**/public/assets/**/*'])
     .pipe(rework.rebase('assets'))
     .pipe(gulp.dest('build/public'))
     .pipe(launcher.livereload())
@@ -120,7 +120,7 @@ gulp.task('build-public-assets', function () {
  */
 gulp.task('build-public-vendors', function () {
   gulp
-    .src(['construct/plugins/**/public/vendors/**/*'])
+    .src(['construct/**/public/vendors/**/*'])
     .pipe(rework.rebase('vendors'))
     .pipe(gulp.dest('build/public'))
     .pipe(launcher.livereload())
