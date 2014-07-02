@@ -124,7 +124,11 @@ entityRessource
     .index('dateCreation')
     .index('dateUpdate')
     .beforeStoring(function () {
-      this.dateUpdate = new Date();
+      // on ne met à jour cette date que si elle n'existait pas, sinon c'est la date de maj de la ressource
+      // et pas de son indexation ici
+      if (!this.dateUpdate) {
+        this.dateUpdate = new Date();
+      }
     });
 
 module.exports = entityRessource;

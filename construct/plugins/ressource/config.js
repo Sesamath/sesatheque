@@ -153,7 +153,7 @@ module.exports = {
     dateMiseAJour    : "Date de mise à jour"
   },
   // les types requis seront vérifiés avec _.is{type}
-  types            : {
+  typesVar         : {
     oid              : 'Number',
     codeTechnique    : 'String',
     titre            : 'String',
@@ -173,5 +173,62 @@ module.exports = {
     restriction      : 'Number',
     dateCreation     : 'Date',
     dateMiseAJour    : 'Date'
+  },
+  // des constantes pour rendre le code plus lisible
+  constantes       : {
+    categories:{
+      activiteFixe:1,
+      activiteAnimee:2,
+      coursFixe:3,
+      coursAnime:4,
+      exerciceFixe:5,
+      exerciceAnime:6,
+      exerciceInteractif:7
+    },
+    typePedagogiques : {
+      cours            : 3,
+      exercice         : 9,
+      corrigeExercice  : 91,
+      enonceExercice   : 92,
+      qcm              : 191,
+      evaluation       : 7,
+      autoEvaluation   : 2,
+      sujetExam        : 81,
+      prepareExam      : 82,
+      jeuEduc          : 13,
+      manuel           : 141,
+      documentReference: 151,
+      simulation       : 21,
+      tutoriel         : 22
+    },
+    typeDocumentaires: {
+      animation : 5,
+      interactif: 9,
+      imageFixe : 6,
+      texte     : 12,
+      son       : 11,
+      collection: 1,
+      dataSet   : 2
+    },
+    relations        : {
+      assocA           : 1,
+      estVersionDe     : 4,
+      existeAussi      : 5,
+      estRemplacePar   : 6,
+      remplace         : 7,
+      estRequisPar     : 8,
+      requiert         : 9,
+      estPartieDe      : 10,
+      contient         : 11,
+      estRefPar        : 12,
+      contientRefA     : 13,
+      estUnFormatDe    : 14,
+      existeDansFormat : 15,
+      estTraductionDe  : 16,
+      estTraduitAvec   : 17,
+      aPourVignette    : 21,
+      aPourCorrige     : 51,
+      estLaCorrectionDe: 52
+    }
   }
 };

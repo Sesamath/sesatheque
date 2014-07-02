@@ -43,15 +43,15 @@ function valideRessource(ressource) {
     errors.push("Ressource vide");
   } else {
     // vérif présence et type
-    _.each(configRessource.types, function (type, key) {
+    _.each(configRessource.typesVar, function (typeVar, key) {
       // propriétés obligatoires
       if (_.isEmpty(ressource[key]) && configRessource.required.indexOf(key) > -1) {
         errors.push("Le champ " + configRessource.labels[key] + " est obligatoire");
       }
       // le type
-      if (ressource.hasOwnProperty(key) && ! _['is' + value](ressource[key])) {
+      if (ressource.hasOwnProperty(key) && ! _['is' + typeVar](ressource[key])) {
         errors.push("Le champ " + configRessource.labels[key] + " ne contient pas le type attendu");
-      } else if (type === 'Number') {
+      } else if (typeVar === 'Number') {
         // on vérifie entier positif
         if (Math.floor(ressource[key]) !== ressource[key]) {
           errors.push("Le champ " + configRessource.labels[key] + " ne contient pas un entier");
