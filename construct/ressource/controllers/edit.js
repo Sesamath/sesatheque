@@ -186,7 +186,7 @@ controller
 controller
   .Action('add')
   .via('get')
-  //.view('form')
+  .useView('form')
 // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
   .do(function () {
     //configRessource = this.application.settings.ressource;
