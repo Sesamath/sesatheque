@@ -5,9 +5,16 @@
  * @extends {lassi.Component}
  * @constructor
  */
-var component = lassi.Component()
+var ressourceComponent = lassi.Component()
     .initialize(function() {
       this.application.settings.ressource = require('./config.js');
     });
 
-module.exports = component;
+// On ajoute toutes les methodes du repository à notre component
+var ressourceRepository = require('./repository');
+_.each(ressourceRepository, function(name, method) {
+  ressourceComponent[name] = method;
+});
+
+// et on l'exporte
+module.exports = ressourceComponent;

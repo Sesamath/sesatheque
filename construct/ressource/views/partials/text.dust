@@ -13,17 +13,17 @@
         class : classes css qui remplaceront la classe par défaut
         maxlength
         size
+        width
 !}
-<div class="control-group  {?o.errors}has-error{/o.errors}">
-    {#o.errors}<div class="help-block">{.}</div>{/o.errors}
-    <div class="input-group">
-        {?o.label}<label for="{o.name}">{o.label}</label>{/o.label}
-        <input type="{?o.hidden}hidden{:else}text{/o.hidden}"
-               name="{o.name}"
-               {?maxlength}maxlength="{maxlength}"{/maxlength}
-               {?size}size = "{size}"{/size}
-               class="{?class}{class}{:else}form-control{/class}"
-               {?o.label}placeholder="{o.label}"{/o.label}
-               value="{o.value}" />
-    </div>
-</div>
+
+<input type="{?o.hidden}hidden{:else}text{/o.hidden}"
+       name="{o.name}"
+       {?o.id}id="form-{o.id}"{:else}{?id}id="form-{id}"{/id}{/o.id}
+       class="{?class}{class}{:else}form-control{/class}"
+       {?o.label}placeholder="{o.label}"{/o.label}
+       {?o.value}value="{o.value}"{/o.value}
+       {?o.readonly}readonly="readonly"{/o.readonly}
+       {?maxlength}maxlength="{maxlength}"{/maxlength}
+       {?size}size="{size}"{/size}
+       {?width}width="{width}"{/width}
+/>

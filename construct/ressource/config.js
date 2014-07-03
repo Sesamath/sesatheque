@@ -92,6 +92,11 @@ module.exports = {
     'ita': 'italien',
     'por': 'portugais'
   },
+  restriction      : {
+    0: 'aucune',
+    1: 'enseignant',
+    2: 'privé'
+  },
   /**
    * Donne les types induits par la catégorie, mais ça peut être surchargé par l'utilisateur qui renseigne les champs
    */
@@ -151,11 +156,12 @@ module.exports = {
     typePedagogiques : "Type pédagogique",
     typeDocumentaires: "Type documentaire",
     relations        : "Ressources liées",
-    contenu          : "Options",
+    parametres       : "Paramètres",
     auteurs          : "Auteurs",
     contributeurs    : "Contributeurs",
     langue           : "Langue",
     publie           : "Publié",
+    version          : "Version",
     restriction      : "Restriction",
     dateCreation     : "Date de création",
     dateMiseAJour    : "Date de mise à jour"
@@ -173,11 +179,12 @@ module.exports = {
     typePedagogiques : 'Array',
     typeDocumentaires: 'Array',
     relations        : 'Array',
-    contenu          : 'Object',
+    parametres       : 'Object',
     auteurs          : 'Array',
     contributeurs    : 'Array',
     langue           : 'String',
     publie           : 'Boolean',
+    version          : 'String',
     restriction      : 'Number',
     dateCreation     : 'Date',
     dateMiseAJour    : 'Date'
@@ -187,14 +194,14 @@ module.exports = {
    * (en gros un reverse sur les listes d'ids de nos propriétés)
    */
   constantes       : {
-    categories:{
-      activiteFixe:1,
-      activiteAnimee:2,
-      coursFixe:3,
-      coursAnime:4,
-      exerciceFixe:5,
-      exerciceAnime:6,
-      exerciceInteractif:7
+    categories       : {
+      activiteFixe      : 1,
+      activiteAnimee    : 2,
+      coursFixe         : 3,
+      coursAnime        : 4,
+      exerciceFixe      : 5,
+      exerciceAnime     : 6,
+      exerciceInteractif: 7
     },
     typePedagogiques : {
       cours            : 3,
@@ -240,6 +247,11 @@ module.exports = {
       aPourVignette    : 21,
       aPourCorrige     : 51,
       estLaCorrectionDe: 52
+    },
+    restriction      : {
+      aucune    : 0,
+      enseignant: 1,
+      prive     : 2
     }
   }
 };

@@ -1,0 +1,16 @@
+{! enveloppe de chaque saisie de propriété, avec
+        o l'objet à afficher, avec notamment
+            o.errors (facultatif)
+            o.label (le titre de la propriété à saisir)
+        widget le template à utiliser
+        extra des attributs supplémentaires pour le widget
+!}
+<div class="control-group  {?o.errors}has-error{/o.errors}">
+    {#o.errors}<div class="help-block">{.}</div>{/o.errors}
+
+    <label>{o.label}{?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{/o.required}</label>
+
+    <div class="input-group {widget}">
+        {>"{widget}" /}
+    </div>
+</div>

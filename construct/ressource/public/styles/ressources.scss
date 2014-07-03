@@ -1,0 +1,19 @@
+#formRessource .form-group { clear: left; margin: 1em; position: relative;}
+/* propriété flottante dans son groupe */
+#formRessource .control-group {float: left; margin: 0.5em;}
+/* titres centrés */
+#formRessource .control-group > label {font-weight: bold; width: 100%; text-align: center; }
+/* checkboxes, alignés à droite dans son div */
+#formRessource .checkboxes { position: relative;}
+#formRessource .checkboxes input { margin: 0.2em 0 0.1em 0.5em; } /* */
+#formRessource .checkboxes label {float: right; clear: right; font-weight: normal; margin: 0.1em 0;}
+/*
+#formRessource .form-group div.input-group {}
+
+#formRessource .checkboxes { margin: 1em; }
+#formRessource .checkboxes br.clear { clear: both; }
+#formRessource .checkboxes label { float: right; }
+
+/* titres centrés * /
+#formRessource .input-group div, #formRessource .input-group label {font-weight: bold; width: 100%; text-align: center; float: none; }
+/* #form-oid, #form-codeTechnique {width: 5em;} fait passer le titre à droite.... */

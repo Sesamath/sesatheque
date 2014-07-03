@@ -24,7 +24,7 @@ function ressourceToDustForm(ressource) {
 
     if (key === '_entity') return;
     data[key] = {
-      id   : key,
+      id   : key, // le template ajoutera un préfixe de son choix
       label: label
     };
     // c'est un tableau ou une valeur unique (donc une liste)
@@ -38,6 +38,11 @@ function ressourceToDustForm(ressource) {
         // faut ça sur le select et pas les choices
         data[key].name = key;
       }
+    } else if (_.isBoolean(value)) {
+      // checkbox
+      data[key].choices = {
+        value: [value]
+      }
     } else {
       // propriété scalaire (boolean compris) => input
       data[key].name = key;
@@ -49,6 +54,7 @@ function ressourceToDustForm(ressource) {
   }); // fin each propriété
   // on ajoute nos cas particulier
   data.oid.readonly = true;
+  data.version.readonly = true;
   data.categories.required = true;
   data.langue.unique = true;
 
@@ -65,7 +71,6 @@ function ressourceToDustForm(ressource) {
  */
 function arrayToDust(key, selectedValues, isUnique) {
   var choices = [];
-  if (key === 'langue') log.dev('langue', selectedValues)
   _.each(configRessource[key], function (label, cbValue) {
     var choice = {
       label: label,
@@ -205,10 +210,19 @@ controller
   .Action('add/validate')
   .via('post')
   .do(function () {
+    var compRessource, oid;
     // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
     // et rediriger vers le describe ou vers le form avec les erreurs
-      log.dev('request dans add/validate', this.request.body);
-      this.response.redirect('/');
+    log.dev('post dans add', this.post);
+    compRessource = lassi.ressource; // le Component, pas entity
+    try {
+      oid = compRessource.add(this.post); // il valide avant d'enregistrer
+      this.response.redirect('describe/' + oid);
+    } catch (error) {
+      log.dev("dans add le store renvoie l'erreur", error);
+      // @todo voir comment ce truc fonctionne...
+      lassi.action.ressource.add({error:error});
+    }
   });
 
 /**

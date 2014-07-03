@@ -21,8 +21,12 @@ GLOBAL._ = underscore_;
 GLOBAL.log = log;
 
 // Construction de l'application
-lassi.Application().boot();
+var application = lassi.Application();
+// on déclenchera ça quand le boot sera fini
+application.on('boot', function(){
+  console.log("onBoot de l'application Bibliothèque");
+  log.dev('BOOT');
+});
 
-/* On laisse ça ici même si le boot a à peine démarré, en attendant de savoir écouter onBoot */
-console.log("Boot de l'application Bibliothèque");
-log.dev('BOOT');
+// et on boot
+application.boot();

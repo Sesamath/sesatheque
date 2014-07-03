@@ -13,6 +13,16 @@ function Ressource() {
    */
   this.codeTechnique = '';
   /**
+   * identifiant du dépôt d'origine (où est stockée et géré la ressource)
+   * @type {string}
+   */
+  this.origine = null;
+  /**
+   * Id de la ressource dans son dépôt d'origine
+   * @type {string}
+   */
+  this.idOriginal = null;
+  /**
    * Titre
    * @type {string}
    */

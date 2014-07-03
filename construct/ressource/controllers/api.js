@@ -26,6 +26,9 @@ function convertPostToRessource(postParams) {
           ressource[propName] = JSON.parse(postParams[propName]);
         } catch(error) {
           ressource[propName] = null;
+          // on le note
+          log.error("La ressource " +postParams.oid + " passée en post a une propriété invalide : " +
+              propName +"=\n" +postParams[propName]);
         }
       }
     }
@@ -34,43 +37,9 @@ function convertPostToRessource(postParams) {
   return ressource;
 }
 
-/**
- * Vérifie que les champs obligatoires existent et sont non vides
- * @param {ressource}
- */
-function valideRessource(ressource) {
-  var errors = [];
-  if (_.isEmpty(ressource)) {
-    errors.push("Ressource vide");
-  } else {
-    // vérif présence et type
-    _.each(configRessource.typesVar, function (typeVar, key) {
-      // propriétés obligatoires
-      if (_.isEmpty(ressource[key]) && configRessource.required.indexOf(key) > -1) {
-        errors.push("Le champ " + configRessource.labels[key] + " est obligatoire");
-      }
-      // le type
-      if (ressource.hasOwnProperty(key) && ! _['is' + typeVar](ressource[key])) {
-        errors.push("Le champ " + configRessource.labels[key] + " ne contient pas le type attendu");
-      } else if (typeVar === 'Number') {
-        // on vérifie entier positif
-        if (Math.floor(ressource[key]) !== ressource[key]) {
-          errors.push("Le champ " + configRessource.labels[key] + " ne contient pas un entier");
-        }
-        if (ressource[key] < 0) {
-          errors.push("Le champ " + configRessource.labels[key] + " ne contient pas un entier positif");
-        }
-      }
-    });
-  }
 
-  if (errors !== []) {
-    throw new Error(errors.join("\n"));
-  }
 
-  return ressource;
-}
-
+controller.defineBaseAction().respond('json');
 
 /**
  * Create
@@ -81,30 +50,35 @@ controller
     .do(function() {
       var ressourcePosted, ressourcePlausible, Ressource;
       try {
+        lassi.component.ressource.toto()
+        log.dev('le post', this.post)
         // @todo vérif droits
         // on accepte un seul param data qui contient la ressource en json
         // mais aussi chaque champ séparément
-        if (this.request.query.param.data) {
+        if (_.isEmpty(this.post)) {
+          throw new Error("Ressource vide");
+        }
+        if (this.post.data) {
           try {
-            ressourcePosted = JSON.parse(this.request.query.param.data);
+            ressourcePosted = JSON.parse(this.post.data);
           } catch (error) {
             throw new Error("Ressource invalide");
           }
         } else {
-          ressourcePosted = convertPostToRessource(this.request.query.param);
+          ressourcePosted = convertPostToRessource(this.post);
         }
         // on vérifie l'intégrité
         ressourcePlausible = valideRessource(ressourcePosted);
         // si on est toujours là on peut instancier une entité
-        Ressource = this.application.entity('Ressource');
+        Ressource = lassi.entity.Ressource;
         Ressource
             .create(ressourcePlausible)
             .store(function (error, ressource) {
               if (error) throw error;
-              this.response.send({result: 'ok', oid: ressource.oid});
+              return {result: 'ok', oid: ressource.oid};
             })
       } catch (error) {
-        this.response.send({error: error.toString()});
+        return {error: error.toString()};
       }
     }); // do
 
