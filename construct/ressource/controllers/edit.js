@@ -209,7 +209,8 @@ controller
   .do(function () {
     // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
     // et rediriger vers le describe ou vers le form avec les erreurs
-      log.dev('request dans add/validate', this.request);
+      log.dev('request dans add/validate', this.request.body);
+      this.response.redirect('/');
   });
 
 /**

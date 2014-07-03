@@ -4,6 +4,9 @@
  * Nos listes de types & co, qui changent rarement
  */
 module.exports = {
+  /**
+   * Les listes de choix pour nos propriétés dont on enregistre des ids
+   */
   niveaux          : {
     11: 'CP',
     10: 'CE1',
@@ -26,39 +29,6 @@ module.exports = {
     5: "Exercice fixe",
     6: "Exercice avec animation",
     7: "Exercice interactif"
-  },
-  /**
-   * Donne les types induits par la catégorie, mais ça peut être surchargé par l'utilisateur qui renseigne les champs
-   */
-  categoriesToTypes: {
-    1: {
-      typePedagogiques : [9],
-      typeDocumentaires: [12]
-    },
-    2: {
-      typePedagogiques : [9],
-      typeDocumentaires: [5]
-    },
-    3: {
-      typePedagogiques : [3],
-      typeDocumentaires: [12]
-    },
-    4: {
-      typePedagogiques : [3],
-      typeDocumentaires: [5]
-    },
-    5: {
-      typePedagogiques : [9],
-      typeDocumentaires: [12]
-    },
-    6: {
-      typePedagogiques : [9],
-      typeDocumentaires: [5]
-    },
-    7: {
-      typePedagogiques : [9],
-      typeDocumentaires: [9]
-    }
   },
   typePedagogiques : {
     // id de scolomfr-voc-010, « on s'en sert pour faire quoi ? »
@@ -122,6 +92,39 @@ module.exports = {
     'ita': 'italien',
     'por': 'portugais'
   },
+  /**
+   * Donne les types induits par la catégorie, mais ça peut être surchargé par l'utilisateur qui renseigne les champs
+   */
+  categoriesToTypes: {
+    1: {
+      typePedagogiques : [9],
+      typeDocumentaires: [12]
+    },
+    2: {
+      typePedagogiques : [9],
+      typeDocumentaires: [5]
+    },
+    3: {
+      typePedagogiques : [3],
+      typeDocumentaires: [12]
+    },
+    4: {
+      typePedagogiques : [3],
+      typeDocumentaires: [5]
+    },
+    5: {
+      typePedagogiques : [9],
+      typeDocumentaires: [12]
+    },
+    6: {
+      typePedagogiques : [9],
+      typeDocumentaires: [5]
+    },
+    7: {
+      typePedagogiques : [9],
+      typeDocumentaires: [9]
+    }
+  },
   // les propriétés qui doivent être uniques
   uniques          : {
     'codeTechnique': true,
@@ -129,8 +132,13 @@ module.exports = {
     'restriction'  : true
   },
   // les propriétés obligatoires (oid ne l'est pas, on le vérifie spécifiquement si besoin)
-  required         : ['titre', 'codeTechnique', 'categories', 'auteurs'],
-  // les libellés que l'on affiche pour chaque champ
+  required         : [
+    'titre',
+    'codeTechnique',
+    'categories',
+    //'auteurs'
+  ],
+  // les libellés que l'on affiche pour chaque champ de notre entité
   labels           : {
     oid              : "Identifiant",
     titre            : "Titre",
@@ -174,7 +182,10 @@ module.exports = {
     dateCreation     : 'Date',
     dateMiseAJour    : 'Date'
   },
-  // des constantes pour rendre le code plus lisible
+  /**
+   * Des constantes pour rendre le code plus lisible
+   * (en gros un reverse sur les listes d'ids de nos propriétés)
+   */
   constantes       : {
     categories:{
       activiteFixe:1,
