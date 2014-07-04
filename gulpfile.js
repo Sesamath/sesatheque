@@ -80,7 +80,7 @@ gulp.task('build-public-sources', function () {
       .pipe(dust())
       )
   .pipe(concat('main.js'))
-  .pipe(gulp.dest('build/public'))
+  .pipe(gulp.dest('build/public/scripts'))
   .pipe(launcher.livereload())
 });
 
@@ -97,7 +97,7 @@ gulp.task('build-public-styles', function () {
       errLogToConsole: true,
       sourceComments: 'map'}))
     .pipe(concat('main.css'))
-    .pipe(gulp.dest('build/public'))
+    .pipe(gulp.dest('build/public/styles'))
     .pipe(launcher.livereload())
 })
 
@@ -174,7 +174,7 @@ gulp.task('rebuild', [ 'clean', 'build' ], function () {});
  */
 gulp.task('watch', function () {
   gulp.watch('construct/**/public/styles/**/*.scss', ['build-public-styles']);
-  gulp.watch(['construct/**/*', '!construct/**/public/**/*.js'], ['build-server-sources']);
+  gulp.watch(['construct/**/*', '!construct/**/public/**/*'], ['build-server-sources']);
   gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
   gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources'])
   launcher.start();
