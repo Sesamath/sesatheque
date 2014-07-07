@@ -166,9 +166,10 @@ module.exports = {
     dateCreation     : "Date de création",
     dateMiseAJour    : "Date de mise à jour"
   },
-  // les types requis seront vérifiés avec _.is{type}
+  // les types requis, Attention, le code suppose que tous les Array sont des tableaux d'entiers,
+  // faudra modifier postToRessource dans edit.js si ça change
   typesVar         : {
-    oid              : 'Number',
+    //oid              : 'Number',
     codeTechnique    : 'String',
     titre            : 'String',
     resume           : 'String',
@@ -252,6 +253,9 @@ module.exports = {
       aucune    : 0,
       enseignant: 1,
       prive     : 2
+    },
+    formats : {
+      jour : 'DD/MM/YYYY'
     }
   }
 };

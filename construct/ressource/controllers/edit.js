@@ -47,7 +47,7 @@ function ressourceToDustForm(ressource) {
       // propriété scalaire (boolean compris) => input
       data[key].name = key;
       if (_.isDate(value)) {
-        value = moment(value).format('DD/MM/YYYY');
+        value = moment(value).format(configRessource.constantes.formats.jour);
       }
       data[key].value = value;
     }
@@ -71,11 +71,17 @@ function ressourceToDustForm(ressource) {
  */
 function arrayToDust(key, selectedValues, isUnique) {
   var choices = [];
+  var i = 0;
   _.each(configRessource[key], function (label, cbValue) {
     var choice = {
       label: label,
       value: cbValue
     };
+    if (!isUnique) {
+      // faut du name sur chaque checkbox
+      choice.name = key + '[' + i + ']';
+      i++;
+    }
     // et on ajoute les selected s'il y en a
     if (selectedValues) {
       // verif type
@@ -90,6 +96,79 @@ function arrayToDust(key, selectedValues, isUnique) {
   });
 
   return choices;
+}
+
+/**
+ * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
+ * @param data
+ * @return {Ressource}
+ */
+function postToRessource(data) {
+  var Ressource = lassi.entity.Ressource;
+  var ressource = Ressource.create();
+  var errors = [];
+  var buffer;
+  var msg;
+  log.dev('dans postToRessource', data)
+  if (_.isEmpty(data)) {
+    errors.push("Ressource vide");
+  } else {
+    // vérif présence et type
+    _.each(configRessource.typesVar, function (typeVar, key) {
+      // propriétés obligatoires
+      if (_.isEmpty(data[key]) && configRessource.required.indexOf(key) > -1) {
+        errors.push("Le champ " + configRessource.labels[key] + " est obligatoire");
+      }
+      // les cast
+      if (data[key]) {
+        if (typeVar === 'String') {
+          if (_.isString(data[key])) {
+            ressource[key] = data[key];
+          } else {
+            errors.push("Le champ " + configRessource.labels[key] + " n'est pas une chaine de caractères");
+          }
+        } else if (typeVar === 'Date') {
+          buffer = moment(data[key], configRessource.constantes.formats.jour, true);
+          if (buffer.isValid()) {
+            ressource[key] = new Date(buffer); // pb car _.isDate(buffer) renvoie false !
+            log.dev("type moment " + typeof buffer + _.isDate(buffer))
+          } else {
+            errors.push("Le champ " + configRessource.labels[key] +
+                " n'est pas une date valide (" + configRessource.constantes.formats.jour +')');
+          }
+        } else if (typeVar === 'Number') {
+          ressource[key] = parseInt(data[key], 10);
+        } else if (typeVar === 'Boolean') {
+          ressource[key] = !!data[key];
+        } else if (typeVar === 'Array') {
+          if (_.isArray(data[key])) {
+            _.each(data[key], function (value) {
+              // tous nos tableaux sont des tableaux d'entiers
+              ressource[key].push(parseInt(value, 10));
+            });
+          } else {
+            errors.push("Le champ " + configRessource.labels[key] + " n'est pas une liste");
+          }
+        } else if (typeVar === 'Object') {
+          try {
+            ressource[key] = JSON.parse(data[key]);
+          } catch (e) {
+            errors.push("Le champ " + configRessource.labels[key] + " n'est pas du json valide : " + e.toString());
+          }
+        } else {
+          msg = "Le champ " + configRessource.labels[key] + " est d'un type non prévu (" +typeVar +')';
+          errors.push(msg);
+          log.error(msg);
+        }
+      }
+    });
+  }
+
+log.dev('errors à la fin postToRessource', errors)
+  if (!_.isEmpty(errors)) {
+    throw new Error(errors.join("\n"));
+  }
+  return ressource;
 }
 
 /**
@@ -137,7 +216,6 @@ function getRessource(oid, format) {
   // oid est une fonction ???
   var data;
   var ressource = lassi.entity.Ressource.find({oid: oid});
-  //configRessource = this.application.settings.ressource;
   if (!ressource || ressource.oid !== oid) {
     data = {
       error: 'La ressource ' + oid + " n'existe pas."
@@ -184,44 +262,41 @@ controller
  * embed : Voir la ressource sans fioriture autour (pour insertion en iframe)
  * @todo à implémenter, dans un controleur séparé si trop compliqué de changer le template de base ici
  */
+function getEmptyFormData() {
+  var Ressource = lassi.entity.Ressource;
+  var newRessource = Ressource.create();
+  return ressourceToDustForm(newRessource);
+}
 
 /**
  * Create, le form de saisie
  */
 controller
   .Action('add')
-  .via('get')
+  .via('get', 'post')
   .useView('form')
 // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
   .do(function () {
-    //configRessource = this.application.settings.ressource;
-    var Ressource = lassi.entity.Ressource;
-    var newRessource = Ressource.create();
-    var data = ressourceToDustForm(newRessource);
-    data.postUrl = 'add/validate'; // relatif à nous
-    log.dev('data renvoyé par add', data);
-    return data;
-  });
-
-/**
- * Create, validation du form et insert
- */
-controller
-  .Action('add/validate')
-  .via('post')
-  .do(function () {
-    var compRessource, oid;
-    // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-    // et rediriger vers le describe ou vers le form avec les erreurs
-    log.dev('post dans add', this.post);
-    compRessource = lassi.ressource; // le Component, pas entity
-    try {
-      oid = compRessource.add(this.post); // il valide avant d'enregistrer
-      this.response.redirect('describe/' + oid);
-    } catch (error) {
-      log.dev("dans add le store renvoie l'erreur", error);
-      // @todo voir comment ce truc fonctionne...
-      lassi.action.ressource.add({error:error});
+    var data, compRessource, oid;
+    if (this.method === 'get') {
+      return getEmptyFormData();
+    } else {
+      // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+      // et rediriger vers le describe ou vers le form avec les erreurs
+      log.dev('post dans add', this.post);
+      compRessource = lassi.ressource; // le Component, pas entity
+      try {
+        data = postToRessource(this.post);
+        log.dev("après cast", data)
+        oid = compRessource.add(data); // il valide avant d'enregistrer
+        this.response.redirect('describe/' + oid);
+      } catch (error) {
+        log.dev("dans add (post html) on a l'erreur", error.toString());
+        data = this.post;
+        data = getEmptyFormData();
+        data.errors = [error.toString()];
+        return data;
+      }
     }
   });
 

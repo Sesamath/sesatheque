@@ -1,12 +1,18 @@
-var ressourceRepository = {}
+/**
+ * Les méthodes génériques de notre composant, utilisées par les différents contrôleurs
+ */
+
+var ressourceRepository = {};
+var configRessource = require('../config.js');
 
 /**
- * Vérifie que les champs obligatoires existent et sont non vides
+ * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
  * @param {Ressource}
  * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
  * @return true sinon
  */
 ressourceRepository.valide = function(ressource) {
+  log.dev('on va valider ', ressource)
   var errors = [];
   if (_.isEmpty(ressource)) {
     errors.push("Ressource vide");
@@ -18,8 +24,9 @@ ressourceRepository.valide = function(ressource) {
         errors.push("Le champ " + configRessource.labels[key] + " est obligatoire");
       }
       // le type
-      if (ressource.hasOwnProperty(key) && ! _['is' + typeVar](ressource[key])) {
+      if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
         errors.push("Le champ " + configRessource.labels[key] + " ne contient pas le type attendu");
+        log.dev("à la validation on a reçu pour " + key + ' : ' + JSON.stringify(ressource[key]))
       } else if (typeVar === 'Number') {
         // on vérifie entier positif
         if (Math.floor(ressource[key]) !== ressource[key]) {
@@ -48,6 +55,7 @@ ressourceRepository.valide = function(ressource) {
 ressourceRepository.add = function(ressource) {
   var Ressource = lassi.entity.Ressource;
   ressourceRepository.valide(ressource);
+  log.dev('validation OK')
   Ressource
       .create(ressource)
       .store(function (error, ressource) {
