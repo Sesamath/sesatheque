@@ -12,7 +12,7 @@ var configRessource = require('../config.js');
  * @return true sinon
  */
 ressourceRepository.valide = function(ressource) {
-  log.dev('on va valider ', ressource)
+  // log.dev('on va valider ', ressource)
   var errors = [];
   if (_.isEmpty(ressource)) {
     errors.push("Ressource vide");
@@ -39,8 +39,8 @@ ressourceRepository.valide = function(ressource) {
     });
   }
 
-  if (errors !== []) {
-    throw new Error(errors.join("\n"));
+  if (!_.isEmpty(errors)) {
+    throw new Error("Les erreurs à la validation : " + errors.join("\n"));
   }
 
   return true;
@@ -49,36 +49,41 @@ ressourceRepository.valide = function(ressource) {
 /**
  * Ajoute une ressource
  * @param ressource
+ * @param {Function} next callback qui sera passé au store() et recevra les arguments (error, ressource)
  * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
- * @return {number} L'oid de la ressource insérée
+ * @return {string} L'id de la ressource insérée
  */
-ressourceRepository.add = function(ressource) {
+ressourceRepository.add = function(ressource, next) {
   var Ressource = lassi.entity.Ressource;
   ressourceRepository.valide(ressource);
-  log.dev('validation OK')
+  log.dev('validation OK dans le add')
   Ressource
       .create(ressource)
       .store(function (error, ressource) {
         if (error) throw error;
-        return ressource.oid;
+        if (!ressource.id) {
+          // pas le choix, faut une 2e requete d'update :-(
+          ressource.id = 'bib' + ressource.oid;
+          ressource.store(next)
+        } else {
+          next(error, ressource);
+        }
       })
 };
 
 /**
  * Update une ressource
  * @param ressource
+ * @param {Function} next callback qui sera passé au store() et recevra les arguments (error, ressource)
  * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
  * @return {number} L'oid de la ressource insérée
  */
-ressourceRepository.update = function(ressource) {
+ressourceRepository.update = function(ressource, next) {
   var Ressource = lassi.entity.Ressource;
   ressourceRepository.valide(ressource);
   Ressource
-      .initialize(ressource)
-      .store(function (error, ressource) {
-        if (error) throw error;
-        return true;
-      })
+      .create(ressource)
+      .store(next)
 };
 
 /**
@@ -104,10 +109,11 @@ ressourceRepository.delete = function(oid) {
  * @throws {Error} Si la récupération (le find de l'entity) en a trouvé une
  * @returns {Ressource}
  */
-ressourceRepository.get = function(oid) {
+ressourceRepository.get = function(id) {
   var Ressource = lassi.entity.Ressource;
   Ressource
-      .find({oid:oid})
+      .find()
+      .include({id:id})
       .execute(function (error, ressource) {
         if (error) {
           throw error;

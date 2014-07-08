@@ -1,0 +1,25 @@
+<div class="block ressource">
+{?error}
+    <p class="has-error">{error}</p>
+{:else}
+    <h2>{titre}</h2>
+    Id : {oid}
+    {?publie}Publié{:else}NON PUBLIÉ{/publie},
+    {?restreint}{restreint}{:else}public{/restreint}
+    (codeTechnique {codeTechnique},
+    version {version})<br />
+    Date de création : {dateCreation}<br />
+    Dernière mise à jour : {dateMiseAJour}<br />
+    niveaux : {niveaux}<br />
+    categories : {categories}<br />
+    typePedagogiques : {typePedagogiques}<br />
+    typeDocumentaires : {typeDocumentaires}<br />
+    <p>resume : {resume}</p>
+    <p>description : {description}</p>
+    {?relations}<ul>relations {#relations}<li>{predicat} {lien}</li>{/relations}</ul>{/relations}
+    <p>commentaires : {commentaires}</p>
+    <p>parametres : {parametres}</p>
+    {?auteurs}<ul>auteurs : {#auteurs}<li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>{/auteurs}</ul>{/auteurs}
+    {?contributeurs}<ul>contributeurs : {#contributeurs}<li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>{/contributeurs}</ul>{/contributeurs}
+{/error}
+</div>

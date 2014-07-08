@@ -65,8 +65,17 @@ if (env === 'dev') {
         try {
           buffer = js_beautify(JSON.stringify(objectToDump));
         } catch (error) {
-          // @todo tenter un dump au 1er niveau
-          buffer = "Impossible d'assurer le rendu de l'objet : " + error.toString();
+          // on tente une construction à la main pour chacun des 1ers niveaux
+          buffer = "{\n";
+          _.each(objectToDump, function(value, key) {
+            buffer += '  ' + key + ' : ';
+            try {
+              buffer += js_beautify(JSON.stringify(value));
+            } catch (error) {
+              buffer += "Impossible d'assurer le rendu de l'objet : " + error.toString();
+            }
+            buffer += '\n';
+          });
         }
         suffix += buffer + "\n";
       }

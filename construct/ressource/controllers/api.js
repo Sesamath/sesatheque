@@ -1,10 +1,5 @@
 'use strict';
 
-var controller = lassi.Controller('api/ressource');
-controller.defineBaseAction().respond('json');
-
-var configRessource = require('../config.js');
-
 /**
  * Passe en revue les propriétés de l'objet passé en argument, si la propriété existe dans ressource
  * recopie sa valeur dans l'objet qui sera retourné (avec le bon type)
@@ -37,9 +32,9 @@ function convertPostToRessource(postParams) {
   return ressource;
 }
 
-
-
-controller.defineBaseAction().respond('json');
+var controller = lassi.Controller('api/ressource');
+var configRessource = require('../config.js');
+controller.respond('json');
 
 /**
  * Create

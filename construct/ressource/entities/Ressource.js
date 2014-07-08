@@ -18,10 +18,10 @@ function Ressource() {
    */
   this.origine = null;
   /**
-   * Id de la ressource dans son dépôt d'origine
+   * Id de la ressource (concaténation origine + id dans son dépôt d'origine, mep42 ou j3p42 par ex)
    * @type {string}
    */
-  this.idOriginal = null;
+  this.id = null;
   /**
    * Titre
    * @type {string}
@@ -120,6 +120,7 @@ this.restriction = 0;
 
 entityRessource
     .initialize(Ressource)
+    .index('id')
     .index('codeTechnique')
     .index('niveaux')
     .index('categories')
@@ -139,6 +140,7 @@ entityRessource
       if (!this.dateUpdate) {
         this.dateUpdate = new Date();
       }
+      // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
     });
 
 module.exports = entityRessource;
