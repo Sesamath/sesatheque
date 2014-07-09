@@ -242,7 +242,6 @@ function getEmptyFormData() {
 var controller = lassi.Controller('ressource');
 var configRessource = require('../config.js');
 var moment = require('moment');
-var flow = require('seq');
 
 controller.respond('html');
 
@@ -293,36 +292,35 @@ controller
   .via('get', 'post')
   .renderWith('form')
 // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
-  .do(function () {
-    var data, compRessource, context, spawn, sleep;
-    if (this.method === 'get') {
-      return getEmptyFormData();
-    } else {
-      // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-      // et rediriger vers le describe ou vers le form avec les erreurs
-      log.dev('post dans add', this.post);
-      compRessource = lassi.ressource; // le Component, pas entity
-      try {
-        data = postToRessource(this.post);
-        context = this;
-        // il validera avant d'enregistrer
-        compRessource.add(data, function (error, ressource) {
-          if (error) throw error;
-          log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
-          context.redirect(lassi.action.ressource.describe, {id: ressource.id});
-        });
-        // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
-        require('exec-sync')('sleep 5'); // ça bloque bien le process courant, et tout ce qu'il a lancé...
-        log.dev("Après le sleep");
-      } catch (error) {
-        log.dev("dans add (post html) on a l'erreur", error.toString());
-        data = this.post;
-        data = getEmptyFormData();
-        data.errors = [error.toString()];
-        return data;
+  .do(
+    function () {
+      var data, compRessource, context;
+      if (this.method === 'get') {
+        return getEmptyFormData();
+      } else {
+        // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+        // et rediriger vers le describe ou vers le form avec les erreurs
+        log.dev('post dans add', this.post);
+        compRessource = lassi.ressource; // le Component, pas entity
+        try {
+          data = postToRessource(this.post);
+          context = this;
+          // il validera avant d'enregistrer
+          compRessource.add(data, function (error, ressource) {
+            if (error) throw error;
+            log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
+            context.redirect(lassi.action.ressource.describe, {id: ressource.id});
+          });
+          // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
+        } catch (error) {
+        log.dev("dans add (post html) on a l'erreur", error.stack);
+          data = this.post;
+          data = getEmptyFormData();
+          data.errors = [error.toString()];
+          return data;
+        }
       }
-    }
-    log.dev("fin du do add");
+      log.dev("fin du do add");
   });
 
 /**

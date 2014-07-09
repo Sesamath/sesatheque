@@ -6,7 +6,6 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "exec-sync": "^0.1.6",
     "exfs": "git+ssh://git@arnumeral.fr:node-exfs",
     "filters": "git+ssh://git@arnumeral.fr:node-filters",
     "gravatars": "git+ssh://git@arnumeral.fr:node-gravatars",

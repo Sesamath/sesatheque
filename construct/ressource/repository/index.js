@@ -55,20 +55,24 @@ ressourceRepository.valide = function(ressource) {
  */
 ressourceRepository.add = function(ressource, next) {
   var Ressource = lassi.entity.Ressource;
+  var ress;
+
+  function updateNewIndex(error, ressource) {
+    log.dev('updateNewIndex')
+    if (error) throw error;
+    if (ressource && !ressource.id) {
+      // pas le choix, faut une 2e requete d'update :-(
+      ressource.id = 'bib' + ressource.oid;
+      ressource.store(next)
+    } else {
+      next(error, ressource);
+    }
+  }
+
   ressourceRepository.valide(ressource);
   log.dev('validation OK dans le add')
-  Ressource
-      .create(ressource)
-      .store(function (error, ressource) {
-        if (error) throw error;
-        if (!ressource.id) {
-          // pas le choix, faut une 2e requete d'update :-(
-          ressource.id = 'bib' + ressource.oid;
-          ressource.store(next)
-        } else {
-          next(error, ressource);
-        }
-      })
+  ress = Ressource.create(ressource);
+  ress.store(updateNewIndex);
 };
 
 /**
