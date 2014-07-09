@@ -311,10 +311,10 @@ controller
               // il validera avant d'enregistrer
               compRessource.add(data, function (error, ressource) {
                 if (error) throw error;
-                log.dev("Après le save on récupère l'id " + ressource.id);
+                log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
                 context.redirect(lassi.action.ressource.describe, {id: ressource.id});
                 // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
-                seqContext();
+                // donc on appelle pas seqContext();
               });
             });
       } catch (error) {
