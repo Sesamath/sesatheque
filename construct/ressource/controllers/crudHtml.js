@@ -294,7 +294,7 @@ controller
   .renderWith('form')
 // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
   .do(function () {
-    var data, compRessource, context;
+    var data, compRessource, context, chainsaw;
     if (this.method === 'get') {
       return getEmptyFormData();
     } else {
@@ -305,18 +305,17 @@ controller
       try {
         data = postToRessource(this.post);
         context = this;
-        flow()
-            .seq(function() {
-              var seqContext = this;
-              // il validera avant d'enregistrer
-              compRessource.add(data, function (error, ressource) {
-                if (error) throw error;
-                log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
-                context.redirect(lassi.action.ressource.describe, {id: ressource.id});
-                // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
-                // donc on appelle pas seqContext();
-              });
-            });
+        chainsaw = require('chainsaw');
+        chainsaw(function () {
+            // il validera avant d'enregistrer
+            compRessource.add(data, function (error, ressource) {
+              if (error) throw error;
+              log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
+              context.redirect(lassi.action.ressource.describe, {id: ressource.id});
+              // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
+              // donc on appelle pas saw.next();
+          });
+        });
       } catch (error) {
         log.dev("dans add (post html) on a l'erreur", error.toString());
         data = this.post;
