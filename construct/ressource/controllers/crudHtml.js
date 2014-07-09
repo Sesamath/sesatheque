@@ -310,9 +310,10 @@ controller
           if (error) throw error;
           log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
           context.redirect(lassi.action.ressource.describe, {id: ressource.id});
-          // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
-          require('child_process').spawn('sleep', [1]);
         });
+        // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
+        require('exec-sync')('sleep 5'); // ça bloque bien le process courant, et tout ce qu'il a lancé...
+        log.dev("Après le sleep");
       } catch (error) {
         log.dev("dans add (post html) on a l'erreur", error.toString());
         data = this.post;
