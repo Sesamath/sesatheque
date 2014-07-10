@@ -134,14 +134,14 @@ module.exports = {
   },
   // les propriétés qui doivent être uniques
   uniques          : {
-    'codeTechnique': true,
+    'typeTechnique': true,
     'langue'       : true,
     'restriction'  : true
   },
   // les propriétés obligatoires (oid ne l'est pas, on le vérifie spécifiquement si besoin)
   required         : [
     'titre',
-    'codeTechnique',
+    'typeTechnique',
     'categories',
     //'auteurs'
   ],
@@ -149,7 +149,7 @@ module.exports = {
   labels           : {
     oid              : "Identifiant",
     titre            : "Titre",
-    codeTechnique    : "Code technique",
+    typeTechnique    : "Type technique",
     resume           : "Résumé",
     description      : "Description",
     commentaires     : "Commentaires",
@@ -172,7 +172,7 @@ module.exports = {
   // faudra modifier postToRessource dans edit.js si ça change
   typesVar         : {
     //oid              : 'Number',
-    codeTechnique    : 'String',
+    typeTechnique    : 'String',
     titre            : 'String',
     resume           : 'String',
     description      : 'String',

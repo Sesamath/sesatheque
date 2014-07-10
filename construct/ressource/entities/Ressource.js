@@ -11,7 +11,7 @@ function Ressource() {
    * Le code du plugin qui gère la ressource
    * @type {string}
    */
-  this.codeTechnique = '';
+  this.typeTechnique = '';
   /**
    * identifiant du dépôt d'origine (où est stockée et géré la ressource)
    * @type {string}
@@ -97,15 +97,9 @@ function Ressource() {
    */
   this.publie = false;
   /**
-   * Restriction sur la ressource :
-   *   0 public
-   *   1 restreint au rôle prof
-   *   2 restreint en édition à l'auteur, visualisation à gérer suivant le contexte
-   *   4 restreint au personnes ayant le rôle d'id 4 (à définir)
-   *   ...
-   * ces restrictions peuvent se combiner (masque binaire)
+   * Restriction sur la ressource
    */
-this.restriction = 0;
+  this.restriction = 0;
   /**
    * Date de création
    * @type {Date}
@@ -116,12 +110,16 @@ this.restriction = 0;
    * @type {Date}
    */
   this.dateMiseAJour = undefined;
+  /**
+   * Version de la ressource
+   */
+  this.version = 0;
 }
 
 entityRessource
     .initialize(Ressource)
     .index('id')
-    .index('codeTechnique')
+    .index('typeTechnique')
     .index('niveaux')
     .index('categories')
     .index('typePedagogiques')
@@ -135,10 +133,13 @@ entityRessource
     .index('dateCreation')
     .index('dateUpdate')
     .beforeStoring(function () {
-      // on ne met à jour cette date que si elle n'existait pas, sinon c'est la date de maj de la ressource
-      // et pas de son indexation ici
-      if (!this.dateUpdate) {
-        this.dateUpdate = new Date();
+      // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
+      // et pas de celle de son indexation ici
+      if (!this.dateMiseAJour) {
+        this.dateMiseAJour = new Date();
+      }
+      if (!this.version) {
+        this.version = 1;
       }
       // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
     });

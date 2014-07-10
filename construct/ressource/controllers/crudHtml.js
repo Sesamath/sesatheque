@@ -6,7 +6,7 @@
  * @param {Boolean} avecJointure passer true si on veut aussi les titres des ressources liées, les noms des auteurs, etc.
  * @returns {Object} La ressource, avec pour chaque champ les propriétés title et value
  */
-function ressourceToDustPage(ressource, avecJointure) {
+function ressourceToDustPage(ressource) {
   var data = {};
   var buffer;
   // on boucle sur les propriétés que l'on veut afficher
@@ -25,13 +25,13 @@ function ressourceToDustPage(ressource, avecJointure) {
               " pour la propriété " + key + " qui n'est pas dans la liste");
         });
       } else {
-        buffer = value;
+        buffer = value; // on garde l'array tel quel
       }
       data[key].value = buffer.join(', ');
 
 
-    } else if (_.isBoolean(value)) {
-      data[key].value = value ? 'oui' : 'non';
+    } else if (_.isDate(value)) {
+      data[key].value = value ? moment(value).format(configRessource.formats.jour) : 'inconnue';
     } else {
       data[key].value = value;
     }
@@ -256,22 +256,27 @@ controller.respond('html');
 controller
     .Action('describe/:id')
     .renderWith('describe')
-    .do(function () {
-      var id, ressource, compRessource;
+    .do(function (next) {
+      var id, ressource, error, data;
       try {
         id = this.arguments.id;
-        if (!id || parseInt(id) != id) throw new Error("Identifiant de ressource incorrect (" + id + ")");
-        ressource = lassi.ressource.get(id);
-        /* compRessource = lassi.ressource; // le Component, pas entity
-        ressource = compRessource.get(oid); */
-        if (!ressource) throw new Error("La ressource " + id + " n'existe pas");
+        if (!id) data = {error: "Identifiant de ressource incorrect (" + id + ")"};
+        else {
+          return lassi.ressource.get(id, function (error, ressource) {
 
-        return ressourceToDustPage(ressource);
-
+            if (ressource) {
+              data = ressourceToDustPage(ressource, true);
+            } else {
+              data = {error: "La ressource " + id + " n'existe pas"};
+            }
+      log.dev("fin du do describe", data);
+            next(error, data);
+          })
+        }
       } catch (e) {
-
-        return {error: e.toString()}
+        error = e
       }
+      next(error, data);
     });
 
 /**
@@ -279,8 +284,8 @@ controller
  */
 controller
   .Action('display/:oid')
-  .do(function (oid) {
-    return getRessource(oid, 'page');
+  .do(function (next) {
+    getRessource(oid, 'page');
   });
 
 
@@ -292,11 +297,11 @@ controller
   .via('get', 'post')
   .renderWith('form')
 // ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
-  .do(
-    function () {
-      var data, compRessource, context;
+  .do(function (next) {
+      var data, compRessource, context = this;
+      //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        return getEmptyFormData();
+        next(null, getEmptyFormData());
       } else {
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
@@ -304,23 +309,19 @@ controller
         compRessource = lassi.ressource; // le Component, pas entity
         try {
           data = postToRessource(this.post);
-          context = this;
           // il validera avant d'enregistrer
           compRessource.add(data, function (error, ressource) {
             if (error) throw error;
             log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
-            context.redirect(lassi.action.ressource.describe, {id: ressource.id});
+            context.redirect(next, lassi.action.ressource.describe, {id: ressource.id});
           });
           // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
         } catch (error) {
-        log.dev("dans add (post html) on a l'erreur", error.stack);
-          data = this.post;
-          data = getEmptyFormData();
-          data.errors = [error.toString()];
-          return data;
+          log.dev("dans add (post html) on a l'erreur", error.stack);
+          next(error);
         }
       }
-      log.dev("fin du do add");
+      log.dev("fin do add");
   });
 
 /**

@@ -10,7 +10,7 @@
         <div class="form-group">
             {?oid.value}{>wrapper widget="text" o=oid width="50px" id="ressOid" /}{/oid.value} {! n'existe pas encore à l'affichage du add !}
             {>wrapper widget="text" o=titre /}
-            {>wrapper widget="text" o=codeTechnique size=2 /}
+            {>wrapper widget="text" o=typeTechnique size=2 /}
             {>wrapper widget="checkboxes" o=publie /}
             {>wrapper widget="select" o=langue /}
         </div>
