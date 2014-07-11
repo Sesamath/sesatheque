@@ -16,4 +16,7 @@
 
 /* titres centrés * /
 #formRessource .input-group div, #formRessource .input-group label {font-weight: bold; width: 100%; text-align: center; float: none; }
-/* #form-oid, #form-codeTechnique {width: 5em;} fait passer le titre à droite.... */
+/* #form-oid, #form-typeTechnique {width: 5em;} fait passer le titre à droite.... */
+
+/* description */
+.ressource span.publie, .ressource span.restriction  {display: block; float: right; margin: 0.5em;}

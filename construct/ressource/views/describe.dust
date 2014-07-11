@@ -1,0 +1,29 @@
+<div class="block ressource">
+{?error}
+    <p class="has-error">{error}</p>
+{:else}
+    <span class="publie">{?publie.value} Publié{:else} NON PUBLIÉ{/publie.value}</span>
+    <span class="restriction">{?restreint.value} {restreint.titre} : {restreint.value}{:else} public{/restreint.value}</span>
+    <h2>{titre.value}</h2>
+    {oid.title} : {oid.value}
+    ({typeTechnique.title} : {typeTechnique.value},
+    {version.title} {version.value})<br />
+    {dateCreation.title} : {dateCreation.value}<br />
+    {dateMiseAJour.title} : {dateMiseAJour.value}<br />
+    {niveaux.title} : {niveaux.value}<br />
+    {categories.title} : {categories.value}<br />
+    {typePedagogiques.title} : {typePedagogiques.value}<br />
+    {typeDocumentaires.title} : {typeDocumentaires.value}<br />
+    <p>{resume.title} : {resume.value}</p>
+    <p>{description.title} : {description.value}</p>
+    {?relations.value}<ul>{relations} {#relations.value}<li>{predicat} {lien}</li>{/relations.value}</ul>{/relations.value}
+    <p>{commentaires.title} : {commentaires.value}</p>
+    <p>{parametres.title} : {parametres.value}</p>
+    {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}
+        <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
+    {/auteurs.value}</ul>{/auteurs.value}
+    {?contributeurs.value}<ul>{contributeurs.titre} : {#contributeurs.value}
+        <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
+    {/contributeurs.value}</ul>{/contributeurs.value}
+{/error}
+</div>

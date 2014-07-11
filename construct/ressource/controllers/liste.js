@@ -1,7 +1,6 @@
 'use strict';
 
-var controller = lassi.Controller();
-controller.defineBaseAction().respond('html');
+var controller = lassi.Controller().respond('html');
 
 controller
   .Action('liste')

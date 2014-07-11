@@ -3,14 +3,14 @@
     <div class="control-group has-error">
         <div class="help-block">{.}</div>
     </div>
+    {/errors}
 
-    {:else}
-    <form method="post" id="formRessource" action="{postUrl}">
+    <form method="post" id="formRessource">
 
         <div class="form-group">
             {?oid.value}{>wrapper widget="text" o=oid width="50px" id="ressOid" /}{/oid.value} {! n'existe pas encore à l'affichage du add !}
             {>wrapper widget="text" o=titre /}
-            {>wrapper widget="text" o=codeTechnique size=2 /}
+            {>wrapper widget="text" o=typeTechnique size=2 /}
             {>wrapper widget="checkboxes" o=publie /}
             {>wrapper widget="select" o=langue /}
         </div>
@@ -41,7 +41,7 @@
 
          <div class="form-group">
             {>wrapper widget="text" o=version /}
-            {>wrapper widget="text" o=restriction /}
+            {>wrapper widget="select" o=restriction /}
             {>wrapper widget="text" o=dateCreation filter="jour" /}
         </div>
 
@@ -55,5 +55,4 @@
             <input class="btn btn-primary" type="submit" value="Enregistrer" />
         </div>
     </form>
-    {/errors}
 </div>

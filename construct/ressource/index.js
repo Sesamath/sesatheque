@@ -12,7 +12,8 @@ ressourceComponent.initialize = function() {
 
 // On ajoute toutes les methodes du repository à notre component
 var ressourceRepository = require('./repository');
-_.each(ressourceRepository, function(name, method) {
+_.each(ressourceRepository, function(method, name) {
+  // log.dev('ajoute au component ressource la méthode ' + name)
   ressourceComponent[name] = method;
 });
 
