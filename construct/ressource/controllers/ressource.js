@@ -1,12 +1,174 @@
 'use strict';
 
+var controller = lassi.Controller('ressource');
+var configRessource = require('../config.js');
+var moment = require('moment');
+
+controller.respond('html');
+
+/**
+ * On ajoute nos 4 méthodes CRUD (Create, Read, Update, Delete), avec 2 méthodes read suivant que
+ * l'on veut voir la ressource (display ou embed) ou sa description (describe)
+ */
+
+/**
+ * describe : Voir les propriétés de la ressource
+ */
+controller
+    .Action('describe/:oid')
+    .renderWith('describe')
+    .do(function (next) {
+      sendDataForDust(this.arguments.oid, next);
+    });
+
+/**
+ * describe : Voir les propriétés de la ressource, ici via origin/idOrigin
+ */
+controller
+    .Action('describe/:origin/:idOrigin')
+    .renderWith('describe')
+    .do(function (next) {
+      // ajouter en meta <link rel="canonical" href="..." />
+      sendDataForDust(this.arguments.id, next);
+    });
+
+/**
+ * display : Voir la ressource
+ */
+controller
+  .Action('display/:oid')
+  .do(function (next) {
+    sendDataForDust(this.arguments.oid, next);
+  });
+
+
+/**
+ * Create, le form de saisie
+ */
+controller
+  .Action('add')
+  .via('get', 'post')
+  .renderWith('form')
+// ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
+  .do(function (next) {
+      var data, compRessource, context = this;
+      //log.dev('action', lassi.action.ressource); next()
+      if (this.method === 'get') {
+        next(null, getEmptyFormData());
+      } else {
+        // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+        // et rediriger vers le describe ou vers le form avec les erreurs
+        log.dev('post dans add', this.post);
+        compRessource = lassi.ressource; // le Component, pas entity
+        try {
+          data = postToRessource(this.post);
+          // il validera avant d'enregistrer
+          compRessource.add(data, function (error, ressource) {
+            if (error) throw error;
+            log.dev("Après le save on récupère l'id " + ressource.oid + ", on lance le redirect");
+            context.redirect(next, lassi.action.ressource.describe, {oid: ressource.oid});
+          });
+          // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
+        } catch (error) {
+          log.dev("dans add (post html) on a l'erreur", error.stack);
+          next(error);
+        }
+      }
+      log.dev("fin do add");
+  });
+
+/**
+ * Uptate, le form
+ */
+controller
+  .Action('edit/:oid')
+  .via('get')
+  .do(function (oid) {
+    return getRessource(oid, 'form');
+  });
+
+/**
+ * Update, validation du form et insert
+ */
+controller
+  .Action('update')
+  .via('post')
+  .do(function () {
+    // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+    // et rediriger vers le describe
+  });
+
+/**
+ * Del
+ */
+controller
+  .Action('del/:oid')
+  .via('get', 'post')
+  .renderWith('del')
+  .do(function (next) {
+      var oid = this.arguments.oid;
+      if (this.method === 'get') {
+        // on affiche et on demande confirmation
+        sendDataForDust(oid, next)
+      } else {
+        // post, on supprime
+        try {
+          lassi.ressource.delByOid(oid, function (error, nbRows) {
+            log.dev("nbRows", nbRows)
+            if (nbRows !== 1) next(null, {error: "Aucune ressource d'identifiant " + oid + ' retour ' +nbRows})
+            else {
+              if (error) next(null, {error: error, deletedId: oid})
+              else next(null, {deletedId: oid})
+            }
+          });
+        } catch (e) {
+          // pas normal que cette requete plante, pb d'accès à la base ou table manquante
+          log.error(e.stack)
+          next(null, {error:"La suppression de la ressource " + oid +" a échouée."});
+        }
+      }
+  });
+
+module.exports = controller;
+
+
+/****************************************
+ * déclarations de toutes nos fonctions *
+ ***************************************/
+
+/**
+ * Récupère une ressource, prépare data et passe à next
+ * @param id
+ * @param next callback appelée avec (error, data)
+ * @returns {undefined}
+ */
+function sendDataForDust(oid, next) {
+  var data;
+  try {
+    if (!oid) next(null, {error: "Identifiant de ressource incorrect (" + oid + ")"})
+    else {
+      lassi.ressource.get(oid, function (error, ressource) {
+        if (error) {
+          data = {error: error.toString() }
+        } else {
+          data = getPageData(ressource);
+        }
+        log.dev("on envoie à dust", data);
+        next(null, data);
+      })
+    }
+  } catch (e) {
+    next(null, {error: "La récupération de la ressource " + oid + " a échouée"});
+  }
+}
+
 /**
  * Transforme une entité ressource en objet pour la vue describe
  * @param {Ressource} ressource
  * @param {Boolean} avecJointure passer true si on veut aussi les titres des ressources liées, les noms des auteurs, etc.
  * @returns {Object} La ressource, avec pour chaque champ les propriétés title et value
  */
-function ressourceToDustPage(ressource) {
+function getPageData(ressource) {
   var data = {};
   var buffer;
   // on boucle sur les propriétés que l'on veut afficher
@@ -22,7 +184,7 @@ function ressourceToDustPage(ressource) {
         _.each(value, function(id) {
           if (configRessource.listes[key][id])  buffer.push(configRessource.listes[key][id])
           else log.error("La ressource " + ressource.oid + " a une valeur " + id +
-              " pour la propriété " + key + " qui n'est pas dans la liste");
+              " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
         });
       } else {
         buffer = value; // on garde l'array tel quel
@@ -64,7 +226,7 @@ function ressourceToDustPage(ressource) {
  * }]
  *
  */
-function ressourceToDustForm(ressource) {
+function getFormData(ressource) {
   var data = {};
   // on boucle sur les propriétés déclarées dans config pour récupérer les labels
   _.each(configRessource.labels, function (label, key) {
@@ -156,6 +318,7 @@ function arrayToDust(key, selectedValues, isUnique) {
  * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
  * @param data
  * @return {Ressource}
+ * @throws {Error} En cas de données invalides
  */
 function postToRessource(data) {
   var Ressource = lassi.entity.Ressource;
@@ -220,7 +383,7 @@ function postToRessource(data) {
   }
 
   // if (errors !== []) { // ce truc est toujours vrai !
-  if (!_.isEmpty(errors)) {
+  if (errors.length) {
     log.dev('errors à la fin postToRessource', errors)
     throw new Error("Les erreurs de validation .\n" + errors.join("\n"));
   }
@@ -229,120 +392,10 @@ function postToRessource(data) {
 }
 
 /**
- * embed : Voir la ressource sans fioriture autour (pour insertion en iframe)
- * @todo à implémenter, dans un controleur séparé si trop compliqué de changer le template de base ici
+ * Retourne les datas pour un form sans ressource (à remplir)
  */
 function getEmptyFormData() {
   var Ressource = lassi.entity.Ressource;
-  var newRessource = Ressource.create();
-  return ressourceToDustForm(newRessource);
+  var ressourceEmpty = Ressource.create();
+  return getFormData(ressourceEmpty);
 }
-
-
-var controller = lassi.Controller('ressource');
-var configRessource = require('../config.js');
-var moment = require('moment');
-
-controller.respond('html');
-
-/**
- * On ajoute nos 4 méthodes CRUD (Create, Read, Update, Delete), avec 2 méthodes read suivant que
- * l'on veut voir la ressource (display ou embed) ou sa description (describe)
- */
-
-/**
- * describe : Voir les propriétés de la ressource
- */
-controller
-    .Action('describe/:id')
-    .renderWith('describe')
-    .do(function (next) {
-      var id, ressource, error, data;
-      try {
-        id = this.arguments.id;
-        if (!id) data = {error: "Identifiant de ressource incorrect (" + id + ")"};
-        else {
-          return lassi.ressource.get(id, function (error, ressource) {
-
-            if (ressource) {
-              data = ressourceToDustPage(ressource, true);
-            } else {
-              data = {error: "La ressource " + id + " n'existe pas"};
-            }
-      log.dev("fin du do describe", data);
-            next(error, data);
-          })
-        }
-      } catch (e) {
-        error = e
-      }
-      next(error, data);
-    });
-
-/**
- * display : Voir la ressource
- */
-controller
-  .Action('display/:oid')
-  .do(function (next) {
-    getRessource(oid, 'page');
-  });
-
-
-/**
- * Create, le form de saisie
- */
-controller
-  .Action('add')
-  .via('get', 'post')
-  .renderWith('form')
-// ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
-  .do(function (next) {
-      var data, compRessource, context = this;
-      //log.dev('action', lassi.action.ressource); next()
-      if (this.method === 'get') {
-        next(null, getEmptyFormData());
-      } else {
-        // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-        // et rediriger vers le describe ou vers le form avec les erreurs
-        log.dev('post dans add', this.post);
-        compRessource = lassi.ressource; // le Component, pas entity
-        try {
-          data = postToRessource(this.post);
-          // il validera avant d'enregistrer
-          compRessource.add(data, function (error, ressource) {
-            if (error) throw error;
-            log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
-            context.redirect(next, lassi.action.ressource.describe, {id: ressource.id});
-          });
-          // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
-        } catch (error) {
-          log.dev("dans add (post html) on a l'erreur", error.stack);
-          next(error);
-        }
-      }
-      log.dev("fin do add");
-  });
-
-/**
- * Uptate, le form
- */
-controller
-  .Action('edit/:oid')
-  .via('get')
-  .do(function (oid) {
-    return getRessource(oid, 'form');
-  });
-
-/**
- * Update, validation du form et insert
- */
-controller
-  .Action('update')
-  .via('post')
-  .do(function () {
-    // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-    // et rediriger vers le describe
-  });
-
-module.exports = controller;

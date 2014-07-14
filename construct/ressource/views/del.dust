@@ -1,0 +1,18 @@
+<div class="block del ressource">
+    {?error}<p class="has-error">{error}</p>{/error}
+
+{?deletedId}
+    La ressource {} a été définitivement supprimée
+{:else}
+    {?oid}
+    Supprimer cette ressource définitivement ?
+    {>"../describe" /}
+
+    <form method="post" id="formRessource">
+        <div class="form-group buttons">
+            <input class="btn btn-primary" type="submit" value="Supprimer" />
+        </div>
+    </form>
+    {/oid}
+{/deletedId}
+</div>

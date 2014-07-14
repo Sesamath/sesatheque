@@ -96,33 +96,65 @@ ressourceRepository.update = function(ressource, next) {
 };
 
 /**
- * Efface une ressource
- * @param ressource
- * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
- * @return {number} L'oid de la ressource insérée
+ * Efface l'entity par son oid (on peut passer un tableau)
+ * @param {Number|Array} oid Le ou les oid à supprimer
+ * @param {Function} La callback qui sera appelée en lui passant le nb de ligne effacées en argument
+ * @throws {Error} Si la requete plante
+ * @returns {undefined}
  */
-ressourceRepository.delById = function(id, next) {
-  lassi.entity.Ressource.delById(id, next);
+ressourceRepository.delByOid = function(id, next) {
+  //lassi.entity.Ressource.delWhere('dateCreation', 'IN', ['2014-07-10 00:00:00.001', '2014-07-10 00:00:00.002'], next)
+  lassi.entity.Ressource.delByOid([id, 5, 6], next);
 };
 
 /**
  * Retourne une ressource
  * @param oid
- * @throws {Error} Si la récupération (le find de l'entity) en a trouvé une
+ * @throws {Error} Si la récupération (le find de l'entity) a planté
  * @returns {Ressource}
  */
 ressourceRepository.get = function(id, next) {
   var Ressource = lassi.entity.Ressource;
   Ressource
       .find()
+      .byId(id)
+      .execute(function (error, rows) {
+        log.dev('rows', rows)
+        if (!rows.length) next(new Error("La ressource " + id + " n'existe pas"))
+        else {
+          // on vérifie l'unicité et on log un doublon éventuel
+          if (rows.length > 1) log.errorData("Il y a " + rows.length + " ressources d'id " + id);
+          var ressource = rows[0];
+          // faut transformer les dates en objets date
+          ressource.dateCreation = new Date(ressource.dateCreation);
+          ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+          next(error, ressource)
+        }
+      });
+};
+
+/**
+ * Retourne une ressource
+ * @param oid
+ * @throws {Error} Si la récupération (le find de l'entity) a planté
+ * @returns {Ressource}
+ */
+ressourceRepository.getBy = function(id, next) {
+  var Ressource = lassi.entity.Ressource;
+  Ressource
+      .find()
       .include('id', id, '=')
       .execute(function (error, rows) {
-        var ressource = rows[0];
-        if (rows.length > 1) log.error("Il y a " + rows.length + " ressources d'id " + id);
-        // faut transformer les dates en objets date
-        ressource.dateCreation = new Date(ressource.dateCreation);
-        ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
-        next(error, ressource)
+        if (!rows.length) next(new Error("La ressource " + id + " n'existe pas"))
+        else {
+          // on vérifie l'unicité et on log un doublon éventuel
+          if (rows.length > 1) log.errorData("Il y a " + rows.length + " ressources d'id " + id);
+          var ressource = rows[0];
+          // faut transformer les dates en objets date
+          ressource.dateCreation = new Date(ressource.dateCreation);
+          ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+          next(error, ressource)
+        }
       });
 };
 
