@@ -6,10 +6,10 @@
 
     <script type="text/javascript" src="/vendors/jquery.min.js"></script>
     <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.min.js"></script>
-    <!--script type="text/javascript" src="/main.js"></script-->
+    <!--script type="text/javascript" src="/scripts/main.js"></script-->
     <link type="text/css" rel="stylesheet" href="/vendors/bootstrap/css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="/vendors/normalize.css" />
-    <link type="text/css" rel="stylesheet" href="/main.css" media="all" />
+    <link type="text/css" rel="stylesheet" href="/styles/main.css" media="all" />
 </head>
 <body>
 
