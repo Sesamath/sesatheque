@@ -43,8 +43,8 @@ var
   dust       = require('gulp-dust'),
   concat     = require('gulp-concat'),
   jsdoc      = require("gulp-jsdoc"),
-  rework     = require('gulp-path-rework'),
-  launcher   = require('launcher'),
+  rework     = require('./node_modules/lassi/gulpTasks/gulp-path-rework'),
+  launcher   = require('./node_modules/lassi/gulpTasks/launcher'),
   fs         = require('fs');
 
 
@@ -93,7 +93,7 @@ gulp.task('build-public-styles', function () {
   gulp
     .src('construct/**/public/styles/*.scss')
     .pipe(sass({
-      includePaths: [ './node_modules/sass-tools' ],
+      includePaths: [ './node_modules/lassi/sass-tools' ],
       errLogToConsole: true,
       sourceComments: 'map'}))
     .pipe(concat('main.css'))

@@ -6,15 +6,11 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "exfs": "git+ssh://git@arnumeral.fr:node-exfs",
-    "filters": "git+ssh://git@arnumeral.fr:node-filters",
-    "gravatars": "git+ssh://git@arnumeral.fr:node-gravatars",
     "knex": "^0.5.14",
     "lassi": "git+ssh://git@arnumeral.fr:node-lassi",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",
-    "sass-tools": "git+ssh://git@arnumeral.fr:sass-tools",
     "seq": "^0.3.5",
     "underscore": "^1.6.0"
   },
@@ -27,12 +23,10 @@
     "gulp-dust": "^0.3.0",
     "gulp-jsdoc": "^0.1.4",
     "gulp-jshint": "^1.7.0",
-    "gulp-path-rework": "git+ssh://git@arnumeral.fr:gulp-path-rework",
     "gulp-sass": "0.7.1",
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
     "jshint-stylish": "^0.3.0",
-    "launcher": "git+ssh://git@arnumeral.fr:gulp-launcher",
     "merge-stream": "^0.1.1",
     "through2": "^0.4.2"
   },
