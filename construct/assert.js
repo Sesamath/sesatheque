@@ -7,6 +7,8 @@
  */
 'use strict';
 
+var _ = require('underscore')._;
+
 /**
  * Vérifie que c'est bien une callback qui prend au moins 2 arguments
  * @param next
@@ -18,5 +20,5 @@ function nextOk(next) {
 }
 
 module.exports = {
-  next : nextOk
+  nextOk : nextOk
 };

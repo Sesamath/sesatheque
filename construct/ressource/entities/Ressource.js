@@ -1,5 +1,7 @@
 "use strict";
 
+var _ = require('underscore')._
+
 var entityRessource = lassi.Entity('Ressource');
 
 /**
@@ -139,7 +141,7 @@ entityRessource
     .addIndex('restriction')
     .addIndex('dateCreation')
     .addIndex('dateUpdate')
-    .onBeforeStorage(function () {
+    .onBeforeStorage(function (next) {
       // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
       // et pas de celle de son indexation ici
       if (!this.dateMiseAJour) {
@@ -148,6 +150,10 @@ entityRessource
       if (!this.version) {
         this.version = 1;
       }
+      // si le tableau d'erreur est vide (devrait toujours être le cas,
+      // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
+      if (_.isEmpty(this.errors)) delete this.errors
+      next()
       // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
     });
 

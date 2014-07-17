@@ -7,9 +7,6 @@
 // (il le fait déjà mais le déclarer ici fait plaisir à mon IDE)
 GLOBAL.lassi = require('lassi');
 
-// underscore que l'on va mettre en global aussi parce que l'on est fainéant
-GLOBAL._ = require('underscore')._;
-
 // nos loggers
 GLOBAL.log = require('./log.js'); // jshint ignore:line
 
@@ -20,7 +17,7 @@ GLOBAL.assert = require('./assert.js');
 var application = lassi.Application();
 // on déclenchera ça quand le boot sera fini
 application.on('boot', function(){
-  console.log("Boot de l'application " +this.application.name);
+  console.log("Boot de l'application " + application.name);
   log.dev('BOOT');
 });
 

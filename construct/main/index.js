@@ -6,7 +6,7 @@
  */
 var mainComponent = lassi.Component();
 
-mainComponent.onInitialize = function(next) {
+mainComponent.initialize = function(next) {
   // Définition du layout "page" pour les réponses "html" (qui utilise l'engine dust et le tpl layout-page.dust).
   this.application.transports.html.defineLayout('page', this, 'layout-page');
   next()

@@ -1,8 +1,9 @@
 'use strict';
 
 var controller = lassi.Controller('ressource');
-var config = require('../config.js');
 var moment = require('moment');
+var _ = require('underscore')._;
+var config = require('../config.js');
 var routes = config.constantes.routes;
 
 controller.respond('html');
@@ -63,15 +64,16 @@ controller
 controller
   .Action(routes.display + '/:oid', 'display')
   .do(function (ctx, next) {
-      loadRessource(this.arguments.oid, function(error, ressource) {
+      var oid = ctx.arguments.oid
+      lassi.ressource.load(oid, function (error, ressource) {
         if (!ressource) {
-          ctx.response.statusCode = 404
+          ctx.response.statusCode = 404;
           ressource = {
             errors : ["La ressource d'identifiant " + oid + " n'existe pas"]
           }
         }
         sendPageData(error, ressource, next)
-      });
+      })
   });
 
 
@@ -88,7 +90,7 @@ controller
       var data, compRessource;
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        sendEmptyFormData(next)
+        sendFormData(null, lassi.entity.Ressource.create(), next)
       } else {
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
@@ -193,36 +195,6 @@ module.exports = controller;
 /****************************************
  * déclarations de toutes nos fonctions *
  ***************************************/
-
-/**
- * Récupère une ressource et la passe à next
- * @param oid
- * @param {Function} next      callback appelée avec (error, ressource, nextFinal) si on a une ressource
- * @param {Function} nextFinal callback appelée avec (null, {error:"message"}) en cas de pb
- * @returns {undefined}
- */
-function loadRessource(oid, next, nextFinal) {
-  assert.nextOk(next)
-  assert.nextOk(nextFinal)
-  if (oid) {
-    // méthode load du composant
-    lassi.ressource.load(oid, function (error, ressource) {
-      if (error) {
-        if (error.finalMsg) nextFinal(null, {error:error.toString()})
-        else {
-          // y'a un bug dans le load du component
-          log.error("Error not handled by component")
-          log.error(error)
-          nextFinal(null, {error: "La récupération de la ressource " + oid + " a échouée"});
-        }
-      } else if (_.isEmpty(data)) {
-        this.FileNotFound(new Error("La ressource d'identifiant " + oid + " n'existe pas"))
-      } else {
-        next(error, ressource, nextFinal)
-      }
-    })
-  } else throw new Error("Unable to load a ressource without argument")
-}
 
 /**
  * Transforme une entité ressource en objet pour la vue describe et la passe à next
@@ -358,7 +330,7 @@ function sendFormData(error, ressource, next) {
   data.categories.required = true;
   data.langue.unique = true;
 
-  return data;
+  next(null, data);
 }
 
 /**
@@ -474,14 +446,4 @@ function getRessourceFromPost(data) {
   }
 
   return ressource;
-}
-
-/**
- * Retourne les datas pour un form sans ressource (à remplir)
- *
- */
-function sendEmptyFormData(next) {
-  var Ressource = lassi.entity.Ressource;
-  var ressourceEmpty = Ressource.create();
-  return sendFormData(ressourceEmpty, next);
 }

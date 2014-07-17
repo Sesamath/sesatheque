@@ -1,5 +1,7 @@
 'use strict';
 
+var _ = require('underscore')._;
+
 /**
  * Passe en revue les propriétés de l'objet passé en argument, si la propriété existe dans ressource
  * recopie sa valeur dans l'objet qui sera retourné (avec le bon type)

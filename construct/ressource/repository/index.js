@@ -2,6 +2,7 @@
  * Les méthodes génériques de notre composant, utilisées par les différents contrôleurs
  */
 
+var _ = require('underscore')._;
 var ressourceRepository = {};
 var config = require('../config.js');
 
