@@ -8,6 +8,12 @@ var entityRessource = lassi.Entity('Ressource');
  */
 function Ressource() {
   /**
+   * Une liste d'erreurs éventuelles (incohérences de données, etc)
+   * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
+   * Devrait être viré au save s'il est vide
+   */
+  this.errors = []
+  /**
    * Le code du plugin qui gère la ressource
    * @type {string}
    */
@@ -21,7 +27,7 @@ function Ressource() {
    * Id de la ressource (concaténation origine + id dans son dépôt d'origine, mep42 ou j3p42 par ex)
    * @type {string}
    */
-  this.id = null;
+  this.idOrigin = null;
   /**
    * Titre
    * @type {string}
@@ -117,22 +123,23 @@ function Ressource() {
 }
 
 entityRessource
-    .initialize(Ressource)
-    .index('id')
-    .index('typeTechnique')
-    .index('niveaux')
-    .index('categories')
-    .index('typePedagogiques')
-    .index('typeDocumentaires')
-    .index('relations')
-    .index('auteurs')
-    .index('contributeurs')
-    .index('langue')
-    .index('publie')
-    .index('restriction')
-    .index('dateCreation')
-    .index('dateUpdate')
-    .beforeStoring(function () {
+    .onInitialize(Ressource)
+    .addIndex('origin')
+    .addIndex('idOrigin')
+    .addIndex('typeTechnique')
+    .addIndex('niveaux')
+    .addIndex('categories')
+    .addIndex('typePedagogiques')
+    .addIndex('typeDocumentaires')
+    .addIndex('relations')
+    .addIndex('auteurs')
+    .addIndex('contributeurs')
+    .addIndex('langue')
+    .addIndex('publie')
+    .addIndex('restriction')
+    .addIndex('dateCreation')
+    .addIndex('dateUpdate')
+    .onBeforeStorage(function () {
       // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
       // et pas de celle de son indexation ici
       if (!this.dateMiseAJour) {

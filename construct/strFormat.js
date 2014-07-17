@@ -11,13 +11,16 @@ var util = require('util')
  * @returns {*}
  */
 module.exports = function strFormat(message, args) {
+  var retour
   if (_.isArray(args)) {
     // faut ajouter message en 1er argument et le passer à util.format
-    return util.format.apply(null, args.unshift(message));
+    retour = util.format.apply(null, args.unshift(message));
   } else {
     // pas la peine de bosser pour rien
-    if (arguments.length < 2) return message
+    if (arguments.length < 2) retour = message
     // on transmet tel quel
-    return util.format.apply(null, arguments);
+    else retour = util.format.apply(null, arguments);
   }
+
+  return retour
 }

@@ -6,7 +6,7 @@ controller
   .Action('liste')
   .do(function (request, response) {
     lassi.entity.Ressource
-      .find({})
+      .query()
       .limit(10)
       .orderBy('id', 'asc')
       .execute(function (error, ressources) {

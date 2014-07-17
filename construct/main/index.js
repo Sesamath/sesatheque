@@ -6,9 +6,10 @@
  */
 var mainComponent = lassi.Component();
 
-mainComponent.initialize = function() {
+mainComponent.onInitialize = function(next) {
   // Définition du layout "page" pour les réponses "html" (qui utilise l'engine dust et le tpl layout-page.dust).
   this.application.transports.html.defineLayout('page', this, 'layout-page');
+  next()
 
   /* On se met en écoute de l'évènement qui précède le rendu (dust)
    * des données sur le gestionnaire de vues.

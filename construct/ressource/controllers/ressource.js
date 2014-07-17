@@ -1,44 +1,77 @@
 'use strict';
 
 var controller = lassi.Controller('ressource');
-var configRessource = require('../config.js');
+var config = require('../config.js');
 var moment = require('moment');
+var routes = config.constantes.routes;
 
 controller.respond('html');
 
 /**
  * On ajoute nos 4 méthodes CRUD (Create, Read, Update, Delete), avec 2 méthodes read suivant que
  * l'on veut voir la ressource (display ou embed) ou sa description (describe)
+ *
+ * Les erreurs liées à un bug dans le code sont en anglais,
+ * celles liées à une incohérence de data et destinés à l'utilisateur en français
+ * (celles liées à une url malformée doivent être interceptées avant nous par les contrôleurs)
  */
 
 /**
  * describe : Voir les propriétés de la ressource
  */
 controller
-    .Action('describe/:oid')
+    .Action(routes.describe + '/:oid', 'describe')
     .renderWith('describe')
-    .do(function (next) {
-      sendDataForDust(this.arguments.oid, next);
+    .do(function (ctx, next) {
+      var oid = ctx.arguments.oid
+      lassi.ressource.load(oid, function (error, ressource) {
+        if (!ressource) {
+          ctx.response.statusCode = 404;
+          ressource = {
+            errors : ["La ressource d'identifiant " + oid + " n'existe pas"]
+          }
+        }
+        sendPageData(error, ressource, next)
+      })
     });
 
 /**
- * describe : Voir les propriétés de la ressource, ici via origin/idOrigin
+ * describe via origin : Voir les propriétés de la ressource, ici via origin/idOrigin
  */
 controller
-    .Action('describe/:origin/:idOrigin')
+    .Action(routes.describe + '/:origin/:idOrigin', 'describeByOrigin')
     .renderWith('describe')
-    .do(function (next) {
-      // ajouter en meta <link rel="canonical" href="..." />
-      sendDataForDust(this.arguments.id, next);
-    });
+    .do(function (ctx, next) {
+      var origin = ctx.arguments.origin
+      var idOrigin = ctx.arguments.idOrigin
+      lassi.ressource.loadByOrigin(origin, idOrigin, function (error, ressource) {
+        if (!ressource) {
+          ressource = {
+              errors : ["La ressource d'identifiant " + idOrigin + " (origine " + origin +" n'existe pas"]
+          }
+          ctx.response.statusCode = 404;
+        } else if (!error) {
+          ctx.permalink = ctx.url(lassi.action.ressource.describe, {oid: ressource.oid})
+        }
+        sendPageData(error, ressource, next)
+      })
+    })
 
 /**
  * display : Voir la ressource
  */
 controller
-  .Action('display/:oid')
-  .do(function (next) {
-    sendDataForDust(this.arguments.oid, next);
+  .Action(routes.display + '/:oid', 'display')
+  .do(function (ctx, next) {
+      loadRessource(this.arguments.oid, function(error, ressource) {
+        if (!ressource) {
+          ctx.response.statusCode = 404
+          ressource = {
+            errors : ["La ressource d'identifiant " + oid + " n'existe pas"]
+          }
+        }
+        sendPageData(error, ressource, next)
+      });
   });
 
 
@@ -46,80 +79,105 @@ controller
  * Create, le form de saisie
  */
 controller
-  .Action('add')
+  .Action(routes.add, 'add')
   .via('get', 'post')
   .renderWith('form')
-// ajouter ici un meta pour ajouter le js client qui va conditionner les types à la catégorie
-  .do(function (next) {
-      var data, compRessource, context = this;
+  .do(function (ctx, next) {
+      // ajouter un meta ou un autre moyen pour mettre le js client
+      // qui va conditionner les types à la catégorie dans la page
+      var data, compRessource;
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        next(null, getEmptyFormData());
+        sendEmptyFormData(next)
       } else {
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
-        log.dev('post dans add', this.post);
+        //log.dev('post dans add', this.post);
         compRessource = lassi.ressource; // le Component, pas entity
-        try {
-          data = postToRessource(this.post);
-          // il validera avant d'enregistrer
-          compRessource.add(data, function (error, ressource) {
-            if (error) throw error;
+        data = getRessourceFromPost(ctx.post)
+        // il validera avant d'enregistrer
+        compRessource.add(data, function (error, ressource) {
+          if (error || !_.isEmpty(ressource.errors)) {
+            // faut réafficher le form
+            sendFormData(error, ressource, next)
+          } else {
             log.dev("Après le save on récupère l'id " + ressource.oid + ", on lance le redirect");
-            context.redirect(next, lassi.action.ressource.describe, {oid: ressource.oid});
-          });
-          // ici on doit pas rendre la main ! (sinon il lance un rendu vide avant d'avoir reçu le redirect)
-        } catch (error) {
-          log.dev("dans add (post html) on a l'erreur", error.stack);
-          next(error);
-        }
+            ctx.redirect(lassi.action.ressource.describe, {oid: ressource.oid});
+            // on appelle pas next, on attend le redirect
+          }
+        }) // compRessource.add
       }
       log.dev("fin do add");
   });
 
 /**
- * Uptate, le form
+ * Uptate
  */
 controller
-  .Action('edit/:oid')
-  .via('get')
-  .do(function (oid) {
-    return getRessource(oid, 'form');
-  });
+  .Action(routes.edit +'/:oid', 'edit')
+  .via('get', 'post')
+  .do(function (ctx, next) {
 
-/**
- * Update, validation du form et insert
- */
-controller
-  .Action('update')
-  .via('post')
-  .do(function () {
-    // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-    // et rediriger vers le describe
+    if (this.method === 'get') {
+      // get => affichage du form
+      var oid = ctx.arguments.oid
+      lassi.ressource.load(oid, function (error, ressource) {
+        if (!ressource) {
+          ctx.response.statusCode = 404;
+          ressource = {
+            errors: ["La ressource d'identifiant " + oid + " n'existe pas"]
+          }
+        }
+        sendFormData(error, ressource, next)
+      })
+
+    } else {
+      // post => on enregistre ou on réaffiche le form si pb
+      lassi.ressource.update(
+          getRessourceFromPost(ctx.post),
+          function(error, ressource) {
+            if (error || !_.isEmpty(ressource.errors)) {
+              // faut réafficher le form avec les erreurs
+              sendFormData(error, ressource, next)
+            } else {
+              log.dev("update ok, on lance le redirect")
+              ctx.redirect(lassi.action.ressource.describe, {oid: ressource.oid});
+              // on appelle pas next, on attend le redirect
+            }
+          }
+      )
+    }
   });
 
 /**
  * Del
  */
 controller
-  .Action('del/:oid')
+  .Action(routes.del +'/:oid', 'del')
   .via('get', 'post')
   .renderWith('del')
   .do(function (next) {
       var oid = this.arguments.oid;
       if (this.method === 'get') {
         // on affiche et on demande confirmation
-        sendDataForDust(oid, next)
+        lassi.ressource.load(oid, function (error, ressource) {
+          if (!ressource) {
+            ctx.response.statusCode = 404;
+            ressource = {
+              errors : ["La ressource d'identifiant " + oid + " n'existe pas"]
+            }
+          }
+          sendPageData(error, ressource, next)
+        })
       } else {
         // post, on supprime
         try {
           lassi.ressource.delByOid(oid, function (error, nbRows) {
             log.dev("nbRows", nbRows)
-            if (nbRows !== 1) next(null, {error: "Aucune ressource d'identifiant " + oid + ' retour ' +nbRows})
-            else {
+            if (nbRows === 1) {
               if (error) next(null, {error: error, deletedId: oid})
               else next(null, {deletedId: oid})
-            }
+            } else next(null, {error: "Aucune ressource d'identifiant " + oid + ' retour ' + nbRows})
           });
         } catch (e) {
           // pas normal que cette requete plante, pb d'accès à la base ou table manquante
@@ -137,69 +195,82 @@ module.exports = controller;
  ***************************************/
 
 /**
- * Récupère une ressource, prépare data et passe à next
- * @param id
- * @param next callback appelée avec (error, data)
+ * Récupère une ressource et la passe à next
+ * @param oid
+ * @param {Function} next      callback appelée avec (error, ressource, nextFinal) si on a une ressource
+ * @param {Function} nextFinal callback appelée avec (null, {error:"message"}) en cas de pb
  * @returns {undefined}
  */
-function sendDataForDust(oid, next) {
-  var data;
-  try {
-    if (!oid) next(null, {error: "Identifiant de ressource incorrect (" + oid + ")"})
-    else {
-      lassi.ressource.get(oid, function (error, ressource) {
-        if (error) {
-          data = {error: error.toString() }
-        } else {
-          data = getPageData(ressource);
+function loadRessource(oid, next, nextFinal) {
+  assert.nextOk(next)
+  assert.nextOk(nextFinal)
+  if (oid) {
+    // méthode load du composant
+    lassi.ressource.load(oid, function (error, ressource) {
+      if (error) {
+        if (error.finalMsg) nextFinal(null, {error:error.toString()})
+        else {
+          // y'a un bug dans le load du component
+          log.error("Error not handled by component")
+          log.error(error)
+          nextFinal(null, {error: "La récupération de la ressource " + oid + " a échouée"});
         }
-        log.dev("on envoie à dust", data);
-        next(null, data);
-      })
-    }
-  } catch (e) {
-    next(null, {error: "La récupération de la ressource " + oid + " a échouée"});
-  }
+      } else if (_.isEmpty(data)) {
+        this.FileNotFound(new Error("La ressource d'identifiant " + oid + " n'existe pas"))
+      } else {
+        next(error, ressource, nextFinal)
+      }
+    })
+  } else throw new Error("Unable to load a ressource without argument")
 }
 
 /**
- * Transforme une entité ressource en objet pour la vue describe
- * @param {Ressource} ressource
- * @param {Boolean} avecJointure passer true si on veut aussi les titres des ressources liées, les noms des auteurs, etc.
- * @returns {Object} La ressource, avec pour chaque champ les propriétés title et value
+ * Transforme une entité ressource en objet pour la vue describe et la passe à next
+ * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
+ * @param {Ressource} ressource La ressource qui sort d'un load
+ * @param {Function}  next      callback qui sera appelée avec (error, data), data pour une vue dust
+ * @returns {undefined} La ressource, avec pour chaque champ les propriétés title et value
  */
-function getPageData(ressource) {
+function sendPageData(error, ressource, next) {
   var data = {};
   var buffer;
-  // on boucle sur les propriétés que l'on veut afficher
-  _.each(configRessource.labels, function (label, key) {
-    var value = ressource[key];
-    data[key] = {
-      title: label
-    };
-    if (_.isArray(value)) {
-      if (configRessource.listes[key]) {
-        // faut remplacer des ids par des labels
-        buffer = [];
-        _.each(value, function(id) {
-          if (configRessource.listes[key][id])  buffer.push(configRessource.listes[key][id])
-          else log.error("La ressource " + ressource.oid + " a une valeur " + id +
-              " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
-        });
-      } else {
-        buffer = value; // on garde l'array tel quel
-      }
-      data[key].value = buffer.join(', ');
-
-
-    } else if (_.isDate(value)) {
-      data[key].value = value ? moment(value).format(configRessource.formats.jour) : 'inconnue';
+  if (error) data.error = error.toString();
+  else {
+    if (ressource) {
+      // pas d'erreur mais pas de ressource non plus
+      data.error = "Aucune ressource";
     } else {
-      data[key].value = value;
-    }
-  }); // fin each propriété
+      // on boucle sur les propriétés que l'on veut afficher
+      _.each(config.labels, function (label, key) {
+        var value = ressource[key];
+        data[key] = {
+          title: label
+        };
+        if (_.isArray(value)) {
+          if (config.listes[key]) {
+            // faut remplacer des ids par des labels
+            buffer = [];
+            _.each(value, function (id) {
+              if (config.listes[key][id])  buffer.push(config.listes[key][id])
+              else log.error("La ressource " + ressource.oid + " a une valeur " + id +
+                  " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
+            });
+          } else {
+            buffer = value; // on garde l'array tel quel
+          }
+          data[key].value = buffer.join(', ');
 
-  return data;
+
+        } else if (_.isDate(value)) {
+          data[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
+        } else {
+          data[key].value = value;
+        }
+      }); // fin each propriété
+    }
+  }
+
+  next(null, data);
 }
 
 /**
@@ -226,12 +297,26 @@ function getPageData(ressource) {
  * }]
  *
  */
-function getFormData(ressource) {
-  var data = {};
+function sendFormData(error, ressource, next) {
+  var data = {errors:[]};
+  if (ressource && ressource.errors) {
+    data.errors = ressource.errors
+  }
+  if (error) {
+    log.error(error)
+    data.errors.push(error.toString())
+  }
+
+  // on s'assure que l'on a un objet, sinon on en créé un vide
+  if (!ressource) {
+    // on en créé une vide
+    ressource = lassi.entity.Ressource.create()
+  }
+
   // on boucle sur les propriétés déclarées dans config pour récupérer les labels
-  _.each(configRessource.labels, function (label, key) {
+  _.each(config.labels, function (label, key) {
     var value = ressource[key];
-    var isUnique = configRessource.uniques[key];
+    var isUnique = config.uniques[key];
 
     // pour tout le monde
     data[key] = {
@@ -240,9 +325,9 @@ function getFormData(ressource) {
     };
 
     // c'est un tableau ou une valeur unique (donc prise dans une liste => select ou checkboxes)
-    if (_.isArray(value) || configRessource.uniques[key]) {
+    if (_.isArray(value) || config.uniques[key]) {
       // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
-      // et la liste des possibles dans configRessource.prop
+      // et la liste des possibles dans config.prop
       if (isUnique) {
         value = [value]; // arrayToDust veut un array
         // faut ça sur le select et pas les choices
@@ -261,7 +346,7 @@ function getFormData(ressource) {
       // propriété scalaire => input ou textarea
       data[key].name = key;
       if (_.isDate(value)) {
-        value = moment(value).format(configRessource.formats.jour);
+        value = moment(value).format(config.formats.jour);
       }
       data[key].value = value;
     }
@@ -288,7 +373,7 @@ function arrayToDust(key, selectedValues, isUnique) {
   var choices = [];
   var i = 0;
   // on boucle sur les éléments de la liste
-  _.each(configRessource.listes[key], function (label, cbValue) {
+  _.each(config.listes[key], function (label, cbValue) {
     var choice = {
       label: label,
       value: cbValue
@@ -320,22 +405,22 @@ function arrayToDust(key, selectedValues, isUnique) {
  * @return {Ressource}
  * @throws {Error} En cas de données invalides
  */
-function postToRessource(data) {
+function getRessourceFromPost(data) {
   var Ressource = lassi.entity.Ressource;
   var ressource = Ressource.create();
   var errors = [];
   var buffer;
   var msg;
-  log.dev('dans postToRessource on récupère', data)
+  log.dev('dans getRessourceFromPost on récupère', data)
   //log.dev('ressource vide', ressource)
   if (_.isEmpty(data)) {
     errors.push("Ressource vide");
   } else {
     // vérif présence et type
-    _.each(configRessource.typesVar, function (typeVar, key) {
+    _.each(config.typesVar, function (typeVar, key) {
       // propriétés obligatoires
-      if (_.isEmpty(data[key]) && configRessource.required.indexOf(key) > -1) {
-        errors.push("Le champ " + configRessource.labels[key] + " est obligatoire");
+      if (_.isEmpty(data[key]) && config.required.indexOf(key) > -1) {
+        errors.push("Le champ " + config.labels[key] + " est obligatoire");
       }
       // les cast
       if (data[key]) {
@@ -343,16 +428,16 @@ function postToRessource(data) {
           if (_.isString(data[key])) {
             ressource[key] = data[key];
           } else {
-            errors.push("Le champ " + configRessource.labels[key] + " n'est pas une chaine de caractères");
+            errors.push("Le champ " + config.labels[key] + " n'est pas une chaine de caractères");
           }
         } else if (typeVar === 'Date') {
-          buffer = moment(data[key], configRessource.formats.jour, true);
+          buffer = moment(data[key], config.formats.jour, true);
           if (buffer.isValid()) {
             ressource[key] = new Date(buffer); // pb car _.isDate(buffer) renvoie false !
             log.dev("type moment " + typeof buffer + _.isDate(buffer))
           } else {
-            errors.push("Le champ " + configRessource.labels[key] +
-                " n'est pas une date valide (" + configRessource.formats.jour +')');
+            errors.push("Le champ " + config.labels[key] +
+                " n'est pas une date valide (" + config.formats.jour +')');
           }
         } else if (typeVar === 'Number') {
           ressource[key] = parseInt(data[key], 10);
@@ -365,16 +450,16 @@ function postToRessource(data) {
               ressource[key].push(parseInt(value, 10));
             });
           } else {
-            errors.push("Le champ " + configRessource.labels[key] + " n'est pas une liste");
+            errors.push("Le champ " + config.labels[key] + " n'est pas une liste");
           }
         } else if (typeVar === 'Object') {
           try {
             ressource[key] = JSON.parse(data[key]);
           } catch (e) {
-            errors.push("Le champ " + configRessource.labels[key] + " n'est pas du json valide : " + e.toString());
+            errors.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
           }
         } else {
-          msg = "Le champ " + configRessource.labels[key] + " est d'un type non prévu (" +typeVar +')';
+          msg = "Le champ " + config.labels[key] + " est d'un type non prévu (" +typeVar +')';
           errors.push(msg);
           log.error(msg);
         }
@@ -384,7 +469,7 @@ function postToRessource(data) {
 
   // if (errors !== []) { // ce truc est toujours vrai !
   if (errors.length) {
-    log.dev('errors à la fin postToRessource', errors)
+    log.dev('errors à la fin getRessourceFromPost', errors)
     throw new Error("Les erreurs de validation .\n" + errors.join("\n"));
   }
 
@@ -393,9 +478,10 @@ function postToRessource(data) {
 
 /**
  * Retourne les datas pour un form sans ressource (à remplir)
+ *
  */
-function getEmptyFormData() {
+function sendEmptyFormData(next) {
   var Ressource = lassi.entity.Ressource;
   var ressourceEmpty = Ressource.create();
-  return getFormData(ressourceEmpty);
+  return sendFormData(ressourceEmpty, next);
 }

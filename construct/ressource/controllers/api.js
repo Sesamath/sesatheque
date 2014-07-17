@@ -42,7 +42,7 @@ controller.respond('json');
 controller
     .Action('add')
     .via('post')
-    .do(function() {
+    .do(function(next) {
       var ressourcePosted, ressourcePlausible, Ressource;
       try {
         lassi.component.ressource.toto()
@@ -82,16 +82,17 @@ controller
  */
 controller
     .Action('get/:oid')
-    .do(function(oid) {
+    .do(function(next) {
+      // on récupère la ressource
       var Ressource = this.application.entity('Ressource');
       Ressource
-          .find({oid:oid})
+          .query()
+          .include('oid', oid, '=')
           .execute(function (error, ressource) {
-            if (error) {
-              this.response.send({error: error.toString()});
-            } else {
+            if (error) next(error)
+            else {
               // @todo vérif droits et restriction
-              this.response.send(ressource);
+              next(null, ressource);
             }
         })
     });
@@ -101,9 +102,9 @@ controller
  */
 controller
     .Action('update').via('post')
-    .do(function() {
+    .do(function(next) {
       // @todo vérif droits
-      var ressourcePosted, ressourcePlausible, ressource;
+      var ressourcePosted, ressourcePlausible, ressource, context = this;
       // on accepte un seul param data qui contient la ressource en json
       // mais aussi chaque champ séparément
       if (this.request.query.param.data) {
@@ -122,12 +123,12 @@ controller
         ressource = this.application.entity('Ressource');
         // @todo vérif d'intégrité
         ressource
-            .initialize(ressourcePlausible)
+            .onInitialize(ressourcePlausible)
             .store(function (error, ressource) {
               if (error) {
-                this.response.send({error: error.toString()});
+                context.response.send({error: error.toString()});
               } else {
-                this.response.send({result: 'ok', oid: ressource.oid});
+                context.response.send({result: 'ok', oid: ressource.oid});
               }
             })
       }
@@ -137,7 +138,7 @@ controller
  * Delete
  */
 controller.Action('delete/:oid')
-  .do(function(oid) {
+  .do(function(next) {
     // @todo vérif droits
     var Ressource = this.application.entity('Ressource');
     Ressource.delete({oid:oid});

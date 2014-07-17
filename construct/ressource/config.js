@@ -142,7 +142,7 @@ module.exports = {
   required         : [
     'titre',
     'typeTechnique',
-    'categories',
+    'categories'
     //'auteurs'
   ],
   // les libellés que l'on affiche pour chaque champ de notre entité
@@ -255,6 +255,13 @@ module.exports = {
       aucune    : 0,
       enseignant: 1,
       prive     : 2
+    },
+    // des constantes pour nos routes (le nom des actions est en dur mais interne au code)
+    routes : {
+      add : 'ajouter',
+      edit: 'modifier',
+      describe:'decrire',
+      display:'affiche'
     }
   }, // fin constantes
   /**
@@ -262,5 +269,7 @@ module.exports = {
    */
   formats : {
     jour : 'DD/MM/YYYY'
-  }
+  },
+  // le code origine de nous même pour les ressources créées par l'appli
+  myOrigin : 'bib'
 };

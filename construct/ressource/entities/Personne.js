@@ -31,8 +31,8 @@ function Personne() {
 }
 
 entityPersonne
-    .initialize(Personne)
-    .index('nom')
-    .index('email');
+    .onInitialize(Personne)
+    .addIndex('nom')
+    .addIndex('email');
 
 module.exports = entityPersonne;

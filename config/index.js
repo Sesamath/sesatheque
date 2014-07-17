@@ -26,6 +26,11 @@ var morganFormat = (env === 'dev') ? 'dev' : 'default'
 
 /** La config exportée */
 module.exports = {
+  application : {
+    name : "bibliotheque",
+    mail : "tech@sesamath.net",
+    staging : "development"
+  },
   entities: {
     // Configuration de la base de données
     database: require(root + '/_private/dbconfig')

@@ -5,7 +5,7 @@
 
 var fs = require('fs');
 var moment = require('moment');
-var config = require('../../config');
+var config = require('../../config'); // jshint ignore:line
 
 // les streams vers nos logs, celui de dev est ouvert plus loin si besoin
 var devOutputStream;
@@ -40,6 +40,8 @@ function addToLog(message, stream) {
 }
 
 function logError(message, filter) {
+  // pour ce log on veut toute la pile d'appel
+  if (message instanceof Error) message = message.stack
   if (!filter || filters[filter]) {
     addToLog(message, errorOutputStream);
   }

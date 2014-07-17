@@ -6,8 +6,9 @@
  * @constructor
  */
 var ressourceComponent = lassi.Component();
-ressourceComponent.initialize = function() {
+ressourceComponent.onInitialize = function(next) {
   this.application.settings.ressource = require('./config.js');
+  next();
 }
 
 // On ajoute toutes les methodes du repository à notre component

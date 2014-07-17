@@ -3,30 +3,26 @@
  */
 'use strict';
 
-// pour les logs
-var log = require('./log.js'); // jshint ignore:line
-
-// Récupération du module lassi
-require('lassi');
-// après ce 1er appel lassi est une var globale
+// Récupération du module lassi que l'on met en global
+// (il le fait déjà mais le déclarer ici fait plaisir à mon IDE)
+GLOBAL.lassi = require('lassi');
 
 // underscore que l'on va mettre en global aussi parce que l'on est fainéant
-var underscore_ = require('underscore')._;
-if (GLOBAL._ && GLOBAL._ !== underscore_) {
-  console.error("_ existe en GLOBAL mais ce n'est pas underscore._");
-}
-GLOBAL._ = underscore_;
+GLOBAL._ = require('underscore')._;
 
-// et nos loggers
-GLOBAL.log = log;
+// nos loggers
+GLOBAL.log = require('./log.js'); // jshint ignore:line
+
+// nos vérificateurs d'assertions
+GLOBAL.assert = require('./assert.js');
 
 // Construction de l'application
 var application = lassi.Application();
 // on déclenchera ça quand le boot sera fini
 application.on('boot', function(){
-  console.log("onBoot de l'application Bibliothèque");
+  console.log("Boot de l'application " +this.application.name);
   log.dev('BOOT');
 });
 
-// et on boot
+// et on lance le boot
 application.boot();

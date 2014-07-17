@@ -43,8 +43,17 @@
     "unused": true,
     "indent": 2,
     "predef": [
-      "lassi",
       "_",
+      "assert",
+      "GLOBAL",
+      "lassi",
+      "log"
+    ],
+    "globals" : [
+      "_",
+      "assert",
+      "GLOBAL",
+      "lassi",
       "log"
     ]
   }
