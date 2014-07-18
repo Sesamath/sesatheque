@@ -3,6 +3,7 @@
 var _ = require('underscore')._
 
 var entityRessource = lassi.Entity('Ressource');
+var config = require('../config.js');
 
 /**
  * Notre entité Ressource
@@ -16,38 +17,43 @@ function Ressource() {
    */
   this.errors = []
   /**
-   * Le code du plugin qui gère la ressource
-   * @type {string}
+   * L'identifiant de la ressource, utilisé dans les urls
+   * @type {Number}
    */
-  this.typeTechnique = '';
+  this.id = 0
   /**
-   * identifiant du dépôt d'origine (où est stockée et géré la ressource)
-   * @type {string}
+   * identifiant du dépôt d'origine (où est stockée et géré la ressource), reste null si créé ici
+   * @type {String}
    */
   this.origine = null;
   /**
-   * Id de la ressource (concaténation origine + id dans son dépôt d'origine, mep42 ou j3p42 par ex)
-   * @type {string}
+   * Id de la ressource dans son dépôt d'origine
+   * @type {String}
    */
   this.idOrigin = null;
   /**
+   * Le code du plugin qui gère la ressource
+   * @type {String}
+   */
+  this.typeTechnique = '';
+  /**
    * Titre
-   * @type {string}
+   * @type {String}
    */
   this.titre = '';
   /**
    * Résumé qui apparait souvent au survol du titre ou dans les descriptions brèves, destiné à tous
-   * @type {string}
+   * @type {String}
    */
   this.resume = '';
   /**
    *  Description plus complète, facultative (préférer le résumé)
-   *  @type {string}
+   *  @type {String}
    */
   this.description = '';
   /**
    * Commentaires destinés aux éditeurs, ou au prescipteur de la ressource mais pas à l'utilisateur
-   * @type {string}
+   * @type {String}
    */
   this.commentaires = '';
   /**
@@ -96,7 +102,7 @@ function Ressource() {
   this.contributeurs = [];
   /**
    * code langue ISO 639-2 (http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2)
-   * @type {string}
+   * @type {String}
    */
   this.langue = 'fra';
   /**
@@ -147,14 +153,38 @@ entityRessource
       if (!this.dateMiseAJour) {
         this.dateMiseAJour = new Date();
       }
-      if (!this.version) {
-        this.version = 1;
-      }
       // si le tableau d'erreur est vide (devrait toujours être le cas,
       // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
       if (_.isEmpty(this.errors)) delete this.errors
-      next()
+      updateVersion(this, next)
       // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
     });
 
 module.exports = entityRessource;
+
+function updateVersion(ressource, next) {
+  var needIncrement = false
+  var ressourceInitiale
+  if (ressource.version) {
+    // on peut réclamer une nouvelle version
+    if (ressource.newVersion) needIncrement = true
+    // on regarde si nos champs qui déclenchent un changement de version on changé
+    else {
+      if (lassi.cache.ressource[ressource.oid]) {
+        ressourceInitiale = lassi.cache.ressource[ressource.oid]
+        _.each(config.versionTriggers, function (prop) {
+          if (ressource[prop] !== ressourceInitiale[prop]) {
+            needIncrement = true
+          }
+        })
+      } else {
+        // pas de cache, bizarre
+        log.error("La ressource d'identifiant interne " +ressource.oid +
+            " n'était pas en cache alors qu'elle va être enregistrée")
+        needIncrement = true
+      }
+    }
+    if (needIncrement) ressource.version++
+  }
+  else ressource.version = 1;
+}

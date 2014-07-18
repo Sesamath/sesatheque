@@ -70,11 +70,17 @@ ressourceRepository.add = function(ressource, next) {
             if (error) {
               next(error)
             } else if (ressource && !ressource.id) {
-              // pas d'id, donc on est l'origine
-              // pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
-              ressource.origin = config.myOrigin
-              ressource.idOrigin = ressource.oid;
-              ressource.store(next)
+              // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
+              if (ressource.id) {
+                log.dev('ressource.id existe déjà après un add, faut modifier ressourceRepository.add')
+                next()
+              } else if (ressource.oid != parseInt(ressource.oid, 10)) {
+                throw new Error("L'oid n'est plus entier, faut venir changer le code de ressourceRepository.add")
+              } else {
+                // on prend l'oid tant qu'il est entier
+                ressource.id = ressource.oid;
+                ressource.store(next)
+              }
             } else {
               next(error, ressource);
             }
@@ -94,7 +100,7 @@ ressourceRepository.update = function(ressource, next) {
   ressourceRepository.valide(ressource, function (error, ressource) {
     lassi.entity.Ressource
         .create(ressource)
-        .store({}, next)
+        .store(next)
   })
 };
 
@@ -106,27 +112,44 @@ ressourceRepository.update = function(ressource, next) {
  * @returns {undefined}
  */
 ressourceRepository.delByOid = function(oid, next) {
-  lassi.entity.Ressource
-      .query()
-      .whereEquals('oid', oid)
-      .delete(next)
+  if (_.isArray(oid)) lassi.entity.Ressource.match('oid').in(oid).del(next)
+  else lassi.entity.Ressource.match('oid').equals(oid).del(next)
 };
 
 /**
  * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
+ * @param {Number|String} id  L'identifiant de la ressource
+ * @param {Function}      next La callback qui sera appelée avec (error, ressource).
+ * @returns {undefined}
+ */
+ressourceRepository.load = function(id, next) {
+  lassi.entity.Ressource.match('id').equals(id).sort('version', 'desc').grabOne(function (error, ressource) {
+    if (error) next(error)
+    else if (ressource) {
+      prepareAndSend(ressource, next)
+    } else {
+      ressource = {error: "La ressource d'identifiant " +id + " n'existe pas"}
+      next(null, ressource)
+    }
+  })
+};
+
+/**
+ * Récupère une ressource par son oid et la passe à next (seulement une erreur si elle n'existe pas)
  * @param {Number|String} oid  L'identifiant interne de la ressource
  * @param {Function}      next La callback qui sera appelée avec (error, ressource).
  * @returns {undefined}
  */
-ressourceRepository.load = function(oid, next) {
+ressourceRepository.loadByOid = function(oid, next) {
   var Ressource = lassi.entity.Ressource
   Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
-    if (!error && ressource) {
-      // faut transformer les dates en objets date
-      ressource.dateCreation = new Date(ressource.dateCreation);
-      ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+    if (error) next(error)
+    else if (ressource) {
+      prepareAndSend(ressource, next)
+    } else {
+      ressource = {error: "La ressource d'identifiant interne " +oid + " n'existe pas"}
+      next(null, ressource)
     }
-    next(error, ressource);
   })
 };
 
@@ -149,15 +172,40 @@ ressourceRepository.loadByOrigin = function(origin, idOrigin, next) {
             // on vérifie l'unicité et on log si on a un doublon
             if (rows.length > 1) log.errorData("Il y a " + rows.length + " ressources " + origin + '-' + idOrigin);
             ressource = rows[0];
-            // faut transformer les dates en objets date
-            ressource.dateCreation = new Date(ressource.dateCreation);
-            ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+            prepareAndSend(ressource, next)
           } else {
             ressource = {error: "La ressource " + origin + '-' + idOrigin + " n'existe pas"}
+            next(null, ressource)
           }
         }
-        next(null, ressource)
       })
 }
 
 module.exports = ressourceRepository;
+
+/**
+ * Créé les objets date à partir des Strings, met en cache et fait suivre
+ * @private
+ * @param ressources ressource ou tableau de ressources
+ * @param next
+ * @throws {Error} Si ressources n'est pas une ressource ou un tableau de ressources
+ */
+function prepareAndSend(ressources, next) {
+  /**
+   * Helper qui process une ressource
+   * @param ressource
+   */
+  function processOne(ressource) {
+    if (!ressource.oid) throw new Error("Paramètre invalide (n'est pas une ressource)")
+    // faut transformer les dates en objets date
+    ressource.dateCreation = new Date(ressource.dateCreation);
+    ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+    // on met en cache
+    lassi.register(['cache', 'ressource', ressource.oid], ressource)
+  }
+
+  if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")
+  if (_.isArray(ressources)) ressources.forEach(processOne)
+  else processOne(ressources)
+  next(null, ressources)
+}

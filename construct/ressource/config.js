@@ -99,6 +99,7 @@ module.exports = {
       2: 'privé'
     }
   }, // fin des listes
+
   /**
    * Donne les types induits par la catégorie, mais ça peut être surchargé par l'utilisateur qui renseigne les champs
    */
@@ -132,12 +133,14 @@ module.exports = {
       typeDocumentaires: [9]
     }
   },
-  // les propriétés qui doivent être uniques
+
+  // les propriétés qui ne prennent qu'une seule valeur
   uniques          : {
     'typeTechnique': true,
     'langue'       : true,
     'restriction'  : true
   },
+
   // les propriétés obligatoires (oid ne l'est pas, on le vérifie spécifiquement si besoin)
   required         : [
     'titre',
@@ -145,9 +148,12 @@ module.exports = {
     'categories'
     //'auteurs'
   ],
+
   // les libellés que l'on affiche pour chaque champ de notre entité
   labels           : {
-    oid              : "Identifiant",
+    id               : "Identifiant",
+    origin           : 'Origine',
+    idOrigin         : "Identifiant d'origine",
     titre            : "Titre",
     typeTechnique    : "Type technique",
     resume           : "Résumé",
@@ -168,10 +174,16 @@ module.exports = {
     dateCreation     : "Date de création",
     dateMiseAJour    : "Date de mise à jour"
   },
+
+  // les propriétés dont la modif déclenche un upgrade de version
+  versionTriggers : ['origin', 'idOrigin', 'parametres', 'auteurs', 'contributeurs'],
+
   // les types requis, Attention, le code suppose que tous les Array sont des tableaux d'entiers,
   // faudra modifier postToRessource dans edit.js si ça change
   typesVar         : {
-    //oid              : 'Number',
+    id               : 'Number',
+    origin           : 'String',
+    idOrigin         : 'String',
     typeTechnique    : 'String',
     titre            : 'String',
     resume           : 'String',
@@ -269,7 +281,5 @@ module.exports = {
    */
   formats : {
     jour : 'DD/MM/YYYY'
-  },
-  // le code origine de nous même pour les ressources créées par l'appli
-  myOrigin : 'bib'
+  }
 };

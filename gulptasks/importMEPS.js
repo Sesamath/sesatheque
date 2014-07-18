@@ -1,9 +1,15 @@
+/**
+ * Ce script passe en revue les tables MEPS et AIDES de mepcol et envoie tout ça à l'api (en http)
+ *
+ * Ça lui permettra d'être déplacé sur un autre serveur et de tourner de manière autonome
+ * sans l'appli bibliothèque ni lassi
+ */
 'use strict';
 
 var knex = require('knex');
 var _ = require('underscore');
 // conf de l'appli
-var config = require('../construct/plugins/ressource/config.js');
+var config = require('../construct/ressource/config.js');
 // constantes
 var tdCode = config.constantes.typeDocumentaires;
 var tpCode = config.constantes.typePedagogiques;
@@ -132,7 +138,7 @@ function addPendingRelation(id, relation) {
 }
 
 /**
- * Convertit un recordset MEPS en objet Ressource
+ * Convertit un recordset MEPS en objet Ressource que l'on pourra poster à l'api
  * @param row
  * @returns {Ressource}
  */
