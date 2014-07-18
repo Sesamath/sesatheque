@@ -209,9 +209,6 @@ function sendPageData(error, ressource, next) {
   if (error) data.error = error.toString();
   else {
     if (ressource) {
-      // pas d'erreur mais pas de ressource non plus
-      data.error = "Aucune ressource";
-    } else {
       // on boucle sur les propriétés que l'on veut afficher
       _.each(config.labels, function (label, key) {
         var value = ressource[key];
@@ -239,6 +236,9 @@ function sendPageData(error, ressource, next) {
           data[key].value = value;
         }
       }); // fin each propriété
+    } else {
+      // pas d'erreur mais pas de ressource non plus
+      data.error = "Aucune ressource";
     }
   }
 

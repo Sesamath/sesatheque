@@ -72,7 +72,8 @@ ressourceRepository.add = function(ressource, next) {
             } else if (ressource && !ressource.id) {
               // pas d'id, donc on est l'origine
               // pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
-              ressource.id = config.myOrigin + ressource.oid;
+              ressource.origin = config.myOrigin
+              ressource.idOrigin = ressource.oid;
               ressource.store(next)
             } else {
               next(error, ressource);
@@ -119,19 +120,14 @@ ressourceRepository.delByOid = function(oid, next) {
  */
 ressourceRepository.load = function(oid, next) {
   var Ressource = lassi.entity.Ressource
-  Ressource
-      .query()
-      .whereEquals('oid', oid)
-      .execute(function (error, rows) {
-        var ressource;
-        if (!error && rows.length) {
-          ressource = rows[0];
-          // faut transformer les dates en objets date
-          ressource.dateCreation = new Date(ressource.dateCreation);
-          ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
-        }
-        next(error, ressource);
-      })
+  Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
+    if (!error && ressource) {
+      // faut transformer les dates en objets date
+      ressource.dateCreation = new Date(ressource.dateCreation);
+      ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+    }
+    next(error, ressource);
+  })
 };
 
 /**
