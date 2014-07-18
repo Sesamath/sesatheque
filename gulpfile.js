@@ -180,9 +180,22 @@ gulp.task('watch', function () {
   launcher.start();
 })
 
+/*
 gulp.task('doc', function() {
-  gulp.src("construct/**/*.js")
-    .pipe(jsdoc('./documentation-output'))
-});
+  gulp.src("construct/** /*.js")
+    .pipe(jsdoc('./documentation'))
+}); */
+
+gulp.task('doc', function() {
+  var infos = {
+    plugins: ['plugins/markdown'],
+    markdown: {
+      parser: "gfm"
+    }
+  }
+  gulp.src(['construct/**/*.js', 'README.md'])
+      .pipe(jsdoc.parser(infos,'data'))
+      .pipe(jsdoc.generator('./documentation'))
+}); /* */
 
 gulp.task('default', ['build', 'watch'])

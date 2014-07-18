@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: build/application/ressource/entities/Ressource.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: build/application/ressource/entities/Ressource.js</h1>
+
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+
+var _ = require('underscore')._
+
+var entityRessource = lassi.Entity('Ressource');
+
+/**
+ * Notre entité Ressource
+ * @constructor
+ */
+function Ressource() {
+  /**
+   * Une liste d'erreurs éventuelles (incohérences de données, etc)
+   * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
+   * Devrait être viré au save s'il est vide
+   */
+  this.errors = []
+  /**
+   * Le code du plugin qui gère la ressource
+   * @type {string}
+   */
+  this.typeTechnique = '';
+  /**
+   * identifiant du dépôt d'origine (où est stockée et géré la ressource)
+   * @type {string}
+   */
+  this.origine = null;
+  /**
+   * Id de la ressource (concaténation origine + id dans son dépôt d'origine, mep42 ou j3p42 par ex)
+   * @type {string}
+   */
+  this.idOrigin = null;
+  /**
+   * Titre
+   * @type {string}
+   */
+  this.titre = '';
+  /**
+   * Résumé qui apparait souvent au survol du titre ou dans les descriptions brèves, destiné à tous
+   * @type {string}
+   */
+  this.resume = '';
+  /**
+   *  Description plus complète, facultative (préférer le résumé)
+   *  @type {string}
+   */
+  this.description = '';
+  /**
+   * Commentaires destinés aux éditeurs, ou au prescipteur de la ressource mais pas à l'utilisateur
+   * @type {string}
+   */
+  this.commentaires = '';
+  /**
+   * Niveaux scolaire de la ressource, dans son système éducatif par défaut, fr_FR s'il n'est pas précisé
+   * @type {Array}
+   */
+  this.niveaux = [];
+  /**
+   * Une catégorie correspond à un recoupement de types, par ex "exercice interactif"
+   * @type {Array}
+   */
+  this.categories = [];
+  /**
+   * Type pédagogique (5.2 - scolomfr-voc-010) : cours, exercice...
+   * C'est un champ conditionné par la catégorie, mais à priori seulement, l'utilisateur peut modifier / enrichir
+   * http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=62
+   * @type {Array}
+   */
+  this.typePedagogiques = [];
+  /**
+   * type documentaire (1.9 - scolomfr-voc-004) : image, ressource interactive, son, texte
+   * Idem, conditionné par la catégorie mais à priori seulement
+   * @see http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=49
+   * @type {Array}
+   */
+  this.typeDocumentaires = [];
+  /**
+   * Liste des ressources liées, une liaison étant un array [idLiaison, idRessourceLiée]
+   * @type {Array}
+   */
+  this.relations = [];
+  /**
+   * Contenu qui dépend du type technique, json
+   * @type {Array}
+   */
+  this.contenu = '';
+  /**
+   * Liste d'id d'auteurs
+   * @type {Array}
+   */
+  this.auteurs = [];
+  /**
+   * Liste d'id de contributeurs
+   * @type {Array}
+   */
+  this.contributeurs = [];
+  /**
+   * code langue ISO 639-2 (http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2)
+   * @type {string}
+   */
+  this.langue = 'fra';
+  /**
+   * Vrai si la ressource est publiée (les non-publiées sont visibles par leur auteur et ceux ayant les droits ad hoc)
+   * @type {boolean}
+   */
+  this.publie = false;
+  /**
+   * Restriction sur la ressource
+   */
+  this.restriction = 0;
+  /**
+   * Date de création
+   * @type {Date}
+   */
+  this.dateCreation = new Date();
+  /**
+   * Date de mise à jour
+   * @type {Date}
+   */
+  this.dateMiseAJour = undefined;
+  /**
+   * Version de la ressource
+   */
+  this.version = 0;
+}
+
+entityRessource
+    .onInitialize(Ressource)
+    .addIndex('origin')
+    .addIndex('idOrigin')
+    .addIndex('typeTechnique')
+    .addIndex('niveaux')
+    .addIndex('categories')
+    .addIndex('typePedagogiques')
+    .addIndex('typeDocumentaires')
+    .addIndex('relations')
+    .addIndex('auteurs')
+    .addIndex('contributeurs')
+    .addIndex('langue')
+    .addIndex('publie')
+    .addIndex('restriction')
+    .addIndex('dateCreation')
+    .addIndex('dateUpdate')
+    .onBeforeStorage(function (next) {
+      // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
+      // et pas de celle de son indexation ici
+      if (!this.dateMiseAJour) {
+        this.dateMiseAJour = new Date();
+      }
+      if (!this.version) {
+        this.version = 1;
+      }
+      // si le tableau d'erreur est vide (devrait toujours être le cas,
+      // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
+      if (_.isEmpty(this.errors)) delete this.errors
+      next()
+      // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
+    });
+
+module.exports = entityRessource;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="mainComponent.html">mainComponent</a></li><li><a href="Personne.html">Personne</a></li><li><a href="Ressource.html">Ressource</a></li><li><a href="ressourceComponent.html">ressourceComponent</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Thu Jul 17 2014 20:13:28 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
