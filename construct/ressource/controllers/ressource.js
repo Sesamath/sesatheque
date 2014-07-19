@@ -325,7 +325,7 @@ function sendFormData(error, ressource, next) {
   }); // fin each propriété
 
   // on ajoute nos cas particulier
-  data.oid.readonly = true;
+  if (data.oid) data.oid.readonly = true;
   data.version.readonly = true;
   data.categories.required = true;
   data.langue.unique = true;

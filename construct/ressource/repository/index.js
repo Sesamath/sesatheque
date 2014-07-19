@@ -64,10 +64,12 @@ ressourceRepository.add = function(ressource, next) {
     if (error) {
       next(error);
     } else {
+      log.dev('la ressource passée à create puis store', ressource)
       lassi.entity.Ressource
           .create(ressource)
           .store(function (error, ressource) {
             if (error) {
+              log.dev(error.stack)
               next(error)
             } else if (ressource && !ressource.id) {
               // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(

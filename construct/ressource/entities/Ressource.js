@@ -170,7 +170,7 @@ function updateVersion(ressource, next) {
     if (ressource.newVersion) needIncrement = true
     // on regarde si nos champs qui déclenchent un changement de version on changé
     else {
-      if (lassi.cache.ressource[ressource.oid]) {
+      if (lassi.cache && lassi.cache.ressource && lassi.cache.ressource[ressource.oid]) {
         ressourceInitiale = lassi.cache.ressource[ressource.oid]
         _.each(config.versionTriggers, function (prop) {
           if (ressource[prop] !== ressourceInitiale[prop]) {
@@ -187,4 +187,5 @@ function updateVersion(ressource, next) {
     if (needIncrement) ressource.version++
   }
   else ressource.version = 1;
+  next()
 }
