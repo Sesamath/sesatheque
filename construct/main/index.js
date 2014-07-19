@@ -4,20 +4,14 @@
  * Notre component principal (qui défini le layout et le rendu)
  * @constructor
  */
-var mainComponent = lassi.Component();
+var component = lassi.Component();
 
-mainComponent.initialize = function(next) {
+component.initialize = function(next) {
   // Définition du layout "page" pour les réponses "html" (qui utilise l'engine dust et le tpl layout-page.dust).
-  this.application.transports.html.defineLayout('page', this, 'layout-page');
+  this.application.transports.html.on('layout', function(useLayout) {
+    useLayout(component, 'layout-page');
+  });
   next()
-
-  /* On se met en écoute de l'évènement qui précède le rendu (dust)
-   * des données sur le gestionnaire de vues.
-  this.application.controllers.on('renderLayout', function(data) {
-    // On peut ici ajouter des trucs à data pour tous les rendus
-    // mais data vaut undefined...
-    // if (!data.debug) data.debug = {};
-  }); /* */
 
   /**
    * On ajoute un dust.helper à l'initialisation du framework
@@ -35,4 +29,4 @@ mainComponent.initialize = function(next) {
   }); /**/
 }
 
-module.exports = mainComponent;
+module.exports = component;
