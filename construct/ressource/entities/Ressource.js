@@ -2,14 +2,10 @@
 
 var _ = require('underscore')._
 
-var entityRessource = lassi.Entity('Ressource');
+var entity = lassi.Entity('Ressource');
 var config = require('../config.js');
 
-/**
- * Notre entité Ressource
- * @constructor
- */
-function Ressource() {
+entity.initialize = function() {
   /**
    * Une liste d'erreurs éventuelles (incohérences de données, etc)
    * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
@@ -130,37 +126,37 @@ function Ressource() {
   this.version = 0;
 }
 
-entityRessource
-    .onInitialize(Ressource)
-    .addIndex('origin')
-    .addIndex('idOrigin')
-    .addIndex('typeTechnique')
-    .addIndex('niveaux')
-    .addIndex('categories')
-    .addIndex('typePedagogiques')
-    .addIndex('typeDocumentaires')
-    .addIndex('relations')
-    .addIndex('auteurs')
-    .addIndex('contributeurs')
-    .addIndex('langue')
-    .addIndex('publie')
-    .addIndex('restriction')
-    .addIndex('dateCreation')
-    .addIndex('dateUpdate')
-    .onBeforeStorage(function (next) {
-      // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
-      // et pas de celle de son indexation ici
-      if (!this.dateMiseAJour) {
-        this.dateMiseAJour = new Date();
-      }
-      // si le tableau d'erreur est vide (devrait toujours être le cas,
-      // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-      if (_.isEmpty(this.errors)) delete this.errors
-      updateVersion(this, next)
-      // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
-    });
+entity.beforeStore = function (next) {
+  // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
+  // et pas de celle de son indexation ici
+  if (!this.dateMiseAJour) {
+    this.dateMiseAJour = new Date();
+  }
+  // si le tableau d'erreur est vide (devrait toujours être le cas,
+  // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
+  if (_.isEmpty(this.errors)) delete this.errors
+  updateVersion(this, next)
+  // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
+}
 
-module.exports = entityRessource;
+entity
+    .addIndex('origine', 'string')
+    .addIndex('idOrigin', 'string')
+    .addIndex('typeTechnique', 'string')
+    .addIndex('niveaux', 'integer')
+    .addIndex('categories', 'integer')
+    .addIndex('typePedagogiques', 'integer')
+    .addIndex('typeDocumentaires', 'integer')
+    .addIndex('relations', 'integer')
+    .addIndex('auteurs', 'integer')
+    .addIndex('contributeurs', 'integer')
+    .addIndex('langue', 'string')
+    .addIndex('publie', 'integer')
+    .addIndex('restriction', 'integer')
+    .addIndex('dateCreation', 'date')
+    .addIndex('dateUpdate', 'date');
+
+module.exports = entity;
 
 function updateVersion(ressource, next) {
   var needIncrement = false

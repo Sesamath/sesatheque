@@ -1,12 +1,8 @@
 "use strict";
 
-var entityPersonne = lassi.Entity('Personne');
+var entity = lassi.Entity('Personne');
 
-/**
- * Notre entité Personne
- * @constructor
- */
-function Personne() {
+entity.initialize = function() {
   /**
    * Prénom
    * @type {string}
@@ -30,9 +26,8 @@ function Personne() {
   this.infos = '';
 }
 
-entityPersonne
-    .onInitialize(Personne)
-    .addIndex('nom')
-    .addIndex('email');
+entity
+    .addIndex('nom', 'string')
+    .addIndex('email', 'string');
 
-module.exports = entityPersonne;
+module.exports = entity;
