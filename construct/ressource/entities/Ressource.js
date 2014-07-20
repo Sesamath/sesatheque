@@ -2,10 +2,11 @@
 
 var _ = require('underscore')._
 
-var entity = lassi.Entity('Ressource');
+var entityRessource = lassi.Entity('Ressource');
 var config = require('../config.js');
 
-entity.initialize = function() {
+entityRessource.initialize = function() {
+  log.dev('on passe dans entityRessource.initialize')
   /**
    * Une liste d'erreurs éventuelles (incohérences de données, etc)
    * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
@@ -126,7 +127,7 @@ entity.initialize = function() {
   this.version = 0;
 }
 
-entity.beforeStore = function (next) {
+entityRessource.beforeStore = function (next) {
   // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
   // et pas de celle de son indexation ici
   if (!this.dateMiseAJour) {
@@ -139,7 +140,7 @@ entity.beforeStore = function (next) {
   // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
 }
 
-entity
+entityRessource
     .addIndex('origine', 'string')
     .addIndex('idOrigin', 'string')
     .addIndex('typeTechnique', 'string')
@@ -156,7 +157,7 @@ entity
     .addIndex('dateCreation', 'date')
     .addIndex('dateUpdate', 'date');
 
-module.exports = entity;
+module.exports = entityRessource;
 
 function updateVersion(ressource, next) {
   var needIncrement = false

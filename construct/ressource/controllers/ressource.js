@@ -90,7 +90,8 @@ controller
       var data, compRessource;
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        sendFormData(null, lassi.entity.Ressource.create(), next)
+        //sendFormData(null, lassi.entity.Ressource.create(), next)
+        sendFormData(null, null, next)
       } else {
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
@@ -282,8 +283,10 @@ function sendFormData(error, ressource, next) {
   // on s'assure que l'on a un objet, sinon on en créé un vide
   if (!ressource) {
     // on en créé une vide
+    log.dev('dans sendFormData on lance un create')
     ressource = lassi.entity.Ressource.create()
   }
+  log.dev('ressource traitée par sendFormData', ressource)
 
   // on boucle sur les propriétés déclarées dans config pour récupérer les labels
   _.each(config.labels, function (label, key) {
@@ -329,6 +332,7 @@ function sendFormData(error, ressource, next) {
   data.version.readonly = true;
   data.categories.required = true;
   data.langue.unique = true;
+  log.dev('On envoie au form', data)
 
   next(null, data);
 }
