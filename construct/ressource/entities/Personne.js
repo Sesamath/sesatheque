@@ -1,8 +1,7 @@
 "use strict";
 
-var entity = lassi.Entity('Personne');
 
-entity.initialize = function() {
+function Personne() {
   /**
    * Prénom
    * @type {string}
@@ -26,7 +25,8 @@ entity.initialize = function() {
   this.infos = '';
 }
 
-entity
+var entity =
+    lassi.Entity(Personne)
     .addIndex('nom', 'string')
     .addIndex('email', 'string');
 

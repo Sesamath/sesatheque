@@ -2,11 +2,10 @@
 
 var _ = require('underscore')._
 
-var entityRessource = lassi.Entity('Ressource');
 var config = require('../config.js');
 
-entityRessource.initialize = function() {
-  log.dev('on passe dans entityRessource.initialize')
+function Ressource() {
+  log.dev('on passe dans entity.initialize')
   /**
    * Une liste d'erreurs éventuelles (incohérences de données, etc)
    * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
@@ -127,62 +126,63 @@ entityRessource.initialize = function() {
   this.version = 0;
 }
 
-entityRessource.beforeStore = function (next) {
-  // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
-  // et pas de celle de son indexation ici
-  if (!this.dateMiseAJour) {
-    this.dateMiseAJour = new Date();
-  }
-  // si le tableau d'erreur est vide (devrait toujours être le cas,
-  // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-  if (_.isEmpty(this.errors)) delete this.errors
-  updateVersion(this, next)
-  // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
-}
-
-entityRessource
-    .addIndex('origine', 'string')
-    .addIndex('idOrigin', 'string')
-    .addIndex('typeTechnique', 'string')
-    .addIndex('niveaux', 'integer')
-    .addIndex('categories', 'integer')
-    .addIndex('typePedagogiques', 'integer')
-    .addIndex('typeDocumentaires', 'integer')
-    .addIndex('relations', 'integer')
-    .addIndex('auteurs', 'integer')
-    .addIndex('contributeurs', 'integer')
-    .addIndex('langue', 'string')
-    .addIndex('publie', 'integer')
-    .addIndex('restriction', 'integer')
-    .addIndex('dateCreation', 'date')
-    .addIndex('dateUpdate', 'date');
-
-module.exports = entityRessource;
-
-function updateVersion(ressource, next) {
+Ressource.prototype.updateVersion = function() {
   var needIncrement = false
   var ressourceInitiale
-  if (ressource.version) {
+  if (this.version) {
     // on peut réclamer une nouvelle version
-    if (ressource.newVersion) needIncrement = true
+    if (this.newVersion) needIncrement = true
     // on regarde si nos champs qui déclenchent un changement de version on changé
     else {
-      if (lassi.cache && lassi.cache.ressource && lassi.cache.ressource[ressource.oid]) {
-        ressourceInitiale = lassi.cache.ressource[ressource.oid]
+      if (lassi.cache && lassi.cache.ressource && lassi.cache.ressource[this.oid]) {
+        ressourceInitiale = lassi.cache.ressource[this.oid]
         _.each(config.versionTriggers, function (prop) {
-          if (ressource[prop] !== ressourceInitiale[prop]) {
+          if (this[prop] !== ressourceInitiale[prop]) {
             needIncrement = true
           }
         })
       } else {
         // pas de cache, bizarre
-        log.error("La ressource d'identifiant interne " +ressource.oid +
+        log.error("La ressource d'identifiant interne " +this.oid +
             " n'était pas en cache alors qu'elle va être enregistrée")
         needIncrement = true
       }
     }
-    if (needIncrement) ressource.version++
+    if (needIncrement) this.version++
   }
-  else ressource.version = 1;
-  next()
+  else {
+    this.version = 1;
+  }
 }
+var entity = lassi.Entity(Ressource)
+  .on('beforeStore', function() {
+    // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
+    // et pas de celle de son indexation ici
+    if (!this.dateMiseAJour) {
+      this.dateMiseAJour = new Date();
+    }
+    // si le tableau d'erreur est vide (devrait toujours être le cas,
+    // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
+    if (_.isEmpty(this.errors)) delete this.errors
+    this.updateVersion
+    // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
+  })
+  .addIndex('origine', 'string')
+  .addIndex('idOrigin', 'string')
+  .addIndex('typeTechnique', 'string')
+  .addIndex('niveaux', 'integer')
+  .addIndex('categories', 'integer')
+  .addIndex('typePedagogiques', 'integer')
+  .addIndex('typeDocumentaires', 'integer')
+  .addIndex('relations', 'integer')
+  .addIndex('auteurs', 'integer')
+  .addIndex('contributeurs', 'integer')
+  .addIndex('langue', 'string')
+  .addIndex('publie', 'integer')
+  .addIndex('restriction', 'integer')
+  .addIndex('dateCreation', 'date')
+  .addIndex('dateUpdate', 'date');
+
+module.exports = entity;
+
+
