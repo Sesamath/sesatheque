@@ -13,7 +13,7 @@ var config = require('../config.js');
  * @return {Boolean}
  */
 ressourceRepository.valide = function(ressource, next) {
-  assert.nextOk(next);
+  //assert.nextOk(next);
   // log.dev('on va valider ', ressource)
   /** tableau d'erreurs qui sera concaténé et passé à next si non vide */
   var errors = [];
@@ -73,17 +73,16 @@ ressourceRepository.add = function(ressource, next) {
               next(error)
             } else if (ressource && !ressource.id) {
               // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
-              if (ressource.id) {
-                log.dev('ressource.id existe déjà après un add, faut modifier ressourceRepository.add')
-                next()
-              } else if (ressource.oid != parseInt(ressource.oid, 10)) {
+              if (ressource.oid != parseInt(ressource.oid, 10)) {
                 throw new Error("L'oid n'est plus entier, faut venir changer le code de ressourceRepository.add")
               } else {
                 // on prend l'oid tant qu'il est entier
                 ressource.id = ressource.oid;
+                cacheSet(ressource)
                 ressource.store(next)
               }
             } else {
+              cacheSet(ressource)
               next(error, ressource);
             }
           });
@@ -102,7 +101,10 @@ ressourceRepository.update = function(ressource, next) {
   ressourceRepository.valide(ressource, function (error, ressource) {
     lassi.entity.Ressource
         .create(ressource)
-        .store(next)
+        .store(function(error, ressource) {
+          cacheSet(ressource)
+          next(error, ressource)
+        })
   })
 };
 
@@ -115,7 +117,14 @@ ressourceRepository.update = function(ressource, next) {
  */
 ressourceRepository.delByOid = function(oid, next) {
   if (_.isArray(oid)) lassi.entity.Ressource.match('oid').in(oid).del(next)
-  else lassi.entity.Ressource.match('oid').equals(oid).del(next)
+  else lassi.entity.Ressource.match('oid').equals(oid).del(function(error, nbObjects, nbIndexes) {
+    if (error) next(error, nbObjects, nbIndexes)
+    else {
+      cacheDelByOid(oid)
+      next(error, nbObjects, nbIndexes)
+    }
+    log.dev("La ressource d'oid " +oid + " a été effacée (avec ses " +nbIndexes +" index)")
+  })
 };
 
 /**
@@ -125,15 +134,18 @@ ressourceRepository.delByOid = function(oid, next) {
  * @returns {undefined}
  */
 ressourceRepository.load = function(id, next) {
-  lassi.entity.Ressource.match('id').equals(id).sort('version', 'desc').grabOne(function (error, ressource) {
-    if (error) next(error)
-    else if (ressource) {
-      prepareAndSend(ressource, next)
-    } else {
-      ressource = {error: "La ressource d'identifiant " +id + " n'existe pas"}
-      next(null, ressource)
-    }
-  })
+  var ressourceCached = cacheGet(id)
+  if (ressourceCached) next(null, ressourceCached)
+  else {
+    lassi.entity.Ressource.match('id').equals(id).sort('version', 'desc').grabOne(function (error, ressource) {
+      if (error) next(error)
+      else if (ressource) {
+        prepareAndSend(ressource, next)
+      } else {
+        next(null, null)
+      }
+    })
+  }
 };
 
 /**
@@ -143,47 +155,56 @@ ressourceRepository.load = function(id, next) {
  * @returns {undefined}
  */
 ressourceRepository.loadByOid = function(oid, next) {
-  var Ressource = lassi.entity.Ressource
-  Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
-    if (error) next(error)
-    else if (ressource) {
-      prepareAndSend(ressource, next)
-    } else {
-      ressource = {error: "La ressource d'identifiant interne " +oid + " n'existe pas"}
-      next(null, ressource)
-    }
-  })
+  var ressourceCached = cacheGetByOid(oid)
+  if (ressourceCached) next(null, ressourceCached)
+  else {
+    lassi.entity.Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
+      if (error) next(error)
+      else if (ressource) {
+        prepareAndSend(ressource, next)
+      } else {
+        next(null, null)
+      }
+    })
+  }
 };
 
 /**
  * Récupère une ressource d'après son idOrigine et la passe à next
- * @param {String}   origin
- * @param {String}   idOrigin
+ * @param {String}   origine
+ * @param {String}   idOrigine
  * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
  */
-ressourceRepository.loadByOrigin = function(origin, idOrigin, next) {
-  var Ressource = lassi.entity.Ressource;
-  Ressource
-      .query()
-      .whereEquals('origin', origin)
-      .whereEquals('idOrigin', idOrigin)
-      .execute(function (error, rows) {
-        var ressource
-        if (!error) {
-          if (rows.length) {
-            // on vérifie l'unicité et on log si on a un doublon
-            if (rows.length > 1) log.errorData("Il y a " + rows.length + " ressources " + origin + '-' + idOrigin);
-            ressource = rows[0];
-            prepareAndSend(ressource, next)
-          } else {
-            ressource = {error: "La ressource " + origin + '-' + idOrigin + " n'existe pas"}
-            next(null, ressource)
+ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
+  var ressourceCached = cacheGetByOrigine(origine, idOrigine)
+  if (ressourceCached) next(null, ressourceCached)
+  else {
+    lassi.entity.Ressource
+        .query()
+        .whereEquals('origine', origine)
+        .whereEquals('idOrigine', idOrigine)
+        .execute(function (error, rows) {
+          var ressource
+          if (!error) {
+            if (rows.length) {
+              // on vérifie l'unicité et on log si on a un doublon
+              if (rows.length > 1) log.errorData("Il y a " + rows.length + " ressources " + origine + '-' + idOrigine);
+              ressource = rows[0];
+              prepareAndSend(ressource, next)
+            } else {
+              ressource = {error: "La ressource " + origine + '-' + idOrigine + " n'existe pas"}
+              next(null, ressource)
+            }
           }
-        }
-      })
+        })
+  }
 }
 
 module.exports = ressourceRepository;
+
+/********************
+ * Nos fcts privées *
+ *******************/
 
 /**
  * Créé les objets date à partir des Strings, met en cache et fait suivre
@@ -202,12 +223,80 @@ function prepareAndSend(ressources, next) {
     // faut transformer les dates en objets date
     ressource.dateCreation = new Date(ressource.dateCreation);
     ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
-    // on met en cache
-    lassi.register(['cache', 'ressource', ressource.oid], ressource)
+    cacheSet(ressource)
   }
 
   if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")
   if (_.isArray(ressources)) ressources.forEach(processOne)
   else processOne(ressources)
   next(null, ressources)
+}
+
+/**
+ * Renvoie la ressource en cache (ou undefined si elle n'y est pas)
+ * @param id
+ * @returns {Ressource}
+ */
+function cacheGet(id) {
+  return lassi.cache.ressource[id]
+}
+
+/**
+ * Renvoie la ressource en cache d'après son oid (ou undefined si elle n'y est pas)
+ * @param oid
+ * @returns {Ressource}
+ */
+function cacheGetByOid(oid) {
+  var id = lassi.cache.ressourceIdByOid[oid]
+  return id ? lassi.cache.ressource[id] : undefined
+}
+
+/**
+ * Renvoie la ressource en cache d'après son origine (ou undefined si elle n'y est pas)
+ * @param origine
+ * @param idOrigine
+ * @returns {Ressource}
+ */
+function cacheGetByOrigine(origine, idOrigine) {
+  var id
+  if (lassi.cache.ressourceIdByOrigine[origine]) id = lassi.cache.ressourceIdByOrigine[origine][idOrigine]
+  return id ? lassi.cache.ressource[id] : undefined
+}
+
+/**
+ * Met en cache une ressource
+ * @param ressource
+ */
+function cacheSet(ressource) {
+  lassi.register(['cache', 'ressource', ressource.id], ressource)
+  lassi.register(['cache', 'ressourceIdByOid', ressource.oid], ressource.id)
+  if (ressource.origine) {
+    lassi.register(['cache', 'ressourceIdByOrigine', ressource.origine, ressource.idOrigine], ressource.id)
+  }
+}
+
+/**
+ * Efface une ressource du cache
+ * @param id
+ */
+function cacheDel(id) {
+  if (lassi.cache.ressource[id]) {
+    var ressource = lassi.cache.ressource[id]
+    var oid
+    var origine = ressource.origine
+    var idOrigine = ressource.idOrigine
+    delete lassi.ressource[ressource.id]
+    delete lassi.cache.ressourceIdByOid[ressource.oid]
+    if (ressource.origine) delete lassi.cache.ressourceIdByOrigine[ressource.origine][ressource.idOrigine]
+  }
+}
+
+/**
+ * Efface une ressource du cache d'après son oid
+ * @param oid
+ */
+function cacheDelByOid(oid) {
+  if (lassi.cache.ressourceIdByOid[oid]) {
+    cacheDel(lassi.cache.ressourceIdByOid[oid])
+  }
 }

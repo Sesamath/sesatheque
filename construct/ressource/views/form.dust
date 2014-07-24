@@ -5,6 +5,7 @@
     </div>
     {/errors}
 
+    {^noForm}
     <form method="post" id="formRessource">
 
         <div class="form-group">
@@ -48,11 +49,10 @@
 
         {! Les types, devraient disparaitrent car conditionnés par la catégorie ! }
 
-        Dump global {@dump}{.}{/dump}
-
         {! submit !}
         <div class="form-group buttons">
             <input class="btn btn-primary" type="submit" value="Enregistrer" />
         </div>
     </form>
+    {/noForm}
 </div>

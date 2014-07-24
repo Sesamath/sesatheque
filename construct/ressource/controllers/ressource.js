@@ -21,38 +21,38 @@ controller.respond('html');
  * describe : Voir les propriétés de la ressource
  */
 controller
-    .Action(routes.describe + '/:oid', 'describe')
+    .Action(routes.describe + '/:id', 'ressource.describe')
     .renderWith('describe')
     .do(function (ctx, next) {
-      var oid = ctx.arguments.oid
-      lassi.ressource.load(oid, function (error, ressource) {
-        if (!ressource) {
+      var id = ctx.arguments.id
+      lassi.ressource.load(id, function (error, ressource) {
+        if (error) next(error)
+        else if (ressource) {
+          sendPageData(error, ressource, next)
+        } else {
           ctx.response.statusCode = 404;
-          ressource = {
-            errors : ["La ressource d'identifiant " + oid + " n'existe pas"]
-          }
+          next(null, {errors: ["La ressource d'identifiant " + id + " n'existe pas"]})
         }
-        sendPageData(error, ressource, next)
       })
     });
 
 /**
- * describe via origin : Voir les propriétés de la ressource, ici via origin/idOrigin
+ * describe via origine : Voir les propriétés de la ressource, ici via origine/idOrigine
  */
 controller
-    .Action(routes.describe + '/:origin/:idOrigin', 'describeByOrigin')
+    .Action(routes.describe + '/:origine/:idOrigine', 'ressource.describeByOrigin')
     .renderWith('describe')
     .do(function (ctx, next) {
-      var origin = ctx.arguments.origin
-      var idOrigin = ctx.arguments.idOrigin
-      lassi.ressource.loadByOrigin(origin, idOrigin, function (error, ressource) {
+      var origine = ctx.arguments.origine
+      var idOrigine = ctx.arguments.idOrigine
+      lassi.ressource.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (!ressource) {
           ressource = {
-              errors : ["La ressource d'identifiant " + idOrigin + " (origine " + origin +" n'existe pas"]
+              errors : ["La ressource d'identifiant " + idOrigine + " (origine " + origine +" n'existe pas"]
           }
           ctx.response.statusCode = 404;
         } else if (!error) {
-          ctx.permalink = ctx.url(lassi.action.ressource.describe, {oid: ressource.oid})
+          ctx.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
         }
         sendPageData(error, ressource, next)
       })
@@ -62,14 +62,14 @@ controller
  * display : Voir la ressource
  */
 controller
-  .Action(routes.display + '/:oid', 'display')
+  .Action(routes.display + '/:id', 'ressource.display')
   .do(function (ctx, next) {
-      var oid = ctx.arguments.oid
-      lassi.ressource.load(oid, function (error, ressource) {
+      var id = ctx.arguments.id
+      lassi.ressource.load(id, function (error, ressource) {
         if (!ressource) {
           ctx.response.statusCode = 404;
           ressource = {
-            errors : ["La ressource d'identifiant " + oid + " n'existe pas"]
+            errors : ["La ressource d'identifiant " + id + " n'existe pas"]
           }
         }
         sendPageData(error, ressource, next)
@@ -81,7 +81,7 @@ controller
  * Create, le form de saisie
  */
 controller
-  .Action(routes.add, 'add')
+  .Action(routes.add, 'ressource.add')
   .via('get', 'post')
   .renderWith('form')
   .do(function (ctx, next) {
@@ -104,8 +104,8 @@ controller
             // faut réafficher le form
             sendFormData(error, ressource, next)
           } else {
-            log.dev("Après le save on récupère l'id " + ressource.oid + ", on lance le redirect");
-            ctx.redirect(lassi.action.ressource.describe, {oid: ressource.oid});
+            log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
+            ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
             // on appelle pas next, on attend le redirect
           }
         }) // compRessource.add
@@ -117,21 +117,25 @@ controller
  * Uptate
  */
 controller
-  .Action(routes.edit +'/:oid', 'edit')
+  .Action(routes.edit +'/:id', 'ressource.edit')
   .via('get', 'post')
+  .renderWith('form')
   .do(function (ctx, next) {
 
     if (this.method === 'get') {
       // get => affichage du form
-      var oid = ctx.arguments.oid
-      lassi.ressource.load(oid, function (error, ressource) {
+      var id = ctx.arguments.id
+      lassi.ressource.load(id, function (error, ressource) {
         if (!ressource) {
           ctx.response.statusCode = 404;
           ressource = {
-            errors: ["La ressource d'identifiant " + oid + " n'existe pas"]
+            errors: ["La ressource d'identifiant " + id + " n'existe pas"],
+            noForm : true
           }
+          next(null, ressource)
+        } else {
+          sendFormData(error, ressource, next)
         }
-        sendFormData(error, ressource, next)
       })
 
     } else {
@@ -144,7 +148,7 @@ controller
               sendFormData(error, ressource, next)
             } else {
               log.dev("update ok, on lance le redirect")
-              ctx.redirect(lassi.action.ressource.describe, {oid: ressource.oid});
+              ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
               // on appelle pas next, on attend le redirect
             }
           }
@@ -156,18 +160,18 @@ controller
  * Del
  */
 controller
-  .Action(routes.del +'/:oid', 'del')
+  .Action(routes.del +'/:id', 'ressource.del')
   .via('get', 'post')
   .renderWith('del')
   .do(function (next) {
-      var oid = this.arguments.oid;
+      var id = this.arguments.id;
       if (this.method === 'get') {
         // on affiche et on demande confirmation
-        lassi.ressource.load(oid, function (error, ressource) {
+        lassi.ressource.load(id, function (error, ressource) {
           if (!ressource) {
             ctx.response.statusCode = 404;
             ressource = {
-              errors : ["La ressource d'identifiant " + oid + " n'existe pas"]
+              errors : ["La ressource d'identifiant " + id + " n'existe pas"]
             }
           }
           sendPageData(error, ressource, next)
@@ -175,17 +179,17 @@ controller
       } else {
         // post, on supprime
         try {
-          lassi.ressource.delByOid(oid, function (error, nbRows) {
+          lassi.ressource.del(id, function (error, nbRows) {
             log.dev("nbRows", nbRows)
             if (nbRows === 1) {
-              if (error) next(null, {error: error, deletedId: oid})
-              else next(null, {deletedId: oid})
-            } else next(null, {error: "Aucune ressource d'identifiant " + oid + ' retour ' + nbRows})
+              if (error) next(null, {error: error, deletedId: id})
+              else next(null, {deletedId: id})
+            } else next(null, {error: "Aucune ressource d'identifiant " + id + ' retour ' + nbRows})
           });
         } catch (e) {
           // pas normal que cette requete plante, pb d'accès à la base ou table manquante
           log.error(e.stack)
-          next(null, {error:"La suppression de la ressource " + oid +" a échouée."});
+          next(null, {error:"La suppression de la ressource " + id +" a échouée."});
         }
       }
   });
@@ -222,7 +226,7 @@ function sendPageData(error, ressource, next) {
             buffer = [];
             _.each(value, function (id) {
               if (config.listes[key][id])  buffer.push(config.listes[key][id])
-              else log.error("La ressource " + ressource.oid + " a une valeur " + id +
+              else log.error("La ressource " + ressource.id + " a une valeur " + id +
                   " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
             });
           } else {
@@ -275,6 +279,7 @@ function sendFormData(error, ressource, next) {
   if (ressource && ressource.errors) {
     data.errors = ressource.errors
   }
+
   if (error) {
     log.error(error)
     data.errors.push(error.toString())
@@ -286,7 +291,7 @@ function sendFormData(error, ressource, next) {
     log.dev('dans sendFormData on lance un create')
     ressource = lassi.entity.Ressource.create()
   }
-  log.dev('ressource traitée par sendFormData', ressource)
+  //log.dev('ressource traitée par sendFormData', ressource)
 
   // on boucle sur les propriétés déclarées dans config pour récupérer les labels
   _.each(config.labels, function (label, key) {
@@ -312,10 +317,12 @@ function sendFormData(error, ressource, next) {
 
     } else if (_.isBoolean(value)) {
       // checkbox tout seul (pas de label, c'est le parent qui le porte)
-      data[key].choices = [{
-        name: key,
-        value: [value]
-      }]
+      data[key].choices = [
+        {
+          name : key,
+          value: [value]
+        }
+      ]
 
     } else {
       // propriété scalaire => input ou textarea
@@ -328,11 +335,11 @@ function sendFormData(error, ressource, next) {
   }); // fin each propriété
 
   // on ajoute nos cas particulier
-  if (data.oid) data.oid.readonly = true;
+  if (data.id) data.id.readonly = true;
   data.version.readonly = true;
   data.categories.required = true;
   data.langue.unique = true;
-  log.dev('On envoie au form', data)
+  // log.dev('On envoie au form', data)
 
   next(null, data);
 }

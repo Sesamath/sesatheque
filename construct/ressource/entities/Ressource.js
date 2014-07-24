@@ -5,7 +5,7 @@ var _ = require('underscore')._
 var config = require('../config.js');
 
 function Ressource() {
-  log.dev('on passe dans entity.initialize')
+  log.dev('Ressource.initialize')
   /**
    * Une liste d'erreurs éventuelles (incohérences de données, etc)
    * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
@@ -26,7 +26,7 @@ function Ressource() {
    * Id de la ressource dans son dépôt d'origine
    * @type {String}
    */
-  this.idOrigin = null;
+  this.idOrigine = null;
   /**
    * Le code du plugin qui gère la ressource
    * @type {String}
@@ -126,34 +126,35 @@ function Ressource() {
   this.version = 0;
 }
 
-Ressource.prototype.updateVersion = function() {
+function updateVersion(ressource) {
   var needIncrement = false
   var ressourceInitiale
-  if (this.version) {
+  if (ressource.version) {
     // on peut réclamer une nouvelle version
-    if (this.newVersion) needIncrement = true
+    if (ressource.newVersion) needIncrement = true
     // on regarde si nos champs qui déclenchent un changement de version on changé
     else {
-      if (lassi.cache && lassi.cache.ressource && lassi.cache.ressource[this.oid]) {
-        ressourceInitiale = lassi.cache.ressource[this.oid]
+      if (lassi.cache.ressource[ressource.id]) {
+        ressourceInitiale = lassi.cache.ressource[ressource.id]
         _.each(config.versionTriggers, function (prop) {
-          if (this[prop] !== ressourceInitiale[prop]) {
+          if (ressource[prop] !== ressourceInitiale[prop]) {
             needIncrement = true
           }
         })
       } else {
         // pas de cache, bizarre
-        log.error("La ressource d'identifiant interne " +this.oid +
-            " n'était pas en cache alors qu'elle va être enregistrée")
+        log.error("La ressource d'identifiant " +ressource.id +" n'était pas en cache alors qu'elle va être enregistrée " +
+          ressource.version)
         needIncrement = true
       }
     }
-    if (needIncrement) this.version++
-  }
-  else {
-    this.version = 1;
+    if (needIncrement) ressource.version++
+
+  } else {
+    ressource.version = 1;
   }
 }
+
 var entity = lassi.Entity(Ressource)
   .on('beforeStore', function() {
     // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
@@ -164,11 +165,15 @@ var entity = lassi.Entity(Ressource)
     // si le tableau d'erreur est vide (devrait toujours être le cas,
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
     if (_.isEmpty(this.errors)) delete this.errors
-    this.updateVersion
+    updateVersion(this)
     // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
   })
+  // finalement on laisse la gestion du cache dans les accesseurs du repository
+  // plus pratique même si updateVersion appelle directement lassi.cache.ressource.XXX
+  //.on('afterStore', function(next) {log.dev("afterStore", this); next();})
+  .addIndex('id', 'integer')
   .addIndex('origine', 'string')
-  .addIndex('idOrigin', 'string')
+  .addIndex('idOrigine', 'string')
   .addIndex('typeTechnique', 'string')
   .addIndex('niveaux', 'integer')
   .addIndex('categories', 'integer')
@@ -181,7 +186,13 @@ var entity = lassi.Entity(Ressource)
   .addIndex('publie', 'integer')
   .addIndex('restriction', 'integer')
   .addIndex('dateCreation', 'date')
-  .addIndex('dateUpdate', 'date');
+  .addIndex('dateMiseAJour', 'date')
+  .addIndex('version', 'integer')
+
+/* un écouteur sur registered qui pourrait servir
+lassi.on('registered', function(className, path, ressource) {
+  if (className === 'Ressource') log.dev(path +" registered")
+}); /* */
 
 module.exports = entity;
 

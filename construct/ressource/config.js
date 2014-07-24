@@ -152,8 +152,8 @@ module.exports = {
   // les libellés que l'on affiche pour chaque champ de notre entité
   labels           : {
     id               : "Identifiant",
-    origin           : 'Origine',
-    idOrigin         : "Identifiant d'origine",
+    origine           : 'Origine',
+    idOrigine         : "Identifiant d'origine",
     titre            : "Titre",
     typeTechnique    : "Type technique",
     resume           : "Résumé",
@@ -176,14 +176,14 @@ module.exports = {
   },
 
   // les propriétés dont la modif déclenche un upgrade de version
-  versionTriggers : ['origin', 'idOrigin', 'parametres', 'auteurs', 'contributeurs'],
+  versionTriggers : ['origine', 'idOrigine', 'parametres', 'auteurs', 'contributeurs'],
 
   // les types requis, Attention, le code suppose que tous les Array sont des tableaux d'entiers,
   // faudra modifier postToRessource dans edit.js si ça change
   typesVar         : {
     id               : 'Number',
-    origin           : 'String',
-    idOrigin         : 'String',
+    origine           : 'String',
+    idOrigine         : 'String',
     typeTechnique    : 'String',
     titre            : 'String',
     resume           : 'String',
@@ -273,7 +273,8 @@ module.exports = {
       add : 'ajouter',
       edit: 'modifier',
       describe:'decrire',
-      display:'affiche'
+      display:'afficher',
+      del:'supprimer'
     }
   }, // fin constantes
   /**
