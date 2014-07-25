@@ -14,7 +14,7 @@ controller.respond('html');
  *
  * Les erreurs liées à un bug dans le code sont en anglais,
  * celles liées à une incohérence de data et destinés à l'utilisateur en français
- * (celles liées à une url malformée doivent être interceptées avant nous par les contrôleurs)
+ * (celles liées à une url malformée doivent être interceptées avant nous)
  */
 
 /**
@@ -87,7 +87,7 @@ controller
   .do(function (ctx, next) {
       // ajouter un meta ou un autre moyen pour mettre le js client
       // qui va conditionner les types à la catégorie dans la page
-      var data, compRessource;
+      var data
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
         //sendFormData(null, lassi.entity.Ressource.create(), next)
@@ -96,10 +96,9 @@ controller
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
         //log.dev('post dans add', this.post);
-        compRessource = lassi.ressource; // le Component, pas entity
-        data = getRessourceFromPost(ctx.post)
+        data = lassi.ressource.getRessourceFromPost(ctx.post)
         // il validera avant d'enregistrer
-        compRessource.add(data, function (error, ressource) {
+        lassi.ressource.add(data, function (error, ressource) {
           if (error || !_.isEmpty(ressource.errors)) {
             // faut réafficher le form
             sendFormData(error, ressource, next)
@@ -141,7 +140,7 @@ controller
     } else if (this.isPost()) {
       // post => on enregistre ou on réaffiche le form si pb
       lassi.ressource.update(
-          getRessourceFromPost(ctx.post),
+          lassi.ressource.getRessourceFromPost(ctx.post),
           function(error, ressource) {
             if (error || !_.isEmpty(ressource.errors)) {
               // faut réafficher le form avec les erreurs
@@ -404,82 +403,4 @@ function arrayToDust(key, selectedValues, isUnique) {
   });
 
   return choices;
-}
-
-/**
- * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
- * @param data
- * @return {Ressource}
- * @throws {Error} En cas de données invalides
- */
-function getRessourceFromPost(data) {
-  var ressource = lassi.entity.Ressource.create();
-  var errors = [];
-  var buffer;
-  var msg;
-  log.dev('dans getRessourceFromPost on récupère', data)
-  //log.dev('ressource vide', ressource)
-  if (_.isEmpty(data)) {
-    errors.push("Ressource vide");
-  } else {
-    // vérif présence et type
-    _.each(config.typesVar, function (typeVar, key) {
-      // propriétés obligatoires
-      if (_.isEmpty(data[key]) && config.required[key]) {
-        errors.push("Le champ " + config.labels[key] + " est obligatoire");
-      }
-      // les cast
-      if (data[key]) {
-        if (typeVar === 'String') {
-          if (_.isString(data[key])) {
-            ressource[key] = data[key];
-          } else {
-            errors.push("Le champ " + config.labels[key] + " n'est pas une chaine de caractères");
-          }
-        } else if (typeVar === 'Date') {
-          buffer = moment(data[key], config.formats.jour, true);
-          if (buffer.isValid()) {
-            ressource[key] = new Date(buffer); // pb car _.isDate(buffer) renvoie false !
-            log.dev("type moment " + typeof buffer + _.isDate(buffer))
-          } else {
-            errors.push("Le champ " + config.labels[key] +
-                " n'est pas une date valide (" + config.formats.jour +')');
-          }
-        } else if (typeVar === 'Number') {
-          ressource[key] = parseInt(data[key], 10);
-        } else if (typeVar === 'Boolean') {
-          ressource[key] = !!data[key];
-        } else if (typeVar === 'Array') {
-          if (_.isArray(data[key])) {
-            _.each(data[key], function (value) {
-              // tous nos tableaux sont des tableaux d'entiers
-              ressource[key].push(parseInt(value, 10));
-            });
-          } else {
-            errors.push("Le champ " + config.labels[key] + " n'est pas une liste");
-          }
-        } else if (typeVar === 'Object') {
-          try {
-            ressource[key] = JSON.parse(data[key]);
-          } catch (e) {
-            errors.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
-          }
-        } else {
-          msg = "Le champ " + config.labels[key] + " est d'un type non prévu (" +typeVar +')';
-          errors.push(msg);
-          log.error(msg);
-        }
-      }
-    });
-    // faut ajouter l'oid
-    ressource.oid = data.oid;
-  }
-
-  // if (errors !== []) { // ce truc est toujours vrai !
-  if (errors.length) {
-    log.dev('errors à la fin getRessourceFromPost', errors)
-    throw new Error("Les erreurs de validation .\n" + errors.join("\n"));
-  }
-
-  return ressource;
 }

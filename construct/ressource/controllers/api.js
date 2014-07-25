@@ -1,41 +1,10 @@
 'use strict';
 
-var _ = require('underscore')._;
-
-/**
- * Passe en revue les propriétés de l'objet passé en argument, si la propriété existe dans ressource
- * recopie sa valeur dans l'objet qui sera retourné (avec le bon type)
- * @param {Object} postParams
- * @returns {Ressource}
- */
-function convertPostToRessource(postParams) {
-  var ressource = {};
-  _.each(configRessource.types, function (type, propName) {
-    if (postParams.hasOwnProperty(propName)) {
-      if (type === 'String') {
-        ressource[propName] = postParams[propName];
-      } else if (type === 'Date') {
-        ressource[propName] = new Date(postParams[propName]);
-      } else if (type === 'Boolean') {
-        ressource[propName] = !!postParams[propName]; // cast boolean
-      } else {
-        try {
-          ressource[propName] = JSON.parse(postParams[propName]);
-        } catch(error) {
-          ressource[propName] = null;
-          // on le note
-          log.error("La ressource " +postParams.oid + " passée en post a une propriété invalide : " +
-              propName +"=\n" +postParams[propName]);
-        }
-      }
-    }
-  }); // each
-
-  return ressource;
-}
-
 var controller = lassi.Controller('api/ressource');
-var configRessource = require('../config.js');
+var moment = require('moment');
+var _ = require('underscore')._;
+var config = require('../config.js');
+
 controller.respond('json');
 
 /**
@@ -44,60 +13,43 @@ controller.respond('json');
 controller
     .Action('add')
     .via('post')
-    .do(function(next) {
-      var ressourcePosted, ressourcePlausible, Ressource;
+    .do(function(ctx, next) {
+      log.dev("dans api add on récupère en post", ctx.post)
       try {
-        lassi.component.ressource.toto()
-        log.dev('le post', this.post)
-        // @todo vérif droits
-        // on accepte un seul param data qui contient la ressource en json
-        // mais aussi chaque champ séparément
-        if (_.isEmpty(this.post)) {
-          throw new Error("Ressource vide");
-        }
-        if (this.post.data) {
-          try {
-            ressourcePosted = JSON.parse(this.post.data);
-          } catch (error) {
-            throw new Error("Ressource invalide");
+        var ressource = lassi.ressource.getRessourceFromPost(ctx.post)
+        log.dev("que l'on a transformé en", ressource)
+        lassi.ressource.add(ressource, function (error, ressource) {
+          log.dev("dans cb api add on récupère", error)
+          log.dev("et", ressource)
+          if (error) next(null, {error: error.toString()})
+          else if (!_.isEmpty(ressource.errors)) {
+            next(null, {error: ressource.errors.join("\n")})
+          } else {
+            next(null, {id: ressource.id})
           }
-        } else {
-          ressourcePosted = convertPostToRessource(this.post);
-        }
-        // on vérifie l'intégrité
-        ressourcePlausible = valideRessource(ressourcePosted);
-        // si on est toujours là on peut instancier une entité
-        Ressource = lassi.entity.Ressource;
-        Ressource
-            .create(ressourcePlausible)
-            .store(function (error, ressource) {
-              if (error) throw error;
-              return {result: 'ok', oid: ressource.oid};
-            })
-      } catch (error) {
-        return {error: error.toString()};
+        })
+      } catch (e) {
+        next(null, {error: e.toString()})
       }
-    }); // do
+    })
 
 /**
  * Read (get)
  */
 controller
-    .Action('get/:oid')
-    .do(function(next) {
-      // on récupère la ressource
-      var Ressource = this.application.entity('Ressource');
-      Ressource
-          .query()
-          .include('oid', oid, '=')
-          .execute(function (error, ressource) {
-            if (error) next(error)
-            else {
-              // @todo vérif droits et restriction
-              next(null, ressource);
-            }
-        })
-    });
+    .Action('get/:id')
+    .do(function (ctx, next) {
+      var id = ctx.arguments.id
+      lassi.ressource.load(id, function (error, ressource) {
+        if (error) next(error)
+        else if (ressource) {
+          next(null, ressource)
+        } else {
+          ctx.response.statusCode = 404;
+          next(null, {error: "La ressource d'identifiant " + id + " n'existe pas"})
+        }
+      })
+    })
 
 /**
  * Update
