@@ -44,7 +44,7 @@ var
   concat     = require('gulp-concat'),
   jsdoc      = require("gulp-jsdoc"),
   rework     = require('./node_modules/lassi/gulpTasks/gulp-path-rework'),
-  launcher   = require('./node_modules/lassi/gulpTasks/launcher'),
+  launcher   = require('gulp-launcher'),
   fs         = require('fs');
 
 

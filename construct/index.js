@@ -19,8 +19,6 @@ var application = lassi.Application();
 application.on('boot', function(){
   console.log("Boot de l'application " + application.name);
   log.dev('BOOT');
-  // Notre gestion du cache
-  lassi.register('cache', require('./cache.js'))
 });
 
 // et on lance le boot

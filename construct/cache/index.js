@@ -18,6 +18,12 @@ var purgeDelay = 600000
 
 var timerId
 
+var component = lassi.Component();
+
+component.initialize = function(next) {
+    next()
+}
+
 /**
  * Passe en revue les clés stockées et efface celles qui ont expiré
  * @private
@@ -39,7 +45,7 @@ function purge() {
  * Ça déclenche un passage s'il y en avait un en attente
  * @param delay
  */
-function setPurgeDelay(delay) {
+component.setPurgeDelay = function (delay) {
   purgeDelay = delay
   if (timerId) {
     clearTimeout(timerId)
@@ -52,7 +58,7 @@ function setPurgeDelay(delay) {
  * @param {String|array} key La clé (si array on concatène avec '_')
  * @returns {*} La valeur en cache (ou undefined si pas trouvé ou expiré)
  */
-function get(key) {
+component.get = function (key) {
   var now = (new Date()).getTime()
   var value
   if (arguments.length === 0) throw new Error("La fonction cache.get réclame un argument")
@@ -69,7 +75,6 @@ function get(key) {
     }
   }
 
-
   return value
 }
 
@@ -80,7 +85,7 @@ function get(key) {
  * @param {Number} ttl [optional] La durée de vie en ms (10min par défaut)
  * @returns {undefined}
  */
-function set(key, value, ttl) {
+component.set = function (key, value, ttl) {
   var now = (new Date()).getTime()
   if (arguments.length <2) throw new Error("cache.set réclame au moins deux arguments")
 
@@ -100,8 +105,6 @@ function set(key, value, ttl) {
   }
 }
 
-module.exports = {
-  get:get,
-  set:set,
-  setPurgeDelay:setPurgeDelay
-}
+console.log('component cache '+component.constructor.name)
+
+module.exports = component
