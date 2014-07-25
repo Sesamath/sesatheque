@@ -16,7 +16,6 @@
   },
   "devDependencies": {
     "arpm": "git+ssh://git@arnumeral.fr:node-arpm",
-    "dustjs-helpers": "^1.2.0",
     "express-debug": "^1.1.0",
     "gulp": "^3.8.5",
     "gulp-concat": "^2.2.0",

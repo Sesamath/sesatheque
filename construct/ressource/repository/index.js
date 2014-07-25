@@ -114,14 +114,40 @@ ressourceRepository.update = function(ressource, next) {
 
 /**
  * Efface l'entity par son oid (on peut passer un tableau)
+ * @param {Number|Array} id  Le ou les id à supprimer
+ * @param {Function}     next La callback qui sera appelée en lui passant (error, nbObjects, nbIndexes)
+ * @returns {undefined}
+ */
+ressourceRepository.del = function(id, next) {
+  log.dev("La ressource " +id + " va être effacée")
+  var query
+  if (_.isArray(id)) query = lassi.entity.Ressource.match('id').in(id)
+  else query = lassi.entity.Ressource.match('id').equals(id)
+  query.delete(function(error, nbObjects, nbIndexes) {
+    if (error) next(error, nbObjects, nbIndexes)
+    else {
+      if (_.isArray(id)) {
+        id.forEach(function (idToDel) {
+          cacheDel(idToDel)
+        })
+      } else cacheDel(id)
+      next(error, nbObjects, nbIndexes)
+    }
+    log.dev("La ressource " +id + " a été effacée (" +nbObjects +" versions et " +nbIndexes +" index)")
+  })
+}
+
+/**
+ * Efface l'entity par son oid (on peut passer un tableau)
  * @param {Number|Array} oid  Le ou les oid à supprimer
- * @param {Function}     next La callback qui sera appelée en lui passant le nb de ligne effacées en argument
- * @throws {Error} Si la requete plante
+ * @param {Function}     next La callback qui sera appelée en lui passant (error, nbObjects, nbIndexes)
  * @returns {undefined}
  */
 ressourceRepository.delByOid = function(oid, next) {
-  if (_.isArray(oid)) lassi.entity.Ressource.match('oid').in(oid).del(next)
-  else lassi.entity.Ressource.match('oid').equals(oid).del(function(error, nbObjects, nbIndexes) {
+  var query
+  if (_.isArray(oid)) query = lassi.entity.Ressource.match('oid').in(oid)
+  else query = lassi.entity.Ressource.match('oid').equals(oid)
+  query.delete(function(error, nbObjects, nbIndexes) {
     if (error) next(error, nbObjects, nbIndexes)
     else {
       cacheDelByOid(oid)

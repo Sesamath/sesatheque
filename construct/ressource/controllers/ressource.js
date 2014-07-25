@@ -173,26 +173,20 @@ controller
           if (!ressource) {
             ctx.response.statusCode = 404;
             ressource = {
-              errors : ["La ressource d'identifiant " + id + " n'existe pas"]
+              error : "La ressource d'identifiant " + id + " n'existe pas"
             }
-          }
-          sendPageData(error, ressource, next)
+            next(null, ressource)
+          } else sendPageData(error, ressource, next)
         })
       } else {
         // post, on supprime
-        try {
-          lassi.ressource.del(id, function (error, nbRows) {
-            log.dev("nbRows", nbRows)
-            if (nbRows === 1) {
-              if (error) next(null, {error: error, deletedId: id})
-              else next(null, {deletedId: id})
-            } else next(null, {error: "Aucune ressource d'identifiant " + id + ' retour ' + nbRows})
-          });
-        } catch (e) {
-          // pas normal que cette requete plante, pb d'accès à la base ou table manquante
-          log.error(e.stack)
-          next(null, {error:"La suppression de la ressource " + id +" a échouée."});
-        }
+        lassi.ressource.del(id, function (error, nbObjects, nbIndexes) {
+          log.dev("nbRows", nbRows)
+          if (nbObjects > 0) {
+            if (error) next(null, {error: error, deletedId: id})
+            else next(null, {deletedId: id})
+          } else next(null, {error: "Aucune ressource d'identifiant " + id})
+        });
       }
   });
 

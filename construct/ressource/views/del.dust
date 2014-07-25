@@ -2,9 +2,9 @@
     {?error}<p class="has-error">{error}</p>{/error}
 
 {?deletedId}
-    La ressource {} a été définitivement supprimée
+    La ressource {id} a été définitivement supprimée
 {:else}
-    {?oid}
+    {?id}
     Supprimer cette ressource définitivement ?
     {>"../describe" /}
 
@@ -13,6 +13,6 @@
             <input class="btn btn-primary" type="submit" value="Supprimer" />
         </div>
     </form>
-    {/oid}
+    {/id}
 {/deletedId}
 </div>
