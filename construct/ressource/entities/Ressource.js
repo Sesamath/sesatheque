@@ -5,7 +5,6 @@ var _ = require('underscore')._
 var config = require('../config.js');
 
 function Ressource() {
-  log.dev('Ressource.initialize')
   /**
    * Une liste d'erreurs éventuelles (incohérences de données, etc)
    * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
@@ -134,8 +133,8 @@ function updateVersion(ressource) {
     if (ressource.newVersion) needIncrement = true
     // on regarde si nos champs qui déclenchent un changement de version on changé
     else {
-      if (lassi.cache.ressource[ressource.id]) {
-        ressourceInitiale = lassi.cache.ressource[ressource.id]
+      ressourceInitiale = lassi.cache.get('ressource_' +ressource.id)
+      if (ressourceInitiale) {
         _.each(config.versionTriggers, function (prop) {
           if (ressource[prop] !== ressourceInitiale[prop]) {
             needIncrement = true

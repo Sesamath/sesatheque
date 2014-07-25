@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "arpm": "git+ssh://git@arnumeral.fr:node-arpm",
-    "launcher": "git+ssh://git@arnumeral.fr:gulp-launcher",
+    "dustjs-helpers": "^1.2.0",
     "express-debug": "^1.1.0",
     "gulp": "^3.8.5",
     "gulp-concat": "^2.2.0",
@@ -28,6 +28,7 @@
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
     "jshint-stylish": "^0.3.0",
+    "launcher": "git+ssh://git@arnumeral.fr:gulp-launcher",
     "merge-stream": "^0.1.1",
     "through2": "^0.4.2"
   },
@@ -48,7 +49,7 @@
       "lassi",
       "log"
     ],
-    "globals" : [
+    "globals": [
       "GLOBAL",
       "lassi",
       "log"

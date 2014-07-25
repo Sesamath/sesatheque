@@ -122,7 +122,7 @@ controller
   .renderWith('form')
   .do(function (ctx, next) {
 
-    if (this.method === 'get') {
+    if (this.isGet()) {
       // get => affichage du form
       var id = ctx.arguments.id
       lassi.ressource.load(id, function (error, ressource) {
@@ -138,7 +138,7 @@ controller
         }
       })
 
-    } else {
+    } else if (this.isPost()) {
       // post => on enregistre ou on réaffiche le form si pb
       lassi.ressource.update(
           getRessourceFromPost(ctx.post),
@@ -153,6 +153,8 @@ controller
             }
           }
       )
+    } else {
+      throw new Error("methode non supportée " +this.method)
     }
   });
 
@@ -163,7 +165,7 @@ controller
   .Action(routes.del +'/:id', 'ressource.del')
   .via('get', 'post')
   .renderWith('del')
-  .do(function (next) {
+  .do(function (ctx, next) {
       var id = this.arguments.id;
       if (this.method === 'get') {
         // on affiche et on demande confirmation
@@ -241,6 +243,8 @@ function sendPageData(error, ressource, next) {
           data[key].value = value;
         }
       }); // fin each propriété
+      // on ajoute oid
+      data.oid = ressource.oid
     } else {
       // pas d'erreur mais pas de ressource non plus
       data.error = "Aucune ressource";
@@ -292,7 +296,7 @@ function sendFormData(error, ressource, next) {
     log.dev('dans sendFormData on lance un create')
     ressource = lassi.entity.Ressource.create()
   }
-  log.dev('ressource traitée par sendFormData', ressource)
+  //log.dev('ressource traitée par sendFormData', ressource)
 
   // on boucle sur les propriétés déclarées dans config pour récupérer les labels
   _.each(config.labels, function (label, key) {
@@ -348,7 +352,7 @@ function sendFormData(error, ressource, next) {
     value: ressource.oid,
     hidden:true
   }
-  log.dev('On envoie au form', data)
+  //log.dev('On envoie au form', data)
 
   next(null, data)
 }

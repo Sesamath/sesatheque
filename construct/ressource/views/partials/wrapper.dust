@@ -10,7 +10,7 @@
 
     <label>{o.label}{?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{/o.required}</label>
 
-    <div class="input-group {widget}">
+    <div class="input-group {widget}"{?width} width="{width}"{/width}>
         {>"{widget}" /}
     </div>
 </div>

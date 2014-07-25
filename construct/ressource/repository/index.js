@@ -42,11 +42,13 @@ ressourceRepository.valide = function(ressource, next) {
     })
   }
 
-  if (errors.length && next) {
-    // on passe les erreurs mais pas la ressource invalide
-    next("Les erreurs à la validation : \n" + errors.join("\n"))
-  } else {
-    next && next(null, ressource)
+  if (next) {
+    if (errors.length) {
+      // on passe les erreurs mais pas la ressource invalide
+      next(new Error("Ressource invalide : \n" + errors.join("\n")))
+    } else {
+      next(null, ressource)
+    }
   }
 
   return !errors.length;
@@ -60,11 +62,13 @@ ressourceRepository.valide = function(ressource, next) {
  * @return {string} L'id de la ressource insérée
  */
 ressourceRepository.add = function(ressource, next) {
+  log.dev("avant validation dans update", ressource)
   ressourceRepository.valide(ressource, function(error, ressource) {
     if (error) {
+      log.error(error)
       next(error);
     } else {
-      log.dev('la ressource passée à create puis store', ressource)
+      log.dev('la ressource passée à create puis store dans update', ressource)
       lassi.entity.Ressource
           .create(ressource)
           .store(function (error, ressource) {
@@ -98,7 +102,7 @@ ressourceRepository.add = function(ressource, next) {
  * @return {number} L'oid de la ressource insérée
  */
 ressourceRepository.update = function(ressource, next) {
-  ressourceRepository.valide(ressource, function (error, ressource) {
+  ressourceRepository.valide(ressource, function (error, ressourc) {
     lassi.entity.Ressource
         .create(ressource)
         .store(function(error, ressource) {

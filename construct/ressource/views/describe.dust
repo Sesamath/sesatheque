@@ -5,9 +5,10 @@
     <span class="publie">{?publie.value} Publié{:else} NON PUBLIÉ{/publie.value}</span>
     <span class="restriction">{?restreint.value} {restreint.titre} : {restreint.value}{:else} public{/restreint.value}</span>
     <h2>{titre.value}</h2>
-    {oid.title} : {oid.value}
-    ({typeTechnique.title} : {typeTechnique.value},
-    {version.title} {version.value})<br />
+    {id.title} : {id.value}{~s}
+    ({typeTechnique.title} : {typeTechnique.value},{~s}
+    {version.title} {version.value},{~s}
+    oid : {oid})<br />
     {dateCreation.title} : {dateCreation.value}<br />
     {dateMiseAJour.title} : {dateMiseAJour.value}<br />
     {niveaux.title} : {niveaux.value}<br />
