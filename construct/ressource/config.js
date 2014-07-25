@@ -281,5 +281,8 @@ module.exports = {
    */
   formats : {
     jour : 'DD/MM/YYYY'
+  },
+  limites : {
+    maxSql : 500
   }
 };

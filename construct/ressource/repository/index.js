@@ -210,24 +210,63 @@ ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
   if (ressourceCached) next(null, ressourceCached)
   else {
     lassi.entity.Ressource
-        .query()
-        .whereEquals('origine', origine)
-        .whereEquals('idOrigine', idOrigine)
-        .execute(function (error, rows) {
-          var ressource
-          if (!error) {
-            if (rows.length) {
-              // on vérifie l'unicité et on log si on a un doublon
-              if (rows.length > 1) log.errorData("Il y a " + rows.length + " ressources " + origine + '-' + idOrigine);
-              ressource = rows[0];
-              prepareAndSend(ressource, next)
-            } else {
-              ressource = {error: "La ressource " + origine + '-' + idOrigine + " n'existe pas"}
-              next(null, ressource)
-            }
+        .match('origine').equals(origine)
+        .match('idOrigine').equals(idOrigine)
+        .grabOne(function (error, ressource) {
+          if (error) next(error)
+          else if (ressource) {
+            prepareAndSend(ressource, next)
+          } else {
+            next(null, null)
           }
         })
   }
+}
+
+/**
+ * Récupère une ressource d'après son idOrigine et la passe à next
+ * @param {Object}   options Un objet avec éventuellement les propriétés
+ *                             filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
+ *                                       où valeur peut être une valeur ou un tableau de valeurs
+ *                                       (si non précisé filtrera sur les ressources ayant cet index)
+ *                             orderBy : L'index sur lequel trier
+ *                             order   : asc ou desc
+ * @param {Number}   start   L'indice de la 1re valeur à remonter
+ * @param {Number}   nb      Le nombre de ressources à remonter
+ * @param {Function} next    La callback qui sera appelée en lui passant la liste de ressources en argument
+ */
+ressourceRepository.getListe = function(options, start, nb, next) {
+  var query = lassi.entity.Ressource
+  // par defaut on filtre sur id (donc tous, mais faut un argument à match)
+  if (!options) options = {filters:[{index:'id'}]}
+  if (!options.filters) options.filters = [{index:'id'}]
+  if (!_.isArray(options.filters)) next(new Error("Filtres incorrects"))
+
+  // les filtres
+  options.filters.forEach(function (filter) {
+    if (filter.index) {
+      if (filter.values) {
+        if (filter.values.length > 1) query = query.match(filter.index).in(filter.values)
+        else query = query.match(filter.index).equals(filter.values[0])
+      } else query = query.match(filter.index)
+    }
+  })
+
+  // orderBy
+  if (options.orderBy) {
+    if (options.order === 'desc') query = query.sort(options.orderBy, 'desc')
+    else query = query.sort(options.orderBy)
+  }
+
+  // limit
+  start = start || 0
+  nb = nb || 10
+  if (nb > config.limites.maxSql) {
+    log.error("La limite de cette requete sql (" +nb +") dépasse le maximum autorisé par la configuration (" +
+        config.limites.maxSql +")")
+    nb = config.limites.maxSql
+  }
+  query.grab(nb, start, next)
 }
 
 module.exports = ressourceRepository;

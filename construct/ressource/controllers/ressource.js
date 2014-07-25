@@ -190,6 +190,23 @@ controller
       }
   });
 
+controller
+  .Action('by/:index/:value/:start/:nb')
+  .renderWith('liste')
+  .do(function (ctx, next) {
+      var index = ctx.arguments.index
+      var value = ctx.arguments.value
+      var start = ctx.arguments.start
+      var nb = ctx.arguments.nb
+      var options = {
+        filters : [{index:index, values:[value]}],
+        orderBy:'id'
+      }
+      lassi.ressource.getListe(options, start, nb, function (error, ressources) {
+        next(error, {ressources:ressources})
+      })
+  });
+
 module.exports = controller;
 
 

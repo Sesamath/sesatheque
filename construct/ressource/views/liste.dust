@@ -1,3 +1,4 @@
+<p>Résultats de la recherche</p>
 <ul class="liste">
 {#ressources}
 <li>{id} : {titre}</li>
