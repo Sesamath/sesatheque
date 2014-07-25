@@ -10,6 +10,15 @@ component.initialize = function(next) {
   // Définition du layout "page" pour les réponses "html" (qui utilise l'engine dust et le tpl layout-page.dust).
   this.application.transports.html.on('layout', function(useLayout) {
     useLayout(component, 'layout-page');
+    if(useLayout.context.status) {
+      switch(useLayout.context.status) {
+        case 404: useLayout(component, 'layout-page404'); break;
+        case 403: useLayout(component, 'layout-page403'); break;
+        default: useLayout(component, 'layout-page-error');
+      }
+    } else {
+      useLayout(component, 'layout-page');
+    }
   });
   next()
 

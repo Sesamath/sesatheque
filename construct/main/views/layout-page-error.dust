@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>{?title}{title}{:else}Bibliothèque Sésamath{/title}</title>
+    <script type="text/javascript" src="/vendors/jquery.min.js"></script>
+    <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/vendors/bootstrap/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="/vendors/normalize.css" />
+    <link type="text/css" rel="stylesheet" href="/styles/main.css" media="all" />
+</head>
+<body>
+
+  <div id="header">
+    <div class="container">
+      {>header/}
+    </div>
+  </div>
+
+  <div id="body" class="container">
+    <div class="row">
+          <div class="col-md-3" id="sidebar">
+            {#sidebar}{.|s}{/sidebar}
+          </div>
+          <div id="content" class="col-md-9">
+            {#content}{.|s}{/content}
+          </div>
+      </div>
+  </div>
+
+</body>
+</html>

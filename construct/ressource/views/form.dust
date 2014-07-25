@@ -9,7 +9,14 @@
     <form method="post" id="formRessource">
 
         <div class="form-group">
-            {?oid.value}{>wrapper widget="text" o=oid width="50px" id="ressOid" /}{/oid.value} {! n'existe pas encore à l'affichage du add !}
+            {! Attention à masquer l'élément id du form si l'objet passé n'a pas de propriété id
+               On peut le faire en donnant cette valeur id ou en masquant le contexte comme avec
+               #oid:oid, cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting
+            !}
+
+            {! id et oid n'existe pas encore à l'affichage du add !}
+            {?oid.value}{#oid:oid}{>wrapper widget="text" o=. /}{/oid}{/oid.value}
+            {?id.value}{>wrapper widget="text" o=id width="50px" /}{/id.value}
             {>wrapper widget="text" o=titre /}
             {>wrapper widget="text" o=typeTechnique size=2 /}
             {>wrapper widget="checkboxes" o=publie /}

@@ -31,7 +31,7 @@ controller
           sendPageData(error, ressource, next)
         } else {
           ctx.response.statusCode = 404;
-          next(null, {errors: ["La ressource d'identifiant " + id + " n'existe pas"]})
+          next(null, {error: "La ressource d'identifiant " + id + " n'existe pas"})
         }
       })
     });
@@ -246,6 +246,7 @@ function sendPageData(error, ressource, next) {
       data.error = "Aucune ressource";
     }
   }
+  //log.dev('On envoie à la page', data)
 
   next(null, data);
 }
@@ -291,7 +292,7 @@ function sendFormData(error, ressource, next) {
     log.dev('dans sendFormData on lance un create')
     ressource = lassi.entity.Ressource.create()
   }
-  //log.dev('ressource traitée par sendFormData', ressource)
+  log.dev('ressource traitée par sendFormData', ressource)
 
   // on boucle sur les propriétés déclarées dans config pour récupérer les labels
   _.each(config.labels, function (label, key) {
@@ -303,6 +304,9 @@ function sendFormData(error, ressource, next) {
       id   : key, // le template ajoutera un préfixe de son choix
       label: label
     };
+    // required ?
+    if (config.required[key]) data[key].required = true
+    if (isUnique) data[key].unique = true
 
     // c'est un tableau ou une valeur unique (donc prise dans une liste => select ou checkboxes)
     if (_.isArray(value) || config.uniques[key]) {
@@ -311,37 +315,42 @@ function sendFormData(error, ressource, next) {
       if (isUnique) {
         value = [value]; // arrayToDust veut un array
         // faut ça sur le select et pas les choices
-        data[key].name = key;
+        data[key].name = key
       }
-      data[key].choices = arrayToDust(key, value, isUnique);
+      data[key].choices = arrayToDust(key, value, isUnique)
 
+    // checkbox tout seul (pas de label, c'est le parent qui le porte)
     } else if (_.isBoolean(value)) {
-      // checkbox tout seul (pas de label, c'est le parent qui le porte)
       data[key].choices = [
         {
           name : key,
           value: [value]
         }
       ]
+      if (value) data[key].choices[0].selected = true
 
+    // propriété scalaire => input ou textarea
     } else {
-      // propriété scalaire => input ou textarea
-      data[key].name = key;
+      data[key].name = key
       if (_.isDate(value)) {
-        value = moment(value).format(config.formats.jour);
+        value = moment(value).format(config.formats.jour)
       }
-      data[key].value = value;
+      data[key].value = value
     }
   }); // fin each propriété
 
   // on ajoute nos cas particulier
-  if (data.id) data.id.readonly = true;
-  data.version.readonly = true;
-  data.categories.required = true;
-  data.langue.unique = true;
-  // log.dev('On envoie au form', data)
+  if (data.id) data.id.readonly = true
+  data.version.readonly = true
+  // et l'oid
+  data.oid = {
+    name : 'oid',
+    value: ressource.oid,
+    hidden:true
+  }
+  log.dev('On envoie au form', data)
 
-  next(null, data);
+  next(null, data)
 }
 
 /**
@@ -355,8 +364,9 @@ function sendFormData(error, ressource, next) {
 function arrayToDust(key, selectedValues, isUnique) {
   var choices = [];
   var i = 0;
-  // on boucle sur les éléments de la liste
   _.each(config.listes[key], function (label, cbValue) {
+    // cbValue est une string (le nom de la propriété), on veut la valeur entière éventuelle
+    if (cbValue == parseInt(cbValue, 10)) cbValue = parseInt(cbValue, 10)
     var choice = {
       label: label,
       value: cbValue
@@ -367,8 +377,7 @@ function arrayToDust(key, selectedValues, isUnique) {
       i++;
     }
     // et on ajoute les selected s'il y en a
-    if (selectedValues) {
-      // verif type
+    if (!_.isEmpty(selectedValues)) {
       if (!_.isArray(selectedValues)) {
         throw new Error("La propriété " + key + " de la ressource n'est pas un tableau");
       }
@@ -389,8 +398,7 @@ function arrayToDust(key, selectedValues, isUnique) {
  * @throws {Error} En cas de données invalides
  */
 function getRessourceFromPost(data) {
-  var Ressource = lassi.entity.Ressource;
-  var ressource = Ressource.create();
+  var ressource = lassi.entity.Ressource.create();
   var errors = [];
   var buffer;
   var msg;
@@ -402,7 +410,7 @@ function getRessourceFromPost(data) {
     // vérif présence et type
     _.each(config.typesVar, function (typeVar, key) {
       // propriétés obligatoires
-      if (_.isEmpty(data[key]) && config.required.indexOf(key) > -1) {
+      if (_.isEmpty(data[key]) && config.required[key]) {
         errors.push("Le champ " + config.labels[key] + " est obligatoire");
       }
       // les cast
@@ -448,6 +456,8 @@ function getRessourceFromPost(data) {
         }
       }
     });
+    // faut ajouter l'oid
+    ressource.oid = data.oid;
   }
 
   // if (errors !== []) { // ce truc est toujours vrai !

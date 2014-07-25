@@ -20,7 +20,7 @@ module.exports = {
       3 : 'troisième',
       2 : 'seconde',
       1 : 'première',
-      T : 'terminale'
+      12: 'terminale'
     },
     categories       : {
       1: "Activité fixe",
@@ -136,18 +136,17 @@ module.exports = {
 
   // les propriétés qui ne prennent qu'une seule valeur
   uniques          : {
-    'typeTechnique': true,
     'langue'       : true,
     'restriction'  : true
   },
 
   // les propriétés obligatoires (oid ne l'est pas, on le vérifie spécifiquement si besoin)
-  required         : [
-    'titre',
-    'typeTechnique',
-    'categories'
+  required         : {
+    'titre' : true,
+    'typeTechnique' : true,
+    'categories' : true
     //'auteurs'
-  ],
+  },
 
   // les libellés que l'on affiche pour chaque champ de notre entité
   labels           : {
@@ -273,7 +272,7 @@ module.exports = {
       add : 'ajouter',
       edit: 'modifier',
       describe:'decrire',
-      display:'afficher',
+      display:'voir',
       del:'supprimer'
     }
   }, // fin constantes

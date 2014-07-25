@@ -23,8 +23,8 @@ ressourceRepository.valide = function(ressource, next) {
     // vérif présence et type
     _.each(config.typesVar, function (typeVar, key) {
       // propriétés obligatoires
-      if (_.isEmpty(ressource[key]) && config.required.indexOf(key) > -1) {
-        errors.push("Le champ " + config.labels[key] + " est obligatoire");
+      if (_.isEmpty(ressource[key]) && config.required[key]) {
+        errors.push("Le champ " + config.labels[key] + " est obligatoire")
       }
       // le type
       if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
@@ -39,18 +39,18 @@ ressourceRepository.valide = function(ressource, next) {
           errors.push("Le champ " + config.labels[key] + " ne contient pas un entier positif");
         }
       }
-    });
+    })
   }
 
   if (errors.length && next) {
     // on passe les erreurs mais pas la ressource invalide
-    next("Les erreurs à la validation : \n" + errors.join("\n"));
+    next("Les erreurs à la validation : \n" + errors.join("\n"))
   } else {
-    next && next(null, ressource);
+    next && next(null, ressource)
   }
 
   return !errors.length;
-};
+}
 
 /**
  * Ajoute une ressource
@@ -238,7 +238,7 @@ function prepareAndSend(ressources, next) {
  * @returns {Ressource}
  */
 function cacheGet(id) {
-  return lassi.cache.ressource[id]
+  return lassi.cache.get('ressource_' + id)
 }
 
 /**
@@ -247,8 +247,8 @@ function cacheGet(id) {
  * @returns {Ressource}
  */
 function cacheGetByOid(oid) {
-  var id = lassi.cache.ressourceIdByOid[oid]
-  return id ? lassi.cache.ressource[id] : undefined
+  var id = lassi.cache.get('ressourceIdByOid_' +oid)
+  return id ? lassi.cache.get('ressource_' + id) : undefined
 }
 
 /**
@@ -258,9 +258,8 @@ function cacheGetByOid(oid) {
  * @returns {Ressource}
  */
 function cacheGetByOrigine(origine, idOrigine) {
-  var id
-  if (lassi.cache.ressourceIdByOrigine[origine]) id = lassi.cache.ressourceIdByOrigine[origine][idOrigine]
-  return id ? lassi.cache.ressource[id] : undefined
+  var id = lassi.cache.get('ressourceIdByOrigine_' +origine +'_' +idOrigine)
+  return id ? lassi.cache.get('ressource_' +id) : undefined
 }
 
 /**
@@ -268,10 +267,13 @@ function cacheGetByOrigine(origine, idOrigine) {
  * @param ressource
  */
 function cacheSet(ressource) {
-  lassi.register(['cache', 'ressource', ressource.id], ressource)
-  lassi.register(['cache', 'ressourceIdByOid', ressource.oid], ressource.id)
-  if (ressource.origine) {
-    lassi.register(['cache', 'ressourceIdByOrigine', ressource.origine, ressource.idOrigine], ressource.id)
+  if (!ressource || !ressource.id) log.error(new Error('Impossible de mettre en cache une ressource inexistante'))
+  else {
+    lassi.cache.set('ressource_' +ressource.id, ressource)
+    lassi.cache.set('ressourceIdByOid_' +ressource.oid, ressource.id)
+    if (ressource.origine) {
+      lassi.cache.set('ressourceIdByOrigine_' +ressource.origine +'_' +ressource.idOrigine, ressource.id)
+    }
   }
 }
 
@@ -280,14 +282,11 @@ function cacheSet(ressource) {
  * @param id
  */
 function cacheDel(id) {
-  if (lassi.cache.ressource[id]) {
-    var ressource = lassi.cache.ressource[id]
-    var oid
-    var origine = ressource.origine
-    var idOrigine = ressource.idOrigine
-    delete lassi.ressource[ressource.id]
-    delete lassi.cache.ressourceIdByOid[ressource.oid]
-    if (ressource.origine) delete lassi.cache.ressourceIdByOrigine[ressource.origine][ressource.idOrigine]
+  var ressource = lassi.cache.get('ressource_' +id)
+  if (ressource) {
+    lassi.cache.set('ressource_' +ressource.id, undefined)
+    lassi.cache.set('ressourceIdByOid_' +ressource.oid, undefined)
+    if (ressource.origine) lassi.cache.set('ressourceIdByOrigine_' +ressource.origine +'_' +ressource.idOrigine, undefined)
   }
 }
 
@@ -296,7 +295,8 @@ function cacheDel(id) {
  * @param oid
  */
 function cacheDelByOid(oid) {
-  if (lassi.cache.ressourceIdByOid[oid]) {
-    cacheDel(lassi.cache.ressourceIdByOid[oid])
+  var id = lassi.cache.get('ressourceIdByOid_' +oid)
+  if (id) {
+    cacheDel(id)
   }
 }

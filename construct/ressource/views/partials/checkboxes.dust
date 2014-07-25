@@ -1,5 +1,5 @@
 {#o.choices}
 <label for="{id}">{label}
-    <input id="{id}" type="checkbox" name="{name}" value="{value}" />
+    <input id="{id}" type="checkbox" name="{name}" value="{value}" {?selected}checked="checked"{/selected} />
 </label>
 {/o.choices}
