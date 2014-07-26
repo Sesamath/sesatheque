@@ -142,8 +142,8 @@ function updateVersion(ressource) {
         })
       } else {
         // pas de cache, bizarre
-        log.error("La ressource d'identifiant " +ressource.id +" n'était pas en cache alors qu'elle va être enregistrée " +
-          ressource.version)
+        log.error("La ressource d'identifiant " +ressource.id +
+            " n'était pas en cache alors qu'elle va être enregistrée " +ressource.version)
         needIncrement = true
       }
     }

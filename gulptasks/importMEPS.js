@@ -7,7 +7,8 @@
 'use strict';
 
 var knex = require('knex');
-var _ = require('underscore');
+var _ = require('underscore')._;
+var request = require('request');
 // conf de l'appli
 var config = require('../construct/ressource/config.js');
 // constantes
@@ -17,11 +18,9 @@ var catCode = config.constantes.categories;
 var relCode = config.constantes.relations;
 
 // databases
-var dbConfigBibli = require(__dirname + '/../_private/dbconfig/index.js');
 var dbConfigMepCol = require(__dirname + '/../_private/dbconfig/mepcol.js');
 // les connexions aux bases
 var kmepcol = knex(dbConfigMepCol);
-var kbibli = knex(dbConfigBibli);
 
 // le décalage d'id
 var decalageAm = 6000;
@@ -235,7 +234,7 @@ function initRessourceAm(row) {
  */
 function importMEPS() {
   // sous-requete sur DEV_FILES pour aller chercher les dates
-  var dates;
+  // var dates;
   // dates = kmepcol.raw("SELECT min(dev_file_date) as dateCreation, max(dev_file_date) as dateMiseAJour FROM DEV_FILES WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf' ORDER BY mep_id DESC");
   /* dates = kmepcol('DEV_FILES')
       /* .select(kmepcol.raw("min(dev_file_date) as dateCreation, max(dev_file_date) as dateMiseAJour"))
@@ -271,7 +270,7 @@ function importMEPS() {
         var r;
         oidsParsed.push(row.mep_id);
         r = initRessourceMep(row);
-        insertOrUpdate(r);
+        addRessource(r);
       })
       .then(function() {
         // le then sert juste à attendre que tout le monde ait fini
@@ -291,7 +290,7 @@ function importAIDES() {
         var r;
         oidsParsed.push(row.aide_id + decalageAm);
         r = initRessourceAm(row);
-        insertOrUpdate(r);
+        addRessource(r);
       })
       .then(function() {
         // le then sert juste à attendre que tout le monde ait fini
@@ -320,29 +319,17 @@ function flushPendingRelations() {
   });
 }
 
-/**
- * Insert r dans la table ressource, et fait un update si l'insert plante
- * @param r
- */
-function insertOrUpdate(r) {
-  var data;
-  try {
-    data = JSON.stringify(r);
-    kbibli
-        .insert({data:data})
-        .into('ressource');
-    oidsInserted.push(r.oid);
-  } catch (error) {
-    try {
-      kbibli('ressource')
-          .update({data:data})
-          .where({oid: r.oid});
-      oidsUpdated.push(r.oid);
-    } catch (error) {
-      oidFailed.push(r.oid);
-      throw error;
-    }
+function addRessource(ressource) {
+  var options = {
+    url : 'http://localhost:3000/api/ressource',
+    json:true,
+    body:JSON.stringify({ressource:ressource})
   }
+  request.post(options, function (error, response, body) {
+    if (error) console.log(error)
+    else console.log(body) // Print the google web page.
+  })
+
 }
 
 module.exports = function () {
@@ -352,7 +339,7 @@ module.exports = function () {
     importMEPS();
     importAIDES();
     console.log("L'insertion ou update des ressources suivantes a échoué : \n" + oidFailed.join(', '));
-    flushPendingRelations();
+    //flushPendingRelations();
   } catch (error) {
     console.error(error);
     throw error;

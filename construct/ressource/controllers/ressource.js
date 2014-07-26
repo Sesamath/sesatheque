@@ -180,8 +180,8 @@ controller
       } else {
         // post, on supprime
         lassi.ressource.del(id, function (error, nbObjects, nbIndexes) {
-          if (error) next(null, {error: error, deletedId: id})
-          else if (nbObjects > 0) next(null, {deletedId: id})
+          if (error) next(null, {error: error})
+          else if (nbObjects > 0) next(null, {deletedId: id, nbObjects:nbObjects, nbIndexes:nbIndexes})
           else next(null, {error: "Aucune ressource d'identifiant " + id})
         });
       }

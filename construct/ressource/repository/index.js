@@ -337,7 +337,8 @@ function cacheDel(id) {
   if (ressource) {
     lassi.cache.set('ressource_' +ressource.id, undefined)
     lassi.cache.set('ressourceIdByOid_' +ressource.oid, undefined)
-    if (ressource.origine) lassi.cache.set('ressourceIdByOrigine_' +ressource.origine +'_' +ressource.idOrigine, undefined)
+    if (ressource.origine)
+        lassi.cache.set('ressourceIdByOrigine_' +ressource.origine +'_' +ressource.idOrigine, undefined)
   }
 }
 
