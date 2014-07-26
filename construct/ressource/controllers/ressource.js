@@ -98,7 +98,7 @@ controller
         //log.dev('post dans add', this.post);
         data = lassi.ressource.getRessourceFromPost(ctx.post)
         // il validera avant d'enregistrer
-        lassi.ressource.add(data, function (error, ressource) {
+        lassi.ressource.write(data, function (error, ressource) {
           if (error || !_.isEmpty(ressource.errors)) {
             // faut réafficher le form
             sendFormData(error, ressource, next)
@@ -139,7 +139,7 @@ controller
 
     } else if (this.isPost()) {
       // post => on enregistre ou on réaffiche le form si pb
-      lassi.ressource.update(
+      lassi.ressource.write(
           lassi.ressource.getRessourceFromPost(ctx.post),
           function(error, ressource) {
             if (error || !_.isEmpty(ressource.errors)) {
@@ -180,11 +180,9 @@ controller
       } else {
         // post, on supprime
         lassi.ressource.del(id, function (error, nbObjects, nbIndexes) {
-          log.dev("nbRows", nbRows)
-          if (nbObjects > 0) {
-            if (error) next(null, {error: error, deletedId: id})
-            else next(null, {deletedId: id})
-          } else next(null, {error: "Aucune ressource d'identifiant " + id})
+          if (error) next(null, {error: error, deletedId: id})
+          else if (nbObjects > 0) next(null, {deletedId: id})
+          else next(null, {error: "Aucune ressource d'identifiant " + id})
         });
       }
   });

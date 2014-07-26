@@ -55,13 +55,13 @@ ressourceRepository.valide = function(ressource, next) {
 }
 
 /**
- * Ajoute une ressource
+ * Ajoute ou modifie une ressource
  * @param ressource
  * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
  * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
  * @return {string} L'id de la ressource insérée
  */
-ressourceRepository.add = function(ressource, next) {
+ressourceRepository.write = function(ressource, next) {
   log.dev("avant validation dans update", ressource)
   ressourceRepository.valide(ressource, function(error, ressource) {
     if (error) {
@@ -78,7 +78,7 @@ ressourceRepository.add = function(ressource, next) {
             } else if (ressource && !ressource.id) {
               // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
               if (ressource.oid != parseInt(ressource.oid, 10)) {
-                throw new Error("L'oid n'est plus entier, faut venir changer le code de ressourceRepository.add")
+                throw new Error("L'oid n'est plus entier, faut venir changer le code de ressourceRepository.write")
               } else {
                 // on prend l'oid tant qu'il est entier
                 ressource.id = ressource.oid;
@@ -92,24 +92,6 @@ ressourceRepository.add = function(ressource, next) {
           });
     }
   });
-};
-
-/**
- * Update une ressource
- * @param ressource
- * @param {Function} next callback qui sera passé au store() et recevra les arguments (error, ressource)
- * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
- * @return {number} L'oid de la ressource insérée
- */
-ressourceRepository.update = function(ressource, next) {
-  ressourceRepository.valide(ressource, function (error, ressourc) {
-    lassi.entity.Ressource
-        .create(ressource)
-        .store(function(error, ressource) {
-          cacheSet(ressource)
-          next(error, ressource)
-        })
-  })
 };
 
 /**
