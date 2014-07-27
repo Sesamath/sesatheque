@@ -39,88 +39,11 @@
 
 var
   gulp       = require('gulp'),
-  sass       = require('gulp-sass'),
-  dust       = require('gulp-dust'),
-  concat     = require('gulp-concat'),
-  jsdoc      = require("gulp-jsdoc"),
-  jshint     = require("gulp-jshint"),
-  rework     = require('./node_modules/lassi/gulpTasks/gulp-path-rework'),
-  launcher   = require('gulp-launcher'),
-  fs         = require('fs');
+  fs         = require('fs'),
+  buildTasks = require('./node_modules/lassi/gulpTasks/builder');
 
 
-/**
- * L'instance de notre (re)démarreur de serveur (incluant un serveur livereload)
- */
-var launcher = launcher('./construct/index.js');
-
-/**
- * Comme pour les sources, les styles sont d'abords construits dans le dossier build/tmp.
- * Chaque module pouvant avoir plusieurs feuilles de styles générées par SASS, toutes finissent
- * d'abord ici à l'issue de la compilation.
- */
-gulp.task('compile-sass', function () {
-  gulp
-    .src('construct/**/public/**/scss/*.scss', {base: './'})
-    .pipe(sass({
-      includePaths: [ './node_modules/lassi/sass-tools' ],
-      errLogToConsole: true,
-      sourceComments: 'map'}))
-    .pipe(rework.replace({'scss': 'styles'}))
-    .pipe(gulp.dest('./'))
-
-    .pipe(launcher.livereload())
-})
-
-/**
- * Tâche de construction globale de l'application
- */
-gulp.task('build', function() {
-  gulp
-    .src(['construct/**/*', '!construct/**/public/**/scss/*'])
-    .pipe(gulp.dest('./build'));
-});
-
-/**
- * Tâche qui efface build
- */
-gulp.task('clean', function () {
-  // thanks to http://stackoverflow.com/a/12761924
-  // works on windows ?
-  function deleteFolderRecursive(path) {
-    var files = [];
-    if (fs.existsSync(path)) {
-      files = fs.readdirSync(path);
-      files.forEach(function (file, index) {
-        var curPath = path + "/" + file;
-        if (fs.lstatSync(curPath).isDirectory()) { // recurse
-          deleteFolderRecursive(curPath);
-        } else { // delete file
-          fs.unlinkSync(curPath);
-        }
-      });
-      fs.rmdirSync(path);
-    }
-  }
-
-  deleteFolderRecursive('./build');
-});
-
-/**
- * Tâche qui efface build et le reconstruit
- */
-gulp.task('rebuild', [ 'clean', 'build' ], function () {});
-
-
-/**
- * Lance le serveur (node et livereload) puis se met en écoute des modification de fichier.
- */
-gulp.task('watch', ['compile-sass'], function () {
-  gulp.watch('construct/**/public/**/scss/**/*.scss', ['compile-sass']);
-  gulp.watch(['construct/**/*', '!construct/**/public/**/*']).on('change', function() { launcher.restart(); });
-  gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
-  launcher.start();
-})
+buildTasks(gulp).launch('./construct/index.js');
 
 
 /**
@@ -166,7 +89,3 @@ if (fs.existsSync(taskDir)) {
   })
 }
 
-/**
- * La tâche par défaut relance un build puis l'appli
- */
-gulp.task('default', ['watch']);
