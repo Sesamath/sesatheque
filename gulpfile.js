@@ -59,7 +59,7 @@ var launcher = launcher('./construct/index.js');
  * Chaque module pouvant avoir plusieurs feuilles de styles générées par SASS, toutes finissent
  * d'abord ici à l'issue de la compilation.
  */
-gulp.task('build-public-styles', function () {
+gulp.task('compile-sass', function () {
   gulp
     .src('construct/**/public/**/scss/*.scss', {base: './'})
     .pipe(sass({
@@ -75,7 +75,11 @@ gulp.task('build-public-styles', function () {
 /**
  * Tâche de construction globale de l'application
  */
-gulp.task('build', [ 'build-public-styles' ], function () {});
+gulp.task('build', function() {
+  gulp
+    .src(['construct/**/*', '!construct/**/public/**/scss/*'])
+    .pipe(gulp.dest('./build'));
+});
 
 /**
  * Tâche qui efface build
@@ -111,8 +115,8 @@ gulp.task('rebuild', [ 'clean', 'build' ], function () {});
 /**
  * Lance le serveur (node et livereload) puis se met en écoute des modification de fichier.
  */
-gulp.task('watch', function () {
-  gulp.watch('construct/**/public/**/scss/**/*.scss', ['build-public-styles']);
+gulp.task('watch', ['compile-sass'], function () {
+  gulp.watch('construct/**/public/**/scss/**/*.scss', ['compile-sass']);
   gulp.watch(['construct/**/*', '!construct/**/public/**/*']).on('change', function() { launcher.restart(); });
   gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
   launcher.start();
@@ -165,4 +169,4 @@ if (fs.existsSync(taskDir)) {
 /**
  * La tâche par défaut relance un build puis l'appli
  */
-gulp.task('default', ['build', 'watch']);
+gulp.task('default', ['watch']);
