@@ -52,7 +52,7 @@ var
 /**
  * L'instance de notre (re)démarreur de serveur (incluant un serveur livereload)
  */
-var launcher = launcher('./build/application/index.js');
+var launcher = launcher('./construct/index.js');
 
 /**
  * Comme pour les sources, les styles sont d'abords construits dans le dossier build/tmp.
@@ -66,7 +66,7 @@ gulp.task('build-public-styles', function () {
       includePaths: [ './node_modules/lassi/sass-tools' ],
       errLogToConsole: true,
       sourceComments: 'map'}))
-    .pipe(rework.replace({'scss': 'css'}))
+    .pipe(rework.replace({'scss': 'styles'}))
     .pipe(gulp.dest('./'))
 
     .pipe(launcher.livereload())
