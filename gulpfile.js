@@ -55,89 +55,27 @@ var
 var launcher = launcher('./build/application/index.js');
 
 /**
- * La construction des sources côté serveur sont juste
- * une recopie du contenu de "construct" en excluant les sous-dossiers
- * public. On supprime aussi "server" et "shared" des chemins cible.
- */
-gulp.task('build-server-sources', function () {
-  gulp
-    .src(['construct/**/*', '!construct/**/public/**/*'])
-    .pipe(gulp.dest('build/application'))
-    .pipe(launcher.changed())
-})
-
-
-/**
- * Construction des sources public en fusionnant le flux non modifié des sources
- * clients et la version compilée des templates.
- */
-gulp.task('build-public-sources', function () {
-  var merge = require('merge-stream');
-  return merge(
-    gulp
-      .src(['construct/**/public/**/*.js', '!construct/**/vendors/**']),
-    gulp
-      .src(['construct/**/public/**/*.dust', '!construct/**/vendors/**'])
-      .pipe(dust())
-      )
-  .pipe(concat('main.js'))
-  .pipe(gulp.dest('build/public/scripts'))
-  .pipe(launcher.livereload())
-});
-
-/**
  * Comme pour les sources, les styles sont d'abords construits dans le dossier build/tmp.
  * Chaque module pouvant avoir plusieurs feuilles de styles générées par SASS, toutes finissent
  * d'abord ici à l'issue de la compilation.
  */
 gulp.task('build-public-styles', function () {
   gulp
-    .src('construct/**/public/styles/*.scss')
+    .src('construct/**/public/**/scss/*.scss', {base: './'})
     .pipe(sass({
       includePaths: [ './node_modules/lassi/sass-tools' ],
       errLogToConsole: true,
       sourceComments: 'map'}))
-    .pipe(concat('main.css'))
-    .pipe(gulp.dest('build/public/styles'))
+    .pipe(rework.replace({'scss': 'css'}))
+    .pipe(gulp.dest('./'))
+
     .pipe(launcher.livereload())
 })
-
-
-/**
- * La construction des assets consiste juste à une fusion des divers dossiers public/assets des
- * plugins vers build/public/assets.
- */
-gulp.task('build-public-assets', function () {
-  gulp
-    .src(['construct/**/public/assets/**/*'])
-    .pipe(rework.rebase('assets'))
-    .pipe(gulp.dest('build/public'))
-    .pipe(launcher.livereload())
-})
-
-/**
- * La construction des libs externes consiste juste à une fusion des divers dossiers public/vendors des
- * plugins vers build/public/vendors.
- */
-gulp.task('build-public-vendors', function () {
-  gulp
-    .src(['construct/**/public/vendors/**/*'])
-    .pipe(rework.rebase('vendors'))
-    .pipe(gulp.dest('build/public'))
-    .pipe(launcher.livereload())
-})
-
-/**
- * Tâche de regroupement pour construire l'aspect public de l'application.
- */
-gulp.task('build-public', ['build-public-sources', 'build-public-styles', 'build-public-assets', 'build-public-vendors'], function () { });
-
-
 
 /**
  * Tâche de construction globale de l'application
  */
-gulp.task('build', [ 'build-server-sources', 'build-public' ], function () {});
+gulp.task('build', [ 'build-public-styles' ], function () {});
 
 /**
  * Tâche qui efface build
@@ -174,30 +112,12 @@ gulp.task('rebuild', [ 'clean', 'build' ], function () {});
  * Lance le serveur (node et livereload) puis se met en écoute des modification de fichier.
  */
 gulp.task('watch', function () {
-  gulp.watch('construct/**/public/styles/**/*.scss', ['build-public-styles']);
-  gulp.watch(['construct/**/*', '!construct/**/public/**/*'], ['build-server-sources']);
+  gulp.watch('construct/**/public/**/scss/**/*.scss', ['build-public-styles']);
+  gulp.watch(['construct/**/*', '!construct/**/public/**/*']).on('change', function() { launcher.restart(); });
   gulp.watch(['modules/**/*.js', '!modules/*/node_modules']).on('change', function() { launcher.restart(); });
-  gulp.watch(['construct/**/public/**/*.js', 'construct/**/public/**/*.dust'], ['build-public-sources'])
   launcher.start();
 })
 
-/*
-gulp.task('doc', function() {
-  gulp.src("construct/** /*.js")
-    .pipe(jsdoc('./documentation'))
-}); */
-
-gulp.task('doc', function() {
-  var infos = {
-    plugins: ['plugins/markdown'],
-    markdown: {
-      parser: "gfm"
-    }
-  }
-  gulp.src(['construct/**/*.js', 'README.md'])
-      .pipe(jsdoc.parser(infos,'data'))
-      .pipe(jsdoc.generator('./documentation'))
-}); /* */
 
 /**
  * Lance l'analyse de notre code serveur
