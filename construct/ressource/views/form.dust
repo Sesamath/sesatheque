@@ -16,6 +16,7 @@
 
             {! id et oid n'existe pas encore à l'affichage du add !}
             {?oid.value}{#oid:oid}{>wrapper widget="text" o=. /}{/oid}{/oid.value}
+            {@gt key=id.value value=0}{>wrapper widget="text" o=id width="50px" /}{/gt}
             {>wrapper widget="text" o=id width="50px" /}
             {>wrapper widget="text" o=titre /}
             {>wrapper widget="text" o=typeTechnique size=2 /}

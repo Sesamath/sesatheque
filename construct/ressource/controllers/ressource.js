@@ -28,6 +28,7 @@ controller
       lassi.ressource.load(id, function (error, ressource) {
         if (error) next(error)
         else if (ressource) {
+          ctx.metas.title = ressource.titre
           sendPageData(error, ressource, next)
         } else {
           ctx.response.statusCode = 404;
@@ -52,7 +53,8 @@ controller
           }
           ctx.response.statusCode = 404;
         } else if (!error) {
-          ctx.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
+          ctx.metas.title = ressource.titre
+          ctx.metas.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
         }
         sendPageData(error, ressource, next)
       })
@@ -71,8 +73,10 @@ controller
           ressource = {
             errors : ["La ressource d'identifiant " + id + " n'existe pas"]
           }
+        } else {
+          ctx.metas.title = ressource.titre
+          sendPageData(error, ressource, next)
         }
-        sendPageData(error, ressource, next)
       })
   });
 
@@ -91,6 +95,7 @@ controller
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
         //sendFormData(null, lassi.entity.Ressource.create(), next)
+        ctx.metas.title = 'Ajouter une ressource'
         sendFormData(null, null, next)
       } else {
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
@@ -133,6 +138,7 @@ controller
           }
           next(null, ressource)
         } else {
+          ctx.metas.title = 'Modifier ' +ressource.titre
           sendFormData(error, ressource, next)
         }
       })
@@ -175,7 +181,10 @@ controller
               error : "La ressource d'identifiant " + id + " n'existe pas"
             }
             next(null, ressource)
-          } else sendPageData(error, ressource, next)
+          } else {
+            ctx.metas.title = 'Supprimer ' +ressource.titre
+            sendPageData(error, ressource, next)
+          }
         })
       } else {
         // post, on supprime
@@ -200,6 +209,7 @@ controller
         orderBy:'id'
       }
       lassi.ressource.getListe(options, start, nb, function (error, ressources) {
+        ctx.metas.title = 'Résultats de recherche'
         next(error, {ressources:ressources})
       })
   });
