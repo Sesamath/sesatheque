@@ -2,9 +2,10 @@
  * Les méthodes génériques de notre composant, utilisées par les différents contrôleurs
  */
 
-var _ = require('underscore')._;
-var ressourceRepository = {};
-var config = require('../config.js');
+var _ = require('underscore')._
+var flow          = require('seq')
+var ressourceRepository = {}
+var config = require('../config.js')
 
 /**
  * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
@@ -55,44 +56,87 @@ ressourceRepository.valide = function(ressource, next) {
 }
 
 /**
- * Ajoute ou modifie une ressource
+ * Incrémente le n° de version si la ressource a une propriété newVersion ou si une des propriétés listées
+ * dans config.versionTriggers a changée de valeur
  * @param ressource
+ * @private
+ */
+function setVersion(ressource, next) {
+  var needIncrement
+  // ira seulement en cache dans la plupart des cas, mais de toute façon faut récupérer le n° de version actuel
+  lassi.ressource.load(ressource.id, function (error, ressourceInitiale) {
+    if (error) next(error)
+    if (ressourceInitiale) {
+      // on peut réclamer une nouvelle version via un flag sur la ressource
+      if (ressource.newVersion) needIncrement = true
+      // on regarde si nos champs qui déclenchent un changement de version on changé
+      else {
+        _.each(config.versionTriggers, function (prop) {
+          if (ressource[prop] !== ressourceInitiale[prop]) {
+            needIncrement = true
+          }
+        })
+      }
+      if (needIncrement) ressource.version = ressourceInitiale.version +1
+      else {
+        ressource.version = ressourceInitiale.version
+        // faut aussi récupérer son oid pour écrasement de l'ancienne ressource
+        ressource.oid = ressourceInitiale.oid
+      }
+    } else {
+      ressource.version = 1
+    }
+    next(null, ressource)
+  })
+}
+
+/**
+ * Ajoute ou modifie une ressource
+ * @param {Ressource} ressource
  * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
  * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
  * @return {string} L'id de la ressource insérée
  */
 ressourceRepository.write = function(ressource, next) {
-  log.dev("avant validation dans update", ressource)
-  ressourceRepository.valide(ressource, function(error, ressource) {
-    if (error) {
-      log.error(error)
-      next(error);
-    } else {
-      log.dev('la ressource passée à create puis store dans update', ressource)
-      lassi.entity.Ressource
-          .create(ressource)
-          .store(function (error, ressource) {
-            if (error) {
-              log.dev(error.stack)
-              next(error)
-            } else if (ressource && !ressource.id) {
-              // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
-              if (ressource.oid != parseInt(ressource.oid, 10)) {
-                throw new Error("L'oid n'est plus entier, faut venir changer le code de ressourceRepository.write")
-              } else {
-                // on prend l'oid tant qu'il est entier
-                ressource.id = ressource.oid;
-                cacheSet(ressource)
-                ressource.store(next)
-              }
-            } else {
-              cacheSet(ressource)
-              next(error, ressource);
+  console.log(ressource.constructor.name)
+  if (ressource.constructor.name !== 'Ressource') {
+    console.log('cast en Ressource')
+    ressource = lassi.entity.Ressource.create(ressource)
+    console.log(ressource.constructor.name)
+  }
+  //log.dev("avant validation dans update", ressource)
+  flow()
+      // validation
+      .seq(function() { ressourceRepository.valide(ressource, this) })
+      // setVersion
+      .seq(function (ressource) { setVersion(ressource, this) })
+      // store
+      .seq(function (ressource) { ressource.store(this) })
+      // ajout de l'id si c'était un insert, et
+      .seq(function (ressource) {
+        console.log(ressource)
+          if (ressource.id) this(null, ressource) // rien à faire
+          else {
+            // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
+            if (ressource.oid != parseInt(ressource.oid, 10)) {
+              throw new Error("L'oid n'est plus entier, faut venir changer le code de ressourceRepository.write")
             }
-          });
-    }
-  });
-};
+            // on prend l'oid tant qu'il est entier
+            ressource.id = ressource.oid;
+            // et on enregistre
+            ressource.store(this)
+          }
+      })
+      // mise en cache et passage au suivant
+      .seq(function (ressource) {
+          cacheSet(ressource)
+          next(null, ressource)
+      })
+      .catch(function(error) {
+        log.error(error)
+        next(error);
+      })
+}
 
 /**
  * Efface l'entity par son oid (on peut passer un tableau)

@@ -125,35 +125,6 @@ function Ressource() {
   this.version = 0;
 }
 
-function updateVersion(ressource) {
-  var needIncrement = false
-  var ressourceInitiale
-  if (ressource.version) {
-    // on peut réclamer une nouvelle version
-    if (ressource.newVersion) needIncrement = true
-    // on regarde si nos champs qui déclenchent un changement de version on changé
-    else {
-      ressourceInitiale = lassi.cache.get('ressource_' +ressource.id)
-      if (ressourceInitiale) {
-        _.each(config.versionTriggers, function (prop) {
-          if (ressource[prop] !== ressourceInitiale[prop]) {
-            needIncrement = true
-          }
-        })
-      } else {
-        // pas de cache, bizarre
-        log.error("La ressource d'identifiant " +ressource.id +
-            " n'était pas en cache alors qu'elle va être enregistrée " +ressource.version)
-        needIncrement = true
-      }
-    }
-    if (needIncrement) ressource.version++
-
-  } else {
-    ressource.version = 1;
-  }
-}
-
 var entity = lassi.Entity(Ressource)
   .on('beforeStore', function() {
     // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
@@ -164,8 +135,8 @@ var entity = lassi.Entity(Ressource)
     // si le tableau d'erreur est vide (devrait toujours être le cas,
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
     if (_.isEmpty(this.errors)) delete this.errors
-    updateVersion(this)
     // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
+    // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
   })
   // finalement on laisse la gestion du cache dans les accesseurs du repository
   // plus pratique même si updateVersion appelle directement lassi.cache.ressource.XXX

@@ -20,9 +20,19 @@ var root  = __dirname + '/..';
  */
 var fs = require('fs');
 var env = process.env.NODE_ENV || 'dev';
+
 var logAccess = root + '/logs/' + env + '.access.log';
 var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'});
-var morganFormat = (env === 'dev') ? 'dev' : 'default'
+var morganOptions = {format:'default', stream : logAccessWriteStream}
+if (env === 'dev') {
+  morganOptions.format = ':method :url :status :response-time ms - :res[content-length] :post'
+  morganOptions.skip =  function (req) {
+    var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
+    var i = req.url.lastIndexOf('.')
+    var suffix = (i > 0) ? req.url.substr(i+1) : null // au moins un char avant le point
+    return (suffix && excluded.indexOf(suffix) > -1)
+  }
+}
 
 /** La config exportée */
 module.exports = {
@@ -44,7 +54,7 @@ module.exports = {
   },
   rail    : {
     favicon       : '/assets/images/favicon.ico',
-    logger        : { format: morganFormat, stream : logAccessWriteStream}, // pour morgan
+    logger        : morganOptions, // passé tel quel à morgan()
     public        : true,
     authentication: true
   },

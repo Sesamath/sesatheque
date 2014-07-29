@@ -112,12 +112,13 @@ function getDateCreation(row) {
 }
 
 /**
- * Convertie un timestamp (en s) en objet Date
+ * Convertie un timestamp (en s ou ms) en objet Date
  * Retourne null si le timestamp est dans le futur (+2h) ou avant le 01/01/2004
  * @param ts
  * @returns {Date}
  */
 function getDate(ts) {
+  if (ts > 10001001001001) ts = Math.round(ts / 1000) // c'était des ms, on passe en s
   // 7260 en cas de décalage horaire (fuseau mal réglé)
   if (ts > 1072911600 && ts < (new Date()).getTime() / 1000 + 7260) {
     return new Date(ts * 1000);
@@ -148,7 +149,7 @@ function initRessourceMep(row) {
   var id = row.mep_id;
   // contenu
   contenu.nbq_defaut = row.mep_nbq_defaut; // obligatoire
-  if (row.mep_swf_id !== id)    contenu.swf_id          = row.mep_swf_id;
+  if (row.mep_swf_id !== id)            contenu.swf_id          = row.mep_swf_id;
   if (row.mep_projet !== 'mep')         contenu.projet          = row.mep_projet;
   if (row.mep_old)                      contenu.old             = row.mep_old;
   if (row.mep_suite_formateur !== 'o')  contenu.suite_formateur = row.mep_suite_formateur;
@@ -175,8 +176,10 @@ function initRessourceMep(row) {
 
   // @todo regarder mep_swf_utilisateur_id pour récupérer les auteurs et ajouter les mep_txt_utilisateur_id dans les contributeurs
   return {
-    oid              : id,
-    codeTechnique    : getCodeTechnique(row),
+    id               : id,
+    origine          : 'mep',
+    idOrigine        : id,
+    typeTechnique    : getCodeTechnique(row),
     titre            : row.mep_titre,
     resume           : row.mep_descriptif,
     description      : '',
@@ -211,8 +214,10 @@ function initRessourceAm(row) {
     delete pendingRelations[id];
   }
   return {
-    oid              : id,
-    codeTechnique    : 'am',
+    id              : id,
+    origine          : 'am',
+    idOrigine        : row.aide_id,
+    typeTechnique    : 'am',
     titre            : row.aide_titre,
     categories       : [7],
     typePedagogiques : [3],
@@ -248,34 +253,39 @@ function importMEPS() {
       .orderBy('mep_id', 'desc');
   tout ça marche pas, on essaie de coller plus près de http://knexjs.org/#Raw-queries-wrapped * /
   dates = kmepcol.raw("SELECT min(dev_file_date) as dateCreation, max(dev_file_date) as dateMiseAJour FROM DEV_FILES WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf'")
-      .wrap('(', ')'); */
+      .wrap('(', ')'); * /
   var dateCreation = kmepcol('DEV_FILES')
       .min('dev_file_date')
       //.whereRaw('dev_file_identifiant = m.mep_swf_id')
       //.andWhere('dev_file_type', 'exswf')
-      .whereRaw("dev_file_identifiant = m.mep_swf_id AND dev_file_type', 'exswf'")
+      .whereRaw("dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf'")
       // .as('dateCreation');
   var dateMiseAJour = kmepcol
       .max('dev_file_date')
       .from('DEV_FILES')
       .whereRaw('dev_file_identifiant = m.mep_swf_id')
       .andWhere('dev_file_type', 'exswf')
-      .as('dateMiseAJour');
+      .as('dateMiseAJour'); /* */
   // le select sur MEPS
   kmepcol()
-      .select('*', dateCreation, dateMiseAJour)
+      .select('*')
       .from('MEPS as m')
-      .whereRaw('mep_id < 100')
+      .whereRaw('mep_id < 2')
       .map(function (row) {
+        //console.log(row); return
         var r;
         oidsParsed.push(row.mep_id);
         r = initRessourceMep(row);
+        console.log('processing mep ' + r.id)
         addRessource(r);
       })
       .then(function() {
         // le then sert juste à attendre que tout le monde ait fini
         return true;
-      });
+      })
+      .catch(function(e) {
+        console.log(e.stack)
+      })
 }
 
 /**
@@ -285,16 +295,21 @@ function importAIDES() {
   kmepcol()
       .select()
       .from('AIDES')
-      .whereRaw('aide_id < 100')
+      .whereRaw('aide_id < 2')
       .map(function (row) {
+        //console.log(row); return
         var r;
         oidsParsed.push(row.aide_id + decalageAm);
         r = initRessourceAm(row);
+        console.log('processing aide ' + r.id)
         addRessource(r);
       })
       .then(function() {
         // le then sert juste à attendre que tout le monde ait fini
         return true;
+      })
+      .catch(function(e) {
+        console.log(e.stack)
       })
 }
 
@@ -322,12 +337,16 @@ function flushPendingRelations() {
 function addRessource(ressource) {
   var options = {
     url : 'http://localhost:3000/api/ressource',
-    json:true,
-    body:JSON.stringify({ressource:ressource})
+    json: true,
+    //body: JSON.stringify({ressource:ressource})
+    form: ressource
   }
   request.post(options, function (error, response, body) {
     if (error) console.log(error)
-    else console.log(body) // Print the google web page.
+    else {
+      if (body.error) console.log('erreur sur ' +ressource.id +' : ' +body.error)
+      else console.log('retour de ' +ressource.id +' : ' +body)
+    }
   })
 
 }
@@ -336,7 +355,7 @@ module.exports = function () {
   try {
     console.log('task ' + __filename);
      //console.log(dbConfigMepCol); return;
-    importMEPS();
+    //importMEPS();
     importAIDES();
     console.log("L'insertion ou update des ressources suivantes a échoué : \n" + oidFailed.join(', '));
     //flushPendingRelations();
