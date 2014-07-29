@@ -15,11 +15,18 @@ GLOBAL.assert = require('./assert.js');
 
 // Construction de l'application
 var application = lassi.Application();
+
 // on déclenchera ça quand le boot sera fini
 application.on('boot', function(){
   console.log("Boot de l'application " + application.name);
   log.dev('BOOT');
 });
+
+/* application.on('loaded', function (type, name, instance) {
+  if (type === 'middleware' && name === 'logger') {
+    console.log(instance.toString())
+  }
+}) */
 
 // et on lance le boot
 application.boot();

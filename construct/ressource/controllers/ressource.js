@@ -91,7 +91,7 @@ controller
   .do(function (ctx, next) {
       // ajouter un meta ou un autre moyen pour mettre le js client
       // qui va conditionner les types à la catégorie dans la page
-      var data
+      var ressource
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
         //sendFormData(null, lassi.entity.Ressource.create(), next)
@@ -101,9 +101,9 @@ controller
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
         //log.dev('post dans add', this.post);
-        data = lassi.ressource.getRessourceFromPost(ctx.post)
+        ressource = lassi.ressource.getRessourceFromPost(ctx.post)
         // il validera avant d'enregistrer
-        lassi.ressource.write(data, function (error, ressource) {
+        lassi.ressource.write(ressource, function (error, ressource) {
           if (error || !_.isEmpty(ressource.errors)) {
             // faut réafficher le form
             sendFormData(error, ressource, next)

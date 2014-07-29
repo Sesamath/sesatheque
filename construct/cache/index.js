@@ -66,14 +66,20 @@ component.get = function (key) {
   // on transforme la clé si besoin
   if (_.isArray(key)) key = key.join('_')
 
-  if (expires[key] ) {
-    if (expires[key] < now) value = hashtable[key]
+  if (expires[key]) {
+    if (expires[key] > now) {
+      value = hashtable[key]
+      log.dev('cache ' +key +' ok')
+    }
     else {
       // trop vieux, on purge tout de suite
+      log.dev('cache ' +key +' too old => removed')
       delete expires[key]
       delete hashtable[key]
     }
   }
+  /* log.dev('cache.get ' +key +(expires[key] ?
+      ' exists ' +(expires[key] < now ? 'too old': 'ok'):" doesn't exists"), value) */
 
   return value
 }
@@ -82,11 +88,11 @@ component.get = function (key) {
  * Stocke une valeur en cache
  * @param {String|array} key La clé (si array on concatène avec '_')
  * @param value La valeur à stocker (efface l'entrée en cache si undefined)
- * @param {Number} ttl [optional] La durée de vie en ms (10min par défaut)
+ * @param {Number} ttl [optional] La durée de vie en s (600s par défaut)
  * @returns {undefined}
  */
 component.set = function (key, value, ttl) {
-  var now = (new Date()).getTime()
+  var now = (new Date()).getTime() // en milisecondes
   if (arguments.length <2) throw new Error("cache.set réclame au moins deux arguments")
 
   // si c'est le 1er appel on déclenche la purge périodique
@@ -95,16 +101,17 @@ component.set = function (key, value, ttl) {
   // on transforme la clé si besoin
   if (_.isArray(key)) key = key.join('_')
 
-  ttl = ttl || 600000 // 10min par défaut
+  ttl = ttl || 600 // 10min par défaut
   if (value === undefined) {
+    log.dev('cache ' +key +' removed')
     delete expires[key]
     delete hashtable[key]
   } else {
+    log.dev('cache ' +key +' set')
     hashtable[key] = value
-    expires[key] = now + ttl
+    expires[key] = now + (ttl*1000)
+    //log.dev('cache.set ' +key +' (' +ttl +') ', value)
   }
 }
-
-console.log('component cache '+component.constructor.name)
 
 module.exports = component

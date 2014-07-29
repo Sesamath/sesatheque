@@ -5,7 +5,7 @@
 var _ = require('underscore')._
 var flow          = require('seq')
 var ressourceRepository = {}
-var config = require('../config.js')
+var config = require('./config.js')
 
 /**
  * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
@@ -98,11 +98,9 @@ function setVersion(ressource, next) {
  * @return {string} L'id de la ressource insérée
  */
 ressourceRepository.write = function(ressource, next) {
-  console.log(ressource.constructor.name)
   if (ressource.constructor.name !== 'Ressource') {
-    console.log('cast en Ressource')
     ressource = lassi.entity.Ressource.create(ressource)
-    console.log(ressource.constructor.name)
+    log.dev('cast en Ressource : ' +ressource.constructor.name)
   }
   //log.dev("avant validation dans update", ressource)
   flow()
@@ -114,7 +112,6 @@ ressourceRepository.write = function(ressource, next) {
       .seq(function (ressource) { ressource.store(this) })
       // ajout de l'id si c'était un insert, et
       .seq(function (ressource) {
-        console.log(ressource)
           if (ressource.id) this(null, ressource) // rien à faire
           else {
             // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
@@ -193,6 +190,7 @@ ressourceRepository.load = function(id, next) {
   var ressourceCached = cacheGet(id)
   if (ressourceCached) next(null, ressourceCached)
   else {
+    log.dev('ressource ' +id +' pas en cache', ressourceCached)
     lassi.entity.Ressource.match('id').equals(id).sort('version', 'desc').grabOne(function (error, ressource) {
       if (error) next(error)
       else if (ressource) {

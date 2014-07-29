@@ -16,7 +16,7 @@ ressourceComponent.initialize = function(next) {
 }
 
 // On ajoute toutes les methodes du repository à notre component
-var ressourceRepository = require('./repository');
+var ressourceRepository = require('./repository.js');
 _.each(ressourceRepository, function(method, name) {
   // log.dev('ajoute au component ressource la méthode ' + name)
   ressourceComponent[name] = method;
@@ -36,7 +36,6 @@ ressourceComponent.getRessourceFromPost = function (data) {
   var buffer;
   var msg;
   log.dev('dans getRessourceFromPost on récupère', data)
-  //log.dev('ressource vide', ressource)
   if (_.isEmpty(data)) {
     errors.push("Ressource vide");
   } else {
@@ -49,6 +48,7 @@ ressourceComponent.getRessourceFromPost = function (data) {
       }
       log.dev("On nous a envoyé une ressource en json", data)
     }
+
     // vérif présence et type
     _.each(config.typesVar, function (typeVar, key) {
       // propriétés obligatoires
@@ -105,7 +105,7 @@ ressourceComponent.getRessourceFromPost = function (data) {
         }
       }
     });
-    // faut ajouter l'oid
+    // faut ajouter l'oid s'il existe
     if (data.oid) ressource.oid = data.oid;
   }
 

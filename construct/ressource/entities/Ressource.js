@@ -2,8 +2,6 @@
 
 var _ = require('underscore')._
 
-var config = require('../config.js');
-
 function Ressource() {
   /**
    * Une liste d'erreurs éventuelles (incohérences de données, etc)
