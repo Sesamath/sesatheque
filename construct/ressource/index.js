@@ -22,6 +22,24 @@ _.each(ressourceRepository, function(method, name) {
   ressourceComponent[name] = method;
 });
 
+/**
+ * Parcours récursivement tab et remplace toutes les chaînes représentant des entiers en entiers
+ * @param {Array} tab
+ * @returns {Array} Le tableau modifié
+ */
+function integerify(tab) {
+  tab.forEach(function (value) {
+    var i
+    if (_.isArray(value)) value = integerify(value)
+    else {
+      i = parseInt(value, 10)
+      if (value == i) value = i
+    }
+  });
+
+  return tab
+}
+
 // et ces méthodes communes à plusieurs contrôleurs
 
 /**
@@ -51,47 +69,61 @@ ressourceComponent.getRessourceFromPost = function (data) {
 
     // vérif présence et type
     _.each(config.typesVar, function (typeVar, key) {
+
       // propriétés obligatoires
       if (_.isEmpty(data[key]) && config.required[key]) {
         errors.push("Le champ " + config.labels[key] + " est obligatoire");
       }
+
       // les cast
       if (data[key]) {
+
         if (typeVar === 'String') {
           if (_.isString(data[key])) {
             ressource[key] = data[key];
           } else {
             errors.push("Le champ " + config.labels[key] + " n'est pas une chaine de caractères");
           }
+
         } else if (typeVar === 'Date') {
-          buffer = moment(data[key], config.formats.jour, true);
+          if (data[key] == parseInt(data[key], 10)) {
+            // timestamp
+            var ts = data[key]
+            if (ts < 11001001001) ts = ts * 1000 // c'était des s, on passe en ms
+            // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
+            buffer = moment(new Date(ts), config.formats.jour, true);
+          } else {
+            // une string
+            buffer = moment(data[key], config.formats.jour, true);
+          }
           if (buffer.isValid()) {
             ressource[key] = new Date(buffer); // pb car _.isDate(buffer) renvoie false !
-            log.dev("type moment " + typeof buffer + _.isDate(buffer))
           } else {
-            errors.push("Le champ " + config.labels[key] +
-                " n'est pas une date valide (" + config.formats.jour +')');
+            errors.push("Le champ " + config.labels[key] +' vaut ' +data[key] +
+                " qui n'est pas une date valide (" + config.formats.jour +')');
           }
+
         } else if (typeVar === 'Number') {
           ressource[key] = parseInt(data[key], 10);
+
         } else if (typeVar === 'Boolean') {
           ressource[key] = !!data[key];
+
         } else if (typeVar === 'Array') {
-          // l'api peut nous envoyer du "[1,2]"
+          // l'api peut nous envoyer une string "[1,2]"
           if (_.isString(data[key]) && data[key].substr(0,1) === '[' && data[key].substr(-1) === ']') {
             try {
               buffer = JSON.parse(data[key])
               data[key] = buffer // c'était du json valide
             } catch (e) { /* on laisse faire la suite sans modifier data[key] */ }
           }
+
           if (_.isArray(data[key])) {
-            _.each(data[key], function (value) {
-              // tous nos tableaux sont des tableaux d'entiers
-              ressource[key].push(parseInt(value, 10));
-            });
+            ressource[key] = integerify(data[key])
           } else {
             errors.push("Le champ " + config.labels[key] + " n'est pas une liste");
           }
+
         } else if (typeVar === 'Object') {
           try {
             ressource[key] = JSON.parse(data[key]);
@@ -103,7 +135,8 @@ ressourceComponent.getRessourceFromPost = function (data) {
           errors.push(msg);
           log.error(msg);
         }
-      }
+      } // cast
+
     });
     // faut ajouter l'oid s'il existe
     if (data.oid) ressource.oid = data.oid;

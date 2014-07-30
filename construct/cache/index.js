@@ -20,7 +20,17 @@ var timerId
 
 var component = lassi.Component();
 
+var config = require('../../config')
+var logCache
+
 component.initialize = function(next) {
+    if (config.logs && config.logs.cacheEntries) {
+      logCache = function (msg, obj) {
+        log.dev(msg, obj)
+      }
+    } else {
+      logCache = function (){}
+    }
     next()
 }
 
@@ -29,11 +39,13 @@ component.initialize = function(next) {
  * @private
  */
 function purge() {
+  logCache( 'start purge cache')
   var now = (new Date()).getTime()
   _.each(expires, function(ts, key) {
     if (ts < now) {
       delete expires[key]
       delete hashtable[key]
+      logCache( key +' expired & purge')
     }
   })
   // on se rappelera nous-même
@@ -69,16 +81,16 @@ component.get = function (key) {
   if (expires[key]) {
     if (expires[key] > now) {
       value = hashtable[key]
-      log.dev('cache ' +key +' ok')
+      logCache( 'cache ' +key +' ok')
     }
     else {
       // trop vieux, on purge tout de suite
-      log.dev('cache ' +key +' too old => removed')
+      logCache( 'cache ' +key +' too old => removed')
       delete expires[key]
       delete hashtable[key]
     }
   }
-  /* log.dev('cache.get ' +key +(expires[key] ?
+  /* logCache( 'cache.get ' +key +(expires[key] ?
       ' exists ' +(expires[key] < now ? 'too old': 'ok'):" doesn't exists"), value) */
 
   return value
@@ -103,14 +115,14 @@ component.set = function (key, value, ttl) {
 
   ttl = ttl || 600 // 10min par défaut
   if (value === undefined) {
-    log.dev('cache ' +key +' removed')
+    logCache( 'cache ' +key +' removed')
     delete expires[key]
     delete hashtable[key]
   } else {
-    log.dev('cache ' +key +' set')
+    logCache( 'cache ' +key +' set')
     hashtable[key] = value
     expires[key] = now + (ttl*1000)
-    //log.dev('cache.set ' +key +' (' +ttl +') ', value)
+    //logCache( 'cache.set ' +key +' (' +ttl +') ', value)
   }
 }
 

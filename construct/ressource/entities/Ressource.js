@@ -124,7 +124,7 @@ function Ressource() {
 }
 
 var entity = lassi.Entity(Ressource)
-  .on('beforeStore', function() {
+  .on('beforeStore', function(next) {
     // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
     // et pas de celle de son indexation ici
     if (!this.dateMiseAJour) {
@@ -135,6 +135,8 @@ var entity = lassi.Entity(Ressource)
     if (_.isEmpty(this.errors)) delete this.errors
     // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
     // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
+    //log.dev('beforeStore fini')
+    next()
   })
   // finalement on laisse la gestion du cache dans les accesseurs du repository
   // plus pratique même si updateVersion appelle directement lassi.cache.ressource.XXX
@@ -147,7 +149,7 @@ var entity = lassi.Entity(Ressource)
   .addIndex('categories', 'integer')
   .addIndex('typePedagogiques', 'integer')
   .addIndex('typeDocumentaires', 'integer')
-  .addIndex('relations', 'integer')
+  //.addIndex('relations', 'integer') // chaque relation est un tableau, faudra voir si on peut indexer ça
   .addIndex('auteurs', 'integer')
   .addIndex('contributeurs', 'integer')
   .addIndex('langue', 'string')

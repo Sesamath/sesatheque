@@ -6,8 +6,6 @@
  * On est config/index.js (hors build)
  */
 
-/** Le dossier build/application */
-var appdir = __dirname + '/../build/application';
 /** Le dossier build */
 var builddir = __dirname + '/../build';
 /** La racine du projet */
@@ -25,7 +23,7 @@ var logAccess = root + '/logs/' + env + '.access.log';
 var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'});
 var morganOptions = {format:'default', stream : logAccessWriteStream}
 if (env === 'dev') {
-  morganOptions.format = ':method :url :status :response-time ms - :res[content-length] :post'
+  morganOptions.format = ':date :method :url :status :response-time ms - :res[content-length] :post'
   morganOptions.skip =  function (req) {
     var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
     var i = req.url.lastIndexOf('.')
@@ -67,6 +65,7 @@ module.exports = {
     access : logAccess,
     error : root + '/logs/' + env + '.error.log',
     errorData : root + '/logs/' + env + '.errorData.log',
-    dev : root + '/logs/dev.log'
+    dev : root + '/logs/dev.log',
+    cacheEntries : false
   }
 }

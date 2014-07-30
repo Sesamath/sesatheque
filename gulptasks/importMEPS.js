@@ -9,8 +9,12 @@
 var knex = require('knex');
 var _ = require('underscore')._;
 var request = require('request');
+var moment = require('moment')
+var flow          = require('seq');
+
 // conf de l'appli
 var config = require('../construct/ressource/config.js');
+
 // constantes
 var tdCode = config.constantes.typeDocumentaires;
 var tpCode = config.constantes.typePedagogiques;
@@ -22,15 +26,17 @@ var dbConfigMepCol = require(__dirname + '/../_private/dbconfig/mepcol.js');
 // les connexions aux bases
 var kmepcol = knex(dbConfigMepCol);
 
-// le décalage d'id
+// le décalage d'id pour les aides
 var decalageAm = 6000;
 
 // les ids traités
-var oidsParsed = [];
-var oidsInserted = [];
-var oidsUpdated = [];
-var oidFailed = [];
+var idsParsed = [];
+var idsOk = []
+var idsFailed = [];
 var pendingRelations = {};
+
+/** Un timer pour démarrer pendingRelations quand toutes les ressources auront été traitées */
+var timerId
 
 /**
  * Renvoie le codeTechnique d'un resultSet Mep
@@ -118,6 +124,7 @@ function getDateCreation(row) {
  * @returns {Date}
  */
 function getDate(ts) {
+  console.log('getDate avec ' +ts)
   if (ts > 10001001001001) ts = Math.round(ts / 1000) // c'était des ms, on passe en s
   // 7260 en cas de décalage horaire (fuseau mal réglé)
   if (ts > 1072911600 && ts < (new Date()).getTime() / 1000 + 7260) {
@@ -127,14 +134,24 @@ function getDate(ts) {
   }
 }
 
+function getJour(ts) {
+  // console.log('getJour avec ' +ts)
+  // si c'est des s, on passe en ms
+  // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
+  if (ts < 11001001001) ts = ts * 1000
+
+  return ts ? moment.utc(new Date(ts)).format(config.formats.jour) : null
+}
+
 /**
  * Note dans la var globale pendingRelations une relation à ajouter plus tard
  * @param id
- * @param relation
+ * @param relation [relationCode, idLié]
  */
 function addPendingRelation(id, relation) {
-  if (!pendingRelations[id]) pendingRelations[id] = [];
-  pendingRelations[id].push(relation);
+  console.log('on ajoute la relation ' +id +' >' +relation[0] +'> ' +relation[1])
+  if (!pendingRelations[id]) pendingRelations[id] = [relation];
+  else pendingRelations[id].push(relation);
 }
 
 /**
@@ -155,6 +172,7 @@ function initRessourceMep(row) {
   if (row.mep_suite_formateur !== 'o')  contenu.suite_formateur = row.mep_suite_formateur;
   if (row.mep_aide_formateur !== 'o')   contenu.aide_formateur  = row.mep_aide_formateur;
   if (row.mep_nb_wnk)                   contenu.nb_wnk          = row.mep_nb_wnk;
+
   // contenu + relations
   // aide
   if (row.mep_aide_id) {
@@ -168,13 +186,17 @@ function initRessourceMep(row) {
     relations.push([relCode.estTraductionDe, row.mep_id_fr]);
     addPendingRelation(row.mep_id_fr, [relCode.estTraduitAvec, id]);
   }
+
   // on regarde si on a des relations à ajouter
   if (pendingRelations[id]) {
+    console.log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
     relations = relations.concat(pendingRelations[id]);
     delete pendingRelations[id];
   }
 
-  // @todo regarder mep_swf_utilisateur_id pour récupérer les auteurs et ajouter les mep_txt_utilisateur_id dans les contributeurs
+  // @todo regarder mep_swf_utilisateur_id pour récupérer les auteurs
+  // et ajouter les mep_txt_utilisateur_id dans les contributeurs
+
   return {
     id               : id,
     origine          : 'mep',
@@ -195,8 +217,8 @@ function initRessourceMep(row) {
     langue           : getLangue(row.mep_langue_id),
     publie           : (row.mep_statut_public === 'en_public' ? true : false),
     restriction      : 0,
-    dateCreation     : getDate(row.dateCreation),
-    dateMiseAJour    : getDate(row.dateMiseAJour)
+    dateCreation     : getJour(row.dateCreation),
+    dateMiseAJour    : getJour(row.dateMiseAJour)
   };
 }
 
@@ -210,6 +232,7 @@ function initRessourceAm(row) {
   var id = row.aide_id + decalageAm;
   // on regarde si on a des relations à ajouter
   if (pendingRelations[id]) {
+    console.log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
     relations = relations.concat(pendingRelations[id]);
     delete pendingRelations[id];
   }
@@ -229,59 +252,40 @@ function initRessourceAm(row) {
     langue           : 'fra',
     publie           : true,
     restriction      : 0,
-    dateCreation     : getDate(row.dateCreation),
-    dateMiseAJour    : getDate(row.dateMiseAJour)
+    dateCreation     : getJour(row.dateCreation),
+    dateMiseAJour    : getJour(row.dateMiseAJour)
   };
 }
 
 /**
  * Importe la table MEPS dans ressource
  */
-function importMEPS() {
-  // sous-requete sur DEV_FILES pour aller chercher les dates
-  // var dates;
-  // dates = kmepcol.raw("SELECT min(dev_file_date) as dateCreation, max(dev_file_date) as dateMiseAJour FROM DEV_FILES WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf' ORDER BY mep_id DESC");
-  /* dates = kmepcol('DEV_FILES')
-      /* .select(kmepcol.raw("min(dev_file_date) as dateCreation, max(dev_file_date) as dateMiseAJour"))
-      .whereRaw("dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf' ")
-      // pour tomber sur les traductions en 1er et économiser des requetes d'ajout de relations ultérieures
-      .orderBy('mep_id', 'desc') */
-  /* dates = kmepcol('DEV_FILES')
-      .select("min(dev_file_date)").as('dateCreation')
-      .select('max(dev_file_date)').as('dateMiseAJour')
-      .whereRaw("dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf' ")
-      .orderBy('mep_id', 'desc');
-  tout ça marche pas, on essaie de coller plus près de http://knexjs.org/#Raw-queries-wrapped * /
-  dates = kmepcol.raw("SELECT min(dev_file_date) as dateCreation, max(dev_file_date) as dateMiseAJour FROM DEV_FILES WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf'")
-      .wrap('(', ')'); * /
-  var dateCreation = kmepcol('DEV_FILES')
-      .min('dev_file_date')
-      //.whereRaw('dev_file_identifiant = m.mep_swf_id')
-      //.andWhere('dev_file_type', 'exswf')
-      .whereRaw("dev_file_identifiant = m.mep_swf_id AND dev_file_type = 'exswf'")
-      // .as('dateCreation');
-  var dateMiseAJour = kmepcol
-      .max('dev_file_date')
-      .from('DEV_FILES')
-      .whereRaw('dev_file_identifiant = m.mep_swf_id')
-      .andWhere('dev_file_type', 'exswf')
-      .as('dateMiseAJour'); /* */
-  // le select sur MEPS
-  kmepcol()
-      .select('*')
-      .from('MEPS as m')
-      .whereRaw('mep_id < 2')
-      .map(function (row) {
-        //console.log(row); return
-        var r;
-        oidsParsed.push(row.mep_id);
-        r = initRessourceMep(row);
-        console.log('processing mep ' + r.id)
-        addRessource(r);
-      })
-      .then(function() {
-        // le then sert juste à attendre que tout le monde ait fini
-        return true;
+function importMEPS(next) {
+  var nbMeps = 0
+
+  function checkEnd() {
+    nbMeps--
+    if (nbMeps === 0) next()
+  }
+
+  kmepcol
+      .raw("SELECT *" +
+        ", (SELECT MIN( dev_file_date ) FROM DEV_FILES" +
+            " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateCreation" +
+        ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
+          " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateMiseAJour" +
+        " FROM MEPS m WHERE mep_id < 100")
+      .then(function (rows) {
+          var ressources = rows[0]
+          nbMeps = ressources.length
+          ressources.forEach(function(row) {
+            //console.log(row); return
+            var r;
+            idsParsed.push(row.mep_id);
+            r = initRessourceMep(row);
+            console.log('processing mep ' + r.id)
+            addRessource(r, checkEnd);
+          })
       })
       .catch(function(e) {
         console.log(e.stack)
@@ -291,78 +295,105 @@ function importMEPS() {
 /**
  * Importe la table AIDES dans ressource
  */
-function importAIDES() {
-  kmepcol()
-      .select()
-      .from('AIDES')
-      .whereRaw('aide_id < 2')
-      .map(function (row) {
-        //console.log(row); return
-        var r;
-        oidsParsed.push(row.aide_id + decalageAm);
-        r = initRessourceAm(row);
-        console.log('processing aide ' + r.id)
-        addRessource(r);
-      })
-      .then(function() {
-        // le then sert juste à attendre que tout le monde ait fini
-        return true;
+function importAIDES(next) {
+  var nbAides = 0
+
+  function checkEnd() {
+    nbAides--
+    if (nbAides === 0) next()
+  }
+
+  kmepcol
+      .raw("SELECT *" +
+          ", (SELECT MIN( dev_file_date ) FROM DEV_FILES" +
+          " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateCreation" +
+          ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
+          " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateMiseAJour" +
+          " FROM AIDES a WHERE aide_id < 100")
+      .then(function (rows) {
+          nbAides = rows[0].length
+          rows[0].forEach(function(row) {
+              var r = initRessourceAm(row)
+              idsParsed.push(row.aide_id + decalageAm);
+              console.log('processing aide ' + r.id)
+              addRessource(r, checkEnd);
+          })
       })
       .catch(function(e) {
         console.log(e.stack)
       })
 }
 
-function flushPendingRelations() {
+function flushPendingRelations(next) {
+  var nbRelations = pendingRelations.length
+
+  function checkEnd() {
+    nbRelations--
+    if (nbRelations === 0) next()
+  }
+
+  if (!nbRelations) {
+    console.log('rien à faire dans flushPendingRelations')
+    next()
+    return
+  }
+
+  console.log('start flushPendingRelations ' +nbRelations)
+
   _.each(pendingRelations, function(pendingRelations, id) {
-    kbibli()
-        .select('data')
-        .where({oid:id})
-        .map(function(row) {
-          var ressource, data;
-          ressource = JSON.parse(row.data);
-          ressource.relations = ressource.relations.concat(pendingRelations);
-          data = JSON.stringify(ressource);
-          kbibli('ressource')
-              .update({data:data})
-              .where({oid: id});
-          console.log("Relations ajoutées à " + id);
-        })
-        .catch(function(e) {
-          console.error(e);
-        });
-  });
+      getAndSendRessource(id, function(error, ressource) {
+          if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = pendingRelations
+          else ressource.relations = ressource.relations.concat(pendingRelations)
+          addRessource(ressource, checkEnd)
+      })
+  })
 }
 
-function addRessource(ressource) {
+function addRessource(ressource, next) {
   var options = {
     url : 'http://localhost:3000/api/ressource',
     json: true,
-    //body: JSON.stringify({ressource:ressource})
+    //body: JSON.stringify({ressource:ressource}),
+    content_type: 'charset=UTF-8',
     form: ressource
   }
   request.post(options, function (error, response, body) {
     if (error) console.log(error)
     else {
-      if (body.error) console.log('erreur sur ' +ressource.id +' : ' +body.error)
-      else console.log('retour de ' +ressource.id +' : ' +body)
+      if (body.error) {
+        idsFailed.push(ressource.id)
+        console.log('erreur sur ' +ressource.id +' : ' +body.error)
+      } else {
+        if (body.id == ressource.id) {
+          idsOk.push(ressource.id)
+          console.log(ressource.id +' ok')
+        }
+        else {
+          idsFailed.push(ressource.id)
+          console.log('PB, ' +ressource.id +' renvoie ' +JSON.stringify(body))
+        }
+      }
     }
+    next()
   })
-
 }
 
 module.exports = function () {
-  try {
     console.log('task ' + __filename);
-     //console.log(dbConfigMepCol); return;
-    //importMEPS();
-    importAIDES();
-    console.log("L'insertion ou update des ressources suivantes a échoué : \n" + oidFailed.join(', '));
-    //flushPendingRelations();
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-
-  return true;
+    flow()
+        .seq(function () {
+          importMEPS(this)
+        })
+        .seq(function () {
+          importAIDES(this)
+        })
+        .seq(function () {
+          flushPendingRelations(this)
+        })
+        .seq(function (){
+          console.error('END');
+        })
+        .catch(function (error) {
+          console.error(error);
+        })
 }
