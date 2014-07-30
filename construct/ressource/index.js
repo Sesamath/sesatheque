@@ -35,7 +35,7 @@ ressourceComponent.getRessourceFromPost = function (data) {
   var errors = [];
   var buffer;
   var msg;
-  log.dev('dans getRessourceFromPost on récupère', data)
+  //log.dev('dans getRessourceFromPost on récupère', data)
   if (_.isEmpty(data)) {
     errors.push("Ressource vide");
   } else {

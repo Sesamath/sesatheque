@@ -72,7 +72,12 @@ function setVersion(ressource, next) {
       // on regarde si nos champs qui déclenchent un changement de version on changé
       else {
         _.each(config.versionTriggers, function (prop) {
-          if (ressource[prop] !== ressourceInitiale[prop]) {
+          if ( // deux array vides passent le !=, pourquoi ????
+              !(_.isEmpty(ressource[prop]) && _.isEmpty(ressourceInitiale[prop])) &&
+              ressource[prop] != ressourceInitiale[prop]) {
+            log.dev('La modif du champ ' +prop +' entraîne un incrément de version')
+            log.dev('avant', ressourceInitiale[prop])
+            log.dev('après', ressource[prop])
             needIncrement = true
           }
         })
