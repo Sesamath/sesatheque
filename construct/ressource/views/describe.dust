@@ -15,9 +15,9 @@
     {categories.title} : {categories.value}<br />
     {typePedagogiques.title} : {typePedagogiques.value}<br />
     {typeDocumentaires.title} : {typeDocumentaires.value}<br />
-    <p>{resume.title} : {resume.value}</p>
+    <p>{resume.title} : {resume.value|s}</p>
     <p>{description.title} : {description.value}</p>
-    {?relations.value}<ul>{relations} {#relations.value}<li>{predicat} {lien}</li>{/relations.value}</ul>{/relations.value}
+    {?relations.value}<ul>{relations.title} {#relations.value}<li>{predicat} {lien|s}</li>{/relations.value}</ul>{/relations.value}<br />
     <p>{commentaires.title} : {commentaires.value}</p>
     <p>{parametres.title} : {parametres.value}</p>
     {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}

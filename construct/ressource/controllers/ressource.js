@@ -29,7 +29,7 @@ controller
         if (error) next(error)
         else if (ressource) {
           ctx.metas.title = ressource.titre
-          sendPageData(error, ressource, next)
+          sendPageData(error, ressource, ctx, next)
         } else {
           ctx.response.statusCode = 404;
           next(null, {error: "La ressource d'identifiant " + id + " n'existe pas"})
@@ -56,7 +56,7 @@ controller
           ctx.metas.title = ressource.titre
           ctx.metas.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
         }
-        sendPageData(error, ressource, next)
+        sendPageData(error, ressource, ctx, next)
       })
     })
 
@@ -75,7 +75,7 @@ controller
           }
         } else {
           ctx.metas.title = ressource.titre
-          sendPageData(error, ressource, next)
+          sendPageData(error, ressource, ctx, next)
         }
       })
   });
@@ -183,7 +183,7 @@ controller
             next(null, ressource)
           } else {
             ctx.metas.title = 'Supprimer ' +ressource.titre
-            sendPageData(error, ressource, next)
+            sendPageData(error, ressource, ctx, next)
           }
         })
       } else {
@@ -228,7 +228,7 @@ module.exports = controller;
  * @param {Function}  next      callback qui sera appelée avec (error, data), data pour une vue dust
  * @returns {undefined} La ressource, avec pour chaque champ les propriétés title et value
  */
-function sendPageData(error, ressource, next) {
+function sendPageData(error, ressource, ctx, next) {
   var data = {};
   var buffer;
   if (error) data.error = error.toString();
@@ -241,7 +241,19 @@ function sendPageData(error, ressource, next) {
           title: label
         };
         if (_.isArray(value)) {
-          if (config.listes[key]) {
+
+          // cas particulier de tableau de tableaux
+          if (key === 'relations' && value.length) {
+            data.relations.value = []
+            value.forEach(function (relation) {
+              data.relations.value.push({
+                predicat : config.listes.relations[relation[0]],
+                lien : ctx.link(lassi.action.describe, relation[1], {id:relation[1]})
+              })
+            })
+            log.dev('relations ajoutée pour ' +ressource.id, data.relations)
+
+          } else if (config.listes[key]) {
             // faut remplacer des ids par des labels
             buffer = [];
             _.each(value, function (id) {
@@ -249,18 +261,21 @@ function sendPageData(error, ressource, next) {
               else log.error("La ressource " + ressource.id + " a une valeur " + id +
                   " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
             });
+            data[key].value = buffer.join(', ');
+
           } else {
-            buffer = value; // on garde l'array tel quel
+            data[key].value = value.join(', ')
           }
-          data[key].value = buffer.join(', ');
 
 
         } else if (_.isDate(value)) {
           data[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
+
         } else {
           data[key].value = value;
         }
       }); // fin each propriété
+
       // on ajoute oid
       data.oid = ressource.oid
     } else {
@@ -268,7 +283,7 @@ function sendPageData(error, ressource, next) {
       data.error = "Aucune ressource";
     }
   }
-  //log.dev('On envoie à la page', data)
+  log.dev('On envoie à la page', data)
 
   next(null, data);
 }

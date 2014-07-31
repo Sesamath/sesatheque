@@ -23,7 +23,8 @@ var logAccess = root + '/logs/' + env + '.access.log';
 var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'});
 var morganOptions = {format:'default', stream : logAccessWriteStream}
 if (env === 'dev') {
-  morganOptions.format = ':date :method :url :status :response-time ms - :res[content-length] :post'
+  //morganOptions.format = ':date :method :url :status :response-time ms - :res[content-length] :post'
+  morganOptions.format = ':date :method :url :status :response-time ms - :res[content-length]'
   morganOptions.skip =  function (req) {
     var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
     var i = req.url.lastIndexOf('.')
@@ -31,6 +32,8 @@ if (env === 'dev') {
     return (suffix && excluded.indexOf(suffix) > -1)
   }
 }
+// on remet la conf qui marche dans node-lassi-example
+morganOptions = {format: ':method :url - :post - :referrer', options: {}}
 
 /** La config exportée */
 module.exports = {

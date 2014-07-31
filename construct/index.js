@@ -22,6 +22,16 @@ application.on('boot', function(){
   log.dev('BOOT');
 });
 
+/*/ pour créer un token morgan
+application.on('beforeRailUse', function(name, settings) {
+  if (name=='logger') {
+    log.dev('settings morgan dans beforeRailUse', settings)
+    lassi.require('morgan').token('post', function (req, res) {
+      return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
+    });
+  }
+})
+
 /* application.on('loaded', function (type, name, instance) {
   if (type === 'middleware' && name === 'logger') {
     console.log(instance.toString())

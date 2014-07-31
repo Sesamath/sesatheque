@@ -4,7 +4,20 @@
  * Notre component principal (qui défini le layout et le rendu)
  * @constructor
  */
-var component = lassi.Component();
+var component = lassi.Component()
+
+/*
+component.blessed = function() {
+  this.application.on('beforeRailUse', function(name, settings) {
+    if (name=='logger') {
+      console.log('settings morgan dans beforeRailUse')
+      console.log(settings)
+      lassi.require('morgan').token('post', function (req, res) {
+        return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body);
+      });
+    }
+  })
+} /**/
 
 component.initialize = function(next) {
   // Définition du layout "page" pour les réponses "html" (qui utilise l'engine dust et le tpl layout-page.dust).
