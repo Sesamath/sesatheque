@@ -25,29 +25,41 @@ application.on('boot', function(){
 });
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
-/*
+/* */
 application.on('beforeRailUse', function(name, settings) {
   if (name=='logger') {
+    console.log('beforeRailUse logger')
+    // sert à rien de modifier settings, pas pris en compte car fait trop tard
+    // on laisse tout ça là quand même pour le passer éventuellement dans une fct + tard
+    return
+
+    log.dev('settings morgan dans beforeRailUse', settings)
     // les settings pour morgan
     var fs = require('fs');
     var logAccess = application.settings.logs.access;
     var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'});
-    settings = { format : ':date :method :url :status :response-time ms - :res[content-length] :post' }
-    settings.options = {
-      stream : logAccessWriteStream,
-      skip :  function (req) {
-        var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
-        var i = req.url.lastIndexOf('.')
-        var suffix = (i > 0) ? req.url.substr(i+1) : null // au moins un char avant le point
-        return (suffix && excluded.indexOf(suffix) > -1)
+    // les tokens
+    var moment = require('moment')
+    var morgan = lassi.require('morgan')
+    morgan.token('post', function (req, res) {
+      return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
+    })
+    morgan.token('moment', function () {
+      return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
+    })
+    settings = {
+      format: ':moment :method :url :status :response-time ms - :res[content-length] :post',
+      options : {
+        skip  : function (req) {
+          var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
+          var i = req.url.lastIndexOf('.')
+          var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
+          return (suffix && excluded.indexOf(suffix) > -1)
+        },
+        stream: logAccessWriteStream
       }
     }
-    log.dev('settings morgan dans beforeRailUse', settings)
-    // et nos tokens
-    lassi.require('morgan').token('post', function (req, res) {
-      return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
-    });
-    return settings
+    log.dev('settings modifiés', settings)
   }
 })
 

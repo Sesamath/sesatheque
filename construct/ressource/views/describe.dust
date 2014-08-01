@@ -16,7 +16,7 @@
     {typePedagogiques.title} : {typePedagogiques.value}<br />
     {typeDocumentaires.title} : {typeDocumentaires.value}<br />
     <p>{resume.title} : {resume.value|s}</p>
-    <p>{description.title} : {description.value}</p>
+    <p>{description.title} : {description.value|s}</p>
     {?relations.value}<ul>{relations.title} {#relations.value}<li>{predicat} {lien|s}</li>{/relations.value}</ul>{/relations.value}<br />
     <p>{commentaires.title} : {commentaires.value}</p>
     <p>{parametres.title} : {parametres.value}</p>
@@ -28,3 +28,8 @@
     {/contributeurs.value}</ul>{/contributeurs.value}
 {/error}
 </div>
+{!
+<pre>
+{@contextDump key="full" to="output"/}
+</pre>
+!}
