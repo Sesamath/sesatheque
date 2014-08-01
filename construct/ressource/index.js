@@ -125,11 +125,16 @@ ressourceComponent.getRessourceFromPost = function (data) {
           }
 
         } else if (typeVar === 'Object') {
-          try {
-            ressource[key] = JSON.parse(data[key]);
-          } catch (e) {
-            errors.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
-          }
+            if (_.isString(data[key])) {
+              try {
+                ressource[key] = JSON.parse(data[key]);
+              } catch (e) {
+                errors.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
+              }
+            }
+            else
+              if (_.isObject(data[key])) ressource[key] = data[key]
+              else errors.push("Le champ " + config.labels[key] + " est invalide : ");
         } else {
           msg = "Le champ " + config.labels[key] + " est d'un type non prévu (" +typeVar +')';
           errors.push(msg);

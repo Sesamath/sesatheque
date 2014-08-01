@@ -79,10 +79,10 @@ function Ressource() {
    */
   this.relations = [];
   /**
-   * Contenu qui dépend du type technique, json
-   * @type {Array}
+   * Contenu qui dépend du type technique (toutes les autres infos concernant la ressource de ce type)
+   * @type {Object}
    */
-  this.contenu = '';
+  this.parametres = {};
   /**
    * Liste d'id d'auteurs
    * @type {Array}

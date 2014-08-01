@@ -283,7 +283,7 @@ function sendPageData(error, ressource, ctx, next) {
       data.error = "Aucune ressource";
     }
   }
-  log.dev('On envoie à la page', data)
+  //log.dev('On envoie à la page', data)
 
   next(null, data);
 }
