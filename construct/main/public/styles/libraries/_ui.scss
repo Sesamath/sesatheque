@@ -1,0 +1,107 @@
+@mixin ui-glow-box($glow-color:red, $glow-opacity:0.8, $border-opacity:0.4, $shade-opacity:0.3) {
+  border: 1px solid rgba($glow-color, $border-opacity);
+  $s1 : rgba($glow-color, $glow-opacity);
+  $s2 : rgba(black,$shade-opacity);
+  @include box-shadow(0 0 8px $s1, 1px 2px 5px $s2 inset);
+  @if $glow-opacity==0 { /* Si l'opacité est 0, c'est que l'on défini l'élément principal */
+    -moz-transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    -o-transition: border 0.2s linear 0s, -o-box-shadow 0.2s linear 0s;
+    -webkit-transition: border 0.2s linear 0s, -webkit-box-shadow 0.2s linear 0s;
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+  }
+}
+
+@mixin ui-input($error-color: red, $active-color: orange, $stale-color: black) {
+  @include box-sizing;
+  width:100%;
+  background-color: #FFF;
+  color: #626262;
+  &:hover,&:active {
+    color: #2F2D2D;
+  }
+  @include ui-glow-box($stale-color, 0, 0.3, 0.1);
+  @include border-radius(4px);
+  padding: 0.5em;
+  &.form-text {
+    @include height(1.8em);
+  }
+
+  &:hover { @include ui-glow-box($stale-color, 0.2, 0.3, 0.15); }
+  &:focus { @include ui-glow-box($active-color, 0.7, 0.8); }
+  .error & { @include ui-glow-box($error-color, 0, 0.6, 0.1); border-width:2px;}
+  .error &:hover { @include ui-glow-box($error-color, 0.2, 0.6, 0.15);border-width:2px; }
+  .error &:focus { @include ui-glow-box($error-color, 0.7, 0.8);border-width:2px; }
+
+  body.msie & {
+    border:1px solid lighten($stale-color, 80%);
+    &:hover { border-color:lighten($stale-color, 50%) }
+    &:focus { border-color:lighten($active-color, 20%) }
+    &.error { border-color:lighten($error-color, 40%) }
+    &.error:hover { border-color:lighten($error-color, 20%) }
+    &.error:focus { border-color:lighten($error-color, 20%) }
+  }
+}
+
+@mixin ui-button($color, $a, $b, $c, $dark:false, $height:25px) {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  white-space:nowrap;
+  outline: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  margin:0;
+  position: relative;
+  top:0px;
+  @if ($dark) {
+    color: white !important;
+    text-shadow:0 1px 1px rgba(black, 0.7);
+  } @else {
+    color: #2F2F2F !important;
+    text-shadow:0 1px 1px rgba(white, 0.5);
+  }
+  @include border-radius(3px);
+  @include box-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  @include gradiant-box($color, $a, $b, $c);
+  @include transition(all .2s ease);
+  &:hover {
+    @include gradiant($color, $b*2, $c*2);
+  }
+  &:active {
+    position: relative;
+    top:2px;
+    @include box-shadow(0 0 0 rgba(0, 0, 0, 0.2));
+
+    @include gradiant($color, $c*2, $b*2);
+  }
+}
+@mixin ui-button-white {
+  @include ui-button(white, -25%, 0, -10%);
+}
+@mixin ui-button-black  {
+  @include ui-button(black,20%, 30%, 0, true);
+}
+@mixin ui-button-orange {
+  @include ui-button(orange, -0%, 30%, 0);
+}
+@mixin ui-button-yellow {
+  @include ui-button(yellow, -10%, 30%, 0);
+}
+@mixin ui-button-green  {
+  @include ui-button(#D1FF00, -10%, 0, -20%);
+}
+@mixin ui-button-red    {
+  @include ui-button(#C3050A, -10%, 0, -10%, true);
+}
+@mixin ui-button-blue   {
+  @include ui-button(#5C72E6, -10%, 10%, -10%, true);
+}
+@mixin ui-button-magenta   {
+  @include ui-button(#FF009D, -10%, 20%, -5%);
+}
+@mixin ui-button-pink   {
+  @include ui-button(pink, -10%, 0, -10%);
+}
+
+

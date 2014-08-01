@@ -1,0 +1,117 @@
+@import "_colors";
+@import "_css3";
+@import "_ui";
+
+@function black($opacity:0.8) {
+  @return rgba(black, $opacity);
+}
+
+@function white($opacity:0.8) {
+  @return rgba(white, $opacity);
+}
+
+@mixin font-face($family, $file, $weight: normal, $style: normal) {
+  @font-face {
+    font-family: quote($family);
+    src: url('../assets/fonts/#{$file}.eot'); // IE9
+    src: url('../assets/fonts/#{$file}.eot?#iefix') format('embedded-opentype'), // IE6-IE8
+         url('../assets/fonts/#{$file}.woff') format('woff'), // Navigateurs modernes
+         url('../assets/fonts/#{$file}.ttf') format('truetype'), // Safari, Android, iOS
+         url('../assets/fonts/#{$file}.svg') format('svg');  // Legacy iOS
+    font-weight: $weight;
+    font-style: $style;
+  }
+}
+
+@mixin _reset {
+  width:auto;
+  height:auto;
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  border: 0 none;
+  font-style: inherit;
+  font-variant: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  font-size-adjust: inherit;
+  font-stretch: inherit;
+  -moz-font-feature-settings: inherit;
+  -moz-font-language-override: inherit;
+  vertical-align: baseline;
+  line-height: 100%;
+  background:none transparent;
+  text-decoration: none;
+  color:black;
+  @include transition(none);
+}
+
+@mixin reset {
+  @include _reset;
+  * {
+    @include _reset;
+  }
+}
+
+@mixin height($h) {
+  height:$h;
+  line-height:$h;
+  @include box-sizing;
+}
+
+@mixin clear {
+  &:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+  }
+}
+
+@mixin list-bullets {
+  li {
+    list-style-image: none;
+    list-style-type: none;
+    position:relative;
+    margin-left: 1.4em;
+    &:before {
+      font-family:icons;
+      font-size:15px;
+      display:inline-block;
+      position:absolute;
+      left:-1.2em;
+      @content;
+    }
+  }
+}
+
+@mixin list-numbered($suffix:".") {
+  counter-reset: item 0;
+  li {
+    counter-increment: item;
+    &:before {
+      content: counter(item) $suffix;
+      @content;
+    }
+  }
+}
+
+@function em($px, $base: 16px) {
+    @return ($px / $base) * 1em;
+}
+
+$break-small: 480px;
+$break-large: 1024px;
+
+@mixin respond-to($media) {
+  @if $media == phone {
+    @media only screen and (max-width: $break-small) { @content; }
+  }
+  @else if $media == tablet {
+    @media only screen and (min-width: $break-small + 1) and (max-width: $break-large - 1) { @content; }
+  }
+  @else if $media == desktop {
+    @media only screen and (min-width: $break-large) { @content; }
+  }
+}
