@@ -94,7 +94,6 @@ gulp.task('hint', ['hintServer', 'hintClient']);
  * On ajoute toutes les tâches du dossier gulptasks s'il existe
  * Chaque fichier doit exporter une fonction qui sera exécutée à l'appel de la tâche
  */
-/*
 var taskDir = './gulptasks';
 if (fs.existsSync(taskDir)) {
   fs.readdirSync(taskDir).forEach(function (file) {
@@ -105,6 +104,5 @@ if (fs.existsSync(taskDir)) {
     }
   })
 }
-*/
 
 gulp.task('default', ['compile-sass', 'watch'])
