@@ -1,0 +1,106 @@
+@mixin prefixer ($property, $value, $prefixes) {
+  @each $prefix in $prefixes {
+    @if $prefix == webkit {
+      -webkit-#{$property}: $value;
+    }
+    @else if $prefix == moz {
+      -moz-#{$property}: $value;
+    }
+    @else if $prefix == ms {
+      -ms-#{$property}: $value;
+    }
+    @else if $prefix == o {
+      -o-#{$property}: $value;
+    }
+    @else if $prefix == spec {
+      #{$property}: $value;
+    }
+    @else {
+      @warn "Unrecognized prefix: #{$prefix}";
+    }
+  }
+}
+
+@mixin border-radius($value) {
+  @include prefixer(border-radius, $value, moz webkit spec);
+}
+
+@mixin linear-gradient($value...) {
+  background-image: -webkit-linear-gradient($value);
+  background-image: -moz-linear-gradient($value);
+  background-image: -o-linear-gradient($value);
+  background-image: linear-gradient($value);
+}
+
+@mixin repeating-linear-gradient($value...) {
+  background-image: -webkit-repeating-linear-gradient($value);
+  background-image: -moz-repeating-linear-gradient($value);
+  background-image: -o-repeating-linear-gradient($value);
+  background-image: repeating-linear-gradient($value);
+}
+
+@mixin background-color($color) {
+  background-color:$color;
+  $ie-color: ie-hex-str($color);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$ie-color}', endColorstr='#{$ie-color}');
+}
+
+@mixin background-size($value...) {
+  -webkit-background-size: $value;
+  -moz-background-size: $value;
+  background-size: $value;
+}
+
+@mixin horizontal-linear-gradient($begin: black, $end: white, $switch:100%) {
+  background: -webkit-gradient(linear, 0 0, 0 100%, from($begin), color-stop($switch, $end));
+  background: -moz-linear-gradient(left center, $begin, $end $switch);
+  background: -o-linear-gradient(left center, $begin, $end $switch);
+  background: linear-gradient(left center, $begin, $end $switch);
+  $ie-from: ie-hex-str($begin);
+  $ie-to: ie-hex-str($end);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1,startColorstr='#{$ie-from}', endColorstr='#{$ie-to}');
+}
+
+@mixin box-shadow($value...) {
+  @include prefixer(box-shadow,$value,moz webkit spec ms);
+}
+
+@mixin transition($value...) {
+  @include prefixer(transition,$value,moz webkit o spec ms)
+}
+
+@mixin transform($value...) {
+  /*transform: translateZ(0); // Officiellement cela active l'accélération materielle*/
+  @include prefixer(transform, $value, moz ms o webkit spec ms);
+}
+
+@mixin box-sizing($value : border-box) {
+  @include prefixer(box-sizing, $value, moz ms o webkit spec ms);
+}
+
+@mixin keyframes($name) {
+  @-moz-keyframes $name {
+    @content;
+  }
+  @-webkit-keyframes $name {
+    @content;
+  }
+  @-o-keyframes $name {
+    @content;
+  }
+  @-ms-keyframes $name {
+    @content;
+  }
+  @keyframes $name {
+    @content;
+  }
+}
+
+
+@mixin animation($value...) {
+  @include prefixer(animation, $value, moz ms o webkit spec ms);
+}
+@mixin columns($value...) {
+  @include prefixer(columns, $value, moz ms o webkit spec ms);
+}
+

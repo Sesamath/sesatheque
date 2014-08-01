@@ -22,34 +22,32 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
+var gulp   = require('gulp');
+var sass   = require('gulp-sass');
+var jsdoc  = require('gulp-jsdoc');
+var jshint = require('gulp-jshint');
+var fs     = require('fs');
+require('lassi');
 
+gulp.task('compile-sass', function () {
+  gulp
+    .src('construct/**/public/styles/*.scss', {base: './'})
+    .pipe(sass({
+      errLogToConsole: true,
+      sourceComments: 'map'}))
+    .pipe(gulp.dest('./'));
+})
 
-/**
- * Fichier de construction et de gestion du projet.
- *
- * Installation des éléments externes (ckeditor, etc.)
- *  $$ gulp install
- *
- * Construction du projet
- *  $$ gulp build
- *
- * Développement
- *  $$ gulp start
- */
+gulp.task('watch', function() {
+  var launcher = new lassi.tools.Launcher({ path: 'construct/index.js' });
+  launcher.observe('config').including('**/*.js').restart();
+  launcher.observe('construct').including('**/*.+(js|dust)').excluding('**/public').restart();
+  launcher.observe('construct').including('**/public/styles/**/*.scss').do(function() { gulp.start('compile-sass') });
+  launcher.observe('construct').including('**/public/**/*.+(css|js)').reload();
+  launcher.observe('node_modules/lassi').including('**/*.js').excluding('**/node_modules').restart();
+  launcher.start();
+})
 
-var
-  gulp       = require('gulp'),
-  fs         = require('fs'),
-  buildTasks = require('./node_modules/lassi/gulpTasks/builder');
-
-
-buildTasks(gulp).launch('./construct/index.js');
-
-/*
- gulp.task('doc', function() {
- gulp.src("construct/** /*.js")
- .pipe(jsdoc('./documentation'))
- }); */
 
 gulp.task('doc', function() {
   var infos = {
@@ -61,7 +59,7 @@ gulp.task('doc', function() {
   gulp.src(['construct/**/*.js', 'README.md'])
       .pipe(jsdoc.parser(infos,'data'))
       .pipe(jsdoc.generator('./documentation'))
-}); /* */
+});
 
 
 /**
@@ -98,7 +96,7 @@ gulp.task('hint', ['hintServer', 'hintClient']);
  */
 var taskDir = './gulptasks';
 if (fs.existsSync(taskDir)) {
-  fs.readdirSync(taskDir).forEach(function (file, index) {
+  fs.readdirSync(taskDir).forEach(function (file) {
     var name;
     if (file.substr(-3) === '.js') {
       name = file.substr(0, file.length -3);
@@ -107,3 +105,4 @@ if (fs.existsSync(taskDir)) {
   })
 }
 
+gulp.task('default', ['compile-sass', 'watch'])
