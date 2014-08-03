@@ -1,0 +1,67 @@
+{?error}
+    <p class="has-error">{error}</p>
+{:else}
+<div id="errors" class="has-error"></div>
+<div id="display">Vous devez avoir un navigateur avec javascript activé pour voir ce contenu.<br />
+Chargement en cours</div>
+<script type="application/javascript">
+    /** Le conteneur html pour afficher la ressource */
+    var container = document.getElementById('display');
+    /** Le conteneur html pour afficher d'éventuelles erreurs */
+    var errorsContainer = document.getElementById('errors');
+    /** Le préfixe vers le dossier du plugin */
+    var baseUrl = '{pluginBaseUrl}';
+
+    /**
+     * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
+     * @param msg Le message à afficher
+     * @param obj Un objet éventuel dont on veut le dump en console
+     */
+    function log(msg, obj) {
+        if (!console || !console.log) return;
+        console.log(msg);
+        if (obj) console.log(obj);
+    }
+
+    /**
+     * Ajoute une css dans le <head> courant
+     * @param file le chemin du fichier css relatif au dossier du plugin
+     */
+    function addCss(file) {
+        var elt = document.createElement("link");
+        elt.rel = "stylesheet";
+        elt.type = "text/css";
+        elt.href = '{pluginBaseUrl}/' + file;
+        document.getElementsByTagName("head")[0].appendChild(elt);
+    }
+
+    require.config({
+        baseUrl     : '{pluginBaseUrl}',
+        paths: {
+            head        : '{vendorsBaseUrl}/headjs/head.1.0',
+            head10      : '{vendorsBaseUrl}/headjs/head.1.0',
+            head_load   : '{vendorsBaseUrl}/headjs/head.load.1.0',
+            head_load10 : '{vendorsBaseUrl}/headjs/head.load.1.0',
+            jquery      : '{vendorsBaseUrl}/jquery/jquery.2.1',
+            jquery21    : '{vendorsBaseUrl}/jquery/jquery.2.1',
+            swfobject   : '{vendorsBaseUrl}/swfobject/swfobject.2.2',
+            underscore  : '{vendorsBaseUrl}/underscore/underscore.1.6',
+            underscore16: '{vendorsBaseUrl}/underscore/underscore.1.6'
+        }
+    });
+    require(['{pluginName}'], function (plugin) {
+        log('Le plugin chargé par require', plugin);
+        try {
+            if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin {pluginName} a échoué');
+            if (typeof plugin.display !== 'function') throw new Error('Le plugin ' +plugin +" n'a pas de méthode display");
+        } catch(error) {
+            container.innerHTML = error.toString();
+        }
+        container.innerHTML = '';
+        {~n}var ressource = {ressource|s};{~n}
+        if (top.Sesamath && top.Sesamath.scores && typeof top.Sesamath.scores.saveResult === 'function')
+            plugin.display(ressource, container, top.Sesamath.scores.saveResult);
+        else plugin.display(ressource, container);
+    });
+</script>
+{/error}

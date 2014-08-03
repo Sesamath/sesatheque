@@ -61,22 +61,29 @@ controller
     })
 
 /**
- * display : Voir la ressource
+ * display : Voir la ressource (layout-iframe défini ressource.display pour dans le main)
  */
 controller
   .Action(routes.display + '/:id', 'ressource.display')
+  .renderWith('display')
   .do(function (ctx, next) {
       var id = ctx.arguments.id
       lassi.ressource.load(id, function (error, ressource) {
+        var data
         if (!ressource) {
           ctx.response.statusCode = 404;
-          ressource = {
-            errors : ["La ressource d'identifiant " + id + " n'existe pas"]
-          }
+          data = {error : "La ressource d'identifiant " + id + " n'existe pas"}
         } else {
           ctx.metas.title = ressource.titre
-          sendPageData(error, ressource, ctx, next)
+          delete ressource._entity
+          data = {
+            pluginBaseUrl:'../../plugins/' +ressource.typeTechnique,
+            vendorsBaseUrl:'../../vendors',
+            pluginName : ressource.typeTechnique,
+            ressource:JSON.stringify(ressource)
+          }
         }
+        next(null, data)
       })
   });
 

@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "inotify": "^1.2.1",
     "knex": "^0.5.14",
     "lassi": "git+ssh://git@arnumeral.fr:node-lassi",
     "moment": "^2.6.0",

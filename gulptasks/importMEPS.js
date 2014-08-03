@@ -204,6 +204,7 @@ function initRessourceMep(row) {
   // parametres
   parametres.nbq_defaut = row.mep_nbq_defaut; // obligatoire
   parametres.mep_modele = getMepModele(row)
+  parametres.mep_langue_id = row.mep_langue_id || 'fr' // le swf veut le code langue à 2 lettres
   if (row.mep_swf_id !== id)            parametres.swf_id          = row.mep_swf_id;
   if (row.mep_projet !== 'mep')         parametres.projet          = row.mep_projet;
   if (row.mep_old)                      parametres.old             = row.mep_old;
