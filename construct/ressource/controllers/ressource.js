@@ -29,6 +29,7 @@ controller
         if (error) next(error)
         else if (ressource) {
           ctx.metas.title = ressource.titre
+          console.log(ressource.dateCreation)
           sendPageData(error, ressource, ctx, next)
         } else {
           ctx.response.statusCode = 404;
@@ -203,14 +204,18 @@ controller
       }
   });
 
+/**
+ * Liste d'après le critère passé en 1er param (puis valeur, offset & nb)
+ */
 controller
   .Action('by/:index/:value/:start/:nb')
   .renderWith('liste')
   .do(function (ctx, next) {
+      log.dev('liste avec les args', ctx.arguments)
       var index = ctx.arguments.index
       var value = ctx.arguments.value
       var start = ctx.arguments.start
-      var nb = ctx.arguments.nb
+      var nb    = ctx.arguments.nb
       var options = {
         filters : [{index:index, values:[value]}],
         orderBy:'id'

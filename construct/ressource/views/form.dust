@@ -17,7 +17,7 @@
             {! id et oid n'existe pas encore à l'affichage du add !}
             {?oid.value}{#oid:oid}{>wrapper widget="text" o=. /}{/oid}{/oid.value}
             {@gt key=id.value value=0}{>wrapper widget="text" o=id width="50px" /}{/gt}
-            {>wrapper widget="text" o=id width="50px" /}
+            {! {>wrapper widget="text" o=id width="50px" /} !}
             {>wrapper widget="text" o=titre /}
             {>wrapper widget="text" o=typeTechnique size=2 /}
             {>wrapper widget="checkboxes" o=publie /}
@@ -51,9 +51,9 @@
          <div class="form-group">
             {>wrapper widget="text" o=version /}
             {>wrapper widget="select" o=restriction /}
-            {>wrapper widget="text" o=dateCreation filter="jour" /}
+            {>wrapper widget="text" o=dateCreation rmq="JJ/MM/YYYY" /}
+            {>wrapper widget="text" o=dateMiseAJour /}
         </div>
-
 
         {! Les types, devraient disparaitrent car conditionnés par la catégorie ! }
 
@@ -64,3 +64,6 @@
     </form>
     {/noForm}
 </div>
+{! <pre>
+{@contextDump key="oid" to="output"/}
+</pre> !}

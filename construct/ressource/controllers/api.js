@@ -1,4 +1,7 @@
 'use strict';
+/**
+ * Controller ressource/api
+ */
 
 var controller = lassi.Controller('api');
 var _ = require('underscore')._;

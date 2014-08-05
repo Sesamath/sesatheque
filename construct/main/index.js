@@ -4,9 +4,9 @@
  * Notre component principal (qui défini le layout et le rendu)
  * @constructor
  */
-var component = lassi.Component()
+var mainComponent = lassi.Component()
 
-component.initialize = function(next) {
+mainComponent.initialize = function(next) {
   // Définition du layout "page" pour les réponses "html" (qui utilise l'engine dust et le tpl layout-page.dust).
   this.application.transports.html.on('layout', function(useLayout) {
     if (useLayout.context.status) {
@@ -41,4 +41,4 @@ component.initialize = function(next) {
   }); /**/
 }
 
-module.exports = component;
+module.exports = mainComponent;

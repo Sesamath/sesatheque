@@ -6,6 +6,11 @@
  */
 'use strict';
 
+/** pour logguer les relations */
+var logRelations = false
+/** pour loguer le processing (un point par ressource sinon) */
+var logProcess = false
+
 var knex = require('knex');
 var _ = require('underscore')._;
 var request = require('request');
@@ -41,9 +46,10 @@ var pendingRelations = {};
  * Écrit en console avec le moment en préfixe
  * @param msg
  */
-function log(msg) {
+function log(msg, objToDump) {
   var prefix = '[' +moment().format('HH:mm:ss.SSS') +'] '
   console.log(prefix + msg)
+  if (objToDump) console.log(objToDump)
 }
 
 // pour passer à l'étape suivante
@@ -72,9 +78,6 @@ function checkEnd() {
   }
 }
 
-// debug
-var dumpLog = __dirname + '/../logs/'
-
 /**
  * Renvoie le codeTechnique d'un resultSet Mep
  * @param mepRow
@@ -85,10 +88,12 @@ function getMepModele(mepRow) {
     return 'mep1';
   } else if (mepRow.mep_modele === '2' && mepRow.mep_modele2 === 'college') {
     return 'mep2col';
-  } else if (mepRow.mep_modele === '2' && mepRow.mep_modele2 === 'college') {
+  } else if (mepRow.mep_modele === '2' && mepRow.mep_modele2 === 'lycee') {
     return 'mep2lyc';
   } else {
-    throw new Error("mep_modele incohérent " + mepRow.mep_modele + ' ' + mepRow.mep_modele2);
+    var msg = "mep_modele incohérent " + mepRow.mep_modele + ' ' + mepRow.mep_modele2
+    if (!errors[mepRow.mep_id]) errors[mepRow.mep_id] = msg
+    else errors[mepRow.mep_id] += msg
   }
 }
 
@@ -138,8 +143,8 @@ function getDateCreation(row) {
         .orderBy('dev_file_date', 'desc')
         .then(function (results) {
           var ts;
-          if (results[0] && results[0]['dev_file_date']) {
-            ts = results[0]['dev_file_date'];
+          if (results[0] && results[0].dev_file_date) {
+            ts = results[0].dev_file_date
             if (ts > 1072911600 && ts < (new Date()).getTime() / 1000) {
               return new Date(ts * 1000);
             } else {
@@ -161,7 +166,7 @@ function getDateCreation(row) {
  * @returns {Date}
  */
 function getDate(ts) {
-  log('getDate avec ' +ts)
+  if (logProcess) log('getDate avec ' +ts)
   if (ts > 10001001001001) ts = Math.round(ts / 1000) // c'était des ms, on passe en s
   // 7260 en cas de décalage horaire (fuseau mal réglé)
   if (ts > 1072911600 && ts < (new Date()).getTime() / 1000 + 7260) {
@@ -171,6 +176,11 @@ function getDate(ts) {
   }
 }
 
+/**
+ * Converti un timestamp (ms ou s) en string (JJ/DD/YYYY, suivant la conf)
+ * @param ts le timestamp
+ * @returns {String}
+ */
 function getJour(ts) {
   // log('getJour avec ' +ts)
   // si c'est des s, on passe en ms
@@ -181,12 +191,30 @@ function getJour(ts) {
 }
 
 /**
+ * Vérifie qu'une chaine est une liste d'entiers séparés par des virgules
+ * @param {String} ids
+ */
+function checkListOfInt (ids) {
+  if (_.isString(ids)) {
+    if (ids == parseInt(ids, 10)) return
+    else {
+      var a = ids.split(',')
+      a.forEach(function (elt) {
+        if (elt != parseInt(elt, 10)) throw new Error("L'élément " + elt + " n'est pas un entier")
+      })
+    }
+  } else {
+    throw new Error("La liste d'ids n'est pas une chaine")
+  }
+}
+
+/**
  * Note dans la var globale pendingRelations une relation à ajouter plus tard
  * @param id
  * @param relation [relationCode, idLié]
  */
 function addPendingRelation(id, relation) {
-  log('on ajoute la relation ' +id +' >' +relation[0] +'> ' +relation[1])
+  if (logRelations) log('on ajoute pour plus tard la relation ' +id +' >' +relation[0] +'> ' +relation[1])
   if (!pendingRelations[id]) pendingRelations[id] = [relation];
   else pendingRelations[id].push(relation);
 }
@@ -228,7 +256,7 @@ function initRessourceMep(row) {
 
   // on regarde si on a des relations à ajouter
   if (pendingRelations[id]) {
-    log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
+    if (logRelations) log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
     relations = relations.concat(pendingRelations[id]);
     delete pendingRelations[id];
   }
@@ -241,10 +269,10 @@ function initRessourceMep(row) {
     origine          : 'mep',
     idOrigine        : id,
     typeTechnique    : 'mep',
-    titre            : row.mep_titre,
-    resume           : row.mep_descriptif,
+    titre            : row.mep_titre || 'Exercice mathenpoche',
+    resume           : row.mep_descriptif || '',
     description      : '',
-    commentaires     : row.mep_commentaire,
+    commentaires     : row.mep_commentaire || '',
     niveaux          : [],
     categories       : [catCode.exerciceInteractif],
     typePedagogiques : [tpCode.exercice, tpCode.autoEvaluation],
@@ -271,7 +299,7 @@ function initRessourceAm(row) {
   var id = row.aide_id + decalageAm;
   // on regarde si on a des relations à ajouter
   if (pendingRelations[id]) {
-    log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
+    if (logRelations) log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
     relations = relations.concat(pendingRelations[id]);
     delete pendingRelations[id];
   }
@@ -280,7 +308,7 @@ function initRessourceAm(row) {
     origine          : 'am',
     idOrigine        : row.aide_id,
     typeTechnique    : 'am',
-    titre            : row.aide_titre,
+    titre            : row.aide_titre || 'aide mathenpoche',
     categories       : [7],
     typePedagogiques : [3],
     typeDocumentaires: [9],
@@ -297,13 +325,25 @@ function initRessourceAm(row) {
 }
 
 /**
- * Importe la table MEPS dans ressource
+ * Importe la table MEPS dans les ressource
+ *
+ * @param {Function} next fct à appeler quand tous les mep auront été importés
+ * @param {String}   ids  ids mep à traiter, séparés par des virgules sans espace (passer 'all' pour les faire tous)
  */
-function importMEPS(next) {
-  var ressourceCourante
+function importMEPS(next, ids) {
+  var ressourceCourante, where
   log('Starting importMEPS')
   nbWaiting = 1 // au cas où un timer tournerait toujours
   nextStep = next
+
+  // la liste des ids à traiter
+  if (ids === 'all') where = ''
+  else if (ids) where = ' WHERE mep_id IN (' + ids + ')'
+  else {
+    log("Pas d'import mep à faire")
+    next()
+    return
+  }
 
   kmepcol
       .raw("SELECT *" +
@@ -311,15 +351,24 @@ function importMEPS(next) {
             " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateCreation" +
         ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
           " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateMiseAJour" +
-        " FROM MEPS m") //WHERE mep_id < 100
+        " FROM MEPS m" +where)
       .then(function (rows) {
+        /*
+        var fs = require('fs'), tmpFile, writeStream
+        for (var i = 0; i < rows.length; i++) {
+          tmpFile = __dirname + '/../logs/tmp' +i +'.dump';
+          writeStream = fs.createWriteStream(tmpFile);
+          writeStream.write(JSON.stringify(rows[i]))
+          writeStream.end();
+        } /* */
+
           var ressources = rows[0]
           nbWaiting = ressources.length
           nbRessToParse += ressources.length
           ressources.forEach(function(row) {
             ressourceCourante = initRessourceMep(row);
             idsParsed.push(ressourceCourante.id);
-            log('processing mep ' + ressourceCourante.id)
+            if (logProcess) log('processing mep ' + ressourceCourante.id)
             addRessource(ressourceCourante, checkEnd);
           })
       })
@@ -332,11 +381,21 @@ function importMEPS(next) {
 /**
  * Importe la table AIDES dans ressource
  */
-function importAIDES(next) {
-  var ressourceCourante
+function importAIDES(next, ids) {
+  var ressourceCourante,
+      where = ''
   log('Starting importAIDES')
   nbWaiting = 1 // au cas où un timer tournerait toujours
   nextStep = next
+
+  // la liste des ids à traiter
+  if (ids === 'all') where = ''
+  else if (ids) where = ' WHERE aide_id IN (' +ids +')'
+  else {
+    log("Pas d'import aide à faire")
+    next()
+    return
+  }
 
   kmepcol
       .raw("SELECT *" +
@@ -344,7 +403,7 @@ function importAIDES(next) {
           " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateCreation" +
           ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
           " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateMiseAJour" +
-          " FROM AIDES a ") // WHERE aide_id < 100
+          " FROM AIDES a " +where)
       .then(function (rows) {
         nbWaiting = rows[0].length
         nbRessToParse += rows[0].length
@@ -367,36 +426,44 @@ function importAIDES(next) {
  * @param next
  */
 function flushPendingRelations(next) {
-  var nbRelations = pendingRelations.length
+  nbWaiting = 0
+  nextStep = next
 
-  function checkEnd() {
-    nbRelations--
-    if (nbRelations === 0) next()
-  }
-
-  if (!nbRelations) {
-    log('rien à faire dans flushPendingRelations')
+  if (_.isEmpty(pendingRelations)) {
+    log('Rien à faire dans flushPendingRelations')
     next()
-    return
-  }
-
-  log('start flushPendingRelations ' +nbRelations)
-
-  _.each(pendingRelations, function(pendingRelations, id) {
-    // on récupère la ressource avec l'api
-    var options = {
-      url : 'http://localhost:3000/api/ressource/' +id,
-      json: true,
-      content_type: 'charset=UTF-8',
-    }
-    request.get(options, function(error, response, ressource) {
-        if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = pendingRelations
-        else ressource.relations = ressource.relations.concat(pendingRelations)
-        addRessource(ressource, checkEnd)
+  } else {
+    log('start flushPendingRelations', pendingRelations)
+    _.each(pendingRelations, function (relations, id) {
+      nbWaiting++
+      // on récupère la ressource avec l'api
+      var options = {
+        url         : 'http://localhost:3000/api/ressource/' + id,
+        json        : true,
+        content_type: 'charset=UTF-8'
+      }
+      request.get(options, function (error, response, ressource) {
+        if (ressource.error) {
+          errors['0'] += "Erreur sur la récupération de " + id + ' : ' + ressource.error
+          checkEnd()
+        } else if (ressource.id != id) {
+          errors['0'] += "Erreur sur la récupération de " + id + " (ressource incohérente)"
+          checkEnd()
+        } else {
+          if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = relations
+          else ressource.relations = ressource.relations.concat(relations)
+          addRessource(ressource, checkEnd)
+        }
+      })
     })
-  })
+  }
 }
 
+/**
+ * Ajoute une ressource dans la bibli en appelant l'api en http
+ * @param ressource
+ * @param next
+ */
 function addRessource(ressource, next) {
   var options = {
     url : 'http://localhost:3000/api/ressource',
@@ -430,39 +497,76 @@ function addRessource(ressource, next) {
   })
 }
 
+/**
+ * Affiche la compilation des résultats
+ * @param next
+ */
 function displayResult(next) {
   // attendues 4109 + 1613
   log(nbRessToParse +' ressources trouvées en bdd')
   log(idsParsed.length +' ressources traitées')
   log(idsOk.length +' ressources enregistrées')
   if (idsFailed.length) {
+    var fs = require('fs')
+    var logfile = __dirname + '/../logs/' +__filename +'.error.log'
+    var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
+    log('erreurs vers '+logfile)
     log(idsFailed.length +' ressources avec erreurs :')
+    writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
     idsFailed.forEach(function (id) {
       log(id +' : ' +errors[id])
+      writeStream.write(id +' : ' +errors[id])
     })
+    writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
+    writeStream.end();
   } else log('Aucune erreur rencontrée')
   next()
 }
 
 module.exports = function () {
-    log('task ' + __filename);
-    flow()
-        .seq(function () {
-          importMEPS(this)
-        })
-        .seq(function () {
-          importAIDES(this)
-        })
-        .seq(function () {
-          flushPendingRelations(this)
-        })
-        .seq(function () {
-          displayResult(this)
-        })
-        .seq(function (){
-          log('END');
-        })
-        .catch(function (error) {
-          console.error('Erreur dans le flow : \n' + error.stack);
-        })
+  // les 3 premiers args sont node, /path/2/gulp, importMEPS
+  var argv = process.argv.slice(3)
+  // tout par défaut
+  var mepIds = 'all',
+      aideIds = 'all'
+
+  log('task ' + __filename);
+
+  // sauf si on précise l'un ou l'autre (on impose le log dans ce cas
+  if (argv[0] === '--mep') {
+    mepIds = argv.slice(1)[0]
+    checkListOfInt(mepIds)
+    aideIds = undefined
+    log('On ne traitera que les id mep ' +mepIds)
+    logProcess = true
+    logRelations = true
+  } else if (argv[0] === '--aide') {
+    aideIds = argv.slice(1)[0]
+    checkListOfInt(aideIds)
+    mepIds = undefined
+    log('On ne traitera que les id aide ' +aideIds)
+    logProcess = true
+    logRelations = true
+  }
+
+  flow()
+      .seq(function () {
+        importMEPS(this, mepIds)
+      })
+      .seq(function () {
+        importAIDES(this, aideIds)
+      })
+      .seq(function () {
+        flushPendingRelations(this)
+      })
+      .seq(function () {
+        displayResult(this)
+      })
+      .seq(function () {
+        log('END')
+        process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
+      })
+      .catch(function (error) {
+        console.error('Erreur dans le flow : \n' + error.stack);
+      })
 }

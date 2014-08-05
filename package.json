@@ -18,10 +18,7 @@
   },
   "devDependencies": {
     "express-debug": "^1.1.0",
-    "gulp": "^3.8.5",
-    "gulp-concat": "^2.2.0",
-    "gulp-debug": "^0.3.0",
-    "gulp-dust": "^0.3.0",
+    "gulp": "^3.8.7",
     "gulp-jsdoc": "^0.1.4",
     "gulp-jshint": "^1.7.0",
     "gulp-sass": "0.7.1",
