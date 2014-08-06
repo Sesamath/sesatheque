@@ -5,7 +5,8 @@
  * sans l'appli bibliothèque ni lassi
  */
 'use strict';
-
+/** timeout en ms */
+var timeout = 2000;
 /** pour logguer les relations */
 var logRelations = false
 /** pour loguer le processing (un point par ressource sinon) */
@@ -68,7 +69,7 @@ function checkEnd() {
     errors['0'] += msg +'\n'
     log(msg)
     nextStep()
-  }, 1000)
+  }, timeout)
 
   nbWaiting--
   if (nbWaiting === 0) {

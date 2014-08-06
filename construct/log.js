@@ -23,6 +23,14 @@ var logDev;
 var filters = {}
 
 /**
+ * Retourne le nb de ms écoulées depuis start
+ * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
+ */
+function getElapsed(start) {
+  return (new Date()).getTime() -start
+}
+
+/**
  * Active un filtre (le créé si besoin)
  */
 function setFilterOn(filter) {
@@ -91,6 +99,7 @@ if (env === 'dev') {
 }
 
 module.exports = {
+  getElapsed:getElapsed,
   dev : logDev,
   error : logError,
   errorData : logErrorData,

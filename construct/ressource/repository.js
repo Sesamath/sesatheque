@@ -107,6 +107,7 @@ ressourceRepository.write = function(ressource, next) {
     ressource = lassi.entity.Ressource.create(ressource)
     log.dev('cast en Ressource : ' +ressource.constructor.name)
   }
+  var t = lassi.tmp[ressource.id]
   //log.dev("avant validation dans write", ressource)
   flow()
       // validation
@@ -114,9 +115,10 @@ ressourceRepository.write = function(ressource, next) {
       // setVersion
       .seq(function (ressource) { setVersion(ressource, this) })
       // store
-      .seq(function (ressource) { ressource.store(this) })
+      .seq(function (ressource) { t.m += '\tvsv ' +log.getElapsed(t.s); ressource.store(this) })
       // ajout de l'id si c'était un insert, et
       .seq(function (ressource) {
+        t.m += '\tst ' +log.getElapsed(t.s)
           if (ressource.id) { this(null, ressource) }// rien à faire
           else {
             // pas d'id, pas le choix faut une 2e requete d'update avec l'id qu'on génère ici :-(
