@@ -6,11 +6,15 @@
  */
 'use strict';
 /** timeout en ms */
-var timeout = 2000;
+var timeout = 3000
+var maxLaunched = 100
+
 /** pour logguer les relations */
 var logRelations = false
 /** pour loguer le processing (un point par ressource sinon) */
 var logProcess = false
+/** pour loguer les ressources dont le retour est ok */
+var logOk = false
 
 var knex = require('knex');
 var _ = require('underscore')._;
@@ -37,6 +41,8 @@ var decalageAm = 6000;
 
 // les ids traités
 var nbRessToParse = 0
+var nbToRec = 0
+var nbRec = 0
 var idsParsed = [];
 var idsOk = []
 var idsFailed = [];
@@ -54,29 +60,46 @@ function log(msg, objToDump) {
 }
 
 // pour passer à l'étape suivante
-var nbWaiting = 0
+var nbLaunched = 0
+var waitingRessource = []
 var nextStep
 var timerId
 
 /**
- * Lance l'étape suivante si toutes les ressources ont été traitées ou si on reste plus d'1s sans être rappelé
+ * Lance l'étape suivante si toutes les ressources ont été traitées ou si on reste plus de timeout ms sans être rappelé
  */
 function checkEnd() {
+  // le timeout
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(function () {
-    var msg = 'timeout, 1s sans rien depuis le dernier retour de bdd, il restait ' +nbWaiting +' ressources\n' +
-        'trouvées ' +nbRessToParse +'parsed ' +idsParsed.length +', failed ' +idsFailed.length
+    var msg = 'timeout, ' +Math.floor(timeout / 1000) +
+        's sans rien depuis le dernier retour de bdd, il restait ' +nbLaunched +' ressources en cours et ' +
+        waitingRessource.length+' en attente de traitement\n' +
+        'trouvées ' +nbRessToParse +', parsed ' +idsParsed.length +', failed ' +idsFailed.length
     errors['0'] += msg +'\n'
     log(msg)
     nextStep()
   }, timeout)
 
-  nbWaiting--
-  if (nbWaiting === 0) {
-    log('toutes les ressources de cette étape ont été traitées')
+  // on regarde s'il en reste en attente et si c'est terminé
+  if (waitingRessource.length) {
+    while (nbLaunched < maxLaunched && waitingRessource.length) {
+      addRessource(waitingRessource.shift(), checkEnd)
+    }
+  } else if (nbLaunched === 0) {
+    log('toutes les ressources de cette étape ont été traitées (on en est à ' +nbRec +'/' +nbToRec)
     clearTimeout(timerId)
     nextStep()
   }
+}
+
+/**
+ * Lance l'ajout d'une ressource via l'api si on est pas au max et la met en attente sinon
+ * @param ressource
+ */
+function defer(ressource) {
+  if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
+  else waitingRessource.push(ressource)
 }
 
 /**
@@ -245,7 +268,7 @@ function initRessourceMep(row) {
   // aide
   if (row.mep_aide_id) {
     parametres.aide_id         = row.mep_aide_id;
-    relations.push([relCode.requiert, row.mep_aide_id]);
+    relations.push([relCode.requiert, row.mep_aide_id + decalageAm]);
     addPendingRelation(row.mep_aide_id + decalageAm, [relCode.estRequisPar, id]);
   }
   // traduction
@@ -334,7 +357,7 @@ function initRessourceAm(row) {
 function importMEPS(next, ids) {
   var ressourceCourante, where
   log('Starting importMEPS')
-  nbWaiting = 1 // au cas où un timer tournerait toujours
+  nbLaunched = 0
   nextStep = next
 
   // la liste des ids à traiter
@@ -364,13 +387,13 @@ function importMEPS(next, ids) {
         } /* */
 
           var ressources = rows[0]
-          nbWaiting = ressources.length
           nbRessToParse += ressources.length
+          nbToRec += ressources.length
           ressources.forEach(function(row) {
             ressourceCourante = initRessourceMep(row);
             idsParsed.push(ressourceCourante.id);
             if (logProcess) log('processing mep ' + ressourceCourante.id)
-            addRessource(ressourceCourante, checkEnd);
+            defer(ressourceCourante)
           })
       })
       .catch(function(e) {
@@ -386,7 +409,7 @@ function importAIDES(next, ids) {
   var ressourceCourante,
       where = ''
   log('Starting importAIDES')
-  nbWaiting = 1 // au cas où un timer tournerait toujours
+  nbLaunched = 0
   nextStep = next
 
   // la liste des ids à traiter
@@ -406,12 +429,12 @@ function importAIDES(next, ids) {
           " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateMiseAJour" +
           " FROM AIDES a " +where)
       .then(function (rows) {
-        nbWaiting = rows[0].length
+        nbToRec += rows[0].length
         nbRessToParse += rows[0].length
         rows[0].forEach(function(row) {
             ressourceCourante = initRessourceAm(row)
             idsParsed.push(ressourceCourante.id);
-            log('processing aide ' + ressourceCourante.id)
+            if (logProcess) log('processing aide ' + ressourceCourante.id)
             addRessource(ressourceCourante, checkEnd);
         })
       })
@@ -426,23 +449,24 @@ function importAIDES(next, ids) {
  * Passe en revue les relations qui n'auraient pas été affectées
  * @param next
  */
-function flushPendingRelations(next) {
-  nbWaiting = 0
+function flushPendingRelationsOld(next) {
+  nbLaunched = 0
   nextStep = next
 
   if (_.isEmpty(pendingRelations)) {
     log('Rien à faire dans flushPendingRelations')
     next()
   } else {
-    log('start flushPendingRelations', pendingRelations)
+    log('start flushPendingRelations')
     _.each(pendingRelations, function (relations, id) {
-      nbWaiting++
+      nbToRec++
       // on récupère la ressource avec l'api
       var options = {
         url         : 'http://localhost:3000/api/ressource/' + id,
         json        : true,
         content_type: 'charset=UTF-8'
       }
+      log('relations de '+id)
       request.get(options, function (error, response, ressource) {
         if (ressource.error) {
           errors['0'] += "Erreur sur la récupération de " + id + ' : ' + ressource.error
@@ -451,12 +475,73 @@ function flushPendingRelations(next) {
           errors['0'] += "Erreur sur la récupération de " + id + " (ressource incohérente)"
           checkEnd()
         } else {
+          log(id +' récupérée')
           if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = relations
           else ressource.relations = ressource.relations.concat(relations)
-          addRessource(ressource, checkEnd)
+          defer(ressource)
         }
       })
     })
+  }
+}
+
+/**
+ * Passe en revue les relations qui n'auraient pas été affectées, mais une par une
+ * (plusieurs relations peuvent affecter les même ressources, deux updates en // marchent pas)
+ * @param next
+ */
+function flushPendingRelations(next) {
+  var pile = []
+
+  function depile() {
+    var task, options, id, relations
+    if (pile.length) {
+      task = pile.shift()
+      id = task[0]
+      relations = task[1]
+      // on récupère la ressource avec l'api
+      options = {
+        url         : 'http://localhost:3000/api/ressource/' + id,
+        json        : true,
+        content_type: 'charset=UTF-8'
+      }
+      log('relations de '+id +' ' +JSON.stringify(relations))
+      request.get(options, function (error, response, ressource) {
+        if (ressource.error) {
+          errors['0'] += "Erreur sur la récupération de " + id + ' : ' + ressource.error
+          log('erreur ' +ressource.error)
+          depile()
+        } else if (ressource.id != id) {
+          errors['0'] += "Erreur sur la récupération de " + id + " (ressource incohérente)"
+          log('erreur cohérence')
+          depile()
+        } else {
+          log(id +' récupérée')
+          if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = relations
+          else ressource.relations = ressource.relations.concat(relations)
+          addRessource(ressource, depile)
+        }
+      })
+
+    } else {
+      next()
+    }
+  } // depile
+
+  if (_.isEmpty(pendingRelations)) {
+    log('Rien à faire dans flushPendingRelations')
+    next()
+  } else {
+    log('start flushPendingRelations')
+
+    // on remplit la pile
+    _.each(pendingRelations, function (relations, id) {
+      nbToRec++
+      pile.push([id, relations])
+    })
+
+    // et on lance sa vidange
+    depile()
   }
 }
 
@@ -466,6 +551,7 @@ function flushPendingRelations(next) {
  * @param next
  */
 function addRessource(ressource, next) {
+  nbLaunched++
   var options = {
     url : 'http://localhost:3000/api/ressource',
     json: true,
@@ -474,6 +560,7 @@ function addRessource(ressource, next) {
     form: ressource
   }
   request.post(options, function (error, response, body) {
+    nbLaunched--
     if (error) {
       idsFailed.push(ressource.id)
       errors[ressource.id] = error.toString()
@@ -486,7 +573,8 @@ function addRessource(ressource, next) {
       } else {
         if (body.id == ressource.id) {
           idsOk.push(ressource.id)
-          log(ressource.id +' ok')
+          nbRec++
+          if (logOk) log(ressource.id +' ok')
         } else {
           idsFailed.push(ressource.id)
           errors[ressource.id] = JSON.stringify(body)
@@ -507,6 +595,8 @@ function displayResult(next) {
   log(nbRessToParse +' ressources trouvées en bdd')
   log(idsParsed.length +' ressources traitées')
   log(idsOk.length +' ressources enregistrées')
+  log('à enregistrer : ' +nbToRec)
+  log('enregistrées : ' +nbRec)
   if (idsFailed.length) {
     var fs = require('fs')
     var logfile = __dirname + '/../logs/' +__filename +'.error.log'
