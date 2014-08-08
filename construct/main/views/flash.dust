@@ -1,0 +1,7 @@
+{!flashBloc!}
+{#errors}
+    <p class="error">{.}</p>
+{/errors}
+{#warnings}
+    <p class="warning">{.}</p>
+{/warnings}

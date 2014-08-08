@@ -21,16 +21,17 @@
   </div>
 
   <div id="body" class="container">
+  {#flashBloc}{.|s}{/flashBloc}
     <div class="row">
         <div class="col-md-3" id="auth">
             {#authBloc}{.|s}{/authBloc}
         </div>
-          <div class="col-md-3" id="sidebar">
-            {#sidebar}{.|s}{/sidebar}
-          </div>
-          <div id="content" class="col-md-9">
-            {#content}{.|s}{/content}
-          </div>
+        <div class="col-md-3" id="sidebar">
+        {#sidebar}{.|s}{/sidebar}
+        </div>
+        <div id="content" class="col-md-9">
+        {#content}{.|s}{/content}
+        </div>
       </div>
   </div>
 
