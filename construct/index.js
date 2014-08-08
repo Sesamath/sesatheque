@@ -22,10 +22,11 @@ var application = lassi.Application();
 application.on('boot', function(){
   console.log("Boot de l'application " + application.name);
   log.dev('BOOT');
+  /* on a une tache gulp reset pour ça, on ne vide plus systématiquement les sessions au démarrage
   if (lassi.sessions && application.settings.staging !== lassi.Staging.production) {
     log.dev('Purge des sessions récupérées')
     lassi.sessions = {}
-  }
+  } */
 });
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici

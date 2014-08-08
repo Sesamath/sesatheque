@@ -13,8 +13,8 @@ controller
     .renderWith('deconnexion')
     .do(function (ctx, next) {
       var msg 
-      if (lassi.session.user) {
-        lassi.session.user = {}
+      if (ctx.session.user) {
+        ctx.session.user = {}
         msg = 'déconnexion effectuée'
       } else msg = "Cet utilisateur n'était pas connecté"
       next(null, {msg:msg})
