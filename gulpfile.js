@@ -105,4 +105,55 @@ if (fs.existsSync(taskDir)) {
   })
 }
 
+gulp.task('purge', function() {
+  // on efface la session
+  var file = './temp/sessions.json'
+  if (fs.lstatSync(file).isFile()) {
+    fs.unlinkSync(file)
+    console.log(file +' effacé')
+  }
+  // et les logs
+  var dirLogs = './logs'
+  if (fs.existsSync(dirLogs) && fs.lstatSync(dirLogs).isDirectory()) {
+    fs.readdirSync(dirLogs).forEach(function (log) {
+      file = dirLogs + '/' + log
+      if (fs.lstatSync(file).isFile()) {
+        fs.unlinkSync(file);
+        console.log(file +' effacé')
+      }
+    })
+  } else {
+    console.log('pas de dossier ' +dirLogs)
+  }
+});
+
+gulp.task('reset', ['purge', 'compile-sass', 'watch'])
+
 gulp.task('default', ['compile-sass', 'watch'])
+
+/**
+ * On conserve ce bout de code qui pourrait resservir
+ * Tâche qui efface build
+ * /
+gulp.task('clean', function () {
+  // thanks to http://stackoverflow.com/a/12761924
+  // works on windows ?
+  function deleteFolderRecursive(path) {
+    var files = [];
+    if (fs.existsSync(path)) {
+      files = fs.readdirSync(path);
+      files.forEach(function (file, index) {
+        var curPath = path + "/" + file;
+        if (fs.lstatSync(curPath).isDirectory()) { // recurse
+          deleteFolderRecursive(curPath);
+        } else { // delete file
+          fs.unlinkSync(curPath);
+        }
+      });
+      fs.rmdirSync(path);
+    }
+  }
+
+  deleteFolderRecursive('./build');
+});
+/* */
