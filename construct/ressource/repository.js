@@ -198,7 +198,7 @@ ressourceRepository.load = function(id, next) {
   var ressourceCached = cacheGet(id)
   if (ressourceCached) next(null, ressourceCached)
   else {
-    log.dev('ressource ' +id +' pas en cache', ressourceCached)
+    log.dev('ressource ' +id +' pas en cache')
     lassi.entity.Ressource.match('id').equals(id).sort('version', 'desc').grabOne(function (error, ressource) {
       if (error) next(error)
       else if (ressource) {

@@ -11,15 +11,15 @@ mainComponent.initialize = function(next) {
   this.application.transports.html.on('layout', function(useLayout) {
     if (useLayout.context.status) {
       switch(useLayout.context.status) {
-        case 404: useLayout(component, 'layout-page404'); break;
-        case 403: useLayout(component, 'layout-page403'); break;
-        default: useLayout(component, 'layout-page-error');
+        case 404: useLayout(mainComponent, 'layout-page404'); break;
+        case 403: useLayout(mainComponent, 'layout-page403'); break;
+        default: useLayout(mainComponent, 'layout-page-error');
       }
     } else if (useLayout.context.action == lassi.action.ressource.display) {
       // le layout sans navigation ni header
-      useLayout(component, 'layout-iframe');
+      useLayout(mainComponent, 'layout-iframe');
     } else {
-      useLayout(component, 'layout-page');
+      useLayout(mainComponent, 'layout-page');
     }
   });
 

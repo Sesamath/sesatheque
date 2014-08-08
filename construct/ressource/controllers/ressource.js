@@ -81,7 +81,7 @@ controller
             pluginBaseUrl:'../../plugins/' +ressource.typeTechnique,
             vendorsBaseUrl:'../../vendors',
             pluginName : ressource.typeTechnique,
-            ressource:JSON.stringify(ressource)
+            ressource: ressource.toString()
           }
         }
         next(null, data)

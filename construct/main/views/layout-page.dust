@@ -22,6 +22,9 @@
 
   <div id="body" class="container">
     <div class="row">
+        <div class="col-md-3" id="auth">
+            {#authBloc}{.|s}{/authBloc}
+        </div>
           <div class="col-md-3" id="sidebar">
             {#sidebar}{.|s}{/sidebar}
           </div>
