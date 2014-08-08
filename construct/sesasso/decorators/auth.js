@@ -37,7 +37,14 @@ module.exports = lassi.Decorator('auth')
       // log.dev('request', ctx.request)
 
       if (ctx.get.hasOwnProperty('ticket')) {
-        checkTicket(ctx, next)
+        if (ctx.session.user && ctx.session.user.id) {
+          if (!ctx.session.flash) ctx.session.flash = {}
+          if (!ctx.session.flash.warnings) ctx.session.flash.warnings = []
+          ctx.session.flash.warnings.push("Utilisateur déjà connecté, ticket passé en paramètre ignoré")
+          ctx.redirect(getMyUrl(ctx))
+        } else {
+          checkTicket(ctx, next)
+        }
 
       } else if (ctx.get.hasOwnProperty('connexion')) {
         // connexion
@@ -67,7 +74,7 @@ module.exports = lassi.Decorator('auth')
 /**
  * Renvoie l'url courante, débarassée de ses arguments non voulus
  * @param {Context} ctx     Le contexte
- * @param {boolean} encoded passer true pour récupérer la chaine après encodeURIComponent
+ * @param {boolean} encoded [optional] passer true pour récupérer la chaine après encodeURIComponent
  */
 function getMyUrl(ctx, encoded) {
   var myUrl = 'http://' +ctx.request.headers.host
@@ -113,21 +120,26 @@ function checkTicket(ctx, next) {
       if (!body.SSO) throw new Error("Le serveur d'authentification n'a pas renvoyé la réponse attendue, " +
         "impossible de valider le ticket transmis")
       personneSso = new PersonneSso(body.SSO)
-      if (!personneSso.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant, " +
-        "impossible de valider le ticket transmis")
-      personneSso.toPersonne(function(personne) {
-        if (personne && personne.id) {
-          ctx.session.user = personne.toObject()
-          next(null, ctx.session.user)
-        } else {
-          var error = new Error("Erreur interne, l'initialisation de l'utilisateur courant a échoué")
-          log.error(error)
-          throw error
-        }
-      })
+      if (!personneSso.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant" +
+          " pour le ticket transmis")
     } catch (error) {
       log.dev(error.stack)
       next(null, {error:error.toString()})
     }
+
+    personneSso.toPersonne(function(error, personne) {
+      if (error) next(error)
+      else if (personne && personne.oid) {
+        ctx.session.user = personne.toObject()
+        log.dev('ticket OK, user enregistré localement et en session', ctx.session.user)
+        // on redirige vers cette page sans le ticket en get
+        ctx.redirect(getMyUrl(ctx))
+      } else {
+        log.dev('pb de personne', personne)
+        error = new Error("Erreur interne, l'initialisation de l'utilisateur courant a échoué")
+        log.error(error +' (id ' +personneSso.id +')')
+        next(error)
+      }
+    })
   })
 }

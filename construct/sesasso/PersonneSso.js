@@ -39,9 +39,9 @@ function PersonneSso(sso) {
  * @returns {Personne}
  */
 PersonneSso.prototype.toPersonne = function(next) {
-  log.dev('dans toPersonne le next', next)
   if (!this.id) throw new Error("Impossible de convertir une personne sans id")
-  // on essaie d'abord de récupérer l'entity, car elle est probablement déjà en BdD
+
+  // on met au format personne
   var personneMaj = {
     id:this.id,
     login:this.login,
@@ -56,24 +56,18 @@ PersonneSso.prototype.toPersonne = function(next) {
       grpWiki:this.grpWiki
     }
   }
+
+  // on essaie d'abord de récupérer l'entity, car elle est probablement déjà en BdD
   lassi.personne.load(this.id, function(personne) {
-    if (!personne) personne = lassi.entity.Personne.create(personneMaj)
-    else {
-      // on regarde si qqchose a changé pour le sauvegarder
-      var change = false
-      _.each(personneMaj, function(value, key) {
-        if (!_.isEqual(value, personne[key])) {
-          personne[key] = value
-          change = true
-        }
-      })
-      // on passe un next juste pour logger d'éventuelles erreurs,
-      // pas gênant que ce soit fait en asynchrone, au pire si ça plante ça sera relancé au prochain login sso
-      if (change) personne.store(function (error, personne) {
-        if (error) log.error(error)
-      })
+    if (personne) {
+      // on l'avait déjà, on regarde si qqchose a changé pour le sauvegarder
+      if (_.isEqual(personne.toObject(), personneMaj)) next(personne)
+      else personne.store(next)
+    } else {
+      // c'est un nouveau
+      personne = lassi.entity.Personne.create(personneMaj)
+      personne.store(next)
     }
-    next(personne)
   })
 }
 
