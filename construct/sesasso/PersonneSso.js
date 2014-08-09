@@ -1,5 +1,6 @@
 /**
  * Un constructeur pour les objets retournés par le sso
+ * (module js standard, pas un composant lassi, utilisé par le composant sesasso)
  */
 'use strict'
 
@@ -35,10 +36,10 @@ function PersonneSso(sso) {
 }
 
 /**
- * Converti une ssoPersonne en entity Personne (la cherche en bdd et l'enregistre si besoin)
- * @returns {Personne}
+ * Converti une ssoPersonne en objet ayant les propriétés d'une entity Personne (sauf oid et _entity)
+ * @returns {Object}
  */
-PersonneSso.prototype.toPersonne = function(next) {
+PersonneSso.prototype.toPersonne = function() {
   if (!this.id) throw new Error("Impossible de convertir une personne sans id")
 
   // on met au format personne
@@ -57,18 +58,7 @@ PersonneSso.prototype.toPersonne = function(next) {
     }
   }
 
-  // on essaie d'abord de récupérer l'entity, car elle est probablement déjà en BdD
-  lassi.personne.load(this.id, function(personne) {
-    if (personne) {
-      // on l'avait déjà, on regarde si qqchose a changé pour le sauvegarder
-      if (_.isEqual(personne.toObject(), personneMaj)) next(personne)
-      else personne.store(next)
-    } else {
-      // c'est un nouveau
-      personne = lassi.entity.Personne.create(personneMaj)
-      personne.store(next)
-    }
-  })
+  return lassi.entity.Personne.create(personneMaj)
 }
 
 module.exports = PersonneSso

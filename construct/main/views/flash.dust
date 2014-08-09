@@ -1,7 +1,4 @@
-{!flashBloc!}
-{#errors}
-    <p class="error">{.}</p>
-{/errors}
-{#warnings}
-    <p class="warning">{.}</p>
-{/warnings}
+{! flashBloc !}
+{#messages}
+<p {?level}class="{level}"{/level}>{value}</p>
+{/messages}

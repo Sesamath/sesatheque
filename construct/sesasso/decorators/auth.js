@@ -27,27 +27,27 @@ var urlAuth = '/sesamath/pages/identification.php'
 var urlDeco = '/sesamath/pages/identification_deconnexion.php'
 var urlWs = '/sesamath/pages/identification_webservice.php'
 var hostAuth = 'https://ssl.sesamath.net'
-if (appConfig.application.staging !== lassi.Staging.production) hostAuth += ':8443'
+if (appConfig && appConfig.application.staging !== lassi.Staging.production) hostAuth += ':8443'
 
 module.exports = lassi.Decorator('auth')
     .renderTo('authBloc')
     .do(function(ctx, next) {
       var urlSso = hostAuth
-
-      // log.dev('request', ctx.request)
-
       if (ctx.get.hasOwnProperty('ticket')) {
+        /**
+         * Check d'un ticket (appel de sso et redirect ici sans le ticket)
+         */
         if (ctx.session.user && ctx.session.user.id) {
-          if (!ctx.session.flash) ctx.session.flash = {}
-          if (!ctx.session.flash.warnings) ctx.session.flash.warnings = []
-          ctx.session.flash.warnings.push("Utilisateur déjà connecté, ticket passé en paramètre ignoré")
+          lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté, ticket passé en paramètre ignoré", 'warning')
           ctx.redirect(getMyUrl(ctx))
         } else {
           checkTicket(ctx, next)
         }
 
       } else if (ctx.get.hasOwnProperty('connexion')) {
-        // connexion
+        /**
+         * Connexion (via redirect vers sso)
+         */
         if (!ctx.session.user || !ctx.session.user.id) {
           // faut aller chercher un ticket
           urlSso += urlAuth +'?statut_requis=Prof_Valide' +
@@ -58,16 +58,25 @@ module.exports = lassi.Decorator('auth')
           ctx.redirect(urlSso)
         } else {
           // sinon on redirige vers la page courante sans ce param car on est déjà connecté
+          lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté", "notice")
           ctx.redirect(getMyUrl(ctx))
         }
 
       } else if (ctx.get.hasOwnProperty('deconnexion')) {
-        // deconnexion, on renvoie vers le host sso
+        /**
+         * Connexion (via redirect vers sso)
+         */
+        delete ctx.session.user
         ctx.redirect(urlSso + urlDeco)
 
       } else {
-        // on fait notre boulot de décorateur std pour alimenter le bloc user
-        next(null, {user:ctx.session.user});
+        /**
+         * on fait notre boulot de décorateur std pour alimenter le bloc user
+         * attention, si on renvoie undefined ou un objet vide le bloc n'est pas rendu
+         */
+        var data = getUserForDust(ctx.session.user)
+        //log.dev("décorateur auth renvoie", data)
+        next(null, data)
       }
     });
 
@@ -93,12 +102,33 @@ function getMyUrl(ctx, encoded) {
 }
 
 /**
+ * Récupère les propriétés id, nom, prénom de personne et les renvoient, un objet vide sinon
+ * (mais pas undefined sinon le bloc n'est pas rendu)
+ * @param personne
+ */
+function getUserForDust(personne) {
+  var user = {}
+  if (personne && personne.id) {
+    user.id = personne.id
+    user.nom = personne.nom
+    user.prenom = personne.prenom
+  } else {
+    // faut renvoyer qqchose sinon le bloc n'est pas rendu
+    user.none = true
+  }
+
+  return user
+}
+
+/**
  * Vérifie un ticket en appelant le serveur SSO, enregistre les infos retournées si ok et met le user en session
  * @param ctx
  * @param next
  */
 function checkTicket(ctx, next) {
-  if (!ctx.get.ticket) return
+  if (!ctx.get.ticket) throw new Error("checkTicket appelé sans ticket dans l'url")
+
+  log.dev('On poste pour valider le ticket')
   var options = {
     url : hostAuth + urlWs,
     json: true,
@@ -110,10 +140,31 @@ function checkTicket(ctx, next) {
       ticket_client:ctx.get.ticket
     }
   }
-  log.dev('On poste pour valider le ticket')
   request.post(options, function (error, response, body) {
     var personneSso
-    //log.dev('On récupère', body)
+
+    /**
+     * Enregistre le user en sesion et redirige (ou appelle next en cas de pb)
+     * @param error
+     * @param personne
+     */
+    function setSessionAndRedirect(error, personne) {
+      if (error) next(error)
+      else if (personne && personne.oid) {
+        ctx.session.user = personne.toObject()
+        log.dev('ticket OK, user enregistré localement et en session, ' +ctx.session.user.oid)
+        // on redirige vers cette page sans le ticket en get
+        ctx.redirect(getMyUrl(ctx))
+      } else {
+        log.dev('pb de personne', personne)
+        error = new Error("Erreur interne, l'initialisation de l'utilisateur courant a échoué")
+        log.error(error +' (id ' +personneSso.id +')')
+        next(error)
+      }
+      next(null, personne)
+    }
+
+    // analyse du retour du serveur sso
     try {
       if (error) throw error
       if (body.error) throw new Error(body.error)
@@ -123,23 +174,27 @@ function checkTicket(ctx, next) {
       if (!personneSso.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant" +
           " pour le ticket transmis")
     } catch (error) {
+      // on affichera l'erreur sur la page (sans erreur 500)
       log.dev(error.stack)
       next(null, {error:error.toString()})
     }
 
-    personneSso.toPersonne(function(error, personne) {
-      if (error) next(error)
-      else if (personne && personne.oid) {
-        ctx.session.user = personne.toObject()
-        log.dev('ticket OK, user enregistré localement et en session', ctx.session.user)
-        // on redirige vers cette page sans le ticket en get
-        ctx.redirect(getMyUrl(ctx))
+    // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
+    lassi.personne.load(personneSso.id, function(error, personne) {
+      var newPersonne = personneSso.toPersonne()
+      var needToStore = true
+
+      if (personne) {
+        // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
+        newPersonne.oid = personne.oid
+        if (_.isEqual(personne.toObject(), newPersonne)) needToStore = false
+        else lassi.tools.update(personne, newPersonne) // ça a changé, on met à jour l'entité
       } else {
-        log.dev('pb de personne', personne)
-        error = new Error("Erreur interne, l'initialisation de l'utilisateur courant a échoué")
-        log.error(error +' (id ' +personneSso.id +')')
-        next(error)
+        // c'est un nouveau
+        personne = lassi.entity.Personne.create(newPersonne)
       }
+      if (needToStore) personne.store(setSessionAndRedirect)
+      else setSessionAndRedirect(null, personne)
     })
   })
 }

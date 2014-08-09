@@ -36,11 +36,13 @@ personneComponent.initialize = function(next) {
  * @param next
  */
 personneComponent.load = function(id, next) {
+  log.dev('load ' +id)
   var personneCached = lassi.cache.get('personne_' + id)
   if (personneCached) next(null, personneCached)
   else {
     log.dev('personne ' +id +' pas en cache')
     lassi.entity.Personne.match('id').equals(id).grabOne(function (error, personne) {
+      log.dev('remonte ', personne)
       if (error) next(error)
       else if (personne) {
         lassi.cache.set('personne_' + id, personne)

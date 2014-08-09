@@ -1,23 +1,28 @@
 'use strict'
 
 /**
- * Pour la page de déconnexion locale appelée en ajax par le serveur sso
+ * Pour la déconnexion locale, appelée en jsonp par le serveur sso
  */
 
 var controller = lassi.Controller('sesasso');
 
-controller.respond('html');
+controller.respond('json') // en fait du jsonp
 
 controller
     .Action('deconnexion')
     .renderWith('deconnexion')
     .do(function (ctx, next) {
-      var msg 
-      if (ctx.session.user) {
+      var id = 'id_inconnu'
+      log.dev("ds act deco")
+      if (ctx.session.user && ctx.session.user.id) {
+        // le sso s'attend à récupérer l'id (Cf ssl:/sesamath/pages/identification_deconnexion.js)
+        id = ctx.session.user.id
+        // on efface en session
         ctx.session.user = {}
-        msg = 'déconnexion effectuée'
-      } else msg = "Cet utilisateur n'était pas connecté"
-      next(null, {msg:msg})
+        // et on envoie
+        log.dev("on a id " +id)
+      }
+      next(null, {id:id})
     })
 
 module.exports = controller;

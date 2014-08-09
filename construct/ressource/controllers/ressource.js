@@ -62,13 +62,16 @@ controller
     })
 
 /**
- * display : Voir la ressource (layout-iframe défini ressource.display pour dans le main)
+ * display : Voir la ressource (layout-iframe est défini pour ressource.display dans le mainComponent.initialize)
  */
 controller
   .Action(routes.display + '/:id', 'ressource.display')
   .renderWith('display')
   .do(function (ctx, next) {
       var id = ctx.arguments.id
+      // on force le layout en ajoutant cette propriété au contexte,
+      // qui sera récupéré par l'écouteur layout défini dans le mainComponent.initialize
+      ctx.forceLayout = 'layout-iframe'
       lassi.ressource.load(id, function (error, ressource) {
         var data
         if (!ressource) {

@@ -24,7 +24,7 @@
   {#flashBloc}{.|s}{/flashBloc}
     <div class="row">
         <div class="col-md-3" id="auth">
-            {#authBloc}{.|s}{/authBloc}
+            {#authBloc}{.|s}{:else}pas de authBloc{/authBloc}
         </div>
         <div class="col-md-3" id="sidebar">
         {#sidebar}{.|s}{/sidebar}
