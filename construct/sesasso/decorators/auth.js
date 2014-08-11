@@ -96,7 +96,6 @@ function getMyUrl(ctx, encoded) {
     if (key !== 'connexion' && key !== 'deconnexion' && key !== 'ticket')
         queryString += (queryString === '' ? '?' : '&') +key +'=' +value
   })
-  log.dev(ctx.request.url, myUrl + queryString)
 
   return encoded ? encodeURIComponent(myUrl + queryString) : myUrl + queryString
 }
@@ -173,28 +172,30 @@ function checkTicket(ctx, next) {
       personneSso = new PersonneSso(body.SSO)
       if (!personneSso.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant" +
           " pour le ticket transmis")
+
+      // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
+      lassi.personne.load(personneSso.id, function(error, personne) {
+        var newPersonne = personneSso.toPersonne()
+        var needToStore = true
+
+        if (personne) {
+          // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
+          newPersonne.oid = personne.oid
+          if (_.isEqual(personne.toObject(), newPersonne)) needToStore = false
+          else lassi.tools.update(personne, newPersonne) // ça a changé, on met à jour l'entité
+        } else {
+          // c'est un nouveau
+          personne = lassi.entity.Personne.create(newPersonne)
+        }
+        if (needToStore) personne.store(setSessionAndRedirect)
+        else setSessionAndRedirect(null, personne)
+      })
+
     } catch (error) {
       // on affichera l'erreur sur la page (sans erreur 500)
       log.dev(error.stack)
       next(null, {error:error.toString()})
     }
 
-    // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
-    lassi.personne.load(personneSso.id, function(error, personne) {
-      var newPersonne = personneSso.toPersonne()
-      var needToStore = true
-
-      if (personne) {
-        // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
-        newPersonne.oid = personne.oid
-        if (_.isEqual(personne.toObject(), newPersonne)) needToStore = false
-        else lassi.tools.update(personne, newPersonne) // ça a changé, on met à jour l'entité
-      } else {
-        // c'est un nouveau
-        personne = lassi.entity.Personne.create(newPersonne)
-      }
-      if (needToStore) personne.store(setSessionAndRedirect)
-      else setSessionAndRedirect(null, personne)
-    })
   })
 }

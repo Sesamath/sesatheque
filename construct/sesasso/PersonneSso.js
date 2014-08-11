@@ -1,10 +1,10 @@
+'use strict'
 /**
  * Un constructeur pour les objets retournés par le sso
  * (module js standard, pas un composant lassi, utilisé par le composant sesasso)
  */
-'use strict'
 
-var _ = require('underscore')._
+//var _ = require('underscore')._
 
 /**
  * Constructeur appelé au retour de sso, ce n'est pas une entity
@@ -49,6 +49,7 @@ PersonneSso.prototype.toPersonne = function() {
     nom:this.nom,
     prenom:this.prenom,
     mail:this.emailPerso || this.emailAcad,
+    roles:[],
     infos:{
       statut:this.statut,
       structures:this.structures,
@@ -57,6 +58,9 @@ PersonneSso.prototype.toPersonne = function() {
       grpWiki:this.grpWiki
     }
   }
+  // reste les roles, on reste basique
+  if (this.statut && this.statut.Sesamath_CA_salarie) personneMaj.roles.push('admin')
+  else if (this.statut && this.statut.Sesamath_Membre) personneMaj.roles.push('editor')
 
   return lassi.entity.Personne.create(personneMaj)
 }

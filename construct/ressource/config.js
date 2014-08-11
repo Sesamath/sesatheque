@@ -181,8 +181,8 @@ module.exports = {
   // faudra modifier postToRessource dans edit.js si ça change
   typesVar         : {
     id               : 'Number',
-    origine           : 'String',
-    idOrigine         : 'String',
+    origine          : 'String',
+    idOrigine        : 'String',
     typeTechnique    : 'String',
     titre            : 'String',
     resume           : 'String',
@@ -269,10 +269,11 @@ module.exports = {
     },
     // des constantes pour nos routes (le nom des actions est en dur mais interne au code)
     routes : {
+      display:'voir',
+      preview:'apercu',
       add : 'ajouter',
       edit: 'modifier',
       describe:'decrire',
-      display:'voir',
       del:'supprimer'
     }
   }, // fin constantes

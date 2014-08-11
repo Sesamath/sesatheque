@@ -1,6 +1,6 @@
 {!blockAuth!}
 {?id}
-    <p>{prenom} {nom} (<a href="?deconnexion">me déconnecter</a>)</p>
+    <p>{prenom} {nom}<br />(<a href="?deconnexion">me déconnecter</a>)</p>
 {:else}
     <p><a href="?connexion">Connexion</a></p>
 {/id}

@@ -5,6 +5,7 @@
     <span class="publie">{?publie.value} Publié{:else} NON PUBLIÉ{/publie.value}</span>
     <span class="restriction">{?restreint.value} {restreint.titre} : {restreint.value}{:else} public{/restreint.value}</span>
     <h2>{titre.value}</h2>
+    <p>
     {id.title} : {id.value}{~s}
     ({typeTechnique.title} : {typeTechnique.value},{~s}
     {version.title} {version.value},{~s}
@@ -15,17 +16,21 @@
     {categories.title} : {categories.value}<br />
     {typePedagogiques.title} : {typePedagogiques.value}<br />
     {typeDocumentaires.title} : {typeDocumentaires.value}<br />
+    </p>
     <p>{resume.title} : {resume.value|s}</p>
     <p>{description.title} : {description.value|s}</p>
-    {?relations.value}<ul>{relations.title} {#relations.value}<li>{predicat} {lien|s}</li>{/relations.value}</ul>{/relations.value}<br />
-    <p>{commentaires.title} : {commentaires.value}</p>
+    <p>{commentaires.title} : {commentaires.value|s}</p>
     <p>{parametres.title} : {parametres.value}</p>
+
     {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}
         <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
     {/auteurs.value}</ul>{/auteurs.value}
     {?contributeurs.value}<ul>{contributeurs.titre} : {#contributeurs.value}
         <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
     {/contributeurs.value}</ul>{/contributeurs.value}
+
+    {?relations.value}<ul>{relations.title} {#relations.value}<li>{predicat} {lien|s}</li>{/relations.value}</ul>{/relations.value}<br />
+
 {/error}
 </div>
 {!

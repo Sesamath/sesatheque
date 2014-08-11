@@ -69,9 +69,11 @@ controller
   .renderWith('display')
   .do(function (ctx, next) {
       var id = ctx.arguments.id
+
       // on force le layout en ajoutant cette propriété au contexte,
       // qui sera récupéré par l'écouteur layout défini dans le mainComponent.initialize
       ctx.forceLayout = 'layout-iframe'
+
       lassi.ressource.load(id, function (error, ressource) {
         var data
         if (!ressource) {
@@ -89,8 +91,18 @@ controller
         }
         next(null, data)
       })
-  });
+    })
 
+/**
+ * preview : Voir la ressource dans le site
+ */
+controller
+  .Action(routes.preview + '/:id', 'ressource.preview')
+  .renderWith('preview')
+    .do(function (ctx, next) {
+      log.dev('url iframe', ctx.url(lassi.action.ressource.display, ctx.arguments))
+      next(null, {url:ctx.url(lassi.action.ressource.display, ctx.arguments)})
+    })
 
 /**
  * Create, le form de saisie
@@ -263,7 +275,7 @@ function sendPageData(error, ressource, ctx, next) {
             value.forEach(function (relation) {
               data.relations.value.push({
                 predicat : config.listes.relations[relation[0]],
-                lien : ctx.link(lassi.action.describe, relation[1], {id:relation[1]})
+                lien : ctx.link(lassi.action.ressource.describe, relation[1], {id:relation[1]})
               })
             })
             log.dev('relations ajoutée pour ' +ressource.id, data.relations)
@@ -285,6 +297,13 @@ function sendPageData(error, ressource, ctx, next) {
 
         } else if (_.isDate(value)) {
           data[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
+
+        } else if (_.isObject(value)) {
+          try {
+            data[key].value = JSON.stringify(value)
+          } catch (error) {
+            data[key].value = error.toString()
+          }
 
         } else {
           data[key].value = value;

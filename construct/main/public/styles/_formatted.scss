@@ -163,7 +163,7 @@
     padding: 10px 10px 10px 32px;
   }
 
-  attention {
+  .attention {
     @extend .base-texte;
     margin: 10px -10px;
     font-size:12px;
@@ -189,7 +189,7 @@
       float:left;
     }
   }
-  note {
+  .note {
     @extend attention;
     &:before {
       content: '';
