@@ -17,9 +17,11 @@ controller
     .do(function(ctx, next) {
       //log.dev("dans api write on récupère en post", ctx.post)
       try {
-        var msg = ctx.post.id
+        var id = ctx.post.id || 0
+        var msg = id
         // init du chrono
         var start = log.getElapsed(0)
+        /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
         if (!lassi.tmp) lassi.tmp = {}
         lassi.tmp[ctx.post.id] = {m:msg,s:start}
         var ressource = lassi.ressource.getRessourceFromPost(ctx.post)

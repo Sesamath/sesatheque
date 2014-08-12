@@ -43,7 +43,7 @@
         {! todo widget relations !}
 
         <div class="form-group">
-            {>wrapper widget="textarea" o=contenu cols=50 rows=5 /}
+            {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
         </div>
 
         {! todo widget auteurs et contributeurs !}

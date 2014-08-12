@@ -14,8 +14,8 @@ module.exports = lassi.Decorator('menu')
         links.push(ctx.link(lassi.action.ressource.add, 'Ajouter une ressource'))
         // on est sur une description
         if (ctx.action === lassi.action.ressource.describe || ctx.action === lassi.action.ressource.describeByOrigin) {
-          links.push(ctx.link(lassi.action.ressource.edit, 'Modifier cette ressource'))
-          links.push(ctx.link(lassi.action.ressource.del, 'Supprimer cette ressource'))
+          links.push(ctx.link(lassi.action.ressource.edit, 'Modifier cette ressource', ctx.arguments))
+          links.push(ctx.link(lassi.action.ressource.del, 'Supprimer cette ressource', ctx.arguments))
         }
       }
 

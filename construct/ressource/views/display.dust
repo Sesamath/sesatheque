@@ -45,23 +45,23 @@ Chargement en cours</div>
             jquery      : '{vendorsBaseUrl}/jquery/jquery.2.1',
             jquery21    : '{vendorsBaseUrl}/jquery/jquery.2.1',
             swfobject   : '{vendorsBaseUrl}/swfobject/swfobject.2.2',
+            sesaswf     : '{vendorsBaseUrl}/sesamath/swf',
             underscore  : '{vendorsBaseUrl}/underscore/underscore.1.6',
             underscore16: '{vendorsBaseUrl}/underscore/underscore.1.6'
         }
     });
     require(['{pluginName}'], function (plugin) {
-        log('Le plugin chargé par require', plugin);
         try {
             if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin {pluginName} a échoué');
             if (typeof plugin.display !== 'function') throw new Error('Le plugin ' +plugin +" n'a pas de méthode display");
+            container.innerHTML = '';
+            {~n}var ressource = {ressource|s};{~n}
+            if (top.Sesamath && top.Sesamath.scores && typeof top.Sesamath.scores.saveResult === 'function'){~n}
+                plugin.display(ressource, container, top.Sesamath.scores.saveResult);{~n}
+            else plugin.display(ressource, container);{~n}
         } catch(error) {
             container.innerHTML = error.toString();
         }
-        container.innerHTML = '';
-        {~n}var ressource = {ressource|s};{~n}
-        if (top.Sesamath && top.Sesamath.scores && typeof top.Sesamath.scores.saveResult === 'function')
-            plugin.display(ressource, container, top.Sesamath.scores.saveResult);
-        else plugin.display(ressource, container);
     });
 </script>
 {/error}

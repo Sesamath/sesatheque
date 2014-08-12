@@ -41,7 +41,7 @@ var cssClass = 'mepRess';
 // reste à définir nos méthodes
 
 /**
- * Affiche la ressource dans l'élément eltId
+ * Affiche la ressource dans l'élément d'id mepRess
  * @param {Object}   ressource   L'objet ressource tel qu'il sort de la bdd
  * @param {Function} next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
  * @param {Function} saveResult [optional] Une méthode à appeler, si elle existe, pour sauvegarder un résultat
@@ -77,8 +77,7 @@ function display(ressource, next, saveResult) {
   // le message en attendant le chargement
   htmlElt = wd.createElement("div");
   htmlElt.id = divId;
-  htmlElt.appendChild(wd.createTextNode('Vous devez avoir un navigateur ' +
-      'qui possède un lecteur Adobe Flash pour voir ce contenu.'));
+  htmlElt.appendChild(wd.createTextNode("Chargement de la ressource " +ressource.id +" en cours."));
   container.appendChild(htmlElt);
 
   // notre base

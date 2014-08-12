@@ -29,7 +29,6 @@ controller
         if (error) next(error)
         else if (ressource) {
           ctx.metas.title = ressource.titre
-          console.log(ressource.dateCreation)
           sendPageData(error, ressource, ctx, next)
         } else {
           ctx.response.statusCode = 404;
@@ -100,7 +99,6 @@ controller
   .Action(routes.preview + '/:id', 'ressource.preview')
   .renderWith('preview')
     .do(function (ctx, next) {
-      log.dev('url iframe', ctx.url(lassi.action.ressource.display, ctx.arguments))
       next(null, {url:ctx.url(lassi.action.ressource.display, ctx.arguments)})
     })
 
@@ -405,7 +403,15 @@ function sendFormData(error, ressource, next) {
       data[key].name = key
       if (_.isDate(value)) {
         value = moment(value).format(config.formats.jour)
+
+      } else if (_.isObject(value)) {
+        try {
+          value = JSON.stringify(value)
+        } catch (error) {
+          value = error.toString()
+        }
       }
+
       data[key].value = value
     }
   }); // fin each propriété
