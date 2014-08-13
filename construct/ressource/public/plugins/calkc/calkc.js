@@ -1,8 +1,6 @@
 /**
  * Tous les plugins doivent exporter les méthodes display et showResult
- */
-
-/**
+ *
  * Tout ce qui est dans ce fichier est privé,
  * spécifique à ce plugin sans collision possible avec le DOM de la page courante
  *
@@ -25,11 +23,11 @@
 //'use strict';
 
 
-/** class utilisée dans notre css */
+/** module de chargement d'un swf */
 var sesaswf
 
 define(['sesaswf'], function (module) {
-  // on affecte notre var swfload avec son module
+  // on affecte notre var sesaswf avec le module chargé
   sesaswf = module
 
   return {

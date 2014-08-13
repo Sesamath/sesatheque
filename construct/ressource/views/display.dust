@@ -1,3 +1,11 @@
+{!
+    template inclus dans layout-iframe.dust qui est une page minimaliste qui n'inclut en head que require.js
+    on nous fournit les variables
+      pluginName     : le nom du plugin
+      pluginBaseUrl  : le chemin relatif vers le dossier du plugin concerné
+      vendorsBaseUrl : le chemin relatif vers le dossier vendors (pour toutes les libs partagées)
+      ressource      : l'objet ressource
+!}
 {?error}
     <p class="has-error">{error}</p>
 {:else}
