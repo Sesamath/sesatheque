@@ -2,13 +2,15 @@
 
 var _ = require('underscore')._
 
-function Ressource() {
+/**
+ * Idem Ressource avec errors en moins, et moins d'index
+ * @constructor
+ */
+function Archive() {
   /**
-   * Une liste d'erreurs éventuelles (incohérences de données, etc)
-   * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
-   * Devrait être viré au save s'il est vide
+   * L'oid de la ressource archivée
    */
-  this.errors = []
+  this.oidRessource = 0
   /**
    * L'identifiant de la ressource, utilisé dans les urls
    * @type {Number}
@@ -127,41 +129,15 @@ function Ressource() {
   this.previousOid = 0
 }
 
-var entity = lassi.Entity(Ressource)
-  .on('beforeStore', function(next) {
-    // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
-    // et pas de celle de son indexation ici
-    if (!this.dateMiseAJour) {
-      this.dateMiseAJour = new Date();
-    }
-    // si le tableau d'erreur est vide (devrait toujours être le cas,
-    // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-    if (_.isEmpty(this.errors)) delete this.errors
-    // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
-    // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
-    //log.dev('beforeStore fini')
-    next()
-  })
+var entity = lassi.Entity(Archive)
   // finalement on laisse la gestion du cache dans les accesseurs du repository
   // plus pratique même si updateVersion appelle directement lassi.cache.ressource.XXX
   //.on('afterStore', function(next) {log.dev("afterStore", this); next();})
   .addIndex('id', 'integer')
   .addIndex('origine', 'string')
   .addIndex('idOrigine', 'string')
-  .addIndex('typeTechnique', 'string')
-  .addIndex('niveaux', 'integer')
-  .addIndex('categories', 'integer')
-  .addIndex('typePedagogiques', 'integer')
-  .addIndex('typeDocumentaires', 'integer')
-  //.addIndex('relations', 'integer') // chaque relation est un tableau, faudra voir si on peut indexer ça
-  .addIndex('auteurs', 'integer')
-  .addIndex('contributeurs', 'integer')
-  .addIndex('langue', 'string')
-  .addIndex('publie', 'boolean')
-  .addIndex('restriction', 'integer')
-  .addIndex('dateCreation', 'date')
-  .addIndex('dateMiseAJour', 'date')
   .addIndex('version', 'integer')
+  .addIndex('oidRessource', 'integer')
 
 /* un écouteur sur registered qui pourrait servir
 lassi.on('registered', function(className, path, ressource) {
@@ -170,25 +146,4 @@ lassi.on('registered', function(className, path, ressource) {
 
 module.exports = entity;
 
-/**
- * Enregistre la ressource en archive et passe l'archive à next (à l'appelant de gérer les versions)
- * @param next
- */
-Ressource.prototype.archive = function (next) {
-  if (!this.oid) {
-    next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
-    return
-  }
-  var archive = this.toObject()
-  // on ajoute la nouvelle propriété
-  archive.oidRessource = this.oid
-  // on vire les propriétés dont on ne veut pas
-  delete archive.oid
-  if (archive.errors) {
-    if (archive.errors.length) log.error("Archivage de la ressource " +this.oid +" (id " +this.id +
-        ") qui comportait des erreurs : " +archive.errors.join('\n'))
-    delete archive.errors
-  }
-  // et on archive
-  lassi.entity.Archive.create(archive).store(next)
-}
+

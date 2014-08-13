@@ -82,16 +82,24 @@ function setVersion(ressource, next) {
           }
         })
       }
-      if (needIncrement) ressource.version = ressourceInitiale.version +1
-      else {
-        ressource.version = ressourceInitiale.version
-        // faut aussi récupérer son oid pour écrasement de l'ancienne ressource
-        ressource.oid = ressourceInitiale.oid
-      }
+      // on recopie version et oid (pour écrasement éventuel de l'ancienne ressource)
+      ressource.version = ressourceInitiale.version
+      ressource.oid = ressourceInitiale.oid
     } else {
       ressource.version = 1
     }
-    next(null, ressource)
+
+    if (needIncrement) ressourceInitiale.archive(function(error, archive) {
+      if (error) next(error)
+      else {
+        // incrément version et màj dateMiseAJour
+        log.dev("On a archivé la ressource " + ressourceInitiale.id + " (avec l'oid en archive " + archive.oid + ')')
+        ressource.version++
+        ressource.dateMiseAJour = new Date();
+        next(null, ressource)
+      }
+    })
+    else next(null, ressource)
   })
 }
 
