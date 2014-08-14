@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 /**
  * Pour la déconnexion locale, appelée en jsonp par le serveur sso

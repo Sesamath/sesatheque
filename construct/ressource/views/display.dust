@@ -54,6 +54,7 @@ Chargement en cours</div>
             jquery21    : '{vendorsBaseUrl}/jquery/jquery.2.1',
             swfobject   : '{vendorsBaseUrl}/swfobject/swfobject.2.2',
             sesaswf     : '{vendorsBaseUrl}/sesamath/swf',
+            sesalog     : '{vendorsBaseUrl}/sesamath/log',
             underscore  : '{vendorsBaseUrl}/underscore/underscore.1.6',
             underscore16: '{vendorsBaseUrl}/underscore/underscore.1.6'
         }

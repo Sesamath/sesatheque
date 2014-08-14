@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Les méthodes génériques de notre composant, utilisées par les différents contrôleurs
  */
@@ -64,7 +66,7 @@ ressourceRepository.valide = function(ressource, next) {
 function setVersion(ressource, next) {
   var needIncrement
   // ira seulement en cache dans la plupart des cas, mais de toute façon faut récupérer le n° de version actuel
-  lassi.ressource.load(ressource.id, function (error, ressourceInitiale) {
+  ressourceRepository.load(ressource.id, function (error, ressourceInitiale) {
     if (error) next(error)
     if (ressourceInitiale) {
       // on peut réclamer une nouvelle version via un flag sur la ressource
@@ -218,7 +220,7 @@ ressourceRepository.load = function(id, next) {
       }
     })
   }
-};
+}
 
 /**
  * Récupère une ressource par son oid et la passe à next (seulement une erreur si elle n'existe pas)

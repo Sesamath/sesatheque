@@ -1,7 +1,7 @@
 /**
  * Ajoute les liens de modif / visualisation suivant le contexte
  */
-'use strict'
+'use strict';
 
 module.exports = lassi.Decorator('menu')
     .renderTo('menu')

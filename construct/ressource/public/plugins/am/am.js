@@ -21,16 +21,16 @@
  * et aussi
  * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
  */
-/*global define, require, log, addCss, container, errorsContainer, baseUrl, window */
+/*global define, log, container */
 //'use strict';
 
 
 /** notre module sesaswf */
 var sesaswf
 
-define(['sesaswf'], function (module) {
+define(['sesaswf'], function (modswf) {
   // on affecte notre module
-  sesaswf = module
+  sesaswf = modswf
 
   return {
     display   : display,
@@ -49,7 +49,7 @@ function display(ressource, next) {
   var baseSwf, swfUrl, options;
   var params = ressource.parametres;
 
-  console.log('start am display avec la ressource', ressource)
+  log('start am display avec la ressource', ressource)
   //les params minimaux
   if (!ressource.id || !ressource.titre || !params) {
     throw new Error("Paramètres manquants");
@@ -79,5 +79,6 @@ function display(ressource, next) {
  * @param {HTMLElement} elt    L'élément html (https://developer.mozilla.org/fr/docs/Web/API/HTMLElement)
  */
 function showResult(result, elt) {
-  console.log('showResult')
+  log('showResult', result)
+  log("dans l'élément", elt)
 }

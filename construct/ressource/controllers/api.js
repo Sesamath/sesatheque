@@ -1,10 +1,12 @@
-'use strict';
 /**
  * Controller ressource/api
  */
+'use strict';
 
-var controller = lassi.Controller('api');
-var _ = require('underscore')._;
+var controller = lassi.Controller('api')
+var _ = require('underscore')._
+var converter = require('../converter')
+var repository = require('../repository')
 
 controller.respond('json');
 
@@ -24,10 +26,10 @@ controller
         /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
         if (!lassi.tmp) lassi.tmp = {}
         lassi.tmp[ctx.post.id] = {m:msg,s:start}
-        var ressource = lassi.ressource.getRessourceFromPost(ctx.post)
+        var ressource = converter.getRessourceFromPost(ctx.post)
         lassi.tmp[ctx.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
         //log.dev("que l'on a transformé en", ressource)
-        lassi.ressource.write(ressource, function (error, ressource) {
+        repository.write(ressource, function (error, ressource) {
           // id - convertPost - valide+setVersion - store - store2 - fin
           lassi.tmp[ctx.post.id].m += '\tretSt ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
           log.errorData(lassi.tmp[ctx.post.id].m)
@@ -54,7 +56,7 @@ controller
       var id = ctx.arguments.id
 
       if (ctx.method === 'get') {
-        lassi.ressource.load(id, function (error, ressource) {
+        repository.load(id, function (error, ressource) {
           log.dev("dans api get " +id, ressource)
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
@@ -69,7 +71,7 @@ controller
         })
 
       } else {
-        lassi.ressource.del(id, function (error, nbObjects, nbIndexes) {
+        repository.del(id, function (error, nbObjects, nbIndexes) {
           if (error) next(null, {error: error.toString()})
           else if (nbObjects > 0) {
             next(null, {deletedId: id, nbObjects:nbObjects, nbIndexes:nbIndexes})

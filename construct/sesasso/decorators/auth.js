@@ -15,7 +15,7 @@
  regenerer = 0|pas de param  // pour récupérer le ticket définitif
  ticket_client = <ticket>
  */
-'use strict'
+'use strict';
 
 var request = require('request')
 var _ = require('underscore')._
@@ -150,6 +150,8 @@ function checkTicket(ctx, next) {
     function setSessionAndRedirect(error, personne) {
       if (error) next(error)
       else if (personne && personne.oid) {
+        // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
+        // hormis le controleur deconnexion qui affecte un objet vide
         ctx.session.user = personne.toObject()
         log.dev('ticket OK, user enregistré localement et en session, ' +ctx.session.user.oid)
         // on redirige vers cette page sans le ticket en get

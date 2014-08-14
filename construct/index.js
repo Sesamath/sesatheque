@@ -46,7 +46,7 @@ application.on('beforeRailUse', function(name, settings) {
     // les tokens
     var moment = require('moment')
     var morgan = lassi.require('morgan')
-    morgan.token('post', function (req, res) {
+    morgan.token('post', function (req) {
       return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
     })
     morgan.token('moment', function () {

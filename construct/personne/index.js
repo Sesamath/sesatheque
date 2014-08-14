@@ -5,6 +5,17 @@
 
 //var _ = require('underscore')._
 
+/** Notre configuration des droits, qui sera accessible sous lassi.personne.settings */
+var settings = {
+  roles:{
+    // en attendant de gérer modIndexation, modParametres et publish on utilise juste mod
+    admin:['delVersion', 'del', 'mod', 'modIndexation', 'modParametres', 'publish', 'readProf'],
+    editor:['mod', 'modIndexation', 'modParametres', 'publish', 'readProf'],
+    indexator:['modIndexation', 'readProf'],
+    prof:['readProf']
+  }
+}
+
 /**
  * Component de gestion des types de contenu "personne".
  * @extends {lassi.Component}
@@ -14,19 +25,7 @@ var personneComponent = lassi.Component('personne');
 
 personneComponent.initialize = function(next) {
   // les roles et permissions en conf
-  this.application.settings.personne = {
-    permissions:{
-      delVersion:true,
-      modIndexation:true,
-      modParametres:true,
-      publish:true
-    },
-    roles:{
-      admin:['delVersion', 'modIndexation', 'modParametres', 'publish'],
-      editor:['modIndexation', 'modParametres', 'publish'],
-      indexator:['modIndexation']
-    }
-  }
+  this.application.settings.personne = settings
   next();
 }
 
@@ -52,6 +51,10 @@ personneComponent.load = function(id, next) {
       }
     })
   }
+}
+
+personneComponent.isAuthenticated = function(context) {
+  return context.session.user && context.session.user.id
 }
 
 // et on l'exporte

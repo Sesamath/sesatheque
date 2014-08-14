@@ -1,4 +1,5 @@
-'use strict'
+'use strict';
+
 /**
  * Un constructeur pour les objets retournés par le sso
  * (module js standard, pas un composant lassi, utilisé par le composant sesasso)
@@ -49,7 +50,7 @@ PersonneSso.prototype.toPersonne = function() {
     nom:this.nom,
     prenom:this.prenom,
     mail:this.emailPerso || this.emailAcad,
-    roles:[],
+    permissions:{},
     infos:{
       statut:this.statut,
       structures:this.structures,
@@ -58,16 +59,25 @@ PersonneSso.prototype.toPersonne = function() {
       grpWiki:this.grpWiki
     }
   }
-  // reste les roles, on reste basique
-  if (this.statut && this.statut.Sesamath_CA_salarie) personneMaj.roles.push('admin')
-  else if (this.statut && this.statut.Sesamath_Membre) personneMaj.roles.push('editor')
 
-  return lassi.entity.Personne.create(personneMaj)
+  var personne = lassi.entity.Personne.create(personneMaj)
+
+  // reste les roles, on reste basique
+  if (this.statut) {
+    if (this.statut.Sesamath_CA_salarie) personne.addRolePermissions('admin')
+    else if (this.statut.Sesamath_Membre) personne.addRolePermissions('editor')
+    else addRoleFromStatut(this.statut, personne)
+  }
+
+  return personne
 }
 
 module.exports = PersonneSso
 
 /**
+ * Ajoute les permissions d'après le statut
+ * @todo étoffer tout ça quand on aura la gestion des groupes
+ *
  * La liste des statuts possibles
  *
  * Authentifie
@@ -94,7 +104,15 @@ module.exports = PersonneSso
  * Sesamath_Responsable_LaboMEP
  * Sesamath_Salarie
  * Sesamath_WikiInterne
+ *
+ * @param {Object} statut
+ * @param {Personne} personne
  */
+function addRoleFromStatut(statut, personne) {
+  if (statut.Prof_Valide) {
+    personne.addRolePermissions('prof')
+  }
+}
 
 /**
  * Transforme une chaine de liste de groupes en objet

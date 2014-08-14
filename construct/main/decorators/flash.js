@@ -2,7 +2,7 @@
  * Ce décorateur récupère les flashMessages en session s'il y en a et les envoie à son bloc
  * Attention, si une autre action qui passe après nous (un autre décorateur) lance une redirection ils seront perdus
  */
-'use strict'
+'use strict';
 
 var _ = require('underscore')._
 

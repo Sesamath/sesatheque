@@ -1,9 +1,8 @@
 'use strict';
 
 var controller = lassi.Controller('debug');
-var _ = require('underscore')._;
+//var _ = require('underscore')._;
 var js_beautify = require('js-beautify').js_beautify;
-var config = require('../../ressource/config.js');
 
 controller.respond('html');
 

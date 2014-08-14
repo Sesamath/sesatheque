@@ -1,6 +1,7 @@
 html, body {padding: 0}
 .mepRess {
     background-image: url('images/fond.gif');
+    margin: 0 auto;
 }
 .mepRess .titre{
 	background-color:  #7484a6;

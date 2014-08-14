@@ -1,6 +1,9 @@
 "use strict";
 
-
+/**
+ * Constructeur utilisé par l'entity Personne
+ * @constructor
+ */
 function Personne() {
   this.id = 0
   /**
@@ -19,10 +22,10 @@ function Personne() {
    */
   this.email = ''
   /**
-   * La liste des ids des roles
-   * @type {Array}
+   * La liste des permissions
+   * @type {Object}
    */
-  this.roles = []
+  this.permissions = {}
   /**
    * D'autres champs stockés en json, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
    * suivant le source d'authentification par ex.
@@ -37,3 +40,16 @@ var entity = lassi.Entity(Personne)
     .addIndex('email', 'string')
 
 module.exports = entity;
+
+Personne.prototype.addRolePermissions = function (role) {
+  var s = lassi.personne.settings;
+  if (s.roles[role]) {
+    s.roles[role].forEach(function (permission) {
+      this.addPermission(permission)
+    })
+  }
+}
+
+Personne.prototype.addPermission = function (permission) {
+  if (!this.permissions[permission]) this.permissions[permission] = true
+}

@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require('underscore')._
+// var _ = require('underscore')._
 
 /**
  * Idem Ressource avec errors en moins, et moins d'index

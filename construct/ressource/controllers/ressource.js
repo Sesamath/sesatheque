@@ -1,10 +1,12 @@
 'use strict';
 
 var controller = lassi.Controller('ressource');
-var moment = require('moment');
 var _ = require('underscore')._;
-var config = require('../config.js');
-var routes = config.constantes.routes;
+
+var rights = require('../rights')
+var converter = require('../converter')
+var repository = require('../repository')
+var routes = require('../config.js').constantes.routes;
 
 controller.respond('html');
 
@@ -25,15 +27,14 @@ controller
     .renderWith('describe')
     .do(function (ctx, next) {
       var id = ctx.arguments.id
-      lassi.ressource.load(id, function (error, ressource) {
+      repository.load(id, function (error, ressource) {
         if (error) next(error)
         else if (ressource) {
-          ctx.metas.title = ressource.titre
-          sendPageData(error, ressource, ctx, next)
-        } else {
-          ctx.response.statusCode = 404;
-          next(null, {error: "La ressource d'identifiant " + id + " n'existe pas"})
-        }
+          rights.checkPermission('read', ctx, ressource, function (ressource) {
+            ctx.metas.title = ressource.titre
+            converter.sendPageData(error, ressource, ctx, next)
+          })
+        } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
       })
     });
 
@@ -46,17 +47,16 @@ controller
     .do(function (ctx, next) {
       var origine = ctx.arguments.origine
       var idOrigine = ctx.arguments.idOrigine
-      lassi.ressource.loadByOrigin(origine, idOrigine, function (error, ressource) {
-        if (!ressource) {
-          ressource = {
-              errors : ["La ressource d'identifiant " + idOrigine + " (origine " + origine +" n'existe pas"]
-          }
-          ctx.response.statusCode = 404;
-        } else if (!error) {
-          ctx.metas.title = ressource.titre
-          ctx.metas.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
-        }
-        sendPageData(error, ressource, ctx, next)
+      repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        if (error) next(error)
+        else if(ressource) {
+          rights.checkPermission('read', ctx, ressource, function (ressource) {
+            ctx.metas.title = ressource.titre
+            if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
+            else ctx.metas.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
+            converter.sendPageData(error, ressource, ctx, next)
+          })
+        } else ctx.notFound("La ressource d'identifiant " + idOrigine + " (origine " + origine +" n'existe pas")
       })
     })
 
@@ -73,22 +73,22 @@ controller
       // qui sera récupéré par l'écouteur layout défini dans le mainComponent.initialize
       ctx.forceLayout = 'layout-iframe'
 
-      lassi.ressource.load(id, function (error, ressource) {
-        var data
-        if (!ressource) {
-          ctx.response.statusCode = 404;
-          data = {error : "La ressource d'identifiant " + id + " n'existe pas"}
-        } else {
-          ctx.metas.title = ressource.titre
-          delete ressource._entity
-          data = {
-            pluginBaseUrl:'../../plugins/' +ressource.typeTechnique,
-            vendorsBaseUrl:'../../vendors',
-            pluginName : ressource.typeTechnique,
-            ressource: ressource.toString()
-          }
-        }
-        next(null, data)
+      repository.load(id, function (error, ressource) {
+        if (error) next(error)
+        else if (ressource) {
+          rights.checkPermission('read', ctx, ressource, function (ressource) {
+            ctx.metas.title = ressource.titre
+            // si public son permalink est dans le namespace public
+            if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
+            var data = {
+              pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
+              vendorsBaseUrl: '../../vendors',
+              pluginName    : ressource.typeTechnique,
+              ressource     : ressource.toString()
+            }
+            next(null, data)
+          })
+        } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
       })
     })
 
@@ -99,6 +99,7 @@ controller
   .Action(routes.preview + '/:id', 'ressource.preview')
   .renderWith('preview')
     .do(function (ctx, next) {
+      // sera affiché en iframe, comme pour tous les autres sites
       next(null, {url:ctx.url(lassi.action.ressource.display, ctx.arguments)})
     })
 
@@ -115,19 +116,27 @@ controller
       var ressource
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        //sendFormData(null, lassi.entity.Ressource.create(), next)
-        ctx.metas.title = 'Ajouter une ressource'
-        sendFormData(null, null, next)
+        rights.checkPermission('add', ctx, null, function (ressource) {
+          ctx.metas.title = 'Ajouter une ressource'
+          // on ajoute le token, permet de ne pas vérifier les droits au post
+          ctx.session.addToken = converter.sendFormData(null, null, next)
+        })
       } else {
+        if (!ctx.post.token || ctx.post.token !== ctx.session.addToken) {
+          if (ctx.session.addToken) delete ctx.session.addToken
+          log.dev('pb de token au add', ctx.post)
+          ctx.notFound("Paramètres invalides, ajout impossible")
+          return
+        }
         // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
         //log.dev('post dans add', this.post);
-        ressource = lassi.ressource.getRessourceFromPost(ctx.post)
+        ressource = converter.getRessourceFromPost(ctx.post)
         // il validera avant d'enregistrer
-        lassi.ressource.write(ressource, function (error, ressource) {
+        repository.write(ressource, function (error, ressource) {
           if (error || !_.isEmpty(ressource.errors)) {
             // faut réafficher le form
-            sendFormData(error, ressource, next)
+            converter.sendFormData(error, ressource, next)
           } else {
             log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
             ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
@@ -150,7 +159,7 @@ controller
     if (this.isGet()) {
       // get => affichage du form
       var id = ctx.arguments.id
-      lassi.ressource.load(id, function (error, ressource) {
+      repository.load(id, function (error, ressource) {
         if (!ressource) {
           ctx.response.statusCode = 404;
           ressource = {
@@ -160,18 +169,18 @@ controller
           next(null, ressource)
         } else {
           ctx.metas.title = 'Modifier ' +ressource.titre
-          sendFormData(error, ressource, next)
+          converter.sendFormData(error, ressource, next)
         }
       })
 
     } else if (this.isPost()) {
       // post => on enregistre ou on réaffiche le form si pb
-      lassi.ressource.write(
-          lassi.ressource.getRessourceFromPost(ctx.post),
+      repository.write(
+          converter.getRessourceFromPost(ctx.post),
           function(error, ressource) {
             if (error || !_.isEmpty(ressource.errors)) {
               // faut réafficher le form avec les erreurs
-              sendFormData(error, ressource, next)
+              converter.sendFormData(error, ressource, next)
             } else {
               log.dev("update ok, on lance le redirect")
               ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
@@ -195,7 +204,7 @@ controller
       var id = this.arguments.id;
       if (this.method === 'get') {
         // on affiche et on demande confirmation
-        lassi.ressource.load(id, function (error, ressource) {
+        repository.load(id, function (error, ressource) {
           if (!ressource) {
             ctx.response.statusCode = 404;
             ressource = {
@@ -203,17 +212,28 @@ controller
             }
             next(null, ressource)
           } else {
-            ctx.metas.title = 'Supprimer ' +ressource.titre
-            sendPageData(error, ressource, ctx, next)
+            rights.checkPermission('del', ctx, ressource, function() {
+              ctx.metas.title = 'Supprimer ' +ressource.titre
+              // on ajoute un flag en session pour ne pas refaire les vérifs de droits dans le le post
+              ctx.session['del' +id] = true
+              converter.sendPageData(error, ressource, ctx, next)
+            })
           }
         })
       } else {
-        // post, on supprime
-        lassi.ressource.del(id, function (error, nbObjects, nbIndexes) {
-          if (error) next(null, {error: error})
-          else if (nbObjects > 0) next(null, {deletedId: id, nbObjects:nbObjects, nbIndexes:nbIndexes})
-          else next(null, {error: "Aucune ressource d'identifiant " + id})
-        });
+        // post, on supprime, si on a eu les droits au get
+        if (ctx.session['del' +id]) {
+          repository.del(id, function (error, nbObjects, nbIndexes) {
+            if (error) next(null, {error: error})
+            else if (nbObjects > 0) {
+              delete ctx.session['del' + id]
+              next(null, {deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
+            }
+            else next(null, {error: "Aucune ressource d'identifiant " + id})
+          });
+        } else {
+          ctx.accessDenied("Vous n'avez pas de droits suffisants pour effacer cette ressource")
+        }
       }
   });
 
@@ -233,237 +253,10 @@ controller
         filters : [{index:index, values:[value]}],
         orderBy:'id'
       }
-      lassi.ressource.getListe(options, start, nb, function (error, ressources) {
+      repository.getListe(options, start, nb, function (error, ressources) {
         ctx.metas.title = 'Résultats de recherche'
         next(error, {ressources:ressources})
       })
   });
 
 module.exports = controller;
-
-
-/****************************************
- * déclarations de toutes nos fonctions *
- ***************************************/
-
-/**
- * Transforme une entité ressource en objet pour la vue describe et la passe à next
- * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
- * @param {Ressource} ressource La ressource qui sort d'un load
- * @param {Function}  next      callback qui sera appelée avec (error, data), data pour une vue dust
- * @returns {undefined} La ressource, avec pour chaque champ les propriétés title et value
- */
-function sendPageData(error, ressource, ctx, next) {
-  var data = {};
-  var buffer;
-  if (error) data.error = error.toString();
-  else {
-    if (ressource) {
-      // on boucle sur les propriétés que l'on veut afficher
-      _.each(config.labels, function (label, key) {
-        var value = ressource[key];
-        data[key] = {
-          title: label
-        };
-        if (_.isArray(value)) {
-
-          // cas particulier de tableau de tableaux
-          if (key === 'relations' && value.length) {
-            data.relations.value = []
-            value.forEach(function (relation) {
-              data.relations.value.push({
-                predicat : config.listes.relations[relation[0]],
-                lien : ctx.link(lassi.action.ressource.describe, relation[1], {id:relation[1]})
-              })
-            })
-            log.dev('relations ajoutée pour ' +ressource.id, data.relations)
-
-          } else if (config.listes[key]) {
-            // faut remplacer des ids par des labels
-            buffer = [];
-            _.each(value, function (id) {
-              if (config.listes[key][id])  buffer.push(config.listes[key][id])
-              else log.error("La ressource " + ressource.id + " a une valeur " + id +
-                  " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
-            });
-            data[key].value = buffer.join(', ');
-
-          } else {
-            data[key].value = value.join(', ')
-          }
-
-
-        } else if (_.isDate(value)) {
-          data[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
-
-        } else if (_.isObject(value)) {
-          try {
-            data[key].value = JSON.stringify(value)
-          } catch (error) {
-            data[key].value = error.toString()
-          }
-
-        } else {
-          data[key].value = value;
-        }
-      }); // fin each propriété
-
-      // on ajoute oid
-      data.oid = ressource.oid
-    } else {
-      // pas d'erreur mais pas de ressource non plus
-      data.error = "Aucune ressource";
-    }
-  }
-  //log.dev('On envoie à la page', data)
-
-  next(null, data);
-}
-
-/**
- * Transforme un objet ressource en qqchose que la vue pourra digérer
- *
- * On ajoute ici de la logique d'affichage avec des attributs html qui n'ont pas forcément
- * grand chose à faire dans un contrôleur (bien que pour required ou readonly ça se justifie, pour les attribut
- * name des input aussi) mais c'est plus simple et lisible en js qu'en dust.
- *
- * Un dust helper (transformer) aurait peut-être été plus propre, on verra plus tard si c'est faisable
- * @param ressource
- * @returns {Object} L'objet qui sera retourné à la vue, chaque propriété contient
- * id       : le nom de la propriété (pour attr html, le tpl dust ajoutera un préfixe)
- * label    : Le nom à afficher pour la propriété
- * value    : La valeur de l'input text ou textarea
- * name     : attr html (sauf choix multiple)
- * unique   : true ou absent (select à la place de checkboxes)
- * readonly : true ou absent
- * choices.name : si unique, pour le select
- * choices = [{
- *   name
- *   label
- *   value
- * }]
- *
- */
-function sendFormData(error, ressource, next) {
-  var data = {errors:[]};
-  if (ressource && ressource.errors) {
-    data.errors = ressource.errors
-  }
-
-  if (error) {
-    log.error(error)
-    data.errors.push(error.toString())
-  }
-
-  // on s'assure que l'on a un objet, sinon on en créé un vide
-  if (!ressource) {
-    // on en créé une vide
-    log.dev('dans sendFormData on lance un create')
-    ressource = lassi.entity.Ressource.create()
-  }
-  //log.dev('ressource traitée par sendFormData', ressource)
-
-  // on boucle sur les propriétés déclarées dans config pour récupérer les labels
-  _.each(config.labels, function (label, key) {
-    var value = ressource[key];
-    var isUnique = config.uniques[key];
-
-    // pour tout le monde
-    data[key] = {
-      id   : key, // le template ajoutera un préfixe de son choix
-      label: label
-    };
-    // required ?
-    if (config.required[key]) data[key].required = true
-    if (isUnique) data[key].unique = true
-
-    // c'est un tableau ou une valeur unique (donc prise dans une liste => select ou checkboxes)
-    if (_.isArray(value) || config.uniques[key]) {
-      // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
-      // et la liste des possibles dans config.prop
-      if (isUnique) {
-        value = [value]; // arrayToDust veut un array
-        // faut ça sur le select et pas les choices
-        data[key].name = key
-      }
-      data[key].choices = arrayToDust(key, value, isUnique)
-
-    // checkbox tout seul (pas de label, c'est le parent qui le porte)
-    } else if (_.isBoolean(value)) {
-      data[key].choices = [
-        {
-          name : key,
-          value: [value]
-        }
-      ]
-      if (value) data[key].choices[0].selected = true
-
-    // propriété scalaire => input ou textarea
-    } else {
-      data[key].name = key
-      if (_.isDate(value)) {
-        value = moment(value).format(config.formats.jour)
-
-      } else if (_.isObject(value)) {
-        try {
-          value = JSON.stringify(value)
-        } catch (error) {
-          value = error.toString()
-        }
-      }
-
-      data[key].value = value
-    }
-  }); // fin each propriété
-
-  // on ajoute nos cas particulier
-  if (data.id) data.id.readonly = true
-  data.version.readonly = true
-  // et l'oid
-  data.oid = {
-    name : 'oid',
-    value: ressource.oid,
-    hidden:true
-  }
-  //log.dev('On envoie au form', data)
-
-  next(null, data)
-}
-
-/**
- * Créé les infos pour une liste de choix dans dust
- * @param key le nom de la propriété de la ressource
- * @param {Array} selectedValues Les valeurs pour cette ressource
- * @param {boolean} isUnique Si c'est un select et pas des checkbox
- *                           (dans ce cas on ajoute pas de propriété name sur chaque choix)
- * @returns {Array}
- */
-function arrayToDust(key, selectedValues, isUnique) {
-  var choices = [];
-  var i = 0;
-  _.each(config.listes[key], function (label, cbValue) {
-    // cbValue est une string (le nom de la propriété), on veut la valeur entière éventuelle
-    if (cbValue == parseInt(cbValue, 10)) cbValue = parseInt(cbValue, 10)
-    var choice = {
-      label: label,
-      value: cbValue
-    };
-    if (!isUnique) {
-      // faut du name sur chaque checkbox
-      choice.name = key + '[' + i + ']';
-      i++;
-    }
-    // et on ajoute les selected s'il y en a
-    if (!_.isEmpty(selectedValues)) {
-      if (!_.isArray(selectedValues)) {
-        throw new Error("La propriété " + key + " de la ressource n'est pas un tableau");
-      }
-      if (selectedValues.indexOf(cbValue) > -1) {
-        choice.selected = true;
-      }
-    }
-    choices.push(choice);
-  });
-
-  return choices;
-}

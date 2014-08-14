@@ -19,16 +19,21 @@
  * et aussi
  * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
  */
-/*global define, require, log, addCss, container, errorsContainer, baseUrl, window */
+/*global define, log, addCss, container, baseUrl, window */
 //'use strict';
 
 
 /** module de chargement d'un swf */
 var sesaswf
+  /** contient l'historique des réponses de chaque question */
+var histoReponses = [];
 
 define(['sesaswf'], function (module) {
   // on affecte notre var sesaswf avec le module chargé
   sesaswf = module
+
+  // on exporte dans le dom global cette fct que le swf appellera
+  window.com_calkc_resultat = com_calkc_resultat
 
   return {
     display   : display,
@@ -45,10 +50,8 @@ define(['sesaswf'], function (module) {
  */
 function display(ressource, next) {
   var swfUrl, options;
-  var wd = window.document;
-  var htmlElt;
 
-  console.log('start calkc display avec la ressource', ressource)
+  log('start calkc display avec la ressource', ressource)
   //les params minimaux
   if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
     throw new Error("Paramètres manquants");
@@ -79,5 +82,17 @@ function display(ressource, next) {
  * @param {HTMLElement} elt    L'élément html (https://developer.mozilla.org/fr/docs/Web/API/HTMLElement)
  */
 function showResult(result, elt) {
-  console.log('showResult')
+  log('showResult', result)
+  log("dans l'élément", elt)
+}
+
+/**
+ * Appelée par calkc.swf à la validation d'une opération
+ * elle a pour but d'enregistrer le resultat en base
+ */
+function com_calkc_resultat(nombrequestions, numeroquestion, reponse) {
+  // reponse est de la forme 1#+#1#egal#2#|13|ok
+  // reponse comporte la liste des touches tapées|le temps écoulé|ok/suite/tard
+  histoReponses.push([nombrequestions, reponse]);
+  if (window.saveResult) window.saveResult({reponse : histoReponses});
 }

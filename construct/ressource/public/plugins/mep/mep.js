@@ -21,7 +21,7 @@
  * et aussi
  * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
  */
-/*global define, require, log, addCss, container, errorsContainer, baseUrl, window */
+/*global define, log, addCss, container, errorsContainer, baseUrl, window */
 //'use strict';
 
 // pour le plugin mep, on a besoin de swfobject, que l'on indique ici comme dépendance
@@ -53,7 +53,7 @@ function display(ressource, next, saveResult) {
   var htmlElt;
   var divId = 'mepRess'; // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
 
-  console.log('start mep display avec la ressource', ressource)
+  log('start mep display avec la ressource', ressource)
   //les params minimaux
   if (!ressource.id || !ressource.titre || !params) {
     throw new Error("Paramètres manquants");
@@ -97,7 +97,8 @@ function display(ressource, next, saveResult) {
     hauteur = 450;
   }
   // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-  container.setAttribute("width", largeur);
+  if (container.style) container.style.width = largeur +'px';
+  else container.setAttribute("width", largeur +'px'); // marche pas avec chrome ou ff
 
   /** @see http://redmine.sesamath.net/projects/alibaba/wiki/ExosMep pour les flashvars à passer */
     // les flashvars pour le swf obligatoires à tous
@@ -161,5 +162,6 @@ function display(ressource, next, saveResult) {
  * @param {HTMLElement} elt    L'élément html (https://developer.mozilla.org/fr/docs/Web/API/HTMLElement)
  */
 function showResult(result, elt) {
-  console.log('showResult')
+  log('showResult', result)
+  log("dans l'élément", elt)
 }
