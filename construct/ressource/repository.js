@@ -6,8 +6,10 @@
 
 var _ = require('underscore')._
 var flow          = require('seq')
+
+var config = require('./config')
+
 var ressourceRepository = {}
-var config = require('./config.js')
 
 /**
  * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
@@ -223,6 +225,31 @@ ressourceRepository.load = function(id, next) {
 }
 
 /**
+ * Récupère une ressource publique et la passe à next (seulement une erreur si elle n'existe pas)
+ * @param {Number|String} id  L'identifiant de la ressource
+ * @param {Function}      next La callback qui sera appelée avec (error, ressource).
+ * @returns {undefined}
+ */
+ressourceRepository.loadPublic = function(id, next) {
+  var ressourceCached = cacheGet(id)
+  if (ressourceCached) next(null, ressourceCached)
+  else {
+    lassi.entity.Ressource
+        .match('id').equals(id)
+        .match('restriction').equals(0)
+        .sort('version', 'desc')
+        .grabOne(function (error, ressource) {
+          if (error) next(error)
+          else if (ressource) {
+            prepareAndSend(ressource, next)
+          } else {
+            next(null, null)
+          }
+        })
+  }
+}
+
+/**
  * Récupère une ressource par son oid et la passe à next (seulement une erreur si elle n'existe pas)
  * @param {Number|String} oid  L'identifiant interne de la ressource
  * @param {Function}      next La callback qui sera appelée avec (error, ressource).
@@ -268,49 +295,120 @@ ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
 }
 
 /**
- * Récupère une ressource d'après son idOrigine et la passe à next
- * @param {Object}   options Un objet avec éventuellement les propriétés
+ * Récupère un liste de ressource d'après critères
+ * @param {string}   visibilite facultatif, peut valoir public|prof|moi, public par défaut
+ * @param {Context}  ctx     facultatif si visibilite n'est pas précisé
+ * @param {Object}   options Un objet (ou son json) avec éventuellement les propriétés
  *                             filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
- *                                       où valeur peut être une valeur ou un tableau de valeurs
+ *                                       où valeur peut être undefined ou un tableau de valeurs
  *                                       (si non précisé filtrera sur les ressources ayant cet index)
  *                             orderBy : L'index sur lequel trier
  *                             order   : asc ou desc
- * @param {Number}   start   L'indice de la 1re valeur à remonter
- * @param {Number}   nb      Le nombre de ressources à remonter
+ *                             start   : L'indice de la 1re valeur à remonter
+ *                             nb      : Le nombre de ressources à remonter
  * @param {Function} next    La callback qui sera appelée en lui passant la liste de ressources en argument
  */
-ressourceRepository.getListe = function(options, start, nb, next) {
-  var query = lassi.entity.Ressource
-  // par defaut on filtre sur id (donc tous, mais faut un argument à match)
-  if (!options) options = {filters:[{index:'id'}]}
-  if (!options.filters) options.filters = [{index:'id'}]
-  if (!_.isArray(options.filters)) next(new Error("Filtres incorrects"))
+ressourceRepository.getListe = function(visibilite, ctx, options, next) {
+  try {
+    // on normalise les arguments
+    log.dev('getListe visibilite', visibilite)
+    log.dev('opt', options)
+    var publicOnly
+    if (arguments.length < 4) {
+      if (arguments.length == 3) throw new Error("nombre d'arguments incorrect")
+      options = visibilite
+      next = ctx
+      publicOnly = true
+    } else if (visibilite === 'public') {
+      publicOnly = true
+    } else if (visibilite !== 'prof' && visibilite !== 'moi') {
+      log.error('valeur de visibilite invalide ' + visibilite)
+      publicOnly = true
+      visibilite = 'public'
+    }
+    log.dev('getListe ap mod', options)
 
-  // les filtres
-  options.filters.forEach(function (filter) {
-    if (filter.index) {
-      if (filter.values) {
+    // on converti si json si besoin
+    if (options && _.isString(options)) {
+      try {
+        options = JSON.parse(options)
+      } catch (error) {
+        error.userMessage = "options de recherche invalides"
+        throw error
+      }
+    }
+
+    // avant de construire la query on fait un minimum de vérifications
+    var start, nb
+    var optionsSafe = {
+      filters: []
+    }
+    // filtres
+    if (options.filters) {
+      if (!_.isArray(options.filters)) throw new Error("Filtres incorrects")
+      options.filters.forEach(function (filter) {
+        if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant')
+        if (!_.isArray(filter.values)) throw new Error('valeurs invalides')
+        // on ignore le filtre restriction, c'est visibilite qui l'impose éventuellement
+        if (filter.index !== 'restriction') optionsSafe.filters.push(filter)
+      })
+
+    } else optionsSafe.filters.push({index: 'id'}) // donc tous, mais faut un argument à match
+    // le reste
+    if (options.orderBy && !_.isString(options.orderBy)) throw new Error('orderBy invalide')
+    optionsSafe.orderBy = options.orderBy || 'id'
+    if (options.order === 'desc') optionsSafe.order = 'desc'
+    start = parseInt(options.start, 10) || 0
+    nb = parseInt(options.nb, 10) || 10
+
+    // si on est toujours là on peut construire la requete
+    var query = lassi.entity.Ressource
+    optionsSafe.filters.forEach(function (filter) {
+      log.dev("filter", filter)
+      if (filter.values && filter.values.length) {
         if (filter.values.length > 1) query = query.match(filter.index).in(filter.values)
         else query = query.match(filter.index).equals(filter.values[0])
       } else query = query.match(filter.index)
+    })
+
+    // restriction d'après les droits
+    if (publicOnly) {
+      query = query.match('restriction').equals(0)
+
+    } else if (visibilite == 'prof') {
+      if (!ctx.session.user || !ctx.session.user.permissions || !ctx.session.user.permissions.readProf) {
+        next(new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources"))
+        return
+      }
+      query = query.match('restriction').equals(1)
+
+    } else if (visibilite == 'moi') {
+      if (!ctx.session.user || !ctx.session.user.id) {
+        next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
+        return
+      }
+      query = query.match('auteurs').equals(ctx.session.user.id)
     }
-  })
 
-  // orderBy
-  if (options.orderBy) {
-    if (options.order === 'desc') query = query.sort(options.orderBy, 'desc')
-    else query = query.sort(options.orderBy)
-  }
+    // orderBy
+    if (optionsSafe.orderBy) {
+      if (optionsSafe.order === 'desc') query = query.sort(optionsSafes.orderBy, 'desc')
+      else query = query.sort(optionsSafe.orderBy)
+    }
 
-  // limit
-  start = start || 0
-  nb = nb || 10
-  if (nb > config.limites.maxSql) {
-    log.error("La limite de cette requete sql (" +nb +") dépasse le maximum autorisé par la configuration (" +
-        config.limites.maxSql +")")
-    nb = config.limites.maxSql
+    // limit
+    if (nb > config.limites.maxSql) {
+      log.error("La limite de cette requete sql (" + nb + ") dépasse le maximum autorisé par la configuration (" +
+          config.limites.maxSql + ")")
+      nb = config.limites.maxSql
+    }
+    query.grab(nb, start, next)
+
+  } catch (error) {
+    log.dev(error)
+    if (error.userMessage) next(new Error(error.userMessage))
+    else next(error)
   }
-  query.grab(nb, start, next)
 }
 
 module.exports = ressourceRepository;

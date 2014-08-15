@@ -61,7 +61,10 @@ controller
     })
 
 /**
- * display : Voir la ressource (layout-iframe est défini pour ressource.display dans le mainComponent.initialize)
+ * display : Voir la ressource
+ *
+ * Le layout-iframe est imposé via ctx.forceLayout qui est lu par un écouteur transports.html.on('layout'...
+ * défini dans le mainComponent.initialize
  */
 controller
   .Action(routes.display + '/:id', 'ressource.display')
@@ -116,35 +119,30 @@ controller
       var ressource
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        rights.checkPermission('add', ctx, null, function (ressource) {
+        rights.checkPermission('add', ctx, null, function () {
           ctx.metas.title = 'Ajouter une ressource'
           // on ajoute le token, permet de ne pas vérifier les droits au post
-          ctx.session.addToken = converter.sendFormData(null, null, next)
+          ctx.session.token = converter.sendFormData(null, null, next)
         })
       } else {
-        if (!ctx.post.token || ctx.post.token !== ctx.session.addToken) {
-          if (ctx.session.addToken) delete ctx.session.addToken
-          log.dev('pb de token au add', ctx.post)
-          ctx.notFound("Paramètres invalides, ajout impossible")
-          return
-        }
-        // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-        // et rediriger vers le describe ou vers le form avec les erreurs
-        //log.dev('post dans add', this.post);
-        ressource = converter.getRessourceFromPost(ctx.post)
-        // il validera avant d'enregistrer
-        repository.write(ressource, function (error, ressource) {
-          if (error || !_.isEmpty(ressource.errors)) {
-            // faut réafficher le form
-            converter.sendFormData(error, ressource, next)
-          } else {
-            log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
-            ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
-            // on appelle pas next, on attend le redirect
-          }
-        }) // compRessource.add
+        checkToken(ctx, function() {
+          // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+          // et rediriger vers le describe ou vers le form avec les erreurs
+          //log.dev('post dans add', this.post);
+          ressource = converter.getRessourceFromPost(ctx.post)
+          // il validera avant d'enregistrer
+          repository.write(ressource, function (error, ressource) {
+            if (error || !_.isEmpty(ressource.errors)) {
+              // faut réafficher le form
+              converter.sendFormData(error, ressource, next)
+            } else {
+              log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
+              ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
+              // on appelle pas next, on attend le redirect
+            }
+          }) // write
+        }) // checkToken
       }
-      log.dev("fin do add");
   });
 
 /**
@@ -160,34 +158,31 @@ controller
       // get => affichage du form
       var id = ctx.arguments.id
       repository.load(id, function (error, ressource) {
-        if (!ressource) {
-          ctx.response.statusCode = 404;
-          ressource = {
-            errors: ["La ressource d'identifiant " + id + " n'existe pas"],
-            noForm : true
-          }
-          next(null, ressource)
+        if (ressource) {
+          rights.checkPermission('write', ctx, ressource, function (ressource) {
+            ctx.metas.title = 'Modifier ' + ressource.titre
+            ctx.session.token = converter.sendFormData(error, ressource, next)
+          })
         } else {
-          ctx.metas.title = 'Modifier ' +ressource.titre
-          converter.sendFormData(error, ressource, next)
+          ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
+          return
         }
       })
 
     } else if (this.isPost()) {
       // post => on enregistre ou on réaffiche le form si pb
-      repository.write(
-          converter.getRessourceFromPost(ctx.post),
-          function(error, ressource) {
-            if (error || !_.isEmpty(ressource.errors)) {
-              // faut réafficher le form avec les erreurs
-              converter.sendFormData(error, ressource, next)
-            } else {
-              log.dev("update ok, on lance le redirect")
-              ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
-              // on appelle pas next, on attend le redirect
-            }
+      checkToken(ctx, function () {
+        var ressource = converter.getRessourceFromPost(ctx.post)
+        repository.write(ressource, function(error, ressource) {
+          if (error || !_.isEmpty(ressource.errors)) {
+            // faut réafficher le form avec les erreurs
+            converter.sendFormData(error, ressource, next)
+          } else {
+            log.dev("update ok, on lance le redirect")
+            ctx.redirect(lassi.action.ressource.describe, {id: ressource.id});
           }
-      )
+        })
+      })
     } else {
       throw new Error("methode non supportée " +this.method)
     }
@@ -205,35 +200,27 @@ controller
       if (this.method === 'get') {
         // on affiche et on demande confirmation
         repository.load(id, function (error, ressource) {
-          if (!ressource) {
-            ctx.response.statusCode = 404;
-            ressource = {
-              error : "La ressource d'identifiant " + id + " n'existe pas"
-            }
-            next(null, ressource)
-          } else {
-            rights.checkPermission('del', ctx, ressource, function() {
-              ctx.metas.title = 'Supprimer ' +ressource.titre
+          if (ressource) {
+            rights.checkPermission('del', ctx, ressource, function () {
+              ctx.metas.title = 'Supprimer ' + ressource.titre
               // on ajoute un flag en session pour ne pas refaire les vérifs de droits dans le le post
-              ctx.session['del' +id] = true
+              ctx.session['del' + id] = true
               converter.sendPageData(error, ressource, ctx, next)
             })
-          }
+          } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
         })
       } else {
-        // post, on supprime, si on a eu les droits au get
-        if (ctx.session['del' +id]) {
+        // post
+        checkToken(ctx, function () {
           repository.del(id, function (error, nbObjects, nbIndexes) {
             if (error) next(null, {error: error})
-            else if (nbObjects > 0) {
-              delete ctx.session['del' + id]
-              next(null, {deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
+            else if (nbObjects > 0) next(null, {deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
+            else {
+              log.error("del : au post on a aucun objet effacé")
+              next(null, {error: "La ressource d'identifiant " + id +" n'a pas pu être effacée"})
             }
-            else next(null, {error: "Aucune ressource d'identifiant " + id})
           });
-        } else {
-          ctx.accessDenied("Vous n'avez pas de droits suffisants pour effacer cette ressource")
-        }
+        })
       }
   });
 
@@ -241,22 +228,55 @@ controller
  * Liste d'après le critère passé en 1er param (puis valeur, offset & nb)
  */
 controller
-  .Action('by/:index/:value/:start/:nb')
+  .Action('by/:index/:value/:start/:nb', 'ressource.by')
   .renderWith('liste')
   .do(function (ctx, next) {
       log.dev('liste avec les args', ctx.arguments)
       var index = ctx.arguments.index
       var value = ctx.arguments.value
-      var start = ctx.arguments.start
-      var nb    = ctx.arguments.nb
       var options = {
         filters : [{index:index, values:[value]}],
-        orderBy:'id'
+        orderBy :'id',
+        start   : parseInt(ctx.arguments.start),
+        nb      : parseInt(ctx.arguments.nb)
       }
-      repository.getListe(options, start, nb, function (error, ressources) {
-        ctx.metas.title = 'Résultats de recherche'
-        next(error, {ressources:ressources})
+      repository.getListe('public', ctx, options, function (error, ressources) {
+        if (error) next(error)
+        else {
+          ctx.metas.title = 'Résultats de recherche'
+          next(null, {ressources: addUrls(ctx, ressources)})
+        }
       })
   });
 
 module.exports = controller;
+
+/**
+ * Vérifie que le token du post correspond à celui en session
+ * @param ctx
+ * @param next
+ */
+function checkToken(ctx, next) {
+  if (!ctx.post.token || ctx.post.token !== ctx.session.token) {
+    if (ctx.session.token) delete ctx.session.token
+    log.dev('pb de token', ctx.post)
+    ctx.accessDenied("Paramètres invalides")
+  } else next()
+}
+
+/**
+ * Ajoute les propriétés url à chaque elt du tableau de ressource
+ * @param {Context} ctx
+ * @param {Array} ressources
+ * @returns {Array} Le nouveau tableau de ressources
+ */
+function addUrls(ctx, ressources) {
+          log.dev('avant', ressources)
+  if (ressources && ressources.length) ressources.forEach(function (ressource) {
+    ressource.urlDescribe = ctx.url(lassi.action.ressource.describe, {id:ressource.id})
+    ressource.urlPreview = ctx.url(lassi.action.ressource.preview, {id:ressource.id})
+    ressource.urlDisplay = ctx.url(lassi.action.ressource.display, {id:ressource.id})
+  })
+          log.dev('après', ressources)
+  return ressources
+}

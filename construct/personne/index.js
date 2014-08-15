@@ -6,15 +6,6 @@
 //var _ = require('underscore')._
 
 /** Notre configuration des droits, qui sera accessible sous lassi.personne.settings */
-var settings = {
-  roles:{
-    // en attendant de gérer modIndexation, modParametres et publish on utilise juste mod
-    admin:['delVersion', 'del', 'mod', 'modIndexation', 'modParametres', 'publish', 'readProf'],
-    editor:['mod', 'modIndexation', 'modParametres', 'publish', 'readProf'],
-    indexator:['modIndexation', 'readProf'],
-    prof:['readProf']
-  }
-}
 
 /**
  * Component de gestion des types de contenu "personne".
@@ -23,11 +14,11 @@ var settings = {
  */
 var personneComponent = lassi.Component('personne');
 
+/* rien à initialiser
 personneComponent.initialize = function(next) {
   // les roles et permissions en conf
-  this.application.settings.personne = settings
   next();
-}
+} */
 
 /**
  * Récupère une personne (en cache ou en bdd)

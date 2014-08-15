@@ -88,9 +88,17 @@ module.exports = {
     },
     authentication: {}
   },
-  // Configuration des plugins
-  plugins : {
-    session: false
+  components: {
+    // Configuration des roles (settings du composant personne)
+    personne : {
+      roles: {
+        // en attendant de gérer modIndexation, modParametres et publish on utilise juste write
+        admin    : ['delVersion', 'del', 'write', 'modIndexation', 'modParametres', 'publish', 'readProf'],
+        editor   : ['write', 'modIndexation', 'modParametres', 'publish', 'readProf'],
+        indexator: ['modIndexation', 'readProf'],
+        prof     : ['readProf']
+      }
+    }
   },
   // le reste est spécifique à notre appli et ignoré par lassi
   // les différents logs

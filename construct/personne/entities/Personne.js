@@ -42,10 +42,11 @@ var entity = lassi.Entity(Personne)
 module.exports = entity;
 
 Personne.prototype.addRolePermissions = function (role) {
-  var s = lassi.personne.settings;
-  if (s.roles[role]) {
-    s.roles[role].forEach(function (permission) {
-      this.addPermission(permission)
+  var personne = this
+  var config = lassi.personne.settings;
+  if (config.roles[role]) {
+    config.roles[role].forEach(function (permission) {
+      personne.addPermission(permission)
     })
   }
 }

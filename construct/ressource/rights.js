@@ -15,22 +15,21 @@ var rights = {}
  * @param permission
  * @param {Context} ctx
  * @param {Ressource} ressource
- * @param {Function} next callback qui sera appelée si tout va bien
+ * @param {Function} next callback qui sera appelée si tout va bien (avec la ressource qu'on nous a donné)
  */
 rights.checkPermission = function (permission, ctx, ressource, next) {
   var msg
 
-  // pas la peine de continuer si l'utilisateur a des droits génériques
-  if (rights.hasGenericPermission(ctx, permission)) {
-    next()
-    return
-  }
+  // pas la peine de continuer si c'est pour voir une ressource publique
+  if (permission === 'read' && ressource.restriction === 0) {next(ressource); return }
+  // ou si l'utilisateur a les droits génériques
+  if (rights.hasGenericPermission(permission, ctx)) {next(ressource); return }
 
   if (!rights.isAuthenticated(ctx)) msg = "Authentification requise"
   // sinon on délègue suivant la permission
   else switch (permission) {
     case 'add':
-      msg = "Vous n'avez pas de droits suffisants pour créer une ressource"; break;
+      msg = getAddDeniedMessage(ctx); break;
     case 'del':
       msg = getDelDeniedMessage(ctx, ressource); break;
     case 'read':
@@ -45,14 +44,49 @@ rights.checkPermission = function (permission, ctx, ressource, next) {
 }
 
 /**
+ * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
+ * @param permission
+ * @param ctx
+ * @param ressource
+ * @returns {boolean}
+ */
+rights.hasPermission = function (permission, ctx, ressource) {
+  if (rights.hasGenericPermission(permission, ctx)) return true
+
+  // read n'a pas forcément besoin de session
+  if (permission === 'read') return rights.hasReadPermission(ctx, ressource)
+
+  if (!rights.isAuthenticated(ctx)) return false
+  else switch (permission) {
+    case 'add'  : return (getAddDeniedMessage(ctx) === '')
+    case 'del'  : return (getDelDeniedMessage(ctx, ressource) === '')
+    case 'write': return (getWriteDeniedMessage(ctx, ressource) === '')
+    default: return false
+  }
+}
+
+/**
  * Retourne true si le user en session a la permission générique demandée
  * @param {Context} ctx
  * @param {string} permission
  * @returns {boolean}
  */
-rights.hasGenericPermission = function (ctx, permission) {
-  if (!ctx.session.user || !ctx.session.user.id) return false
+rights.hasGenericPermission = function (permission, ctx) {
+  if (!rights.isAuthenticated(ctx)) return false
   return (ctx.session.user.permissions && ctx.session.user.permissions[permission])
+}
+
+/**
+ * Renvoie true si cette ressource est visible par l'utilisateur courant
+ * @param ctx
+ * @param ressource
+ * @returns {boolean}
+ */
+rights.hasReadPermission = function (ctx, ressource) {
+  if (!ressource.restriction) return true
+  if (!rights.isAuthenticated(ctx)) return false
+  if (rights.hasGenericPermission('read', ctx)) return true
+  return (getReadDeniedMessage(ctx, ressource) === '')
 }
 
 /**
@@ -62,6 +96,18 @@ rights.hasGenericPermission = function (ctx, permission) {
  */
 rights.isAuthenticated = function (ctx) {
   return (ctx.session.user && ctx.session.user.id)
+}
+
+module.exports = rights
+
+/**
+ * Helper de getDeniedMessage pour la permission add
+ * @param {Context}   ctx
+ * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+ */
+function getAddDeniedMessage(ctx) {
+  if (!ctx.session.user.permissions || ! ctx.session.user.permissions.add)
+    return "Vous n'avez pas de droits suffisants pour créer une ressource"
 }
 
 /**
@@ -99,7 +145,7 @@ function getReadDeniedMessage(ctx, ressource) {
 
     // prof
     case 1:
-      if (rights.hasGenericPermission(ctx, 'readProf')) return
+      if (rights.hasGenericPermission('readProf', ctx)) return
       else return "Vous n'avez pas de droits suffisants pour consulter cette ressource"
       break //inutile mais évite à jshint de râler
 

@@ -108,7 +108,7 @@ if (fs.existsSync(taskDir)) {
 gulp.task('purge', function() {
   // on efface la session
   var file = './temp/sessions.json'
-  if (fs.lstatSync(file).isFile()) {
+  if (fs.existsSync(file) && fs.lstatSync(file).isFile()) {
     fs.unlinkSync(file)
     console.log(file +' effacé')
   }

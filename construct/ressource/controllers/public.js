@@ -1,19 +1,18 @@
 'use strict';
 
-var controller = lassi.Controller('public')
+// var _ = require('underscore')._
 var converter = require('../converter')
 var repository = require('../repository')
 var routes = require('../config.js').constantes.routes
 
+var controller = lassi.Controller('public')
 controller.respond('html')
 
 /**
  * Les routes d'accès aux ressources public (sans authentification)
  * La session ne doit pas être utilisée ici (pour que varnish puisse virer les cookies en amont)
  *
- * Seules sont disponibles les routes
- * - describe et display (en html avec layout-iframe)
- * - json (en json)
+ * Seules sont disponibles les routes describe et display (avec layout-iframe)
  */
 
 /**
@@ -25,20 +24,14 @@ controller
     .do(function (ctx, next) {
       ctx.forceLayout = 'layout-iframe'
       var id = ctx.arguments.id
-      repository.load(id, function (error, ressource) {
-        if (error) next(error)
-        else if (ressource) {
-          // elle doit être publique
-          if (ressource.restriction) {
-            ctx.accessDenied("La ressource d'identifiant " + id + " n'est pas publique")
-            return
-          } else {
-            ctx.metas.title = ressource.titre
-            converter.sendPageData(error, ressource, ctx, next)
-          }
+      repository.loadPublic(id, function (error, ressource) {
+        if (error) {
+          next(error)
+        } else if (ressource) {
+          ctx.metas.title = ressource.titre
+          converter.sendPageData(error, ressource, ctx, next)
         } else {
-          ctx.response.statusCode = 404;
-          next(null, {error: "La ressource d'identifiant " + id + " n'existe pas"})
+          ctx.notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas publique")
         }
       })
     });
@@ -56,30 +49,38 @@ controller
       // qui sera récupéré par l'écouteur layout défini dans le mainComponent.initialize
       ctx.forceLayout = 'layout-iframe'
 
-      repository.load(id, function (error, ressource) {
-        var data
+      repository.loadPublic(id, function (error, ressource) {
         if (!ressource) {
-          ctx.response.statusCode = 404;
-          data = {error: "La ressource d'identifiant " + id + " n'existe pas"}
-        } else if (ressource.restriction) {
-          ctx.accessDenied("La ressource d'identifiant " + id + " n'est pas publique")
-          return
+          ctx.notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas publique")
         } else {
           ctx.metas.title = ressource.titre
-          delete ressource._entity
-          data = {
+          var data = {
             pluginBaseUrl:'../../plugins/' +ressource.typeTechnique,
             vendorsBaseUrl:'../../vendors',
             pluginName : ressource.typeTechnique,
-            ressource: ressource.toString()
+            ressource: ressource.toString() // une string pour que dust le mette dans le source
           }
+          next(null, data)
         }
-        next(null, data)
       })
     })
 
 /**
- * Liste d'après le critère passé en 1er param (puis valeur, offset & nb)
+ * preview : Voir la ressource dans le site
+ */
+controller
+    .Action(routes.preview + '/:id', 'public.preview')
+    .renderWith('preview')
+    .do(function (ctx, next) {
+      // sera affiché en iframe, comme pour tous les autres sites
+      next(null, {url:ctx.url(lassi.action.ressource.display, ctx.arguments)})
+    })
+
+/**
+ * Liste d'après les critères passés
+ * index : nom du champ à filtrer
+ * value : valeurs possibles
+ * en 1er param (puis valeur, offset & nb)
  */
 controller
   .Action('by/:index/:value/:start/:nb', 'public.by')
@@ -88,24 +89,91 @@ controller
       log.dev('liste avec les args', ctx.arguments)
       var index = ctx.arguments.index
       var value = ctx.arguments.value
-      var start = ctx.arguments.start
-      var nb    = ctx.arguments.nb
-      var options = {
-        filters : [{index:index, values:[value]}],
-        orderBy:'id'
+      var values
+      if (value !== "undefined") {
+        if (value.indexOf(',')) values = value.split(',')
+        else values = [value]
       }
-      repository.getListe(options, start, nb, function (error, ressources) {
+      var options = {
+        filters : [
+          {index:'restriction', value:0},
+          {index:index, values:values}
+        ],
+        orderBy:'id',
+        start   : parseInt(ctx.arguments.start),
+        nb      : parseInt(ctx.arguments.nb)
+      }
+      repository.getListe(options, function (error, ressources) {
         if (error) next(error)
         else {
-          // on ne garde que les publiques
-          var ressourcesPubliques = []
-          ressources.forEach(function (ressource) {
-            if (!ressource.restriction) ressourcesPubliques.push(ressource)
-          })
           ctx.metas.title = 'Résultats de recherche'
-          next(null, {ressources: ressourcesPubliques})
+          next(null, {ressources: addUrls(ctx, ressources)})
         }
       })
   });
 
+/**
+ * Liste d'après les filtres en json (qui peuvent être multiple)
+ * Le json doit contenir
+ * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
+ *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
+ * et peut contenir
+ * - orderBy : un nom d'index
+ * - order : 'desc' si on veut l'ordre descendant
+ * - start : offset
+ * - nb : nb de résultats voulus
+ */
+controller
+  .Action('by', 'public.byOptionsPost')
+  .via('post')
+  .renderWith('liste')
+    .do(function (ctx, next) {
+      repository.getListe(ctx.post, function (error, ressources) {
+        if (error) next(error)
+        else {
+          ctx.metas.title = 'Résultats de recherche'
+          next(null, {ressources: addUrls(ctx, ressources)})
+        }
+      })
+    })
+
+/**
+ * Liste d'après les filtres en json (qui peuvent être multiple), dispo aussi en get
+ * Le json doit contenir
+ * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
+ *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
+ * et peut contenir
+ * - orderBy : un nom d'index
+ * - order : 'desc' si on veut l'ordre descendant
+ * - start : offset
+ * - nb : nb de résultats voulus
+ */
+controller
+    .Action('by/:json', 'public.byOptionsGet')
+    .renderWith('liste')
+    .do(function (ctx, next) {
+      repository.getListe(ctx.arguments.json, function (error, ressources) {
+        if (error) next(error)
+        else {
+          ctx.metas.title = 'Résultats de recherche'
+          next(null, {ressources: addUrls(ctx, ressources)})
+        }
+      })
+    })
+
 module.exports = controller;
+
+/**
+ * Ajoute les propriétés url à chaque elt du tableau de ressource
+ * @param {Context} ctx
+ * @param {Array} ressources
+ * @returns {Array} Le nouveau tableau de ressources
+ */
+function addUrls(ctx, ressources) {
+  if (ressources && ressources.length) ressources.forEach(function (ressource) {
+    ressource.urlDescribe = ctx.url(lassi.action.public.describe, {id:ressource.id})
+    ressource.urlPreview = ctx.url(lassi.action.public.preview, {id:ressource.id})
+    ressource.urlDisplay = ctx.url(lassi.action.public.display, {id:ressource.id})
+  })
+  return ressources
+}
