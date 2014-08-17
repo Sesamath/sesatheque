@@ -67,7 +67,6 @@ function logErrorData(message, filter) {
 if (env === 'dev') {
   // (attention, on sera dans build/application/index.js au runtime) */
   var devOutputStream = fs.createWriteStream(config.logs.dev, {'flags': 'a'});
-  var js_beautify = require('js-beautify').js_beautify;
   var buffer;
   logDev = function(message, objectToDump, filter) {
     if (!filter || filters[filter]) {

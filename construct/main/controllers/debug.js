@@ -7,15 +7,6 @@ var js_beautify = require('js-beautify').js_beautify;
 controller.respond('html');
 
 /**
- * On ajoute nos 4 méthodes CRUD (Create, Read, Update, Delete), avec 2 méthodes read suivant que
- * l'on veut voir la ressource (display ou embed) ou sa description (describe)
- *
- * Les erreurs liées à un bug dans le code sont en anglais,
- * celles liées à une incohérence de data et destinés à l'utilisateur en français
- * (celles liées à une url malformée doivent être interceptées avant nous)
- */
-
-/**
  * Une route pour afficher des objets en dev (debug)
  */
 controller

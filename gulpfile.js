@@ -109,7 +109,7 @@ gulp.task('purge', function() {
   // on efface la session
   var file = './temp/sessions.json'
   if (fs.existsSync(file) && fs.lstatSync(file).isFile()) {
-    fs.unlinkSync(file)
+    fs.unlink(file, 2)
     console.log(file +' effacé')
   }
   // et les logs
@@ -118,7 +118,7 @@ gulp.task('purge', function() {
     fs.readdirSync(dirLogs).forEach(function (log) {
       file = dirLogs + '/' + log
       if (fs.lstatSync(file).isFile()) {
-        fs.unlinkSync(file);
+        fs.truncateSync(file, 2);
         console.log(file +' effacé')
       }
     })

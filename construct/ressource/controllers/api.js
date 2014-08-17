@@ -5,7 +5,6 @@
 
 var controller = lassi.Controller('api')
 var _ = require('underscore')._
-var rights = require('../rights')
 var converter = require('../converter')
 var repository = require('../repository')
 
@@ -31,7 +30,7 @@ controller
         lassi.tmp[ctx.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
         //log.dev("que l'on a transformé en", ressource)
         var permission = id ? 'write' : 'add'
-        if (rights.hasPermission(permission, ctx, ressource)) {
+        if (lassi.personne.hasPermission(permission, ctx, ressource)) {
           repository.write(ressource, function (error, ressource) {
             // id - convertPost - valide+setVersion - store - store2 - fin
             lassi.tmp[ctx.post.id].m += '\tretSt ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
@@ -79,16 +78,18 @@ controller
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
             // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
-            if (rights.hasReadPermission(ctx, ressource)) next(null, ressource.toObject())
+            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource.toObject())
             else  denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, ctx, next)
           } else notFound("La ressource d'identifiant " + id + " n'existe pas", ctx, next)
         })
 
       } else {
-        if (!rights.hasGenericPermission('del', ctx)) {
+        if (!lassi.personne.hasPermission('del', ctx)) {
           // faut charger la ressource pour le savoir
           repository.load(id, function (error, ressource) {
-            if (rights.hasPermission('del', ctx, ressource)) del(id)
+            if (error) next(error)
+            else if (!ressource) next(new Error("la ressource d'identifiant " + id +" n'existe pas"))
+            else if (lassi.personne.hasPermission('del', ctx, ressource)) del(id) // next inclus
             else denied("Droits insuffisants pour supprimer la ressource d'identifiant " + id, ctx, next)
           })
         }
@@ -146,7 +147,7 @@ controller
     .via('post')
     .renderWith('liste')
     .do(function (ctx, next) {
-      if (!rights.isAuthenticated()) next(null, {error:"Il faut être authentifié pour accéder aux ressources prof"})
+      if (!lassi.personne.isAuthenticated()) next(null, {error:"Il faut être authentifié pour accéder aux ressources prof"})
       else repository.getListe('prof', ctx, ctx.post, function(error, ressources) {
         if (error) next(null, {error:error.toString()})
         else next(null, addUrls(ctx, ressources))
@@ -158,7 +159,7 @@ controller
     .via('post')
     .renderWith('liste')
     .do(function (ctx, next) {
-      if (!rights.isAuthenticated()) next(null, {error:"Il faut être authentifié pour accéder à ses ressources"})
+      if (!lassi.personne.isAuthenticated()) next(null, {error:"Il faut être authentifié pour accéder à ses ressources"})
       else repository.getListe('moi', ctx, ctx.post, function(error, ressources) {
         if (error) next(null, {error:error.toString()})
         else next(null, addUrls(ctx, ressources))

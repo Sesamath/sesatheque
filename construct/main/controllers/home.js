@@ -7,12 +7,11 @@ var controller = lassi.Controller();
 
 controller
     .respond('html')
-    .Action('/', 'home') // on lui donne un nom pour la retrouver dans
-    // .renderWith('home')
+    .Action('/', 'home')
     .do(function (next) {
       next(null, {
         title  : "Bienvenue dans la bibliothèque Sésamath",
-        content: "On verra plus tard pour raconter notre vie <strong>ici</strong>."
+        content: "Ce site est encore un prototype expérimental."
       });
     })
 

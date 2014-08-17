@@ -3,6 +3,7 @@
 /**
  * Constructeur utilisé par l'entity Personne
  * @constructor
+ * @extends {EntityInstance}
  */
 function Personne() {
   this.id = 0
@@ -22,10 +23,15 @@ function Personne() {
    */
   this.email = ''
   /**
-   * La liste des permissions
+   * La liste des permissions {permission:boolean}
    * @type {Object}
    */
   this.permissions = {}
+  /**
+   * La liste des groupes {id:boolean}
+   * @type {Object}
+   */
+  this.groupes = {}
   /**
    * D'autres champs stockés en json, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
    * suivant le source d'authentification par ex.
@@ -41,6 +47,18 @@ var entity = lassi.Entity(Personne)
 
 module.exports = entity;
 
+/**
+ * Retourne true si la personne a la permission
+ * @param {string} permission
+ */
+Personne.prototype.hasPermission = function (permission) {
+  return (this.permissions[permission] === true)
+}
+
+/**
+ * Ajoute les permissions d'un role
+ * @param {string} role
+ */
 Personne.prototype.addRolePermissions = function (role) {
   var personne = this
   var config = lassi.personne.settings;
@@ -51,6 +69,51 @@ Personne.prototype.addRolePermissions = function (role) {
   }
 }
 
+/**
+ * Ajoute une permission
+ * @param permission
+ */
 Personne.prototype.addPermission = function (permission) {
   if (!this.permissions[permission]) this.permissions[permission] = true
+}
+
+/**
+ * Ajoute un groupe d'après son id (vérifie qu'il existe)
+ * @param {int} groupeId
+ * @param {EntityInstance~StoreCallback} next
+ */
+Personne.prototype.addGroupeById = function (groupeId, next) {
+  var personne = this
+  if (!personne.groupes[groupeId]) {
+    lassi.Groupe.load(groupeId, function (error, groupe) {
+      if (groupe) {
+        personne.groupes[groupeId] = true
+      }
+      next(null, personne)
+    })
+  }
+}
+
+/**
+ * Ajoute un groupe à la personne (en le créant s'il n'existait pas)
+ * @param {string} groupeNom Le nom
+ * @param {EntityInstance~StoreCallback} next
+ */
+Personne.prototype.addGroupeByName = function (groupeNom, next) {
+  var personne = this
+  lassi.entity.Groupe.loadByNom(groupeNom, function (error, groupe) {
+    if (error) {
+      next(error, personne)
+    } else if (groupe) {
+      personne.groupes[groupe.id] = true
+      next(null, personne)
+    } else {
+      // on le créé au passage
+      lassi.entity.Groupe.create({nom:groupeNom}).save(function (error, groupe) {
+        if (groupe) personne.groupes[groupe.id] = true
+        // sinon y'a une erreur que l'on fait suivre
+        next(error, personne)
+      })
+    }
+  })
 }

@@ -376,23 +376,20 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
       query = query.match('restriction').equals(0)
 
     } else if (visibilite == 'prof') {
-      if (!ctx.session.user || !ctx.session.user.permissions || !ctx.session.user.permissions.readProf) {
-        next(new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources"))
-        return
+      if (!lassi.personne.hasPermission('readProf', ctx)) {
+        return next(new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources"))
       }
       query = query.match('restriction').equals(1)
 
     } else if (visibilite == 'moi') {
-      if (!ctx.session.user || !ctx.session.user.id) {
-        next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
-        return
-      }
+      if (!ctx.session.user || !ctx.session.user.id)
+        return next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
       query = query.match('auteurs').equals(ctx.session.user.id)
     }
 
     // orderBy
     if (optionsSafe.orderBy) {
-      if (optionsSafe.order === 'desc') query = query.sort(optionsSafes.orderBy, 'desc')
+      if (optionsSafe.order === 'desc') query = query.sort(optionsSafe.orderBy, 'desc')
       else query = query.sort(optionsSafe.orderBy)
     }
 

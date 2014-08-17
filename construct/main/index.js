@@ -37,8 +37,7 @@ mainComponent.initialize = function(next) {
    * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
    * this.application.templateEngines.dust existe plus /
   this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
-    var js_beautify = require('js-beautify').js_beautify;
-    return chunk.write('<pre class="debug">' + js_beautify(JSON.stringify(params)) + '</pre>');
+    return chunk.write('<pre class="debug">' + JSON.stringify(params, null, 2) + '</pre>');
   }); /**/
 }
 

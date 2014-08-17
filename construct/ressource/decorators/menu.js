@@ -7,22 +7,29 @@ module.exports = lassi.Decorator('menu')
     .renderTo('menu')
     .do(function(ctx, next) {
       var links = []
+      // raccourci
+      function hasPerm(permission) {
+        return lassi.personne.hasPermission(permission, ctx)
+      }
 
-      // édition
-      if (ctx.session.user && ctx.session.user.roles && ctx.session.user.roles.indexOf('editor')) {
-        // on est authentifié avec les droits d'edition
+      // ajout
+      if (hasPerm('add')) {
         links.push(ctx.link(lassi.action.ressource.add, 'Ajouter une ressource'))
-        // on est sur une description
-        if (ctx.action === lassi.action.ressource.describe || ctx.action === lassi.action.ressource.describeByOrigin) {
+      }
+      // si on est sur une description, on a les liens contextuels
+      if (ctx.action === lassi.action.ressource.describe || ctx.action === lassi.action.ressource.describeByOrigin) {
+        if (hasPerm('write'))
           links.push(ctx.link(lassi.action.ressource.edit, 'Modifier cette ressource', ctx.arguments))
+        if (hasPerm('del'))
           links.push(ctx.link(lassi.action.ressource.del, 'Supprimer cette ressource', ctx.arguments))
+        if (hasPerm('read')) {
+          links.push(ctx.link(lassi.action.ressource.preview, 'Voir la ressource', ctx.arguments))
+          links.push(ctx.link(lassi.action.ressource.display, 'Voir la ressource (pleine page)', ctx.arguments))
         }
       }
 
       // voir
       if (ctx.action === lassi.action.ressource.describe || ctx.action === lassi.action.ressource.describeByOrigin) {
-        links.push(ctx.link(lassi.action.ressource.preview, 'Voir la ressource', ctx.arguments))
-        links.push(ctx.link(lassi.action.ressource.display, 'Voir la ressource (pleine page)', ctx.arguments))
       }
 
       next(null, {links:links})

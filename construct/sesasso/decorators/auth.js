@@ -127,6 +127,31 @@ function getUserForDust(personne) {
 function checkTicket(ctx, next) {
   if (!ctx.get.ticket) throw new Error("checkTicket appelé sans ticket dans l'url")
 
+  var personneSso
+
+  /**
+   * Enregistre le user en sesion et redirige (ou appelle next en cas de pb)
+   * @param error
+   * @param personne
+   */
+  function setSessionAndRedirect(error, personne) {
+    if (error) next(error)
+    else if (personne && personne.oid) {
+      // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
+      // hormis le controleur deconnexion qui affecte un objet vide
+      ctx.session.user = personne
+      log.dev('ticket OK, user enregistré localement et en session, ' +ctx.session.user.oid)
+      // on redirige vers cette page sans le ticket en get
+      ctx.redirect(getMyUrl(ctx))
+    } else {
+      log.dev('pb de personne', personne)
+      error = new Error("Erreur interne, l'initialisation de l'utilisateur courant a échoué")
+      log.error(error +' (id ' +personneSso.id +')')
+      next(error)
+    }
+    next(null, personne)
+  }
+
   log.dev('On poste pour valider le ticket')
   var options = {
     url : hostAuth + urlWs,
@@ -139,33 +164,8 @@ function checkTicket(ctx, next) {
       ticket_client:ctx.get.ticket
     }
   }
+  // analyse du retour du serveur sso
   request.post(options, function (error, response, body) {
-    var personneSso
-
-    /**
-     * Enregistre le user en sesion et redirige (ou appelle next en cas de pb)
-     * @param error
-     * @param personne
-     */
-    function setSessionAndRedirect(error, personne) {
-      if (error) next(error)
-      else if (personne && personne.oid) {
-        // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
-        // hormis le controleur deconnexion qui affecte un objet vide
-        ctx.session.user = personne.toObject()
-        log.dev('ticket OK, user enregistré localement et en session, ' +ctx.session.user.oid)
-        // on redirige vers cette page sans le ticket en get
-        ctx.redirect(getMyUrl(ctx))
-      } else {
-        log.dev('pb de personne', personne)
-        error = new Error("Erreur interne, l'initialisation de l'utilisateur courant a échoué")
-        log.error(error +' (id ' +personneSso.id +')')
-        next(error)
-      }
-      next(null, personne)
-    }
-
-    // analyse du retour du serveur sso
     try {
       if (error) throw error
       if (body.error) throw new Error(body.error)
@@ -177,20 +177,21 @@ function checkTicket(ctx, next) {
 
       // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
       lassi.personne.load(personneSso.id, function(error, personne) {
-        var newPersonne = personneSso.toPersonne()
-        var needToStore = true
+        if (error) next(error)
+        else {
+          // on compare cette personne de la BdD avec newPersonne issue du sso
+          personneSso.toPersonne(function (error, newPersonne) {
+            var needToStore = true
 
-        if (personne) {
-          // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
-          newPersonne.oid = personne.oid
-          if (_.isEqual(personne.toObject(), newPersonne)) needToStore = false
-          else lassi.tools.update(personne, newPersonne) // ça a changé, on met à jour l'entité
-        } else {
-          // c'est un nouveau
-          personne = lassi.entity.Personne.create(newPersonne)
+            if (personne) {
+              // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
+              newPersonne.oid = personne.oid
+              if (_.isEqual(personne.toObject(), newPersonne.toObject())) needToStore = false
+            }
+            if (needToStore) newPersonne.store(setSessionAndRedirect)
+            else setSessionAndRedirect(null, personne)
+          })
         }
-        if (needToStore) personne.store(setSessionAndRedirect)
-        else setSessionAndRedirect(null, personne)
       })
 
     } catch (error) {
