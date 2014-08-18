@@ -142,12 +142,13 @@ PersonneSso.prototype.addGroupes =  function (personne, next) {
   })
 
   // reste à ajouter tous ces groupes
+  log.dev('addGroupes')
   flow(groupeNoms)
       .parEach(function(groupeNom) {
         personne.addGroupeByName(groupeNom, this)
       })
-      .empty()
       .seq(function () {
+        log.dev('addGroupes fini')
         next(null, personne)
       })
       .catch(next)

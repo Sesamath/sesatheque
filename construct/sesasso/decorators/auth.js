@@ -37,7 +37,7 @@ module.exports = lassi.Decorator('auth')
         /**
          * Check d'un ticket (appel de sso et redirect ici sans le ticket)
          */
-        if (ctx.session.user && ctx.session.user.id) {
+        if (lassi.personne.isAuthenticated(ctx)) {
           lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté, ticket passé en paramètre ignoré", 'warning')
           ctx.redirect(getMyUrl(ctx))
         } else {
@@ -131,15 +131,15 @@ function checkTicket(ctx, next) {
 
   /**
    * Enregistre le user en sesion et redirige (ou appelle next en cas de pb)
-   * @param error
-   * @param personne
+   * @param {Error|null|undefined} error
+   * @param {Personne} personne
    */
   function setSessionAndRedirect(error, personne) {
     if (error) next(error)
-    else if (personne && personne.oid) {
+    else if (personne /* @FIXME remettre ça dès que le store fonctionne && personne.oid */) {
       // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
       // hormis le controleur deconnexion qui affecte un objet vide
-      ctx.session.user = personne
+      ctx.session.user = personne.toObject() // express-session fait un stringify dessus et tolère pas les refs circulaires
       log.dev('ticket OK, user enregistré localement et en session, ' +ctx.session.user.oid)
       // on redirige vers cette page sans le ticket en get
       ctx.redirect(getMyUrl(ctx))
@@ -149,7 +149,6 @@ function checkTicket(ctx, next) {
       log.error(error +' (id ' +personneSso.id +')')
       next(error)
     }
-    next(null, personne)
   }
 
   log.dev('On poste pour valider le ticket')
@@ -176,20 +175,25 @@ function checkTicket(ctx, next) {
           " pour le ticket transmis")
 
       // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
-      lassi.personne.load(personneSso.id, function(error, personne) {
+      lassi.personne.load(personneSso.id, function(error, personneBdd) {
         if (error) next(error)
         else {
           // on compare cette personne de la BdD avec newPersonne issue du sso
           personneSso.toPersonne(function (error, newPersonne) {
             var needToStore = true
 
-            if (personne) {
+            if (personneBdd) {
               // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
-              newPersonne.oid = personne.oid
-              if (_.isEqual(personne.toObject(), newPersonne.toObject())) needToStore = false
+              newPersonne.oid = personneBdd.oid
+              if (_.isEqual(personneBdd.toObject(), newPersonne.toObject())) needToStore = false
             }
-            if (needToStore) newPersonne.store(setSessionAndRedirect)
-            else setSessionAndRedirect(null, personne)
+            if (needToStore) {
+              log.dev('av store personne', newPersonne)
+              newPersonne.store(setSessionAndRedirect)
+              // @FIXME le store rappelle pas la cb, on le fait ici
+              setSessionAndRedirect(null, newPersonne)
+            }
+            else setSessionAndRedirect(null, personneBdd)
           })
         }
       })

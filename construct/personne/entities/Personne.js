@@ -101,7 +101,7 @@ Personne.prototype.addGroupeById = function (groupeId, next) {
  */
 Personne.prototype.addGroupeByName = function (groupeNom, next) {
   var personne = this
-  lassi.entity.Groupe.loadByNom(groupeNom, function (error, groupe) {
+  lassi.personne.loadGroupeByNom(groupeNom, function (error, groupe) {
     if (error) {
       next(error, personne)
     } else if (groupe) {
@@ -110,10 +110,13 @@ Personne.prototype.addGroupeByName = function (groupeNom, next) {
     } else {
       // on le créé au passage
       lassi.entity.Groupe.create({nom:groupeNom}).save(function (error, groupe) {
+        log.dev('après save ', groupe)
         if (groupe) personne.groupes[groupe.id] = true
         // sinon y'a une erreur que l'on fait suivre
         next(error, personne)
       })
+      // @FIXME tant que le store marche pas on passe à la suite quand même
+      next(null, personne)
     }
   })
 }

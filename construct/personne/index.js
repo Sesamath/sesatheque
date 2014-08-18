@@ -32,7 +32,7 @@ personneComponent.load = function(id, next) {
   else {
     log.dev('personne ' +id +' pas en cache')
     lassi.entity.Personne.match('id').equals(id).grabOne(function (error, personne) {
-      log.dev('remonte ', personne)
+      //log.dev('personne load remonte ', personne)
       if (error) next(error)
       else if (personne) {
         lassi.cache.set('personne_' + id, personne)
@@ -109,7 +109,53 @@ personneComponent.hasReadPermission = function (ctx, ressource) {
  * @returns {boolean}
  */
 personneComponent.isAuthenticated = function (ctx) {
-  return (ctx.session.user && ctx.session.user.id)
+  return (ctx.session && ctx.session.user && ctx.session.user.id)
+}
+
+
+/**
+ * Récupère un groupe d'après son nom
+ * @param {string} groupeNom
+ * @param {EntityInstance~StoreCallback} next
+ */
+personneComponent.loadGroupeByNom = function (groupeNom, next) {
+  var cacheKey = personneComponent.getCacheKeyGroupeByNom(groupeNom)
+  var groupe = lassi.cache.get(cacheKey)
+  if (groupe) return next(null, groupe)
+  lassi.entity.Groupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
+    if (error) return next(error)
+    if (groupe) {
+      lassi.cache.set(cacheKey, groupe, cacheTTL)
+      return next(null, groupe)
+    }
+    next(null, null)
+  })
+}
+
+/**
+ * Récupère un groupe d'après son id (si erreur on la log)
+ * @param {int} id
+ * @param {EntityInstance~StoreCallback} next
+ */
+personneComponent.loadGroupe = function (groupeId, next) {
+  if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.id doit être entier"))
+  var cacheKey = 'groupe_' +groupeId
+  var groupe = lassi.cache.get(cacheKey)
+  if (groupe) return next(null, groupe)
+  lassi.entity.Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {
+    if (error) log.error(error)
+    if (groupe) lassi.cache.set(cacheKey, groupe, cacheTTL)
+    next(error, groupe)
+  })
+}
+
+/**
+ * Renvoie la clé de cache pour le stockage des groupes par leur nom
+ * @param groupeNom
+ * @returns {string} La clé
+ */
+personneComponent.getCacheKeyGroupeByNom = function (groupeNom) {
+  return 'groupeNom_' +groupeNom.replace(/[^\w]/, '')
 }
 
 module.exports = personneComponent
@@ -212,8 +258,8 @@ function getReadDeniedMessage(ctx, ressource) {
     // privée
     case 2:
       if (_.contains(ressource.auteurs, ctx.session.user.id)) return
-      else if (_.contains(ressource.contributeurs, ctx.session.user.id)) return
-      else return "Ressource privée"
+      if (_.contains(ressource.contributeurs, ctx.session.user.id)) return
+      return "Ressource privée"
       // @todo gérer les partages par groupes
       break //inutile mais évite à jshint de râler
 
@@ -229,10 +275,9 @@ function getReadDeniedMessage(ctx, ressource) {
  */
 function getWriteDeniedMessage(ctx, ressource) {
   // on regarde si c'est l'auteur
-  if (ressource.auteurs.indexOf(ctx.session.user.id) > -1) return
+  if (_.contains(ressource.auteurs, ctx.session.user.id)) return
   // un contributeur
-  if (ressource.contributeurs.indexOf(ctx.session.user.id) > -1) return
+  if (_.contains(ressource.contributeurs, ctx.session.user.id)) return
   // pour le moment tout le reste est interdit
   return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
 }
-

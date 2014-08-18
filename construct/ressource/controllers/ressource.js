@@ -3,7 +3,6 @@
 var controller = lassi.Controller('ressource');
 var _ = require('underscore')._;
 
-var rights = require('../rights')
 var converter = require('../converter')
 var repository = require('../repository')
 var routes = require('../config.js').constantes.routes;
@@ -30,7 +29,7 @@ controller
       repository.load(id, function (error, ressource) {
         if (error) next(error)
         else if (ressource) {
-          rights.checkPermission('read', ctx, ressource, function (ressource) {
+          lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
             ctx.metas.title = ressource.titre
             converter.sendPageData(error, ressource, ctx, next)
           })
@@ -50,7 +49,7 @@ controller
       repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) next(error)
         else if(ressource) {
-          rights.checkPermission('read', ctx, ressource, function (ressource) {
+          lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
             ctx.metas.title = ressource.titre
             if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
             else ctx.metas.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
@@ -79,7 +78,7 @@ controller
       repository.load(id, function (error, ressource) {
         if (error) next(error)
         else if (ressource) {
-          rights.checkPermission('read', ctx, ressource, function (ressource) {
+          lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
             ctx.metas.title = ressource.titre
             // si public son permalink est dans le namespace public
             if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
@@ -119,7 +118,7 @@ controller
       var ressource
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        rights.checkPermission('add', ctx, null, function () {
+        lassi.personne.checkPermission('add', ctx, null, function () {
           ctx.metas.title = 'Ajouter une ressource'
           // on ajoute le token, permet de ne pas vérifier les droits au post
           ctx.session.token = converter.sendFormData(null, null, next)
@@ -159,7 +158,7 @@ controller
       var id = ctx.arguments.id
       repository.load(id, function (error, ressource) {
         if (ressource) {
-          rights.checkPermission('write', ctx, ressource, function (ressource) {
+          lassi.personne.checkPermission('write', ctx, ressource, function (ressource) {
             ctx.metas.title = 'Modifier ' + ressource.titre
             ctx.session.token = converter.sendFormData(error, ressource, next)
           })
@@ -201,7 +200,7 @@ controller
         // on affiche et on demande confirmation
         repository.load(id, function (error, ressource) {
           if (ressource) {
-            rights.checkPermission('del', ctx, ressource, function () {
+            lassi.personne.checkPermission('del', ctx, ressource, function () {
               ctx.metas.title = 'Supprimer ' + ressource.titre
               // on ajoute un flag en session pour ne pas refaire les vérifs de droits dans le le post
               ctx.session['del' + id] = true

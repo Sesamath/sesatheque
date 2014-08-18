@@ -147,7 +147,7 @@ controller
     .via('post')
     .renderWith('liste')
     .do(function (ctx, next) {
-      if (!lassi.personne.isAuthenticated()) next(null, {error:"Il faut être authentifié pour accéder aux ressources prof"})
+      if (!lassi.personne.isAuthenticated(ctx)) next(null, {error:"Il faut être authentifié pour accéder aux ressources prof"})
       else repository.getListe('prof', ctx, ctx.post, function(error, ressources) {
         if (error) next(null, {error:error.toString()})
         else next(null, addUrls(ctx, ressources))
@@ -159,7 +159,7 @@ controller
     .via('post')
     .renderWith('liste')
     .do(function (ctx, next) {
-      if (!lassi.personne.isAuthenticated()) next(null, {error:"Il faut être authentifié pour accéder à ses ressources"})
+      if (!lassi.personne.isAuthenticated(ctx)) next(null, {error:"Il faut être authentifié pour accéder à ses ressources"})
       else repository.getListe('moi', ctx, ctx.post, function(error, ressources) {
         if (error) next(null, {error:error.toString()})
         else next(null, addUrls(ctx, ressources))
