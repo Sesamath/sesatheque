@@ -1,0 +1,44 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 10pt;
+}
+#filariane {
+    padding: 3px;
+    padding-left: 24px;
+    background: url(../../../includes/images/information.gif) no-repeat left center;
+    border-bottom: 1px solid black;
+    font-style: italic;
+    height: 16px;
+}
+#filariane .highlight {
+    color: #660000;
+    font-weight: bold;
+}
+#lienreponse, #lienconsigne {
+    padding-top: 3px;
+    padding-left: 5px;
+    border-left: 1px solid black;
+    float: right;
+    display:none;
+    cursor: pointer;
+    height: 18px;
+    margin-left: 5px;
+    width: 65px;
+    text-align: center;
+}
+#liensuivant, .liensuivant {
+    cursor: pointer;
+    margin: 0 5px;
+}
+.invisible {
+    display: none;
+}
+#page {
+    z-index: 1;
+    width:98%;
+}
+#divpage {
+    text-align: center;
+}

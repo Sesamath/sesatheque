@@ -93,7 +93,7 @@ module.exports = {
     personne : {
       roles: {
         // en attendant de gérer modIndexation, modParametres et publish on utilise juste write
-        admin    : ['add', 'delVersion', 'del', 'modIndexation', 'modParametres', 'publish', 'readProf', 'write'],
+        admin    : ['add', 'delVersion', 'del', 'modIndexation', 'modParametres', 'publish', 'read', 'readProf', 'write'],
         editor   : ['add', 'modIndexation', 'modParametres', 'publish', 'readProf', 'write'],
         indexator: ['modIndexation', 'readProf'],
         prof     : ['readProf']

@@ -167,6 +167,7 @@ module.exports = personneComponent
  * @returns {boolean}
  */
 function hasGenericPermission(permission, ctx) {
+  givePermOursServers(ctx)
   return ctx &&
       ctx.session &&
       ctx.session.user &&
@@ -280,4 +281,20 @@ function getWriteDeniedMessage(ctx, ressource) {
   if (_.contains(ressource.contributeurs, ctx.session.user.id)) return
   // pour le moment tout le reste est interdit
   return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
+}
+
+/**
+ * Ajoute un user d'id -1 en session avec tout les droits si l'ip du client est locale
+ * @param ctx
+ */
+function givePermOursServers(ctx) {
+  if (!ctx || !ctx.session) throw new Error("Il faut une session")
+  if (!ctx.session.user || !ctx.session.user.id) {
+    // log.dev('req', ctx.request)
+    var fake = {id:-1, permissions:{read:true, add:true, del:true, write:true}} // un user bidon pour nos serveurs
+    if (ctx.request && ctx.request._remoteAddress) {
+      var ip = ctx.request._remoteAddress
+      if (ip === '127.0.0.1' || ip.indexOf('192.168') === 0) ctx.session.user = fake
+    }
+  }
 }

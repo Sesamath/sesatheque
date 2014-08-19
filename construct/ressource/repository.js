@@ -184,6 +184,30 @@ ressourceRepository.del = function(id, next) {
 
 /**
  * Efface l'entity par son oid (on peut passer un tableau)
+ * @param {string} origine L'origine
+ * @param {Integer} idOrigine L'id à supprimer
+ * @param {Function} next La callback qui sera appelée en lui passant (error, nbObjects, nbIndexes)
+ * @returns {undefined}
+ */
+ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
+  log.dev("La ressource d'origine " +origine +" et d'id " +idOrigine + " va être effacée")
+  lassi.entity.Ressource
+      .match('origine').equals(origine)
+      .match('idOrigine').equals(idOrigine)
+      .delete(function(error, nbObjects, nbIndexes) {
+        // on passe le cache en revue pour effacer par idOrigine
+        _.each(lassi.cache, function(value, key) {
+          if (key.indexOf("ressource_") === 0 && value.origine == origine && value.idOrigine == idOrigine)
+            delete lassi.cache[key]
+        })
+        log.dev("La ressource d'origine " +origine +" et d'id " +idOrigine + " a été effacée (" +
+            nbObjects +" versions et " +nbIndexes +" index)")
+        next(error, nbObjects, nbIndexes)
+      })
+}
+
+/**
+ * Efface l'entity par son oid (on peut passer un tableau)
  * @param {Number|Array} oid  Le ou les oid à supprimer
  * @param {Function}     next La callback qui sera appelée en lui passant (error, nbObjects, nbIndexes)
  * @returns {undefined}

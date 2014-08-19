@@ -12,46 +12,68 @@ controller.respond('json');
 
 /**
  * Create / update
+ * Si le titre et la catégorie sont manquants on merge avec la ressource existante que l'on update, sinon on écrase
  */
 controller
     .Action('ressource')
     .via('post')
     .do(function(ctx, next) {
+      var partial = !ctx.post.titre && !ctx.post.categories &&
+          (ctx.post.id || (ctx.post.origine && ctx.post.idOrigine))
+      var id = ctx.post.id || 0
+      var ressource = converter.getRessourceFromPost(ctx.post, partial)
+
+      function update(error, ressourceLoaded) {
+        if (error) next(null, {error:error.toString()})
+        else {
+          ressourceLoaded.udate(ressource)
+          write(ctx, ressourceLoaded, next)
+        }
+      }
+
       //log.dev("dans api write on récupère en post", ctx.post)
       try {
-        var id = ctx.post.id || 0
         var msg = id
         // init du chrono
         var start = log.getElapsed(0)
         /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
         if (!lassi.tmp) lassi.tmp = {}
         lassi.tmp[ctx.post.id] = {m:msg,s:start}
-        var ressource = converter.getRessourceFromPost(ctx.post)
         lassi.tmp[ctx.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
         //log.dev("que l'on a transformé en", ressource)
-        var permission = id ? 'write' : 'add'
-        if (lassi.personne.hasPermission(permission, ctx, ressource)) {
-          repository.write(ressource, function (error, ressource) {
-            // id - convertPost - valide+setVersion - store - store2 - fin
-            lassi.tmp[ctx.post.id].m += '\tretSt ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
-            log.errorData(lassi.tmp[ctx.post.id].m)
-            //log.dev("dans cb api write on récupère", ressource)
-            if (error) next(null, {error: error.toString()})
-            else if (!_.isEmpty(ressource.errors)) {
-              next(null, {error: ressource.errors.join("\n")})
-            } else {
-              next(null, {id: ressource.id})
-            }
-          })
-        } else {
-          var errorMsg = "Droits insuffisants"
-          if (id) errorMsg += " pour modifier la ressource d'identifiant " + id
-          else errorMsg += " pour ajouter une ressource"
-          denied(errorMsg, ctx, next)
-        }
+
+        if (partial) {
+          // faut la charger
+          if (ressource.id) repository.load(ressource.id, update)
+          else repository.loadByOrigin(ressource.origine, ressource.idOrigine, update)
+        } else write(ctx, ressource, next)
+
       } catch (e) {
         next(null, {error: e.toString()})
       }
+    })
+
+/**
+ * Merge
+ * Si le titre et la catégorie sont manquants on merge avec la ressource existante que l'on update, sinon on écrase
+ */
+controller
+    .Action('ressourceMerge')
+    .via('post')
+    .do(function(ctx, next) {
+      var part = converter.getRessourceFromPost(ctx.post, true)
+
+      function merge(error, ressource) {
+        if (error) next(null, {error:error.toString()})
+        else {
+          ressource.merge(part)
+          write(ctx, ressource, next)
+        }
+      }
+
+      if (part.id) repository.load(ctx.post.id, merge)
+      else if (ctx.post.origine && ctx.post.idOrigine) repository.loadByOrigin(part.origine, part.idOrigine, merge)
+      else next(null, {error:"Il faut fournir id ou origine+idOrigine"})
     })
 
 /**
@@ -63,7 +85,7 @@ controller
     .do(function (ctx, next) {
       var id = ctx.arguments.id
 
-      function del(id) {
+      function del() {
         repository.del(id, function (error, nbObjects, nbIndexes) {
           if (error) next(null, {error: error.toString()})
           else if (nbObjects > 0) {
@@ -84,13 +106,80 @@ controller
         })
 
       } else {
-        if (!lassi.personne.hasPermission('del', ctx)) {
+        if (lassi.personne.hasPermission('del', ctx)) {
+          del()
+        } else {
           // faut charger la ressource pour le savoir
           repository.load(id, function (error, ressource) {
             if (error) next(error)
-            else if (!ressource) next(new Error("la ressource d'identifiant " + id +" n'existe pas"))
-            else if (lassi.personne.hasPermission('del', ctx, ressource)) del(id) // next inclus
+            else if (!ressource) next(new Error("la ressource d'identifiant " + id + " n'existe pas"))
+            else if (lassi.personne.hasPermission('del', ctx, ressource)) del() // next inclus
             else denied("Droits insuffisants pour supprimer la ressource d'identifiant " + id, ctx, next)
+          })
+        }
+      }
+    })
+
+/**
+ * Read (get) & delete byOrigine
+ */
+controller
+    .Action('ressource/:origine/:id', 'api.readByOrigine')
+    .via('get', 'delete')
+    .do(function (ctx, next) {
+      var idOrigine = ctx.arguments.id
+      var origine = ctx.arguments.origine
+
+      /**
+       * Efface la ressource d'après les params origine & idOrigine de la requete
+       */
+      function delByOrigine() {
+        repository.delByOrigine(origine, idOrigine, function (error, nbObjects, nbIndexes) {
+          if (error) next(null, {error: error.toString()})
+          else if (nbObjects > 0) {
+            next(null, {nbObjects:nbObjects, nbIndexes:nbIndexes})
+          } else next(null, {error: "Aucune ressource d'origine " +origine +" et d'identifiant " + idOrigine})
+        });
+      }
+
+      /**
+       * Fct à privilégier car l'effacement du cache est nettement plus performant
+       * @param id
+       */
+      function del(id) {
+        repository.del(id, function (error, nbObjects, nbIndexes) {
+          if (error) next(null, {error: error.toString()})
+          else if (nbObjects > 0) {
+            next(null, {deletedId: id, nbObjects:nbObjects, nbIndexes:nbIndexes})
+          } else next(null, {error: "Aucune ressource d'identifiant " + id})
+        });
+      }
+
+      if (ctx.method === 'get') {
+        repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+          // log.dev("dans api get " +id, ressource)
+          if (error) next(null, {error: error.toString()})
+          else if (ressource) {
+            // l'entité passe pas le JSON.stringify pour la sortie, à cause de la propriété _entity, d'où le toObject
+            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource.toObject())
+            else  denied("Droits insuffisants pour accéder à la ressource d'origine " +
+                origine +" et d'identifiant " + idOrigine, ctx, next)
+          } else notFound("La ressource d'origine " +origine +" et d'identifiant " + idOrigine +
+              " n'existe pas", ctx, next)
+        })
+
+      } else {
+        if (lassi.personne.hasPermission('del', ctx)) {
+          delByOrigine()
+        } else {
+          // faut charger la ressource pour le savoir
+          repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+            if (error) next(error)
+            else if (!ressource) notFound("La ressource d'origine " + origine + " et d'identifiant " + idOrigine +
+                " n'existe pas", ctx, next)
+            else if (lassi.personne.hasPermission('del', ctx, ressource)) del(ressource.id) // next inclus
+            else denied("Droits insuffisants pour accéder à la ressource d'origine " +
+                  origine + " et d'identifiant " + idOrigine, ctx, next)
           })
         }
       }
@@ -190,4 +279,33 @@ function addUrls(ctx, ressources) {
     else ressource.url = ctx.url(lassi.action.api.read, {id:ressource.id})
     return ressource.toObject()
   })
+}
+
+/**
+ * Vérifie les droits et enregistre la ressource
+ * @param ctx
+ * @param ressource
+ * @param next
+ */
+function write(ctx, ressource, next) {
+  var permission = ressource.id ? 'write' : 'add'
+  if (lassi.personne.hasPermission(permission, ctx, ressource)) {
+    repository.write(ressource, function (error, ressource) {
+      // id - convertPost - valide+setVersion - store - store2 - fin
+      lassi.tmp[ctx.post.id].m += '\tretSt ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
+      log.errorData(lassi.tmp[ctx.post.id].m)
+      //log.dev("dans cb api write on récupère", ressource)
+      if (error) next(null, {error: error.toString()})
+      else if (!_.isEmpty(ressource.errors)) {
+        next(null, {error: ressource.errors.join("\n")})
+      } else {
+        next(null, {id: ressource.id})
+      }
+    })
+  } else {
+    var errorMsg = "Droits insuffisants"
+    if (ressource.id) errorMsg += " pour modifier la ressource d'identifiant " + id
+    else errorMsg += " pour ajouter une ressource"
+    denied(errorMsg, ctx, next)
+  }
 }

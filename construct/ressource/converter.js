@@ -208,10 +208,11 @@ converter.sendFormData = function (error, ressource, next) {
 /**
  * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
  * @param data
+ * @param {boolean=} partial Passer true pour ne pas générer d'erreur sur des champs requis manquants
  * @return {Ressource}
  * @throws {Error} En cas de données invalides
  */
-converter.getRessourceFromPost = function (data) {
+converter.getRessourceFromPost = function (data, partial) {
   var ressource = lassi.entity.Ressource.create();
   var errors = [];
   var buffer;
@@ -236,7 +237,7 @@ converter.getRessourceFromPost = function (data) {
       var value = data[key]
 
       // propriétés obligatoires
-      if (_.isEmpty(value) && config.required[key]) {
+      if (!partial && _.isEmpty(value) && config.required[key]) {
         errors.push("Le champ " + config.labels[key] + " est obligatoire");
       }
 
@@ -273,7 +274,6 @@ converter.getRessourceFromPost = function (data) {
             if (buffer > 0) ressource[key] = new Date(buffer);
             else errors.push("Le champ " + config.labels[key] +' vaut ' +value +
                 " qui n'est pas une date valide (" + config.formats.jour +')');
-            log.dev('buffer en dernier recours', buffer)
           }
 
         } else if (typeVar === 'Number') {

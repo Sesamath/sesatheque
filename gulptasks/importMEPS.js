@@ -36,9 +36,6 @@ var dbConfigMepCol = require(__dirname + '/../_private/dbconfig/mepcol.js');
 // les connexions aux bases
 var kmepcol = knex(dbConfigMepCol);
 
-// le décalage d'id pour les aides
-var decalageAm = 6000;
-
 // les ids traités
 var nbRessToParse = 0
 var nbToRec = 0
@@ -48,6 +45,8 @@ var idsOk = []
 var idsFailed = [];
 var errors = {}
 var pendingRelations = {};
+/** liste idComb:id */
+var ids = {}
 
 /**
  * Écrit en console avec le moment en préfixe
@@ -234,13 +233,13 @@ function checkListOfInt (ids) {
 
 /**
  * Note dans la var globale pendingRelations une relation à ajouter plus tard
- * @param id
- * @param relation [relationCode, idLié]
+ * @param idComb id combiné origine-idOrigine
+ * @param relation [relationCode, idCombLié]
  */
-function addPendingRelation(id, relation) {
-  if (logRelations) log('on ajoute pour plus tard la relation ' +id +' >' +relation[0] +'> ' +relation[1])
-  if (!pendingRelations[id]) pendingRelations[id] = [relation];
-  else pendingRelations[id].push(relation);
+function addPendingRelation(idComb, relation) {
+  if (logRelations) log('on ajoute pour plus tard la relation ' +idComb +' >' +relation[0] +'> ' +relation[1])
+  if (!pendingRelations[idComb]) pendingRelations[idComb] = [relation];
+  else pendingRelations[idComb].push(relation);
 }
 
 /**
@@ -265,24 +264,18 @@ function initRessourceMep(row) {
   if (row.mep_nb_wnk)                   parametres.nb_wnk          = row.mep_nb_wnk;
 
   // parametres + relations
+  var idComb = 'mep-' +id
   // aide
   if (row.mep_aide_id) {
     parametres.aide_id         = row.mep_aide_id;
-    relations.push([relCode.requiert, row.mep_aide_id + decalageAm]);
-    addPendingRelation(row.mep_aide_id + decalageAm, [relCode.estRequisPar, id]);
+    addPendingRelation(idComb, [relCode.requiert, 'am-' +row.mep_aide_id]);
+    addPendingRelation('am-' +row.mep_aide_id, [relCode.estRequisPar, idComb]);
   }
   // traduction
   if (row.mep_id_fr !== id) {
     parametres.id_fr = row.mep_id_fr;
-    relations.push([relCode.estTraductionDe, row.mep_id_fr]);
-    addPendingRelation(row.mep_id_fr, [relCode.estTraduitAvec, id]);
-  }
-
-  // on regarde si on a des relations à ajouter
-  if (pendingRelations[id]) {
-    if (logRelations) log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
-    relations = relations.concat(pendingRelations[id]);
-    delete pendingRelations[id];
+    addPendingRelation(idComb, [relCode.estTraductionDe, 'mep-' +row.mep_id_fr]);
+    addPendingRelation('mep-' +row.mep_id_fr, [relCode.estTraduitAvec, idComb]);
   }
 
   // @todo regarder mep_swf_utilisateur_id pour récupérer les auteurs
@@ -319,16 +312,7 @@ function initRessourceMep(row) {
  * @returns {Ressource}
  */
 function initRessourceAm(row) {
-  var relations = [];
-  var id = row.aide_id + decalageAm;
-  // on regarde si on a des relations à ajouter
-  if (pendingRelations[id]) {
-    if (logRelations) log('pour ' +id +' on a trouvé les relations ', pendingRelations[id])
-    relations = relations.concat(pendingRelations[id]);
-    delete pendingRelations[id];
-  }
   return {
-    id              : id,
     origine          : 'am',
     idOrigine        : row.aide_id,
     typeTechnique    : 'am',
@@ -336,7 +320,7 @@ function initRessourceAm(row) {
     categories       : [7],
     typePedagogiques : [3],
     typeDocumentaires: [9],
-    relations        : relations,
+    relations        : [],
     parametres       : {},
     // auteurs
     // contributeurs
@@ -446,46 +430,6 @@ function importAIDES(next, ids) {
 }
 
 /**
- * Passe en revue les relations qui n'auraient pas été affectées
- * @param next
- */
-function flushPendingRelationsOld(next) {
-  nbLaunched = 0
-  nextStep = next
-
-  if (_.isEmpty(pendingRelations)) {
-    log('Rien à faire dans flushPendingRelations')
-    next()
-  } else {
-    log('start flushPendingRelations')
-    _.each(pendingRelations, function (relations, id) {
-      nbToRec++
-      // on récupère la ressource avec l'api
-      var options = {
-        url         : 'http://localhost:3000/api/ressource/' + id,
-        json        : true,
-        content_type: 'charset=UTF-8'
-      }
-      log('relations de '+id)
-      request.get(options, function (error, response, ressource) {
-        if (ressource.error) {
-          errors['0'] += "Erreur sur la récupération de " + id + ' : ' + ressource.error
-          checkEnd()
-        } else if (ressource.id != id) {
-          errors['0'] += "Erreur sur la récupération de " + id + " (ressource incohérente)"
-          checkEnd()
-        } else {
-          log(id +' récupérée')
-          if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = relations
-          else ressource.relations = ressource.relations.concat(relations)
-          defer(ressource)
-        }
-      })
-    })
-  }
-}
-
-/**
  * Passe en revue les relations qui n'auraient pas été affectées, mais une par une
  * (plusieurs relations peuvent affecter les même ressources, deux updates en // marchent pas)
  * @param next
@@ -494,36 +438,56 @@ function flushPendingRelations(next) {
   var pile = []
 
   function depile() {
-    var task, options, id, relations
     if (pile.length) {
-      task = pile.shift()
-      id = task[0]
-      relations = task[1]
+      var task = pile.shift()
+      var idComb = task[0]
+      var relations = task[1]
+      var pos =  idComb.indexOf('-')
+      var origine = idComb.substr(0, pos)
+      var idOrigine = parseInt(idComb.substr(pos+1), 10)
       // on récupère la ressource avec l'api
-      options = {
-        url         : 'http://localhost:3000/api/ressource/' + id,
-        json        : true,
-        content_type: 'charset=UTF-8'
-      }
-      log('relations de '+id +' ' +JSON.stringify(relations))
-      request.get(options, function (error, response, ressource) {
-        if (ressource.error) {
-          errors['0'] += "Erreur sur la récupération de " + id + ' : ' + ressource.error
-          log('erreur ' +ressource.error)
-          depile()
-        } else if (ressource.id != id) {
-          errors['0'] += "Erreur sur la récupération de " + id + " (ressource incohérente)"
-          log('erreur cohérence')
-          depile()
+      getRessource(origine, idOrigine, function (ressource) {
+        // error loggée dans get, on traite pas ici
+        if (ressource) {
+          // faut récupérer les id de toutes ses relations (dont on a que les idComb dans relations)
+          flow(relations)
+            .parMap(function(relation) {
+              // avec parMap la stack sera composée de tous les retours passé à this()
+              var newRel = [relation[0]] // le 1er param change pas, c'est la nature de la relation
+              var idComb = relation[1]
+              var nextSeq = this
+              if (ids[idComb]) {
+                newRel[1] = ids[idComb]
+                nextSeq(newRel)
+              } else {
+                // faut aller chercher l'id de cette ressource liée
+                pos =  idComb.indexOf('-')
+                origine = idComb.substr(0, pos)
+                idOrigine = parseInt(idComb.substr(pos+1), 10)
+                getRessource(origine, idOrigine, function (ressource) {
+                  if (ressource && ressource.id) {
+                    newRel[1] = ressource.id
+                    nextSeq(newRel)
+                  } else {
+                    errors[idComb] = 'une relation pointait vers ' +origine +'-' +idOrigine +" qui n'existe pas"
+                    nextSeq()
+                  }
+                })
+              }
+            })
+            .seq(function(newRelations) {
+                mergeRessource({id:ressource.id, relations:newRelations}, this)
+            })
+            .seq(depile)
+            .catch(depile)
         } else {
-          log(id +' récupérée')
-          if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = relations
-          else ressource.relations = ressource.relations.concat(relations)
-          addRessource(ressource, depile)
+          // pb mais on continue
+          depile()
         }
       })
 
     } else {
+      // la pile est vide, on peut passer à l'étape suivante
       next()
     }
   } // depile
@@ -534,7 +498,7 @@ function flushPendingRelations(next) {
   } else {
     log('start flushPendingRelations')
 
-    // on remplit la pile
+    // on remplit la pile avec nos relations en attente
     _.each(pendingRelations, function (relations, id) {
       nbToRec++
       pile.push([id, relations])
@@ -543,6 +507,33 @@ function flushPendingRelations(next) {
     // et on lance sa vidange
     depile()
   }
+}
+
+/**
+ * Récupère une ressource via l'api
+ * @param origine
+ * @param idOrigine
+ * @param next appelé avec la ressource (ou rien en cas de pb, que l'on log ici)
+ */
+function getRessource(origine, idOrigine, next) {
+  var idComb = origine +'-' +idOrigine
+  var options = {
+    url         : 'http://localhost:3000/api/ressource/' + origine +'/' +idOrigine,
+    json        : true,
+    content_type: 'charset=UTF-8'
+  }
+  request.get(options, function (error, response, ressource) {
+    if (error) {
+      errors[idComb] = error.toString()
+      next(null)
+    } else if (ressource.error) {
+      errors[idComb] = ressource.error
+      next(null)
+    } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
+      errors[idComb] = "ressource " +idComb +" incohérente : " +JSON.stringify(ressource)
+      next(null)
+    } else next(null, ressource)
+  })
 }
 
 /**
@@ -559,28 +550,54 @@ function addRessource(ressource, next) {
     content_type: 'charset=UTF-8',
     form: ressource
   }
+  var idMix = ressource.id ? ressource.id : ressource.origine +'-' +ressource.idOrigine
   request.post(options, function (error, response, body) {
     nbLaunched--
-    if (error) {
-      idsFailed.push(ressource.id)
-      errors[ressource.id] = error.toString()
-      log(error)
+    if (error || body.error) {
+      var errorString = error ? error.toString() : body.error
+      idsFailed.push(idMix)
+      errors[idMix] = errorString
+      log('erreur api sur ' +idMix +' : ' +errorString, options)
+    } else if (body.id) {
+      idsOk.push(body.id)
+      // on note la correspondance pour éviter de retourner le chercher
+      if (!ressource.id) ids[idMix] = body.id
+      nbRec++
+      if (logOk) log(idMix +' ok')
     } else {
-      if (body.error) {
-        idsFailed.push(ressource.id)
-        errors[ressource.id] = body.error
-        log('erreur sur ' +ressource.id +' : ' +body.error)
-      } else {
-        if (body.id == ressource.id) {
-          idsOk.push(ressource.id)
-          nbRec++
-          if (logOk) log(ressource.id +' ok')
-        } else {
-          idsFailed.push(ressource.id)
-          errors[ressource.id] = JSON.stringify(body)
-          log('PB, ' +ressource.id +' renvoie ' +JSON.stringify(body))
-        }
-      }
+      idsFailed.push(idMix)
+      errors[idMix] = JSON.stringify(body)
+      log('PB, ' +idMix +" renvoie à l'enregistrement " +JSON.stringify(body))
+    }
+    next()
+  })
+}
+
+/**
+ * Ajoute des propriétés à une ressource de la bibli via l'api
+ * @param ressourcePartielle
+ * @param next
+ */
+function mergeRessource(ressourcePartielle, next) {
+  nbLaunched++
+  var options = {
+    url : 'http://localhost:3000/api/ressource/merge',
+    json: true,
+    //body: JSON.stringify({ressource:ressource}),
+    content_type: 'charset=UTF-8',
+    form: ressourcePartielle
+  }
+  request.post(options, function (error, response, body) {
+    nbLaunched--
+    if (body && body.id) {
+      idsOk.push(body.id)
+      if (logOk) log('màj ' +body.id +' ok')
+    } else {
+      var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
+      var idErr = ressourcePartielle.id || ressourcePartielle.origine +'-' +ressourcePartielle.idOrigine || 0
+      idsFailed.push(idErr)
+      errors[idErr] = (errors[idErr] ? errors[idErr] +'\n' : '') +errStr
+      log(errStr)
     }
     next()
   })
@@ -599,7 +616,7 @@ function displayResult(next) {
   log('enregistrées : ' +nbRec)
   if (idsFailed.length) {
     var fs = require('fs')
-    var logfile = __dirname + '/../logs/' +__filename +'.error.log'
+    var logfile = __dirname + '/../logs/import.error.log'
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
     log(idsFailed.length +' ressources avec erreurs :')
