@@ -237,7 +237,7 @@ ressourceRepository.load = function(id, next) {
   if (ressourceCached) next(null, ressourceCached)
   else {
     log.dev('ressource ' +id +' pas en cache')
-    lassi.entity.Ressource.match('id').equals(id).sort('version', 'desc').grabOne(function (error, ressource) {
+    lassi.entity.Ressource.match('id').equals(id).grabOne(function (error, ressource) {
       if (error) next(error)
       else if (ressource) {
         prepareAndSend(ressource, next)
@@ -261,7 +261,6 @@ ressourceRepository.loadPublic = function(id, next) {
     lassi.entity.Ressource
         .match('id').equals(id)
         .match('restriction').equals(0)
-        .sort('version', 'desc')
         .grabOne(function (error, ressource) {
           if (error) next(error)
           else if (ressource) {
