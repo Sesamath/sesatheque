@@ -49,7 +49,9 @@ controller
       repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) next(error)
         else if(ressource) {
+          // on ajoute l'argument id pour le décorateur menu
           lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
+            ctx.ressourceId = ressource.id
             ctx.metas.title = ressource.titre
             if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
             else ctx.metas.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
