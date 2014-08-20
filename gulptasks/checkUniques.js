@@ -10,7 +10,7 @@ var knex = require('knex')
 var moment = require('moment')
 var flow          = require('seq')
 
-var dbConfig = require(__dirname + '/../_private/dbconfig/index.js')
+var dbConfig = require(__dirname + '/../_private/dbconfig')
 var kdb = knex(dbConfig)
 
 /** La liste d'ids passés en argument avec --dump (séparateur virgule sans espaces) */
@@ -31,7 +31,7 @@ function log(msg, objToDump) {
 }
 
 /**
- * Importe la table MEPS dans les ressource
+ * Récupère toutes les ressources ayant plus d'un id (et rempli la var globale duplicates avec)
  *
  * @param {Function} next fct à appeler quand tous les mep auront été importés
  */
@@ -55,6 +55,10 @@ function checkId(next) {
   })
 }
 
+/**
+ * Passe en revue les ressources avec id en doublons et les dump (jusqu'au max autorisé)
+ * @param next
+ */
 function dumpDup(next) {
   if (!dumpAsked) next()
   else {

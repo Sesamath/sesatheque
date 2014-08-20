@@ -1,14 +1,16 @@
 /**
- * Ce script passe en revue les ressources persos de type calculatrice cassée
- * (calkc, type 7 de la table PERSOS, rien dans BIBS)
- * On peut aussi les repérer avec le <cassees> que contient le xml de conf
+ * Ce script passe en revue les ressources de Labomep,
+ * soit la table PERSOS (origine = labomepPERSOS),
+ * soit BIBS (origine = labomepBIBS)
+ * l'origine est donc commune à toutes les ressources traitées par le script
  */
 'use strict';
-
-var origine // sera labomepPersos ou labomepBibs suivant le cas
+/** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
+var origine
 /** timeout en ms */
-var timeout = 3000
-var maxLaunched = 100
+var timeout = 5000
+/** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
+var maxLaunched = 10
 
 /** pour logguer les relations */
 var logRelations = false
@@ -17,11 +19,12 @@ var logProcess = false
 /** pour loguer les ressources dont le retour est ok */
 var logOk = false
 
-var knex = require('knex');
-var _ = require('underscore')._;
-var request = require('request');
+var knex = require('knex')
+var _ = require('underscore')._
+var request = require('request')
 var moment = require('moment')
-var flow          = require('seq');
+var flow   = require('seq')
+var xml2js = require('xml2js')
 
 // conf de l'appli
 var config = require('../construct/ressource/config.js');
@@ -37,15 +40,22 @@ var dbConfigLabomep = require(__dirname + '/../_private/dbconfig/labomep');
 // les connexions aux bases
 var klabomep = knex(dbConfigLabomep);
 
-// les ids traités
-var nbRessToParse = 0
-var nbToRec = 0
-var nbRec = 0
+/** ids des ressources traitées ici */
 var idsParsed = [];
+/** ids des ressources enregistrées par l'api */
 var idsOk = []
+/** ids des ressources dont l'enregistrement a planté */
 var idsFailed = [];
+/** la liste des erreurs rencontrées (la clé est l'id, 0 pour les erreurs générées ici hors ressource) */
 var errors = {}
+/** La liste des relations à ajouter ensuite */
 var pendingRelations = {};
+
+// Les variables globales de checkEnd, pour chaque étape (pour décider de passer à la suivante)
+var nbLaunched = 0
+var waitingRessource = []
+var nextStep
+var timerId
 
 /**
  * Écrit en console avec le moment en préfixe
@@ -57,11 +67,22 @@ function log(msg, objToDump) {
   if (objToDump) console.log(objToDump)
 }
 
-// pour passer à l'étape suivante
-var nbLaunched = 0
-var waitingRessource = []
-var nextStep
-var timerId
+/**
+ * Ajoute une erreur à la liste qui sera affichée à la fin
+ * (et affiche la stack en console si c'est une erreur de notre code)
+ * @param id
+ * @param error
+ */
+function addError(id, error) {
+  if (error instanceof Error) {
+    log(error.stack)
+    error = error.toString()
+  }
+  if (errors[id]) errors[id] += '\n'
+  else errors[id] = ''
+  errors[id] += error
+  if (id) idsFailed.push(id)
+}
 
 /**
  * Lance l'étape suivante si toutes les ressources ont été traitées ou si on reste plus de timeout ms sans être rappelé
@@ -71,10 +92,10 @@ function checkEnd() {
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(function () {
     var msg = 'timeout, ' +Math.floor(timeout / 1000) +
-        's sans rien depuis le dernier retour de bdd, il restait ' +nbLaunched +' ressources en cours et ' +
+        "s sans rien depuis le dernier retour de l'api, il restait " +nbLaunched +' ressources en cours et ' +
         waitingRessource.length+' en attente de traitement\n' +
-        'trouvées ' +nbRessToParse +', parsed ' +idsParsed.length +', failed ' +idsFailed.length
-    errors['0'] += msg +'\n'
+        ', parsed ' +idsParsed.length +', failed ' +idsFailed.length
+    addError(0, msg)
     log(msg)
     nextStep()
   }, timeout)
@@ -85,7 +106,7 @@ function checkEnd() {
       addRessource(waitingRessource.shift(), checkEnd)
     }
   } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées (on en est à ' +nbRec +'/' +nbToRec)
+    log('toutes les ressources de cette étape ont été traitées')
     clearTimeout(timerId)
     nextStep()
   }
@@ -151,8 +172,10 @@ function checkListOfInt (ids) {
 
 /**
  * Note dans la var globale pendingRelations une relation à ajouter plus tard
+ * Attention, les relations contiennent un id combiné,
+ * il faudra récupérer l'id réel de la ressource au moment d'ajouter la relation
  * @param idOrigine
- * @param relation [relationCode, idLié]
+ * @param relation [relationCode, idComb]
  */
 function addPendingRelation(idOrigine, relation) {
   if (logRelations) log('on ajoute pour plus tard la relation ' +idOrigine +' >' +relation[0] +'> ' +relation[1])
@@ -161,27 +184,9 @@ function addPendingRelation(idOrigine, relation) {
 }
 
 /**
- * Convertit un recordset en objet Ressource que l'on pourra poster à l'api après enrichissement suivant les cas
- * @param row
- * @returns {Ressource}
+ * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
+ * @param ressource
  */
-function initRessourceGenerique(row) {
-  var ressource = {
-    origine          : origine,
-    idOrigine        : row.id,
-    resume           : row.descriptif || '',
-    description      : '',
-    commentaires     : row.commentaire || '',
-    parametres       : {xml:row.xml},
-    langue           : 'fre',
-    publie           : true,
-    restriction      : 2
-  }
-  if (row.user_sslsesa_id) ressource.auteurs =  [row.user_sslsesa_id]
-
-  return ressource
-}
-
 function addCatExoInteractif(ressource) {
     ressource.categories       = [catCode.exerciceInteractif]
     ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation]
@@ -189,7 +194,7 @@ function addCatExoInteractif(ressource) {
 }
 
 /**
- * Convertit un recordset Perso en objet Ressource que l'on pourra poster à l'api
+ * Convertit un recordset en objet Ressource que l'on pourra poster à l'api
  * @param row
  * @returns {Ressource}
  */
@@ -232,6 +237,7 @@ function parseRessource(row) {
       // @todo affiner la catégorie suivant consigne et réponse ou pas
       if (!ressource.titre) ressource.titre = "Page externe"
       addCatExoInteractif(ressource)
+      modifyUrl(ressource)
       break
     case 11:
       ressource.typeTechnique = 'mental'
@@ -295,10 +301,97 @@ function parseRessource(row) {
       ajout = false
   }
   if (ajout) {
-    var idComb = origine + '-' + ressource.idOrigine
+    var idComb = getIdComb(ressource)
     idsParsed.push(idComb);
     if (logProcess) log('processing ' + idComb)
-    defer(ressource);
+    // on transforme le xml en objet js pour certains
+    switch (ressource.typeTechnique) {
+      case 'url':
+          modifyUrl(ressource, defer)
+        break
+      /* case '':
+          xml2js.parseString(ressource.xml, function(error, result) {
+            if (error) addError(idComb)
+            else {
+              ressource.parametres = result
+              defer(ressource)
+            }
+          })
+        break */
+      default : defer(ressource)
+    }
+
+  }
+}
+
+/**
+ * Initialise les propriété communes à toutes les ressources à partir du recordset, helper de parseRessource
+ * @param {Object} row
+ * @returns {Object}
+ */
+function initRessourceGenerique(row) {
+  var ressource = {
+    origine          : origine,
+    idOrigine        : row.id,
+    resume           : row.descriptif || '',
+    description      : '',
+    commentaires     : row.commentaire || '',
+    parametres       : {xml:row.xml},
+    langue           : 'fre',
+    publie           : true,
+    restriction      : 2
+  }
+  if (row.user_sslsesa_id) ressource.auteurs =  [row.user_sslsesa_id]
+
+  return ressource
+}
+
+/**
+ * Renvoie l'id combiné origine - idOrigine
+ * @param ressource
+ * @returns {string}
+ */
+function getIdComb(ressource) {
+  return origine + '-' + ressource.idOrigine
+}
+
+/**
+ * Affine les ressources de type url
+ * @param ressource
+ * @param next
+ */
+function modifyUrl(ressource, next) {
+  try {
+    // il faut échapper d'éventuels & qui ne sont pas sous la forme &amp;
+    var xmlSrc = ressource.parametres.xml.replace(/&/g, '&amp;').replace(/&amp;amp;/g, '&amp;')
+    xml2js.parseString(xmlSrc, function (error, result) {
+      if (error) {
+        log(error.stack)
+        log("le parsing du xml a planté " +xmlSrc)
+        addError(ressource.idOrigine, "le parsing du xml a planté " +ressource.parametres.xml)
+      }
+      else {
+        ressource.parametres = result
+        // on modifie le type suivant ce que l'on trouve
+        if (result.adresse.indexOf("http://mep-outils.sesamath.net/manuel_numerique/diapo.php?atome=") === 0) {
+          var test = /diapo.php\?atome=([0-9]+)/.exec(result.adresse)
+          // c'est en fait un atome, on le garde comme ressource url originaire de labomep,
+          // mais on ajoute les refs à l'atome, ça servira probablement
+          ressource.parametres.cloneDe = {
+            origine      : 'zoneur',
+            idOrigine    : test[1],
+            typeTechnique: 'ato'
+          }
+          // ne sachant pas trop on met cours et exercice
+          ressource.categories = [catCode.coursFixe, catCode.exerciceFixe]
+          ressource.typeDocumentaires = [tdCode.imageFixe, tdCode.texte]
+          ressource.typePedagogiques = [tpCode.cours, tpCode.exercice]
+        }
+        next()
+      }
+    })
+  } catch (error) {
+    addError(ressource.id, "le parsing du xml a planté " +xmlSrc)
   }
 }
 
@@ -353,7 +446,6 @@ function flushPendingRelations(next) {
 
     // on remplit la pile
     _.each(pendingRelations, function (relations, idOrigine) {
-      nbToRec++
       pile.push([idOrigine, relations])
     })
 
@@ -378,24 +470,16 @@ function addRessource(ressource, next) {
   }
   request.post(options, function (error, response, body) {
     nbLaunched--
-    if (error) {
-      idsFailed.push(ressource.idOrigine)
-      errors[ressource.idOrigine] = error.toString()
-      log(error)
-    } else {
+    if (error) addError(ressource.idOrigine, error.toString())
+    else {
       if (body.error) {
-        idsFailed.push(ressource.idOrigine)
-        errors[ressource.idOrigine] = body.error
-        log('erreur sur ' +ressource.idOrigine +' : ' +body.error)
+        addError(ressource.idOrigine, body.error)
       } else {
-        if (body.id) { // on ne récupère que ça
+        if (body.id) { // on ne récupère que ça, c'est pas le idOrigine posté
           idsOk.push(ressource.idOrigine)
-          nbRec++
           if (logOk) log(ressource.idOrigine +' ok avec ' +ressource.idOrigine)
         } else {
-          idsFailed.push(ressource.idOrigine)
-          errors[ressource.idOrigine] = JSON.stringify(body)
-          log('PB, ' +ressource.idOrigine +' renvoie ' +JSON.stringify(body))
+          addError(ressource.idOrigine, "L'api renvoie " +JSON.stringify(body))
         }
       }
     }
@@ -409,14 +493,11 @@ function addRessource(ressource, next) {
  */
 function displayResult(next) {
   // attendues 4109 + 1613
-  log(nbRessToParse +' ressources trouvées en bdd')
   log(idsParsed.length +' ressources traitées')
   log(idsOk.length +' ressources enregistrées')
-  log('à enregistrer : ' +nbToRec)
-  log('enregistrées : ' +nbRec)
   if (idsFailed.length) {
     var fs = require('fs')
-    var logfile = __dirname + '/../logs/' +__filename +'.error.log'
+    var logfile = __dirname + '/../logs/importLabomep.error.log'
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
     log(idsFailed.length +' ressources avec erreurs :')
@@ -432,14 +513,14 @@ function displayResult(next) {
 }
 
 module.exports = function () {
-  // les 3 premiers args sont node, /path/2/gulp, importMEPS
+  // les 3 premiers args sont node, /path/2/gulp, nomDeLaTache
   var argv = process.argv.slice(3)
   var ids
   var query
 
   log('task ' + __filename);
 
-  // sauf si on précise l'un ou l'autre (on impose le log dans ce cas
+  // on doit préciser persos ou bibs
   if (argv[0] === '--persos') {
     query = "SELECT perso_id AS id, perso_type_id AS type_id, perso_titre AS titre, perso_descriptif AS descriptif," +
         " perso_commentaire AS commentaire, perso_xml AS xml, su.user_id AS sslsesa_user_id FROM PERSOS" +
@@ -453,6 +534,8 @@ module.exports = function () {
     throw new Error("il faut ajouter l'argument --persos ou --bibs " +
         "(suivi éventuellement d'une liste d'ids séparés par des virgules)")
   }
+
+  // on regarde s'il faut se limiter à certains ids
   ids = argv.slice(1)[0]
   if (ids) {
     checkListOfInt(ids)
@@ -463,6 +546,7 @@ module.exports = function () {
     else query += " WHERE bib_id IN(" +ids +")"
   }
 
+  // yapluka
   flow()
       .seq(function () {
         nextStep = this

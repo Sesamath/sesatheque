@@ -34,8 +34,9 @@ application.on('boot', function(){
 application.on('beforeRailUse', function(name, settings) {
   if (name=='logger') {
     console.log('beforeRailUse logger')
-    // sert à rien de modifier settings, pas pris en compte car fait trop tard
+    // sert à rien de modifier settings, pas pris en compte car asynchrone
     // on laisse tout ça là quand même pour le passer éventuellement dans une fct + tard
+    // sinon faudrait utiliser seq pour ne pas sortir de la fct tant qu'on a pas notre stream
     return
 
     log.dev('settings morgan dans beforeRailUse', settings)
@@ -65,7 +66,7 @@ application.on('beforeRailUse', function(name, settings) {
       }
     }
     log.dev('settings modifiés', settings)
-  }
+  } // on pourrait préciser la limite d'upload ici (name === 'body-parser') mais elle est dans la conf
 })
 
 /* application.on('loaded', function (type, name, instance) {

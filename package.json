@@ -8,7 +8,7 @@
   "dependencies": {
     "inotify": "^1.2.1",
     "knex": "^0.5.14",
-    "lassi": "git+ssh://git@arnumeral.fr:node-lassi",
+    "lassi": "git+ssh://git@arnumeral.fr:node-lassi#1.5",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",
@@ -16,7 +16,8 @@
     "request": "^2.39.0",
     "seq": "^0.3.5",
     "taffydb": "^2.7.2",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "xml2js": "^0.4.4"
   },
   "devDependencies": {
     "express-debug": "^1.1.0",

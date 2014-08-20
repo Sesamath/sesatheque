@@ -79,7 +79,7 @@ function setVersion(ressource, next) {
           // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
           // on utilise http://underscorejs.org/#isEqual
           if ( !_.isEqual(ressource[prop], ressourceInitiale[prop])) {
-            log.dev('La modif du champ ' +prop +' entraîne un incrément de version')
+            log.dev('La modif du champ ' +prop +' entraîne un incrément de version de ' +ressourceInitiale.id)
             log.dev('avant', ressourceInitiale[prop])
             log.dev('après', ressource[prop])
             needIncrement = true
@@ -453,9 +453,9 @@ function prepareAndSend(ressources, next) {
   function processOne(ressource) {
     if (!ressource.oid) throw new Error("Paramètre invalide (n'est pas une ressource)")
     // faut transformer les dates en objets date
-    ressource.dateCreation = new Date(ressource.dateCreation);
-    ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
-    cacheSet(ressource)
+    if (ressource.dateCreation) ressource.dateCreation = new Date(ressource.dateCreation);
+    if (ressource.dateMiseAJour) ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+    if (ressource.id) cacheSet(ressource) // pas forcément le cas au 1er insert
   }
 
   if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")

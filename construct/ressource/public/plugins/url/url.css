@@ -42,3 +42,6 @@ body {
 #divpage {
     text-align: center;
 }
+#urlSrc {
+    font-size: 0.8em; font-style: italic;
+}

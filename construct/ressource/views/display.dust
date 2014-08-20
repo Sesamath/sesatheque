@@ -19,6 +19,8 @@ Chargement en cours</div>
     var errorsContainer = document.getElementById('errors');
     /** Le préfixe vers le dossier du plugin */
     var baseUrl = '{pluginBaseUrl}';
+    /** Le post reçu que l'on transmet tel quel */
+    var post = {?post}{post}{:else}{~lb}{~rb}{/post};
 
     /**
      * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
@@ -50,13 +52,15 @@ Chargement en cours</div>
             head10      : '{vendorsBaseUrl}/headjs/head.1.0',
             head_load   : '{vendorsBaseUrl}/headjs/head.load.1.0',
             head_load10 : '{vendorsBaseUrl}/headjs/head.load.1.0',
-            jquery      : '{vendorsBaseUrl}/jquery/jquery.2.1',
-            jquery21    : '{vendorsBaseUrl}/jquery/jquery.2.1',
+            jquery      : '{vendorsBaseUrl}/jquery/jquery-2.1.1.min',
+            jquery211   : '{vendorsBaseUrl}/jquery/jquery-2.1.1.min',
             swfobject   : '{vendorsBaseUrl}/swfobject/swfobject.2.2',
             sesaswf     : '{vendorsBaseUrl}/sesamath/swf',
             sesalog     : '{vendorsBaseUrl}/sesamath/log',
             underscore  : '{vendorsBaseUrl}/underscore/underscore.1.6',
-            underscore16: '{vendorsBaseUrl}/underscore/underscore.1.6'
+            underscore16: '{vendorsBaseUrl}/underscore/underscore.1.6',
+            jqueryUi    : '{vendorsBaseUrl}/jqueryUi/jquery-ui-1.11.1/jquery-ui.min',
+            jqueryUi1111: '{vendorsBaseUrl}/jqueryUi/jquery-ui-1.11.1/jquery-ui.min'
         }
     });
     require(['{pluginName}'], function (plugin) {
