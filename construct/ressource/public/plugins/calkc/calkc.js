@@ -6,8 +6,8 @@
  *
  * this est ce module (donc on a this.display et this.showResult), avec dans notre scope les variables
  * {Function}    require         : pour charger d'autres modules ou d'autres scripts js
- * {Function}    log             : un console.log qui ne plantera pas sur les vieux IE
- *                                 et accepte un éventuel objet un 2e argument
+ * {Function}    log             : un console.log qui ne fait rien en prod, ne plantera pas sur les vieux IE
+ *                                 et accepte un éventuel objet un 2e argument pour ajouter son dump en console
  * {Function}    addCss          : ajoute une css dans le head de la page
  *                                 (lui passer le fichier relativement à ce dossier)
  * {HTMLElement} container       : le conteneur pour affichage
@@ -70,9 +70,10 @@ function display(ressource, next) {
     largeur : 589,
     hauteur : 393,
     flashvars : {
-      parametres_xml :ressource.parametres.xml
+      parametres_xml :ressource.parametres.xml.replace('\\n', '').replace('\n', '')
     }
   }
+  log('appel swfobject avec', options)
   sesaswf.load(container, swfUrl, next, options);
 }
 

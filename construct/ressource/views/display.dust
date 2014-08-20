@@ -22,6 +22,12 @@ Chargement en cours</div>
     /** Le post reçu que l'on transmet tel quel */
     var post = {?post}{post}{:else}{~lb}{~rb}{/post};
 
+    {?staging}
+        {! faut pas de " autour du nom de la clé pour @eq contrairement à ce que la doc indique !}
+        {@eq key=staging value="production"}
+    /** en prod on envoie rien en console */
+    function log() { return; }
+        {:else}
     /**
      * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
      * @param msg Le message à afficher
@@ -32,6 +38,10 @@ Chargement en cours</div>
         console.log(msg);
         if (obj) console.log(obj);
     }
+        {/eq}
+    {:else}
+    function log() { return; }
+    {/staging}
 
     /**
      * Ajoute une css dans le <head> courant

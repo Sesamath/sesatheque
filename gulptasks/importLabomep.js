@@ -8,7 +8,7 @@
 /** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
 var origine
 /** timeout en ms */
-var timeout = 5000
+var timeout = 30000
 /** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
 var maxLaunched = 10
 

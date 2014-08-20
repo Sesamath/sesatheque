@@ -72,7 +72,6 @@ controller
   .renderWith('display')
   .do(function (ctx, next) {
       var id = ctx.arguments.id
-
       // on force le layout en ajoutant cette propriété au contexte,
       // qui sera récupéré par l'écouteur layout défini dans le mainComponent.initialize
       ctx.forceLayout = 'layout-iframe'
@@ -88,7 +87,8 @@ controller
               pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
               vendorsBaseUrl: '../../vendors',
               pluginName    : ressource.typeTechnique,
-              ressource     : ressource.toString()
+              ressource     : ressource.toString(),
+              staging       : ctx.application.settings.application.staging
             }
             next(null, data)
           })
@@ -227,6 +227,7 @@ controller
 
 /**
  * Liste d'après le critère passé en 1er param (puis valeur, offset & nb)
+ * Ne remonte que les ressources publiques
  */
 controller
   .Action('by/:index/:value/:start/:nb', 'ressource.by')
