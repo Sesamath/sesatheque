@@ -43,6 +43,8 @@ Chargement en cours</div>
     function log() { return; }
     {/staging}
 
+console.log('le parent');
+console.log(window.parent);
     /**
      * Ajoute une css dans le <head> courant
      * @param file le chemin du fichier css relatif au dossier du plugin
@@ -53,7 +55,7 @@ Chargement en cours</div>
         elt.type = "text/css";
         elt.href = '{pluginBaseUrl}/' + file;
         document.getElementsByTagName("head")[0].appendChild(elt);
-    }
+    };
 
     require.config({
         baseUrl     : '{pluginBaseUrl}',
@@ -79,8 +81,9 @@ Chargement en cours</div>
             if (typeof plugin.display !== 'function') throw new Error('Le plugin ' +plugin +" n'a pas de méthode display");
             container.innerHTML = '';
             {~n}var ressource = {ressource|s};{~n}
-            if (top.Sesamath && top.Sesamath.scores && typeof top.Sesamath.scores.saveResult === 'function'){~n}
-                plugin.display(ressource, container, top.Sesamath.scores.saveResult);{~n}
+            if (window.name && window.parent[window.name] && window.parent[window.name].saveResult &&
+                    typeof window.parent[window.name].saveResult === 'function'){~n}
+                plugin.display(ressource, container, window.parent[window.name].saveResult);{~n}
             else plugin.display(ressource, container);{~n}
         } catch(error) {
             errorsContainer.innerHTML = error.toString();

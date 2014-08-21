@@ -126,17 +126,7 @@ function display(ressource, saveResult) {
   // url source en footer
   // url source (non cliquable)
   addElt(container, 'p', {id:'urlSrc'}, "url source : " +ressource.parametres.adresse);
-  // on redimensionne
-  function resizeIframe() {
-    var taille = Math.floor(window.innerHeight - $("#head").outerHeight(true) - $("#urlSrc").outerHeight(true));
-    log('resize hauteur à ' +taille)
-    $("#display").css("height", taille +'px');
-    $("#page").css("height", taille +'px');
-    taille = $(container).innerWidth()
-    log('resize largeur à ' +taille)
-    $("#page").css("width", taille +'px');
-  }
-  // tout de suite
+  // on redimensionne tout de suite
   resizeIframe()
   // et à chaque changement de la taille de la fenêtre
   $(window).resize(resizeIframe)
@@ -150,4 +140,17 @@ function display(ressource, saveResult) {
 function showResult(result, elt) {
   log('showResult', result)
   log("dans l'élément", elt)
+}
+
+/**
+ * Modifie la taille de l'iframe pour lui donner tout l'espace restant de container
+ */
+function resizeIframe() {
+  var taille = Math.floor(window.innerHeight - $("#head").outerHeight(true) - $("#urlSrc").outerHeight(true));
+  log('resize hauteur à ' +taille)
+  $("#display").css("height", taille +'px');
+  $("#page").css("height", taille +'px');
+  taille = $(container).innerWidth()
+  log('resize largeur à ' +taille)
+  $("#page").css("width", taille +'px');
 }

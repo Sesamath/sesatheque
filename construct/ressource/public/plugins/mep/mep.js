@@ -117,9 +117,9 @@ function display(ressource, next, saveResult) {
 
     // traitement du résultat éventuel (il faudra que l'appelant passe un idUtilisateur)
     if (saveResult && typeof saveResult === "function") {
-      // faut nommer cette fonction et la rendre accessible au swf dans le dom
-      window.saveResult = saveResult
-      flashvars.nomFonctionCallback = 'saveResult';
+      // faut nommer cette fonction et la rendre accessible au swf dans son dom
+      window.resultCb = saveResult
+      flashvars.nomFonctionCallback = 'resultCb';
     }
 
     // les params pour le player

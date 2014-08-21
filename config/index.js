@@ -59,7 +59,7 @@ module.exports = {
   application : {
     name : "bibliotheque",
     mail : "tech@sesamath.net",
-    staging: lassi.Staging.production
+    staging: staging
   },
   entities: {
     // Configuration de la base de données

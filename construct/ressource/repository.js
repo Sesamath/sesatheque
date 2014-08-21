@@ -122,9 +122,11 @@ ressourceRepository.write = function(ressource, next) {
     ressource = lassi.entity.Ressource.create(ressource)
     log.dev('cast en Ressource : ' +ressource.constructor.name)
   }
+  /* mesure de perfs */
   var t
   if (ressource.id && lassi.tmp && lassi.tmp[ressource.id]) t = lassi.tmp[ressource.id]
   else t = {m:'',s:0}
+  /* fin mesures */
   //log.dev("avant validation dans write", ressource)
   flow()
       // validation
