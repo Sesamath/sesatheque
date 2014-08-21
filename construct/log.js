@@ -4,6 +4,8 @@
  */
 'use strict';
 
+/*global */
+
 var fs = require('fs');
 var moment = require('moment');
 var config = require('../config'); // jshint ignore:line
@@ -17,10 +19,19 @@ var errorDataOutputStream = fs.createWriteStream(config.logs.errorData, {'flags'
 
 var env = process.env.NODE_ENV || 'dev';
 
-var logDev;
 
 /** Nos filtres possibles, qui seront ajoutés si besoin par setFilter */
 var filters = {}
+
+/**
+ * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans la console)
+ */
+var log // jshint ignore:line
+
+/**
+ * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans dev.log)
+ */
+var logDev
 
 /**
  * Retourne le nb de ms écoulées depuis start
@@ -94,15 +105,19 @@ if (env === 'dev') {
       addToLog(message + suffix, devOutputStream);
     }
   };
+
+  log = console.log // jshint ignore:line
 } else {
   logDev = function() {};
+  log = function () {} // jshint ignore:line
 }
 
-module.exports = {
-  getElapsed:getElapsed,
-  dev : logDev,
-  error : logError,
-  errorData : logErrorData,
-  setFilterOn : setFilterOn,
-  setFilterOff : setFilterOff
-};
+// on ajoute nos fct comme méthodes de la fct principale exportée
+log.getElapsed = getElapsed
+log.dev = logDev
+log.error = logError
+log.errorData = logErrorData
+log.setFilterOn = setFilterOn
+log.setFilterOff = setFilterOff
+
+module.exports = log
