@@ -12,7 +12,7 @@ function Groupe() {
    * Id
    * @type {Number}
    */
-  this.id = '';
+  this.id = 0;
   /**
    * Nom
    * @type {string}
@@ -31,9 +31,9 @@ function Groupe() {
  */
 Groupe.prototype.save = function (next) {
   var groupe = this
-  log.dev('dans save groupe ' +groupe.nom)
+  log.dev('dans Groupe.save le nom ' +groupe.nom)
   this.store(function(error, groupe) {
-    log.dev('dans save groupe au retour du store ' +cacheKey)
+    log.dev('dans save groupe au retour du store ' +groupe.nom)
     // on met en cache
     lassi.cache.set(lassi.personne.getCacheKeyGroupeByNom(groupe.nom), groupe, cacheTTL)
     lassi.cache.set('groupe_' +groupe.id, groupe, cacheTTL)
