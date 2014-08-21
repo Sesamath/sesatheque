@@ -191,7 +191,7 @@ function checkTicket(ctx, next) {
               log.dev('av store personne', newPersonne)
               newPersonne.store(setSessionAndRedirect)
               // @FIXME le store rappelle pas la cb, on le fait ici
-              setSessionAndRedirect(null, newPersonne)
+              //setSessionAndRedirect(null, newPersonne)
             }
             else setSessionAndRedirect(null, personneBdd)
           })
