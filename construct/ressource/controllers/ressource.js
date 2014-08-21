@@ -90,6 +90,7 @@ controller
               ressource     : ressource.toString(),
               staging       : ctx.application.settings.application.staging
             }
+            ctx.metas.addCss('styles/ressourceDisplay.css')
             next(null, data)
           })
         } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")

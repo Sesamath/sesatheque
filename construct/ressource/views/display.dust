@@ -83,7 +83,7 @@ Chargement en cours</div>
                 plugin.display(ressource, container, top.Sesamath.scores.saveResult);{~n}
             else plugin.display(ressource, container);{~n}
         } catch(error) {
-            container.innerHTML = error.toString();
+            errorsContainer.innerHTML = error.toString();
         }
     });
 </script>

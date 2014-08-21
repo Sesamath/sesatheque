@@ -37,11 +37,8 @@ body {
 }
 #page {
     z-index: 1;
-    width:98%;
-}
-#divpage {
-    text-align: center;
 }
 #urlSrc {
+    text-align: right;
     font-size: 0.8em; font-style: italic;
 }
