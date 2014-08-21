@@ -5,10 +5,13 @@
  * l'origine est donc commune à toutes les ressources traitées par le script
  */
 'use strict';
+
+/** le timestamp en ms du lancement de ce script */
+var topDepart = (new Date()).getTime()
 /** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
 var origine
 /** timeout en ms */
-var timeout = 30000
+var timeout = 10000
 /** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
 var maxLaunched = 10
 
@@ -56,6 +59,14 @@ var nbLaunched = 0
 var waitingRessource = []
 var nextStep
 var timerId
+
+/**
+ * Retourne le nb de ms écoulées depuis start
+ * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
+ */
+function getElapsed(start) {
+  return (new Date()).getTime() -start
+}
 
 /**
  * Écrit en console avec le moment en préfixe
@@ -116,9 +127,14 @@ function checkEnd() {
  * Lance l'ajout d'une ressource via l'api si on est pas au max et la met en attente sinon
  * @param ressource
  */
-function defer(ressource) {
-  if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
-  else waitingRessource.push(ressource)
+function deferAdd(ressource) {
+  if (ressource && ressource.titre) {
+    if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
+    else waitingRessource.push(ressource)
+  } else {
+    log("deferAdd appelé sans ressource valide")
+    log(ressource)
+  }
 }
 
 /**
@@ -194,6 +210,18 @@ function addCatExoInteractif(ressource) {
 }
 
 /**
+ * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un contenu fixe
+ * dont on sait pas si c'est un cours ou un exo (on met les 2)
+ * @param ressource
+ */
+function addCoursExoFixe(ressource) {
+  // ne sachant pas trop on met cours et exercice
+  ressource.categories        = [catCode.coursFixe, catCode.exerciceFixe]
+  ressource.typeDocumentaires = [tdCode.imageFixe, tdCode.texte]
+  ressource.typePedagogiques  = [tpCode.cours, tpCode.exercice]
+}
+
+/**
  * Convertit un recordset en objet Ressource que l'on pourra poster à l'api
  * @param row
  * @returns {Ressource}
@@ -237,7 +265,6 @@ function parseRessource(row) {
       // @todo affiner la catégorie suivant consigne et réponse ou pas
       if (!ressource.titre) ressource.titre = "Page externe"
       addCatExoInteractif(ressource)
-      modifyUrl(ressource)
       break
     case 11:
       ressource.typeTechnique = 'mental'
@@ -301,24 +328,23 @@ function parseRessource(row) {
       ajout = false
   }
   if (ajout) {
-    var idComb = getIdComb(ressource)
-    idsParsed.push(idComb);
-    if (logProcess) log('processing ' + idComb)
+    idsParsed.push(ressource.idOrigine);
+    if (logProcess) log('processing ' + ressource.idOrigine)
     // on transforme le xml en objet js pour certains
     switch (ressource.typeTechnique) {
       case 'url':
-          modifyUrl(ressource, defer)
+          modifyUrl(ressource, deferAdd)
         break
       /* case '':
           xml2js.parseString(ressource.xml, function(error, result) {
-            if (error) addError(idComb)
+            if (error) addError(ressource.idOrigine)
             else {
               ressource.parametres = result
-              defer(ressource)
+              deferAdd(ressource)
             }
           })
         break */
-      default : defer(ressource)
+      default : deferAdd(ressource)
     }
 
   }
@@ -363,31 +389,54 @@ function getIdComb(ressource) {
 function modifyUrl(ressource, next) {
   try {
     // il faut échapper d'éventuels & qui ne sont pas sous la forme &amp;
+    // on pourrait passer l'option strict:false mais on préfère planter en cas de xml bancal
     var xmlSrc = ressource.parametres.xml.replace(/&/g, '&amp;').replace(/&amp;amp;/g, '&amp;')
-    xml2js.parseString(xmlSrc, function (error, result) {
+    // cf https://github.com/Leonidas-from-XIV/node-xml2js
+    var options = {
+      explicitArray :false,
+      explicitRoot  :false,
+      trim          :true,
+      ignoreAttrs   :true
+    }
+    xml2js.parseString(xmlSrc, options, function (error, result) {
       if (error) {
         log(error.stack)
         log("le parsing du xml a planté " +xmlSrc)
         addError(ressource.idOrigine, "le parsing du xml a planté " +ressource.parametres.xml)
-      }
-      else {
+      } else {
+        // log('le xml', xmlSrc)
+        // log('donne', result)
         ressource.parametres = result
-        // on modifie le type suivant ce que l'on trouve
-        if (result.adresse.indexOf("http://mep-outils.sesamath.net/manuel_numerique/diapo.php?atome=") === 0) {
-          var test = /diapo.php\?atome=([0-9]+)/.exec(result.adresse)
-          // c'est en fait un atome, on le garde comme ressource url originaire de labomep,
-          // mais on ajoute les refs à l'atome, ça servira probablement
-          ressource.parametres.cloneDe = {
-            origine      : 'zoneur',
-            idOrigine    : test[1],
-            typeTechnique: 'ato'
+        // un raccourci
+        var p = ressource.parametres
+        if (p.adresse) {
+          // on simplifie les ressources sans consigne ni question
+          if (!p.consigne &&
+             (!p.question_option || p.question_option === 'off') &&
+             (!p.answer_option   || p.answer_option   === 'off')) {
+            // url toute simple, on nettoie un peu
+            ressource.parametres = {adresse: p.adresse}
+            // ne sachant pas trop on met rien...
+            // (0 pour que l'api accepte l'import, il faudra compléter à la prochaine édition)
+            ressource.categories = [0]
+            // un cas particulier sur toutes ces diapos qui devraient exister par ailleurs
+            if (p.adresse.indexOf("http://mep-outils.sesamath.net/manuel_numerique/diapo.php?atome=") === 0) {
+              var test = /diapo.php\?atome=([0-9]+)/.exec(result.adresse)
+              // c'est en fait un atome, on le garde comme ressource url originaire de labomep,
+              // mais on ajoute les refs à l'atome, ça servira probablement
+              ressource.parametres.cloneDe = {
+                origine      : 'zoneur',
+                idOrigine    : test[1],
+                typeTechnique: 'ato'
+              }
+              // ne sachant pas trop on met cours et exercice
+              addCoursExoFixe(ressource)
+            }
           }
-          // ne sachant pas trop on met cours et exercice
-          ressource.categories = [catCode.coursFixe, catCode.exerciceFixe]
-          ressource.typeDocumentaires = [tdCode.imageFixe, tdCode.texte]
-          ressource.typePedagogiques = [tpCode.cours, tpCode.exercice]
+        } else {
+          return addError(ressource.idOrigine, "Url sans adresse")
         }
-        next()
+        next(ressource)
       }
     })
   } catch (error) {
@@ -509,7 +558,8 @@ function displayResult(next) {
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
     writeStream.end();
   } else log('Aucune erreur rencontrée')
-  next()
+  log('Durée : ' +getElapsed(topDepart)/1000 +'s')
+  if (next) next()
 }
 
 module.exports = function () {
@@ -546,6 +596,10 @@ module.exports = function () {
     else query += " WHERE bib_id IN(" +ids +")"
   }
 
+  // en cas d'interruption on veut le résultat quand même
+  process.on('SIGTERM', displayResult);
+  process.on('SIGINT', displayResult);
+
   // yapluka
   flow()
       .seq(function () {
@@ -569,6 +623,6 @@ module.exports = function () {
         process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
       })
       .catch(function (error) {
-        console.error('Erreur dans le flow : \n' + error.stack);
+        log('Erreur dans le flow :', error);
       })
 }

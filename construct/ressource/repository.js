@@ -67,44 +67,47 @@ ressourceRepository.valide = function(ressource, next) {
  */
 function setVersion(ressource, next) {
   var needIncrement
-  // ira seulement en cache dans la plupart des cas, mais de toute façon faut récupérer le n° de version actuel
-  ressourceRepository.load(ressource.id, function (error, ressourceInitiale) {
-    if (error) next(error)
-    if (ressourceInitiale) {
-      // on peut réclamer une nouvelle version via un flag sur la ressource
-      if (ressource.newVersion) needIncrement = true
-      // on regarde si nos champs qui déclenchent un changement de version on changé
-      else {
-        _.each(config.versionTriggers, function (prop) {
-          // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
-          // on utilise http://underscorejs.org/#isEqual
-          if ( !_.isEqual(ressource[prop], ressourceInitiale[prop])) {
-            log.dev('La modif du champ ' +prop +' entraîne un incrément de version de ' +ressourceInitiale.id)
-            log.dev('avant', ressourceInitiale[prop])
-            log.dev('après', ressource[prop])
-            needIncrement = true
-          }
-        })
-      }
-      // on recopie version et oid (pour écrasement éventuel de l'ancienne ressource)
-      ressource.version = ressourceInitiale.version
-      ressource.oid = ressourceInitiale.oid
-    } else {
-      ressource.version = 1
-    }
-
-    if (needIncrement) ressourceInitiale.archive(function(error, archive) {
+  if (ressource.id) { // pas le cas au create
+    // ira seulement en cache dans la plupart des cas, de toute façon faut récupérer le n° de version actuel
+    ressourceRepository.load(ressource.id, function (error, ressourceInitiale) {
       if (error) next(error)
+      if (ressourceInitiale) {
+        // on peut réclamer une nouvelle version via un flag sur la ressource
+        if (ressource.versionNeedIncrement) needIncrement = true
+        // on regarde si nos champs qui déclenchent un changement de version on changé
+        else {
+          _.each(config.versionTriggers, function (prop) {
+            // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
+            // on utilise http://underscorejs.org/#isEqual
+            if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
+              log.dev('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id + '\n' +
+                  'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' + 'après\n' + JSON.parse(ressource[prop]))
+              needIncrement = true
+            }
+          })
+        }
+        // on recopie version et oid (pour écrasement éventuel de l'ancienne ressource)
+        ressource.version = ressourceInitiale.version
+        ressource.oid = ressourceInitiale.oid
+      }
+
+      if (needIncrement) ressourceInitiale.archive(function (error, archive) {
+        if (error) next(error)
+        else {
+          // incrément version et màj dateMiseAJour
+          log.dev("On a archivé la ressource " + ressourceInitiale.id + " (avec l'oid en archive " + archive.oid + ')')
+          ressource.version++
+          ressource.dateMiseAJour = new Date();
+          next(null, ressource)
+        }
+      })
       else {
-        // incrément version et màj dateMiseAJour
-        log.dev("On a archivé la ressource " + ressourceInitiale.id + " (avec l'oid en archive " + archive.oid + ')')
-        ressource.version++
-        ressource.dateMiseAJour = new Date();
         next(null, ressource)
       }
     })
-    else next(null, ressource)
-  })
+  } else {
+    next(null, ressource)
+  }
 }
 
 /**
@@ -236,7 +239,6 @@ ressourceRepository.load = function(id, next) {
   var ressourceCached = cacheGet(id)
   if (ressourceCached) next(null, ressourceCached)
   else {
-    log.dev('ressource ' +id +' pas en cache')
     lassi.entity.Ressource.match('id').equals(id).grabOne(function (error, ressource) {
       if (error) next(error)
       else if (ressource) {
@@ -498,8 +500,7 @@ function cacheGetByOrigine(origine, idOrigine) {
  * @param ressource
  */
 function cacheSet(ressource) {
-  if (!ressource || !ressource.id) log.error(new Error('Impossible de mettre en cache une ressource inexistante'))
-  else {
+  if (ressource.id) {
     lassi.cache.set('ressource_' +ressource.id, ressource)
     lassi.cache.set('ressourceIdByOid_' +ressource.oid, ressource.id)
     if (ressource.origine) {

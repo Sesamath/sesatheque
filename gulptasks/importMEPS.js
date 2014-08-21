@@ -5,6 +5,9 @@
  * sans l'appli bibliothèque ni lassi
  */
 'use strict';
+
+/** le timestamp en ms du lancement de ce script */
+var topDepart = (new Date()).getTime()
 /** timeout en ms */
 var timeout = 3000
 var maxLaunched = 100
@@ -47,6 +50,14 @@ var errors = {}
 var pendingRelations = {};
 /** liste idComb:id */
 var ids = {}
+
+/**
+ * Retourne le nb de ms écoulées depuis start
+ * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
+ */
+function getElapsed(start) {
+  return (new Date()).getTime() -start
+}
 
 /**
  * Écrit en console avec le moment en préfixe
@@ -628,7 +639,8 @@ function displayResult(next) {
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
     writeStream.end();
   } else log('Aucune erreur rencontrée')
-  next()
+  log('Durée : ' +getElapsed(topDepart)/1000 +'s')
+  if (next) next()
 }
 
 module.exports = function () {
@@ -656,6 +668,10 @@ module.exports = function () {
     logProcess = true
     logRelations = true
   }
+
+  // en cas d'interruption on veut le résultat quand même
+  process.on('SIGTERM', displayResult);
+  process.on('SIGINT', displayResult);
 
   flow()
       .seq(function () {

@@ -120,7 +120,7 @@ function Ressource() {
   /**
    * Version de la ressource
    */
-  this.version = 0;
+  this.version = 1;
   /**
    * L'oid de l'archive correspondant à la version précédente
    */
