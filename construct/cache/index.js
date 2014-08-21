@@ -76,7 +76,7 @@ function purge() {
  * @param delay en s, sera recadré dans l'intervalle 60-3600 s'il en sort
  */
 cacheComponent.setPurgeDelay = function (delay) {
-  purgeDelay = encadre(delay, 60, 3600, 'délai de passage du ramasse miettes du cache')
+  purgeDelay = cacheComponent.encadre(delay, 60, 3600, 'délai de passage du ramasse miettes du cache')
   if (timerId) {
     clearTimeout(timerId)
     purge()
@@ -88,7 +88,7 @@ cacheComponent.setPurgeDelay = function (delay) {
  * @param ttl
  */
 cacheComponent.setDefaultTTL = function (ttl) {
-  defaultTTL = encadre(ttl, 5, 3600, 'ttl par défaut')
+  defaultTTL = cacheComponent.encadre(ttl, 5, 3600, 'ttl par défaut')
   if (timerId) {
     clearTimeout(timerId)
     purge()
@@ -155,8 +155,6 @@ cacheComponent.set = function (key, value, ttl) {
   }
 }
 
-module.exports = cacheComponent
-
 /**
  * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
  * @param int La valeur à contrôler
@@ -165,7 +163,7 @@ module.exports = cacheComponent
  * @param label Un label pour le message d'erreur (qui indique ce qui a été recadré)
  * @returns {Integer}
  */
-function encadre(int, min, max, label) {
+cacheComponent.encadre = function (int, min, max, label) {
   var value = parseInt(int)
   if (value < min) {
     log.error(label +" trop petit (" +value +"), on le fixe à " +min)
@@ -177,3 +175,5 @@ function encadre(int, min, max, label) {
   }
   return value
 }
+
+module.exports = cacheComponent

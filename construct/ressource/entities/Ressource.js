@@ -161,7 +161,6 @@ var entity = lassi.Entity(Ressource)
   .addIndex('restriction', 'integer')
   .addIndex('dateCreation', 'date')
   .addIndex('dateMiseAJour', 'date')
-  .addIndex('version', 'integer')
 
 /* un écouteur sur registered qui pourrait servir
 lassi.on('registered', function(className, path, ressource) {

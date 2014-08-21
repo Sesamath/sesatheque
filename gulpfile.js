@@ -118,7 +118,7 @@ gulp.task('purge', function() {
     fs.readdirSync(dirLogs).forEach(function (log) {
       file = dirLogs + '/' + log
       if (fs.lstatSync(file).isFile()) {
-        fs.truncateSync(file, 2);
+        fs.truncateSync(file, 0);
         console.log(file +' effacé')
       }
     })

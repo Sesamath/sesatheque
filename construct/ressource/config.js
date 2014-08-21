@@ -198,7 +198,7 @@ module.exports = {
     contributeurs    : 'Array',
     langue           : 'String',
     publie           : 'Boolean',
-    version          : 'String',
+    version          : 'Number',
     restriction      : 'Number',
     dateCreation     : 'Date',
     dateMiseAJour    : 'Date'

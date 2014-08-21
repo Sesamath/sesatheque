@@ -21,7 +21,7 @@ personneComponent.initialize = function(next) {
   // l'export de notre config/index.js
   var config = this.application.settings
   if (config.components && config.components.personne && config.components.personne.cacheTTL) {
-    cacheTTL = encadre(config.components.personne.cacheTTL, 60, 12*3600,
+    cacheTTL = lassi.cache.encadre(config.components.personne.cacheTTL, 60, 12*3600,
         'ttl de cache par défaut pour les entities personne')
     log('ttl du cache personne fixé à ' +cacheTTL)
   }
@@ -304,26 +304,4 @@ function givePermOursServers(ctx) {
       if (ip === '127.0.0.1' || ip.indexOf('192.168') === 0) ctx.session.user = fake
     }
   }
-}
-
-/**
- * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
- * @todo doublon avec la même fct dans le composant cache, voir s'il doit l'exporter ou si on met ça ailleurs
- * @param int La valeur à contrôler
- * @param min Le minimum exigé
- * @param max Le maximum exigé
- * @param label Un label pour le message d'erreur (qui indique ce qui a été recadré)
- * @returns {Integer}
- */
-function encadre(int, min, max, label) {
-  var value = parseInt(int)
-  if (value < min) {
-    log.error(label +" trop petit (" +value +"), on le fixe à " +min)
-    value = min
-  }
-  if (value > max) {
-    log.error(label +" trop grand (" +value +"), on le fixe à " +max)
-    value = max
-  }
-  return value
 }
