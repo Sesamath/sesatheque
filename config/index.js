@@ -81,7 +81,7 @@ module.exports = {
     cookie: {
       key: 'asqlSTsrl78lAsg'
     },
-    bodyParser : {limit:'1mb'}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
+    bodyParser : {limit:'4mb'}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
     session: {
       secret: 'asqlSTsrl78lAsg',
       saveUninitialized: true,
@@ -90,7 +90,11 @@ module.exports = {
     authentication: {}
   },
   components: {
-    // Configuration des roles (settings du composant personne)
+    cache : {
+      defaultTTL: 15*60,
+      purgeDelay: 5*60
+    },
+    // Permission pour chacun des rôles
     personne : {
       roles: {
         // en attendant de gérer modIndexation, modParametres et publish on utilise juste write
@@ -98,10 +102,12 @@ module.exports = {
         editor   : ['add', 'modIndexation', 'modParametres', 'publish', 'readProf', 'write'],
         indexator: ['modIndexation', 'readProf'],
         prof     : ['readProf']
-      }
+      },
+      cacheTTL: 20*60
     }
   },
   // le reste est spécifique à notre appli et ignoré par lassi
+
   // les différents logs
   logs : {
     access    : root + '/logs/' + staging + '.access.log',
