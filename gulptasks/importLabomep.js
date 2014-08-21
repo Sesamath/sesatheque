@@ -43,12 +43,23 @@ var dbConfigLabomep = require(__dirname + '/../_private/dbconfig/labomep');
 // les connexions aux bases
 var klabomep = knex(dbConfigLabomep);
 
+/**
+ * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
+ * pour les avoir sous la main pour éventuel debug
+ */
 /** ids des ressources traitées ici */
 var idsParsed = [];
+/** ids des ressources sur la pile d'envoi */
+var idsToSend = [];
+/** ids des ressources envoyées */
+var idsSent = [];
+/** ids des ressources avec une réponse de l'api */
+var idsResp = []
 /** ids des ressources enregistrées par l'api */
 var idsOk = []
 /** ids des ressources dont l'enregistrement a planté */
 var idsFailed = [];
+
 /** la liste des erreurs rencontrées (la clé est l'id, 0 pour les erreurs générées ici hors ressource) */
 var errors = {}
 /** La liste des relations à ajouter ensuite */
@@ -103,9 +114,8 @@ function checkEnd() {
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(function () {
     var msg = 'timeout, ' +Math.floor(timeout / 1000) +
-        "s sans rien depuis le dernier retour de l'api, il restait " +nbLaunched +' ressources en cours et ' +
-        waitingRessource.length+' en attente de traitement\n' +
-        ', parsed ' +idsParsed.length +', failed ' +idsFailed.length
+        "s sans rien depuis le dernier retour de l'api, il restait " +nbLaunched +
+        " ressources en attente de réponse de l'api et " +waitingRessource.length +" en attente d'envoi"
     addError(0, msg)
     log(msg)
     nextStep()
@@ -129,10 +139,12 @@ function checkEnd() {
  */
 function deferAdd(ressource) {
   if (ressource && ressource.titre) {
+    idsToSend.push(ressource.idOrigine);
     if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
     else waitingRessource.push(ressource)
   } else {
-    log("deferAdd appelé sans ressource valide")
+    idsFailed.push(ressource.idOrigine)
+    addError(ressource.idOrigine, "ressource sans titre ou invalide, non postée")
     log(ressource)
   }
 }
@@ -510,6 +522,7 @@ function flushPendingRelations(next) {
  */
 function addRessource(ressource, next) {
   nbLaunched++
+  idsSent.push(ressource.idOrigine)
   var options = {
     url : 'http://localhost:3000/api/ressource',
     json: true,
@@ -519,6 +532,7 @@ function addRessource(ressource, next) {
   }
   request.post(options, function (error, response, body) {
     nbLaunched--
+    idsResp.push(ressource.idOrigine)
     if (error) addError(ressource.idOrigine, error.toString())
     else {
       if (body.error) {
@@ -543,13 +557,15 @@ function addRessource(ressource, next) {
 function displayResult(next) {
   // attendues 4109 + 1613
   log(idsParsed.length +' ressources traitées')
+  log(idsToSend.length +' ressources à poster')
+  log(idsResp.length +" réponses de l'api")
   log(idsOk.length +' ressources enregistrées')
   if (idsFailed.length) {
     var fs = require('fs')
     var logfile = __dirname + '/../logs/importLabomep.error.log'
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
-    log(idsFailed.length +' ressources avec erreurs :')
+    log(idsFailed.length +' ressources avec erreurs :' +idsFailed.join(','))
     writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
     idsFailed.forEach(function (idOrigine) {
       log(idOrigine +' : ' +errors[idOrigine])
