@@ -48,18 +48,18 @@ module.exports = lassi.Decorator('auth')
         /**
          * Connexion (via redirect vers sso)
          */
-        if (!ctx.session.user || !ctx.session.user.id) {
+        if (lassi.personne.isAuthenticated(ctx)) {
+          // on redirige vers la page courante sans ce param car on est déjà connecté
+          lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté", "notice")
+          ctx.redirect(getMyUrl(ctx))
+        } else {
           // faut aller chercher un ticket
           urlSso += urlAuth +'?statut_requis=Prof_Valide' +
               '&motif=identification_requise' +
               '&url_application=' +getMyUrl(ctx, true) +
               '&url_deconnexion=' +
-                encodeURIComponent('http://' +ctx.request.headers.host +ctx.url('personne.deconnexion'))
+              encodeURIComponent('http://' + ctx.request.headers.host + ctx.url('personne.deconnexion'))
           ctx.redirect(urlSso)
-        } else {
-          // sinon on redirige vers la page courante sans ce param car on est déjà connecté
-          lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté", "notice")
-          ctx.redirect(getMyUrl(ctx))
         }
 
       } else if (ctx.get.hasOwnProperty('deconnexion')) {
@@ -75,7 +75,7 @@ module.exports = lassi.Decorator('auth')
          * attention, si on renvoie undefined ou un objet vide le bloc n'est pas rendu
          */
         var data = getUserForDust(ctx.session.user)
-        //log.dev("décorateur auth renvoie", data)
+        log.dev("décorateur auth renvoie", data)
         next(null, data)
       }
     });

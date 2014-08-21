@@ -116,7 +116,7 @@ personneComponent.hasReadPermission = function (ctx, ressource) {
  * @returns {boolean}
  */
 personneComponent.isAuthenticated = function (ctx) {
-  return (ctx.session && ctx.session.user && ctx.session.user.id)
+  return (ctx.session && ctx.session.user && ctx.session.user.id > 0) // id=-1 avec une ip locale
 }
 
 
