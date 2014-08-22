@@ -31,13 +31,32 @@ function Groupe() {
  */
 Groupe.prototype.save = function (next) {
   var groupe = this
+// @FIXME pour debug on fait rien
+return next(null, this)
+  /**
+   * Met en cache avant de passer au suivant
+   * @param error
+   * @param groupe
+   */
+  function setCacheAndNext(error, groupe) {
+    if (groupe && groupe.id) {
+      // on met en cache
+      lassi.cache.set(lassi.personne.getCacheKeyGroupeByNom(groupe.nom), groupe, cacheTTL)
+      lassi.cache.set('groupe_' + groupe.id, groupe, cacheTTL)
+    }
+    next(error, groupe)
+  }
+
   log.dev('dans Groupe.save le nom ' +groupe.nom)
   this.store(function(error, groupe) {
-    log.dev('dans save groupe au retour du store ' +groupe.nom)
-    // on met en cache
-    lassi.cache.set(lassi.personne.getCacheKeyGroupeByNom(groupe.nom), groupe, cacheTTL)
-    lassi.cache.set('groupe_' +groupe.id, groupe, cacheTTL)
-    next(error, groupe)
+    log.dev('dans save groupe, retour du store ' +(groupe?groupe.nom:''))
+    if (error) next(error)
+    else if (!groupe.id) {
+      groupe.id = groupe.oid
+      groupe.store(setCacheAndNext)
+    } else {
+      setCacheAndNext(null, groupe)
+    }
   })
 }
 

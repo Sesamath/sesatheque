@@ -136,7 +136,7 @@ function checkTicket(ctx, next) {
    */
   function setSessionAndRedirect(error, personne) {
     if (error) next(error)
-    else if (personne /* @FIXME remettre ça dès que le store fonctionne && personne.oid */) {
+    else if (personne) {
       // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
       // hormis le controleur deconnexion qui affecte un objet vide
       ctx.session.user = personne.toObject() // express-session fait un stringify dessus et tolère pas les refs circulaires
@@ -185,12 +185,14 @@ function checkTicket(ctx, next) {
             if (personneBdd) {
               // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
               newPersonne.oid = personneBdd.oid
+              // @todo voir pourquoi la comparaison est toujours fausse
               if (_.isEqual(personneBdd.toObject(), newPersonne.toObject())) needToStore = false
             }
             if (needToStore) {
               log.dev('av store personne', newPersonne)
               newPersonne.store(setSessionAndRedirect)
-              // @FIXME le store rappelle pas la cb, on le fait ici
+              // @FIXME le store rappelle pas la cb, on le fait ici, attention à virer ce 2e appel sinon
+              // le redirect plantera avec TypeError: Object #<Context> has no method '_next'
               //setSessionAndRedirect(null, newPersonne)
             }
             else setSessionAndRedirect(null, personneBdd)

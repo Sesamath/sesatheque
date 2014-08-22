@@ -1,6 +1,6 @@
 {!blockAuth, id vaut -1 si on a une ip locale!}
-{@lt key="id" value="0"}
+{@gt key=id value=0}
     <p>{prenom} {nom}<br />(<a href="?deconnexion">me déconnecter</a>)</p>
 {:else}
     <p><a href="?connexion">Connexion</a></p>
-{/lt}
+{/gt}
