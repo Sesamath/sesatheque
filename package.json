@@ -28,7 +28,6 @@
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
     "jshint-stylish": "^0.3.0",
-    "launcher": "git+ssh://git@arnumeral.fr:gulp-launcher",
     "merge-stream": "^0.1.1",
     "through2": "^0.4.2"
   },
