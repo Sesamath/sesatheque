@@ -34,6 +34,9 @@ var logAccess = root + '/logs/' + staging + '.access.log';
 var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'});
 var morganSettings
 
+/**
+ * En dev on a un access.log avec le contenu des POST
+ */
 if (staging === lassi.Staging.development) {
   lassi.require('morgan').token('post', function (req, res) {
     return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
@@ -123,7 +126,7 @@ var appConfig = {
   }
 }
 
-// on ajoute nos params locaux
+// on ajoute nos params locaux (accès à la base et port)
 lassi.tools.update(appConfig, localConfig)
 
 module.exports = appConfig

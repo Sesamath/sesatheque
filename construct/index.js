@@ -3,6 +3,11 @@
  */
 'use strict';
 
+console.log("Démarrage de la bibliothèque : appel de " +__filename +" avec les arguments ")
+console.log(process.argv)
+console.log("et l'environnement")
+console.log(process.env)
+
 var _ = require('underscore')._
 
 // Récupération du module lassi que l'on met en global

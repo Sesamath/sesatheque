@@ -1,0 +1,18 @@
+{
+  "comment":"Cf https://github.com/Unitech/pm2#usagefeatures",
+  "apps" : [{
+    "name"       : "bibliotheque",
+    "script"     : "./construct/index.js",
+    "instances"  : "1",
+    "exec_mode"  : "fork_mode",
+    "pid_file"   : "./bibliotheque.pid",
+    "port"       : 3000,
+    "log_date_format"  : "YYYY-MM-DD HH:mm Z",
+    "error_file" : "./logs/node-err.log",
+    "out_file"   : "./logs/node-out.log",
+    "watch"       : "false",
+    "env": {
+        "NODE_ENV": "production"
+    }
+  }]
+}
