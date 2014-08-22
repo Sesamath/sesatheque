@@ -1,0 +1,4 @@
+Les datas reçus par la vue :
+<pre>
+{@contextDump key="oid" to="output"/}
+</pre>

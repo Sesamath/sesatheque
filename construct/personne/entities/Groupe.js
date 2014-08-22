@@ -32,7 +32,7 @@ function Groupe() {
 Groupe.prototype.save = function (next) {
   var groupe = this
 // @FIXME pour debug on fait rien
-return next(null, this)
+//return next(null, this)
   /**
    * Met en cache avant de passer au suivant
    * @param error
