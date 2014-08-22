@@ -5,6 +5,7 @@ console.log('lecture config appli')
 var _ = require('underscore')._
 var fs = require('fs');
 var moment = require('moment')
+var localConfig = require('../_private/config')
 
 /**
  * On est config/index.js (hors build)
@@ -55,16 +56,19 @@ if (staging === lassi.Staging.development) {
 }
 
 /** La config exportée */
-module.exports = {
+var appConfig = {
+  // dans localConf, sinon conf par défaut i.e. port 3000
   application : {
     name : "bibliotheque",
     mail : "tech@sesamath.net",
     staging: staging
   },
+  /* dans localConf
   entities: {
-    // Configuration de la base de données
-    database: require(root + '/_private/dbconfig')
-  },
+    database: {
+      client...
+    }
+  }, */
   renderer: {
     cache: false
   },
@@ -118,3 +122,8 @@ module.exports = {
     cacheEntries : false
   }
 }
+
+// on ajoute nos params locaux
+lassi.tools.update(appConfig, localConfig)
+
+module.exports = appConfig
