@@ -10,8 +10,8 @@ var knex = require('knex')
 var moment = require('moment')
 var flow          = require('seq')
 
-var dbConfig = require(__dirname + '/../_private/dbconfig')
-var kdb = knex(dbConfig)
+var dbConfig = require(__dirname + '/../_private/config')
+var kdb = knex(dbConfig.entities.database)
 
 /** La liste d'ids passés en argument avec --dump (séparateur virgule sans espaces) */
 var idsAsked = ''

@@ -39,7 +39,7 @@ var catCode = config.constantes.categories;
 var relCode = config.constantes.relations;
 
 // databases
-var dbConfigLabomep = require(__dirname + '/../_private/dbconfig/labomep');
+var dbConfigLabomep = require(__dirname + '/../_private/config/labomep');
 // les connexions aux bases
 var klabomep = knex(dbConfigLabomep);
 

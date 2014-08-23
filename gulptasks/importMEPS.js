@@ -35,7 +35,7 @@ var catCode = config.constantes.categories;
 var relCode = config.constantes.relations;
 
 // databases
-var dbConfigMepCol = require(__dirname + '/../_private/dbconfig/mepcol.js');
+var dbConfigMepCol = require(__dirname + '/../_private/config/mepcol.js');
 // les connexions aux bases
 var kmepcol = knex(dbConfigMepCol);
 
