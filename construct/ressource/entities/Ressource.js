@@ -104,6 +104,12 @@ function Ressource() {
    */
   this.publie = false;
   /**
+   * Vrai si la ressource est indexable (peut sortir sur des résultats de recherche)
+   * Sert à distinguer des ressources "obsolètes" car remplacées par d'autres mais toujours publiées car utilisées.
+   * @type {boolean}
+   */
+  this.indexable = false;
+  /**
    * Restriction sur la ressource
    */
   this.restriction = 0;
@@ -158,6 +164,7 @@ var entity = lassi.Entity(Ressource)
   .addIndex('contributeurs', 'integer')
   .addIndex('langue', 'string')
   .addIndex('publie', 'boolean')
+  .addIndex('indexable', 'boolean')
   .addIndex('restriction', 'integer')
   .addIndex('dateCreation', 'date')
   .addIndex('dateMiseAJour', 'date')
