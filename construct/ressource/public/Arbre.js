@@ -1,0 +1,65 @@
+/**
+ * Format d'un Arbre de ressources Sésamath
+ * sous forme d'un module js exporté pour requirejs ou node
+ */
+
+/* global define, module*/
+
+// suivant que l'on est coté serveur ou client
+if (typeof define === 'function') define(Arbre);
+else if (typeof module === 'object') module.exports = Arbre;
+// sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
+
+/**
+ * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
+ * C'est aussi la définition d'un node de l'arbre
+ *
+ * @param {Object} initObj L'objet qui sert à initialiser un nouvel Arbre
+ * @constructor
+ */
+function Arbre(initObj) {
+  if (! initObj instanceof Object) initObj = {}
+  /**
+   * L'identifiant de l'arbre (pour éventuellement le référencer comme enfant d'un autre arbre)
+   * @type {Number|string|undefined}
+   */
+  this.id = initObj.id || undefined;
+  /**
+   * Une référence vers le "vrai" Arbre, si on n'est qu'une référence et pas l'objet complet 
+   * @type {Number|string|undefined}
+   */
+  this.ref = initObj.ref || undefined;
+  /**
+   * L'origine de la référence, pour savoir où aller la chercher
+   * @type {Number|string|undefined}
+   */
+  this.refOrigine  = initObj.refOrigine || undefined;
+  /**
+   * Le nom
+   * @type {string}
+   */
+  this.name = (initObj.name && typeof initObj.name === 'string') ? initObj.name : '';
+  /**
+   * Le type, qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
+   * @type {Number|string|undefined}
+   */
+  this.type = initObj.type || undefined
+  /**
+   * Le contenu du node (ou la racine de l'arbre)
+   * @type {Object}
+   */
+  this.content = (initObj.content && initObj.content instanceof Object) ? initObj.content : {};
+  /**
+   * Les enfants, un tableaux d'objets Arbre (qui peuvent n'être que des références, ou un mix)
+   * @type {Array}
+   */
+  this.childrens = (initObj.childrens && initObj.childrens instanceof Array) ? initObj.childrens : [];
+}
+
+/**
+ * Cast en string d'un arbre (son nom)
+ * @returns {string}
+ */
+Arbre.prototype.toString = function () {
+  return this.name;
+}
