@@ -7,7 +7,7 @@ body {
 #filariane {
     padding: 3px;
     padding-left: 24px;
-    background: url(../../../includes/images/information.gif) no-repeat left center;
+    background: url(images/information.gif) no-repeat left center;
     border-bottom: 1px solid black;
     font-style: italic;
     height: 16px;
@@ -16,6 +16,7 @@ body {
     color: #660000;
     font-weight: bold;
 }
+#head {max-height: 30%; overflow: scroll;}
 #lienreponse, #lienconsigne {
     padding-top: 3px;
     padding-left: 5px;
@@ -36,6 +37,7 @@ body {
     display: none;
 }
 #page {
+    min-height: 30%;
     z-index: 1;
 }
 #urlSrc {

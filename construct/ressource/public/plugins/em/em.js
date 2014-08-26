@@ -35,10 +35,12 @@ define(['swfobject'], function () {
   }
 });
 
-/** class utilisée dans notre css */
-var cssClass = 'mepRess';
 
 // reste à définir nos méthodes
+
+var ressId;
+var ressType = 'em';
+var startDate
 
 /**
  * Affiche la ressource dans l'élément d'id mepRess
@@ -47,11 +49,14 @@ var cssClass = 'mepRess';
  * @param {Function} saveResult [optional] Une méthode à appeler, si elle existe, pour sauvegarder un résultat
  */
 function display(ressource, next, saveResult) {
+  /** class utilisée dans notre css */
+  var cssClass = 'mepRess';
   var params = ressource.parametres;
   var baseMepSwf, swfUrl, largeur, hauteur, flashvars, swfParams, swfAttributes;
   var wd = window.document;
   var htmlElt;
   var divId = 'mepRess'; // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
+  ressId = ressource.id
 
   log('start mep display avec la ressource', ressource)
   //les params minimaux
@@ -117,8 +122,18 @@ function display(ressource, next, saveResult) {
 
     // traitement du résultat éventuel (il faudra que l'appelant passe un idUtilisateur)
     if (saveResult && typeof saveResult === "function") {
-      // faut nommer cette fonction et la rendre accessible au swf dans son dom
-      window.resultCb = saveResult
+      // faut une fonction qui va transformer le résultat au format attendu
+      // et la pour rendre accessible au swf dans son dom
+      window.resultCb = function (result) {
+        log('le swf renvoie le résultat', result)
+        saveResult({
+          reponse:result,
+          ressId : ressId,
+          ressType:ressType,
+          date : startDate,
+          duree : Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000)
+        })
+      }
       flashvars.nomFonctionCallback = 'resultCb';
     }
 
@@ -142,6 +157,7 @@ function display(ressource, next, saveResult) {
     function callbackFn(e) {
       var retour
       if (e.success) {
+        startDate = new Date();
         log("Chargement de " + swfUrl, e);
       } else {
         htmlElt = wd.createElement("p");
@@ -158,7 +174,8 @@ function display(ressource, next, saveResult) {
 
 /**
  * Affiche un résultat sauvegardé préalablement
- * @param {Object}      result Le résultat tel qu'il a été passé à saveResult au préalable
+ * @todo convertir la chaine vvrvb et rectangles vert rouges et bleus
+ * @param {Resultat} Un résultat à afficher
  * @param {HTMLElement} elt    L'élément html (https://developer.mozilla.org/fr/docs/Web/API/HTMLElement)
  */
 function showResult(result, elt) {

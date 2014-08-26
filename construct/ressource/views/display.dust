@@ -13,80 +13,26 @@
 <div id="display">Vous devez avoir un navigateur avec javascript activé pour voir ce contenu.<br />
 Chargement en cours</div>
 <script type="application/javascript">
-    /** Le conteneur html pour afficher la ressource */
-    var container = document.getElementById('display');
-    /** Le conteneur html pour afficher d'éventuelles erreurs */
-    var errorsContainer = document.getElementById('errors');
-    /** Le préfixe vers le dossier du plugin */
-    var baseUrl = '{pluginBaseUrl}';
     /** Le post reçu que l'on transmet tel quel */
-    var post = {?post}{post}{:else}{~lb}{~rb}{/post};
-
-    {?staging}
-        {! faut pas de " autour du nom de la clé pour @eq contrairement à ce que la doc indique !}
-        {@eq key=staging value="production"}
-    /** en prod on envoie rien en console */
-    function log() { return; }
-        {:else}
-    /**
-     * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
-     * @param msg Le message à afficher
-     * @param obj Un objet éventuel dont on veut le dump en console
-     */
-    function log(msg, obj) {
-        if (!console || !console.log) return;
-        console.log(msg);
-        if (obj) console.log(obj);
-    }
-        {/eq}
-    {:else}
-    function log() { return; }
-    {/staging}
-
-console.log('le parent');
-console.log(window.parent);
-    /**
-     * Ajoute une css dans le <head> courant
-     * @param file le chemin du fichier css relatif au dossier du plugin
-     */
-    function addCss(file) {
-        var elt = document.createElement("link");
-        elt.rel = "stylesheet";
-        elt.type = "text/css";
-        elt.href = '{pluginBaseUrl}/' + file;
-        document.getElementsByTagName("head")[0].appendChild(elt);
-    };
-
-    require.config({
-        baseUrl     : '{pluginBaseUrl}',
-        paths: {
-            head        : '{vendorsBaseUrl}/headjs/head.1.0',
-            head10      : '{vendorsBaseUrl}/headjs/head.1.0',
-            head_load   : '{vendorsBaseUrl}/headjs/head.load.1.0',
-            head_load10 : '{vendorsBaseUrl}/headjs/head.load.1.0',
-            jquery      : '{vendorsBaseUrl}/jquery/jquery-2.1.1.min',
-            jquery211   : '{vendorsBaseUrl}/jquery/jquery-2.1.1.min',
-            swfobject   : '{vendorsBaseUrl}/swfobject/swfobject.2.2',
-            sesaswf     : '{vendorsBaseUrl}/sesamath/swf',
-            sesalog     : '{vendorsBaseUrl}/sesamath/log',
-            underscore  : '{vendorsBaseUrl}/underscore/underscore.1.6',
-            underscore16: '{vendorsBaseUrl}/underscore/underscore.1.6',
-            jqueryUi    : '{vendorsBaseUrl}/jqueryUi/jquery-ui-1.11.1/jquery-ui.min',
-            jqueryUi1111: '{vendorsBaseUrl}/jqueryUi/jquery-ui-1.11.1/jquery-ui.min'
-        }
-    });
-    require(['{pluginName}'], function (plugin) {
+    var post = {?post}{post|js}{:else}{~lb}{~rb}{/post};
+    require(['{vendorsBaseUrl}/../display'], function (modDisplay) {
         try {
-            if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin {pluginName} a échoué');
-            if (typeof plugin.display !== 'function') throw new Error('Le plugin ' +plugin +" n'a pas de méthode display");
-            container.innerHTML = '';
-            {~n}var ressource = {ressource|s};{~n}
-            if (window.name && window.parent[window.name] && window.parent[window.name].saveResult &&
-                    typeof window.parent[window.name].saveResult === 'function'){~n}
-                plugin.display(ressource, container, window.parent[window.name].saveResult);{~n}
-            else plugin.display(ressource, container);{~n}
+            if (typeof modDisplay === 'undefined') throw new Error('Le chargement a échoué');
+            modDisplay.load(
+                {
+                    baseUrl : '{pluginBaseUrl}',
+                    vendorsBaseUrl: '{vendorsBaseUrl}',
+                    pluginName: '{pluginName}',
+                    isDev :{?staging}
+                        {! faut pas de "" autour du nom de la clé pour @eq contrairement à ce que la doc indique !}
+                        {@eq key=staging value="development"}true{:else}false{/eq}
+                        {:else}false
+                    {/staging}
+                },
+                {ressource|s}
+            );
         } catch(error) {
-            errorsContainer.innerHTML = error.toString();
+          document.getElementById('errors').innerHTML = error.toString();
         }
     });
 </script>
