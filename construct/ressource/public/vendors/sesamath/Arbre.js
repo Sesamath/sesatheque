@@ -48,7 +48,7 @@ function Arbre(initObj) {
    * Le contenu du node (ou la racine de l'arbre)
    * @type {Object}
    */
-  this.content = (initObj.content && initObj.content instanceof Object) ? initObj.content : {};
+  this.content = (initObj.content && initObj.content instanceof Objectd ) ? initObj.content : {};
   /**
    * Les enfants, un tableaux d'objets Arbre (qui peuvent n'être que des références, ou un mix)
    * @type {Array}

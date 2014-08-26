@@ -14,13 +14,15 @@ define({start:start})
  * La gestion de consigne / question / réponse
  * On reprend tel quel (quasiment) l'ancien url.js de l'outil labomep
  */
+/** Le html du lien à mettre dans #information */
 var liensuivant = w.getElt("img", {
   class: 'liensuivant',
   src  : w.baseUrl +'/images/forward.png',
   align: 'absmiddle',
   alt  : 'suivant'
 });
-var vliensuivant = w.getElt("img", {
+/** Le lien qui sera dans #filariane, avec id pour lui coller un comportement au clic */
+var liensuivantId = w.getElt("img", {
   id   : 'liensuivant',
   class: 'liensuivant',
   src  : w.baseUrl +'/images/forward.png',
@@ -29,29 +31,61 @@ var vliensuivant = w.getElt("img", {
 });
 
 var etapes = {
-  encours: 0,
-  order  : [],
-  titres : {},
-  show   : showEtapes,
+  currentIndex: 0,
+  // chaque elt est une etape, un tableau avec les objets à afficher (parmi consigne, reponse, information)
+  liste  : [],
+  // les titres de chaque étape
+  titres : [],
+  show   : showEtape,
   next   : function () {
-    if (etapes.encours >= etapes.order.length) return;
-    etapes.encours++;
+    if (etapes.currentIndex >= etapes.liste.length) return;
+    etapes.currentIndex++;
     etapes.show();
   }
 };
 
+/** La page en iframe, ou div si swf */
+var page = {
+  activer   : function () { $("#page").show(); },
+  desactiver: function () { $("#page").hide(); }
+};
+
+/** objet pour la fenêtre modale information */
+var information = {
+  optionsDialog: {
+    title    : 'Information',
+    autoOpen : false,
+    resizable: false,
+    position : ['center', 40],
+    buttons  : {
+      "OK": function () { $('#information').dialog("close"); }
+    }
+  },
+  init       : function () { $('#information').dialog(information.optionsDialog); },
+  activer    : function () { $('#information').dialog('open'); },
+  desactiver   : function () { if ($('#information').dialog('isOpen')) $('#information').dialog('close'); },
+  setContent : function (content) { $('#information').html(content); }
+};
+
+/** objet pour la fenêtre modale consigne */
 var consigne = {
   optionsdialog: {
-    position : [30, 50],
+    //position : [30, 50],
+    // cf http://api.jqueryui.com/position/
+    position : {my:'left+30 top+50', at:'left bottom', of:'#head'},
     width    : 450,
     height   : 350,
     resizable: false,
+    autoOpen : false,
     title    : 'Consigne',
     close    : function () { $('#lienconsigne').css('font-weight', 'bold'); },
     open     : function () { $('#lienconsigne').css('font-weight', 'normal'); }
   },
   init : function () { $('#consigne').dialog(consigne.optionsdialog); },
-  activer      : function () { $('#lienconsigne').show(); },
+  activer      : function () {
+    $('#consigne').dialog('open');
+    $('#lienconsigne').show();
+  },
   desactiver   : function () {
     $('#consigne').dialog('close');
     $('#lienconsigne').hide();
@@ -62,20 +96,26 @@ var consigne = {
   }
 };
 
+/** objet pour la fenêtre modale réponse */
 var reponse = {
   optionsdialog: {
     width    : 472,
     height   : 290,
-    position : [$('body').width() - 30 - 472, 50],
+    //position : [$('body').width() - 30 - 472, 50],
+    position : {my:'right-30 top+70', at:'right bottom', of:'#head'},
     resizable: false,
+    autoOpen : false,
     title    : 'Ta réponse',
     close    : function () { $('#lienreponse').css('font-weight', 'bold'); },
     open     : function () { $('#lienreponse').css('font-weight', 'normal'); }
   },
   init : function () { $('#reponse').dialog(reponse.optionsdialog); },
-  activer      : function () { $('#lienreponse').show(); },
+  activer      : function () {
+    $('#reponse').dialog('open');
+    $('#lienreponse').show();
+  },
   desactiver   : function () {
-    if ($('#reponse').dialog('isOpen')) $('#reponse').dialog('close');
+    $('#reponse').dialog('close');
     $('#lienreponse').hide();
   },
   toggle       : function () {
@@ -84,59 +124,39 @@ var reponse = {
   }
 };
 
-var page = {
-  activer   : function () { $("#divpage").show(); },
-  desactiver: function () { $("#divpage").hide(); }
-};
 
-var informations = {
-  optionsDialog: {
-    modal    : true,
-    title    : 'Information',
-    resizable: false,
-    position : ['center', 40],
-    buttons  : {
-      "OK": function () { $(this).dialog("close"); }
-    }
-  },
-  activer      : function () { $('#information').dialog(informations.optionsDialog); }
-};
+function showEtape() {
+  var i, num;
 
-function showEtapes() {
-  // on init les dialog
-  reponse.init();
+  // on ferme tout
   reponse.desactiver();
-  consigne.init();
   consigne.desactiver();
   page.desactiver();
-  var i;
-  var etape = etapes.order[etapes.encours]
-  for (i in etape) {
+
+  // et on active les elts de l'etape en cours
+  var etape = etapes.liste[etapes.currentIndex]
+  for (i = 0; i < etape.length; i++) {
     etape[i].activer();
   }
+  
+  // reconstruction du fil d'ariane (titre des étapes passées + titre actuel ≠ + suivant)
   $('#filariane').html("");
-  var j=0;
-  for (i in etapes.titres) {
-    j++;
-    if (j==etapes.encours+2) {
-      $('#filariane').append(vliensuivant);
+  for (i = 0; i < etapes.titres.length; i++) {
+    num = i+1;
+    if (i < etapes.currentIndex) {
+      $('#filariane').append("Étape "+num+" : "+etapes.titres[i] +' >> ');
+    } else if (i == etapes.currentIndex) {
+      // ajout titre courant
+      $('#filariane').append("Étape "+(i+1) +" : ").append(w.getElt('span', {class:'highlight'}, etapes.titres[i]));
+    } else if (i == etapes.currentIndex +1) {
+      // y'a un suivant
+      $('#filariane').append(liensuivantId);
       $('#liensuivant').click(etapes.next);
     }
-    else if(j>1) {
-      $('#filariane').append(" >> ");
-    }
-    if (j==etapes.encours+1) {
-      $('#filariane').append("Étape "+j+" : ").append(w.getElt('span', {class:'highlight'}, etapes.titres["e"+j]));
-    }
-    else {
-      $('#filariane').append("Étape "+j+" : "+etapes.titres["e"+j]);
-    }
   }
-  log('ds showEtapes')
+  log('ds showEtape')
 }
 
-/**
- */
 /**
  * Affecte les comportements
  * @param {string} question_option Option de l'affichage de la question qui peut prendre les valeurs
@@ -151,119 +171,95 @@ function showEtapes() {
  *   "after"    : après la page
  */
 function start(question_option, answer_option) {
+  log('main.start avec ' + question_option + ' et ' + answer_option, $('#consigne'))
+
+  // les comportements qui dépendent pas du contexte
   $('#lienconsigne').click(consigne.toggle);
   $('#lienreponse').click(reponse.toggle);
-  log('main.start avec ' +question_option +' et ' +answer_option)
+
+  // init dialog
+  information.init();
+  consigne.init();
+  reponse.init();
 
   if (question_option == "off") {
-    etapes.order = [[informations, page]];
+    etapes.liste = [[information, page]];
     if (answer_option == "while") {
-      $('#information').html("Observe ce document et réponds.");
-      etapes.order[0].push(reponse);
-      etapes.titres = {
-        e1:"Visualisation du document et réponse"
-      };
+      etapes.titres = ["Visualisation du document et réponse"];
+      information.setContent("Observe ce document et envoie ta réponse.");
+      etapes.liste[0].push(reponse);
+
     } else if (answer_option == "after") {
-      $('#information').html("Observe ce document puis clique sur "+liensuivant+" pour répondre.");
-      etapes.order.push([reponse]);
-      etapes.titres = {
-        e1: "Visualisation du document",
-        e2: "Réponse"
-      };
+      etapes.titres = ["Visualisation du document", "Réponse"];
+      information.setContent("Observe ce document puis clique sur " +liensuivant +" pour répondre.");
+      etapes.liste.push([reponse]);
     }
   }
 
   else if (question_option == "before") {
-    etapes.order = [[consigne,informations],[page]];
+    etapes.liste = [[consigne,information],[page]];
     if (answer_option == "off") {
-      $('#information').html("Commence par lire la consigne, puis clique sur "+liensuivant+" pour voir le document.");
-      etapes.titres = {
-        e1: "Lecture de la consigne",
-        e2: "Visualisation du document"
-      };
-    }
-    else if (answer_option == "while") {
-      $('#information').html("Lis la consigne, clique sur "+liensuivant+" pour voir le document et répondre.");
-      etapes.order[1].push(reponse);
-      etapes.titres = {
-        e1:"Lecture de la consigne",
-        e2:"Visualisation du document et réponse"
-      };
-    }
-    else if (answer_option == "after") {
-      $('#information').html("Lis la consigne, clique sur "+liensuivant+" pour voir le document, puis encore une fois pour répondre.");
-      etapes.order.push([reponse]);
-      etapes.titres = {
-        e1: "Lecture de la consigne",
-        e2: "Visualisation du document",
-        e3: "Réponse"
-      };
-    }
-    else if (answer_option == "question") {
-      $('#information').html("Réponds à la question, puis clique sur "+liensuivant+" pour voir le document.");
-      // on ajoute la réponse avant l'info
-      etapes.order[0].splice(1,0,reponse);
-      etapes.titres = {
-        e1: "Lecture de la consigne et réponse",
-        e2: "Visualisation du document"
-      };
+      etapes.titres = ["Lecture de la consigne", "Visualisation du document"];
+      information.setContent("Commence par lire la consigne, puis clique sur " +liensuivant +" pour voir le document.");
+
+    } else if (answer_option == "while") {
+      etapes.titres = ["Lecture de la consigne", "Visualisation du document et réponse"];
+      information.setContent("Lis la consigne, clique sur " +liensuivant +" pour voir le document et répondre.");
+      etapes.liste[1].push(reponse);
+
+    } else if (answer_option == "after") {
+      etapes.titres = ["Lecture de la consigne", "Visualisation du document", "Réponse"];
+      information.setContent("Lis la consigne, clique sur " +liensuivant +
+          " pour voir le document, puis encore une fois pour répondre.");
+      etapes.liste.push([reponse]);
+
+    } else if (answer_option == "question") {
+      etapes.titres = ["Lecture de la consigne et réponse", "Visualisation du document"];
+      information.setContent("Réponds à la question, puis clique sur " +liensuivant +" pour voir le document.");
+      // réponse avant l'info
+      etapes.liste = [[consigne, reponse, information],[page]];
     }
   }
 
   else if (question_option == "while") {
-    etapes.order = [[consigne, page]];
-    $('#divpage').show();
+    etapes.liste = [[consigne, page]];
     if (answer_option == "after") {
-      etapes.order[0].push(informations);
-      $('#information').html("Lis la consigne, observe bien le document puis clique sur "+liensuivant+" pour pouvoir répondre.");
-      etapes.order.push([reponse]);
-      etapes.titres = {
-        e2: "Réponse",
-        e1: "Visualisation de la consigne et du document"
-      };
-    }
-    else if (answer_option == "while" || answer_option == "question") {
+      etapes.liste[0].push(information);
+      information.setContent("Lis la consigne, observe bien le document puis clique sur " +liensuivant +
+          " pour pouvoir répondre.");
+      etapes.liste.push([reponse]);
+      etapes.titres = ["Réponse", "Visualisation de la consigne et du document"];
+
+    } else if (answer_option == "while" || answer_option == "question") {
       $('#filariane').hide();
-      etapes.order[0].push(reponse);
-      etapes.titres = {
-        e1: "Consigne, visualisation du document et réponse"
-      };
-    }
-    else {
+      etapes.liste[0].push(reponse);
+      etapes.titres = ["Consigne, visualisation du document et réponse"];
+
+    } else {
       $('#filariane').hide();
-      etapes.titres = {
-        e1: "Consigne et visualisation du document"
-      };
+      etapes.titres = ["Consigne et visualisation du document"];
     }
   }
 
   else if(question_option == "after") {
-    $('#divpage').show();
-    etapes.order = [[page, informations], [consigne]];
+    etapes.liste = [[page, information], [consigne]];
     if (answer_option == "off") {
-      $('#information').html("Observe bien le document puis clique sur "+liensuivant+" pour lire la consigne.");
-      etapes.titres = {
-        e1: "Visualisation du document",
-        e2: consigne
-      };
-    }
-    else if (answer_option == "after") {
-      $('#information').html("Observe bien le document puis clique sur "+liensuivant+" pour lire la consigne et encore une fois pour répondre.");
-      etapes.order.push([reponse]);
-      etapes.titres = {
-        e1: "Visualisation du document",
-        e2: "Lecture de la consigne",
-        e3: "Réponse"
-      };
+      etapes.titres = ["Visualisation du document", "consigne"];
+      information.setContent("Observe bien le document puis clique sur " +liensuivant +" pour lire la consigne.");
+
+    } else if (answer_option == "after") {
+      etapes.titres = ["Visualisation du document", "Lecture de la consigne", "Réponse"];
+      information.setContent("Observe bien le document puis clique sur " +liensuivant +
+          " pour lire la consigne et encore une fois pour répondre.");
+      etapes.liste.push([reponse]);
     }
     else {
-      $('#information').html("Observe bien le document puis clique sur "+liensuivant+" pour lire la consigne et répondre.");
-      etapes.order[1].push(reponse);
-      etapes.titres = {
-        e1: "Visualisation du document",
-        e2: "Consigne et réponse"
-      };
+      information.setContent("Observe bien le document puis clique sur "+liensuivant+" pour lire la consigne et répondre.");
+      etapes.liste[1].push(reponse);
+      etapes.titres = ["Visualisation du document", "Consigne et réponse"];
     }
   }
+
+  // et on affiche ce qu'il faut
   etapes.show();
 }

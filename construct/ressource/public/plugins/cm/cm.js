@@ -69,7 +69,7 @@ function display(ressource, next) {
       parametres_xml :ressource.parametres.xml
     }
   }
-  sesaswf.load(container, swfUrl, next, options);
+  sesaswf.load(container, swfUrl, options, next);
 }
 
 /**

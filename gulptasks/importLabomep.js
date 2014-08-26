@@ -444,6 +444,13 @@ function modifyUrl(ressource, next) {
               // ne sachant pas trop on met cours et exercice
               addCoursExoFixe(ressource)
             }
+          } else if (p.consigne) {
+            // faut remettre le html
+            p.consigne = p.consigne
+                .replace(/\&amp;/g, '&')
+                .replace(/\&lt;/g, '<')
+                .replace(/\&gt;/g, '>')
+            console.log(p.consigne)
           }
         } else {
           return addError(ressource.idOrigine, "Url sans adresse")
@@ -472,7 +479,7 @@ function flushPendingRelations(next) {
       relations = task[1]
       // on récupère la ressource avec l'api
       options = {
-        url         : 'http://localhost:3000/api/ressource/' +origine +'/' + idOrigine,
+        url         : 'http://localhost:3001/api/ressource/' +origine +'/' + idOrigine,
         json        : true,
         content_type: 'charset=UTF-8'
       }
@@ -524,7 +531,7 @@ function addRessource(ressource, next) {
   nbLaunched++
   idsSent.push(ressource.idOrigine)
   var options = {
-    url : 'http://localhost:3000/api/ressource',
+    url : 'http://localhost:3001/api/ressource',
     json: true,
     //body: JSON.stringify({ressource:ressource}),
     content_type: 'charset=UTF-8',

@@ -19,6 +19,7 @@ Chargement en cours</div>
         try {
             if (typeof modDisplay === 'undefined') throw new Error('Le chargement a échoué');
             modDisplay.load(
+                {ressource|s},
                 {
                     baseUrl : '{pluginBaseUrl}',
                     vendorsBaseUrl: '{vendorsBaseUrl}',
@@ -28,8 +29,7 @@ Chargement en cours</div>
                         {@eq key=staging value="development"}true{:else}false{/eq}
                         {:else}false
                     {/staging}
-                },
-                {ressource|s}
+                }
             );
         } catch(error) {
           document.getElementById('errors').innerHTML = error.toString();

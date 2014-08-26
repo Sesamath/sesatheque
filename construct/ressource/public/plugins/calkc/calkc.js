@@ -74,7 +74,7 @@ function display(ressource, next) {
     }
   }
   log('appel swfobject avec', options)
-  sesaswf.load(container, swfUrl, next, options);
+  sesaswf.load(container, swfUrl, options, next);
 }
 
 /**

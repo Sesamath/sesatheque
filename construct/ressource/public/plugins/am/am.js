@@ -70,7 +70,7 @@ function display(ressource, next) {
     largeur : 735,
     hauteur : 450
   }
-  sesaswf.load(container, swfUrl, next, options);
+  sesaswf.load(container, swfUrl, options, next);
 }
 
 /**

@@ -8,8 +8,16 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
   
   // la liste des méthodes que l'on exporte 
   return {
-    // sera appelée avec les arguments (ressource, saveResult), saveResult pouvant être undefined ou une fct
-    display : afficher
+    /**
+     * display sera appelée avec les arguments (ressource, options), et options doit contenir les propriétés 
+     *   {string}      baseUrl         Le préfixe d'url qui pointe vers le dossier du plugin
+     *   {HTMLElement} container       Le div pour afficher la ressource
+     *   {HTMLElement} errorsContainer Le div pour afficher les erreurs
+     * et peut contenir
+     *   {function}    saveResult      La fct à qui on doit passer un résultat
+     *                                 (Cf le constructeur Resultat pour le format)
+     */
+    display : foo,
     // on peut aussi mettre le code directement ici
     showResult : function (args) { /* code */ },
   }
@@ -32,11 +40,7 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  * {Function}    addCss(file)    : ajoute une css dans le head de la page courante
  *                                 (lui passer le fichier relativement au dossier du plugin)
  * {Function}    addElement(eltContainer, tag, attributes, innerText) : ajoute un HTMLElement dans eltContainer
- * {Function}    getElement(tag, attributes, innerText) : récupère un HTMLElement
- * {HTMLElement} container       : le conteneur pour l'affichage (div#display)
- * {HTMLElement} errorsContainer : un conteneur pour afficher d'éventuelles erreurs (div#errors au dessus du display)
- * {String}      baseUrl         : le préfixe vers ce dossier à utiliser dans d'éventuels href (sans le / de fin, 
- *                                 pour des médias ou autres fichiers à charger)
+ * {Function}    getElement(tag, attributes, innerText)               : récupère un HTMLElement
  */
  // une variable privée de ce module mais globale pour nos fonctions
  var toto;
@@ -47,3 +51,20 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  // etc.
  
 ```
+
+Pour passer une fonction de sauvegarde à une ressource chargée en iframe, 
+ajouter un attribut data-resultCallbackName avec le nom de la fonction (qui doit être accessible à la racine
+du window qui embarque l'iframe).
+
+Par exemple
+```
+function setScore(resultat) {
+  // traiter le résultat reçu
+}
+<iframe src="http://laBibliothequeVoulue/ressource/voir/42" data-resultCallbackName="setScore" />
+```
+Et la ressource enverra son résultat à setScore().
+
+Le résultat est au format du constructeur Resultat (dans construct/ressource/public/vendors/sesamath/Resultat.js), 
+mais avec seulement certaines propriétés complétées (à priori avec ressId, ressType, score, reponse, date, duree, 
+mais parfois seulement ressType et score|reponse, tout le reste pouvant être déjà connu de l'appelant).
