@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Class: Ressource</title>
+    <title>Class: Archive</title>
     
     
     
@@ -441,7 +441,7 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="Ressource.html">Class: Ressource</h1>
+        <h1 class="page-title" data-filename="Archive.html">Class: Archive</h1>
         
 
 
@@ -450,7 +450,7 @@
     
 <header>
     <h2>
-    Ressource
+    Archive
     </h2>
     
 </header>  
@@ -463,14 +463,14 @@
         
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="Ressource">
+        <h4 class="name" id="Archive">
             
-            new Ressource<span class="signature">()</span>
+            new Archive<span class="signature">()</span>
         </h4>
     
         
         <div class="tag-source">
-            ressource/entities/Ressource.js, line 10
+            ressource/entities/Archive.js, line 9
         </div>
         
     </div>
@@ -481,7 +481,7 @@
     
     
     <div class="description">
-        <p>L'entity Ressource</p>
+        <p>Idem Ressource avec errors en moins, et moins d'index</p>
     </div>
     
 
@@ -533,12 +533,6 @@
     
     </div>
     
-    
-        <h3 class="subsection-title">Extends</h3>
-        
-        <ul>
-            <li>EntityInstance</li>
-        </ul>
     
     
     
@@ -871,53 +865,6 @@
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="errors">errors</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Une liste d'erreurs éventuelles (incohérences de données, etc)
-Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
-Devrait être viré au save s'il est vide</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="id">id<span class="type-signature type number">Number</span> </h4>
     </div>
     
@@ -1008,52 +955,6 @@ Devrait être viré au save s'il est vide</p>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="indexable">indexable<span class="type-signature type boolean">boolean</span> </h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Vrai si la ressource est indexable (peut sortir sur des résultats de recherche)
-Sert à distinguer des ressources &quot;obsolètes&quot; car remplacées par d'autres mais toujours publiées car utilisées.</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="langue">langue<span class="type-signature type string">String</span> </h4>
     </div>
     
@@ -1108,6 +1009,51 @@ Sert à distinguer des ressources &quot;obsolètes&quot; car remplacées par d'a
     
     <div class="description">
         <p>Niveaux scolaire de la ressource, dans son système éducatif par défaut, fr_FR s'il n'est pas précisé</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="oidRessource">oidRessource</h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>L'oid de la ressource archivée</p>
     </div>
     
     
@@ -1657,8 +1603,7 @@ http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[det
 <dd>
     
     <div class="description">
-        <p>Version de la ressource
-{integer}</p>
+        <p>Version de la ressource</p>
     </div>
     
     
@@ -1694,121 +1639,6 @@ http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[det
         </dl>
     
     
-    
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="archive">
-            
-            archive<span class="signature">(next)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            ressource/entities/Ressource.js, line 189
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Enregistre la ressource en archive et passe l'archive à next (à l'appelant de gérer les versions)</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>next</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        </dl>
     
     
     
