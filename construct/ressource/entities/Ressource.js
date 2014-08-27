@@ -2,6 +2,11 @@
 
 var _ = require('underscore')._
 
+/**
+ * L'entity Ressource
+ * @constructor
+ * @extends EntityInstance
+ */
 function Ressource() {
   /**
    * Une liste d'erreurs éventuelles (incohérences de données, etc)
@@ -125,6 +130,7 @@ function Ressource() {
   this.dateMiseAJour = undefined;
   /**
    * Version de la ressource
+   * {integer}
    */
   this.version = 1;
   /**

@@ -330,6 +330,35 @@ converter.getRessourceFromPost = function (data, partial) {
   return ressource;
 }
 
+/**
+ * Modifie le post d'un arbre pour en déléguer l'analyse à getRessourceFromPost
+ * @param data
+ * @param partial
+ * @returns {Ressource}
+ */
+converter.getRessourceFromPostedArbre = function (data, partial) {
+  // on transforme le post pour ressembler à un post de ressource
+  var ressource
+  if (!_.isEmpty(data)) {
+    if (data.arbre) {
+      // on nous envoie tout en json
+      try {
+        data = JSON.parse(data.arbre)
+      } catch (e) {
+        throw e // pas la peine d'insister
+      }
+      //log.dev("On nous a envoyé un arbre en json", data)
+    }
+  }
+  if (data.id) ressource.id = data.id
+  if (data.titre) ressource.titre = data.titre
+  ressource.type = 'arbre'
+  ressource.categories = [config.constantes.categories.liste]
+  ressource.parametres = data;
+  // @todo gérer les relations avec les enfants ? (ça va en faire bcp...)
+  return converter.getRessourceFromPost(ressource, partial)
+}
+
 module.exports = converter
 
 /**

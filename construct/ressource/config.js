@@ -29,7 +29,8 @@ module.exports = {
       4: "Cours avec animation",
       5: "Exercice fixe",
       6: "Exercice avec animation",
-      7: "Exercice interactif"
+      7: "Exercice interactif",
+      8: "Liste de ressources"
     },
     typePedagogiques : {
       // id de scolomfr-voc-010, « on s'en sert pour faire quoi ? »
@@ -131,6 +132,10 @@ module.exports = {
     7: {
       typePedagogiques : [9],
       typeDocumentaires: [9]
+    },
+    8:{
+      typePedagogiques : [],
+      typeDocumentaires: [1]
     }
   },
 
@@ -215,7 +220,8 @@ module.exports = {
       coursAnime        : 4,
       exerciceFixe      : 5,
       exerciceAnime     : 6,
-      exerciceInteractif: 7
+      exerciceInteractif: 7,
+      liste             : 8
     },
     typePedagogiques : {
       cours            : 3,

@@ -1,9 +1,17 @@
 /**
- * Controller ressource/api
+ * @file Controleur de la route api/*
+ * POST /api/ressource
+ * GET  /api/ressource/:id Renvoie la ressource d'id :id
+ * POST /api/ressourceMerge
  */
 'use strict';
 
+/**
+ * Controleur de la route api/
+ * @extends {lassi.Controller}
+ */
 var controller = lassi.Controller('api')
+
 var _ = require('underscore')._
 var converter = require('../converter')
 var repository = require('../repository')
@@ -11,48 +19,56 @@ var repository = require('../repository')
 controller.respond('json');
 
 /**
- * Create / update
- * Si le titre et la catégorie sont manquants on merge avec la ressource existante que l'on update, sinon on écrase
+ * @callback api_ressource POST api/ressource
  */
 controller
     .Action('ressource')
     .via('post')
-    .do(function(ctx, next) {
-      var partial = !ctx.post.titre && !ctx.post.categories &&
-          (ctx.post.id || (ctx.post.origine && ctx.post.idOrigine))
-      var id = ctx.post.id || 0
-      var ressource = converter.getRessourceFromPost(ctx.post, partial)
+    .do(postRessource, {timeout:5000})
 
-      function update(error, ressourceLoaded) {
-        if (error) next(null, {error:error.toString()})
-        else {
-          ressourceLoaded.udate(ressource)
-          write(ctx, ressourceLoaded, next)
-        }
-      }
+/**
+ * Create / update une ressource
+ * Si le titre et la catégorie sont manquants on merge avec la ressource existante que l'on update, sinon on écrase
+ * @callback Callback~Task
+ * @param ctx
+ * @param next
+ */
+function postRessource(ctx, next) {
+  var partial = !ctx.post.titre && !ctx.post.categories &&
+      (ctx.post.id || (ctx.post.origine && ctx.post.idOrigine))
+  var id = ctx.post.id || 0
+  var ressource = converter.getRessourceFromPost(ctx.post, partial)
 
-      //log.dev("dans api write on récupère en post", ctx.post)
-      try {
-        var msg = id
-        // init du chrono
-        var start = log.getElapsed(0)
-        /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
-        if (!lassi.tmp) lassi.tmp = {}
-        lassi.tmp[ctx.post.id] = {m:msg,s:start}
-        lassi.tmp[ctx.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
-        //log.dev("que l'on a transformé en", ressource)
+  function update(error, ressourceLoaded) {
+    if (error) next(null, {error:error.toString()})
+    else {
+      ressourceLoaded.udate(ressource)
+      write(ctx, ressourceLoaded, next)
+    }
+  }
 
-        if (partial) {
-          // faut la charger
-          if (ressource.id) repository.load(ressource.id, update)
-          else repository.loadByOrigin(ressource.origine, ressource.idOrigine, update)
-        } else write(ctx, ressource, next)
+  //log.dev("dans api write on récupère en post", ctx.post)
+  try {
+    var msg = id
+    // init du chrono
+    var start = log.getElapsed(0)
+    /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
+    if (!lassi.tmp) lassi.tmp = {}
+    lassi.tmp[ctx.post.id] = {m:msg,s:start}
+    lassi.tmp[ctx.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
+    //log.dev("que l'on a transformé en", ressource)
 
-      } catch (e) {
-        log.error(e);
-        next(null, {error: e.toString()})
-      }
-    }, {timeout:5000})
+    if (partial) {
+      // faut la charger
+      if (ressource.id) repository.load(ressource.id, update)
+      else repository.loadByOrigin(ressource.origine, ressource.idOrigine, update)
+    } else write(ctx, ressource, next)
+
+  } catch (e) {
+    log.error(e);
+    next(null, {error: e.toString()})
+  }
+}
 
 /**
  * Merge
@@ -255,6 +271,48 @@ controller
         else next(null, addUrls(ctx, ressources))
       })
     })
+
+/**
+ * Create / update une ressource à partir du post d'un arbre
+ * Si l'arbre posté contient un id mais pas d'enfant, on tentera de récupérer l'arbre et de mettre à jour sa racine,
+ * sinon, avec un id on écrase l'ancien s'il existait et sans on insère une nouvelle ressource
+ */
+controller
+    .Action('arbre')
+    .via('post')
+    .do(function(ctx, next) {
+      var partial = ctx.post.id && !ctx.post.childrens
+      var id = ctx.post.id || 0
+      var ressource = converter.getRessourceFromPostedArbre(ctx.post, partial)
+
+      function update(error, ressourceLoaded) {
+        if (error) next(null, {error:error.toString()})
+        else {
+          ressourceLoaded.udate(ressource)
+          write(ctx, ressourceLoaded, next)
+        }
+      }
+
+      //log.dev("dans api arbre on récupère en post", ctx.post)
+      try {
+        var msg = id
+        // init du chrono
+        var start = log.getElapsed(0)
+        /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
+        if (!lassi.tmp) lassi.tmp = {}
+        lassi.tmp[ctx.post.id] = {m:msg,s:start}
+        lassi.tmp[ctx.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
+
+        if (partial) {
+          // faut charger
+          if (ressource.id) repository.load(ressource.id, update)
+          else write(ctx, ressource, next)
+        }
+      } catch (e) {
+        log.error(e);
+        next(null, {error: e.toString()})
+      }
+    }, {timeout:5000})
 
 module.exports = controller;
 
