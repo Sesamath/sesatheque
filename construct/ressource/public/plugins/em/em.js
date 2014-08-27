@@ -1,27 +1,9 @@
 /**
- * Tous les plugins doivent exporter les méthodes display et showResult
- */
-
-/**
- * Tout ce qui est dans ce fichier est privé,
- * spécifique à ce plugin sans collision possible avec le DOM de la page courante
+ * Affiche une ressource de type url, avec post de la réponse ou simplement de la durée d'affichage
  *
- * this est ce module (donc on a this.display et this.showResult), avec dans notre scope les variables
- * {Function}    require         : pour charger d'autres modules ou d'autres scripts js
- * {Function}    log             : un console.log qui ne plantera pas sur les vieux IE
- *                                 et accepte un éventuel objet un 2e argument
- * {Function}    addCss          : ajoute une css dans le head de la page
- *                                 (lui passer le fichier relativement à ce dossier)
- * {HTMLElement} container       : le conteneur pour affichage
- * {HTMLElement} errorsContainer : un conteneur pour afficher d'éventuelles erreurs
- * {String}      baseUrl         : le préfixe vers ce dossier à utiliser dans d'éventuels href
- *                                 (pour des médias ou autres fichiers à charger)
- * {Object}      window          : l'objet window
- *
- * et aussi
- * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
+ * Cf ../README.md pour plus d'info sur l'écriture de plugins
  */
-/*global define, log, addCss, container, errorsContainer, baseUrl, window */
+/*global define, log, addCss, window */
 //'use strict';
 
 // pour le plugin mep, on a besoin de swfobject, que l'on indique ici comme dépendance
@@ -44,18 +26,27 @@ var startDate
 
 /**
  * Affiche la ressource dans l'élément d'id mepRess
- * @param {Object}   ressource   L'objet ressource tel qu'il sort de la bdd
+ * @param {Object}   ressource  L'objet ressource tel qu'il sort de la bdd
+ * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
+ *                              et éventuellement resultCallback)
  * @param {Function} next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
- * @param {Function} saveResult [optional] Une méthode à appeler, si elle existe, pour sauvegarder un résultat
  */
-function display(ressource, next, saveResult) {
+function display(ressource, options, next) {
+  var container = options.container;
+  if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+  var baseUrl = options.baseUrl; // si on a pas tant pis pour le css
+  var saveResult;
+  if (options.resultCallback) saveResult = options.resultCallback;
   /** class utilisée dans notre css */
   var cssClass = 'mepRess';
   var params = ressource.parametres;
   var baseMepSwf, swfUrl, largeur, hauteur, flashvars, swfParams, swfAttributes;
+  // raccourcis
+  var w = window;
   var wd = window.document;
   var htmlElt;
-  var divId = 'mepRess'; // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
+  // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
+  var divId = 'mepRess' +(new Date()).getTime();
   ressId = ressource.id
 
   log('start mep display avec la ressource', ressource)
@@ -72,18 +63,10 @@ function display(ressource, next, saveResult) {
   container.className = cssClass;
 
   // On insère le titre, sauf si on le refuse expressément via un param dans l'url
-  if (! /\?.*showTitle=0/.test(wd.URL)) {
-    htmlElt = wd.createElement("div");
-    htmlElt.className = 'titre';
-    htmlElt.appendChild(wd.createTextNode(ressource.titre));
-    container.appendChild(htmlElt);
-  }
+  if (! /\?.*showTitle=0/.test(wd.URL)) w.addElt(container, "div", {class:'titre'}, ressource.titre);
 
   // le message en attendant le chargement
-  htmlElt = wd.createElement("div");
-  htmlElt.id = divId;
-  htmlElt.appendChild(wd.createTextNode("Chargement de la ressource " +ressource.id +" en cours."));
-  container.appendChild(htmlElt);
+  w.addElt(container, "div", {id:divId}, "Chargement de la ressource " +ressource.id +" en cours.");
 
   // notre base
   if (ressource.origine !== 'mep' && ressource.baseUrl) baseMepSwf =  ressource.baseUrl;

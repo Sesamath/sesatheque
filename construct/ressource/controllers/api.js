@@ -49,9 +49,10 @@ controller
         } else write(ctx, ressource, next)
 
       } catch (e) {
+        log.error(e);
         next(null, {error: e.toString()})
       }
-    })
+    }, {timeout:5000})
 
 /**
  * Merge

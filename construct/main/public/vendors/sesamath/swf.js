@@ -19,6 +19,7 @@ define({
  * @param {HTMLElement} container
  * @param {string} url
  * @param {Object=} options Des params utilisés pour le chargement, peut contenir
+ *                          - id
  *                          - flashvars
  *                          - base
  *                          - hauteur
@@ -28,7 +29,8 @@ define({
 function load(container, url, options, next) {
   var wd = window.document;
   var htmlElt, largeur, hauteur, flashversion, flashvars, swfParams, swfAttributes;
-  var divId = 'swfRess'; // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
+  // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
+  var divId = options.id || 'sesaSwf' +(new Date()).getTime();
 
   // le message en attendant le chargement
   htmlElt = wd.createElement("div");
@@ -61,7 +63,7 @@ function load(container, url, options, next) {
   function callbackFn(e) {
     var retour
     if (e.success) {
-      log("Chargement de " + url, e);
+      log("Lancement de " + url +' réussi');
     } else {
       htmlElt = wd.createElement("p");
       htmlElt.appendChild(wd.createTextNode("Javascript fonctionne" +

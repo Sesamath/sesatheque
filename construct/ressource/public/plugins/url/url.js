@@ -37,9 +37,8 @@ var isBasic;
  *                              et éventuellement resultCallback)
  * @param {Function} next       La fct à appeler quand la ressource sera chargée (sans argument ou avec une erreur)
  */
-function display(ressource, opt) {
-  log('start url display avec la ressource', ressource);
-  log('et les options', opt);
+function display(ressource, opt, next) {
+  log('url.display avec les options', opt);
   //les params minimaux
   if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.adresse)
     throw new Error("Ressource incomplète");
@@ -148,7 +147,9 @@ function display(ressource, opt) {
     log("C'est un swf, on ajoute un div et pas une iframe")
     require(['sesaswf'], function(sesaswf) {
       var swfContainer = w.getElt('div', {src: params.adresse, id: 'page'});
+      var swfId = 'swf' +(new Date()).getTime();
       var options = {
+        id : swfId,
         hauteur : Math.floor(window.innerHeight -60),
         largeur : Math.floor(window.innerWidth - 40)
       };
@@ -157,12 +158,17 @@ function display(ressource, opt) {
       log("On charge " +url +" dans #page avec", options)
       sesaswf.load(swfContainer, url, options, function() {
         finalize(params);
+        // on est appelé quand swfobject a mis l'object dans le dom, mais le swf est pas forcément chargé
+        // on regarde la hauteur pour savoir si c'est fait
+        if ($('#' +swfId).innerHeight() > 10) next();
+        else $('#' +swfId).on('load', next)
       }); /* */
     });
   } else {
     w.addElt(container, 'iframe', {src: params.adresse, id: 'page'}, "Si vous lisez ce texte," +
         " votre navigateur ne supporte probablement pas les iframes");
-    finalize(params)
+    $('#page').on('load', next)
+    finalize(params);
   }
 }
 

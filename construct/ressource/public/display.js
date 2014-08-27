@@ -69,9 +69,10 @@ window.getElt = function (tag, attrs, txtContent) {
 
 define({
   load: function (ressource, options) {
-    log('init display', options)
+    log('display.load avec la ressource', ressource)
+    log('et les options', options);
     // init du dom
-    init(options)
+    init(options);
 
     // tente de charger le plugin du type de ressource
     var name = options.pluginName;
@@ -91,9 +92,13 @@ define({
         var cbName = w.frameElement && w.frameElement.getAttribute &&
             w.frameElement.getAttribute('data-resultCallbackName')
         if (cbName && typeof w[cbName] === 'function') displayOptions.resultCallback = w[cbName];
-        displayOptions.resultCallback = log; // pour debug
+        else displayOptions.resultCallback = function (resultat) {
+          log("La ressource a renvoyé le résultat", resultat); // pour debug
+        }
         // on peut afficher
-        plugin.display(ressource, displayOptions);
+        plugin.display(ressource, displayOptions, function (arg) {
+          log("le display a terminé et a renvoyé", arg);
+        });
       } catch(error) {
         errorsContainer.innerHTML = error.toString();
       }

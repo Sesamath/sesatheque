@@ -80,8 +80,14 @@ function setVersion(ressource, next) {
             // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
             // on utilise http://underscorejs.org/#isEqual
             if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
-              log.dev('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id + '\n' +
-                  'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' + 'après\n' + JSON.parse(ressource[prop]))
+              try {
+                log.dev('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id +
+                    '\n' +'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' +
+                    'après\n' + JSON.parse(ressource[prop]))
+              } catch (e) {
+                log.dev('le parsing de ressource[' +prop +'] a planté ' +ressource.id +' ' +
+                    ressource.origine +'-' +ressource.idOrigine)
+              }
               needIncrement = true
             }
           })

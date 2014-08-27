@@ -154,7 +154,6 @@ function showEtape() {
       $('#liensuivant').click(etapes.next);
     }
   }
-  log('ds showEtape')
 }
 
 /**
@@ -171,7 +170,7 @@ function showEtape() {
  *   "after"    : après la page
  */
 function start(question_option, answer_option) {
-  log('main.start avec ' + question_option + ' et ' + answer_option, $('#consigne'))
+  log('main.start avec ' + question_option + ' et ' + answer_option);
 
   // les comportements qui dépendent pas du contexte
   $('#lienconsigne').click(consigne.toggle);

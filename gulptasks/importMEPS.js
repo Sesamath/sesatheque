@@ -26,7 +26,9 @@ var moment = require('moment')
 var flow          = require('seq');
 
 // conf de l'appli
+var serverConf = require('../_private/config');
 var config = require('../construct/ressource/config.js');
+var port = serverConf.server && serverConf.server.port || 3000;
 
 // constantes
 var tdCode = config.constantes.typeDocumentaires;
@@ -296,7 +298,7 @@ function initRessourceMep(row) {
     id               : id,
     origine          : 'mep',
     idOrigine        : id,
-    typeTechnique    : 'mep',
+    typeTechnique    : 'em',
     titre            : row.mep_titre || 'Exercice mathenpoche',
     resume           : row.mep_descriptif || '',
     description      : '',
@@ -529,7 +531,7 @@ function flushPendingRelations(next) {
 function getRessource(origine, idOrigine, next) {
   var idComb = origine +'-' +idOrigine
   var options = {
-    url         : 'http://localhost:3000/api/ressource/' + origine +'/' +idOrigine,
+    url         : 'http://localhost:' +port +'/api/ressource/' + origine +'/' +idOrigine,
     json        : true,
     content_type: 'charset=UTF-8'
   }
@@ -555,7 +557,7 @@ function getRessource(origine, idOrigine, next) {
 function addRessource(ressource, next) {
   nbLaunched++
   var options = {
-    url : 'http://localhost:3000/api/ressource',
+    url : 'http://localhost:' +port +'/api/ressource',
     json: true,
     //body: JSON.stringify({ressource:ressource}),
     content_type: 'charset=UTF-8',
@@ -592,7 +594,7 @@ function addRessource(ressource, next) {
 function mergeRessource(ressourcePartielle, next) {
   nbLaunched++
   var options = {
-    url : 'http://localhost:3000/api/ressource/merge',
+    url : 'http://localhost:' +port +'/api/ressource/merge',
     json: true,
     //body: JSON.stringify({ressource:ressource}),
     content_type: 'charset=UTF-8',

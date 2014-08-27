@@ -21,7 +21,7 @@
  * et aussi
  * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
  */
-/*global define, log, container */
+/*global define, log */
 //'use strict';
 
 
@@ -38,15 +38,37 @@ define(['sesaswf'], function (modswf) {
   }
 });
 
-// reste à définir nos méthodes
+// reste à définir nos variables et méthodes
+
+var startDate = new Date();
+var ressId;
+
+function getResultat() {
+  return {
+    ressType : 'am',
+    ressId:ressId,
+    date:startDate,
+    duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
+    score : 1
+  }
+}
 
 /**
  * Affiche la ressource dans l'élément d'id mepRess
- * @param {Object}   ressource   L'objet ressource tel qu'il sort de la bdd
+ * @param {Object}   ressource  L'objet ressource tel qu'il sort de la bdd
+ * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
+ *                              et éventuellement resultCallback)
  * @param {Function} next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
  */
-function display(ressource, next) {
-  var baseSwf, swfUrl, options;
+function display(ressource, options, next) {
+  var baseSwf, swfUrl, swfOpt;
+  var container = options.container;
+  if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+  if (options.resultCallback && container.addEventListener) {
+    container.addEventListener('unload', function () {
+      options.resultCallback(getResultat());
+    })
+  }
   var params = ressource.parametres;
 
   log('start am display avec la ressource', ressource)
@@ -65,12 +87,12 @@ function display(ressource, next) {
   swfUrl = baseSwf +'/aide' +ressource.idOrigine +".swf";
   // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
   container.setAttribute("width", 735);
-  options = {
+  swfOpt = {
     base    : baseSwf + "/",
     largeur : 735,
     hauteur : 450
   }
-  sesaswf.load(container, swfUrl, options, next);
+  sesaswf.load(container, swfUrl, swfOpt, next);
 }
 
 /**
