@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="yes"?>
+<partagees>
+    <d n="Initiation Tracenpoche">
+        <tep i="40" n="bouton intersection (1)" e="1"/>
+        <tep i="41" n="bouton intersection (2)" e="1"/>
+        <tep i="42" n="bouton intersection (3)" e="1"/>
+        <tep i="43" n="cercle passant par deux points" e="1"/>
+        <tep i="44" n="Ellipse" e="1"/>
+        <tep i="45" n="Parabole" e="1"/>
+        <tep i="46" n="Cardio&#xEF;de" e="1"/>
+        <tep i="47" n="deux droites perpendiculaires" e="1"/>
+        <tep i="48" n="milieux &quot;&#xE0; la vol&#xE9;e&quot;" e="1"/>
+        <tep i="49" n="milieux, aires et p&#xE9;rim&#xE8;tres" e="1"/>
+        <tep i="50" n="deux droites parall&#xE8;les" e="1"/>
+        <tep i="51" n="une perpendiculaire et une parall&#xE8;le" e="1"/>
+        <tep i="52" n="cercles olympiques" e="1"/>
+        <tep i="53" n="cercles fractals" e="1"/>
+        <tep i="54" n="hexagone r&#xE9;gulier" e="1"/>
+    </d>
+</partagees>

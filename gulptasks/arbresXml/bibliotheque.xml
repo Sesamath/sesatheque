@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="yes"?>
+<bibliotheque>
+<d n="Tests d'algèbre" onload="openAideLingot">
+<mn i="3"/>
+<mn i="1"/>
+<mn i="2"/>
+</d>
+<d n="Tests de l'IREM de Lorraine" onload="openAideTestD">
+<testd i="100"/>
+<testd i="101"/>
+<testd i="102"/>
+<testd i="103"/>
+<testd i="104"/>
+<testd i="105"/>
+<testd i="106"/>
+</d>
+</bibliotheque>

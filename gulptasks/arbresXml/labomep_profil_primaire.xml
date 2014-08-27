@@ -1,0 +1,317 @@
+<?xml version="1.0" standalone="yes"?>
+<labomep_profil_primaire>
+    <d n="N1 : Nombres entiers">
+        <d n="Ecrire des nombres entiers">
+            <em i="208"/>
+            <em i="211"/>
+            <em i="214"/>
+            <em i="3325"/>
+            <em i="3326"/>
+        </d>
+        <d n="D&#xE9;composition des nombres entiers">
+            <em i="3324"/>
+            <em i="209"/>
+            <em i="210"/>
+            <em i="213"/>
+            <em i="212"/>
+        </d>
+        <d n="Droite gradu&#xE9;e et comparaison de nombres entiers">
+            <em i="236"/>
+            <em i="238"/>
+            <em i="241"/>
+        </d>
+    </d>
+    <d n="N2 : Op&#xE9;rations sur les nombres entiers">
+        <d n="Additions et soustractions de nombres entiers">
+            <em i="258"/>
+            <em i="259"/>
+            <em i="261"/>
+            <em i="262"/>
+            <em i="264"/>
+            <em i="265"/>
+            <em i="268"/>
+        </d>
+        <d n="Multiplication de nombres entiers">
+            <em i="260"/>
+            <em i="263"/>
+            <em i="266"/>
+            <em i="267"/>
+            <em i="280"/>
+        </d>
+        <d n="Multiples et crit&#xE8;res de divisibilit&#xE9;">
+            <em i="276"/>
+            <em i="277"/>
+            <em i="278"/>
+            <em i="279"/>
+        </d>
+        <d n="Division de nombres entiers">
+            <em i="269"/>
+            <em i="270"/>
+            <em i="271"/>
+            <em i="272"/>
+            <em i="273"/>
+            <em i="274"/>
+        </d>
+        <d n="Probl&#xE8;mes avec des nombres entiers"/>
+    </d>
+    <d n="N3 : Fractions">
+        <d n="Fraction partage">
+            <em i="315"/>
+            <em i="316"/>
+            <em i="317"/>
+            <em i="318"/>
+            <em i="319"/>
+        </d>
+        <d n="Fraction et droite gradu&#xE9;e">
+            <em i="320"/>
+            <em i="321"/>
+        </d>
+        <d n="Comparaison de fractions">
+            <em i="593"/>
+            <em i="594"/>
+        </d>
+        <d n="D&#xE9;composition de fractions">
+            <em i="598"/>
+        </d>
+    </d>
+    <d n="N4 : Fractions d&#xE9;cimales, nombres d&#xE9;cimaux">
+        <em i="215"/>
+        <em i="216"/>
+        <em i="217"/>
+        <em i="218"/>
+        <em i="219"/>
+        <em i="220"/>
+        <em i="223"/>
+        <em i="225"/>
+        <em i="224"/>
+        <em i="226"/>
+        <em i="227"/>
+        <em i="228"/>
+        <em i="229"/>
+        <em i="230"/>
+        <em i="231"/>
+        <em i="232"/>
+        <em i="233"/>
+        <em i="234"/>
+        <em i="235"/>
+    </d>
+    <d n="N5 : Op&#xE9;rations sur les nombres d&#xE9;cimaux">
+        <d n="Additions et soustractions de nombres decimaux">
+            <em i="291"/>
+            <em i="292"/>
+            <em i="294"/>
+            <em i="295"/>
+            <em i="296"/>
+            <em i="297"/>
+            <em i="301"/>
+            <em i="302"/>
+        </d>
+        <d n="Multiplications de nombres d&#xE9;cimaux">
+            <em i="293"/>
+            <em i="303"/>
+        </d>
+        <d n="Division d'un nombre d&#xE9;cimal par un nombre entier">
+            <em i="298"/>
+            <em i="299"/>
+            <em i="300"/>
+            <em i="304"/>
+            <em i="313"/>
+            <em i="314"/>
+            <em i="312"/>
+        </d>
+        <d n="Nombres d&#xE9;cimaux et probl&#xE8;mes">
+            <em i="306"/>
+            <em i="305"/>
+            <em i="307"/>
+            <em i="308"/>
+            <em i="309"/>
+        </d>
+    </d>
+    <d n="G1 : Droites parall&#xE8;les et perpendiculaires">
+        <d n="Identifier et tracer des droites parall&#xE8;les">
+            <em i="45"/>
+            <em i="48"/>
+            <em i="42"/>
+        </d>
+        <d n="Identifier et tracer des droites perpendiculaires">
+            <em i="41"/>
+            <em i="46"/>
+            <em i="49"/>
+        </d>
+        <d n="Droites parall&#xE8;les et perpendiculaires">
+            <em i="43"/>
+            <em i="44"/>
+            <em i="47"/>
+            <em i="50"/>
+        </d>
+        <d n="Reproduire une figure"/>
+        <d n="Programme de construction"/>
+    </d>
+    <d n="G2 : Cercles et triangles">
+        <d n="Construire et identifier un cercle">
+            <em i="32"/>
+            <em i="33"/>
+            <em i="34"/>
+        </d>
+        <d n="Identifier les triangles">
+            <em i="63"/>
+            <em i="64"/>
+            <em i="75"/>
+            <em i="74"/>
+            <em i="76"/>
+            <em i="77"/>
+        </d>
+        <d n="Construire des triangles">
+            <em i="66"/>
+            <em i="84"/>
+            <em i="87"/>
+        </d>
+        <d n="La hauteur du triangle"/>
+        <d n="Probl&#xE8;mes"/>
+    </d>
+    <d n="G3 : Figures usuelles et constructions">
+        <d n="Quadrilat&#xE8;re">
+            <em i="67"/>
+            <em i="68"/>
+            <em i="69"/>
+            <em i="78"/>
+            <em i="79"/>
+            <em i="80"/>
+            <em i="81"/>
+            <em i="82"/>
+            <em i="83"/>
+        </d>
+        <d n="Reproduction, agrandissement, r&#xE9;duction, programme de construction">
+            <em i="70"/>
+            <em i="88"/>
+            <em i="89"/>
+            <em i="90"/>
+            <em i="91"/>
+        </d>
+    </d>
+    <d n="G4 : Solides">
+        <em i="166"/>
+        <em i="167"/>
+        <em i="177"/>
+        <d n="Cube et pav&#xE9;">
+            <em i="175"/>
+            <em i="170"/>
+            <em i="169"/>
+            <em i="176"/>
+            <em i="165"/>
+        </d>
+        <d n="Prisme droit"/>
+        <d n="Cylindre"/>
+    </d>
+    <d n="G5 : Sym&#xE9;trie">
+        <d n="Identifier des axes de sym&#xE9;trie">
+            <em i="4513"/>
+        </d>
+        <d n="Tracer avec un quadrillage">
+            <em i="4521"/>
+            <em i="4522"/>
+            <em i="4523"/>
+            <em i="4524"/>
+            <em i="4525"/>
+            <em i="4526"/>
+            <em i="4527"/>
+            <em i="4528"/>
+        </d>
+        <d n="Tracer sans quadrillage"/>
+    </d>
+    <d n="D1 : Gestion de donn&#xE9;es">
+        <d n="Identifier, trier, traiter les informations d'un probl&#xE8;me"/>
+        <d n="Lire un tableau et un graphique">
+            <em i="364"/>
+            <em i="365"/>
+            <em i="366"/>
+        </d>
+        <d n="Construire un tableau et un graphique">
+            <em i="367"/>
+            <em i="368"/>
+            <em i="369"/>
+            <em i="370"/>
+        </d>
+        <d n="Situation pratique"/>
+        <d n="Probl&#xE8;me pour chercher"/>
+    </d>
+    <d n="D2 : Proportionnalit&#xE9;">
+        <d n="Identifier et r&#xE9;soudre des situations de proportionnalit&#xE9;">
+            <em i="346"/>
+            <em i="347"/>
+            <em i="349"/>
+            <em i="350"/>
+            <em i="351"/>
+            <em i="352"/>
+            <em i="353"/>
+            <em i="355"/>
+            <em i="354"/>
+            <em i="356"/>
+            <em i="362"/>
+            <em i="363"/>
+        </d>
+        <d n="La r&#xE8;gle de trois"/>
+        <d n="Pourcentages"/>
+        <d n="&#xC9;chelles">
+            <em i="357"/>
+            <em i="358"/>
+            <em i="359"/>
+            <em i="360"/>
+            <em i="361"/>
+        </d>
+        <d n="Vitesse"/>
+    </d>
+    <d n="M1 : Aires et p&#xE9;rim&#xE8;tres">
+        <d n="P&#xE9;rim&#xE8;tre d'un polygone">
+            <em i="197"/>
+            <em i="199"/>
+            <em i="200"/>
+            <em i="201"/>
+        </d>
+        <d n="Longueur du cercle">
+            <em i="198"/>
+        </d>
+        <d n="Comptage et comparaison d'aires">
+            <em i="207"/>
+            <em i="182"/>
+            <em i="185"/>
+            <em i="186"/>
+        </d>
+        <d n="Conversions d'aires">
+            <em i="195"/>
+            <em i="196"/>
+        </d>
+        <d n="Aire du carr&#xE9; et du rectangle">
+            <em i="191"/>
+        </d>
+        <d n="Aire du triangle">
+            <em i="192"/>
+            <em i="193"/>
+        </d>
+        <d n="Aire d'une figure complexe">
+            <em i="194"/>
+            <em i="204"/>
+        </d>
+        <em i="4792"/>
+    </d>
+    <d n="M2 : Contenances, masses et volumes">
+        <d n="Mesures et conversion de contenances">
+            <em i="179"/>
+        </d>
+        <d n="Mesures et conversion de masses">
+            <em i="222"/>
+        </d>
+        <d n="Mesures et conversion de volumes">
+            <em i="180"/>
+            <em i="178"/>
+        </d>
+    </d>
+    <d n="M3 : Horaires">
+        <d n="Lire les heures et les dur&#xE9;es"/>
+        <d n="Probl&#xE8;mes sur les dur&#xE9;es"/>
+        <d n="Conversions"/>
+    </d>
+    <d n="M4 : Angles">
+        <em i="3317"/>
+    </d>
+</labomep_profil_primaire>
