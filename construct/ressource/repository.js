@@ -119,7 +119,7 @@ function setVersion(ressource, next) {
   } else if (ressource.idOrigine) {
     ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceInitiale) {
       // on lui ajoute l'id qui n'a pas été fourni (l'oid est ajouté par analyse dans les 2 cas)
-      if (ressourceInitiale.id) ressource.id = ressourceInitiale.id
+      if (ressourceInitiale) ressource.id = ressourceInitiale.id
       analyse(error, ressourceInitiale)
     })
   } else {
