@@ -190,12 +190,12 @@ function parseXml(xmlFile) {
       typeTechnique : 'arbre',
       origine : 'labomepXml',
       idOrigine: xmlFile,
-      categories : [config.constantes.categories.liste],
+      /* categories : [config.constantes.categories.liste],
       typeDocumentaire : [config.constantes.typeDocumentaires.collection],
       publie : true,
-      parametres:{
+      parametres:{ */
         enfants:getEnfants(children, xmlFile)
-      }
+      //}
     }
     deferAdd(ressource)
     origine = undefined // pour le prochain
@@ -257,7 +257,7 @@ function addRessource(ressource, next) {
   nbLaunched++
   idsSent.push(ressource.idOrigine)
   var options = {
-    url : 'http://localhost:' +port +'/api/ressource',
+    url : 'http://localhost:' +port +'/api/arbre?populate=1',
     json: true,
     //body: JSON.stringify({ressource:ressource}),
     content_type: 'charset=UTF-8',
