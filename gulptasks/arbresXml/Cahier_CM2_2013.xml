@@ -1,0 +1,2350 @@
+<?xml version="1.0"?>
+<manuel>
+    <d n="Cahier CM2 - 2013" ico="cscm2_2012">
+        <d n="Nombres entiers ">
+            <d n="Écriture des nombres entiers">
+                <url i="1054000" e="1" n="Exercice 1 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056000" e="1" n="Correction exercice 1 p 4" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054001" e="1" n="Exercice 2 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056001" e="1" n="Correction exercice 2 p 4" ico="corr_cscm2_2012"/>
+                    <am i="195"/>
+                </d>
+                <url i="1054002" e="1" n="Exercice 3 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056002" e="1" n="Correction exercice 3 p 4" ico="corr_cscm2_2012"/>
+                    <am i="192"/>
+                    <url i="3021243" e="1" n="Page internet"/>
+                    <url i="3021249" e="1" n="Page internet"/>
+                    <url i="3021255" e="1" n="Page internet"/>
+                    <url i="3021257" e="1" n="Page internet"/>
+                </d>
+                <url i="1054003" e="1" n="Exercice 4 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056003" e="1" n="Correction exercice 4 p 4" ico="corr_cscm2_2012"/>
+                    <am i="195"/>
+                    <url i="3021237" e="1" n="Page internet"/>
+                    <url i="3021247" e="1" n="Page internet"/>
+                    <url i="3021251" e="1" n="Page internet"/>
+                    <url i="3021253" e="1" n="Page internet"/>
+                </d>
+                <url i="1054004" e="1" n="Exercice 5 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056004" e="1" n="Correction exercice 5 p 4" ico="corr_cscm2_2012"/>
+                    <am i="189"/>
+                </d>
+                <url i="1054005" e="1" n="Exercice 6 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056005" e="1" n="Correction exercice 6 p 4" ico="corr_cscm2_2012"/>
+                    <am i="189"/>
+                </d>
+                <url i="1054006" e="1" n="Exercice 7 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056006" e="1" n="Correction exercice 7 p 4" ico="corr_cscm2_2012"/>
+                    <url i="3021239" e="1" n="Page internet"/>
+                </d>
+                <url i="1054007" e="1" n="Exercice 8 p 4" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056007" e="1" n="Correction exercice 8 p 4" ico="corr_cscm2_2012"/>
+                    <url i="3022687" e="1" n="Page internet"/>
+                    <url i="3022689" e="1" n="Page internet"/>
+                    <url i="3022691" e="1" n="Page internet"/>
+                    <url i="3022693" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Décomposition des nombres entiers">
+                <url i="1054008" e="1" n="Exercice 1 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056008" e="1" n="Correction exercice 1 p 5" ico="corr_cscm2_2012"/>
+                    <am i="193"/>
+                </d>
+                <url i="1054009" e="1" n="Exercice 2 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056009" e="1" n="Correction exercice 2 p 5" ico="corr_cscm2_2012"/>
+                    <am i="194"/>
+                </d>
+                <url i="1054010" e="1" n="Exercice 3 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056010" e="1" n="Correction exercice 3 p 5" ico="corr_cscm2_2012"/>
+                    <am i="190"/>
+                    <url i="3021613" e="1" n="Page internet"/>
+                </d>
+                <url i="1054011" e="1" n="Exercice 4 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056011" e="1" n="Correction exercice 4 p 5" ico="corr_cscm2_2012"/>
+                    <am i="190"/>
+                </d>
+                <url i="1054012" e="1" n="Exercice 5 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056012" e="1" n="Correction exercice 5 p 5" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054013" e="1" n="Exercice 6 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056013" e="1" n="Correction exercice 6 p 5" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054014" e="1" n="Exercice 7 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056014" e="1" n="Correction exercice 7 p 5" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054015" e="1" n="Exercice 8 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056015" e="1" n="Correction exercice 8 p 5" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054016" e="1" n="Exercice 9 p 5" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056016" e="1" n="Correction exercice 9 p 5" ico="corr_cscm2_2012"/>
+                    <url i="3021263" e="1" n="Page internet"/>
+                    <url i="3021265" e="1" n="Page internet"/>
+                    <url i="3021267" e="1" n="Page internet"/>
+                    <url i="3021269" e="1" n="Page internet"/>
+                    <url i="3021271" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Droite graduée et comparaison de nombres entiers">
+                <url i="1054017" e="1" n="Exercice 1 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056017" e="1" n="Correction exercice 1 p 6" ico="corr_cscm2_2012"/>
+                    <url i="3021273" e="1" n="Page internet"/>
+                    <url i="3021275" e="1" n="Page internet"/>
+                    <url i="3021277" e="1" n="Page internet"/>
+                </d>
+                <url i="1054018" e="1" n="Exercice 2 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056018" e="1" n="Correction exercice 2 p 6" ico="corr_cscm2_2012"/>
+                    <am i="217"/>
+                </d>
+                <url i="1054019" e="1" n="Exercice 3 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056019" e="1" n="Correction exercice 3 p 6" ico="corr_cscm2_2012"/>
+                    <am i="219"/>
+                    <url i="3021279" e="1" n="Page internet"/>
+                </d>
+                <url i="1054020" e="1" n="Exercice 4 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056020" e="1" n="Correction exercice 4 p 6" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054021" e="1" n="Exercice 5 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056021" e="1" n="Correction exercice 5 p 6" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054022" e="1" n="Exercice 6 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056022" e="1" n="Correction exercice 6 p 6" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054023" e="1" n="Exercice 7 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056023" e="1" n="Correction exercice 7 p 6" ico="corr_cscm2_2012"/>
+                    <url i="3021259" e="1" n="Page internet"/>
+                </d>
+                <url i="1054024" e="1" n="Exercice 8 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056024" e="1" n="Correction exercice 8 p 6" ico="corr_cscm2_2012"/>
+                    <url i="3021261" e="1" n="Page internet"/>
+                </d>
+                <url i="1054025" e="1" n="Exercice 9 p 6" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056025" e="1" n="Correction exercice 9 p 6" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Les grands nombres entiers">
+                <url i="1054026" e="1" n="Exercice 1 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056026" e="1" n="Correction exercice 1 p 7" ico="corr_cscm2_2012"/>
+                    <am i="195"/>
+                </d>
+                <url i="1054027" e="1" n="Exercice 2 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056027" e="1" n="Correction exercice 2 p 7" ico="corr_cscm2_2012"/>
+                    <am i="192"/>
+                    <url i="3021245" e="1" n="Page internet"/>
+                </d>
+                <url i="1054028" e="1" n="Exercice 3 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056028" e="1" n="Correction exercice 3 p 7" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054029" e="1" n="Exercice 4 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056029" e="1" n="Correction exercice 4 p 7" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054030" e="1" n="Exercice 5 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056030" e="1" n="Correction exercice 5 p 7" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054031" e="1" n="Exercice 6 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056031" e="1" n="Correction exercice 6 p 7" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054032" e="1" n="Exercice 7 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056032" e="1" n="Correction exercice 7 p 7" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054033" e="1" n="Exercice 8 p 7" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056033" e="1" n="Correction exercice 8 p 7" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Autres numérations">
+                <url i="1054034" e="1" n="Exercice 1 p 8" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056034" e="1" n="Correction exercice 1 p 8" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054035" e="1" n="Exercice 2 p 8" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056035" e="1" n="Correction exercice 2 p 8" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054036" e="1" n="Exercice 3 p 8" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056036" e="1" n="Correction exercice 3 p 8" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054037" e="1" n="Exercice 4 p 8" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056037" e="1" n="Correction exercice 4 p 8" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054038" e="1" n="Exercice 5 p 8" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056038" e="1" n="Correction exercice 5 p 8" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Opérations sur les nombres entiers">
+            <d n="Additions et soustractions de nombres entiers ">
+                <url i="1054052" e="1" n="Exercice 1 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056052" e="1" n="Correction exercice 1 p 10" ico="corr_cscm2_2012"/>
+                    <am i="233"/>
+                    <am i="234"/>
+                </d>
+                <url i="1054053" e="1" n="Exercice 2 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056053" e="1" n="Correction exercice 2 p 10" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054054" e="1" n="Exercice 3 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056054" e="1" n="Correction exercice 3 p 10" ico="corr_cscm2_2012"/>
+                    <am i="230"/>
+                    <am i="231"/>
+                    <url i="3021585" e="1" n="Page internet"/>
+                    <url i="3021595" e="1" n="Page internet"/>
+                </d>
+                <url i="1054055" e="1" n="Exercice 4 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056055" e="1" n="Correction exercice 4 p 10" ico="corr_cscm2_2012"/>
+                    <am i="230"/>
+                    <am i="231"/>
+                    <url i="3021581" e="1" n="Page internet"/>
+                    <url i="3021583" e="1" n="Page internet"/>
+                    <url i="3021591" e="1" n="Page internet"/>
+                    <url i="3021593" e="1" n="Page internet"/>
+                </d>
+                <url i="1054056" e="1" n="Exercice 5 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056056" e="1" n="Correction exercice 5 p 10" ico="corr_cscm2_2012"/>
+                    <am i="240"/>
+                    <url i="3021587" e="1" n="Page internet"/>
+                    <url i="3021589" e="1" n="Page internet"/>
+                    <url i="3021597" e="1" n="Page internet"/>
+                    <url i="3021599" e="1" n="Page internet"/>
+                </d>
+                <url i="1054057" e="1" n="Exercice 6 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056057" e="1" n="Correction exercice 6 p 10" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054058" e="1" n="Exercice 7 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056058" e="1" n="Correction exercice 7 p 10" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054059" e="1" n="Exercice 8 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056059" e="1" n="Correction exercice 8 p 10" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054060" e="1" n="Exercice 9 p 10" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056060" e="1" n="Correction exercice 9 p 10" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Multiplication de nombres entiers ">
+                <url i="1054061" e="1" n="Exercice 1 p 11" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056061" e="1" n="Correction exercice 1 p 11" ico="corr_cscm2_2012"/>
+                    <url i="3021601" e="1" n="Page internet"/>
+                    <url i="3021603" e="1" n="Page internet"/>
+                    <url i="3021605" e="1" n="Page internet"/>
+                    <url i="3021607" e="1" n="Page internet"/>
+                    <url i="3021609" e="1" n="Page internet"/>
+                </d>
+                <url i="1054062" e="1" n="Exercice 2 p 11" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056062" e="1" n="Correction exercice 2 p 11" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054063" e="1" n="Exercice 3 p 11" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056063" e="1" n="Correction exercice 3 p 11" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054064" e="1" n="Exercice 4 p 11" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056064" e="1" n="Correction exercice 4 p 11" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054065" e="1" n="Exercice 5 p 11" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056065" e="1" n="Correction exercice 5 p 11" ico="corr_cscm2_2012"/>
+                    <am i="232"/>
+                    <am i="235"/>
+                </d>
+                <url i="1054066" e="1" n="Exercice 6 p 11" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056066" e="1" n="Correction exercice 6 p 11" ico="corr_cscm2_2012"/>
+                    <am i="232"/>
+                    <am i="235"/>
+                </d>
+                <url i="1054067" e="1" n="Exercice 7 p 11" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056067" e="1" n="Correction exercice 7 p 11" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Multiples et critères de divisibilité ">
+                <url i="1054068" e="1" n="Exercice 1 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056068" e="1" n="Correction exercice 1 p 12" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054069" e="1" n="Exercice 2 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056069" e="1" n="Correction exercice 2 p 12" ico="corr_cscm2_2012"/>
+                    <url i="3021611" e="1" n="Page internet"/>
+                </d>
+                <url i="1054070" e="1" n="Exercice 3 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056070" e="1" n="Correction exercice 3 p 12" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054071" e="1" n="Exercice 4 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056071" e="1" n="Correction exercice 4 p 12" ico="corr_cscm2_2012"/>
+                    <am i="242"/>
+                </d>
+                <url i="1054072" e="1" n="Exercice 5 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056072" e="1" n="Correction exercice 5 p 12" ico="corr_cscm2_2012"/>
+                    <am i="248"/>
+                    <am i="249"/>
+                </d>
+                <url i="1054073" e="1" n="Exercice 6 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056073" e="1" n="Correction exercice 6 p 12" ico="corr_cscm2_2012"/>
+                    <am i="248"/>
+                    <am i="249"/>
+                </d>
+                <url i="1054074" e="1" n="Exercice 7 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056074" e="1" n="Correction exercice 7 p 12" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054075" e="1" n="Exercice 8 p 12" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056075" e="1" n="Correction exercice 8 p 12" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Division de nombres entiers ">
+                <url i="1054076" e="1" n="Exercice 1 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056076" e="1" n="Correction exercice 1 p 13" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054077" e="1" n="Exercice 2 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056077" e="1" n="Correction exercice 2 p 13" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054078" e="1" n="Exercice 3 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056078" e="1" n="Correction exercice 3 p 13" ico="corr_cscm2_2012"/>
+                    <am i="242"/>
+                </d>
+                <url i="1054079" e="1" n="Exercice 4 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056079" e="1" n="Correction exercice 4 p 13" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054080" e="1" n="Exercice 5 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056080" e="1" n="Correction exercice 5 p 13" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054081" e="1" n="Exercice 6 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056081" e="1" n="Correction exercice 6 p 13" ico="corr_cscm2_2012"/>
+                    <am i="244"/>
+                </d>
+                <url i="1054082" e="1" n="Exercice 7 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056082" e="1" n="Correction exercice 7 p 13" ico="corr_cscm2_2012"/>
+                    <am i="245"/>
+                </d>
+                <url i="1054083" e="1" n="Exercice 8 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056083" e="1" n="Correction exercice 8 p 13" ico="corr_cscm2_2012"/>
+                    <am i="245"/>
+                </d>
+                <url i="1054084" e="1" n="Exercice 9 p 13" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056084" e="1" n="Correction exercice 9 p 13" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Problèmes avec des nombres entiers ">
+                <url i="1054085" e="1" n="Exercice 1 p 14" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056085" e="1" n="Correction exercice 1 p 14" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054086" e="1" n="Exercice 2 p 14" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056086" e="1" n="Correction exercice 2 p 14" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054087" e="1" n="Exercice 3 p 14" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056087" e="1" n="Correction exercice 3 p 14" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054088" e="1" n="Exercice 4 p 14" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056088" e="1" n="Correction exercice 4 p 14" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054089" e="1" n="Exercice 5 p 14" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056089" e="1" n="Correction exercice 5 p 14" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054090" e="1" n="Exercice 6 p 14" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056090" e="1" n="Correction exercice 6 p 14" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Fractions">
+            <d n="Fraction partage (1) ">
+                <url i="1054091" e="1" n="Exercice 1 p 16" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056091" e="1" n="Correction exercice 1 p 16" ico="corr_cscm2_2012"/>
+                    <am i="284"/>
+                    <url i="3021615" e="1" n="Page internet"/>
+                </d>
+                <url i="1054092" e="1" n="Exercice 2 p 16" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056092" e="1" n="Correction exercice 2 p 16" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054093" e="1" n="Exercice 3 p 16" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056093" e="1" n="Correction exercice 3 p 16" ico="corr_cscm2_2012"/>
+                    <am i="287"/>
+                    <url i="3021629" e="1" n="Page internet"/>
+                    <url i="3021631" e="1" n="Page internet"/>
+                </d>
+                <url i="1054094" e="1" n="Exercice 4 p 16" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056094" e="1" n="Correction exercice 4 p 16" ico="corr_cscm2_2012"/>
+                    <am i="287"/>
+                </d>
+                <url i="1054095" e="1" n="Exercice 5 p 16" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056095" e="1" n="Correction exercice 5 p 16" ico="corr_cscm2_2012"/>
+                    <am i="287"/>
+                </d>
+                <url i="1054096" e="1" n="Exercice 6 p 16" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056096" e="1" n="Correction exercice 6 p 16" ico="corr_cscm2_2012"/>
+                    <am i="287"/>
+                </d>
+                <url i="1054097" e="1" n="Exercice 7 p 16" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056097" e="1" n="Correction exercice 7 p 16" ico="corr_cscm2_2012"/>
+                    <am i="287"/>
+                </d>
+            </d>
+            <d n="Fraction partage (2) ">
+                <url i="1054098" e="1" n="Exercice 1 p 17" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056098" e="1" n="Correction exercice 1 p 17" ico="corr_cscm2_2012"/>
+                    <am i="288"/>
+                    <url i="3021633" e="1" n="Page internet"/>
+                    <url i="3021639" e="1" n="Page internet"/>
+                </d>
+                <url i="1054099" e="1" n="Exercice 2 p 17" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056099" e="1" n="Correction exercice 2 p 17" ico="corr_cscm2_2012"/>
+                    <am i="288"/>
+                </d>
+                <url i="1054100" e="1" n="Exercice 3 p 17" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056100" e="1" n="Correction exercice 3 p 17" ico="corr_cscm2_2012"/>
+                    <am i="288"/>
+                </d>
+                <url i="1054101" e="1" n="Exercice 4 p 17" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056101" e="1" n="Correction exercice 4 p 17" ico="corr_cscm2_2012"/>
+                    <am i="288"/>
+                    <url i="3021637" e="1" n="Page internet"/>
+                </d>
+                <url i="1054102" e="1" n="Exercice 5 p 17" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056102" e="1" n="Correction exercice 5 p 17" ico="corr_cscm2_2012"/>
+                    <url i="3021619" e="1" n="Page internet"/>
+                    <url i="3021621" e="1" n="Page internet"/>
+                    <url i="3021623" e="1" n="Page internet"/>
+                    <url i="3021625" e="1" n="Page internet"/>
+                </d>
+                <url i="1054103" e="1" n="Exercice 6 p 17" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056103" e="1" n="Correction exercice 6 p 17" ico="corr_cscm2_2012"/>
+                    <url i="3021627" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Fraction et droite graduée ">
+                <url i="1054104" e="1" n="Exercice 1 p 18" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056104" e="1" n="Correction exercice 1 p 18" ico="corr_cscm2_2012"/>
+                    <am i="289"/>
+                </d>
+                <url i="1054105" e="1" n="Exercice 2 p 18" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056105" e="1" n="Correction exercice 2 p 18" ico="corr_cscm2_2012"/>
+                    <am i="290"/>
+                </d>
+                <url i="1054106" e="1" n="Exercice 3 p 18" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056106" e="1" n="Correction exercice 3 p 18" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054107" e="1" n="Exercice 4 p 18" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056107" e="1" n="Correction exercice 4 p 18" ico="corr_cscm2_2012"/>
+                    <am i="289"/>
+                    <am i="290"/>
+                </d>
+                <url i="1054108" e="1" n="Exercice 5 p 18" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056108" e="1" n="Correction exercice 5 p 18" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054109" e="1" n="Exercice 6 p 18" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056109" e="1" n="Correction exercice 6 p 18" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Comparaison de fractions ">
+                <url i="1054110" e="1" n="Exercice 1 p 19" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056110" e="1" n="Correction exercice 1 p 19" ico="corr_cscm2_2012"/>
+                    <am i="542"/>
+                    <url i="3021617" e="1" n="Page internet"/>
+                </d>
+                <url i="1054111" e="1" n="Exercice 2 p 19" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056111" e="1" n="Correction exercice 2 p 19" ico="corr_cscm2_2012"/>
+                    <am i="542"/>
+                    <url i="3021617" e="1" n="Page internet"/>
+                </d>
+                <url i="1054112" e="1" n="Exercice 3 p 19" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056112" e="1" n="Correction exercice 3 p 19" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054113" e="1" n="Exercice 4 p 19" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056113" e="1" n="Correction exercice 4 p 19" ico="corr_cscm2_2012"/>
+                    <am i="543"/>
+                </d>
+                <url i="1054114" e="1" n="Exercice 5 p 19" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056114" e="1" n="Correction exercice 5 p 19" ico="corr_cscm2_2012"/>
+                    <am i="543"/>
+                </d>
+                <url i="1054115" e="1" n="Exercice 6 p 19" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056115" e="1" n="Correction exercice 6 p 19" ico="corr_cscm2_2012"/>
+                    <am i="543"/>
+                </d>
+                <url i="1054116" e="1" n="Exercice 7 p 19" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056116" e="1" n="Correction exercice 7 p 19" ico="corr_cscm2_2012"/>
+                    <am i="543"/>
+                    <url i="3021635" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Décomposition de fractions ">
+                <url i="1054117" e="1" n="Exercice 1 p 20" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056117" e="1" n="Correction exercice 1 p 20" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054118" e="1" n="Exercice 2 p 20" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056118" e="1" n="Correction exercice 2 p 20" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054119" e="1" n="Exercice 3 p 20" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056119" e="1" n="Correction exercice 3 p 20" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054120" e="1" n="Exercice 4 p 20" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056120" e="1" n="Correction exercice 4 p 20" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054121" e="1" n="Exercice 5 p 20" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056121" e="1" n="Correction exercice 5 p 20" ico="corr_cscm2_2012"/>
+                    <am i="547"/>
+                </d>
+                <url i="1054122" e="1" n="Exercice 6 p 20" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056122" e="1" n="Correction exercice 6 p 20" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Fractions décimales et nombres décimaux">
+            <d n="Fractions décimales">
+                <url i="1054270" e="1" n="Exercice 1 p 22" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056270" e="1" n="Correction exercice 1 p 22" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054271" e="1" n="Exercice 2 p 22" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056271" e="1" n="Correction exercice 2 p 22" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054272" e="1" n="Exercice 3 p 22" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056272" e="1" n="Correction exercice 3 p 22" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054273" e="1" n="Exercice 4 p 22" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056273" e="1" n="Correction exercice 4 p 22" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Fractions décimales et nombres décimaux">
+                <url i="1054274" e="1" n="Exercice 1 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056274" e="1" n="Correction exercice 1 p 23" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054275" e="1" n="Exercice 2 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056275" e="1" n="Correction exercice 2 p 23" ico="corr_cscm2_2012"/>
+                    <am i="206"/>
+                    <url i="3021651" e="1" n="Page internet"/>
+                </d>
+                <url i="1054276" e="1" n="Exercice 3 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056276" e="1" n="Correction exercice 3 p 23" ico="corr_cscm2_2012"/>
+                    <am i="205"/>
+                    <url i="3021653" e="1" n="Page internet"/>
+                </d>
+                <url i="1054277" e="1" n="Exercice 4 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056277" e="1" n="Correction exercice 4 p 23" ico="corr_cscm2_2012"/>
+                    <am i="208"/>
+                </d>
+                <url i="1054278" e="1" n="Exercice 5 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056278" e="1" n="Correction exercice 5 p 23" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054279" e="1" n="Exercice 6 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056279" e="1" n="Correction exercice 6 p 23" ico="corr_cscm2_2012"/>
+                    <am i="207"/>
+                </d>
+                <url i="1054280" e="1" n="Exercice 7 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056280" e="1" n="Correction exercice 7 p 23" ico="corr_cscm2_2012"/>
+                    <url i="3021655" e="1" n="Page internet"/>
+                    <url i="3021657" e="1" n="Page internet"/>
+                </d>
+                <url i="1054281" e="1" n="Exercice 8 p 23" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056281" e="1" n="Correction exercice 8 p 23" ico="corr_cscm2_2012"/>
+                    <url i="3021659" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Écriture décimale (1)">
+                <url i="1054282" e="1" n="Exercice 1 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056282" e="1" n="Correction exercice 1 p 24" ico="corr_cscm2_2012"/>
+                    <am i="198"/>
+                </d>
+                <url i="1054283" e="1" n="Exercice 2 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056283" e="1" n="Correction exercice 2 p 24" ico="corr_cscm2_2012"/>
+                    <am i="197"/>
+                    <url i="3021645" e="1" n="Page internet"/>
+                </d>
+                <url i="1054284" e="1" n="Exercice 3 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056284" e="1" n="Correction exercice 3 p 24" ico="corr_cscm2_2012"/>
+                    <am i="198"/>
+                </d>
+                <url i="1054285" e="1" n="Exercice 4 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056285" e="1" n="Correction exercice 4 p 24" ico="corr_cscm2_2012"/>
+                    <am i="199"/>
+                </d>
+                <url i="1054286" e="1" n="Exercice 5 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056286" e="1" n="Correction exercice 5 p 24" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054287" e="1" n="Exercice 6 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056287" e="1" n="Correction exercice 6 p 24" ico="corr_cscm2_2012"/>
+                    <am i="200"/>
+                </d>
+                <url i="1054288" e="1" n="Exercice 7 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056288" e="1" n="Correction exercice 7 p 24" ico="corr_cscm2_2012"/>
+                    <am i="201"/>
+                    <url i="3021643" e="1" n="Page internet"/>
+                </d>
+                <url i="1054289" e="1" n="Exercice 8 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056289" e="1" n="Correction exercice 8 p 24" ico="corr_cscm2_2012"/>
+                    <am i="201"/>
+                    <url i="3021643" e="1" n="Page internet"/>
+                </d>
+                <url i="1054290" e="1" n="Exercice 9 p 24" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056290" e="1" n="Correction exercice 9 p 24" ico="corr_cscm2_2012"/>
+                    <am i="204"/>
+                    <url i="3021647" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Écriture décimale (2)">
+                <url i="1054291" e="1" n="Exercice 1 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056291" e="1" n="Correction exercice 1 p 25" ico="corr_cscm2_2012"/>
+                    <am i="196"/>
+                    <url i="3021649" e="1" n="Page internet"/>
+                </d>
+                <url i="1054292" e="1" n="Exercice 2 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056292" e="1" n="Correction exercice 2 p 25" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054293" e="1" n="Exercice 3 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056293" e="1" n="Correction exercice 3 p 25" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054294" e="1" n="Exercice 4 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056294" e="1" n="Correction exercice 4 p 25" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054295" e="1" n="Exercice 5 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056295" e="1" n="Correction exercice 5 p 25" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054296" e="1" n="Exercice 6 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056296" e="1" n="Correction exercice 6 p 25" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054297" e="1" n="Exercice 7 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056297" e="1" n="Correction exercice 7 p 25" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054298" e="1" n="Exercice 8 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056298" e="1" n="Correction exercice 8 p 25" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054299" e="1" n="Exercice 9 p 25" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056299" e="1" n="Correction exercice 9 p 25" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Demi-droite graduée et nombres décimaux">
+                <url i="1054300" e="1" n="Exercice 1 p 26" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056300" e="1" n="Correction exercice 1 p 26" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054301" e="1" n="Exercice 2 p 26" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056301" e="1" n="Correction exercice 2 p 26" ico="corr_cscm2_2012"/>
+                    <url i="3021661" e="1" n="Page internet"/>
+                    <url i="3021665" e="1" n="Page internet"/>
+                    <url i="3021667" e="1" n="Page internet"/>
+                </d>
+                <url i="1054302" e="1" n="Exercice 3 p 26" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056302" e="1" n="Correction exercice 3 p 26" ico="corr_cscm2_2012"/>
+                    <am i="219"/>
+                    <am i="220"/>
+                    <url i="3021663" e="1" n="Page internet"/>
+                </d>
+                <url i="1054303" e="1" n="Exercice 4 p 26" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056303" e="1" n="Correction exercice 4 p 26" ico="corr_cscm2_2012"/>
+                    <am i="217"/>
+                    <am i="218"/>
+                </d>
+                <url i="1054304" e="1" n="Exercice 5 p 26" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056304" e="1" n="Correction exercice 5 p 26" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Comparaison et rangement des nombres décimaux">
+                <url i="1054305" e="1" n="Exercice 1 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056305" e="1" n="Correction exercice 1 p 27" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054306" e="1" n="Exercice 2 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056306" e="1" n="Correction exercice 2 p 27" ico="corr_cscm2_2012"/>
+                    <am i="212"/>
+                    <am i="213"/>
+                    <url i="3021677" e="1" n="Page internet"/>
+                </d>
+                <url i="1054307" e="1" n="Exercice 3 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056307" e="1" n="Correction exercice 3 p 27" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054308" e="1" n="Exercice 4 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056308" e="1" n="Correction exercice 4 p 27" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054309" e="1" n="Exercice 5 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056309" e="1" n="Correction exercice 5 p 27" ico="corr_cscm2_2012"/>
+                    <am i="215"/>
+                    <url i="3021679" e="1" n="Page internet"/>
+                    <url i="3021685" e="1" n="Page internet"/>
+                </d>
+                <url i="1054310" e="1" n="Exercice 6 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056310" e="1" n="Correction exercice 6 p 27" ico="corr_cscm2_2012"/>
+                    <am i="215"/>
+                    <url i="3021681" e="1" n="Page internet"/>
+                    <url i="3021683" e="1" n="Page internet"/>
+                </d>
+                <url i="1054311" e="1" n="Exercice 7 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056311" e="1" n="Correction exercice 7 p 27" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054312" e="1" n="Exercice 8 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056312" e="1" n="Correction exercice 8 p 27" ico="corr_cscm2_2012"/>
+                    <am i="209"/>
+                    <url i="3021671" e="1" n="Page internet"/>
+                </d>
+                <url i="1054313" e="1" n="Exercice 9 p 27" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056313" e="1" n="Correction exercice 9 p 27" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Encadrement et valeurs approchées">
+                <url i="1054314" e="1" n="Exercice 1 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056314" e="1" n="Correction exercice 1 p 28" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054315" e="1" n="Exercice 2 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056315" e="1" n="Correction exercice 2 p 28" ico="corr_cscm2_2012"/>
+                    <am i="210"/>
+                    <url i="3021669" e="1" n="Page internet"/>
+                </d>
+                <url i="1054316" e="1" n="Exercice 3 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056316" e="1" n="Correction exercice 3 p 28" ico="corr_cscm2_2012"/>
+                    <url i="3021641" e="1" n="Page internet"/>
+                </d>
+                <url i="1054317" e="1" n="Exercice 4 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056317" e="1" n="Correction exercice 4 p 28" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054318" e="1" n="Exercice 5 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056318" e="1" n="Correction exercice 5 p 28" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054319" e="1" n="Exercice 6 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056319" e="1" n="Correction exercice 6 p 28" ico="corr_cscm2_2012"/>
+                    <am i="216"/>
+                    <url i="3021675" e="1" n="Page internet"/>
+                </d>
+                <url i="1054320" e="1" n="Exercice 7 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056320" e="1" n="Correction exercice 7 p 28" ico="corr_cscm2_2012"/>
+                    <am i="221"/>
+                </d>
+                <url i="1054321" e="1" n="Exercice 8 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056321" e="1" n="Correction exercice 8 p 28" ico="corr_cscm2_2012"/>
+                    <url i="3021673" e="1" n="Page internet"/>
+                </d>
+                <url i="1054322" e="1" n="Exercice 9 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056322" e="1" n="Correction exercice 9 p 28" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054323" e="1" n="Exercice 10 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056323" e="1" n="Correction exercice 10 p 28" ico="corr_cscm2_2012"/>
+                    <url i="3021673" e="1" n="Page internet"/>
+                </d>
+                <url i="1054324" e="1" n="Exercice 11 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056324" e="1" n="Correction exercice 11 p 28" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054325" e="1" n="Exercice 12 p 28" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056325" e="1" n="Correction exercice 12 p 28" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Opérations sur les nombres décimaux">
+            <d n="Additions et soustractions de nombres décimaux ">
+                <url i="1054123" e="1" n="Exercice 1 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056123" e="1" n="Correction exercice 1 p 30" ico="corr_cscm2_2012"/>
+                    <am i="263"/>
+                    <am i="264"/>
+                    <url i="3021691" e="1" n="Page internet"/>
+                    <url i="3021697" e="1" n="Page internet"/>
+                </d>
+                <url i="1054124" e="1" n="Exercice 2 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056124" e="1" n="Correction exercice 2 p 30" ico="corr_cscm2_2012"/>
+                    <am i="263"/>
+                    <am i="264"/>
+                    <am i="261"/>
+                    <am i="260"/>
+                    <url i="3021687" e="1" n="Page internet"/>
+                    <url i="3021689" e="1" n="Page internet"/>
+                    <url i="3021693" e="1" n="Page internet"/>
+                    <url i="3021695" e="1" n="Page internet"/>
+                </d>
+                <url i="1054125" e="1" n="Exercice 3 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056125" e="1" n="Correction exercice 3 p 30" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054126" e="1" n="Exercice 4 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056126" e="1" n="Correction exercice 4 p 30" ico="corr_cscm2_2012"/>
+                    <am i="256"/>
+                </d>
+                <url i="1054127" e="1" n="Exercice 5 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056127" e="1" n="Correction exercice 5 p 30" ico="corr_cscm2_2012"/>
+                    <am i="256"/>
+                </d>
+                <url i="1054128" e="1" n="Exercice 6 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056128" e="1" n="Correction exercice 6 p 30" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054129" e="1" n="Exercice 7 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056129" e="1" n="Correction exercice 7 p 30" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054130" e="1" n="Exercice 8 p 30" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056130" e="1" n="Correction exercice 8 p 30" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Multiplications de nombres décimaux ">
+                <url i="1054131" e="1" n="Exercice 1 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056131" e="1" n="Correction exercice 1 p 31" ico="corr_cscm2_2012"/>
+                    <am i="257"/>
+                </d>
+                <url i="1054132" e="1" n="Exercice 2 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056132" e="1" n="Correction exercice 2 p 31" ico="corr_cscm2_2012"/>
+                    <am i="262"/>
+                </d>
+                <url i="1054133" e="1" n="Exercice 3 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056133" e="1" n="Correction exercice 3 p 31" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054134" e="1" n="Exercice 4 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056134" e="1" n="Correction exercice 4 p 31" ico="corr_cscm2_2012"/>
+                    <am i="262"/>
+                </d>
+                <url i="1054135" e="1" n="Exercice 5 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056135" e="1" n="Correction exercice 5 p 31" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054136" e="1" n="Exercice 6 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056136" e="1" n="Correction exercice 6 p 31" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054137" e="1" n="Exercice 7 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056137" e="1" n="Correction exercice 7 p 31" ico="corr_cscm2_2012"/>
+                    <am i="259"/>
+                </d>
+                <url i="1054138" e="1" n="Exercice 8 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056138" e="1" n="Correction exercice 8 p 31" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054139" e="1" n="Exercice 9 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056139" e="1" n="Correction exercice 9 p 31" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054140" e="1" n="Exercice 10 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056140" e="1" n="Correction exercice 10 p 31" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054141" e="1" n="Exercice 11 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056141" e="1" n="Correction exercice 11 p 31" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054142" e="1" n="Exercice 12 p 31" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056142" e="1" n="Correction exercice 12 p 31" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Division d'un nombre décimal par un nombre entier ">
+                <url i="1054143" e="1" n="Exercice 1 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056143" e="1" n="Correction exercice 1 p 32" ico="corr_cscm2_2012"/>
+                    <am i="258"/>
+                </d>
+                <url i="1054144" e="1" n="Exercice 2 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056144" e="1" n="Correction exercice 2 p 32" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054145" e="1" n="Exercice 3 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056145" e="1" n="Correction exercice 3 p 32" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054146" e="1" n="Exercice 4 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056146" e="1" n="Correction exercice 4 p 32" ico="corr_cscm2_2012"/>
+                    <am i="267"/>
+                    <am i="268"/>
+                </d>
+                <url i="1054147" e="1" n="Exercice 5 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056147" e="1" n="Correction exercice 5 p 32" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054148" e="1" n="Exercice 6 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056148" e="1" n="Correction exercice 6 p 32" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054149" e="1" n="Exercice 7 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056149" e="1" n="Correction exercice 7 p 32" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054150" e="1" n="Exercice 8 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056150" e="1" n="Correction exercice 8 p 32" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054151" e="1" n="Exercice 9 p 32" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056151" e="1" n="Correction exercice 9 p 32" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Problèmes avec les nombres décimaux (1) ">
+                <url i="1054152" e="1" n="Exercice 1 p 33" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056152" e="1" n="Correction exercice 1 p 33" ico="corr_cscm2_2012"/>
+                    <am i="276"/>
+                </d>
+                <url i="1054153" e="1" n="Exercice 2 p 33" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056153" e="1" n="Correction exercice 2 p 33" ico="corr_cscm2_2012"/>
+                    <am i="274"/>
+                </d>
+                <url i="1054154" e="1" n="Exercice 3 p 33" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056154" e="1" n="Correction exercice 3 p 33" ico="corr_cscm2_2012"/>
+                    <am i="277"/>
+                </d>
+                <url i="1054155" e="1" n="Exercice 4 p 33" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056155" e="1" n="Correction exercice 4 p 33" ico="corr_cscm2_2012"/>
+                    <am i="277"/>
+                </d>
+                <url i="1054156" e="1" n="Exercice 5 p 33" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056156" e="1" n="Correction exercice 5 p 33" ico="corr_cscm2_2012"/>
+                    <am i="277"/>
+                </d>
+            </d>
+            <d n="Problèmes avec les nombres décimaux (2) ">
+                <url i="1054157" e="1" n="Exercice 1 p 34" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056157" e="1" n="Correction exercice 1 p 34" ico="corr_cscm2_2012"/>
+                    <am i="278"/>
+                </d>
+                <url i="1054158" e="1" n="Exercice 2 p 34" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056158" e="1" n="Correction exercice 2 p 34" ico="corr_cscm2_2012"/>
+                    <am i="278"/>
+                </d>
+                <url i="1054159" e="1" n="Exercice 3 p 34" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056159" e="1" n="Correction exercice 3 p 34" ico="corr_cscm2_2012"/>
+                    <am i="278"/>
+                </d>
+                <url i="1054160" e="1" n="Exercice 4 p 34" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056160" e="1" n="Correction exercice 4 p 34" ico="corr_cscm2_2012"/>
+                    <am i="278"/>
+                </d>
+            </d>
+        </d>
+        <d n="Proportionnalité">
+            <d n="Situations de proportionnalité ?">
+                <url i="1054326" e="1" n="Exercice 1 p 36" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056326" e="1" n="Correction exercice 1 p 36" ico="corr_cscm2_2012"/>
+                    <am i="319"/>
+                    <url i="3021699" e="1" n="Page internet"/>
+                </d>
+                <url i="1054327" e="1" n="Exercice 2 p 36" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056327" e="1" n="Correction exercice 2 p 36" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054328" e="1" n="Exercice 3 p 36" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056328" e="1" n="Correction exercice 3 p 36" ico="corr_cscm2_2012"/>
+                    <am i="322"/>
+                </d>
+                <url i="1054329" e="1" n="Exercice 4 p 36" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056329" e="1" n="Correction exercice 4 p 36" ico="corr_cscm2_2012"/>
+                    <am i="321"/>
+                </d>
+                <url i="1054330" e="1" n="Exercice 5 p 36" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056330" e="1" n="Correction exercice 5 p 36" ico="corr_cscm2_2012"/>
+                    <am i="320"/>
+                </d>
+            </d>
+            <d n="Règle de trois">
+                <url i="1054331" e="1" n="Exercice 1 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056331" e="1" n="Correction exercice 1 p 37" ico="corr_cscm2_2012"/>
+                    <am i="318"/>
+                    <am i="320"/>
+                </d>
+                <url i="1054332" e="1" n="Exercice 2 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056332" e="1" n="Correction exercice 2 p 37" ico="corr_cscm2_2012"/>
+                    <am i="318"/>
+                    <am i="320"/>
+                    <url i="3021701" e="1" n="Page internet"/>
+                </d>
+                <url i="1054333" e="1" n="Exercice 3 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056333" e="1" n="Correction exercice 3 p 37" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054334" e="1" n="Exercice 4 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056334" e="1" n="Correction exercice 4 p 37" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054335" e="1" n="Exercice 5 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056335" e="1" n="Correction exercice 5 p 37" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054336" e="1" n="Exercice 6 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056336" e="1" n="Correction exercice 6 p 37" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054337" e="1" n="Exercice 7 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056337" e="1" n="Correction exercice 7 p 37" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054338" e="1" n="Exercice 8 p 37" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056338" e="1" n="Correction exercice 8 p 37" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Pourcentages">
+                <url i="1054339" e="1" n="Exercice 1 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056339" e="1" n="Correction exercice 1 p 38" ico="corr_cscm2_2012"/>
+                    <url i="3021703" e="1" n="Page internet"/>
+                </d>
+                <url i="1054340" e="1" n="Exercice 2 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056340" e="1" n="Correction exercice 2 p 38" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054341" e="1" n="Exercice 3 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056341" e="1" n="Correction exercice 3 p 38" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054342" e="1" n="Exercice 4 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056342" e="1" n="Correction exercice 4 p 38" ico="corr_cscm2_2012"/>
+                    <am i="306"/>
+                </d>
+                <url i="1054343" e="1" n="Exercice 5 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056343" e="1" n="Correction exercice 5 p 38" ico="corr_cscm2_2012"/>
+                    <am i="306"/>
+                </d>
+                <url i="1054344" e="1" n="Exercice 6 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056344" e="1" n="Correction exercice 6 p 38" ico="corr_cscm2_2012"/>
+                    <am i="306"/>
+                </d>
+                <url i="1054345" e="1" n="Exercice 7 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056345" e="1" n="Correction exercice 7 p 38" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054346" e="1" n="Exercice 8 p 38" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056346" e="1" n="Correction exercice 8 p 38" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Échelles">
+                <url i="1054347" e="1" n="Exercice 1 p 39" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056347" e="1" n="Correction exercice 1 p 39" ico="corr_cscm2_2012"/>
+                    <am i="327"/>
+                </d>
+                <url i="1054348" e="1" n="Exercice 2 p 39" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056348" e="1" n="Correction exercice 2 p 39" ico="corr_cscm2_2012"/>
+                    <am i="324"/>
+                </d>
+                <url i="1054349" e="1" n="Exercice 3 p 39" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056349" e="1" n="Correction exercice 3 p 39" ico="corr_cscm2_2012"/>
+                    <am i="324"/>
+                </d>
+                <url i="1054350" e="1" n="Exercice 4 p 39" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056350" e="1" n="Correction exercice 4 p 39" ico="corr_cscm2_2012"/>
+                    <am i="325"/>
+                </d>
+                <url i="1054351" e="1" n="Exercice 5 p 39" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056351" e="1" n="Correction exercice 5 p 39" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054352" e="1" n="Exercice 6 p 39" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056352" e="1" n="Correction exercice 6 p 39" ico="corr_cscm2_2012"/>
+                    <am i="326"/>
+                </d>
+                <url i="1054353" e="1" n="Exercice 7 p 39" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056353" e="1" n="Correction exercice 7 p 39" ico="corr_cscm2_2012"/>
+                    <am i="323"/>
+                </d>
+            </d>
+            <d n="Vitesses">
+                <url i="1054354" e="1" n="Exercice 1 p 40" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056354" e="1" n="Correction exercice 1 p 40" ico="corr_cscm2_2012"/>
+                    <am i="674"/>
+                </d>
+                <url i="1054355" e="1" n="Exercice 2 p 40" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056355" e="1" n="Correction exercice 2 p 40" ico="corr_cscm2_2012"/>
+                    <am i="674"/>
+                </d>
+                <url i="1054356" e="1" n="Exercice 3 p 40" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056356" e="1" n="Correction exercice 3 p 40" ico="corr_cscm2_2012"/>
+                    <am i="675"/>
+                </d>
+                <url i="1054357" e="1" n="Exercice 4 p 40" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056357" e="1" n="Correction exercice 4 p 40" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054358" e="1" n="Exercice 5 p 40" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056358" e="1" n="Correction exercice 5 p 40" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054359" e="1" n="Exercice 6 p 40" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056359" e="1" n="Correction exercice 6 p 40" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Gestion de données">
+            <d n="Lecture d'informations dans un tableau">
+                <url i="1054360" e="1" n="Exercice 1 p 42" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056360" e="1" n="Correction exercice 1 p 42" ico="corr_cscm2_2012"/>
+                    <am i="330"/>
+                </d>
+                <url i="1054361" e="1" n="Exercice 2 p 42" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056361" e="1" n="Correction exercice 2 p 42" ico="corr_cscm2_2012"/>
+                    <am i="330"/>
+                </d>
+                <url i="1054362" e="1" n="Exercice 3 p 42" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056362" e="1" n="Correction exercice 3 p 42" ico="corr_cscm2_2012"/>
+                    <am i="330"/>
+                </d>
+            </d>
+            <d n="Lecture d'informations dans un diagramme">
+                <url i="1054363" e="1" n="Exercice 1 p 43" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056363" e="1" n="Correction exercice 1 p 43" ico="corr_cscm2_2012"/>
+                    <am i="331"/>
+                </d>
+                <url i="1054364" e="1" n="Exercice 2 p 43" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056364" e="1" n="Correction exercice 2 p 43" ico="corr_cscm2_2012"/>
+                    <am i="332"/>
+                </d>
+                <url i="1054365" e="1" n="Exercice 3 p 43" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056365" e="1" n="Correction exercice 3 p 43" ico="corr_cscm2_2012"/>
+                    <am i="332"/>
+                    <url i="3021719" e="1" n="Page internet"/>
+                    <url i="3021721" e="1" n="Page internet"/>
+                    <url i="3021723" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Construction de tableaux">
+                <url i="1054366" e="1" n="Exercice 1 p 44" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056366" e="1" n="Correction exercice 1 p 44" ico="corr_cscm2_2012"/>
+                    <am i="334"/>
+                </d>
+                <url i="1054367" e="1" n="Exercice 2 p 44" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056367" e="1" n="Correction exercice 2 p 44" ico="corr_cscm2_2012"/>
+                    <am i="334"/>
+                </d>
+                <url i="1054368" e="1" n="Exercice 3 p 44" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056368" e="1" n="Correction exercice 3 p 44" ico="corr_cscm2_2012"/>
+                    <am i="334"/>
+                </d>
+                <url i="1054369" e="1" n="Exercice 4 p 44" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056369" e="1" n="Correction exercice 4 p 44" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Construction de diagrammes">
+                <url i="1054370" e="1" n="Exercice 1 p 45" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056370" e="1" n="Correction exercice 1 p 45" ico="corr_cscm2_2012"/>
+                    <am i="333"/>
+                    <url i="3021715" e="1" n="Page internet"/>
+                    <url i="3021717" e="1" n="Page internet"/>
+                    <url i="3021725" e="1" n="Page internet"/>
+                </d>
+                <url i="1054371" e="1" n="Exercice 2 p 45" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056371" e="1" n="Correction exercice 2 p 45" ico="corr_cscm2_2012"/>
+                    <am i="335"/>
+                </d>
+                <url i="1054372" e="1" n="Exercice 3 p 45" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056372" e="1" n="Correction exercice 3 p 45" ico="corr_cscm2_2012"/>
+                    <am i="336"/>
+                    <url i="3021727" e="1" n="Page internet"/>
+                    <url i="3021729" e="1" n="Page internet"/>
+                </d>
+                <url i="1054373" e="1" n="Exercice 4 p 45" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056373" e="1" n="Correction exercice 4 p 45" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Problèmes pour chercher">
+                <url i="1054374" e="1" n="Exercice 1 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056374" e="1" n="Correction exercice 1 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054375" e="1" n="Exercice 2 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056375" e="1" n="Correction exercice 2 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054376" e="1" n="Exercice 3 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056376" e="1" n="Correction exercice 3 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054377" e="1" n="Exercice 4 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056377" e="1" n="Correction exercice 4 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054378" e="1" n="Exercice 5 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056378" e="1" n="Correction exercice 5 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054379" e="1" n="Exercice 6 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056379" e="1" n="Correction exercice 6 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054380" e="1" n="Exercice 7 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056380" e="1" n="Correction exercice 7 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054381" e="1" n="Exercice 8 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056381" e="1" n="Correction exercice 8 p 46" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054382" e="1" n="Exercice 9 p 46" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056382" e="1" n="Correction exercice 9 p 46" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Droites parallèles et perpendiculaires">
+            <d n="Droites parallèles ">
+                <url i="1054216" e="1" n="Exercice 1 p 48" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056216" e="1" n="Correction exercice 1 p 48" ico="corr_cscm2_2012"/>
+                    <am i="32"/>
+                </d>
+                <url i="1054217" e="1" n="Exercice 2 p 48" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056217" e="1" n="Correction exercice 2 p 48" ico="corr_cscm2_2012"/>
+                    <am i="38"/>
+                </d>
+                <url i="1054218" e="1" n="Exercice 3 p 48" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056218" e="1" n="Correction exercice 3 p 48" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054219" e="1" n="Exercice 4 p 48" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056219" e="1" n="Correction exercice 4 p 48" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054220" e="1" n="Exercice 5 p 48" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056220" e="1" n="Correction exercice 5 p 48" ico="corr_cscm2_2012"/>
+                    <am i="42"/>
+                    <am i="43"/>
+                </d>
+            </d>
+            <d n="Droites perpendiculaires ">
+                <url i="1054221" e="1" n="Exercice 1 p 49" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056221" e="1" n="Correction exercice 1 p 49" ico="corr_cscm2_2012"/>
+                    <am i="31"/>
+                </d>
+                <url i="1054222" e="1" n="Exercice 2 p 49" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056222" e="1" n="Correction exercice 2 p 49" ico="corr_cscm2_2012"/>
+                    <am i="39"/>
+                </d>
+                <url i="1054223" e="1" n="Exercice 3 p 49" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056223" e="1" n="Correction exercice 3 p 49" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054224" e="1" n="Exercice 4 p 49" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056224" e="1" n="Correction exercice 4 p 49" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054225" e="1" n="Exercice 5 p 49" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056225" e="1" n="Correction exercice 5 p 49" ico="corr_cscm2_2012"/>
+                    <am i="41"/>
+                </d>
+            </d>
+            <d n="Droites parallèles et perpendiculaires (1)">
+                <url i="1054226" e="1" n="Exercice 1 p 50" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056226" e="1" n="Correction exercice 1 p 50" ico="corr_cscm2_2012"/>
+                    <am i="33"/>
+                </d>
+                <url i="1054227" e="1" n="Exercice 2 p 50" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056227" e="1" n="Correction exercice 2 p 50" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054228" e="1" n="Exercice 3 p 50" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056228" e="1" n="Correction exercice 3 p 50" ico="corr_cscm2_2012"/>
+                    <am i="44"/>
+                    <am i="45"/>
+                </d>
+            </d>
+            <d n="Droites parallèles et perpendiculaires (2)">
+                <url i="1054229" e="1" n="Exercice 1 p 51" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056229" e="1" n="Correction exercice 1 p 51" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054230" e="1" n="Exercice 2 p 51" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056230" e="1" n="Correction exercice 2 p 51" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054231" e="1" n="Exercice 3 p 51" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056231" e="1" n="Correction exercice 3 p 51" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054232" e="1" n="Exercice 4 p 51" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056232" e="1" n="Correction exercice 4 p 51" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Synthèse">
+                <url i="1054235" e="1" n="Exercice 1 p 52" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056235" e="1" n="Correction exercice 1 p 52" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054236" e="1" n="Exercice 2 p 52" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056236" e="1" n="Correction exercice 2 p 52" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054237" e="1" n="Exercice 3 p 52" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056237" e="1" n="Correction exercice 3 p 52" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054238" e="1" n="Exercice 4 p 52" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056238" e="1" n="Correction exercice 4 p 52" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Cercles et triangles">
+            <d n="Cercles (1) ">
+                <url i="1054161" e="1" n="Exercice 1 p 54" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056161" e="1" n="Correction exercice 1 p 54" ico="corr_cscm2_2012"/>
+                    <am i="21"/>
+                </d>
+                <url i="1054162" e="1" n="Exercice 2 p 54" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056162" e="1" n="Correction exercice 2 p 54" ico="corr_cscm2_2012"/>
+                    <am i="24"/>
+                </d>
+                <url i="1054163" e="1" n="Exercice 3 p 54" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056163" e="1" n="Correction exercice 3 p 54" ico="corr_cscm2_2012"/>
+                    <am i="24"/>
+                </d>
+                <url i="1054164" e="1" n="Exercice 4 p 54" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056164" e="1" n="Correction exercice 4 p 54" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054165" e="1" n="Exercice 5 p 54" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056165" e="1" n="Correction exercice 5 p 54" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054166" e="1" n="Exercice 6 p 54" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056166" e="1" n="Correction exercice 6 p 54" ico="corr_cscm2_2012"/>
+                    <am i="24"/>
+                </d>
+            </d>
+            <d n="Cercles (2) ">
+                <url i="1054167" e="1" n="Exercice 1 p 55" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056167" e="1" n="Correction exercice 1 p 55" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Identification de triangles particuliers">
+                <url i="1054168" e="1" n="Exercice 1 p 56" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056168" e="1" n="Correction exercice 1 p 56" ico="corr_cscm2_2012"/>
+                    <am i="54"/>
+                </d>
+                <url i="1054169" e="1" n="Exercice 2 p 56" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056169" e="1" n="Correction exercice 2 p 56" ico="corr_cscm2_2012"/>
+                    <am i="66"/>
+                </d>
+                <url i="1054170" e="1" n="Exercice 3 p 56" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056170" e="1" n="Correction exercice 3 p 56" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Construction de triangles quelconques ">
+                <url i="1054172" e="1" n="Exercice 1 p 57" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056172" e="1" n="Correction exercice 1 p 57" ico="corr_cscm2_2012"/>
+                    <am i="72"/>
+                </d>
+                <url i="1054173" e="1" n="Exercice 2 p 57" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056173" e="1" n="Correction exercice 2 p 57" ico="corr_cscm2_2012"/>
+                    <am i="73"/>
+                </d>
+                <url i="1054174" e="1" n="Exercice 3 p 57" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056174" e="1" n="Correction exercice 3 p 57" ico="corr_cscm2_2012"/>
+                    <am i="74"/>
+                </d>
+            </d>
+            <d n="Construction de triangles particuliers ">
+                <url i="1054175" e="1" n="Exercice 1 p 58" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056175" e="1" n="Correction exercice 1 p 58" ico="corr_cscm2_2012"/>
+                    <am i="75"/>
+                </d>
+                <url i="1054176" e="1" n="Exercice 2 p 58" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056176" e="1" n="Correction exercice 2 p 58" ico="corr_cscm2_2012"/>
+                    <am i="75"/>
+                </d>
+                <url i="1054177" e="1" n="Exercice 3 p 58" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056177" e="1" n="Correction exercice 3 p 58" ico="corr_cscm2_2012"/>
+                    <am i="75"/>
+                </d>
+            </d>
+            <d n="Hauteur dans un triangle ">
+                <url i="1054178" e="1" n="Exercice 1 p 59" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056178" e="1" n="Correction exercice 1 p 59" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054179" e="1" n="Exercice 2 p 59" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056179" e="1" n="Correction exercice 2 p 59" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054180" e="1" n="Exercice 3 p 59" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056180" e="1" n="Correction exercice 3 p 59" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054181" e="1" n="Exercice 4 p 59" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056181" e="1" n="Correction exercice 4 p 59" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054182" e="1" n="Exercice 5 p 59" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056182" e="1" n="Correction exercice 5 p 59" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Synthèse ">
+                <url i="1054183" e="1" n="Exercice 1 p 60" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056183" e="1" n="Correction exercice 1 p 60" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054184" e="1" n="Exercice 2 p 60" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056184" e="1" n="Correction exercice 2 p 60" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054185" e="1" n="Exercice 3 p 60" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056185" e="1" n="Correction exercice 3 p 60" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054186" e="1" n="Exercice 4 p 60" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056186" e="1" n="Correction exercice 4 p 60" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054187" e="1" n="Exercice 5 p 60" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056187" e="1" n="Correction exercice 5 p 60" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Figures usuelles et constructions">
+            <d n="Polygones (1) ">
+                <url i="1054239" e="1" n="Exercice 1 p 62" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056239" e="1" n="Correction exercice 1 p 62" ico="corr_cscm2_2012"/>
+                    <url i="3021131" e="1" n="Page internet"/>
+                </d>
+                <url i="1054240" e="1" n="Exercice 2 p 62" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056240" e="1" n="Correction exercice 2 p 62" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Polygones (2) ">
+                <url i="1054241" e="1" n="Exercice 1 p 63" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056241" e="1" n="Correction exercice 1 p 63" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054242" e="1" n="Exercice 2 p 63" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056242" e="1" n="Correction exercice 2 p 63" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054243" e="1" n="Exercice 3 p 63" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056243" e="1" n="Correction exercice 3 p 63" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Quadrilatères (1) ">
+                <url i="1054244" e="1" n="Exercice 1 p 64" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056244" e="1" n="Correction exercice 1 p 64" ico="corr_cscm2_2012"/>
+                    <url i="3021135" e="1" n="Page internet"/>
+                    <url i="3021137" e="1" n="Page internet"/>
+                </d>
+                <url i="1054245" e="1" n="Exercice 2 p 64" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056245" e="1" n="Correction exercice 2 p 64" ico="corr_cscm2_2012"/>
+                    <url i="3021133" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Quadrilatères (2) ">
+                <url i="1054246" e="1" n="Exercice 1 p 65" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056246" e="1" n="Correction exercice 1 p 65" ico="corr_cscm2_2012"/>
+                    <am i="70"/>
+                </d>
+                <url i="1054247" e="1" n="Exercice 2 p 65" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056247" e="1" n="Correction exercice 2 p 65" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054248" e="1" n="Exercice 3 p 65" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056248" e="1" n="Correction exercice 3 p 65" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054249" e="1" n="Exercice 4 p 65" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056249" e="1" n="Correction exercice 4 p 65" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054269" e="1" n="Exercice 5 p 65" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056269" e="1" n="Correction exercice 5 p 65" ico="corr_cscm2_2012"/>
+                    <url i="3021139" e="1" n="Page internet"/>
+                    <url i="3021141" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Quadrilatères (3) ">
+                <url i="1054250" e="1" n="Exercice 1 p 66" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056250" e="1" n="Correction exercice 1 p 66" ico="corr_cscm2_2012"/>
+                    <am i="76"/>
+                    <am i="77"/>
+                    <am i="78"/>
+                    <am i="79"/>
+                </d>
+                <url i="1054251" e="1" n="Exercice 2 p 66" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056251" e="1" n="Correction exercice 2 p 66" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054252" e="1" n="Exercice 3 p 66" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056252" e="1" n="Correction exercice 3 p 66" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Constructions complexes (1) ">
+                <url i="1054253" e="1" n="Exercice 1 p 67" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056253" e="1" n="Correction exercice 1 p 67" ico="corr_cscm2_2012"/>
+                    <url i="3021143" e="1" n="Page internet"/>
+                    <url i="3021145" e="1" n="Page internet"/>
+                </d>
+                <url i="1054254" e="1" n="Exercice 2 p 67" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056254" e="1" n="Correction exercice 2 p 67" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Constructions complexes (2) ">
+                <url i="1054255" e="1" n="Exercice 1 p 68" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056255" e="1" n="Correction exercice 1 p 68" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054256" e="1" n="Exercice 2 p 68" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056256" e="1" n="Correction exercice 2 p 68" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054257" e="1" n="Exercice 3 p 68" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056257" e="1" n="Correction exercice 3 p 68" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054258" e="1" n="Exercice 4 p 68" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056258" e="1" n="Correction exercice 4 p 68" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054259" e="1" n="Exercice 5 p 68" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056259" e="1" n="Correction exercice 5 p 68" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054260" e="1" n="Exercice 6 p 68" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056260" e="1" n="Correction exercice 6 p 68" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Solides">
+            <d n="Caractérisation des solides ">
+                <url i="1054261" e="1" n="Exercice 1 p 70" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056261" e="1" n="Correction exercice 1 p 70" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054262" e="1" n="Exercice 2 p 70" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056262" e="1" n="Correction exercice 2 p 70" ico="corr_cscm2_2012"/>
+                    <am i="151"/>
+                </d>
+                <url i="1054263" e="1" n="Exercice 3 p 70" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056263" e="1" n="Correction exercice 3 p 70" ico="corr_cscm2_2012"/>
+                    <am i="149"/>
+                </d>
+            </d>
+            <d n="Patrons (1) ">
+                <url i="1054264" e="1" n="Exercice 1 p 71" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056264" e="1" n="Correction exercice 1 p 71" ico="corr_cscm2_2012"/>
+                    <am i="153"/>
+                </d>
+                <url i="1054265" e="1" n="Exercice 2 p 71" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056265" e="1" n="Correction exercice 2 p 71" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054266" e="1" n="Exercice 3 p 71" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056266" e="1" n="Correction exercice 3 p 71" ico="corr_cscm2_2012"/>
+                    <am i="157"/>
+                </d>
+            </d>
+            <d n="Patrons (2) ">
+                <url i="1054267" e="1" n="Exercice 1 p 72" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056267" e="1" n="Correction exercice 1 p 72" ico="corr_cscm2_2012"/>
+                    <am i="493"/>
+                </d>
+                <url i="1054268" e="1" n="Exercice 2 p 72" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056268" e="1" n="Correction exercice 2 p 72" ico="corr_cscm2_2012"/>
+                    <am i="494"/>
+                </d>
+            </d>
+        </d>
+        <d n="Symétrie axiale">
+            <d n="Axes de symétrie">
+                <url i="1054039" e="1" n="Exercice 1 p 74" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056039" e="1" n="Correction exercice 1 p 74" ico="corr_cscm2_2012"/>
+                    <am i="109"/>
+                    <url i="3021707" e="1" n="Page internet"/>
+                    <url i="3021705" e="1" n="Page internet"/>
+                </d>
+                <url i="1054040" e="1" n="Exercice 2 p 74" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056040" e="1" n="Correction exercice 2 p 74" ico="corr_cscm2_2012"/>
+                    <am i="129"/>
+                    <url i="3021711" e="1" n="Page internet"/>
+                </d>
+                <url i="1054041" e="1" n="Exercice 3 p 74" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056041" e="1" n="Correction exercice 3 p 74" ico="corr_cscm2_2012"/>
+                    <am i="129"/>
+                    <url i="3021711" e="1" n="Page internet"/>
+                </d>
+                <url i="1054042" e="1" n="Exercice 4 p 74" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056042" e="1" n="Correction exercice 4 p 74" ico="corr_cscm2_2012"/>
+                    <am i="130"/>
+                    <url i="3021709" e="1" n="Page internet"/>
+                </d>
+                <url i="1054043" e="1" n="Exercice 5 p 74" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056043" e="1" n="Correction exercice 5 p 74" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054044" e="1" n="Exercice 6 p 74" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056044" e="1" n="Correction exercice 6 p 74" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Construction de symétriques dans un quadrillage ou sur du papier pointé">
+                <url i="1054045" e="1" n="Exercice 1 p 75" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056045" e="1" n="Correction exercice 1 p 75" ico="corr_cscm2_2012"/>
+                    <am i="120"/>
+                </d>
+                <url i="1054046" e="1" n="Exercice 2 p 75" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056046" e="1" n="Correction exercice 2 p 75" ico="corr_cscm2_2012"/>
+                    <am i="120"/>
+                </d>
+                <url i="1054047" e="1" n="Exercice 3 p 75" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056047" e="1" n="Correction exercice 3 p 75" ico="corr_cscm2_2012"/>
+                    <am i="120"/>
+                </d>
+            </d>
+            <d n="Construction de symétriques sans quadrillage">
+                <url i="1054048" e="1" n="Exercice 1 p 76" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056048" e="1" n="Correction exercice 1 p 76" ico="corr_cscm2_2012"/>
+                    <url i="3021713" e="1" n="Page internet"/>
+                </d>
+                <url i="1054049" e="1" n="Exercice 2 p 76" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056049" e="1" n="Correction exercice 2 p 76" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054050" e="1" n="Exercice 3 p 76" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056050" e="1" n="Correction exercice 3 p 76" ico="corr_cscm2_2012"/>
+                    <am i="121"/>
+                    <am i="122"/>
+                    <am i="123"/>
+                </d>
+                <url i="1054051" e="1" n="Exercice 4 p 76" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056051" e="1" n="Correction exercice 4 p 76" ico="corr_cscm2_2012"/>
+                    <am i="121"/>
+                    <am i="122"/>
+                    <am i="123"/>
+                </d>
+            </d>
+        </d>
+        <d n="Aires et périmètres">
+            <d n="Périmètre de polygones">
+                <url i="1054383" e="1" n="Exercice 1 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056383" e="1" n="Correction exercice 1 p 78" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054384" e="1" n="Exercice 2 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056384" e="1" n="Correction exercice 2 p 78" ico="corr_cscm2_2012"/>
+                    <am i="170"/>
+                </d>
+                <url i="1054385" e="1" n="Exercice 3 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056385" e="1" n="Correction exercice 3 p 78" ico="corr_cscm2_2012"/>
+                    <am i="171"/>
+                </d>
+                <url i="1054386" e="1" n="Exercice 4 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056386" e="1" n="Correction exercice 4 p 78" ico="corr_cscm2_2012"/>
+                    <url i="3021747" e="1" n="Page internet"/>
+                </d>
+                <url i="1054387" e="1" n="Exercice 5 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056387" e="1" n="Correction exercice 5 p 78" ico="corr_cscm2_2012"/>
+                    <am i="179"/>
+                </d>
+                <url i="1054388" e="1" n="Exercice 6 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056388" e="1" n="Correction exercice 6 p 78" ico="corr_cscm2_2012"/>
+                    <am i="179"/>
+                </d>
+                <url i="1054389" e="1" n="Exercice 7 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056389" e="1" n="Correction exercice 7 p 78" ico="corr_cscm2_2012"/>
+                    <am i="179"/>
+                </d>
+                <url i="1054390" e="1" n="Exercice 8 p 78" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056390" e="1" n="Correction exercice 8 p 78" ico="corr_cscm2_2012"/>
+                    <am i="179"/>
+                </d>
+            </d>
+            <d n="Périmètre du cercle">
+                <url i="1054391" e="1" n="Exercice 1 p 79" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056391" e="1" n="Correction exercice 1 p 79" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054392" e="1" n="Exercice 2 p 79" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056392" e="1" n="Correction exercice 2 p 79" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054393" e="1" n="Exercice 3 p 79" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056393" e="1" n="Correction exercice 3 p 79" ico="corr_cscm2_2012"/>
+                    <am i="180"/>
+                </d>
+                <url i="1054394" e="1" n="Exercice 4 p 79" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056394" e="1" n="Correction exercice 4 p 79" ico="corr_cscm2_2012"/>
+                    <am i="180"/>
+                </d>
+                <url i="1054395" e="1" n="Exercice 5 p 79" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056395" e="1" n="Correction exercice 5 p 79" ico="corr_cscm2_2012"/>
+                    <am i="180"/>
+                </d>
+                <url i="1054396" e="1" n="Exercice 6 p 79" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056396" e="1" n="Correction exercice 6 p 79" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054397" e="1" n="Exercice 7 p 79" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056397" e="1" n="Correction exercice 7 p 79" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Aire (pavage, comparaison d'aires)">
+                <url i="1054398" e="1" n="Exercice 1 p 80" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056398" e="1" n="Correction exercice 1 p 80" ico="corr_cscm2_2012"/>
+                    <am i="188"/>
+                </d>
+                <url i="1054399" e="1" n="Exercice 2 p 80" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056399" e="1" n="Correction exercice 2 p 80" ico="corr_cscm2_2012"/>
+                    <am i="164"/>
+                    <am i="165"/>
+                    <am i="167"/>
+                </d>
+                <url i="1054400" e="1" n="Exercice 3 p 80" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056400" e="1" n="Correction exercice 3 p 80" ico="corr_cscm2_2012"/>
+                    <am i="166"/>
+                </d>
+                <url i="1054401" e="1" n="Exercice 4 p 80" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056401" e="1" n="Correction exercice 4 p 80" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054402" e="1" n="Exercice 5 p 80" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056402" e="1" n="Correction exercice 5 p 80" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Conversions d'unités d'aires">
+                <url i="1054403" e="1" n="Exercice 1 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056403" e="1" n="Correction exercice 1 p 81" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054404" e="1" n="Exercice 2 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056404" e="1" n="Correction exercice 2 p 81" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054405" e="1" n="Exercice 3 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056405" e="1" n="Correction exercice 3 p 81" ico="corr_cscm2_2012"/>
+                    <am i="177"/>
+                </d>
+                <url i="1054406" e="1" n="Exercice 4 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056406" e="1" n="Correction exercice 4 p 81" ico="corr_cscm2_2012"/>
+                    <am i="177"/>
+                    <url i="3021743" e="1" n="Page internet"/>
+                </d>
+                <url i="1054407" e="1" n="Exercice 5 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056407" e="1" n="Correction exercice 5 p 81" ico="corr_cscm2_2012"/>
+                    <url i="3021743" e="1" n="Page internet"/>
+                </d>
+                <url i="1054408" e="1" n="Exercice 6 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056408" e="1" n="Correction exercice 6 p 81" ico="corr_cscm2_2012"/>
+                    <url i="3021745" e="1" n="Page internet"/>
+                </d>
+                <url i="1054409" e="1" n="Exercice 7 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056409" e="1" n="Correction exercice 7 p 81" ico="corr_cscm2_2012"/>
+                    <am i="177"/>
+                    <url i="3021745" e="1" n="Page internet"/>
+                </d>
+                <url i="1054410" e="1" n="Exercice 8 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056410" e="1" n="Correction exercice 8 p 81" ico="corr_cscm2_2012"/>
+                    <am i="177"/>
+                </d>
+                <url i="1054411" e="1" n="Exercice 9 p 81" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056411" e="1" n="Correction exercice 9 p 81" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Aire du carré et aire du rectangle">
+                <url i="1054412" e="1" n="Exercice 1 p 82" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056412" e="1" n="Correction exercice 1 p 82" ico="corr_cscm2_2012"/>
+                    <am i="173"/>
+                </d>
+                <url i="1054413" e="1" n="Exercice 2 p 82" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056413" e="1" n="Correction exercice 2 p 82" ico="corr_cscm2_2012"/>
+                    <am i="173"/>
+                </d>
+                <url i="1054414" e="1" n="Exercice 3 p 82" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056414" e="1" n="Correction exercice 3 p 82" ico="corr_cscm2_2012"/>
+                    <am i="173"/>
+                </d>
+                <url i="1054415" e="1" n="Exercice 4 p 82" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056415" e="1" n="Correction exercice 4 p 82" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054416" e="1" n="Exercice 5 p 82" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056416" e="1" n="Correction exercice 5 p 82" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054417" e="1" n="Exercice 6 p 82" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056417" e="1" n="Correction exercice 6 p 82" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Aire du triangle">
+                <url i="1054418" e="1" n="Exercice 1 p 83" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056418" e="1" n="Correction exercice 1 p 83" ico="corr_cscm2_2012"/>
+                    <am i="174"/>
+                </d>
+                <url i="1054419" e="1" n="Exercice 2 p 83" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056419" e="1" n="Correction exercice 2 p 83" ico="corr_cscm2_2012"/>
+                    <am i="174"/>
+                </d>
+                <url i="1054420" e="1" n="Exercice 3 p 83" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056420" e="1" n="Correction exercice 3 p 83" ico="corr_cscm2_2012"/>
+                    <am i="445"/>
+                    <am i="448"/>
+                </d>
+                <url i="1054421" e="1" n="Exercice 4 p 83" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056421" e="1" n="Correction exercice 4 p 83" ico="corr_cscm2_2012"/>
+                    <am i="447"/>
+                </d>
+                <url i="1054422" e="1" n="Exercice 5 p 83" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056422" e="1" n="Correction exercice 5 p 83" ico="corr_cscm2_2012"/>
+                    <am i="446"/>
+                </d>
+                <url i="1054423" e="1" n="Exercice 6 p 83" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056423" e="1" n="Correction exercice 6 p 83" ico="corr_cscm2_2012"/>
+                    <am i="449"/>
+                </d>
+                <url i="1054424" e="1" n="Exercice 7 p 83" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056424" e="1" n="Correction exercice 7 p 83" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Aire d'une figure complexe">
+                <url i="1054425" e="1" n="Exercice 1 p 84" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056425" e="1" n="Correction exercice 1 p 84" ico="corr_cscm2_2012"/>
+                    <am i="176"/>
+                </d>
+                <url i="1054426" e="1" n="Exercice 2 p 84" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056426" e="1" n="Correction exercice 2 p 84" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054427" e="1" n="Exercice 3 p 84" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056427" e="1" n="Correction exercice 3 p 84" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Capacités, masses et volumes">
+            <d n="Capacités">
+                <url i="1054428" e="1" n="Exercice 1 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056428" e="1" n="Correction exercice 1 p 86" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054429" e="1" n="Exercice 2 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056429" e="1" n="Correction exercice 2 p 86" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054430" e="1" n="Exercice 3 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056430" e="1" n="Correction exercice 3 p 86" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054431" e="1" n="Exercice 4 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056431" e="1" n="Correction exercice 4 p 86" ico="corr_cscm2_2012"/>
+                    <am i="161"/>
+                    <url i="3021741" e="1" n="Page internet"/>
+                </d>
+                <url i="1054432" e="1" n="Exercice 5 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056432" e="1" n="Correction exercice 5 p 86" ico="corr_cscm2_2012"/>
+                    <am i="161"/>
+                    <url i="3021741" e="1" n="Page internet"/>
+                </d>
+                <url i="1054433" e="1" n="Exercice 6 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056433" e="1" n="Correction exercice 6 p 86" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054434" e="1" n="Exercice 7 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056434" e="1" n="Correction exercice 7 p 86" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054435" e="1" n="Exercice 8 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056435" e="1" n="Correction exercice 8 p 86" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054436" e="1" n="Exercice 9 p 86" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056436" e="1" n="Correction exercice 9 p 86" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Masses">
+                <url i="1054437" e="1" n="Exercice 1 p 87" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056437" e="1" n="Correction exercice 1 p 87" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054438" e="1" n="Exercice 2 p 87" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056438" e="1" n="Correction exercice 2 p 87" ico="corr_cscm2_2012"/>
+                    <url i="3021739" e="1" n="Page internet"/>
+                </d>
+                <url i="1054439" e="1" n="Exercice 3 p 87" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056439" e="1" n="Correction exercice 3 p 87" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054440" e="1" n="Exercice 4 p 87" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056440" e="1" n="Correction exercice 4 p 87" ico="corr_cscm2_2012"/>
+                    <url i="3021737" e="1" n="Page internet"/>
+                </d>
+                <url i="1054441" e="1" n="Exercice 5 p 87" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056441" e="1" n="Correction exercice 5 p 87" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054442" e="1" n="Exercice 6 p 87" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056442" e="1" n="Correction exercice 6 p 87" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Volumes">
+                <url i="1054443" e="1" n="Exercice 1 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056443" e="1" n="Correction exercice 1 p 88" ico="corr_cscm2_2012"/>
+                    <am i="158"/>
+                </d>
+                <url i="1054444" e="1" n="Exercice 2 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056444" e="1" n="Correction exercice 2 p 88" ico="corr_cscm2_2012"/>
+                    <am i="158"/>
+                </d>
+                <url i="1054445" e="1" n="Exercice 3 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056445" e="1" n="Correction exercice 3 p 88" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054446" e="1" n="Exercice 4 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056446" e="1" n="Correction exercice 4 p 88" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054447" e="1" n="Exercice 5 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056447" e="1" n="Correction exercice 5 p 88" ico="corr_cscm2_2012"/>
+                    <am i="163"/>
+                </d>
+                <url i="1054448" e="1" n="Exercice 6 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056448" e="1" n="Correction exercice 6 p 88" ico="corr_cscm2_2012"/>
+                    <am i="163"/>
+                </d>
+                <url i="1054449" e="1" n="Exercice 7 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056449" e="1" n="Correction exercice 7 p 88" ico="corr_cscm2_2012"/>
+                    <am i="163"/>
+                </d>
+                <url i="1054450" e="1" n="Exercice 8 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056450" e="1" n="Correction exercice 8 p 88" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054451" e="1" n="Exercice 9 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056451" e="1" n="Correction exercice 9 p 88" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054452" e="1" n="Exercice 10 p 88" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056452" e="1" n="Correction exercice 10 p 88" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Horaires">
+            <d n="Calculs d'une durée ">
+                <url i="1054188" e="1" n="Exercice 1 p 90" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056188" e="1" n="Correction exercice 1 p 90" ico="corr_cscm2_2012"/>
+                    <url i="3021281" e="1" n="Page internet"/>
+                    <url i="3021283" e="1" n="Page internet"/>
+                    <url i="3021285" e="1" n="Page internet"/>
+                </d>
+                <url i="1054189" e="1" n="Exercice 2 p 90" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056189" e="1" n="Correction exercice 2 p 90" ico="corr_cscm2_2012"/>
+                    <url i="3021287" e="1" n="Page internet"/>
+                </d>
+                <url i="1054190" e="1" n="Exercice 3 p 90" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056190" e="1" n="Correction exercice 3 p 90" ico="corr_cscm2_2012"/>
+                    <url i="3021297" e="1" n="Page internet"/>
+                </d>
+                <url i="1054191" e="1" n="Exercice 4 p 90" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056191" e="1" n="Correction exercice 4 p 90" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Problèmes sur les durées ">
+                <url i="1054192" e="1" n="Exercice 1 p 91" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056192" e="1" n="Correction exercice 1 p 91" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054193" e="1" n="Exercice 2 p 91" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056193" e="1" n="Correction exercice 2 p 91" ico="corr_cscm2_2012"/>
+                    <url i="3021291" e="1" n="Page internet"/>
+                </d>
+                <url i="1054194" e="1" n="Exercice 3 p 91" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056194" e="1" n="Correction exercice 3 p 91" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054195" e="1" n="Exercice 4 p 91" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056195" e="1" n="Correction exercice 4 p 91" ico="corr_cscm2_2012"/>
+                    <url i="3021293" e="1" n="Page internet"/>
+                </d>
+                <url i="1054196" e="1" n="Exercice 5 p 91" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056196" e="1" n="Correction exercice 5 p 91" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054197" e="1" n="Exercice 6 p 91" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056197" e="1" n="Correction exercice 6 p 91" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Conversions de durées ">
+                <url i="1054198" e="1" n="Exercice 1 p 92" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056198" e="1" n="Correction exercice 1 p 92" ico="corr_cscm2_2012"/>
+                    <url i="3021289" e="1" n="Page internet"/>
+                </d>
+                <url i="1054199" e="1" n="Exercice 2 p 92" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056199" e="1" n="Correction exercice 2 p 92" ico="corr_cscm2_2012"/>
+                    <url i="3021299" e="1" n="Page internet"/>
+                </d>
+                <url i="1054200" e="1" n="Exercice 3 p 92" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056200" e="1" n="Correction exercice 3 p 92" ico="corr_cscm2_2012"/>
+                    <url i="3021295" e="1" n="Page internet"/>
+                </d>
+                <url i="1054201" e="1" n="Exercice 4 p 92" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056201" e="1" n="Correction exercice 4 p 92" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054202" e="1" n="Exercice 5 p 92" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056202" e="1" n="Correction exercice 5 p 92" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054203" e="1" n="Exercice 6 p 92" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056203" e="1" n="Correction exercice 6 p 92" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054204" e="1" n="Exercice 7 p 92" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056204" e="1" n="Correction exercice 7 p 92" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+        <d n="Angles">
+            <d n="Comparaison d'angles ">
+                <url i="1054205" e="1" n="Exercice 1 p 94" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056205" e="1" n="Correction exercice 1 p 94" ico="corr_cscm2_2012"/>
+                    <url i="3021303" e="1" n="Page internet"/>
+                    <url i="3021305" e="1" n="Page internet"/>
+                </d>
+                <url i="1054206" e="1" n="Exercice 2 p 94" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056206" e="1" n="Correction exercice 2 p 94" ico="corr_cscm2_2012"/>
+                    <url i="3021307" e="1" n="Page internet"/>
+                    <url i="3021309" e="1" n="Page internet"/>
+                </d>
+                <url i="1054207" e="1" n="Exercice 3 p 94" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056207" e="1" n="Correction exercice 3 p 94" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054208" e="1" n="Exercice 4 p 94" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056208" e="1" n="Correction exercice 4 p 94" ico="corr_cscm2_2012"/>
+                    <url i="3021301" e="1" n="Page internet"/>
+                    <url i="3021311" e="1" n="Page internet"/>
+                    <url i="3021315" e="1" n="Page internet"/>
+                </d>
+                <url i="1054209" e="1" n="Exercice 5 p 94" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056209" e="1" n="Correction exercice 5 p 94" ico="corr_cscm2_2012"/>
+                    <url i="3021313" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Reproduction d'angles ">
+                <url i="1054210" e="1" n="Exercice 1 p 95" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056210" e="1" n="Correction exercice 1 p 95" ico="corr_cscm2_2012"/>
+                    <url i="3021317" e="1" n="Page internet"/>
+                </d>
+                <url i="1054211" e="1" n="Exercice 2 p 95" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056211" e="1" n="Correction exercice 2 p 95" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054212" e="1" n="Exercice 3 p 95" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056212" e="1" n="Correction exercice 3 p 95" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054213" e="1" n="Exercice 4 p 95" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056213" e="1" n="Correction exercice 4 p 95" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+            <d n="Vers la mesure d'un angle ">
+                <url i="1054214" e="1" n="Exercice 1 p 96" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056214" e="1" n="Correction exercice 1 p 96" ico="corr_cscm2_2012"/>
+                </d>
+                <url i="1054215" e="1" n="Exercice 2 p 96" ico="cscm2_2012"/>
+                <d n="Corrections &amp; compléments">
+                    <url i="1056215" e="1" n="Correction exercice 2 p 96" ico="corr_cscm2_2012"/>
+                </d>
+            </d>
+        </d>
+    </d>
+</manuel>

@@ -1,0 +1,614 @@
+<?xml version="1.0"?>
+<manuel>
+<d n="Cahiers 4e - 2007" ico="cm4_2007">
+    <d n="Relatifs ">
+        <d n="Multiplication">
+            <url i="1002781" e="1" n="Question de cours 0 p 4" ico="cm4_2007"/>
+            <url i="1002782" e="1" n="Exercice 1 p 4" ico="cm4_2007"/>
+            <url i="1002790" e="1" n="Exercice 2 p 4" ico="cm4_2007"/>
+            <url i="1002791" e="1" n="Exercice 3 p 4" ico="cm4_2007"/>
+            <url i="1002792" e="1" n="Exercice 4 p 4" ico="cm4_2007"/>
+            <url i="1002793" e="1" n="Exercice 5 p 5" ico="cm4_2007"/>
+            <url i="1002794" e="1" n="Exercice 6 p 5" ico="cm4_2007"/>
+            <url i="1002795" e="1" n="Exercice 7 p 5" ico="cm4_2007"/>
+            <url i="1002796" e="1" n="Exercice 8 p 5" ico="cm4_2007"/>
+            <url i="1002797" e="1" n="Exercice 9 p 5" ico="cm4_2007"/>
+            <url i="1002783" e="1" n="Exercice 10 p 5" ico="cm4_2007"/>
+            <url i="1002784" e="1" n="Exercice 11 p 6" ico="cm4_2007"/>
+            <url i="1002785" e="1" n="Exercice 12 p 6" ico="cm4_2007"/>
+            <url i="1002786" e="1" n="Exercice 13 p 6" ico="cm4_2007"/>
+            <url i="1002787" e="1" n="Exercice 14 p 6" ico="cm4_2007"/>
+            <url i="1002788" e="1" n="Exercice 15 p 6" ico="cm4_2007"/>
+            <url i="1002789" e="1" n="Exercice 16 p 6" ico="cm4_2007"/>
+        </d>
+        <d n="Division">
+            <url i="1002798" e="1" n="Question de cours 0 p 7" ico="cm4_2007"/>
+            <url i="1002799" e="1" n="Exercice 1 p 7" ico="cm4_2007"/>
+            <url i="1002810" e="1" n="Exercice 2 p 7" ico="cm4_2007"/>
+            <url i="1002812" e="1" n="Exercice 3 p 7" ico="cm4_2007"/>
+            <url i="1002813" e="1" n="Exercice 4 p 7" ico="cm4_2007"/>
+            <url i="1002814" e="1" n="Exercice 5 p 7" ico="cm4_2007"/>
+            <url i="1002815" e="1" n="Exercice 6 p 7" ico="cm4_2007"/>
+            <url i="1002816" e="1" n="Exercice 7 p 7" ico="cm4_2007"/>
+            <url i="1002817" e="1" n="Exercice 8 p 8" ico="cm4_2007"/>
+            <url i="1002818" e="1" n="Exercice 9 p 8" ico="cm4_2007"/>
+            <url i="1002800" e="1" n="Exercice 10 p 8" ico="cm4_2007"/>
+            <url i="1002801" e="1" n="Exercice 11 p 8" ico="cm4_2007"/>
+            <url i="1002802" e="1" n="Exercice 12 p 8" ico="cm4_2007"/>
+            <url i="1002803" e="1" n="Exercice 13 p 8" ico="cm4_2007"/>
+            <url i="1002804" e="1" n="Exercice 14 p 8" ico="cm4_2007"/>
+            <url i="1002805" e="1" n="Exercice 15 p 8" ico="cm4_2007"/>
+            <url i="1002806" e="1" n="Exercice 16 p 8" ico="cm4_2007"/>
+            <url i="1002807" e="1" n="Exercice 17 p 9" ico="cm4_2007"/>
+            <url i="1002808" e="1" n="Exercice 18 p 9" ico="cm4_2007"/>
+            <url i="1002809" e="1" n="Exercice 19 p 9" ico="cm4_2007"/>
+            <url i="1002811" e="1" n="Exercice 20 p 9" ico="cm4_2007"/>
+        </d>
+        <d n="Calculs">
+            <url i="1002819" e="1" n="Question de cours 0 p 10" ico="cm4_2007"/>
+            <url i="1002820" e="1" n="Exercice 1 p 10" ico="cm4_2007"/>
+            <url i="1002829" e="1" n="Exercice 2 p 10" ico="cm4_2007"/>
+            <url i="1002830" e="1" n="Exercice 3 p 10" ico="cm4_2007"/>
+            <url i="1002831" e="1" n="Exercice 4 p 10" ico="cm4_2007"/>
+            <url i="1002832" e="1" n="Exercice 5 p 10" ico="cm4_2007"/>
+            <url i="1002833" e="1" n="Exercice 6 p 10" ico="cm4_2007"/>
+            <url i="1002834" e="1" n="Exercice 7 p 11" ico="cm4_2007"/>
+            <url i="1002835" e="1" n="Exercice 8 p 11" ico="cm4_2007"/>
+            <url i="1002836" e="1" n="Exercice 9 p 11" ico="cm4_2007"/>
+            <url i="1002821" e="1" n="Exercice 10 p 11" ico="cm4_2007"/>
+            <url i="1002822" e="1" n="Exercice 11 p 11" ico="cm4_2007"/>
+            <url i="1002823" e="1" n="Exercice 12 p 11" ico="cm4_2007"/>
+            <url i="1002824" e="1" n="Exercice 13 p 12" ico="cm4_2007"/>
+            <url i="1002825" e="1" n="Exercice 14 p 12" ico="cm4_2007"/>
+            <url i="1002826" e="1" n="Exercice 15 p 12" ico="cm4_2007"/>
+            <url i="1002827" e="1" n="Exercice 16 p 12" ico="cm4_2007"/>
+            <url i="1002828" e="1" n="Exercice 17 p 12" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Fractions">
+        <d n="Comparaison">
+            <url i="1002837" e="1" n="Question de cours 0 p 14" ico="cm4_2007"/>
+            <url i="1002838" e="1" n="Exercice 1 p 14" ico="cm4_2007"/>
+            <url i="1002840" e="1" n="Exercice 2 p 14" ico="cm4_2007"/>
+            <url i="1002841" e="1" n="Exercice 3 p 14" ico="cm4_2007"/>
+            <url i="1002842" e="1" n="Exercice 4 p 14" ico="cm4_2007"/>
+            <url i="1002843" e="1" n="Exercice 5 p 14" ico="cm4_2007"/>
+            <url i="1002844" e="1" n="Exercice 6 p 14" ico="cm4_2007"/>
+            <url i="1002845" e="1" n="Exercice 7 p 15" ico="cm4_2007"/>
+            <url i="1002846" e="1" n="Exercice 8 p 15" ico="cm4_2007"/>
+            <url i="1002847" e="1" n="Exercice 9 p 15" ico="cm4_2007"/>
+            <url i="1002839" e="1" n="Exercice 10 p 15" ico="cm4_2007"/>
+        </d>
+        <d n="Addition, soustraction">
+            <url i="1002848" e="1" n="Question de cours 0 p 16" ico="cm4_2007"/>
+            <url i="1002849" e="1" n="Exercice 1 p 16" ico="cm4_2007"/>
+            <url i="1002850" e="1" n="Exercice 2 p 16" ico="cm4_2007"/>
+            <url i="1002851" e="1" n="Exercice 3 p 16" ico="cm4_2007"/>
+            <url i="1002852" e="1" n="Exercice 4 p 17" ico="cm4_2007"/>
+            <url i="1002853" e="1" n="Exercice 5 p 17" ico="cm4_2007"/>
+            <url i="1002854" e="1" n="Exercice 6 p 18" ico="cm4_2007"/>
+            <url i="1002855" e="1" n="Exercice 7 p 18" ico="cm4_2007"/>
+            <url i="1002856" e="1" n="Exercice 8 p 18" ico="cm4_2007"/>
+            <url i="1002857" e="1" n="Exercice 9 p 18" ico="cm4_2007"/>
+        </d>
+        <d n="Multiplication">
+            <url i="1002858" e="1" n="Question de cours 0 p 19" ico="cm4_2007"/>
+            <url i="1002859" e="1" n="Exercice 1 p 19" ico="cm4_2007"/>
+            <url i="1002860" e="1" n="Exercice 2 p 19" ico="cm4_2007"/>
+            <url i="1002861" e="1" n="Exercice 3 p 19" ico="cm4_2007"/>
+        </d>
+        <d n="Division">
+            <url i="1002862" e="1" n="Question de cours 0 p 20" ico="cm4_2007"/>
+            <url i="1002863" e="1" n="Exercice 1 p 20" ico="cm4_2007"/>
+            <url i="1002865" e="1" n="Exercice 2 p 20" ico="cm4_2007"/>
+            <url i="1002866" e="1" n="Exercice 3 p 20" ico="cm4_2007"/>
+            <url i="1002867" e="1" n="Exercice 4 p 20" ico="cm4_2007"/>
+            <url i="1002868" e="1" n="Exercice 5 p 20" ico="cm4_2007"/>
+            <url i="1002869" e="1" n="Exercice 6 p 20" ico="cm4_2007"/>
+            <url i="1002870" e="1" n="Exercice 7 p 21" ico="cm4_2007"/>
+            <url i="1002871" e="1" n="Exercice 8 p 21" ico="cm4_2007"/>
+            <url i="1002872" e="1" n="Exercice 9 p 21" ico="cm4_2007"/>
+            <url i="1002864" e="1" n="Exercice 10 p 21" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1002873" e="1" n="Exercice 1 p 22" ico="cm4_2007"/>
+            <url i="1002880" e="1" n="Exercice 2 p 22" ico="cm4_2007"/>
+            <url i="1002881" e="1" n="Exercice 3 p 22" ico="cm4_2007"/>
+            <url i="1002882" e="1" n="Exercice 4 p 23" ico="cm4_2007"/>
+            <url i="1002883" e="1" n="Exercice 5 p 23" ico="cm4_2007"/>
+            <url i="1002884" e="1" n="Exercice 6 p 23" ico="cm4_2007"/>
+            <url i="1002885" e="1" n="Exercice 7 p 23" ico="cm4_2007"/>
+            <url i="1002886" e="1" n="Exercice 8 p 23" ico="cm4_2007"/>
+            <url i="1002887" e="1" n="Exercice 9 p 24" ico="cm4_2007"/>
+            <url i="1002874" e="1" n="Exercice 10 p 24" ico="cm4_2007"/>
+            <url i="1002875" e="1" n="Exercice 11 p 24" ico="cm4_2007"/>
+            <url i="1002876" e="1" n="Exercice 12 p 24" ico="cm4_2007"/>
+            <url i="1002877" e="1" n="Exercice 13 p 24" ico="cm4_2007"/>
+            <url i="1002878" e="1" n="Exercice 14 p 24" ico="cm4_2007"/>
+            <url i="1002879" e="1" n="Exercice 15 p 24" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Puissances">
+        <d n="Définitions, notations">
+            <url i="1002888" e="1" n="Question de cours 0 p 26" ico="cm4_2007"/>
+            <url i="1002889" e="1" n="Exercice 1 p 26" ico="cm4_2007"/>
+            <url i="1002896" e="1" n="Exercice 2 p 26" ico="cm4_2007"/>
+            <url i="1002897" e="1" n="Exercice 3 p 26" ico="cm4_2007"/>
+            <url i="1002898" e="1" n="Exercice 4 p 26" ico="cm4_2007"/>
+            <url i="1002899" e="1" n="Exercice 5 p 26" ico="cm4_2007"/>
+            <url i="1002900" e="1" n="Exercice 6 p 26" ico="cm4_2007"/>
+            <url i="1002901" e="1" n="Exercice 7 p 26" ico="cm4_2007"/>
+            <url i="1002902" e="1" n="Exercice 8 p 26" ico="cm4_2007"/>
+            <url i="1002903" e="1" n="Exercice 9 p 27" ico="cm4_2007"/>
+            <url i="1002890" e="1" n="Exercice 10 p 27" ico="cm4_2007"/>
+            <url i="1002891" e="1" n="Exercice 11 p 27" ico="cm4_2007"/>
+            <url i="1002892" e="1" n="Exercice 12 p 27" ico="cm4_2007"/>
+            <url i="1002893" e="1" n="Exercice 13 p 27" ico="cm4_2007"/>
+            <url i="1002894" e="1" n="Exercice 14 p 27" ico="cm4_2007"/>
+            <url i="1002895" e="1" n="Exercice 15 p 27" ico="cm4_2007"/>
+        </d>
+        <d n="Multiplier par une puissance de 10, priorités">
+            <url i="1002904" e="1" n="Question de cours 0 p 28" ico="cm4_2007"/>
+            <url i="1002905" e="1" n="Exercice 1 p 28" ico="cm4_2007"/>
+            <url i="1002907" e="1" n="Exercice 2 p 28" ico="cm4_2007"/>
+            <url i="1002908" e="1" n="Exercice 3 p 28" ico="cm4_2007"/>
+            <url i="1002909" e="1" n="Exercice 4 p 28" ico="cm4_2007"/>
+            <url i="1002910" e="1" n="Exercice 5 p 28" ico="cm4_2007"/>
+            <url i="1002911" e="1" n="Exercice 6 p 29" ico="cm4_2007"/>
+            <url i="1002912" e="1" n="Exercice 7 p 29" ico="cm4_2007"/>
+            <url i="1002913" e="1" n="Exercice 8 p 29" ico="cm4_2007"/>
+            <url i="1002914" e="1" n="Exercice 9 p 29" ico="cm4_2007"/>
+            <url i="1002906" e="1" n="Exercice 10 p 29" ico="cm4_2007"/>
+        </d>
+        <d n="Calculs avec des puissances, formules">
+            <url i="1002915" e="1" n="Question de cours 0 p 30" ico="cm4_2007"/>
+            <url i="1002916" e="1" n="Exercice 1 p 30" ico="cm4_2007"/>
+            <url i="1002924" e="1" n="Exercice 2 p 30" ico="cm4_2007"/>
+            <url i="1002925" e="1" n="Exercice 3 p 30" ico="cm4_2007"/>
+            <url i="1002926" e="1" n="Exercice 4 p 30" ico="cm4_2007"/>
+            <url i="1002927" e="1" n="Exercice 5 p 30" ico="cm4_2007"/>
+            <url i="1002928" e="1" n="Exercice 6 p 31" ico="cm4_2007"/>
+            <url i="1002929" e="1" n="Exercice 7 p 31" ico="cm4_2007"/>
+            <url i="1002930" e="1" n="Exercice 8 p 31" ico="cm4_2007"/>
+            <url i="1002931" e="1" n="Exercice 9 p 31" ico="cm4_2007"/>
+            <url i="1002917" e="1" n="Exercice 10 p 31" ico="cm4_2007"/>
+            <url i="1002918" e="1" n="Exercice 11 p 31" ico="cm4_2007"/>
+            <url i="1002919" e="1" n="Exercice 12 p 32" ico="cm4_2007"/>
+            <url i="1002920" e="1" n="Exercice 13 p 32" ico="cm4_2007"/>
+            <url i="1002921" e="1" n="Exercice 14 p 32" ico="cm4_2007"/>
+            <url i="1002922" e="1" n="Exercice 15 p 32" ico="cm4_2007"/>
+            <url i="1002923" e="1" n="Exercice 16 p 32" ico="cm4_2007"/>
+        </d>
+        <d n="Écritures a fois 10 puissance n, notation scientifique">
+            <url i="1002932" e="1" n="Question de cours 0 p 33" ico="cm4_2007"/>
+            <url i="1002933" e="1" n="Exercice 1 p 33" ico="cm4_2007"/>
+            <url i="1002935" e="1" n="Exercice 2 p 33" ico="cm4_2007"/>
+            <url i="1002936" e="1" n="Exercice 3 p 33" ico="cm4_2007"/>
+            <url i="1002937" e="1" n="Exercice 4 p 33" ico="cm4_2007"/>
+            <url i="1002938" e="1" n="Exercice 5 p 34" ico="cm4_2007"/>
+            <url i="1002939" e="1" n="Exercice 6 p 34" ico="cm4_2007"/>
+            <url i="1002940" e="1" n="Exercice 7 p 34" ico="cm4_2007"/>
+            <url i="1002941" e="1" n="Exercice 8 p 34" ico="cm4_2007"/>
+            <url i="1002942" e="1" n="Exercice 9 p 34" ico="cm4_2007"/>
+            <url i="1002934" e="1" n="Exercice 10 p 34" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1002943" e="1" n="Exercice 1 p 35" ico="cm4_2007"/>
+            <url i="1002948" e="1" n="Exercice 2 p 35" ico="cm4_2007"/>
+            <url i="1002949" e="1" n="Exercice 3 p 35" ico="cm4_2007"/>
+            <url i="1002950" e="1" n="Exercice 4 p 35" ico="cm4_2007"/>
+            <url i="1002951" e="1" n="Exercice 5 p 35" ico="cm4_2007"/>
+            <url i="1002952" e="1" n="Exercice 6 p 35" ico="cm4_2007"/>
+            <url i="1002953" e="1" n="Exercice 7 p 36" ico="cm4_2007"/>
+            <url i="1002954" e="1" n="Exercice 8 p 36" ico="cm4_2007"/>
+            <url i="1002955" e="1" n="Exercice 9 p 36" ico="cm4_2007"/>
+            <url i="1002944" e="1" n="Exercice 10 p 36" ico="cm4_2007"/>
+            <url i="1002945" e="1" n="Exercice 11 p 36" ico="cm4_2007"/>
+            <url i="1002946" e="1" n="Exercice 12 p 36" ico="cm4_2007"/>
+            <url i="1002947" e="1" n="Exercice 13 p 36" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Calcul littéral ">
+        <d n="Substitution">
+            <url i="1002956" e="1" n="Question de cours 0 p 38" ico="cm4_2007"/>
+            <url i="1002957" e="1" n="Exercice 1 p 38" ico="cm4_2007"/>
+            <url i="1002958" e="1" n="Exercice 2 p 38" ico="cm4_2007"/>
+            <url i="1002959" e="1" n="Exercice 3 p 38" ico="cm4_2007"/>
+            <url i="1002960" e="1" n="Exercice 4 p 38" ico="cm4_2007"/>
+            <url i="1002961" e="1" n="Exercice 5 p 38" ico="cm4_2007"/>
+            <url i="1002962" e="1" n="Exercice 6 p 38" ico="cm4_2007"/>
+            <url i="1002963" e="1" n="Exercice 7 p 38" ico="cm4_2007"/>
+            <url i="1002964" e="1" n="Exercice 8 p 38" ico="cm4_2007"/>
+        </d>
+        <d n="Factorisation, réduction, somme algébrique">
+            <url i="1002965" e="1" n="Question de cours 0 p 39" ico="cm4_2007"/>
+            <url i="1002966" e="1" n="Exercice 1 p 39" ico="cm4_2007"/>
+            <url i="1002971" e="1" n="Exercice 2 p 39" ico="cm4_2007"/>
+            <url i="1002972" e="1" n="Exercice 3 p 39" ico="cm4_2007"/>
+            <url i="1002973" e="1" n="Exercice 4 p 39" ico="cm4_2007"/>
+            <url i="1002974" e="1" n="Exercice 5 p 39" ico="cm4_2007"/>
+            <url i="1002975" e="1" n="Exercice 6 p 39" ico="cm4_2007"/>
+            <url i="1002976" e="1" n="Exercice 7 p 40" ico="cm4_2007"/>
+            <url i="1002977" e="1" n="Exercice 8 p 40" ico="cm4_2007"/>
+            <url i="1002978" e="1" n="Exercice 9 p 40" ico="cm4_2007"/>
+            <url i="1002967" e="1" n="Exercice 10 p 40" ico="cm4_2007"/>
+            <url i="1002968" e="1" n="Exercice 11 p 40" ico="cm4_2007"/>
+            <url i="1002969" e="1" n="Exercice 12 p 40" ico="cm4_2007"/>
+            <url i="1002970" e="1" n="Exercice 13 p 40" ico="cm4_2007"/>
+        </d>
+        <d n="Développement, réduction">
+            <url i="1002979" e="1" n="Question de cours 0 p 41" ico="cm4_2007"/>
+            <url i="1002980" e="1" n="Exercice 1 p 41" ico="cm4_2007"/>
+            <url i="1002982" e="1" n="Exercice 2 p 41" ico="cm4_2007"/>
+            <url i="1002983" e="1" n="Exercice 3 p 41" ico="cm4_2007"/>
+            <url i="1002984" e="1" n="Exercice 4 p 41" ico="cm4_2007"/>
+            <url i="1002985" e="1" n="Exercice 5 p 41" ico="cm4_2007"/>
+            <url i="1002986" e="1" n="Exercice 6 p 42" ico="cm4_2007"/>
+            <url i="1002987" e="1" n="Exercice 7 p 42" ico="cm4_2007"/>
+            <url i="1002988" e="1" n="Exercice 8 p 42" ico="cm4_2007"/>
+            <url i="1002989" e="1" n="Exercice 9 p 42" ico="cm4_2007"/>
+            <url i="1002981" e="1" n="Exercice 10 p 42" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1002990" e="1" n="Question de cours 0 p 43" ico="cm4_2007"/>
+            <url i="1002991" e="1" n="Exercice 1 p 43" ico="cm4_2007"/>
+            <url i="1002992" e="1" n="Exercice 2 p 43" ico="cm4_2007"/>
+            <url i="1002993" e="1" n="Exercice 3 p 43" ico="cm4_2007"/>
+            <url i="1002994" e="1" n="Exercice 4 p 43" ico="cm4_2007"/>
+            <url i="1002995" e="1" n="Exercice 5 p 43" ico="cm4_2007"/>
+            <url i="1002996" e="1" n="Exercice 6 p 44" ico="cm4_2007"/>
+            <url i="1002997" e="1" n="Exercice 7 p 44" ico="cm4_2007"/>
+            <url i="1002998" e="1" n="Exercice 8 p 44" ico="cm4_2007"/>
+            <url i="1002999" e="1" n="Exercice 9 p 44" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Équations, ordre ">
+        <d n="Résolution">
+            <url i="1003000" e="1" n="Question de cours 0 p 46" ico="cm4_2007"/>
+            <url i="1003001" e="1" n="Exercice 1 p 46" ico="cm4_2007"/>
+            <url i="1003004" e="1" n="Exercice 2 p 46" ico="cm4_2007"/>
+            <url i="1003005" e="1" n="Exercice 3 p 46" ico="cm4_2007"/>
+            <url i="1003006" e="1" n="Exercice 4 p 46" ico="cm4_2007"/>
+            <url i="1003007" e="1" n="Exercice 5 p 46" ico="cm4_2007"/>
+            <url i="1003008" e="1" n="Exercice 6 p 47" ico="cm4_2007"/>
+            <url i="1003009" e="1" n="Exercice 7 p 47" ico="cm4_2007"/>
+            <url i="1003010" e="1" n="Exercice 8 p 47" ico="cm4_2007"/>
+            <url i="1003011" e="1" n="Exercice 9 p 47" ico="cm4_2007"/>
+            <url i="1003002" e="1" n="Exercice 10 p 47" ico="cm4_2007"/>
+            <url i="1003003" e="1" n="Exercice 11 p 47" ico="cm4_2007"/>
+        </d>
+        <d n="Problèmes">
+            <url i="1003012" e="1" n="Exercice 1 p 48" ico="cm4_2007"/>
+            <url i="1003013" e="1" n="Exercice 2 p 48" ico="cm4_2007"/>
+            <url i="1003014" e="1" n="Exercice 3 p 48" ico="cm4_2007"/>
+            <url i="1003015" e="1" n="Exercice 4 p 48" ico="cm4_2007"/>
+            <url i="1003016" e="1" n="Exercice 5 p 49" ico="cm4_2007"/>
+            <url i="1003017" e="1" n="Exercice 6 p 49" ico="cm4_2007"/>
+            <url i="1003018" e="1" n="Exercice 7 p 49" ico="cm4_2007"/>
+            <url i="1003019" e="1" n="Exercice 8 p 49" ico="cm4_2007"/>
+        </d>
+        <d n="Ordre">
+            <url i="1003020" e="1" n="Question de cours 0 p 50" ico="cm4_2007"/>
+            <url i="1003021" e="1" n="Exercice 1 p 50" ico="cm4_2007"/>
+            <url i="1003022" e="1" n="Exercice 2 p 50" ico="cm4_2007"/>
+            <url i="1003023" e="1" n="Exercice 3 p 50" ico="cm4_2007"/>
+            <url i="1003024" e="1" n="Exercice 4 p 50" ico="cm4_2007"/>
+            <url i="1003025" e="1" n="Exercice 5 p 50" ico="cm4_2007"/>
+            <url i="1003026" e="1" n="Exercice 6 p 50" ico="cm4_2007"/>
+            <url i="1003027" e="1" n="Exercice 7 p 50" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Proportionnalité ">
+        <d n="Quatrième proportionnelle">
+            <url i="1003028" e="1" n="Question de cours 0 p 52" ico="cm4_2007"/>
+            <url i="1003029" e="1" n="Exercice 1 p 52" ico="cm4_2007"/>
+            <url i="1003030" e="1" n="Exercice 2 p 52" ico="cm4_2007"/>
+            <url i="1003031" e="1" n="Exercice 3 p 52" ico="cm4_2007"/>
+            <url i="1003032" e="1" n="Exercice 4 p 52" ico="cm4_2007"/>
+            <url i="1003033" e="1" n="Exercice 5 p 52" ico="cm4_2007"/>
+            <url i="1003034" e="1" n="Exercice 6 p 52" ico="cm4_2007"/>
+            <url i="1003035" e="1" n="Exercice 7 p 52" ico="cm4_2007"/>
+        </d>
+        <d n="Pourcentages, vitesses">
+            <url i="1003036" e="1" n="Question de cours 0 p 53" ico="cm4_2007"/>
+            <url i="1003037" e="1" n="Exercice 1 p 53" ico="cm4_2007"/>
+            <url i="1003041" e="1" n="Exercice 2 p 53" ico="cm4_2007"/>
+            <url i="1003042" e="1" n="Exercice 3 p 53" ico="cm4_2007"/>
+            <url i="1003043" e="1" n="Exercice 4 p 53" ico="cm4_2007"/>
+            <url i="1003044" e="1" n="Exercice 5 p 53" ico="cm4_2007"/>
+            <url i="1003045" e="1" n="Exercice 6 p 53" ico="cm4_2007"/>
+            <url i="1003046" e="1" n="Exercice 7 p 54" ico="cm4_2007"/>
+            <url i="1003047" e="1" n="Exercice 8 p 54" ico="cm4_2007"/>
+            <url i="1003048" e="1" n="Exercice 9 p 54" ico="cm4_2007"/>
+            <url i="1003038" e="1" n="Exercice 10 p 54" ico="cm4_2007"/>
+            <url i="1003039" e="1" n="Exercice 11 p 54" ico="cm4_2007"/>
+            <url i="1003040" e="1" n="Exercice 12 p 54" ico="cm4_2007"/>
+        </d>
+        <d n="Graphiques">
+            <url i="1003049" e="1" n="Question de cours 0 p 55" ico="cm4_2007"/>
+            <url i="1003050" e="1" n="Exercice 1 p 55" ico="cm4_2007"/>
+            <url i="1003051" e="1" n="Exercice 2 p 55" ico="cm4_2007"/>
+            <url i="1003052" e="1" n="Exercice 3 p 55" ico="cm4_2007"/>
+            <url i="1003053" e="1" n="Exercice 4 p 55" ico="cm4_2007"/>
+            <url i="1003054" e="1" n="Exercice 5 p 56" ico="cm4_2007"/>
+            <url i="1003055" e="1" n="Exercice 6 p 56" ico="cm4_2007"/>
+            <url i="1003056" e="1" n="Exercice 7 p 56" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1003057" e="1" n="Question de cours 0 p 57" ico="cm4_2007"/>
+            <url i="1003058" e="1" n="Exercice 1 p 57" ico="cm4_2007"/>
+            <url i="1003059" e="1" n="Exercice 2 p 57" ico="cm4_2007"/>
+            <url i="1003060" e="1" n="Exercice 3 p 57" ico="cm4_2007"/>
+            <url i="1003061" e="1" n="Exercice 4 p 58" ico="cm4_2007"/>
+            <url i="1003062" e="1" n="Exercice 5 p 58" ico="cm4_2007"/>
+            <url i="1003063" e="1" n="Exercice 6 p 58" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Statistiques ">
+        <d n="Moyennes arithmétiques">
+            <url i="1003064" e="1" n="Question de cours 0 p 60" ico="cm4_2007"/>
+            <url i="1003065" e="1" n="Exercice 1 p 60" ico="cm4_2007"/>
+            <url i="1003066" e="1" n="Exercice 2 p 60" ico="cm4_2007"/>
+            <url i="1003067" e="1" n="Exercice 3 p 60" ico="cm4_2007"/>
+            <url i="1003068" e="1" n="Exercice 4 p 60" ico="cm4_2007"/>
+            <url i="1003069" e="1" n="Exercice 5 p 61" ico="cm4_2007"/>
+            <url i="1003070" e="1" n="Exercice 6 p 61" ico="cm4_2007"/>
+            <url i="1003071" e="1" n="Exercice 7 p 61" ico="cm4_2007"/>
+        </d>
+        <d n="Moyennes pondérées">
+            <url i="1003072" e="1" n="Question de cours 0 p 62" ico="cm4_2007"/>
+            <url i="1003073" e="1" n="Exercice 1 p 62" ico="cm4_2007"/>
+            <url i="1003074" e="1" n="Exercice 2 p 62" ico="cm4_2007"/>
+            <url i="1003075" e="1" n="Exercice 3 p 62" ico="cm4_2007"/>
+            <url i="1003076" e="1" n="Exercice 4 p 62" ico="cm4_2007"/>
+            <url i="1003077" e="1" n="Exercice 5 p 63" ico="cm4_2007"/>
+            <url i="1003078" e="1" n="Exercice 6 p 63" ico="cm4_2007"/>
+            <url i="1003079" e="1" n="Exercice 7 p 63" ico="cm4_2007"/>
+            <url i="1003080" e="1" n="Exercice 8 p 63" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1003081" e="1" n="Exercice 1 p 64" ico="cm4_2007"/>
+            <url i="1003084" e="1" n="Exercice 2 p 64" ico="cm4_2007"/>
+            <url i="1003085" e="1" n="Exercice 3 p 64" ico="cm4_2007"/>
+            <url i="1003086" e="1" n="Exercice 4 p 64" ico="cm4_2007"/>
+            <url i="1003087" e="1" n="Exercice 5 p 65" ico="cm4_2007"/>
+            <url i="1003088" e="1" n="Exercice 6 p 65" ico="cm4_2007"/>
+            <url i="1003089" e="1" n="Exercice 7 p 65" ico="cm4_2007"/>
+            <url i="1003090" e="1" n="Exercice 8 p 66" ico="cm4_2007"/>
+            <url i="1003091" e="1" n="Exercice 9 p 66" ico="cm4_2007"/>
+            <url i="1003082" e="1" n="Exercice 10 p 66" ico="cm4_2007"/>
+            <url i="1003083" e="1" n="Exercice 11 p 66" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Triangle rectangle ">
+        <d n="Cercles">
+            <url i="1003092" e="1" n="Question de cours 0 p 68" ico="cm4_2007"/>
+            <url i="1003093" e="1" n="Exercice 1 p 68" ico="cm4_2007"/>
+            <url i="1003094" e="1" n="Exercice 2 p 68" ico="cm4_2007"/>
+            <url i="1003095" e="1" n="Exercice 3 p 68" ico="cm4_2007"/>
+            <url i="1003096" e="1" n="Exercice 4 p 69" ico="cm4_2007"/>
+            <url i="1003097" e="1" n="Exercice 5 p 69" ico="cm4_2007"/>
+            <url i="1003098" e="1" n="Exercice 6 p 69" ico="cm4_2007"/>
+            <url i="1003099" e="1" n="Exercice 7 p 70" ico="cm4_2007"/>
+            <url i="1003100" e="1" n="Exercice 8 p 70" ico="cm4_2007"/>
+            <url i="1003101" e="1" n="Exercice 9 p 70" ico="cm4_2007"/>
+        </d>
+        <d n="Théorème de Pythagore">
+            <url i="1003102" e="1" n="Question de cours 0 p 71" ico="cm4_2007"/>
+            <url i="1003103" e="1" n="Exercice 1 p 71" ico="cm4_2007"/>
+            <url i="1003107" e="1" n="Exercice 2 p 71" ico="cm4_2007"/>
+            <url i="1003108" e="1" n="Exercice 3 p 71" ico="cm4_2007"/>
+            <url i="1003109" e="1" n="Exercice 4 p 72" ico="cm4_2007"/>
+            <url i="1003110" e="1" n="Exercice 5 p 72" ico="cm4_2007"/>
+            <url i="1003111" e="1" n="Exercice 6 p 72" ico="cm4_2007"/>
+            <url i="1003112" e="1" n="Exercice 7 p 72" ico="cm4_2007"/>
+            <url i="1003113" e="1" n="Exercice 8 p 72" ico="cm4_2007"/>
+            <url i="1003114" e="1" n="Exercice 9 p 73" ico="cm4_2007"/>
+            <url i="1003104" e="1" n="Exercice 10 p 73" ico="cm4_2007"/>
+            <url i="1003105" e="1" n="Exercice 11 p 73" ico="cm4_2007"/>
+            <url i="1003106" e="1" n="Exercice 12 p 73" ico="cm4_2007"/>
+        </d>
+        <d n="Réciproque du théorème de Pythagore">
+            <url i="1003115" e="1" n="Question de cours 0 p 74" ico="cm4_2007"/>
+            <url i="1003116" e="1" n="Exercice 1 p 74" ico="cm4_2007"/>
+            <url i="1003120" e="1" n="Exercice 2 p 74" ico="cm4_2007"/>
+            <url i="1003121" e="1" n="Exercice 3 p 74" ico="cm4_2007"/>
+            <url i="1003122" e="1" n="Exercice 4 p 74" ico="cm4_2007"/>
+            <url i="1003123" e="1" n="Exercice 5 p 75" ico="cm4_2007"/>
+            <url i="1003124" e="1" n="Exercice 6 p 75" ico="cm4_2007"/>
+            <url i="1003125" e="1" n="Exercice 7 p 75" ico="cm4_2007"/>
+            <url i="1003126" e="1" n="Exercice 8 p 75" ico="cm4_2007"/>
+            <url i="1003127" e="1" n="Exercice 9 p 76" ico="cm4_2007"/>
+            <url i="1003117" e="1" n="Exercice 10 p 76" ico="cm4_2007"/>
+            <url i="1003118" e="1" n="Exercice 11 p 76" ico="cm4_2007"/>
+            <url i="1003119" e="1" n="Exercice 12 p 76" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1003128" e="1" n="Question de cours 0 p 77" ico="cm4_2007"/>
+            <url i="1003129" e="1" n="Exercice 1 p 77" ico="cm4_2007"/>
+            <url i="1003132" e="1" n="Exercice 2 p 77" ico="cm4_2007"/>
+            <url i="1003133" e="1" n="Exercice 3 p 77" ico="cm4_2007"/>
+            <url i="1003134" e="1" n="Exercice 4 p 78" ico="cm4_2007"/>
+            <url i="1003135" e="1" n="Exercice 5 p 78" ico="cm4_2007"/>
+            <url i="1003136" e="1" n="Exercice 6 p 78" ico="cm4_2007"/>
+            <url i="1003137" e="1" n="Exercice 7 p 78" ico="cm4_2007"/>
+            <url i="1003138" e="1" n="Exercice 8 p 79" ico="cm4_2007"/>
+            <url i="1003139" e="1" n="Exercice 9 p 79" ico="cm4_2007"/>
+            <url i="1003130" e="1" n="Exercice 10 p 80" ico="cm4_2007"/>
+            <url i="1003131" e="1" n="Exercice 11 p 80" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Triangles et parallèles ">
+        <d n="Théorèmes des milieux">
+            <url i="1003140" e="1" n="Question de cours 0 p 82" ico="cm4_2007"/>
+            <url i="1003141" e="1" n="Exercice 1 p 82" ico="cm4_2007"/>
+            <url i="1003142" e="1" n="Exercice 2 p 82" ico="cm4_2007"/>
+            <url i="1003143" e="1" n="Exercice 3 p 82" ico="cm4_2007"/>
+            <url i="1003144" e="1" n="Exercice 4 p 83" ico="cm4_2007"/>
+            <url i="1003145" e="1" n="Exercice 5 p 83" ico="cm4_2007"/>
+            <url i="1003146" e="1" n="Exercice 6 p 83" ico="cm4_2007"/>
+            <url i="1003147" e="1" n="Exercice 7 p 84" ico="cm4_2007"/>
+            <url i="1003148" e="1" n="Exercice 8 p 84" ico="cm4_2007"/>
+            <url i="1003149" e="1" n="Exercice 9 p 84" ico="cm4_2007"/>
+        </d>
+        <d n="Triangles et parallèles">
+            <url i="1003150" e="1" n="Question de cours 0 p 85" ico="cm4_2007"/>
+            <url i="1003151" e="1" n="Exercice 1 p 85" ico="cm4_2007"/>
+            <url i="1003152" e="1" n="Exercice 2 p 85" ico="cm4_2007"/>
+            <url i="1003153" e="1" n="Exercice 3 p 86" ico="cm4_2007"/>
+            <url i="1003154" e="1" n="Exercice 4 p 86" ico="cm4_2007"/>
+            <url i="1003155" e="1" n="Exercice 5 p 86" ico="cm4_2007"/>
+            <url i="1003156" e="1" n="Exercice 6 p 87" ico="cm4_2007"/>
+            <url i="1003157" e="1" n="Exercice 7 p 87" ico="cm4_2007"/>
+        </d>
+        <d n="Agrandissements, réductions">
+            <url i="1003158" e="1" n="Question de cours 0 p 88" ico="cm4_2007"/>
+            <url i="1003159" e="1" n="Exercice 1 p 88" ico="cm4_2007"/>
+            <url i="1003160" e="1" n="Exercice 2 p 88" ico="cm4_2007"/>
+            <url i="1003161" e="1" n="Exercice 3 p 88" ico="cm4_2007"/>
+            <url i="1003162" e="1" n="Exercice 4 p 88" ico="cm4_2007"/>
+            <url i="1003163" e="1" n="Exercice 5 p 89" ico="cm4_2007"/>
+            <url i="1003164" e="1" n="Exercice 6 p 89" ico="cm4_2007"/>
+            <url i="1003165" e="1" n="Exercice 7 p 89" ico="cm4_2007"/>
+            <url i="1003166" e="1" n="Exercice 8 p 89" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1003167" e="1" n="Exercice 1 p 90" ico="cm4_2007"/>
+            <url i="1003168" e="1" n="Exercice 2 p 90" ico="cm4_2007"/>
+            <url i="1003169" e="1" n="Exercice 3 p 91" ico="cm4_2007"/>
+            <url i="1003170" e="1" n="Exercice 4 p 91" ico="cm4_2007"/>
+            <url i="1003171" e="1" n="Exercice 5 p 92" ico="cm4_2007"/>
+            <url i="1003172" e="1" n="Exercice 6 p 92" ico="cm4_2007"/>
+            <url i="1003173" e="1" n="Exercice 7 p 92" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Distances et tangentes ">
+        <d n="Distance d'un point à une droite">
+            <url i="1003174" e="1" n="Question de cours 0 p 94" ico="cm4_2007"/>
+            <url i="1003175" e="1" n="Exercice 1 p 94" ico="cm4_2007"/>
+            <url i="1003176" e="1" n="Exercice 2 p 94" ico="cm4_2007"/>
+            <url i="1003177" e="1" n="Exercice 3 p 94" ico="cm4_2007"/>
+            <url i="1003178" e="1" n="Exercice 4 p 95" ico="cm4_2007"/>
+            <url i="1003179" e="1" n="Exercice 5 p 95" ico="cm4_2007"/>
+            <url i="1003180" e="1" n="Exercice 6 p 95" ico="cm4_2007"/>
+        </d>
+        <d n="Tangentes à un cercle">
+            <url i="1003181" e="1" n="Question de cours 0 p 96" ico="cm4_2007"/>
+            <url i="1003182" e="1" n="Exercice 1 p 96" ico="cm4_2007"/>
+            <url i="1003183" e="1" n="Exercice 2 p 96" ico="cm4_2007"/>
+            <url i="1003184" e="1" n="Exercice 3 p 96" ico="cm4_2007"/>
+            <url i="1003185" e="1" n="Exercice 4 p 96" ico="cm4_2007"/>
+            <url i="1003186" e="1" n="Exercice 5 p 97" ico="cm4_2007"/>
+            <url i="1003187" e="1" n="Exercice 6 p 97" ico="cm4_2007"/>
+            <url i="1003188" e="1" n="Exercice 7 p 97" ico="cm4_2007"/>
+        </d>
+        <d n="Bissectrices et cercle inscrit">
+            <url i="1003189" e="1" n="Question de cours 0 p 98" ico="cm4_2007"/>
+            <url i="1003190" e="1" n="Exercice 1 p 98" ico="cm4_2007"/>
+            <url i="1003191" e="1" n="Exercice 2 p 98" ico="cm4_2007"/>
+            <url i="1003192" e="1" n="Exercice 3 p 98" ico="cm4_2007"/>
+            <url i="1003193" e="1" n="Exercice 4 p 98" ico="cm4_2007"/>
+            <url i="1003194" e="1" n="Exercice 5 p 99" ico="cm4_2007"/>
+            <url i="1003195" e="1" n="Exercice 6 p 99" ico="cm4_2007"/>
+            <url i="1003196" e="1" n="Exercice 7 p 99" ico="cm4_2007"/>
+        </d>
+        <d n="Synthèse">
+            <url i="1003197" e="1" n="Exercice 1 p 100" ico="cm4_2007"/>
+            <url i="1003200" e="1" n="Exercice 2 p 100" ico="cm4_2007"/>
+            <url i="1003201" e="1" n="Exercice 3 p 100" ico="cm4_2007"/>
+            <url i="1003202" e="1" n="Exercice 4 p 101" ico="cm4_2007"/>
+            <url i="1003203" e="1" n="Exercice 5 p 101" ico="cm4_2007"/>
+            <url i="1003204" e="1" n="Exercice 6 p 101" ico="cm4_2007"/>
+            <url i="1003205" e="1" n="Exercice 7 p 101" ico="cm4_2007"/>
+            <url i="1003206" e="1" n="Exercice 8 p 102" ico="cm4_2007"/>
+            <url i="1003207" e="1" n="Exercice 9 p 102" ico="cm4_2007"/>
+            <url i="1003198" e="1" n="Exercice 10 p 102" ico="cm4_2007"/>
+            <url i="1003199" e="1" n="Exercice 11 p 102" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Cosinus ">
+        <d n="Définition">
+            <url i="1003208" e="1" n="Question de cours 0 p 103" ico="cm4_2007"/>
+            <url i="1003209" e="1" n="Exercice 1 p 104" ico="cm4_2007"/>
+            <url i="1003213" e="1" n="Exercice 2 p 104" ico="cm4_2007"/>
+            <url i="1003214" e="1" n="Exercice 3 p 104" ico="cm4_2007"/>
+            <url i="1003215" e="1" n="Exercice 4 p 104" ico="cm4_2007"/>
+            <url i="1003216" e="1" n="Exercice 5 p 104" ico="cm4_2007"/>
+            <url i="1003217" e="1" n="Exercice 6 p 104" ico="cm4_2007"/>
+            <url i="1003218" e="1" n="Exercice 7 p 104" ico="cm4_2007"/>
+            <url i="1003219" e="1" n="Exercice 8 p 105" ico="cm4_2007"/>
+            <url i="1003220" e="1" n="Exercice 9 p 105" ico="cm4_2007"/>
+            <url i="1003210" e="1" n="Exercice 10 p 105" ico="cm4_2007"/>
+            <url i="1003211" e="1" n="Exercice 11 p 105" ico="cm4_2007"/>
+            <url i="1003212" e="1" n="Exercice 12 p 105" ico="cm4_2007"/>
+        </d>
+        <d n="Calculs">
+            <url i="1003221" e="1" n="Question de cours 0 p 106" ico="cm4_2007"/>
+            <url i="1003222" e="1" n="Exercice 1 p 106" ico="cm4_2007"/>
+            <url i="1003229" e="1" n="Exercice 2 p 106" ico="cm4_2007"/>
+            <url i="1003230" e="1" n="Exercice 3 p 106" ico="cm4_2007"/>
+            <url i="1003231" e="1" n="Exercice 4 p 106" ico="cm4_2007"/>
+            <url i="1003232" e="1" n="Exercice 5 p 106" ico="cm4_2007"/>
+            <url i="1003233" e="1" n="Exercice 6 p 106" ico="cm4_2007"/>
+            <url i="1003234" e="1" n="Exercice 7 p 106" ico="cm4_2007"/>
+            <url i="1003235" e="1" n="Exercice 8 p 106" ico="cm4_2007"/>
+            <url i="1003236" e="1" n="Exercice 9 p 107" ico="cm4_2007"/>
+            <url i="1003223" e="1" n="Exercice 10 p 107" ico="cm4_2007"/>
+            <url i="1003224" e="1" n="Exercice 11 p 107" ico="cm4_2007"/>
+            <url i="1003225" e="1" n="Exercice 12 p 107" ico="cm4_2007"/>
+            <url i="1003226" e="1" n="Exercice 13 p 107" ico="cm4_2007"/>
+            <url i="1003227" e="1" n="Exercice 14 p 108" ico="cm4_2007"/>
+            <url i="1003228" e="1" n="Exercice 15 p 108" ico="cm4_2007"/>
+        </d>
+        <d n="Problèmes">
+            <url i="1003237" e="1" n="Question de cours 0 p 109" ico="cm4_2007"/>
+            <url i="1003238" e="1" n="Exercice 1 p 109" ico="cm4_2007"/>
+            <url i="1003239" e="1" n="Exercice 2 p 109" ico="cm4_2007"/>
+            <url i="1003240" e="1" n="Exercice 3 p 109" ico="cm4_2007"/>
+            <url i="1003241" e="1" n="Exercice 4 p 110" ico="cm4_2007"/>
+            <url i="1003242" e="1" n="Exercice 5 p 110" ico="cm4_2007"/>
+            <url i="1003243" e="1" n="Exercice 6 p 110" ico="cm4_2007"/>
+            <url i="1003244" e="1" n="Exercice 7 p 110" ico="cm4_2007"/>
+        </d>
+    </d>
+    <d n="Pyramides et cônes ">
+        <d n="Patrons">
+            <url i="1003245" e="1" n="Question de cours 0 p 112" ico="cm4_2007"/>
+            <url i="1003246" e="1" n="Exercice 1 p 112" ico="cm4_2007"/>
+            <url i="1003248" e="1" n="Exercice 2 p 112" ico="cm4_2007"/>
+            <url i="1003249" e="1" n="Exercice 3 p 112" ico="cm4_2007"/>
+            <url i="1003250" e="1" n="Exercice 4 p 112" ico="cm4_2007"/>
+            <url i="1003251" e="1" n="Exercice 5 p 112" ico="cm4_2007"/>
+            <url i="1003252" e="1" n="Exercice 6 p 112" ico="cm4_2007"/>
+            <url i="1003253" e="1" n="Exercice 7 p 113" ico="cm4_2007"/>
+            <url i="1003254" e="1" n="Exercice 8 p 113" ico="cm4_2007"/>
+            <url i="1003255" e="1" n="Exercice 9 p 113" ico="cm4_2007"/>
+            <url i="1003247" e="1" n="Exercice 10 p 113" ico="cm4_2007"/>
+        </d>
+        <d n="Aires, volumes">
+            <url i="1003256" e="1" n="Question de cours 0 p 114" ico="cm4_2007"/>
+            <url i="1003257" e="1" n="Exercice 1 p 114" ico="cm4_2007"/>
+            <url i="1003258" e="1" n="Exercice 2 p 114" ico="cm4_2007"/>
+            <url i="1003259" e="1" n="Exercice 3 p 114" ico="cm4_2007"/>
+            <url i="1003260" e="1" n="Exercice 4 p 114" ico="cm4_2007"/>
+            <url i="1003261" e="1" n="Exercice 5 p 115" ico="cm4_2007"/>
+            <url i="1003262" e="1" n="Exercice 6 p 115" ico="cm4_2007"/>
+            <url i="1003263" e="1" n="Exercice 7 p 116" ico="cm4_2007"/>
+            <url i="1003264" e="1" n="Exercice 8 p 116" ico="cm4_2007"/>
+        </d>
+        <d n="Calculs">
+            <url i="1003265" e="1" n="Exercice 1 p 117" ico="cm4_2007"/>
+            <url i="1003268" e="1" n="Exercice 2 p 117" ico="cm4_2007"/>
+            <url i="1003269" e="1" n="Exercice 3 p 117" ico="cm4_2007"/>
+            <url i="1003270" e="1" n="Exercice 4 p 118" ico="cm4_2007"/>
+            <url i="1003271" e="1" n="Exercice 5 p 118" ico="cm4_2007"/>
+            <url i="1003272" e="1" n="Exercice 6 p 118" ico="cm4_2007"/>
+            <url i="1003273" e="1" n="Exercice 7 p 119" ico="cm4_2007"/>
+            <url i="1003274" e="1" n="Exercice 8 p 119" ico="cm4_2007"/>
+            <url i="1003275" e="1" n="Exercice 9 p 119" ico="cm4_2007"/>
+            <url i="1003266" e="1" n="Exercice 10 p 119" ico="cm4_2007"/>
+            <url i="1003267" e="1" n="Exercice 11 p 120" ico="cm4_2007"/>
+        </d>
+    </d>
+</d>
+</manuel>

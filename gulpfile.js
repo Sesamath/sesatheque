@@ -24,7 +24,6 @@
 
 var gulp   = require('gulp');
 var sass   = require('gulp-sass');
-var jsdoc  = require('gulp-jsdoc');
 var jshint = require('gulp-jshint');
 var fs     = require('fs');
 require('lassi');
@@ -47,20 +46,6 @@ gulp.task('watch', function() {
   launcher.observe('node_modules/lassi').including('**/*.js').excluding('**/node_modules').restart();
   launcher.start();
 })
-
-
-gulp.task('doc', function() {
-  var infos = {
-    plugins: ['plugins/markdown'],
-    markdown: {
-      parser: "gfm"
-    }
-  }
-  gulp.src(['construct/**/*.js', 'README.md'])
-      .pipe(jsdoc.parser(infos,'data'))
-      .pipe(jsdoc.generator('./documentation'))
-});
-
 
 /**
  * Lance l'analyse de notre code serveur

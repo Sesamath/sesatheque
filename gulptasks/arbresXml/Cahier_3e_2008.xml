@@ -1,0 +1,1985 @@
+<?xml version="1.0"?>
+<manuel>
+    <d n="Cahiers 3e - 2008" ico="cm3_2008">
+        <d n="Nombres entiers et rationnels">
+            <d n="Diviseurs communs, PGCD">
+                <url i="1004660" e="1" n="Question de cours 1 p 4" ico="cm3_2008"/>
+                <url i="1004661" e="1" n="Question de cours 2 p 4" ico="cm3_2008"/>
+                <url i="1004662" e="1" n="Exercice 1 p 4" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008161" e="1" n="Correction exercice 1 p 4" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004663" e="1" n="Exercice 2 p 4" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008162" e="1" n="Correction exercice 2 p 4" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004664" e="1" n="Exercice 3 p 4" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008163" e="1" n="Correction exercice 3 p 4" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004665" e="1" n="Exercice 4 p 4" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008164" e="1" n="Correction exercice 4 p 4" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004666" e="1" n="Exercice 5 p 4" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008165" e="1" n="Correction exercice 5 p 4" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004667" e="1" n="Exercice 6 p 4" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008166" e="1" n="Correction exercice 6 p 4" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004668" e="1" n="Exercice 7 p 5" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008167" e="1" n="Correction exercice 7 p 5" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004669" e="1" n="Exercice 8 p 5" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008168" e="1" n="Correction exercice 8 p 5" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004670" e="1" n="Exercice 9 p 5" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008169" e="1" n="Correction exercice 9 p 5" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004671" e="1" n="Exercice 10 p 5" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008170" e="1" n="Correction exercice 10 p 5" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004672" e="1" n="Exercice 11 p 5" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008171" e="1" n="Correction exercice 11 p 5" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Calculs de PGCD">
+                <url i="1004673" e="1" n="Question de cours 1 p 6" ico="cm3_2008"/>
+                <url i="1004674" e="1" n="Question de cours 2 p 6" ico="cm3_2008"/>
+                <url i="1004675" e="1" n="Exercice 1 p 6" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008172" e="1" n="Correction exercice 1 p 6" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004676" e="1" n="Exercice 2 p 6" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008173" e="1" n="Correction exercice 2 p 6" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004677" e="1" n="Exercice 3 p 6" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008174" e="1" n="Correction exercice 3 p 6" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004678" e="1" n="Exercice 4 p 6" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008175" e="1" n="Correction exercice 4 p 6" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004679" e="1" n="Exercice 5 p 7" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008176" e="1" n="Correction exercice 5 p 7" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004680" e="1" n="Exercice 6 p 7" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008177" e="1" n="Correction exercice 6 p 7" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004681" e="1" n="Exercice 7 p 7" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008178" e="1" n="Correction exercice 7 p 7" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004682" e="1" n="Exercice 8 p 7" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008179" e="1" n="Correction exercice 8 p 7" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004683" e="1" n="Exercice 9 p 7" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008180" e="1" n="Correction exercice 9 p 7" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004684" e="1" n="Exercice 10 p 7" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008181" e="1" n="Correction exercice 10 p 7" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Problèmes">
+                <url i="1004685" e="1" n="Question de cours 1 p 8" ico="cm3_2008"/>
+                <url i="1004686" e="1" n="Question de cours 2 p 8" ico="cm3_2008"/>
+                <url i="1004687" e="1" n="Exercice 1 p 8" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008182" e="1" n="Correction exercice 1 p 8" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004688" e="1" n="Exercice 2 p 8" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008183" e="1" n="Correction exercice 2 p 8" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004689" e="1" n="Exercice 3 p 8" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008184" e="1" n="Correction exercice 3 p 8" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004690" e="1" n="Exercice 4 p 8" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008185" e="1" n="Correction exercice 4 p 8" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004691" e="1" n="Exercice 5 p 9" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008186" e="1" n="Correction exercice 5 p 9" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004692" e="1" n="Exercice 6 p 9" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008187" e="1" n="Correction exercice 6 p 9" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004693" e="1" n="Exercice 7 p 9" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008188" e="1" n="Correction exercice 7 p 9" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004694" e="1" n="Exercice 8 p 9" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008189" e="1" n="Correction exercice 8 p 9" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004695" e="1" n="Exercice 9 p 9" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008190" e="1" n="Correction exercice 9 p 9" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Simplifier une fraction">
+                <url i="1004696" e="1" n="Question de cours 1 p 10" ico="cm3_2008"/>
+                <url i="1004697" e="1" n="Question de cours 2 p 10" ico="cm3_2008"/>
+                <url i="1004698" e="1" n="Question de cours 3 p 10" ico="cm3_2008"/>
+                <url i="1004699" e="1" n="Exercice 1 p 10" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008191" e="1" n="Correction exercice 1 p 10" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004700" e="1" n="Exercice 2 p 10" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008192" e="1" n="Correction exercice 2 p 10" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004701" e="1" n="Exercice 3 p 10" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008193" e="1" n="Correction exercice 3 p 10" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004702" e="1" n="Exercice 4 p 10" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008194" e="1" n="Correction exercice 4 p 10" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004703" e="1" n="Exercice 5 p 10" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008195" e="1" n="Correction exercice 5 p 10" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004704" e="1" n="Exercice 6 p 10" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008196" e="1" n="Correction exercice 6 p 10" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Opérations avec des écritures fractionnaires">
+                <url i="1004705" e="1" n="Question de cours 1 p 11" ico="cm3_2008"/>
+                <url i="1004706" e="1" n="Question de cours 2 p 11" ico="cm3_2008"/>
+                <url i="1004707" e="1" n="Exercice 1 p 11" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008197" e="1" n="Correction exercice 1 p 11" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004708" e="1" n="Exercice 2 p 11" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008198" e="1" n="Correction exercice 2 p 11" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004709" e="1" n="Exercice 3 p 11" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008199" e="1" n="Correction exercice 3 p 11" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004710" e="1" n="Exercice 4 p 11" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008200" e="1" n="Correction exercice 4 p 11" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004711" e="1" n="Exercice 5 p 12" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008201" e="1" n="Correction exercice 5 p 12" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004712" e="1" n="Exercice 6 p 12" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008202" e="1" n="Correction exercice 6 p 12" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004713" e="1" n="Exercice 7 p 12" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008203" e="1" n="Correction exercice 7 p 12" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004714" e="1" n="Exercice 8 p 12" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008204" e="1" n="Correction exercice 8 p 12" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004715" e="1" n="Exercice 9 p 12" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008205" e="1" n="Correction exercice 9 p 12" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Calcul littéral et équations">
+            <d n="Développements">
+                <url i="1004716" e="1" n="Question de cours 1 p 14" ico="cm3_2008"/>
+                <url i="1004717" e="1" n="Question de cours 2 p 14" ico="cm3_2008"/>
+                <url i="1004718" e="1" n="Question de cours 3 p 14" ico="cm3_2008"/>
+                <url i="1004719" e="1" n="Exercice 1 p 14" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008214" e="1" n="Correction exercice 1 p 14" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004720" e="1" n="Exercice 2 p 14" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008215" e="1" n="Correction exercice 2 p 14" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004721" e="1" n="Exercice 3 p 14" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008216" e="1" n="Correction exercice 3 p 14" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004722" e="1" n="Exercice 4 p 14" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008217" e="1" n="Correction exercice 4 p 14" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004723" e="1" n="Exercice 5 p 15" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008218" e="1" n="Correction exercice 5 p 15" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004724" e="1" n="Exercice 6 p 15" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008219" e="1" n="Correction exercice 6 p 15" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004725" e="1" n="Exercice 7 p 15" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008220" e="1" n="Correction exercice 7 p 15" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004726" e="1" n="Exercice 8 p 15" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008221" e="1" n="Correction exercice 8 p 15" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004727" e="1" n="Exercice 9 p 15" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008222" e="1" n="Correction exercice 9 p 15" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004728" e="1" n="Exercice 10 p 15" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008223" e="1" n="Correction exercice 10 p 15" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004729" e="1" n="Exercice 11 p 16" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008224" e="1" n="Correction exercice 11 p 16" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004730" e="1" n="Exercice 12 p 16" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008225" e="1" n="Correction exercice 12 p 16" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004731" e="1" n="Exercice 13 p 16" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008226" e="1" n="Correction exercice 13 p 16" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004732" e="1" n="Exercice 14 p 16" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008227" e="1" n="Correction exercice 14 p 16" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004733" e="1" n="Exercice 15 p 16" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008228" e="1" n="Correction exercice 15 p 16" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004734" e="1" n="Exercice 16 p 16" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008229" e="1" n="Correction exercice 16 p 16" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Factorisations avec un facteur commun">
+                <url i="1004735" e="1" n="Exercice 1 p 17" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008230" e="1" n="Correction exercice 1 p 17" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004736" e="1" n="Exercice 2 p 17" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008231" e="1" n="Correction exercice 2 p 17" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004737" e="1" n="Exercice 3 p 17" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008232" e="1" n="Correction exercice 3 p 17" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004738" e="1" n="Exercice 4 p 17" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008233" e="1" n="Correction exercice 4 p 17" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004739" e="1" n="Exercice 5 p 17" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008234" e="1" n="Correction exercice 5 p 17" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004740" e="1" n="Exercice 6 p 17" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008235" e="1" n="Correction exercice 6 p 17" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004741" e="1" n="Exercice 7 p 18" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008236" e="1" n="Correction exercice 7 p 18" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004742" e="1" n="Exercice 8 p 18" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008237" e="1" n="Correction exercice 8 p 18" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004743" e="1" n="Exercice 9 p 18" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008238" e="1" n="Correction exercice 9 p 18" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004744" e="1" n="Exercice 10 p 18" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008239" e="1" n="Correction exercice 10 p 18" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004745" e="1" n="Exercice 11 p 18" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008240" e="1" n="Correction exercice 11 p 18" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004746" e="1" n="Exercice 12 p 18" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008241" e="1" n="Correction exercice 12 p 18" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Factorisations et identités remarquables">
+                <url i="1004747" e="1" n="Question de cours 1 p 19" ico="cm3_2008"/>
+                <url i="1004748" e="1" n="Question de cours 2 p 19" ico="cm3_2008"/>
+                <url i="1004749" e="1" n="Question de cours 3 p 19" ico="cm3_2008"/>
+                <url i="1004750" e="1" n="Exercice 1 p 19" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008242" e="1" n="Correction exercice 1 p 19" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004751" e="1" n="Exercice 2 p 19" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008243" e="1" n="Correction exercice 2 p 19" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004752" e="1" n="Exercice 3 p 19" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008244" e="1" n="Correction exercice 3 p 19" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004753" e="1" n="Exercice 4 p 19" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008245" e="1" n="Correction exercice 4 p 19" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004754" e="1" n="Exercice 5 p 19" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008246" e="1" n="Correction exercice 5 p 19" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004755" e="1" n="Exercice 6 p 19" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008247" e="1" n="Correction exercice 6 p 19" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004756" e="1" n="Exercice 7 p 19" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008248" e="1" n="Correction exercice 7 p 19" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004757" e="1" n="Exercice 8 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008249" e="1" n="Correction exercice 8 p 20" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004758" e="1" n="Exercice 9 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008250" e="1" n="Correction exercice 9 p 20" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004759" e="1" n="Exercice 10 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008251" e="1" n="Correction exercice 10 p 20" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004760" e="1" n="Exercice 11 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008252" e="1" n="Correction exercice 11 p 20" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004761" e="1" n="Exercice 12 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008253" e="1" n="Correction exercice 12 p 20" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004762" e="1" n="Exercice 13 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008254" e="1" n="Correction exercice 13 p 20" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004763" e="1" n="Exercice 14 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008255" e="1" n="Correction exercice 14 p 20" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004764" e="1" n="Exercice 15 p 20" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008256" e="1" n="Correction exercice 15 p 20" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Équations et équations produits">
+                <url i="1004765" e="1" n="Question de cours 1 p 21" ico="cm3_2008"/>
+                <url i="1004766" e="1" n="Question de cours 2 p 21" ico="cm3_2008"/>
+                <url i="1004767" e="1" n="Exercice 1 p 21" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008257" e="1" n="Correction exercice 1 p 21" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004768" e="1" n="Exercice 2 p 21" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008258" e="1" n="Correction exercice 2 p 21" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004769" e="1" n="Exercice 3 p 21" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008259" e="1" n="Correction exercice 3 p 21" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004770" e="1" n="Exercice 4 p 22" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008260" e="1" n="Correction exercice 4 p 22" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004771" e="1" n="Exercice 5 p 22" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008261" e="1" n="Correction exercice 5 p 22" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004772" e="1" n="Exercice 6 p 22" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008262" e="1" n="Correction exercice 6 p 22" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004773" e="1" n="Exercice 7 p 22" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008263" e="1" n="Correction exercice 7 p 22" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004774" e="1" n="Exercice 8 p 22" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008264" e="1" n="Correction exercice 8 p 22" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Synthèse">
+                <url i="1004775" e="1" n="Exercice 1 p 23" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008265" e="1" n="Correction exercice 1 p 23" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004776" e="1" n="Exercice 2 p 23" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008266" e="1" n="Correction exercice 2 p 23" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004777" e="1" n="Exercice 3 p 23" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008267" e="1" n="Correction exercice 3 p 23" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004778" e="1" n="Exercice 4 p 23" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008268" e="1" n="Correction exercice 4 p 23" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004779" e="1" n="Exercice 5 p 24" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008269" e="1" n="Correction exercice 5 p 24" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004780" e="1" n="Exercice 6 p 24" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008270" e="1" n="Correction exercice 6 p 24" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004781" e="1" n="Exercice 7 p 24" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008271" e="1" n="Correction exercice 7 p 24" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004782" e="1" n="Exercice 8 p 24" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008272" e="1" n="Correction exercice 8 p 24" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004783" e="1" n="Exercice 9 p 24" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008273" e="1" n="Correction exercice 9 p 24" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Racines carrées">
+            <d n="Définition">
+                <url i="1004784" e="1" n="Question de cours 1 p 26" ico="cm3_2008"/>
+                <url i="1004785" e="1" n="Question de cours 2 p 26" ico="cm3_2008"/>
+                <url i="1004786" e="1" n="Exercice 1 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008283" e="1" n="Correction exercice 1 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004787" e="1" n="Exercice 2 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008284" e="1" n="Correction exercice 2 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004788" e="1" n="Exercice 3 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008285" e="1" n="Correction exercice 3 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004789" e="1" n="Exercice 4 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008286" e="1" n="Correction exercice 4 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004790" e="1" n="Exercice 5 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008287" e="1" n="Correction exercice 5 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004791" e="1" n="Exercice 6 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008288" e="1" n="Correction exercice 6 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004792" e="1" n="Exercice 7 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008289" e="1" n="Correction exercice 7 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004793" e="1" n="Exercice 8 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008290" e="1" n="Correction exercice 8 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004794" e="1" n="Exercice 9 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008291" e="1" n="Correction exercice 9 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004795" e="1" n="Exercice 10 p 26" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008292" e="1" n="Correction exercice 10 p 26" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004796" e="1" n="Exercice 11 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008293" e="1" n="Correction exercice 11 p 27" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004797" e="1" n="Exercice 12 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008294" e="1" n="Correction exercice 12 p 27" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004798" e="1" n="Exercice 13 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008295" e="1" n="Correction exercice 13 p 27" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004799" e="1" n="Exercice 14 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008296" e="1" n="Correction exercice 14 p 27" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004800" e="1" n="Exercice 15 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008297" e="1" n="Correction exercice 15 p 27" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004801" e="1" n="Exercice 16 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008298" e="1" n="Correction exercice 16 p 27" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004802" e="1" n="Exercice 17 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008299" e="1" n="Correction exercice 17 p 27" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004803" e="1" n="Exercice 18 p 27" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008300" e="1" n="Correction exercice 18 p 27" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Propriétés : applications">
+                <url i="1004804" e="1" n="Question de cours 1 p 28" ico="cm3_2008"/>
+                <url i="1004805" e="1" n="Question de cours 2 p 28" ico="cm3_2008"/>
+                <url i="1004806" e="1" n="Question de cours 3 p 28" ico="cm3_2008"/>
+                <url i="1004807" e="1" n="Exercice 1 p 28" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008301" e="1" n="Correction exercice 1 p 28" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004808" e="1" n="Exercice 2 p 28" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008302" e="1" n="Correction exercice 2 p 28" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004809" e="1" n="Exercice 3 p 28" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008303" e="1" n="Correction exercice 3 p 28" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004810" e="1" n="Exercice 4 p 28" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008304" e="1" n="Correction exercice 4 p 28" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004811" e="1" n="Exercice 5 p 28" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008305" e="1" n="Correction exercice 5 p 28" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004812" e="1" n="Exercice 6 p 28" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008306" e="1" n="Correction exercice 6 p 28" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004813" e="1" n="Exercice 7 p 28" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008307" e="1" n="Correction exercice 7 p 28" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004814" e="1" n="Exercice 8 p 29" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008308" e="1" n="Correction exercice 8 p 29" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004815" e="1" n="Exercice 9 p 29" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008309" e="1" n="Correction exercice 9 p 29" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004816" e="1" n="Exercice 10 p 29" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008310" e="1" n="Correction exercice 10 p 29" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004817" e="1" n="Exercice 11 p 29" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008311" e="1" n="Correction exercice 11 p 29" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004818" e="1" n="Exercice 12 p 29" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008312" e="1" n="Correction exercice 12 p 29" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004819" e="1" n="Exercice 13 p 29" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008313" e="1" n="Correction exercice 13 p 29" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004820" e="1" n="Exercice 14 p 30" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008314" e="1" n="Correction exercice 14 p 30" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004821" e="1" n="Exercice 15 p 30" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008315" e="1" n="Correction exercice 15 p 30" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004822" e="1" n="Exercice 16 p 30" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008316" e="1" n="Correction exercice 16 p 30" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004823" e="1" n="Exercice 17 p 30" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008317" e="1" n="Correction exercice 17 p 30" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004824" e="1" n="Exercice 18 p 30" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008318" e="1" n="Correction exercice 18 p 30" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Synthèse">
+                <url i="1004825" e="1" n="Question de cours 1 p 31" ico="cm3_2008"/>
+                <url i="1004826" e="1" n="Question de cours 2 p 31" ico="cm3_2008"/>
+                <url i="1004827" e="1" n="Exercice 1 p 31" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008319" e="1" n="Correction exercice 1 p 31" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004828" e="1" n="Exercice 2 p 31" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008320" e="1" n="Correction exercice 2 p 31" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004829" e="1" n="Exercice 3 p 31" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008321" e="1" n="Correction exercice 3 p 31" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004830" e="1" n="Exercice 4 p 31" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008322" e="1" n="Correction exercice 4 p 31" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004831" e="1" n="Exercice 5 p 31" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008323" e="1" n="Correction exercice 5 p 31" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004832" e="1" n="Exercice 6 p 31" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008324" e="1" n="Correction exercice 6 p 31" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004833" e="1" n="Exercice 7 p 31" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008325" e="1" n="Correction exercice 7 p 31" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004834" e="1" n="Exercice 8 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008326" e="1" n="Correction exercice 8 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004835" e="1" n="Exercice 9 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008327" e="1" n="Correction exercice 9 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004836" e="1" n="Exercice 10 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008328" e="1" n="Correction exercice 10 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004837" e="1" n="Exercice 11 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008329" e="1" n="Correction exercice 11 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004838" e="1" n="Exercice 12 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008330" e="1" n="Correction exercice 12 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004839" e="1" n="Exercice 13 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008331" e="1" n="Correction exercice 13 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004840" e="1" n="Exercice 14 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008332" e="1" n="Correction exercice 14 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004841" e="1" n="Exercice 15 p 32" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008333" e="1" n="Correction exercice 15 p 32" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004842" e="1" n="Exercice 16 p 33" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008334" e="1" n="Correction exercice 16 p 33" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004843" e="1" n="Exercice 17 p 33" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008335" e="1" n="Correction exercice 17 p 33" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004844" e="1" n="Exercice 18 p 33" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008336" e="1" n="Correction exercice 18 p 33" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004845" e="1" n="Exercice 19 p 33" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008337" e="1" n="Correction exercice 19 p 33" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004846" e="1" n="Exercice 20 p 33" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008338" e="1" n="Correction exercice 20 p 33" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Équations du type x²=a">
+                <url i="1004847" e="1" n="Question de cours 1 p 34" ico="cm3_2008"/>
+                <url i="1004848" e="1" n="Question de cours 2 p 34" ico="cm3_2008"/>
+                <url i="1004849" e="1" n="Exercice 1 p 34" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008339" e="1" n="Correction exercice 1 p 34" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004850" e="1" n="Exercice 2 p 34" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008340" e="1" n="Correction exercice 2 p 34" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004851" e="1" n="Exercice 3 p 34" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008341" e="1" n="Correction exercice 3 p 34" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004852" e="1" n="Exercice 4 p 34" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008342" e="1" n="Correction exercice 4 p 34" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004853" e="1" n="Exercice 5 p 34" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008343" e="1" n="Correction exercice 5 p 34" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Système d'équations">
+            <d n="Tester une solution">
+                <url i="1004854" e="1" n="Question de cours 1 p 36" ico="cm3_2008"/>
+                <url i="1004855" e="1" n="Question de cours 2 p 36" ico="cm3_2008"/>
+                <url i="1004856" e="1" n="Exercice 1 p 36" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008350" e="1" n="Correction exercice 1 p 36" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004857" e="1" n="Exercice 2 p 36" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008351" e="1" n="Correction exercice 2 p 36" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004858" e="1" n="Exercice 3 p 36" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008352" e="1" n="Correction exercice 3 p 36" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004859" e="1" n="Exercice 4 p 36" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008353" e="1" n="Correction exercice 4 p 36" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004860" e="1" n="Exercice 5 p 36" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008354" e="1" n="Correction exercice 5 p 36" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004861" e="1" n="Exercice 6 p 36" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008355" e="1" n="Correction exercice 6 p 36" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Résolutions par substitution">
+                <url i="1004862" e="1" n="Question de cours 1 p 37" ico="cm3_2008"/>
+                <url i="1004863" e="1" n="Question de cours 2 p 37" ico="cm3_2008"/>
+                <url i="1004864" e="1" n="Exercice 1 p 37" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008356" e="1" n="Correction exercice 1 p 37" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004865" e="1" n="Exercice 2 p 37" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008357" e="1" n="Correction exercice 2 p 37" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004866" e="1" n="Exercice 3 p 37" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008358" e="1" n="Correction exercice 3 p 37" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004867" e="1" n="Exercice 4 p 38" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008359" e="1" n="Correction exercice 4 p 38" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004868" e="1" n="Exercice 5 p 38" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008360" e="1" n="Correction exercice 5 p 38" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004869" e="1" n="Exercice 6 p 38" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008361" e="1" n="Correction exercice 6 p 38" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Résolutions par combinaisons">
+                <url i="1004870" e="1" n="Question de cours 1 p 39" ico="cm3_2008"/>
+                <url i="1004871" e="1" n="Question de cours 2 p 39" ico="cm3_2008"/>
+                <url i="1004872" e="1" n="Exercice 1 p 39" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008362" e="1" n="Correction exercice 1 p 39" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004873" e="1" n="Exercice 2 p 39" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008363" e="1" n="Correction exercice 2 p 39" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004874" e="1" n="Exercice 3 p 40" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008364" e="1" n="Correction exercice 3 p 40" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004875" e="1" n="Exercice 4 p 40" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008365" e="1" n="Correction exercice 4 p 40" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004876" e="1" n="Exercice 5 p 40" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008366" e="1" n="Correction exercice 5 p 40" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Problèmes">
+                <url i="1004877" e="1" n="Exercice 1 p 41" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008367" e="1" n="Correction exercice 1 p 41" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004878" e="1" n="Exercice 2 p 41" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008368" e="1" n="Correction exercice 2 p 41" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004879" e="1" n="Exercice 3 p 41" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008369" e="1" n="Correction exercice 3 p 41" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004880" e="1" n="Exercice 4 p 42" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008370" e="1" n="Correction exercice 4 p 42" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004881" e="1" n="Exercice 5 p 42" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008371" e="1" n="Correction exercice 5 p 42" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004882" e="1" n="Exercice 6 p 42" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008372" e="1" n="Correction exercice 6 p 42" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Inégalités et inéquations">
+            <d n="Notion d'inéquation">
+                <url i="1004883" e="1" n="Question de cours 1 p 44" ico="cm3_2008"/>
+                <url i="1004884" e="1" n="Question de cours 2 p 44" ico="cm3_2008"/>
+                <url i="1004885" e="1" n="Question de cours 3 p 44" ico="cm3_2008"/>
+                <url i="1004886" e="1" n="Exercice 1 p 44" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008382" e="1" n="Correction exercice 1 p 44" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004887" e="1" n="Exercice 2 p 44" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008383" e="1" n="Correction exercice 2 p 44" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004888" e="1" n="Exercice 3 p 44" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008384" e="1" n="Correction exercice 3 p 44" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004889" e="1" n="Exercice 4 p 44" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008385" e="1" n="Correction exercice 4 p 44" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004890" e="1" n="Exercice 5 p 44" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008386" e="1" n="Correction exercice 5 p 44" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Résolutions">
+                <url i="1004891" e="1" n="Question de cours 1 p 45" ico="cm3_2008"/>
+                <url i="1004892" e="1" n="Question de cours 2 p 45" ico="cm3_2008"/>
+                <url i="1004893" e="1" n="Question de cours 3 p 45" ico="cm3_2008"/>
+                <url i="1004894" e="1" n="Exercice 1 p 45" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008387" e="1" n="Correction exercice 1 p 45" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004895" e="1" n="Exercice 2 p 45" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008388" e="1" n="Correction exercice 2 p 45" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004896" e="1" n="Exercice 3 p 45" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008389" e="1" n="Correction exercice 3 p 45" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004897" e="1" n="Exercice 4 p 46" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008390" e="1" n="Correction exercice 4 p 46" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004898" e="1" n="Exercice 5 p 46" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008391" e="1" n="Correction exercice 5 p 46" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004899" e="1" n="Exercice 6 p 46" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008392" e="1" n="Correction exercice 6 p 46" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004900" e="1" n="Exercice 7 p 46" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008393" e="1" n="Correction exercice 7 p 46" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004901" e="1" n="Exercice 8 p 46" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008394" e="1" n="Correction exercice 8 p 46" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Représentations graphiques">
+                <url i="1004902" e="1" n="Question de cours 1 p 47" ico="cm3_2008"/>
+                <url i="1004903" e="1" n="Question de cours 2 p 47" ico="cm3_2008"/>
+                <url i="1004904" e="1" n="Exercice 1 p 47" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008395" e="1" n="Correction exercice 1 p 47" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004905" e="1" n="Exercice 2 p 47" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008396" e="1" n="Correction exercice 2 p 47" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004906" e="1" n="Exercice 3 p 47" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008397" e="1" n="Correction exercice 3 p 47" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004907" e="1" n="Exercice 4 p 47" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008398" e="1" n="Correction exercice 4 p 47" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004908" e="1" n="Exercice 5 p 47" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008399" e="1" n="Correction exercice 5 p 47" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Problèmes">
+                <url i="1004909" e="1" n="Question de cours 1 p 48" ico="cm3_2008"/>
+                <url i="1004910" e="1" n="Exercice 1 p 48" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008400" e="1" n="Correction exercice 1 p 48" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004911" e="1" n="Exercice 2 p 48" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008401" e="1" n="Correction exercice 2 p 48" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004912" e="1" n="Exercice 3 p 48" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008402" e="1" n="Correction exercice 3 p 48" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Puissances et grandeurs">
+            <d n="Puissances : applications">
+                <url i="1004913" e="1" n="Question de cours 1 p 50" ico="cm3_2008"/>
+                <url i="1004914" e="1" n="Question de cours 2 p 50" ico="cm3_2008"/>
+                <url i="1004915" e="1" n="Question de cours 3 p 50" ico="cm3_2008"/>
+                <url i="1004916" e="1" n="Exercice 1 p 50" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008408" e="1" n="Correction exercice 1 p 50" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004917" e="1" n="Exercice 2 p 50" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008409" e="1" n="Correction exercice 2 p 50" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004918" e="1" n="Exercice 3 p 50" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008410" e="1" n="Correction exercice 3 p 50" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004919" e="1" n="Exercice 4 p 50" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008411" e="1" n="Correction exercice 4 p 50" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004920" e="1" n="Exercice 5 p 50" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008412" e="1" n="Correction exercice 5 p 50" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004921" e="1" n="Exercice 6 p 50" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008413" e="1" n="Correction exercice 6 p 50" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004922" e="1" n="Exercice 7 p 51" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008414" e="1" n="Correction exercice 7 p 51" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004923" e="1" n="Exercice 8 p 51" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008415" e="1" n="Correction exercice 8 p 51" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004924" e="1" n="Exercice 9 p 51" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008416" e="1" n="Correction exercice 9 p 51" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004925" e="1" n="Exercice 10 p 51" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008417" e="1" n="Correction exercice 10 p 51" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004926" e="1" n="Exercice 11 p 51" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008418" e="1" n="Correction exercice 11 p 51" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Puissances : synthèse">
+                <url i="1004927" e="1" n="Exercice 1 p 52" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008419" e="1" n="Correction exercice 1 p 52" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004928" e="1" n="Exercice 2 p 52" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008420" e="1" n="Correction exercice 2 p 52" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004929" e="1" n="Exercice 3 p 52" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008421" e="1" n="Correction exercice 3 p 52" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004930" e="1" n="Exercice 4 p 52" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008422" e="1" n="Correction exercice 4 p 52" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004931" e="1" n="Exercice 5 p 52" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008423" e="1" n="Correction exercice 5 p 52" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004932" e="1" n="Exercice 6 p 53" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008424" e="1" n="Correction exercice 6 p 53" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004933" e="1" n="Exercice 7 p 53" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008425" e="1" n="Correction exercice 7 p 53" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004934" e="1" n="Exercice 8 p 53" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008426" e="1" n="Correction exercice 8 p 53" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Changements d'unités">
+                <url i="1004935" e="1" n="Question de cours 1 p 54" ico="cm3_2008"/>
+                <url i="1004936" e="1" n="Question de cours 2 p 54" ico="cm3_2008"/>
+                <url i="1004937" e="1" n="Exercice 1 p 54" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008427" e="1" n="Correction exercice 1 p 54" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004938" e="1" n="Exercice 2 p 54" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008428" e="1" n="Correction exercice 2 p 54" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004939" e="1" n="Exercice 3 p 54" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008429" e="1" n="Correction exercice 3 p 54" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004940" e="1" n="Exercice 4 p 54" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008430" e="1" n="Correction exercice 4 p 54" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004941" e="1" n="Exercice 5 p 54" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008431" e="1" n="Correction exercice 5 p 54" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Grandeurs">
+                <url i="1004942" e="1" n="Exercice 1 p 55" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008432" e="1" n="Correction exercice 1 p 55" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004943" e="1" n="Exercice 2 p 55" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008433" e="1" n="Correction exercice 2 p 55" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004944" e="1" n="Exercice 3 p 55" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008434" e="1" n="Correction exercice 3 p 55" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004945" e="1" n="Exercice 4 p 55" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008435" e="1" n="Correction exercice 4 p 55" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004946" e="1" n="Exercice 5 p 55" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008436" e="1" n="Correction exercice 5 p 55" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004947" e="1" n="Exercice 6 p 56" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008437" e="1" n="Correction exercice 6 p 56" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004948" e="1" n="Exercice 7 p 56" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008438" e="1" n="Correction exercice 7 p 56" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004949" e="1" n="Exercice 8 p 56" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008439" e="1" n="Correction exercice 8 p 56" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Notion de fonctions">
+            <d n="Tableaux de données">
+                <url i="1004950" e="1" n="Question de cours 1 p 58" ico="cm3_2008"/>
+                <url i="1004951" e="1" n="Question de cours 2 p 58" ico="cm3_2008"/>
+                <url i="1004952" e="1" n="Exercice 1 p 58" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008445" e="1" n="Correction exercice 1 p 58" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004953" e="1" n="Exercice 2 p 58" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008446" e="1" n="Correction exercice 2 p 58" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004954" e="1" n="Exercice 3 p 58" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008447" e="1" n="Correction exercice 3 p 58" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004955" e="1" n="Exercice 4 p 58" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008448" e="1" n="Correction exercice 4 p 58" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004956" e="1" n="Exercice 5 p 58" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008449" e="1" n="Correction exercice 5 p 58" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Graphiques">
+                <url i="1004957" e="1" n="Question de cours 1 p 59" ico="cm3_2008"/>
+                <url i="1004958" e="1" n="Question de cours 2 p 59" ico="cm3_2008"/>
+                <url i="1004959" e="1" n="Exercice 1 p 59" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008450" e="1" n="Correction exercice 1 p 59" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004960" e="1" n="Exercice 2 p 59" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008451" e="1" n="Correction exercice 2 p 59" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004961" e="1" n="Exercice 3 p 60" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008452" e="1" n="Correction exercice 3 p 60" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004962" e="1" n="Exercice 4 p 60" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008453" e="1" n="Correction exercice 4 p 60" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Formules">
+                <url i="1004963" e="1" n="Question de cours 1 p 61" ico="cm3_2008"/>
+                <url i="1004964" e="1" n="Exercice 1 p 61" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008454" e="1" n="Correction exercice 1 p 61" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004965" e="1" n="Exercice 2 p 61" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008455" e="1" n="Correction exercice 2 p 61" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004966" e="1" n="Exercice 3 p 61" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008456" e="1" n="Correction exercice 3 p 61" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004967" e="1" n="Exercice 4 p 61" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008457" e="1" n="Correction exercice 4 p 61" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Synthèse">
+                <url i="1004968" e="1" n="Exercice 1 p 62" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008458" e="1" n="Correction exercice 1 p 62" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004969" e="1" n="Exercice 2 p 62" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008459" e="1" n="Correction exercice 2 p 62" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004970" e="1" n="Exercice 3 p 62" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008460" e="1" n="Correction exercice 3 p 62" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004971" e="1" n="Exercice 4 p 63" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008461" e="1" n="Correction exercice 4 p 63" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004972" e="1" n="Exercice 5 p 63" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008462" e="1" n="Correction exercice 5 p 63" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004973" e="1" n="Exercice 6 p 64" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008463" e="1" n="Correction exercice 6 p 64" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004974" e="1" n="Exercice 7 p 64" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008464" e="1" n="Correction exercice 7 p 64" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Fonctions linéaires et affines">
+            <d n="Généralités">
+                <url i="1004975" e="1" n="Question de cours 1 p 66" ico="cm3_2008"/>
+                <url i="1004976" e="1" n="Question de cours 2 p 66" ico="cm3_2008"/>
+                <url i="1004977" e="1" n="Exercice 1 p 66" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008473" e="1" n="Correction exercice 1 p 66" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004978" e="1" n="Exercice 2 p 66" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008474" e="1" n="Correction exercice 2 p 66" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004979" e="1" n="Exercice 3 p 66" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008475" e="1" n="Correction exercice 3 p 66" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004980" e="1" n="Exercice 4 p 66" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008476" e="1" n="Correction exercice 4 p 66" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004981" e="1" n="Exercice 5 p 67" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008477" e="1" n="Correction exercice 5 p 67" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004982" e="1" n="Exercice 6 p 67" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008478" e="1" n="Correction exercice 6 p 67" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004983" e="1" n="Exercice 7 p 67" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008479" e="1" n="Correction exercice 7 p 67" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004984" e="1" n="Exercice 8 p 67" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008480" e="1" n="Correction exercice 8 p 67" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004985" e="1" n="Exercice 9 p 67" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008481" e="1" n="Correction exercice 9 p 67" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Représentations graphiques">
+                <url i="1004986" e="1" n="Question de cours 1 p 68" ico="cm3_2008"/>
+                <url i="1004987" e="1" n="Question de cours 2 p 68" ico="cm3_2008"/>
+                <url i="1004988" e="1" n="Question de cours 3 p 68" ico="cm3_2008"/>
+                <url i="1004989" e="1" n="Exercice 1 p 68" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008482" e="1" n="Correction exercice 1 p 68" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004990" e="1" n="Exercice 2 p 68" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008483" e="1" n="Correction exercice 2 p 68" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004991" e="1" n="Exercice 3 p 68" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008484" e="1" n="Correction exercice 3 p 68" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004992" e="1" n="Exercice 4 p 69" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008485" e="1" n="Correction exercice 4 p 69" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004993" e="1" n="Exercice 5 p 69" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008486" e="1" n="Correction exercice 5 p 69" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Déterminer une fonction linéaire ou affine">
+                <url i="1004994" e="1" n="Question de cours 1 p 70" ico="cm3_2008"/>
+                <url i="1004995" e="1" n="Question de cours 2 p 70" ico="cm3_2008"/>
+                <url i="1004996" e="1" n="Exercice 1 p 70" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008487" e="1" n="Correction exercice 1 p 70" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004997" e="1" n="Exercice 2 p 70" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008488" e="1" n="Correction exercice 2 p 70" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004998" e="1" n="Exercice 3 p 71" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008489" e="1" n="Correction exercice 3 p 71" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004999" e="1" n="Exercice 4 p 71" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008490" e="1" n="Correction exercice 4 p 71" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005000" e="1" n="Exercice 5 p 71" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008491" e="1" n="Correction exercice 5 p 71" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005001" e="1" n="Exercice 6 p 71" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008492" e="1" n="Correction exercice 6 p 71" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Synthèse">
+                <url i="1005002" e="1" n="Question de cours 1 p 72" ico="cm3_2008"/>
+                <url i="1005003" e="1" n="Exercice 1 p 72" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008493" e="1" n="Correction exercice 1 p 72" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005004" e="1" n="Exercice 2 p 72" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008494" e="1" n="Correction exercice 2 p 72" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005005" e="1" n="Exercice 3 p 73" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008495" e="1" n="Correction exercice 3 p 73" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005006" e="1" n="Exercice 4 p 73" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008496" e="1" n="Correction exercice 4 p 73" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005007" e="1" n="Exercice 5 p 74" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008497" e="1" n="Correction exercice 5 p 74" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005008" e="1" n="Exercice 6 p 74" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008498" e="1" n="Correction exercice 6 p 74" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005009" e="1" n="Exercice 7 p 74" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008499" e="1" n="Correction exercice 7 p 74" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Statistiques et probabilités">
+            <d n="Caractéristiques d'une série statistique">
+                <url i="1005010" e="1" n="Question de cours 1 p 76" ico="cm3_2008"/>
+                <url i="1005011" e="1" n="Question de cours 2 p 76" ico="cm3_2008"/>
+                <url i="1005012" e="1" n="Question de cours 3 p 76" ico="cm3_2008"/>
+                <url i="1005013" e="1" n="Exercice 1 p 76" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008508" e="1" n="Correction exercice 1 p 76" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005014" e="1" n="Exercice 2 p 76" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008509" e="1" n="Correction exercice 2 p 76" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005015" e="1" n="Exercice 3 p 76" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008510" e="1" n="Correction exercice 3 p 76" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005016" e="1" n="Exercice 4 p 77" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008511" e="1" n="Correction exercice 4 p 77" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005017" e="1" n="Exercice 5 p 77" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008512" e="1" n="Correction exercice 5 p 77" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005018" e="1" n="Exercice 6 p 77" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008513" e="1" n="Correction exercice 6 p 77" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005019" e="1" n="Exercice 7 p 78" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008514" e="1" n="Correction exercice 7 p 78" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005020" e="1" n="Exercice 8 p 78" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008515" e="1" n="Correction exercice 8 p 78" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005021" e="1" n="Exercice 9 p 78" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008516" e="1" n="Correction exercice 9 p 78" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005022" e="1" n="Exercice 10 p 78" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008517" e="1" n="Correction exercice 10 p 78" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Séries statistiques et graphiques">
+                <url i="1005023" e="1" n="Question de cours 1 p 79" ico="cm3_2008"/>
+                <url i="1005024" e="1" n="Question de cours 2 p 79" ico="cm3_2008"/>
+                <url i="1005025" e="1" n="Exercice 1 p 79" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008518" e="1" n="Correction exercice 1 p 79" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005026" e="1" n="Exercice 2 p 80" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008519" e="1" n="Correction exercice 2 p 80" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005027" e="1" n="Exercice 3 p 80" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008520" e="1" n="Correction exercice 3 p 80" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Probabilités, épreuves simples">
+                <url i="1005028" e="1" n="Question de cours 1 p 81" ico="cm3_2008"/>
+                <url i="1005029" e="1" n="Question de cours 2 p 81" ico="cm3_2008"/>
+                <url i="1005030" e="1" n="Question de cours 3 p 81" ico="cm3_2008"/>
+                <url i="1005031" e="1" n="Exercice 1 p 81" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008521" e="1" n="Correction exercice 1 p 81" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005032" e="1" n="Exercice 2 p 81" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008522" e="1" n="Correction exercice 2 p 81" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005033" e="1" n="Exercice 3 p 81" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008523" e="1" n="Correction exercice 3 p 81" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005034" e="1" n="Exercice 4 p 81" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008524" e="1" n="Correction exercice 4 p 81" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005035" e="1" n="Exercice 5 p 82" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008525" e="1" n="Correction exercice 5 p 82" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005036" e="1" n="Exercice 6 p 82" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008526" e="1" n="Correction exercice 6 p 82" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005037" e="1" n="Exercice 7 p 82" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008527" e="1" n="Correction exercice 7 p 82" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005038" e="1" n="Exercice 8 p 82" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008528" e="1" n="Correction exercice 8 p 82" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005039" e="1" n="Exercice 9 p 82" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008529" e="1" n="Correction exercice 9 p 82" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005040" e="1" n="Exercice 10 p 83" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008530" e="1" n="Correction exercice 10 p 83" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005041" e="1" n="Exercice 11 p 83" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008531" e="1" n="Correction exercice 11 p 83" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005042" e="1" n="Exercice 12 p 83" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008532" e="1" n="Correction exercice 12 p 83" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005043" e="1" n="Exercice 13 p 83" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008533" e="1" n="Correction exercice 13 p 83" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Probabilités, épreuves doubles">
+                <url i="1005044" e="1" n="Exercice 1 p 84" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008534" e="1" n="Correction exercice 1 p 84" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1005045" e="1" n="Exercice 2 p 84" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008535" e="1" n="Correction exercice 2 p 84" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Théorème de Thalès">
+            <d n="Théorème de Thalès">
+                <url i="1004510" e="1" n="Question de cours 1 p 86" ico="cm3_2008"/>
+                <url i="1004511" e="1" n="Question de cours 2 p 86" ico="cm3_2008"/>
+                <url i="1004512" e="1" n="Exercice 1 p 86" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008010" e="1" n="Correction exercice 1 p 86" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004513" e="1" n="Exercice 2 p 86" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008011" e="1" n="Correction exercice 2 p 86" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004514" e="1" n="Exercice 3 p 87" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008012" e="1" n="Correction exercice 3 p 87" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004515" e="1" n="Exercice 4 p 87" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008013" e="1" n="Correction exercice 4 p 87" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004516" e="1" n="Exercice 5 p 87" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008014" e="1" n="Correction exercice 5 p 87" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004517" e="1" n="Exercice 6 p 88" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008015" e="1" n="Correction exercice 6 p 88" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004518" e="1" n="Exercice 7 p 88" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008016" e="1" n="Correction exercice 7 p 88" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004519" e="1" n="Exercice 8 p 88" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008017" e="1" n="Correction exercice 8 p 88" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004520" e="1" n="Exercice 9 p 88" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008018" e="1" n="Correction exercice 9 p 88" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Réciproque du théorème de Thalès">
+                <url i="1004521" e="1" n="Question de cours 1 p 89" ico="cm3_2008"/>
+                <url i="1004522" e="1" n="Question de cours 2 p 89" ico="cm3_2008"/>
+                <url i="1004523" e="1" n="Question de cours 3 p 89" ico="cm3_2008"/>
+                <url i="1004524" e="1" n="Exercice 1 p 89" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008019" e="1" n="Correction exercice 1 p 89" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004525" e="1" n="Exercice 2 p 89" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008020" e="1" n="Correction exercice 2 p 89" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004526" e="1" n="Exercice 3 p 89" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008021" e="1" n="Correction exercice 3 p 89" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004527" e="1" n="Exercice 4 p 89" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008022" e="1" n="Correction exercice 4 p 89" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004528" e="1" n="Exercice 5 p 90" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008023" e="1" n="Correction exercice 5 p 90" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004529" e="1" n="Exercice 6 p 90" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008024" e="1" n="Correction exercice 6 p 90" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004530" e="1" n="Exercice 7 p 90" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008025" e="1" n="Correction exercice 7 p 90" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004531" e="1" n="Exercice 8 p 91" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008026" e="1" n="Correction exercice 8 p 91" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004532" e="1" n="Exercice 9 p 91" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008027" e="1" n="Correction exercice 9 p 91" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004533" e="1" n="Exercice 10 p 91" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008028" e="1" n="Correction exercice 10 p 91" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Agrandissements, réductions">
+                <url i="1004534" e="1" n="Question de cours 1 p 92" ico="cm3_2008"/>
+                <url i="1004535" e="1" n="Question de cours 2 p 92" ico="cm3_2008"/>
+                <url i="1004536" e="1" n="Question de cours 3 p 92" ico="cm3_2008"/>
+                <url i="1004537" e="1" n="Exercice 1 p 92" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008029" e="1" n="Correction exercice 1 p 92" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004538" e="1" n="Exercice 2 p 92" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008030" e="1" n="Correction exercice 2 p 92" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004539" e="1" n="Exercice 3 p 92" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008031" e="1" n="Correction exercice 3 p 92" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004540" e="1" n="Exercice 4 p 92" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008032" e="1" n="Correction exercice 4 p 92" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004541" e="1" n="Exercice 5 p 93" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008033" e="1" n="Correction exercice 5 p 93" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004542" e="1" n="Exercice 6 p 93" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008034" e="1" n="Correction exercice 6 p 93" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004543" e="1" n="Exercice 7 p 93" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008035" e="1" n="Correction exercice 7 p 93" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004544" e="1" n="Exercice 8 p 93" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008036" e="1" n="Correction exercice 8 p 93" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004545" e="1" n="Exercice 9 p 93" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008037" e="1" n="Correction exercice 9 p 93" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Synthèse">
+                <url i="1004546" e="1" n="Question de cours 1 p 94" ico="cm3_2008"/>
+                <url i="1004547" e="1" n="Question de cours 2 p 94" ico="cm3_2008"/>
+                <url i="1004548" e="1" n="Exercice 1 p 94" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008038" e="1" n="Correction exercice 1 p 94" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004549" e="1" n="Exercice 2 p 94" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008039" e="1" n="Correction exercice 2 p 94" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004550" e="1" n="Exercice 3 p 94" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008040" e="1" n="Correction exercice 3 p 94" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004551" e="1" n="Exercice 4 p 95" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008041" e="1" n="Correction exercice 4 p 95" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004552" e="1" n="Exercice 5 p 95" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008042" e="1" n="Correction exercice 5 p 95" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004553" e="1" n="Exercice 6 p 96" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008043" e="1" n="Correction exercice 6 p 96" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004554" e="1" n="Exercice 7 p 96" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008044" e="1" n="Correction exercice 7 p 96" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Trigonométrie">
+            <d n="Définitions">
+                <url i="1004555" e="1" n="Question de cours 1 p 98" ico="cm3_2008"/>
+                <url i="1004556" e="1" n="Question de cours 2 p 98" ico="cm3_2008"/>
+                <url i="1004557" e="1" n="Exercice 1 p 98" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008049" e="1" n="Correction exercice 1 p 98" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004558" e="1" n="Exercice 2 p 98" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008050" e="1" n="Correction exercice 2 p 98" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004559" e="1" n="Exercice 3 p 98" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008051" e="1" n="Correction exercice 3 p 98" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004560" e="1" n="Exercice 4 p 98" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008052" e="1" n="Correction exercice 4 p 98" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004561" e="1" n="Exercice 5 p 99" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008053" e="1" n="Correction exercice 5 p 99" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004562" e="1" n="Exercice 6 p 99" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008054" e="1" n="Correction exercice 6 p 99" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004563" e="1" n="Exercice 7 p 99" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008055" e="1" n="Correction exercice 7 p 99" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004564" e="1" n="Exercice 8 p 99" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008056" e="1" n="Correction exercice 8 p 99" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004565" e="1" n="Exercice 9 p 99" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008057" e="1" n="Correction exercice 9 p 99" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004566" e="1" n="Exercice 10 p 99" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008058" e="1" n="Correction exercice 10 p 99" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004567" e="1" n="Exercice 11 p 99" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008059" e="1" n="Correction exercice 11 p 99" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Calculs">
+                <url i="1004568" e="1" n="Question de cours 1 p 100" ico="cm3_2008"/>
+                <url i="1004569" e="1" n="Question de cours 2 p 100" ico="cm3_2008"/>
+                <url i="1004570" e="1" n="Exercice 1 p 100" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008060" e="1" n="Correction exercice 1 p 100" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004571" e="1" n="Exercice 2 p 100" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008061" e="1" n="Correction exercice 2 p 100" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004572" e="1" n="Exercice 3 p 100" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008062" e="1" n="Correction exercice 3 p 100" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004573" e="1" n="Exercice 4 p 100" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008063" e="1" n="Correction exercice 4 p 100" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004574" e="1" n="Exercice 5 p 100" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008064" e="1" n="Correction exercice 5 p 100" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004575" e="1" n="Exercice 6 p 101" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008065" e="1" n="Correction exercice 6 p 101" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004576" e="1" n="Exercice 7 p 101" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008066" e="1" n="Correction exercice 7 p 101" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004577" e="1" n="Exercice 8 p 101" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008067" e="1" n="Correction exercice 8 p 101" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Synthèse">
+                <url i="1004578" e="1" n="Exercice 1 p 102" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008068" e="1" n="Correction exercice 1 p 102" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004579" e="1" n="Exercice 2 p 102" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008069" e="1" n="Correction exercice 2 p 102" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004580" e="1" n="Exercice 3 p 102" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008070" e="1" n="Correction exercice 3 p 102" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004581" e="1" n="Exercice 4 p 102" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008071" e="1" n="Correction exercice 4 p 102" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004582" e="1" n="Exercice 5 p 103" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008072" e="1" n="Correction exercice 5 p 103" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004583" e="1" n="Exercice 6 p 103" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008073" e="1" n="Correction exercice 6 p 103" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004584" e="1" n="Exercice 7 p 103" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008074" e="1" n="Correction exercice 7 p 103" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004585" e="1" n="Exercice 8 p 103" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008075" e="1" n="Correction exercice 8 p 103" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004586" e="1" n="Exercice 9 p 104" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008076" e="1" n="Correction exercice 9 p 104" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004587" e="1" n="Exercice 10 p 104" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008077" e="1" n="Correction exercice 10 p 104" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004588" e="1" n="Exercice 11 p 104" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008078" e="1" n="Correction exercice 11 p 104" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004589" e="1" n="Exercice 12 p 104" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008079" e="1" n="Correction exercice 12 p 104" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Géométrie dans l'espace">
+            <d n="Sphère, boule, définitions">
+                <url i="1004590" e="1" n="Question de cours 1 p 106" ico="cm3_2008"/>
+                <url i="1004591" e="1" n="Question de cours 2 p 106" ico="cm3_2008"/>
+                <url i="1004592" e="1" n="Exercice 1 p 106" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008089" e="1" n="Correction exercice 1 p 106" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004593" e="1" n="Exercice 2 p 106" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008090" e="1" n="Correction exercice 2 p 106" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004594" e="1" n="Exercice 3 p 106" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008091" e="1" n="Correction exercice 3 p 106" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004595" e="1" n="Exercice 4 p 106" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008092" e="1" n="Correction exercice 4 p 106" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004596" e="1" n="Exercice 5 p 106" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008093" e="1" n="Correction exercice 5 p 106" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Calculs de volumes">
+                <url i="1004597" e="1" n="Question de cours 1 p 107" ico="cm3_2008"/>
+                <url i="1004598" e="1" n="Question de cours 2 p 107" ico="cm3_2008"/>
+                <url i="1004599" e="1" n="Exercice 1 p 107" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008094" e="1" n="Correction exercice 1 p 107" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004600" e="1" n="Exercice 2 p 107" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008095" e="1" n="Correction exercice 2 p 107" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004601" e="1" n="Exercice 3 p 107" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008096" e="1" n="Correction exercice 3 p 107" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004602" e="1" n="Exercice 4 p 107" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008097" e="1" n="Correction exercice 4 p 107" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004603" e="1" n="Exercice 5 p 108" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008098" e="1" n="Correction exercice 5 p 108" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004604" e="1" n="Exercice 6 p 108" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008099" e="1" n="Correction exercice 6 p 108" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004605" e="1" n="Exercice 7 p 108" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008100" e="1" n="Correction exercice 7 p 108" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Sections de solides">
+                <url i="1004606" e="1" n="Question de cours 1 p 109" ico="cm3_2008"/>
+                <url i="1004607" e="1" n="Question de cours 2 p 109" ico="cm3_2008"/>
+                <url i="1004608" e="1" n="Question de cours 3 p 109" ico="cm3_2008"/>
+                <url i="1004609" e="1" n="Exercice 1 p 109" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008101" e="1" n="Correction exercice 1 p 109" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004610" e="1" n="Exercice 2 p 109" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008102" e="1" n="Correction exercice 2 p 109" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004611" e="1" n="Exercice 3 p 109" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008103" e="1" n="Correction exercice 3 p 109" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004612" e="1" n="Exercice 4 p 109" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008104" e="1" n="Correction exercice 4 p 109" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004613" e="1" n="Exercice 5 p 109" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008105" e="1" n="Correction exercice 5 p 109" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004614" e="1" n="Exercice 6 p 110" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008106" e="1" n="Correction exercice 6 p 110" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004615" e="1" n="Exercice 7 p 110" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008107" e="1" n="Correction exercice 7 p 110" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004616" e="1" n="Exercice 8 p 110" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008108" e="1" n="Correction exercice 8 p 110" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004617" e="1" n="Exercice 9 p 110" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008109" e="1" n="Correction exercice 9 p 110" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004618" e="1" n="Exercice 10 p 111" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008110" e="1" n="Correction exercice 10 p 111" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004619" e="1" n="Exercice 11 p 111" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008111" e="1" n="Correction exercice 11 p 111" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004620" e="1" n="Exercice 12 p 111" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008112" e="1" n="Correction exercice 12 p 111" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Agrandissements, réductions">
+                <url i="1004621" e="1" n="Question de cours 1 p 112" ico="cm3_2008"/>
+                <url i="1004622" e="1" n="Question de cours 2 p 112" ico="cm3_2008"/>
+                <url i="1004623" e="1" n="Exercice 1 p 112" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008113" e="1" n="Correction exercice 1 p 112" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004624" e="1" n="Exercice 2 p 112" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008114" e="1" n="Correction exercice 2 p 112" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004625" e="1" n="Exercice 3 p 112" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008115" e="1" n="Correction exercice 3 p 112" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004626" e="1" n="Exercice 4 p 112" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008116" e="1" n="Correction exercice 4 p 112" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004627" e="1" n="Exercice 5 p 112" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008117" e="1" n="Correction exercice 5 p 112" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004628" e="1" n="Exercice 6 p 113" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008118" e="1" n="Correction exercice 6 p 113" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004629" e="1" n="Exercice 7 p 113" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008119" e="1" n="Correction exercice 7 p 113" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004630" e="1" n="Exercice 8 p 113" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008120" e="1" n="Correction exercice 8 p 113" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004631" e="1" n="Exercice 9 p 114" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008121" e="1" n="Correction exercice 9 p 114" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004632" e="1" n="Exercice 10 p 114" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008122" e="1" n="Correction exercice 10 p 114" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004633" e="1" n="Exercice 11 p 114" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008123" e="1" n="Correction exercice 11 p 114" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004634" e="1" n="Exercice 12 p 114" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008124" e="1" n="Correction exercice 12 p 114" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+        <d n="Angles et polygones">
+            <d n="Angles inscrits, angles au centre">
+                <url i="1004635" e="1" n="Question de cours 1 p 116" ico="cm3_2008"/>
+                <url i="1004636" e="1" n="Question de cours 2 p 116" ico="cm3_2008"/>
+                <url i="1004637" e="1" n="Exercice 1 p 116" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008131" e="1" n="Correction exercice 1 p 116" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004638" e="1" n="Exercice 2 p 116" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008132" e="1" n="Correction exercice 2 p 116" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004639" e="1" n="Exercice 3 p 116" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008133" e="1" n="Correction exercice 3 p 116" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004640" e="1" n="Exercice 4 p 116" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008134" e="1" n="Correction exercice 4 p 116" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Calculs">
+                <url i="1004641" e="1" n="Question de cours 1 p 117" ico="cm3_2008"/>
+                <url i="1004642" e="1" n="Question de cours 2 p 117" ico="cm3_2008"/>
+                <url i="1004643" e="1" n="Exercice 1 p 117" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008135" e="1" n="Correction exercice 1 p 117" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004644" e="1" n="Exercice 2 p 117" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008136" e="1" n="Correction exercice 2 p 117" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004645" e="1" n="Exercice 3 p 117" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008137" e="1" n="Correction exercice 3 p 117" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004646" e="1" n="Exercice 4 p 117" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008138" e="1" n="Correction exercice 4 p 117" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004647" e="1" n="Exercice 5 p 118" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008139" e="1" n="Correction exercice 5 p 118" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004648" e="1" n="Exercice 6 p 118" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008140" e="1" n="Correction exercice 6 p 118" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004649" e="1" n="Exercice 7 p 118" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008141" e="1" n="Correction exercice 7 p 118" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+            <d n="Polygones réguliers">
+                <url i="1004650" e="1" n="Question de cours 1 p 119" ico="cm3_2008"/>
+                <url i="1004651" e="1" n="Question de cours 2 p 119" ico="cm3_2008"/>
+                <url i="1004652" e="1" n="Exercice 1 p 119" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008142" e="1" n="Correction exercice 1 p 119" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004653" e="1" n="Exercice 2 p 119" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008143" e="1" n="Correction exercice 2 p 119" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004654" e="1" n="Exercice 3 p 119" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008144" e="1" n="Correction exercice 3 p 119" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004655" e="1" n="Exercice 4 p 119" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008145" e="1" n="Correction exercice 4 p 119" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004656" e="1" n="Exercice 5 p 120" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008146" e="1" n="Correction exercice 5 p 120" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004657" e="1" n="Exercice 6 p 120" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008147" e="1" n="Correction exercice 6 p 120" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004658" e="1" n="Exercice 7 p 120" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008148" e="1" n="Correction exercice 7 p 120" ico="corr_cm3_2008"/>
+                </d>
+                <url i="1004659" e="1" n="Exercice 8 p 120" ico="cm3_2008"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1008149" e="1" n="Correction exercice 8 p 120" ico="corr_cm3_2008"/>
+                </d>
+            </d>
+        </d>
+    </d>
+</manuel>

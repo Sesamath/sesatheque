@@ -88,7 +88,7 @@ var appConfig = {
     cookie: {
       key: 'asqlSTsrl78lAsg'
     },
-    bodyParser : {limit:'4mb'}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
+    bodyParser : {limit:'8mb'}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
     session: {
       secret: 'asqlSTsrl78lAsg',
       saveUninitialized: true,

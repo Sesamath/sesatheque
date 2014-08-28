@@ -1,0 +1,2337 @@
+<?xml version="1.0"?>
+<manuel5_2006>
+    <d n="Manuel 5e - 2006" ico="ms5_2006">
+        <d n="Priorités, distributivité">
+            <url i="1009108" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000001" e="1" n="Activité 1 p 8" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="516"/>
+                </d>
+                <url i="1000002" e="1" n="Activité 2 p 8" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="518"/>
+                </d>
+                <url i="1000003" e="1" n="Activité 3 p 8" ico="ms5_2006"/>
+                <url i="1000004" e="1" n="Activité 4 p 9" ico="ms5_2006"/>
+                <url i="1000005" e="1" n="Activité 5 p 9" ico="ms5_2006"/>
+                <url i="1000006" e="1" n="Activité 6 p 9" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000002" e="1" n="Animation" ico=""/>
+                    <url i="2000069" e="1" n="Animation" ico=""/>
+                </d>
+                <url i="1000007" e="1" n="Activité 7 p 10" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000001" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000008" e="1" n="Activité 8 p 10" ico="ms5_2006"/>
+                <url i="1000009" e="1" n="Activité 9 p 11" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000003" e="1" n="Animation" ico=""/>
+                </d>
+                <url i="1000010" e="1" n="Activité 10 p 11" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="526"/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000011" e="1" n="Méthode 1 p 12" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="514"/>
+                </d>
+                <url i="1005047" e="1" n="Exercice 1 p 12" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006522" e="1" n="Correction Exercice 1 p 12" ico="corr_ms5_2006"/>
+                    <url i="2001195" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005048" e="1" n="Exercice 2 p 12" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006523" e="1" n="Correction Exercice 2 p 12" ico="corr_ms5_2006"/>
+                    <url i="2001196" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000012" e="1" n="Méthode 2 p 12" ico="ms5_2006"/>
+                <url i="1005049" e="1" n="Exercice 3 p 12" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006524" e="1" n="Correction Exercice 3 p 12" ico="corr_ms5_2006"/>
+                    <url i="2001197" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000013" e="1" n="Méthode 3 p 13" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="524"/>
+                </d>
+                <url i="1005050" e="1" n="Exercice 4 p 13" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006525" e="1" n="Correction Exercice 4 p 13" ico="corr_ms5_2006"/>
+                    <url i="2001198" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005051" e="1" n="Exercice 5 p 13" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006526" e="1" n="Correction Exercice 5 p 13" ico="corr_ms5_2006"/>
+                    <url i="2001199" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000014" e="1" n="Méthode 4 p 13" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="525"/>
+                </d>
+                <url i="1005052" e="1" n="Exercice 6 p 13" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006527" e="1" n="Correction Exercice 6 p 13" ico="corr_ms5_2006"/>
+                    <url i="2001200" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005053" e="1" n="Exercice 7 p 13" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006528" e="1" n="Correction Exercice 7 p 13" ico="corr_ms5_2006"/>
+                    <url i="2001201" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000015" e="1" n="Exercice 1 p 14" ico="ms5_2006"/>
+                <url i="1000016" e="1" n="Exercice 2 p 14" ico="ms5_2006"/>
+                <url i="1000017" e="1" n="Exercice 3 p 14" ico="ms5_2006"/>
+                <url i="1000018" e="1" n="Exercice 4 p 14" ico="ms5_2006"/>
+                <url i="1000019" e="1" n="Exercice 5 p 14" ico="ms5_2006"/>
+                <url i="1000020" e="1" n="Exercice 6 p 14" ico="ms5_2006"/>
+                <url i="1000021" e="1" n="Exercice 7 p 14" ico="ms5_2006"/>
+                <url i="1000022" e="1" n="Exercice 8 p 14" ico="ms5_2006"/>
+                <url i="1000023" e="1" n="Exercice 9 p 14" ico="ms5_2006"/>
+                <url i="1000024" e="1" n="Exercice 10 p 14" ico="ms5_2006"/>
+                <url i="1000025" e="1" n="Exercice 11 p 15" ico="ms5_2006"/>
+                <url i="1000026" e="1" n="Exercice 12 p 15" ico="ms5_2006"/>
+                <url i="1000027" e="1" n="Exercice 13 p 15" ico="ms5_2006"/>
+                <url i="1000028" e="1" n="Exercice 14 p 15" ico="ms5_2006"/>
+                <url i="1000029" e="1" n="Exercice 15 p 15" ico="ms5_2006"/>
+                <url i="1000030" e="1" n="Exercice 16 p 15" ico="ms5_2006"/>
+                <url i="1000031" e="1" n="Exercice 17 p 15" ico="ms5_2006"/>
+                <url i="1000032" e="1" n="Exercice 18 p 15" ico="ms5_2006"/>
+                <url i="1000033" e="1" n="Exercice 19 p 15" ico="ms5_2006"/>
+                <url i="1000034" e="1" n="Exercice 20 p 15" ico="ms5_2006"/>
+                <url i="1000035" e="1" n="Exercice 21 p 15" ico="ms5_2006"/>
+                <url i="1000036" e="1" n="Exercice 22 p 15" ico="ms5_2006"/>
+                <url i="1000037" e="1" n="Exercice 23 p 16" ico="ms5_2006"/>
+                <url i="1000038" e="1" n="Exercice 24 p 16" ico="ms5_2006"/>
+                <url i="1000039" e="1" n="Exercice 25 p 16" ico="ms5_2006"/>
+                <url i="1000040" e="1" n="Exercice 26 p 16" ico="ms5_2006"/>
+                <url i="1000041" e="1" n="Exercice 27 p 16" ico="ms5_2006"/>
+                <url i="1000042" e="1" n="Exercice 28 p 16" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000043" e="1" n="Exercice 1 p 17" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000044" e="1" n="Exercice 2 p 17" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000005" e="1" n="Animation" ico=""/>
+                </d>
+            </d>
+        </d>
+        <d n="Nombres en écriture fractionnaire">
+            <url i="1009109" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000102" e="1" n="Activité 1 p 20" ico="ms5_2006"/>
+                <url i="1000103" e="1" n="Activité 2 p 20" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="542"/>
+                </d>
+                <url i="1000104" e="1" n="Activité 3 p 21" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="543"/>
+                </d>
+                <url i="1000105" e="1" n="Activité 4 p 21" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="544"/>
+                </d>
+                <url i="1000106" e="1" n="Activité 5 p 22" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="547"/>
+                </d>
+                <url i="1000107" e="1" n="Activité 6 p 22" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="548"/>
+                </d>
+                <url i="1000108" e="1" n="Activité 7 p 23" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="552"/>
+                </d>
+                <url i="1000109" e="1" n="Activité 8 p 23" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000126" e="1" n="Animation" ico=""/>
+                    <url i="2000127" e="1" n="Animation" ico=""/>
+                </d>
+                <url i="1000110" e="1" n="Activité 9 p 24" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000111" e="1" n="Activité 10 p 24" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000128" e="1" n="Animation" ico=""/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000112" e="1" n="Méthode 1 p 25" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="534"/>
+                    <url i="3000206" e="1" n="Page internet"/>
+                    <url i="3000205" e="1" n="Page internet"/>
+                </d>
+                <url i="1005054" e="1" n="Exercice 1 p 25" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006529" e="1" n="Correction Exercice 1 p 25" ico="corr_ms5_2006"/>
+                    <url i="2001202" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005055" e="1" n="Exercice 2 p 25" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006530" e="1" n="Correction Exercice 2 p 25" ico="corr_ms5_2006"/>
+                    <url i="2001203" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005056" e="1" n="Exercice 3 p 25" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006531" e="1" n="Correction Exercice 3 p 25" ico="corr_ms5_2006"/>
+                    <url i="2001204" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000113" e="1" n="Méthode 2 p 25" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="544"/>
+                </d>
+                <url i="1005057" e="1" n="Exercice 4 p 25" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006532" e="1" n="Correction Exercice 4 p 25" ico="corr_ms5_2006"/>
+                    <url i="2001205" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005058" e="1" n="Exercice 5 p 25" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006533" e="1" n="Correction Exercice 5 p 25" ico="corr_ms5_2006"/>
+                    <url i="2001206" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000114" e="1" n="Méthode 3 p 26" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="548"/>
+                    <url i="3000208" e="1" n="Page internet"/>
+                    <url i="3000207" e="1" n="Page internet"/>
+                </d>
+                <url i="1005059" e="1" n="Exercice 6 p 26" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006534" e="1" n="Correction Exercice 6 p 26" ico="corr_ms5_2006"/>
+                    <url i="2001207" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000115" e="1" n="Méthode 4 p 26" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="552"/>
+                    <url i="3000209" e="1" n="Page internet"/>
+                    <url i="3000210" e="1" n="Page internet"/>
+                </d>
+                <url i="1005060" e="1" n="Exercice 7 p 27" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006535" e="1" n="Correction Exercice 7 p 27" ico="corr_ms5_2006"/>
+                    <url i="2001208" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000116" e="1" n="Méthode 5 p 27" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000210" e="1" n="Page internet"/>
+                    <url i="3000209" e="1" n="Page internet"/>
+                </d>
+                <url i="1005061" e="1" n="Exercice 8 p 27" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006536" e="1" n="Correction Exercice 8 p 27" ico="corr_ms5_2006"/>
+                    <url i="2001209" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005062" e="1" n="Exercice 9 p 27" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006537" e="1" n="Correction Exercice 9 p 27" ico="corr_ms5_2006"/>
+                    <url i="2001210" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005063" e="1" n="Exercice 10 p 27" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006538" e="1" n="Correction Exercice 10 p 27" ico="corr_ms5_2006"/>
+                    <url i="2001211" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000117" e="1" n="Exercice 1 p 28" ico="ms5_2006"/>
+                <url i="1000118" e="1" n="Exercice 2 p 28" ico="ms5_2006"/>
+                <url i="1000119" e="1" n="Exercice 3 p 28" ico="ms5_2006"/>
+                <url i="1000120" e="1" n="Exercice 4 p 28" ico="ms5_2006"/>
+                <url i="1000121" e="1" n="Exercice 5 p 28" ico="ms5_2006"/>
+                <url i="1000122" e="1" n="Exercice 6 p 28" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000130" e="1" n="Animation" ico=""/>
+                </d>
+                <url i="1000123" e="1" n="Exercice 7 p 28" ico="ms5_2006"/>
+                <url i="1000124" e="1" n="Exercice 8 p 28" ico="ms5_2006"/>
+                <url i="1000125" e="1" n="Exercice 9 p 28" ico="ms5_2006"/>
+                <url i="1000126" e="1" n="Exercice 10 p 28" ico="ms5_2006"/>
+                <url i="1000127" e="1" n="Exercice 11 p 29" ico="ms5_2006"/>
+                <url i="1000128" e="1" n="Exercice 12 p 29" ico="ms5_2006"/>
+                <url i="1000129" e="1" n="Exercice 13 p 29" ico="ms5_2006"/>
+                <url i="1000130" e="1" n="Exercice 14 p 29" ico="ms5_2006"/>
+                <url i="1000131" e="1" n="Exercice 15 p 29" ico="ms5_2006"/>
+                <url i="1000132" e="1" n="Exercice 16 p 29" ico="ms5_2006"/>
+                <url i="1000133" e="1" n="Exercice 17 p 29" ico="ms5_2006"/>
+                <url i="1000134" e="1" n="Exercice 18 p 29" ico="ms5_2006"/>
+                <url i="1000135" e="1" n="Exercice 19 p 29" ico="ms5_2006"/>
+                <url i="1000136" e="1" n="Exercice 20 p 29" ico="ms5_2006"/>
+                <url i="1000137" e="1" n="Exercice 21 p 30" ico="ms5_2006"/>
+                <url i="1000138" e="1" n="Exercice 22 p 30" ico="ms5_2006"/>
+                <url i="1000139" e="1" n="Exercice 23 p 30" ico="ms5_2006"/>
+                <url i="1000140" e="1" n="Exercice 24 p 30" ico="ms5_2006"/>
+                <url i="1000141" e="1" n="Exercice 25 p 30" ico="ms5_2006"/>
+                <url i="1000142" e="1" n="Exercice 26 p 30" ico="ms5_2006"/>
+                <url i="1000143" e="1" n="Exercice 27 p 30" ico="ms5_2006"/>
+                <url i="1000144" e="1" n="Exercice 28 p 30" ico="ms5_2006"/>
+                <url i="1000145" e="1" n="Exercice 29 p 30" ico="ms5_2006"/>
+                <url i="1000146" e="1" n="Exercice 30 p 30" ico="ms5_2006"/>
+                <url i="1000147" e="1" n="Exercice 31 p 30" ico="ms5_2006"/>
+                <url i="1000148" e="1" n="Exercice 32 p 31" ico="ms5_2006"/>
+                <url i="1000149" e="1" n="Exercice 33 p 31" ico="ms5_2006"/>
+                <url i="1000150" e="1" n="Exercice 34 p 31" ico="ms5_2006"/>
+                <url i="1000151" e="1" n="Exercice 35 p 31" ico="ms5_2006"/>
+                <url i="1000152" e="1" n="Exercice 36 p 31" ico="ms5_2006"/>
+                <url i="1000153" e="1" n="Exercice 37 p 31" ico="ms5_2006"/>
+                <url i="1000154" e="1" n="Exercice 38 p 31" ico="ms5_2006"/>
+                <url i="1000155" e="1" n="Exercice 39 p 31" ico="ms5_2006"/>
+                <url i="1000156" e="1" n="Exercice 40 p 31" ico="ms5_2006"/>
+                <url i="1000157" e="1" n="Exercice 41 p 31" ico="ms5_2006"/>
+                <url i="1000158" e="1" n="Exercice 42 p 31" ico="ms5_2006"/>
+                <url i="1000159" e="1" n="Exercice 43 p 32" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000160" e="1" n="Exercice 44 p 32" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000130" e="1" n="Animation" ico=""/>
+                </d>
+                <url i="1000161" e="1" n="Exercice 45 p 32" ico="ms5_2006"/>
+                <url i="1000162" e="1" n="Exercice 46 p 32" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000163" e="1" n="Exercice 1 p 33" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000164" e="1" n="Exercice 2 p 33" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000153" e="1" n="Page internet"/>
+                </d>
+            </d>
+        </d>
+        <d n="Nombres relatifs">
+            <url i="1009110" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000304" e="1" n="Activité 1 p 36" ico="ms5_2006"/>
+                <url i="1000305" e="1" n="Activité 2 p 36" ico="ms5_2006"/>
+                <url i="1000306" e="1" n="Activité 3 p 37" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="567"/>
+                </d>
+                <url i="1000307" e="1" n="Activité 4 p 38" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="574"/>
+                </d>
+                <url i="1000308" e="1" n="Activité 5 p 38" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="579"/>
+                </d>
+                <url i="1000309" e="1" n="Activité 6 p 39" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="583"/>
+                </d>
+                <url i="1000310" e="1" n="Activité 7 p 40" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="608"/>
+                </d>
+                <url i="1000311" e="1" n="Activité 8 p 40" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="587"/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000312" e="1" n="Méthode 1 p 41" ico="ms5_2006"/>
+                <url i="1005064" e="1" n="Exercice 1 p 41" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006539" e="1" n="Correction Exercice 1 p 41" ico="corr_ms5_2006"/>
+                    <url i="2001212" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005065" e="1" n="Exercice 2 p 41" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006540" e="1" n="Correction Exercice 2 p 41" ico="corr_ms5_2006"/>
+                    <url i="2001213" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000313" e="1" n="Méthode 2 p 41" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="608"/>
+                    <am i="565"/>
+                </d>
+                <url i="1005066" e="1" n="Exercice 3 p 41" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006541" e="1" n="Correction Exercice 3 p 41" ico="corr_ms5_2006"/>
+                    <url i="2001214" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000314" e="1" n="Méthode 3 p 42" ico="ms5_2006"/>
+                <url i="1005067" e="1" n="Exercice 4 p 42" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006542" e="1" n="Correction Exercice 4 p 42" ico="corr_ms5_2006"/>
+                    <url i="2001215" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000315" e="1" n="Méthode 4 p 42" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="566"/>
+                    <am i="567"/>
+                </d>
+                <url i="1005068" e="1" n="Exercice 5 p 42" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006543" e="1" n="Correction Exercice 5 p 42" ico="corr_ms5_2006"/>
+                    <url i="2001216" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005069" e="1" n="Exercice 6 p 42" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006544" e="1" n="Correction Exercice 6 p 42" ico="corr_ms5_2006"/>
+                    <url i="2001217" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000316" e="1" n="Méthode 5 p 43" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="574"/>
+                </d>
+                <url i="1005070" e="1" n="Exercice 7 p 43" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006545" e="1" n="Correction Exercice 7 p 43" ico="corr_ms5_2006"/>
+                    <url i="2001218" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005071" e="1" n="Exercice 8 p 43" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006546" e="1" n="Correction Exercice 8 p 43" ico="corr_ms5_2006"/>
+                    <url i="2001219" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000317" e="1" n="Méthode 6 p 43" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="579"/>
+                    <url i="3000267" e="1" n="Page internet"/>
+                    <url i="3000268" e="1" n="Page internet"/>
+                </d>
+                <url i="1005072" e="1" n="Exercice 9 p 43" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006547" e="1" n="Correction Exercice 9 p 43" ico="corr_ms5_2006"/>
+                    <url i="2001220" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000318" e="1" n="Méthode 7 p 44" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="583"/>
+                    <url i="3000269" e="1" n="Page internet"/>
+                </d>
+                <url i="1005073" e="1" n="Exercice 10 p 44" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006548" e="1" n="Correction Exercice 10 p 44" ico="corr_ms5_2006"/>
+                    <url i="2001221" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005074" e="1" n="Exercice 11 p 44" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006549" e="1" n="Correction Exercice 11 p 44" ico="corr_ms5_2006"/>
+                    <url i="2001222" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000319" e="1" n="Méthode 8 p 44" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="594"/>
+                </d>
+                <url i="1005075" e="1" n="Exercice 12 p 44" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006550" e="1" n="Correction Exercice 12 p 44" ico="corr_ms5_2006"/>
+                    <url i="2001223" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005076" e="1" n="Exercice 13 p 44" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006551" e="1" n="Correction Exercice 13 p 44" ico="corr_ms5_2006"/>
+                    <url i="2001224" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000320" e="1" n="Méthode 9 p 45" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="581"/>
+                </d>
+                <url i="1005077" e="1" n="Exercice 14 p 45" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006552" e="1" n="Correction Exercice 14 p 45" ico="corr_ms5_2006"/>
+                    <url i="2001225" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000321" e="1" n="Méthode 10 p 45" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="588"/>
+                    <am i="588"/>
+                </d>
+                <url i="1005078" e="1" n="Exercice 15 p 45" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006553" e="1" n="Correction Exercice 15 p 45" ico="corr_ms5_2006"/>
+                    <url i="2001226" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000322" e="1" n="Exercice 1 p 46" ico="ms5_2006"/>
+                <url i="1000323" e="1" n="Exercice 2 p 46" ico="ms5_2006"/>
+                <url i="1000324" e="1" n="Exercice 3 p 46" ico="ms5_2006"/>
+                <url i="1000325" e="1" n="Exercice 4 p 46" ico="ms5_2006"/>
+                <url i="1000326" e="1" n="Exercice 5 p 46" ico="ms5_2006"/>
+                <url i="1000327" e="1" n="Exercice 6 p 46" ico="ms5_2006"/>
+                <url i="1000328" e="1" n="Exercice 7 p 46" ico="ms5_2006"/>
+                <url i="1000329" e="1" n="Exercice 8 p 46" ico="ms5_2006"/>
+                <url i="1000330" e="1" n="Exercice 9 p 46" ico="ms5_2006"/>
+                <url i="1000331" e="1" n="Exercice 10 p 47" ico="ms5_2006"/>
+                <url i="1000332" e="1" n="Exercice 11 p 47" ico="ms5_2006"/>
+                <url i="1000333" e="1" n="Exercice 12 p 47" ico="ms5_2006"/>
+                <url i="1000334" e="1" n="Exercice 13 p 47" ico="ms5_2006"/>
+                <url i="1000335" e="1" n="Exercice 14 p 47" ico="ms5_2006"/>
+                <url i="1000336" e="1" n="Exercice 15 p 47" ico="ms5_2006"/>
+                <url i="1000337" e="1" n="Exercice 16 p 47" ico="ms5_2006"/>
+                <url i="1000338" e="1" n="Exercice 17 p 48" ico="ms5_2006"/>
+                <url i="1000339" e="1" n="Exercice 18 p 48" ico="ms5_2006"/>
+                <url i="1000340" e="1" n="Exercice 19 p 48" ico="ms5_2006"/>
+                <url i="1000341" e="1" n="Exercice 20 p 48" ico="ms5_2006"/>
+                <url i="1000342" e="1" n="Exercice 21 p 48" ico="ms5_2006"/>
+                <url i="1000343" e="1" n="Exercice 22 p 48" ico="ms5_2006"/>
+                <url i="1000344" e="1" n="Exercice 23 p 48" ico="ms5_2006"/>
+                <url i="1000345" e="1" n="Exercice 24 p 49" ico="ms5_2006"/>
+                <url i="1000346" e="1" n="Exercice 25 p 49" ico="ms5_2006"/>
+                <url i="1000347" e="1" n="Exercice 26 p 49" ico="ms5_2006"/>
+                <url i="1000348" e="1" n="Exercice 27 p 49" ico="ms5_2006"/>
+                <url i="1000349" e="1" n="Exercice 28 p 49" ico="ms5_2006"/>
+                <url i="1000350" e="1" n="Exercice 29 p 49" ico="ms5_2006"/>
+                <url i="1000351" e="1" n="Exercice 30 p 49" ico="ms5_2006"/>
+                <url i="1000352" e="1" n="Exercice 31 p 49" ico="ms5_2006"/>
+                <url i="1000353" e="1" n="Exercice 32 p 49" ico="ms5_2006"/>
+                <url i="1000354" e="1" n="Exercice 33 p 50" ico="ms5_2006"/>
+                <url i="1000355" e="1" n="Exercice 34 p 50" ico="ms5_2006"/>
+                <url i="1000356" e="1" n="Exercice 35 p 50" ico="ms5_2006"/>
+                <url i="1000357" e="1" n="Exercice 36 p 50" ico="ms5_2006"/>
+                <url i="1000358" e="1" n="Exercice 37 p 50" ico="ms5_2006"/>
+                <url i="1000359" e="1" n="Exercice 38 p 50" ico="ms5_2006"/>
+                <url i="1000360" e="1" n="Exercice 39 p 50" ico="ms5_2006"/>
+                <url i="1000361" e="1" n="Exercice 40 p 50" ico="ms5_2006"/>
+                <url i="1000362" e="1" n="Exercice 41 p 50" ico="ms5_2006"/>
+                <url i="1000363" e="1" n="Exercice 42 p 50" ico="ms5_2006"/>
+                <url i="1000364" e="1" n="Exercice 43 p 50" ico="ms5_2006"/>
+                <url i="1000365" e="1" n="Exercice 44 p 50" ico="ms5_2006"/>
+                <url i="1000366" e="1" n="Exercice 45 p 50" ico="ms5_2006"/>
+                <url i="1000367" e="1" n="Exercice 46 p 51" ico="ms5_2006"/>
+                <url i="1000368" e="1" n="Exercice 47 p 51" ico="ms5_2006"/>
+                <url i="1000369" e="1" n="Exercice 48 p 51" ico="ms5_2006"/>
+                <url i="1000370" e="1" n="Exercice 49 p 51" ico="ms5_2006"/>
+                <url i="1000371" e="1" n="Exercice 50 p 51" ico="ms5_2006"/>
+                <url i="1000372" e="1" n="Exercice 51 p 51" ico="ms5_2006"/>
+                <url i="1000373" e="1" n="Exercice 52 p 51" ico="ms5_2006"/>
+                <url i="1000374" e="1" n="Exercice 53 p 51" ico="ms5_2006"/>
+                <url i="1000375" e="1" n="Exercice 54 p 51" ico="ms5_2006"/>
+                <url i="1000376" e="1" n="Exercice 55 p 51" ico="ms5_2006"/>
+                <url i="1000377" e="1" n="Exercice 56 p 51" ico="ms5_2006"/>
+                <url i="1000378" e="1" n="Exercice 57 p 51" ico="ms5_2006"/>
+                <url i="1000379" e="1" n="Exercice 58 p 51" ico="ms5_2006"/>
+                <url i="1000380" e="1" n="Exercice 59 p 52" ico="ms5_2006"/>
+                <url i="1000381" e="1" n="Exercice 60 p 52" ico="ms5_2006"/>
+                <url i="1000382" e="1" n="Exercice 61 p 52" ico="ms5_2006"/>
+                <url i="1000383" e="1" n="Exercice 62 p 52" ico="ms5_2006"/>
+                <url i="1000384" e="1" n="Exercice 63 p 52" ico="ms5_2006"/>
+                <url i="1000385" e="1" n="Exercice 64 p 52" ico="ms5_2006"/>
+                <url i="1000386" e="1" n="Exercice 65 p 52" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000306" e="1" n="Page internet"/>
+                </d>
+                <url i="1000387" e="1" n="Exercice 66 p 52" ico="ms5_2006"/>
+                <url i="1000388" e="1" n="Exercice 67 p 52" ico="ms5_2006"/>
+                <url i="1000389" e="1" n="Exercice 68 p 53" ico="ms5_2006"/>
+                <url i="1000390" e="1" n="Exercice 69 p 53" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000270" e="1" n="Page internet"/>
+                </d>
+                <url i="1000391" e="1" n="Exercice 70 p 53" ico="ms5_2006"/>
+                <url i="1000392" e="1" n="Exercice 71 p 53" ico="ms5_2006"/>
+                <url i="1000393" e="1" n="Exercice 72 p 53" ico="ms5_2006"/>
+                <url i="1000394" e="1" n="Exercice 73 p 53" ico="ms5_2006"/>
+                <url i="1000395" e="1" n="Exercice 74 p 53" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000396" e="1" n="Exercice 1 p 54" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000273" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000397" e="1" n="Exercice 2 p 54" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+            </d>
+        </d>
+        <d n="Calcul littéral">
+            <url i="1009111" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000398" e="1" n="Activité 1 p 56" ico="ms5_2006"/>
+                <url i="1000399" e="1" n="Activité 2 p 56" ico="ms5_2006"/>
+                <url i="1000400" e="1" n="Activité 3 p 56" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000303" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000401" e="1" n="Activité 4 p 57" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000402" e="1" n="Activité 5 p 57" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000302" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000403" e="1" n="Activité 6 p 57" ico="ms5_2006"/>
+                <url i="1000404" e="1" n="Activité 7 p 58" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000405" e="1" n="Activité 8 p 58" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+            </d>
+            <d n="Cours">
+                <url i="1000406" e="1" n="Méthode 1 p 59" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="625"/>
+                </d>
+                <url i="1005079" e="1" n="Exercice 1 p 59" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006554" e="1" n="Correction Exercice 1 p 59" ico="corr_ms5_2006"/>
+                    <url i="2001227" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005080" e="1" n="Exercice 2 p 59" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006555" e="1" n="Correction Exercice 2 p 59" ico="corr_ms5_2006"/>
+                    <url i="2001228" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000407" e="1" n="Méthode 2 p 59" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="615"/>
+                    <url i="3000291" e="1" n="Page internet"/>
+                    <url i="3000292" e="1" n="Page internet"/>
+                </d>
+                <url i="1005081" e="1" n="Exercice 3 p 59" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006556" e="1" n="Correction Exercice 3 p 59" ico="corr_ms5_2006"/>
+                    <url i="2001229" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005082" e="1" n="Exercice 4 p 59" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006557" e="1" n="Correction Exercice 4 p 59" ico="corr_ms5_2006"/>
+                    <url i="2001230" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000408" e="1" n="Méthode 3 p 60" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="631"/>
+                    <url i="3000293" e="1" n="Page internet"/>
+                    <url i="3000294" e="1" n="Page internet"/>
+                </d>
+                <url i="1005083" e="1" n="Exercice 5 p 60" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006558" e="1" n="Correction Exercice 5 p 60" ico="corr_ms5_2006"/>
+                    <url i="2001231" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005084" e="1" n="Exercice 6 p 60" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006559" e="1" n="Correction Exercice 6 p 60" ico="corr_ms5_2006"/>
+                    <url i="2001232" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000409" e="1" n="Méthode 4 p 60" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="632"/>
+                    <url i="3000295" e="1" n="Page internet"/>
+                    <url i="3000296" e="1" n="Page internet"/>
+                </d>
+                <url i="1005085" e="1" n="Exercice 7 p 60" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006560" e="1" n="Correction Exercice 7 p 60" ico="corr_ms5_2006"/>
+                    <url i="2001233" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005086" e="1" n="Exercice 8 p 60" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006561" e="1" n="Correction Exercice 8 p 60" ico="corr_ms5_2006"/>
+                    <url i="2001234" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000410" e="1" n="Méthode 5 p 61" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="633"/>
+                    <am i="634"/>
+                    <url i="3000297" e="1" n="Page internet"/>
+                    <url i="3000298" e="1" n="Page internet"/>
+                </d>
+                <url i="1005087" e="1" n="Exercice 9 p 61" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006562" e="1" n="Correction Exercice 9 p 61" ico="corr_ms5_2006"/>
+                    <url i="2001235" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005088" e="1" n="Exercice 10 p 61" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006563" e="1" n="Correction Exercice 10 p 61" ico="corr_ms5_2006"/>
+                    <url i="2001236" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000411" e="1" n="Méthode 6 p 61" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="639"/>
+                </d>
+                <url i="1005089" e="1" n="Exercice 11 p 61" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006564" e="1" n="Correction Exercice 11 p 61" ico="corr_ms5_2006"/>
+                    <url i="2001237" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005090" e="1" n="Exercice 12 p 61" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006565" e="1" n="Correction Exercice 12 p 61" ico="corr_ms5_2006"/>
+                    <url i="2001238" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000412" e="1" n="Exercice 1 p 62" ico="ms5_2006"/>
+                <url i="1000413" e="1" n="Exercice 2 p 62" ico="ms5_2006"/>
+                <url i="1000414" e="1" n="Exercice 3 p 62" ico="ms5_2006"/>
+                <url i="1000415" e="1" n="Exercice 4 p 62" ico="ms5_2006"/>
+                <url i="1000416" e="1" n="Exercice 5 p 62" ico="ms5_2006"/>
+                <url i="1000417" e="1" n="Exercice 6 p 62" ico="ms5_2006"/>
+                <url i="1000418" e="1" n="Exercice 7 p 62" ico="ms5_2006"/>
+                <url i="1000419" e="1" n="Exercice 8 p 62" ico="ms5_2006"/>
+                <url i="1000420" e="1" n="Exercice 9 p 62" ico="ms5_2006"/>
+                <url i="1000421" e="1" n="Exercice 10 p 62" ico="ms5_2006"/>
+                <url i="1000422" e="1" n="Exercice 11 p 62" ico="ms5_2006"/>
+                <url i="1000423" e="1" n="Exercice 12 p 63" ico="ms5_2006"/>
+                <url i="1000424" e="1" n="Exercice 13 p 63" ico="ms5_2006"/>
+                <url i="1000425" e="1" n="Exercice 14 p 63" ico="ms5_2006"/>
+                <url i="1000426" e="1" n="Exercice 15 p 63" ico="ms5_2006"/>
+                <url i="1000427" e="1" n="Exercice 16 p 63" ico="ms5_2006"/>
+                <url i="1000428" e="1" n="Exercice 17 p 63" ico="ms5_2006"/>
+                <url i="1000429" e="1" n="Exercice 18 p 63" ico="ms5_2006"/>
+                <url i="1000430" e="1" n="Exercice 19 p 63" ico="ms5_2006"/>
+                <url i="1000431" e="1" n="Exercice 20 p 63" ico="ms5_2006"/>
+                <url i="1000432" e="1" n="Exercice 21 p 63" ico="ms5_2006"/>
+                <url i="1000433" e="1" n="Exercice 22 p 63" ico="ms5_2006"/>
+                <url i="1000434" e="1" n="Exercice 23 p 64" ico="ms5_2006"/>
+                <url i="1000435" e="1" n="Exercice 24 p 64" ico="ms5_2006"/>
+                <url i="1000436" e="1" n="Exercice 25 p 64" ico="ms5_2006"/>
+                <url i="1000437" e="1" n="Exercice 26 p 64" ico="ms5_2006"/>
+                <url i="1000438" e="1" n="Exercice 27 p 64" ico="ms5_2006"/>
+                <url i="1000439" e="1" n="Exercice 28 p 64" ico="ms5_2006"/>
+                <url i="1000440" e="1" n="Exercice 29 p 64" ico="ms5_2006"/>
+                <url i="1000441" e="1" n="Exercice 30 p 64" ico="ms5_2006"/>
+                <url i="1000442" e="1" n="Exercice 31 p 64" ico="ms5_2006"/>
+                <url i="1000443" e="1" n="Exercice 32 p 64" ico="ms5_2006"/>
+                <url i="1000444" e="1" n="Exercice 33 p 64" ico="ms5_2006"/>
+                <url i="1000445" e="1" n="Exercice 34 p 65" ico="ms5_2006"/>
+                <url i="1000446" e="1" n="Exercice 35 p 65" ico="ms5_2006"/>
+                <url i="1000447" e="1" n="Exercice 36 p 65" ico="ms5_2006"/>
+                <url i="1000448" e="1" n="Exercice 37 p 65" ico="ms5_2006"/>
+                <url i="1000449" e="1" n="Exercice 38 p 65" ico="ms5_2006"/>
+                <url i="1000450" e="1" n="Exercice 39 p 65" ico="ms5_2006"/>
+                <url i="1000451" e="1" n="Exercice 40 p 65" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000452" e="1" n="Exercice 1 p 66" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000305" e="1" n="Animation" ico=""/>
+                </d>
+            </d>
+        </d>
+        <d n="Proportionnalité">
+            <url i="1009112" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000498" e="1" n="Activité 1 p 68" ico="ms5_2006"/>
+                <url i="1000499" e="1" n="Activité 2 p 68" ico="ms5_2006"/>
+                <url i="1000500" e="1" n="Activité 3 p 69" ico="ms5_2006"/>
+                <url i="1000501" e="1" n="Activité 4 p 69" ico="ms5_2006"/>
+                <url i="1000502" e="1" n="Activité 5 p 70" ico="ms5_2006"/>
+                <url i="1000503" e="1" n="Activité 6 p 70" ico="ms5_2006"/>
+                <url i="1000504" e="1" n="Activité 7 p 71" ico="ms5_2006"/>
+                <url i="1000505" e="1" n="Activité 8 p 71" ico="ms5_2006"/>
+                <url i="1000506" e="1" n="Activité 9 p 71" ico="ms5_2006"/>
+            </d>
+            <d n="Cours">
+                <url i="1000507" e="1" n="Méthode 1 p 72" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="652"/>
+                </d>
+                <url i="1005091" e="1" n="Exercice 1 p 72" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006566" e="1" n="Correction Exercice 1 p 72" ico="corr_ms5_2006"/>
+                    <url i="2001239" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005092" e="1" n="Exercice 2 p 72" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006567" e="1" n="Correction Exercice 2 p 72" ico="corr_ms5_2006"/>
+                    <url i="2001240" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000508" e="1" n="Méthode 2 p 73" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="656"/>
+                    <am i="657"/>
+                </d>
+                <url i="1005093" e="1" n="Exercice 3 p 73" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006568" e="1" n="Correction Exercice 3 p 73" ico="corr_ms5_2006"/>
+                    <url i="2001241" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005094" e="1" n="Exercice 4 p 73" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006569" e="1" n="Correction Exercice 4 p 73" ico="corr_ms5_2006"/>
+                    <url i="2001242" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005095" e="1" n="Exercice 5 p 73" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006570" e="1" n="Correction Exercice 5 p 73" ico="corr_ms5_2006"/>
+                    <url i="2001243" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005096" e="1" n="Exercice 6 p 73" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006571" e="1" n="Correction Exercice 6 p 73" ico="corr_ms5_2006"/>
+                    <url i="2001244" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000509" e="1" n="Méthode 3 p 74" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="652"/>
+                </d>
+                <url i="1005346" e="1" n="Exercice 7 p 74" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006572" e="1" n="Correction Exercice 7 p 74" ico="corr_ms5_2006"/>
+                </d>
+                <url i="1000510" e="1" n="Méthode 4 p 74" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="665"/>
+                </d>
+                <url i="1005347" e="1" n="Exercice 8 p 74" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006573" e="1" n="Correction Exercice 8 p 74" ico="corr_ms5_2006"/>
+                </d>
+                <url i="1000511" e="1" n="Méthode 5 p 75" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="674"/>
+                </d>
+                <url i="1005348" e="1" n="Exercice 9 p 75" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006574" e="1" n="Correction Exercice 9 p 75" ico="corr_ms5_2006"/>
+                </d>
+                <url i="1000512" e="1" n="Méthode 6 p 75" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="659"/>
+                </d>
+                <url i="1005349" e="1" n="Exercice 10 p 75" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006575" e="1" n="Correction Exercice 10 p 75" ico="corr_ms5_2006"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000513" e="1" n="Exercice 1 p 76" ico="ms5_2006"/>
+                <url i="1000514" e="1" n="Exercice 2 p 76" ico="ms5_2006"/>
+                <url i="1000515" e="1" n="Exercice 3 p 76" ico="ms5_2006"/>
+                <url i="1000516" e="1" n="Exercice 4 p 76" ico="ms5_2006"/>
+                <url i="1000517" e="1" n="Exercice 5 p 76" ico="ms5_2006"/>
+                <url i="1000518" e="1" n="Exercice 6 p 76" ico="ms5_2006"/>
+                <url i="1000519" e="1" n="Exercice 7 p 76" ico="ms5_2006"/>
+                <url i="1000520" e="1" n="Exercice 8 p 76" ico="ms5_2006"/>
+                <url i="1000521" e="1" n="Exercice 9 p 76" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000357" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1000522" e="1" n="Exercice 10 p 76" ico="ms5_2006"/>
+                <url i="1000523" e="1" n="Exercice 11 p 76" ico="ms5_2006"/>
+                <url i="1000524" e="1" n="Exercice 12 p 77" ico="ms5_2006"/>
+                <url i="1000525" e="1" n="Exercice 13 p 77" ico="ms5_2006"/>
+                <url i="1000526" e="1" n="Exercice 14 p 77" ico="ms5_2006"/>
+                <url i="1000527" e="1" n="Exercice 15 p 77" ico="ms5_2006"/>
+                <url i="1000528" e="1" n="Exercice 16 p 77" ico="ms5_2006"/>
+                <url i="1000529" e="1" n="Exercice 17 p 77" ico="ms5_2006"/>
+                <url i="1000530" e="1" n="Exercice 18 p 77" ico="ms5_2006"/>
+                <url i="1000531" e="1" n="Exercice 19 p 77" ico="ms5_2006"/>
+                <url i="1000532" e="1" n="Exercice 20 p 78" ico="ms5_2006"/>
+                <url i="1000533" e="1" n="Exercice 21 p 78" ico="ms5_2006"/>
+                <url i="1000534" e="1" n="Exercice 22 p 78" ico="ms5_2006"/>
+                <url i="1000535" e="1" n="Exercice 23 p 78" ico="ms5_2006"/>
+                <url i="1000536" e="1" n="Exercice 24 p 78" ico="ms5_2006"/>
+                <url i="1000537" e="1" n="Exercice 25 p 78" ico="ms5_2006"/>
+                <url i="1000538" e="1" n="Exercice 26 p 78" ico="ms5_2006"/>
+                <url i="1000539" e="1" n="Exercice 27 p 78" ico="ms5_2006"/>
+                <url i="1000540" e="1" n="Exercice 28 p 78" ico="ms5_2006"/>
+                <url i="1000541" e="1" n="Exercice 29 p 78" ico="ms5_2006"/>
+                <url i="1000542" e="1" n="Exercice 30 p 79" ico="ms5_2006"/>
+                <url i="1000543" e="1" n="Exercice 31 p 79" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000544" e="1" n="Exercice 1 p 80" ico="ms5_2006"/>
+                <url i="1000545" e="1" n="Exercice 2 p 80" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000358" e="1" n="Animation" ico=""/>
+                </d>
+            </d>
+        </d>
+        <d n="Statistiques">
+            <url i="1009113" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000578" e="1" n="Activité 1 p 82" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000579" e="1" n="Activité 2 p 83" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="697"/>
+                </d>
+                <url i="1000580" e="1" n="Activité 3 p 83" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="681"/>
+                </d>
+                <url i="1000581" e="1" n="Activité 4 p 84" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="694"/>
+                </d>
+                <url i="1000582" e="1" n="Activité 5 p 84" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="684"/>
+                </d>
+                <url i="1000583" e="1" n="Activité 6 p 85" ico="ms5_2006"/>
+                <url i="1000584" e="1" n="Activité 7 p 85" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000409" e="1" n="Page internet"/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000585" e="1" n="Méthode 1 p 86" ico="ms5_2006"/>
+                <url i="1005340" e="1" n="Exercice 1 p 86" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006576" e="1" n="Correction Exercice 1 p 86" ico="corr_ms5_2006"/>
+                    <url i="2001312" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005341" e="1" n="Exercice 2 p 86" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006577" e="1" n="Correction Exercice 2 p 86" ico="corr_ms5_2006"/>
+                    <url i="2001313" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000586" e="1" n="Méthode 2 p 87" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="697"/>
+                </d>
+                <url i="1005342" e="1" n="Exercice 3 p 87" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006578" e="1" n="Correction Exercice 3 p 87" ico="corr_ms5_2006"/>
+                    <url i="2001314" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005343" e="1" n="Exercice 4 p 87" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006579" e="1" n="Correction Exercice 4 p 87" ico="corr_ms5_2006"/>
+                    <url i="2001315" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000587" e="1" n="Méthode 3 p 88" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="684"/>
+                </d>
+                <url i="1005344" e="1" n="Exercice 5 p 88" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006580" e="1" n="Correction Exercice 5 p 88" ico="corr_ms5_2006"/>
+                    <url i="2001316" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000588" e="1" n="Méthode 4 p 89" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="694"/>
+                    <am i="694"/>
+                    <am i="694"/>
+                </d>
+                <url i="1005345" e="1" n="Exercice 6 p 89" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006581" e="1" n="Correction Exercice 6 p 89" ico="corr_ms5_2006"/>
+                    <url i="2001317" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000589" e="1" n="Exercice 1 p 90" ico="ms5_2006"/>
+                <url i="1000590" e="1" n="Exercice 2 p 90" ico="ms5_2006"/>
+                <url i="1000591" e="1" n="Exercice 3 p 90" ico="ms5_2006"/>
+                <url i="1000592" e="1" n="Exercice 4 p 90" ico="ms5_2006"/>
+                <url i="1000593" e="1" n="Exercice 5 p 90" ico="ms5_2006"/>
+                <url i="1000594" e="1" n="Exercice 6 p 90" ico="ms5_2006"/>
+                <url i="1000595" e="1" n="Exercice 7 p 91" ico="ms5_2006"/>
+                <url i="1000596" e="1" n="Exercice 8 p 91" ico="ms5_2006"/>
+                <url i="1000597" e="1" n="Exercice 9 p 91" ico="ms5_2006"/>
+                <url i="1000598" e="1" n="Exercice 10 p 91" ico="ms5_2006"/>
+                <url i="1000599" e="1" n="Exercice 11 p 91" ico="ms5_2006"/>
+                <url i="1000600" e="1" n="Exercice 12 p 91" ico="ms5_2006"/>
+                <url i="1000601" e="1" n="Exercice 13 p 92" ico="ms5_2006"/>
+                <url i="1000602" e="1" n="Exercice 14 p 92" ico="ms5_2006"/>
+                <url i="1000603" e="1" n="Exercice 15 p 92" ico="ms5_2006"/>
+                <url i="1000604" e="1" n="Exercice 16 p 92" ico="ms5_2006"/>
+                <url i="1000605" e="1" n="Exercice 17 p 93" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000606" e="1" n="Exercice 18 p 93" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000607" e="1" n="Exercice 1 p 94" ico="ms5_2006"/>
+                <url i="1000608" e="1" n="Exercice 2 p 94" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000415" e="1" n="Animation" ico=""/>
+                </d>
+            </d>
+        </d>
+        <d n="Symétrie centrale">
+            <url i="1009114" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000045" e="1" n="Activité 1 p 96" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="339"/>
+                    <url i="2000008" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1000046" e="1" n="Activité 2 p 96" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="338"/>
+                    <url i="2000006" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000047" e="1" n="Activité 3 p 97" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000073" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000048" e="1" n="Activité 4 p 97" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000084" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1000049" e="1" n="Activité 5 p 97" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="343"/>
+                    <url i="3000032" e="1" n="Page internet"/>
+                </d>
+                <url i="1000050" e="1" n="Activité 6 p 98" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000033" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000051" e="1" n="Activité 7 p 98" ico="ms5_2006"/>
+            </d>
+            <d n="Cours">
+                <url i="1000053" e="1" n="Méthode 1 p 99" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="349"/>
+                </d>
+                <url i="1005097" e="1" n="Exercice 1 p 99" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006582" e="1" n="Correction Exercice 1 p 99" ico="corr_ms5_2006"/>
+                    <url i="2001245" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005098" e="1" n="Exercice 2 p 99" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006583" e="1" n="Correction Exercice 2 p 99" ico="corr_ms5_2006"/>
+                    <url i="2001246" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000054" e="1" n="Méthode 2 p 99" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000010" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005099" e="1" n="Exercice 3 p 99" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006584" e="1" n="Correction Exercice 3 p 99" ico="corr_ms5_2006"/>
+                    <url i="2001247" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005100" e="1" n="Exercice 4 p 99" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006585" e="1" n="Correction Exercice 4 p 99" ico="corr_ms5_2006"/>
+                    <url i="2001248" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000055" e="1" n="Méthode 3 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000011" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005101" e="1" n="Exercice 5 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006586" e="1" n="Correction Exercice 5 p 100" ico="corr_ms5_2006"/>
+                    <url i="2001249" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005102" e="1" n="Exercice 6 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006587" e="1" n="Correction Exercice 6 p 100" ico="corr_ms5_2006"/>
+                    <url i="2001250" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005103" e="1" n="Exercice 7 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006588" e="1" n="Correction Exercice 7 p 100" ico="corr_ms5_2006"/>
+                    <url i="2001251" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000056" e="1" n="Méthode 4 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="354"/>
+                    <url i="3000068" e="1" n="Page internet"/>
+                    <url i="3000199" e="1" n="Page internet"/>
+                    <url i="2000013" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1005104" e="1" n="Exercice 8 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006589" e="1" n="Correction Exercice 8 p 100" ico="corr_ms5_2006"/>
+                    <url i="2001252" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005105" e="1" n="Exercice 9 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006590" e="1" n="Correction Exercice 9 p 100" ico="corr_ms5_2006"/>
+                    <url i="2001253" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005106" e="1" n="Exercice 10 p 100" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006591" e="1" n="Correction Exercice 10 p 100" ico="corr_ms5_2006"/>
+                    <url i="2001254" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000057" e="1" n="Méthode 5 p 101" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="355"/>
+                    <url i="3000199" e="1" n="Page internet"/>
+                    <url i="2000015" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1005107" e="1" n="Exercice 11 p 101" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006592" e="1" n="Correction Exercice 11 p 101" ico="corr_ms5_2006"/>
+                    <url i="2001255" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005108" e="1" n="Exercice 12 p 101" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006593" e="1" n="Correction Exercice 12 p 101" ico="corr_ms5_2006"/>
+                    <url i="2001256" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000058" e="1" n="Méthode 6 p 101" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000012" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005109" e="1" n="Exercice 13 p 101" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006594" e="1" n="Correction Exercice 13 p 101" ico="corr_ms5_2006"/>
+                    <url i="2001257" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000059" e="1" n="Exercice 1 p 102" ico="ms5_2006"/>
+                <url i="1000060" e="1" n="Exercice 2 p 102" ico="ms5_2006"/>
+                <url i="1000101" e="1" n="Exercice 3 p 102" ico="ms5_2006"/>
+                <url i="1000061" e="1" n="Exercice 4 p 102" ico="ms5_2006"/>
+                <url i="1000062" e="1" n="Exercice 5 p 102" ico="ms5_2006"/>
+                <url i="1000063" e="1" n="Exercice 6 p 102" ico="ms5_2006"/>
+                <url i="1000064" e="1" n="Exercice 7 p 102" ico="ms5_2006"/>
+                <url i="1000065" e="1" n="Exercice 8 p 102" ico="ms5_2006"/>
+                <url i="1000066" e="1" n="Exercice 9 p 102" ico="ms5_2006"/>
+                <url i="1000067" e="1" n="Exercice 10 p 103" ico="ms5_2006"/>
+                <url i="1000068" e="1" n="Exercice 11 p 103" ico="ms5_2006"/>
+                <url i="1000069" e="1" n="Exercice 12 p 103" ico="ms5_2006"/>
+                <url i="1000070" e="1" n="Exercice 13 p 103" ico="ms5_2006"/>
+                <url i="1000071" e="1" n="Exercice 14 p 103" ico="ms5_2006"/>
+                <url i="1000072" e="1" n="Exercice 15 p 103" ico="ms5_2006"/>
+                <url i="1000073" e="1" n="Exercice 16 p 103" ico="ms5_2006"/>
+                <url i="1000074" e="1" n="Exercice 17 p 103" ico="ms5_2006"/>
+                <url i="1000075" e="1" n="Exercice 18 p 103" ico="ms5_2006"/>
+                <url i="1000076" e="1" n="Exercice 19 p 104" ico="ms5_2006"/>
+                <url i="1000077" e="1" n="Exercice 20 p 104" ico="ms5_2006"/>
+                <url i="1000078" e="1" n="Exercice 21 p 104" ico="ms5_2006"/>
+                <url i="1000079" e="1" n="Exercice 22 p 104" ico="ms5_2006"/>
+                <url i="1000080" e="1" n="Exercice 23 p 104" ico="ms5_2006"/>
+                <url i="1000081" e="1" n="Exercice 24 p 104" ico="ms5_2006"/>
+                <url i="1000082" e="1" n="Exercice 25 p 104" ico="ms5_2006"/>
+                <url i="1000083" e="1" n="Exercice 26 p 104" ico="ms5_2006"/>
+                <url i="1000084" e="1" n="Exercice 27 p 105" ico="ms5_2006"/>
+                <url i="1000085" e="1" n="Exercice 28 p 105" ico="ms5_2006"/>
+                <url i="1000086" e="1" n="Exercice 29 p 105" ico="ms5_2006"/>
+                <url i="1000087" e="1" n="Exercice 30 p 105" ico="ms5_2006"/>
+                <url i="1000088" e="1" n="Exercice 31 p 105" ico="ms5_2006"/>
+                <url i="1000089" e="1" n="Exercice 32 p 105" ico="ms5_2006"/>
+                <url i="1000090" e="1" n="Exercice 33 p 105" ico="ms5_2006"/>
+                <url i="1000091" e="1" n="Exercice 34 p 105" ico="ms5_2006"/>
+                <url i="1000092" e="1" n="Exercice 35 p 105" ico="ms5_2006"/>
+                <url i="1000093" e="1" n="Exercice 36 p 106" ico="ms5_2006"/>
+                <url i="1000094" e="1" n="Exercice 37 p 106" ico="ms5_2006"/>
+                <url i="1000095" e="1" n="Exercice 38 p 106" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000096" e="1" n="Exercice 39 p 106" ico="ms5_2006"/>
+                <url i="1000097" e="1" n="Exercice 40 p 106" ico="ms5_2006"/>
+                <url i="1000098" e="1" n="Exercice 41 p 106" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000099" e="1" n="Exercice 1 p 107" ico="ms5_2006"/>
+                <url i="1000100" e="1" n="Exercice 2 p 107" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000026" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+            </d>
+        </d>
+        <d n="Triangles">
+            <url i="1009115" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000165" e="1" n="Activité 1 p 110" ico="ms5_2006"/>
+                <url i="1000166" e="1" n="Activité 2 p 110" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="366"/>
+                </d>
+                <url i="1000167" e="1" n="Activité 3 p 110" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="368"/>
+                    <url i="2000154" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000168" e="1" n="Activité 4 p 111" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="368"/>
+                    <url i="3000200" e="1" n="Page internet"/>
+                    <url i="2000155" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000169" e="1" n="Activité 5 p 111" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000170" e="1" n="Activité 6 p 112" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000171" e="1" n="Activité 7 p 112" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="372"/>
+                </d>
+                <url i="1000172" e="1" n="Activité 8 p 112" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="372"/>
+                    <url i="2000156" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000173" e="1" n="Activité 9 p 113" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="376"/>
+                    <url i="2000157" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000174" e="1" n="Activité 10 p 113" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="379"/>
+                    <am i="380"/>
+                </d>
+                <url i="1000175" e="1" n="Activité 11 p 113" ico="ms5_2006"/>
+                <url i="1000176" e="1" n="Activité 12 p 114" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000177" e="1" n="Activité 13 p 114" ico="ms5_2006"/>
+                <url i="1000178" e="1" n="Activité 14 p 115" ico="ms5_2006"/>
+                <url i="1000179" e="1" n="Activité 15 p 115" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000240" e="1" n="Page internet"/>
+                    <url i="2000158" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000180" e="1" n="Méthode 1 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="368"/>
+                    <am i="369"/>
+                    <url i="3000202" e="1" n="Page internet"/>
+                    <url i="2000154" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1005110" e="1" n="Exercice 1 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006595" e="1" n="Correction Exercice 1 p 116" ico="corr_ms5_2006"/>
+                    <url i="2001258" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005111" e="1" n="Exercice 2 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006596" e="1" n="Correction Exercice 2 p 116" ico="corr_ms5_2006"/>
+                    <url i="2001259" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005112" e="1" n="Exercice 3 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006597" e="1" n="Correction Exercice 3 p 116" ico="corr_ms5_2006"/>
+                    <url i="2001260" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005113" e="1" n="Exercice 4 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006598" e="1" n="Correction Exercice 4 p 116" ico="corr_ms5_2006"/>
+                    <url i="2001261" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000181" e="1" n="Méthode 2 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="373"/>
+                    <url i="2000156" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1005114" e="1" n="Exercice 5 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006599" e="1" n="Correction Exercice 5 p 116" ico="corr_ms5_2006"/>
+                    <url i="2001262" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005115" e="1" n="Exercice 6 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006600" e="1" n="Correction Exercice 6 p 116" ico="corr_ms5_2006"/>
+                    <url i="2001263" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005116" e="1" n="Exercice 7 p 116" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006601" e="1" n="Correction Exercice 7 p 116" ico="corr_ms5_2006"/>
+                    <url i="2001264" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000182" e="1" n="Méthode 3 p 117" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="377"/>
+                    <url i="2000162" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005117" e="1" n="Exercice 8 p 117" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006602" e="1" n="Correction Exercice 8 p 117" ico="corr_ms5_2006"/>
+                    <url i="2001265" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005118" e="1" n="Exercice 9 p 117" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006603" e="1" n="Correction Exercice 9 p 117" ico="corr_ms5_2006"/>
+                    <url i="2001266" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000183" e="1" n="Méthode 4 p 117" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="378"/>
+                    <url i="2000163" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005119" e="1" n="Exercice 10 p 117" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006604" e="1" n="Correction Exercice 10 p 117" ico="corr_ms5_2006"/>
+                    <url i="2001267" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005120" e="1" n="Exercice 11 p 117" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006605" e="1" n="Correction Exercice 11 p 117" ico="corr_ms5_2006"/>
+                    <url i="2001268" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000184" e="1" n="Méthode 5 p 118" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="379"/>
+                    <url i="2000164" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005121" e="1" n="Exercice 12 p 118" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006606" e="1" n="Correction Exercice 12 p 118" ico="corr_ms5_2006"/>
+                    <url i="2001269" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005122" e="1" n="Exercice 13 p 118" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006607" e="1" n="Correction Exercice 13 p 118" ico="corr_ms5_2006"/>
+                    <url i="2001270" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000185" e="1" n="Méthode 6 p 118" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="386"/>
+                    <am i="386"/>
+                    <url i="2000165" e="1" n="Animation" ico="iep"/>
+                    <url i="2000158" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1005123" e="1" n="Exercice 14 p 118" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006608" e="1" n="Correction Exercice 14 p 118" ico="corr_ms5_2006"/>
+                    <url i="2001271" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005124" e="1" n="Exercice 15 p 118" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006609" e="1" n="Correction Exercice 15 p 118" ico="corr_ms5_2006"/>
+                    <url i="2001272" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000186" e="1" n="Méthode 7 p 119" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="385"/>
+                    <url i="2000166" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005125" e="1" n="Exercice 16 p 119" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006610" e="1" n="Correction Exercice 16 p 119" ico="corr_ms5_2006"/>
+                    <url i="2001273" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005126" e="1" n="Exercice 17 p 119" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006611" e="1" n="Correction Exercice 17 p 119" ico="corr_ms5_2006"/>
+                    <url i="2001274" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000187" e="1" n="Méthode 8 p 119" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="384"/>
+                    <url i="2000167" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005127" e="1" n="Exercice 18 p 119" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006612" e="1" n="Correction Exercice 18 p 119" ico="corr_ms5_2006"/>
+                    <url i="2001275" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005128" e="1" n="Exercice 19 p 119" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006613" e="1" n="Correction Exercice 19 p 119" ico="corr_ms5_2006"/>
+                    <url i="2001276" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005129" e="1" n="Exercice 20 p 119" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006614" e="1" n="Correction Exercice 20 p 119" ico="corr_ms5_2006"/>
+                    <url i="2001277" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000188" e="1" n="Exercice 1 p 120" ico="ms5_2006"/>
+                <url i="1000189" e="1" n="Exercice 2 p 120" ico="ms5_2006"/>
+                <url i="1000190" e="1" n="Exercice 3 p 120" ico="ms5_2006"/>
+                <url i="1000191" e="1" n="Exercice 4 p 120" ico="ms5_2006"/>
+                <url i="1000192" e="1" n="Exercice 5 p 120" ico="ms5_2006"/>
+                <url i="1000193" e="1" n="Exercice 6 p 120" ico="ms5_2006"/>
+                <url i="1000194" e="1" n="Exercice 7 p 120" ico="ms5_2006"/>
+                <url i="1000195" e="1" n="Exercice 8 p 120" ico="ms5_2006"/>
+                <url i="1000196" e="1" n="Exercice 9 p 121" ico="ms5_2006"/>
+                <url i="1000197" e="1" n="Exercice 10 p 121" ico="ms5_2006"/>
+                <url i="1000198" e="1" n="Exercice 11 p 121" ico="ms5_2006"/>
+                <url i="1000199" e="1" n="Exercice 12 p 121" ico="ms5_2006"/>
+                <url i="1000200" e="1" n="Exercice 13 p 121" ico="ms5_2006"/>
+                <url i="1000201" e="1" n="Exercice 14 p 121" ico="ms5_2006"/>
+                <url i="1000202" e="1" n="Exercice 15 p 121" ico="ms5_2006"/>
+                <url i="1000203" e="1" n="Exercice 16 p 121" ico="ms5_2006"/>
+                <url i="1000204" e="1" n="Exercice 17 p 122" ico="ms5_2006"/>
+                <url i="1000205" e="1" n="Exercice 18 p 122" ico="ms5_2006"/>
+                <url i="1000206" e="1" n="Exercice 19 p 122" ico="ms5_2006"/>
+                <url i="1000207" e="1" n="Exercice 20 p 122" ico="ms5_2006"/>
+                <url i="1000208" e="1" n="Exercice 21 p 122" ico="ms5_2006"/>
+                <url i="1000209" e="1" n="Exercice 22 p 122" ico="ms5_2006"/>
+                <url i="1000210" e="1" n="Exercice 23 p 122" ico="ms5_2006"/>
+                <url i="1000211" e="1" n="Exercice 24 p 122" ico="ms5_2006"/>
+                <url i="1000212" e="1" n="Exercice 25 p 123" ico="ms5_2006"/>
+                <url i="1000213" e="1" n="Exercice 26 p 123" ico="ms5_2006"/>
+                <url i="1000214" e="1" n="Exercice 27 p 123" ico="ms5_2006"/>
+                <url i="1000215" e="1" n="Exercice 28 p 123" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000159" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000216" e="1" n="Exercice 29 p 123" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000159" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000217" e="1" n="Exercice 30 p 123" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000159" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000218" e="1" n="Exercice 31 p 123" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000159" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000219" e="1" n="Exercice 32 p 123" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000159" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000220" e="1" n="Exercice 33 p 123" ico="ms5_2006"/>
+                <url i="1000221" e="1" n="Exercice 34 p 124" ico="ms5_2006"/>
+                <url i="1000222" e="1" n="Exercice 35 p 124" ico="ms5_2006"/>
+                <url i="1000223" e="1" n="Exercice 36 p 124" ico="ms5_2006"/>
+                <url i="1000224" e="1" n="Exercice 37 p 124" ico="ms5_2006"/>
+                <url i="1000225" e="1" n="Exercice 38 p 124" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000226" e="1" n="Exercice 1 p 125" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000334" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000227" e="1" n="Exercice 2 p 126" ico="ms5_2006"/>
+            </d>
+        </d>
+        <d n="Parallélogrammes">
+            <url i="1009116" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000228" e="1" n="Activité 1 p 128" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="396"/>
+                </d>
+                <url i="1000229" e="1" n="Activité 2 p 128" ico="ms5_2006"/>
+                <url i="1000230" e="1" n="Activité 3 p 129" ico="ms5_2006"/>
+                <url i="1000231" e="1" n="Activité 4 p 129" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="399"/>
+                    <url i="2000074" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000232" e="1" n="Activité 5 p 130" ico="ms5_2006"/>
+                <url i="1000233" e="1" n="Activité 6 p 130" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="407"/>
+                    <url i="2000075" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000234" e="1" n="Activité 7 p 131" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="407"/>
+                    <url i="2000076" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000235" e="1" n="Activité 8 p 131" ico="ms5_2006"/>
+            </d>
+            <d n="Cours">
+                <url i="1000236" e="1" n="Méthode 1 p 132" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="411"/>
+                    <url i="2000077" e="1" n="Animation" ico="iep"/>
+                    <url i="2000078" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005130" e="1" n="Exercice 1 p 132" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006615" e="1" n="Correction Exercice 1 p 132" ico="corr_ms5_2006"/>
+                    <url i="2001278" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005131" e="1" n="Exercice 2 p 132" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006616" e="1" n="Correction Exercice 2 p 132" ico="corr_ms5_2006"/>
+                    <url i="2001279" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000237" e="1" n="Méthode 2 p 133" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="412"/>
+                    <am i="413"/>
+                    <url i="2000079" e="1" n="Animation" ico="iep"/>
+                    <url i="2000080" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005132" e="1" n="Exercice 3 p 133" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006617" e="1" n="Correction Exercice 3 p 133" ico="corr_ms5_2006"/>
+                    <url i="2001280" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005133" e="1" n="Exercice 4 p 133" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006618" e="1" n="Correction Exercice 4 p 133" ico="corr_ms5_2006"/>
+                    <url i="2001281" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005134" e="1" n="Exercice 5 p 133" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006619" e="1" n="Correction Exercice 5 p 133" ico="corr_ms5_2006"/>
+                    <url i="2001282" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000238" e="1" n="Méthode 3 p 134" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="399"/>
+                    <am i="424"/>
+                    <url i="3000203" e="1" n="Page internet"/>
+                </d>
+                <url i="1000239" e="1" n="Méthode 4 p 134" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="401"/>
+                    <am i="425"/>
+                    <url i="3000203" e="1" n="Page internet"/>
+                </d>
+                <url i="1000240" e="1" n="Méthode 5 p 135" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="416"/>
+                    <am i="423"/>
+                    <url i="3000204" e="1" n="Page internet"/>
+                    <url i="2000085" e="1" n="Animation" ico="iep"/>
+                    <url i="2000086" e="1" n="Animation" ico="iep"/>
+                </d>
+                <url i="1005135" e="1" n="Exercice 6 p 135" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006620" e="1" n="Correction Exercice 6 p 135" ico="corr_ms5_2006"/>
+                    <url i="2001283" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000241" e="1" n="Méthode 6 p 136" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="428"/>
+                    <am i="405"/>
+                </d>
+                <url i="1005136" e="1" n="Exercice 7 p 136" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006621" e="1" n="Correction Exercice 7 p 136" ico="corr_ms5_2006"/>
+                    <url i="2001284" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000242" e="1" n="Méthode 7 p 136" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="407"/>
+                    <am i="429"/>
+                    <url i="3000204" e="1" n="Page internet"/>
+                </d>
+                <url i="1005137" e="1" n="Exercice 8 p 136" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006622" e="1" n="Correction Exercice 8 p 136" ico="corr_ms5_2006"/>
+                    <url i="2001285" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000243" e="1" n="Exercice 1 p 137" ico="ms5_2006"/>
+                <url i="1000244" e="1" n="Exercice 2 p 137" ico="ms5_2006"/>
+                <url i="1000245" e="1" n="Exercice 3 p 137" ico="ms5_2006"/>
+                <url i="1000246" e="1" n="Exercice 4 p 137" ico="ms5_2006"/>
+                <url i="1000247" e="1" n="Exercice 5 p 137" ico="ms5_2006"/>
+                <url i="1000248" e="1" n="Exercice 6 p 137" ico="ms5_2006"/>
+                <url i="1000249" e="1" n="Exercice 7 p 137" ico="ms5_2006"/>
+                <url i="1000250" e="1" n="Exercice 8 p 138" ico="ms5_2006"/>
+                <url i="1000251" e="1" n="Exercice 9 p 138" ico="ms5_2006"/>
+                <url i="1000252" e="1" n="Exercice 10 p 138" ico="ms5_2006"/>
+                <url i="1000253" e="1" n="Exercice 11 p 138" ico="ms5_2006"/>
+                <url i="1000254" e="1" n="Exercice 12 p 138" ico="ms5_2006"/>
+                <url i="1000255" e="1" n="Exercice 13 p 138" ico="ms5_2006"/>
+                <url i="1000256" e="1" n="Exercice 14 p 138" ico="ms5_2006"/>
+                <url i="1000257" e="1" n="Exercice 15 p 138" ico="ms5_2006"/>
+                <url i="1000258" e="1" n="Exercice 16 p 139" ico="ms5_2006"/>
+                <url i="1000259" e="1" n="Exercice 17 p 139" ico="ms5_2006"/>
+                <url i="1000260" e="1" n="Exercice 18 p 139" ico="ms5_2006"/>
+                <url i="1000261" e="1" n="Exercice 19 p 139" ico="ms5_2006"/>
+                <url i="1000262" e="1" n="Exercice 20 p 139" ico="ms5_2006"/>
+                <url i="1000263" e="1" n="Exercice 21 p 139" ico="ms5_2006"/>
+                <url i="1000264" e="1" n="Exercice 22 p 139" ico="ms5_2006"/>
+                <url i="1000265" e="1" n="Exercice 23 p 139" ico="ms5_2006"/>
+                <url i="1000266" e="1" n="Exercice 24 p 139" ico="ms5_2006"/>
+                <url i="1000267" e="1" n="Exercice 25 p 139" ico="ms5_2006"/>
+                <url i="1000268" e="1" n="Exercice 26 p 139" ico="ms5_2006"/>
+                <url i="1000269" e="1" n="Exercice 27 p 140" ico="ms5_2006"/>
+                <url i="1000270" e="1" n="Exercice 28 p 140" ico="ms5_2006"/>
+                <url i="1000271" e="1" n="Exercice 29 p 140" ico="ms5_2006"/>
+                <url i="1000272" e="1" n="Exercice 30 p 140" ico="ms5_2006"/>
+                <url i="1000273" e="1" n="Exercice 31 p 140" ico="ms5_2006"/>
+                <url i="1000274" e="1" n="Exercice 32 p 140" ico="ms5_2006"/>
+                <url i="1000275" e="1" n="Exercice 33 p 140" ico="ms5_2006"/>
+                <url i="1000276" e="1" n="Exercice 34 p 140" ico="ms5_2006"/>
+                <url i="1000277" e="1" n="Exercice 35 p 140" ico="ms5_2006"/>
+                <url i="1000278" e="1" n="Exercice 36 p 140" ico="ms5_2006"/>
+                <url i="1000279" e="1" n="Exercice 37 p 141" ico="ms5_2006"/>
+                <url i="1000280" e="1" n="Exercice 38 p 141" ico="ms5_2006"/>
+                <url i="1000281" e="1" n="Exercice 39 p 141" ico="ms5_2006"/>
+                <url i="1000282" e="1" n="Exercice 40 p 141" ico="ms5_2006"/>
+                <url i="1000283" e="1" n="Exercice 41 p 141" ico="ms5_2006"/>
+                <url i="1000284" e="1" n="Exercice 42 p 141" ico="ms5_2006"/>
+                <url i="1000285" e="1" n="Exercice 43 p 141" ico="ms5_2006"/>
+                <url i="1000286" e="1" n="Exercice 44 p 141" ico="ms5_2006"/>
+                <url i="1000287" e="1" n="Exercice 45 p 142" ico="ms5_2006"/>
+                <url i="1000288" e="1" n="Exercice 46 p 142" ico="ms5_2006"/>
+                <url i="1000289" e="1" n="Exercice 47 p 142" ico="ms5_2006"/>
+                <url i="1000290" e="1" n="Exercice 48 p 142" ico="ms5_2006"/>
+                <url i="1000291" e="1" n="Exercice 49 p 142" ico="ms5_2006"/>
+                <url i="1000292" e="1" n="Exercice 50 p 142" ico="ms5_2006"/>
+                <url i="1000293" e="1" n="Exercice 51 p 142" ico="ms5_2006"/>
+                <url i="1000294" e="1" n="Exercice 52 p 143" ico="ms5_2006"/>
+                <url i="1000295" e="1" n="Exercice 53 p 143" ico="ms5_2006"/>
+                <url i="1000296" e="1" n="Exercice 54 p 143" ico="ms5_2006"/>
+                <url i="1000297" e="1" n="Exercice 55 p 143" ico="ms5_2006"/>
+                <url i="1000298" e="1" n="Exercice 56 p 143" ico="ms5_2006"/>
+                <url i="1000299" e="1" n="Exercice 57 p 143" ico="ms5_2006"/>
+                <url i="1000300" e="1" n="Exercice 58 p 143" ico="ms5_2006"/>
+                <url i="1000301" e="1" n="Exercice 59 p 143" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000302" e="1" n="Exercice 1 p 144" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1000303" e="1" n="Exercice 2 p 144" ico="ms5_2006"/>
+            </d>
+        </d>
+        <d n="Aires">
+            <url i="1009117" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000453" e="1" n="Activité 1 p 146" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000326" e="1" n="Page internet"/>
+                    <url i="2000314" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000454" e="1" n="Activité 2 p 146" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="3000327" e="1" n="Page internet"/>
+                </d>
+                <url i="1000455" e="1" n="Activité 3 p 147" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000315" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000456" e="1" n="Activité 4 p 147" ico="ms5_2006"/>
+                <url i="1000457" e="1" n="Activité 5 p 147" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="2000316" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000458" e="1" n="Méthode 1 p 148" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1005138" e="1" n="Exercice 1 p 148" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006623" e="1" n="Correction Exercice 1 p 148" ico="corr_ms5_2006"/>
+                    <url i="2001286" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005139" e="1" n="Exercice 2 p 148" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006624" e="1" n="Correction Exercice 2 p 148" ico="corr_ms5_2006"/>
+                    <url i="2001287" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005140" e="1" n="Exercice 3 p 148" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006625" e="1" n="Correction Exercice 3 p 148" ico="corr_ms5_2006"/>
+                    <url i="2001288" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000459" e="1" n="Méthode 2 p 148" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+                <url i="1005141" e="1" n="Exercice 4 p 148" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006626" e="1" n="Correction Exercice 4 p 148" ico="corr_ms5_2006"/>
+                    <url i="2001289" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000460" e="1" n="Méthode 3 p 149" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="447"/>
+                </d>
+                <url i="1005142" e="1" n="Exercice 5 p 149" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006627" e="1" n="Correction Exercice 5 p 149" ico="corr_ms5_2006"/>
+                    <url i="2001290" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000461" e="1" n="Méthode 4 p 149" ico="ms5_2006"/>
+                <url i="1005143" e="1" n="Exercice 6 p 149" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006628" e="1" n="Correction Exercice 6 p 149" ico="corr_ms5_2006"/>
+                    <url i="2001291" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005144" e="1" n="Exercice 7 p 149" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006629" e="1" n="Correction Exercice 7 p 149" ico="corr_ms5_2006"/>
+                    <url i="2001292" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000462" e="1" n="Méthode 5 p 150" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="461"/>
+                </d>
+                <url i="1005145" e="1" n="Exercice 8 p 150" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006630" e="1" n="Correction Exercice 8 p 150" ico="corr_ms5_2006"/>
+                    <url i="2001293" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000463" e="1" n="Exercice 1 p 151" ico="ms5_2006"/>
+                <url i="1000464" e="1" n="Exercice 2 p 151" ico="ms5_2006"/>
+                <url i="1000465" e="1" n="Exercice 3 p 151" ico="ms5_2006"/>
+                <url i="1000466" e="1" n="Exercice 4 p 151" ico="ms5_2006"/>
+                <url i="1000467" e="1" n="Exercice 5 p 151" ico="ms5_2006"/>
+                <url i="1000468" e="1" n="Exercice 6 p 151" ico="ms5_2006"/>
+                <url i="1000469" e="1" n="Exercice 7 p 151" ico="ms5_2006"/>
+                <url i="1000470" e="1" n="Exercice 8 p 151" ico="ms5_2006"/>
+                <url i="1000471" e="1" n="Exercice 9 p 151" ico="ms5_2006"/>
+                <url i="1000472" e="1" n="Exercice 10 p 151" ico="ms5_2006"/>
+                <url i="1000473" e="1" n="Exercice 11 p 152" ico="ms5_2006"/>
+                <url i="1000474" e="1" n="Exercice 12 p 152" ico="ms5_2006"/>
+                <url i="1000475" e="1" n="Exercice 13 p 152" ico="ms5_2006"/>
+                <url i="1000476" e="1" n="Exercice 14 p 152" ico="ms5_2006"/>
+                <url i="1000477" e="1" n="Exercice 15 p 152" ico="ms5_2006"/>
+                <url i="1000478" e="1" n="Exercice 16 p 152" ico="ms5_2006"/>
+                <url i="1000479" e="1" n="Exercice 17 p 152" ico="ms5_2006"/>
+                <url i="1000480" e="1" n="Exercice 18 p 152" ico="ms5_2006"/>
+                <url i="1000481" e="1" n="Exercice 19 p 152" ico="ms5_2006"/>
+                <url i="1000482" e="1" n="Exercice 20 p 153" ico="ms5_2006"/>
+                <url i="1000483" e="1" n="Exercice 21 p 153" ico="ms5_2006"/>
+                <url i="1000484" e="1" n="Exercice 22 p 153" ico="ms5_2006"/>
+                <url i="1000485" e="1" n="Exercice 23 p 153" ico="ms5_2006"/>
+                <url i="1000486" e="1" n="Exercice 24 p 153" ico="ms5_2006"/>
+                <url i="1000487" e="1" n="Exercice 25 p 153" ico="ms5_2006"/>
+                <url i="1000488" e="1" n="Exercice 26 p 153" ico="ms5_2006"/>
+                <url i="1000489" e="1" n="Exercice 27 p 153" ico="ms5_2006"/>
+                <url i="1000490" e="1" n="Exercice 28 p 153" ico="ms5_2006"/>
+                <url i="1000491" e="1" n="Exercice 29 p 153" ico="ms5_2006"/>
+                <url i="1000492" e="1" n="Exercice 30 p 153" ico="ms5_2006"/>
+                <url i="1000493" e="1" n="Exercice 31 p 154" ico="ms5_2006"/>
+                <url i="1000494" e="1" n="Exercice 32 p 154" ico="ms5_2006"/>
+                <url i="1000495" e="1" n="Exercice 33 p 154" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000496" e="1" n="Exercice 1 p 155" ico="ms5_2006"/>
+                <url i="1000497" e="1" n="Exercice 2 p 155" ico="ms5_2006"/>
+            </d>
+        </d>
+        <d n="Angles">
+            <url i="1009118" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000546" e="1" n="Activité 1 p 158" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="471"/>
+                </d>
+                <url i="1000547" e="1" n="Activité 2 p 158" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="472"/>
+                </d>
+                <url i="1000548" e="1" n="Activité 3 p 159" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="477"/>
+                    <url i="2000398" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+                <url i="1000549" e="1" n="Activité 4 p 159" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="477"/>
+                    <url i="2000399" e="1" n="Animation Tracenpoche" ico="tep"/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000550" e="1" n="Méthode 1 p 160" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="471"/>
+                </d>
+                <url i="1005146" e="1" n="Exercice 1 p 160" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006631" e="1" n="Correction Exercice 1 p 160" ico="corr_ms5_2006"/>
+                    <url i="2001294" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005147" e="1" n="Exercice 2 p 160" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006632" e="1" n="Correction Exercice 2 p 160" ico="corr_ms5_2006"/>
+                    <url i="2001295" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000551" e="1" n="Méthode 2 p 160" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="472"/>
+                </d>
+                <url i="1005148" e="1" n="Exercice 3 p 160" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006633" e="1" n="Correction Exercice 3 p 160" ico="corr_ms5_2006"/>
+                    <url i="2001296" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005149" e="1" n="Exercice 4 p 160" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006634" e="1" n="Correction Exercice 4 p 160" ico="corr_ms5_2006"/>
+                    <url i="2001297" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005150" e="1" n="Exercice 5 p 160" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006635" e="1" n="Correction Exercice 5 p 160" ico="corr_ms5_2006"/>
+                    <url i="2001298" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000552" e="1" n="Méthode 3 p 161" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="472"/>
+                </d>
+                <url i="1005151" e="1" n="Exercice 6 p 161" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006636" e="1" n="Correction Exercice 6 p 161" ico="corr_ms5_2006"/>
+                    <url i="2001299" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005152" e="1" n="Exercice 7 p 161" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006637" e="1" n="Correction Exercice 7 p 161" ico="corr_ms5_2006"/>
+                    <url i="2001300" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000553" e="1" n="Méthode 4 p 161" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="471"/>
+                </d>
+                <url i="1005153" e="1" n="Exercice 8 p 161" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006638" e="1" n="Correction Exercice 8 p 161" ico="corr_ms5_2006"/>
+                    <url i="2001301" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005154" e="1" n="Exercice 9 p 161" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006639" e="1" n="Correction Exercice 9 p 161" ico="corr_ms5_2006"/>
+                    <url i="2001302" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000554" e="1" n="Méthode 5 p 162" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="471"/>
+                    <url i="3000400" e="1" n="Page internet"/>
+                </d>
+                <url i="1005155" e="1" n="Exercice 10 p 162" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006640" e="1" n="Correction Exercice 10 p 162" ico="corr_ms5_2006"/>
+                    <url i="2001303" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000555" e="1" n="Méthode 6 p 162" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="478"/>
+                    <am i="478"/>
+                    <url i="3000400" e="1" n="Page internet"/>
+                </d>
+                <url i="1005156" e="1" n="Exercice 11 p 162" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006641" e="1" n="Correction Exercice 11 p 162" ico="corr_ms5_2006"/>
+                    <url i="2001304" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000556" e="1" n="Exercice 1 p 163" ico="ms5_2006"/>
+                <url i="1000557" e="1" n="Exercice 2 p 163" ico="ms5_2006"/>
+                <url i="1000558" e="1" n="Exercice 3 p 163" ico="ms5_2006"/>
+                <url i="1000559" e="1" n="Exercice 4 p 163" ico="ms5_2006"/>
+                <url i="1000560" e="1" n="Exercice 5 p 163" ico="ms5_2006"/>
+                <url i="1000561" e="1" n="Exercice 6 p 163" ico="ms5_2006"/>
+                <url i="1000562" e="1" n="Exercice 7 p 163" ico="ms5_2006"/>
+                <url i="1000563" e="1" n="Exercice 8 p 163" ico="ms5_2006"/>
+                <url i="1000564" e="1" n="Exercice 9 p 164" ico="ms5_2006"/>
+                <url i="1000565" e="1" n="Exercice 10 p 164" ico="ms5_2006"/>
+                <url i="1000566" e="1" n="Exercice 11 p 164" ico="ms5_2006"/>
+                <url i="1000567" e="1" n="Exercice 12 p 164" ico="ms5_2006"/>
+                <url i="1000568" e="1" n="Exercice 13 p 164" ico="ms5_2006"/>
+                <url i="1000569" e="1" n="Exercice 14 p 164" ico="ms5_2006"/>
+                <url i="1000570" e="1" n="Exercice 15 p 164" ico="ms5_2006"/>
+                <url i="1000571" e="1" n="Exercice 16 p 165" ico="ms5_2006"/>
+                <url i="1000572" e="1" n="Exercice 17 p 165" ico="ms5_2006"/>
+                <url i="1000573" e="1" n="Exercice 18 p 165" ico="ms5_2006"/>
+                <url i="1000574" e="1" n="Exercice 19 p 165" ico="ms5_2006"/>
+                <url i="1000575" e="1" n="Exercice 20 p 165" ico="ms5_2006"/>
+                <url i="1000576" e="1" n="Exercice 21 p 165" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000577" e="1" n="Exercice 1 p 166" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements"></d>
+            </d>
+        </d>
+        <d n="Prismes et cylindres">
+            <url i="1009119" e="1" n="Énigme" ico="ms5_2006"/>
+            <d n="Activités">
+                <url i="1000609" e="1" n="Activité 1 p 168" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="487"/>
+                </d>
+                <url i="1000610" e="1" n="Activité 2 p 168" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="494"/>
+                </d>
+                <url i="1000611" e="1" n="Activité 3 p 169" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="502"/>
+                    <am i="501"/>
+                </d>
+                <url i="1000612" e="1" n="Activité 4 p 169" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="500"/>
+                </d>
+            </d>
+            <d n="Cours">
+                <url i="1000613" e="1" n="Méthode 1 p 170" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="495"/>
+                    <url i="3000401" e="1" n="Page internet"/>
+                </d>
+                <url i="1005157" e="1" n="Exercice 1 p 170" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006642" e="1" n="Correction Exercice 1 p 170" ico="corr_ms5_2006"/>
+                    <url i="2001305" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000614" e="1" n="Méthode 2 p 170" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="496"/>
+                    <am i="497"/>
+                    <am i="498"/>
+                </d>
+                <url i="1005158" e="1" n="Exercice 2 p 171" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006643" e="1" n="Correction Exercice 2 p 171" ico="corr_ms5_2006"/>
+                    <url i="2001306" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005159" e="1" n="Exercice 3 p 171" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006644" e="1" n="Correction Exercice 3 p 171" ico="corr_ms5_2006"/>
+                    <url i="2001307" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000615" e="1" n="Méthode 3 p 171" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="500"/>
+                    <am i="501"/>
+                    <am i="502"/>
+                </d>
+                <url i="1005160" e="1" n="Exercice 4 p 171" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006645" e="1" n="Correction Exercice 4 p 171" ico="corr_ms5_2006"/>
+                    <url i="2001308" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005161" e="1" n="Exercice 5 p 171" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006646" e="1" n="Correction Exercice 5 p 171" ico="corr_ms5_2006"/>
+                    <url i="2001309" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1000616" e="1" n="Méthode 4 p 172" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <am i="493"/>
+                    <am i="494"/>
+                </d>
+                <url i="1005162" e="1" n="Exercice 6 p 172" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006647" e="1" n="Correction Exercice 6 p 172" ico="corr_ms5_2006"/>
+                    <url i="2001310" e="1" n="Complément" ico="msatdj"/>
+                </d>
+                <url i="1005163" e="1" n="Exercice 7 p 172" ico="ms5_2006"/>
+                <d n="Corrections &amp; complements">
+                    <url i="1006648" e="1" n="Correction Exercice 7 p 172" ico="corr_ms5_2006"/>
+                    <url i="2001311" e="1" n="Complément" ico="msatdj"/>
+                </d>
+            </d>
+            <d n="Exercices">
+                <url i="1000617" e="1" n="Exercice 1 p 173" ico="ms5_2006"/>
+                <url i="1000618" e="1" n="Exercice 2 p 173" ico="ms5_2006"/>
+                <url i="1000619" e="1" n="Exercice 3 p 173" ico="ms5_2006"/>
+                <url i="1000620" e="1" n="Exercice 4 p 173" ico="ms5_2006"/>
+                <url i="1000621" e="1" n="Exercice 5 p 173" ico="ms5_2006"/>
+                <url i="1000622" e="1" n="Exercice 6 p 173" ico="ms5_2006"/>
+                <url i="1000623" e="1" n="Exercice 7 p 173" ico="ms5_2006"/>
+                <url i="1000624" e="1" n="Exercice 8 p 174" ico="ms5_2006"/>
+                <url i="1000625" e="1" n="Exercice 9 p 174" ico="ms5_2006"/>
+                <url i="1000626" e="1" n="Exercice 10 p 174" ico="ms5_2006"/>
+                <url i="1000627" e="1" n="Exercice 11 p 174" ico="ms5_2006"/>
+                <url i="1000628" e="1" n="Exercice 12 p 174" ico="ms5_2006"/>
+                <url i="1000629" e="1" n="Exercice 13 p 174" ico="ms5_2006"/>
+                <url i="1000630" e="1" n="Exercice 14 p 174" ico="ms5_2006"/>
+                <url i="1000631" e="1" n="Exercice 15 p 174" ico="ms5_2006"/>
+                <url i="1000632" e="1" n="Exercice 16 p 175" ico="ms5_2006"/>
+                <url i="1000633" e="1" n="Exercice 17 p 175" ico="ms5_2006"/>
+                <url i="1000634" e="1" n="Exercice 18 p 175" ico="ms5_2006"/>
+                <url i="1000635" e="1" n="Exercice 19 p 175" ico="ms5_2006"/>
+                <url i="1000636" e="1" n="Exercice 20 p 175" ico="ms5_2006"/>
+                <url i="1000637" e="1" n="Exercice 21 p 175" ico="ms5_2006"/>
+                <url i="1000638" e="1" n="Exercice 22 p 175" ico="ms5_2006"/>
+                <url i="1000639" e="1" n="Exercice 23 p 175" ico="ms5_2006"/>
+                <url i="1000640" e="1" n="Exercice 24 p 175" ico="ms5_2006"/>
+                <url i="1000641" e="1" n="Exercice 25 p 175" ico="ms5_2006"/>
+                <url i="1000642" e="1" n="Exercice 26 p 175" ico="ms5_2006"/>
+                <url i="1000643" e="1" n="Exercice 27 p 176" ico="ms5_2006"/>
+                <url i="1000644" e="1" n="Exercice 28 p 176" ico="ms5_2006"/>
+            </d>
+            <d n="Fin de chapitre">
+                <url i="1000645" e="1" n="Exercice 1 p 177" ico="ms5_2006"/>
+                <url i="1000646" e="1" n="Exercice 2 p 177" ico="ms5_2006"/>
+                <url i="1000647" e="1" n="Exercice 3 p 177" ico="ms5_2006"/>
+            </d>
+        </d>
+        <d n="Énigmes">
+            <url i="1009100" e="1" n="Énigme" ico="ms5_2006"/>
+            <url i="1009101" e="1" n="Énigme" ico="ms5_2006"/>
+            <url i="1009102" e="1" n="Énigme" ico="ms5_2006"/>
+            <url i="1009103" e="1" n="Énigme" ico="ms5_2006"/>
+            <url i="1009104" e="1" n="Énigme" ico="ms5_2006"/>
+            <url i="1009105" e="1" n="Énigme" ico="ms5_2006"/>
+            <url i="1009106" e="1" n="Énigme" ico="ms5_2006"/>
+            <url i="1009107" e="1" n="Énigme" ico="ms5_2006"/>
+        </d>
+        <d n="Corrections des exercices À toi de jouer">
+            <d n="Priorités, distributivité">
+                <url i="1006522" e="1" n="Correction N1 - n°1" ico="ms5_2006"/>
+                <url i="1006523" e="1" n="Correction N1 - n°2" ico="ms5_2006"/>
+                <url i="1006524" e="1" n="Correction N1 - n°3" ico="ms5_2006"/>
+                <url i="1006525" e="1" n="Correction N1 - n°4" ico="ms5_2006"/>
+                <url i="1006526" e="1" n="Correction N1 - n°5" ico="ms5_2006"/>
+                <url i="1006527" e="1" n="Correction N1 - n°6" ico="ms5_2006"/>
+                <url i="1006528" e="1" n="Correction N1 - n°7" ico="ms5_2006"/>
+            </d>
+            <d n="Nombres en écriture fractionnaire">
+                <url i="1006529" e="1" n="Correction N2 - n°1" ico="ms5_2006"/>
+                <url i="1006530" e="1" n="Correction N2 - n°2" ico="ms5_2006"/>
+                <url i="1006531" e="1" n="Correction N2 - n°3" ico="ms5_2006"/>
+                <url i="1006532" e="1" n="Correction N2 - n°4" ico="ms5_2006"/>
+                <url i="1006533" e="1" n="Correction N2 - n°5" ico="ms5_2006"/>
+                <url i="1006534" e="1" n="Correction N2 - n°6" ico="ms5_2006"/>
+                <url i="1006535" e="1" n="Correction N2 - n°7" ico="ms5_2006"/>
+                <url i="1006536" e="1" n="Correction N2 - n°8" ico="ms5_2006"/>
+                <url i="1006537" e="1" n="Correction N2 - n°9" ico="ms5_2006"/>
+                <url i="1006538" e="1" n="Correction N2 - n°10" ico="ms5_2006"/>
+            </d>
+            <d n="Nombres relatifs">
+                <url i="1006539" e="1" n="Correction N3 - n°1" ico="ms5_2006"/>
+                <url i="1006540" e="1" n="Correction N3 - n°2" ico="ms5_2006"/>
+                <url i="1006541" e="1" n="Correction N3 - n°3" ico="ms5_2006"/>
+                <url i="1006542" e="1" n="Correction N3 - n°4" ico="ms5_2006"/>
+                <url i="1006543" e="1" n="Correction N3 - n°5" ico="ms5_2006"/>
+                <url i="1006544" e="1" n="Correction N3 - n°6" ico="ms5_2006"/>
+                <url i="1006545" e="1" n="Correction N3 - n°7" ico="ms5_2006"/>
+                <url i="1006546" e="1" n="Correction N3 - n°8" ico="ms5_2006"/>
+                <url i="1006547" e="1" n="Correction N3 - n°9" ico="ms5_2006"/>
+                <url i="1006548" e="1" n="Correction N3 - n°10" ico="ms5_2006"/>
+                <url i="1006549" e="1" n="Correction N3 - n°11" ico="ms5_2006"/>
+                <url i="1006550" e="1" n="Correction N3 - n°12" ico="ms5_2006"/>
+                <url i="1006551" e="1" n="Correction N3 - n°13" ico="ms5_2006"/>
+                <url i="1006552" e="1" n="Correction N3 - n°14" ico="ms5_2006"/>
+                <url i="1006553" e="1" n="Correction N3 - n°15" ico="ms5_2006"/>
+            </d>
+            <d n="Calcul littéral">
+                <url i="1006554" e="1" n="Correction N4 - n°1" ico="ms5_2006"/>
+                <url i="1006555" e="1" n="Correction N4 - n°2" ico="ms5_2006"/>
+                <url i="1006556" e="1" n="Correction N4 - n°3" ico="ms5_2006"/>
+                <url i="1006557" e="1" n="Correction N4 - n°4" ico="ms5_2006"/>
+                <url i="1006558" e="1" n="Correction N4 - n°5" ico="ms5_2006"/>
+                <url i="1006559" e="1" n="Correction N4 - n°6" ico="ms5_2006"/>
+                <url i="1006560" e="1" n="Correction N4 - n°7" ico="ms5_2006"/>
+                <url i="1006561" e="1" n="Correction N4 - n°8" ico="ms5_2006"/>
+                <url i="1006562" e="1" n="Correction N4 - n°9" ico="ms5_2006"/>
+                <url i="1006563" e="1" n="Correction N4 - n°10" ico="ms5_2006"/>
+                <url i="1006564" e="1" n="Correction N4 - n°11" ico="ms5_2006"/>
+                <url i="1006565" e="1" n="Correction N4 - n°12" ico="ms5_2006"/>
+            </d>
+            <d n="Proportionnalité">
+                <url i="1006566" e="1" n="Correction N5 - n°1" ico="ms5_2006"/>
+                <url i="1006567" e="1" n="Correction N5 - n°2" ico="ms5_2006"/>
+                <url i="1006568" e="1" n="Correction N5 - n°3" ico="ms5_2006"/>
+                <url i="1006569" e="1" n="Correction N5 - n°4" ico="ms5_2006"/>
+                <url i="1006570" e="1" n="Correction N5 - n°5" ico="ms5_2006"/>
+                <url i="1006571" e="1" n="Correction N5 - n°6" ico="ms5_2006"/>
+                <url i="1006572" e="1" n="Correction N5 - n°7" ico="ms5_2006"/>
+                <url i="1006573" e="1" n="Correction N5 - n°8" ico="ms5_2006"/>
+                <url i="1006574" e="1" n="Correction N5 - n°9" ico="ms5_2006"/>
+                <url i="1006575" e="1" n="Correction N5 - n°10" ico="ms5_2006"/>
+            </d>
+            <d n="Statistiques">
+                <url i="1006576" e="1" n="Correction N6 - n°1" ico="ms5_2006"/>
+                <url i="1006577" e="1" n="Correction N6 - n°2" ico="ms5_2006"/>
+                <url i="1006578" e="1" n="Correction N6 - n°3" ico="ms5_2006"/>
+                <url i="1006579" e="1" n="Correction N6 - n°4" ico="ms5_2006"/>
+                <url i="1006580" e="1" n="Correction N6 - n°5" ico="ms5_2006"/>
+                <url i="1006581" e="1" n="Correction N6 - n°6" ico="ms5_2006"/>
+            </d>
+            <d n="Symétrie centrale">
+                <url i="1006582" e="1" n="Correction G1 - n°1" ico="ms5_2006"/>
+                <url i="1006583" e="1" n="Correction G1 - n°2" ico="ms5_2006"/>
+                <url i="1006584" e="1" n="Correction G1 - n°3" ico="ms5_2006"/>
+                <url i="1006585" e="1" n="Correction G1 - n°4" ico="ms5_2006"/>
+                <url i="1006586" e="1" n="Correction G1 - n°5" ico="ms5_2006"/>
+                <url i="1006587" e="1" n="Correction G1 - n°6" ico="ms5_2006"/>
+                <url i="1006588" e="1" n="Correction G1 - n°7" ico="ms5_2006"/>
+                <url i="1006589" e="1" n="Correction G1 - n°8" ico="ms5_2006"/>
+                <url i="1006590" e="1" n="Correction G1 - n°9" ico="ms5_2006"/>
+                <url i="1006591" e="1" n="Correction G1 - n°10" ico="ms5_2006"/>
+                <url i="1006592" e="1" n="Correction G1 - n°11" ico="ms5_2006"/>
+                <url i="1006593" e="1" n="Correction G1 - n°12" ico="ms5_2006"/>
+                <url i="1006594" e="1" n="Correction G1 - n°13" ico="ms5_2006"/>
+            </d>
+            <d n="Triangles">
+                <url i="1006595" e="1" n="Correction G2 - n°1" ico="ms5_2006"/>
+                <url i="1006596" e="1" n="Correction G2 - n°2" ico="ms5_2006"/>
+                <url i="1006597" e="1" n="Correction G2 - n°3" ico="ms5_2006"/>
+                <url i="1006598" e="1" n="Correction G2 - n°4" ico="ms5_2006"/>
+                <url i="1006599" e="1" n="Correction G2 - n°5" ico="ms5_2006"/>
+                <url i="1006600" e="1" n="Correction G2 - n°6" ico="ms5_2006"/>
+                <url i="1006601" e="1" n="Correction G2 - n°7" ico="ms5_2006"/>
+                <url i="1006602" e="1" n="Correction G2 - n°8" ico="ms5_2006"/>
+                <url i="1006603" e="1" n="Correction G2 - n°9" ico="ms5_2006"/>
+                <url i="1006604" e="1" n="Correction G2 - n°10" ico="ms5_2006"/>
+                <url i="1006605" e="1" n="Correction G2 - n°11" ico="ms5_2006"/>
+                <url i="1006606" e="1" n="Correction G2 - n°12" ico="ms5_2006"/>
+                <url i="1006607" e="1" n="Correction G2 - n°13" ico="ms5_2006"/>
+                <url i="1006608" e="1" n="Correction G2 - n°14" ico="ms5_2006"/>
+                <url i="1006609" e="1" n="Correction G2 - n°15" ico="ms5_2006"/>
+                <url i="1006610" e="1" n="Correction G2 - n°16" ico="ms5_2006"/>
+                <url i="1006611" e="1" n="Correction G2 - n°17" ico="ms5_2006"/>
+                <url i="1006612" e="1" n="Correction G2 - n°18" ico="ms5_2006"/>
+                <url i="1006613" e="1" n="Correction G2 - n°19" ico="ms5_2006"/>
+                <url i="1006614" e="1" n="Correction G2 - n°20" ico="ms5_2006"/>
+            </d>
+            <d n="Parallélogrammes">
+                <url i="1006615" e="1" n="Correction G3 - n°1" ico="ms5_2006"/>
+                <url i="1006616" e="1" n="Correction G3 - n°2" ico="ms5_2006"/>
+                <url i="1006617" e="1" n="Correction G3 - n°3" ico="ms5_2006"/>
+                <url i="1006618" e="1" n="Correction G3 - n°4" ico="ms5_2006"/>
+                <url i="1006619" e="1" n="Correction G3 - n°5" ico="ms5_2006"/>
+                <url i="1006620" e="1" n="Correction G3 - n°6" ico="ms5_2006"/>
+                <url i="1006621" e="1" n="Correction G3 - n°7" ico="ms5_2006"/>
+                <url i="1006622" e="1" n="Correction G3 - n°8" ico="ms5_2006"/>
+            </d>
+            <d n="Aires">
+                <url i="1006623" e="1" n="Correction G4 - n°1" ico="ms5_2006"/>
+                <url i="1006624" e="1" n="Correction G4 - n°2" ico="ms5_2006"/>
+                <url i="1006625" e="1" n="Correction G4 - n°3" ico="ms5_2006"/>
+                <url i="1006626" e="1" n="Correction G4 - n°4" ico="ms5_2006"/>
+                <url i="1006627" e="1" n="Correction G4 - n°5" ico="ms5_2006"/>
+                <url i="1006628" e="1" n="Correction G4 - n°6" ico="ms5_2006"/>
+                <url i="1006629" e="1" n="Correction G4 - n°7" ico="ms5_2006"/>
+                <url i="1006630" e="1" n="Correction G4 - n°8" ico="ms5_2006"/>
+            </d>
+            <d n="Angles">
+                <url i="1006631" e="1" n="Correction G5 - n°1" ico="ms5_2006"/>
+                <url i="1006632" e="1" n="Correction G5 - n°2" ico="ms5_2006"/>
+                <url i="1006633" e="1" n="Correction G5 - n°3" ico="ms5_2006"/>
+                <url i="1006634" e="1" n="Correction G5 - n°4" ico="ms5_2006"/>
+                <url i="1006635" e="1" n="Correction G5 - n°5" ico="ms5_2006"/>
+                <url i="1006636" e="1" n="Correction G5 - n°6" ico="ms5_2006"/>
+                <url i="1006637" e="1" n="Correction G5 - n°7" ico="ms5_2006"/>
+                <url i="1006638" e="1" n="Correction G5 - n°8" ico="ms5_2006"/>
+                <url i="1006639" e="1" n="Correction G5 - n°9" ico="ms5_2006"/>
+                <url i="1006640" e="1" n="Correction G5 - n°10" ico="ms5_2006"/>
+                <url i="1006641" e="1" n="Correction G5 - n°11" ico="ms5_2006"/>
+            </d>
+            <d n="Prismes et cylindres">
+                <url i="1006642" e="1" n="Correction G6 - n°1" ico="ms5_2006"/>
+                <url i="1006643" e="1" n="Correction G6 - n°2" ico="ms5_2006"/>
+                <url i="1006644" e="1" n="Correction G6 - n°3" ico="ms5_2006"/>
+                <url i="1006645" e="1" n="Correction G6 - n°4" ico="ms5_2006"/>
+                <url i="1006646" e="1" n="Correction G6 - n°5" ico="ms5_2006"/>
+                <url i="1006647" e="1" n="Correction G6 - n°6" ico="ms5_2006"/>
+                <url i="1006648" e="1" n="Correction G6 - n°7" ico="ms5_2006"/>
+            </d>
+        </d>
+        <d n="Lexique">
+            <d n="A">
+                <url i="1006436" e="1" n="Abscisse d'un point" ico="ms5_2006"/>
+                <url i="1006437" e="1" n="Additionner des nombres en écriture fractionnaire" ico="ms5_2006"/>
+                <url i="1006438" e="1" n="Additionner deux nombres relatifs" ico="ms5_2006"/>
+                <url i="1006439" e="1" n="Aire d'un carré" ico="ms5_2006"/>
+                <url i="1006440" e="1" n="Aire d'un disque" ico="ms5_2006"/>
+                <url i="1006441" e="1" n="Aire d'un losange" ico="ms5_2006"/>
+                <url i="1006442" e="1" n="Aire d'un parallélogramme" ico="ms5_2006"/>
+                <url i="1006443" e="1" n="Aire d'un triangle" ico="ms5_2006"/>
+                <url i="1006444" e="1" n="Aire d'un triangle rectangle" ico="ms5_2006"/>
+                <url i="1006445" e="1" n="Aire d'un rectangle" ico="ms5_2006"/>
+                <url i="1006446" e="1" n="Aire latérale d'un cylindre de révolution" ico="ms5_2006"/>
+                <url i="1006447" e="1" n="Aire latérale d'un prisme droit" ico="ms5_2006"/>
+                <url i="1006448" e="1" n="Angles adjacents" ico="ms5_2006"/>
+                <url i="1006449" e="1" n="Angle aigu" ico="ms5_2006"/>
+                <url i="1006450" e="1" n="Angles alternes-internes" ico="ms5_2006"/>
+                <url i="1006451" e="1" n="Angles complémentaires" ico="ms5_2006"/>
+                <url i="1006452" e="1" n="Angles correspondants" ico="ms5_2006"/>
+                <url i="1006453" e="1" n="Angle droit" ico="ms5_2006"/>
+                <url i="1006454" e="1" n="Angle obtus" ico="ms5_2006"/>
+                <url i="1006455" e="1" n="Angles opposés par le sommet" ico="ms5_2006"/>
+                <url i="1006456" e="1" n="Angle plat" ico="ms5_2006"/>
+                <url i="1006457" e="1" n="Angles supplémentaires" ico="ms5_2006"/>
+                <url i="1006458" e="1" n="Axe de symétrie" ico="ms5_2006"/>
+            </d>
+            <d n="B">
+                <url i="1006459" e="1" n="Bissectrice" ico="ms5_2006"/>
+            </d>
+            <d n="C">
+                <url i="1006460" e="1" n="Carré" ico="ms5_2006"/>
+                <url i="1006461" e="1" n="Centre de symétrie" ico="ms5_2006"/>
+                <url i="1006462" e="1" n="Cercle" ico="ms5_2006"/>
+                <url i="1006463" e="1" n="Cercle circonscrit à un triangle" ico="ms5_2006"/>
+                <url i="1006464" e="1" n="Cerf-volant" ico="ms5_2006"/>
+                <url i="1006465" e="1" n="Classe de valeurs" ico="ms5_2006"/>
+                <url i="1006466" e="1" n="Coefficient de proportionnalité" ico="ms5_2006"/>
+                <url i="1006467" e="1" n="Comparer des nombres en écriture fractionnaire" ico="ms5_2006"/>
+                <url i="1006468" e="1" n="Comparer des nombres relatifs" ico="ms5_2006"/>
+                <url i="1006469" e="1" n="Coordonnées d'un point" ico="ms5_2006"/>
+                <url i="1006470" e="1" n="Critères de divisibilité" ico="ms5_2006"/>
+                <url i="1006471" e="1" n="Cylindre de révolution" ico="ms5_2006"/>
+            </d>
+            <d n="D">
+                <url i="1006472" e="1" n="Développer une expression" ico="ms5_2006"/>
+                <url i="1006473" e="1" n="Diagramme à barres, en bâtons" ico="ms5_2006"/>
+                <url i="1006474" e="1" n="Diagramme circulaire et semi-circulaire" ico="ms5_2006"/>
+                <url i="1006475" e="1" n="Distance à zéro" ico="ms5_2006"/>
+                <url i="1006476" e="1" n="Distance entre deux points sur une droite graduée" ico="ms5_2006"/>
+                <url i="1006477" e="1" n="Droites concourantes" ico="ms5_2006"/>
+                <url i="1006478" e="1" n="Droites parallèles" ico="ms5_2006"/>
+                <url i="1006479" e="1" n="Droites perpendiculaires" ico="ms5_2006"/>
+                <url i="1006480" e="1" n="Droites sécantes" ico="ms5_2006"/>
+            </d>
+            <d n="E">
+                <url i="1006481" e="1" n="Échelle" ico="ms5_2006"/>
+                <url i="1006482" e="1" n="Effectif du caractère" ico="ms5_2006"/>
+                <url i="1006483" e="1" n="Effectif total" ico="ms5_2006"/>
+            </d>
+            <d n="F">
+                <url i="1006484" e="1" n="Factoriser une expression" ico="ms5_2006"/>
+                <url i="1006485" e="1" n="Fraction d'une quantité" ico="ms5_2006"/>
+                <url i="1006486" e="1" n="Fractions égales" ico="ms5_2006"/>
+                <url i="1006487" e="1" n="Fréquence" ico="ms5_2006"/>
+                <url i="1006488" e="1" n="Fréquence en pourcentages" ico="ms5_2006"/>
+            </d>
+            <d n="H">
+                <url i="1006489" e="1" n="Hauteur d'un parallélogramme" ico="ms5_2006"/>
+                <url i="1006490" e="1" n="Hauteur d'un prisme droit" ico="ms5_2006"/>
+                <url i="1006491" e="1" n="Hauteur d'un triangle" ico="ms5_2006"/>
+                <url i="1006492" e="1" n="Hypoténuse" ico="ms5_2006"/>
+            </d>
+            <d n="I">
+                <url i="1006493" e="1" n="Inégalité triangluaire" ico="ms5_2006"/>
+            </d>
+            <d n="L">
+                <url i="1006494" e="1" n="Losange" ico="ms5_2006"/>
+            </d>
+            <d n="M">
+                <url i="1006495" e="1" n="Médiatrice d'un segment" ico="ms5_2006"/>
+                <url i="1006496" e="1" n="Médiane" ico="ms5_2006"/>
+                <url i="1006497" e="1" n="Mouvement uniforme" ico="ms5_2006"/>
+                <url i="1006498" e="1" n="Multiplier des nombres en écriture fractionnaire" ico="ms5_2006"/>
+            </d>
+            <d n="N">
+                <url i="1006499" e="1" n="Nombre relatif" ico="ms5_2006"/>
+            </d>
+            <d n="O">
+                <url i="1006500" e="1" n="Opposé d'un nombre relatif" ico="ms5_2006"/>
+            </d>
+            <d n="P">
+                <url i="1006501" e="1" n="Parallélogramme" ico="ms5_2006"/>
+                <url i="1006502" e="1" n="Patron d'un cylindre de révolution" ico="ms5_2006"/>
+                <url i="1006503" e="1" n="Patron d'un prisme droit" ico="ms5_2006"/>
+                <url i="1006504" e="1" n="Périmètre" ico="ms5_2006"/>
+                <url i="1006505" e="1" n="Périmètre d'un cercle" ico="ms5_2006"/>
+                <url i="1006506" e="1" n="Priorités opératoires" ico="ms5_2006"/>
+                <url i="1006507" e="1" n="Prisme droit" ico="ms5_2006"/>
+            </d>
+            <d n="S">
+                <url i="1006508" e="1" n="Série statistique" ico="ms5_2006"/>
+                <url i="1006509" e="1" n="Simplifier une fraction" ico="ms5_2006"/>
+                <url i="1006510" e="1" n="Somme des mesures des angles d'un triangle" ico="ms5_2006"/>
+                <url i="1006511" e="1" n="Soustraire deux nombres en écriture fractionnaire" ico="ms5_2006"/>
+                <url i="1006512" e="1" n="Soustraire un nombre relatif" ico="ms5_2006"/>
+                <url i="1006513" e="1" n="Symétrie axiale" ico="ms5_2006"/>
+                <url i="1006514" e="1" n="Symétrie centrale" ico="ms5_2006"/>
+            </d>
+            <d n="T">
+                <url i="1006515" e="1" n="Tester une égalité" ico="ms5_2006"/>
+                <url i="1006516" e="1" n="Trapèze" ico="ms5_2006"/>
+                <url i="1006517" e="1" n="Triangle équilatéral" ico="ms5_2006"/>
+                <url i="1006518" e="1" n="Triangle isolèle" ico="ms5_2006"/>
+                <url i="1006519" e="1" n="Triangle rectangle" ico="ms5_2006"/>
+            </d>
+            <d n="V">
+                <url i="1006520" e="1" n="Volume d'un cylindre de révolution" ico="ms5_2006"/>
+                <url i="1006521" e="1" n="Volume d'un prisme droit" ico="ms5_2006"/>
+            </d>
+        </d>
+        <d n="Propriétés">
+            <d n="Démontrer qu'un point est le milieu d'un segment">
+                <url i="1006380" e="1" n="Démontrer qu'un point est le milieu d'un segment" ico="ms5_2006"/>
+                <url i="1006381" e="1" n="Démontrer qu'un point est le milieu d'un segment" ico="ms5_2006"/>
+                <url i="1006382" e="1" n="Démontrer qu'un point est le milieu d'un segment" ico="ms5_2006"/>
+                <url i="1006383" e="1" n="Démontrer qu'un point est le milieu d'un segment" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un point appartient à la médiatrice d'un segment">
+                <url i="1006384" e="1" n="Démontrer qu'un point appartient à la médiatrice d'un segment"
+                     ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer que deux droites sont parallèles">
+                <url i="1006385" e="1" n="Démontrer que deux droites sont parallèles" ico="ms5_2006"/>
+                <url i="1006386" e="1" n="Démontrer que deux droites sont parallèles" ico="ms5_2006"/>
+                <url i="1006387" e="1" n="Démontrer que deux droites sont parallèles" ico="ms5_2006"/>
+                <url i="1006388" e="1" n="Démontrer que deux droites sont parallèles" ico="ms5_2006"/>
+                <url i="1006389" e="1" n="Démontrer que deux droites sont parallèles" ico="ms5_2006"/>
+                <url i="1006390" e="1" n="Démontrer que deux droites sont parallèles" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer que deux droites sont perpendiculaires">
+                <url i="1006391" e="1" n="Démontrer que deux droites sont perpendiculaires" ico="ms5_2006"/>
+                <url i="1006392" e="1" n="Démontrer que deux droites sont perpendiculaires" ico="ms5_2006"/>
+                <url i="1006393" e="1" n="Démontrer que deux droites sont perpendiculaires" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un triangle est rectangle">
+                <url i="1006394" e="1" n="Démontrer qu'un triangle est rectangle" ico="ms5_2006"/>
+                <url i="1006395" e="1" n="Démontrer qu'un triangle est rectangle" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un triangle est isocèle">
+                <url i="1006396" e="1" n="Démontrer qu'un triangle est isocèle" ico="ms5_2006"/>
+                <url i="1006397" e="1" n="Démontrer qu'un triangle est isocèle" ico="ms5_2006"/>
+                <url i="1006398" e="1" n="Démontrer qu'un triangle est isocèle" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un triangle est équilatéral">
+                <url i="1006399" e="1" n="Démontrer qu'un triangle est équilatéral" ico="ms5_2006"/>
+                <url i="1006400" e="1" n="Démontrer qu'un triangle est équilatéral" ico="ms5_2006"/>
+                <url i="1006401" e="1" n="Démontrer qu'un triangle est équilatéral" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un quadrilatère est un parallélogramme">
+                <url i="1006402" e="1" n="Démontrer qu'un quadrilatère est un parallélogramme" ico="ms5_2006"/>
+                <url i="1006403" e="1" n="Démontrer qu'un quadrilatère est un parallélogramme" ico="ms5_2006"/>
+                <url i="1006404" e="1" n="Démontrer qu'un quadrilatère est un parallélogramme" ico="ms5_2006"/>
+                <url i="1006405" e="1" n="Démontrer qu'un quadrilatère est un parallélogramme" ico="ms5_2006"/>
+                <url i="1006406" e="1" n="Démontrer qu'un quadrilatère est un parallélogramme" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un quadrilatère est un losange">
+                <url i="1006407" e="1" n="Démontrer qu'un quadrilatère est un losange" ico="ms5_2006"/>
+                <url i="1006408" e="1" n="Démontrer qu'un quadrilatère est un losange" ico="ms5_2006"/>
+                <url i="1006409" e="1" n="Démontrer qu'un quadrilatère est un losange" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un quadrilatère est un rectangle">
+                <url i="1006410" e="1" n="Démontrer qu'un quadrilatère est un rectangle" ico="ms5_2006"/>
+                <url i="1006411" e="1" n="Démontrer qu'un quadrilatère est un rectangle" ico="ms5_2006"/>
+                <url i="1006412" e="1" n="Démontrer qu'un quadrilatère est un rectangle" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer qu'un quadrilatère est un carré">
+                <url i="1006413" e="1" n="Démontrer qu'un quadrilatère est un carré" ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment">
+                <url i="1006414" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006415" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006416" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006417" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006418" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006419" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006420" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006421" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006422" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+                <url i="1006423" e="1"
+                     n="Démontrer que des segments ont la même longueur ou trouver la longueur d'un segment"
+                     ico="ms5_2006"/>
+            </d>
+            <d n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle">
+                <url i="1006424" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006425" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006426" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006427" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006428" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006429" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006430" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006431" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006432" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006433" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006434" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+                <url i="1006435" e="1" n="Démontrer que deux angles ont la même mesure ou trouver la mesure d'un angle"
+                     ico="ms5_2006"/>
+            </d>
+        </d>
+    </d>
+</manuel5_2006>

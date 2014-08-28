@@ -20,13 +20,14 @@
     "xml2js": "^0.4.4"
   },
   "devDependencies": {
+    "elementtree": "^0.1.6",
     "express-debug": "^1.1.0",
     "gulp": "^3.8.7",
-    "gulp-jsdoc": "^0.1.4",
     "gulp-jshint": "^1.7.0",
     "gulp-sass": "0.7.1",
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
+    "jsdoc": "^3.3.0-alpha9",
     "jshint-stylish": "^0.3.0",
     "merge-stream": "^0.1.1",
     "through2": "^0.4.2"
