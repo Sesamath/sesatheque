@@ -347,7 +347,7 @@ function addUrls(ctx, ressources) {
  * @param next
  */
 function write(ctx, ressource, next) {
-  var permission = ressource.id ? 'write' : 'add'
+  var permission = (ressource.id || ressource.idOrigine) ? 'write' : 'add'
   if (lassi.personne.hasPermission(permission, ctx, ressource)) {
     repository.write(ressource, function (error, ressource) {
       // id - convertPost - valide+setVersion - store - store2 - fin
