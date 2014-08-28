@@ -158,55 +158,6 @@ function deferAdd(ressource) {
 }
 
 /**
- * Convertie un timestamp (en s ou ms) en objet Date
- * Retourne null si le timestamp est dans le futur (+2h) ou avant le 01/01/2004
- * @param ts
- * @returns {Date}
- */
-function getDate(ts) {
-  if (logProcess) log('getDate avec ' +ts)
-  if (ts > 10001001001001) ts = Math.round(ts / 1000) // c'était des ms, on passe en s
-  // 7260 en cas de décalage horaire (fuseau mal réglé)
-  if (ts > 1072911600 && ts < (new Date()).getTime() / 1000 + 7260) {
-    return new Date(ts * 1000);
-  } else {
-    return null;
-  }
-}
-
-/**
- * Converti un timestamp (ms ou s) en string (JJ/DD/YYYY, suivant la conf)
- * @param ts le timestamp
- * @returns {String}
- */
-function getJour(ts) {
-  // log('getJour avec ' +ts)
-  // si c'est des s, on passe en ms
-  // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
-  if (ts < 11001001001) ts = ts * 1000
-
-  return ts ? moment.utc(new Date(ts)).format(config.formats.jour) : null
-}
-
-/**
- * Vérifie qu'une chaine est une liste d'entiers séparés par des virgules
- * @param {String} ids
- */
-function checkListOfInt (ids) {
-  if (_.isString(ids)) {
-    if (ids == parseInt(ids, 10)) return
-    else {
-      var a = ids.split(',')
-      a.forEach(function (elt) {
-        if (elt != parseInt(elt, 10)) throw new Error("L'élément " + elt + " n'est pas un entier")
-      })
-    }
-  } else {
-    throw new Error("La liste d'ids n'est pas une chaine")
-  }
-}
-
-/**
  * Parse un xml (et appelle parseArbre avec le résultat)
  * @param xmlFile
  */
@@ -220,9 +171,20 @@ function parseXml(xmlFile) {
     var xmlString = fs.readFileSync(__dirname +'/arbresXml/' +xmlFile).toString();
     var arbre = elementtree.parse(xmlString)
     if (!arbre._root) throw new Error("arbre sans racine")
-    if (!arbre._root._children) throw new Error("arbre vide")
+    if (!arbre._root._children || !arbre._root._children.length) throw new Error("arbre vide")
+    var children
     /* log(JSON.stringify(arbre, null, 2))
     process.exit() */
+    // si l'arbre n'a qu'un fils qui est un tag d avec enfants c'est lui qu'on prend comme racine
+    if (arbre._root._children.length === 1 && arbre._root._children[0].tag === 'd') {
+      if (arbre._root._children[0]._children.length) {
+        children = arbre._root._children[0]._children
+        if (arbre._root._children[0].attrib.n) titre = arbre._root._children[0].attrib.n
+      } else throw new Error("arbre avec un seul dossier vide")
+    } else {
+      children = arbre._root._children
+      titre = titre.replace('_', ' ')
+    }
     var ressource = {
       titre : titre,
       typeTechnique : 'arbre',
@@ -232,7 +194,7 @@ function parseXml(xmlFile) {
       typeDocumentaire : [config.constantes.typeDocumentaires.collection],
       publie : true,
       parametres:{
-        enfants:getEnfants(arbre._root._children, xmlFile)
+        enfants:getEnfants(children, xmlFile)
       }
     }
     deferAdd(ressource)
@@ -284,50 +246,6 @@ function getEnfants(childrens, xmlFile) {
   })
 
   return enfants
-}
-
-function parseNode(node) {
-  var retour = {}
-  _.each(node, function(value, key) {
-    if (key === 'd') {
-      // c'est une branche
-      if (value.attrs) {
-        if (value.attrs.n) {
-          retour.titre = value.attrs.n
-          delete value.attrs.n
-        }
-        retour.contenu = value.attrs
-      }
-      if (!retour.titre) retour.titre = 'branche sans titre'
-      retour.type = 'arbre'
-      retour.enfants = parseNode(value)
-    } else {
-      retour.type = key
-      if (value.attrs && value.attrs.n) retour.titre = value.attrs.n
-    }
-  })
-}
-
-/**
- * Initialise les propriété communes à toutes les ressources à partir du recordset, helper de parseRessource
- * @param {Object} row
- * @returns {Object}
- */
-function initRessourceGenerique(row) {
-  var ressource = {
-    origine          : origine,
-    idOrigine        : row.id,
-    resume           : row.descriptif || '',
-    description      : '',
-    commentaires     : row.commentaire || '',
-    parametres       : {xml:row.xml},
-    langue           : 'fre',
-    publie           : true,
-    restriction      : 2
-  }
-  if (row.user_sslsesa_id) ressource.auteurs =  [row.user_sslsesa_id]
-
-  return ressource
 }
 
 /**
