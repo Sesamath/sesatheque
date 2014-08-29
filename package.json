@@ -12,11 +12,12 @@
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",
-    "pg": "^3.4.0",
+    "mysql-libmysqlclient": "^1.6.0",
+    "pg": "^3.4.1",
     "request": "^2.39.0",
     "seq": "^0.3.5",
     "taffydb": "^2.7.2",
-    "underscore": "^1.6.0",
+    "underscore": "^1.7.0",
     "xml2js": "^0.4.4"
   },
   "devDependencies": {

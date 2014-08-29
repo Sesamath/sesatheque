@@ -9,7 +9,8 @@
 /** le timestamp en ms du lancement de ce script */
 var topDepart = (new Date()).getTime()
 /** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
-var origine = "labomepBIBS"
+var origine = "labomepBIBS" // des ressources
+var origineArbre = 'sesamath'
 /** timeout en ms */
 var timeout = 21000
 /** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
@@ -17,13 +18,14 @@ var maxLaunched = 2 // les arbres sont gros et l'api doit retrouver tous les enf
 
 /**
  * La liste des xml qui doivent être découpés
- * @param xmlFile
+ * @param xmlName
  * @returns {boolean}
  */
-function needToSplit(xmlFile) {
-  if (/^Manuel.*\.xml$/.test(xmlFile)) return true
-  if (/^Cahier.*\.xml$/.test(xmlFile)) return true
-  if (xmlFile === 'exercices_interactifs.xml') return true
+function needToSplit(xmlName) {
+  if (/^Manuel/.test(xmlName)) return true
+  if (/^Cahier/.test(xmlName)) return true
+  if (xmlName === 'exercices_interactifs') return true
+  if (xmlName === 'animations_interactives') return true
   return false
 }
 
@@ -169,15 +171,14 @@ function deferAdd(ressource, noPopulate) {
  * @param xmlFile
  */
 function parseXml(xmlFile) {
-  idsParsed.push(xmlFile);
-  var titre = xmlFile.substr(0, xmlFile.length -4) // sans l'extension
-  if (logProcess) log('processing ' + xmlFile)
+  var xmlName = xmlFile.substr(0, xmlFile.length -4) // sans l'extension
+  idsParsed.push(xmlName);
+  if (logProcess) log('processing ' + xmlName)
   try {
     var xmlString = fs.readFileSync(__dirname +'/arbresXml/' +xmlFile).toString();
     var arbre = elementtree.parse(xmlString)
     if (!arbre._root) throw new Error("arbre sans racine")
     if (!arbre._root._children || !arbre._root._children.length) throw new Error("arbre vide")
-    var children
     /* log(JSON.stringify(arbre, null, 2))
     process.exit() */
     // si l'arbre n'a qu'un fils qui est un tag d avec enfants c'est lui qu'on prend comme racine
@@ -192,24 +193,29 @@ function parseXml(xmlFile) {
     } else {
       arbre = arbre._root
     }
-    arbre.titre = titre.replace('_', ' ')
+    arbre.titre = xmlName.replace('_', ' ')
 
-    splitOrNotToSplit(xmlFile, arbre)
+    splitOrNotToSplit(arbre, xmlName)
 
   } catch (error) {
-    addError(xmlFile, "le parsing du xml " +xmlFile +" a planté : " +error.toString())
+    addError(xmlName, "le parsing du xml " +xmlFile +" a planté : " +error.toString())
   }
 }
 
-function splitOrNotToSplit(xmlFile, arbre) {
-  if (needToSplit(xmlFile)) {
+/**
+ * Regarde s'il faut découper l'arbre en branches avant de passer à convert
+ * @param arbre
+ * @param xmlName
+ */
+function splitOrNotToSplit(arbre, xmlName) {
+  if (needToSplit(xmlName)) {
     // faudra l'ajouter (sans populate),
     // mais une fois que ces enfants auront été enregistrés (pour que l'api nous donne les bons id)
     var root = {
       titre        : arbre.titre,
       typeTechnique: 'arbre',
-      origine      : 'labomepXml',
-      idOrigine    : xmlFile,
+      origine      : origineArbre,
+      idOrigine    : xmlName,
       enfants      : [],
       // servira d'idOrigine pour récupérer l'id des children quand il auront été enregistrés
       branches     : []
@@ -217,9 +223,9 @@ function splitOrNotToSplit(xmlFile, arbre) {
     var num = 0
     arbre._children.forEach(function (branche) {
       num++
-      if (branche.tag !== 'd') return addError(xmlFile, "doit être découpé mais on a trouvé un " + branche.tag +
+      if (branche.tag !== 'd') return addError(xmlName, "doit être découpé mais on a trouvé un " + branche.tag +
           " à la racine")
-      var file = xmlFile.replace('.xml', '.part' + num)
+      var file = xmlName +'.part' + num
       root.branches.push(file)
       if (branche.attrib.n) {
         branche.titre = branche.attrib.n
@@ -228,30 +234,36 @@ function splitOrNotToSplit(xmlFile, arbre) {
         addError(file, 'sans titre')
         branche.titre = file
       }
-      convert(file, branche)
+      convert(branche, file)
     })
     lastArbres.push(root)
   } else {
-    convert(xmlFile, arbre)
+    convert(arbre, xmlName)
   }
 }
 
-function convert(xmlFile, arbre) {
+/**
+ * Converti un arbre en ressource à poster (qu'on passe à deferAdd)
+ * @param arbre
+ * @param xmlName
+ */
+function convert(arbre, xmlName) {
   var ressource = {
     titre        : arbre.titre,
     typeTechnique: 'arbre',
-    origine      : 'labomepXml',
-    idOrigine    : xmlFile,
-    enfants      : getEnfants(arbre, xmlFile)
+    origine      : origineArbre,
+    idOrigine    : xmlName,
+    enfants      : getEnfants(arbre, xmlName)
   }
   deferAdd(ressource)
 }
 
 /**
  * Passe en revue l'objet issu du xml pour en faire une ressource
- * @param {Array} childrens
+ * @param {Object} arbre
+ * @param {string} Le xml (nom du fichier sans extension qui sera idOrigine, éventuellement avec un suffixe)
  */
-function getEnfants(arbre, xmlFile) {
+function getEnfants(arbre, xmlName) {
   var enfants = []
   if (arbre._children) arbre._children.forEach(function(child) {
     var enfant = {}
@@ -263,7 +275,7 @@ function getEnfants(arbre, xmlFile) {
 
     if (child.tag === 'd') {
       if (!enfant.titre) {
-        addError(xmlFile, "dossier sans titre, n° d'ordre " +child._id)
+        addError(xmlName, "dossier sans titre, n° d'ordre " +child._id)
         enfant.titre = 'sans titre'
       }
       enfant.typeTechnique = 'arbre'
@@ -278,9 +290,9 @@ function getEnfants(arbre, xmlFile) {
         enfant.typeTechnique = child.tag
         enfant.refOrigine = origine
         // on vérifie qu'il a pas d'enfants
-        if (child._children.length) addError(xmlFile, "L'élément " +child.tag +" a des enfants, n° d'ordre " +child._id)
+        if (child._children.length) addError(xmlName, "L'élément " +child.tag +" a des enfants, n° d'ordre " +child._id)
       } else {
-        addError(xmlFile, "élément " +child.tag +" sans id , n° d'ordre " +child._id)
+        addError(xmlName, "élément " +child.tag +" sans id , n° d'ordre " +child._id)
         enfant = undefined
       }
     }
@@ -421,7 +433,7 @@ module.exports = function () {
                 .seqEach(function (idOrigine) {
                   var nextSeq = this
                   // monstrueux de récupérer toute la ressource pour si peu, mais ça tourne pas souvent
-                  getRessource('labomepXml', idOrigine, function (error, ressource) {
+                  getRessource(origineArbre, idOrigine, function (error, ressource) {
                     if (ressource && ressource.id)
                       root.enfants.push({
                         ref          : ressource.id,
@@ -438,6 +450,7 @@ module.exports = function () {
                 .seq(function () {
                   // tous les enfants ont été récupérés
                   delete root.branches
+                  root.idOrigine = root.idOrigine.replace('.xml', '') // on vire le suffixe pour la racine de ces arbres
                   deferAdd(root, true)
                   this()
                 })
@@ -460,3 +473,19 @@ module.exports = function () {
         log('Erreur dans le flow :', error);
       })
 }
+
+/* après l'import, pour passer en origine sesamath, et virer le suffixe .xml de idOrigine
+ * un peu bourrin le xml de idOrigine qui précede typeTechnique mais ça passe
+ UPDATE ressource r
+ inner join ressource_index io using(oid)
+ inner join ressource_index ii using(oid)
+ SET
+    io._string = 'sesamath',
+    ii._string = replace(ii._string, '.xml', ''),
+    r.data = replace(replace(r.data, 'origine":"sesamath"', 'origine":"sesamath"'), '.xml","typeTechnique":', '","typeTechnique":')
+ WHERE io.name = 'origine'
+   and io._string = 'labomepXml'
+   and ii.name = 'idOrigine'
+   and ii._string like '%.xml'
+
+ */

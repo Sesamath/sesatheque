@@ -324,12 +324,10 @@ ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
   var ressourceCached// = cacheGetByOrigine(origine, idOrigine)
   if (ressourceCached) next(null, ressourceCached)
   else {
-    log('ds ressourceRepository.loadByOrigin')
     lassi.entity.Ressource
         .match('origine').equals(origine)
         .match('idOrigine').equals(idOrigine)
         .grabOne(function (error, ressource) {
-          log('retour grabOne')
           if (error) next(error)
           else if (ressource) {
             prepareAndSend(ressource, next)

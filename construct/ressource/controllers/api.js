@@ -174,9 +174,9 @@ controller
       }
 
       if (ctx.method === 'get') {
-        log('api.readByOrigine ' +origine +' ' +idOrigine)
+        // log('api.readByOrigine ' +origine +' ' +idOrigine)
         repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-          log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
+          // log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
           // log.dev("dans api get " +id, ressource)
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
@@ -240,12 +240,7 @@ controller
     .via('post')
     .renderWith('liste')
     .do(function (ctx, next) {
-      console.log('do ')
-
-      log.dev('do post', ctx.post)
       repository.getListe(ctx.post, function(error, ressources) {
-        log.dev('retour de getListe error', error)
-        log.dev('retour de getListe ress', ressources)
         if (error) next(null, {error:error.toString()})
         else next(null, addUrls(ctx, ressources))
       })
@@ -413,11 +408,8 @@ function populateArbre(ctx, ressource, next) {
 
   /**
    * Enregistre la ressource avant de passer à next
-   * @param parametres
    */
   function suite() {
-    //ressource.parametres = parametres
-    log("on va enregistrer les params", ressource.parametres)
     write(ctx, ressource, next)
   }
 
@@ -430,15 +422,15 @@ function populateArbre(ctx, ressource, next) {
   function populateEnfants(parent, nextStep) {
     if (parent.enfants && parent.enfants.length) {
       flow(parent.enfants)
-          // on passera au suivant quand chaque cb aura appelé this
-          .parEach(3, function (enfant, enfantIndex) {
+          // seqEach passe au suivant de la boucle quand la cb appelle this et au seq suivant à la fin
+          .seqEach(function (enfant, enfantIndex) {
             var finEach = this
             if (enfant.ref && enfant.refOrigine) {
               // on le cherche en db
-              var logSuffix = enfant.refOrigine + ' - ' + enfant.ref
-              log('load ' + logSuffix)
+              //var logSuffix = enfant.refOrigine + ' - ' + enfant.ref
+              //log('load ' + logSuffix)
               repository.loadByOrigin(enfant.refOrigine, enfant.ref, function (error, ressource) {
-                log('load retour' +logSuffix)
+                //log('load retour' +logSuffix)
                 if (ressource) {
                   updateTitre(ressource, enfant.titre)
                   var newEnfant = {
@@ -448,7 +440,6 @@ function populateArbre(ctx, ressource, next) {
                   }
                   if (enfant.contenu) newEnfant.contenu = enfant.contenu
                   if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
-                  log('on a transformé ' + logSuffix, newEnfant)
                   // visiblement seq casse les références,
                   // on affecte directement à la variable parent restée hors du flux
                   parent.enfants[enfantIndex] = newEnfant
@@ -461,7 +452,6 @@ function populateArbre(ctx, ressource, next) {
             }
           }) // parEach
           .seq(function () {
-            log('parEach a fini')
             nextStep()
           })
           .catch(function() {
