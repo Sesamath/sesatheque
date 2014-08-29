@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Index</title>
+    
+    
+    
+    
+    
+    <meta property="og:title" content=""/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    
+    <meta property="og:url" content=""/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":false,"cleverLinks":false,"applicationName":"plugins bibliotheque","disqus":"","googleAnalytics":"","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"default":{}};
+    </script>
+    
+
+    
+</head>
+<body>
+<div id="wrap" class="clearfix">
+    
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">plugins bibliotheque</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+    </ul>
+</div>
+    <div class="main">
+        <h1 class="page-title" data-filename="index.html">Index</h1>
+        
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article class="readme"><h1>Plugin ressource</h1><p>Tous les plugins doivent exporter les méthodes display et showResult avec la syntaxe </p>
+<pre class="prettyprint source"><code>define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
+  // du code privé pour initialiser ce que l'on veut
+
+  // la liste des méthodes que l'on exporte 
+  return {
+    /**
+     * display sera appelée avec les arguments (ressource, options), et options doit contenir les propriétés 
+     *   {string}      baseUrl         Le préfixe d'url qui pointe vers le dossier du plugin
+     *   {HTMLElement} container       Le div pour afficher la ressource
+     *   {HTMLElement} errorsContainer Le div pour afficher les erreurs
+     * et peut contenir
+     *   {function}    saveResult      La fct à qui on doit passer un résultat
+     *                                 (Cf le constructeur Resultat pour le format)
+     */
+    display : foo,
+    // on peut aussi mettre le code directement ici
+    showResult : function (args) { /* code */ },
+  }
+})
+
+/**
+ * Tout le reste est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
+ *
+ * this est ce module (donc on a par exemple les méthodes this.display et this.showResult, mais pas this.document),
+ * avec disponible dans notre scope les variables
+ * {Function}    define          : à utiliser une fois pour définir les librairies que l'on veut avoir à disposition
+ *                                 avant de renvoyer l'export de ce module
+ * {Function}    require         : pour charger d'autres modules ou d'autres scripts js (dans notre dossier)
+ * {Object}      window          : l'objet window
+ * {Object}      post            : le post éventuel (sinon un objet vide)
+ *
+ * Dans l'objet window on a ajouté les propriétés suivantes
+ * {Function}    log(msg)        : un console.log qui ne fait rien en prod, ne plantera pas sur les vieux IE
+ *                                 et accepte un éventuel objet un 2e argument
+ * {Function}    addCss(file)    : ajoute une css dans le head de la page courante
+ *                                 (lui passer le fichier relativement au dossier du plugin)
+ * {Function}    addElement(eltContainer, tag, attributes, innerText) : ajoute un HTMLElement dans eltContainer
+ * {Function}    getElement(tag, attributes, innerText)               : récupère un HTMLElement
+ */
+ // une variable privée de ce module mais globale pour nos fonctions
+ var toto;
+
+ function foo(ressource, saveResult) { /* */ }
+
+ funtion truc(args) {/* */}
+ // etc.</code></pre><p>Pour passer une fonction de sauvegarde à une ressource chargée en iframe, 
+ajouter un attribut data-resultCallbackName avec le nom de la fonction (qui doit être accessible à la racine
+du window qui embarque l'iframe).</p>
+<p>Par exemple</p>
+<pre class="prettyprint source"><code>function setScore(resultat) {
+  // traiter le résultat reçu
+}
+&lt;iframe src=&quot;http://laBibliothequeVoulue/ressource/voir/42&quot; data-resultCallbackName=&quot;setScore&quot; /></code></pre><p>Et la ressource enverra son résultat à setScore().</p>
+<p>Le résultat est au format du constructeur Resultat (dans construct/ressource/public/vendors/sesamath/Resultat.js), 
+mais avec seulement certaines propriétés complétées (à priori avec ressId, ressType, score, reponse, date, duree, 
+mais parfois seulement ressType et score|reponse, tout le reste pouvant être déjà connu de l'appelant).</p></article>
+    </section>
+
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    arbre/arbre.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>Affiche un arbre</p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+        
+
+        <footer>
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Thu Aug 28 2014 21:24:13 GMT-0500 (COT)
+        </footer>
+    </div>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>

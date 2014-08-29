@@ -1,0 +1,40 @@
+{
+  "comment"  : "cf http://usejsdoc.org/about-configuring-jsdoc.html",
+  "tags"     : {
+    "allowUnknownTags": true
+  },
+  "source"   : {
+    "include":["./construct", "./README.md"],
+    "includePattern": ".+\\.(js|md)",
+    "excludePattern": "(node_modules|public)"
+  },
+  "plugins"  : ["plugins/markdown"],
+  "markdown" : {
+    "parser"  : "gfm",
+    "hardwrap": true
+  },
+  "templates": {
+    "applicationName": "bibliotheque",
+    "disqus"         : "",
+    "googleAnalytics": "",
+    "openGraph"      : {
+      "title"    : "",
+      "type"     : "website",
+      "image"    : "",
+      "site_name": "",
+      "url"      : ""
+    },
+    "meta"           : {
+      "title"      : "",
+      "description": "",
+      "keyword"    : ""
+    }
+
+  },
+  "opts"     : {
+    "destination": "./documentation",
+    "recurse"    : true,
+    "template"   : "./jaguarjs-jsdoc",
+    "private"    : false
+  }
+}
