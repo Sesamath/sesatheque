@@ -240,7 +240,8 @@ controller
     .via('post')
     .renderWith('liste')
     .do(function (ctx, next) {
-      repository.getListe(ctx.post, function(error, ressources) {
+      log.dev('api.public.by reçoit', ctx.post)
+      repository.getListe('public', ctx, ctx.post, function(error, ressources) {
         if (error) next(null, {error:error.toString()})
         else next(null, addUrls(ctx, ressources))
       })

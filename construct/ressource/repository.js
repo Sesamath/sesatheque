@@ -3,6 +3,7 @@
 /**
  * Les méthodes génériques de notre composant, utilisées par les différents contrôleurs
  */
+var limitMax = 100 // on appliquera toujours un limit inférieur à cette valeur
 
 var _ = require('underscore')._
 var flow          = require('seq')
@@ -169,9 +170,12 @@ ressourceRepository.write = function(ressource, next) {
       })
       // mise en cache et passage au suivant
       .seq(function (ressource) {
+        if (!ressource.id) this("Après un write la ressource n'a toujours pas d'id")
+        else {
           cacheSet(ressource)
-          log.dev('write ' +ressource.id +' ok')
+          log.dev('write ' + ressource.id + ' ok')
           next(null, ressource)
+        }
       })
       .catch(function(error) {
         log.error(error)
@@ -340,8 +344,8 @@ ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
 
 /**
  * Récupère un liste de ressource d'après critères
- * @param {string}   visibilite facultatif, peut valoir public|prof|moi, public par défaut
- * @param {Context}  ctx     facultatif si visibilite n'est pas précisé
+ * @param {string}   [visibilite=public] peut valoir public|prof|moi
+ * @param {Context}  [ctx]     facultatif si visibilite n'est pas précisé
  * @param {Object}   options Un objet (ou son json) avec éventuellement les propriétés
  *                             filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
  *                                       où valeur peut être undefined ou un tableau de valeurs
@@ -350,13 +354,13 @@ ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
  *                             order   : asc ou desc
  *                             start   : L'indice de la 1re valeur à remonter
  *                             nb      : Le nombre de ressources à remonter
+ *                             full    : Préciser true si on veut aussi la propriété parametres des ressources
+ *                                       (sinon on renvoie tout sauf elle)
  * @param {Function} next    La callback qui sera appelée en lui passant la liste de ressources en argument
  */
 ressourceRepository.getListe = function(visibilite, ctx, options, next) {
   try {
     // on normalise les arguments
-    log.dev('getListe visibilite', visibilite)
-    log.dev('opt', options)
     var publicOnly
     if (arguments.length < 4) {
       if (arguments.length == 3) throw new Error("nombre d'arguments incorrect")
@@ -370,7 +374,6 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
       publicOnly = true
       visibilite = 'public'
     }
-    log.dev('getListe ap mod', options)
 
     // on converti si json si besoin
     if (options && _.isString(options)) {
@@ -381,6 +384,7 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
         throw error
       }
     }
+    log.dev('getListe visibilite :' +visibilite, options)
 
     // avant de construire la query on fait un minimum de vérifications
     var start, nb
@@ -404,6 +408,7 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
     if (options.order === 'desc') optionsSafe.order = 'desc'
     start = parseInt(options.start, 10) || 0
     nb = parseInt(options.nb, 10) || 10
+    if (nb > limitMax) nb = limitMax
 
     // si on est toujours là on peut construire la requete
     var query = lassi.entity.Ressource
@@ -443,7 +448,16 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
           config.limites.maxSql + ")")
       nb = config.limites.maxSql
     }
-    query.grab(nb, start, next)
+    query.grab(nb, start, function(error, ressources) {
+      if (error) next(error)
+      else if (options.full) next(null, ressources)
+      else {
+        if (ressources) ressources.forEach(function(ressource) {
+          if (ressource.parametres) delete ressource.parametres
+        })
+        next(null, ressources)
+      }
+    })
 
   } catch (error) {
     log.dev(error)
@@ -475,7 +489,7 @@ function prepareAndSend(ressources, next) {
     // faut transformer les dates en objets date
     if (ressource.dateCreation) ressource.dateCreation = new Date(ressource.dateCreation);
     if (ressource.dateMiseAJour) ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
-    //if (ressource.id) cacheSet(ressource) // pas forcément le cas au 1er insert
+    if (ressource.id) cacheSet(ressource) // pas forcément le cas au 1er insert
   }
 
   if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")

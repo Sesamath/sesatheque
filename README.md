@@ -35,5 +35,13 @@ Les arbres
 * POST   /api/arbre         Permet d'enregistrer une ressource en passant un json au format [Arbre](Arbre.html)
 * GET    /api/arbre/:id     Récupère la ressource :id au format Arbre
 
-
-
+Pour les post …/by, il faut envoyer un objet avec les propriétés (toutes facultatives)
+  filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
+            où valeur peut être undefined ou un tableau de valeurs
+            (si non précisé filtrera sur les ressources ayant cet index)
+  orderBy : L'index sur lequel trier
+  order   : asc ou desc
+  start   : L'indice de la 1re valeur à remonter
+  nb      : Le nombre de ressources à remonter
+  full    : Préciser true si on veut aussi la propriété parametres des ressources
+            (sinon on renvoie tout sauf elle)
