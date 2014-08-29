@@ -329,7 +329,7 @@ function initRessourceAm(row) {
     origine          : 'am',
     idOrigine        : row.aide_id,
     typeTechnique    : 'am',
-    titre            : row.aide_titre || 'aide mathenpoche',
+    titre            : row.aide_titre || 'Aide mathenpoche',
     categories       : [7],
     typePedagogiques : [3],
     typeDocumentaires: [9],

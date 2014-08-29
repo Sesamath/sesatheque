@@ -321,13 +321,15 @@ ressourceRepository.loadByOid = function(oid, next) {
  * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
  */
 ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
-  var ressourceCached = cacheGetByOrigine(origine, idOrigine)
+  var ressourceCached// = cacheGetByOrigine(origine, idOrigine)
   if (ressourceCached) next(null, ressourceCached)
   else {
+    log('ds ressourceRepository.loadByOrigin')
     lassi.entity.Ressource
         .match('origine').equals(origine)
         .match('idOrigine').equals(idOrigine)
         .grabOne(function (error, ressource) {
+          log('retour grabOne')
           if (error) next(error)
           else if (ressource) {
             prepareAndSend(ressource, next)
@@ -475,7 +477,7 @@ function prepareAndSend(ressources, next) {
     // faut transformer les dates en objets date
     if (ressource.dateCreation) ressource.dateCreation = new Date(ressource.dateCreation);
     if (ressource.dateMiseAJour) ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
-    if (ressource.id) cacheSet(ressource) // pas forcément le cas au 1er insert
+    //if (ressource.id) cacheSet(ressource) // pas forcément le cas au 1er insert
   }
 
   if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")

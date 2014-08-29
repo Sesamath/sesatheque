@@ -11,7 +11,7 @@ else if (typeof module === 'object') module.exports = Arbre;
 
 /**
  * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
- * C'est aussi la définition d'un node de l'arbre
+ * C'est aussi la définition d'une branche ou d'une feuille
  *
  * @param {Object} initObj L'objet qui sert à initialiser un nouvel Arbre
  * @constructor
@@ -30,6 +30,8 @@ function Arbre(initObj) {
   this.ref = initObj.ref || undefined;
   /**
    * L'origine de la référence, pour savoir où aller la chercher
+   * Il peut être un identifiant d'une bibliothèque ou une origine (dans ce cas ref est un idOrigine de ressource)
+   * S'il est vide ou absent, on considèrera ref comme un id de la bibliothèque courante
    * @type {(Number|string|undefined)}
    */
   this.refOrigine  = initObj.refOrigine || undefined;
@@ -39,10 +41,11 @@ function Arbre(initObj) {
    */
   this.titre = (initObj.titre && typeof initObj.titre === 'string') ? initObj.titre : '';
   /**
-   * Le type, qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
+   * Le typeTechnique de la racine (qui peut être une feuille),
+   * qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {(Number|string|undefined)}
    */
-  this.type = initObj.type || undefined
+  this.typeTechnique = initObj.typeTechnique || undefined
   /**
    * Le contenu du node (ou la racine de l'arbre)
    * @type {Object}

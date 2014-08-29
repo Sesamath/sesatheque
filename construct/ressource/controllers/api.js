@@ -13,6 +13,7 @@
 var controller = lassi.Controller('api')
 
 var _ = require('underscore')._
+var flow = require('seq')
 var converter = require('../converter')
 var repository = require('../repository')
 
@@ -24,7 +25,7 @@ controller.respond('json');
 controller
     .Action('ressource')
     .via('post')
-    .do(postRessource, {timeout:5000})
+    .do(postRessource, {timeout:10000})
 
 /**
  * Create / update une ressource
@@ -173,7 +174,9 @@ controller
       }
 
       if (ctx.method === 'get') {
+        log('api.readByOrigine ' +origine +' ' +idOrigine)
         repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+          log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
           // log.dev("dans api get " +id, ressource)
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
@@ -283,36 +286,57 @@ controller
     .do(function(ctx, next) {
       var partial = ctx.post.id && !ctx.post.childrens
       var id = ctx.post.id || 0
+      // si on passe ?populate=1 dans l'url on parse les enfants pour récupérer titre et type
+      // sinon on laisse en l'état
+      var final = (ctx.get.populate) ? populateArbre : write
       var ressource = converter.getRessourceFromPostedArbre(ctx.post, partial)
 
       function update(error, ressourceLoaded) {
         if (error) next(null, {error:error.toString()})
         else {
           ressourceLoaded.udate(ressource)
-          write(ctx, ressourceLoaded, next)
+          final(ctx, ressource, next)
         }
       }
 
-      //log.dev("dans api arbre on récupère en post", ctx.post)
+      // log.dev("dans api arbre on récupère", ressource)
       try {
+
+        /* debug, mesure de perfs, init du chrono */
         var msg = id
-        // init du chrono
         var start = log.getElapsed(0)
         /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
         if (!lassi.tmp) lassi.tmp = {}
         lassi.tmp[ctx.post.id] = {m:msg,s:start}
         lassi.tmp[ctx.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[ctx.post.id].s)
+        /* fin mesures de perfs */
 
-        if (partial) {
-          // faut charger
-          if (ressource.id) repository.load(ressource.id, update)
-          else write(ctx, ressource, next)
-        }
+        if (partial) repository.load(id, update)
+        else final(ctx, ressource, next);
       } catch (e) {
         log.error(e);
         next(null, {error: e.toString()})
       }
-    }, {timeout:5000})
+    }, {timeout:10000})
+
+
+/**
+ * Read arbre
+ */
+controller
+    .Action('arbre/:id', 'api.arbre.read')
+    .via('get')
+    .do(function (ctx, next) {
+      var id = ctx.arguments.id
+      repository.load(id, function (error, ressource) {
+        // log.dev("dans api get " +id, ressource)
+        if (error) next(null, {error: error.toString()})
+        else if (ressource && ressource.typeTechnique === 'arbre') {
+          if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource.toArbre())
+          else  denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, ctx, next)
+        } else notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas un arbre", ctx, next)
+      })
+    })
 
 module.exports = controller;
 
@@ -366,5 +390,118 @@ function write(ctx, ressource, next) {
     if (ressource.id) errorMsg += " pour modifier la ressource d'identifiant " + id
     else errorMsg += " pour ajouter une ressource"
     denied(errorMsg, ctx, next)
+  }
+}
+
+/**
+ * Parse les enfants de l'arbre et remplace
+ * @param ctx
+ * @param ressource
+ * @param {Callbacks~Done} next
+ */
+function populateArbre(ctx, ressource, next) {
+  // checks
+  if (ressource.typeTechnique !== 'arbre')
+    return next(null, {error:"Impossible de peupler une ressource autre qu'un arbre"})
+  if (!ressource.parametres.enfants ||
+      !ressource.parametres.enfants instanceof Array ||
+      !ressource.parametres.enfants.length)
+    return next(null, {error:"Impossible de peupler un arbre vide"})
+
+  // go
+  populateEnfants(ressource.parametres, suite)
+
+  /**
+   * Enregistre la ressource avant de passer à next
+   * @param parametres
+   */
+  function suite() {
+    //ressource.parametres = parametres
+    log("on va enregistrer les params", ressource.parametres)
+    write(ctx, ressource, next)
+  }
+
+  /**
+   * Parcours les enfants de parent pour les transformer et appeler nextStep
+   * (sans argument, nextStep peut être le this de seq)
+   * @param parent
+   * @param nextStep
+   */
+  function populateEnfants(parent, nextStep) {
+    if (parent.enfants && parent.enfants.length) {
+      flow(parent.enfants)
+          // on passera au suivant quand chaque cb aura appelé this
+          .parEach(3, function (enfant, enfantIndex) {
+            var finEach = this
+            if (enfant.ref && enfant.refOrigine) {
+              // on le cherche en db
+              var logSuffix = enfant.refOrigine + ' - ' + enfant.ref
+              log('load ' + logSuffix)
+              repository.loadByOrigin(enfant.refOrigine, enfant.ref, function (error, ressource) {
+                log('load retour' +logSuffix)
+                if (ressource) {
+                  updateTitre(ressource, enfant.titre)
+                  var newEnfant = {
+                    id           : ressource.id,
+                    titre        : ressource.titre,
+                    typeTechnique: ressource.typeTechnique
+                  }
+                  if (enfant.contenu) newEnfant.contenu = enfant.contenu
+                  if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
+                  log('on a transformé ' + logSuffix, newEnfant)
+                  // visiblement seq casse les références,
+                  // on affecte directement à la variable parent restée hors du flux
+                  parent.enfants[enfantIndex] = newEnfant
+                } // sinon on laisse en l'état
+                populateEnfants(parent.enfants[enfantIndex], finEach)
+              })
+            } else {
+              // pas de ref, on cherche quand même des enfants
+              populateEnfants(enfant, finEach)
+            }
+          }) // parEach
+          .seq(function () {
+            log('parEach a fini')
+            nextStep()
+          })
+          .catch(function() {
+            log.error("L'analyse de l'arbre a planté")
+            try {log.error(JSON.stringify(parent))} catch(e) { }
+            nextStep()
+          })
+    } else {
+      nextStep()
+    }
+  } // populateEnfants
+}
+
+function updateTitre(ressource, newTitre) {
+  // on regarde si l'arbre nous apporte un titre que l'on aurait pas
+  if (newTitre) switch (ressource.titre) {
+    // titres par défaut mis par importMEPS
+    case 'Exercice mathenpoche':
+    case 'Aide mathenpoche':
+    // titres par défaut mis par importLabomep
+    case 'Message ou question':
+    case 'Figure TracenPoche':
+    case 'Test diagnostique':
+    case 'Opération posée':
+    case 'Exercice avec la calculatrice cassée':
+    case 'Figure GeoGebra':
+    case 'Page externe':
+    case 'Exercice de calcul mental':
+    case 'Animation interactive':
+    case 'QCM interactif':
+    case 'Exercice corrigé':
+    case 'QCM':
+    case 'Animation instrumenpoche':
+    case 'Titre manquant':
+    case 'Parcours interactif':
+    case "Test diagnostique d'algèbre":
+    case 'Exercice Calcul@TICE':
+      // on sauvegarde le nouveau titre
+      log.dev("titre changé " +ressource.titre +' => ' +newTitre +' pour ' +ressource.id)
+      ressource.titre = newTitre
+      ressource.store()
   }
 }

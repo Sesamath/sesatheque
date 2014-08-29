@@ -338,7 +338,20 @@ converter.getRessourceFromPost = function (data, partial) {
  */
 converter.getRessourceFromPostedArbre = function (data, partial) {
   // on transforme le post pour ressembler à un post de ressource
-  var ressource
+  var ressource = {}
+
+  /**
+   * Déplace une propriété de data vers ressource (si la propriété existe)
+   * @param {string} prop Le nom de la propriété
+   */
+  function moveProp(prop) {
+    if (data[prop]) {
+      ressource[prop] = data[prop]
+      delete data[prop]
+    }
+  }
+
+  // on accepte deux forme de post
   if (!_.isEmpty(data)) {
     if (data.arbre) {
       // on nous envoie tout en json
@@ -350,12 +363,19 @@ converter.getRessourceFromPostedArbre = function (data, partial) {
       //log.dev("On nous a envoyé un arbre en json", data)
     }
   }
-  if (data.id) ressource.id = data.id
-  if (data.titre) ressource.titre = data.titre
-  ressource.type = 'arbre'
+
+  moveProp('id')
+  moveProp('titre')
+  // si on a ajouté origine et idOrigine on le conserve
+  moveProp('origine')
+  moveProp('idOrigine')
+  // ces propriétés sont imposées
+  ressource.typeTechnique = 'arbre'
   ressource.categories = [config.constantes.categories.liste]
   ressource.parametres = data;
-  // @todo gérer les relations avec les enfants ? (ça va en faire bcp...)
+  // on ne gère pas de relations avec les enfants des arbres,
+  // pour certaines ressources on en aurait des centaines
+  // on verra si on passe une tâche de fond pour ajouter ces relations sur certains arbres
   return converter.getRessourceFromPost(ressource, partial)
 }
 

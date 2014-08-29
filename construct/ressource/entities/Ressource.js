@@ -204,3 +204,16 @@ Ressource.prototype.archive = function (next) {
   // et on archive
   lassi.entity.Archive.create(archive).store(next)
 }
+
+/**
+ * Transforme la ressource en arbre (les parametres de la ressource où on ajoute titre et id)
+ * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
+ */
+Ressource.prototype.toArbre = function () {
+  if (this.typeTechnique !== 'arbre') return undefined
+  var arbre = this.parametres
+  // on ajoute id et titre
+  arbre.id = this.id
+  arbre.titre = this.titre
+  return arbre
+}

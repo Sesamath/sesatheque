@@ -249,7 +249,7 @@ function parseRessource(row) {
       break
     case 2:
       ressource.typeTechnique = 'tep'
-      if (!ressource.titre) ressource.titre = "figure TracenPoche"
+      if (!ressource.titre) ressource.titre = "Figure TracenPoche"
       addCatExoInteractif(ressource)
       break
     case 4: // Test diagnostique (IREM Nancy)
@@ -264,12 +264,12 @@ function parseRessource(row) {
       break
     case 7:
       ressource.typeTechnique = 'calkc'
-      if (!ressource.titre) ressource.titre = "exercice avec la calculatrice cassée"
+      if (!ressource.titre) ressource.titre = "Exercice avec la calculatrice cassée"
       addCatExoInteractif(ressource)
       break
     case 9: // exercice GeoGebra (java)
       ressource.typeTechnique = 'ggb'
-      if (!ressource.titre) ressource.titre = "figure GeoGebra"
+      if (!ressource.titre) ressource.titre = "Figure GeoGebra"
       addCatExoInteractif(ressource)
       break
     case 10: // page externe (avec consigne ou pas)
@@ -309,14 +309,14 @@ function parseRessource(row) {
       break
     case 17:
       ressource.typeTechnique = 'iep'
-      if (!ressource.titre) ressource.titre = "animation instrumenpoche"
+      if (!ressource.titre) ressource.titre = "Animation instrumenpoche"
       ressource.categories       = [catCode.activiteAnimee]
       ressource.typePedagogiques = [tpCode.exercice, tpCode.cours]
       ressource.typeDocumentaires= [tdCode.interactif]
       break
     case 18: // outil Labomep et ses composants
       ressource.typeTechnique = 'gen'
-      if (!ressource.titre) ressource.titre = "titre manquant"
+      if (!ressource.titre) ressource.titre = "Titre manquant"
       addCatExoInteractif(ressource)
       break
     case 19:

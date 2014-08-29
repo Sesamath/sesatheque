@@ -11,14 +11,26 @@ var topDepart = (new Date()).getTime()
 /** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
 var origine = "labomepBIBS"
 /** timeout en ms */
-var timeout = 10000
+var timeout = 21000
 /** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
-var maxLaunched = 2
+var maxLaunched = 2 // les arbres sont gros et l'api doit retrouver tous les enfants...
+
+/**
+ * La liste des xml qui doivent être découpés
+ * @param xmlFile
+ * @returns {boolean}
+ */
+function needToSplit(xmlFile) {
+  if (/^Manuel.*\.xml$/.test(xmlFile)) return true
+  if (/^Cahier.*\.xml$/.test(xmlFile)) return true
+  if (xmlFile === 'exercices_interactifs.xml') return true
+  return false
+}
 
 /** pour loguer le processing (un point par ressource sinon) */
 var logProcess = true
 /** pour loguer les ressources dont le retour est ok */
-var logOk = false
+var logOk = true
 
 var fs = require('fs')
 var _ = require('underscore')._
@@ -43,13 +55,7 @@ var elementtree = require('elementtree')
 
 // conf de l'appli
 var serverConf = require('../_private/config');
-var config = require('../construct/ressource/config.js');
 var port = serverConf.server && serverConf.server.port || 3000;
-
-// constantes
-var tdCode = config.constantes.typeDocumentaires;
-var tpCode = config.constantes.typePedagogiques;
-var catCode = config.constantes.categories;
 
 /**
  * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
@@ -70,8 +76,9 @@ var idsFailed = [];
 
 /** la liste des erreurs rencontrées (la clé est l'id, 0 pour les erreurs générées ici hors ressource) */
 var errors = {}
-/** La liste des relations à ajouter ensuite */
-var pendingRelations = {};
+
+/** une liste d'arbre à envoyer après tous les autres */
+var lastArbres = []
 
 // Les variables globales de checkEnd, pour chaque étape (pour décider de passer à la suivante)
 var nbLaunched = 0
@@ -145,10 +152,10 @@ function checkEnd() {
  * Lance l'ajout d'une ressource via l'api si on est pas au max et la met en attente sinon
  * @param ressource
  */
-function deferAdd(ressource) {
+function deferAdd(ressource, noPopulate) {
   if (ressource && ressource.titre) {
     idsToSend.push(ressource.idOrigine);
-    if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
+    if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd, noPopulate)
     else waitingRessource.push(ressource)
   } else {
     idsFailed.push(ressource.idOrigine)
@@ -165,8 +172,6 @@ function parseXml(xmlFile) {
   idsParsed.push(xmlFile);
   var titre = xmlFile.substr(0, xmlFile.length -4) // sans l'extension
   if (logProcess) log('processing ' + xmlFile)
-  else if (!origine) return addError(xmlFile, "origine de " +xmlFile +
-      " inconnue, il faut la préciser avec --origine ou l'ajouter dans ce fichier " +__filename)
   try {
     var xmlString = fs.readFileSync(__dirname +'/arbresXml/' +xmlFile).toString();
     var arbre = elementtree.parse(xmlString)
@@ -178,61 +183,99 @@ function parseXml(xmlFile) {
     // si l'arbre n'a qu'un fils qui est un tag d avec enfants c'est lui qu'on prend comme racine
     if (arbre._root._children.length === 1 && arbre._root._children[0].tag === 'd') {
       if (arbre._root._children[0]._children.length) {
-        children = arbre._root._children[0]._children
-        if (arbre._root._children[0].attrib.n) titre = arbre._root._children[0].attrib.n
+        arbre = arbre._root._children[0]
+        if (arbre.attrib.n) {
+          arbre.titre = arbre.attrib.n
+          delete arbre.attrib.n
+        }
       } else throw new Error("arbre avec un seul dossier vide")
     } else {
-      children = arbre._root._children
-      titre = titre.replace('_', ' ')
+      arbre = arbre._root
     }
-    var ressource = {
-      titre : titre,
-      typeTechnique : 'arbre',
-      origine : 'labomepXml',
-      idOrigine: xmlFile,
-      /* categories : [config.constantes.categories.liste],
-      typeDocumentaire : [config.constantes.typeDocumentaires.collection],
-      publie : true,
-      parametres:{ */
-        enfants:getEnfants(children, xmlFile)
-      //}
-    }
-    deferAdd(ressource)
-    origine = undefined // pour le prochain
+    arbre.titre = titre.replace('_', ' ')
+
+    splitOrNotToSplit(xmlFile, arbre)
+
   } catch (error) {
     addError(xmlFile, "le parsing du xml " +xmlFile +" a planté : " +error.toString())
   }
+}
 
+function splitOrNotToSplit(xmlFile, arbre) {
+  if (needToSplit(xmlFile)) {
+    // faudra l'ajouter (sans populate),
+    // mais une fois que ces enfants auront été enregistrés (pour que l'api nous donne les bons id)
+    var root = {
+      titre        : arbre.titre,
+      typeTechnique: 'arbre',
+      origine      : 'labomepXml',
+      idOrigine    : xmlFile,
+      enfants      : [],
+      // servira d'idOrigine pour récupérer l'id des children quand il auront été enregistrés
+      branches     : []
+    }
+    var num = 0
+    arbre._children.forEach(function (branche) {
+      num++
+      if (branche.tag !== 'd') return addError(xmlFile, "doit être découpé mais on a trouvé un " + branche.tag +
+          " à la racine")
+      var file = xmlFile.replace('.xml', '.part' + num)
+      root.branches.push(file)
+      if (branche.attrib.n) {
+        branche.titre = branche.attrib.n
+        delete branche.attrib.n
+      } else {
+        addError(file, 'sans titre')
+        branche.titre = file
+      }
+      convert(file, branche)
+    })
+    lastArbres.push(root)
+  } else {
+    convert(xmlFile, arbre)
+  }
+}
+
+function convert(xmlFile, arbre) {
+  var ressource = {
+    titre        : arbre.titre,
+    typeTechnique: 'arbre',
+    origine      : 'labomepXml',
+    idOrigine    : xmlFile,
+    enfants      : getEnfants(arbre, xmlFile)
+  }
+  deferAdd(ressource)
 }
 
 /**
  * Passe en revue l'objet issu du xml pour en faire une ressource
  * @param {Array} childrens
  */
-function getEnfants(childrens, xmlFile) {
+function getEnfants(arbre, xmlFile) {
   var enfants = []
-  childrens.forEach(function(child) {
+  if (arbre._children) arbre._children.forEach(function(child) {
     var enfant = {}
+    // un titre si on le trouve dans les attributs
+    if (child.attrib.n) {
+      enfant.titre = child.attrib.n
+      delete child.attrib.n;
+    }
 
     if (child.tag === 'd') {
-      if (child.attrib.n) {
-        enfant.titre = child.attrib.n
-        delete child.attrib.n;
-      }
       if (!enfant.titre) {
         addError(xmlFile, "dossier sans titre, n° d'ordre " +child._id)
         enfant.titre = 'sans titre'
       }
-      enfant.type = 'arbre'
+      enfant.typeTechnique = 'arbre'
       enfant.contenu = child.attrib
-      enfant.enfants = getEnfants(child._children)
+      enfant.enfants = getEnfants(child)
 
     } else {
       if (child.attrib.i) {
         enfant.ref = child.attrib.i
         delete child.attrib.i
-        enfant.contenu = child.attrib
-        enfant.type = child.tag
+        if (!_.isEmpty(child.attrib)) enfant.contenu = child.attrib
+        enfant.typeTechnique = child.tag
         enfant.refOrigine = origine
         // on vérifie qu'il a pas d'enfants
         if (child._children.length) addError(xmlFile, "L'élément " +child.tag +" a des enfants, n° d'ordre " +child._id)
@@ -249,15 +292,42 @@ function getEnfants(childrens, xmlFile) {
 }
 
 /**
+ * Récupère une ressource via l'api
+ * @param origine
+ * @param idOrigine
+ * @param next appelé avec la ressource (ou rien en cas de pb, que l'on log ici)
+ */
+function getRessource(origine, idOrigine, next) {
+  var idComb = origine +'-' +idOrigine
+  var options = {
+    url         : 'http://localhost:' +port +'/api/ressource/' + origine +'/' +idOrigine,
+    json        : true,
+    content_type: 'charset=UTF-8'
+  }
+  request.get(options, function (error, response, ressource) {
+    if (error) {
+      errors[idComb] = error.toString()
+      next(null)
+    } else if (ressource.error) {
+      errors[idComb] = ressource.error
+      next(null)
+    } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
+      errors[idComb] = "ressource " +idComb +" incohérente : " +JSON.stringify(ressource)
+      next(null)
+    } else next(null, ressource)
+  })
+}
+
+/**
  * Ajoute une ressource dans la bibli en appelant l'api en http
  * @param ressource
  * @param next
  */
-function addRessource(ressource, next) {
+function addRessource(ressource, next, noPopulate) {
   nbLaunched++
   idsSent.push(ressource.idOrigine)
   var options = {
-    url : 'http://localhost:' +port +'/api/arbre?populate=1',
+    url : 'http://localhost:' +port +'/api/arbre' +(noPopulate ? '' : '?populate=1'),
     json: true,
     //body: JSON.stringify({ressource:ressource}),
     content_type: 'charset=UTF-8',
@@ -340,6 +410,44 @@ module.exports = function () {
       .seq(function () {
         nextStep = this
         xmls.forEach(parseXml)
+      })
+      .seq(function () {
+        // on regarde les arbres qu'il fallait envoyer en dernier
+        nextStep = this
+        if (lastArbres.length) {
+          lastArbres.forEach(function (root) {
+            // faut récupérer les ids des idOrigine de chaque branche
+            flow(root.branches)
+                .seqEach(function (idOrigine) {
+                  var nextSeq = this
+                  // monstrueux de récupérer toute la ressource pour si peu, mais ça tourne pas souvent
+                  getRessource('labomepXml', idOrigine, function (error, ressource) {
+                    if (ressource && ressource.id)
+                      root.enfants.push({
+                        ref          : ressource.id,
+                        titre        : ressource.titre,
+                        typeTechnique: ressource.typeTechnique
+                      })
+                    else {
+                      addError(idOrigine, 'info de la branche pas récupérée')
+                      log('à la place de ' + idOrigine + ' on récupère', error ? error.stack : ressource)
+                    }
+                    nextSeq()
+                  })
+                })
+                .seq(function () {
+                  // tous les enfants ont été récupérés
+                  delete root.branches
+                  deferAdd(root, true)
+                  this()
+                })
+                .catch(function (error) {
+                  addError(root.idOrigine, 'seq a planté pendant la récup des ids des branches : '.error.toString())
+                })
+          })
+        } else {
+          nextStep()
+        }
       })
       .seq(function () {
         displayResult(this)

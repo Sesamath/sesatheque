@@ -129,4 +129,8 @@ var appConfig = {
 // on ajoute nos params locaux (accès à la base et port)
 lassi.tools.update(appConfig, localConfig)
 
+// on ecrase le debug mysql si on nous précise prod
+if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && appConfig.entities.database.connection.debug)
+  delete appConfig.entities.database.connection.debug
+
 module.exports = appConfig
