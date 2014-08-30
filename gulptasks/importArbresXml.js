@@ -24,8 +24,10 @@ var maxLaunched = 2 // les arbres sont gros et l'api doit retrouver tous les enf
 function needToSplit(xmlName) {
   if (/^Manuel/.test(xmlName)) return true
   if (/^Cahier/.test(xmlName)) return true
-  if (xmlName === 'exercices_interactifs') return true
   if (xmlName === 'animations_interactives') return true
+  if (xmlName === 'exercices_interactifs') return true
+  if (xmlName === 'exercices_non') return true
+  if (xmlName === 'tous_les_manuels') return true
   return false
 }
 
@@ -79,8 +81,23 @@ var idsFailed = [];
 /** la liste des erreurs rencontrées (la clé est l'id, 0 pour les erreurs générées ici hors ressource) */
 var errors = {}
 
-/** une liste d'arbre à envoyer après tous les autres */
-var lastArbres = []
+/** une liste d'arbre à envoyer après tous les autres, le 1er aura une ref vers chacun des autres */
+var lastArbres = [
+  { // 0 => sesamath_all
+    titre        : 'Ressources Sésamath',
+    typeTechnique: 'arbre',
+    origine      : origineArbre,
+    idOrigine    : 'labomep_all',
+    enfants      : []
+  },
+  { // 1 => tous_les_manuels
+    titre        : 'Manuels Sésamath',
+    typeTechnique: 'arbre',
+    origine      : origineArbre,
+    idOrigine    : 'tous_les_manuels',
+    enfants      : []
+  }
+]
 
 // Les variables globales de checkEnd, pour chaque étape (pour décider de passer à la suivante)
 var nbLaunched = 0
@@ -208,6 +225,22 @@ function parseXml(xmlFile) {
  * @param xmlName
  */
 function splitOrNotToSplit(arbre, xmlName) {
+  // on l'ajoute au lastArbres[0] (ressources sésamath)
+  lastArbres[0].enfants.push({
+    titre        : arbre.titre,
+    typeTechnique: 'arbre',
+    origine      : origineArbre,
+    idOrigine    : xmlName
+  })
+  // si manuel ou cahier on ajoute à lastArbres[1] (tous les manuels)
+  if (/^Manuel/.test(xmlName) || /^Cahier/.test(xmlName)) {
+    lastArbres[1].enfants.push({
+      titre        : arbre.titre,
+      typeTechnique: 'arbre',
+      origine      : origineArbre,
+      idOrigine    : xmlName
+    })
+  }
   if (needToSplit(xmlName)) {
     // faudra l'ajouter (sans populate),
     // mais une fois que ces enfants auront été enregistrés (pour que l'api nous donne les bons id)
@@ -221,6 +254,7 @@ function splitOrNotToSplit(arbre, xmlName) {
       branches     : []
     }
     var num = 0
+    // on découpe en branches
     arbre._children.forEach(function (branche) {
       num++
       if (branche.tag !== 'd') return addError(xmlName, "doit être découpé mais on a trouvé un " + branche.tag +
@@ -426,6 +460,11 @@ module.exports = function () {
       .seq(function () {
         // on regarde les arbres qu'il fallait envoyer en dernier
         nextStep = this
+        // on envoie tel quel les 2 premiers (on préfère garder les ref avec origine, plus lisibles,
+        // et il faudrait les remettre en fin de pile pour récupérer des ids)
+        deferAdd(lastArbres.shift(), true)
+        deferAdd(lastArbres.shift(), true)
+        // pour le reste on remplace par des ids
         if (lastArbres.length) {
           lastArbres.forEach(function (root) {
             // faut récupérer les ids des idOrigine de chaque branche

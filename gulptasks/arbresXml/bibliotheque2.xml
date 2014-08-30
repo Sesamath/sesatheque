@@ -1,9 +1,0 @@
-<?xml version="1.0" standalone="yes"?>
-<bibliotheque>
-    <d n="Tests d'algèbre" onload="openAideLingot">
-        <mn i="3" e="1"/>
-        <mn i="1" e="1"/>
-        <testd i="102"/>
-        <mn i="2" e="1"/>
-    </d>
-</bibliotheque>
