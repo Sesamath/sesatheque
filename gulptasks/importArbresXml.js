@@ -88,6 +88,8 @@ var lastArbres = [
     typeTechnique: 'arbre',
     origine      : origineArbre,
     idOrigine    : 'labomep_all',
+    publie       : true,
+    restriction  : 0,
     enfants      : []
   },
   { // 1 => tous_les_manuels
@@ -95,6 +97,8 @@ var lastArbres = [
     typeTechnique: 'arbre',
     origine      : origineArbre,
     idOrigine    : 'tous_les_manuels',
+    publie       : true,
+    restriction  : 0,
     enfants      : []
   }
 ]
@@ -210,7 +214,7 @@ function parseXml(xmlFile) {
     } else {
       arbre = arbre._root
     }
-    arbre.titre = xmlName.replace('_', ' ')
+    arbre.titre = xmlName.replace(/_/g, ' ')
 
     splitOrNotToSplit(arbre, xmlName)
 
@@ -249,6 +253,8 @@ function splitOrNotToSplit(arbre, xmlName) {
       typeTechnique: 'arbre',
       origine      : origineArbre,
       idOrigine    : xmlName,
+      publie       : true,
+      restriction  : 0,
       enfants      : [],
       // servira d'idOrigine pour récupérer l'id des children quand il auront été enregistrés
       branches     : []
@@ -287,6 +293,8 @@ function convert(arbre, xmlName) {
     typeTechnique: 'arbre',
     origine      : origineArbre,
     idOrigine    : xmlName,
+    publie       : true,
+    restriction  : 0,
     enfants      : getEnfants(arbre, xmlName)
   }
   deferAdd(ressource)
