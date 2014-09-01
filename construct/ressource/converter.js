@@ -2,7 +2,7 @@
 
 var _ = require('underscore')._
 var moment = require('moment')
-var config = require('./config.js')
+var config = require('./config')
 
 /**
  * Module qui regroupe les fonctions de transformation de données pour les vues
@@ -341,14 +341,8 @@ converter.getRessourceFromPostedArbre = function (data, partial) {
   var ressource = {}
 
   /**
-   * Déplace une propriété de data vers ressource (si la propriété existe)
-   * @param {string} prop Le nom de la propriété
    */
-  function moveProp(prop) {
-    if (data[prop]) {
-      ressource[prop] = data[prop]
-      delete data[prop]
-    }
+  function moveProps() {
   }
 
   // on accepte deux forme de post
@@ -364,11 +358,13 @@ converter.getRessourceFromPostedArbre = function (data, partial) {
     }
   }
 
-  moveProp('id')
-  moveProp('titre')
-  // si on a ajouté origine et idOrigine on le conserve
-  moveProp('origine')
-  moveProp('idOrigine')
+  // Déplace les propriétés de data vers ressource (si la propriété existe et que c'est une propriété de ressource)
+  _.each(config.typesVar, function(value, prop) {
+    if (data[prop]) {
+      ressource[prop] = data[prop]
+      delete data[prop]
+    }
+  })
   // ces propriétés sont imposées
   ressource.typeTechnique = 'arbre'
   ressource.categories = [config.constantes.categories.liste]
