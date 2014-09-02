@@ -143,7 +143,7 @@ function display(ressource, opt, next) {
   // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
   // ff aime pas et sort une erreur js Error: Permission denied to access property 'toString'
   // chrome râle aussi parce que c'est pas un document
-  if (url.substr(-4) === '.swf') {
+  if (/^[^?]+.swf(\?.*)?$/.test(url)) { // faut pas prendre les truc.php?toto=truc.swf
     log("C'est un swf, on ajoute un div et pas une iframe")
     require(['sesaswf'], function(sesaswf) {
       var swfContainer = w.getElt('div', {src: params.adresse, id: 'page'});
