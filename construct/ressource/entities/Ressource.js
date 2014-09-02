@@ -136,7 +136,7 @@ function Ressource() {
   /**
    * L'oid de l'archive correspondant à la version précédente
    */
-  this.previousOid = 0
+  this.archiveOid = 0
 }
 
 var entity = lassi.Entity(Ressource)
@@ -154,9 +154,13 @@ var entity = lassi.Entity(Ressource)
     //log.dev('beforeStore fini')
     next()
   })
-  // finalement on laisse la gestion du cache dans les accesseurs du repository
-  // plus pratique même si updateVersion appelle directement lassi.cache.ressource.XXX
-  //.on('afterStore', function(next) {log.dev("afterStore", this); next();})
+  .on('afterStore', function(next) {
+    // on met en cache
+    if (this.id) lassi.tools.cache.set('ressource_' +this.id, this, lassi.ressource.cacheTTL)
+    if (this.idOrigine) lassi.tools.cache.set('ressourceIdByOrigine_' +
+        this.origine +'_' +this.idOrigine, this, lassi.ressource.cacheTTL)
+    next()
+  })
   .addIndex('id', 'integer')
   .addIndex('origine', 'string')
   .addIndex('idOrigine', 'string')
@@ -183,7 +187,8 @@ lassi.on('registered', function(className, path, ressource) {
 module.exports = entity;
 
 /**
- * Enregistre la ressource en archive et passe l'archive à next (à l'appelant de gérer les versions)
+ * Enregistre la ressource en archive, màl archiveOid sur la ressource courante et passe l'archive à next
+ * (à l'appelant de gérer les versions)
  * @param next
  */
 Ressource.prototype.archive = function (next) {
@@ -191,18 +196,24 @@ Ressource.prototype.archive = function (next) {
     next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
     return
   }
-  var archive = this.toObject()
-  // on ajoute la nouvelle propriété
-  archive.oidRessource = this.oid
+  var ressource = this
+  var archive = ressource.toObject()
   // on vire les propriétés dont on ne veut pas
   delete archive.oid
+  if (this.archiveOid) archive.oidPrecedent = this.archiveOid
   if (archive.errors) {
     if (archive.errors.length) log.error("Archivage de la ressource " +this.oid +" (id " +this.id +
         ") qui comportait des erreurs : " +archive.errors.join('\n'))
     delete archive.errors
   }
   // et on archive
-  lassi.entity.Archive.create(archive).store(next)
+  lassi.entity.Archive.create(archive).store(function (error, archive) {
+    if (error) next(error)
+    else {
+      ressource.archiveOid = archive.oid
+      next(null, archive)
+    }
+  })
 }
 
 /**

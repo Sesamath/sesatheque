@@ -109,10 +109,9 @@ Personne.prototype.addGroupeByName = function (groupeNom, next) {
       next(null, personne)
     } else {
       // on le créé au passage
-      lassi.entity.Groupe.create({nom:groupeNom}).save(function (error, groupe) {
-        log.dev('après save ', groupe)
+      lassi.entity.Groupe.create({nom:groupeNom}).store(function (error, groupe) {
+        log.dev('après store ', groupe)
         if (groupe) personne.groupes[groupe.id] = true
-        // sinon y'a une erreur que l'on fait suivre
         next(error, personne)
       })
       // @FIXME tant que le store marche pas on passe à la suite quand même

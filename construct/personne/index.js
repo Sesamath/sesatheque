@@ -5,9 +5,11 @@
 
 var _ = require('underscore')._
 
-var cacheTTL
+/** Durée de cache, 1h par défaut, sera écrasé par config.components.personne.cacheTTL s'il existe */
+var cacheTTL = 3600
 
-var connectLink = '<br /><a href="/?connexion">Me connecter</a>'
+/** lien éventuel à ajouter au message accessDenied, initialisé d'après la conf s'il existe */
+var connectLink = ''
 
 /**
  * Component de gestion des types de contenu "personne".
@@ -16,17 +18,17 @@ var connectLink = '<br /><a href="/?connexion">Me connecter</a>'
  */
 var personneComponent = lassi.Component('personne');
 
-/* rien à initialiser */
 personneComponent.initialize = function(next) {
   // l'export de notre config/index.js
   var config = this.application.settings
-  if (config.components && config.components.personne && config.components.personne.cacheTTL) {
-    cacheTTL = lassi.cache.encadre(config.components.personne.cacheTTL, 60, 12*3600,
+  if (config.components && config.components.personne && config.components.personne.connectLink)
+    connectLink = config.components.personne.connectLink
+  if (config.components && config.components.personne && config.components.personne.cacheTTL)
+    cacheTTL = lassi.main.encadre(config.components.personne.cacheTTL, 60, 12*3600,
         'ttl de cache par défaut pour les entities personne')
-    log('ttl du cache personne fixé à ' +cacheTTL)
-  }
+  log('ttl du cache personne fixé à ' +cacheTTL)
   next();
-} /* */
+}
 
 /**
  * Récupère une personne (en cache ou en bdd)
@@ -35,20 +37,21 @@ personneComponent.initialize = function(next) {
  */
 personneComponent.load = function(id, next) {
   log.dev('load ' +id)
-  var personneCached = lassi.cache.get('personne_' + id)
-  if (personneCached) next(null, personneCached)
-  else {
-    lassi.entity.Personne.match('id').equals(id).grabOne(function (error, personne) {
-      //log.dev('personne load remonte ', personne)
-      if (error) next(error)
-      else if (personne) {
-        lassi.cache.set('personne_' + id, personne)
-        next(null, personne)
-      } else {
-        next(null, undefined)
-      }
-    })
-  }
+  lassi.tools.cache.get('personne_' + id, function(error, personneCached) {
+    if (personneCached) next(null, personneCached)
+    else {
+      lassi.entity.Personne.match('id').equals(id).grabOne(function (error, personne) {
+        //log.dev('personne load remonte ', personne)
+        if (error) next(error)
+        else if (personne) {
+          lassi.tools.cache.set('personne_' + id, personne, cacheTTL)
+          next(null, personne)
+        } else {
+          next(null, undefined)
+        }
+      })
+    }
+  })
 }
 
 /**
@@ -126,16 +129,17 @@ personneComponent.isAuthenticated = function (ctx) {
  * @param {EntityInstance~StoreCallback} next
  */
 personneComponent.loadGroupeByNom = function (groupeNom, next) {
-  var cacheKey = personneComponent.getCacheKeyGroupeByNom(groupeNom)
-  var groupe = lassi.cache.get(cacheKey)
-  if (groupe) return next(null, groupe)
-  lassi.entity.Groupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
-    if (error) return next(error)
-    if (groupe) {
-      lassi.cache.set(cacheKey, groupe, cacheTTL)
-      return next(null, groupe)
-    }
-    next(null, null)
+  lassi.tools.cache.get('groupeByNom_' +groupeNom, function (error, groupe) {
+    if (groupe) return next(null, groupe)
+    lassi.entity.Groupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
+      if (error) return next(error)
+      if (groupe) {
+        lassi.tools.cache.set('groupe_' +groupe.id, groupe, cacheTTL)
+        lassi.tools.cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
+        return next(null, groupe)
+      }
+      next(null, null)
+    })
   })
 }
 
@@ -146,24 +150,20 @@ personneComponent.loadGroupeByNom = function (groupeNom, next) {
  */
 personneComponent.loadGroupe = function (groupeId, next) {
   if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.id doit être entier"))
-  var cacheKey = 'groupe_' +groupeId
-  var groupe = lassi.cache.get(cacheKey)
-  if (groupe) return next(null, groupe)
-  lassi.entity.Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {
-    if (error) log.error(error)
-    if (groupe) lassi.cache.set(cacheKey, groupe, cacheTTL)
-    next(error, groupe)
+  lassi.tools.cache.get('groupe_' +groupeId, function(error, groupe) {
+    if (groupe) return next(null, groupe)
+    lassi.entity.Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {
+      if (error) log.error(error)
+      if (groupe) {
+        lassi.tools.cache.set('groupe_' +groupeId, groupe, cacheTTL)
+        lassi.tools.cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
+      }
+      next(error, groupe)
+    })
   })
 }
 
-/**
- * Renvoie la clé de cache pour le stockage des groupes par leur nom
- * @param groupeNom
- * @returns {string} La clé
- */
-personneComponent.getCacheKeyGroupeByNom = function (groupeNom) {
-  return 'groupeNom_' +groupeNom.replace(/[^\w]/, '')
-}
+
 
 module.exports = personneComponent
 

@@ -111,6 +111,7 @@ var appConfig = {
         prof     : ['readProf']
       },
       cacheTTL: 20*60
+      // connectLink sera mis par le composant d'authentification, pour le message accessDenied
     }
   },
   // le reste est spécifique à notre appli et ignoré par lassi

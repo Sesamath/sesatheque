@@ -55,4 +55,25 @@ mainComponent.addFlashMessage = function(ctx, message, level) {
   ctx.session.flash[level].push(message)
 }
 
+/**
+ * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
+ * @param int La valeur à contrôler
+ * @param min Le minimum exigé
+ * @param max Le maximum exigé
+ * @param label Un label pour le message d'erreur (qui indique ce qui a été recadré)
+ * @returns {Integer}
+ */
+mainComponent.encadre = function (int, min, max, label) {
+  var value = parseInt(int)
+  if (value < min) {
+    log.error(label +" trop petit (" +value +"), on le fixe à " +min)
+    value = min
+  }
+  if (value > max) {
+    log.error(label +" trop grand (" +value +"), on le fixe à " +max)
+    value = max
+  }
+  return value
+}
+
 module.exports = mainComponent;

@@ -8,10 +8,6 @@
  */
 function Archive() {
   /**
-   * L'oid de la ressource archivée
-   */
-  this.oidRessource = 0
-  /**
    * L'identifiant de la ressource, utilisé dans les urls
    * @type {Number}
    */
@@ -126,24 +122,24 @@ function Archive() {
   /**
    * L'oid de l'archive correspondant à la version précédente
    */
-  this.previousOid = 0
+  this.oidPrecedent = 0
 }
 
 var entity = lassi.Entity(Archive)
-  // finalement on laisse la gestion du cache dans les accesseurs du repository
-  // plus pratique même si updateVersion appelle directement lassi.cache.ressource.XXX
-  //.on('afterStore', function(next) {log.dev("afterStore", this); next();})
+  .on('beforeStore', function(next) {
+    var archive = this
+    // on regarde s'il y avait une archive précédente
+    lassi.entity.Archive
+      .match('id').equals(archive.id)
+      .sort('version', 'desc')
+      .grabOne(function(error, archivePrec) {
+        if (archivePrec) archive.oidPrecedent = archivePrec.oid
+        next()
+      })
+  })
   .addIndex('id', 'integer')
   .addIndex('origine', 'string')
   .addIndex('idOrigine', 'string')
   .addIndex('version', 'integer')
-  .addIndex('oidRessource', 'integer')
-
-/* un écouteur sur registered qui pourrait servir
-lassi.on('registered', function(className, path, ressource) {
-  if (className === 'Ressource') log.dev(path +" registered")
-}); /* */
 
 module.exports = entity;
-
-

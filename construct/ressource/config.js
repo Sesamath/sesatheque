@@ -145,7 +145,7 @@ module.exports = {
     'restriction'  : true
   },
 
-  // les propriétés obligatoires (oid ne l'est pas, on le vérifie spécifiquement si besoin)
+  // les propriétés obligatoires
   required         : {
     'titre' : true,
     'typeTechnique' : true,
@@ -291,5 +291,6 @@ module.exports = {
   },
   limites : {
     maxSql : 500
-  }
+  },
+  cacheTTL : 3600
 };

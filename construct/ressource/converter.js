@@ -340,11 +340,6 @@ converter.getRessourceFromPostedArbre = function (data, partial) {
   // on transforme le post pour ressembler à un post de ressource
   var ressource = {}
 
-  /**
-   */
-  function moveProps() {
-  }
-
   // on accepte deux forme de post
   if (!_.isEmpty(data)) {
     if (data.arbre) {
@@ -365,6 +360,7 @@ converter.getRessourceFromPostedArbre = function (data, partial) {
       delete data[prop]
     }
   })
+
   // ces propriétés sont imposées
   ressource.typeTechnique = 'arbre'
   ressource.categories = [config.constantes.categories.liste]

@@ -23,6 +23,9 @@ GLOBAL.assert = require('./assert.js');
 // Construction de l'application
 var application = lassi.Application();
 
+// on ajoute memcache
+lassi.tools.cache.addEngine(new lassi.cache.MemcacheEngine('127.0.0.1:11211'));
+
 // on déclenchera ça quand le boot sera fini
 application.on('boot', function(){
   console.log("Boot de l'application " + application.name);
