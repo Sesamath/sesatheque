@@ -84,22 +84,7 @@ if (env === 'dev') {
       var suffix = "\n";
       if (objectToDump) {
         if (objectToDump instanceof Error) suffix += objectToDump.stack +'\n'
-        // ça peut planter en cas de ref circulaire
-        else {
-          try { buffer = JSON.stringify(objectToDump, null, 2) }
-          catch (error) {
-            // on tente une construction à la main pour chacun des 1ers niveaux
-            buffer = "{\n";
-            _.each(objectToDump, function(value, key) {
-              buffer += '  ' + key + ' : ';
-              try { buffer += JSON.stringify(value, null, 2) }
-              catch (error) { buffer += "Impossible d'assurer le rendu de l'objet : " + error.toString() }
-              buffer += "\n";
-            })
-            buffer += "}";
-          }
-          suffix += buffer + "\n";
-        }
+        else suffix += lassi.main.objToString(objectToDump) + "\n";
       }
       if (message instanceof Error) message = message.stack // on veut toute la pile
       addToLog(message + suffix, devOutputStream);

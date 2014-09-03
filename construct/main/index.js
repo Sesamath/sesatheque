@@ -1,5 +1,7 @@
 'use strict';
 
+var _ = require('underscore')._;
+
 /**
  * Notre component principal (qui défini le layout et le rendu)
  * @constructor
@@ -74,6 +76,28 @@ mainComponent.encadre = function (int, min, max, label) {
     value = max
   }
   return value
+}
+
+/**
+ * Retourne le json indenté d'un objet, sans planter sur les refs circulaire (et sans les rendre)
+ * @param objectToDump
+ * @returns {string}
+ */
+mainComponent.objToString = function (objectToDump) {
+  var buffer
+  try { buffer = JSON.stringify(objectToDump, null, 2) }
+  catch (error) {
+    // on tente une construction à la main pour chacun des 1ers niveaux
+    buffer = "{\n";
+    _.each(objectToDump, function(value, key) {
+      buffer += '  ' + key + ' : ';
+      try { buffer += JSON.stringify(value, null, 2) }
+      catch (error) { buffer += "\"Impossible d'assurer le rendu de l'objet : " + error.toString() +'"' }
+      buffer += ",\n";
+    })
+    buffer += "}";
+  }
+  return buffer
 }
 
 module.exports = mainComponent;

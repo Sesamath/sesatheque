@@ -12,31 +12,34 @@ controller
     .Action('session')
     .renderWith('debug')
     .do(function (ctx, next) {
-      next(null, {debug:lassi.tools.stringify(ctx.session, 2)})
+      next(null, {debug:lassi.main.objToString(ctx.session)})
     });
 
 controller
     .Action('request')
     .renderWith('debug')
     .do(function (ctx, next) {
-      next(null, {debug:lassi.tools.stringify(ctx.request, 2)})
+      next(null, {debug:lassi.main.objToString(ctx.request)})
     });
 
 controller
     .Action('response')
     .renderWith('debug')
     .do(function (ctx, next) {
-      next(null, {debug:lassi.tools.stringify(ctx.response, 2)})
+      next(null, {debug:lassi.main.objToString(ctx.response)})
     });
 
 // un controleur tout prêt pour tout et n'importe quoi
 controller
-    .Action('groupe')
-    .renderWith('debugDump')
+    .Action('test')
+    //.renderWith('debugDump')
+    .renderWith('debug')
     .do(function (ctx, next) {
-      lassi.entity.Groupe.create({nom:'toto'}).store(function(error, groupe) {
-        next(null, {error:error, groupe:groupe.toObject()})
-      })
+      next(null, {debug:lassi.main.objToString(ctx.request)})
+      var repository = require('../../ressource/repository')
+      repository.load(42, function(error, ress) {
+        next(null, {debug:lassi.main.objToString(ress)})
+      }) /* */
     });
 
 module.exports = controller;

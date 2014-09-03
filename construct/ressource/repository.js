@@ -35,7 +35,7 @@ ressourceRepository.valide = function(ressource, next) {
       // le type
       if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
         errors.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
-        log.dev("à la validation on a reçu pour " + key + ' : ' + JSON.stringify(ressource[key]))
+        log.dev("à la validation on a reçu pour " + key + ' : ' + lassi.tools.stringify(ressource[key]))
       } else if (typeVar === 'Number') {
         // on vérifie entier positif
         if (Math.floor(ressource[key]) !== ressource[key]) {

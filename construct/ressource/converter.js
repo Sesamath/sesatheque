@@ -62,7 +62,7 @@ converter.sendPageData = function (error, ressource, ctx, next) {
 
         } else if (_.isObject(value)) {
           try {
-            data[key].value = JSON.stringify(value)
+            data[key].value = lassi.tools.stringify(value)
           } catch (error) {
             data[key].value = error.toString()
           }

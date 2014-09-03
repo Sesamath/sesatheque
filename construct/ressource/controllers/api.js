@@ -457,7 +457,7 @@ function populateArbre(ctx, ressource, next) {
           })
           .catch(function() {
             log.error("L'analyse de l'arbre a planté")
-            try {log.error(JSON.stringify(parent))} catch(e) { }
+            try {log.error(lassi.tools.stringify(parent))} catch(e) { }
             nextStep()
           })
     } else {
