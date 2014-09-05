@@ -239,22 +239,25 @@ ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
 /**
  * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
  * @param {Number|String} id  L'identifiant de la ressource
- * @param {Function}      next La callback qui sera appelée avec (error, ressource).
+ * @param {Function}      next La callback qui sera appelée avec (error, ressource)
+ *                             Attention, ressource peut avoir perdu son prototype s'il vient du cache
  * @returns {undefined}
  */
 ressourceRepository.load = function(id, next) {
-  var ressourceCached = cacheGet(id)
-  if (ressourceCached) next(null, ressourceCached)
-  else {
-    lassi.entity.Ressource.match('id').equals(id).grabOne(function (error, ressource) {
-      if (error) next(error)
-      else if (ressource) {
-        prepareAndSend(ressource, next)
-      } else {
-        next(null, null)
-      }
-    })
-  }
+  log.dev('load ressource_' +id)
+  cacheGet(id, function (error, ressourceCached) {
+    if (ressourceCached) next(null, ressourceCached)
+    else {
+      lassi.entity.Ressource.match('id').equals(id).grabOne(function (error, ressource) {
+        if (error) next(error)
+        else if (ressource) {
+          prepareAndSend(ressource, next)
+        } else {
+          next(null, null)
+        }
+      })
+    }
+  })
 }
 
 /**
@@ -264,21 +267,22 @@ ressourceRepository.load = function(id, next) {
  * @returns {undefined}
  */
 ressourceRepository.loadPublic = function(id, next) {
-  var ressourceCached = cacheGet(id)
-  if (ressourceCached) next(null, ressourceCached)
-  else {
-    lassi.entity.Ressource
-        .match('id').equals(id)
-        .match('restriction').equals(0)
-        .grabOne(function (error, ressource) {
-          if (error) next(error)
-          else if (ressource) {
-            prepareAndSend(ressource, next)
-          } else {
-            next(null, null)
-          }
-        })
-  }
+  cacheGet(id, function (error, ressourceCached) {
+    if (ressourceCached) next(null, ressourceCached)
+    else {
+      lassi.entity.Ressource
+          .match('id').equals(id)
+          .match('restriction').equals(0)
+          .grabOne(function (error, ressource) {
+            if (error) next(error)
+            else if (ressource) {
+              prepareAndSend(ressource, next)
+            } else {
+              next(null, null)
+            }
+          })
+    }
+  })
 }
 
 /**

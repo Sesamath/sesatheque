@@ -58,7 +58,7 @@ controller
             pluginBaseUrl:'../../plugins/' +ressource.typeTechnique,
             vendorsBaseUrl:'../../vendors',
             pluginName : ressource.typeTechnique,
-            ressource: ressource.toString() // une string pour que dust le mette dans le source
+            ressource: lassi.tools.stringify(ressource) // une string pour que dust le mette dans le source
           }
           next(null, data)
         }

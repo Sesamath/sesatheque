@@ -12,24 +12,25 @@ var _ = require('underscore')._
 
 // Récupération du module lassi que l'on met en global
 // (il le fait déjà mais le déclarer ici fait plaisir à mon IDE)
-GLOBAL.lassi = require('lassi');
+GLOBAL.lassi = require('lassi')
 
 // nos loggers
-GLOBAL.log = require('./log.js'); // jshint ignore:line
+GLOBAL.log = require('./log.js') // jshint ignore:line
 
 // nos vérificateurs d'assertions
-GLOBAL.assert = require('./assert.js');
+GLOBAL.assert = require('./assert.js')
 
 // Construction de l'application
-var application = lassi.Application();
+var application = lassi.Application()
 
 // on ajoute memcache
-lassi.tools.cache.addEngine(new lassi.cache.MemcacheEngine('127.0.0.1:11211'));
+log('Memcache sur ' +application.settings.memcache)
+lassi.tools.cache.addEngine(new lassi.cache.MemcacheEngine(application.settings.memcache))
 
 // on déclenchera ça quand le boot sera fini
-application.on('boot', function(){
-  console.log("Boot de l'application " + application.name);
-  log.dev('BOOT');
+application.on('boot', function () {
+  console.log("Boot de l'application " + application.name)
+  log.dev('BOOT')
   /* on a une tache gulp reset pour ça, on ne vide plus systématiquement les sessions au démarrage
   if (lassi.sessions && application.settings.staging !== lassi.Staging.production) {
     log.dev('Purge des sessions récupérées')
@@ -49,9 +50,9 @@ application.on('beforeRailUse', function(name, settings) {
 
     log.dev('settings morgan dans beforeRailUse', settings)
     // les settings pour morgan
-    var fs = require('fs');
-    var logAccess = application.settings.logs.access;
-    var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'});
+    var fs = require('fs')
+    var logAccess = application.settings.logs.access
+    var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'})
     // les tokens
     var moment = require('moment')
     var morgan = lassi.require('morgan')
@@ -84,4 +85,4 @@ application.on('beforeRailUse', function(name, settings) {
 }) */
 
 // et on lance le boot
-application.boot();
+application.boot()
