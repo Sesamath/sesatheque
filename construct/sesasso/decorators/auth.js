@@ -32,7 +32,11 @@ if (appConfig && appConfig.application.staging !== lassi.Staging.production) hos
 module.exports = lassi.Decorator('auth')
     .renderTo('authBloc')
     .do(function(ctx, next) {
+      if (ctx.responseFormat !== 'html') return // pas de connexion sur l'api
       var urlSso = hostAuth
+      /**
+       * Retour avec un ticket
+       */
       if (ctx.get.hasOwnProperty('ticket')) {
         /**
          * Check d'un ticket (appel de sso et redirect ici sans le ticket)
@@ -44,6 +48,9 @@ module.exports = lassi.Decorator('auth')
           checkTicket(ctx, next)
         }
 
+      /**
+       * Demande de connexion
+       */
       } else if (ctx.get.hasOwnProperty('connexion')) {
         /**
          * Connexion (via redirect vers sso)
@@ -62,6 +69,9 @@ module.exports = lassi.Decorator('auth')
           ctx.redirect(urlSso)
         }
 
+      /**
+       * Demande de déconnexion
+       */
       } else if (ctx.get.hasOwnProperty('deconnexion')) {
         /**
          * Connexion (via redirect vers sso)
@@ -69,16 +79,16 @@ module.exports = lassi.Decorator('auth')
         delete ctx.session.user
         ctx.redirect(urlSso + urlDeco)
 
+      /**
+       * Pas de demande particulière, on alimente la variable dust authBloc du layout-page
+       */
       } else {
-        /**
-         * on fait notre boulot de décorateur std pour alimenter le bloc user
-         * attention, si on renvoie undefined ou un objet vide le bloc n'est pas rendu
-         */
+        // attention, si on renvoie undefined ou un objet vide le bloc n'est pas rendu
         var data = getUserForDust(ctx.session.user)
         log.dev("décorateur auth renvoie", data)
         next(null, data)
       }
-    });
+    }, {timeout:10000})
 
 /**
  * Renvoie l'url courante, débarassée de ses arguments non voulus
@@ -135,11 +145,12 @@ function checkTicket(ctx, next) {
    * @param {Personne} personne
    */
   function setSessionAndRedirect(error, personne) {
+    log('appel setSessionAndRedirect')
     if (error) next(error)
     else if (personne) {
       // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
       // hormis le controleur deconnexion qui affecte un objet vide
-      ctx.session.user = personne.toObject() // express-session fait un stringify dessus et tolère pas les refs circulaires
+      ctx.session.user = personne
       log.dev('ticket OK, user enregistré localement et en session, ' +ctx.session.user.oid)
       // on redirige vers cette page sans le ticket en get
       ctx.redirect(getMyUrl(ctx))
@@ -185,13 +196,14 @@ function checkTicket(ctx, next) {
             if (personneBdd) {
               // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
               newPersonne.oid = personneBdd.oid
-              // @todo voir pourquoi la comparaison est toujours fausse
-              if (_.isEqual(personneBdd.toObject(), newPersonne.toObject())) needToStore = false
+              // comparaison directe toujours fausse à cause du prototype
+              if (_.isEqual(personneBdd, newPersonne)) needToStore = false
             }
             if (needToStore) {
               log.dev('av store personne', newPersonne)
               newPersonne.store(setSessionAndRedirect)
-              // @FIXME le store rappelle pas la cb, on le fait ici, attention à virer ce 2e appel sinon
+              // le store rappelait pas la cb, ça semble réglé depuis noknex, on le faisait ici,
+              // attention à virer ce 2e appel si le store marche, sinon
               // le redirect plantera avec TypeError: Object #<Context> has no method '_next'
               //setSessionAndRedirect(null, newPersonne)
             }

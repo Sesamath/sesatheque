@@ -9,7 +9,7 @@
 var fs = require('fs');
 var moment = require('moment');
 var config = require('../config'); // jshint ignore:line
-var _ = require('underscore')._
+//var _ = require('underscore')._
 
 // les streams vers nos logs, celui de dev est ouvert plus loin si besoin
 var devOutputStream;

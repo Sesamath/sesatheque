@@ -12,6 +12,8 @@ controller
     .Action('session')
     .renderWith('debug')
     .do(function (ctx, next) {
+      if (ctx.session.compteur) ctx.session.compteur++
+      else ctx.session.compteur = 1
       next(null, {debug:lassi.main.objToString(ctx.session)})
     });
 

@@ -44,7 +44,7 @@ PersonneSso.prototype.toPersonne = function(next) {
   if (!this.id) throw new Error("Impossible de convertir une personne sans id")
 
   // on met au format personne
-  var personneMaj = {
+  var personneInit = {
     id:this.id,
     login:this.login,
     nom:this.nom,
@@ -62,10 +62,10 @@ PersonneSso.prototype.toPersonne = function(next) {
   }
 
   // reste les permissions et les groupes
-  var personne = lassi.entity.Personne.create(personneMaj)
+  var personne = lassi.entity.Personne.create(personneInit)
   var personneSso = this
-  personneSso.addPermissions(personne, function(error, personne) {
-    personneSso.addGroupes(personne, next)
+  personneSso.grantPermissionsTo(personne, function(error, personne) {
+    personneSso.giveGroupesTo(personne, next)
   })
 }
 
@@ -75,7 +75,7 @@ PersonneSso.prototype.toPersonne = function(next) {
  * @param {EntityInstance} personne
  * @param {EntityInstance~StoreCallback} next appelée avec (null, personne)
  */
-PersonneSso.prototype.addPermissions =  function (personne, next) {
+PersonneSso.prototype.grantPermissionsTo =  function (personne, next) {
   var s = this.statut
   /**
    * La liste des statuts possibles
@@ -116,7 +116,7 @@ PersonneSso.prototype.addPermissions =  function (personne, next) {
  * @param {Personne} personne
  * @param {EntityInstance~StoreCallback} next appelée avec (null, personne)
  */
-PersonneSso.prototype.addGroupes =  function (personne, next) {
+PersonneSso.prototype.giveGroupesTo =  function (personne, next) {
   /** Les groupes que l'on va ajouter (liste de noms) */
   var groupeNoms = []
   /** Les groupes venant de SSO sous la forme nomGroupe:true|false */
@@ -142,13 +142,13 @@ PersonneSso.prototype.addGroupes =  function (personne, next) {
   })
 
   // reste à ajouter tous ces groupes
-  log.dev('addGroupes')
+  log.dev('giveGroupesTo')
   flow(groupeNoms)
       .parEach(function(groupeNom) {
         personne.addGroupeByName(groupeNom, this)
       })
       .seq(function () {
-        log.dev('addGroupes fini')
+        log.dev('giveGroupesTo fini')
         next(null, personne)
       })
       .catch(next)

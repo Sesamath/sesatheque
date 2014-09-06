@@ -30,6 +30,6 @@ module.exports = {
   },
   server : {
     port:process.env.PORT || 3001
-  }
-  // memcache : '127.0.0.1:11211' ou autre dans _private
+  },
+  memcache : '127.0.0.1:11211'
 };
