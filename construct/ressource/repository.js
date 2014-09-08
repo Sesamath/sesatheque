@@ -172,7 +172,7 @@ ressourceRepository.write = function(ressource, next) {
       .seq(function (ressource) {
         if (!ressource.id) this("Après un write la ressource n'a toujours pas d'id")
         else {
-          cacheSet(ressource)
+          lassi.tools.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
           log.dev('write ' + ressource.id + ' ok')
           next(null, ressource)
         }
