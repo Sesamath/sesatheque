@@ -36,7 +36,7 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  *
  * Dans l'objet window on a ajouté les propriétés suivantes
  * {Function}    log(msg)        : un console.log qui ne fait rien en prod, ne plantera pas sur les vieux IE
- *                                 et accepte un éventuel objet un 2e argument
+ *                                 et accepte un éventuel objet un 2e argument (que l'on enverra aussi à console.log())
  * {Function}    addCss(file)    : ajoute une css dans le head de la page courante
  *                                 (lui passer le fichier relativement au dossier du plugin)
  * {Function}    addElement(eltContainer, tag, attributes, innerText) : ajoute un HTMLElement dans eltContainer

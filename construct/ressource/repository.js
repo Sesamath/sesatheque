@@ -6,6 +6,7 @@
 
 var _ = require('underscore')._
 var flow          = require('seq')
+var elementtree = require('elementtree')
 
 var config = require('./config')
 var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
@@ -174,12 +175,12 @@ ressourceRepository.write = function(ressource, next) {
         else {
           lassi.tools.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
           log.dev('write ' + ressource.id + ' ok')
-          next(null, ressource)
+          if (next) next(null, ressource)
         }
       })
       .catch(function(error) {
         log.error(error)
-        next(error);
+        if (next) next(error);
       })
 }
 
@@ -448,6 +449,7 @@ module.exports = ressourceRepository;
 
 /**
  * Créé les objets date à partir des Strings, met en cache et fait suivre
+ * Si on trouve un seul paramètre xml, on le jsonify
  * @private
  * @param ressources ressource ou tableau de ressources
  * @param next
@@ -463,6 +465,10 @@ function prepareAndSend(ressources, next) {
     // faut transformer les dates en objets date
     if (ressource.dateCreation) ressource.dateCreation = new Date(ressource.dateCreation);
     if (ressource.dateMiseAJour) ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
+    // on regarde si on a un xml et rien d'autre
+    if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
+      convertXmlEc2(ressource)
+    }
     // pas forcément le cas au 1er insert
     if (ressource.id) lassi.tools.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
   }
@@ -471,6 +477,47 @@ function prepareAndSend(ressources, next) {
   if (_.isArray(ressources)) ressources.forEach(processOne)
   else processOne(ressources)
   next(null, ressources)
+}
+
+function convertXmlEc2(ressource) {
+  var config = elementtree.parse(ressource.parametres.xml)
+  var params = {}
+  /*
+   { _root:
+     { _id: 0,
+       tag: 'config',
+       attrib: {},
+       text: '\r\n',
+       tail: null,
+       _children: [
+         [ { _id: 1,
+         tag: 'swf',
+         attrib: {},
+         text: 'calcul-differe-3.swf',
+         tail: '\n',
+         _children: [] },
+         { _id: 2,
+         tag: 'json',
+         attrib: {},
+         text: 'default',
+         tail: '\r\n',
+         _children: [] } ]
+       ]
+     }
+   }
+
+   */
+  if (config._root && config._root.tag === 'config' && config._root._children) {
+    config._root._children.forEach(function (child) {
+      if (child.tag) {
+        params[child.tag] = child.text
+      }
+    })
+    ressource.parametres = params
+    // on enregistre la ressource modifiée en async
+    ressourceRepository.write(ressource)
+  }
+    log(params)
 }
 
 /**
