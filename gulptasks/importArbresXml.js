@@ -69,6 +69,8 @@ var port = serverConf.server && serverConf.server.port || 3000;
 var idsParsed = [];
 /** ids des ressources sur la pile d'envoi */
 var idsToSend = [];
+/** Liste des ressources en attentes qu'il faut appeler avec noPopulate */
+var idsNoPopulate = {}
 /** ids des ressources envoyées */
 var idsSent = [];
 /** ids des ressources avec une réponse de l'api */
@@ -176,10 +178,16 @@ function checkEnd() {
  * @param ressource
  */
 function deferAdd(ressource, noPopulate) {
+  //log("deferAdd" +ressource.idOrigine +" " +nbLaunched +' / ' +maxLaunched)
   if (ressource && ressource.titre) {
     idsToSend.push(ressource.idOrigine);
-    if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd, noPopulate)
-    else waitingRessource.push(ressource)
+    if (nbLaunched < maxLaunched) {
+      addRessource(ressource, checkEnd, noPopulate)
+    } else {
+      // on stocke le noPopulate à part...
+      idsNoPopulate[ressource.idOrigine] = true
+      waitingRessource.push(ressource)
+    }
   } else {
     idsFailed.push(ressource.idOrigine)
     addError(ressource.idOrigine, "ressource sans titre ou invalide, non postée")
@@ -246,6 +254,7 @@ function splitOrNotToSplit(arbre, xmlName) {
     })
   }
   if (needToSplit(xmlName)) {
+    log("split " +xmlName)
     // faudra l'ajouter (sans populate),
     // mais une fois que ces enfants auront été enregistrés (pour que l'api nous donne les bons id)
     var root = {
@@ -288,6 +297,7 @@ function splitOrNotToSplit(arbre, xmlName) {
  * @param xmlName
  */
 function convert(arbre, xmlName) {
+  //log("convert " +xmlName)
   var ressource = {
     titre        : arbre.titre,
     typeTechnique: 'arbre',
@@ -378,15 +388,19 @@ function getRessource(origine, idOrigine, next) {
  * @param next
  */
 function addRessource(ressource, next, noPopulate) {
+  //log("addRessource " +ressource.idOrigine)
   nbLaunched++
   idsSent.push(ressource.idOrigine)
+  if (idsNoPopulate[ressource.idOrigine]) noPopulate = true
   var options = {
     url : 'http://localhost:' +port +'/api/arbre' +(noPopulate ? '' : '?populate=1'),
     json: true,
     //body: JSON.stringify({ressource:ressource}),
     content_type: 'charset=UTF-8',
-    form: ressource
+    form: ressource,
+    timeout:5000
   }
+  //log("appel de " +options.url +" avec " +ressource.idOrigine)
   request.post(options, function (error, response, body) {
     nbLaunched--
     idsResp.push(ressource.idOrigine)
@@ -434,6 +448,14 @@ function displayResult(next) {
   if (next) next()
 }
 
+/**
+ * gulp sort pas tout seul sur du ctrl+C
+ */
+function stop() {
+  displayResult()
+  process.exit()
+}
+
 module.exports = function () {
   // les 3 premiers args sont node, /path/2/gulp, nomDeLaTache
   var argv = process.argv.slice(3)
@@ -456,8 +478,8 @@ module.exports = function () {
   log('On va parser les xml', xmls)
 
   // en cas d'interruption on veut le résultat quand même
-  process.on('SIGTERM', displayResult);
-  process.on('SIGINT', displayResult);
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
 
   // yapluka
   flow()
