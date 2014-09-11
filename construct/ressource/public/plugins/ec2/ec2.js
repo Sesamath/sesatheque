@@ -1,17 +1,14 @@
 /**
  * Ressource calculatice en flash
- * ex 5894
+ * ex 5894 et suivants
  */
 /*global define, log, container, window */
 //'use strict';
 
 var baseEc2 = "http://www.labomep.net/exercices_calculatice";
-var optionsChargement = "defaut";
 
 /** module de chargement d'un swf */
 var sesaswf
-/** contient l'historique des réponses de chaque question */
-var histoReponses = [];
 
 define(['sesaswf'], function (module) {
   // on affecte notre var sesaswf avec le module chargé
