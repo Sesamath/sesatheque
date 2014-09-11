@@ -173,7 +173,7 @@ ressourceRepository.write = function(ressource, next) {
       .seq(function (ressource) {
         if (!ressource.id) this("Après un write la ressource n'a toujours pas d'id")
         else {
-          lassi.tools.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
+          lassi.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
           log.dev('write ' + ressource.id + ' ok')
           if (next) next(null, ressource)
         }
@@ -200,9 +200,9 @@ ressourceRepository.del = function(id, next) {
     else {
       if (_.isArray(id)) {
         id.forEach(function (idToDel) {
-          lassi.tools.cache.delete('ressource_' +idToDel)
+          lassi.cache.delete('ressource_' +idToDel)
         })
-      } else lassi.tools.cache.delete('ressource_' +id)
+      } else lassi.cache.delete('ressource_' +id)
       next(error, nbObjects, nbIndexes)
     }
     log.dev("La ressource " +id + " a été effacée (" +nbObjects +" versions et " +nbIndexes +" index)")
@@ -224,10 +224,10 @@ ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
       .delete(function(error, nbObjects, nbIndexes) {
         if (nbObjects) {
           // faut regarder si on l'a en cache pour la virer (on a pas l'id)
-          lassi.tools.cache.get('ressourceIdByOrigine_' +origine +'_' +idOrigine, function(error, id) {
+          lassi.cache.get('ressourceIdByOrigine_' +origine +'_' +idOrigine, function(error, id) {
             if (id) {
-              lassi.tools.cache.delete('ressource_' +id)
-              lassi.tools.cache.delete('ressourceIdByOrigine_' +origine +'_' +idOrigine)
+              lassi.cache.delete('ressource_' +id)
+              lassi.cache.delete('ressourceIdByOrigine_' +origine +'_' +idOrigine)
             }
           })
         }
@@ -470,7 +470,7 @@ function prepareAndSend(ressources, next) {
       convertXmlEc2(ressource)
     }
     // pas forcément le cas au 1er insert
-    if (ressource.id) lassi.tools.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
+    if (ressource.id) lassi.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
   }
 
   if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")
@@ -526,7 +526,7 @@ function convertXmlEc2(ressource) {
  * @returns {Ressource}
  */
 function cacheGet(id, next) {
-  lassi.tools.cache.get('ressource_' + id, next)
+  lassi.cache.get('ressource_' + id, next)
 }
 
 /**
@@ -537,9 +537,9 @@ function cacheGet(id, next) {
  */
 function cacheGetByOrigine(origine, idOrigine, next) {
   if (idOrigine) {
-    lassi.tools.cache.get('ressourceIdByOrigine_' + origine + '_' + idOrigine, function (error, id) {
+    lassi.cache.get('ressourceIdByOrigine_' + origine + '_' + idOrigine, function (error, id) {
       if (id) {
-        lassi.tools.cache.get('ressource_' + id, next)
+        lassi.cache.get('ressource_' + id, next)
       } else next(null, undefined)
     })
   } else next(null, undefined)

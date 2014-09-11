@@ -24,6 +24,7 @@ function setLayout(useLayout) {
 }
 
 mainComponent.initialize = function(next) {
+  console.log('HERE');
   // un écouteur pour l'affectation du bon layout aux réponses "html"
   this.application.transports.html.on('layout', setLayout);
   next()

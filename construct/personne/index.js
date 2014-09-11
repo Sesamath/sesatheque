@@ -37,14 +37,14 @@ personneComponent.initialize = function(next) {
  */
 personneComponent.load = function(id, next) {
   log.dev('load ' +id)
-  lassi.tools.cache.get('personne_' + id, function(error, personneCached) {
+  lassi.cache.get('personne_' + id, function(error, personneCached) {
     if (personneCached) next(null, personneCached)
     else {
       lassi.entity.Personne.match('id').equals(id).grabOne(function (error, personne) {
         //log.dev('personne load remonte ', personne)
         if (error) next(error)
         else if (personne) {
-          lassi.tools.cache.set('personne_' + id, personne, cacheTTL)
+          lassi.cache.set('personne_' + id, personne, cacheTTL)
           next(null, personne)
         } else {
           next(null, undefined)
@@ -129,13 +129,13 @@ personneComponent.isAuthenticated = function (ctx) {
  * @param {EntityInstance~StoreCallback} next
  */
 personneComponent.loadGroupeByNom = function (groupeNom, next) {
-  lassi.tools.cache.get('groupeByNom_' +groupeNom, function (error, groupe) {
+  lassi.cache.get('groupeByNom_' +groupeNom, function (error, groupe) {
     if (groupe) return next(null, groupe)
     lassi.entity.Groupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
       if (error) return next(error)
       if (groupe) {
-        lassi.tools.cache.set('groupe_' +groupe.id, groupe, cacheTTL)
-        lassi.tools.cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
+        lassi.cache.set('groupe_' +groupe.id, groupe, cacheTTL)
+        lassi.cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
         return next(null, groupe)
       }
       next(null, null)
@@ -150,13 +150,13 @@ personneComponent.loadGroupeByNom = function (groupeNom, next) {
  */
 personneComponent.loadGroupe = function (groupeId, next) {
   if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.id doit être entier"))
-  lassi.tools.cache.get('groupe_' +groupeId, function(error, groupe) {
+  lassi.cache.get('groupe_' +groupeId, function(error, groupe) {
     if (groupe) return next(null, groupe)
     lassi.entity.Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {
       if (error) log.error(error)
       if (groupe) {
-        lassi.tools.cache.set('groupe_' +groupeId, groupe, cacheTTL)
-        lassi.tools.cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
+        lassi.cache.set('groupe_' +groupeId, groupe, cacheTTL)
+        lassi.cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
       }
       next(error, groupe)
     })
