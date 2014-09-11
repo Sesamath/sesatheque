@@ -25,7 +25,7 @@ var application = lassi.Application()
 
 // on ajoute memcache
 log('Memcache sur ' +application.settings.memcache)
-lassi.tools.cache.addEngine(new lassi.cache.MemcacheEngine(application.settings.memcache))
+lassi.cache.addEngine(new lfw.cache.MemcacheEngine(application.settings.memcache))
 
 // on déclenchera ça quand le boot sera fini
 application.on('boot', function () {
