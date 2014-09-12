@@ -185,7 +185,7 @@ lassi.Entity('Ressource', {
   members: {
 
     /**
-     * Enregistre la ressource en archive, màl archiveOid sur la ressource courante et passe l'archive à next
+     * Enregistre la ressource en archive, màj archiveOid sur la ressource courante et passe l'archive à next
      * (à l'appelant de gérer les versions)
      * @param next
      */
@@ -195,7 +195,7 @@ lassi.Entity('Ressource', {
         return
       }
       var ressource = this
-      var archive = ressource.toObject()
+      var archive = ressource
       // on vire les propriétés dont on ne veut pas
       delete archive.oid
       if (this.archiveOid) archive.oidPrecedent = this.archiveOid

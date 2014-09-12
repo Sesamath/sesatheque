@@ -118,7 +118,7 @@ controller
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
             // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
-            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource.toObject())
+            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource)
             else  denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, ctx, next)
           } else notFound("La ressource d'identifiant " + id + " n'existe pas", ctx, next)
         })
@@ -181,7 +181,7 @@ controller
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
             // l'entité passe pas le JSON.stringify pour la sortie, à cause de la propriété _entity, d'où le toObject
-            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource.toObject())
+            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource)
             else  denied("Droits insuffisants pour accéder à la ressource d'origine " +
                 origine +" et d'identifiant " + idOrigine, ctx, next)
           } else notFound("La ressource d'origine " +origine +" et d'identifiant " + idOrigine +
@@ -217,7 +217,7 @@ controller
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
             // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
-            if (ressource.restriction === 0) next(null, ressource.toObject())
+            if (ressource.restriction === 0) next(null, ressource)
             else  denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, ctx, next)
           } else notFound("La ressource d'identifiant " + id + " n'existe pas", ctx, next)
         })
@@ -356,7 +356,7 @@ function addUrls(ctx, ressources) {
   return ressources.map(function (ressource) {
     if (ressource.restriction === 0) ressource.url = ctx.url(lassi.action.api.public.read, {id:ressource.id})
     else ressource.url = ctx.url(lassi.action.api.read, {id:ressource.id})
-    return ressource.toObject()
+    return ressource
   })
 }
 

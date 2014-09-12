@@ -70,33 +70,36 @@ ressourceRepository.valide = function(ressource, next) {
 function setVersion(ressource, next) {
   var needIncrement
 
+  /**
+   * compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
+   * @param error
+   * @param ressourceInitiale
+   */
   function analyse(error, ressourceInitiale) {
     if (error) next(error)
-    if (ressourceInitiale) {
-      // on peut réclamer une nouvelle version via un flag sur la ressource
-      if (ressource.versionNeedIncrement) needIncrement = true
-      // on regarde si nos champs qui déclenchent un changement de version on changé
-      else {
-        _.each(config.versionTriggers, function (prop) {
-          // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
-          // on utilise http://underscorejs.org/#isEqual
-          if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
-            try {
-              log.dev('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id +
-                  '\n' +'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' +
-                  'après\n' + JSON.parse(ressource[prop]))
-            } catch (e) {
-              log.dev('le parsing de ressource[' +prop +'] a planté ' +ressource.id +' ' +
-                  ressource.origine +'-' +ressource.idOrigine)
-            }
-            needIncrement = true
+    // on peut réclamer une nouvelle version via un flag sur la ressource
+    if (ressource.versionNeedIncrement) needIncrement = true
+    // on regarde si nos champs qui déclenchent un changement de version on changé
+    else {
+      _.each(config.versionTriggers, function (prop) {
+        // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
+        // on utilise http://underscorejs.org/#isEqual
+        if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
+          try {
+            log.dev('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id +
+                '\n' +'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' +
+                'après\n' + JSON.parse(ressource[prop]))
+          } catch (e) {
+            log.dev('le parsing de ressource[' +prop +'] a planté ' +ressource.id +' ' +
+                ressource.origine +'-' +ressource.idOrigine)
           }
-        })
-      }
-      // on recopie version et oid (pour écrasement éventuel de l'ancienne ressource)
-      ressource.version = ressourceInitiale.version
-      ressource.oid = ressourceInitiale.oid
+          needIncrement = true
+        }
+      })
     }
+    // on recopie version et oid (pour écrasement éventuel de l'ancienne ressource)
+    ressource.version = ressourceInitiale.version
+    ressource.oid = ressourceInitiale.oid
 
     if (needIncrement) ressourceInitiale.archive(function (error, archive) {
       if (error) next(error)
@@ -111,7 +114,7 @@ function setVersion(ressource, next) {
     else {
       next(null, ressource)
     }
-  }
+  } // analyse
 
   if (ressource.id) { // pas le cas au create
     // ira seulement en cache dans la plupart des cas, de toute façon faut récupérer le n° de version actuel
@@ -121,8 +124,10 @@ function setVersion(ressource, next) {
   } else if (ressource.idOrigine) {
     ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceInitiale) {
       // on lui ajoute l'id qui n'a pas été fourni (l'oid est ajouté par analyse dans les 2 cas)
-      if (ressourceInitiale) ressource.id = ressourceInitiale.id
-      analyse(error, ressourceInitiale)
+      if (ressourceInitiale) {
+        ressource.id = ressourceInitiale.id
+        analyse(error, ressourceInitiale)
+      } else next(null, ressource)
     })
   } else {
     next(null, ressource)
