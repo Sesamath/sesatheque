@@ -1,0 +1,41 @@
+{
+  "titre"        : "Ressources Sésamath",
+  "typeTechnique": "arbre",
+  "publie"       : true,
+  "restriction"  : 0,
+  "indexable"    : true,
+  "parametres"   : {
+    "enfants": [
+      {
+        "ref"          : "animations_interactives",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Animations interactives",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "exercices_interactifs",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Exercices interactifs",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "tests_diagnostiques",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Tests diagnostiques",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "tous_manuels_cahiers",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Tous les manuels et cahiers",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "labomep_suisse",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Sélection de ressources pour le curriculum Suisse",
+        "typeTechnique": "arbre"
+      }
+    ]
+  }
+}

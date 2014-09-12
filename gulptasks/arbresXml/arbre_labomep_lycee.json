@@ -2,7 +2,7 @@
   "titre"        : "Ressources Collège",
   "typeTechnique": "arbre",
   "origine"      : "sesamath",
-  "idOrigine"    : "labomep_college",
+  "idOrigine"    : "labomep_lycee",
   "publie"       : true,
   "restriction"  : 0,
   "enfants"      : [

@@ -27,7 +27,37 @@
         "typeTechnique": "arbre"
       },
       {
-        "ref"          : "tous_manuels_cahiers",
+        "ref"          : "tous_les_manuels",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Tous les manuels et cahiers",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "labomep_ecole",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Toutes les ressources école",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "labomep_college",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Toutes les ressources collège",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "labomep_lycee",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Toutes les ressources lycée",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "labomep_suisse",
+        "refOrigine"   : "sesamath",
+        "titre"        : "Sélection de ressources pour le curriculum Suisse",
+        "typeTechnique": "arbre"
+      },
+      {
+        "ref"          : "tous_les_manuels",
         "refOrigine"   : "sesamath",
         "titre"        : "Tous les manuels et cahiers",
         "typeTechnique": "arbre"
@@ -121,6 +151,18 @@
         "refOrigine"   : "sesamath",
         "titre"        : "Cahier 3e 2012",
         "typeTechnique": "arbre"
+      },
+      {
+        "titre": "Manuel 2de 2014",
+        "typeTechnique": "arbre",
+        "origine": "sesamath",
+        "idOrigine": "Manuel_2de_2014"
+      },
+      {
+        "titre": "Cahier 2de Pro 2014",
+        "typeTechnique": "arbre",
+        "origine": "sesamath",
+        "idOrigine": "Cahier_2de_Pro_2014"
       }
     ]
   }

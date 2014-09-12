@@ -295,7 +295,6 @@ function initRessourceMep(row) {
   // et ajouter les mep_txt_utilisateur_id dans les contributeurs
 
   return {
-    id               : id,
     origine          : 'mep',
     idOrigine        : id,
     typeTechnique    : 'em',

@@ -71,12 +71,10 @@ function setVersion(ressource, next) {
   var needIncrement
 
   /**
-   * compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
-   * @param error
+   * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
    * @param ressourceInitiale
    */
-  function analyse(error, ressourceInitiale) {
-    if (error) next(error)
+  function analyse(ressourceInitiale) {
     // on peut réclamer une nouvelle version via un flag sur la ressource
     if (ressource.versionNeedIncrement) needIncrement = true
     // on regarde si nos champs qui déclenchent un changement de version on changé
@@ -119,14 +117,19 @@ function setVersion(ressource, next) {
   if (ressource.id) { // pas le cas au create
     // ira seulement en cache dans la plupart des cas, de toute façon faut récupérer le n° de version actuel
     ressourceRepository.load(ressource.id, function (error, ressourceInitiale) {
-      analyse(error, ressourceInitiale)
+      if (error) next(error)
+      else if (ressourceInitiale) analyse(ressourceInitiale)
+      else {
+        log.error(new Error("setVersion a reçu une ressource avec id " +ressource.id +" qui n'existait pas en base"))
+        next(null, ressource)
+      }
     })
   } else if (ressource.idOrigine) {
     ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceInitiale) {
       // on lui ajoute l'id qui n'a pas été fourni (l'oid est ajouté par analyse dans les 2 cas)
       if (ressourceInitiale) {
         ressource.id = ressourceInitiale.id
-        analyse(error, ressourceInitiale)
+        analyse(ressourceInitiale)
       } else next(null, ressource)
     })
   } else {
