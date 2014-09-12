@@ -25,6 +25,11 @@
         </div>
 
         <div class="form-group">
+            {>wrapper widget="text" o=origine /}
+            {>wrapper widget="text" o=idOrigine /}
+        </div>
+
+        <div class="form-group">
             {>wrapper widget="checkboxes" o=categories /}
             {>wrapper widget="textarea" o=resume cols=50 rows=5 /}
         </div>
