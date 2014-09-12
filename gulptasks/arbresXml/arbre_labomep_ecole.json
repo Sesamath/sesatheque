@@ -1,0 +1,34 @@
+{
+  "titre"        : "Ressources Collège",
+  "typeTechnique": "arbre",
+  "origine"      : "sesamath",
+  "idOrigine"    : "labomep_college",
+  "publie"       : true,
+  "restriction"  : 0,
+  "enfants"      : [
+    {
+      "titre"        : "animations interactives",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "animations_interactives"
+    },
+    {
+      "titre"        : "exercices interactifs",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "exercices_interactifs"
+    },
+    {
+      "titre"        : "tests diagnostiques",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "tests_diagnostiques"
+    },
+    {
+      "ref"          : "Cahier_CM2_2013",
+      "refOrigine"   : "sesamath",
+      "titre"        : "Cahier CM2 2013",
+      "typeTechnique": "arbre"
+    }
+  ]
+}

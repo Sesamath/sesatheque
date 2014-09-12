@@ -1,0 +1,112 @@
+{
+  "titre"        : "Ressources Collège",
+  "typeTechnique": "arbre",
+  "origine"      : "sesamath",
+  "idOrigine"    : "labomep_college",
+  "publie"       : true,
+  "restriction"  : 0,
+  "enfants"      : [
+    {
+      "titre"        : "animations interactives",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "animations_interactives"
+    },
+    {
+      "titre"        : "exercices interactifs",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "exercices_interactifs"
+    },
+    {
+      "titre"        : "tests diagnostiques",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "tests_diagnostiques"
+    },
+    {
+      "titre"        : "Cahier 3e 2008",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Cahier_3e_2008"
+    },
+    {
+      "titre"        : "Cahier 3e 2012",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Cahier_3e_2012"
+    },
+    {
+      "titre"        : "Cahier 4e 2007",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Cahier_4e_2007"
+    },
+    {
+      "titre"        : "Cahier 4e 2011",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Cahier_4e_2011"
+    },
+    {
+      "titre"        : "Cahier 5e 2010",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Cahier_5e_2010"
+    },
+    {
+      "titre"        : "Cahier 6e 2009",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Cahier_6e_2009"
+    },
+    {
+      "titre"        : "Manuel 3e 2008",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_3e_2008"
+    },
+    {
+      "titre"        : "Manuel 3e 2012",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_3e_2012"
+    },
+    {
+      "titre"        : "Manuel 4e 2007",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_4e_2007"
+    },
+    {
+      "titre"        : "Manuel 4e 2011",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_4e_2011"
+    },
+    {
+      "titre"        : "Manuel 5e 2006",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_5e_2006"
+    },
+    {
+      "titre"        : "Manuel 5e 2010",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_5e_2010"
+    },
+    {
+      "titre"        : "Manuel 6e 2009",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_6e_2009"
+    },
+    {
+      "titre"        : "Manuel 6e 2013",
+      "typeTechnique": "arbre",
+      "refOrigine"      : "sesamath",
+      "ref"    : "Manuel_6e_2013"
+    }
+  ]
+}
