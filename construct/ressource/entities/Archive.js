@@ -125,24 +125,22 @@ lassi.Entity('Archive', {
      */
     this.oidPrecedent = 0
   },
-  statics: {
-    configure: function() {
-      this
-      .on('beforeStore', function(next) {
-        var archive = this
-        // on regarde s'il y avait une archive précédente
-        lassi.entity.Archive
-        .match('id').equals(archive.id)
-        .sort('version', 'desc')
-        .grabOne(function(error, archivePrec) {
-          if (archivePrec) archive.oidPrecedent = archivePrec.oid
-            next()
-        })
+  configure: function() {
+    this
+    .on('beforeStore', function(next) {
+      var archive = this
+      // on regarde s'il y avait une archive précédente
+      lassi.entity.Archive
+      .match('id').equals(archive.id)
+      .sort('version', 'desc')
+      .grabOne(function(error, archivePrec) {
+        if (archivePrec) archive.oidPrecedent = archivePrec.oid
+          next()
       })
-      .defineIndex('id', 'integer')
-      .defineIndex('origine', 'string')
-      .defineIndex('idOrigine', 'string')
-      .defineIndex('version', 'integer')
-    }
+    })
+    .defineIndex('id', 'integer')
+    .defineIndex('origine', 'string')
+    .defineIndex('idOrigine', 'string')
+    .defineIndex('version', 'integer')
   }
 });

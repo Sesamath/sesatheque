@@ -8,8 +8,7 @@
   "dependencies": {
     "inotify": "^1.2.1",
     "knex": "^0.5.14",
-    "lassi": "git+ssh://git@arnumeral.fr:node-lassi",
-    "arpm": "git+ssh://git@arnumeral.fr:node-arpm",
+    "lassi": "http://npm.arnumeral.fr/package/lassi/latest",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",

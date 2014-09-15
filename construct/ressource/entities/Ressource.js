@@ -139,92 +139,88 @@ lassi.Entity('Ressource', {
      */
     this.archiveOid = 0
   },
-  statics: {
-    configure: function() {
-      this
-      .on('beforeStore', function(next) {
-        // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
-        // et pas de celle de son indexation ici
-        if (!this.dateMiseAJour) {
-          this.dateMiseAJour = new Date();
-        }
-        // si le tableau d'erreur est vide (devrait toujours être le cas,
-        // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-        if (_.isEmpty(this.errors)) delete this.errors
-          // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
-          // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
-          //log.dev('beforeStore fini')
+  configure: function() {
+    this
+    .on('beforeStore', function(next) {
+      // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
+      // et pas de celle de son indexation ici
+      if (!this.dateMiseAJour) {
+        this.dateMiseAJour = new Date();
+      }
+      // si le tableau d'erreur est vide (devrait toujours être le cas,
+      // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
+      if (_.isEmpty(this.errors)) delete this.errors
+        // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
+        // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
+        //log.dev('beforeStore fini')
+        next()
+    })
+    .on('afterStore', function(next) {
+      // on met en cache
+      if (this.id) lassi.cache.set('ressource_' +this.id, this, lassi.ressource.cacheTTL)
+        if (this.idOrigine) lassi.cache.set('ressourceIdByOrigine_' +
+                                                  this.origine +'_' +this.idOrigine, this, lassi.ressource.cacheTTL)
           next()
-      })
-      .on('afterStore', function(next) {
-        // on met en cache
-        if (this.id) lassi.cache.set('ressource_' +this.id, this, lassi.ressource.cacheTTL)
-          if (this.idOrigine) lassi.cache.set('ressourceIdByOrigine_' +
-                                                    this.origine +'_' +this.idOrigine, this, lassi.ressource.cacheTTL)
-            next()
-      })
-      .defineIndex('id', 'integer')
-      .defineIndex('origine', 'string')
-      .defineIndex('idOrigine', 'string')
-      .defineIndex('typeTechnique', 'string')
-      .defineIndex('niveaux', 'integer')
-      .defineIndex('categories', 'integer')
-      .defineIndex('typePedagogiques', 'integer')
-      .defineIndex('typeDocumentaires', 'integer')
-      //.defineIndex('relations', 'integer') // chaque relation est un tableau, faudra voir si on peut indexer ça
-      .defineIndex('auteurs', 'integer')
-      .defineIndex('contributeurs', 'integer')
-      .defineIndex('langue', 'string')
-      .defineIndex('publie', 'boolean')
-      .defineIndex('indexable', 'boolean')
-      .defineIndex('restriction', 'integer')
-      .defineIndex('dateCreation', 'date')
-      .defineIndex('dateMiseAJour', 'date')
-    }
+    })
+    .defineIndex('id', 'integer')
+    .defineIndex('origine', 'string')
+    .defineIndex('idOrigine', 'string')
+    .defineIndex('typeTechnique', 'string')
+    .defineIndex('niveaux', 'integer')
+    .defineIndex('categories', 'integer')
+    .defineIndex('typePedagogiques', 'integer')
+    .defineIndex('typeDocumentaires', 'integer')
+    //.defineIndex('relations', 'integer') // chaque relation est un tableau, faudra voir si on peut indexer ça
+    .defineIndex('auteurs', 'integer')
+    .defineIndex('contributeurs', 'integer')
+    .defineIndex('langue', 'string')
+    .defineIndex('publie', 'boolean')
+    .defineIndex('indexable', 'boolean')
+    .defineIndex('restriction', 'integer')
+    .defineIndex('dateCreation', 'date')
+    .defineIndex('dateMiseAJour', 'date')
   },
-  members: {
 
-    /**
-     * Enregistre la ressource en archive, màj archiveOid sur la ressource courante et passe l'archive à next
-     * (à l'appelant de gérer les versions)
-     * @param next
-     */
-    archive: function (next) {
-      if (!this.oid) {
-        next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
-        return
-      }
-      var ressource = this
-      var archive = ressource
-      // on vire les propriétés dont on ne veut pas
-      delete archive.oid
-      if (this.archiveOid) archive.oidPrecedent = this.archiveOid
-      if (archive.errors) {
-        if (archive.errors.length) log.error("Archivage de la ressource " +this.oid +" (id " +this.id +
-            ") qui comportait des erreurs : " +archive.errors.join('\n'))
-        delete archive.errors
-      }
-      // et on archive
-      lassi.entity.Archive.create(archive).store(function (error, archive) {
-        if (error) next(error)
-        else {
-          ressource.archiveOid = archive.oid
-          next(null, archive)
-        }
-      })
-    },
-
-    /**
-     * Transforme la ressource en arbre (les parametres de la ressource où on ajoute titre et id)
-     * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
-     */
-    toArbre: function () {
-      if (this.typeTechnique !== 'arbre') return undefined
-      var arbre = this.parametres
-      // on ajoute id et titre
-      arbre.id = this.id
-      arbre.titre = this.titre
-      return arbre
+  /**
+   * Enregistre la ressource en archive, màj archiveOid sur la ressource courante et passe l'archive à next
+   * (à l'appelant de gérer les versions)
+   * @param next
+   */
+  archive: function (next) {
+    if (!this.oid) {
+      next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
+      return
     }
+    var ressource = this
+    var archive = ressource
+    // on vire les propriétés dont on ne veut pas
+    delete archive.oid
+    if (this.archiveOid) archive.oidPrecedent = this.archiveOid
+    if (archive.errors) {
+      if (archive.errors.length) log.error("Archivage de la ressource " +this.oid +" (id " +this.id +
+          ") qui comportait des erreurs : " +archive.errors.join('\n'))
+      delete archive.errors
+    }
+    // et on archive
+    lassi.entity.Archive.create(archive).store(function (error, archive) {
+      if (error) next(error)
+      else {
+        ressource.archiveOid = archive.oid
+        next(null, archive)
+      }
+    })
+  },
+
+  /**
+   * Transforme la ressource en arbre (les parametres de la ressource où on ajoute titre et id)
+   * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
+   */
+  toArbre: function () {
+    if (this.typeTechnique !== 'arbre') return undefined
+    var arbre = this.parametres
+    // on ajoute id et titre
+    arbre.id = this.id
+    arbre.titre = this.titre
+    return arbre
   }
 });
