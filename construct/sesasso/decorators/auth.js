@@ -19,7 +19,10 @@
 
 var request = require('request')
 var _ = require('underscore')._
+
 var PersonneSso = require('../PersonneSso')
+var validate = require('../validate')
+
 // faut aller chercher la conf car lassi.application est pas dispo dans le do
 var appConfig = require('../../../config')
 
@@ -129,6 +132,7 @@ function getUserForDust(personne) {
   return user
 }
 
+
 /**
  * Vérifie un ticket en appelant le serveur SSO, enregistre les infos retournées si ok et met le user en session
  * @param ctx
@@ -136,8 +140,6 @@ function getUserForDust(personne) {
  */
 function checkTicket(ctx, next) {
   if (!ctx.get.ticket) throw new Error("checkTicket appelé sans ticket dans l'url")
-
-  var personneSso
 
   /**
    * Enregistre le user en sesion et redirige (ou appelle next en cas de pb)
@@ -163,52 +165,31 @@ function checkTicket(ctx, next) {
   }
 
   log.dev('On poste pour valider le ticket')
-  var options = {
-    url : hostAuth + urlWs,
-    json: true,
-    //body: JSON.stringify({ressource:ressource}),
-    content_type: 'charset=UTF-8',
-    form: {
-      action:'recuperer',
-      json:1,
-      ticket_client:ctx.get.ticket
-    }
-  }
-  // analyse du retour du serveur sso
-  request.post(options, function (error, response, body) {
+  validate(ctx.get.ticket, function (error, result) {
     try {
       if (error) throw error
-      if (body.error) throw new Error(body.error)
-      if (!body.SSO) throw new Error("Le serveur d'authentification n'a pas renvoyé la réponse attendue, " +
-        "impossible de valider le ticket transmis")
-      personneSso = new PersonneSso(body.SSO)
-      if (!personneSso.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant" +
+      if (!result.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant" +
           " pour le ticket transmis")
 
       // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
-      lassi.personne.load(personneSso.id, function(error, personneBdd) {
+      lassi.personne.load(result.id, function(error, personne) {
         if (error) next(error)
         else {
-          // on compare cette personne de la BdD avec newPersonne issue du sso
-          personneSso.toPersonne(function (error, newPersonne) {
-            var needToStore = true
-
-            if (personneBdd) {
-              // on l'avait déjà, on regarde si qqchose a changé, faut ajouter oid pour la comparaison
-              newPersonne.oid = personneBdd.oid
-              // comparaison directe toujours fausse à cause du prototype
-              if (_.isEqual(personneBdd, newPersonne)) needToStore = false
+          // on compare cette personne avec ce que l'on a récupéré
+          var needToStore = true
+          var keys = ['nom', 'prenom', 'email', 'groupes']
+          keys.forEach(function (key) {
+            if (!_.equals(personne[key], result[key])) {
+              personne[key] = result[key]
+              needToStore = true
             }
-            if (needToStore) {
-              log.dev('av store personne', newPersonne)
-              newPersonne.store(setSessionAndRedirect)
-              // le store rappelait pas la cb, ça semble réglé depuis noknex, on le faisait ici,
-              // attention à virer ce 2e appel si le store marche, sinon
-              // le redirect plantera avec TypeError: Object #<Context> has no method '_next'
-              //setSessionAndRedirect(null, newPersonne)
-            }
-            else setSessionAndRedirect(null, personneBdd)
           })
+
+          if (needToStore) {
+            log.dev('màj personne', personne)
+            personne.store(setSessionAndRedirect)
+          } else
+            setSessionAndRedirect(null, personne)
         }
       })
 

@@ -10,29 +10,28 @@ var flow = require('seq');
 
 /**
  * Constructeur appelé au retour de sso, ce n'est pas une entity
- * @param {Object} sso l'objet 'SSO' retourné par le serveur sso
+ * @param {Object} sso l'objet retourné par le validate
  * @constructor
  */
-function PersonneSso(sso) {
-  this.id = sso.user_id
-  this.login = sso.user_login
-  this.statut = sso.STATUT
-  this.nom = sso.user_nom
-  this.prenom = sso.user_prenom
-  this.structures = sso.structure_id || []
-  this.grpCollab = grpToArray(sso.contributeur_int_collab_groupes)
-  this.grpMepDev = grpToArray(sso.contributeur_mepdevel_groupes)
-  this.grpWiki = grpToArray(sso.contributeur_wiki_groupes)
-  this.emailAcad = sso.user_email_acad
-  this.emailPerso = sso.user_email_supp
-  //this.vip = sso.Ligne_VIP
-  this.contactProjet = sso.TabProjetContact // {idProjet1:idProjet1, idProjet2:idProjet2, ...}
-  this.participantProjet = sso.TabProjetParticipant
-  this.responsableProjet = sso.TabProjetResponsable
-  this.profil = sso.user_profil // SesaProf ou ExtProf
-  this.labomepId = sso.user_labomep_id
-  //this.emailDerog = sso.user_email_derog // si l'emailAcad n'en est pas un (donc par dérogation manuelle)
-  //this.genre = sso.user_genre
+function PersonneSso(ssoObj) {
+  this.id = ssoObj.id
+  this.nom = ssoObj.nom
+  this.prenom = ssoObj.prenom
+  this.structures = ssoObj.structures || []
+  this.groupes = ssoObj.groupes || []
+  this.permissions = ssoObj.permissions || []
+  this.grpMepDev = grpToArray(ssoObj.contributeur_mepdevel_groupes)
+  this.grpWiki = grpToArray(ssoObj.contributeur_wiki_groupes)
+  this.emailAcad = ssoObj.user_email_acad
+  this.emailPerso = ssoObj.user_email_supp
+  //this.vip = ssoObj.Ligne_VIP
+  this.contactProjet = ssoObj.TabProjetContact // {idProjet1:idProjet1, idProjet2:idProjet2, ...}
+  this.participantProjet = ssoObj.TabProjetParticipant
+  this.responsableProjet = ssoObj.TabProjetResponsable
+  this.profil = ssoObj.user_profil // SesaProf ou ExtProf
+  this.labomepId = ssoObj.user_labomep_id
+  //this.emailDerog = ssoObj.user_email_derog // si l'emailAcad n'en est pas un (donc par dérogation manuelle)
+  //this.genre = ssoObj.user_genre
   /* */
 }
 
