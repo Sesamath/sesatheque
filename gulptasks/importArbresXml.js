@@ -167,7 +167,7 @@ function checkEnd() {
       addRessource(waitingRessource.shift(), checkEnd)
     }
   } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées')
+    log('toutes les ressources de cette étape ont été traitées\n')
     clearTimeout(timerId)
     nextStep()
   }
@@ -253,6 +253,7 @@ function splitOrNotToSplit(arbre, xmlName) {
       idOrigine    : xmlName
     })
   }
+
   if (needToSplit(xmlName)) {
     log("split " +xmlName)
     // faudra l'ajouter (sans populate),
@@ -285,6 +286,7 @@ function splitOrNotToSplit(arbre, xmlName) {
       }
       convert(branche, file)
     })
+    log('push ' +xmlName +' dans lastArbres')
     lastArbres.push(root)
   } else {
     convert(arbre, xmlName)
@@ -502,9 +504,11 @@ module.exports = function () {
           lastArbres.shift()
           lastArbres.shift()
         }
+        log('On traite les ' +lastArbres.length +' ressources de lastArbres')
         // pour le reste on remplace par des ids
         if (lastArbres.length) {
           lastArbres.forEach(function (root) {
+            log(root.idOrigine)
             // faut récupérer les ids des idOrigine de chaque branche
             flow(root.branches)
                 .seqEach(function (idOrigine) {
