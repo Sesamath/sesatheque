@@ -81,23 +81,31 @@ controller
         if (error) next(error)
         else if (ressource) {
           lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
-            ctx.metas.title = ressource.titre
-            // si public son permalink est dans le namespace public
-            if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
-            var data = {
-              pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
-              vendorsBaseUrl: '../../vendors',
-              pluginName    : ressource.typeTechnique,
-              ressource     : lassi.tools.stringify(ressource),
-              staging       : ctx.application.settings.application.staging
-            }
-            ctx.metas.addCss('styles/ressourceDisplay.css')
-            next(null, data)
+            display(error, ressource, ctx, next)
           })
         } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
       })
     })
 
+/**
+ * display : Voir la ressource
+ *
+ * Le layout-iframe est imposé via ctx.forceLayout qui est lu par un écouteur transports.html.on('layout'...
+ * défini dans le mainComponent.initialize
+ */
+controller
+    .Action(routes.display + '/:origine/:idOrigine', 'ressource.displayByOrigin')
+    .renderWith('display')
+    .do(function (ctx, next) {
+      // on force le layout en ajoutant cette propriété au contexte,
+      // qui sera récupéré par l'écouteur layout défini dans le mainComponent.initialize
+      ctx.forceLayout = 'layout-iframe'
+      var origine = ctx.arguments.origine
+      var idOrigine = ctx.arguments.idOrigine
+      repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        display(error, ressource, ctx, next)
+      })
+    })
 /**
  * preview : Voir la ressource dans le site
  */
@@ -283,4 +291,32 @@ function addUrls(ctx, ressources) {
   })
           log.dev('après', ressources)
   return ressources
+}
+
+/**
+ * Code commun aux 2 controlleurs display
+ * @param error
+ * @param ressource
+ * @param ctx
+ * @param next
+ */
+function display (error, ressource, ctx, next) {
+  //log.dev('retour de load dans display', ressource)
+  if (error) next(error)
+  else if (ressource) {
+    lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
+      ctx.metas.title = ressource.titre
+      // si public son permalink est dans le namespace public
+      if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
+      var data = {
+        pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
+        vendorsBaseUrl: '../../vendors',
+        pluginName    : ressource.typeTechnique,
+        ressource     : lassi.tools.stringify(ressource),
+        staging       : ctx.application.settings.application.staging
+      }
+      ctx.metas.addCss('styles/ressourceDisplay.css')
+      next(null, data)
+    })
+  } else ctx.notFound("Cette ressource n'existe pas")
 }

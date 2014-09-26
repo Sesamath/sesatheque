@@ -80,7 +80,7 @@ var appConfig = {
     cache: builddir + '/data/cache'
   },
   rail    : {
-    // cors : {origin: '*'},
+    cors : {origin: '*'},
     favicon       : '/assets/images/favicon.ico',
     logger        : morganSettings, // passé tel quel à morgan()
     public        : true,

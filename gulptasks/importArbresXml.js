@@ -14,7 +14,7 @@ var origineArbre = 'sesamath'
 /** timeout en ms */
 var timeout = 21000
 /** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
-var maxLaunched = 2 // les arbres sont gros et l'api doit retrouver tous les enfants...
+var maxLaunched = 1 // les arbres sont gros et l'api doit retrouver tous les enfants...
 
 /**
  * La liste des xml qui doivent être découpés
@@ -460,6 +460,7 @@ module.exports = function () {
   // les 3 premiers args sont node, /path/2/gulp, nomDeLaTache
   var argv = process.argv.slice(3)
   var xmls = []
+  var doCompil = false
 
   log('task ' + __filename);
 
@@ -474,6 +475,7 @@ module.exports = function () {
         xmls.push(file)
       }
     })
+    if (xmls.length) doCompil = true
   }
   log('On va parser les xml', xmls)
 
@@ -490,10 +492,16 @@ module.exports = function () {
       .seq(function () {
         // on regarde les arbres qu'il fallait envoyer en dernier
         nextStep = this
-        // on envoie tel quel les 2 premiers (on préfère garder les ref avec origine, plus lisibles,
-        // et il faudrait les remettre en fin de pile pour récupérer des ids)
-        deferAdd(lastArbres.shift(), true)
-        deferAdd(lastArbres.shift(), true)
+        if (doCompil) {
+          // on envoie tel quel les 2 premiers (on préfère garder les ref avec origine, plus lisibles,
+          // et il faudrait les remettre en fin de pile pour récupérer des ids)
+          deferAdd(lastArbres.shift(), true)
+          deferAdd(lastArbres.shift(), true)
+        } else {
+          // faut virer les 2 1ers destinés à la compil globale
+          lastArbres.shift()
+          lastArbres.shift()
+        }
         // pour le reste on remplace par des ids
         if (lastArbres.length) {
           lastArbres.forEach(function (root) {

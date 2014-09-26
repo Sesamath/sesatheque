@@ -8,7 +8,7 @@
   "dependencies": {
     "inotify": "^1.2.1",
     "knex": "^0.5.14",
-    "lassi": "http://npm.arnumeral.fr/package/lassi/latest",
+    "lassi": "http://npm.arnumeral.fr/package/lassi/1.7",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",
