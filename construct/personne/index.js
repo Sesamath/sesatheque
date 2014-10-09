@@ -78,35 +78,35 @@ personneComponent.checkPermission = function (permission, ctx, ressource, next) 
 /**
  * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
  * (ou sur toutes les ressources si ressource n'est pas fournie)
- * @param {string} permission
+ * @param {string} right create|read|update|delete
  * @param {Context} ctx
  * @param {Ressource=} ressource
  * @returns {boolean}
  */
-personneComponent.hasPermission = function (permission, ctx, ressource) {
+personneComponent.hasRight = function (right, ctx, ressource) {
   if (hasGenericPermission(permission, ctx)) return true
   if (!ressource) return false
 
   // read n'a pas forcément besoin de session
-  if (permission === 'read') return personneComponent.hasReadPermission(ctx, ressource)
+  if (right === 'read') return personneComponent.hasReadRight(ctx, ressource)
 
   if (!personneComponent.isAuthenticated(ctx)) return false
-  else switch (permission) {
-    case 'add'  : return (getAddDeniedMessage(ctx) === '')
-    case 'del'  : return (getDelDeniedMessage(ctx, ressource) === '')
-    case 'write': return (getWriteDeniedMessage(ctx, ressource) === '')
+  else switch (right) {
+    case 'create' : return (getCreateDeniedMessage(ctx) === '')
+    case 'delete' : return (getDeleteDeniedMessage(ctx, ressource) === '')
+    case 'update' : return (getUpdateDeniedMessage(ctx, ressource) === '')
     default: return false
   }
 }
 
 /**
  * Renvoie true si cette ressource est visible par l'utilisateur courant
- * (helper de hasPermission qui peut s'utiliser directement)
+ * (helper de hasRight qui peut s'utiliser directement)
  * @param {Context} ctx
  * @param {Ressource} ressource
  * @returns {boolean}
  */
-personneComponent.hasReadPermission = function (ctx, ressource) {
+personneComponent.hasReadRight = function (ctx, ressource) {
   if (!ressource.restriction) return true
   if (!personneComponent.isAuthenticated(ctx)) return false
   if (hasGenericPermission('read', ctx)) return true
@@ -178,8 +178,8 @@ function hasGenericPermission(permission, ctx) {
   return ctx &&
       ctx.session &&
       ctx.session.user &&
-      ctx.session.user.permissions &&
-      ctx.session.user.permissions[permission]
+      typeof ctx.session.user.hasPermission === 'function' &&
+      ctx.session.user.hasPermission(permission)
 }
 
 /**
@@ -200,14 +200,14 @@ function getDeniedMessage(permission, ctx, ressource, next) {
   if (!personneComponent.isAuthenticated(ctx)) msg = "Authentification requise" +connectLink
   // sinon on délègue suivant la permission
   else switch (permission) {
-    case 'add':
-      msg = getAddDeniedMessage(ctx); break;
-    case 'del':
-      msg = getDelDeniedMessage(ctx, ressource); break;
+    case 'create':
+      msg = getCreateDeniedMessage(ctx); break;
+    case 'delete':
+      msg = getDeleteDeniedMessage(ctx, ressource); break;
     case 'read':
       msg = getReadDeniedMessage(ctx, ressource); break;
-    case 'write':
-      msg = getWriteDeniedMessage(ctx, ressource); break;
+    case 'update':
+      msg = getUpdateDeniedMessage(ctx, ressource); break;
     default:
       msg = "Permission " + permission + " inconnue, refusée par défaut"
   }
@@ -219,7 +219,7 @@ function getDeniedMessage(permission, ctx, ressource, next) {
  * @param {Context}   ctx
  * @returns {string} Le message d'interdiction éventuel (undefined sinon)
  */
-function getAddDeniedMessage(ctx) {
+function getCreateDeniedMessage(ctx) {
   if (!ctx.session.user.permissions || ! ctx.session.user.permissions.add)
     return "Vous n'avez pas de droits suffisants pour créer une ressource"
 }
@@ -230,7 +230,7 @@ function getAddDeniedMessage(ctx) {
  * @param {Ressource} ressource
  * @returns {string} Le message d'interdiction éventuel (undefined sinon)
  */
-function getDelDeniedMessage(ctx, ressource) {
+function getDeleteDeniedMessage(ctx, ressource) {
   // on regarde si c'est l'auteur
   if (_.contains(ressource.auteurs, ctx.session.user.id)) {
     // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
@@ -281,7 +281,7 @@ function getReadDeniedMessage(ctx, ressource) {
  * @param {Ressource} ressource
  * @returns {string} Le message d'interdiction éventuel (undefined sinon)
  */
-function getWriteDeniedMessage(ctx, ressource) {
+function getUpdateDeniedMessage(ctx, ressource) {
   // on regarde si c'est l'auteur
   if (_.contains(ressource.auteurs, ctx.session.user.id)) return
   // un contributeur
@@ -298,7 +298,7 @@ function givePermOursServers(ctx) {
   if (!ctx || !ctx.session) throw new Error("Il faut une session")
   if (!ctx.session.user || !ctx.session.user.id) {
     // log.dev('req', ctx.request)
-    var fake = {id:-1, permissions:{read:true, add:true, del:true, write:true}} // un user bidon pour nos serveurs
+    var fake = {id:-1, permissions:{read:true, create:true, delete:true, write:true}} // un user bidon pour nos serveurs
     if (ctx.request && ctx.request._remoteAddress) {
       var ip = ctx.request._remoteAddress
       if (ip === '127.0.0.1' || ip.indexOf('192.168') === 0) ctx.session.user = fake

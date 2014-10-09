@@ -408,7 +408,7 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
       query = query.match('restriction').equals(0)
 
     } else if (visibilite == 'prof') {
-      if (!lassi.personne.hasPermission('readProf', ctx)) {
+      if (!lassi.personne.hasPermission('corrections', ctx)) {
         return next(new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources"))
       }
       query = query.match('restriction').equals(1)

@@ -5,44 +5,35 @@
  * redirect vers https://ssl.sesamath.net/pages/identification.php?
  *   statut_requis=<statut>
  *   &motif=identification_requise
- *   &url_application=<urlRetourIciAvecTicket>
+ *   &url_application=<urlRetourIciAvecTicketQuiSeraAjoutéEnParam>
  *   &url_deconnexion=<urlRappelLogoutIci>
  *
  * Au retour, pour valider le ticket dans l'url on appelle
  * POST https://ssl.sesamath.net/sesamath/pages/identification_webservice.php
  * avec
- * action = tester|recuperer
- regenerer = 0|pas de param  // pour récupérer le ticket définitif
- ticket_client = <ticket>
+ *   action = tester|recuperer
+ *   regenerer = 0|pas de param  // pour récupérer le ticket définitif
+ *   ticket_client = <ticket>
  */
 'use strict';
 
-var request = require('request')
 var _ = require('underscore')._
-
+// on externalise tout ce qui est générique dans ce module
+var sso = require('../sso')
 var PersonneSso = require('../PersonneSso')
-var validate = require('../validate')
-
-// faut aller chercher la conf car lassi.application est pas dispo dans le do
-var appConfig = require('../../../config')
-
-var urlAuth = '/sesamath/pages/identification.php'
-var urlDeco = '/sesamath/pages/identification_deconnexion.php'
-var urlWs = '/sesamath/pages/identification_webservice.php'
-var hostAuth = 'https://ssl.sesamath.net'
-if (appConfig && appConfig.application.staging !== lassi.Staging.production) hostAuth += ':8443'
+var timeout = 10000
 
 module.exports = lassi.Decorator('auth')
     .renderTo('authBloc')
     .do(function(ctx, next) {
-      if (ctx.responseFormat !== 'html') return // pas de connexion sur l'api
-      var urlSso = hostAuth
+      if (ctx.responseFormat !== 'html') return // pas de connexion sur l'api json
+      var urlSso
       /**
        * Retour avec un ticket
        */
       if (ctx.get.hasOwnProperty('ticket')) {
         /**
-         * Check d'un ticket (appel de sso et redirect ici sans le ticket)
+         * Check d'un ticket (appel de sso pour vérif puis redirect sur la même url ici sans le ticket)
          */
         if (lassi.personne.isAuthenticated(ctx)) {
           lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté, ticket passé en paramètre ignoré", 'warning')
@@ -64,11 +55,9 @@ module.exports = lassi.Decorator('auth')
           ctx.redirect(getMyUrl(ctx))
         } else {
           // faut aller chercher un ticket
-          urlSso += urlAuth +'?statut_requis=Prof_Valide' +
-              '&motif=identification_requise' +
-              '&url_application=' +getMyUrl(ctx, true) +
-              '&url_deconnexion=' +
-              encodeURIComponent('http://' + ctx.request.headers.host + ctx.url('personne.deconnexion'))
+          var urlApplication = getMyUrl(ctx, true)
+          var urlDeconnexion = encodeURIComponent('http://' + ctx.request.headers.host + ctx.url('personne.deconnexion'))
+          urlSso = sso.getUrlConnexion(urlApplication, urlDeconnexion)
           ctx.redirect(urlSso)
         }
 
@@ -80,7 +69,8 @@ module.exports = lassi.Decorator('auth')
          * Connexion (via redirect vers sso)
          */
         delete ctx.session.user
-        ctx.redirect(urlSso + urlDeco)
+        urlSso = sso.getUrlDeconnexion()
+        ctx.redirect(urlSso)
 
       /**
        * Pas de demande particulière, on alimente la variable dust authBloc du layout-page
@@ -91,7 +81,7 @@ module.exports = lassi.Decorator('auth')
         log.dev("décorateur auth renvoie", data)
         next(null, data)
       }
-    }, {timeout:10000})
+    }, {timeout:timeout})
 
 /**
  * Renvoie l'url courante, débarassée de ses arguments non voulus
@@ -142,7 +132,7 @@ function checkTicket(ctx, next) {
   if (!ctx.get.ticket) throw new Error("checkTicket appelé sans ticket dans l'url")
 
   /**
-   * Enregistre le user en sesion et redirige (ou appelle next en cas de pb)
+   * Enregistre le user en session et redirige (ou appelle next en cas de pb)
    * @param {Error|null|undefined} error
    * @param {Personne} personne
    */
@@ -164,8 +154,12 @@ function checkTicket(ctx, next) {
     }
   }
 
-  log.dev('On poste pour valider le ticket')
-  validate(ctx.get.ticket, function (error, result) {
+  log.dev('On poste pour valider le ticket ' +ctx.get.ticket)
+  var options = {
+    withGroups:true,
+    timeout:timeout
+  }
+  sso.validate(ctx.get.ticket, options, function (error, result) {
     try {
       if (error) throw error
       if (!result.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant" +
@@ -174,9 +168,9 @@ function checkTicket(ctx, next) {
       // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
       lassi.personne.load(result.id, function(error, personne) {
         if (error) next(error)
-        else {
+        else if (personne) {
           // on compare cette personne avec ce que l'on a récupéré
-          var needToStore = true
+          var needToStore = false
           var keys = ['nom', 'prenom', 'email', 'groupes']
           keys.forEach(function (key) {
             if (!_.equals(personne[key], result[key])) {
@@ -190,14 +184,34 @@ function checkTicket(ctx, next) {
             personne.store(setSessionAndRedirect)
           } else
             setSessionAndRedirect(null, personne)
+        } else {
+          var personneSso = new PersonneSso(result)
+          personneSso.toPersonne(function (error, personne) {
+            if (error) next(error)
+            else personne.store(setSessionAndRedirect)
+          })
         }
       })
 
     } catch (error) {
       // on affichera l'erreur sur la page (sans erreur 500)
-      log.dev(error.stack)
+      log.dev('dans le catch du retour de validate on a ' +error.toString(), error)
       next(null, {error:error.toString()})
     }
 
   })
+}
+
+function ssoResultToPersonne(ssoResult, next) {
+  if (!ssoResult.id) throw new Error("personne sans id")
+  // on vérifie juste le profil avant de stocker
+  var personneInit = {
+    id:ssoResult.id,
+    login:ssoResult.login,
+    nom:ssoResult.nom,
+    prenom:ssoResult.prenom,
+    mail:ssoResult.emailPerso || ssoResult.emailAcad,
+    permissions:{},
+
+  }
 }
