@@ -6,7 +6,8 @@
   "publie"       : true,
   "restriction"  : 0,
   "indexable"    : true,
-  "parametres"   : {
+  "origine"      : "sesamath",
+  "idOrigine"    : "labomep_all",
     "enfants": [
       {
         "ref"          : "animations_interactives",
@@ -165,5 +166,4 @@
         "idOrigine": "Cahier_2de_Pro_2014"
       }
     ]
-  }
 }

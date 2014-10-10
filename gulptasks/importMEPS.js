@@ -277,7 +277,7 @@ function initRessourceMep(row) {
   if (row.mep_nb_wnk)                   parametres.nb_wnk          = row.mep_nb_wnk;
 
   // parametres + relations
-  var idComb = 'mep-' +id
+  var idComb = 'em-' +id
   // aide
   if (row.mep_aide_id) {
     parametres.aide_id         = row.mep_aide_id;
@@ -287,15 +287,15 @@ function initRessourceMep(row) {
   // traduction
   if (row.mep_id_fr !== id) {
     parametres.id_fr = row.mep_id_fr;
-    addPendingRelation(idComb, [relCode.estTraductionDe, 'mep-' +row.mep_id_fr]);
-    addPendingRelation('mep-' +row.mep_id_fr, [relCode.estTraduitAvec, idComb]);
+    addPendingRelation(idComb, [relCode.estTraductionDe, 'em-' +row.mep_id_fr]);
+    addPendingRelation('em-' +row.mep_id_fr, [relCode.estTraduitAvec, idComb]);
   }
 
   // @todo regarder mep_swf_utilisateur_id pour récupérer les auteurs
   // et ajouter les mep_txt_utilisateur_id dans les contributeurs
 
   return {
-    origine          : 'mep',
+    origine          : 'em',
     idOrigine        : id,
     typeTechnique    : 'em',
     titre            : row.mep_titre || 'Exercice mathenpoche',

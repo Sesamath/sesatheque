@@ -360,15 +360,16 @@ converter.getRessourceFromPostedArbre = function (data, partial) {
       delete data[prop]
     }
   })
-
   // ces propriétés sont imposées
   ressource.typeTechnique = 'arbre'
   ressource.categories = [config.constantes.categories.liste]
-  ressource.parametres = data;
   // on ne gère pas de relations avec les enfants des arbres,
   // pour certaines ressources on en aurait des centaines
   // on verra si on passe une tâche de fond pour ajouter ces relations sur certains arbres
-  return converter.getRessourceFromPost(ressource, partial)
+  var arbre = converter.getRessourceFromPost(ressource, partial)
+  // faut ajouter les enfants qui passent pas le filtre getRessourceFromPost (car pas une propriété de l'entité
+  if (data.enfants) arbre.enfants = data.enfants;
+  return arbre
 }
 
 module.exports = converter

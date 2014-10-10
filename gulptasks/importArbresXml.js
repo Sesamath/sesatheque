@@ -1,18 +1,16 @@
 /**
- * Ce script passe en revue les ressources de Labomep,
- * soit la table PERSOS (origine = labomepPERSOS),
- * soit BIBS (origine = labomepBIBS)
- * l'origine est donc commune à toutes les ressources traitées par le script
+ * Ce script passe en revue les ressources des xml
+ * ça vient de la table BIBS (origine = labomepBIBS) sauf pour les tags em et am
  */
 'use strict';
 
 /** le timestamp en ms du lancement de ce script */
 var topDepart = (new Date()).getTime()
-/** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
-var origine = "labomepBIBS" // des ressources
+/** origine par défaut (si on la précise pas via --origine), sauf em et am qui ont l'origine du même nom */
+var defaultOrigine = "labomepBIBS" // des ressources
 var origineArbre = 'sesamath'
 /** timeout en ms */
-var timeout = 21000
+var defaultTimeout = 21000
 /** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
 var maxLaunched = 1 // les arbres sont gros et l'api doit retrouver tous les enfants...
 
@@ -153,13 +151,13 @@ function checkEnd() {
   // le timeout
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(function () {
-    var msg = 'timeout, ' +Math.floor(timeout / 1000) +
+    var msg = 'timeout, ' +Math.floor(defaultTimeout / 1000) +
         "s sans rien depuis le dernier retour de l'api, il restait " +nbLaunched +
         " ressources en attente de réponse de l'api et " +waitingRessource.length +" en attente d'envoi"
     addError(0, msg)
     log(msg)
     nextStep()
-  }, timeout)
+  }, defaultTimeout)
 
   // on regarde s'il en reste en attente et si c'est terminé
   if (waitingRessource.length) {
@@ -177,15 +175,13 @@ function checkEnd() {
  * Lance l'ajout d'une ressource via l'api si on est pas au max et la met en attente sinon
  * @param ressource
  */
-function deferAdd(ressource, noPopulate) {
+function deferAdd(ressource) {
   //log("deferAdd" +ressource.idOrigine +" " +nbLaunched +' / ' +maxLaunched)
   if (ressource && ressource.titre) {
     idsToSend.push(ressource.idOrigine);
     if (nbLaunched < maxLaunched) {
-      addRessource(ressource, checkEnd, noPopulate)
+      addRessource(ressource, checkEnd)
     } else {
-      // on stocke le noPopulate à part...
-      idsNoPopulate[ressource.idOrigine] = true
       waitingRessource.push(ressource)
     }
   } else {
@@ -257,6 +253,7 @@ function splitOrNotToSplit(arbre, xmlName) {
   if (needToSplit(xmlName)) {
     log("split " +xmlName)
     // faudra l'ajouter (sans populate),
+    idsNoPopulate[xmlName] = true
     // mais une fois que ces enfants auront été enregistrés (pour que l'api nous donne les bons id)
     var root = {
       titre        : arbre.titre,
@@ -315,7 +312,7 @@ function convert(arbre, xmlName) {
 /**
  * Passe en revue l'objet issu du xml pour en faire une ressource
  * @param {Object} arbre
- * @param {string} Le xml (nom du fichier sans extension qui sera idOrigine, éventuellement avec un suffixe)
+ * @param {string} xmlName Le xml (nom du fichier sans extension qui sera idOrigine, éventuellement avec un suffixe)
  */
 function getEnfants(arbre, xmlName) {
   var enfants = []
@@ -333,16 +330,18 @@ function getEnfants(arbre, xmlName) {
         enfant.titre = 'sans titre'
       }
       enfant.typeTechnique = 'arbre'
-      enfant.contenu = child.attrib
+      enfant.attributes = child.attrib
       enfant.enfants = getEnfants(child)
 
     } else {
       if (child.attrib.i) {
         enfant.ref = child.attrib.i
         delete child.attrib.i
-        if (!_.isEmpty(child.attrib)) enfant.contenu = child.attrib
+        if (!_.isEmpty(child.attrib)) enfant.attributes = child.attrib
         enfant.typeTechnique = child.tag
-        enfant.refOrigine = origine
+        if (child.tag == 'em') enfant.refOrigine = 'em'
+        else if (child.tag == 'am') enfant.refOrigine = 'am'
+        else enfant.refOrigine = defaultOrigine
         // on vérifie qu'il a pas d'enfants
         if (child._children.length) addError(xmlName, "L'élément " +child.tag +" a des enfants, n° d'ordre " +child._id)
       } else {
@@ -389,18 +388,19 @@ function getRessource(origine, idOrigine, next) {
  * @param ressource
  * @param next
  */
-function addRessource(ressource, next, noPopulate) {
+function addRessource(ressource, next) {
   //log("addRessource " +ressource.idOrigine)
+  var suffix = ''
   nbLaunched++
   idsSent.push(ressource.idOrigine)
-  if (idsNoPopulate[ressource.idOrigine]) noPopulate = true
+  if (!idsNoPopulate[ressource.idOrigine]) suffix = '?populate=1'
   var options = {
-    url : 'http://localhost:' +port +'/api/arbre' +(noPopulate ? '' : '?populate=1'),
+    url : 'http://localhost:' +port +'/api/arbre' +suffix,
     json: true,
     //body: JSON.stringify({ressource:ressource}),
     content_type: 'charset=UTF-8',
     form: ressource,
-    timeout:5000
+    timeout:defaultTimeout
   }
   //log("appel de " +options.url +" avec " +ressource.idOrigine)
   request.post(options, function (error, response, body) {
@@ -469,7 +469,7 @@ module.exports = function () {
   // on peut préciser un ou des nom(s) de fichier
   if (argv[0] === '--xml') {
       xmls = argv.slice(1)[0].split(',')
-      if (argv[2] === '--origine') origine = argv.slice(2)[0]
+      if (argv[2] === '--origine') defaultOrigine = argv.slice(2)[0]
   } else {
     // on prend ceux du dossier arbresXml
     fs.readdirSync(__dirname +'/arbresXml').forEach(function (file) {

@@ -4,7 +4,8 @@
   "publie"       : true,
   "restriction"  : 0,
   "indexable"    : true,
-  "parametres"   : {
+  "origine"      : "sesamath",
+  "idOrigine"    : "labomep_default",
     "enfants": [
       {
         "ref"          : "animations_interactives",
@@ -37,5 +38,4 @@
         "typeTechnique": "arbre"
       }
     ]
-  }
 }
