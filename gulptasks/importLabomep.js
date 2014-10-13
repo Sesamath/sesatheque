@@ -1,7 +1,7 @@
 /**
  * Ce script passe en revue les ressources de Labomep,
- * soit la table PERSOS (origine = labomepPERSOS),
- * soit BIBS (origine = labomepBIBS)
+ * soit la table PERSOS (origine = labomepPERSOS, avec --persos),
+ * soit BIBS (origine = labomepBIBS, avec --bibs)
  * l'origine est donc commune à toutes les ressources traitées par le script
  */
 'use strict';
@@ -36,7 +36,6 @@ var config = require('../construct/ressource/config.js');
 var tdCode = config.constantes.typeDocumentaires;
 var tpCode = config.constantes.typePedagogiques;
 var catCode = config.constantes.categories;
-var relCode = config.constantes.relations;
 
 // databases
 var dbConfigLabomep = require(__dirname + '/../_private/config/labomep');

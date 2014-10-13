@@ -274,7 +274,7 @@ controller
 /**
  * Create / update une ressource à partir du post d'un arbre
  * Si l'arbre posté contient un id mais pas d'enfant, on tentera de récupérer l'arbre et de mettre à jour sa racine,
- * sinon, avec un id on écrase l'ancien s'il existait et sans on insère une nouvelle ressource
+ * sinon, avec un id on écrase l'ancien s'il existait ou on insère une nouvelle ressource
  */
 controller
     .Action('arbre')
@@ -284,6 +284,7 @@ controller
       var id = ctx.post.id || 0
       // si on passe ?populate=1 dans l'url on parse les enfants pour récupérer titre et type
       // sinon on laisse en l'état
+      log.dev('post avec populate ' +ctx.get.populate)
       var final = (ctx.get.populate) ? populateArbre : write
       var ressource = converter.getRessourceFromPostedArbre(ctx.post, partial)
 
@@ -313,7 +314,7 @@ controller
         log.error(e);
         next(null, {error: e.toString()})
       }
-    }, {timeout:10000})
+    }, {timeout:20000})
 
 
 /**
@@ -396,16 +397,19 @@ function write(ctx, ressource, next) {
  * @param {Callbacks~Done} next
  */
 function populateArbre(ctx, ressource, next) {
+  if (ressource.idOrigine == "exercices_interactifs.part1") log.dev('populateArbre de', ressource)
   // checks
   if (ressource.typeTechnique !== 'arbre')
     return next(null, {error:"Impossible de peupler une ressource autre qu'un arbre"})
-  if (!ressource.parametres.enfants ||
-      !ressource.parametres.enfants instanceof Array ||
-      !ressource.parametres.enfants.length)
+  if (!ressource.enfants ||
+      !ressource.enfants instanceof Array ||
+      !ressource.enfants.length) {
+    log('arbre vide', ressource)
     return next(null, {error:"Impossible de peupler un arbre vide"})
+  }
 
   // go
-  populateEnfants(ressource.parametres, suite)
+  populateEnfants(ressource, suite)
 
   /**
    * Enregistre la ressource avant de passer à next
@@ -444,11 +448,15 @@ function populateArbre(ctx, ressource, next) {
                   // visiblement seq casse les références,
                   // on affecte directement à la variable parent restée hors du flux
                   parent.enfants[enfantIndex] = newEnfant
-                } // sinon on laisse en l'état
+                } else {
+                  // sinon on laisse en l'état mais on logue
+                  log.errorData("On a pas trouvé la ressource " +enfant.refOrigine +' ' +enfant.ref)
+                  parent.enfants[enfantIndex].titre += ' (non trouvé)'
+                }
                 populateEnfants(parent.enfants[enfantIndex], finEach)
               })
             } else {
-              // pas de ref, on cherche quand même des enfants
+              // pas de ref, on regarde quand même s'il y a des enfants éventuels
               populateEnfants(enfant, finEach)
             }
           }) // parEach
@@ -466,6 +474,11 @@ function populateArbre(ctx, ressource, next) {
   } // populateEnfants
 }
 
+/**
+ * Met éventuellement à jour un titre bateau si on en a un meilleur
+ * @param ressource
+ * @param newTitre
+ */
 function updateTitre(ressource, newTitre) {
   // on regarde si l'arbre nous apporte un titre que l'on aurait pas
   if (newTitre) switch (ressource.titre) {
