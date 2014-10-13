@@ -8,12 +8,12 @@ module.exports = lassi.Decorator('menu')
     .do(function(ctx, next) {
       var links = []
       // raccourci
-      function hasRight(permission) {
-        return lassi.personne.hasRight(permission, ctx)
+      function hasPermission(permission) {
+        return lassi.personne.hasPermission(permission, ctx)
       }
 
       // ajout
-      if (hasRight('create')) {
+      if (hasPermission('create')) {
         links.push(ctx.link(lassi.action.ressource.add, 'Ajouter une ressource'))
       }
       // si on est sur une description, on a les liens contextuels
@@ -22,11 +22,11 @@ module.exports = lassi.Decorator('menu')
         var id = ctx.arguments.id || ctx.ressourceId
         if (id) {
           var arg = {id:id}
-          if (hasRight('update'))
+          if (hasPermission('update'))
             links.push(ctx.link(lassi.action.ressource.edit, 'Modifier cette ressource', arg))
-          if (hasRight('delete'))
+          if (hasPermission('delete'))
             links.push(ctx.link(lassi.action.ressource.del, 'Supprimer cette ressource', arg))
-          if (hasRight('read')) {
+          if (hasPermission('read')) {
             links.push(ctx.link(lassi.action.ressource.preview, 'Voir la ressource', arg))
             links.push(ctx.link(lassi.action.ressource.display, 'Voir la ressource (pleine page)', arg))
           }

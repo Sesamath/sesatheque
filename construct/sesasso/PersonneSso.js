@@ -1,6 +1,7 @@
 'use strict';
 
 /**
+ * @obsolete
  * Un constructeur pour les objets retournés par le sso
  * (module js standard, pas un composant lassi, utilisé par le composant sesasso)
  */

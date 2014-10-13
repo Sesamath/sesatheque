@@ -38,7 +38,7 @@ controller
     .renderWith('debug')
     .do(function (ctx, next) {
       next(null, {debug:lassi.main.objToString(ctx.request)})
-      var repository = require('../../ressource/repository')
+      /* var repository = require('../../ressource/repository')
       repository.load(42, function(error, ress) {
         next(null, {debug:lassi.main.objToString(ress)})
       }) /* */

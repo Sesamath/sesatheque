@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @file Module js commun aux applis qui utilisent le SSO Sésamath
+ * Chaque appli aura son composant lassi qui utilisera ce module pour récupérer les urls du SSO et valider les tickets
+ */
+
 var request = require('request')
 // la conf pour récupérer le staging
 var appConfig = require('../../config')
@@ -29,8 +34,7 @@ var defaultTimeout = 10000 // 10s
  *      nom        : "le nom",
  *      prenom     : "le prenom",
  *      email      : "email ou undefined",
- *      profil     : "prof | eleve | undefined",
- *      permissions: "array avec 'corrections' ou vide",
+ *      roles      : objet avec les rôles en propriétés (valeur booléenne)
  * avec éventuellement (si options.structures)
  *      structures : [
  *        {
@@ -56,6 +60,8 @@ var defaultTimeout = 10000 // 10s
  *      wiki_externe_*             (cf user_acces_collabo.sesamath_wiki_externe_groupes)
  *      mathenpoche_developpeur_*  (cf user_acces_collabo.sesamath_mathenpoche_developpeur)
  * roles peut contenir
+ *      eleve, prof, acces_correction
+ * mais aussi (si options.groupes)
  *      sesamath_gestionnaire, sesamath_conseil_administration, sesamath_salarie, sesamath_membre, sesamath_dezoneur
  */
 function validate(ticket, options, next) {
@@ -90,8 +96,12 @@ function validate(ticket, options, next) {
   request.post(postOptions, function (error, response, body) {
     if (error) next(error)
     else if (body.error) next(new Error(body.error))
-    else if (!body.id) next(new Error("Le serveur d'authentification n'a pas renvoyé la réponse attendue, " +
-        "impossible de valider le ticket transmis"))
+    else if (!body.id) {
+      log.error('réponse de sso sans id')
+      log.dev('réponse de sso au validate', body)
+      next(new Error("Le serveur d'authentification n'a pas renvoyé la réponse attendue, " +
+          "impossible de valider le ticket transmis"))
+    }
     else next(null, body)
   })
 }

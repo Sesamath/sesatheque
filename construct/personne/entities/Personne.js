@@ -1,5 +1,7 @@
 "use strict";
 
+var _ = require('underscore')._
+
 lassi.Entity('Personne', {
   /**
    * Constructeur utilisé par l'entity Personne
@@ -23,13 +25,19 @@ lassi.Entity('Personne', {
      * @type {string}
      */
     this.email = ''
+
     /**
-     * La liste des permissions {permission:boolean}
+     * La liste des permissions {permission:boolean} n'est pas une propriété stockée de l'entity mais définie par init
      * @type {Object}
      */
-    this.permissions = {}
+
     /**
-     * La liste des groupes {id:boolean}
+     * La liste des roles {role:boolean}
+     * @type {Object}
+     */
+    this.roles = {}
+    /**
+     * La liste des groupes {groupe:boolean}
      * @type {Object}
      */
     this.groupes = {}
@@ -42,33 +50,32 @@ lassi.Entity('Personne', {
   },
 
   /**
-   * Retourne true si la personne a la permission
+   * Crée la proriété permissions et l'affecte en fonction des rôles
+   * Cette propriété ne sera pas stockée dans l'entity
+   * @returns {boolean} true si l'init est fait (false s'il avait déjà été fait, dans ce cas on a rien changé)
+   */
+  initPermissions : function() {
+    // on ne peut initialiser qu'une seule fois (propriété read only)
+    if (this.permissions) {
+      log.error(new Error("Personne.initPermissions appelé alors que la propriété existe déjà"))
+      return false
+    }
+    var permissions = {}
+    var config = lassi.personne.settings;
+    _.each(this.roles, function(hasRole, role) {
+      // on ajoute les permissions définies pour ce role en config
+      if (hasRole && config.roles[role]) lassi.tools.merge(permissions, config.roles[role])
+    })
+    Object.defineProperty(this, 'permissions', {value:permissions})
+    return true
+  },
+
+  /**
+   * Retourne true si la personne a la permission demandée
    * @param {string} permission
    */
   hasPermission: function (permission) {
-    return (this.permissions[permission] === true)
-  },
-
-  /**
-   * Ajoute les permissions d'un role
-   * @param {string} role
-   */
-  addRolePermissions: function (role) {
-    var personne = this
-    var config = lassi.personne.settings;
-    if (config.roles[role]) {
-      config.roles[role].forEach(function (permission) {
-        personne.addPermission(permission)
-      })
-    }
-  },
-
-  /**
-   * Ajoute une permission
-   * @param permission
-   */
-  addPermission: function (permission) {
-    if (!this.permissions[permission]) this.permissions[permission] = true
+    return (this.permissions && this.permissions[permission] === true)
   },
 
   /**
@@ -115,9 +122,9 @@ lassi.Entity('Personne', {
   },
   configure: function() {
     this
-    .defineIndex('id', 'integer')
-    .defineIndex('nom', 'string')
-    .defineIndex('email', 'string')
+      .defineIndex('id', 'integer')
+      .defineIndex('nom', 'string')
+      .defineIndex('email', 'string')
   }
 });
 

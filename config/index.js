@@ -6,6 +6,7 @@ var _ = require('underscore')._
 var fs = require('fs');
 var moment = require('moment')
 var localConfig = require('../_private/config')
+var ressourceConfig = require('../construct/ressource/config')
 
 /**
  * On est config/index.js (hors build)
@@ -101,18 +102,22 @@ var appConfig = {
       defaultTTL: 15*60,
       purgeDelay: 5*60
     },
-    // Permission pour chacun des rôles
+    // Permissions (cumulatives) pour chacun des rôles
     personne : {
       roles: {
-        // en attendant de gérer modIndexation, modParametres et publish on utilise juste write
-        admin    : ['add', 'delVersion', 'del', 'modIndexation', 'modParametres', 'publish', 'read', 'readProf', 'write'],
-        editor   : ['add', 'modIndexation', 'modParametres', 'publish', 'readProf', 'write'],
-        indexator: ['modIndexation', 'readProf'],
-        prof     : ['readProf']
+        // les droits sont dans l'absolu, mais il peut y avoir des modifications liées au contexte
+        // (on a toujours le droit de modifier un contenu dont on serait le seul auteur,
+        // pas de droits read sur les ressources privées sauf les siennes, etc.)
+        admin      : {'create':true, 'read':true, 'update':true, 'delete':true, 'deleteVersion':true, 'index':true, 'publish':true, 'correction':true}, // jshint ignore:line
+        editeur    : {'create':true, 'read':true, 'update':true, 'delete':true, 'deleteVersion':true, 'index':true, 'publish':true, 'correction':true}, // jshint ignore:line
+        indexateur : {'index':true},
+        prof       : {'create':true, 'read':true},
+        acces_correction : {'correction':true},
+        eleve      : {'read':true}
       },
       cacheTTL: 20*60
-      // connectLink sera mis par le composant d'authentification, pour le message accessDenied
-    }
+    },
+    ressource : ressourceConfig
   },
   // le reste est spécifique à notre appli et ignoré par lassi
 
@@ -128,9 +133,9 @@ var appConfig = {
 }
 
 // on ajoute nos params locaux (accès à la base et port)
-lassi.tools.update(appConfig, localConfig)
+if (localConfig) lassi.tools.update(appConfig, localConfig)
 
-// on ecrase le debug mysql si on nous précise prod
+// on enlève le debug mysql si on nous précise prod dans l'environnement
 if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && appConfig.entities.database.connection.debug)
   delete appConfig.entities.database.connection.debug
 

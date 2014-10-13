@@ -118,20 +118,20 @@ controller
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
             // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
-            if (lassi.personne.hasReadRight(ctx, ressource)) next(null, ressource)
+            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource)
             else  denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, ctx, next)
           } else notFound("La ressource d'identifiant " + id + " n'existe pas", ctx, next)
         })
 
       } else {
-        if (lassi.personne.hasRight('delete', ctx)) {
+        if (lassi.personne.hasPermission('delete', ctx)) {
           del()
         } else {
           // faut charger la ressource pour le savoir
           repository.load(id, function (error, ressource) {
             if (error) next(error)
             else if (!ressource) next(new Error("la ressource d'identifiant " + id + " n'existe pas"))
-            else if (lassi.personne.hasRight('delete', ctx, ressource)) del() // next inclus
+            else if (lassi.personne.hasPermission('delete', ctx, ressource)) del() // next inclus
             else denied("Droits insuffisants pour supprimer la ressource d'identifiant " + id, ctx, next)
           })
         }
@@ -181,7 +181,7 @@ controller
           if (error) next(null, {error: error.toString()})
           else if (ressource) {
             // l'entité passe pas le JSON.stringify pour la sortie, à cause de la propriété _entity, d'où le toObject
-            if (lassi.personne.hasReadRight(ctx, ressource)) next(null, ressource)
+            if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource)
             else  denied("Droits insuffisants pour accéder à la ressource d'origine " +
                 origine +" et d'identifiant " + idOrigine, ctx, next)
           } else notFound("La ressource d'origine " +origine +" et d'identifiant " + idOrigine +
@@ -189,7 +189,7 @@ controller
         })
 
       } else {
-        if (lassi.personne.hasRight('delete', ctx)) {
+        if (lassi.personne.hasPermission('delete', ctx)) {
           delByOrigine()
         } else {
           // faut charger la ressource pour le savoir
@@ -197,7 +197,7 @@ controller
             if (error) next(error)
             else if (!ressource) notFound("La ressource d'origine " + origine + " et d'identifiant " + idOrigine +
                 " n'existe pas", ctx, next)
-            else if (lassi.personne.hasRight('delete', ctx, ressource)) del(ressource.id) // next inclus
+            else if (lassi.personne.hasPermission('delete', ctx, ressource)) del(ressource.id) // next inclus
             else denied("Droits insuffisants pour accéder à la ressource d'origine " +
                   origine + " et d'identifiant " + idOrigine, ctx, next)
           })
@@ -329,7 +329,7 @@ controller
         // log.dev("dans api get " +id, ressource)
         if (error) next(null, {error: error.toString()})
         else if (ressource && ressource.typeTechnique === 'arbre') {
-          if (lassi.personne.hasReadRight(ctx, ressource)) next(null, ressource.toArbre())
+          if (lassi.personne.hasReadPermission(ctx, ressource)) next(null, ressource.toArbre())
           else  denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, ctx, next)
         } else notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas un arbre", ctx, next)
       })
@@ -368,8 +368,8 @@ function addUrls(ctx, ressources) {
  * @param next
  */
 function write(ctx, ressource, next) {
-  var right = (ressource.id || ressource.idOrigine) ? 'update' : 'create'
-  if (lassi.personne.hasRight(right, ctx, ressource)) {
+  var permission = (ressource.id || ressource.idOrigine) ? 'update' : 'create'
+  if (lassi.personne.hasPermission(permission, ctx, ressource)) {
     repository.write(ressource, function (error, ressource) {
       // id - convertPost - valide+setVersion - store - store2 - fin
       lassi.tmp[ctx.post.id].m += '\tretSt ' +log.getElapsed(lassi.tmp[ctx.post.id].s)

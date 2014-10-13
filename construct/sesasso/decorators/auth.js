@@ -1,5 +1,5 @@
 /**
- * Ce décorateur est utilisé pour récupérer le ?connexion ou le ?deconnexion
+ * Ce décorateur est utilisé pour récupérer le ?connexion ou le ?deconnexion que l'on peut mettre sur toutes les urls
  *
  * principe de l'authentification Sésamath
  * redirect vers https://ssl.sesamath.net/pages/identification.php?
@@ -8,7 +8,7 @@
  *   &url_application=<urlRetourIciAvecTicketQuiSeraAjoutéEnParam>
  *   &url_deconnexion=<urlRappelLogoutIci>
  *
- * Au retour, pour valider le ticket dans l'url on appelle
+ * Au retour du sso, pour valider le ticket dans l'url on appelle
  * POST https://ssl.sesamath.net/sesamath/pages/identification_webservice.php
  * avec
  *   action = tester|recuperer
@@ -18,9 +18,9 @@
 'use strict';
 
 var _ = require('underscore')._
+
 // on externalise tout ce qui est générique dans ce module
 var sso = require('../sso')
-var PersonneSso = require('../PersonneSso')
 var timeout = 10000
 
 module.exports = lassi.Decorator('auth')
@@ -140,6 +140,7 @@ function checkTicket(ctx, next) {
     log('appel setSessionAndRedirect')
     if (error) next(error)
     else if (personne) {
+      personne.initPermissions()
       // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
       // hormis le controleur deconnexion qui affecte un objet vide
       ctx.session.user = personne
@@ -156,7 +157,7 @@ function checkTicket(ctx, next) {
 
   log.dev('On poste pour valider le ticket ' +ctx.get.ticket)
   var options = {
-    withGroups:true,
+    groupes:true,
     timeout:timeout
   }
   sso.validate(ctx.get.ticket, options, function (error, result) {
@@ -164,6 +165,16 @@ function checkTicket(ctx, next) {
       if (error) throw error
       if (!result.id) throw new Error("Le serveur d'authentification n'a pas renvoyé d'identifiant" +
           " pour le ticket transmis")
+      if (!result.roles) throw new Error("Le serveur d'authentification n'a pas renvoyé de roles")
+
+      // on transforme les roles du sso en roles de l'appli bibliotheque
+      var r = _.clone(result.roles);
+      result.roles = {}
+      if (r.sesamath_gestionnaire) result.roles.admin = true
+      if (r.sesamath_salarie || r.sesamath_membre) result.roles.editeur = true
+      if (r.sesamath_dezoneur) result.roles.indexateur = true
+
+      log.dev('le resultat sso après modif des roles', result)
 
       // on essaie de récupérer l'entity, car elle est probablement déjà en BdD
       lassi.personne.load(result.id, function(error, personne) {
@@ -171,9 +182,9 @@ function checkTicket(ctx, next) {
         else if (personne) {
           // on compare cette personne avec ce que l'on a récupéré
           var needToStore = false
-          var keys = ['nom', 'prenom', 'email', 'groupes']
+          var keys = ['nom', 'prenom', 'email', 'roles', 'groupes']
           keys.forEach(function (key) {
-            if (!_.equals(personne[key], result[key])) {
+            if (!_.isEqual(personne[key], result[key])) {
               personne[key] = result[key]
               needToStore = true
             }
@@ -185,11 +196,9 @@ function checkTicket(ctx, next) {
           } else
             setSessionAndRedirect(null, personne)
         } else {
-          var personneSso = new PersonneSso(result)
-          personneSso.toPersonne(function (error, personne) {
-            if (error) next(error)
-            else personne.store(setSessionAndRedirect)
-          })
+          lassi.entity.Personne
+              .create(result)
+              .store(setSessionAndRedirect)
         }
       })
 
@@ -200,18 +209,4 @@ function checkTicket(ctx, next) {
     }
 
   })
-}
-
-function ssoResultToPersonne(ssoResult, next) {
-  if (!ssoResult.id) throw new Error("personne sans id")
-  // on vérifie juste le profil avant de stocker
-  var personneInit = {
-    id:ssoResult.id,
-    login:ssoResult.login,
-    nom:ssoResult.nom,
-    prenom:ssoResult.prenom,
-    mail:ssoResult.emailPerso || ssoResult.emailAcad,
-    permissions:{},
-
-  }
 }

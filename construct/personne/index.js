@@ -1,6 +1,8 @@
 'use strict';
 /**
  * Component personne
+ * Les permissions sont génériques et liées au rôle
+ * Les droits (create, read, update, delete) en découlent et peuvent dépendre de la ressource
  */
 
 var _ = require('underscore')._
@@ -78,20 +80,21 @@ personneComponent.checkPermission = function (permission, ctx, ressource, next) 
 /**
  * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
  * (ou sur toutes les ressources si ressource n'est pas fournie)
- * @param {string} right create|read|update|delete
+ * @param {string} permission create|read|update|delete
  * @param {Context} ctx
  * @param {Ressource=} ressource
  * @returns {boolean}
  */
-personneComponent.hasRight = function (right, ctx, ressource) {
+personneComponent.hasPermission = function (permission, ctx, ressource) {
   if (hasGenericPermission(permission, ctx)) return true
+  if (isOurServerOnApi(ctx)) return true
   if (!ressource) return false
 
   // read n'a pas forcément besoin de session
-  if (right === 'read') return personneComponent.hasReadRight(ctx, ressource)
+  if (permission === 'read') return personneComponent.hasReadPermission(ctx, ressource)
 
   if (!personneComponent.isAuthenticated(ctx)) return false
-  else switch (right) {
+  else switch (permission) {
     case 'create' : return (getCreateDeniedMessage(ctx) === '')
     case 'delete' : return (getDeleteDeniedMessage(ctx, ressource) === '')
     case 'update' : return (getUpdateDeniedMessage(ctx, ressource) === '')
@@ -101,13 +104,14 @@ personneComponent.hasRight = function (right, ctx, ressource) {
 
 /**
  * Renvoie true si cette ressource est visible par l'utilisateur courant
- * (helper de hasRight qui peut s'utiliser directement)
+ * (helper de hasPermission qui peut s'utiliser directement)
  * @param {Context} ctx
  * @param {Ressource} ressource
  * @returns {boolean}
  */
-personneComponent.hasReadRight = function (ctx, ressource) {
+personneComponent.hasReadPermission = function (ctx, ressource) {
   if (!ressource.restriction) return true
+  if (isOurServerOnApi(ctx)) return true
   if (!personneComponent.isAuthenticated(ctx)) return false
   if (hasGenericPermission('read', ctx)) return true
   return (getReadDeniedMessage(ctx, ressource) === '')
@@ -174,7 +178,6 @@ module.exports = personneComponent
  * @returns {boolean}
  */
 function hasGenericPermission(permission, ctx) {
-  givePermOursServers(ctx)
   return ctx &&
       ctx.session &&
       ctx.session.user &&
@@ -193,10 +196,16 @@ function hasGenericPermission(permission, ctx) {
 function getDeniedMessage(permission, ctx, ressource, next) {
   var msg
   // pas la peine de continuer si c'est pour voir une ressource publique
-  if (permission === 'read' && ressource.restriction === 0) {next(ressource); return }
-  // ou si l'utilisateur a les droits génériques
-  if (hasGenericPermission(permission, ctx)) {next(ressource); return }
-
+  if (permission === 'read' && ressource.restriction === 0 ||
+      // ni si c'est l'api appelée par un de nos serveurs
+      isOurServerOnApi(ctx) ||
+      // ni si l'utilisateur a les droits génériques
+      hasGenericPermission(permission, ctx)
+  ) {
+    next(ressource)
+    return
+  }
+  // on regarde donc ce user pour cette ressource
   if (!personneComponent.isAuthenticated(ctx)) msg = "Authentification requise" +connectLink
   // sinon on délègue suivant la permission
   else switch (permission) {
@@ -253,23 +262,33 @@ function getDeleteDeniedMessage(ctx, ressource) {
  * @returns {string|undefined} Le message d'interdiction éventuel (undefined sinon)
  */
 function getReadDeniedMessage(ctx, ressource) {
+  if (isOurServerOnApi(ctx)) return
+  var restriction = lassi.settings.ressource.constantes.restriction
   switch (ressource.restriction) {
     // public
-    case 0: return
+    case restriction.aucune: return
 
-    // prof
-    case 1:
-      if (hasGenericPermission('readProf', ctx)) return
+    // correction
+    case restriction.correction:
+      if (hasGenericPermission('correction', ctx)) return
       else return "Vous n'avez pas de droits suffisants pour consulter cette ressource"
       break //inutile mais évite à jshint de râler
 
+    // réservée au groupe
+    case restriction.groupe:
+      if (_.contains(ressource.auteurs, ctx.session.user.id)) return
+      if (_.contains(ressource.contributeurs, ctx.session.user.id)) return
+      if (ressource.parametres.allow && ressource.parametres.allow.groupes &&
+          !_.empty(_.intersection(ressource.parametres.allow.groupes, ctx.session.user.groupes))) return
+      return "Ressource restreinte"
+      break
+
     // privée
-    case 2:
+    case restriction.prive:
       if (_.contains(ressource.auteurs, ctx.session.user.id)) return
       if (_.contains(ressource.contributeurs, ctx.session.user.id)) return
       return "Ressource privée"
-      // @todo gérer les partages par groupes
-      break //inutile mais évite à jshint de râler
+      break
 
     default: return "restriction non gérée"
   }
@@ -291,17 +310,14 @@ function getUpdateDeniedMessage(ctx, ressource) {
 }
 
 /**
- * Ajoute un user d'id -1 en session avec tout les droits si l'ip du client est locale
+ * Renvoie true si c'est du json (api) appelé par une ip locale
  * @param ctx
  */
-function givePermOursServers(ctx) {
-  if (!ctx || !ctx.session) throw new Error("Il faut une session")
-  if (!ctx.session.user || !ctx.session.user.id) {
-    // log.dev('req', ctx.request)
-    var fake = {id:-1, permissions:{read:true, create:true, delete:true, write:true}} // un user bidon pour nos serveurs
-    if (ctx.request && ctx.request._remoteAddress) {
-      var ip = ctx.request._remoteAddress
-      if (ip === '127.0.0.1' || ip.indexOf('192.168') === 0) ctx.session.user = fake
-    }
+function isOurServerOnApi(ctx) {
+  if (ctx.responseFormat && ctx.responseFormat === 'json' && ctx.request && ctx.request._remoteAddress) {
+    var ip = ctx.request._remoteAddress
+    return (ip === '127.0.0.1' || ip.indexOf('192.168') === 0)
+  } else {
+    return false
   }
 }

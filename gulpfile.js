@@ -1,6 +1,6 @@
 "use strict";
 /*
- * This file is part of "Collection".
+ * This file is part of "Lassi".
  *    Copyright 2009-2012, arNuméral
  *    Author : Yoran Brault
  *    eMail  : yoran.brault@arnumeral.fr

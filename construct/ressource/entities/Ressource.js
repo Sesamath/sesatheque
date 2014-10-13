@@ -116,9 +116,9 @@ lassi.Entity('Ressource', {
      */
     this.indexable = false;
     /**
-     * Restriction sur la ressource
+     * Restriction sur la ressource, cf lassi.settings.ressource.constantes.restriction
      */
-    this.restriction = 0;
+    this.restriction = 0 // lassi.settings.ressource.constantes.restriction.aucune pas encore dispo
     /**
      * Date de création
      * @type {Date}
@@ -145,7 +145,12 @@ lassi.Entity('Ressource', {
       // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
       // et pas de celle de son indexation ici
       if (!this.dateMiseAJour) {
-        this.dateMiseAJour = new Date();
+        this.dateMiseAJour = new Date()
+      }
+      // cohérence de la restriction
+      if (this.restriction === 2 && (!this.parametres.allow || !this.parametres.allow.groupes)) {
+        log.error("Ressource " +this.id +" restreinte à des groupes sans préciser lesquels, on la passe privée")
+        this.restriction = 3
       }
       // si le tableau d'erreur est vide (devrait toujours être le cas,
       // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)

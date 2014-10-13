@@ -3,7 +3,7 @@
 /**
  * Nos listes de types & co, qui changent rarement
  */
-module.exports = {
+var ressourceConfig = {
   /**
    * Les listes de choix pour nos propriétés dont on enregistre des ids
    */
@@ -96,8 +96,9 @@ module.exports = {
     },
     restriction      : {
       0: 'aucune',
-      1: 'enseignant',
-      2: 'privé'
+      1: 'corrigé',
+      2: 'groupe',
+      3: 'privé'
     }
   }, // fin des listes
 
@@ -268,10 +269,11 @@ module.exports = {
       aPourCorrige     : 51,
       estLaCorrectionDe: 52
     },
-    restriction      : {
+    restriction      : { // l'inverse est dans listes
       aucune    : 0,
-      enseignant: 1,
-      prive     : 2
+      correction: 1,
+      groupe    : 2,
+      prive     : 3
     },
     // des constantes pour nos routes (le nom des actions est en dur mais interne au code)
     routes : {
@@ -294,3 +296,5 @@ module.exports = {
   },
   cacheTTL : 3600
 };
+
+module.exports = ressourceConfig
