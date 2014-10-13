@@ -47,10 +47,10 @@ function Arbre(initObj) {
    */
   this.typeTechnique = initObj.typeTechnique || undefined
   /**
-   * Le contenu du node (ou la racine de l'arbre)
+   * Des attributs du node (ou la racine de l'arbre), ça peut être ico pour une icone particulière
    * @type {Object}
    */
-  this.contenu = (initObj.contenu && initObj.contenu instanceof Object ) ? initObj.contenu : {};
+  this.attributes = (initObj.attributes && initObj.attributes instanceof Object ) ? initObj.attributes : {};
   /**
    * Les enfants, un tableaux d'objets Arbre (qui peuvent n'être que des références, ou un mix)
    * @type {Array}
@@ -63,7 +63,7 @@ function Arbre(initObj) {
  * @returns {string}
  */
 Arbre.prototype.toString = function () {
-  return this.name;
+  return this.titre;
 }
 
 /**
