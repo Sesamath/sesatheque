@@ -26,7 +26,7 @@ var timeout = 10000
 module.exports = lassi.Decorator('auth')
     .renderTo('authBloc')
     .do(function(ctx, next) {
-      if (ctx.responseFormat !== 'html') return // pas de connexion sur l'api json
+      if (ctx.responseFormat !== 'html') return // pas de bloc de connexion sur l'api json
       var urlSso
       /**
        * Retour avec un ticket

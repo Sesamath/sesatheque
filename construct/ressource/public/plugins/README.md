@@ -45,25 +45,23 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  // une variable privée de ce module mais globale pour nos fonctions
  var toto;
  
- function foo(ressource, saveResult) { /* */ }
+ function foo(ressource, options, next) { /* */ }
  
  funtion truc(args) {/* */}
  // etc.
  
 ```
 
-Pour passer une fonction de sauvegarde à une ressource chargée en iframe, 
-ajouter un attribut data-resultCallbackName avec le nom de la fonction (qui doit être accessible à la racine
-du window qui embarque l'iframe).
+Pour passer une fonction de sauvegarde à une ressource chargée en iframe, il faut appeler l'url avec un paramètre 
+resultCallbackUrl qui sera appelée en ajax (post) avec un objet Résultat.
+Cette url devra répondre
+{"result":"ok"} ou bien {"error":"Un message d'erreur"}
 
-Par exemple
+Par exemple avec
 ```
-function setScore(resultat) {
-  // traiter le résultat reçu
-}
-<iframe src="http://laBibliothequeVoulue/ressource/voir/42" data-resultCallbackName="setScore" />
+<iframe src="http://laBibliothequeVoulue/ressource/voir/42?resultCallbackUrl=http://localhost:3000/debugJson/postOk" />
 ```
-Et la ressource enverra son résultat à setScore().
+Attention à passer l'url de rappel à encodeURIComponent si elle contient des "&"
 
 Le résultat est au format du constructeur Resultat (dans construct/ressource/public/vendors/sesamath/Resultat.js), 
 mais avec seulement certaines propriétés complétées (à priori avec ressId, ressType, score, reponse, date, duree, 

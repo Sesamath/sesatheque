@@ -35,8 +35,6 @@ function display(ressource, options, next) {
   var container = options.container;
   if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
   var baseUrl = options.baseUrl; // si on a pas tant pis pour le css
-  var saveResult;
-  if (options.resultCallback) saveResult = options.resultCallback;
   /** class utilisée dans notre css */
   var cssClass = 'mepRess';
   var params = ressource.parametres;
@@ -49,7 +47,7 @@ function display(ressource, options, next) {
   var divId = 'mepRess' +(new Date()).getTime();
   ressId = ressource.id
 
-  log('start mep display avec la ressource', ressource)
+  log('start mep display avec la ressource (+options)', ressource, options)
   //les params minimaux
   if (!ressource.id || !ressource.titre || !params) {
     throw new Error("Paramètres manquants");
@@ -104,20 +102,19 @@ function display(ressource, options, next) {
     if (params.nb_wnk) flashvars.mep_nb_wnk = params.nb_wnk;
 
     // traitement du résultat éventuel (il faudra que l'appelant passe un idUtilisateur)
-    if (saveResult && typeof saveResult === "function") {
+    if (options.saveResultat) {
       // faut une fonction qui va transformer le résultat au format attendu
       // et la pour rendre accessible au swf dans son dom
-      window.resultCb = function (result) {
-        log('le swf renvoie le résultat', result)
-        saveResult({
-          reponse:result,
+      window.saveResultat = function (resultat) {
+        options.saveResultat({
+          reponse:resultat.reponse,
           ressId : ressId,
           ressType:ressType,
           date : startDate,
           duree : Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000)
-        })
+        });
       }
-      flashvars.nomFonctionCallback = 'resultCb';
+      flashvars.nomFonctionCallback = 'saveResultat';
     }
 
     // les params pour le player
@@ -132,7 +129,7 @@ function display(ressource, options, next) {
       id: divId,
       name: divId
     };
-
+log('flashvars', flashvars);
     // swfobject.embedSWF (swfUrl, htmlId, largeur, hauteur, version_requise,
     //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
     swfobject.embedSWF(swfUrl, divId, largeur, hauteur, "8", null, flashvars, swfParams, swfAttributes, callbackFn);

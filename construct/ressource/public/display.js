@@ -13,16 +13,29 @@ var baseUrl;
 var container = window.document.getElementById('display');
 /** Le conteneur html pour afficher d'éventuelles erreurs */
 var errorsContainer = window.document.getElementById('errors');
+/**
+ * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
+ * @type {number}
+ */
+var ajaxTimeout = 10000;
+
+/**
+ * On ajoute les fcts addCss, addElt, getElt en global
+ * log est ajouté par init (dépend du contexte)
+ */
 
 /**
  * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
+ * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
  * @param msg Le message à afficher
- * @param obj Un objet éventuel dont on veut le dump en console
+ * @param obj Des objets éventuels (autant d'arguments que l'on veut) dont on veut le dump en console
  */
-function log(msg, obj) {
+function log(msg) {
   if (!console || !console.log) return;
   console.log(msg);
-  if (obj) console.log(obj);
+  for (var i = 1; i < arguments.length; i++) {
+    console.log(arguments[i]);
+  }
 }
 
 /**
@@ -66,8 +79,16 @@ window.getElt = function (tag, attrs, txtContent) {
   return elt;
 }
 
+/**
+ * Ces fonctions sont celles de notre module js
+ */
 
 define({
+  /**
+   * Charge une ressource et le plugin qui la gère, puis appelle la methode display du plugin
+   * @param ressource
+   * @param options
+   */
   load: function (ressource, options) {
     log('display.load avec la ressource', ressource)
     log('et les options', options);
@@ -76,7 +97,10 @@ define({
 
     // tente de charger le plugin du type de ressource
     var name = options.pluginName;
-    require([name], function (plugin) {
+    var modules = [name];
+    var urlResultat = getURLParameter("urlScoreCallback");
+    if (urlResultat) modules.push('Resultat');
+    require(modules, function (plugin, Resultat) {
       try {
         if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' +name +' a échoué');
         if (typeof plugin.display !== 'function') throw new Error('Le plugin ' +name +" n'a pas de méthode display");
@@ -88,13 +112,8 @@ define({
           container : container,
           errorsContainer: errorsContainer
         };
-        // on regarde si on nous file un saveResult dans l'attribut data-resultCallbackName de notre iframe
-        var cbName = w.frameElement && w.frameElement.getAttribute &&
-            w.frameElement.getAttribute('data-resultCallbackName')
-        if (cbName && typeof w[cbName] === 'function') displayOptions.resultCallback = w[cbName];
-        else displayOptions.resultCallback = function (resultat) {
-          log("La ressource a renvoyé le résultat", resultat); // pour debug
-        }
+        // on regarde s'il faut ajouter une fct de sauvegarde des résultats
+        if (Resultat) addSaveResultat(displayOptions, urlResultat, Resultat);
         // on peut afficher
         plugin.display(ressource, displayOptions, function (arg) {
           log("le display a terminé et a renvoyé", arg);
@@ -105,6 +124,7 @@ define({
     });
   }
 });
+
 
 /**
  * helper de load, initialise les chemins des librairies pour les require des plugins
@@ -158,4 +178,96 @@ function init(options) {
       }
     } /* */
   });
+}
+
+/**
+ * Ajoute une méthode saveResultat aux options si besoin
+ * @param options     {object}   L'objet sur lequel on ajoutera la methode saveResultat
+ * @param urlResultat {string}   L'url vers laquelle poster
+ * @param Resultat    {function} Le constructeur Resultat
+ */
+function addSaveResultat(options, urlResultat, Resultat) {
+  /*global XMLHttpRequest*/
+  if (!urlResultat || urlResultat.substr(0, 4) !== 'http') {
+    log("Il faut fournir une url absolue pour envoyer des résultats");
+  } else if (typeof XMLHttpRequest === "undefined") {
+    log("Le navigateur ne supporte pas les appels ajax, impossible d'envoyer des résultats");
+      // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+  } else {
+    /**
+     * Envoi un résultat en ajax pour sauvegarde
+     * @param result     {object}   Le résultat à envoyer
+     * @param retourUser {function} La fonction à rappeler avec le retour de l'appel ajax
+     */
+    options.saveResultat = function (result, retourUser) {
+      log("saveResultat", result);
+      // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
+      ["biblioName", "userOrigine", "userId"].forEach(function (paramName) {
+        var paramValue = getURLParameter(paramName);
+        if (paramValue) result[paramName] = paramValue;
+      });
+      var resultat = new Resultat(result);
+      // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+      var request = new XMLHttpRequest();
+      // la fct de retour est facultative, si elle existe pas on la créé et ça écrira dans la console
+      if (!retourUser) {
+        retourUser = function (retour) {
+          log("L'enregistrement du résultat a renvoyé", retour);
+        }
+      }
+      request.timeout = ajaxTimeout;
+      // les différentes callback
+      request.onload = function () {
+        if (request.status >= 200 && request.status < 400) {
+          try {
+            var reponse = JSON.parse(request.responseText);
+            retourUser(reponse);
+          } catch (error) {
+            retourUser({error:"La réponse de l'enregistrement du résultat est invalide"});
+          }
+        } else {
+          // On a une réponse mais c'est une erreur
+          retourUser({error:"La réponse de l'enregistrement du résultat est une erreur " +
+              request.status + ' : ' + request.responseText});
+        }
+      };
+
+      request.onerror = function () {
+        // Pb de connexion au serveur
+        retourUser({error:"Impossible d'envoyer le résultat (à " +urlResultat +")"});
+      };
+
+      request.ontimeout = function () {
+        retourUser({error:"Pas de réponse de l'enregistrement du résultat après " +
+            Math.floor(ajaxTimeout/1000) +"s d'attente."});
+      };
+
+      // et on envoie
+      log("on poste à " +urlResultat, resultat);
+      request.open('POST', urlResultat, true);
+      request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      try {
+        var resultatStr = "resultat=" +JSON.stringify(resultat);
+        request.send(resultatStr);
+      } catch (error) {
+        retourUser({error:"Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
+      }
+    }
+  }
+}
+
+/**
+ * Récupère un paramètre de l'url courante
+ * Inspiré de http://stackoverflow.com/a/11582513
+ * @param name Le nom du paramètre
+ * @returns Sa valeur (ou null s'il n'existait pas)
+ */
+function getURLParameter(name) {
+  // log("getURLParameter(" +name +") sur " +window.location.search);
+  var regexp = new RegExp('[?|&]' + name + '=([^&#]+?)(&|#|$)');
+  var param = regexp.exec(window.location.search)
+  if (param) {
+    param = decodeURIComponent(param[1].replace(/\+/g, '%20'));
+  }
+  return param;
 }

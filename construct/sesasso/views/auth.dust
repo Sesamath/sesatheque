@@ -4,3 +4,4 @@
 {:else}
     <p><a href="?connexion">Connexion</a></p>
 {/gt}
+<p>ID : {id}</p>

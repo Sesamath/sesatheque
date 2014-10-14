@@ -3,7 +3,7 @@
  * Attention, les urls sont en dur et supposent que la bibliotheque est installée à la racine du domaine,
  * il faut modifier prefix si ce n'est pas le cas
  */
-/*global define, window, XMLHttpRequest */
+/*global define, XMLHttpRequest */
 'use strict';
 
 /**
@@ -14,57 +14,65 @@
  */
 var prefix = '/';
 
+/**
+ * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
+ * @type {number}
+ */
+var ajaxTimeout = 10000;
+
 define({
-  setPrefix:setPrefix,
-  getRessource:getRessource,
-  setRessource:setRessource
+  /**
+   * Modifie le préfixe par défaut (/)
+   * @param bibliPrefix Le préfixe a mettre devant api/ressource. Il doit se terminer par un slash,
+   *                    et commencer par slash ou http
+   */
+  setPrefix: function (bibliPrefix) {
+    prefix = bibliPrefix;
+  },
+  /**
+   * Récupère une ressource sur la bibliothèque en ajax
+   * @param id
+   * @param next
+   */
+  getRessource: function (id, next) {
+    if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
+    if (!id) return next(new Error("Il faut fournir un identifiant"));
+    if (parseInt(id, 10) != id) return next(new Error("L'identifiant fourni n'est pas un entier"));
+    callBibli(id, next)
+  },
+  /**
+   * Enregistre une ressource sur la bibliotheque
+   * @param ressource
+   * @param next
+   */
+  setRessource: function (ressource, next) {
+    if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
+    if (!ressource) return next(new Error("Il faut fournir une ressource"));
+    if (!ressource.titre || !ressource.categories) return next(new Error("Ressource invalide"));
+    callBibli(ressource, next);
+  }
 })
 
-/**
- * Modifie le préfixe par défaut (/)
- * @param bibliPrefix Le préfixe a mettre devant api/ressource. Il doit se terminer par un slash,
- *                    et commencer par slash ou http
- */
-function setPrefix(bibliPrefix) {
-  prefix = bibliPrefix;
-}
 
 /**
- * Récupère une ressource sur la bibliothèque en ajax
- * @param id
- * @param next
- */
-function getRessource(id, next) {
-  if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-  if (!id) return next(new Error("Il faut fournir un identifiant"));
-  if (parseInt(id, 10) != id) return next(new Error("L'identifiant fourni n'est pas un entier"));
-  callBibli(id, next)
-}
-
-/**
- * Enregistre une ressource sur la bibliotheque
- * @param ressource
- * @param next
- */
-function setRessource(ressource, next) {
-  if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-  if (!ressource) return next(new Error("Il faut fournir une ressource"));
-  if (!ressource.titre || !ressource.categories) return next(new Error("Ressource invalide"));
-  callBibli(ressource, next);
-}
-
-/**
- *
+ * Gère les appels ajax vers l'api de la bibliothèque
  * @param {number|Object} data Si data est un id on fera un get, si data est une ressource un post
  * @param {function} next
  * @private
  */
 function callBibli(data, next) {
-  var request, reponse, isGet;
-  var timeout = 20000; // 20s c'est énorme mais certains peuvent avoir des BP catastrophiques
+  var request, method, url, isGet;
 
   // post ou get ?
-  isGet = !data.hasOwnProperty('titre')
+  if (data.hasOwnProperty('titre')) {
+    isGet = true;
+    method = 'GET';
+    url = prefix + 'api/ressource/' + data.id;
+  } else {
+    isGet = false;
+    method = 'POST';
+    url = prefix + 'api/ressource/';
+  }
 
   if (typeof XMLHttpRequest !== undefined) {
     // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
@@ -73,7 +81,10 @@ function callBibli(data, next) {
     return next(new Error("votre navigateur ne supporte pas les appels ajax"));
   }
   try {
-    request.timeout = timeout;
+    // on prépare la requete
+    request.timeout = ajaxTimeout;
+
+    // les différentes callback
     request.onload = function () {
       if (request.status >= 200 && request.status < 400) {
         try {
@@ -104,8 +115,9 @@ function callBibli(data, next) {
       next(new Error("Le serveur n'a pas répondu après " +Math.floor(timeout/1000) +"s d'attente."));
     };
 
-    request.open('GET', prefix + 'api/ressource/' + id, true);
-    request.send();
+    // et on envoie
+    request.open(method, url, true);
+    request.send(data);
   } catch (error) {
     next(new Error("votre navigateur ne supporte pas les appels ajax, erreur : " +error.toString()));
   }

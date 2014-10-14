@@ -6,7 +6,8 @@
 /* global define, module*/
 
 // suivant que l'on est coté serveur ou client
-if (typeof define === 'function') define(Resultat);
+// Avec requirejsoOn retourne juste le constructeur comme module mais faut le mettre en retour de fct
+if (typeof define === 'function') define(function () {return Resultat});
 else if (typeof module === 'object') module.exports = Resultat;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
 

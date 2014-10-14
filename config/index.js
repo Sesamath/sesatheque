@@ -8,12 +8,6 @@ var moment = require('moment')
 var localConfig = require('../_private/config')
 var ressourceConfig = require('../construct/ressource/config')
 
-/**
- * On est config/index.js (hors build)
- */
-
-/** Le dossier build */
-var builddir = __dirname + '/../build';
 /** La racine du projet */
 var root  = __dirname + '/..';
 
@@ -77,8 +71,8 @@ var appConfig = {
     cache: false
   },
   layout  : {
-    data : builddir + '/data',
-    cache: builddir + '/data/cache'
+    data : root + '/data',
+    cache: root + '/data/cache'
   },
   rail    : {
     cors : {origin: '*'},
