@@ -85,7 +85,7 @@ function display(ressource, options, next) {
     // les flashvars pour le swf obligatoires à tous
   flashvars = {
     idMep: Number(ressource.idOrigine),
-    modeleMep : params.mep_modele,
+    modeleMep : (params.mep_modele === "mep1") ? "1" : "2",
     abreviationLangue: params.mep_langue_id,
     idSwf : (params.swf_id) ? params.swf_id : Number(ressource.idOrigine)
   };
