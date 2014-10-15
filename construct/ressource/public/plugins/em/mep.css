@@ -1,17 +1,8 @@
-html, body {padding: 0}
 .mepRess {
     background-image: url('images/fond.gif');
     margin: 0 auto;
 }
-.mepRess .titre{
+#titre{
 	background-color:  #7484a6;
-	text-align:center;
-	font-family: Verdana;
-	font-size: 16pt;
 	color: white;
-	width: 85%;
-	margin:auto;
-	height:28px;
 }
-/* fullpage */
-#display {margin: 0 auto;}

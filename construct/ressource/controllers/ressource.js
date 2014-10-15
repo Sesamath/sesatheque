@@ -312,6 +312,7 @@ function display (error, ressource, ctx, next) {
         pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
         vendorsBaseUrl: '../../vendors',
         pluginName    : ressource.typeTechnique,
+        titre         : ressource.titre,
         ressource     : lassi.tools.stringify(ressource),
         staging       : ctx.application.settings.application.staging
       }

@@ -13,6 +13,21 @@ var baseUrl;
 var container = window.document.getElementById('display');
 /** Le conteneur html pour afficher d'éventuelles erreurs */
 var errorsContainer = window.document.getElementById('errors');
+
+/** Le conteneur du picto enregistrement */
+var divFeedback = window.document.getElementById('pictoFeedback');
+function feedbackOff() {
+  divFeedback.className = 'feedbackOff'
+}
+function feedbackOk() {
+  divFeedback.className = 'feedbackOk'
+  setTimeout(feedbackOff, 4000);
+}
+function feedbackKo() {
+  divFeedback.className = 'feedbackKo'
+  setTimeout(feedbackOff, 4000);
+}
+
 /**
  * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
  * @type {number}
@@ -73,10 +88,26 @@ window.getElt = function (tag, attrs, txtContent) {
   var elt = wd.createElement(tag);
   var attr
   if (attrs) for (attr in attrs) {
-    if (attrs.hasOwnProperty(attr)) elt[attr] = attrs[attr]
+    if (attrs.hasOwnProperty(attr)) {
+      if (attr === 'class') elt.className = attrs[attr]
+      else elt[attr] = attrs[attr]
+    }
+
   }
   if (txtContent) elt.appendChild(wd.createTextNode(txtContent));
+
   return elt;
+}
+
+/**
+ * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent)
+ * @param errorMsg {string} Le message à afficher
+ */
+window.setError = function (errorMsg) {
+  // on ajoute un peu de margin à ce div qui n'en avait pas
+  if (!errorsContainer.style) errorsContainer.style = {};
+  errorsContainer.style.margin = "0.2em"
+  errorsContainer.textContent = errorMsg;
 }
 
 /**
@@ -106,12 +137,20 @@ define({
         if (typeof plugin.display !== 'function') throw new Error('Le plugin ' +name +" n'a pas de méthode display");
         container.innerHTML = '';
         errorsContainer.innerHTML = '';
+
+        // On vire le titre si on nous le demande via un param dans l'url
+        if (/\?.*showTitle=0/.test(wd.URL)) {
+          var titre = wd.getElementById('titre');
+          if (titre) titre.style = {display: "none"};
+        }
+
         var displayOptions = {
           baseUrl : options.baseUrl,
           vendorsBaseUrl : options.vendorsBaseUrl,
           container : container,
           errorsContainer: errorsContainer
         };
+        if (options.isDev) displayOptions.isDev = options.isDev;
         // on regarde s'il faut ajouter une fct de sauvegarde des résultats
         if (Resultat) addSaveResultat(displayOptions, urlResultat, Resultat);
         // on peut afficher
@@ -119,7 +158,7 @@ define({
           log("le display a terminé et a renvoyé", arg);
         });
       } catch(error) {
-        errorsContainer.innerHTML = error.toString();
+        w.setError(error.toString());
       }
     });
   }
@@ -132,6 +171,8 @@ define({
  * @private
  */
 function init(options) {
+  // le ctx.metas.addCss('styles/ressourceDisplay.css') marche pas, on ajoute notre css ici
+  w.addCss('styles/ressourceDisplay.css', true);
   baseUrl = options.baseUrl;
   var vbu = options.vendorsBaseUrl;
   // on exporte aux plugins ces fcts que l'on met dans de dom global
@@ -196,8 +237,8 @@ function addSaveResultat(options, urlResultat, Resultat) {
   } else {
     /**
      * Envoi un résultat en ajax pour sauvegarde
-     * @param result     {object}   Le résultat à envoyer
-     * @param retourUser {function} La fonction à rappeler avec le retour de l'appel ajax
+     * @param result       {object}   Le résultat à envoyer
+     * @param [retourUser] {function} La fonction à rappeler avec le retour de l'appel ajax
      */
     options.saveResultat = function (result, retourUser) {
       log("saveResultat", result);
@@ -209,36 +250,43 @@ function addSaveResultat(options, urlResultat, Resultat) {
       var resultat = new Resultat(result);
       // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
       var request = new XMLHttpRequest();
-      // la fct de retour est facultative, si elle existe pas on la créé et ça écrira dans la console
-      if (!retourUser) {
-        retourUser = function (retour) {
-          log("L'enregistrement du résultat a renvoyé", retour);
+
+      // la fct de retour est facultative, mais on affiche toujours le picto
+      function feedback(retour) {
+        log('feedback', retour);
+        if (retour && retour.result && retour.result === 'ok') feedbackOk();
+        else {
+          if (retour && retour.error) w.setError(retour.error);
+          feedbackKo();
         }
+        // et on appelle retourUser si on nous l'a fourni
+        if (retourUser) retourUser(retour);
       }
+
       request.timeout = ajaxTimeout;
       // les différentes callback
       request.onload = function () {
         if (request.status >= 200 && request.status < 400) {
           try {
-            var reponse = JSON.parse(request.responseText);
-            retourUser(reponse);
+            var retour = JSON.parse(request.responseText);
+            feedback(retour);
           } catch (error) {
-            retourUser({error:"La réponse de l'enregistrement du résultat est invalide"});
+            feedback({error:"La réponse de l'enregistrement du résultat est invalide"});
           }
         } else {
           // On a une réponse mais c'est une erreur
-          retourUser({error:"La réponse de l'enregistrement du résultat est une erreur " +
+          feedback({error:"La réponse de l'enregistrement du résultat est une erreur " +
               request.status + ' : ' + request.responseText});
         }
       };
 
       request.onerror = function () {
         // Pb de connexion au serveur
-        retourUser({error:"Impossible d'envoyer le résultat (à " +urlResultat +")"});
+        feedback({error:"Impossible d'envoyer le résultat (à " +urlResultat +")"});
       };
 
       request.ontimeout = function () {
-        retourUser({error:"Pas de réponse de l'enregistrement du résultat après " +
+        feedback({error:"Pas de réponse de l'enregistrement du résultat après " +
             Math.floor(ajaxTimeout/1000) +"s d'attente."});
       };
 
@@ -250,7 +298,7 @@ function addSaveResultat(options, urlResultat, Resultat) {
         var resultatStr = "resultat=" +JSON.stringify(resultat);
         request.send(resultatStr);
       } catch (error) {
-        retourUser({error:"Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
+        feedback({error:"Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
       }
     }
   }

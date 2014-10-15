@@ -53,21 +53,16 @@ function display(ressource, options, next) {
     throw new Error("Paramètres manquants");
   }
 
-
-  // On réinitialise le conteneur
-  container.innerHTML = '';
   // Ajout css
   addCss(baseUrl + '/mep.css');
   container.className = cssClass;
-
-  // On insère le titre, sauf si on le refuse expressément via un param dans l'url
-  if (! /\?.*showTitle=0/.test(wd.URL)) w.addElt(container, "div", {class:'titre'}, ressource.titre);
 
   // le message en attendant le chargement
   w.addElt(container, "div", {id:divId}, "Chargement de la ressource " +ressource.id +" en cours.");
 
   // notre base
-  if (ressource.origine !== 'mep' && ressource.baseUrl) baseMepSwf =  ressource.baseUrl;
+  if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf =  ressource.baseUrl;
+  else if (options.isDev) baseMepSwf = "http://mep-col.devsesamath.net/dev/swf";
   else baseMepSwf = "http://mep-col.sesamath.net/dev/swf";
   // url du swf
   if (params.swf_id)  swfUrl = baseMepSwf +'/exo' +params.swf_id +".swf";
@@ -89,14 +84,14 @@ function display(ressource, options, next) {
   /** @see http://redmine.sesamath.net/projects/alibaba/wiki/ExosMep pour les flashvars à passer */
     // les flashvars pour le swf obligatoires à tous
   flashvars = {
-    idMep: ressource.id,
+    idMep: Number(ressource.idOrigine),
     modeleMep : params.mep_modele,
     abreviationLangue: params.mep_langue_id,
-    idSwf : (params.swf_id) ? params.swf_id : ressource.id
+    idSwf : (params.swf_id) ? params.swf_id : Number(ressource.idOrigine)
   };
     // ensuite le facultatif si présent
     if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;
-    if (params.aide_id) flashvars.idAide = params.aide_id;
+    if (params.aide_id) flashvars.idAide = Number(params.aide_id);
     if (params.aide_formateur) flashvars.isBoutonAide = params.aide_formateur;
     // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
     if (params.nb_wnk) flashvars.mep_nb_wnk = params.nb_wnk;

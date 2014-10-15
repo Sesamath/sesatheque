@@ -9,7 +9,7 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
   // la liste des méthodes que l'on exporte 
   return {
     /**
-     * display sera appelée avec les arguments (ressource, options), et options doit contenir les propriétés 
+     * display sera appelée avec les arguments (ressource, options), options contient les propriétés 
      *   {string}      baseUrl         Le préfixe d'url qui pointe vers le dossier du plugin
      *   {HTMLElement} container       Le div pour afficher la ressource
      *   {HTMLElement} errorsContainer Le div pour afficher les erreurs
@@ -40,7 +40,8 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  * {Function}    addCss(file)    : ajoute une css dans le head de la page courante
  *                                 (lui passer le fichier relativement au dossier du plugin)
  * {Function}    addElement(eltContainer, tag, attributes, innerText) : ajoute un HTMLElement dans eltContainer
- * {Function}    getElement(tag, attributes, innerText)               : récupère un HTMLElement
+ * {Function}    getElement(tag, attributes, innerText)               : renvoie un HTMLElement créé d'après les arguments
+ * {Function}    setError(errorMsg) : Affiche une erreur dans errorsContainer (ça efface la précédente s'il y en avait une)
  */
  // une variable privée de ce module mais globale pour nos fonctions
  var toto;
