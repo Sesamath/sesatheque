@@ -130,7 +130,7 @@ controller
       var ressource
       //log.dev('action', lassi.action.ressource); next()
       if (this.method === 'get') {
-        lassi.personne.checkPermission('add', ctx, null, function () {
+        lassi.personne.checkPermission('create', ctx, null, function () {
           ctx.metas.title = 'Ajouter une ressource'
           // on ajoute le token, permet de ne pas vérifier les droits au post
           ctx.session.token = converter.sendFormData(null, null, next)
@@ -170,7 +170,7 @@ controller
       var id = ctx.arguments.id
       repository.load(id, function (error, ressource) {
         if (ressource) {
-          lassi.personne.checkPermission('write', ctx, ressource, function (ressource) {
+          lassi.personne.checkPermission('update', ctx, ressource, function (ressource) {
             ctx.metas.title = 'Modifier ' + ressource.titre
             ctx.session.token = converter.sendFormData(error, ressource, next)
           })
@@ -212,7 +212,7 @@ controller
         // on affiche et on demande confirmation
         repository.load(id, function (error, ressource) {
           if (ressource) {
-            lassi.personne.checkPermission('del', ctx, ressource, function () {
+            lassi.personne.checkPermission('delete', ctx, ressource, function () {
               ctx.metas.title = 'Supprimer ' + ressource.titre
               // on ajoute un flag en session pour ne pas refaire les vérifs de droits dans le le post
               ctx.session['del' + id] = true

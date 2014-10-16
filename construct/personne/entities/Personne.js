@@ -50,32 +50,16 @@ lassi.Entity('Personne', {
   },
 
   /**
-   * Crée la proriété permissions et l'affecte en fonction des rôles
-   * Cette propriété ne sera pas stockée dans l'entity
-   * @returns {boolean} true si l'init est fait (false s'il avait déjà été fait, dans ce cas on a rien changé)
+   * Calcule et renvoie les permissions en fonction des rôles
    */
-  initPermissions : function() {
-    // on ne peut initialiser qu'une seule fois (propriété read only)
-    if (this.permissions) {
-      log.error(new Error("Personne.initPermissions appelé alors que la propriété existe déjà"))
-      return false
-    }
+  getPermissions : function() {
     var permissions = {}
     var config = lassi.personne.settings;
     _.each(this.roles, function(hasRole, role) {
       // on ajoute les permissions définies pour ce role en config
       if (hasRole && config.roles[role]) lassi.tools.merge(permissions, config.roles[role])
     })
-    Object.defineProperty(this, 'permissions', {value:permissions})
-    return true
-  },
-
-  /**
-   * Retourne true si la personne a la permission demandée
-   * @param {string} permission
-   */
-  hasPermission: function (permission) {
-    return (this.permissions && this.permissions[permission] === true)
+    return permissions
   },
 
   /**

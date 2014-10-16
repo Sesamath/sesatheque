@@ -133,4 +133,18 @@ if (localConfig) lassi.tools.update(appConfig, localConfig)
 if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && appConfig.entities.database.connection.debug)
   delete appConfig.entities.database.connection.debug
 
-module.exports = appConfig
+module.exports = appConfig  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

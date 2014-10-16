@@ -116,7 +116,7 @@ function getUserForDust(personne) {
     user.prenom = personne.prenom
   } else {
     // faut renvoyer qqchose sinon le bloc n'est pas rendu
-    user.none = true
+    user.id = 0
   }
 
   return user
@@ -137,13 +137,16 @@ function checkTicket(ctx, next) {
    * @param {Personne} personne
    */
   function setSessionAndRedirect(error, personne) {
-    log('appel setSessionAndRedirect')
+    log.dev('appel setSessionAndRedirect')
     if (error) next(error)
     else if (personne) {
-      personne.initPermissions()
       // c'est normalement le seul endroit où on affecte cet objet (qui n'a pas de prototype) en session
       // hormis le controleur deconnexion qui affecte un objet vide
       ctx.session.user = personne
+      // on veut pas des permissions dans l'entity pour pas les stocker en DB
+      // les ajouter avec un defineProperty ne les met pas en session
+      // donc on les met en session ici
+      ctx.session.user.permissions = personne.getPermissions()
       log.dev('ticket OK, user enregistré localement et en session, ' +ctx.session.user.oid)
       // on redirige vers cette page sans le ticket en get
       ctx.redirect(getMyUrl(ctx))

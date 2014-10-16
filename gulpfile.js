@@ -37,13 +37,22 @@ gulp.task('compile-sass', function () {
     .pipe(gulp.dest('./'));
 })
 
-gulp.task('watch', function() {
+// gulp.task('watch', function() {
+//  var launcher = new lassi.tools.Launcher({ path: 'construct/index.js' });
+//  launcher.observe('config').including('**/*.js').restart();
+//  launcher.observe('construct').including('**/*.+(js|dust)').excluding('**/public').restart();
+//  launcher.observe('construct').including('**/public/styles/**/*.scss').do(function() { gulp.start('compile-sass') });
+//  launcher.observe('construct').including('**/public/**/*.+(css|js)').reload();
+//  launcher.observe('node_modules/lassi').including('**/*.js').excluding('**/node_modules').restart();
+//  launcher.start();
+//})
+
+/**
+ * Lance le serveur (node et livereload) puis se met en écoute des modification de fichier.
+ */
+gulp.task('watch', function () {
   var launcher = new lassi.tools.Launcher({ path: 'construct/index.js' });
-  launcher.observe('config').including('**/*.js').restart();
-  launcher.observe('construct').including('**/*.+(js|dust)').excluding('**/public').restart();
-  launcher.observe('construct').including('**/public/styles/**/*.scss').do(function() { gulp.start('compile-sass') });
-  launcher.observe('construct').including('**/public/**/*.+(css|js)').reload();
-  launcher.observe('node_modules/lassi').including('**/*.js').excluding('**/node_modules').restart();
+  gulp.watch(['construct/**/*', '!construct/**/public/**/*']).on('change', function() { launcher.restart(); });
   launcher.start();
 })
 
