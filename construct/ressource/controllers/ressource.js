@@ -81,7 +81,7 @@ controller
         if (error) next(error)
         else if (ressource) {
           lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
-            display(error, ressource, ctx, next)
+            display(error, ressource, ctx, '../..', next)
           })
         } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
       })
@@ -103,7 +103,7 @@ controller
       var origine = ctx.arguments.origine
       var idOrigine = ctx.arguments.idOrigine
       repository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-        display(error, ressource, ctx, next)
+        display(error, ressource, ctx, '../../..', next)
       })
     })
 /**
@@ -300,9 +300,11 @@ function addUrls(ctx, ressources) {
  * @param error
  * @param ressource
  * @param ctx
+ * @param publicPrefix Le chemin relatif pour trouver le dossier public
+ *                     (par rapport à la route courante, sans / au début ou à la fin)
  * @param next
  */
-function display (error, ressource, ctx, next) {
+function display (error, ressource, ctx, publicPrefix, next) {
   //log.dev('retour de load dans display', ressource)
   if (error) next(error)
   else if (ressource) {
@@ -311,8 +313,8 @@ function display (error, ressource, ctx, next) {
       // si public son permalink est dans le namespace public
       if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
       var data = {
-        pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
-        vendorsBaseUrl: '../../vendors',
+        pluginBaseUrl : publicPrefix +'/plugins/' + ressource.typeTechnique,
+        vendorsBaseUrl: publicPrefix + '/vendors',
         pluginName    : ressource.typeTechnique,
         titre         : ressource.titre,
         ressource     : lassi.tools.stringify(ressource),
