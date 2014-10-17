@@ -240,6 +240,7 @@ controller
 /**
  * Liste d'après le critère passé en 1er param (puis valeur, offset & nb)
  * Ne remonte que les ressources publiques
+ * SELECT _string, COUNT(*) AS nb  FROM ressource_index WHERE name = 'typeTechnique' GROUP BY _string
  */
 controller
   .Action('by/:index/:value/:start/:nb', 'ressource.by')
@@ -254,7 +255,10 @@ controller
         start   : parseInt(ctx.arguments.start),
         nb      : parseInt(ctx.arguments.nb)
       }
-      repository.getListe('public', ctx, options, function (error, ressources) {
+      var visibilite = 'public'
+      // avec une exception pour l'admin qui peut passer ?all=1
+      if (ctx.get.all && ctx.session.user && ctx.session.user.roles && ctx.session.user.roles.admin) visibilite = "all"
+      repository.getListe(visibilite, ctx, options, function (error, ressources) {
         if (error) next(error)
         else {
           ctx.metas.title = 'Résultats de recherche'
@@ -285,13 +289,11 @@ function checkToken(ctx, next) {
  * @returns {Array} Le nouveau tableau de ressources
  */
 function addUrls(ctx, ressources) {
-          log.dev('avant', ressources)
   if (ressources && ressources.length) ressources.forEach(function (ressource) {
     ressource.urlDescribe = ctx.url(lassi.action.ressource.describe, {id:ressource.id})
     ressource.urlPreview = ctx.url(lassi.action.ressource.preview, {id:ressource.id})
     ressource.urlDisplay = ctx.url(lassi.action.ressource.display, {id:ressource.id})
   })
-          log.dev('après', ressources)
   return ressources
 }
 

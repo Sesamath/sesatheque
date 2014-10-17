@@ -348,15 +348,14 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
     var publicOnly
     if (arguments.length < 4) {
       if (arguments.length == 3) throw new Error("nombre d'arguments incorrect")
+      // 2 args
       options = visibilite
       next = ctx
       publicOnly = true
     } else if (visibilite === 'public') {
       publicOnly = true
-    } else if (visibilite !== 'prof' && visibilite !== 'moi') {
-      log.error('valeur de visibilite invalide ' + visibilite)
-      publicOnly = true
-      visibilite = 'public'
+    } else if (visibilite === 'all') {
+      publicOnly = false
     }
 
     // on converti si json si besoin
@@ -418,6 +417,15 @@ ressourceRepository.getListe = function(visibilite, ctx, options, next) {
       if (!ctx.session.user || !ctx.session.user.id)
         return next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
       query = query.match('auteurs').equals(ctx.session.user.id)
+
+    } else if (visibilite == 'all') {
+      if (!ctx.session.user.roles || !ctx.session.user.roles.admin)
+        return next(new Error("Il faut être admin pour tout voir"))
+
+    } else {
+      // on a pas mis de restriction, c'est pas normal
+      log.error(new Error("Appel de getListe avec visibilite " +visibilite))
+      return next(new Error("Appel de getListe incorrect"))
     }
 
     // orderBy
