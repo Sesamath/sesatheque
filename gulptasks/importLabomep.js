@@ -376,7 +376,7 @@ function initRessourceGenerique(row) {
     parametres       : {xml:row.xml},
     langue           : 'fre',
     publie           : true,
-    restriction      : 2
+    restriction      : (origine == 'labomepBIBS') ? 0 : 3
   }
   if (row.user_sslsesa_id) ressource.auteurs =  [row.user_sslsesa_id]
 
