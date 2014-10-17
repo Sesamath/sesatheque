@@ -63,7 +63,6 @@ function display(ressource, opt, next) {
 
   // init
   addCss(baseUrl + '/url.css');
-  container.setAttribute("height", '100%');
 
   // un div pour la partie hors iframe
   elt = w.getElt('div', {id:'head'});
@@ -203,16 +202,19 @@ function showResult(result, elt) {
  * Modifie la taille de l'iframe pour lui donner tout l'espace restant de container
  */
 function resizePage() {
-  return
-  var tailleDispo = Math.floor(window.innerHeight - $("#head").outerHeight(true) - $("#urlSrc").outerHeight(true));
+  var occupe = 0;
+  ["#errors", "#titre", "#head", "#urlSrc"].forEach(function (selector) {
+    occupe += $(selector).outerHeight(true);
+  })
+  var tailleDispo = Math.floor(window.innerHeight - occupe);
   if (tailleDispo < 300) tailleDispo = 300;
-  log('resize hauteur à ' +tailleDispo)
   $("#display").css("height", tailleDispo +'px');
+  log('resize iframe à ' +tailleDispo)
   // pour l'iframe de l'url, faut retirer ce que l'on utilise pour consigne & co
   if (!isBasic) tailleDispo -= $('#head').innerHeight()
   $("#page").css("height", tailleDispo +'px');
   // et la largeur de l'iframe
-  tailleDispo = $(container).innerWidth()
+  tailleDispo = $(container).innerWidth() - 4; // 2px de marge dans le css
   if (tailleDispo < 300) tailleDispo = 300;
   log('resize largeur à ' +tailleDispo)
   $("#page").css("width", tailleDispo +'px');

@@ -38,9 +38,9 @@ body {
 #page {
     z-index: 1;
     width:98%;
-    min-height: 30%;
+    min-height: 90%;
     overflow: auto;
-    margin: 0 auto;
+    margin: 0 2px;
 }
 #urlSrc {
     margin-right: 2em;
