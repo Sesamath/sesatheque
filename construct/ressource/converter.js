@@ -387,7 +387,7 @@ function arrayToDust(key, selectedValues, isUnique) {
   var i = 0;
   _.each(config.listes[key], function (label, cbValue) {
     // cbValue est une string (le nom de la propriété), on veut la valeur entière éventuelle
-    if (cbValue == parseInt(cbValue, 10)) cbValue = parseInt(cbValue, 10)
+    //if (cbValue == parseInt(cbValue, 10)) cbValue = parseInt(cbValue, 10)
     var choice = {
       label: label,
       value: cbValue

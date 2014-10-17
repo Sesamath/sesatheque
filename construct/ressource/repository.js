@@ -260,6 +260,7 @@ ressourceRepository.load = function(id, next) {
       lassi.entity.Ressource.match('id').equals(id).grabOne(function (error, ressource) {
         if (error) next(error)
         else if (ressource) {
+          // log.dev('on a récupéré en db la ressource', ressource)
           prepareAndSend(ressource, next)
         } else {
           next(null, null)

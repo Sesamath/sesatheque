@@ -79,7 +79,7 @@ controller
       ctx.forceLayout = 'layout-iframe'
 
       repository.load(id, function (error, ressource) {
-        log.dev('retour de load dans display', ressource)
+        // log.dev('retour de load dans display', ressource)
         if (error) next(error)
         else if (ressource) {
           lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {

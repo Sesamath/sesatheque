@@ -32,9 +32,7 @@ module.exports = lassi.Decorator('auth')
        * Retour avec un ticket
        */
       if (ctx.get.hasOwnProperty('ticket')) {
-        /**
-         * Check d'un ticket (appel de sso pour vérif puis redirect sur la même url ici sans le ticket)
-         */
+        // Check d'un ticket (appel de sso pour vérif puis redirect sur la même url ici sans le ticket)
         if (lassi.personne.isAuthenticated(ctx)) {
           lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté, ticket passé en paramètre ignoré", 'warning')
           ctx.redirect(getMyUrl(ctx))
@@ -46,9 +44,7 @@ module.exports = lassi.Decorator('auth')
        * Demande de connexion
        */
       } else if (ctx.get.hasOwnProperty('connexion')) {
-        /**
-         * Connexion (via redirect vers sso)
-         */
+        // Connexion (via redirect vers sso)
         if (lassi.personne.isAuthenticated(ctx)) {
           // on redirige vers la page courante sans ce param car on est déjà connecté
           lassi.main.addFlashMessage(ctx, "Utilisateur déjà connecté", "notice")
@@ -65,10 +61,9 @@ module.exports = lassi.Decorator('auth')
        * Demande de déconnexion
        */
       } else if (ctx.get.hasOwnProperty('deconnexion')) {
-        /**
-         * Connexion (via redirect vers sso)
-         */
-        delete ctx.session.user
+        // reset user en session
+        ctx.session.user = {id:0}
+        // redirect vers la déconnexion du sso
         urlSso = sso.getUrlDeconnexion()
         ctx.redirect(urlSso)
 
@@ -76,9 +71,16 @@ module.exports = lassi.Decorator('auth')
        * Pas de demande particulière, on alimente la variable dust authBloc du layout-page
        */
       } else {
+        if (!ctx.session.user) ctx.session.user = {id:0}
         // attention, si on renvoie undefined ou un objet vide le bloc n'est pas rendu
-        var data = getUserForDust(ctx.session.user)
-        log.dev("décorateur auth renvoie", data)
+        var data = {none:true}
+        if (ctx.session.user.nom) { // -1 si ip locale sans connexion, pour l'api
+          data.user = {
+            id    : ctx.session.user.id,
+            nom   : ctx.session.user.nom,
+            prenom: ctx.session.user.prenom
+          }
+        }
         next(null, data)
       }
     }, {timeout:timeout})
@@ -102,26 +104,6 @@ function getMyUrl(ctx, encoded) {
 
   return encoded ? encodeURIComponent(myUrl + queryString) : myUrl + queryString
 }
-
-/**
- * Récupère les propriétés id, nom, prénom de personne et les renvoient, un objet vide sinon
- * (mais pas undefined sinon le bloc n'est pas rendu)
- * @param personne
- */
-function getUserForDust(personne) {
-  var user = {}
-  if (personne && personne.id) {
-    user.id = personne.id
-    user.nom = personne.nom
-    user.prenom = personne.prenom
-  } else {
-    // faut renvoyer qqchose sinon le bloc n'est pas rendu
-    user.id = 0
-  }
-
-  return user
-}
-
 
 /**
  * Vérifie un ticket en appelant le serveur SSO, enregistre les infos retournées si ok et met le user en session

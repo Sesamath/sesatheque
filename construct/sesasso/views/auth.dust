@@ -1,6 +1,6 @@
-{!blockAuth, id vaut -1 si on a une ip locale, faut pas de " autour du nom de la propriété !}
-{@gt key=id value="O"}
-    <p>{prenom} {nom}<br />(<a href="?deconnexion">me déconnecter</a>)</p>
+{!blockAuth!}
+{?user}
+    <p>{user.prenom} {user.nom}<br />(<a href="?deconnexion">me déconnecter</a>)</p>
 {:else}
     <p><a href="?connexion">Connexion</a></p>
-  {/gt}
+{/user}

@@ -301,8 +301,6 @@ function getReadDeniedMessage(ctx, ressource) {
  * @returns {string} Le message d'interdiction éventuel (undefined sinon)
  */
 function getUpdateDeniedMessage(ctx, ressource) {
-  log.dev('perm', ctx.session.user.permissions)
-  if (ctx.session.user.permissions && ctx.session.user.permissions.update) return
   // on regarde si c'est l'auteur
   if (_.contains(ressource.auteurs, ctx.session.user.id)) return
   // un contributeur
