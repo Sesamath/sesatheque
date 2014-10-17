@@ -55,8 +55,8 @@ function display(ressource, options, next) {
   container.innerHTML = '';
 
   // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-  container.setAttribute("width", 735);
-  // aj d'un div pour notre swf
+  container.setAttribute("width", 735); // change rien avec ff
+  container.style.width = '735px';
 
   options = {
     largeur : 735,
