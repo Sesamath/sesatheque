@@ -87,6 +87,8 @@ function display(ressource, options, next) {
   swfUrl = baseSwf +'/aide' +ressource.idOrigine +".swf";
   // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
   container.setAttribute("width", 735);
+  container.style.width = '735px';
+  
   swfOpt = {
     base    : baseSwf + "/",
     largeur : 735,

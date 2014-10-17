@@ -6,10 +6,6 @@
 /*global define, log, container, window, addElement */
 'use strict';
 
-var baseMental;
-/** contient l'historique des réponses de chaque question */
-var histoReponses = [];
-
 /** module de chargement d'un swf */
 var sesaswf
 
@@ -17,13 +13,18 @@ define(['sesaswf', 'underscore'], function (modSwf) {
   // on affecte notre var sesaswf avec le module chargé
   sesaswf = modSwf;
   /*global _*/
-  // charger_options et enregistrer_score exportées dans le dom global par display
 
   return {
     display   : display,
     showResult: showResult
   }
 });
+
+// nos vars globales
+
+var baseMental;
+/** contient l'historique des réponses de chaque question */
+var histoReponses = [];
 
 // reste à définir nos méthodes
 
@@ -49,14 +50,16 @@ function display(ressource, options, next) {
     swfUrl = baseMental + '/cm.swf';
 
     // les fcts exportées pour le swf
-    if (options && options.resultCallback) window.com_mental_resultat = function (nbQuestions, numQuestion, reponse) {
-      // reponse est de la forme o/n
-      histoReponses.push([nbQuestions, reponse]);
-      // labomep recevait aussi type_tag : 'mental', node_type: 'mental', idres : ressource.id, origine & seance_id,
-      // l'appelant devra le mettre dans la callback qu'il nous donne s'il en a besoin
-      options.resultCallback({
-        reponse: histoReponses
-      })
+    if (options && options.resultCallback) {
+      window.com_mental_resultat = function (nbQuestions, numQuestion, reponse) {
+        // reponse est de la forme o/n
+        histoReponses.push([nbQuestions, reponse]);
+        // labomep recevait aussi type_tag : 'mental', node_type: 'mental', idres : ressource.id, origine & seance_id,
+        // l'appelant devra le mettre dans la callback qu'il nous donne s'il en a besoin
+        options.resultCallback({
+          reponse: histoReponses
+        })
+      }
     } else window.com_mental_resultat = function () {};
 
     // On réinitialise le conteneur
@@ -64,7 +67,7 @@ function display(ressource, options, next) {
 
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
     container.setAttribute("width", 735);
-    // aj d'un div pour notre swf
+    container.style.width = '735px';
 
     options = {
       largeur  : 735,

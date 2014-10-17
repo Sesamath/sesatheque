@@ -27,11 +27,10 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  * Tout le reste est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
  *
  * this est ce module (donc on a par exemple les méthodes this.display et this.showResult, mais pas this.document),
- * avec disponible dans notre scope les variables
+ * avec disponible dans notre scope l'objet window qui contient (faut prefixer par window pour y accéder)
  * {Function}    define          : à utiliser une fois pour définir les librairies que l'on veut avoir à disposition
  *                                 avant de renvoyer l'export de ce module
  * {Function}    require         : pour charger d'autres modules ou d'autres scripts js (dans notre dossier)
- * {Object}      window          : l'objet window
  * {Object}      post            : le post éventuel (sinon un objet vide)
  *
  * Dans l'objet window on a ajouté les propriétés suivantes

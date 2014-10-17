@@ -25,8 +25,6 @@ controller
     .Action(routes.describe + '/:id', 'ressource.describe')
     .renderWith('describe')
     .do(function (ctx, next) {
-      // pour debug du addCss qui marche plus
-      ctx.metas.addCss('styles/ressourceDisplay.css')
       var id = ctx.arguments.id
       repository.load(id, function (error, ressource) {
         if (error) next(error)

@@ -15,14 +15,14 @@ define({start:start})
  * On reprend tel quel (quasiment) l'ancien url.js de l'outil labomep
  */
 /** Le html du lien à mettre dans #information */
-var liensuivant = w.getElt("img", {
+var liensuivant = w.getElement("img", {
   class: 'liensuivant',
   src  : w.baseUrl +'/images/forward.png',
   align: 'absmiddle',
   alt  : 'suivant'
 });
 /** Le lien qui sera dans #filariane, avec id pour lui coller un comportement au clic */
-var liensuivantId = w.getElt("img", {
+var liensuivantId = w.getElement("img", {
   id   : 'liensuivant',
   class: 'liensuivant',
   src  : w.baseUrl +'/images/forward.png',
@@ -147,7 +147,7 @@ function showEtape() {
       $('#filariane').append("Étape "+num+" : "+etapes.titres[i] +' >> ');
     } else if (i == etapes.currentIndex) {
       // ajout titre courant
-      $('#filariane').append("Étape "+(i+1) +" : ").append(w.getElt('span', {class:'highlight'}, etapes.titres[i]));
+      $('#filariane').append("Étape "+(i+1) +" : ").append(w.getElement('span', {class:'highlight'}, etapes.titres[i]));
     } else if (i == etapes.currentIndex +1) {
       // y'a un suivant
       $('#filariane').append(liensuivantId);

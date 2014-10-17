@@ -17,9 +17,7 @@ define(['swfobject'], function () {
   }
 });
 
-
-// reste à définir nos méthodes
-
+// nos vars globales
 var ressId;
 var ressType = 'em';
 var startDate
@@ -58,7 +56,7 @@ function display(ressource, options, next) {
   container.className = cssClass;
 
   // le message en attendant le chargement
-  w.addElt(container, "div", {id:divId}, "Chargement de la ressource " +ressource.id +" en cours.");
+  w.addElement(container, "div", {id:divId}, "Chargement de la ressource " +ressource.id +" en cours.");
 
   // notre base
   if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf =  ressource.baseUrl;
@@ -124,7 +122,8 @@ function display(ressource, options, next) {
       id: divId,
       name: divId
     };
-log('flashvars', flashvars);
+    // pour debug
+    log('flashvars', flashvars);
     // swfobject.embedSWF (swfUrl, htmlId, largeur, hauteur, version_requise,
     //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
     swfobject.embedSWF(swfUrl, divId, largeur, hauteur, "8", null, flashvars, swfParams, swfAttributes, callbackFn);

@@ -35,7 +35,7 @@ function feedbackKo() {
 var ajaxTimeout = 10000;
 
 /**
- * On ajoute les fcts addCss, addElt, getElt en global
+ * On ajoute les fcts addCss, addElement, getElement en global
  * log est ajouté par init (dépend du contexte)
  */
 
@@ -73,8 +73,8 @@ window.addCss = function (file, isRootRel) {
  * @param {Object=} attrs Les attributs
  * @param {string=} content
  */
-window.addElt = function (parent, tag, attrs, content) {
-  var elt = w.getElt(tag, attrs, content)
+window.addElement = function (parent, tag, attrs, content) {
+  var elt = w.getElement(tag, attrs, content)
   parent.appendChild(elt);
 }
 
@@ -84,7 +84,7 @@ window.addElt = function (parent, tag, attrs, content) {
  * @param {Object=} attrs Les attributs
  * @param {string=} txtContent
  */
-window.getElt = function (tag, attrs, txtContent) {
+window.getElement = function (tag, attrs, txtContent) {
   var elt = wd.createElement(tag);
   var attr
   if (attrs) for (attr in attrs) {
@@ -181,11 +181,11 @@ function init(options) {
   else w.log = function () { return; };
   // on vérifie que l'on a nos containers et on les créé sinon
   if (!errorsContainer) {
-    errorsContainer = w.getElt('div', {id:'errors', class:'error'});
-    w.addElt(wd.getElementsByName('body')[0], errorsContainer)
+    errorsContainer = w.getElement('div', {id:'errors', class:'error'});
+    w.addElement(wd.getElementsByName('body')[0], errorsContainer)
   }
   if (!container) {
-    container = w.getElt('div', {id:'display'})
+    container = w.getElement('div', {id:'display'})
     wd.getElementsByName('body')[0].appendChild(container)
   }
   // et on configure requireJs avec une liste de librairies que l'on met à dispo des plugins

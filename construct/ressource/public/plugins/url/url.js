@@ -65,7 +65,7 @@ function display(ressource, opt, next) {
   addCss(baseUrl + '/url.css');
 
   // un div pour la partie hors iframe
-  elt = w.getElt('div', {id:'head'});
+  elt = w.getElement('div', {id:'head'});
   // ni question ni réponse
   isBasic = ((!params.question_option || params.question_option === 'off') &&
              (!params.answer_option   || params.answer_option === 'off'))
@@ -83,38 +83,38 @@ function display(ressource, opt, next) {
     })
   } else if (!isBasic) {
     // pas seulement la page
-    w.addElt(elt, "div", {id: "lienreponse"}, "Réponse");
-    w.addElt(elt, "div", {id: "lienconsigne"}, "Consigne");
-    w.addElt(elt, "div", {id: "filariane"}, "Étape 1 : lecture de la consigne >> " +
+    w.addElement(elt, "div", {id: "lienreponse"}, "Réponse");
+    w.addElement(elt, "div", {id: "lienconsigne"}, "Consigne");
+    w.addElement(elt, "div", {id: "filariane"}, "Étape 1 : lecture de la consigne >> " +
         "étape 2 : visualisation de la page >> étape 3 : réponse à la consigne");
-    w.addElt(elt, "div", {id: "information", class: "invisible"},
+    w.addElement(elt, "div", {id: "information", class: "invisible"},
         "Ici les informations concernant le déroulement de l'activité");
 
     // la consigne
-    elt2 = w.getElt('div', {id: 'consigne', class: 'invisible'});
+    elt2 = w.getElement('div', {id: 'consigne', class: 'invisible'});
     // elle peut contenir du html
     if (params.consigne) elt2.innerHTML = params.consigne;
     elt.appendChild(elt2);
 
     // la réponse
-    elt2 = w.getElt('div', {id: 'reponse', class: 'invisible'});
+    elt2 = w.getElement('div', {id: 'reponse', class: 'invisible'});
     // avec son form éventuel
     if (params.answer_option !== 'off') {
       // la ressource attend une réponse
       if (resultCallback) {
         log('aj du form')
-        elt3 = w.getElt('div', {}, "Ta réponse ici :"); // form obligatoire ?
-        w.addElt(elt3, 'br');
-        w.addElt(elt3, 'textarea', {id: 'answer', name: 'answer', cols: 45, rows: 9});
-        w.addElt(elt3, 'br');
-        w.addElt(elt3, 'button', {id: 'envoi'}, 'Enregistrer cette réponse');
+        elt3 = w.getElement('div', {}, "Ta réponse ici :"); // form obligatoire ?
+        w.addElement(elt3, 'br');
+        w.addElement(elt3, 'textarea', {id: 'answer', name: 'answer', cols: 45, rows: 9});
+        w.addElement(elt3, 'br');
+        w.addElement(elt3, 'button', {id: 'envoi'}, 'Enregistrer cette réponse');
         elt2.appendChild(elt3);
       } else {
         // on a une question qui attend une réponse mais rien pour l'enregistrer, c'est louche
         log("La ressource url " +ressId +
             " possède consigne et question mais aucune fonction n'a été fournie pour enregistrer la réponse");
         // on affiche une explication
-        w.addElt(elt2, 'p', "Il y a une réponse attendue mais le contexte actuel ne permet pas de l'enregistrer" +
+        w.addElement(elt2, 'p', "Il y a une réponse attendue mais le contexte actuel ne permet pas de l'enregistrer" +
             " (vous n'êtes pas authentifié ou l'application qui affiche cette ressource" +
             " ne gère pas l'enregistrement de ce type de réponse)")
       }
@@ -145,7 +145,7 @@ function display(ressource, opt, next) {
   if (/^[^?]+.swf(\?.*)?$/.test(url)) { // faut pas prendre les truc.php?toto=truc.swf
     log("C'est un swf, on ajoute un div et pas une iframe")
     require(['sesaswf'], function(sesaswf) {
-      var swfContainer = w.getElt('div', {src: params.adresse, id: 'page'});
+      var swfContainer = w.getElement('div', {src: params.adresse, id: 'page'});
       var swfId = 'swf' +(new Date()).getTime();
       var options = {
         id : swfId,
@@ -164,7 +164,7 @@ function display(ressource, opt, next) {
       }); /* */
     });
   } else {
-    w.addElt(container, 'iframe', {src: params.adresse, id: 'page'}, "Si vous lisez ce texte," +
+    w.addElement(container, 'iframe', {src: params.adresse, id: 'page'}, "Si vous lisez ce texte," +
         " votre navigateur ne supporte probablement pas les iframes");
     $('#page').on('load', next)
     finalize(params);
@@ -173,7 +173,7 @@ function display(ressource, opt, next) {
 
 function finalize(params) {
     // url source (non cliquable) en footer
-    w.addElt(container, 'p', {id: 'urlSrc'}, "source : " + params.adresse);
+    w.addElement(container, 'p', {id: 'urlSrc'}, "source : " + params.adresse);
     // on redimensionne tout de suite
     resizePage()
     // et à chaque changement de la taille de la fenêtre

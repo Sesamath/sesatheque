@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8" />
     <title>{?title}{title}{:else}Bibliothèque Sésamath{/title}</title>
-
     <script type="text/javascript" src="/vendors/jquery/jquery.2.1.js"></script>
     <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.min.js"></script>
     <!--script type="text/javascript" src="/scripts/main.js"></script-->
@@ -11,6 +10,7 @@
     <link type="text/css" rel="stylesheet" href="/vendors/normalize.css" />
     <link type="text/css" rel="stylesheet" href="/styles/main.css" media="all" />
     <link type="text/css" rel="stylesheet" href="/styles/ressources.css" media="all" />
+    {head|s}
 </head>
 <body>
 
