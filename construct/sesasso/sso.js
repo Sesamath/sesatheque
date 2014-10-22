@@ -12,9 +12,12 @@ var appConfig = require('../../config')
 var prodSso = 'https://ssl.sesamath.net'
 var devSso  = prodSso + ':8443'
 var hostSso = (appConfig && appConfig.application.staging !== lassi.Staging.production) ? devSso : prodSso
+// pour la déconnexion c'est sans https
+var urlDecoAbs = 'http://ssl.sesamath.net'
+if (appConfig && appConfig.application.staging !== lassi.Staging.production) urlDecoAbs += '/dev'
+urlDecoAbs += '/sesamath/pages/identification_deconnexion_http.php'
 
 var urlAuth = '/sesamath/pages/identification.php'
-var urlDeco = '/sesamath/pages/identification_deconnexion.php'
 var urlWs = '/sesamath/pages/identification_webservice.php'
 
 var defaultAction = 'getInfos'
@@ -127,7 +130,7 @@ function getUrlConnexion(urlApplication, urlDeconnexionLocale, statutRequis) {
  * @returns {string}
  */
 function getUrlDeconnexion() {
-  return hostSso + urlDeco
+  return urlDecoAbs
 }
 
 module.exports = {

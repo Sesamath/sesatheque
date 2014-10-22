@@ -12,17 +12,15 @@ controller
     .Action('deconnexion')
     .renderWith('deconnexion')
     .do(function (ctx, next) {
-      var id = 'id_inconnu'
+      var id = ctx.get.id || 'id_inconnu'
       log.dev("ds act deco")
+      var deconnexion = false
       if (ctx.session.user && ctx.session.user.id) {
-        // le sso s'attend à récupérer l'id (Cf ssl:/sesamath/pages/identification_deconnexion.js)
-        id = ctx.session.user.id
-        // on efface en session
+        // on efface la session
         ctx.session.user = {}
-        // et on envoie
-        log.dev("on a id " +id)
+        deconnexion = true
       }
-      next(null, {id:id})
+      next(null, {id:id, deconnexion:deconnexion})
     })
 
 module.exports = controller;
