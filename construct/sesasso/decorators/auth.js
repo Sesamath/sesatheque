@@ -52,8 +52,9 @@ module.exports = lassi.Decorator('auth')
         } else {
           // faut aller chercher un ticket
           var urlApplication = getMyUrl(ctx, true)
-          var urlDeconnexion = encodeURIComponent('http://' + ctx.request.headers.host + ctx.url('personne.deconnexion'))
-          urlSso = sso.getUrlConnexion(urlApplication, urlDeconnexion)
+          var urlDeconnexionLocale = encodeURIComponent('http://' + ctx.request.headers.host +
+              ctx.url(lassi.action.sesasso.deconnexion))
+          urlSso = sso.getUrlConnexion(urlApplication, urlDeconnexionLocale)
           ctx.redirect(urlSso)
         }
 

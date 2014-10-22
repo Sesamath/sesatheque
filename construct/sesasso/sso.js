@@ -108,17 +108,17 @@ function validate(ticket, options, next) {
 
 /**
  * Renvoie l'url du sso vers laquelle rediriger le navigateur pour le login
- * @param urlApplication
- * @param urlDeconnexion
- * @param statutRequis
+ * @param {string} urlApplication       L'url qui sera rappelée avec ?ticket=...
+ * @param {string} urlDeconnexionLocale L'url qui sera appelée par le sso pour déconnexion ici
+ * @param {string} statutRequis
  * @returns {string}
  */
-function getUrlConnexion(urlApplication, urlDeconnexion, statutRequis) {
+function getUrlConnexion(urlApplication, urlDeconnexionLocale, statutRequis) {
   if (!statutRequis) statutRequis = 'Prof_Valide'
   return hostSso + urlAuth + '?statut_requis=' +statutRequis +
     '&motif=identification_requise' +
     '&url_application=' +urlApplication +
-    '&url_deconnexion=' +urlDeconnexion
+    '&url_deconnexion=' +urlDeconnexionLocale
 }
 
 /**
