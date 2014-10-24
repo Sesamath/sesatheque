@@ -75,7 +75,15 @@ var appConfig = {
     cache: root + '/data/cache'
   },
   rail    : {
-    cors : {origin: '*'},
+    cors : function(req, res, next) {
+      // pour le moment on accepte tout, mais on pourra ici répondre en fct de req.header.origin ou req.url
+      res.header('Access-Control-Allow-Origin', '*');
+      // faudra ajouter ça si on veut utiliser ce header dans notre code
+      // (seulement si req.method est options, inutile sinon),
+      // mais pour la bibli on s'en fout car on répond pareil à de l'ajax ou du GET direct d'un navigateur
+      // res.header("Access-Control-Allow-Headers", "X-Requested-With");
+      next()
+    },
     favicon       : '/assets/images/favicon.ico',
     logger        : morganSettings, // passé tel quel à morgan()
     public        : true,
