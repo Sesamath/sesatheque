@@ -319,9 +319,8 @@ function parseRessource(row) {
       addCatExoInteractif(ressource)
       break
     case 19:
-      ressource.typeTechnique = 'j3p'
-      if (!ressource.titre) ressource.titre = "Parcours interactif"
-      addCatExoInteractif(ressource)
+      log("Pas d'import j3p depuis labomep (ils sont dans oldbibli et ont leur procédure d'import")
+      ajout = false
       break
     case 20: // test diagnostique Lingot
       ressource.typeTechnique = 'lingotpd'

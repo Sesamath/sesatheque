@@ -14,6 +14,7 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
      *   {HTMLElement} container       Le div pour afficher la ressource
      *   {HTMLElement} errorsContainer Le div pour afficher les erreurs
      * et peut contenir
+     *   {boolean}     isDev           true si on est en dev
      *   {function}    saveResult      La fct à qui on doit passer un résultat
      *                                 (Cf le constructeur Resultat pour le format)
      */
