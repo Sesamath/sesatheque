@@ -11,16 +11,7 @@
 //define(['jquery171', 'jqueryUi18c'], function () {
 // faudra ajouter le css au début de display
 define(['head'], function () {
-  /*global head*/
-  var w = window;
-  var baseUrl;
   var urlBaseJ3p = "http://j3p.sesamath.net";
-  var container;
-  var errorsContainer;
-  var resultCallback;
-  var ressId;
-  var startDate;
-  var isBasic;
 
   /**
    * Nos méthodes exportées
@@ -43,7 +34,6 @@ define(['head'], function () {
       // le domaine où prendre les js j3p
       if (opt.isDev) {
         urlBaseJ3p = 'http://j3p.devsesamath.net';
-        urlBaseJ3p = 'http://j3p.local';
       }
 
       // et on délègue tout le reste
@@ -51,10 +41,10 @@ define(['head'], function () {
         // on lui donne nos params
         loader.init({urlBaseJ3p:urlBaseJ3p, log:log});
         var j3pOptions = {};
-        if (opt.resultCallback) {
+        if (opt.saveResultat) {
           // j3p veut un nom de fct qui existe en global dans son dom
-          window.resultCallback = resultCallback;
-          j3pOptions.nomFctScore = 'resultCallback';
+          window.saveResultat = opt.saveResultat;
+          j3pOptions.nomFctScore = 'saveResultat';
         }
         loader.charge(opt.container, ressource.parametres.g, j3pOptions);
       });
