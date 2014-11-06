@@ -32,11 +32,14 @@ var startDate
 function display(ressource, options, next) {
   var container = options.container;
   if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+  var errorsContainer = options.errorsContainer;
+  if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
+
   var baseUrl = options.baseUrl; // si on a pas tant pis pour le css
   /** class utilisée dans notre css */
   var cssClass = 'mepRess';
   var params = ressource.parametres;
-  var baseMepSwf, swfUrl, largeur, hauteur, flashvars, swfParams, swfAttributes;
+  var baseMepSwf, idSwf, swfUrl, largeur, hauteur, flashvars, swfParams, swfAttributes;
   // raccourcis
   var w = window;
   var wd = window.document;
@@ -62,9 +65,10 @@ function display(ressource, options, next) {
   if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf =  ressource.baseUrl;
   else if (options.isDev) baseMepSwf = "http://mep-col.devsesamath.net/dev/swf";
   else baseMepSwf = "http://mep-col.sesamath.net/dev/swf";
+  // id du swf
+  idSwf = Number(params.swf_id ? params.swf_id : ressource.idOrigine);
   // url du swf
-  if (params.swf_id)  swfUrl = baseMepSwf +'/exo' +params.swf_id +".swf";
-  else swfUrl = baseMepSwf +'/exo' +ressource.id +".swf";
+  swfUrl = baseMepSwf +'/exo' +idSwf +".swf";
   /**
    * Lance le chargement avec swfobject
    */
@@ -85,7 +89,7 @@ function display(ressource, options, next) {
     idMep: Number(ressource.idOrigine),
     modeleMep : (params.mep_modele === "mep1") ? "mep1" : "2",
     abreviationLangue: params.mep_langue_id,
-    idSwf : (params.swf_id) ? params.swf_id : Number(ressource.idOrigine)
+    idSwf : idSwf
   };
     // ensuite le facultatif si présent
     if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;
@@ -128,11 +132,15 @@ function display(ressource, options, next) {
     //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
     swfobject.embedSWF(swfUrl, divId, largeur, hauteur, "8", null, flashvars, swfParams, swfAttributes, callbackFn);
 
+    /**
+     * Callback du chargement
+     * @param e objet avec id,success,ref
+     */
     function callbackFn(e) {
       var retour
       if (e.success) {
         startDate = new Date();
-        log("Chargement de " + swfUrl, e);
+        log("Chargement de " + swfUrl +" ok");
       } else {
         htmlElt = wd.createElement("p");
         htmlElt.appendChild(wd.createTextNode("Javascript fonctionne" +
