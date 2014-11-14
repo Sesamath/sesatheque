@@ -248,6 +248,8 @@ function addSaveResultat(options, urlResultat, Resultat) {
         if (paramValue) result[paramName] = paramValue;
       });
       var resultat = new Resultat(result);
+      // @todo ajouter des vérifs minimales
+      
       // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
       var request = new XMLHttpRequest();
 
@@ -295,8 +297,7 @@ function addSaveResultat(options, urlResultat, Resultat) {
       request.open('POST', urlResultat, true);
       request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       try {
-        var resultatStr = "resultat=" +JSON.stringify(resultat);
-        request.send(resultatStr);
+        request.send(resultat);
       } catch (error) {
         feedback({error:"Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
       }
