@@ -43,13 +43,13 @@ var ajaxTimeout = 10000;
  * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
  * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
  * @param msg Le message à afficher
- * @param obj Des objets éventuels (autant d'arguments que l'on veut) dont on veut le dump en console
  */
 function log(msg) {
-  if (!console || !console.log) return;
-  console.log(msg);
-  for (var i = 1; i < arguments.length; i++) {
-    console.log(arguments[i]);
+  if (console && console.log) {
+    console.log(msg);
+    for (var i = 1; i < arguments.length; i++) {
+      console.log(arguments[i]);
+    }
   }
 }
 
@@ -178,7 +178,7 @@ function init(options) {
   // on exporte aux plugins ces fcts que l'on met dans de dom global
   /** en prod on envoie rien en console */
   if (options.isDev) w.log = log;
-  else w.log = function () { return; };
+  else w.log = function () { };
   // on vérifie que l'on a nos containers et on les créé sinon
   if (!errorsContainer) {
     errorsContainer = w.getElement('div', {id:'errors', class:'error'});
@@ -252,6 +252,8 @@ function addSaveResultat(options, urlResultat, Resultat) {
 
       // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
       var request = new XMLHttpRequest();
+      // pour que le navigateur envoie les cookies
+      request.withCredentials = true;
 
       // la fct de retour est facultative, mais on affiche toujours le picto
       function feedback(retour) {
