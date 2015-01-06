@@ -21,7 +21,11 @@
   </div>
 
   <div id="body" class="container">
-  {#flashBloc}{.|s}{/flashBloc}
+    {?error}<p class="has-error">{error}</p>{/error}
+    {#errors}<p class="has-error">{.}</p>{/errors}
+
+    {#flashBloc}{.|s}{/flashBloc}
+
     <div class="row">
 
         <div class="col-md-3" id="sidebar">
