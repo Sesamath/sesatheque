@@ -8,7 +8,7 @@
   "dependencies": {
     "inotify": "^1.2.1",
     "knex": "^0.5.14",
-    "lassi": "http://npm.arnumeral.fr/package/lassi/1.7",
+    "lassi": "git://src.sesamath.net/lassi",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",
@@ -16,7 +16,6 @@
     "pg": "^3.4.1",
     "request": "^2.39.0",
     "seq": "^0.3.5",
-    "taffydb": "^2.7.2",
     "underscore": "^1.7.0",
     "xml2js": "^0.4.4"
   },

@@ -39,19 +39,6 @@ var ajaxTimeout = 10000;
  * log est ajouté par init (dépend du contexte)
  */
 
-/**
- * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
- * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
- * @param msg Le message à afficher
- */
-function log(msg) {
-  if (console && console.log) {
-    console.log(msg);
-    for (var i = 1; i < arguments.length; i++) {
-      console.log(arguments[i]);
-    }
-  }
-}
 
 /**
  * Ajoute une css dans le <head> courant
@@ -164,6 +151,35 @@ define({
   }
 });
 
+/**
+ * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
+ * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
+ * @param msg Le message à afficher
+ */
+function log(msg) {
+  if (console && console.log) {
+    console.log(msg);
+    for (var i = 1; i < arguments.length; i++) {
+      console.log(arguments[i]);
+    }
+  }
+}
+
+/**
+ * Récupère un paramètre de l'url courante
+ * Inspiré de http://stackoverflow.com/a/11582513
+ * @param name Le nom du paramètre
+ * @returns Sa valeur (ou null s'il n'existait pas)
+ */
+function getURLParameter(name) {
+  // log("getURLParameter(" +name +") sur " +window.location.search);
+  var regexp = new RegExp('[?|&]' + name + '=([^&#]+?)(&|#|$)');
+  var param = regexp.exec(window.location.search)
+  if (param) {
+    param = decodeURIComponent(param[1].replace(/\+/g, '%20'));
+  }
+  return param;
+}
 
 /**
  * helper de load, initialise les chemins des librairies pour les require des plugins
@@ -305,20 +321,4 @@ function addSaveResultat(options, urlResultat, Resultat) {
       }
     }
   }
-}
-
-/**
- * Récupère un paramètre de l'url courante
- * Inspiré de http://stackoverflow.com/a/11582513
- * @param name Le nom du paramètre
- * @returns Sa valeur (ou null s'il n'existait pas)
- */
-function getURLParameter(name) {
-  // log("getURLParameter(" +name +") sur " +window.location.search);
-  var regexp = new RegExp('[?|&]' + name + '=([^&#]+?)(&|#|$)');
-  var param = regexp.exec(window.location.search)
-  if (param) {
-    param = decodeURIComponent(param[1].replace(/\+/g, '%20'));
-  }
-  return param;
 }

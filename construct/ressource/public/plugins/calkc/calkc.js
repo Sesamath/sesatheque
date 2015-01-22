@@ -33,67 +33,58 @@ define(['sesaswf'], function (module) {
   sesaswf = module
 
   // on exporte dans le dom global cette fct que le swf appellera
-  window.com_calkc_resultat = com_calkc_resultat
+
 
   return {
-    display   : display,
-    showResult: showResult
+    /**
+     * Affiche la ressource dans l'élément d'id mepRess
+     * @param {Object}   ressource   L'objet ressource tel qu'il sort de la bdd
+     * @param {Function} next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
+     */
+    display: function (ressource, next) {
+      var swfUrl, options;
+
+      log('start calkc display avec la ressource', ressource)
+      //les params minimaux
+      if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
+        throw new Error("Paramètres manquants");
+      }
+
+      // On réinitialise le conteneur
+      container.innerHTML = '';
+      // Ajout css
+      addCss(baseUrl + '/calkc.css');
+
+      // callback de réponse (toujours appelée par le swf) exportée dans le dom (nom en dur dans le swf)
+      if (options.saveResultat) {
+        /**
+         * Appelée par calkc.swf à la validation d'une opération
+         * elle a pour but d'enregistrer le resultat en base
+         */
+        window.com_calkc_resultat = function (nombrequestions, numeroquestion, reponse) {
+          // reponse est de la forme 1#+#1#egal#2#|13|ok
+          // reponse comporte la liste des touches tapées|le temps écoulé|ok/suite/tard
+          histoReponses.push([nombrequestions, reponse]);
+          options.saveResultat({reponse : histoReponses});
+        }
+      } else {
+        window.com_calkc_resultat = function () {};
+      }
+
+      // url du swf
+      swfUrl = baseUrl + '/calkc.swf';
+      // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
+      container.setAttribute("width", 589);
+      options = {
+        largeur  : 589,
+        hauteur  : 393,
+        flashvars: {
+          parametres_xml: ressource.parametres.xml.replace('\\n', '').replace('\n', '')
+        }
+      }
+      log('appel swfobject avec', options)
+      sesaswf.load(container, swfUrl, options, next);
+    }
   }
 });
 
-// reste à définir nos méthodes
-
-/**
- * Affiche la ressource dans l'élément d'id mepRess
- * @param {Object}   ressource   L'objet ressource tel qu'il sort de la bdd
- * @param {Function} next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
- */
-function display(ressource, next) {
-  var swfUrl, options;
-
-  log('start calkc display avec la ressource', ressource)
-  //les params minimaux
-  if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
-    throw new Error("Paramètres manquants");
-  }
-
-  // On réinitialise le conteneur
-  container.innerHTML = '';
-  // Ajout css
-  addCss(baseUrl + '/calkc.css');
-
-  // url du swf
-  swfUrl = baseUrl +'/calkc.swf';
-  // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-  container.setAttribute("width", 589);
-  options = {
-    largeur : 589,
-    hauteur : 393,
-    flashvars : {
-      parametres_xml :ressource.parametres.xml.replace('\\n', '').replace('\n', '')
-    }
-  }
-  log('appel swfobject avec', options)
-  sesaswf.load(container, swfUrl, options, next);
-}
-
-/**
- * Affiche un résultat sauvegardé préalablement
- * @param {Object}      result Le résultat tel qu'il a été passé à saveResult au préalable
- * @param {HTMLElement} elt    L'élément html (https://developer.mozilla.org/fr/docs/Web/API/HTMLElement)
- */
-function showResult(result, elt) {
-  log('showResult', result)
-  log("dans l'élément", elt)
-}
-
-/**
- * Appelée par calkc.swf à la validation d'une opération
- * elle a pour but d'enregistrer le resultat en base
- */
-function com_calkc_resultat(nombrequestions, numeroquestion, reponse) {
-  // reponse est de la forme 1#+#1#egal#2#|13|ok
-  // reponse comporte la liste des touches tapées|le temps écoulé|ok/suite/tard
-  histoReponses.push([nombrequestions, reponse]);
-  if (window.saveResult) window.saveResult({reponse : histoReponses});
-}
