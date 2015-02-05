@@ -22,6 +22,17 @@ GLOBAL.assert = require('./assert.js')
 
 // Construction de l'application
 var application = lassi.Application()
+// que l'on met en global parce que certains veulent y accéder par là
+// (oui, saimal de laisser les propriétés accessible en écriture)
+GLOBAL.app = application
+
+/* console.log("application dans construct")
+console.log(application) /* */
+
+// on regarde si la conf réclame du chargement complémentaire
+if (application.settings.afterInit) {
+  application.settings.afterInit()
+}
 
 // on ajoute memcache
 log('Memcache sur ' +application.settings.memcache)
@@ -41,6 +52,7 @@ application.on('boot', function () {
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
 /* */
 application.on('beforeRailUse', function(name, settings) {
+  console.log('dans construct, beforeRailUse de ' +name)
   if (name=='logger') {
     console.log('beforeRailUse logger')
     // sert à rien de modifier settings, pas pris en compte car asynchrone

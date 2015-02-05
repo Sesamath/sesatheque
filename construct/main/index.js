@@ -3,30 +3,29 @@
 var _ = require('underscore')._;
 
 /**
- * Notre component principal (qui défini le layout et le rendu)
+ * Notre component principal, défini le layout et le rendu,
+ * et ajoute des méthodes génériques à utiliser dans d'autres components
  * @constructor
  */
 var mainComponent = lassi.Component()
 
-function setLayout(useLayout) {
-  var ctx = useLayout.context
-  if (ctx.status) {
-    switch(ctx.status) {
-      case 404: useLayout(mainComponent, 'layout-page404'); break;
-      case 403: useLayout(mainComponent, 'layout-page403'); break;
-      default: useLayout(mainComponent, 'layout-page-error');
-    }
-  } else if (ctx.forceLayout) {
-    useLayout(mainComponent, ctx.forceLayout);
-  } else {
-    useLayout(mainComponent, 'layout-page');
-  }
-}
-
 mainComponent.initialize = function(next) {
-  console.log('HERE');
+  console.log('initialize mainComponent');
   // un écouteur pour l'affectation du bon layout aux réponses "html"
-  this.application.transports.html.on('layout', setLayout);
+  this.application.transports.html.on('layout', function (useLayout) {
+    var ctx = useLayout.context
+    if (ctx.status) {
+      switch(ctx.status) {
+        case 404: useLayout(mainComponent, 'layout-page404'); break;
+        case 403: useLayout(mainComponent, 'layout-page403'); break;
+        default: useLayout(mainComponent, 'layout-page-error');
+      }
+    } else if (ctx.forceLayout) {
+      useLayout(mainComponent, ctx.forceLayout);
+    } else {
+      useLayout(mainComponent, 'layout-page');
+    }
+  });
   next()
 
   /**

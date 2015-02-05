@@ -1,6 +1,0 @@
-{!blockAuth!}
-{?user}
-    <p>{user.prenom} {user.nom}<br />(<a href="?deconnexion">me déconnecter</a>)</p>
-{:else}
-    <p><a href="?connexion">Connexion</a></p>
-{/user}
