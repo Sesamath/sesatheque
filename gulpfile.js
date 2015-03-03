@@ -1,41 +1,44 @@
-"use strict";
-/*
- * This file is part of "Lassi".
- *    Copyright 2009-2012, arNuméral
- *    Author : Yoran Brault
- *    eMail  : yoran.brault@arnumeral.fr
- *    Site   : http://arnumeral.fr
+/**
+ * This file is part of Sesatheque.
+ *   Copyright 2014-2015, Association Sésamath
  *
- * "Collection" is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
+ * Sesatheque is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License version 3
+ * as published by the Free Software Foundation.
  *
- * "Collection" is distributed in the hope that it will be useful,
+ * Sesatheque is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General public
- * License along with "Collection"; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Sesatheque (LICENCE.txt).
+ * @see http://www.gnu.org/licenses/agpl.txt
+ *
+ *
+ * Ce fichier fait partie de l'application Sésathèque, créée par l'association Sésamath.
+ *
+ * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
+ * les termes de la GNU Affero General Public License version 3 telle que publiée par la
+ * Free Software Foundation.
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
+ * Consultez la GNU Affero General Public License pour plus de détails.
+ * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
+ * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
+ * pour une explication en français)
  */
+"use strict"
 
-var gulp   = require('gulp');
-var sass   = require('gulp-sass');
-var jshint = require('gulp-jshint');
-var fs     = require('fs');
-require('lassi');
+var gulp   = require('gulp')
+var spawn   = require('child_process').spawn
+var jshint = require('gulp-jshint')
+var fs     = require('fs')
+var del     = require('del')
+var childProcess = require('child_process')
+require('lassi')
 
-gulp.task('compile-sass', function () {
-  gulp
-    .src('construct/**/public/styles/*.scss', {base: './'})
-    .pipe(sass({
-      errLogToConsole: true,
-      sourceComments: 'map'}))
-    .pipe(gulp.dest('./'));
-})
+var config = require('./config')
 
 // gulp.task('watch', function() {
 //  var launcher = new lassi.tools.Launcher({ path: 'construct/index.js' });
@@ -50,10 +53,12 @@ gulp.task('compile-sass', function () {
 /**
  * Lance le serveur (node et livereload) puis se met en écoute des modification de fichier.
  */
-gulp.task('watch', function () {
-  var launcher = new lassi.tools.Launcher({ path: 'construct/index.js' });
-  gulp.watch(['construct/**/*', '!construct/**/public/**/*']).on('change', function() { launcher.restart(); });
-  launcher.start();
+gulp.task('launch', function () {
+  var server
+  gulp.watch(['construct/**/*', '!construct/**/public/**/*']).on('change', function() {
+    server.restart();
+  });
+  server.start();
 })
 
 /**
@@ -123,7 +128,7 @@ gulp.task('purge', function() {
 
 gulp.task('reset', ['purge', 'compile-sass', 'watch'])
 
-gulp.task('default', ['compile-sass', 'watch'])
+gulp.task('default', ['launch'])
 
 /**
  * On conserve ce bout de code qui pourrait resservir
