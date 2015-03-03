@@ -34,7 +34,6 @@ var gulp   = require('gulp')
 var spawn   = require('child_process').spawn
 var jshint = require('gulp-jshint')
 var fs     = require('fs')
-var del     = require('del')
 var childProcess = require('child_process')
 require('lassi')
 

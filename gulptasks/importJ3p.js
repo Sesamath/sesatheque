@@ -1,5 +1,8 @@
 /**
+ * OBSOLETE
  * Ce script passe en revue les ressources j3p de l'ancienne bibli (symfony) qu'Alexis avait complété à la main
+ * Il est remplacé par gulptasks/importJ3pViaXml.js qui parse le xml, récupère les infos de BIBS
+ * et complète éventuellement avec oldbibli
  */
 'use strict';
 

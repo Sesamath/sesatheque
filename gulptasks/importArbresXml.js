@@ -1,6 +1,6 @@
 /**
- * Ce script passe en revue les ressources des xml
- * ça vient de la table BIBS (origine = labomepBIBS) sauf pour les tags em et am
+ * Ce script passe en revue les ressources des xml de labomep et les converti en arbre qu'il envoie à sesatheque
+ * Les infos des ressources viennent de la table BIBS (origine = labomepBIBS) sauf pour les tags em et am où c'est MEPS
  */
 'use strict';
 
@@ -192,7 +192,7 @@ function deferAdd(ressource) {
 }
 
 /**
- * Parse un xml (et appelle parseArbre avec le résultat)
+ * Parse un xml (et appelle splitOrNotToSplit avec le résultat)
  * @param xmlFile
  */
 function parseXml(xmlFile) {
