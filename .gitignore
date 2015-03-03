@@ -1,10 +1,5 @@
-build
 node_modules
 npm-debug.log
-modules
-.sass-cache
 .idea
-bibliotheque.komodoproject
 _private
-logs
-temp
+logs/*
