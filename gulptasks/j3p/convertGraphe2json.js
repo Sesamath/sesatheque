@@ -1,13 +1,7 @@
 /**
- * Created by daniel on 03/03/15.
- */
-/**
  * Moulinette qui transforme un graphe au format J3P en json (utile pour la bibli)
- * code envoyé par Alexis le 20/01/15 à 16:17
+ * code envoyé par Alexis le 20/01/15 à 16:17, avec correctif du 04/03/15 à 09:56
  */
-
-
-
 function J3PSupprimeEspaces(ch) {
   while (ch.indexOf(' ') != -1) {
     var pos = ch.indexOf(' ');
@@ -79,6 +73,15 @@ function bibliotheque(ch) {
     return chaine;
   }
 
+  //fonction qui remplace des quotes par des guillemets
+  function remplace_quotes(ch) {
+    var chaine = ch;
+    if (ch.charAt(0) == "'" && ch.charAt(ch.length - 1) == "'") {
+      chaine = '"' + ch.substring(1, ch.length - 1) + '"';
+    }
+    return chaine;
+  }
+
   //fonction réciproque
   function remet_virgules(ch) {
     var chaine;
@@ -118,8 +121,10 @@ function bibliotheque(ch) {
   for (var k = 0; k < tab1.length; k++) {
     //tab1[0]=[1,'proglab',[{pe:"<=0.6",nn:"1",conclusion:"Recommencez, c'est trop nul  "},{pe:">=0.6",nn:"2",conclusion:"Continuons mais sans aide maintenant. "},{fichier:"exoprog1.txt",param1:5}}]]
     // Remplacement de l'éventuel guillemet simple du nom de la section par un guillemet double (ou ajout de guillemets doubles)
-    var ch1 = tab1[k]
-    test = ch1.charAt(ch.indexOf(",") + 1);
+    var ch1 = tab1[k];
+    // console.log("ch1=", ch1)
+    test = ch1.charAt(ch1.indexOf(",") + 1);
+    // console.log("test=", test)
     if (test == "'") {
       pos1 = ch1.indexOf(",") + 2;//premier caractere du nom de la section
       pos2 = ch1.indexOf(",", pos1) - 2;//dernier caractere du nom de la section
@@ -132,6 +137,7 @@ function bibliotheque(ch) {
       ch1 = J3PRemplace(ch1, pos1, pos2, '"' + ch1.substring(pos1, pos2 + 1) + '"')
     }
     tab1[k] = ch1;
+    // console.log("tab1[k]=", tab1[k])
     // Extraction de ch2={pe:"<=0.6",nn:"1",conclusion:"Recommencez "},{pe:">=0.6",nn:"2",conclusion:"Continuons mais sans aide maintenant. "},{fichier:"exoprog1.txt"}
     var possecondcrochet = tab1[k].substring(1).indexOf("[");
     ch2 = tab1[k].substring(possecondcrochet + 2, tab1[k].lastIndexOf("]") - 1);//+2 et non +1 à cause du substring(1)
@@ -152,30 +158,60 @@ function bibliotheque(ch) {
     //           fichier:"exoprog3.txt",param1:5]
 
     var tab3 = [];
-    if (tab2[tab2.length - 1].indexOf(",nn") == -1) {
+    if (tab2[tab2.length - 1].indexOf(",nn") == -1 && tab2[tab2.length - 1] !== "") {
       //il y a des paramètres : fichier:"exoprog1.txt",param1:5
       //Initialement split sur la virgule mais posait pb pour les paramètres du type tableau fichier:"exoprog1.txt",param1:5,["choix1","choix2"]
-      //on remplace donc les virgule des tableaux par des points_virgules et on les remettra ensuite.
-      var tab_temp = remplace_virgules(tab2[tab2.length - 1]);
-      tab3 = tab_temp.split(",");
-      //tab3 = tab2[tab2.length-1].split(",");
-      //console.log("tab 3 splitté :");
-
-      //tab3 = [fichier:"exoprog1.txt",param1:5]`
-      for (var i = 0; i < tab3.length; i++) {
-        //on remet les virgules dans les tableaux :
-        tab3[i] = remet_virgules(tab3[i]);
-        //console.log("tab3[i]="+tab3[i]);
-        ch3 = J3PSupprimeEspaces(tab3[i].substring(0, tab3[i].indexOf(':')));//fichier
-        if (ch3.charAt(0) != '"') {
-          //  console.log("ch3="+tab3[i].substring(tab3[i].indexOf(":")))
-          ch3 = '"' + ch3 + '"';
-          tab3[i] = ch3 + tab3[i].substring(tab3[i].indexOf(":"));
-        }
+      //Autre modif au 03/03/2015 : pb avec les params du type ["[-5;5]","[0;0]"] dont la virgule n'était pas convertie en *, autre méthode : split suivant le :
+      // console.log("avant split", tab2[tab2.length - 1])
+      var tab_temp = tab2[tab2.length - 1].split(":");
+      // console.log("tab_temp=", tab_temp)
+      //tab_temp est alors un tableau avec le premier un paramètre et ensuite la valeur d'un param une virgule et un nouveau param, sauf pour le dernier
+      var tab3 = new Array;
+      tab3[0] = J3PSupprimeEspaces(tab_temp[0]);
+      if (tab3[0].charAt(0) != '"') {
+        tab3[0] = '"' + tab3[0] + '"';
       }
-      //console.log(tab3)
+      for (var i = 1; i < tab_temp.length - 1; i++) {
+        //on splitte suivant la dernière virgule, la première pouvant être un élément de la valeur du param...
+        var index = tab_temp[i].lastIndexOf(",");
+        var valeur = remplace_quotes(tab_temp[i].substring(0, index));
+        var param_suivant = J3PSupprimeEspaces(tab_temp[i].substring(index + 1));
+        // console.log("valeur=", valeur, " et param suivant=", param_suivant);
+        //on ajoute eventuellement des guillemets au nom du param
+        if (param_suivant.charAt(0) != '"') {
+          // console.log("param_suivant="+tab3[i].substring(tab3[i].indexOf(":")))
+          param_suivant = '"' + param_suivant + '"';
+          //on doit avoir en tab3[i] "param":valeur
+        }
+        tab3[i - 1] = tab3[i - 1] + ":" + remplace_quotes(valeur);
+        tab3[i] = param_suivant;
+        // console.log("tab3[i]=", tab3[i])
+      }
+      tab3[tab_temp.length - 2] = tab3[tab_temp.length - 2] + ":" + remplace_quotes(tab_temp[tab_temp.length - 1])
+      //on remplace donc les virgule des tableaux par des points_virgules et on les remettra ensuite.
+      /*var tab_temp=remplace_virgules(tab2[tab2.length-1]);
+       // console.log("tab_temp=",tab_temp)
+       tab3=tab_temp.split(",");
+       //tab3 = tab2[tab2.length-1].split(",");
+       //console.log("tab 3 splitté :");
+
+       //tab3 = [fichier:"exoprog1.txt",param1:5]`
+       for (var i=0;i<tab3.length;i++){
+       //on remet les virgules dans les tableaux :
+       tab3[i]=remet_virgules(tab3[i]);
+       //console.log("tab3[i]="+tab3[i]);
+       ch3 = J3PSupprimeEspaces(tab3[i].substring(0,tab3[i].indexOf(':')));//fichier
+       // console.log("ch3=",ch3)
+       if (ch3.charAt(0)!='"'){
+       // console.log("ch3="+tab3[i].substring(tab3[i].indexOf(":")))
+       ch3='"'+ch3+'"';
+       tab3[i]=ch3+remplace_quotes(tab3[i].substring(tab3[i].indexOf(":")));
+       // console.log("tab3[i]=",tab3[i]);
+       }
+       }*/
+      // console.log("!!!! tab3=", tab3)
       tab2.pop();//on supprime le dernier élément contenant les paramètres
-      //console.log(tab2)
+      // console.log("tab2=", tab2)
     }
     // A ce stade tab2 ne contient plus de paramètres (ou n'en contenait pas)
     // les éléments restant sont des accolades de condition
@@ -204,17 +240,17 @@ function bibliotheque(ch) {
       tab2[j] = '{' + tab2[j] + '}';
 
     ch2 = '[' + tab2.join(",") + ']';
-    //console.log(ch2)
+    // console.log("ch2=", ch2)
     //[{"pe":"<=0.6","nn":"1","conclusion":"Recommencez, c'est trop nul "},{"pe":">=0.6","nn":"2","conclusion":"Continuons mais sans aide maintenant. "},{"fichier":"exoprog1.txt","param1":5}]
     sortie += debutchaine + ch2 + "]" + ",";
-
+    // console.log("sortie=", sortie)
   }
   sortie = sortie.substring(0, sortie.length - 1);//on enleve la dernière virgule
   //console.log(sortie)
   sortie = "[" + sortie + "]";
-  //console.log("chaine au format json:")
+  // console.log("chaine au format json:")
 
-  //console.log(sortie);
+  // console.log(sortie);
 
   return sortie;
 
@@ -223,8 +259,8 @@ function bibliotheque(ch) {
 }
 
 /* on commente ces 2 lignes
-var legraphe = '[1,"proglab",[{pe:"<=0.6",nn:"1",conclusion:"Recommencez, c\'est trop nul "},{pe:">=0.6",nn:"2",conclusion:"Continuons mais sans aide maintenant. "},{fichier:"exoprog1.txt",param1:5}]];';
-bibliotheque(legraphe);
+ var legraphe = '[1,"proglab",[{pe:"<=0.6",nn:"1",conclusion:"Recommencez, c\'est trop nul "},{pe:">=0.6",nn:"2",conclusion:"Continuons mais sans aide maintenant. "},{fichier:"exoprog1.txt",param1:5}]];';
+ bibliotheque(legraphe);
  et ajoute celle qui suit */
 
 module.exports = bibliotheque
