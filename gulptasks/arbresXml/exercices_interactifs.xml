@@ -7210,6 +7210,16 @@ ANCIENS EXOS<d n="Prendre un bon départ">
                     <j3p i="4003131" e="1" ico="j3p_s"/>
                 </d>
                 <d n="Factorisation et études de signe">
+                    <d n="Calculs algébriques">
+                         <j3p i="4003187" e="1" ico="j3p_g"/>
+                         <j3p i="4003189" e="1" ico="j3p_g"/>
+                         <j3p i="4003191" e="1" ico="j3p_g"/>
+                         <j3p i="4003193" e="1" ico="j3p_g"/>
+                         <j3p i="4003195" e="1" ico="j3p_g"/>
+                         <j3p i="4003197" e="1" ico="j3p_g"/>
+                         <j3p i="4003199" e="1" ico="j3p_g"/>
+                       
+                    </d>
                     <d n="Etudes de signe à partir de la courbe">
                         <j3p i="4003141" e="1" ico="j3p_s"/>
                         <j3p i="4003143" e="1" ico="j3p_s"/>
@@ -7236,6 +7246,11 @@ ANCIENS EXOS<d n="Prendre un bon départ">
                       <j3p i="4003173" e="1" ico="j3p_s"/>
                       <j3p i="4003175" e="1" ico="j3p_s"/>
                     </d>
+                    <d n="Choix de la forme">
+                      <j3p i="4003177" e="1" ico="j3p_s"/>
+                      <j3p i="4003183" e="1" ico="j3p_s"/>
+                      <j3p i="4003185" e="1" ico="j3p_s"/>
+                   </d>    
                 </d>
                 
                 
