@@ -129,6 +129,16 @@ window.setError = function (errorMsg) {
 }
 
 /**
+ * Cache le titre (en global pour que les plugins puissent le faire)
+ */
+window.hideTitle = function () {
+  var titre = wd.getElementById('titre');
+  if (titre) titre.style = "display: none";
+  log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
+  log(titre);
+}
+
+/**
  * Ces fonctions sont celles de notre module js
  */
 
@@ -158,8 +168,7 @@ define({
 
         // On vire le titre si on nous le demande via un param dans l'url
         if (/\?.*showTitle=0/.test(wd.URL)) {
-          var titre = wd.getElementById('titre');
-          if (titre) titre.style = {display: "none"};
+          w.hideTitle();
         }
 
         var displayOptions = {

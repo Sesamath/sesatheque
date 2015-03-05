@@ -69,6 +69,8 @@ define(['head'], function () {
 
       // et on délègue tout le reste
       require([urlBaseJ3p + '/outils/loader.js'], function (loader) {
+        // on cache le titre
+        window.hideTitle();
         // on lui donne nos params
         loader.init({urlBaseJ3p:urlBaseJ3p, log:log});
         var j3pOptions = {};
