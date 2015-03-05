@@ -558,9 +558,7 @@ function addRessource(ressource, next) {
   var options = {
     url : 'http://localhost:' +port +'/api/ressource',
     json: true,
-    //body: JSON.stringify({ressource:ressource}),
-    content_type: 'charset=UTF-8',
-    form: ressource
+    body: ressource
   }
   var idMix = ressource.id ? ressource.id : ressource.origine +'-' +ressource.idOrigine
   request.post(options, function (error, response, body) {
@@ -595,9 +593,7 @@ function mergeRessource(ressourcePartielle, next) {
   var options = {
     url : 'http://localhost:' +port +'/api/ressource/merge',
     json: true,
-    //body: JSON.stringify({ressource:ressource}),
-    content_type: 'charset=UTF-8',
-    form: ressourcePartielle
+    body: ressourcePartielle
   }
   request.post(options, function (error, response, body) {
     nbLaunched--

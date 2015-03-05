@@ -194,13 +194,15 @@ function parseRessource(row) {
   idsParsed.push(ressource.idOrigine);
   // on ajoute le graphe qu'il faut transformer
   try {
-    ressource.parametres.g = JSON.parse(graphe2Json(row.graphe))
+    var json = graphe2Json(row.graphe);
+    ressource.parametres.g = JSON.parse(json)
   } catch (error) {
     addError(ressource.idOrigine, 'graphe invalide : ' +error)
     log2file('graphe de ' +ressource.idOrigine +' invalide : \n' +row.graphe)
     return
   }
   addCatExoInteractif(ressource)
+  log('qui donne', ressource)
   if (logProcess) log('processing ' + ressource.idOrigine)
   deferAdd(ressource)
 }
@@ -217,10 +219,9 @@ function addRessource(ressource, next) {
   var options = {
     url : 'http://localhost:3001/api/ressource',
     json: true,
-    //body: JSON.stringify({ressource:ressource}),
-    content_type: 'charset=UTF-8',
-    form: ressource
+    body: ressource
   }
+
   request.post(options, function (error, response, body) {
     nbLaunched--
     idsResp.push(ressource.idOrigine)
@@ -284,7 +285,7 @@ function getJ3pIds(arbre) {
       if (child.attrib.i) {
         j3pIds.push(child.attrib.i)
       } else {
-        addError(xmlName, "élément " +child.tag +" sans id , n° d'ordre " +child._id)
+        addError("élément " +child.tag +" sans id , n° d'ordre " +child._id)
       }
     } else if (child.tag === 'd') {
       j3pIds = j3pIds.concat(getJ3pIds(child))
@@ -370,15 +371,19 @@ module.exports = function () {
     // en cas d'interruption on veut le résultat quand même
     process.on('SIGTERM', function () {
       displayResult();
-      process.exit()
+      exit()
     })
     process.on('SIGINT', function () {
       displayResult();
-      process.exit()
+      exit()
     })
 
-    // on parse le xml
-    idsFound = parseJ3pXml()
+    if (argv[0] === '--id') {
+      idsFound = argv[1].split(',');
+    } else {
+      // on parse le xml
+      idsFound = parseJ3pXml()
+    }
     if (idsFound) {
       idsFound.forEach(function (id) {
         flow()
@@ -413,7 +418,7 @@ module.exports = function () {
             })
             .seq(function () {
               log('END')
-              process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
+              exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
             })
             .catch(function (error) {
               log('Erreur dans le flow :', error);
@@ -421,7 +426,6 @@ module.exports = function () {
       })
     } else {
       log("Aucune ressource j3p trouvée dans le xml")
-      //process.exit()
     }
   }
 }

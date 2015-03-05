@@ -531,9 +531,7 @@ function addRessource(ressource, next) {
   var options = {
     url : 'http://localhost:3001/api/ressource',
     json: true,
-    //body: JSON.stringify({ressource:ressource}),
-    content_type: 'charset=UTF-8',
-    form: ressource
+    body: ressource
   }
   request.post(options, function (error, response, body) {
     nbLaunched--

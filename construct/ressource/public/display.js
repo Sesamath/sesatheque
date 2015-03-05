@@ -134,8 +134,8 @@ window.setError = function (errorMsg) {
 window.hideTitle = function () {
   var titre = wd.getElementById('titre');
   if (titre) titre.style = "display: none";
-  log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
-  log(titre);
+  /* log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
+  log(titre); */
 }
 
 /**

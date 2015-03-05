@@ -35,8 +35,7 @@ function postJson(url, obj) {
   var options = {
     url : url,
     json: true,
-    content_type: 'charset=UTF-8',
-    form: obj
+    body: obj
   }
   request.post(options, function (error, response, body) {
     if (error) log('Erreur ' +error)

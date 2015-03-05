@@ -397,9 +397,7 @@ function addRessource(ressource, next) {
   var options = {
     url : 'http://localhost:' +port +'/api/arbre' +suffix,
     json: true,
-    //body: JSON.stringify({ressource:ressource}),
-    content_type: 'charset=UTF-8',
-    form: ressource,
+    body: ressource,
     timeout:defaultTimeout
   }
   //log("appel de " +options.url +" avec " +ressource.idOrigine)
