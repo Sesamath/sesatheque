@@ -82,7 +82,7 @@ application.on('boot', function () {
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
 /* */
-application.on('beforeRailUse', function(name, settings) {
+application.on('beforeRailUse', function (name, settings) {
   console.log('dans construct, beforeRailUse de ' +name)
   if (name=='logger') {
     console.log('beforeRailUse logger')
@@ -126,6 +126,24 @@ application.on('beforeRailUse', function(name, settings) {
     console.log(instance.toString())
   }
 }) */
+
+/**
+ * On ajoute le CORS après compression
+ */
+application.on('afterRailUse', function (name, settings, middleware) {
+  // console.log('afterRailUse ' +name, middleware) // affiche le code de chaque middleware
+  if (name === 'cookie') {
+    console.log("On ajoute CORS sur le rail")
+    application.use('cors', function() {
+      return function(req, res, next) {
+        console.log('cors : ', req)
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header("Access-Control-Allow-Headers", "X-Requested-With");
+        next();
+      }
+    });
+  }
+})
 
 // et on lance le boot
 application.boot()

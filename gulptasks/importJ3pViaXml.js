@@ -177,11 +177,11 @@ function addCatExoInteractif(ressource) {
  */
 function parseRessource(row) {
   // if (idsParsed.length > 2) return
-  log('parseRessource de ', row)
+  //log('parseRessource de ', row)
   var ressource = {
     titre            : row.titre,
     origine          : 'labomepBIBS',
-    idOrigine        : row.id,
+    idOrigine        : String(row.id),
     typeTechnique    : 'j3p',
     resume           : row.resume || '',
     description      : row.description || '',
@@ -202,7 +202,7 @@ function parseRessource(row) {
     return
   }
   addCatExoInteractif(ressource)
-  log('qui donne', ressource)
+  //log('qui donne', ressource)
   if (logProcess) log('processing ' + ressource.idOrigine)
   deferAdd(ressource)
 }
