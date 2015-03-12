@@ -61,7 +61,7 @@ var port = serverConf.server && serverConf.server.port || 3000;
 
 /**
  * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
- * pour les avoir sous la main pour éventuel debug
+ * pour les avoir sous la static pour éventuel debug
  */
 /** ids des ressources traitées ici */
 var idsParsed = [];

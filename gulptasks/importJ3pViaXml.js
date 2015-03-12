@@ -50,7 +50,7 @@ var kLabomep = knex(dbConfigLabomep)
 
 /**
  * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
- * pour les avoir sous la main pour éventuel debug
+ * pour les avoir sous la static pour éventuel debug
  */
 var idsFound = []
 /** ids des ressources traitées ici */
@@ -338,7 +338,7 @@ function purgeJ3pAndExit() {
             .raw(query)
             .exec(function (error, rows) {
               if (error) throw error
-              // la suite est jamais affichée :-/ (mais suffit de passer une fois la requete ci-dessus à la main)
+              // la suite est jamais affichée :-/ (mais suffit de passer une fois la requete ci-dessus à la static)
               else {
                 log('retour', rows);
                 next()

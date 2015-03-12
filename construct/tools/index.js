@@ -124,7 +124,7 @@ tools.stringify = function(obj, indent) {
     try {
       buffer = indent ? JSON.stringify(obj, null, indent):JSON.stringify(obj);
     } catch (error) {
-      // on tente une construction à la main pour chacun des 1ers niveaux
+      // on tente une construction à la static pour chacun des 1ers niveaux
       var pile = [];
       _.each(obj, function(value, key) {
         buffer = '"' + key + '":'

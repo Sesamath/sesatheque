@@ -30,10 +30,12 @@
  */
 
 'use strict';
-/*global lassi*/
 
 /**
  * Définition de l'application
+ * - chargement lassi
+ * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
+ * - boot de l'appli
  */
 
 /*
@@ -42,25 +44,23 @@ console.log(process.argv)
 /* console.log("et l'environnement")
 console.log(process.env) */
 
-var _ = require('underscore')._
+// nos loggers
+GLOBAL.log = require('./tools/log.js')
 
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
+log("lassi juste après init", lassi)
 
-// nos loggers
-GLOBAL.log = require('./tools/log.js') // jshint ignore:line
-log("dump lassi", lassi)
 
 // nos components
-require('./main')
+require('./static')
 //require('./ressource')
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
-var sesatheque = lassi.component('sesatheque', ['main'])
-
+var sesatheque = lassi.component('sesatheque', ['static'])
 log("sesatheque dans construct", sesatheque)
 
-// on ajoute memcache si précisé
+// on ajoute memcache si précisé dans les settings
 if (lassi.settings.memcache) {
   sesatheque.config(function($cache) {
     $cache.addEngine('', 'memcache', lassi.settings.memcache);
@@ -85,7 +85,7 @@ lassi.on('bootstrap', function () {
 });
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
-/* */
+/* * /
 lassi.on('beforeRailUse', function (name, settings) {
   console.log('dans construct, beforeRailUse de ' +name)
   if (name=='logger') {
@@ -134,8 +134,8 @@ lassi.on('beforeRailUse', function (name, settings) {
 /**
  * On ajoute le CORS après cookie
  */
-lassi.on('afterRailUse', function (name, settings, middleware) {
-  // console.log('afterRailUse ' +name, middleware) // affiche le code de chaque middleware
+lassi.on('afterRailUse', function (name) {
+  // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
   if (name === 'cookie') {
     console.log("On ajoute CORS sur le rail")
     lassi.use('cors', function() {

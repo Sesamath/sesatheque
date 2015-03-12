@@ -32,24 +32,18 @@
 'use strict';
 
 /**
- * Notre component principal, défini le layout et le rendu,
- * et ajoute des méthodes génériques à utiliser dans d'autres components
+ * Notre component principal, défini
+ * - le layout et les vues
+ * - les controleurs des pages statiques
  * @constructor
  */
-var mainComponent = lassi.component('main')
+var staticComponent = lassi.component('static')
 
-// On configure metas html et layout des erreurs lors de l'init du composant
-mainComponent.config(function() {
-
-  // les metas génériques du html
-  lassi.transports.html.on('metas', function(metas) {
-    metas.addCss('styles/main.css')
-    //metas.addJs('vendors/jquery.min.js')
-  })
-
+// On configure le layout des erreurs lors de l'init du composant
+staticComponent.config(function() {
   // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
   lassi.controllers.on('beforeTransport', function(data) {
-    log('on beforeTransport on a les data', data)
+    log('on beforeTransport avec les data', data)
     /* console.log('on beforeTransport on a les data')
     console.log(data) */
 
@@ -70,7 +64,7 @@ mainComponent.config(function() {
       data.$contentType = 'text/html'
       data.$layout = data.forceLayout
     }
-  });
+  })
 })
 
   /**
@@ -88,7 +82,7 @@ mainComponent.config(function() {
   }); /**/
 
 
-mainComponent.controller(function () {
+staticComponent.controller(function () {
   // tous nos controlleurs sont en html avec le même layout
   this.renderAs({
     $contentType: 'text/html',
@@ -99,7 +93,7 @@ mainComponent.controller(function () {
   this.serve(__dirname +'/public')
 
   this.get('/', function (ctx) {
-    log('le contexte dans le controleur /',ctx)
+    log('le contexte dans le controleur de static, action /',ctx)
     ctx.next({
       $metas : {
         title  : "Bienvenue dans la bibliothèque Sésamath"
@@ -108,6 +102,6 @@ mainComponent.controller(function () {
         $view : 'home',
         content: "Ce site est encore un prototype expérimental."
       }
-    });
+    })
   })
 })

@@ -29,11 +29,12 @@
  * pour une explication en français)
  */
 
+'use strict';
+
 /**
  * Nos loggers maison
  * @todo utiliser https://www.npmjs.org/package/winston
  */
-'use strict';
 
 var fs = require('fs')
 var moment = require('moment')
@@ -57,7 +58,8 @@ var filters = {}
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans la console)
  */
-var logger
+var log // jshint ignore:line
+// (log étant défini en global dans la conf il râle si on le redéfini)
 
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans dev.log)
@@ -107,7 +109,8 @@ if (env === 'development' && config.logs.debug) {
    * @param objectToDump
    * @param filter
    */
-  logger = function(message, objectToDump, filter) {
+  log = function(message, objectToDump, filter) { // jshint ignore:line
+    // (log étant défini en global dans la conf jshint il râle si on le redéfini)
     out(message, objectToDump, filter)
     /* console.log(message)
     console.log(objectToDump)*/
@@ -115,10 +118,10 @@ if (env === 'development' && config.logs.debug) {
 
 } else {
   logDebug = function() {};
-  logger = function () {} // jshint ignore:line
+  log = function () {} // jshint ignore:line
 }
 
-logger.dev = logDebug
+log.dev = logDebug
 
 // on ajoute nos fct comme méthodes de la fct principale exportée
 
@@ -126,7 +129,7 @@ logger.dev = logDebug
  * Retourne le nb de ms écoulées depuis start
  * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
  */
-logger.getElapsed = function (start) {
+log.getElapsed = function (start) {
   return (new Date()).getTime() -start
 }
 
@@ -136,7 +139,7 @@ logger.getElapsed = function (start) {
  * @param objectToDump
  * @param filter
  */
-logger.error = function (message, objectToDump, filter) {
+log.error = function (message, objectToDump, filter) {
   out(message, objectToDump, filter, errorOutputStream)
 }
 
@@ -146,22 +149,22 @@ logger.error = function (message, objectToDump, filter) {
  * @param objectToDump
  * @param filter
  */
-logger.errorData = function (message, objectToDump, filter) {
+log.errorData = function (message, objectToDump, filter) {
   out(message, objectToDump, filter, errorDataOutputStream)
 }
 
 /**
  * Active un filtre (le créé si besoin)
  */
-logger.setFilterOn = function (filter) {
+log.setFilterOn = function (filter) {
   filters[filter] = true
 }
 
 /**
  * Désactive un filtre (le créé si besoin)
  */
-logger.setFilterOff = function (filter) {
+log.setFilterOff = function (filter) {
   filters[filter] = false
 }
 
-module.exports = logger
+module.exports = log
