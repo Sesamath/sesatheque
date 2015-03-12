@@ -38,6 +38,7 @@ console.log('lecture config appli')
 var _ = require('underscore')._
 var fs = require('fs');
 var moment = require('moment')
+var tools = require('../construct/tools')
 var localConfig = require('../_private/config')
 var ressourceConfig = require('../construct/ressource/config')
 
@@ -49,9 +50,7 @@ var root  = __dirname + '/..';
  * Il peut valoir production, integration ou development (les valeurs de lassi.Staging) et sera
  * mis à development par défaut
  */
-var staging = process.env.NODE_ENV
-// si pas fourni ou pas une valeur connue ce sera dev
-if (!staging || !lassi.Staging[staging]) staging = lassi.Staging.development
+var staging = process.env.NODE_ENV || 'development'
 
 /**
  * Ce serait mieux de mettre ça ailleurs pour ne garder que du déclaratif ici,
@@ -65,11 +64,11 @@ var morganSettings
 /**
  * En dev on a un access.log avec le contenu des POST
  */
-if (staging === lassi.Staging.development) {
-  lassi.require('morgan').token('post', function (req, res) {
+if (staging === 'development') {
+  require('morgan').token('post', function (req, res) {
     return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
   })
-  lassi.require('morgan').token('moment', function () {
+  require('morgan').token('moment', function () {
     return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
   })
   morganSettings = {
@@ -87,7 +86,7 @@ if (staging === lassi.Staging.development) {
 }
 
 /** La config exportée */
-var appConfig = {
+var settings = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application : {
     name : "bibliotheque",
@@ -168,13 +167,13 @@ var appConfig = {
 }
 
 // on ajoute nos params locaux (accès à la base et port)
-if (localConfig) lassi.tools.update(appConfig, localConfig)
+if (localConfig) tools.update(settings, localConfig)
 
 // on enlève le debug mysql si on nous précise prod dans l'environnement
-if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && appConfig.entities.database.connection.debug)
-  delete appConfig.entities.database.connection.debug
+if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && settings.entities.database.connection.debug)
+  delete settings.entities.database.connection.debug
 
-module.exports = appConfig  
+module.exports = settings  
   
   
   

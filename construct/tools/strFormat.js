@@ -37,7 +37,7 @@ var _ = require('underscore')._
 
 /**
  * Incorpore des arguments à un message, façon sprintf
- * pas très intéressant si n arguments, util.format fait la m
+ * pas très intéressant si n arguments, util.format fait la même chose, mais tolère un tableau d'arguments en 2e param
  * @param message
  * @param args Les arguments, en liste ou en tableau
  * @returns {*}

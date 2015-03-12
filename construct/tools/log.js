@@ -35,20 +35,21 @@
  */
 'use strict';
 
-/*global */
-
 var fs = require('fs');
 var moment = require('moment');
-var config = require('../config'); // jshint ignore:line
+var config = require('../../config/index'); // jshint ignore:line
+var tools = require('./index'); // jshint ignore:line
 //var _ = require('underscore')._
 
-// les streams vers nos logs, celui de dev est ouvert plus loin si besoin
-var devOutputStream;
+// les streams vers nos logs, celui de dev est ouvert plus loin si on est en dev
+var devOutputStream
 // ces logs dans tous les cas
+/** un log d'erreur actif en prod */
 var errorOutputStream = fs.createWriteStream(config.logs.error, {'flags': 'a'});
+/** un log spécifique pour les erreurs liées à des datas incohérentes */
 var errorDataOutputStream = fs.createWriteStream(config.logs.errorData, {'flags': 'a'});
 
-var env = process.env.NODE_ENV || 'dev';
+var env = process.env.NODE_ENV || 'development';
 
 
 /** Nos filtres possibles, qui seront ajoutés si besoin par setFilter */
@@ -57,7 +58,7 @@ var filters = {}
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans la console)
  */
-var log // jshint ignore:line
+var logger // jshint ignore:line
 
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans dev.log)
@@ -86,9 +87,12 @@ function setFilterOff(filter) {
   filters[filter] = false;
 }
 
+function getDatePrefix() {
+  return '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] '
+}
+
 function addToLog(message, stream) {
-  var prefix = '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] ';
-  stream.write(prefix + message + "\n");
+  stream.write(message + "\n");
 }
 
 function logError(message, filter) {
@@ -101,39 +105,73 @@ function logError(message, filter) {
 
 function logErrorData(message, filter) {
   if (!filter || filters[filter]) {
+    out(message, null)
     addToLog(message, errorDataOutputStream);
   }
 }
 
-// le log de dev pour raconter sa vie ou envoyer des objets
-if (env === 'dev') {
-  // (attention, on sera dans build/application/index.js au runtime) */
-  var devOutputStream = fs.createWriteStream(config.logs.dev, {'flags': 'a'});
-  var buffer;
-  logDev = function(message, objectToDump, filter) {
-    if (!filter || filters[filter]) {
-      var suffix = "\n";
+/**
+ * Formate le message et l'envoie dans un log ou en console (si stream est null)
+ * @param message
+ * @param objectToDump
+ * @param filter
+ * @param stream
+ */
+function out(message, objectToDump, filter, stream) {
+  if (!filter || filters[filter]) {
+    if (message instanceof Error) message = message.toString() +'\n' +message.stack // on veut toute la pile
+    else {
+      message += "\n";
       if (objectToDump) {
-        if (objectToDump instanceof Error) suffix += objectToDump.stack +'\n'
-        else suffix += lassi.main.objToString(objectToDump) + "\n";
+        if (objectToDump instanceof Error) message += '\n' +objectToDump.toString() +objectToDump.stack + '\n'
+        else message += '\n' + tools.stringify(objectToDump) + "\n";
       }
-      if (message instanceof Error) message = message.stack // on veut toute la pile
-      addToLog(message + suffix, devOutputStream);
     }
+    message = getDatePrefix() +message
+    if (!stream) console.log(message)
+    else addToLog(message, stream);
+  }
+}
+
+if (env === 'dev') {
+  // notre stream vers development.log
+  devOutputStream = fs.createWriteStream(config.logs.dev, {'flags': 'a'})
+
+  /**
+   * Écrit dans development.log, pour raconter sa vie ou envoyer des objets
+   * @param message
+   * @param objectToDump
+   * @param filter
+   */
+  logDev = function(message, objectToDump, filter) {
+    out(message, objectToDump, filter)
   };
 
-  log = console.log // jshint ignore:line
+  /**
+   * Écrit en console
+   * @param message
+   * @param objectToDump
+   * @param filter
+   */
+  logger = function(message, objectToDump, filter) {
+    // out(message, objectToDump, filter, true)
+    console.log(message)
+    console.log(objectToDump)
+  }
+
 } else {
   logDev = function() {};
-  log = function () {} // jshint ignore:line
+  logger = function () {} // jshint ignore:line
 }
 
 // on ajoute nos fct comme méthodes de la fct principale exportée
-log.getElapsed = getElapsed
-log.dev = logDev
-log.error = logError
-log.errorData = logErrorData
-log.setFilterOn = setFilterOn
-log.setFilterOff = setFilterOff
+logger.getElapsed = getElapsed
+logger.dev = logDev
+logger.error = function (message, objectToDump, filter) {
+  out(message, objectToDump, filter)
+}
+logger.errorData = logErrorData
+logger.setFilterOn = setFilterOn
+logger.setFilterOff = setFilterOff
 
-module.exports = log
+module.exports = logger

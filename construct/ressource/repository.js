@@ -51,7 +51,6 @@ var ressourceRepository = {}
  * @return {Boolean}
  */
 ressourceRepository.valide = function(ressource, next) {
-  //assert.nextOk(next);
   // log.dev('on va valider ', ressource)
   /** tableau d'erreurs qui sera concaténé et passé à next si non vide */
   var errors = [];

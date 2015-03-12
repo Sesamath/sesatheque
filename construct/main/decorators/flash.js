@@ -36,7 +36,7 @@
 'use strict';
 
 var _ = require('underscore')._
-
+/*
 module.exports = lassi.Decorator('flash')
     .renderTo('flashBloc')
     .do(function(ctx, next) {
@@ -54,3 +54,4 @@ module.exports = lassi.Decorator('flash')
         next(data)
       } else next()
     });
+*/

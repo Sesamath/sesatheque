@@ -29,52 +29,56 @@
  * pour une explication en français)
  */
 
+'use strict';
+/*global lassi*/
+
 /**
  * Définition de l'application
  */
-'use strict';
 
+/*
 console.log("Démarrage de la bibliothèque : appel de " +__filename +" avec les arguments ")
 console.log(process.argv)
-console.log("et l'environnement")
-console.log(process.env)
+/* console.log("et l'environnement")
+console.log(process.env) */
 
 var _ = require('underscore')._
 
-// Récupération du module lassi que l'on met en global
-// (il le fait déjà mais le déclarer ici fait plaisir à mon IDE)
-GLOBAL.lassi = require('lassi')
+// appel du module lassi qui met en global une variable lassi
+require('lassi')(__dirname +'/..')
 
 // nos loggers
-GLOBAL.log = require('./log.js') // jshint ignore:line
+GLOBAL.log = require('./tools/log.js') // jshint ignore:line
+log("dump lassi", lassi)
 
-// nos vérificateurs d'assertions
-GLOBAL.assert = require('./assert.js')
+// nos components
+require('./main')
+//require('./ressource')
 
-// Construction de l'application
-var application = lassi.Application()
-// que l'on met en global parce que certains veulent y accéder par là
-// (oui, saimal de laisser les propriétés accessible en écriture)
-GLOBAL.app = application
+// Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
+var sesatheque = lassi.component('sesatheque', ['main'])
 
-/* console.log("application dans construct")
-console.log(application) /* */
+log("sesatheque dans construct", sesatheque)
 
-// on regarde si la conf réclame du chargement complémentaire
-if (application.settings.afterInit) {
-  application.settings.afterInit()
+// on ajoute memcache si précisé
+if (lassi.settings.memcache) {
+  sesatheque.config(function($cache) {
+    $cache.addEngine('', 'memcache', lassi.settings.memcache);
+    log('Memcache ajouté sur ' +lassi.settings.memcache)
+  })
 }
 
-// on ajoute memcache
-log('Memcache sur ' +application.settings.memcache)
-lassi.cache.addEngine(new lfw.cache.MemcacheEngine(application.settings.memcache))
+// on regarde si la conf réclame du chargement complémentaire
+if (lassi.settings.afterInit) {
+  //lassi.settings.afterInit()
+}
 
 // on déclenchera ça quand le boot sera fini
-application.on('boot', function () {
-  console.log("Boot de l'application " + application.name)
+lassi.on('bootstrap', function () {
+  console.log("Boot de l'application " + sesatheque.name)
   log.dev('BOOT')
   /* on a une tache gulp reset pour ça, on ne vide plus systématiquement les sessions au démarrage
-  if (lassi.sessions && application.settings.staging !== lassi.Staging.production) {
+  if (lassi.sessions && sesatheque.settings.staging !== lassi.Staging.production) {
     log.dev('Purge des sessions récupérées')
     lassi.sessions = {}
   } */
@@ -82,7 +86,7 @@ application.on('boot', function () {
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
 /* */
-application.on('beforeRailUse', function (name, settings) {
+lassi.on('beforeRailUse', function (name, settings) {
   console.log('dans construct, beforeRailUse de ' +name)
   if (name=='logger') {
     console.log('beforeRailUse logger')
@@ -94,7 +98,7 @@ application.on('beforeRailUse', function (name, settings) {
     log.dev('settings morgan dans beforeRailUse', settings)
     // les settings pour morgan
     var fs = require('fs')
-    var logAccess = application.settings.logs.access
+    var logAccess = sesatheque.settings.logs.access
     var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'})
     // les tokens
     var moment = require('moment')
@@ -121,20 +125,20 @@ application.on('beforeRailUse', function (name, settings) {
   } // on pourrait préciser la limite d'upload ici (name === 'body-parser') mais elle est dans la conf
 })
 
-/* application.on('loaded', function (type, name, instance) {
+/* sesatheque.on('loaded', function (type, name, instance) {
   if (type === 'middleware' && name === 'logger') {
     console.log(instance.toString())
   }
 }) */
 
 /**
- * On ajoute le CORS après compression
+ * On ajoute le CORS après cookie
  */
-application.on('afterRailUse', function (name, settings, middleware) {
+lassi.on('afterRailUse', function (name, settings, middleware) {
   // console.log('afterRailUse ' +name, middleware) // affiche le code de chaque middleware
   if (name === 'cookie') {
     console.log("On ajoute CORS sur le rail")
-    application.use('cors', function() {
+    lassi.use('cors', function() {
       return function(req, res, next) {
         console.log('cors : ', req)
         res.header('Access-Control-Allow-Origin', '*');
@@ -146,4 +150,4 @@ application.on('afterRailUse', function (name, settings, middleware) {
 })
 
 // et on lance le boot
-application.boot()
+sesatheque.bootstrap()

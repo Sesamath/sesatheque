@@ -6,17 +6,15 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "inotify": "^1.2.1",
     "lassi": "git://src.sesamath.net/lassi",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",
-    "pg": "^3.4.1",
     "request": "^2.39.0",
     "seq": "^0.3.5",
+    "sesasso-bibli": "git+ssh://git@src.sesamath.net:npm-sesasso-bibli",
     "underscore": "^1.8.0",
-    "xml2js": "^0.4.4",
-    "sesasso-bibli" : "git+ssh://git@src.sesamath.net:npm-sesasso-bibli"
+    "xml2js": "^0.4.4"
   },
   "devDependencies": {
     "knex": "^0.5.14",
@@ -25,7 +23,6 @@
     "express-debug": "^1.1.0",
     "gulp": "^3.8.7",
     "gulp-jshint": "^1.7.0",
-    "gulp-sass": "0.7.1",
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
     "jsdoc": "^3.3.0-alpha9",

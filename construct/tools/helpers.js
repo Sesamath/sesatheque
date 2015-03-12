@@ -29,53 +29,23 @@
  * pour une explication en français)
  */
 
-'use strict';
-
-var tools = require('../../tools')
-
-var controller = lassi.Controller('debug');
-//var _ = require('underscore')._;
-
-controller.respond('html');
+'use strict'
 
 /**
- * Une route pour afficher des objets en dev (debug)
+ * Méthodes communes pour nos différents composants
  */
-controller
-    .Action('session')
-    .renderWith('debug')
-    .do(function (ctx, next) {
-      if (ctx.session.compteur) ctx.session.compteur++
-      else ctx.session.compteur = 1
-      next(null, {debug:tools.stringify(ctx.session)})
-    });
-
-controller
-    .Action('request')
-    .renderWith('debug')
-    .do(function (ctx, next) {
-      next(null, {debug:tools.stringify(ctx.request)})
-    });
-
-controller
-    .Action('response')
-    .renderWith('debug')
-    .do(function (ctx, next) {
-      next(null, {debug:tools.stringify(ctx.response)})
-    });
-
-// un controleur tout prêt pour tout et n'importe quoi
-controller
-    .Action('test')
-    //.renderWith('debugDump')
-    .renderWith('debug')
-    .do(function (ctx, next) {
-      next(null, {debug:tools.stringify(ctx.request)})
-      /* var repository = require('../../ressource/repository')
-      repository.load(42, function(error, ress) {
-        next(null, {debug:tools.stringify(ress)})
-      }) /* */
-    });
-
-
-module.exports = controller;
+module.exports = {
+  /**
+   * Ajoute un message flash en session (qui sera affiché au prochain rendu html du layout page)
+   * @param ctx
+   * @param message
+   * @param level
+   */
+  addFlashMessage : function (ctx, message, level) {
+    if (!ctx || !ctx.session) return
+    if (!level) level = 'notice'
+    if (!ctx.session.flash) ctx.session.flash = {}
+    if (!ctx.session.flash[level]) ctx.session.flash[level] = []
+    ctx.session.flash[level].push(message)
+  }
+}

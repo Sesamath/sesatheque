@@ -38,26 +38,42 @@ var _ = require('underscore')._;
  * et ajoute des méthodes génériques à utiliser dans d'autres components
  * @constructor
  */
-var mainComponent = lassi.Component()
+var mainComponent = lassi.component('main')
 
-mainComponent.initialize = function(next) {
-  console.log('initialize mainComponent');
-  // un écouteur pour l'affectation du bon layout aux réponses "html"
-  this.application.transports.html.on('layout', function (useLayout) {
-    var ctx = useLayout.context
-    if (ctx.status) {
-      switch(ctx.status) {
-        case 404: useLayout(mainComponent, 'layout-page404'); break;
-        case 403: useLayout(mainComponent, 'layout-page403'); break;
-        default: useLayout(mainComponent, 'layout-page-error');
+// On configure metas html et layout des erreurs lors de l'init du composant
+mainComponent.config(function() {
+
+  // les metas génériques du html
+  lassi.transports.html.on('metas', function(metas) {
+    metas.addCss('styles/main.css')
+    //metas.addJs('vendors/jquery.min.js')
+  })
+
+  // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
+  lassi.controllers.on('beforeTransport', function(data) {
+    log('on beforeTransport on a les data', data)
+    /* console.log('on beforeTransport on a les data')
+    console.log(data) */
+
+    if (data.$status && data.$status > 400) {
+      data.$contentType = 'text/html'
+      // erreur, 403 et 404 on leur layout, et on en a un autre pour les autres erreurs
+      switch (data.$status) {
+        case 404:
+          data.$layout = 'layout-page404'
+          break
+        case 403:
+          data.$layout = 'layout-page403'
+          break
+        default:
+          data.$layout = 'layout-page-error'
       }
-    } else if (ctx.forceLayout) {
-      useLayout(mainComponent, ctx.forceLayout);
-    } else {
-      useLayout(mainComponent, 'layout-page');
+    } else if (data.forceLayout) {
+      data.$contentType = 'text/html'
+      data.$layout = data.forceLayout
     }
   });
-  next()
+})
 
   /**
    * On ajoute un dust.helper à l'initialisation du framework
@@ -72,63 +88,28 @@ mainComponent.initialize = function(next) {
   this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
     return chunk.write('<pre class="debug">' + JSON.stringify(params, null, 2) + '</pre>');
   }); /**/
-}
 
-/**
- * Ajoute un message flash en session (qui sera affiché au prochain rendu html du layout page)
- * @param ctx
- * @param message
- * @param level
- */
-mainComponent.addFlashMessage = function(ctx, message, level) {
-  if (!ctx || !ctx.session) return
-  if (!level) level = 'notice'
-  if (!ctx.session.flash) ctx.session.flash = {}
-  if (!ctx.session.flash[level]) ctx.session.flash[level] = []
-  ctx.session.flash[level].push(message)
-}
 
-/**
- * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
- * @param int La valeur à contrôler
- * @param min Le minimum exigé
- * @param max Le maximum exigé
- * @param label Un label pour le message d'erreur (qui indique ce qui a été recadré)
- * @returns {Integer}
- */
-mainComponent.encadre = function (int, min, max, label) {
-  var value = parseInt(int)
-  if (value < min) {
-    log.error(label +" trop petit (" +value +"), on le fixe à " +min)
-    value = min
-  }
-  if (value > max) {
-    log.error(label +" trop grand (" +value +"), on le fixe à " +max)
-    value = max
-  }
-  return value
-}
+mainComponent.controller(function () {
+  // tous nos controlleurs sont en html avec le même layout
+  this.renderAs({
+    $contentType: 'text/html',
+    $layout: 'layout-page',
+    $views: __dirname +'/views'
+  })
 
-/**
- * Retourne le json indenté d'un objet, sans planter sur les refs circulaire (et sans les rendre)
- * @param objectToDump
- * @returns {string}
- */
-mainComponent.objToString = function (objectToDump) {
-  var buffer
-  try { buffer = JSON.stringify(objectToDump, null, 2) }
-  catch (error) {
-    // on tente une construction à la main pour chacun des 1ers niveaux
-    buffer = "{\n";
-    _.each(objectToDump, function(value, key) {
-      buffer += '  ' + key + ' : ';
-      try { buffer += JSON.stringify(value, null, 2) }
-      catch (error) { buffer += "\"Impossible d'assurer le rendu de l'objet : " + error.toString() +'"' }
-      buffer += ",\n";
-    })
-    buffer += "}";
-  }
-  return buffer
-}
+  this.serve(__dirname +'/public')
 
-module.exports = mainComponent;
+  this.get('/', function (ctx) {
+    log('le contexte dans le controleur /',ctx)
+    ctx.next({
+      $metas : {
+        title  : "Bienvenue dans la bibliothèque Sésamath"
+      },
+      content : {
+        $view : 'home',
+        content: "Ce site est encore un prototype expérimental."
+      }
+    });
+  })
+})

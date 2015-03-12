@@ -33,7 +33,7 @@
  * Ajoute les liens de modif / visualisation suivant le contexte
  */
 'use strict';
-
+/*
 module.exports = lassi.Decorator('menu')
     .renderTo('menu')
     .do(function(ctx, next) {
@@ -71,3 +71,4 @@ module.exports = lassi.Decorator('menu')
       next(null, {links:links})
     })
 
+*/
