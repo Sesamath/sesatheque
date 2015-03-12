@@ -113,10 +113,12 @@ tools.sanitizeHashKey = function(source) {
  * Idem JSON.stringify mais en cas de ref circulaire sur une propriété on renvoie quand même les autres
  * (avec le message d'erreur de JSON.stringify sur la propriété à pb)
  * @param obj
+ * @param {number} indent Le nb d'espaces d'indentation
  * @returns {string}
  */
 tools.stringify = function(obj, indent) {
   var buffer;
+
   if (obj) {
     // ça peut planter en cas de ref circulaire
     try {
@@ -125,15 +127,15 @@ tools.stringify = function(obj, indent) {
       // on tente une construction à la main pour chacun des 1ers niveaux
       var pile = [];
       _.each(obj, function(value, key) {
-        buffer = '"' + key + '":';
+        buffer = '"' + key + '":'
         try {
-          buffer += indent ? JSON.stringify(obj, null, indent):JSON.stringify(obj);
+          buffer += indent ? JSON.stringify(value, null, indent):JSON.stringify(value);
         } catch (error) {
           buffer += '"stringifyError : ' + error.toString() +'"';
         }
         pile.push(buffer)
       });
-      buffer = '{' +pile.join(',') +'}';
+      buffer = '{' +pile.join(',\n') +'}';
     }
   }
   return buffer;

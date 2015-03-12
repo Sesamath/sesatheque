@@ -31,8 +31,6 @@
 
 'use strict';
 
-var _ = require('underscore')._;
-
 /**
  * Notre component principal, défini le layout et le rendu,
  * et ajoute des méthodes génériques à utiliser dans d'autres components

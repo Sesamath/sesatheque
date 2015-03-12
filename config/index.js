@@ -160,7 +160,7 @@ var settings = {
     access    : root + '/logs/' + staging + '.access.log',
     error     : root + '/logs/' + staging + '.error.log',
     errorData : root + '/logs/' + staging + '.errorData.log',
-    dev       : root + '/logs/dev.log',
+    debug     : root + '/logs/debug.log',
     // mettre à true pour ajouter dans dev.log toutes les entrées / sorties du cache
     cacheEntries : false
   }

@@ -35,14 +35,13 @@
  */
 'use strict';
 
-var fs = require('fs');
-var moment = require('moment');
-var config = require('../../config/index'); // jshint ignore:line
-var tools = require('./index'); // jshint ignore:line
-//var _ = require('underscore')._
+var fs = require('fs')
+var moment = require('moment')
+var config = require('../../config/index') // jshint ignore:line
+var tools = require('./index') // jshint ignore:line
 
 // les streams vers nos logs, celui de dev est ouvert plus loin si on est en dev
-var devOutputStream
+var debugOutputStream
 // ces logs dans tous les cas
 /** un log d'erreur actif en prod */
 var errorOutputStream = fs.createWriteStream(config.logs.error, {'flags': 'a'});
@@ -58,57 +57,12 @@ var filters = {}
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans la console)
  */
-var logger // jshint ignore:line
+var logger
 
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans dev.log)
  */
-var logDev
-
-/**
- * Retourne le nb de ms écoulées depuis start
- * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
- */
-function getElapsed(start) {
-  return (new Date()).getTime() -start
-}
-
-/**
- * Active un filtre (le créé si besoin)
- */
-function setFilterOn(filter) {
-  filters[filter] = true;
-}
-
-/**
- * Désactive un filtre (le créé si besoin)
- */
-function setFilterOff(filter) {
-  filters[filter] = false;
-}
-
-function getDatePrefix() {
-  return '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] '
-}
-
-function addToLog(message, stream) {
-  stream.write(message + "\n");
-}
-
-function logError(message, filter) {
-  // pour ce log on veut toute la pile d'appel
-  if (message instanceof Error) message = message.stack
-  if (!filter || filters[filter]) {
-    addToLog(message, errorOutputStream);
-  }
-}
-
-function logErrorData(message, filter) {
-  if (!filter || filters[filter]) {
-    out(message, null)
-    addToLog(message, errorDataOutputStream);
-  }
-}
+var logDebug
 
 /**
  * Formate le message et l'envoie dans un log ou en console (si stream est null)
@@ -124,18 +78,18 @@ function out(message, objectToDump, filter, stream) {
       message += "\n";
       if (objectToDump) {
         if (objectToDump instanceof Error) message += '\n' +objectToDump.toString() +objectToDump.stack + '\n'
-        else message += '\n' + tools.stringify(objectToDump) + "\n";
+        else message += '\n' + tools.stringify(objectToDump, 2) + "\n";
       }
     }
-    message = getDatePrefix() +message
+    message = '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] ' +message
     if (!stream) console.log(message)
-    else addToLog(message, stream);
+    else stream.write(message + "\n")
   }
 }
 
-if (env === 'dev') {
+if (env === 'development' && config.logs.debug) {
   // notre stream vers development.log
-  devOutputStream = fs.createWriteStream(config.logs.dev, {'flags': 'a'})
+  debugOutputStream = fs.createWriteStream(config.logs.debug, {'flags': 'a'})
 
   /**
    * Écrit dans development.log, pour raconter sa vie ou envoyer des objets
@@ -143,9 +97,9 @@ if (env === 'dev') {
    * @param objectToDump
    * @param filter
    */
-  logDev = function(message, objectToDump, filter) {
-    out(message, objectToDump, filter)
-  };
+  logDebug = function(message, objectToDump, filter) {
+    out(message, objectToDump, filter, debugOutputStream)
+  }
 
   /**
    * Écrit en console
@@ -154,24 +108,60 @@ if (env === 'dev') {
    * @param filter
    */
   logger = function(message, objectToDump, filter) {
-    // out(message, objectToDump, filter, true)
-    console.log(message)
-    console.log(objectToDump)
+    out(message, objectToDump, filter)
+    /* console.log(message)
+    console.log(objectToDump)*/
   }
 
 } else {
-  logDev = function() {};
+  logDebug = function() {};
   logger = function () {} // jshint ignore:line
 }
 
+logger.dev = logDebug
+
 // on ajoute nos fct comme méthodes de la fct principale exportée
-logger.getElapsed = getElapsed
-logger.dev = logDev
-logger.error = function (message, objectToDump, filter) {
-  out(message, objectToDump, filter)
+
+/**
+ * Retourne le nb de ms écoulées depuis start
+ * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
+ */
+logger.getElapsed = function (start) {
+  return (new Date()).getTime() -start
 }
-logger.errorData = logErrorData
-logger.setFilterOn = setFilterOn
-logger.setFilterOff = setFilterOff
+
+/**
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur
+ * @param message
+ * @param objectToDump
+ * @param filter
+ */
+logger.error = function (message, objectToDump, filter) {
+  out(message, objectToDump, filter, errorOutputStream)
+}
+
+/**
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données
+ * @param message
+ * @param objectToDump
+ * @param filter
+ */
+logger.errorData = function (message, objectToDump, filter) {
+  out(message, objectToDump, filter, errorDataOutputStream)
+}
+
+/**
+ * Active un filtre (le créé si besoin)
+ */
+logger.setFilterOn = function (filter) {
+  filters[filter] = true
+}
+
+/**
+ * Désactive un filtre (le créé si besoin)
+ */
+logger.setFilterOff = function (filter) {
+  filters[filter] = false
+}
 
 module.exports = logger
