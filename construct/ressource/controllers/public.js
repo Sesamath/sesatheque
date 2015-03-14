@@ -60,7 +60,7 @@ controller
           next(error)
         } else if (ressource) {
           ctx.metas.title = ressource.titre
-          converter.sendPageData(error, ressource, ctx, next)
+          converter.getViewData(error, ressource, ctx, next)
         } else {
           ctx.notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas publique")
         }

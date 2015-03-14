@@ -35,7 +35,7 @@ var controller = lassi.Controller('ressource');
 var _ = require('underscore')._;
 
 var converter = require('../converter')
-var repository = require('../repository')
+var repository = require('../ressourceService')
 var routes = require('../config.js').constantes.routes;
 
 controller.respond('html');
@@ -62,7 +62,7 @@ controller
         else if (ressource) {
           lassi.personne.checkPermission('read', ctx, ressource, function (ressource) {
             ctx.metas.title = ressource.titre
-            converter.sendPageData(error, ressource, ctx, next)
+            converter.getViewData(error, ressource, ctx, next)
           })
         } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
       })
@@ -86,7 +86,7 @@ controller
             ctx.metas.title = ressource.titre
             if (!ressource.restriction) ctx.metas.permalink = ctx.url(lassi.action.public.describe, {id: ressource.id})
             else ctx.metas.permalink = ctx.url(lassi.action.ressource.describe, {id: ressource.id})
-            converter.sendPageData(error, ressource, ctx, next)
+            converter.getViewData(error, ressource, ctx, next)
           })
         } else ctx.notFound("La ressource d'identifiant " + idOrigine + " (origine " + origine +" n'existe pas")
       })
@@ -247,7 +247,7 @@ controller
               ctx.metas.title = 'Supprimer ' + ressource.titre
               // on ajoute un flag en session pour ne pas refaire les vérifs de droits dans le le post
               ctx.session['del' + id] = true
-              converter.sendPageData(error, ressource, ctx, next)
+              converter.getViewData(error, ressource, ctx, next)
             })
           } else ctx.notFound("La ressource d'identifiant " + id + " n'existe pas")
         })

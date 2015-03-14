@@ -39,7 +39,7 @@
 var _ = require('underscore')._
 
 /** Durée de cache, 1h par défaut, sera écrasé par config.components.personne.cacheTTL s'il existe */
-var cacheTTL = 3600
+var defaultCacheTTL = 3600
 
 /** lien éventuel à ajouter au message accessDenied, initialisé d'après la conf s'il existe */
 var connectLink = ''
@@ -49,19 +49,17 @@ var connectLink = ''
  * @extends {lassi.Component}
  * @constructor
  */
-var personneComponent = lassi.Component('personne');
+var personneComponent = lassi.component('personne');
 
-personneComponent.initialize = function(next) {
-  // l'export de notre config/index.js
-  var config = this.application.settings
-  if (config.components && config.components.personne && config.components.personne.connectLink)
-    connectLink = config.components.personne.connectLink
-  if (config.components && config.components.personne && config.components.personne.cacheTTL)
-    cacheTTL = lassi.main.encadre(config.components.personne.cacheTTL, 60, 12*3600,
-        'ttl de cache par défaut pour les entities personne')
+personneComponent.config(function($settings) {
+  // on vérifie que l'on a un cache avec des valeur acceptables
+  var cacheTTL = $settings.get('components.personne.cacheTTL', null)
+  if (!cacheTTL) throw new Error("Il faut indiquer un TTL pour le cache de personne" +
+  " (en s, dans components.personne.cacheTTL)")
+  if (cacheTTL < 60) throw new Error("Le cache personne doit avoir un TTL d'au moins 60s")
+  if (cacheTTL > 12*3600) throw new Error("Le cache personne doit avoir un TTL inférieur à 24h (86400s)")
   log('ttl du cache personne fixé à ' +cacheTTL)
-  next();
-}
+})
 
 /**
  * Récupère une personne (en cache ou en bdd)

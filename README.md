@@ -13,6 +13,18 @@ Plugins
 
 Pour écrire ou utiliser un plugin (qui gère un type de ressource), voir la [documentation des plugins](plugins/index.html)
 
+Routage
+-------
+
+* /ressource/ Affichage et modification de ressource
+** /ressource/public/:id : affichage de la ressource publique seule (prévu pour être en iframe), cookies virés par varnish et résultat mis en cache
+** /ressource/prive/:id  : affichage de la ressource seule (prévu pour être en iframe), redirect vers public si public
+** /ressource/apercu/:id : affichage de la ressource avec l'habillage du site de consultation
+Back-office
+** /ressource/ajouter      : form d'ajout d'une ressource
+** /ressource/modifier/:id : form de modif d'une ressource
+
+
 API http, via /api
 ------------------
 
@@ -20,7 +32,7 @@ Les commandes qui nécessitent des droits les vérifient via l'ip (qui doit êtr
 
 ### Ressource à l'unité
 
-* GET    /api/ressource/:id          Récupère une ressource pas id
+* GET    /api/ressource/:id          Récupère une ressource par son id
 * GET    /api/ressource/:origine/:id Récupère une ressource par origine & idOrigine
 * GET    /api/public/:id             Idem, mais ne remonte que les ressources publique, en cache dans varnish (car cookie virés, donc sans session, à faire).
 

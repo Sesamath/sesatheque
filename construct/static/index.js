@@ -42,7 +42,7 @@ var staticComponent = lassi.component('static')
 // On configure le layout des erreurs lors de l'init du composant
 staticComponent.config(function() {
   // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
-  lassi.controllers.on('beforeTransport', function(data) {
+  lassi.on('beforeTransport', function(data) {
     log('on beforeTransport avec les data', data)
     /* console.log('on beforeTransport on a les data')
     console.log(data) */
@@ -58,7 +58,7 @@ staticComponent.config(function() {
           data.$layout = 'layout-page403'
           break
         default:
-          data.$layout = 'layout-page-error'
+          data.$layout = 'layout-pageError'
       }
     } else if (data.forceLayout) {
       data.$contentType = 'text/html'
@@ -83,25 +83,28 @@ staticComponent.config(function() {
 
 
 staticComponent.controller(function () {
-  // tous nos controlleurs sont en html avec le même layout
-  this.renderAs({
-    $contentType: 'text/html',
-    $layout: 'layout-page',
-    $views: __dirname +'/views'
-  })
+  /**
+   * Affecte les valeurs communes à tous nos controleurs
+   * @param data
+   */
+  function initData(data) {
+    if (!data.$metas) data.$metas = {}
+    data.$views = __dirname +'/views'
+    data.$layout = 'layout-page'
+  }
 
   this.serve(__dirname +'/public')
 
-  this.get('/', function (ctx) {
+  this.get('/', function (ctx, data) {
     log('le contexte dans le controleur de static, action /',ctx)
-    ctx.next({
-      $metas : {
-        title  : "Bienvenue dans la bibliothèque Sésamath"
-      },
-      content : {
-        $view : 'home',
-        content: "Ce site est encore un prototype expérimental."
-      }
-    })
+    initData(data)
+    data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
+    // ce content est le nom du bloc du layout
+    data.content = {
+      $view : 'home',
+      // ce content est la variable passée au template dust
+      content: "Ce site est encore un prototype expérimental."
+    }
+    ctx.html(data)
   })
 })

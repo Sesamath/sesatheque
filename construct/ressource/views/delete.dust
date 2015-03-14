@@ -9,6 +9,7 @@
     {>"../describe" /}
 
     <form method="post" id="formRessource">
+        {>wrapper widget="text" o=token /}
         <div class="form-group buttons">
             <input class="btn btn-primary" type="submit" value="Supprimer" />
         </div>

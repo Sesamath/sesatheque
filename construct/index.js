@@ -50,28 +50,30 @@ GLOBAL.log = require('./tools/log.js')
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
 log("lassi juste après init", lassi)
-
-
-// nos components
+process.exit()
+// les déclarations de nos components
 require('./static')
-//require('./ressource')
+require('./ressource')
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
-var sesatheque = lassi.component('sesatheque', ['static'])
-log("sesatheque dans construct", sesatheque)
+var sesatheque = lassi.component('sesatheque', ['static', 'ressource'])
+//log("sesatheque à la déclaration", sesatheque)
 
 // on ajoute memcache si précisé dans les settings
-if (lassi.settings.memcache) {
-  sesatheque.config(function($cache) {
+sesatheque.config(function($cache) {
+  if (lassi.settings.memcache) {
     $cache.addEngine('', 'memcache', lassi.settings.memcache);
     log('Memcache ajouté sur ' +lassi.settings.memcache)
-  })
-}
+  } else {
+    log.error("Il manque memcache en config, on s'en passera mais il vaudrait mieux l'ajouter")
+  }
+  // on regarde si la conf réclame du chargement complémentaire
+  if (lassi.settings.afterInit) {
+    //lassi.settings.afterInit()
+  }
+  log("sesatheque en fin de config", sesatheque)
+})
 
-// on regarde si la conf réclame du chargement complémentaire
-if (lassi.settings.afterInit) {
-  //lassi.settings.afterInit()
-}
 
 // on déclenchera ça quand le boot sera fini
 lassi.on('bootstrap', function () {
@@ -133,7 +135,7 @@ lassi.on('beforeRailUse', function (name, settings) {
 
 /**
  * On ajoute le CORS après cookie
- */
+ * /
 lassi.on('afterRailUse', function (name) {
   // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
   if (name === 'cookie') {
@@ -148,6 +150,7 @@ lassi.on('afterRailUse', function (name) {
     });
   }
 })
+/* */
 
 // et on lance le boot
 sesatheque.bootstrap()
