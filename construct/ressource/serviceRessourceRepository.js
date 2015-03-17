@@ -33,7 +33,9 @@
 
 /**
  * Service d'accès aux ressources, utilisé par les différents contrôleurs
+ * @namespace $ressourceRepository
  */
+var $ressourceRepository = {}
 
 var _ = require('underscore')._
 var flow          = require('seq')
@@ -42,11 +44,10 @@ var elementtree = require('elementtree')
 var config = require('./config')
 var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
 
-/**
- * Service d'accès aux ressources
- * @namespace $ressourceRepository
- */
-var $ressourceRepository = {}
+/** nos dépendances */
+var $cacheRessource
+var $accessControl
+var Ressource
 
 /**
  * Fonctions privées, helper des méthodes du service
@@ -150,8 +151,6 @@ function prepareAndSend(ressources, next) {
     if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
       convertXmlEc2(ressource)
     }
-    // pas forcément le cas au 1er insert
-    if (ressource.id) lassi.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
   }
 
   if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")
@@ -202,31 +201,6 @@ function convertXmlEc2(ressource) {
 }
 
 /**
- * Renvoie la ressource en cache (ou undefined si elle n'y est pas)
- * @param id
- * @returns {Ressource}
- */
-function cacheGet(id, next) {
-  lassi.cache.get('ressource_' + id, next)
-}
-
-/**
- * Renvoie la ressource en cache d'après son origine (ou undefined si elle n'y est pas)
- * @param origine
- * @param idOrigine
- * @returns {Ressource}
- */
-function cacheGetByOrigine(origine, idOrigine, next) {
-  if (idOrigine) {
-    lassi.cache.get('ressourceIdByOrigine_' + origine + '_' + idOrigine, function (error, id) {
-      if (id) {
-        lassi.cache.get('ressource_' + id, next)
-      } else next(null, undefined)
-    })
-  } else next(null, undefined)
-}
-
-/**
  * Les méthodes du service exportées
  */
 
@@ -252,7 +226,7 @@ $ressourceRepository.valide = function(ressource, next) {
       // le type
       if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
         errors.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
-        log.dev("à la validation on a reçu pour " + key + ' : ' + lassi.tools.stringify(ressource[key]))
+        log.dev("à la validation on a reçu pour " + key + ' : ' + tools.stringify(ressource[key]))
       } else if (typeVar === 'Number') {
         // on vérifie entier positif
         if (Math.floor(ressource[key]) !== ressource[key]) {
@@ -286,7 +260,7 @@ $ressourceRepository.valide = function(ressource, next) {
  */
 $ressourceRepository.write = function(ressource, next) {
   if (ressource.constructor.name !== 'Ressource') {
-    ressource = lassi.entity.Ressource.create(ressource)
+    ressource = Ressource.create(ressource)
     log.dev('cast en Ressource : ' +ressource.constructor.name)
   }
   /* mesure de perfs * /
@@ -317,11 +291,11 @@ $ressourceRepository.write = function(ressource, next) {
           ressource.store(this)
         }
       })
-    // mise en cache et passage au suivant
+      // mise en cache et passage au suivant
       .seq(function (ressource) {
         if (!ressource.id) this("Après un write la ressource n'a toujours pas d'id")
         else {
-          lassi.cache.set('ressource_' +ressource.id, ressource, lassi.ressource.cacheTTL)
+          $cacheRessource.set(ressource)
           log.dev('write ' + ressource.id + ' ok')
           if (next) next(null, ressource)
         }
@@ -341,16 +315,24 @@ $ressourceRepository.write = function(ressource, next) {
 $ressourceRepository.del = function(id, next) {
   log.dev("La ressource " +id + " va être effacée")
   var query
-  if (_.isArray(id)) query = lassi.entity.Ressource.match('id').in(id)
-  else query = lassi.entity.Ressource.match('id').equals(id)
+  if (_.isArray(id)) query = Ressource.match('id').in(id)
+  else query = Ressource.match('id').equals(id)
   query.delete(function(error, nbObjects, nbIndexes) {
     if (error) next(error, nbObjects, nbIndexes)
     else {
+      // faut effacer aussi en cache
       if (_.isArray(id)) {
         id.forEach(function (idToDel) {
-          lassi.cache.delete('ressource_' +idToDel)
+          // faut aller la chercher en cache car delete ne prend pas d'id
+          $cacheRessource.get(idToDel, function(error, ressource) {
+            if (ressource) $cacheRessource.delete(ressource)
+          })
         })
-      } else lassi.cache.delete('ressource_' +id)
+      } else {
+        $cacheRessource.get(id, function(error, ressource) {
+          if (ressource) $cacheRessource.delete(ressource)
+        })
+      }
       next(error, nbObjects, nbIndexes)
     }
     log.dev("La ressource " +id + " a été effacée (" +nbObjects +" versions et " +nbIndexes +" index)")
@@ -366,16 +348,15 @@ $ressourceRepository.del = function(id, next) {
  */
 $ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
   log.dev("La ressource d'origine " +origine +" et d'id " +idOrigine + " va être effacée")
-  lassi.entity.Ressource
+  Ressource
       .match('origine').equals(origine)
       .match('idOrigine').equals(idOrigine)
       .delete(function(error, nbObjects, nbIndexes) {
         if (nbObjects) {
           // faut regarder si on l'a en cache pour la virer (on a pas l'id)
-          lassi.cache.get('ressourceIdByOrigine_' +origine +'_' +idOrigine, function(error, id) {
-            if (id) {
-              lassi.cache.delete('ressource_' +id)
-              lassi.cache.delete('ressourceIdByOrigine_' +origine +'_' +idOrigine)
+          $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressource) {
+            if (ressource) {
+              $cacheRessource.delete(ressource)
             }
           })
         }
@@ -394,13 +375,14 @@ $ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
  */
 $ressourceRepository.load = function(id, next) {
   log.dev('load ressource_' +id)
-  cacheGet(id, function (error, ressourceCached) {
+  $cacheRessource.get(id, function (error, ressourceCached) {
     if (ressourceCached) next(null, ressourceCached)
     else {
-      lassi.entity.Ressource.match('id').equals(id).grabOne(function (error, ressource) {
+      Ressource.match('id').equals(id).grabOne(function (error, ressource) {
         if (error) next(error)
         else if (ressource) {
           // log.dev('on a récupéré en db la ressource', ressource)
+          $cacheRessource.set(ressource)
           prepareAndSend(ressource, next)
         } else {
           next(null, null)
@@ -417,15 +399,16 @@ $ressourceRepository.load = function(id, next) {
  * @returns {undefined}
  */
 $ressourceRepository.loadPublic = function(id, next) {
-  cacheGet(id, function (error, ressourceCached) {
+  $cacheRessource.get(id, function (error, ressourceCached) {
     if (ressourceCached) next(null, ressourceCached)
     else {
-      lassi.entity.Ressource
+      Ressource
           .match('id').equals(id)
           .match('restriction').equals(0)
           .grabOne(function (error, ressource) {
             if (error) next(error)
             else if (ressource) {
+              $cacheRessource.set(ressource)
               prepareAndSend(ressource, next)
             } else {
               next(null, null)
@@ -447,15 +430,16 @@ $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
     return next(null, undefined)
   }
 
-  cacheGetByOrigine(origine, idOrigine, function(error, ressourceCached) {
+  $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
     if (ressourceCached) next(null, ressourceCached)
     else {
-      lassi.entity.Ressource
+      Ressource
           .match('origine').equals(origine)
           .match('idOrigine').equals(idOrigine)
           .grabOne(function (error, ressource) {
             if (error) next(error)
             else if (ressource) {
+              $cacheRessource.set(ressource)
               prepareAndSend(ressource, next)
             } else {
               next(null, null)
@@ -468,7 +452,7 @@ $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
 
 /**
  * Récupère un liste de ressource d'après critères
- * @param {string}   [visibilite=public] peut valoir public|prof|moi
+ * @param {string}   [visibilite=public] peut valoir public|prof|perso|tout
  * @param {Context}  [ctx]     facultatif si visibilite n'est pas précisé
  * @param {Object}   options Un objet (ou son json) avec éventuellement les propriétés
  *                             filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
@@ -486,6 +470,7 @@ $ressourceRepository.getListe = function(visibilite, ctx, options, next) {
   try {
     // on normalise les arguments
     var publicOnly
+
     if (arguments.length < 4) {
       if (arguments.length == 3) throw new Error("nombre d'arguments incorrect")
       // 2 args
@@ -494,7 +479,7 @@ $ressourceRepository.getListe = function(visibilite, ctx, options, next) {
       publicOnly = true
     } else if (visibilite === 'public') {
       publicOnly = true
-    } else if (visibilite === 'all') {
+    } else {
       publicOnly = false
     }
 
@@ -534,7 +519,7 @@ $ressourceRepository.getListe = function(visibilite, ctx, options, next) {
     if (nb > limitMax) nb = limitMax
 
     // si on est toujours là on peut construire la requete
-    var query = lassi.entity.Ressource
+    var query = Ressource
     optionsSafe.filters.forEach(function (filter) {
       log.dev("filter", filter)
       if (filter.values && filter.values.length) {
@@ -548,17 +533,17 @@ $ressourceRepository.getListe = function(visibilite, ctx, options, next) {
       query = query.match('restriction').equals(0)
 
     } else if (visibilite == 'prof') {
-      if (!lassi.personne.hasPermission('corrections', ctx)) {
+      if (!$accessControl.hasPermission('corrections', ctx)) {
         return next(new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources"))
       }
       query = query.match('restriction').equals(1)
 
-    } else if (visibilite == 'moi') {
+    } else if (visibilite == 'perso') {
       if (!ctx.session.user || !ctx.session.user.id)
         return next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
       query = query.match('auteurs').equals(ctx.session.user.id)
 
-    } else if (visibilite == 'all') {
+    } else if (visibilite == 'tout') {
       if (!ctx.session.user.roles || !ctx.session.user.roles.admin)
         return next(new Error("Il faut être admin pour tout voir"))
 
@@ -598,5 +583,16 @@ $ressourceRepository.getListe = function(visibilite, ctx, options, next) {
   }
 }
 
-// et on exporte notre service
-module.exports = $ressourceRepository
+/**
+ * Init de notre service $ressourceRepository qui réclame $cacheRessource en dépendance
+ * @param serviceCache
+ * @param {number} ttl Le ttl du cache ressource
+ * @returns {$ressourceRepository}
+ */
+module.exports = function (ressourceEntity, accessControlService, cacheRessourceService, ttl) {
+  Ressource = ressourceEntity
+  $accessControl = accessControlService
+  $cacheRessource = cacheRessourceService
+
+  return $ressourceRepository
+}

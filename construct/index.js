@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 /**
  * Définition de l'application
@@ -49,21 +49,22 @@ GLOBAL.log = require('./tools/log.js')
 
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
-log("lassi juste après init", lassi)
-process.exit()
+//log("lassi juste après init", lassi)
+
 // les déclarations de nos components
 require('./static')
 require('./ressource')
+require('./personne')
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
-var sesatheque = lassi.component('sesatheque', ['static', 'ressource'])
+var sesatheque = lassi.component('sesatheque', ['static', 'personne', 'ressource'])
 //log("sesatheque à la déclaration", sesatheque)
 
 // on ajoute memcache si précisé dans les settings
-sesatheque.config(function($cache) {
-  if (lassi.settings.memcache) {
-    $cache.addEngine('', 'memcache', lassi.settings.memcache);
-    log('Memcache ajouté sur ' +lassi.settings.memcache)
+sesatheque.config(function($cache, $settings) {
+  if ($settings.get('memcache')) {
+    $cache.addEngine('', 'memcache', $settings.get('memcache'));
+    log('Memcache ajouté sur ' +$settings.get('memcache'))
   } else {
     log.error("Il manque memcache en config, on s'en passera mais il vaudrait mieux l'ajouter")
   }
@@ -71,6 +72,7 @@ sesatheque.config(function($cache) {
   if (lassi.settings.afterInit) {
     //lassi.settings.afterInit()
   }
+
   log("sesatheque en fin de config", sesatheque)
 })
 

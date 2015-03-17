@@ -29,16 +29,32 @@
  * pour une explication en français)
  */
 
-"use strict";
+"use strict"
 
+/**
+ * Entity Ressource
+ * @param Ressource L'entitiy fraichement crée par lassi.entity, que l'on va étoffer ici
+ * @param Archive entity Archive
+ * @param $cache
+ * @param cacheTTL
+ */
+module.exports = function (Ressource, Archive, $cache, cacheTTL) {
 
+  var _ = require('underscore')._
+  var tools = require('../tools')
 
-lassi.Entity('Archive', {
   /**
-   * Idem Ressource avec errors en moins, et moins d'index
+   * L'entity Ressource
    * @constructor
+   * @extends EntityInstance
    */
-  construct: function () {
+  Ressource.construct(function () {
+    /**
+     * Une liste d'erreurs éventuelles (incohérences de données, etc)
+     * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
+     * Devrait être viré au save s'il est vide
+     */
+    this.errors = []
     /**
      * L'identifiant de la ressource, utilisé dans les urls
      * @type {Number}
@@ -134,9 +150,15 @@ lassi.Entity('Archive', {
      */
     this.publie = false;
     /**
-     * Restriction sur la ressource
+     * Vrai si la ressource est indexable (peut sortir sur des résultats de recherche)
+     * Sert à distinguer des ressources "obsolètes" car remplacées par d'autres mais toujours publiées car utilisées.
+     * @type {boolean}
      */
-    this.restriction = 0;
+    this.indexable = false;
+    /**
+     * Restriction sur la ressource, cf lassi.settings.ressource.constantes.restriction
+     */
+    this.restriction = 0 // lassi.settings.ressource.constantes.restriction.aucune pas encore dispo
     /**
      * Date de création
      * @type {Date}
@@ -149,29 +171,106 @@ lassi.Entity('Archive', {
     this.dateMiseAJour = undefined;
     /**
      * Version de la ressource
+     * {integer}
      */
-    this.version = 0;
+    this.version = 1;
     /**
      * L'oid de l'archive correspondant à la version précédente
      */
-    this.oidPrecedent = 0
-  },
-  configure: function() {
-    this
-    .on('beforeStore', function(next) {
-      var archive = this
-      // on regarde s'il y avait une archive précédente
-      lassi.entity.Archive
-      .match('id').equals(archive.id)
-      .sort('version', 'desc')
-      .grabOne(function(error, archivePrec) {
-        if (archivePrec) archive.oidPrecedent = archivePrec.oid
-          next()
+    this.archiveOid = 0
+
+    /**
+     * Enregistre la ressource en archive, màj archiveOid sur la ressource courante et passe l'archive à next
+     * (à l'appelant de gérer les versions)
+     * @param next
+     */
+    this.archive = function (next) {
+      var ressource = this
+      if (!ressource.oid) {
+        next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
+        return
+      }
+      var archiveObj = tools.clone(ressource)
+      // on vire les propriétés dont on ne veut pas
+      delete archiveObj.oid
+      if (ressource.archiveOid) archiveObj.oidPrecedent = ressource.archiveOid
+      if (archiveObj.errors) {
+        if (archiveObj.errors.length) log.error("Archivage de la ressource " +ressource.oid +" (id " +ressource.id +
+        ") qui comportait des erreurs : " +archiveObj.errors.join('\n'))
+        delete archiveObj.errors
+      }
+      // et on archive
+      Archive.create(archiveObj).store(function (error, archiveObj) {
+        if (error) next(error)
+        else {
+          ressource.archiveOid = archiveObj.oid
+          next(null, archiveObj)
+        }
       })
-    })
+    }
+
+    /**
+     * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
+     * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
+     */
+    this.toArbre = function () {
+      if (this.typeTechnique !== 'arbre') return undefined
+      var arbre = this.parametres
+      // on ajoute id et titre
+      arbre.id = this.id
+      arbre.titre = this.titre
+
+      return arbre
+    }
+
+  })
+
+
+  Ressource.beforeStore(function (next) {
+    // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
+    // et pas de celle de son indexation ici
+    if (!this.dateMiseAJour) {
+      this.dateMiseAJour = new Date()
+    }
+    // cohérence de la restriction
+    if (this.restriction === 2 && (!this.parametres.allow || !this.parametres.allow.groupes)) {
+      log.error("Ressource " +this.id +" restreinte à des groupes sans préciser lesquels, on la passe privée")
+      this.restriction = 3
+    }
+    // si le tableau d'erreur est vide (devrait toujours être le cas,
+    // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
+    if (_.isEmpty(this.errors)) delete this.errors
+      // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
+      // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
+      //log.dev('beforeStore fini')
+      next()
+  })
+
+  Ressource.afterStore(function (next) {
+    // on met en cache
+    if (this.id) $cache.set('ressource_' +this.id, this, cacheTTL)
+      if (this.idOrigine) $cache.set('ressourceIdByOrigine_' +
+                                                this.origine +'_' +this.idOrigine, this, cacheTTL)
+        next()
+  })
+
+  Ressource
     .defineIndex('id', 'integer')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
-    .defineIndex('version', 'integer')
-  }
-});
+    .defineIndex('typeTechnique', 'string')
+    .defineIndex('niveaux', 'integer')
+    .defineIndex('categories', 'integer')
+    .defineIndex('typePedagogiques', 'integer')
+    .defineIndex('typeDocumentaires', 'integer')
+    //.defineIndex('relations', 'integer') // chaque relation est un tableau, faudra voir si on peut indexer ça
+    .defineIndex('auteurs', 'integer')
+    .defineIndex('contributeurs', 'integer')
+    .defineIndex('langue', 'string')
+    .defineIndex('publie', 'boolean')
+    .defineIndex('indexable', 'boolean')
+    .defineIndex('restriction', 'integer')
+    .defineIndex('dateCreation', 'date')
+    .defineIndex('dateMiseAJour', 'date')
+
+}

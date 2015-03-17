@@ -162,4 +162,20 @@ tools.encadre = function (int, min, max, label) {
   return value
 }
 
+/**
+ * Génère le code html d'un lien
+ * @param route La route (après "ressources/", cf config.routes)
+ * @param texte Le texte à afficher
+ * @param {string|array} [args] Des arguments à ajouter à la route (séparateur slash)
+ * @returns {string} Le code html du tag a
+ */
+tools.link = function (route, texte, args) {
+  if (args) {
+    if (_.isArray(args)) route += '/' +args.join('/')
+    else route += '/' +args
+  }
+
+  return '<a href="' +route +'">' +texte +'</a>'
+}
+
 module.exports = tools

@@ -34,6 +34,7 @@
 var _ = require('underscore')._
 var moment = require('moment')
 var config = require('./config')
+var routes = config.constantes.routes
 
 /**
  * Module qui regroupe les fonctions de transformation de données pour les vues
@@ -458,6 +459,21 @@ $ressourceConverter.getRessourceFromPostedArbre = function (data, partial) {
   // faut ajouter les enfants qui passent pas le filtre getRessourceFromPost (car pas une propriété de l'entité
   if (data.enfants) arbre.enfants = data.enfants;
   return arbre
+}
+
+/**
+ * Ajoute les propriétés urlXXX à chaque elt du tableau de ressource
+ * @param {Array} ressources
+ * @returns {Array} ressources
+ */
+$ressourceConverter.addUrlsToList = function (ressources) {
+  if (ressources && ressources.length) ressources.forEach(function (ressource) {
+    ressource.urlDescribe = routes.describe +'/' +ressource.id
+    ressource.urlPreview = routes.preview +'/' +ressource.id
+    ressource.urlDisplay = routes.display +'/' +ressource.id
+  })
+
+  return ressources
 }
 
 module.exports = $ressourceConverter

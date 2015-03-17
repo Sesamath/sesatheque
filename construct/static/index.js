@@ -42,27 +42,27 @@ var staticComponent = lassi.component('static')
 // On configure le layout des erreurs lors de l'init du composant
 staticComponent.config(function() {
   // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
-  lassi.on('beforeTransport', function(data) {
+  lassi.on('beforeTransport', function(context, data) {
     log('on beforeTransport avec les data', data)
     /* console.log('on beforeTransport on a les data')
     console.log(data) */
 
-    if (data.$status && data.$status > 400) {
-      data.$contentType = 'text/html'
-      // erreur, 403 et 404 on leur layout, et on en a un autre pour les autres erreurs
-      switch (data.$status) {
-        case 404:
-          data.$layout = 'layout-page404'
-          break
-        case 403:
-          data.$layout = 'layout-page403'
-          break
-        default:
-          data.$layout = 'layout-pageError'
+    if (context.status && context.status > 400) {
+      if (!context.contentType) context.contentType = 'text/html'
+      // on ne gère que le html
+      if (context.contentType === 'text/html') {
+        // erreur, 403 et 404 on leur layout, les autres erreurs ont un layout commun
+        switch (data.$status) {
+          case 404:
+            data.$layout = 'layout-page404'
+            break
+          case 403:
+            data.$layout = 'layout-page403'
+            break
+          default:
+            data.$layout = 'layout-pageError'
+        }
       }
-    } else if (data.forceLayout) {
-      data.$contentType = 'text/html'
-      data.$layout = data.forceLayout
     }
   })
 })

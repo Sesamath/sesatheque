@@ -31,16 +31,12 @@
 
 "use strict";
 
-var cacheTTL = 3600
+module.exports = function (Groupe, $cache, cacheTTL) {
 
-
-lassi.Entity('Groupe', {
-    /**
-     * Définition de l'entity Groupe
-     * @constructor
-     * @extends EntityInstance
-     */
-  construct: function() {
+  /**
+   * @constructor
+   */
+  Groupe.construct = function() {
     /**
      * Id
      * @type {Number}
@@ -56,23 +52,23 @@ lassi.Entity('Groupe', {
      * @type {boolean}
      */
     this.open = false
-  },
-  configure: function() {
-    this
-    .on('beforeStore', function(next) {
-      log.dev('beforeStore groupe ' +this.nom)
-      next()
-    })
-    .on('afterStore', function(next) {
-      // on met en cache
-      lassi.cache.set('groupe_' +this.id, this, cacheTTL)
-      lassi.cache.set('groupeNom_' +this.nom, this, cacheTTL)
-      // et on passe au suivant sans se préoccuper du retour
-      next()
-    })
+  }
+
+  Groupe.beforeStore(function(next) {
+    log.dev('beforeStore groupe ' +this.nom)
+    next()
+  })
+
+  Groupe.afterStore(function(next) {
+    // on met en cache
+    $cache.set('groupe_' +this.id, this, cacheTTL)
+    $cache.set('groupeNom_' +this.nom, this, cacheTTL)
+    // et on passe au suivant sans se préoccuper du retour
+    next()
+  })
+
+  Groupe
     .defineIndex('id', 'integer')
     .defineIndex('nom', 'string')
     .defineIndex('open', 'boolean')
-  }
-});
-
+}
