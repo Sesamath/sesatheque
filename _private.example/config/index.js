@@ -36,7 +36,7 @@
  * @see http://knexjs.org/#Installation-client pour la syntaxe de entities.database
  */
 module.exports = {
-  entities : {
+  $entities : {
     database: {
       /* pour mysql */
       client: "mysql",
@@ -59,7 +59,7 @@ module.exports = {
        } /* */
     }
   },
-  server : {
+  $server : {
     port:process.env.PORT || 3001
   },
   memcache : '127.0.0.1:11211'

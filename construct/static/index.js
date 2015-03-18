@@ -52,15 +52,20 @@ staticComponent.config(function() {
       // on ne gère que le html
       if (context.contentType === 'text/html') {
         // erreur, 403 et 404 on leur layout, les autres erreurs ont un layout commun
+        if (!data.content) data.content = {}
+        if (!data.$layout) data.$layout = 'layout-page'
         switch (data.$status) {
           case 404:
-            data.$layout = 'layout-page404'
+            //data.$layout = 'layout-page404'
+            data.content.content = "Cette page n'existe pas"
             break
           case 403:
-            data.$layout = 'layout-page403'
+            //data.$layout = 'layout-page403'
+            data.content.content = "Authentification requise"
             break
           default:
-            data.$layout = 'layout-pageError'
+            //data.$layout = 'layout-pageError'
+            data.content.content = "Une erreur est survenue"
         }
       }
     }
@@ -82,22 +87,19 @@ staticComponent.config(function() {
   }); /**/
 
 
-staticComponent.controller(function () {
-  /**
-   * Affecte les valeurs communes à tous nos controleurs
-   * @param data
-   */
-  function initData(data) {
-    if (!data.$metas) data.$metas = {}
-    data.$views = __dirname +'/views'
-    data.$layout = 'layout-page'
+staticComponent.controller(function ($flashMessages) {
+  var baseData = {
+    $metas : {},
+    $views : __dirname +'/views',
+    $layout : 'layout-page'
   }
 
   this.serve(__dirname +'/public')
 
-  this.get('/', function (ctx, data) {
-    log('le contexte dans le controleur de static, action /',ctx)
-    initData(data)
+  // home
+  this.get('/', function (context) {
+    var data = baseData
+    log('le contexte dans le controleur de static, action /',context)
     data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
     // ce content est le nom du bloc du layout
     data.content = {
@@ -105,6 +107,33 @@ staticComponent.controller(function () {
       // ce content est la variable passée au template dust
       content: "Ce site est encore un prototype expérimental."
     }
-    ctx.html(data)
+    context.html(data)
   })
+
+  // gestion des messages flash
+  this.get('*', function (context) {
+    if (context.request.url.indexOf('/api/') === 0) return context.next()
+    $flashMessages.print(context)
+  })
+})
+
+staticComponent.service('$flashMessages', function() {
+  return {
+    add : function (context, message) {
+      if (!context.session.flashMessages) context.session.flashMessages = []
+      context.session.flashMessages.push(message)
+    },
+    print : function (context) {
+      var data
+      if (context.session.flashMessages) {
+        data = {
+          flashBloc : {
+            $view : 'flash',
+            messages : context.session.flashMessages
+          }
+        }
+      }
+      context.next(null, data)
+    }
+  }
 })

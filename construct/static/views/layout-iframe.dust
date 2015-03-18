@@ -10,6 +10,9 @@
     {head|s}
 </head>
 <body>
+{?error}<p class="has-error">{error}</p>{/error}
+{#errors}<p class="has-error">{.}</p>{/errors}
+{#flashBloc}{.|s}{/flashBloc}
 {#content}{.|s}{/content}
 </body>
 </html>

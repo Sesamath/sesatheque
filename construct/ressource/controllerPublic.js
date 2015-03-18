@@ -33,7 +33,7 @@
 
 var tools = require('../tools')
 
-var routes = require('config.js').constantes.routes
+var routes = require('./config').constantes.routes
 
 var dataListe = {
   $views : __dirname + '/views',

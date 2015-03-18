@@ -36,7 +36,6 @@
 var ressourceComponent = lassi.component('ressource')
 
 ressourceComponent.config(function($settings) {
-  log('config du component ressource')
   // on vérifie que l'on a un cache avec des valeur acceptables
   var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
   if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")
@@ -74,14 +73,13 @@ ressourceComponent.service('$cacheRessource', function($cache, $settings) {
       // next appelé seulement sur ce set principal
       $cache.set('ressource_' + ressource.id, ressource, ttl, next)
     },
-    delete : function (ressource, next) {
-      if (ressource && ressource.id) {
-        $cache.delete('ressource_', ressource.id, next)
-        if (ressource.origine && ressource.idOrigine) $cache.delete('ressourceByOrigine_' + ressource.origine + '_' + ressource.idOrigine)
-      } else {
-        log.error(new Error("Il faut passer une ressource en argument à $cacheRessource.delete"))
-        next()
-      }
+    delete : function (id, next) {
+      // faut aller le chercher en cache pour effacer par origine
+      $cache.get('ressource_' +id, function (error, ressource) {
+        if (ressource && ressource.origine && ressource.idOrigine)
+            $cache.delete('ressourceByOrigine_' + ressource.origine + '_' + ressource.idOrigine)
+      })
+      $cache.delete('ressource_' +id, next)
     }
   }
 })
@@ -127,3 +125,4 @@ ressourceComponent.controller('api', function ($ressourceRepository, $ressourceC
   log('def controller api')
   require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $accessControl)
 })
+/* */

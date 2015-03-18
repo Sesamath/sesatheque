@@ -32,95 +32,82 @@
 'use strict'
 
 /**
- * Service d'accès aux personnes, utilisé par les différents contrôleurs
- * @namespace $personneRepository
- */
-var $personneRepository = {}
-
-// Les dépendances
-var Personne
-var Groupe
-var $cache
-var cacheTTL
-
-/**
- * Récupère une personne (en cache ou en bdd)
- * @param id
- * @param next
- */
-$personneRepository.load = function(id, next) {
-  log.dev('load ' +id)
-  $cache.get('personne_' + id, function(error, personneCached) {
-    if (personneCached) next(null, personneCached)
-    else {
-      Personne.match('id').equals(id).grabOne(function (error, personne) {
-        //log.dev('personne load remonte ', personne)
-        if (error) next(error)
-        else if (personne) {
-          $cache.set('personne_' + id, personne, cacheTTL)
-          next(null, personne)
-        } else {
-          next(null, undefined)
-        }
-      })
-    }
-  })
-}
-
-/**
- * Récupère un groupe d'après son nom
- * @param {string} groupeNom
- * @param {EntityInstance~StoreCallback} next
- */
-$personneRepository.loadGroupeByNom = function (groupeNom, next) {
-  $cache.get('groupeByNom_' +groupeNom, function (error, groupe) {
-    if (groupe) return next(null, groupe)
-    Groupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
-      if (error) return next(error)
-      if (groupe) {
-        $cache.set('groupe_' +groupe.id, groupe, cacheTTL)
-        $cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
-        return next(null, groupe)
-      }
-      next(null, null)
-    })
-  })
-}
-
-/**
- * Récupère un groupe d'après son id (si erreur on la log)
- * @param {int} id
- * @param {EntityInstance~StoreCallback} next
- */
-$personneRepository.loadGroupe = function (groupeId, next) {
-  if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.id doit être entier"))
-  $cache.get('groupe_' +groupeId, function(error, groupe) {
-    if (groupe) return next(null, groupe)
-    Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {
-      if (error) log.error(error)
-      if (groupe) {
-        $cache.set('groupe_' +groupeId, groupe, cacheTTL)
-        $cache.set('groupeByNom_' +groupe.nom, groupe, cacheTTL)
-      }
-      next(error, groupe)
-    })
-  })
-}
-
-
-/**
- * Init de notre service $personneRepository qui réclame $cache en dépendance
- * @param personneEntity
- * @param groupeEntity
- * @param serviceCache
- * @param {number} ttl Le ttl du cache personne
+ * Init de notre service $personneRepository avec ses dépendances en argument
+ *
+ * @param Personne
+ * @param Groupe
+ * @param $cachePersonne
+ * @param $cacheGroupe
  * @returns {$personneRepository}
  */
-module.exports = function (personneEntity, groupeEntity, cacheService, ttl) {
-  Personne = personneEntity
-  Groupe = groupeEntity
-  $cache = cacheService
-  cacheTTL = ttl
+module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
+  /**
+   * Service d'accès aux personnes, utilisé par les différents contrôleurs
+   * @namespace $personneRepository
+   */
+  var $personneRepository = {}
+
+  /**
+   * Récupère une personne (en cache ou en bdd)
+   * @param id
+   * @param next
+   */
+  $personneRepository.load = function (id, next) {
+    log.dev('load ' + id)
+    $cachePersonne.get(id, function (error, personneCached) {
+      if (personneCached) next(null, personneCached)
+      else {
+        Personne.match('id').equals(id).grabOne(function (error, personne) {
+          //log.dev('personne load remonte ', personne)
+          if (error) next(error)
+          else if (personne) {
+            $cachePersonne.set(personne)
+            next(null, personne)
+          } else {
+            next(null, undefined)
+          }
+        })
+      }
+    })
+  }
+
+  /**
+   * Récupère un groupe d'après son nom
+   * @param {string} groupeNom
+   * @param {EntityInstance~StoreCallback} next
+   */
+  $personneRepository.loadGroupeByNom = function (groupeNom, next) {
+    $cacheGroupe.getByNom(groupeNom, function (error, groupe) {
+      if (groupe) return next(null, groupe)
+      Groupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
+        if (error) return next(error)
+        if (groupe) {
+          $cacheGroupe.set(groupe)
+          return next(null, groupe)
+        }
+        next(null, null)
+      })
+    })
+  }
+
+  /**
+   * Récupère un groupe d'après son id (si erreur on la log)
+   * @param {int} id
+   * @param {EntityInstance~StoreCallback} next
+   */
+  $personneRepository.loadGroupe = function (groupeId, next) {
+    if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.id doit être entier"))
+    $cacheGroupe.get(groupeId, function (error, groupe) {
+      if (groupe) return next(null, groupe)
+      Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {
+        if (error) log.error(error)
+        if (groupe) {
+          $cacheGroupe.set(groupe)
+        }
+        next(error, groupe)
+      })
+    })
+  }
 
   return $personneRepository
 }

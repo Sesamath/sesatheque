@@ -31,7 +31,7 @@
 
 "use strict";
 
-module.exports = function (Groupe, $cache, cacheTTL) {
+module.exports = function (Groupe, $cacheGroupe) {
 
   /**
    * @constructor
@@ -61,9 +61,8 @@ module.exports = function (Groupe, $cache, cacheTTL) {
 
   Groupe.afterStore(function(next) {
     // on met en cache
-    $cache.set('groupe_' +this.id, this, cacheTTL)
-    $cache.set('groupeNom_' +this.nom, this, cacheTTL)
-    // et on passe au suivant sans se préoccuper du retour
+    $cacheGroupe.set(this)
+    // et on passe au suivant sans se préoccuper du retour de mise en cache
     next()
   })
 

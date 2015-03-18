@@ -323,15 +323,10 @@ $ressourceRepository.del = function(id, next) {
       // faut effacer aussi en cache
       if (_.isArray(id)) {
         id.forEach(function (idToDel) {
-          // faut aller la chercher en cache car delete ne prend pas d'id
-          $cacheRessource.get(idToDel, function(error, ressource) {
-            if (ressource) $cacheRessource.delete(ressource)
-          })
+          $cacheRessource.delete(idToDel)
         })
       } else {
-        $cacheRessource.get(id, function(error, ressource) {
-          if (ressource) $cacheRessource.delete(ressource)
-        })
+        $cacheRessource.delete(id)
       }
       next(error, nbObjects, nbIndexes)
     }
@@ -356,7 +351,7 @@ $ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
           // faut regarder si on l'a en cache pour la virer (on a pas l'id)
           $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressource) {
             if (ressource) {
-              $cacheRessource.delete(ressource)
+              $cacheRessource.delete(ressource.id)
             }
           })
         }

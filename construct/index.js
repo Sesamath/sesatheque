@@ -70,7 +70,7 @@ sesatheque.config(function($cache, $settings) {
   }
   // on regarde si la conf réclame du chargement complémentaire
   if (lassi.settings.afterInit) {
-    //lassi.settings.afterInit()
+    lassi.settings.afterInit()
   }
 
   log("sesatheque en fin de config", sesatheque)

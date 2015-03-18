@@ -76,7 +76,7 @@ function getDeniedMessage(permission, context, ressource, next) {
     return
   }
   // on regarde donc ce user pour cette ressource
-  if (!personneComponent.isAuthenticated(context)) msg = "Authentification requise" +connectLink
+  if (!$accessControl.isAuthenticated(context)) msg = "Authentification requise" +connectLink
   // sinon on délègue suivant la permission
   else switch (permission) {
     case 'create':
@@ -221,9 +221,9 @@ $accessControl.hasPermission = function (permission, context, ressource) {
   if (!ressource) return false
 
   // read n'a pas forcément besoin de session
-  if (permission === 'read') return personneComponent.hasReadPermission(context, ressource)
+  if (permission === 'read') return $accessControl.hasReadPermission(context, ressource)
 
-  if (!personneComponent.isAuthenticated(context)) return false
+  if (!$accessControl.isAuthenticated(context)) return false
   else switch (permission) {
     case 'create' : return (getCreateDeniedMessage(context) === '')
     case 'delete' : return (getDeleteDeniedMessage(context, ressource) === '')
@@ -242,7 +242,7 @@ $accessControl.hasPermission = function (permission, context, ressource) {
 $accessControl.hasReadPermission = function (context, ressource) {
   if (!ressource.restriction) return true
   if (isOurServerOnApi(context)) return true
-  if (!personneComponent.isAuthenticated(context)) return false
+  if (!$accessControl.isAuthenticated(context)) return false
   if (hasGenericPermission('read', context)) return true
   return (getReadDeniedMessage(context, ressource) === '')
 }

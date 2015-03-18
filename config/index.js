@@ -94,20 +94,16 @@ var settings = {
     staging: staging
   },
   /* dans localConf
-  entities: {
+  $entities: {
     database: {
       client...
     }
-  }, */
-  renderer: {
-    cache: false
   },
-  layout  : {
-    data : root + '/data',
-    cache: root + '/data/cache'
-  },
-  rail    : {
-    favicon       : '/assets/images/favicon.ico',
+  $server {
+    port:process.env.PORT || 3001
+  }
+   */
+  $rail    : {
     logger        : morganSettings, // passé tel quel à morgan()
     public        : true,
     //compression : {},
@@ -160,22 +156,29 @@ var settings = {
 // on ajoute nos params locaux (accès à la base et port)
 if (localConfig) tools.update(settings, localConfig)
 
-// on enlève le debug mysql si on nous précise prod dans l'environnement
-if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && settings.entities.database.connection.debug)
-  delete settings.entities.database.connection.debug
+// on met les sessions dans memcache si déclaré
+if (settings.memcache) {
+  settings.$rail.session.storage = {
+    type: 'memcache',
+    servers: settings.memcache
+  }
+}
 
-module.exports = settings  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+// on enlève le debug mysql si on nous précise prod dans l'environnement
+if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && settings.$entities.database.connection.debug)
+  delete settings.$entities.database.connection.debug
+else {
+  console.log('Les settings chargés')
+  console.log(settings)
+}
+
+module.exports = settings
+
+/**
+ * composant qui va se placer en dépendance globale
+ * (on charge en private le module sesasso-bibli spécifique à cette instance)
+ * /
+lassi.component('auth').config(function() {
+  require('sesasso-bibli')
+})
+/* */

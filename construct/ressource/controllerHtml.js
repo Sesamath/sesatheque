@@ -126,7 +126,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $metas : {
         css   : ['styles/ressources.css']
       },
-      $layout : 'layout-page'
+      $layout : '../../static/views/layout-page'
     }
     // on ajoute le menu
     addMenu(context, data, ressource)
@@ -134,7 +134,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     data.content = $ressourceConverter.getViewData(error, ressource)
     data.content.$view = view
     // le titre
-    data.$metas.title = ressource.titre || "Ressource introuvable"
+    data.$metas.title = (ressource && ressource.titre) ? ressource.titre : "Ressource introuvable"
     // et d'éventuels overrides
     if (options) tools.merge(data, options)
     // avant d'envoyer
