@@ -45,6 +45,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 // raccourci pour se simplifier la saisie du code
   var config = require('./config.js')
   var routes = config.constantes.routes
+  
+  function getDefaultData() {
+    return {
+      $views : __dirname + '/views',
+      $metas : {
+        css: ['styles/ressources.css']
+      },
+      $layout: 'layout-page'
+    }
+  } 
 
   /**
    * Vérifie que le token du post correspond à celui en session
@@ -66,13 +76,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function checkSession(context) {
     if (!context.session || !context.session.user) {
-      var data = {
-        $metas : {
-          css   : ['styles/ressources.css']
-        },
-        $layout : 'layout-pageError',
-        content : "Authentification requise"
-      }
+      var data = getDefaultData()
+      data.error = "Authentification requise"
       context.status = 401
       context.html(data)
 
@@ -114,20 +119,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Prepare les data pour la vue dust et appelle html avec
-   * @param context
    * @param error
    * @param ressource
+   * @param context
    * @param view
    * @param options
    */
-  function prepareAndSend(context, error, ressource, view, options) {
-    var data = {
-      $views: __dirname+'/views',
-      $metas : {
-        css   : ['styles/ressources.css']
-      },
-      $layout : '../../static/views/layout-page'
-    }
+  function prepareAndSend(error, ressource, context, view, options) {
+    var data = getDefaultData()
     // on ajoute le menu
     addMenu(context, data, ressource)
     // et la ressource (ou erreur)
@@ -138,39 +137,43 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     // et d'éventuels overrides
     if (options) tools.merge(data, options)
     // avant d'envoyer
-    context.html(data)
+    //context.html(data)
+    log("dans prepareAndSend on a un content.next : " +(context.next ? 'oui' : 'non'))
+    log(new Error("la trace dans prepareAndSend"))
+    context.contentType = 'text/html'
+    context.next(data)
   }
 
   /**
    * Envoie la ressource à la vue
-   * @param context
    * @param error
    * @param ressource
+   * @param context
    * @param view
    * @param options
    */
-  function printForRead(context, error, ressource, view, options) {
+  function printForRead(error, ressource, context, view, options) {
     if (error) {
-      prepareAndSend(context, error, null, view, options)
+      prepareAndSend(error, null, context, view, options)
     } else if (ressource) {
       $accessControl.checkPermission('read', context, ressource, function (ressource) {
-        prepareAndSend(context, error, ressource, view, options)
+        prepareAndSend(error, ressource, context, view, options)
       })
     } else {
       context.status = 404
       error = new Error("Ressource introuvable")
-      prepareAndSend(context, error, null, view, options)
+      prepareAndSend(error, null, context, view, options)
     }
   }
 
   /**
    * Prepare les data pour le form dust et appelle html avec
-   * @param context
    * @param error
    * @param ressource
+   * @param context
    * @param options
    */
-  function printForm(context, error, ressource, options) {
+  function printForm(error, ressource, context, options) {
     var data = {
       $views: __dirname+'/views',
       $metas : {
@@ -200,7 +203,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get(routes.describe + '/:id', function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
-      printForRead(context, error, ressource, 'describe')
+      printForRead(error, ressource, context, 'describe')
     })
   })
 
@@ -209,15 +212,20 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      printForRead(context, error, ressource, 'describe')
+      printForRead(error, ressource, context, 'describe')
     })
   })
 
 // display : Voir la ressource pleine page (pour iframe)
   controller.get(routes.display + '/:id', function (context) {
     var id = context.arguments.id
+    log("appel de l'action display pour " +id)
+    /* ça fonctionne en affichant bien l'erreur sans repasser une 2e fois ici
+    printForRead(new Error("display " +id), null, context, 'display', {$layout: 'layout-iframe'})
+    return */
     $ressourceRepository.load(id, function (error, ressource) {
-      printForRead(context, error, ressource, 'display', {$layout: 'layout-iframe'})
+      log("load de display") // pourquoi on passe 2x ici ???
+      printForRead(error, ressource, context, 'display', {$layout: 'layout-iframe'})
     })
   })
 
@@ -226,7 +234,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      printForRead(context, error, ressource, 'display', {$layout: 'layout-iframe'})
+      printForRead(error, ressource, context, 'display', {$layout: 'layout-iframe'})
     })
   })
 
@@ -234,7 +242,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get(routes.preview + '/:id', function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
-      printForRead(context, error, ressource, 'preview')
+      printForRead(error, ressource, context, 'preview')
     })
   })
 
@@ -243,7 +251,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (checkSession()) {
       $accessControl.checkPermission('create', context, null, function () {
         var options = {$metas: {title: 'Ajouter une ressource'}}
-        printForm(context, null, null, options)
+        printForm(null, null, context, options)
       })
     }
   })
@@ -261,7 +269,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (error || !_.isEmpty(ressource.errors)) {
           // faut réafficher le form
           var options = {$metas: {title: 'Ajouter une ressource'}}
-          printForm(context, error, ressource, options)
+          printForm(error, ressource, context, options)
         } else {
           log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
           context.redirect(routes.describe + '/' + ressource.id)
@@ -277,7 +285,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $ressourceRepository.load(id, function (error, ressource) {
         $accessControl.checkPermission('update', context, ressource, function () {
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
-          printForm(context, error, ressource, options)
+          printForm(error, ressource, context, options)
         })
       })
     }
@@ -296,7 +304,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (error || !_.isEmpty(ressource.errors)) {
           // faut réafficher le form
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
-          printForm(context, error, ressource, options)
+          printForm(error, ressource, context, options)
         } else {
           log.dev("update " + ressource.id + " ok, on lance le redirect")
           context.redirect(routes.describe + '/' + ressource.id)
@@ -315,7 +323,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           content: {$view: 'delete'}
         }
         context.session['del' + id] = true
-        printForm(context, error, ressource, options)
+        printForm(error, ressource, context, options)
       })
     })
   })
@@ -332,7 +340,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (error || !_.isEmpty(ressource.errors)) {
           // faut réafficher le form
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
-          printForm(context, error, ressource, options)
+          printForm(error, ressource, context, options)
         } else {
           log.dev("update " + ressource.id + " ok, on lance le redirect")
           context.redirect(routes.describe + '/' + ressource.id)

@@ -43,9 +43,7 @@ var staticComponent = lassi.component('static')
 staticComponent.config(function() {
   // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
   lassi.on('beforeTransport', function(context, data) {
-    log('on beforeTransport avec les data', data)
-    /* console.log('on beforeTransport on a les data')
-    console.log(data) */
+    //log('on beforeTransport avec les data', data)
 
     if (context.status && context.status > 400) {
       if (!context.contentType) context.contentType = 'text/html'

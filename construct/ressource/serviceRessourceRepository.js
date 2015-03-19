@@ -133,17 +133,18 @@ function setVersion(ressource, next) {
  * Créé les objets date à partir des Strings, met en cache et fait suivre
  * Si on trouve un seul paramètre xml, on le jsonify
  * @private
+ * @param error
  * @param ressources ressource ou tableau de ressources
  * @param next
  * @throws {Error} Si ressources n'est pas une ressource ou un tableau de ressources
  */
-function prepareAndSend(ressources, next) {
+function cacheAndNext(error, ressources, next) {
   /**
    * Helper qui process une ressource
    * @param ressource
    */
   function processOne(ressource) {
-    if (!ressource.oid) throw new Error("Paramètre invalide (n'est pas une ressource)")
+    if (!ressource.oid) throw new Error("Paramètre invalide (ressource attendue)")
     // faut transformer les dates en objets date
     if (ressource.dateCreation) ressource.dateCreation = new Date(ressource.dateCreation);
     if (ressource.dateMiseAJour) ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
@@ -151,12 +152,15 @@ function prepareAndSend(ressources, next) {
     if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
       convertXmlEc2(ressource)
     }
+    $cacheRessource.set(ressource)
   }
 
-  if (_.isEmpty(ressources)) throw new Error("Paramètre invalide (n'est pas une ressource ni une liste)")
-  if (_.isArray(ressources)) ressources.forEach(processOne)
-  else processOne(ressources)
-  next(null, ressources)
+  if (error) next(error)
+  else {
+    if (_.isArray(ressources)) ressources.forEach(processOne)
+    else processOne(ressources)
+    next(null, ressources)
+  }
 }
 
 function convertXmlEc2(ressource) {
@@ -370,20 +374,13 @@ $ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
  */
 $ressourceRepository.load = function(id, next) {
   log.dev('load ressource_' +id)
+  log('load ressource_' +id)
   $cacheRessource.get(id, function (error, ressourceCached) {
+    if (ressourceCached) log("trouvé en cache ressource_" +id)
     if (ressourceCached) next(null, ressourceCached)
-    else {
-      Ressource.match('id').equals(id).grabOne(function (error, ressource) {
-        if (error) next(error)
-        else if (ressource) {
-          // log.dev('on a récupéré en db la ressource', ressource)
-          $cacheRessource.set(ressource)
-          prepareAndSend(ressource, next)
-        } else {
-          next(null, null)
-        }
-      })
-    }
+    else Ressource.match('id').equals(id).grabOne(function (error, ressource) {
+      cacheAndNext(error, ressource, next)
+    })
   })
 }
 
@@ -401,13 +398,7 @@ $ressourceRepository.loadPublic = function(id, next) {
           .match('id').equals(id)
           .match('restriction').equals(0)
           .grabOne(function (error, ressource) {
-            if (error) next(error)
-            else if (ressource) {
-              $cacheRessource.set(ressource)
-              prepareAndSend(ressource, next)
-            } else {
-              next(null, null)
-            }
+            cacheAndNext(error, ressource, next)
           })
     }
   })
@@ -432,13 +423,7 @@ $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
           .match('origine').equals(origine)
           .match('idOrigine').equals(idOrigine)
           .grabOne(function (error, ressource) {
-            if (error) next(error)
-            else if (ressource) {
-              $cacheRessource.set(ressource)
-              prepareAndSend(ressource, next)
-            } else {
-              next(null, null)
-            }
+              cacheAndNext(error, ressource, next)
           })
     }
 
@@ -561,14 +546,11 @@ $ressourceRepository.getListe = function(visibilite, ctx, options, next) {
       nb = config.limites.maxSql
     }
     query.grab(nb, start, function(error, ressources) {
-      if (error) next(error)
-      else if (options.full) next(null, ressources)
-      else {
-        if (ressources) ressources.forEach(function(ressource) {
-          if (ressource.parametres) delete ressource.parametres
-        })
-        next(null, ressources)
-      }
+      // on vire les param sauf si on les réclame
+      if (!error && ressources && !options.full) ressources.forEach(function(ressource) {
+        if (ressource.parametres) delete ressource.parametres
+      })
+      cacheAndNext(error, ressources, next)
     })
 
   } catch (error) {

@@ -56,7 +56,7 @@ ressourceComponent.entity('Archive', function () {
  */
 ressourceComponent.service('$cacheRessource', function($cache, $settings) {
   var ttl = $settings.get('components.ressource.cacheTTL', 3600)
-
+  function dummy() {}
   return {
     get: function (id, next) {
       $cache.get('ressource_' +id, next)
@@ -68,16 +68,19 @@ ressourceComponent.service('$cacheRessource', function($cache, $settings) {
       })
     },
     set: function (ressource, next) {
+      next = next || dummy
+      log("cache set ressource_" +ressource.id)
+      // next appelé seulement sur le set principal (le 2e)
       if (ressource.origine)
-          $cache.set('ressourceByOrigine_' +ressource.origine +'_' +ressource.idOrigine, ressource.id, ttl)
-      // next appelé seulement sur ce set principal
+        $cache.set('ressourceByOrigine_' +ressource.origine +'_' +ressource.idOrigine, ressource.id, ttl, dummy)
       $cache.set('ressource_' + ressource.id, ressource, ttl, next)
     },
     delete : function (id, next) {
+      next = next || dummy
       // faut aller le chercher en cache pour effacer par origine
       $cache.get('ressource_' +id, function (error, ressource) {
         if (ressource && ressource.origine && ressource.idOrigine)
-            $cache.delete('ressourceByOrigine_' + ressource.origine + '_' + ressource.idOrigine)
+            $cache.delete('ressourceByOrigine_' + ressource.origine + '_' + ressource.idOrigine, dummy)
       })
       $cache.delete('ressource_' +id, next)
     }
