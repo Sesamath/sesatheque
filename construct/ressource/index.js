@@ -57,6 +57,7 @@ ressourceComponent.entity('Archive', function () {
 ressourceComponent.service('$cacheRessource', function($cache, $settings) {
   var ttl = $settings.get('components.ressource.cacheTTL', 3600)
   function dummy() {}
+
   return {
     get: function (id, next) {
       $cache.get('ressource_' +id, next)
@@ -77,7 +78,7 @@ ressourceComponent.service('$cacheRessource', function($cache, $settings) {
     },
     delete : function (id, next) {
       next = next || dummy
-      // faut aller le chercher en cache pour effacer par origine
+      // faut aller le chercher en cache pour effacer l'entrée par origine
       $cache.get('ressource_' +id, function (error, ressource) {
         if (ressource && ressource.origine && ressource.idOrigine)
             $cache.delete('ressourceByOrigine_' + ressource.origine + '_' + ressource.idOrigine, dummy)

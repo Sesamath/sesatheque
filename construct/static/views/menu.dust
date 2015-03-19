@@ -1,0 +1,6 @@
+{!menuBloc!}
+<ul id="menu">
+{#links}
+<li>{.|s}</li>
+{/links}
+</ul>

@@ -75,11 +75,11 @@ var logDebug
  */
 function out(message, objectToDump, filter, stream) {
   if (!filter || filters[filter]) {
-    if (message instanceof Error) message = message.toString() +'\n' +message.stack // on veut toute la pile
+    // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
+    if (message instanceof Error) message = message.stack + '\n'
     else {
-      message += "\n";
       if (objectToDump) {
-        if (objectToDump instanceof Error) message += '\n' +objectToDump.toString() +objectToDump.stack + '\n'
+        if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
         else message += '\n' + tools.stringify(objectToDump, 2) + "\n";
       }
     }

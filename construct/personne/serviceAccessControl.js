@@ -55,85 +55,59 @@ function hasGenericPermission(permission, context) {
       context.session.user.permissions[permission]
 }
 
-/**
- * Retourne le message d'interdiction (s'il n'y en a pas c'est autorisé)
- * @param permission
- * @param context
- * @param ressource
- * @param next
- * @returns {string|undefined}
- */
-function getDeniedMessage(permission, context, ressource, next) {
-  var msg
-  // pas la peine de continuer si c'est pour voir une ressource publique
-  if (permission === 'read' && ressource.restriction === 0 ||
-        // ni si c'est l'api appelée par un de nos serveurs
-      isOurServerOnApi(context) ||
-        // ni si l'utilisateur a les droits génériques
-      hasGenericPermission(permission, context)
-  ) {
-    next(ressource)
-    return
-  }
-  // on regarde donc ce user pour cette ressource
-  if (!$accessControl.isAuthenticated(context)) msg = "Authentification requise" +connectLink
-  // sinon on délègue suivant la permission
-  else switch (permission) {
-    case 'create':
-      msg = getCreateDeniedMessage(context); break;
-    case 'delete':
-      msg = getDeleteDeniedMessage(context, ressource); break;
-    case 'read':
-      msg = getReadDeniedMessage(context, ressource); break;
-    case 'update':
-      msg = getUpdateDeniedMessage(context, ressource); break;
-    default:
-      msg = "Permission " + permission + " inconnue, refusée par défaut"
-  }
-  return msg
-}
+
 
 /**
- * Helper de getDeniedMessage pour la permission add
+ * Helper de checkAccess pour la permission add
  * @param {Context}   context
  * @returns {string} Le message d'interdiction éventuel (undefined sinon)
  */
 function getCreateDeniedMessage(context) {
+  var msg
   if (!context.session.user.permissions || ! context.session.user.permissions.add)
-    return "Vous n'avez pas de droits suffisants pour créer une ressource"
+      msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+
+  return msg
 }
 
 /**
- * Helper de getDeniedMessage pour la permission del
+ * Helper de checkAccess pour la permission del
  * @param {Context}   context
  * @param {Ressource} ressource
  * @returns {string} Le message d'interdiction éventuel (undefined sinon)
  */
 function getDeleteDeniedMessage(context, ressource) {
+  var msg
   // on regarde si c'est l'auteur
   if (_.contains(ressource.auteurs, context.session.user.id)) {
     // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
     // (sinon d'autres peuvent s'en servir)
-    if (ressource.auteurs.length > 1) return "Vous êtes auteur de cette ressource mais n'êtes pas le seul," +
-        " vous ne pouvez pas la supprimer"
-    else if (ressource.contributeurs.length) return "Vous êtes l'auteur de cette ressource" +
+    if (ressource.auteurs.length > 1)
+        msg = "Vous êtes auteur de cette ressource mais n'êtes pas le seul, vous ne pouvez pas la supprimer"
+    else if (ressource.contributeurs.length) msg = "Vous êtes l'auteur de cette ressource" +
         " mais il y a d'autres contributeurs, vous ne pouvez pas la supprimer"
-    else if (ressource.restriction != 2) return "Vous êtes l'auteur de cette ressource" +
+    else if (ressource.restriction != 2) msg = "Vous êtes l'auteur de cette ressource" +
         " mais elle est partagée avec d'autres, vous ne pouvez plus la supprimer"
   } else {
-    return "Vous n'avez pas de droits suffisants pour effacer cette ressource"
+    msg = "Vous n'avez pas de droits suffisants pour effacer cette ressource"
   }
+
+  return msg
 }
 
 /**
- * Helper de getDeniedMessage pour la permission read
+ * Helper de checkAccess pour la permission read
  * @param {Context}   context
  * @param {Ressource} ressource
  * @returns {string|undefined} Le message d'interdiction éventuel (undefined sinon)
  */
 function getReadDeniedMessage(context, ressource) {
+  // nos ips ont le droit de tout lire via l'api
   if (isOurServerOnApi(context)) return
+
+  var msg
   var restriction = lassi.settings.ressource.constantes.restriction
+
   switch (ressource.restriction) {
     // public
     case restriction.aucune: return
@@ -141,7 +115,7 @@ function getReadDeniedMessage(context, ressource) {
     // correction
     case restriction.correction:
       if (hasGenericPermission('correction', context)) return
-      else return "Vous n'avez pas de droits suffisants pour consulter cette ressource"
+      else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
       break //inutile mais évite à jshint de râler
 
     // réservée au groupe
@@ -150,22 +124,24 @@ function getReadDeniedMessage(context, ressource) {
       if (_.contains(ressource.contributeurs, context.session.user.id)) return
       if (ressource.parametres.allow && ressource.parametres.allow.groupes &&
           !_.empty(_.intersection(ressource.parametres.allow.groupes, context.session.user.groupes))) return
-      return "Ressource restreinte"
+      msg = "Ressource restreinte"
       break
 
     // privée
     case restriction.prive:
       if (_.contains(ressource.auteurs, context.session.user.id)) return
       if (_.contains(ressource.contributeurs, context.session.user.id)) return
-      return "Ressource privée"
+      msg = "Ressource privée"
       break
 
-    default: return "restriction non gérée"
+    default: msg = "restriction non gérée"
   }
+
+  return msg
 }
 
 /**
- * Helper de getDeniedMessage pour la permission del
+ * Helper de checkAccess pour la permission del
  * @param {Context}   context
  * @param {Ressource} ressource
  * @returns {string} Le message d'interdiction éventuel (undefined sinon)
@@ -176,36 +152,80 @@ function getUpdateDeniedMessage(context, ressource) {
   // un contributeur
   if (_.contains(ressource.contributeurs, context.session.user.id)) return
   // pour le moment tout le reste est interdit
+
   return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
 }
 
 /**
  * Renvoie true si c'est du json (api) appelé par une ip locale
- * @param context
+ * @see http://expressjs.com/guide/behind-proxies.html
+ * @see http://expressjs.com/api.html#req.ip
+ * @param {Context} context
  */
 function isOurServerOnApi(context) {
-  if (context.responseFormat && context.responseFormat === 'json' && context.request && context.request._remoteAddress) {
-    var ip = context.request._remoteAddress
-    return (ip === '127.0.0.1' || ip.indexOf('192.168') === 0)
-  } else {
-    return false
+  var ip
+  var isApi = context.contentType && context.contentType === 'application/json' ||
+      (context.request.url.indexOf('/api/') === 0)
+  if (isApi) {
+    log("request dans isOurServerOnApi", context.request)
+    ip = context.request.ip
+    if (ip === '127.0.0.1' || ip.indexOf('192.168') === 0) {
+      // on regarde si par hasard ce serait pas l'ip du proxy
+      var ipClient = ip
+      if (context.ips && context.ips.length) ipClient = context.ips[0]
+      else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
+      else if (context.request.headers['x-forwarded-for'])
+          ipClient = context.request.header('x-forwarded-for').split(',')[0]
+      if (ipClient && ipClient !== ip) log.dev("L'appli est derrière un proxy mais trust proxy n'a pas été déclaré")
+
+      return (ipClient === '127.0.0.1' || ipClient.indexOf('192.168') === 0)
+    }
+
   }
+
+  return false
 }
 
 /**
- * Redirige vers accessDenied si l'utilisateur courant n'a pas la permission demandée pour la ressource
- * (et appelle next avec la ressource sinon)
+ * Appelle context.accessDenied si l'utilisateur courant n'a pas la permission demandée pour la ressource
+ * (et appelle next(null,ressource) sinon)
  * @param permission
  * @param {Context} context
  * @param {Ressource} ressource
  * @param {Function} next callback qui sera appelée si tout va bien (avec la ressource qu'on nous a donné)
  */
 $accessControl.checkPermission = function (permission, context, ressource, next) {
-  var msg = getDeniedMessage(permission, context, ressource, next)
-  if (msg) context.accessDenied(msg)
-  else next(ressource)
+  var msg
+  // pas la peine de continuer si c'est pour voir une ressource publique
+  if (permission === 'read' && ressource.restriction === 0 ||
+        // ni si c'est l'api appelée par un de nos serveurs
+      isOurServerOnApi(context) ||
+        // ni si l'utilisateur a les droits génériques
+      hasGenericPermission(permission, context)
+  ) {
+    next(ressource)
+  }
+  // on regarde donc ce user pour cette ressource
+  else if (!$accessControl.isAuthenticated(context)) {
+    context.accessDenied("Authentification requise")
+  } else {
+    switch (permission) {
+      // sinon on délègue suivant la permission
+      case 'create':
+        msg = getCreateDeniedMessage(context); break
+      case 'delete':
+        msg = getDeleteDeniedMessage(context, ressource, next); break
+      case 'read':
+        msg = getReadDeniedMessage(context, ressource, next); break
+      case 'update':
+        msg = getUpdateDeniedMessage(context, ressource, next); break
+      default:
+        msg = "Permission " + permission + " inconnue, refusée par défaut"
+    }
+    if (msg) context.accessDenied(msg)
+    else next(null, ressource)
+  }
 }
-
 
 /**
  * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource

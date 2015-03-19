@@ -50,9 +50,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     return {
       $views : __dirname + '/views',
       $metas : {
-        css: ['styles/ressources.css']
+        css: ['styles/ressources.css'],
+        js : ['vendors/requirejs/require.2.1.js']
       },
-      $layout: 'layout-page'
+      $layout: 'layout-page',
+      contentBloc : {}
     }
   } 
 
@@ -111,7 +113,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         links.push(tools.link(routes.display, 'Voir la ressource (pleine page)', id))
       }
     }
-    data.menu = {
+    data.menuBloc = {
       $view : 'menu',
       links : links
     }
@@ -127,21 +129,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function prepareAndSend(error, ressource, context, view, options) {
     var data = getDefaultData()
-    // on ajoute le menu
-    addMenu(context, data, ressource)
+    // on ajoute le menu, sauf pour display qui n'en a pas besoin
+    if (view !== 'display') addMenu(context, data, ressource)
     // et la ressource (ou erreur)
-    data.content = $ressourceConverter.getViewData(error, ressource)
-    data.content.$view = view
+    data.contentBloc = $ressourceConverter.getViewData(error, ressource)
+    data.contentBloc.$view = view
     // le titre
     data.$metas.title = (ressource && ressource.titre) ? ressource.titre : "Ressource introuvable"
     // et d'éventuels overrides
     if (options) tools.merge(data, options)
-    // avant d'envoyer
-    //context.html(data)
-    log("dans prepareAndSend on a un content.next : " +(context.next ? 'oui' : 'non'))
-    log(new Error("la trace dans prepareAndSend"))
-    context.contentType = 'text/html'
-    context.next(data)
+    // avant d'envoyer on vérifie que ça bégaye pas
+    if (context.next) context.html(data)
+    else log.error(new Error("prepareAndSend est appelé une 2e fois, on ignore"))
   }
 
   /**
@@ -174,27 +173,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param options
    */
   function printForm(error, ressource, context, options) {
-    var data = {
-      $views: __dirname+'/views',
-      $metas : {
-        css   : ['styles/ressources.css']
-        // @TODO ajouter un js client pour conditionner les types à la catégorie dans la page
-      },
-      $layout : 'layout-page',
-      content : {
-        $view : 'form'
-      }
-    }
+    var data = getDefaultData()
     // on ajoute le menu
     addMenu(context, data, ressource)
     // les datas pour le form
-    data.content = $ressourceConverter.getFormViewData(error, ressource)
+    data.contentBloc = $ressourceConverter.getFormViewData(error, ressource)
+    data.contentBloc.$view = 'form'
     // le titre
     data.$metas.title = 'Éditer une ressource'
     // et d'éventuels overrides
     if (options) tools.merge(data, options)
     // on ajoute le token, en session, pour éviter des post multiples et ne pas vérifier les droits au post
-    context.session.token = data.content.token.value
+    context.session.token = data.contentBloc.token.value
     // avant d'envoyer
     context.html(data)
   }
@@ -320,7 +310,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $accessControl.checkPermission('delete', context, ressource, function () {
         var options = {
           $metas : {title: 'Supprimer la ressource : ' + ressource.titre},
-          content: {$view: 'delete'}
+          contentBloc: {$view: 'delete'}
         }
         context.session['del' + id] = true
         printForm(error, ressource, context, options)
@@ -369,19 +359,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (context.get.all && context.session.user && context.session.user.roles && context.session.user.roles.admin)
       visibilite = "tout"
     $ressourceRepository.getListe(visibilite, context, options, function (error, ressources) {
-      var data = {
-        $views : __dirname + '/views',
-        $metas : {
-          css  : ['styles/ressources.css'],
-          title: 'Résultats de recherche'
-        },
-        $layout: 'layout-page',
-        content: {
-          $view: 'liste'
-        }
+      var data = getDefaultData()
+      data.$metas.title = 'Résultats de recherche'
+      if (error) data.error = error.toString()
+      else {
+        data.contentBloc = $ressourceConverter.addUrlsToList(ressources)
+        data.contentBloc.$view = 'liste'
       }
-      if (error) data.content.error = error.toString()
-      else data.content.ressources = $ressourceConverter.addUrlsToList(ressources)
       context.html(data)
     })
   })

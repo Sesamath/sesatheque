@@ -32,12 +32,12 @@
                 {#authBloc}{.|s}{:else}pas de authBloc{/authBloc}
             </div>
             <div id="menu">
-            {#menu}{.|s}{/menu}
+            {#menuBloc}{.|s}{/menuBloc}
             </div>
         </div>
 
         <div id="content" class="col-md-9">
-        {#content}{.|s}{/content}
+        {#contentBloc}{.|s}{/contentBloc}
         </div>
       </div>
   </div>

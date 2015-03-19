@@ -201,7 +201,7 @@ function convertXmlEc2(ressource) {
     // on enregistre la ressource modifiée en async
     $ressourceRepository.write(ressource)
   }
-    log(params)
+  log("convertXmlEc2", params)
 }
 
 /**
