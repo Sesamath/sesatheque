@@ -37,8 +37,9 @@ var config = require('./config')
 var routes = config.constantes.routes
 
 /**
- * Module qui regroupe les fonctions de transformation de données pour les vues
+ * Service qui regroupe les fonctions de transformation de données pour les vues
  * (objets vers vue ou résultat de post vers controller)
+ * @namespace $ressourceConverter
  */
 var $ressourceConverter = {}
 
@@ -118,63 +119,61 @@ $ressourceConverter.getViewData = function (error, ressource) {
   var viewData = {}
   var buffer;
   if (error) viewData.error = error.toString();
-  else {
-    if (ressource) {
-      // on boucle sur les propriétés que l'on veut afficher
-      _.each(config.labels, function (label, key) {
-        var value = ressource[key];
-        viewData[key] = {
-          title: label
-        };
-        if (_.isArray(value)) {
+  else if (ressource) {
+    // on boucle sur les propriétés que l'on veut afficher
+    _.each(config.labels, function (label, key) {
+      var value = ressource[key];
+      viewData[key] = {
+        title: label
+      };
+      if (_.isArray(value)) {
 
-          // cas particulier de tableau de tableaux
-          if (key === 'relations' && value.length) {
-            viewData.relations.value = []
-            value.forEach(function (relation) {
-              viewData.relations.value.push({
-                predicat : config.listes.relations[relation[0]],
-                lien : context.link(lassi.action.ressource.describe, relation[1], {id:relation[1]})
-              })
+        // cas particulier de tableau de tableaux
+        if (key === 'relations' && value.length) {
+          viewData.relations.value = []
+          value.forEach(function (relation) {
+            viewData.relations.value.push({
+              predicat : config.listes.relations[relation[0]],
+              lien : context.link(lassi.action.ressource.describe, relation[1], {id:relation[1]})
             })
-            log.dev('relations ajoutée pour ' +ressource.id, viewData.relations)
+          })
+          log.dev('relations ajoutée pour ' +ressource.id, viewData.relations)
 
-          } else if (config.listes[key]) {
-            // faut remplacer des ids par des labels
-            buffer = [];
-            _.each(value, function (id) {
-              if (config.listes[key][id])  buffer.push(config.listes[key][id])
-              else log.error("La ressource " + ressource.id + " a une valeur " + id +
-                  " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
-            });
-            viewData[key].value = buffer.join(', ');
-
-          } else {
-            viewData[key].value = value.join(', ')
-          }
-
-
-        } else if (_.isDate(value)) {
-          viewData[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
-
-        } else if (_.isObject(value)) {
-          try {
-            viewData[key].value = lassi.tools.stringify(value)
-          } catch (error) {
-            viewData[key].value = error.toString()
-          }
+        } else if (config.listes[key]) {
+          // faut remplacer des ids par des labels
+          buffer = [];
+          _.each(value, function (id) {
+            if (config.listes[key][id])  buffer.push(config.listes[key][id])
+            else log.error("La ressource " + ressource.id + " a une valeur " + id +
+                " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
+          });
+          viewData[key].value = buffer.join(', ');
 
         } else {
-          viewData[key].value = value;
+          viewData[key].value = value.join(', ')
         }
-      }); // fin each propriété
 
-      // on ajoute oid
-      viewData.oid = ressource.oid
-    } else {
-      // pas d'erreur mais pas de ressource non plus
-      viewData.error = "Aucune ressource";
-    }
+
+      } else if (_.isDate(value)) {
+        viewData[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
+
+      } else if (_.isObject(value)) {
+        try {
+          viewData[key].value = lassi.tools.stringify(value)
+        } catch (error) {
+          viewData[key].value = error.toString()
+        }
+
+      } else {
+        viewData[key].value = value;
+      }
+    }); // fin each propriété
+
+    // on ajoute oid
+    viewData.oid = ressource.oid
+  } else {
+    // pas d'erreur mais pas de ressource non plus
+    viewData.error = "Aucune ressource";
   }
 
   return viewData

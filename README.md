@@ -1,12 +1,14 @@
 Application Bibliothèque
 ========================
 
+<!--
 Pour la syntaxe markdown de ce document cf http://daringfireball.net/projects/markdown/syntax
+-->
 
 Framework Lassi
 ---------------
 
-Cf [lassi](lassi/index.html)
+Cf [lassi](../node_modules/lassi/documentation/index.html)
 
 Plugins
 -------
@@ -16,13 +18,15 @@ Pour écrire ou utiliser un plugin (qui gère un type de ressource), voir la [do
 Routage
 -------
 
-* /ressource/ Affichage et modification de ressource
-** /ressource/public/:id : affichage de la ressource publique seule (prévu pour être en iframe), cookies virés par varnish et résultat mis en cache
-** /ressource/prive/:id  : affichage de la ressource seule (prévu pour être en iframe), redirect vers public si public
-** /ressource/apercu/:id : affichage de la ressource avec l'habillage du site de consultation
+### /ressource/ Affichage et modification de ressource
+
+* /ressource/public/:id : affichage de la ressource publique seule (prévu pour être en iframe), cookies virés par varnish et résultat mis en cache
+* /ressource/prive/:id  : affichage de la ressource seule (prévu pour être en iframe), redirect vers public si public
+* /ressource/apercu/:id : affichage de la ressource avec l'habillage du site de consultation
+
 Back-office
-** /ressource/ajouter      : form d'ajout d'une ressource
-** /ressource/modifier/:id : form de modif d'une ressource
+* /ressource/ajouter      : form d'ajout d'une ressource
+* /ressource/modifier/:id : form de modif d'une ressource
 
 
 API http, via /api

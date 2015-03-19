@@ -51,54 +51,12 @@ ressourceComponent.entity('Archive', function () {
   require('./Archive')(this)
 })
 
-/**
- * Service helper de $ressourceRepository
- */
-ressourceComponent.service('$cacheRessource', function($cache, $settings) {
-  var ttl = $settings.get('components.ressource.cacheTTL', 3600)
-  function dummy() {}
-
-  return {
-    get: function (id, next) {
-      $cache.get('ressource_' +id, next)
-    },
-    getByOrigin: function (origine, idOrigine, next) {
-      $cache.get('ressourceByOrigine_' +origine +'_' +idOrigine, function (error, id) {
-        if (error) next(error)
-        else $cache.get('ressource_' +id, next)
-      })
-    },
-    set: function (ressource, next) {
-      next = next || dummy
-      log("cache set ressource_" +ressource.id)
-      // next appelé seulement sur le set principal (le 2e)
-      if (ressource.origine)
-        $cache.set('ressourceByOrigine_' +ressource.origine +'_' +ressource.idOrigine, ressource.id, ttl, dummy)
-      $cache.set('ressource_' + ressource.id, ressource, ttl, next)
-    },
-    delete : function (id, next) {
-      next = next || dummy
-      // faut aller le chercher en cache pour effacer l'entrée par origine
-      $cache.get('ressource_' +id, function (error, ressource) {
-        if (ressource && ressource.origine && ressource.idOrigine)
-            $cache.delete('ressourceByOrigine_' + ressource.origine + '_' + ressource.idOrigine, dummy)
-      })
-      $cache.delete('ressource_' +id, next)
-    }
-  }
+ressourceComponent.service('$routes', function($settings) {
+  return require('./serviceRoutes')($settings)
 })
 
-ressourceComponent.service('$ressourceSettings', function ($settings) {
-  return {
-    /**
-     * getter des settings de ressource (ajoute le préfixe components.ressource. avant d'appeler $settings.get)
-     * @param key La clé (ex constantes.categories.activiteFixe)
-     * @returns {*} La valeur de key dans les settings ou undefined
-     */
-    get: function (key) {
-      return $settings.get('components.ressource.' +key, undefined)
-    }
-  }
+ressourceComponent.service('$cacheRessource', function($cache, $settings) {
+  return require('./serviceCacheRessource')($cache, $settings)
 })
 
 ressourceComponent.service('$ressourceRepository', function(Ressource, $accessControl, $cacheRessource) {
@@ -113,20 +71,17 @@ ressourceComponent.controller(function () {
 })
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $accessControl) {
-  log('def controller ressource')
-  require('./controllerHtml')(this, $ressourceRepository, $ressourceConverter, $accessControl)
+ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) { // jshint ignore:line
+  require('./controllerHtml')(this, $ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings)
 })
 
 // un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter) {
-  log('def controller public')
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter)
+ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $routes) {
+  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $routes)
 })
 
 // l'api json
 ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $accessControl) {
-  log('def controller api')
   require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $accessControl)
 })
 /* */

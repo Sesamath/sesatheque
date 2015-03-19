@@ -1,6 +1,8 @@
 Plugin ressource
 ================
 
+Pour la doc du code serveur, cf [sesatheque](../index.html)
+
 Tous les plugins doivent exporter les méthodes display et showResult avec la syntaxe 
 ```
 define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {

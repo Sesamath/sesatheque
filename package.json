@@ -17,17 +17,17 @@
     "xml2js": "^0.4.4"
   },
   "devDependencies": {
-    "knex": "^0.5.14",
-    "mysql-libmysqlclient": "^1.6.0",
     "elementtree": "^0.1.6",
     "express-debug": "^1.1.0",
     "gulp": "^3.8.7",
     "gulp-jshint": "^1.7.0",
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
-    "jsdoc": "^3.3.0-alpha9",
+    "jsdoc": "^3.3.0-beta1",
     "jshint-stylish": "^0.3.0",
+    "knex": "^0.5.14",
     "merge-stream": "^0.1.1",
+    "mysql-libmysqlclient": "^1.6.0",
     "through2": "^0.4.2"
   },
   "jshintConfig": {

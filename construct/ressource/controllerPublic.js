@@ -55,8 +55,9 @@ var dataListe = {
  * @param $ressourceRepository
  * @param $ressourceConverter
  * @param $accessControl
+ * @param $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $routes) {
   log('controller ressourcePublic')
 
   function prepareAndSend(context, error, ressource, view, options) {
@@ -96,7 +97,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var options
       if (ressource) {
         options = {
-          content: {
+          contentBloc : {
             pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
             vendorsBaseUrl: '../../vendors',
             pluginName    : ressource.typeTechnique,

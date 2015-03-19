@@ -38,13 +38,10 @@
  * @param $ressourceConverter
  * @param $accessControl
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) {
   var tools = require('../tools')
   var _ = require('underscore')._
-
-// raccourci pour se simplifier la saisie du code
-  var config = require('./config.js')
-  var routes = config.constantes.routes
+  var basePath = $settings.get('basePath', '/')
   
   function getDefaultData() {
     return {
@@ -56,7 +53,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $layout: 'layout-page',
       contentBloc : {}
     }
-  } 
+  }
+
+  function addJsVars(data, ressource) {
+    if (ressource) {
+      data.contentBloc.pluginBaseUrl = '../../plugins/' + ressource.typeTechnique
+      data.contentBloc.vendorsBaseUrl= '../../vendors'
+      data.contentBloc.pluginName    = ressource.typeTechnique
+      // une string pour que dust le mette dans le source
+      data.contentBloc.ressource     = tools.stringify(ressource)
+    }
+  }
 
   /**
    * Vérifie que le token du post correspond à celui en session
@@ -100,17 +107,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var links = []
     // lien ajout
     if ($accessControl.hasPermission('create', context)) {
-      links.push(tools.link(routes.add, 'Ajouter une ressource'))
+      links.push(tools.link($routes.get('add'), 'Ajouter une ressource'))
     }
     // si on est sur une ressource on ajoute les liens contextuels pour cette ressource (auxquels on a droit)
     if (id) {
       if ($accessControl.hasPermission('update', context, id))
-        links.push(tools.link(routes.edit, 'Modifier cette ressource', id))
-      if ($accessControl.hasPermission('delete', context, id))
-        links.push(tools.link(routes.del, 'Supprimer cette ressource', id))
+        links.push(tools.link($routes.get('edit', id), 'Modifier cette ressource'))
+      if ($accessControl.hasPermission('delete', context))
+        links.push(tools.link($routes.get('delete', id), 'Supprimer cette ressource'))
       if ($accessControl.hasPermission('read', context, id)) {
-        links.push(tools.link(routes.preview, 'Voir la ressource', id))
-        links.push(tools.link(routes.display, 'Voir la ressource (pleine page)', id))
+        links.push(tools.link($routes.get('preview', id), 'Voir la ressource'))
+        links.push(tools.link($routes.get('display', id), 'Voir la ressource (pleine page)'))
       }
     }
     data.menuBloc = {
@@ -129,10 +136,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function prepareAndSend(error, ressource, context, view, options) {
     var data = getDefaultData()
-    // on ajoute le menu, sauf pour display qui n'en a pas besoin
-    if (view !== 'display') addMenu(context, data, ressource)
     // et la ressource (ou erreur)
     data.contentBloc = $ressourceConverter.getViewData(error, ressource)
+    // pour display on ajoute les variables js et pour les autres le menu
+    if (view === 'display') addJsVars(data, ressource)
+    else addMenu(context, data, ressource)
     data.contentBloc.$view = view
     // le titre
     data.$metas.title = (ressource && ressource.titre) ? ressource.titre : "Ressource introuvable"
@@ -190,7 +198,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   // describe
-  controller.get(routes.describe + '/:id', function (context) {
+  controller.get($routes.get('describe', ':id'), function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
       printForRead(error, ressource, context, 'describe')
@@ -198,7 +206,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // describeByOrigin
-  controller.get(routes.describe + '/:origine/:idOrigine', function (context) {
+  controller.get($routes.get('describe ', ':origine', ':idOrigine'), function (context) {
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -207,7 +215,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // display : Voir la ressource pleine page (pour iframe)
-  controller.get(routes.display + '/:id', function (context) {
+  controller.get($routes.get('display', ':id'), function (context) {
     var id = context.arguments.id
     log("appel de l'action display pour " +id)
     /* ça fonctionne en affichant bien l'erreur sans repasser une 2e fois ici
@@ -220,7 +228,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // displayByOrigin : Voir la ressource pleine page (pour iframe)
-  controller.get(routes.display + '/:origine/:idOrigine', function (context) {
+  controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -229,15 +237,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // preview : Voir la ressource dans le site
-  controller.get(routes.preview + '/:id', function (context) {
+  controller.get($routes.get('preview', ':id'), function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
-      printForRead(error, ressource, context, 'preview')
+      var options = {contentBloc:{url: '/' +$routes.get('display', ressource.id)}}
+      printForRead(error, ressource, context, 'preview', options)
     })
   })
 
 // Create, affichage du form de saisie
-  controller.get(routes.add, function (context) {
+  controller.get($routes.get('add'), function (context) {
     if (checkSession()) {
       $accessControl.checkPermission('create', context, null, function () {
         var options = {$metas: {title: 'Ajouter une ressource'}}
@@ -247,7 +256,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // Create, traitement du post
-  controller.post(routes.add, function (context) {
+  controller.post($routes.get('add'), function (context) {
     var ressource
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
@@ -261,15 +270,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var options = {$metas: {title: 'Ajouter une ressource'}}
           printForm(error, ressource, context, options)
         } else {
-          log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect");
-          context.redirect(routes.describe + '/' + ressource.id)
+          log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect")
+          var prefix = basePath
+          prefix += (ressource.restriction === 0) ? 'public' : 'ressource'
+          context.redirect(prefix +$routes.get('describe', ressource.id))
         }
       }) // write
     }) // checkToken
   })
 
 // Uptate, affichage du form
-  controller.get(routes.edit + '/:id', function (context) {
+  controller.get($routes.get('edit', ':id'), function (context) {
     if (checkSession()) {
       var id = context.arguments.id
       $ressourceRepository.load(id, function (error, ressource) {
@@ -282,7 +293,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   // Uptate, traitement du form
-  controller.post(routes.add, function (context) {
+  controller.post($routes.get('add'), function (context) {
     var ressource
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
@@ -297,14 +308,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           printForm(error, ressource, context, options)
         } else {
           log.dev("update " + ressource.id + " ok, on lance le redirect")
-          context.redirect(routes.describe + '/' + ressource.id)
+          context.redirect(basePath +$routes.get('describe', ressource.id))
         }
       }) // write
     }) // checkToken
   })
 
   // Delete, demande de confirmation
-  controller.get(routes.del + '/:id', function (context) {
+  controller.get($routes.get('del', ':id'), function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
       $accessControl.checkPermission('delete', context, ressource, function () {
@@ -319,7 +330,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   // Delete, traitement du post
-  controller.post(routes.del, function (context) {
+  controller.post($routes.get('del'), function (context) {
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
       // et rediriger vers le describe ou vers le form avec les erreurs
@@ -333,7 +344,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           printForm(error, ressource, context, options)
         } else {
           log.dev("update " + ressource.id + " ok, on lance le redirect")
-          context.redirect(routes.describe + '/' + ressource.id)
+          context.redirect(basePath +$routes.get('describe',ressource.id))
         }
       })
     })

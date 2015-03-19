@@ -108,7 +108,7 @@ module.exports = function (Ressource, Archive, $cache, cacheTTL) {
     /**
      * Type pédagogique (5.2 - scolomfr-voc-010) : cours, exercice...
      * C'est un champ conditionné par la catégorie, mais à priori seulement, l'utilisateur peut modifier / enrichir
-     * http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=62
+     * @see "http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=62"
      * @type {Array}
      */
     this.typePedagogiques = [];

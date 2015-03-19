@@ -41,6 +41,6 @@
         </div>
       </div>
   </div>
-
+{#jsBloc}{.|s}{/jsBloc}
 </body>
 </html>

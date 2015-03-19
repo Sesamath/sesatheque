@@ -1,0 +1,8 @@
+{#jsFiles}
+<script src="{.}" />
+{/jsFiles}
+{?jsCode}
+<script type="application/javascript" >
+{jsCode}
+</script>
+{/jsCode}

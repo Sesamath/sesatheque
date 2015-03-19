@@ -34,6 +34,9 @@
 /**
  * Service d'accès aux ressources, utilisé par les différents contrôleurs
  * @namespace $ressourceRepository
+ * @requires Ressource
+ * @requires $accessControl
+ * @requires $cacheRessource
  */
 var $ressourceRepository = {}
 
@@ -44,7 +47,7 @@ var elementtree = require('elementtree')
 var config = require('./config')
 var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
 
-/** nos dépendances */
+// nos dépendances
 var $cacheRessource
 var $accessControl
 var Ressource

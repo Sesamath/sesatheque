@@ -82,7 +82,7 @@ var ressourceConfig = {
     },
     typeDocumentaires: {
       // id de scolomfr-voc-004, qui sont de la forme scolomfr-voc-004-num-NNN, on ne reprend ici que le NNN
-      // http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=49
+      // @see http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=49
       // http://www.cndp.fr/scolomfr//fileadmin/_scolomfr/04.xml
       // pour un exercice contenant texte et image faut mettre les deux
       5 : "vidéo / animation", // nommé image en mouvement dans le voc officiel
@@ -306,14 +306,14 @@ var ressourceConfig = {
       groupe    : 2,
       prive     : 3
     },
-    // des constantes pour nos routes (le nom des actions est en dur mais interne au code)
+    // des constantes pour nos routes (le nom des actions est en dur mais reste interne au code)
     routes : {
       display:'voir',
       preview:'apercu',
       add : 'ajouter',
       edit: 'modifier',
       describe:'decrire',
-      del:'supprimer'
+      delete:'supprimer'
     }
   }, // fin constantes
   /**
