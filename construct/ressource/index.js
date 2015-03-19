@@ -44,11 +44,11 @@ ressourceComponent.config(function($settings) {
 })
 
 ressourceComponent.entity('Ressource', function (Archive, $cacheRessource) {
-  require('./Ressource')(this, Archive, $cacheRessource)
+  require('./entityRessource')(this, Archive, $cacheRessource)
 })
 
 ressourceComponent.entity('Archive', function () {
-  require('./Archive')(this)
+  require('./entityArchive')(this)
 })
 
 ressourceComponent.service('$routes', function($settings) {

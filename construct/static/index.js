@@ -135,3 +135,12 @@ staticComponent.service('$flashMessages', function() {
     }
   }
 })
+
+/**
+ * En dev on ajoute des routes de debug
+ */
+if (lassi.settings.staging !== 'production') {
+  staticComponent.controller(function () {
+    require('./controllerDebug')(this)
+  })
+}

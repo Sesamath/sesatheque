@@ -3,6 +3,9 @@ Application Bibliothèque
 
 <!--
 Pour la syntaxe markdown de ce document cf http://daringfireball.net/projects/markdown/syntax
+Pour générer la doc, lancer depuis la racine
+    jsdoc -c jsdoc/jsdocApp.json
+    jsdoc -c jsdoc/jsdocPlugins.json
 -->
 
 Framework Lassi

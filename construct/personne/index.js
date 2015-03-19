@@ -36,7 +36,7 @@
  */
 var personneComponent = lassi.component('personne')
 
-var _ = require('underscore')._
+//var _ = require('underscore')._
 var tools = require('../tools')
 
 personneComponent.config(function($settings) {
@@ -108,9 +108,9 @@ personneComponent.service('$personneRepository', function(Personne, Groupe, $cac
 personneComponent.service('$accessControl', require('./serviceAccessControl'))
 
 personneComponent.entity('Personne', function (Groupe, $personneRepository, $settings) {
-  require('./Personne')(this, Groupe, $personneRepository, $settings)
+  require('./entityPersonne')(this, Groupe, $personneRepository, $settings)
 })
 
 personneComponent.entity('Groupe', function ($cacheGroupe) {
-  require('./Groupe')(this, $cacheGroupe)
+  require('./entityGroupe')(this, $cacheGroupe)
 })
