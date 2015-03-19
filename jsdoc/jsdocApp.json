@@ -14,7 +14,7 @@
     "hardwrap": true
   },
   "templates": {
-    "applicationName": "bibliotheque",
+    "applicationName": "sesatheque",
     "disqus"         : "",
     "googleAnalytics": "",
     "openGraph"      : {
