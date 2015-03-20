@@ -33,8 +33,7 @@
 
 var _ = require('underscore')._
 var moment = require('moment')
-var config = require('./config')
-var routes = config.constantes.routes
+var $routes
 
 /**
  * Service qui regroupe les fonctions de transformation de données pour les vues
@@ -467,12 +466,16 @@ $ressourceConverter.getRessourceFromPostedArbre = function (data, partial) {
  */
 $ressourceConverter.addUrlsToList = function (ressources) {
   if (ressources && ressources.length) ressources.forEach(function (ressource) {
-    ressource.urlDescribe = routes.describe +'/' +ressource.id
-    ressource.urlPreview = routes.preview +'/' +ressource.id
-    ressource.urlDisplay = routes.display +'/' +ressource.id
+    ressource.urlDescribe = $routes.getAbs('describe', ressource)
+    ressource.urlPreview = $routes.getAbs('preview', ressource)
+    ressource.urlDisplay = $routes.getAbs('display', ressource)
   })
 
   return ressources
 }
 
-module.exports = $ressourceConverter
+module.exports = function (routesService) {
+  $routes = routesService
+
+  return $ressourceConverter
+}
