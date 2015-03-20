@@ -6,7 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "lassi": "git://src.sesamath.net/lassi",
+    "lassi": "git://src.sesamath.net/lassi#50e84d573e0253c813207f139c8644f478b9ba37",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "mysql": "^2.3.0",

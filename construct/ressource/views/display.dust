@@ -26,11 +26,7 @@ Chargement en cours</div>
                     baseUrl : '{pluginBaseUrl}',
                     vendorsBaseUrl: '{vendorsBaseUrl}',
                     pluginName: '{pluginName}',
-                    isDev :{?staging}
-                        {! faut pas de "" autour du nom de la clé pour @eq contrairement à ce que la doc indique !}
-                        {@eq key=staging value="development"}true{:else}false{/eq}
-                        {:else}false
-                    {/staging}
+                    isDev :{?isDev}{isDev}{:else}false{/isDev}
                 }
             );
         } catch(error) {

@@ -105,7 +105,9 @@ personneComponent.service('$personneRepository', function(Personne, Groupe, $cac
   return require('./servicePersonneRepository')(Personne, Groupe, $cachePersonne, $cacheGroupe)
 })
 
-personneComponent.service('$accessControl', require('./serviceAccessControl'))
+personneComponent.service('$accessControl', function (Groupe, $settings, $personneRepository) {
+  return require('./serviceAccessControl')(Groupe, $settings, $personneRepository)
+})
 
 personneComponent.entity('Personne', function (Groupe, $personneRepository, $settings) {
   require('./entityPersonne')(this, Groupe, $personneRepository, $settings)

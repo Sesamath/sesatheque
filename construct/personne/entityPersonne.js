@@ -76,63 +76,6 @@ module.exports = function (Personne, Groupe, $personneRepository, $settings) {
     this.infos = '';
   }
 
-  /**
-   * Calcule et renvoie les permissions en fonction des rôles
-   */
-  Personne.getPermissions = function() {
-    var permissions = {}
-    var config = $settings.get('components.personne')
-    _.each(this.roles, function(hasRole, role) {
-      // on ajoute les permissions définies pour ce role en config
-      if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
-    })
-
-    return permissions
-  }
-
-  /**
-   * Ajoute un groupe d'après son id (vérifie qu'il existe)
-   * @param {int} groupeId
-   * @param {EntityInstance~StoreCallback} next
-   */
-  Personne.addGroupeById = function (groupeId, next) {
-    var personne = this
-    if (!personne.groupes[groupeId]) {
-      $personneRepository.loadGroupe(groupeId, function (error, groupe) {
-        if (error) next(error)
-        else {
-          if (groupe) personne.groupes[groupeId] = true
-          else log.error("Aucun groupe d'id " +groupeId)
-          next(null, personne)
-        }
-      })
-    }
-  }
-
-  /**
-   * Ajoute un groupe à la personne (en le créant s'il n'existait pas)
-   * @param {string} groupeNom Le nom
-   * @param {EntityInstance~StoreCallback} next
-   */
-  Personne.addGroupeByName = function (groupeNom, next) {
-    var personne = this
-    $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
-      if (error) {
-        next(error, personne)
-      } else if (groupe) {
-        personne.groupes[groupe.id] = true
-        next(null, personne)
-      } else {
-        // on le créé au passage
-        Groupe.create({nom:groupeNom}).store(function (error, groupe) {
-          log.dev('après store ', groupe)
-          if (groupe) personne.groupes[groupe.id] = true
-          next(error, personne)
-        })
-      }
-    })
-  }
-
   Personne
       .defineIndex('id', 'integer')
       .defineIndex('nom', 'string')

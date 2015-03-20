@@ -32,6 +32,7 @@
 'use strict';
 
 var _ = require('underscore')._
+var tools = require('../tools')
 
 /**
  * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
@@ -40,6 +41,7 @@ var _ = require('underscore')._
  */
 var $accessControl = {}
 
+var Groupe, $settings, $personneRepository
 
 /**
  * Retourne true si le user en session a la permission générique demandée
@@ -276,4 +278,69 @@ $accessControl.isAuthenticated = function (context) {
   return (context.session && context.session.user && context.session.user.id > 0) // id=-1 avec une ip locale
 }
 
-module.exports = $accessControl
+
+/**
+ * Calcule et renvoie les permissions d'une personne en fonction de ses rôles
+ * @param {Personne} personne
+ */
+$accessControl.getPermissions = function(personne) {
+  var permissions = {}
+  var config = $settings.get('components.personne')
+  _.each(personne.roles, function(hasRole, role) {
+    // on ajoute les permissions définies pour ce role en config
+    if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
+  })
+
+  return permissions
+}
+
+/**
+ * Ajoute un groupe d'après son id (vérifie qu'il existe)
+ * @param {Personne} personne
+ * @param {int} groupeId
+ * @param {EntityInstance~StoreCallback} next
+ */
+$accessControl.addGroupeById = function (personne, groupeId, next) {
+  if (!personne.groupes[groupeId]) {
+    $personneRepository.loadGroupe(groupeId, function (error, groupe) {
+      if (error) next(error)
+      else {
+        if (groupe) personne.groupes[groupeId] = true
+        else log.error("Aucun groupe d'id " +groupeId)
+        next(null, personne)
+      }
+    })
+  }
+}
+
+/**
+ * Ajoute un groupe à la personne (en le créant s'il n'existait pas)
+ * @param {Personne} personne
+ * @param {string} groupeNom Le nom
+ * @param {EntityInstance~StoreCallback} next
+ */
+$accessControl.addGroupeByName = function (personne, groupeNom, next) {
+  $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
+    if (error) {
+      next(error, personne)
+    } else if (groupe) {
+      personne.groupes[groupe.id] = true
+      next(null, personne)
+    } else {
+      // on le créé au passage
+      Groupe.create({nom:groupeNom}).store(function (error, groupe) {
+        log.dev('après store ', groupe)
+        if (groupe) personne.groupes[groupe.id] = true
+        next(error, personne)
+      })
+    }
+  })
+}
+
+module.exports = function (groupeEntity, settingsService, personneRepositoryService) {
+  Groupe = groupeEntity
+  $settings = settingsService
+  $personneRepository = personneRepositoryService
+
+  return $accessControl
+}

@@ -29,7 +29,8 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
+/*global lassi*/
 
 /**
  * Notre component principal, défini
@@ -139,7 +140,7 @@ staticComponent.service('$flashMessages', function() {
 /**
  * En dev on ajoute des routes de debug
  */
-if (lassi.settings.staging !== 'production') {
+if (lassi.settings.application.staging !== 'production') {
   staticComponent.controller(function () {
     require('./controllerDebug')(this)
   })

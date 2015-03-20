@@ -42,6 +42,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var tools = require('../tools')
   var _ = require('underscore')._
   var basePath = $settings.get('basePath', '/')
+
+  // on désactive la compression dust en dev
+  if ($settings.get('application.staging') !== 'production' &&
+      lassi.transports.html.engine.disableWhiteSpaceCompression)
+        lassi.transports.html.engine.disableWhiteSpaceCompression()
   
   function getDefaultData() {
     return {
@@ -60,6 +65,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       data.contentBloc.pluginBaseUrl = '../../plugins/' + ressource.typeTechnique
       data.contentBloc.vendorsBaseUrl= '../../vendors'
       data.contentBloc.pluginName    = ressource.typeTechnique
+      data.contentBloc.isDev         = ($settings.get('lassi.application.staging') !== 'production')
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource     = tools.stringify(ressource)
     }

@@ -56,22 +56,40 @@ require('./static')
 require('./ressource')
 require('./personne')
 
+// en attendant mieux, on lit notre config à la main avant de lancer lassi.component
+var dependancies = ['static', 'personne', 'ressource']
+var privateConfig = require('../_private/config')
+if (privateConfig.extraModules) {
+  privateConfig.extraModules.forEach(function (module) {
+    log("ajout du module supplémentaire " +module)
+    require(module)
+  })
+  if (privateConfig.extraComponents) privateConfig.extraComponents.forEach(function (component) {
+    log("ajout du composant supplémentaire " +component)
+    dependancies.push(component)
+  })
+}
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
-var sesatheque = lassi.component('sesatheque', ['static', 'personne', 'ressource'])
+var sesatheque = lassi.component('sesatheque', dependancies)
 //log("sesatheque à la déclaration", sesatheque)
 
 // on ajoute memcache si précisé dans les settings
 sesatheque.config(function($cache, $settings) {
-  if ($settings.get('memcache')) {
-    $cache.addEngine('', 'memcache', $settings.get('memcache'));
-    log('Memcache ajouté sur ' +$settings.get('memcache'))
+  var memcache = $settings.get('memcache')
+  if (memcache) {
+    $cache.addEngine('', 'memcache', memcache);
+    log('Memcache ajouté sur ' +memcache)
   } else {
     log.error("Il manque memcache en config, on s'en passera mais il vaudrait mieux l'ajouter")
   }
-  // on regarde si la conf réclame du chargement complémentaire
-  if (lassi.settings.afterInit) {
-    lassi.settings.afterInit()
-  }
+  /* on regarde si la conf réclame un module pour gérer l'authentification
+  sauf que c'est trop tard pour le mettre en dépendance, d'où le hack plus haut
+  var modules = $settings.get('modules', null)
+  if (modules) {
+    modules.forEach(function (moduleName) {
+      require(moduleName)
+    })
+  } */
 
   log("sesatheque en fin de config", sesatheque)
 })

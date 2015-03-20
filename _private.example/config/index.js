@@ -62,5 +62,7 @@ module.exports = {
   $server : {
     port:process.env.PORT || 3001
   },
-  memcache : '127.0.0.1:11211'
-};
+  memcache : '127.0.0.1:11211',
+  // ajouter éventuellement une liste de noms de modules à charger à l'init, par ex pour gérer l'authentification'
+  modules : []
+}

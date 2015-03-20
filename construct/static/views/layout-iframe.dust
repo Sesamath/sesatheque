@@ -2,11 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>{?title}{title}{:else}Ressource Sésamath{/title}</title>
-    <script type="text/javascript" src="/vendors/requirejs/require.2.1.js"></script>
-    <style type="text/css" >
-        .has-errors {margin: 1em; background-color: #fff; color: #b00;}
-    </style>
     {head|s}
 </head>
 <body>

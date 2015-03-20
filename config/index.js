@@ -65,7 +65,7 @@ var morganSettings
  * En dev on a un access.log avec le contenu des POST
  */
 if (staging === 'development') {
-  require('morgan').token('post', function (req, res) {
+  require('morgan').token('post', function (req) {
     return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
   })
   require('morgan').token('moment', function () {
@@ -177,6 +177,7 @@ module.exports = settings
 /**
  * composant qui va se placer en dépendance globale
  * (on charge en private le module sesasso-bibli spécifique à cette instance)
+ * ça marche pas car on a du lassi undefined ici, on remplace par le param config.authModuleName
  * /
 lassi.component('auth').config(function() {
   require('sesasso-bibli')

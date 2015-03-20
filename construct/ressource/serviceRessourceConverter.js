@@ -33,6 +33,10 @@
 
 var _ = require('underscore')._
 var moment = require('moment')
+// pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
+// car on a l'autocomplétion sur les noms de propriété
+var config = require('./config')
+
 var $routes
 
 /**

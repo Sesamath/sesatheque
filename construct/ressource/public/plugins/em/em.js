@@ -31,7 +31,7 @@
 
 /**
  * Affiche une ressource de type url, avec post de la réponse ou simplement de la durée d'affichage
- *
+ * @module em
  * Cf ../README.md pour plus d'info sur l'écriture de plugins
  */
 /*global define, log, addCss, window */
@@ -61,7 +61,6 @@ define(['swfobject'], function () {
       var errorsContainer = options.errorsContainer;
       if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
 
-      var baseUrl = options.baseUrl; // si on a pas tant pis pour le css
       /** class utilisée dans notre css */
       var cssClass = 'mepRess';
       var params = ressource.parametres;
@@ -80,7 +79,7 @@ define(['swfobject'], function () {
       }
 
       // Ajout css
-      addCss(baseUrl + '/mep.css');
+      if (options.baseUrl) addCss(options.baseUrl + '/mep.css'); // si on a pas tant pis pour le css
       container.className = cssClass;
 
       // le message en attendant le chargement

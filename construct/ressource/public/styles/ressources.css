@@ -1,3 +1,6 @@
+/* pour le layout-iframe qui n'inclue pas main.css */
+.has-errors {margin: 1em; background-color: #fff; color: #b00;}
+
 #formRessource .form-group {
   clear: left;
   margin: 1em;

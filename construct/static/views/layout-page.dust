@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>{?title}{title}{:else}Bibliothèque Sésamath{/title}</title>
     <script type="text/javascript" src="/vendors/jquery/jquery.2.1.js"></script>
     <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.min.js"></script>
     <!--script type="text/javascript" src="/scripts/static.js"></script-->
@@ -20,7 +19,7 @@
   </div>
 
   <div id="body" class="container">
-    {?error}<p class="has-error">{error}</p>{/error}
+    {#error}{.|s}{/error}
     {#errors}<p class="has-error">{.}</p>{/errors}
 
     {#flashBloc}{.|s}{/flashBloc}
