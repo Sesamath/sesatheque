@@ -76,12 +76,11 @@ ressourceComponent.controller('ressource', function ($ressourceRepository, $ress
 })
 
 // un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $routes) {
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $routes)
+ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $routes, $settings) {
+  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $routes, $settings)
 })
 
 // l'api json
 ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $accessControl) {
   require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $accessControl)
 })
-/* */

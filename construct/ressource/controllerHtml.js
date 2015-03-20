@@ -47,8 +47,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     return {
       $views : __dirname + '/views',
       $metas : {
-        css: ['styles/ressources.css'],
-        js : ['vendors/requirejs/require.2.1.js']
+        css: [basePath +'styles/ressources.css'],
+        js : [basePath +'vendors/requirejs/require.2.1.js']
       },
       $layout: 'layout-page',
       contentBloc : {}
@@ -107,17 +107,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var links = []
     // lien ajout
     if ($accessControl.hasPermission('create', context)) {
-      links.push(tools.link($routes.get('add'), 'Ajouter une ressource'))
+      links.push(tools.link(basePath +$routes.get('add'), 'Ajouter une ressource'))
     }
     // si on est sur une ressource on ajoute les liens contextuels pour cette ressource (auxquels on a droit)
     if (id) {
       if ($accessControl.hasPermission('update', context, id))
-        links.push(tools.link($routes.get('edit', id), 'Modifier cette ressource'))
+        links.push(tools.link(basePath +$routes.get('edit', id), 'Modifier cette ressource'))
       if ($accessControl.hasPermission('delete', context))
-        links.push(tools.link($routes.get('delete', id), 'Supprimer cette ressource'))
+        links.push(tools.link(basePath +$routes.get('delete', id), 'Supprimer cette ressource'))
       if ($accessControl.hasPermission('read', context, id)) {
-        links.push(tools.link($routes.get('preview', id), 'Voir la ressource'))
-        links.push(tools.link($routes.get('display', id), 'Voir la ressource (pleine page)'))
+        links.push(tools.link($routes.getAbs('preview', ressource), 'Voir la ressource'))
+        links.push(tools.link($routes.getAbs('display', ressource), 'Voir la ressource (pleine page)'))
       }
     }
     data.menuBloc = {
@@ -138,9 +138,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var data = getDefaultData()
     // et la ressource (ou erreur)
     data.contentBloc = $ressourceConverter.getViewData(error, ressource)
-    // pour display on ajoute les variables js et pour les autres le menu
+    // pour display on ajoute les variables js
     if (view === 'display') addJsVars(data, ressource)
-    else addMenu(context, data, ressource)
+    // le menu pour tous, car preview utilise la vue display, petit gaspillage de data
+    addMenu(context, data, ressource)
     data.contentBloc.$view = view
     // le titre
     data.$metas.title = (ressource && ressource.titre) ? ressource.titre : "Ressource introuvable"
@@ -240,8 +241,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('preview', ':id'), function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
-      var options = {contentBloc:{url: '/' +$routes.get('display', ressource.id)}}
-      printForRead(error, ressource, context, 'preview', options)
+      printForRead(error, ressource, context, 'display')
     })
   })
 

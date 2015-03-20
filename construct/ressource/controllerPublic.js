@@ -31,22 +31,6 @@
 
 'use strict';
 
-var tools = require('../tools')
-
-var routes = require('./config').constantes.routes
-
-var dataListe = {
-  $views : __dirname + '/views',
-  $metas : {
-    css  : ['styles/ressources.css'],
-    title: 'Résultats de recherche'
-  },
-  $layout: 'layout-page',
-  content: {
-    $view: 'liste'
-  }
-}
-
 /**
  * Le controleur html /public/ (sans authentification) du composant ressource
  *
@@ -57,24 +41,48 @@ var dataListe = {
  * @param $accessControl
  * @param $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $routes, $settings) {
   log('controller ressourcePublic')
+  var tools = require('../tools')
+  var basePath = $settings.get('basePath', '/')
+
+  function getDefaultData() {
+    return {
+      $views : __dirname + '/views',
+      $metas : {
+        css: [basePath +'styles/ressources.css'],
+        js : [basePath +'vendors/requirejs/require.2.1.js']
+      },
+      $layout: 'layout-page',
+      contentBloc : {}
+    }
+  }
+
+  function addJsVars(data, ressource) {
+    if (ressource) {
+      data.contentBloc.pluginBaseUrl = '../../plugins/' + ressource.typeTechnique
+      data.contentBloc.vendorsBaseUrl= '../../vendors'
+      data.contentBloc.pluginName    = ressource.typeTechnique
+      // une string pour que dust le mette dans le source
+      data.contentBloc.ressource     = tools.stringify(ressource)
+    }
+  }
 
   function prepareAndSend(context, error, ressource, view, options) {
-    if (!error && !ressource) context.notFound("Cette ressource n'existe pas ou n'est pas publique")
-    else {
-      var data = {
-        $views : __dirname + '/views',
-        $metas : {
-          css: ['styles/ressources.css']
-        },
-        $layout: 'layout-iframe'
-      }
+    var data
+    if (!error && !ressource) {
+      context.notFound("Cette ressource n'existe pas ou n'est pas publique")
+    } else if (ressource.restriction !== 0) {
+      log.error(new Error("ressource non publique (" +ressource.id +") prête à être envoyée (bug dans le contrôleur)"))
+      context.notFound("Cette ressource n'est pas publique")
+    } else {
+      data = getDefaultData()
       // et la ressource (ou erreur)
-      data.content = $ressourceConverter.getViewData(error, ressource)
-      data.content.$view = view
+      data.contentBloc = $ressourceConverter.getViewData(error, ressource)
+      addJsVars(data, ressource)
+      data.contentBloc.$view = view
       // le titre
-      data.$metas.title = ressource.titre || "Ressource inexistante ou non publique"
+      data.$metas.title = ressource.titre
       // et d'éventuels overrides
       if (options) tools.merge(data, options)
       // avant d'envoyer
@@ -83,7 +91,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   // describe
-  controller.get(routes.describe + '/:id', function (context) {
+  controller.get($routes.get('describe', ':id'), function (context) {
     var id = context.arguments.id
     $ressourceRepository.loadPublic(id, function (error, ressource) {
       prepareAndSend(context, error, ressource, 'describe')
@@ -91,21 +99,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   // display : Voir la ressource pleine page (pour iframe)
-  controller.get(routes.display + '/:id', function (context) {
+  controller.get($routes.get('display', ':id'), function (context) {
     var id = context.arguments.id
     $ressourceRepository.loadPublic(id, function (error, ressource) {
-      var options
-      if (ressource) {
-        options = {
-          contentBloc : {
-            pluginBaseUrl : '../../plugins/' + ressource.typeTechnique,
-            vendorsBaseUrl: '../../vendors',
-            pluginName    : ressource.typeTechnique,
-            ressource     : tools.stringify(ressource) // une string pour que dust le mette dans le source
-          }
-        }
-      }
-      prepareAndSend(context, error, ressource, 'display', options)
+      prepareAndSend(context, error, ressource, 'display', {$layout:'layout-iframe'})
+    })
+  })
+
+  // preview : Voir la ressource avec header et menu
+  controller.get($routes.get('preview', ':id'), function (context) {
+    var id = context.arguments.id
+    $ressourceRepository.loadPublic(id, function (error, ressource) {
+      prepareAndSend(context, error, ressource, 'display')
     })
   })
 
@@ -134,9 +139,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       nb     : parseInt(context.arguments.nb)
     }
     $ressourceRepository.getListe(options, function (error, ressources) {
-      var data = dataListe
-      if (error) data.content.error = error.toString()
-      else data.content.ressources = $ressourceConverter.addUrlsToList(ressources)
+      var data = getDefaultData()
+      if (error) data.contentBloc.error = error.toString()
+      else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
     })
   })
 
@@ -153,9 +158,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.post('by', function (context) {
     $ressourceRepository.getListe(context.post, function (error, ressources) {
-      var data = dataListe
-      if (error) data.content.error = error.toString()
-      else data.content.ressources = $ressourceConverter.addUrlsToList(ressources)
+      var data = getDefaultData()
+      if (error) data.contentBloc.error = error.toString()
+      else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
     })
   })
 
@@ -172,15 +177,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.get('by/:json', function (context) {
     var options
-    var data = dataListe
+    var data = getDefaultData()
     try {
       options = JSON.parse(context.arguments.json)
       $ressourceRepository.getListe(context.post, function (error, ressources) {
-        if (error) data.content.error = error.toString()
-        else data.content.ressources = $ressourceConverter.addUrlsToList(ressources)
+        if (error) data.contentBloc.error = error.toString()
+        else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
       })
     } catch (error) {
-      data.content.error = error.toString()
+      data.contentBloc.error = error.toString()
     }
   })
 }
