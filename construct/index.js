@@ -47,6 +47,8 @@ console.log(process.env) */
 // nos loggers
 GLOBAL.log = require('./tools/log.js')
 
+//var _ = require('underscore')._;
+
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
 //log("lassi juste après init", lassi)
@@ -56,19 +58,24 @@ require('./static')
 require('./ressource')
 require('./personne')
 
-// en attendant mieux, on lit notre config à la main avant de lancer lassi.component
 var dependancies = ['static', 'personne', 'ressource']
+
+// en attendant mieux, on lit notre config à la main avant de lancer lassi.component
 var privateConfig = require('../_private/config')
+// des modules sup à charger
 if (privateConfig.extraModules) {
   privateConfig.extraModules.forEach(function (module) {
-    log("ajout du module supplémentaire " +module)
+    log("ajout du module supplémentaire " + module)
     require(module)
   })
-  if (privateConfig.extraComponents) privateConfig.extraComponents.forEach(function (component) {
-    log("ajout du composant supplémentaire " +component)
-    dependancies.push(component)
+}
+if (privateConfig.extraDependencies) {
+  privateConfig.extraDependencies.forEach(function(dependency) {
+    log("ajout de la dépendance supplémentaire " + dependency)
+    dependancies.push(dependency)
   })
 }
+
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
 var sesatheque = lassi.component('sesatheque', dependancies)
 //log("sesatheque à la déclaration", sesatheque)

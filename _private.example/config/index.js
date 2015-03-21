@@ -63,6 +63,8 @@ module.exports = {
     port:process.env.PORT || 3001
   },
   memcache : '127.0.0.1:11211',
-  // ajouter éventuellement une liste de noms de modules à charger à l'init, par ex pour gérer l'authentification'
-  modules : []
+  // les modules à précharger avant bootstrap
+  extraModules : ['fooModule'],
+  // les dépendances à ajouter au composant principal
+  extraDependencies : ['fooComposant']
 }

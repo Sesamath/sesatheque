@@ -34,7 +34,7 @@
 module.exports = function (controller) {
 
   var tools = require('../tools/index')
-  //var _ = require('underscore')._;
+  //var _ = require('underscore')._
 
   function getDefaultData() {
     return {
