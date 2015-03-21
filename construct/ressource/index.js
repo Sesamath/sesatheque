@@ -43,20 +43,20 @@ ressourceComponent.config(function($settings) {
   else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
 })
 
-ressourceComponent.entity('Ressource', function (Archive, $cacheRessource) {
-  require('./entityRessource')(this, Archive, $cacheRessource)
-})
-
 ressourceComponent.entity('Archive', function () {
   require('./entityArchive')(this)
 })
 
-ressourceComponent.service('$routes', function($settings) {
-  return require('./serviceRoutes')($settings)
-})
-
 ressourceComponent.service('$cacheRessource', function($cache, $settings) {
   return require('./serviceCacheRessource')($cache, $settings)
+})
+
+ressourceComponent.entity('Ressource', function (Archive, $cacheRessource) {
+  require('./entityRessource')(this, Archive, $cacheRessource)
+})
+
+ressourceComponent.service('$routes', function($settings) {
+  return require('./serviceRoutes')($settings)
 })
 
 ressourceComponent.service('$ressourceRepository', function(Ressource, $accessControl, $cacheRessource) {

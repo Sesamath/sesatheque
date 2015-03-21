@@ -31,10 +31,7 @@
 
 "use strict";
 
-module.exports = function (Personne, Groupe, $personneRepository, $settings) {
-  var _ = require('underscore')._
-  var tools = require('../tools')
-
+module.exports = function (Personne) {
   Personne.construct = function () {
     this.id = 0
     /**

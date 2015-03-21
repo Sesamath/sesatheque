@@ -101,18 +101,18 @@ personneComponent.service('$cacheGroupe', function($cache, $settings) {
   }
 })
 
+personneComponent.entity('Groupe', function ($cacheGroupe) {
+  require('./entityGroupe')(this, $cacheGroupe)
+})
+
+personneComponent.entity('Personne', function (Groupe) {
+  require('./entityPersonne')(this, Groupe)
+})
+
 personneComponent.service('$personneRepository', function(Personne, Groupe, $cachePersonne, $cacheGroupe) {
   return require('./servicePersonneRepository')(Personne, Groupe, $cachePersonne, $cacheGroupe)
 })
 
 personneComponent.service('$accessControl', function (Groupe, $settings, $personneRepository) {
   return require('./serviceAccessControl')(Groupe, $settings, $personneRepository)
-})
-
-personneComponent.entity('Personne', function (Groupe, $personneRepository, $settings) {
-  require('./entityPersonne')(this, Groupe, $personneRepository, $settings)
-})
-
-personneComponent.entity('Groupe', function ($cacheGroupe) {
-  require('./entityGroupe')(this, $cacheGroupe)
 })
