@@ -19,8 +19,7 @@
   </div>
 
   <div id="body" class="container">
-    {#error}{.|s}{/error}
-    {#errors}<p class="has-error">{.}</p>{/errors}
+    {#errorBloc}{.|s}{/errorBloc}
 
     {#flashBloc}{.|s}{/flashBloc}
 

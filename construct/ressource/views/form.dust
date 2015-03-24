@@ -19,7 +19,7 @@
             {@gt key=id.value value=0}{>wrapper widget="text" o=id width="50px" /}{/gt}
             {! {>wrapper widget="text" o=id width="50px" /} !}
             {>wrapper widget="text" o=titre /}
-            {>wrapper widget="text" o=typeTechnique size=2 /}
+            {>wrapper widget="select" o=typeTechnique size=2 /}
             {>wrapper widget="checkboxes" o=publie /}
             {>wrapper widget="select" o=langue /}
         </div>

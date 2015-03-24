@@ -55,7 +55,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         css: [basePath +'styles/ressources.css'],
         js : [basePath +'vendors/requirejs/require.2.1.js']
       },
-      $layout: 'layout-page',
+      // Si le chemin est absolu, le premier élément est un nom de composant.
+      $layout: '../../static/views/layout-page',
       contentBloc : {}
     }
   }
@@ -204,6 +205,31 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.html(data)
   }
 
+  /**
+   * Prepare les data pour le form dust et appelle html avec
+   * @param context
+   */
+  function printSearchForm(context) {
+    var data = getDefaultData()
+    // on ajoute le menu
+    addMenu(context, data, null)
+    // les datas pour le form
+    data.contentBloc = $ressourceConverter.getFormViewData(null, null)
+    // on vire ou modifie ce qui nous intéresse pour la recherche
+    var fd = data.contentBloc // raccourci d'écriture (form data)
+    delete fd.id
+    delete fd.version.value
+    delete fd.version.readonly
+    fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
+    data.contentBloc.$view = 'form'
+    // le titre
+    data.$metas.title = 'Recherche de ressources'
+    // on ajoute le token, en session, pour éviter des post multiples et ne pas vérifier les droits au post
+    context.session.token = data.contentBloc.token.value
+    // avant d'envoyer
+    context.html(data)
+  }
+
   // describe
   controller.get($routes.get('describe', ':id'), function (context) {
     var id = context.arguments.id
@@ -226,11 +252,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var id = context.arguments.id
     log("appel de l'action display pour " +id)
     /* ça fonctionne en affichant bien l'erreur sans repasser une 2e fois ici
-    printForRead(new Error("display " +id), null, context, 'display', {$layout: 'layout-iframe'})
+    printForRead(new Error("display " +id), null, context, 'display', {$layout: './../static/views/layout-iframe'})
     return */
     $ressourceRepository.load(id, function (error, ressource) {
-      log("load de display") // pourquoi on passe 2x ici ???
-      printForRead(error, ressource, context, 'display', {$layout: 'layout-iframe'})
+      log("load de display")
+      printForRead(error, ressource, context, 'display', {$layout: '../../static/views/layout-iframe'})
     })
   })
 
@@ -239,7 +265,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      printForRead(error, ressource, context, 'display', {$layout: 'layout-iframe'})
+      printForRead(error, ressource, context, 'display', {$layout: '../../static/views/layout-iframe'})
     })
   })
 
@@ -287,7 +313,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
 // Uptate, affichage du form
   controller.get($routes.get('edit', ':id'), function (context) {
-    if (checkSession()) {
+    if (checkSession(context)) {
       var id = context.arguments.id
       $ressourceRepository.load(id, function (error, ressource) {
         $accessControl.checkPermission('update', context, ressource, function () {
@@ -354,6 +380,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         }
       })
     })
+  })
+
+  controller.get($routes.get('search'), function (context) {
+    printSearchForm(context)
   })
 
   /**

@@ -37,7 +37,7 @@ var moment = require('moment')
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
 
-var $routes
+var Ressource, $routes
 
 /**
  * Service qui regroupe les fonctions de transformation de données pour les vues
@@ -220,7 +220,7 @@ $ressourceConverter.getFormViewData = function (error, ressource) {
   if (!ressource) {
     // on en créé une vide
     log.dev('dans sendFormData on lance un create')
-    ressource = lassi.entity.Ressource.create()
+    ressource = Ressource.create()
   }
   //log.dev('ressource traitée par sendFormData', ressource)
 
@@ -305,7 +305,7 @@ $ressourceConverter.getFormViewData = function (error, ressource) {
  * @throws {Error} En cas de données invalides
  */
 $ressourceConverter.getRessourceFromPost = function (data, partial) {
-  var ressource = lassi.entity.Ressource.create();
+  var ressource = Ressource.create();
   var errors = [];
   var buffer;
   var msg;
@@ -478,7 +478,8 @@ $ressourceConverter.addUrlsToList = function (ressources) {
   return ressources
 }
 
-module.exports = function (routesService) {
+module.exports = function (RessourceEntity, routesService) {
+  Ressource = RessourceEntity
   $routes = routesService
 
   return $ressourceConverter

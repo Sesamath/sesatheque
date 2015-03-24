@@ -39,6 +39,16 @@ var ressourceConfig = {
    * Les listes de choix pour nos propriétés dont on enregistre des ids
    */
   listes : {
+    typeTechnique : {
+      'am'    : 'aide mathenpoche',
+      'arbre' : 'arbre (liste hiérarchisée)',
+      'calkc' : 'calculatrice cassée',
+      'ec2'   : 'exercice calculatice',
+      'em'    : 'exercice mathenpoche',
+      'j3p'   : 'activité j3p',
+      'mental': 'calcul mental',
+      'url'   : 'page externe'
+    },
     niveaux          : {
       11: 'CP',
       10: 'CE1',
@@ -173,6 +183,7 @@ var ressourceConfig = {
 
   // les propriétés qui ne prennent qu'une seule valeur
   uniques          : {
+    'typeTechnique': true,
     'langue'       : true,
     'restriction'  : true
   },
@@ -300,20 +311,21 @@ var ressourceConfig = {
       aPourCorrige     : 51,
       estLaCorrectionDe: 52
     },
-    restriction      : { // l'inverse est dans listes
+    restriction      : { // l'inverse id => label est dans listes
       aucune    : 0,
       correction: 1,
       groupe    : 2,
       prive     : 3
     },
-    // des constantes pour nos routes (le nom des actions est en dur mais reste interne au code)
+    // des constantes pour nos routes
     routes : {
       display:'voir',
       preview:'apercu',
       add : 'ajouter',
       edit: 'modifier',
       describe:'decrire',
-      delete:'supprimer'
+      delete:'supprimer',
+      search:'recherche'
     }
   }, // fin constantes
   /**

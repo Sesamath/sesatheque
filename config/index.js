@@ -167,19 +167,14 @@ if (settings.memcache) {
 // on enlève le debug mysql si on nous précise prod dans l'environnement
 if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && settings.$entities.database.connection.debug)
   delete settings.$entities.database.connection.debug
-else {
-  console.log('Les settings chargés')
-  console.log(settings)
-}
-
-module.exports = settings
 
 /**
  * composant qui va se placer en dépendance globale
  * (on charge en private le module sesasso-bibli spécifique à cette instance)
- * ça marche pas car on a du lassi undefined ici, on remplace par le param config.authModuleName
+ * Mais les contrôleurs qu'il déclare sont pas pris en compte
  * /
 lassi.component('auth').config(function() {
   require('sesasso-bibli')
-})
-/* */
+}) /* */
+
+module.exports = settings

@@ -102,7 +102,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('display', ':id'), function (context) {
     var id = context.arguments.id
     $ressourceRepository.loadPublic(id, function (error, ressource) {
-      prepareAndSend(context, error, ressource, 'display', {$layout:'layout-iframe'})
+      prepareAndSend(context, error, ressource, 'display', {$layout:'../../static/views/layout-iframe'})
     })
   })
 

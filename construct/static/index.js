@@ -44,29 +44,43 @@ var staticComponent = lassi.component('static')
 staticComponent.config(function() {
   // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
   lassi.on('beforeTransport', function(context, data) {
-    log('on beforeTransport avec les data', data)
+    log('on beforeTransport (dans static), sur ' +context.request.originalUrl +' avec les data', data)
+    //log('beforeTransport le context ', context)
+    // log('beforeTransport la requête ', context.request)
+    // log('beforeTransport la réponse ', context.response)
+
+    if (!data.contentBloc && !context.status) {
+      log.error('pas de status ni content => 404')
+      context.status = 404
+    }
 
     if (context.status && context.status > 400) {
-      if (!context.contentType) context.contentType = 'text/html'
-      // on ne gère que le html
-      if (context.contentType === 'text/html') {
-        // erreur, 403 et 404 on leur layout, les autres erreurs ont un layout commun
-        if (!data.content) data.content = {}
-        if (!data.$layout) data.$layout = 'layout-page'
-        switch (data.$status) {
-          case 404:
-            //data.$layout = 'layout-page404'
-            data.content.content = "Cette page n'existe pas"
-            break
-          case 403:
-            //data.$layout = 'layout-page403'
-            data.content.content = "Authentification requise"
-            break
-          default:
-            //data.$layout = 'layout-pageError'
-            data.content.content = "Une erreur est survenue"
-        }
+      // lassi a mis du plain sur les erreurs
+      context.contentType = 'text/html'
+      // et une string dans data
+      if (typeof data !== 'object') data = {}
+      if (!data.$metas) data.$metas = {}
+      data.$views = __dirname +'/views'
+      if (!data.$layout) data.$layout = 'layout-page'
+      if (!data.contentBloc) data.contentBloc = {}
+      data.contentBloc.$view = 'error'
+      // reste à choisir le texte d'erreur à afficher
+      switch (context.status) {
+        case 404:
+          //data.$layout = 'layout-page404'
+          data.contentBloc.error = "Cette page n'existe pas"
+          data.$metas.title = "Cette page n'existe pas"
+          break
+        case 403:
+          data.contentBloc.error = "Authentification requise"
+          data.$metas.title = "Authentification requise"
+          break
+        default:
+          data.contentBloc.error = "Une erreur est survenue (" +context.status +')'
+          data.$metas.title = "Ooops, une erreur est survenue (" +context.status +')'
       }
+      log("c'est une erreur, le contexte", context)
+      log('et les data après modif', data)
     }
   })
 })
@@ -100,11 +114,11 @@ staticComponent.controller(function ($flashMessages) {
     var data = baseData
     log('le contexte dans le controleur de static, action /',context)
     data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
-    // ce content est le nom du bloc du layout
-    data.content = {
+    // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
+    data.contentBloc = {
       $view : 'home',
       // ce content est la variable passée au template dust
-      content: "Ce site est encore un prototype expérimental."
+      content : "Ce site est encore un prototype expérimental."
     }
     context.html(data)
   })

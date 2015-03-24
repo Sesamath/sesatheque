@@ -65,6 +65,8 @@ module.exports = {
   memcache : '127.0.0.1:11211',
   // les modules à précharger avant bootstrap
   extraModules : ['fooModule'],
-  // les dépendances à ajouter au composant principal
-  extraDependencies : ['fooComposant']
+  // les dépendances à ajouter au composant principal, en premier
+  extraDependenciesFirst : ['fooComposant']
+  // et éventuellement en dernier
+  // extraDependenciesLast : ['barComposant']
 }

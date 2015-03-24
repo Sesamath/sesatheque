@@ -32,35 +32,27 @@
 'use strict'
 
 /**
- * Définition de l'application
+ * @fileOverview Définition de l'application
  * - chargement lassi
  * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
  * - boot de l'appli
  */
 
-/*
-console.log("Démarrage de la bibliothèque : appel de " +__filename +" avec les arguments ")
-console.log(process.argv)
-/* console.log("et l'environnement")
-console.log(process.env) */
+// appel du module lassi qui met en global une variable lassi
+require('lassi')(__dirname +'/..')
 
 // nos loggers
 GLOBAL.log = require('./tools/log.js')
-
-//var _ = require('underscore')._;
-
-// appel du module lassi qui met en global une variable lassi
-require('lassi')(__dirname +'/..')
-//log("lassi juste après init", lassi)
 
 // les déclarations de nos components
 require('./static')
 require('./ressource')
 require('./personne')
 
+//var _ = require('underscore')._;
 var dependancies = ['static', 'personne', 'ressource']
 
-// en attendant mieux, on lit notre config à la main avant de lancer lassi.component
+// On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
 var privateConfig = require('../_private/config')
 // des modules sup à charger
 if (privateConfig.extraModules) {
@@ -69,16 +61,21 @@ if (privateConfig.extraModules) {
     require(module)
   })
 }
-if (privateConfig.extraDependencies) {
-  privateConfig.extraDependencies.forEach(function(dependency) {
-    log("ajout de la dépendance supplémentaire " + dependency)
+if (privateConfig.extraDependenciesFirst) {
+  privateConfig.extraDependenciesFirst.forEach(function(dependency) {
+    log("ajout en premier de la dépendance supplémentaire " + dependency)
+    dependancies.unshift(dependency)
+  })
+}
+if (privateConfig.extraDependenciesLast) {
+  privateConfig.extraDependenciesLast.forEach(function(dependency) {
+    log("ajout en dernier de la dépendance supplémentaire " + dependency)
     dependancies.push(dependency)
   })
 }
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
 var sesatheque = lassi.component('sesatheque', dependancies)
-//log("sesatheque à la déclaration", sesatheque)
 
 // on ajoute memcache si précisé dans les settings
 sesatheque.config(function($cache, $settings) {
@@ -89,16 +86,7 @@ sesatheque.config(function($cache, $settings) {
   } else {
     log.error("Il manque memcache en config, on s'en passera mais il vaudrait mieux l'ajouter")
   }
-  /* on regarde si la conf réclame un module pour gérer l'authentification
-  sauf que c'est trop tard pour le mettre en dépendance, d'où le hack plus haut
-  var modules = $settings.get('modules', null)
-  if (modules) {
-    modules.forEach(function (moduleName) {
-      require(moduleName)
-    })
-  } */
-
-  log("sesatheque en fin de config", sesatheque)
+  // log("sesatheque en fin de config", sesatheque)
 })
 
 
@@ -106,11 +94,6 @@ sesatheque.config(function($cache, $settings) {
 lassi.on('bootstrap', function () {
   console.log("Boot de l'application " + sesatheque.name)
   log.dev('BOOT')
-  /* on a une tache gulp reset pour ça, on ne vide plus systématiquement les sessions au démarrage
-  if (lassi.sessions && sesatheque.settings.staging !== lassi.Staging.production) {
-    log.dev('Purge des sessions récupérées')
-    lassi.sessions = {}
-  } */
 });
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
