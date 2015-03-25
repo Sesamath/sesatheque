@@ -59,26 +59,22 @@ staticComponent.config(function() {
       context.contentType = 'text/html'
       // et une string dans data
       if (typeof data !== 'object') data = {}
+      // on ajoute layout et vue pour cette erreur
       if (!data.$metas) data.$metas = {}
       data.$views = __dirname +'/views'
       if (!data.$layout) data.$layout = 'layout-page'
       if (!data.contentBloc) data.contentBloc = {}
       data.contentBloc.$view = 'error'
+
       // reste à choisir le texte d'erreur à afficher
+      var msg
       switch (context.status) {
-        case 404:
-          //data.$layout = 'layout-page404'
-          data.contentBloc.error = "Cette page n'existe pas"
-          data.$metas.title = "Cette page n'existe pas"
-          break
-        case 403:
-          data.contentBloc.error = "Authentification requise"
-          data.$metas.title = "Authentification requise"
-          break
-        default:
-          data.contentBloc.error = "Une erreur est survenue (" +context.status +')'
-          data.$metas.title = "Ooops, une erreur est survenue (" +context.status +')'
+        case 404: msg = "Cette page n'existe pas"; break
+        case 403: msg = "Authentification requise"; break
+        default: msg = "Ooops, une erreur est survenue (" +context.status +')'
       }
+      data.contentBloc.error = msg
+      data.$metas.title = msg
       log("c'est une erreur, le contexte", context)
       log('et les data après modif', data)
     }

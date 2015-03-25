@@ -46,18 +46,19 @@
         </div>
 
         {! todo widget relations !}
-
+        {?parametres}
         <div class="form-group">
             {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
         </div>
+        {/parametres}
 
         {! todo widget auteurs et contributeurs !}
 
          <div class="form-group">
             {>wrapper widget="text" o=version /}
             {>wrapper widget="select" o=restriction /}
-            {>wrapper widget="text" o=dateCreation rmq="JJ/MM/YYYY" /}
-            {>wrapper widget="text" o=dateMiseAJour /}
+            {?dateCreation}{>wrapper widget="text" o=dateCreation rmq="JJ/MM/YYYY" /}{/dateCreation}
+            {?dateMiseAJour}{>wrapper widget="text" o=dateMiseAJour /}{/dateMiseAJour}
         </div>
 
         {! Les types, devraient disparaitrent car conditionnés par la catégorie ! }

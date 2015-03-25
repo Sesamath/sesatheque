@@ -52,10 +52,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     return {
       $views : __dirname + '/views',
       $metas : {
-        css: [basePath +'styles/ressources.css'],
-        js : [basePath +'vendors/requirejs/require.2.1.js']
+        css: ['styles/ressources.css'],
+        js : ['../vendors/requirejs/require.2.1.js']
       },
-      // Si le chemin est absolu, le premier élément est un nom de composant.
       $layout: '../../static/views/layout-page',
       contentBloc : {}
     }
@@ -220,6 +219,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     delete fd.id
     delete fd.version.value
     delete fd.version.readonly
+    delete fd.parametres
+    delete fd.dateCreation
+    delete fd.dateMiseAJour
+    delete fd.oid
+
     fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
     data.contentBloc.$view = 'form'
     // le titre
@@ -382,7 +386,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
+  // form de recherche
   controller.get($routes.get('search'), function (context) {
+    printSearchForm(context)
+  })
+
+  // résultats
+  controller.post($routes.get('search'), function (context) {
     printSearchForm(context)
   })
 
