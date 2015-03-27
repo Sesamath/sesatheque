@@ -45,9 +45,12 @@ staticComponent.config(function() {
   // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
   lassi.on('beforeTransport', function(context, data) {
     log('on beforeTransport (dans static), sur ' +context.request.originalUrl +' avec les data', data)
-    //log('beforeTransport le context ', context)
-    // log('beforeTransport la requête ', context.request)
-    // log('beforeTransport la réponse ', context.response)
+    if (/\.css$/.exec(context.request.originalUrl)) {
+      log(new Error("on passe dans beforeTransport sur du css"))
+      log('beforeTransport le context ', context)
+      log('beforeTransport la requête ', context.request)
+      log('beforeTransport la réponse ', context.response)
+    }
 
     if (!data.contentBloc && !context.status) {
       log.error('pas de status ni content => 404')

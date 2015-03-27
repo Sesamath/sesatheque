@@ -87,6 +87,7 @@ sesatheque.config(function($cache, $settings) {
     log.error("Il manque memcache en config, on s'en passera mais il vaudrait mieux l'ajouter")
   }
   // log("sesatheque en fin de config", sesatheque)
+  log("Boot de l'application " + sesatheque.name +" en mode " +$settings.get('application.staging'))
 })
 
 
@@ -148,12 +149,12 @@ lassi.on('beforeRailUse', function (name, settings) {
  * @param {Object} rail le rail express
  * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
  */
-lassi.on('afterRailUse', function (rail, name) {
+lassi.on('afterRailUse', function (rail, name, settings, middleware) {
   // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
   if (name === 'cookie') {
-    lassi.log('$rail', "adding", "cors".blue.underline, "middleware");
-    rail.use('/', function() {
-      return function(req, res, next) {
+    lassi.log('$rail', "adding", "cors".blue.underline, "middleware")
+    log(middleware)
+    rail.use('/', function(req, res, next) {
         var origin = req.header('Origin')
         console.log('cors : ', req)
         if (origin &&
@@ -163,7 +164,6 @@ lassi.on('afterRailUse', function (rail, name) {
           res.header("Access-Control-Allow-Headers", "X-Requested-With");
         }
         next();
-      }
     });
   }
 })
