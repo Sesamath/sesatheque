@@ -20,7 +20,7 @@ var logProcess = false
 var logOk = false
 
 var knex = require('knex');
-var _ = require('underscore')._;
+var _ = require('lodash');
 var request = require('request');
 var moment = require('moment')
 var flow          = require('seq');

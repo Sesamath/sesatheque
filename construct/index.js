@@ -49,7 +49,7 @@ require('./static')
 require('./ressource')
 require('./personne')
 
-//var _ = require('underscore')._;
+//var _ = require('lodash');
 var dependancies = ['static', 'personne', 'ressource']
 
 // On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
@@ -145,16 +145,23 @@ lassi.on('beforeRailUse', function (name, settings) {
 
 /**
  * On ajoute le CORS après cookie
- * /
-lassi.on('afterRailUse', function (name) {
+ * @param {Object} rail le rail express
+ * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
+ */
+lassi.on('afterRailUse', function (rail, name) {
   // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
   if (name === 'cookie') {
-    console.log("On ajoute CORS sur le rail")
-    lassi.use('cors', function() {
+    lassi.log('$rail', "adding", "cors".blue.underline, "middleware");
+    rail.use('/', function() {
       return function(req, res, next) {
+        var origin = req.header('Origin')
         console.log('cors : ', req)
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header("Access-Control-Allow-Headers", "X-Requested-With");
+        if (origin &&
+            /https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(?:[0-9]+)\/$/.exec(origin))
+        {
+          res.header('Access-Control-Allow-Origin', origin);
+          res.header("Access-Control-Allow-Headers", "X-Requested-With");
+        }
         next();
       }
     });

@@ -36,7 +36,7 @@
  */
 var personneComponent = lassi.component('personne')
 
-//var _ = require('underscore')._
+//var _ = require('lodash')
 var tools = require('../tools')
 
 personneComponent.config(function($settings) {

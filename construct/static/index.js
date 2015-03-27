@@ -59,6 +59,8 @@ staticComponent.config(function() {
       context.contentType = 'text/html'
       // et une string dans data
       if (typeof data !== 'object') data = {}
+      // ou data.content
+      if (data.content) delete data.content
       // on ajoute layout et vue pour cette erreur
       if (!data.$metas) data.$metas = {}
       data.$views = __dirname +'/views'
@@ -75,8 +77,8 @@ staticComponent.config(function() {
       }
       data.contentBloc.error = msg
       data.$metas.title = msg
-      log("c'est une erreur, le contexte", context)
-      log('et les data après modif', data)
+      log("c'est une erreur, les data après modif", data)
+      //log("et le contexte", context)
     }
   })
 })

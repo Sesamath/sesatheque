@@ -35,7 +35,7 @@
  * Configuration de l'application
  */
 console.log('lecture config appli')
-var _ = require('underscore')._
+var _ = require('lodash')
 var fs = require('fs');
 var moment = require('moment')
 var tools = require('../construct/tools')

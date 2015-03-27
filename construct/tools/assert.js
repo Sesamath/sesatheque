@@ -38,7 +38,7 @@
  */
 'use strict';
 
-var _ = require('underscore')._;
+var _ = require('lodash');
 
 /**
  * Vérifie que c'est bien une callback qui prend au moins 2 arguments

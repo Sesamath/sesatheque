@@ -40,7 +40,7 @@
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) {
   var tools = require('../tools')
-  var _ = require('underscore')._
+  var _ = require('lodash')
   var basePath = $settings.get('basePath', '/')
 
   // on désactive la compression dust en dev
@@ -52,8 +52,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     return {
       $views : __dirname + '/views',
       $metas : {
-        css: ['styles/ressources.css'],
-        js : ['../vendors/requirejs/require.2.1.js']
+        css: ['/styles/ressources.css'],
+        js : ['/vendors/requirejs/require.2.1.js']
       },
       $layout: '../../static/views/layout-page',
       contentBloc : {}
@@ -62,7 +62,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   function addJsVars(data, ressource) {
     if (ressource) {
-      data.contentBloc.pluginBaseUrl = '../../plugins/' + ressource.typeTechnique
+      data.contentBloc.pluginBaseUrl = '/plugins/' + ressource.typeTechnique
       data.contentBloc.vendorsBaseUrl= '../../vendors'
       data.contentBloc.pluginName    = ressource.typeTechnique
       data.contentBloc.isDev         = ($settings.get('lassi.application.staging') !== 'production')

@@ -40,7 +40,7 @@
  */
 module.exports = function (Ressource, Archive, $cache, cacheTTL) {
 
-  var _ = require('underscore')._
+  var _ = require('lodash')
   var tools = require('../tools')
 
   /**

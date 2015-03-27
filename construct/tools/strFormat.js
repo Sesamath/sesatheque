@@ -33,7 +33,7 @@
  * Des méthodes de formatage de string
  */
 var util = require('util')
-var _ = require('underscore')._
+var _ = require('lodash')
 
 /**
  * Incorpore des arguments à un message, façon sprintf

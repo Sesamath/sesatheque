@@ -40,7 +40,7 @@
  */
 var $ressourceRepository = {}
 
-var _ = require('underscore')._
+var _ = require('lodash')
 var flow          = require('seq')
 var elementtree = require('elementtree')
 
@@ -76,7 +76,7 @@ function setVersion(ressource, next) {
     else {
       _.each(config.versionTriggers, function (prop) {
         // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
-        // on utilise http://underscorejs.org/#isEqual
+        // on utilise https://lodash.com/docs#isEqual
         if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
           try {
             log.dev('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id +

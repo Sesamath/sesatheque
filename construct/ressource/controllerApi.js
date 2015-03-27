@@ -46,7 +46,7 @@
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl) {
 
-  var _ = require('underscore')._
+  var _ = require('lodash')
   var flow = require('seq')
 
   /**

@@ -31,7 +31,7 @@
 
 'use strict'
 
-var _ = require('underscore')._
+var _ = require('lodash')
 
 var tools = {}
 
