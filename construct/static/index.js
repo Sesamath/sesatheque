@@ -134,19 +134,28 @@ staticComponent.controller(function ($flashMessages) {
 
 staticComponent.service('$flashMessages', function() {
   return {
-    add : function (context, message) {
+    add : function (context, message, level) {
+      var cssClass = 'flash'
+      if (level) cssClass += '-' +level
       if (!context.session.flashMessages) context.session.flashMessages = []
-      context.session.flashMessages.push(message)
+      context.session.flashMessages.push({
+        cssClass : cssClass,
+        value : message
+      })
     },
     getData : function (context) {
+      var data
       if (context.session.flashMessages) {
-        return {
+        data = {
           flashBloc : {
             $view : 'flash',
             messages : context.session.flashMessages
           }
         }
+        delete context.session.flashMessages
       }
+
+      return data
     }
   }
 })

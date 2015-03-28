@@ -1,4 +1,4 @@
 {! flashBloc !}
 {#messages}
-<p {?level}class="{level}"{/level}>{value}</p>
+<p class="flash {cssClass}">{value}</p>
 {/messages}

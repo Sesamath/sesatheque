@@ -21,7 +21,6 @@
   <div id="body" class="container">
     {#errorBloc}{.|s}{/errorBloc}
 
-    {#flashBloc}{.|s}{/flashBloc}
 
     <div class="row">
 
@@ -33,6 +32,8 @@
             {#menuBloc}{.|s}{/menuBloc}
             </div>
         </div>
+
+        {#flashBloc}{.|s}{/flashBloc}
 
         <div id="content" class="col-md-9">
         {#contentBloc}{.|s}{/contentBloc}
