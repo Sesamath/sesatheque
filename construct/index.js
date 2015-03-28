@@ -169,7 +169,7 @@ lassi.on('afterRailUse', function (rail, name) {
           res.header('Access-Control-Allow-Origin', origin)
           res.header("Access-Control-Allow-Headers", "X-Requested-With")
           msg += ' accepté'
-        } else if (origin.substr(0, 4) !== 'http') {
+        } else if (origin && origin.substr(0, 4) !== 'http') {
           // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
           res.header('Access-Control-Allow-Origin', '*')
           res.header("Access-Control-Allow-Headers", "X-Requested-With")
