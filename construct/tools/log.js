@@ -80,7 +80,11 @@ function out(message, objectToDump, filter, stream) {
     else {
       if (objectToDump) {
         if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
-        else message += '\n' + tools.stringify(objectToDump, 2) + "\n";
+        else {
+          var dump = tools.stringify(objectToDump, 2)
+          if (dump.length > 200) dump = dump.substr(0, 200) + '…'
+          message += '\n' +dump  + "\n";
+        }
       }
     }
     message = '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] ' +message

@@ -162,12 +162,15 @@ lassi.on('afterRailUse', function (rail, name) {
     lassi.log('$rail', "adding", "cors".blue.underline, "middleware")
     rail.use('/', function(req, res, next) {
         var origin = req.header('Origin')
+        var msg = 'cors avec ' +origin
         if (origin &&
-            /https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(?:[0-9]+)\/$/.exec(origin))
+            /https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin))
         {
           res.header('Access-Control-Allow-Origin', origin)
           res.header("Access-Control-Allow-Headers", "X-Requested-With")
-        }
+          msg += ' accepté'
+        } else msg += ' refusé'
+      log(msg)
         next()
     })
   }
