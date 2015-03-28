@@ -89,7 +89,7 @@ function out(message, objectToDump, filter, stream) {
   }
 }
 
-if (env === 'development' && config.logs.debug) {
+if (env !== 'production' && config.logs.debug) {
   // notre stream vers development.log
   debugOutputStream = fs.createWriteStream(config.logs.debug, {'flags': 'a'})
 
@@ -116,9 +116,11 @@ if (env === 'development' && config.logs.debug) {
     console.log(objectToDump)*/
   }
 
+  console.log("fonction de log activée avec l'environnement : " +env)
 } else {
   logDebug = function() {};
   log = function () {} // jshint ignore:line
+  console.log("fonction de log déactivée avec l'environnement : " +env)
 }
 
 log.dev = logDebug

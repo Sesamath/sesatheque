@@ -113,7 +113,7 @@ staticComponent.controller(function ($flashMessages) {
   // home
   this.get('/', function (context) {
     var data = baseData
-    log('le contexte dans le controleur de static, action /',context)
+    // log('le contexte dans le controleur de static, action /',context)
     data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
     // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
     data.contentBloc = {
@@ -127,7 +127,8 @@ staticComponent.controller(function ($flashMessages) {
   // gestion des messages flash
   this.get('*', function (context) {
     if (context.request.url.indexOf('/api/') === 0) return context.next()
-    $flashMessages.print(context)
+    var data = $flashMessages.getData(context)
+    context.next(null, data)
   })
 })
 
@@ -137,17 +138,15 @@ staticComponent.service('$flashMessages', function() {
       if (!context.session.flashMessages) context.session.flashMessages = []
       context.session.flashMessages.push(message)
     },
-    print : function (context) {
-      var data
+    getData : function (context) {
       if (context.session.flashMessages) {
-        data = {
+        return {
           flashBloc : {
             $view : 'flash',
             messages : context.session.flashMessages
           }
         }
       }
-      context.next(null, data)
     }
   }
 })
