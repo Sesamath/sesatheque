@@ -340,15 +340,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       // log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
-      // log.dev("dans api get " +id, ressource)
+      // log.dev("dans api get " +origine +'/' +idOrigine, ressource)
       if (error) context.json({error: error.toString()})
       else if (ressource) {
-        // l'entité passe pas le JSON.stringify pour la sortie, à cause de la propriété _entity, d'où le toObject
-          if ($accessControl.hasReadPermission(context, ressource)) context.json(ressource)
+        if ($accessControl.hasReadPermission(context, ressource)) context.json(ressource)
         else  denied("Droits insuffisants pour accéder à la ressource d'origine " +
-        origine + " et d'identifiant " + idOrigine, context)
+            origine + " et d'identifiant " + idOrigine, context)
       } else notFound("La ressource d'origine " + origine + " et d'identifiant " + idOrigine +
-      " n'existe pas", context)
+          " n'existe pas", context)
     })
   })
 

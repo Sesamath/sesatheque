@@ -59,7 +59,7 @@ module.exports = function ($cache, $settings) {
      * @param {SimpleCallback} next
      * @memberOf $cacheRessource
      */
-    getByOrigin: function (origine, idOrigine, next) {
+    getByOrigine: function (origine, idOrigine, next) {
       $cache.get('ressourceByOrigine_' +origine +'_' +idOrigine, function (error, id) {
         if (error) next(error)
         else $cache.get('ressource_' +id, next)

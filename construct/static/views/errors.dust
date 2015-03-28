@@ -1,0 +1,1 @@
+{#errors}<p class="has-error">{.}</p>{/errors}
