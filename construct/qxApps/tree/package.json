@@ -1,0 +1,31 @@
+{
+  "name": "tree",
+  "version": "0.1.0",
+  "repository" : {},
+  "dependencies": {
+    "lodash": "^3.5.0",
+    "verror": "^1.4.0"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.3",
+    "grunt": "~0.4.2"
+  },
+  "jshintConfig": {
+    "asi": true,
+    "bitwise": true,
+    "forin": true,
+    "freeze": true,
+    "immed": true,
+    "maxlen": 120,
+    "newcap": true,
+    "undef": true,
+    "unused": true,
+    "indent": 2,
+    "lastsemic": true,
+    "globals": {
+      "window": false,
+      "qx": false,
+      "VError": false
+    }
+  }
+}
