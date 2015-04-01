@@ -26,20 +26,24 @@ var moment = require('moment')
 var flow          = require('seq');
 
 // conf de l'appli
-var serverConf = require('../_private/config');
-var config = require('../construct/ressource/config.js');
-var port = serverConf.server && serverConf.server.port || 3000;
+var confSesatheque = require('../_private/config')
+var urlBibli = 'http://'
+urlBibli += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
+urlBibli += ':'
+urlBibli += confSesatheque.$server && confSesatheque.$server.port || '3000'
+urlBibli += '/api/ressource'
 
 // constantes
-var tdCode = config.constantes.typeDocumentaires;
-var tpCode = config.constantes.typePedagogiques;
-var catCode = config.constantes.categories;
-var relCode = config.constantes.relations;
+var confRessource = require('../construct/ressource/config')
+var tdCode = confRessource.constantes.typeDocumentaires;
+var tpCode = confRessource.constantes.typePedagogiques;
+var catCode = confRessource.constantes.categories;
+var relCode = confRessource.constantes.relations;
 
 // databases
-var dbConfigMepCol = require(__dirname + '/../_private/config/mepcol.js');
+var confMeps = require('../_private/config/mepcol');
 // les connexions aux bases
-var kmepcol = knex(dbConfigMepCol);
+var kmepcol = knex(confMeps);
 
 // les ids traités
 var nbRessToParse = 0
@@ -223,7 +227,7 @@ function getJour(ts) {
   // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
   if (ts < 11001001001) ts = ts * 1000
 
-  return ts ? moment.utc(new Date(ts)).format(config.formats.jour) : null
+  return ts ? moment.utc(new Date(ts)).format(confRessource.formats.jour) : null
 }
 
 /**
@@ -296,7 +300,7 @@ function initRessourceMep(row) {
 
   return {
     origine          : 'em',
-    idOrigine        : id,
+    idOrigine        : id.toString(),
     typeTechnique    : 'em',
     titre            : row.mep_titre || 'Exercice mathenpoche',
     resume           : row.mep_descriptif || '',
@@ -530,7 +534,10 @@ function flushPendingRelations(next) {
 function getRessource(origine, idOrigine, next) {
   var idComb = origine +'-' +idOrigine
   var options = {
-    url         : 'http://localhost:' +port +'/api/ressource/' + origine +'/' +idOrigine,
+    url         : urlBibli +'/' + origine +'/' +idOrigine,
+    headers : {
+      "X-ApiToken" : confMeps.apiToken
+    },
     json        : true,
     content_type: 'charset=UTF-8'
   }
@@ -556,7 +563,10 @@ function getRessource(origine, idOrigine, next) {
 function addRessource(ressource, next) {
   nbLaunched++
   var options = {
-    url : 'http://localhost:' +port +'/api/ressource',
+    url : urlBibli,
+    headers : {
+      "X-ApiToken" : confMeps.apiToken
+    },
     json: true,
     body: ressource
   }
@@ -591,10 +601,14 @@ function addRessource(ressource, next) {
 function mergeRessource(ressourcePartielle, next) {
   nbLaunched++
   var options = {
-    url : 'http://localhost:' +port +'/api/ressource/merge',
+    url : urlBibli +'/ressourceMerge',
+    headers : {
+      "X-ApiToken" : confMeps.apiToken
+    },
     json: true,
     body: ressourcePartielle
   }
+
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (body && body.id) {

@@ -12,9 +12,11 @@ var moment = require('moment')
 var fs = require('fs')
 
 // conf de l'appli
-var serverConf = require('../_private/config');
-var port = serverConf.server && serverConf.server.port || 3000;
-var prefix = 'http://localhost:' +port
+var serverConf = require('../_private/config')
+var urlBibli = 'http://'
+urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
+urlBibli += ':'
+urlBibli += serverConf.$server && serverConf.$server.port || '3000'
 
 /**
  * Écrit en console avec le moment en préfixe
@@ -68,7 +70,7 @@ module.exports = function () {
   var jsonFile = __dirname + '/' +argv[1]
   if (!fs.existsSync(jsonFile)) usage(1, jsonFile +" n'existe pas")
 
-  var url = prefix + uri
+  var url = urlBibli + uri
   log('post de ' +jsonFile +' vers ' +url)
   fs.readFile(jsonFile, function(error, jsonString) {
     try {

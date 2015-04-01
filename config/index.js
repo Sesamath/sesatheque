@@ -140,7 +140,9 @@ var settings = {
     },
     ressource : ressourceConfig
   },
-  // le reste est spécifique à notre appli et ignoré par lassi
+
+  // le reste est spécifique à sesatheque et ignoré par lassi
+  // Cf _private.example/config.js
 
   // les différents logs
   logs : {
@@ -148,12 +150,13 @@ var settings = {
     error     : root + '/logs/' + staging + '.error.log',
     errorData : root + '/logs/' + staging + '.errorData.log',
     debug     : root + '/logs/debug.log',
-    // mettre à true pour ajouter dans dev.log toutes les entrées / sorties du cache
+    // mettre à true pour ajouter dans debug toutes les entrées / sorties du cache
     cacheEntries : false
   }
 }
 
-// on ajoute nos params locaux (accès à la base et port)
+// on ajoute nos params locaux (accès à la base et port,
+// mais aussi tout ce qui est spécifique à une installation de sesatheque)
 if (localConfig) tools.update(settings, localConfig)
 
 // on met les sessions dans memcache si déclaré
@@ -164,17 +167,12 @@ if (settings.memcache) {
   }
 }
 
-// on enlève le debug mysql si on nous précise prod dans l'environnement
-if (process.env.NODE_ENV && process.env.NODE_ENV === 'production' && settings.$entities.database.connection.debug)
+// on enlève le debug mysql en prod
+if (settings.application.staging === 'production' && settings.$entities.database.connection.debug) {
   delete settings.$entities.database.connection.debug
+}
 
-/**
- * composant qui va se placer en dépendance globale
- * (on charge en private le module sesasso-bibli spécifique à cette instance)
- * Mais les contrôleurs qu'il déclare sont pas pris en compte
- * /
-lassi.component('auth').config(function() {
-  require('sesasso-bibli')
-}) /* */
+// Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,
+// cf _private.example/config.js
 
 module.exports = settings

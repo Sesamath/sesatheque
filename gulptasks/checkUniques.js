@@ -1,5 +1,5 @@
 /**
- * Ce script passe en revue les ressources pour vérifier que les id sont uniques
+ * Ce script passe en revue les ressources (dans la base) pour vérifier que les id sont uniques
  */
 'use strict';
 
@@ -11,7 +11,7 @@ var moment = require('moment')
 var flow          = require('seq')
 
 var dbConfig = require(__dirname + '/../_private/config')
-var kdb = knex(dbConfig.entities.database)
+var kdb = knex(dbConfig.$entities.database)
 
 /** La liste d'ids passés en argument avec --dump (séparateur virgule sans espaces) */
 var idsAsked = ''

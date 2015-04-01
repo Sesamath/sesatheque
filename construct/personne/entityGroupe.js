@@ -55,7 +55,7 @@ module.exports = function (Groupe, $cacheGroupe) {
   }
 
   Groupe.beforeStore(function(next) {
-    log.dev('beforeStore groupe ' +this.nom)
+    log.debug('beforeStore groupe ' +this.nom)
     next()
   })
 

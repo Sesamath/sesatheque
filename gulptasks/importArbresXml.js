@@ -55,9 +55,13 @@ var htmlparser = require('htmlparser')
 */
 var elementtree = require('elementtree')
 
-// conf de l'appli
-var serverConf = require('../_private/config');
-var port = serverConf.server && serverConf.server.port || 3000;
+// url bibliotheque d'après conf de l'appli
+var serverConf = require('../_private/config')
+var urlApiBibli = 'http://'
+urlApiBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
+urlApiBibli += ':'
+urlApiBibli += serverConf.$server && serverConf.$server.port || '3000'
+urlApiBibli += '/api'
 
 /**
  * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
@@ -365,7 +369,7 @@ function getEnfants(arbre, xmlName) {
 function getRessource(origine, idOrigine, next) {
   var idComb = origine +'-' +idOrigine
   var options = {
-    url         : 'http://localhost:' +port +'/api/ressource/' + origine +'/' +idOrigine,
+    url         : urlApiBibli +'/ressource/' + origine +'/' +idOrigine,
     json        : true,
     content_type: 'charset=UTF-8'
   }
@@ -395,7 +399,7 @@ function addRessource(ressource, next) {
   idsSent.push(ressource.idOrigine)
   if (!idsNoPopulate[ressource.idOrigine]) suffix = '?populate=1'
   var options = {
-    url : 'http://localhost:' +port +'/api/arbre' +suffix,
+    url : urlApiBibli +'/arbre' +suffix,
     json: true,
     body: ressource,
     timeout:defaultTimeout

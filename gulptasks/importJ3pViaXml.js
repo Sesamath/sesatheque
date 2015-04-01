@@ -1,6 +1,8 @@
 /**
- * Ce script passe en revue les ressources j3p du xml de labomep regarde dans BIBS les infos
- * si aussi dans oldbibli, on regarde les champs commentaires et description, si vide dans BIBS on prend sinon on ignore
+ * Ce script passe en revue les ressources j3p du xml issu de labomep (à copier dans
+ * gulptasks/arbresXml/exercices_interactifs.xml) et regarde dans labomep.BIBS (cf _private/config/labomep) les infos
+ * si aussi dans oldbibli (_private/config/oldbibli), on regarde les champs commentaires et description,
+ *   si vide dans BIBS on prend sinon on ignore
  * (Alexis avait complété ces champs à la main dans l'ancienne bibli symfony)
  */
 'use strict';
@@ -47,6 +49,14 @@ var dbConfigLabomep = require(__dirname + '/../_private/config/labomep')
 // les connexions aux bases
 var kOldBibli = knex(dbConfigOldBibli)
 var kLabomep = knex(dbConfigLabomep)
+
+// conf de l'appli
+var serverConf = require('../_private/config')
+var urlBibli = 'http://'
+urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
+urlBibli += ':'
+urlBibli += serverConf.$server && serverConf.$server.port || '3000'
+urlBibli += '/api/ressource'
 
 /**
  * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
@@ -217,7 +227,7 @@ function addRessource(ressource, next) {
   nbLaunched++
   idsSent.push(ressource.idOrigine)
   var options = {
-    url : 'http://localhost:3001/api/ressource',
+    url : urlBibli,
     json: true,
     body: ressource
   }

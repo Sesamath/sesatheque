@@ -105,7 +105,7 @@ function getDeleteDeniedMessage(context, ressource) {
  */
 function getReadDeniedMessage(context, ressource) {
   // nos ips ont le droit de tout lire via l'api
-  if (isOurServerOnApi(context)) return
+  if (isAllRightsIp(context)) return
 
   var msg
   var restriction = lassi.settings.ressource.constantes.restriction
@@ -159,28 +159,42 @@ function getUpdateDeniedMessage(context, ressource) {
 }
 
 /**
+ * Retourne true si l'ip est locale
+ * @param ip
+ * @returns {boolean}
+ */
+function isOnLan(ip) {
+  // avec pm2 on a du bind ipv6
+  if (/^(::ffff:)?(127\.0|192\.168)/.exec(ip)) return true
+  if (/^::1/.exec(ip)) return true
+  return false
+}
+
+/**
  * Renvoie true si c'est du json (api) appelé par une ip locale
  * @see http://expressjs.com/guide/behind-proxies.html
  * @see http://expressjs.com/api.html#req.ip
  * @param {Context} context
  */
-function isOurServerOnApi(context) {
-  var ip
-  var isApi = context.contentType && context.contentType === 'application/json' ||
-      (context.request.url.indexOf('/api/') === 0)
-  if (isApi) {
-    log("request dans isOurServerOnApi", context.request)
-    ip = context.request.ip
-    if (ip === '127.0.0.1' || ip.indexOf('192.168') === 0) {
-      // on regarde si par hasard ce serait pas l'ip du proxy
-      var ipClient = ip
-      if (context.ips && context.ips.length) ipClient = context.ips[0]
-      else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
-      else if (context.request.headers['x-forwarded-for'])
+function isAllRightsIp(context) {
+  var token = context.request.header('X-ApiToken')
+  if (token && context.request.originalUrl.indexOf('/api/') === 0) {
+    // on vérifie déjà le token
+    if ($settings.get('apiTokens', []).indexOf(token) > -1) {
+      // token ok on vérifie l'ip
+      var ip = context.request.ip
+      log("token ok dans isAllRightsIp avec l'ip " + ip)
+      if (isOnLan(ip)) {
+        // on regarde si par hasard ce serait pas l'ip du proxy
+        var ipClient = ip
+        if (context.ips && context.ips.length) ipClient = context.ips[0]
+        else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
+        else if (context.request.headers['x-forwarded-for'])
           ipClient = context.request.header('x-forwarded-for').split(',')[0]
-      if (ipClient && ipClient !== ip) log.dev("L'appli est derrière un proxy mais trust proxy n'a pas été déclaré")
+        if (ipClient && ipClient !== ip) log.debug("L'appli est derrière un proxy mais trust proxy n'a pas été déclaré")
 
-      return (ipClient === '127.0.0.1' || ipClient.indexOf('192.168') === 0)
+        return isOnLan(ipClient)
+      }
     }
 
   }
@@ -201,7 +215,7 @@ $accessControl.checkPermission = function (permission, context, ressource, next)
   // pas la peine de continuer si c'est pour voir une ressource publique
   if (permission === 'read' && ressource.restriction === 0 ||
         // ni si c'est l'api appelée par un de nos serveurs
-      isOurServerOnApi(context) ||
+      isAllRightsIp(context) ||
         // ni si l'utilisateur a les droits génériques
       hasGenericPermission(permission, context)
   ) {
@@ -239,7 +253,7 @@ $accessControl.checkPermission = function (permission, context, ressource, next)
  */
 $accessControl.hasPermission = function (permission, context, ressource) {
   if (hasGenericPermission(permission, context)) return true
-  if (isOurServerOnApi(context)) return true
+  if (isAllRightsIp(context)) return true
   if (!ressource) return false
 
   // read n'a pas forcément besoin de session
@@ -263,7 +277,7 @@ $accessControl.hasPermission = function (permission, context, ressource) {
  */
 $accessControl.hasReadPermission = function (context, ressource) {
   if (!ressource.restriction) return true
-  if (isOurServerOnApi(context)) return true
+  if (isAllRightsIp(context)) return true
   if (!$accessControl.isAuthenticated(context)) return false
   if (hasGenericPermission('read', context)) return true
   return (getReadDeniedMessage(context, ressource) === '')
@@ -329,7 +343,7 @@ $accessControl.addGroupeByName = function (personne, groupeNom, next) {
     } else {
       // on le créé au passage
       Groupe.create({nom:groupeNom}).store(function (error, groupe) {
-        log.dev('après store ', groupe)
+        log.debug('après store ', groupe)
         if (groupe) personne.groupes[groupe.id] = true
         next(error, personne)
       })

@@ -74,10 +74,11 @@ gulp.task('hintServer', function() {
  * Lance l'analyse de notre code client
  */
 gulp.task('hintClient', function() {
-  var config = require('./package.json').jshintConfig;
+  var config = require('./package.json').jshintConfig
   // faut changer le contexte
-  config.node = false;
-  config.browser = true;
+  config.node = false
+  config.browser = true
+  config.lastsemic = true
   gulp.src(['construct/**/public/**/*.js', '!construct/**/public/vendors/**/*'])
       .pipe(jshint(config))
       .pipe(jshint.reporter('jshint-stylish'))

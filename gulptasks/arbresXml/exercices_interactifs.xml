@@ -7180,6 +7180,13 @@ ANCIENS EXOS<d n="Prendre un bon départ">
                     <j3p i="4002901" e="1" ico="j3p_s"/>
                     <j3p i="4002899" e="1" ico="j3p_s"/>
                 </d> 
+     
+                <d n="Puissances">
+                    <j3p i="4003201" e="1" ico="j3p_g"/>
+                    <j3p i="4003203" e="1" ico="j3p_g"/>
+                    <j3p i="4003205" e="1" ico="j3p_g"/>
+                </d>
+             
             </d> 
         </d> 
         <d n="Jeux">
@@ -7252,7 +7259,13 @@ ANCIENS EXOS<d n="Prendre un bon départ">
                       <j3p i="4003185" e="1" ico="j3p_s"/>
                    </d>    
                 </d>
-                
+                 <d n="Calculs algébriques">
+                     <d n="Puissances">
+                    <j3p i="4003201" e="1" ico="j3p_g"/>
+                    <j3p i="4003203" e="1" ico="j3p_g"/>
+                    <j3p i="4003205" e="1" ico="j3p_g"/>
+                    </d>
+                </d>
                 
              </d>   
             <d n="Géométrie">

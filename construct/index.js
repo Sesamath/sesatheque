@@ -94,7 +94,7 @@ sesatheque.config(function($cache, $settings) {
 // on déclenchera ça quand le boot sera fini
 lassi.on('bootstrap', function () {
   console.log("Boot de l'application " + sesatheque.name)
-  log.dev('BOOT')
+  log.debug('BOOT')
 });
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
@@ -108,7 +108,7 @@ lassi.on('beforeRailUse', function (name, settings) {
     // sinon faudrait utiliser seq pour ne pas sortir de la fct tant qu'on a pas notre stream
     return
 
-    log.dev('settings morgan dans beforeRailUse', settings)
+    log.debug('settings morgan dans beforeRailUse', settings)
     // les settings pour morgan
     var fs = require('fs')
     var logAccess = sesatheque.settings.logs.access
@@ -134,7 +134,7 @@ lassi.on('beforeRailUse', function (name, settings) {
         stream: logAccessWriteStream
       }
     }
-    log.dev('settings modifiés', settings)
+    log.debug('settings modifiés', settings)
   } // on pourrait préciser la limite d'upload ici (name === 'body-parser') mais elle est dans la conf
 })
 
@@ -161,15 +161,14 @@ lassi.on('afterRailUse', function (rail, name) {
     }
     lassi.log('$rail', "adding", "cors".blue.underline, "middleware")
     rail.use('/', function(req, res, next) {
-        var origin = req.header('Origin')
-        var msg = 'cors avec ' +origin
-        if (origin &&
-            /https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin))
-        {
+      var origin = req.header('Origin')
+      if (origin) {
+        var msg = 'cors avec ' + origin
+        if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin)) {
           res.header('Access-Control-Allow-Origin', origin)
           res.header("Access-Control-Allow-Headers", "X-Requested-With")
           msg += ' accepté'
-        } else if (origin && origin.substr(0, 4) !== 'http') {
+        } else if (origin.substr(0, 4) !== 'http') {
           // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
           res.header('Access-Control-Allow-Origin', '*')
           res.header("Access-Control-Allow-Headers", "X-Requested-With")
@@ -177,8 +176,9 @@ lassi.on('afterRailUse', function (rail, name) {
         } else {
           msg += ' refusé'
         }
-      log(msg)
-        next()
+        log(msg)
+      }
+      next()
     })
   }
 })

@@ -121,7 +121,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * en 1er param (puis valeur, offset & nb)
    */
   controller.get('by/:index/:value/:start/:nb', function (context) {
-    log.dev('liste avec les args', context.arguments)
+    log.debug('liste avec les args', context.arguments)
     var index = context.arguments.index
     var value = context.arguments.value
     var values

@@ -28,6 +28,7 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+"use strict";
 
 /**
  * @file Format d'un Arbre de ressources Sésamath, sous forme d'un module js exporté pour requirejs ou node
@@ -121,4 +122,10 @@ Arbre.prototype.toRessource = function () {
   r.parametres = a;
   
   return r;
+}
+
+Arbre.prototype.fromRessource = function (ressource) {
+  var a = new Arbre(ressource)
+  // on ajoute id et idOrigine si besoin
+
 }

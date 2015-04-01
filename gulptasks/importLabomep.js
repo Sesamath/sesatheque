@@ -31,6 +31,13 @@ var xml2js = require('xml2js')
 
 // conf de l'appli
 var config = require('../construct/ressource/config.js');
+// conf de l'appli
+var serverConf = require('../_private/config')
+var urlBibli = 'http://'
+urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
+urlBibli += ':'
+urlBibli += serverConf.$server && serverConf.$server.port || '3000'
+urlBibli += '/api/ressource'
 
 // constantes
 var tdCode = config.constantes.typeDocumentaires;
@@ -477,7 +484,7 @@ function flushPendingRelations(next) {
       relations = task[1]
       // on récupère la ressource avec l'api
       options = {
-        url         : 'http://localhost:3001/api/ressource/' +origine +'/' + idOrigine,
+        url         : urlBibli +origine +'/' + idOrigine,
         json        : true,
         content_type: 'charset=UTF-8'
       }
@@ -529,7 +536,7 @@ function addRessource(ressource, next) {
   nbLaunched++
   idsSent.push(ressource.idOrigine)
   var options = {
-    url : 'http://localhost:3001/api/ressource',
+    url : urlBibli,
     json: true,
     body: ressource
   }

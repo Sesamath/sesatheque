@@ -140,7 +140,7 @@ $ressourceConverter.getViewData = function (error, ressource) {
               lien : context.link(lassi.action.ressource.describe, relation[1], {id:relation[1]})
             })
           })
-          log.dev('relations ajoutée pour ' +ressource.id, viewData.relations)
+          log.debug('relations ajoutée pour ' +ressource.id, viewData.relations)
 
         } else if (config.listes[key]) {
           // faut remplacer des ids par des labels
@@ -173,7 +173,7 @@ $ressourceConverter.getViewData = function (error, ressource) {
     }); // fin each propriété
 
     // on ajoute oid
-    viewData.oid = ressource.oid
+    if (ressource.oid) viewData.oid = ressource.oid
   } else {
     // pas d'erreur mais pas de ressource non plus
     viewData.error = "Aucune ressource";
@@ -219,10 +219,10 @@ $ressourceConverter.getFormViewData = function (error, ressource) {
   // on s'assure que l'on a un objet, sinon on en créé un vide
   if (!ressource) {
     // on en créé une vide
-    log.dev('dans sendFormData on lance un create')
+    log.debug('dans sendFormData on lance un create')
     ressource = Ressource.create()
   }
-  //log.dev('ressource traitée par sendFormData', ressource)
+  //log.debug('ressource traitée par sendFormData', ressource)
 
   // on boucle sur les propriétés déclarées dans config pour récupérer les labels
   _.each(config.labels, function (label, key) {
@@ -280,11 +280,13 @@ $ressourceConverter.getFormViewData = function (error, ressource) {
   // on ajoute nos cas particulier
   if (viewData.id) viewData.id.readonly = true
   viewData.version.readonly = true
-  // et l'oid
-  viewData.oid = {
-    name : 'oid',
-    value: ressource.oid,
-    hidden:true
+  // l'oid
+  if (ressource && ressource.oid) {
+    viewData.oid = {
+      name  : 'oid',
+      value : ressource.oid,
+      hidden: true
+    }
   }
   // et un token
   var token = getToken()
@@ -319,7 +321,7 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
       } catch (e) {
         throw e // pas la peine d'insister
       }
-      log.dev("On nous a envoyé une ressource en json", data)
+      log.debug("On nous a envoyé une ressource en json", data)
     }
     // si la ressource précédende avait des erreurs
 
@@ -394,7 +396,7 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
               ressource[key] = JSON.parse(value);
             } catch (e) {
               errors.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
-              log.dev('pb parsing', value)
+              log.debug('pb parsing', value)
             }
           }
           else
@@ -414,7 +416,7 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
 
   // if (errors !== []) { // ce truc est toujours vrai !
   if (errors.length) {
-    log.dev('errors à la fin getRessourceFromPost', errors)
+    log.debug('errors à la fin getRessourceFromPost', errors)
     ressource.errors = errors
   }
 
@@ -440,7 +442,7 @@ $ressourceConverter.getRessourceFromPostedArbre = function (data, partial) {
       } catch (e) {
         throw e // pas la peine d'insister
       }
-      //log.dev("On nous a envoyé un arbre en json", data)
+      //log.debug("On nous a envoyé un arbre en json", data)
     }
   }
 
@@ -477,6 +479,24 @@ $ressourceConverter.addUrlsToList = function (ressources) {
 
   return ressources
 }
+
+/**
+ * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
+ * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
+ */
+$ressourceConverter.toArbre = function (ressource) {
+  if (ressource.typeTechnique !== 'arbre') return undefined
+  var clone = _.clone(ressource)
+
+  return {
+    id : clone.id,
+    titre : clone.titre,
+    typeTechnique : 'arbre',
+    attributes : clone.parametres.attributes || {},
+    enfants : clone.enfants || []
+  }
+}
+
 
 module.exports = function (RessourceEntity, routesService) {
   Ressource = RessourceEntity

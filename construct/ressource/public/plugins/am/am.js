@@ -34,8 +34,7 @@
  */
 
 /**
- * Tout ce qui est dans ce fichier est privé,
- * spécifique à ce plugin sans collision possible avec le DOM de la page courante
+ * Tout le reste est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
  *
  * this est ce module (donc on a this.display et this.showResult), avec dans notre scope les variables
  * {Function}    require         : pour charger d'autres modules ou d'autres scripts js

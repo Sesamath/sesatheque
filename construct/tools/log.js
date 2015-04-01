@@ -127,7 +127,7 @@ if (env !== 'production' && config.logs.debug) {
   console.log("fonction de log déactivée avec l'environnement : " +env)
 }
 
-log.dev = logDebug
+log.debug = logDebug
 
 // on ajoute nos fct comme méthodes de la fct principale exportée
 

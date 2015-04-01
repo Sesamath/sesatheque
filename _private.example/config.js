@@ -60,13 +60,37 @@ module.exports = {
     }
   },
   $server : {
+    hostname : 'foo.bar', // utilisé par des tâches gulp en dev, mis à localhost si absent
     port:process.env.PORT || 3001
   },
   memcache : '127.0.0.1:11211',
-  // les modules à précharger avant bootstrap
+  // des modules à précharger avant bootstrap
   extraModules : ['fooModule'],
-  // les dépendances à ajouter au composant principal, en premier
-  extraDependenciesFirst : ['fooComposant']
-  // et éventuellement en dernier
-  // extraDependenciesLast : ['barComposant']
+  // des dépendances à ajouter au composant principal en premier
+  extraDependenciesFirst : ['fooComposant'],
+  // des dépendances à ajouter au composant principal en dernier
+  extraDependenciesLast : ['barComposant'],
+  /**
+   * {strings[]} liste de token pour utiliser l'api depuis une ip locale (ou autorisée) avec tous les droits
+   * À passer dans un header http X-ApiToken
+   */
+  apiToken : [],
+  /** {string[]} surcharger ça en private pour autoriser des ip publiques à utiliser un token sur l'api */
+  authIps : [],
+  /**
+   * Liste de pattern de domaine autorisés à utiliser un token sur l'api
+   * par ex /^(.*\.)?(sesamath\.net|foo\.org)(:[0-9]+)?$/
+   * {RegExp[]}
+   */
+  authDomainsRegexs : []
 }
+
+/**
+ * Pour ajouter un composant à placer en dépendance globale (avant les dépendances du composant principal)
+ *
+ * Pas utilisable pour l'authentification si on a des dépendances à d'autres services de l'appli, dans ce
+ * cas utiliser les propriétés extraModules, extraDependenciesFirst et extraDependenciesLast
+ */
+lassi.component('auth').config(function() {
+  require('mon-module-auth')
+})

@@ -36,7 +36,15 @@ var catCode = config.constantes.categories;
 // databases
 var dbConfigOldBibli = require(__dirname + '/../_private/config/oldbibli');
 // les connexions aux bases
-var kOldBibli = knex(dbConfigOldBibli);
+var kOldBibli = knex(dbConfigOldBibli)
+
+// conf de l'appli
+var serverConf = require('../_private/config')
+var urlBibli = 'http://'
+urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
+urlBibli += ':'
+urlBibli += serverConf.$server && serverConf.$server.port || '3000'
+urlBibli += '/api/ressource'
 
 /**
  * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
@@ -186,7 +194,7 @@ function addRessource(ressource, next) {
   nbLaunched++
   idsSent.push(ressource.idOrigine)
   var options = {
-    url : 'http://localhost:3001/api/ressource',
+    url : urlBibli,
     json: true,
     body: ressource
   }

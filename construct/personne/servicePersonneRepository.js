@@ -53,12 +53,12 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
    * @param next
    */
   $personneRepository.load = function (id, next) {
-    log.dev('load ' + id)
+    log.debug('load ' + id)
     $cachePersonne.get(id, function (error, personneCached) {
       if (personneCached) next(null, personneCached)
       else {
         Personne.match('id').equals(id).grabOne(function (error, personne) {
-          //log.dev('personne load remonte ', personne)
+          //log.debug('personne load remonte ', personne)
           if (error) next(error)
           else if (personne) {
             $cachePersonne.set(personne)

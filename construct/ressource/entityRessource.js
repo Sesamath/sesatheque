@@ -35,10 +35,9 @@
  * Entity Ressource
  * @param Ressource L'entitiy fraichement crée par lassi.entity, que l'on va étoffer ici
  * @param Archive entity Archive
- * @param $cache
- * @param cacheTTL
+ * @param $cacheRessource
  */
-module.exports = function (Ressource, Archive, $cache, cacheTTL) {
+module.exports = function (Ressource, Archive, $cacheRessource) {
 
   var _ = require('lodash')
   var tools = require('../tools')
@@ -178,51 +177,6 @@ module.exports = function (Ressource, Archive, $cache, cacheTTL) {
      * L'oid de l'archive correspondant à la version précédente
      */
     this.archiveOid = 0
-
-    /**
-     * Enregistre la ressource en archive, màj archiveOid sur la ressource courante et passe l'archive à next
-     * (à l'appelant de gérer les versions)
-     * @param next
-     */
-    this.archive = function (next) {
-      var ressource = this
-      if (!ressource.oid) {
-        next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
-        return
-      }
-      var archiveObj = tools.clone(ressource)
-      // on vire les propriétés dont on ne veut pas
-      delete archiveObj.oid
-      if (ressource.archiveOid) archiveObj.oidPrecedent = ressource.archiveOid
-      if (archiveObj.errors) {
-        if (archiveObj.errors.length) log.error("Archivage de la ressource " +ressource.oid +" (id " +ressource.id +
-        ") qui comportait des erreurs : " +archiveObj.errors.join('\n'))
-        delete archiveObj.errors
-      }
-      // et on archive
-      Archive.create(archiveObj).store(function (error, archiveObj) {
-        if (error) next(error)
-        else {
-          ressource.archiveOid = archiveObj.oid
-          next(null, archiveObj)
-        }
-      })
-    }
-
-    /**
-     * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
-     * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
-     */
-    this.toArbre = function () {
-      if (this.typeTechnique !== 'arbre') return undefined
-      var arbre = this.parametres
-      // on ajoute id et titre
-      arbre.id = this.id
-      arbre.titre = this.titre
-
-      return arbre
-    }
-
   })
 
 
@@ -242,16 +196,14 @@ module.exports = function (Ressource, Archive, $cache, cacheTTL) {
     if (_.isEmpty(this.errors)) delete this.errors
       // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
       // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
-      //log.dev('beforeStore fini')
+      //log.debug('beforeStore fini')
       next()
   })
 
   Ressource.afterStore(function (next) {
-    // on met en cache
-    if (this.id) $cache.set('ressource_' +this.id, this, cacheTTL)
-      if (this.idOrigine) $cache.set('ressourceIdByOrigine_' +
-                                                this.origine +'_' +this.idOrigine, this, cacheTTL)
-        next()
+    // on met en cache en //
+    if (this.id) $cacheRessource.set(this)
+    next()
   })
 
   Ressource

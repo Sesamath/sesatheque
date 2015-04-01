@@ -55,6 +55,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param context
    */
   function denied(msg, context) {
+    if (!msg) msg = "Accès refusé"
     context.status = 403;
     context.json({error: msg})
   }
@@ -65,6 +66,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param context
    */
   function notFound(msg, context) {
+    if (!msg) msg = "Contenu inexistant"
     context.status = 404;
     context.json({error: msg})
   }
@@ -111,7 +113,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       case "Test diagnostique d'algèbre":
       case 'Exercice Calcul@TICE':
         // on sauvegarde le nouveau titre
-        log.dev("titre de " +ressource.id +" changé : " +ressource.titre +' => ' +newTitre)
+        log.debug("titre de " +ressource.id +" changé : " +ressource.titre +' => ' +newTitre)
         ressource.titre = newTitre
         ressource.store()
     }
@@ -177,8 +179,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               nextStep()
             })
             .catch(function() {
-              log.error("L'analyse de l'arbre a planté")
-              try {log.error(lassi.tools.stringify(parent))} catch(e) { }
+              log.error("L'analyse de l'arbre a planté", parent)
               nextStep()
             })
       } else {
@@ -186,20 +187,22 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
     } // populateEnfants
 
-    if (ressource.idOrigine == "exercices_interactifs.part1") log.dev('populateArbre de', ressource)
+    // debug
+    if (ressource.idOrigine == "exercices_interactifs.part1") log.debug('populateArbre de', ressource)
+
     // checks
     if (ressource.typeTechnique !== 'arbre')
-      return context.json({error:"Impossible de peupler une ressource autre qu'un arbre"})
-    if (!ressource.enfants ||
+        sendJson(context, new Error("Impossible de peupler une ressource autre qu'un arbre"))
+    else if (!ressource.enfants ||
         !ressource.enfants instanceof Array ||
         !ressource.enfants.length
     ) {
-      log('arbre vide', ressource)
-      return context.json({error:"Impossible de peupler un arbre vide"})
+      log.debug('arbre vide', ressource)
+      sendJson(context, new Error("Impossible de peupler un arbre vide"))
+    } else {
+      // go
+      populateEnfants(ressource, suite)
     }
-
-    // go
-    populateEnfants(ressource, suite)
   }
 
   /**
@@ -214,12 +217,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         // id - convertPost - valide+setVersion - store - store2 - fin
         //lassi.tmp[context.post.id].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.id].s)
         //log.errorData(lassi.tmp[context.post.id].m)
-        //log.dev("dans cb api write on récupère", ressource)
-        if (error) context.json({error: error.toString()})
+        //log.debug("dans cb api write on récupère", ressource)
+        if (error) sendJson(context, error)
         else if (!_.isEmpty(ressource.errors)) {
-          context.json({error: ressource.errors.join("\n")})
+          sendJson(context, new Error(ressource.errors.join("\n")))
         } else {
-          context.json({id: ressource.id})
+          sendJson(context, null, {id: ressource.id})
         }
       })
     } else {
@@ -227,6 +230,21 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (ressource.id) errorMsg += " pour modifier la ressource d'identifiant " + ressource.id
       else errorMsg += " pour ajouter une ressource"
       denied(errorMsg, context)
+    }
+  }
+
+  /**
+   * Callback générique de sortie
+   * @param context
+   * @param error
+   * @param data
+   */
+  function sendJson(context, error, data) {
+    if (error) {
+      log.error(error);
+      context.json({error: error.toString()})
+    } else {
+      context.json(data)
     }
   }
 
@@ -243,14 +261,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
 
     function update(error, ressourceLoaded) {
-      if (error) context.json({error:error.toString()})
+      if (error) sendJson(context, error)
       else {
         ressourceLoaded.udate(ressource)
         write(context, ressourceLoaded)
       }
     }
 
-    //log.dev("dans api write on récupère en post", context.post)
+    //log.debug("dans api write on récupère en post", context.post)
     try {
       /*
        var id = context.post.id || 0
@@ -261,7 +279,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
        if (!lassi.tmp) lassi.tmp = {}
        lassi.tmp[context.post.id] = {m:msg,s:start}
        lassi.tmp[context.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[context.post.id].s)
-       //log.dev("que l'on a transformé en", ressource) /* */
+       //log.debug("que l'on a transformé en", ressource) /* */
 
       if (partial) {
         // faut la charger
@@ -269,9 +287,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         else $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, update)
       } else write(context, ressource)
 
-    } catch (e) {
-      log.error(e);
-      context.json({error: e.toString()})
+    } catch (error) {
+      sendJson(context, error)
     }
   })
   
@@ -283,27 +300,29 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         var part = $ressourceConverter.getRessourceFromPost(context.post, true)
 
         function merge(error, ressource) {
-          if (error) context.json({error: error.toString()})
-          else {
+          if (error) {
+            sendJson(context, error)
+          } else {
             ressource.merge(part)
             write(context, ressource)
           }
         }
 
         if (part.id) $ressourceRepository.load(context.post.id, merge)
-        else if (context.post.origine && context.post.idOrigine) $ressourceRepository.loadByOrigin(part.origine, part.idOrigine, merge)
-        else context.json({error: "Il faut fournir id ou origine+idOrigine"})
+        else if (context.post.origine && context.post.idOrigine)
+            $ressourceRepository.loadByOrigin(part.origine, part.idOrigine, merge)
+        else sendJson(context, new Error("Il faut fournir id ou origine+idOrigine"))
       })
 
   // read
   controller.get('ressource/:id', function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
-      // log.dev("dans api get " +id, ressource)
-      if (error) context.json({error: error.toString()})
+      // log.debug("dans api get " +id, ressource)
+      if (error) sendJson(context, error)
       else if (ressource) {
         // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
-        if ($accessControl.hasReadPermission(context, ressource)) context.json(ressource)
+        if ($accessControl.hasReadPermission(context, ressource)) sendJson(context, null, ressource)
         else denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, context)
       } else notFound("La ressource d'identifiant " + id + " n'existe pas", context)
     })
@@ -315,19 +334,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     function del() {
       $ressourceRepository.del(id, function (error, nbObjects, nbIndexes) {
-        if (error) context.json({error: error.toString()})
-        else if (nbObjects > 0) context.json({deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else context.json({error: "Aucune ressource d'identifiant " + id})
+        if (error) sendJson(context, error)
+        else if (nbObjects > 0) sendJson(context, null, {deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
+        else sendJson(context, new Error("Aucune ressource d'identifiant " + id))
       });
     }
 
-    if (lassi.personne.hasPermission('delete', context)) {
+    if ($accessControl.hasPermission('delete', context)) {
       del()
     } else {
       // faut charger la ressource pour le savoir
       $ressourceRepository.load(id, function (error, ressource) {
-        if (error) context.json({error: error.toString()})
-        else if (!ressource) context.json({error: "la ressource d'identifiant " + id + " n'existe pas"})
+        if (error) sendJson(context, error)
+        else if (!ressource) notFound("la ressource d'identifiant " + id + " n'existe pas", context)
         else if ($accessControl.hasPermission('delete', context, ressource)) del()
         else denied("Droits insuffisants pour supprimer la ressource d'identifiant " + id, context)
       })
@@ -340,10 +359,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       // log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
-      // log.dev("dans api get " +origine +'/' +idOrigine, ressource)
-      if (error) context.json({error: error.toString()})
+      // log.debug("dans api get " +origine +'/' +idOrigine, ressource)
+      if (error) sendJson(context, error)
       else if (ressource) {
-        if ($accessControl.hasReadPermission(context, ressource)) context.json(ressource)
+        if ($accessControl.hasReadPermission(context, ressource)) sendJson(context, null, ressource)
         else  denied("Droits insuffisants pour accéder à la ressource d'origine " +
             origine + " et d'identifiant " + idOrigine, context)
       } else notFound("La ressource d'origine " + origine + " et d'identifiant " + idOrigine +
@@ -361,9 +380,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
      */
     function delByOrigine() {
       $ressourceRepository.delByOrigine(origine, idOrigine, function (error, nbObjects, nbIndexes) {
-        if (error) context.json({error: error.toString()})
-        else if (nbObjects > 0) context.json({nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else context.json({error: "Aucune ressource d'origine " + origine + " et d'identifiant " + idOrigine})
+        if (error) sendJson(context, error)
+        else if (nbObjects > 0) sendJson(context, null, {nbObjects: nbObjects, nbIndexes: nbIndexes})
+        else notFound("Aucune ressource d'origine " + origine + " et d'identifiant " + idOrigine, context)
       })
     }
 
@@ -373,19 +392,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
      */
     function del(id) {
       $ressourceRepository.del(id, function (error, nbObjects, nbIndexes) {
-        if (error) context.json({error: error.toString()})
-        else if (nbObjects > 0) context.json({deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else context.json({error: "Aucune ressource d'identifiant " + id})
+        if (error) sendJson(context, error)
+        else if (nbObjects > 0) sendJson(context, null, {deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
+        else notFound("Aucune ressource d'identifiant " + id, context)
       })
     }
 
 
-    if (lassi.personne.hasPermission('delete', context)) {
+    if ($accessControl.hasPermission('delete', context)) {
       delByOrigine()
     } else {
       // faut charger la ressource pour le savoir
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-        if (error) context.json({error: error.toString()})
+        if (error) sendJson(context, error)
         else if (!ressource) notFound("La ressource d'origine " + origine + " et d'identifiant " + idOrigine +
             " n'existe pas", context)
         else if ($accessControl.hasPermission('delete', context, ressource)) del(ressource.id)
@@ -399,8 +418,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get('public/:id', function (context) {
     var id = context.arguments.id
     $ressourceRepository.loadPublic(id, function (error, ressource) {
-      if (error) context.json({error: error.toString()})
-      else if (ressource) context.json(ressource)
+      if (error) sendJson(context, error)
+      else if (ressource) sendJson(context, null, ressource)
       else notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas publique", context)
     })
   })
@@ -410,9 +429,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      if (error) context.json({error: error.toString()})
+      if (error) sendJson(context, error)
       else if (ressource) {
-        if (ressource.restriction === 0) context.json(ressource)
+        if (ressource.restriction === 0) sendJson(context, null, ressource)
         else  denied("Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine, context)
       } else notFound("La ressource " + origine + '/' + idOrigine + " n'existe pas", context)
     })
@@ -431,28 +450,28 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - nb : nb de résultats voulus
    */
   controller.post('public/by', function (context) {
-    log.dev('api.public.by reçoit', context.post)
+    log.debug('api.public.by reçoit', context.post)
     $ressourceRepository.getListe('public', context, context.post, function (error, ressources) {
-      if (error) context.json({error: error.toString()})
-      else context.json(ressources)
+      if (error) sendJson(context, error)
+      else sendJson(context, null, ressources)
     })
   })
 
   controller.post('prof/by', function (context) {
     if (!$accessControl.isAuthenticated(context))
-        context.json({error: "Il faut être authentifié pour accéder aux ressources prof"})
+        denied("Il faut être authentifié pour accéder aux ressources prof", context)
     else $ressourceRepository.getListe('prof', context, context.post, function (error, ressources) {
-      if (error) context.json({error: error.toString()})
-      else context.json(ressources)
+      if (error) sendJson(context, error)
+      else sendJson(context, null, ressources)
     })
   })
 
   controller.post('perso/by', function (context) {
     if (!$accessControl.isAuthenticated(context))
-        context.json({error: "Il faut être authentifié pour accéder à ses ressources"})
+        denied("Il faut être authentifié pour accéder à ses ressources", context)
     else $ressourceRepository.getListe('perso', context, context.post, function (error, ressources) {
-      if (error) context.json({error: error.toString()})
-      else context.json(ressources)
+      if (error) sendJson(context, error)
+      else sendJson(context, null, ressources)
     })
   })
 
@@ -466,25 +485,25 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var id = context.post.id || 0
     // si on passe ?populate=1 dans l'url on parse les enfants pour récupérer titre et type
     // sinon on laisse en l'état
-    log.dev('post avec populate ' + context.get.populate)
+    log.debug('post avec populate ' + context.get.populate)
     var final = (context.get.populate) ? populateArbre : write
     var ressource = $ressourceConverter.getRessourceFromPostedArbre(context.post, partial)
 
     function update(error, ressourceLoaded) {
-      if (error) context.json({error: error.toString()})
+      if (error) sendJson(context, error)
       else {
         ressourceLoaded.udate(ressource)
         final(context, ressource)
       }
     }
 
-    // log.dev("dans api arbre on récupère", ressource)
+    // log.debug("dans api arbre on récupère", ressource)
     try {
 
       /* debug, mesure de perfs, init du chrono */
+      /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs * /
       var msg = id
       var start = log.getElapsed(0)
-      /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs */
       if (!lassi.tmp) lassi.tmp = {}
       lassi.tmp[context.post.id] = {m: msg, s: start}
       lassi.tmp[context.post.id].m += '\tcv ' + log.getElapsed(lassi.tmp[context.post.id].s)
@@ -492,9 +511,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
       if (partial) $ressourceRepository.load(id, update)
       else final(context, ressource);
-    } catch (e) {
-      log.error(e);
-      context.json({error: e.toString()})
+    } catch (error) {
+      sendJson(context, error)
     }
   })
 
@@ -502,12 +520,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get('arbre/:id', function (context) {
     var id = context.arguments.id
     $ressourceRepository.load(id, function (error, ressource) {
-      // log.dev("dans api get " +id, ressource)
-      if (error) context.json({error: error.toString()})
-      else if (ressource && ressource.typeTechnique === 'arbre') {
-        if (lassi.personne.hasReadPermission(context, ressource)) context.json(ressource.toArbre())
-        else  denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, context)
-      } else notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas un arbre", context)
+      // log.debug("dans api get " +id, ressource)
+      if (error) {
+        sendJson(context, error)
+      } else if (ressource && ressource.typeTechnique === 'arbre') {
+        if ($accessControl.hasReadPermission(context, ressource)) {
+          sendJson(context, null, $ressourceConverter.toArbre(ressource))
+        } else {
+          denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, context)
+        }
+      } else {
+        notFound("La ressource d'identifiant " + id + " n'existe pas ou n'est pas un arbre", context)
+      }
     })
   })
 }

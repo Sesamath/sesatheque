@@ -20,7 +20,7 @@ qx.$$g = {}
 
 qx.$$loader = {
   parts : {"boot":[0]},
-  packages : {"0":{"uris":["__out__:sesatheque.16d0187087da.js","sesatheque:sesatheque/Application.js","__out__:sesatheque.d68dc5bd2880.js","sesatheque:sesatheque/widgets/Tree.js","sesatheque:sesatheque/widgets/TreeNode.js","__out__:sesatheque.677a138f0f82.js","sesatheque:sesatheque/api/Rest.js","sesatheque:sesatheque/common/EntityInfo.js","sesatheque:sesatheque/common/ArbreEntityInfo.js","sesatheque:sesatheque/common/RessourceEntityInfo.js","__out__:sesatheque.a0cfc96ed6d2.js","sesatheque:sesatheque/theme/Color.js","__out__:sesatheque.dfb41a569b0c.js","sesatheque:sesatheque/theme/Font.js","__out__:sesatheque.870138203df5.js","sesatheque:sesatheque/theme/Decoration.js","__out__:sesatheque.b821ba4003b9.js","sesatheque:sesatheque/theme/Appearance.js","sesatheque:sesatheque/theme/Theme.js"]}},
+  packages : {"0":{"uris":["__out__:sesatheque.06bde92c475a.js","sesatheque:sesatheque/Application.js","__out__:sesatheque.d68dc5bd2880.js","sesatheque:sesatheque/widgets/Tree.js","sesatheque:sesatheque/widgets/TreeNode.js","__out__:sesatheque.677a138f0f82.js","sesatheque:sesatheque/api/Rest.js","sesatheque:sesatheque/common/EntityInfo.js","sesatheque:sesatheque/common/ArbreEntityInfo.js","sesatheque:sesatheque/common/RessourceEntityInfo.js","__out__:sesatheque.a0cfc96ed6d2.js","sesatheque:sesatheque/theme/Color.js","__out__:sesatheque.dfb41a569b0c.js","sesatheque:sesatheque/theme/Font.js","__out__:sesatheque.870138203df5.js","sesatheque:sesatheque/theme/Decoration.js","__out__:sesatheque.b821ba4003b9.js","sesatheque:sesatheque/theme/Appearance.js","sesatheque:sesatheque/theme/Theme.js"]}},
   urisBefore : [],
   cssBefore : [],
   boot : "boot",

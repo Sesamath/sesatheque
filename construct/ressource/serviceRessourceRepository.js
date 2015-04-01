@@ -36,7 +36,7 @@
  * @param serviceCache
  * @returns {$ressourceRepository}
  */
-module.exports = function (Ressource, $accessControl, $cacheRessource) {
+module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) {
   if (!Ressource || !$accessControl || !$cacheRessource)
       throw new Error("Impossible d'initialiser $ressourceRepository faute de prérequis")
   /**
@@ -62,10 +62,10 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
   /**
    * Incrémente le n° de version si la ressource a une propriété newVersion ou si une des propriétés listées
    * dans config.versionTriggers a changée de valeur
-   * @param ressource
+   * @param {Ressource} ressource
    * @private
    */
-  function setVersion(ressource, next) {
+  function updateVersion(ressource, next) {
     var needIncrement
 
     /**
@@ -81,13 +81,16 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
           // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
           // on utilise https://lodash.com/docs#isEqual
           if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
-            try {
-              log.dev('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id +
-              '\n' +'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' +
-              'après\n' + JSON.parse(ressource[prop]))
-            } catch (e) {
-              log.dev('le parsing de ressource[' +prop +'] a planté ' +ressource.id +' ' +
-              ressource.origine +'-' +ressource.idOrigine)
+            // debug
+            if (!GLOBAL.isProd) {
+              try {
+                log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id +
+                    '\n' + 'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' +
+                    'après\n' + JSON.parse(ressource[prop]))
+              } catch (e) {
+                log.debug('le parsing de ressource[' + prop + '] a planté ' + ressource.id + ' ' +
+                    ressource.origine + '-' + ressource.idOrigine)
+              }
             }
             needIncrement = true
           }
@@ -97,19 +100,8 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
       ressource.version = ressourceInitiale.version
       ressource.oid = ressourceInitiale.oid
 
-      if (needIncrement) ressourceInitiale.archive(function (error, archive) {
-        if (error) next(error)
-        else {
-          // incrément version et màj dateMiseAJour
-          log.dev("On a archivé la ressource " + ressourceInitiale.id + " (avec l'oid en archive " + archive.oid + ')')
-          ressource.version++
-          ressource.dateMiseAJour = new Date();
-          next(null, ressource)
-        }
-      })
-      else {
-        next(null, ressource)
-      }
+      if (needIncrement) $ressourceRepository.archive(ressourceInitiale, next)
+      else next(null, ressource)
     } // analyse
 
     if (ressource.id) { // pas le cas au create
@@ -118,7 +110,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
         if (error) next(error)
         else if (ressourceInitiale) analyse(ressourceInitiale)
         else {
-          log.error(new Error("setVersion a reçu une ressource avec id " +ressource.id +" qui n'existait pas en base"))
+          log.error(new Error("updateVersion a reçu une ressource avec id " +ressource.id +" qui n'existait pas en base"))
           next(null, ressource)
         }
       })
@@ -140,9 +132,9 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
    * Si on trouve un seul paramètre xml, on le jsonify
    * @private
    * @param error
-   * @param ressources ressource ou tableau de ressources
+   * @param ressources ressource ou tableau de ressources (ou rien, sera passé à next tel quel)
    * @param next
-   * @throws {Error} Si ressources n'est pas une ressource ou un tableau de ressources
+   * @throws {Error} Si ressources est défini mais n'est pas une ressource ou un tableau de ressources
    */
   function cacheAndNext(error, ressources, next) {
     /**
@@ -150,7 +142,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
      * @param ressource
      */
     function processOne(ressource) {
-      if (!ressource.oid) throw new Error("Paramètre invalide (ressource attendue)")
+      if (!ressource || !ressource.oid) throw new Error("Paramètre invalide (ressource attendue)")
       // faut transformer les dates en objets date
       if (ressource.dateCreation) ressource.dateCreation = new Date(ressource.dateCreation);
       if (ressource.dateMiseAJour) ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
@@ -164,7 +156,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
     if (error) next(error)
     else {
       if (_.isArray(ressources)) ressources.forEach(processOne)
-      else processOne(ressources)
+      else if (ressources) processOne(ressources)
       next(null, ressources)
     }
   }
@@ -215,13 +207,36 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
    */
 
   /**
+   * Enregistre la ressource en archive, màj archiveOid et incrémente la version sur la ressource
+   * puis la passe à next
+   * @param {Ressource} ressource
+   * @param next
+   */
+  $ressourceRepository.archive = function (ressource, next) {
+    if (!ressource.oid) {
+      next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
+    } else {
+      // on archive
+      Archive.create(ressource).store(function (error, archive) {
+        if (error) next(error)
+        else {
+          log.debug("On a archivé la ressource " + ressource.id + " (avec l'oid en archive " + archive.oid + ')')
+          ressource.archiveOid = archive.oid
+          ressource.version++
+          ressource.store(next)
+        }
+      })
+    }
+  }
+
+  /**
    * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
    * @param {Ressource} ressource
    * @param {Function} next Callback qui recevra les arguments (error, ressource)
-   * @return {Boolean}
+   * @return {boolean}
    */
   $ressourceRepository.valide = function(ressource, next) {
-    // log.dev('on va valider ', ressource)
+    // log.debug('on va valider ', ressource)
     /** tableau d'erreurs qui sera concaténé et passé à next si non vide */
     var errors = [];
     if (_.isEmpty(ressource)) {
@@ -236,7 +251,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
         // le type
         if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
           errors.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
-          log.dev("à la validation on a reçu pour " + key + ' : ' + tools.stringify(ressource[key]))
+          log.debug("à la validation on a reçu pour " + key + ' : ' + tools.stringify(ressource[key]))
         } else if (typeVar === 'Number') {
           // on vérifie entier positif
           if (Math.floor(ressource[key]) !== ressource[key]) {
@@ -271,21 +286,21 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
   $ressourceRepository.write = function(ressource, next) {
     if (ressource.constructor.name !== 'Ressource') {
       ressource = Ressource.create(ressource)
-      log.dev('cast en Ressource : ' +ressource.constructor.name)
+      log.debug('cast en Ressource : ' +ressource.constructor.name)
     }
     /* mesure de perfs * /
      var t
      if (ressource.id && lassi.tmp && lassi.tmp[ressource.id]) t = lassi.tmp[ressource.id]
      else t = {m:'',s:0}
      /* fin mesures (avec la ligne t.m += ... un peu plus bas) */
-    //log.dev("avant validation dans write", ressource)
+    //log.debug("avant validation dans write", ressource)
     flow()
       // validation
         .seq(function() { $ressourceRepository.valide(ressource, this) })
-      // setVersion
-        .seq(function (ressource) { setVersion(ressource, this) })
+      // updateVersion
+        .seq(function (ressource) { updateVersion(ressource, this) })
       // store
-        .seq(function (ressource) { t.m += '\tvsv ' +log.getElapsed(t.s); ressource.store(this) })
+        .seq(function (ressource) { /* t.m += '\tvsv ' +log.getElapsed(t.s);*/ ressource.store(this) })
       // ajout de l'id si c'était un insert, et
         .seq(function (ressource) {
           // t.m += '\tst ' +log.getElapsed(t.s)
@@ -306,7 +321,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
           if (!ressource.id) this("Après un write la ressource n'a toujours pas d'id")
           else {
             $cacheRessource.set(ressource)
-            log.dev('write ' + ressource.id + ' ok')
+            log.debug('write ' + ressource.id + ' ok')
             if (next) next(null, ressource)
           }
         })
@@ -323,7 +338,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
    * @returns {undefined}
    */
   $ressourceRepository.del = function(id, next) {
-    log.dev("La ressource " +id + " va être effacée")
+    log.debug("La ressource " +id + " va être effacée")
     var query
     if (_.isArray(id)) query = Ressource.match('id').in(id)
     else query = Ressource.match('id').equals(id)
@@ -340,7 +355,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
         }
         next(error, nbObjects, nbIndexes)
       }
-      log.dev("La ressource " +id + " a été effacée (" +nbObjects +" versions et " +nbIndexes +" index)")
+      log.debug("La ressource " +id + " a été effacée (" +nbObjects +" versions et " +nbIndexes +" index)")
     })
   }
 
@@ -352,7 +367,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
    * @returns {undefined}
    */
   $ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
-    log.dev("La ressource d'origine " +origine +" et d'id " +idOrigine + " va être effacée")
+    log.debug("La ressource d'origine " +origine +" et d'id " +idOrigine + " va être effacée")
     Ressource
         .match('origine').equals(origine)
         .match('idOrigine').equals(idOrigine)
@@ -365,7 +380,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
               }
             })
           }
-          log.dev("La ressource d'origine " +origine +" et d'id " +idOrigine + " a été effacée (" +
+          log.debug("La ressource d'origine " +origine +" et d'id " +idOrigine + " a été effacée (" +
           nbObjects +" versions et " +nbIndexes +" index)")
           next(error, nbObjects, nbIndexes)
         })
@@ -379,7 +394,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
    * @returns {undefined}
    */
   $ressourceRepository.load = function(id, next) {
-    log.dev('load ressource_' +id)
+    log.debug('load ressource_' +id)
     log('load ressource_' +id)
     $cacheRessource.get(id, function (error, ressourceCached) {
       if (ressourceCached) log("trouvé en cache ressource_" +id)
@@ -478,7 +493,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
           throw error
         }
       }
-      log.dev('getListe visibilite :' +visibilite, options)
+      log.debug('getListe visibilite :' +visibilite, options)
 
       // avant de construire la query on fait un minimum de vérifications
       var start, nb
@@ -507,7 +522,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
       // si on est toujours là on peut construire la requete
       var query = Ressource
       optionsSafe.filters.forEach(function (filter) {
-        log.dev("filter", filter)
+        log.debug("filter", filter)
         if (filter.values && filter.values.length) {
           if (filter.values.length > 1) query = query.match(filter.index).in(filter.values)
           else query = query.match(filter.index).equals(filter.values[0])
@@ -560,7 +575,7 @@ module.exports = function (Ressource, $accessControl, $cacheRessource) {
       })
 
     } catch (error) {
-      log.dev(error)
+      log.debug(error)
       if (error.userMessage) next(new Error(error.userMessage))
       else next(error)
     }

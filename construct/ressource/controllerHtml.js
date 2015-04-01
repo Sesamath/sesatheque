@@ -79,7 +79,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function checkToken(ctx, next) {
     if (!ctx.post.token || ctx.post.token !== ctx.session.token) {
       if (ctx.session.token) delete ctx.session.token
-      log.dev('pb de token', ctx.post)
+      log.debug('pb de token', ctx.post)
       ctx.accessDenied("Paramètres invalides")
     } else next()
   }
@@ -297,7 +297,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
       // et rediriger vers le describe ou vers le form avec les erreurs
-      //log.dev('post dans add', controller.post);
+      //log.debug('post dans add', controller.post);
       ressource = $ressourceConverter.getRessourceFromPost(context.post)
       // il validera avant d'enregistrer
       $ressourceRepository.write(ressource, function (error, ressource) {
@@ -306,7 +306,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var options = {$metas: {title: 'Ajouter une ressource'}}
           printForm(error, ressource, context, options)
         } else {
-          log.dev("Après le save on récupère l'id " + ressource.id + ", on lance le redirect")
+          log.debug("Après le save on récupère l'id " + ressource.id + ", on lance le redirect")
           var prefix = basePath
           prefix += (ressource.restriction === 0) ? 'public' : 'ressource'
           context.redirect(prefix +$routes.get('describe', ressource.id))
@@ -334,7 +334,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
       // et rediriger vers le describe ou vers le form avec les erreurs
-      //log.dev('post dans add', controller.post);
+      //log.debug('post dans add', controller.post);
       ressource = $ressourceConverter.getRessourceFromPost(context.post)
       // il validera avant d'enregistrer
       $ressourceRepository.write(ressource, function (error, ressource) {
@@ -343,7 +343,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
           printForm(error, ressource, context, options)
         } else {
-          log.dev("update " + ressource.id + " ok, on lance le redirect")
+          log.debug("update " + ressource.id + " ok, on lance le redirect")
           context.redirect(basePath +$routes.get('describe', ressource.id))
         }
       }) // write
@@ -370,7 +370,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
       // et rediriger vers le describe ou vers le form avec les erreurs
-      //log.dev('post dans add', controller.post);
+      //log.debug('post dans add', controller.post);
       var ressource = $ressourceConverter.getRessourceFromPost(context.post)
       // il validera avant d'enregistrer
       $ressourceRepository.write(ressource, function (error, ressource) {
@@ -379,7 +379,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
           printForm(error, ressource, context, options)
         } else {
-          log.dev("update " + ressource.id + " ok, on lance le redirect")
+          log.debug("update " + ressource.id + " ok, on lance le redirect")
           context.redirect(basePath +$routes.get('describe',ressource.id))
         }
       })
@@ -402,7 +402,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * SELECT _string, COUNT(*) AS nb  FROM ressource_index WHERE name = 'typeTechnique' GROUP BY _string
    */
   controller.get('by/:index/:value/:start/:nb', function (context) {
-    log.dev('liste avec les args', context.arguments)
+    log.debug('liste avec les args', context.arguments)
     var index = context.arguments.index
     var value = context.arguments.value
     var options = {

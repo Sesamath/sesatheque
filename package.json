@@ -50,6 +50,9 @@
       "GLOBAL",
       "lassi",
       "log"
+    ],
+    "ignore": [
+      "construct/qxApps/tree/build/script/bundle.js"
     ]
   }
 }
