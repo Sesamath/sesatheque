@@ -3,7 +3,7 @@
         o.id    : id html
         o.value : le texte qui initialisera le contenu du textarea
     et facultativement
-        o.errors : une liste de messages d'erreur à afficher au dessus de l'input
+        o.warnings : une liste de messages d'erreur à afficher au dessus de l'input
         o.required (booléen)
     avec aussi les attributs éventuels
         o.label : texte à afficher au dessus du textarea

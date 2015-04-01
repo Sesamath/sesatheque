@@ -33,42 +33,36 @@
 
 /**
  * Entity Ressource
- * @param Ressource L'entitiy fraichement crée par lassi.entity, que l'on va étoffer ici
- * @param Archive entity Archive
- * @param $cacheRessource
+ * @param Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
  */
-module.exports = function (Ressource, Archive, $cacheRessource) {
+module.exports = function (Ressource) {
 
   var _ = require('lodash')
   var tools = require('../tools')
 
   /**
    * L'entity Ressource
-   * @constructor
+   * @param {Ressource} initObj Un objet ayant des propriétés d'une ressource
+   * @constructor Ressource
    * @extends EntityInstance
    */
-  Ressource.construct(function () {
+  Ressource.construct(function (initObj) {
     /**
-     * Une liste d'erreurs éventuelles (incohérences de données, etc)
-     * Bien pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
-     * Devrait être viré au save s'il est vide
+     * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
+     * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
+     * Viré au save s'il est vide
      */
-    this.errors = []
-    /**
-     * L'identifiant de la ressource, utilisé dans les urls
-     * @type {Number}
-     */
-    this.id = 0
+    this.warnings = []
     /**
      * identifiant du dépôt d'origine (où est stockée et géré la ressource), reste null si créé ici
      * @type {String}
      */
-    this.origine = null;
+    this.origine = 'local';
     /**
      * Id de la ressource dans son dépôt d'origine
      * @type {String}
      */
-    this.idOrigine = null;
+    this.idOrigine = this.oid;
     /**
      * Le code du plugin qui gère la ressource
      * @type {String}
@@ -177,6 +171,10 @@ module.exports = function (Ressource, Archive, $cacheRessource) {
      * L'oid de l'archive correspondant à la version précédente
      */
     this.archiveOid = 0
+
+    // et on ajoute toutes les propriétés de notre objet initial (avec des propriétés supplémentaires éventuelles)
+    // Attention, oid aussi (faut le virer avant si c'est l'oid d'une autre entité, archive par ex)
+    tools.merge(this, initObj)
   })
 
 
@@ -193,21 +191,16 @@ module.exports = function (Ressource, Archive, $cacheRessource) {
     }
     // si le tableau d'erreur est vide (devrait toujours être le cas,
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-    if (_.isEmpty(this.errors)) delete this.errors
+    if (_.isEmpty(this.warnings)) delete this.warnings
       // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
       // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
       //log.debug('beforeStore fini')
       next()
   })
 
-  Ressource.afterStore(function (next) {
-    // on met en cache en //
-    if (this.id) $cacheRessource.set(this)
-    next()
-  })
+  // on peut pas mettre du $cacheRessource en afterStore car il est pas encore défini (il dépend de nous)
 
   Ressource
-    .defineIndex('id', 'integer')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
     .defineIndex('typeTechnique', 'string')

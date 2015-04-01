@@ -206,14 +206,14 @@ $ressourceConverter.getViewData = function (error, ressource) {
  * @returns {object} Les data pour la vue dust, avec le token
  */
 $ressourceConverter.getFormViewData = function (error, ressource) {
-  var viewData = {errors:[]};
-  if (ressource && ressource.errors) {
-    viewData.errors = ressource.errors
+  var viewData = {warnings:[]};
+  if (ressource && ressource.warnings) {
+    viewData.warnings = ressource.warnings
   }
 
   if (error) {
     log.error(error)
-    viewData.errors.push(error.toString())
+    viewData.warnings.push(error.toString())
   }
 
   // on s'assure que l'on a un objet, sinon on en créé un vide
@@ -308,14 +308,14 @@ $ressourceConverter.getFormViewData = function (error, ressource) {
  */
 $ressourceConverter.getRessourceFromPost = function (data, partial) {
   var ressource = Ressource.create();
-  var errors = [];
+  var warnings = [];
   var buffer;
   var msg;
   if (_.isEmpty(data)) {
-    errors.push("Ressource vide");
+    warnings.push("Ressource vide");
   } else {
     if (data.ressource) {
-      // on nous envoie tout en json
+      // on nous envoie tout le json dans une string
       try {
         data = JSON.parse(data.ressource)
       } catch (e) {
@@ -331,7 +331,7 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
 
       // propriétés obligatoires
       if (!partial && _.isEmpty(value) && config.required[key]) {
-        errors.push("Le champ " + config.labels[key] + " est obligatoire");
+        warnings.push("Le champ " + config.labels[key] + " est obligatoire");
       }
 
       // les cast
@@ -341,7 +341,9 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
           if (_.isString(value)) {
             ressource[key] = value;
           } else {
-            errors.push("Le champ " + config.labels[key] + " n'est pas une chaine de caractères");
+            // on tolère les nombres et on fait le cast en string
+            if (typeof value === 'number') ressource[key] = value.toString()
+            else warnings.push("Le champ " + config.labels[key] + " n'est pas une chaine de caractères");
           }
 
         } else if (typeVar === 'Date') {
@@ -365,7 +367,7 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
             // et on sait pas trop ce qu'il renvoie
             buffer = Date.parse(value)
             if (buffer > 0) ressource[key] = new Date(buffer);
-            else errors.push("Le champ " + config.labels[key] +' vaut ' +value +
+            else warnings.push("Le champ " + config.labels[key] +' vaut ' +value +
                 " qui n'est pas une date valide (" + config.formats.jour +')');
           }
 
@@ -376,7 +378,7 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
           ressource[key] = !!value;
 
         } else if (typeVar === 'Array') {
-          // l'api peut nous envoyer une string "[1,2]"
+          // on tolère une string "[1,2]"
           if (_.isString(value) && value.substr(0,1) === '[' && value.substr(-1) === ']') {
             try {
               buffer = JSON.parse(value)
@@ -387,7 +389,7 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
           if (_.isArray(value)) {
             ressource[key] = integerify(value)
           } else {
-            errors.push("Le champ " + config.labels[key] + " n'est pas une liste");
+            warnings.push("Le champ " + config.labels[key] + " n'est pas une liste");
           }
 
         } else if (typeVar === 'Object') {
@@ -395,29 +397,28 @@ $ressourceConverter.getRessourceFromPost = function (data, partial) {
             try {
               ressource[key] = JSON.parse(value);
             } catch (e) {
-              errors.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
+              warnings.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
               log.debug('pb parsing', value)
             }
           }
           else
           if (_.isObject(value)) ressource[key] = value
-          else errors.push("Le champ " + config.labels[key] + " est invalide : ");
+          else warnings.push("Le champ " + config.labels[key] + " est invalide : ");
         } else {
           msg = "Le champ " + config.labels[key] + " est d'un type non prévu (" +typeVar +')';
-          errors.push(msg);
+          warnings.push(msg);
           log.error(msg);
         }
       } // cast
 
-    });
-    // faut ajouter l'oid s'il existe
-    if (data.oid) ressource.oid = data.oid;
+    }) // each
+    // data est complet, on créé l'entity
+    ressource = Ressource.create(data)
   }
 
-  // if (errors !== []) { // ce truc est toujours vrai !
-  if (errors.length) {
-    log.debug('errors à la fin getRessourceFromPost', errors)
-    ressource.errors = errors
+  if (warnings.length) {
+    log.debug('warnings à la fin getRessourceFromPost', warnings)
+    ressource.warnings = warnings
   }
 
   return ressource;
@@ -436,7 +437,7 @@ $ressourceConverter.getRessourceFromPostedArbre = function (data, partial) {
   // on accepte deux forme de post
   if (!_.isEmpty(data)) {
     if (data.arbre) {
-      // on nous envoie tout en json
+      // on nous envoie tout le json dans une string
       try {
         data = JSON.parse(data.arbre)
       } catch (e) {
@@ -462,6 +463,7 @@ $ressourceConverter.getRessourceFromPostedArbre = function (data, partial) {
   var arbre = $ressourceConverter.getRessourceFromPost(ressource, partial)
   // faut ajouter les enfants qui passent pas le filtre getRessourceFromPost (car pas une propriété de l'entité
   if (data.enfants) arbre.enfants = data.enfants;
+
   return arbre
 }
 

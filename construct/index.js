@@ -77,8 +77,8 @@ if (privateConfig.extraDependenciesLast) {
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
 var sesatheque = lassi.component('sesatheque', dependancies)
 
-// on ajoute memcache si précisé dans les settings
 sesatheque.config(function($cache, $settings) {
+  // on ajoute memcache si précisé dans les settings
   var memcache = $settings.get('memcache')
   if (memcache) {
     $cache.addEngine('', 'memcache', memcache);
@@ -86,8 +86,10 @@ sesatheque.config(function($cache, $settings) {
   } else {
     log.error("Il manque memcache en config, on s'en passera mais il vaudrait mieux l'ajouter")
   }
+  // on met ce flag en global
+  GLOBAL.isProd = ($settings.get('application.staging') === 'production')
   // log("sesatheque en fin de config", sesatheque)
-  log("Boot de l'application " + sesatheque.name +" en mode " +$settings.get('application.staging'))
+  log("FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
 })
 
 

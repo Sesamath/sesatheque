@@ -150,14 +150,14 @@ var settings = {
     error     : root + '/logs/' + staging + '.error.log',
     errorData : root + '/logs/' + staging + '.errorData.log',
     debug     : root + '/logs/debug.log',
-    // mettre à true pour ajouter dans debug toutes les entrées / sorties du cache
-    cacheEntries : false
+    // ajouter les exclusions voulues parmi ['cache', 'resssourceRepository', 'personneRepository', 'accessControl']
+    debugExclusions : []
   }
 }
 
 // on ajoute nos params locaux (accès à la base et port,
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
-if (localConfig) tools.update(settings, localConfig)
+if (localConfig) tools.merge(settings, localConfig)
 
 // on met les sessions dans memcache si déclaré
 if (settings.memcache) {

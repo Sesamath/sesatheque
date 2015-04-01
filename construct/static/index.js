@@ -44,30 +44,31 @@ var staticComponent = lassi.component('static')
 staticComponent.config(function() {
   // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
   lassi.on('beforeTransport', function(context, data) {
-    log('on beforeTransport (dans static), sur ' +context.request.method +' ' +context.request.originalUrl +
-        ' avec les data (' +context.contentType +' ' +context.status +')', data)
-    if (/\.css$/.exec(context.request.originalUrl)) {
+    var req = context.request.method +' ' +context.request.originalUrl
+    log.debug('on beforeTransport (dans static), sur '  +req +' (' +context.contentType +' ' +context.status +') avec les data ', data, 'beforeTransport')
+    /*if (/\.css$/.exec(context.request.originalUrl)) {
       log(new Error("on passe dans beforeTransport sur du css"))
       log('beforeTransport le context ', context)
       log('beforeTransport la requête ', context.request)
       log('beforeTransport la réponse ', context.response)
-    }
+    } /* */
 
     // l'api gère ses erreurs toute seule sur ses urls
     if (context.contentType !== 'application/json') {
       // mais si c'est une url qu'elle ne gère pas on le fait pour elle
       if (context.request.originalUrl.substr(0, 5) === '/api/') {
-        log.error("requete sur " +context.request.originalUrl +" et réponse non json " +context.contentType, data)
+        log.error(new Error("requete " +req +" et contentType non json " +context.contentType), data)
         context.status = 404
         context.contentType = 'application/json'
         if (!data.error) data.error = 'not found'
       } else {
-        // ça doit être du html, 404 si pas de contenu
+        // ça devrait être du html, on fixe 404 si pas de contenu
         if (!data.contentBloc && !context.status) {
           log.error('pas de status ni content => 404')
           context.status = 404
         }
-        // et on n'affecte que les erreurs
+
+        // et on ne gère que les erreurs
         if (context.status && context.status > 400) {
           // lassi a mis du plain sur les erreurs
           context.contentType = 'text/html'
@@ -91,8 +92,8 @@ staticComponent.config(function() {
           }
           data.contentBloc.error = msg
           data.$metas.title = msg
-          log("c'est une erreur, les data après modif", data)
-          //log("et le contexte", context)
+          log.debug(req +" en erreur " +context.status +", les data après modif", data)
+          //log.debug("et le contexte", context)
         }
       }
     }

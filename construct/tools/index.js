@@ -54,7 +54,7 @@ tools.update = function(object, addition) {
 /**
  * Fusionne les nouvelles valeurs avec les propriétés de l'objet (en profondeur)
  * (concatène si les deux propriétés sont des tableaux, en virant d'éventuels doublons,
- * fusionne si c'est deux objets et écrase sinon)
+ * fusionne si c'est deux objets et écrase les anciennes valeurs sinon)
  * @param {Object} object L'objet source
  * @param {Object} newValues Les valeurs à fusionner
  */
@@ -69,7 +69,7 @@ tools.merge = function(object, newValues) {
     }
   }
   function mergeObj(obj, values) {
-    _.each(values, function(value, key) {
+    if (values instanceof Object) _.each(values, function(value, key) {
       if (_.isArray(value) && _.isArray(obj[key])) mergeArray(obj[key], value);
       else if (_.isObject(value) && _.isObject(obj[key])) mergeObj(obj[key], value);
       else obj[key] = value;

@@ -36,7 +36,7 @@ var _ = require('lodash')
 
 module.exports = function (Archive) {
   /**
-   * Idem Ressource avec errors en moins, dateArchivage en plus et moins d'index
+   * Idem Ressource avec warnings en moins, dateArchivage en plus et moins d'index
    * @constructor
    */
   Archive.construct = function (ressource) {
@@ -46,11 +46,11 @@ module.exports = function (Archive) {
     }
     // on clone car on ne veut pas modifier l'original
     ressource = tools.clone(ressource)
-    // on vire errors
-    if (ressource.errors) {
-      if (ressource.errors.length) log.error("Archivage de la ressource " +ressource.oid +" (id " +ressource.id +
-        ") qui comportait des erreurs : " +ressource.errors.join('\n'))
-      delete ressource.errors
+    // on vire warnings
+    if (ressource.warnings) {
+      if (ressource.warnings.length) log.error("Archivage de la ressource " +ressource.oid +" (id " +ressource.id +
+        ") qui comportait des erreurs : " +ressource.warnings.join('\n'))
+      delete ressource.warnings
     }
     delete ressource.oid
     // on garde tout le reste

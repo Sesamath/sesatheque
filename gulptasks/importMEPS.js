@@ -10,7 +10,8 @@
 var topDepart = (new Date()).getTime()
 /** timeout en ms */
 var timeout = 3000
-var maxLaunched = 100
+/** Le nb max de requetes vers l'api en attente de réponse */
+var maxLaunched = 5
 
 /** pour logguer les relations */
 var logRelations = false
@@ -164,59 +165,6 @@ function getLangue(mep_langue_id) {
 }
 
 /**
- * OBSOLETE
- * Récupère la date de création
- * @param row
- * @returns {Date}
- */
-function getDateCreation(row) {
-  // 1072911600 => 2004-01-01
-  if (row.mep_swf_date > 1072911600 && row.mep_swf_date < (new Date()).getTime() / 1000) {
-    return new Date(row.mep_swf_date * 1000);
-  } else {
-    // faut aller chercher ça dans DEV_FILES
-    kmepcol()
-        .select('dev_file_date')
-        .from('DEV_FILES')
-        .where({dev_file_id: row.mep_swf_id, dev_file_type: 'exswf'})
-        .limit(1)
-        .orderBy('dev_file_date', 'desc')
-        .then(function (results) {
-          var ts;
-          if (results[0] && results[0].dev_file_date) {
-            ts = results[0].dev_file_date
-            if (ts > 1072911600 && ts < (new Date()).getTime() / 1000) {
-              return new Date(ts * 1000);
-            } else {
-              console.error("On a trouvé " + ts + " dans DEV_FILES.dev_file_date pour swf_id " + row.mep_swf_id);
-              return null;
-            }
-          } else {
-            console.error("La requete " + this.toSQL() + " a échouée");
-            return null;
-          }
-        });
-  }
-}
-
-/**
- * Convertie un timestamp (en s ou ms) en objet Date
- * Retourne null si le timestamp est dans le futur (+2h) ou avant le 01/01/2004
- * @param ts
- * @returns {Date}
- */
-function getDate(ts) {
-  if (logProcess) log('getDate avec ' +ts)
-  if (ts > 10001001001001) ts = Math.round(ts / 1000) // c'était des ms, on passe en s
-  // 7260 en cas de décalage horaire (fuseau mal réglé)
-  if (ts > 1072911600 && ts < (new Date()).getTime() / 1000 + 7260) {
-    return new Date(ts * 1000);
-  } else {
-    return null;
-  }
-}
-
-/**
  * Converti un timestamp (ms ou s) en string (JJ/DD/YYYY, suivant la conf)
  * @param ts le timestamp
  * @returns {String}
@@ -361,7 +309,7 @@ function importMEPS(next, ids) {
   nextStep = next
 
   // la liste des ids à traiter
-  if (ids === 'all') where = ''
+  if (ids === 'all') where = ' LIMIT 1'
   else if (ids) where = ' WHERE mep_id IN (' + ids + ')'
   else {
     log("Pas d'import mep à faire")
@@ -688,9 +636,9 @@ module.exports = function () {
       .seq(function () {
         importMEPS(this, mepIds)
       })
-      .seq(function () {
-        importAIDES(this, aideIds)
-      })
+      //.seq(function () {
+      //  importAIDES(this, aideIds)
+      //})
       .seq(function () {
         flushPendingRelations(this)
       })

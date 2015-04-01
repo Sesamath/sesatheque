@@ -6,7 +6,7 @@
 </head>
 <body>
 {?error}<p class="has-error">{error}</p>{/error}
-{#errors}<p class="has-error">{.}</p>{/errors}
+{#warnings}<p class="has-error">{.}</p>{/warnings}
 {#flashBloc}{.|s}{/flashBloc}
 {#contentBloc}{.|s}{/contentBloc}
 {#jsBloc}{.|s}{/jsBloc}

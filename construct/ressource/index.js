@@ -47,12 +47,12 @@ ressourceComponent.entity('Archive', function () {
   require('./entityArchive')(this)
 })
 
-ressourceComponent.service('$cacheRessource', function($cache, $settings) {
-  return require('./serviceCacheRessource')($cache, $settings)
+ressourceComponent.entity('Ressource', function () {
+  require('./entityRessource')(this)
 })
 
-ressourceComponent.entity('Ressource', function (Archive, $cacheRessource) {
-  require('./entityRessource')(this, Archive, $cacheRessource)
+ressourceComponent.service('$cacheRessource', function($cache, $settings, Ressource) {
+  return require('./serviceCacheRessource')($cache, $settings, Ressource)
 })
 
 ressourceComponent.service('$routes', function($settings) {

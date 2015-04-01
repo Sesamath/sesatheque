@@ -33,8 +33,6 @@
 
 /**
  * Init de notre service $ressourceRepository
- * @param serviceCache
- * @returns {$ressourceRepository}
  */
 module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) {
   if (!Ressource || !$accessControl || !$cacheRessource)
@@ -60,24 +58,23 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
    */
 
   /**
-   * Incrémente le n° de version si la ressource a une propriété newVersion ou si une des propriétés listées
-   * dans config.versionTriggers a changée de valeur
+   * Incrémente le n° de version si la ressource a une propriété versionNeedIncrement
+   * ou si une des propriétés listées dans config.versionTriggers a changée de valeur
    * @param {Ressource} ressource
+   * @param {Function} next
    * @private
    */
   function updateVersion(ressource, next) {
-    var needIncrement
 
     /**
      * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
      * @param ressourceInitiale
      */
     function analyse(ressourceInitiale) {
-      // on peut réclamer une nouvelle version via un flag sur la ressource
-      if (ressource.versionNeedIncrement) needIncrement = true
+      var needIncrement = !!ressource.versionNeedIncrement
       // on regarde si nos champs qui déclenchent un changement de version on changé
-      else {
-        _.each(config.versionTriggers, function (prop) {
+      if (!needIncrement && ressourceInitiale.id) {
+        _.forEach(config.versionTriggers, function (prop) {
           // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
           // on utilise https://lodash.com/docs#isEqual
           if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
@@ -93,6 +90,7 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
               }
             }
             needIncrement = true
+            return false // pas la peine de continuer le forEach, cf https://lodash.com/docs#forEach
           }
         })
       }
@@ -110,7 +108,8 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
         if (error) next(error)
         else if (ressourceInitiale) analyse(ressourceInitiale)
         else {
-          log.error(new Error("updateVersion a reçu une ressource avec id " +ressource.id +" qui n'existait pas en base"))
+          log.error(new Error("updateVersion a reçu une ressource avec id " +ressource.id +
+              " qui n'existait pas en base"))
           next(null, ressource)
         }
       })
@@ -216,11 +215,18 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
     if (!ressource.oid) {
       next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
     } else {
+      // debug
+      if (!ressource.store) {
+        log.error(new Error("La ressource " +ressource.oid +" n'a pas de méthode store"))
+        next(null, ressource)
+        return
+      }
       // on archive
       Archive.create(ressource).store(function (error, archive) {
         if (error) next(error)
         else {
           log.debug("On a archivé la ressource " + ressource.id + " (avec l'oid en archive " + archive.oid + ')')
+          //updateRessource(archive)
           ressource.archiveOid = archive.oid
           ressource.version++
           ressource.store(next)
@@ -238,42 +244,42 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
   $ressourceRepository.valide = function(ressource, next) {
     // log.debug('on va valider ', ressource)
     /** tableau d'erreurs qui sera concaténé et passé à next si non vide */
-    var errors = [];
+    var warnings = [];
     if (_.isEmpty(ressource)) {
-      errors.push("Ressource vide");
+      warnings.push("Ressource vide");
     } else {
       // vérif présence et type
       _.each(config.typesVar, function (typeVar, key) {
         // propriétés obligatoires
         if (_.isEmpty(ressource[key]) && config.required[key]) {
-          errors.push("Le champ " + config.labels[key] + " est obligatoire")
+          warnings.push("Le champ " + config.labels[key] + " est obligatoire")
         }
         // le type
         if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
-          errors.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
-          log.debug("à la validation on a reçu pour " + key + ' : ' + tools.stringify(ressource[key]))
+          warnings.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
+          log.debug("à la validation on a reçu pour " + key, ressource[key])
         } else if (typeVar === 'Number') {
           // on vérifie entier positif
           if (Math.floor(ressource[key]) !== ressource[key]) {
-            errors.push("Le champ " + config.labels[key] + " ne contient pas un entier");
+            warnings.push("Le champ " + config.labels[key] + " ne contient pas un entier");
           }
           if (ressource[key] < 0) {
-            errors.push("Le champ " + config.labels[key] + " ne contient pas un entier positif");
+            warnings.push("Le champ " + config.labels[key] + " ne contient pas un entier positif");
           }
         }
       })
     }
 
     if (next) {
-      if (errors.length) {
+      if (warnings.length) {
         // on passe les erreurs mais pas la ressource invalide
-        next(new Error("Ressource invalide : \n" + errors.join("\n")))
+        next(new Error("Ressource invalide : \n" + warnings.join("\n")))
       } else {
         next(null, ressource)
       }
     }
 
-    return !errors.length;
+    return !warnings.length;
   }
 
   /**
@@ -397,7 +403,7 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
     log.debug('load ressource_' +id)
     log('load ressource_' +id)
     $cacheRessource.get(id, function (error, ressourceCached) {
-      if (ressourceCached) log("trouvé en cache ressource_" +id)
+      log("retour de cache ressource_" +id, [error, ressourceCached])
       if (ressourceCached) next(null, ressourceCached)
       else Ressource.match('id').equals(id).grabOne(function (error, ressource) {
         cacheAndNext(error, ressource, next)

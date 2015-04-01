@@ -95,8 +95,8 @@ personneComponent.service('$cacheGroupe', function($cache, $settings) {
           var key = 'groupeNom_' +tools.sanitizeHashKey(groupe.nom)
           $cache.delete(key)
         }
+        $cache.delete('groupe_' +id, next)
       })
-      $cache.delete('groupe_', id, next)
     }
   }
 })

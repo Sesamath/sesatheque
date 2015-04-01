@@ -301,7 +301,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       ressource = $ressourceConverter.getRessourceFromPost(context.post)
       // il validera avant d'enregistrer
       $ressourceRepository.write(ressource, function (error, ressource) {
-        if (error || !_.isEmpty(ressource.errors)) {
+        if (error || !_.isEmpty(ressource.warnings)) {
           // faut réafficher le form
           var options = {$metas: {title: 'Ajouter une ressource'}}
           printForm(error, ressource, context, options)
@@ -338,7 +338,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       ressource = $ressourceConverter.getRessourceFromPost(context.post)
       // il validera avant d'enregistrer
       $ressourceRepository.write(ressource, function (error, ressource) {
-        if (error || !_.isEmpty(ressource.errors)) {
+        if (error || !_.isEmpty(ressource.warnings)) {
           // faut réafficher le form
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
           printForm(error, ressource, context, options)
@@ -374,7 +374,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var ressource = $ressourceConverter.getRessourceFromPost(context.post)
       // il validera avant d'enregistrer
       $ressourceRepository.write(ressource, function (error, ressource) {
-        if (error || !_.isEmpty(ressource.errors)) {
+        if (error || !_.isEmpty(ressource.warnings)) {
           // faut réafficher le form
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
           printForm(error, ressource, context, options)

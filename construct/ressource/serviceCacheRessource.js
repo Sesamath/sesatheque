@@ -37,8 +37,11 @@
  * @requires $cache
  * @requires $settings
  */
-module.exports = function ($cache, $settings) {
+module.exports = function ($cache, $settings, Ressource) {
   var ttl = $settings.get('components.ressource.cacheTTL', 3600)
+  var prefixRessource = 'ressource_'
+  var prefixRessByOrigine = 'ressourceIdByOrigine_'
+
   function dummy() {}
 
   return {
@@ -49,7 +52,15 @@ module.exports = function ($cache, $settings) {
      * @memberOf $cacheRessource
      */
     get: function (id, next) {
-      $cache.get('ressource_' +id, next)
+      $cache.get(prefixRessource +id, function (error, ressourceCached) {
+        var ressource
+        if (!error) {
+          if (ressourceCached) ressource = Ressource.create(ressourceCached)
+          log.debug('ressource ' + id + ' récupérée en cache', ressourceCached, 'cache')
+          log.debug('devenue ', ressource, 'cache')
+        }
+        next(null, ressource)
+      })
     },
 
     /**
@@ -60,9 +71,16 @@ module.exports = function ($cache, $settings) {
      * @memberOf $cacheRessource
      */
     getByOrigine: function (origine, idOrigine, next) {
-      $cache.get('ressourceByOrigine_' +origine +'_' +idOrigine, function (error, id) {
+      $cache.get(prefixRessByOrigine +origine +'_' +idOrigine, function (error, id) {
         if (error) next(error)
-        else $cache.get('ressource_' +id, next)
+        else $cache.get(prefixRessource +id, function (error, ressourceCached) {
+          var ressource
+          if (!error) {
+            if (ressourceCached) ressource = Ressource.create(ressourceCached)
+            log.debug('ressource ' +origine +'_' +idOrigine + ' récupérée en cache', ressourceCached, 'cache')
+          }
+          next(null, ressource)
+        })
       })
     },
 
@@ -74,11 +92,11 @@ module.exports = function ($cache, $settings) {
      */
     set: function (ressource, next) {
       next = next || dummy
-      log("cache set ressource_" +ressource.id)
+      log.debug("cache set ressource_" +ressource.id, null, 'cache')
       // next appelé seulement sur le set principal (le 2e)
       if (ressource.origine)
-        $cache.set('ressourceByOrigine_' +ressource.origine +'_' +ressource.idOrigine, ressource.id, ttl, dummy)
-      $cache.set('ressource_' + ressource.id, ressource, ttl, next)
+        $cache.set(prefixRessByOrigine +ressource.origine +'_' +ressource.idOrigine, ressource.id, ttl, dummy)
+      $cache.set(prefixRessource + ressource.id, ressource, ttl, next)
     },
 
     /**
@@ -90,11 +108,19 @@ module.exports = function ($cache, $settings) {
     delete : function (id, next) {
       next = next || dummy
       // faut aller le chercher en cache pour effacer l'entrée par origine
-      $cache.get('ressource_' +id, function (error, ressource) {
-        if (ressource && ressource.origine && ressource.idOrigine)
-          $cache.delete('ressourceByOrigine_' + ressource.origine + '_' + ressource.idOrigine, dummy)
+      var msg = 'delete ressource ' +id
+      $cache.get(prefixRessource +id, function (error, ressource) {
+        if (ressource) {
+          if (ressource.origine && ressource.idOrigine) {
+            $cache.delete(prefixRessByOrigine + ressource.origine + '_' + ressource.idOrigine, dummy)
+          }
+          msg += " (trouvée)"
+        } else {
+          msg += " (pas trouvée)"
+        }
+        $cache.delete(prefixRessource + id, next)
+        log.debug(msg, null, 'cache')
       })
-      $cache.delete('ressource_' +id, next)
     }
   }
 }

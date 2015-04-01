@@ -52,8 +52,11 @@ var errorDataOutputStream = fs.createWriteStream(config.logs.errorData, {'flags'
 var env = process.env.NODE_ENV || 'development';
 
 
-/** Nos filtres possibles, qui seront ajoutés si besoin par setFilter */
-var filters = {}
+/** 
+ * Les messages à exclure
+ * (une valeur à true excluera les debug de ce type dans le log de debug) 
+ */
+var exclusions = {}
 
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans la console)
@@ -74,7 +77,7 @@ var logDebug
  * @param stream
  */
 function out(message, objectToDump, filter, stream) {
-  if (!filter || filters[filter]) {
+  if (!filter || !exclusions[filter]) {
     // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
     if (message instanceof Error) message = message.stack + '\n'
     else {
@@ -121,6 +124,12 @@ if (env !== 'production' && config.logs.debug) {
   }
 
   console.log("fonction de log activée avec l'environnement : " +env)
+  if (config.logs.debugExclusions) {
+    config.logs.debugExclusions.forEach(function (filter) {
+      exclusions[filter] = true
+    })
+  }
+  
 } else {
   logDebug = function() {};
   log = function () {} // jshint ignore:line
@@ -162,15 +171,15 @@ log.errorData = function (message, objectToDump, filter) {
 /**
  * Active un filtre (le créé si besoin)
  */
-log.setFilterOn = function (filter) {
-  filters[filter] = true
+log.exclude = function (filter) {
+  exclusions[filter] = true
 }
 
 /**
- * Désactive un filtre (le créé si besoin)
+ * Désactive un filtre
  */
-log.setFilterOff = function (filter) {
-  filters[filter] = false
+log.include = function (filter) {
+  exclusions[filter] = false
 }
 
 module.exports = log

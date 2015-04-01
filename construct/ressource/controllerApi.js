@@ -211,18 +211,20 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function write(context, ressource) {
-    var permission = (ressource.id || ressource.idOrigine) ? 'update' : 'create'
+    var permission = ressource.idOrigine ? 'update' : 'create'
     if ($accessControl.hasPermission(permission, context, ressource)) {
       $ressourceRepository.write(ressource, function (error, ressource) {
         // id - convertPost - valide+setVersion - store - store2 - fin
         //lassi.tmp[context.post.id].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.id].s)
         //log.errorData(lassi.tmp[context.post.id].m)
-        //log.debug("dans cb api write on récupère", ressource)
+        log.debug("dans cb api write on récupère", ressource)
         if (error) sendJson(context, error)
-        else if (!_.isEmpty(ressource.errors)) {
-          sendJson(context, new Error(ressource.errors.join("\n")))
-        } else {
-          sendJson(context, null, {id: ressource.id})
+        else {
+          var data = {oid: ressource.oid}
+          if (!_.isEmpty(ressource.warnings)) {
+            data.warnings = ressource.warnings
+          }
+          sendJson(context, null, data)
         }
       })
     } else {
@@ -242,8 +244,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function sendJson(context, error, data) {
     if (error) {
       log.error(error);
+      log.debug("sendJson va renvoyer l'erreur", error, 'api')
       context.json({error: error.toString()})
     } else {
+      log.debug('sendJson va renvoyer', data, 'api')
       context.json(data)
     }
   }
@@ -261,14 +265,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
 
     function update(error, ressourceLoaded) {
-      if (error) sendJson(context, error)
-      else {
+      if (error) {
+        sendJson(context, error)
+      } else {
         ressourceLoaded.udate(ressource)
         write(context, ressourceLoaded)
       }
     }
 
-    //log.debug("dans api write on récupère en post", context.post)
+    log.debug("dans /api/ressource on récupère en post", context.post, 'api')
+
     try {
       /*
        var id = context.post.id || 0
