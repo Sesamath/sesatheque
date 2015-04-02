@@ -35,7 +35,7 @@
  * Entity Ressource
  * @param Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
  */
-module.exports = function (Ressource) {
+module.exports = function (Ressource, $ressourceControl) {
 
   var _ = require('lodash')
   var tools = require('../tools')
@@ -174,7 +174,14 @@ module.exports = function (Ressource) {
 
     // et on ajoute toutes les propriétés de notre objet initial (avec des propriétés supplémentaires éventuelles)
     // Attention, oid aussi (faut le virer avant si c'est l'oid d'une autre entité, archive par ex)
-    tools.merge(this, initObj)
+    if (initObj) {
+      var tmp = tools.clone(this)
+      tools.merge(tmp, initObj)
+      $ressourceControl.validate(tmp, function (error) {
+        if (error) log.error(new Error("Objet invalide passé au constructeur Ressource,\n" +error.toString(), initObj))
+        else tools.merge(this, initObj)
+      })
+    }
   })
 
 
