@@ -47,8 +47,12 @@ ressourceComponent.entity('Archive', function () {
   require('./entityArchive')(this)
 })
 
-ressourceComponent.entity('Ressource', function () {
-  require('./entityRessource')(this)
+ressourceComponent.service('$ressourceControl', function() {
+  return require('./serviceCacheRessource')()
+})
+
+ressourceComponent.entity('Ressource', function ($ressourceControl) {
+  require('./entityRessource')(this, $ressourceControl)
 })
 
 ressourceComponent.service('$cacheRessource', function($cache, $settings, Ressource) {
@@ -59,8 +63,8 @@ ressourceComponent.service('$routes', function($settings) {
   return require('./serviceRoutes')($settings)
 })
 
-ressourceComponent.service('$ressourceRepository', function(Ressource, Archive, $accessControl, $cacheRessource) {
-  return require('./serviceRessourceRepository')(Ressource, Archive, $accessControl, $cacheRessource)
+ressourceComponent.service('$ressourceRepository', function(Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource) {
+  return require('./serviceRessourceRepository')(Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource)
 })
 
 ressourceComponent.service('$ressourceConverter', function (Ressource, $routes) {

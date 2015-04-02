@@ -39,88 +39,108 @@
  */
 module.exports = function ($cache, $settings, Ressource) {
   var ttl = $settings.get('components.ressource.cacheTTL', 3600)
-  var prefixRessource = 'ressource_'
-  var prefixRessByOrigine = 'ressourceIdByOrigine_'
 
   function dummy() {}
 
-  return {
-    /**
-     * Envoie une ressource du cache à next
-     * @param {Number}         id   Id de la ressource
-     * @param {SimpleCallback} next Callback
-     * @memberOf $cacheRessource
-     */
-    get: function (id, next) {
-      $cache.get(prefixRessource +id, function (error, ressourceCached) {
+  function getKey(id, origine) {
+    var prefixRessource = 'ressource_'
+    var prefixRessByOrigine = 'ressourceIdByOrigine_'
+    return origine ? prefixRessByOrigine +origine +'_' +id : prefixRessource +id
+  }
+
+  var $cacheRessource = {}
+
+  /**
+   * Envoie une ressource du cache à next
+   * @param {Number}         oid   Id de la ressource
+   * @param {SimpleCallback} next Callback
+   * @memberOf $cacheRessource
+   */
+  $cacheRessource.get = function (oid, next) {
+    $cache.get(getKey(oid), function (error, ressourceCached) {
+      var ressource
+      if (!error) {
+        if (ressourceCached) ressource = Ressource.create(ressourceCached)
+        log.debug('ressource ' + oid + ' récupérée en cache', ressourceCached, 'cache')
+        log.debug('devenue ', ressource, 'cache')
+      }
+      next(null, ressource)
+    })
+  }
+
+  /**
+   * Envoie une ressource du cache à next
+   * @param {String}         origine
+   * @param {String}         idOrigine
+   * @param {SimpleCallback} next
+   * @memberOf $cacheRessource
+   */
+  $cacheRessource.getByOrigine = function (origine, idOrigine, next) {
+    $cache.get(getKey(idOrigine, origine), function (error, oid) {
+      if (error) next(error)
+      else $cache.get(getKey(oid), function (error, ressourceCached) {
         var ressource
         if (!error) {
           if (ressourceCached) ressource = Ressource.create(ressourceCached)
-          log.debug('ressource ' + id + ' récupérée en cache', ressourceCached, 'cache')
-          log.debug('devenue ', ressource, 'cache')
+          log.debug('ressource ' +origine +'/' +idOrigine + ' récupérée en cache', ressourceCached, 'cache')
         }
         next(null, ressource)
       })
-    },
+    })
+  }
 
-    /**
-     * Envoie une ressource du cache à next
-     * @param {String}         origine
-     * @param {String}         idOrigine
-     * @param {SimpleCallback} next
-     * @memberOf $cacheRessource
-     */
-    getByOrigine: function (origine, idOrigine, next) {
-      $cache.get(prefixRessByOrigine +origine +'_' +idOrigine, function (error, id) {
-        if (error) next(error)
-        else $cache.get(prefixRessource +id, function (error, ressourceCached) {
-          var ressource
-          if (!error) {
-            if (ressourceCached) ressource = Ressource.create(ressourceCached)
-            log.debug('ressource ' +origine +'_' +idOrigine + ' récupérée en cache', ressourceCached, 'cache')
-          }
-          next(null, ressource)
-        })
-      })
-    },
-
-    /**
-     * Met en cache une ressource
-     * @param {Ressource}      ressource
-     * @param {SimpleCallback} next
-     * @memberOf $cacheRessource
-     */
-    set: function (ressource, next) {
-      next = next || dummy
-      log.debug("cache set ressource_" +ressource.id, null, 'cache')
+  /**
+   * Met en cache une ressource
+   * @param {Ressource}      ressource
+   * @param {SimpleCallback} next
+   * @memberOf $cacheRessource
+   */
+  $cacheRessource.set = function (ressource, next) {
+    next = next || dummy
+    log.debug("cache set ressource " +ressource.oid, null, 'cache')
+    if (ressource.oid) {
       // next appelé seulement sur le set principal (le 2e)
-      if (ressource.origine)
-        $cache.set(prefixRessByOrigine +ressource.origine +'_' +ressource.idOrigine, ressource.id, ttl, dummy)
-      $cache.set(prefixRessource + ressource.id, ressource, ttl, next)
-    },
-
-    /**
-     * Efface une ressource du cache
-     * @param {Number}         id
-     * @param {SimpleCallback} next
-     * @memberOf $cacheRessource
-     */
-    delete : function (id, next) {
-      next = next || dummy
-      // faut aller le chercher en cache pour effacer l'entrée par origine
-      var msg = 'delete ressource ' +id
-      $cache.get(prefixRessource +id, function (error, ressource) {
-        if (ressource) {
-          if (ressource.origine && ressource.idOrigine) {
-            $cache.delete(prefixRessByOrigine + ressource.origine + '_' + ressource.idOrigine, dummy)
-          }
-          msg += " (trouvée)"
-        } else {
-          msg += " (pas trouvée)"
-        }
-        $cache.delete(prefixRessource + id, next)
-        log.debug(msg, null, 'cache')
-      })
+      $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, dummy)
+      $cache.set(getKey(ressource.oid), ressource, ttl, next)
+    } else {
+      log.error(new Error("cacheSet sur une ressource sans oid"))
     }
   }
+
+  /**
+   * Efface une ressource du cache
+   * @param {Number}         oid
+   * @param {SimpleCallback} next
+   * @memberOf $cacheRessource
+   */
+  $cacheRessource.delete = function (oid, next) {
+    next = next || dummy
+    log.debug('delete cache ressource ' +oid, null, 'cache')
+    // faut aller le chercher en cache pour effacer l'entrée par origine
+    $cache.get(getKey(oid), function (error, ressource) {
+      if (ressource) {
+        $cache.delete(getKey(ressource.idOrigine, ressource.origine), dummy)
+      }
+      $cache.delete(getKey(oid), next)
+    })
+  }
+
+  /**
+   * Efface une ressource du cache d'après idOrigine
+   * @param origine
+   * @param idOrigine
+   * @param next
+   */
+  $cacheRessource.deleteByOrigine = function (origine, idOrigine, next) {
+    log.debug('delete cache ressource ' +origine +'/' +idOrigine, null, 'cache')
+    $cacheRessource.getByOrigine(origine, idOrigine, function (error, oid) {
+      if (error) next(error)
+      else if (oid) {
+        $cache.delete(prefixRessByOrigine +origine +'_' +idOrigine, dummy)
+        $cacheRessource.delete(oid, next)
+      } else next()
+    })
+  }
+
+  return $cacheRessource
 }

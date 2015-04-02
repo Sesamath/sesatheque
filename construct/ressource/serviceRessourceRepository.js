@@ -34,7 +34,7 @@
 /**
  * Init de notre service $ressourceRepository
  */
-module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) {
+module.exports = function (Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource) {
   if (!Ressource || !$accessControl || !$cacheRessource)
       throw new Error("Impossible d'initialiser $ressourceRepository faute de prérequis")
   /**
@@ -236,53 +236,6 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
   }
 
   /**
-   * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
-   * @param {Ressource} ressource
-   * @param {Function} next Callback qui recevra les arguments (error, ressource)
-   * @return {boolean}
-   */
-  $ressourceRepository.valide = function(ressource, next) {
-    // log.debug('on va valider ', ressource)
-    /** tableau d'erreurs qui sera concaténé et passé à next si non vide */
-    var warnings = [];
-    if (_.isEmpty(ressource)) {
-      warnings.push("Ressource vide");
-    } else {
-      // vérif présence et type
-      _.each(config.typesVar, function (typeVar, key) {
-        // propriétés obligatoires
-        if (_.isEmpty(ressource[key]) && config.required[key]) {
-          warnings.push("Le champ " + config.labels[key] + " est obligatoire")
-        }
-        // le type
-        if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
-          warnings.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
-          log.debug("à la validation on a reçu pour " + key, ressource[key])
-        } else if (typeVar === 'Number') {
-          // on vérifie entier positif
-          if (Math.floor(ressource[key]) !== ressource[key]) {
-            warnings.push("Le champ " + config.labels[key] + " ne contient pas un entier");
-          }
-          if (ressource[key] < 0) {
-            warnings.push("Le champ " + config.labels[key] + " ne contient pas un entier positif");
-          }
-        }
-      })
-    }
-
-    if (next) {
-      if (warnings.length) {
-        // on passe les erreurs mais pas la ressource invalide
-        next(new Error("Ressource invalide : \n" + warnings.join("\n")))
-      } else {
-        next(null, ressource)
-      }
-    }
-
-    return !warnings.length;
-  }
-
-  /**
    * Ajoute ou modifie une ressource
    * @param {Ressource} ressource
    * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
@@ -302,7 +255,7 @@ module.exports = function (Ressource, Archive, $accessControl, $cacheRessource) 
     //log.debug("avant validation dans write", ressource)
     flow()
       // validation
-        .seq(function() { $ressourceRepository.valide(ressource, this) })
+        .seq(function() { $ressourceControl.valide(ressource, this) })
       // updateVersion
         .seq(function (ressource) { updateVersion(ressource, this) })
       // store
