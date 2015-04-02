@@ -58,33 +58,32 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   /**
    * Incrémente le n° de version si la ressource a une propriété versionNeedIncrement
    * ou si une des propriétés listées dans config.versionTriggers a changée de valeur
+   * Affecte la propriété oid si la ressource existait mais qu'on ne l'avait pas chargée depuis le cache ou la bdd
    * @param {Ressource} ressource
    * @param {Function} next
    * @private
    */
   function updateVersion(ressource, next) {
-
     /**
      * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
-     * @param ressourceInitiale
+     * @param ressourceBdd
      */
-    function analyse(ressourceInitiale) {
+    function analyse(ressourceBdd) {
       var needIncrement = !!ressource.versionNeedIncrement
       // on regarde si nos champs qui déclenchent un changement de version on changé
-      if (!needIncrement && ressourceInitiale.id) {
+      if (!needIncrement && ressourceBdd.oid) {
         _.forEach(config.versionTriggers, function (prop) {
           // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
           // on utilise https://lodash.com/docs#isEqual
-          if (!_.isEqual(ressource[prop], ressourceInitiale[prop])) {
+          if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
             // debug
             if (!GLOBAL.isProd) {
               try {
-                log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceInitiale.id +
-                    '\n' + 'avant\n' + JSON.parse(ressourceInitiale[prop]) + '\n' +
-                    'après\n' + JSON.parse(ressource[prop]))
+                log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
+                    '\navant : ' + JSON.parse(ressourceBdd[prop]) +
+                    '\naprès : ' + JSON.parse(ressource[prop]))
               } catch (e) {
-                log.debug('le parsing de ressource[' + prop + '] a planté ' + ressource.id + ' ' +
-                    ressource.origine + '-' + ressource.idOrigine)
+                log.debug('le parsing de ressource[' +prop +'] a planté ' +ressource.oid +' ' +ressource.origine +'/' +ressource.idOrigine)
               }
             }
             needIncrement = true
@@ -93,34 +92,34 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         })
       }
       // on recopie version et oid (pour écrasement éventuel de l'ancienne ressource)
-      ressource.version = ressourceInitiale.version
-      ressource.oid = ressourceInitiale.oid
+      ressource.version = ressourceBdd.version
+      ressource.oid = ressourceBdd.oid
 
-      if (needIncrement) $ressourceRepository.archive(ressourceInitiale, next)
+      if (needIncrement) $ressourceRepository.archive(ressourceBdd, next)
       else next(null, ressource)
     } // analyse
 
-    if (ressource.id) { // pas le cas au create
-      // ira seulement en cache dans la plupart des cas, de toute façon faut récupérer le n° de version actuel
-      $ressourceRepository.load(ressource.id, function (error, ressourceInitiale) {
+    if (ressource.oid) {
+      // pas le cas au create ou sur un update via l'api
+      // ira seulement en cache dans la plupart des cas, et de toute façon faut récupérer
+      // le n° de version actuel et l'oid éventuel
+      $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
         if (error) next(error)
-        else if (ressourceInitiale) analyse(ressourceInitiale)
+        else if (ressourceBdd) analyse(ressourceBdd)
         else {
-          log.error(new Error("updateVersion a reçu une ressource avec id " +ressource.id +
-              " qui n'existait pas en base"))
+          log.error(new Error("updateVersion a reçu une ressource avec oid " +ressource.oid +" qui n'existait pas en base"))
+          ressource.oid = 0
           next(null, ressource)
         }
       })
     } else if (ressource.idOrigine) {
-      $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceInitiale) {
-        // on lui ajoute l'id qui n'a pas été fourni (l'oid est ajouté par analyse dans les 2 cas)
-        if (ressourceInitiale) {
-          ressource.id = ressourceInitiale.id
-          analyse(ressourceInitiale)
-        } else next(null, ressource)
+      $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
+        if (error) next(error)
+        else if (ressourceBdd) analyse(ressourceBdd)
+        else next(null, ressource)
       })
     } else {
-      next(null, ressource)
+      next(new Error("ressource sans oid ni idOrigine"))
     }
   }
 
@@ -223,7 +222,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       Archive.create(ressource).store(function (error, archive) {
         if (error) next(error)
         else {
-          log.debug("On a archivé la ressource " + ressource.id + " (avec l'oid en archive " + archive.oid + ')')
+          log.debug("On a archivé la ressource " + ressource.oid + " (avec l'oid en archive " + archive.oid + ')')
           //updateRessource(archive)
           ressource.archiveOid = archive.oid
           ressource.version++
@@ -234,26 +233,71 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   }
 
   /**
+   * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
+   * @param {Ressource} ressource
+   * @param {Function} next Callback qui recevra les arguments (error, ressource)
+   * @return {boolean}
+   */
+  $ressourceRepository.valide = function(ressource, next) {
+    // log.debug('on va valider ', ressource)
+    /** tableau d'erreurs qui sera concaténé et passé à next si non vide */
+    var warnings = [];
+    if (_.isEmpty(ressource)) {
+      warnings.push("Ressource vide");
+    } else {
+      // vérif présence et type
+      _.each(config.typesVar, function (typeVar, key) {
+        // propriétés obligatoires
+        if (_.isEmpty(ressource[key]) && config.required[key]) {
+          warnings.push("Le champ " + config.labels[key] + " est obligatoire")
+        }
+        // le type
+        if (ressource[key] && ! _['is' + typeVar](ressource[key])) {
+          warnings.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
+          log.debug("à la validation on a reçu pour " + key, ressource[key])
+        } else if (typeVar === 'Number') {
+          // on vérifie entier positif
+          if (Math.floor(ressource[key]) !== ressource[key]) {
+            warnings.push("Le champ " + config.labels[key] + " ne contient pas un entier");
+          }
+          if (ressource[key] < 0) {
+            warnings.push("Le champ " + config.labels[key] + " ne contient pas un entier positif");
+          }
+        }
+      })
+    }
+
+    if (next) {
+      if (warnings.length) {
+        // on passe les erreurs mais pas la ressource invalide
+        next(new Error("Ressource invalide : \n" + warnings.join("\n")))
+      } else {
+        next(null, ressource)
+      }
+    }
+
+    return !warnings.length;
+  }
+
+  /**
    * Ajoute ou modifie une ressource
    * @param {Ressource} ressource
    * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
-   * @throws {Error} Si la ressource est invalide (avec la liste des anomalies relevées)
-   * @return {string} L'id de la ressource insérée
    */
   $ressourceRepository.write = function(ressource, next) {
     if (ressource.constructor.name !== 'Ressource') {
+      log.debug("cast en Ressource dans write")
       ressource = Ressource.create(ressource)
-      log.debug('cast en Ressource : ' +ressource.constructor.name)
     }
     /* mesure de perfs * /
      var t
-     if (ressource.id && lassi.tmp && lassi.tmp[ressource.id]) t = lassi.tmp[ressource.id]
+     if (ressource.oid && lassi.tmp && lassi.tmp[ressource.oid]) t = lassi.tmp[ressource.oid]
      else t = {m:'',s:0}
      /* fin mesures (avec la ligne t.m += ... un peu plus bas) */
     //log.debug("avant validation dans write", ressource)
     flow()
       // validation
-        .seq(function() { $ressourceControl.valide(ressource, this) })
+        .seq(function() { $ressourceRepository.valide(ressource, this) })
       // updateVersion
         .seq(function (ressource) { updateVersion(ressource, this) })
       // store

@@ -34,32 +34,15 @@
 /**
  * Entity Ressource
  * @param Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
- * @param $ressourceControl
  */
-module.exports = function (Ressource, $ressourceControl) {
+module.exports = function (Ressource) {
 
   var _ = require('lodash')
   var tools = require('../tools')
 
-  // on regarde à la déclaration du service quel est le dernier idOrigine utilisé pour l'origine 'local'
-  var firstFreeId
-  Ressource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function(error, entity) {
-    if (error) throw error
-    firstFreeId = 1
-    if (entity) firstFreeId += entity.idOrigine
-  })
-
-  /**
-   * Retourne le 1er id dispo à utiliser comme idOrigine pour l'origine "local"
-   * @returns {number}
-   */
-  function getFreeId() {
-    return firstFreeId++;
-  }
-
   /**
    * L'entity Ressource
-   * @param {Object} initObj Un objet ayant des propriétés d'une ressource
+   * @param {Ressource} initObj Un objet ayant des propriétés d'une ressource
    * @constructor Ressource
    * @extends EntityInstance
    */
@@ -71,11 +54,6 @@ module.exports = function (Ressource, $ressourceControl) {
      */
     this.warnings = []
     /**
-     * L'identifiant de la ressource, utilisé dans les urls
-     * @type {Number}
-     */
-    this.id = 0
-    /**
      * identifiant du dépôt d'origine (où est stockée et géré la ressource), reste null si créé ici
      * @type {String}
      */
@@ -84,7 +62,7 @@ module.exports = function (Ressource, $ressourceControl) {
      * Id de la ressource dans son dépôt d'origine
      * @type {String}
      */
-    this.idOrigine = 0;
+    this.idOrigine = this.oid;
     /**
      * Le code du plugin qui gère la ressource
      * @type {String}
@@ -194,17 +172,9 @@ module.exports = function (Ressource, $ressourceControl) {
      */
     this.archiveOid = 0
 
-    // on ajoute toutes les propriétés de notre objet initial (avec des propriétés supplémentaires éventuelles)
+    // et on ajoute toutes les propriétés de notre objet initial (avec des propriétés supplémentaires éventuelles)
     // Attention, oid aussi (faut le virer avant si c'est l'oid d'une autre entité, archive par ex)
-    if (initObj) {
-      var tmp = tools.clone(this)
-      tools.merge(tmp, initObj)
-      $ressourceControl.validate(tmp, function (error) {
-        if (error) log.error(new Error("Objet invalide passé au constructeur Ressource,\n" +error.toString(), initObj))
-        else tools.merge(this, initObj)
-      })
-    }
-
+    tools.merge(this, initObj)
   })
 
 
@@ -222,17 +192,15 @@ module.exports = function (Ressource, $ressourceControl) {
     // si le tableau d'erreur est vide (devrait toujours être le cas,
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
     if (_.isEmpty(this.warnings)) delete this.warnings
-    // et l'idOrigine pour une origine locale si la ressource n'en a pas encore un
-    if (this.origine === 'local' && !this.idOrigine) this.idOrigine = getFreeId()
-    next()
+      // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
+      // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
+      //log.debug('beforeStore fini')
+      next()
   })
 
   // on peut pas mettre du $cacheRessource en afterStore car il est pas encore défini (il dépend de nous)
-  // on laisse un éventuel idOrigine à 0 avec une origine 'local', mais ce sera rectifié dès prochain load
-  // donc on ne pourra jamais récupérer d'idOrigine nul
 
   Ressource
-    .defineIndex('id', 'integer')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
     .defineIndex('typeTechnique', 'string')
