@@ -57,25 +57,35 @@ tools.update = function(object, addition) {
  * fusionne si c'est deux objets et écrase les anciennes valeurs sinon)
  * @param {Object} object L'objet source
  * @param {Object} newValues Les valeurs à fusionner
+ * @param {boolean} [strict=false] passer true pour lancer une exception si les arguments ne sont pas 2 Object ou 2 Array
  */
-tools.merge = function(object, newValues) {
+tools.merge = function(object, newValues, strict) {
   function mergeArray(arDest, arSrc) {
-    var s, d;
+    var s, d, found
     for (s = 0; s < arSrc.length; s++) {
+      found = false
       for (d = 0; d < arDest.length; d++) {
-        if (_.equals(arSrc[s], arDest[d])) break;
-        else if (d === arDest.length - 1) arDest.push(arSrc[s]);
+        if (_.equals(arSrc[s], arDest[d])) {
+          found = true
+          break
+        }
       }
+      if (!found) arDest.push(arSrc[s])
     }
   }
   function mergeObj(obj, values) {
-    if (values instanceof Object) _.each(values, function(value, key) {
-      if (_.isArray(value) && _.isArray(obj[key])) mergeArray(obj[key], value);
-      else if (_.isObject(value) && _.isObject(obj[key])) mergeObj(obj[key], value);
-      else obj[key] = value;
+    _.each(values, function(value, key) {
+      // 2 tableaux à merger
+      if (_.isArray(value) && _.isArray(obj[key])) mergeArray(obj[key], value)
+      // 2 objets
+      else if (_.isObject(value) && _.isObject(obj[key])) mergeObj(obj[key], value)
+      // sinon on écrase
+      else obj[key] = value
     })
   }
-  mergeObj(object, newValues);
+  if (object instanceof Array && newValues instanceof Array) mergeArray(object, newValues)
+  else if (object instanceof Object && newValues instanceof Object) mergeObj(object, newValues)
+  else if (strict) throw new Error('tools.merge réclame 2 Object ou 2 Array')
 }
 
 /**
