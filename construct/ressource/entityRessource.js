@@ -34,15 +34,32 @@
 /**
  * Entity Ressource
  * @param Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
+ * @param $ressourceControl
  */
 module.exports = function (Ressource, $ressourceControl) {
 
   var _ = require('lodash')
   var tools = require('../tools')
 
+  // on regarde à la déclaration du service quel est le dernier idOrigine utilisé pour l'origine 'local'
+  var firstFreeId
+  Ressource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function(error, entity) {
+    if (error) throw error
+    firstFreeId = 1
+    if (entity) firstFreeId += entity.idOrigine
+  })
+
+  /**
+   * Retourne le 1er id dispo à utiliser comme idOrigine pour l'origine "local"
+   * @returns {number}
+   */
+  function getFreeId() {
+    return firstFreeId++;
+  }
+
   /**
    * L'entity Ressource
-   * @param {Ressource} initObj Un objet ayant des propriétés d'une ressource
+   * @param {Object} initObj Un objet ayant des propriétés d'une ressource
    * @constructor Ressource
    * @extends EntityInstance
    */
@@ -62,7 +79,7 @@ module.exports = function (Ressource, $ressourceControl) {
      * Id de la ressource dans son dépôt d'origine
      * @type {String}
      */
-    this.idOrigine = this.oid;
+    this.idOrigine = 0;
     /**
      * Le code du plugin qui gère la ressource
      * @type {String}
@@ -199,10 +216,9 @@ module.exports = function (Ressource, $ressourceControl) {
     // si le tableau d'erreur est vide (devrait toujours être le cas,
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
     if (_.isEmpty(this.warnings)) delete this.warnings
-      // on ne peut pas générer l'id ici s'il n'existe pas car on a besoin de l'oid qui n'existe pas encore
-      // idem pour updateVersion qui est géré dans le write (car on a besoin d'une callback)
-      //log.debug('beforeStore fini')
-      next()
+    // et l'idOrigine pour une origine locale si la ressource n'en a pas encore un
+    if (this.origine === 'local' && !this.idOrigine) this.idOrigine = getFreeId()
+    next()
   })
 
   // on peut pas mettre du $cacheRessource en afterStore car il est pas encore défini (il dépend de nous)

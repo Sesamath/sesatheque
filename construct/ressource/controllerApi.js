@@ -142,46 +142,47 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     function populateEnfants(parent, nextStep) {
       if (parent.enfants && parent.enfants.length) {
         flow(parent.enfants)
-          // seqEach passe au suivant de la boucle quand la cb appelle this et au seq suivant à la fin
-            .seqEach(function (enfant, enfantIndex) {
-              var finEach = this
-              if (enfant.ref && enfant.refOrigine) {
-                // on le cherche en db
-                //var logSuffix = enfant.refOrigine + ' - ' + enfant.ref
-                //log('load ' + logSuffix)
-                $ressourceRepository.loadByOrigin(enfant.refOrigine, enfant.ref, function (error, ressource) {
-                  //log('load retour' +logSuffix)
-                  if (ressource) {
-                    updateTitre(ressource, enfant.titre)
-                    var newEnfant = {
-                      id           : ressource.oid,
-                      titre        : ressource.titre,
-                      typeTechnique: ressource.typeTechnique
-                    }
-                    if (enfant.contenu) newEnfant.contenu = enfant.contenu
-                    if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
-                    // visiblement seq casse les références,
-                    // on affecte directement à la variable parent restée hors du flux
-                    parent.enfants[enfantIndex] = newEnfant
-                  } else {
-                    // sinon on laisse en l'état mais on logue
-                    log.errorData("On a pas trouvé la ressource " +enfant.refOrigine +' ' +enfant.ref)
-                    parent.enfants[enfantIndex].titre += ' (non trouvé)'
+          // seqEach passe au suivant de la boucle quand la cb appelle this
+          // et au seq suivant quand la dernière cb appele this
+          .seqEach(function (enfant, enfantIndex) {
+            var finEach = this
+            if (enfant.ref && enfant.refOrigine) {
+              // on le cherche en db
+              //var logSuffix = enfant.refOrigine + ' - ' + enfant.ref
+              //log('load ' + logSuffix)
+              $ressourceRepository.loadByOrigin(enfant.refOrigine, enfant.ref, function (error, ressource) {
+                //log('load retour' +logSuffix)
+                if (ressource) {
+                  updateTitre(ressource, enfant.titre)
+                  var newEnfant = {
+                    oid          : ressource.oid,
+                    titre        : ressource.titre,
+                    typeTechnique: ressource.typeTechnique
                   }
-                  populateEnfants(parent.enfants[enfantIndex], finEach)
-                })
-              } else {
-                // pas de ref, on regarde quand même s'il y a des enfants éventuels
-                populateEnfants(enfant, finEach)
-              }
-            }) // parEach
-            .seq(function () {
-              nextStep()
-            })
-            .catch(function() {
-              log.error("L'analyse de l'arbre a planté", parent)
-              nextStep()
-            })
+                  if (enfant.contenu) newEnfant.contenu = enfant.contenu
+                  if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
+                  // visiblement seq casse les références,
+                  // on affecte directement à la variable parent restée hors du flux
+                  parent.enfants[enfantIndex] = newEnfant
+                } else {
+                  // sinon on laisse en l'état mais on logue
+                  log.errorData("On a pas trouvé la ressource " +enfant.refOrigine +' ' +enfant.ref)
+                  parent.enfants[enfantIndex].titre += ' (non trouvé)'
+                }
+                populateEnfants(parent.enfants[enfantIndex], finEach)
+              })
+            } else {
+              // pas de ref, on regarde quand même s'il y a des enfants éventuels
+              populateEnfants(enfant, finEach)
+            }
+          }) // parEach
+          .seq(function () {
+            nextStep()
+          })
+          .catch(function() {
+            log.error("L'analyse de l'arbre a planté", parent)
+            nextStep()
+          })
       } else {
         nextStep()
       }
@@ -483,8 +484,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Create / update une ressource à partir du post d'un arbre
-   * Si l'arbre posté contient une ref mais pas d'enfant, on tentera de récupérer l'arbre et de mettre à jour sa racine,
-   * sinon, avec une ref on écrase l'ancien s'il existait ou on insère une nouvelle ressource
+   * Si l'arbre posté contient une ref mais pas d'enfant, on tentera de mettre à jour 
+   * la racine de l'arbre en référence
+   * Avec une ref et des enfants on écrase l'ancien s'il existait ou on signale l'erreur (ref incorrecte)
    */
   controller.post('arbre', function (context) {
     var partial = context.post.ref && !context.post.childrens
@@ -529,14 +531,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // log.debug("dans api get " +oid, ressource)
       if (error) {
         sendJson(context, error)
-      } else if (ressource && ressource.typeTechnique === 'arbre') {
-        if ($accessControl.hasReadPermission(context, ressource)) {
-          sendJson(context, null, $ressourceConverter.toArbre(ressource))
+      } else if (ressource) {
+        if (ressource.typeTechnique === 'arbre') {
+          if ($accessControl.hasReadPermission(context, ressource)) {
+            sendJson(context, null, $ressourceConverter.toArbre(ressource))
+          } else {
+            denied("Droits insuffisants pour accéder à la ressource " + oid, context)
+          }
         } else {
-          denied("Droits insuffisants pour accéder à la ressource " + oid, context)
+          notFound("La ressource d'identifiant " + oid + " n'est pas un arbre", context)
         }
       } else {
-        notFound("La ressource d'identifiant " + oid + " n'existe pas ou n'est pas un arbre", context)
+        notFound("La ressource d'identifiant " + oid + " n'existe pas", context)
       }
     })
   })
