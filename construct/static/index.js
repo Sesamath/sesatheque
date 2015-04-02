@@ -46,12 +46,6 @@ staticComponent.config(function() {
   lassi.on('beforeTransport', function(context, data) {
     var req = context.request.method +' ' +context.request.originalUrl
     log.debug('on beforeTransport (dans static), sur '  +req +' (' +context.contentType +' ' +context.status +') avec les data ', data, 'beforeTransport')
-    /*if (/\.css$/.exec(context.request.originalUrl)) {
-      log(new Error("on passe dans beforeTransport sur du css"))
-      log('beforeTransport le context ', context)
-      log('beforeTransport la requête ', context.request)
-      log('beforeTransport la réponse ', context.response)
-    } /* */
 
     // l'api gère ses erreurs toute seule sur ses urls
     if (context.contentType !== 'application/json') {

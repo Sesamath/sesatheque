@@ -45,7 +45,7 @@ else if (typeof module === 'object') module.exports = Arbre;
  * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
  * C'est aussi la définition d'une branche ou d'une feuille
  *
- * @param {Object} initObj L'objet qui sert à initialiser un nouvel Arbre
+ * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel Arbre
  * @constructor
  */
 function Arbre(initObj) {
@@ -54,30 +54,27 @@ function Arbre(initObj) {
    * L'identifiant de l'arbre (pour éventuellement le référencer comme enfant d'un autre arbre)
    * @type {(Number|string|undefined)}
    */
-  this.id = initObj.id || undefined;
+  this.oid = initObj.oid || undefined;
   /**
-   * Une référence vers le "vrai" Arbre, si on n'est qu'une référence et pas l'objet complet 
+   * Une référence vers l'oid du "vrai" Arbre|feuille sur la sesatheque courante, si on n'est
+   * qu'une référence et pas l'objet complet.
+   *
+   * Si une appli mélange des références en provenance de différentes sesatheques, elle pourra ajouter une
+   * propriété refSource pour les distinguer
    * @type {(Number|string|undefined)}
    */
   this.ref = initObj.ref || undefined;
-  /**
-   * L'origine de la référence, pour savoir où aller la chercher
-   * Il peut être un identifiant d'une bibliothèque ou une origine (dans ce cas ref est un idOrigine de ressource)
-   * S'il est vide ou absent, on considèrera ref comme un id de la bibliothèque courante
-   * @type {(Number|string|undefined)}
-   */
-  this.refOrigine  = initObj.refOrigine || undefined;
   /**
    * Le nom
    * @type {string}
    */
   this.titre = (initObj.titre && typeof initObj.titre === 'string') ? initObj.titre : '';
   /**
-   * Le typeTechnique de la racine (qui peut être une feuille),
+   * Le typeTechnique de la racine (qui peut être une feuille, dans ce cas c'est pas arbre),
    * qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {(Number|string|undefined)}
    */
-  this.typeTechnique = initObj.typeTechnique || undefined
+  this.typeTechnique = initObj.typeTechnique || 'arbre'
   /**
    * Des attributs du node (ou la racine de l'arbre), ça peut être ico pour une icone particulière
    * @type {Object}
@@ -85,7 +82,7 @@ function Arbre(initObj) {
   this.attributes = (initObj.attributes && initObj.attributes instanceof Object ) ? initObj.attributes : {};
   /**
    * Les enfants, un tableaux d'objets Arbre (qui peuvent n'être que des références, ou un mix)
-   * @type {Array}
+   * @type {Arbre[]}
    */
   this.enfants = (initObj.enfants && initObj.enfants instanceof Array) ? initObj.enfants : [];
 }

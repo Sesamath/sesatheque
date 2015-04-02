@@ -35,8 +35,6 @@
  * Init de notre service $ressourceRepository
  */
 module.exports = function (Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource) {
-  if (!Ressource || !$accessControl || !$cacheRessource)
-      throw new Error("Impossible d'initialiser $ressourceRepository faute de prérequis")
   /**
    * Service d'accès aux ressources, utilisé par les différents contrôleurs
    * @namespace $ressourceRepository

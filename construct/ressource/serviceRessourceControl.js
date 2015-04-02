@@ -34,7 +34,7 @@
 /**
  * Init de notre service $ressourceControl
  */
-module.exports = function () {
+module.exports = function (idInitial) {
   /**
    * Service de validation d'une ressource
    * @namespace $ressourceControl
