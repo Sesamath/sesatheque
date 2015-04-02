@@ -34,6 +34,7 @@
 /**
  * Entity Ressource
  * @param Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
+ * @param $ressourceControl
  */
 module.exports = function (Ressource, $ressourceControl) {
 
@@ -42,7 +43,7 @@ module.exports = function (Ressource, $ressourceControl) {
 
   /**
    * L'entity Ressource
-   * @param {Ressource} initObj Un objet ayant des propriétés d'une ressource
+   * @param {Object} initObj Un objet ayant des propriétés d'une ressource
    * @constructor Ressource
    * @extends EntityInstance
    */
@@ -53,6 +54,11 @@ module.exports = function (Ressource, $ressourceControl) {
      * Viré au save s'il est vide
      */
     this.warnings = []
+    /**
+     * L'identifiant de la ressource, utilisé dans les urls
+     * @type {Number}
+     */
+    this.id = 0
     /**
      * identifiant du dépôt d'origine (où est stockée et géré la ressource), reste null si créé ici
      * @type {String}
@@ -210,6 +216,7 @@ module.exports = function (Ressource, $ressourceControl) {
   // donc on ne pourra jamais récupérer d'idOrigine nul
 
   Ressource
+    .defineIndex('id', 'integer')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
     .defineIndex('typeTechnique', 'string')

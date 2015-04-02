@@ -220,7 +220,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.debug("dans cb api write on récupère", ressource)
         if (error) sendJson(context, error)
         else {
-          var data = {oid: ressource.oid}
+          var data = {id: ressource.id}
           if (!_.isEmpty(ressource.warnings)) {
             data.warnings = ressource.warnings
           }
