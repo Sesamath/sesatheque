@@ -48,7 +48,7 @@ ressourceComponent.entity('Archive', function () {
 })
 
 ressourceComponent.service('$ressourceControl', function() {
-  return require('./serviceCacheRessource')()
+  return require('./serviceRessourceControl')()
 })
 
 ressourceComponent.entity('Ressource', function ($ressourceControl) {
