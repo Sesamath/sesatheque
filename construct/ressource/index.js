@@ -41,28 +41,6 @@ ressourceComponent.config(function($settings, Ressource) {
   if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")
   else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
   else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
-
-  // et on initialise notre fct Ressource.getFreeId (qui regarde à la déclaration du composant
-  // quel est le dernier idOrigine utilisé pour l'origine 'local' et l'incrémentera de 1 à chaque appel
-  // sauf que ça marchera pas en cluster node...
-  Ressource.getFreeId = (function () {
-    // on regarde à la déclaration du composant quel est le dernier idOrigine utilisé pour l'origine 'local'
-    var firstFreeId
-    /*Ressource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function(error, entity) {
-      if (error) throw error
-      firstFreeId = 1
-      if (entity) firstFreeId += entity.idOrigine
-    })*/
-
-    /**
-     * Retourne le 1er id dispo à utiliser comme idOrigine pour l'origine "local"
-     * @returns {number}
-     */
-    return function getFreeId() {
-      return firstFreeId++;
-    }
-
-  })()
 })
 
 ressourceComponent.entity('Archive', function () {
@@ -117,7 +95,7 @@ ressourceComponent.controller('api', function ($ressourceRepository, $ressourceC
  * En dev on ajoute des routes de debug
  */
 if (lassi.settings.application.staging !== 'production') {
-  ressourceComponent.controller('debug', function ($ressourceRepository) {
+  ressourceComponent.controller('debug/ressource', function ($ressourceRepository) {
     require('./controllerDebug')(this, $ressourceRepository)
   })
 }

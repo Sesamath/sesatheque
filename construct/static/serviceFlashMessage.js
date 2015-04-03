@@ -31,42 +31,30 @@
 
 'use strict'
 
-/**
- * Component qui défini
- * - le service $flashMessages
- * - le layout et les vues pour le html
- * - les controleurs des pages statiques
- * - des controleurs de debug en dev
- */
-var staticComponent = lassi.component('static')
+module.exports = function () {
+  return {
+    add : function (context, message, level) {
+      var cssClass = 'flash'
+      if (level) cssClass += '-' +level
+      if (!context.session.flashMessages) context.session.flashMessages = []
+      context.session.flashMessages.push({
+        cssClass : cssClass,
+        value : message
+      })
+    },
+    getData : function (context) {
+      var data
+      if (context.session.flashMessages) {
+        data = {
+          flashBloc : {
+            $view : 'flash',
+            messages : context.session.flashMessages
+          }
+        }
+        delete context.session.flashMessages
+      }
 
-  /**
-   * On ajoute un dust.helper à l'initialisation du framework
-   * Cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
-   *
-   * context contient les propriétés stack,global,blocks,templateName,
-   *     on peut récupérer les paramètres passés à la vue avec context.get('param')
-   * bodies contient block
-   * params liste les attributs passé au helper avec {@helper attrName1=...}
-   * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
-   * this.application.templateEngines.dust existe plus /
-  this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
-    return chunk.write('<pre class="debug">' + JSON.stringify(params, null, 2) + '</pre>');
-  }); /**/
-
-staticComponent.service('$flashMessages', function() {
-  return require('./serviceFlashMessage')()
-})
-
-staticComponent.controller(function ($flashMessages) {
-  require('./controllerMain')(this, $flashMessages)
-})
-
-/**
- * En dev on ajoute des routes de debug
- */
-if (isProd) {
-  staticComponent.controller(function () {
-    require('./controllerDebug')(this)
-  })
+      return data
+    }
+  }
 }
