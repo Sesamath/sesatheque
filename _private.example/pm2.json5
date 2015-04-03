@@ -1,53 +1,32 @@
 {
   /**
-   * This is a sample configuration file for sesatheque deploy with PM2
+   * Fichier de conf pour pm2, dans _private car spécifique à un triplet local/dev/prod
+   * et pas générique au projet sesatheque
    */
   "apps" : [
     // First application
     {
       "name"             : "sesatheque",
-      "script"           : "./construct/index.js",
-      "log_date_format"  : "YYYY-MM-DD HH:mm Z",
-      "exec_mode"        : "cluster_mode",
+      "script"           : "construct/index.js",
+      "log_date_format"  : "YYYY-MM-DD HH:mm:ss",
+      "exec_mode"        : "cluster",
       "exec_interpreter" : "node",
       "node_args"        : [],
       "instances"        : "2",
       "watch"            : false,
-      "pid_file"         : "./sesatheque.pid",
-      "error_file"       : "./logs/sesatheque-err.log",
-      "out_file"         : "./logs/sesatheque-out.log",
+      "pid_file"         : "sesatheque.pid",
+      "error_file"       : "logs/sesatheque-err.log",
+      "out_file"         : "logs/sesatheque-out.log",
 
       "env": {
-        "LOGDIR": "./logs"
-      },
-      "env_local" : {
-        "NODE_ENV": "dev"
+        "LOGDIR": "logs",
+	"PORT"  : 3001
       },
       "env_dev" : {
         "NODE_ENV": "dev"
       },
       "env_production" : {
         "NODE_ENV": "production"
-      }
-    },
-    // second app for local use with watch
-    {
-      "name": "stlocal",
-      "script": "./construct/index.js",
-      "log_date_format": "YYYY-MM-DD HH:mm Z",
-      "exec_mode": "cluster_mode",
-      "exec_interpreter": "node",
-      "node_args": [],
-      "instances": "2",
-      "watch": ["*.js"],
-      "ignore_watch" : ["construct/**/public"],
-      // cf pm2-localwacth.json pour
-      "pid_file": "./sesatheque.pid",
-      "error_file": "./logs/sesatheque-err.log",
-      "out_file": "./logs/sesatheque-out.log",
-      "env": {
-        "NODE_ENV": "dev",
-        "LOGDIR": "./logs"
       }
     }
   ],
@@ -65,21 +44,16 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque#master",
       path : "/var/www/sesatheque/production",
-      "post-deploy" : "npm install && pm2 startOrRestart _private/ecosystem.json5 --env production",
-      env  : {
-        NODE_ENV: "production"
-      }
+      "post-deploy" : "npm install && pm2 startOrRestart _private/pm2.json5 --env production",
     },
     dev : {
       user : "sesatheque",
       host : "0.0.0.0",
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque#master",
-      path : "/var/www/sesatheque/production",
-      "post-deploy" : "npm install && pm2 startOrRestart _private/ecosystem.json5 --env dev",
-      env  : {
-        NODE_ENV: "dev"
-      }
+      path : "/var/www/sesatheque/dev",
+      post-deploy : "npm install && pm2 startOrRestart _private/pm2.json5 --env dev",
+
     }
   }
 }
