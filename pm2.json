@@ -1,0 +1,24 @@
+{
+  "comment1": "Conf PM2 pour un usage de dev en local",
+  "comment2": "Cf https://github.com/Unitech/pm2#usagefeatures",
+  "comment3": "le watch pourrait être utile, ça démarre pas chez moi",
+  "apps": [
+    {
+      "name": "sesatheque",
+      "env": {},
+      "NODE_ENV": "development",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss.SSS",
+      "exec_mode": "cluster_mode",
+      "instances": "2",
+      "exec_interpreter": "node",
+      "script": "construct/index.js",
+      "node_args": [],
+      "watch": ["construct/**/*.js"],
+      "ignore_watch": ["construct/**/public", "construct/qxApps"],
+      "pid_file": "./logs/sesatheque.pid",
+      "error_file": "./logs/error.log",
+      "out_file": "./logs/stdout.log"
+    }
+  ]
+}
+        
