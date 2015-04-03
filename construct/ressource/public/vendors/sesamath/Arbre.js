@@ -45,6 +45,9 @@ else if (typeof module === 'object') module.exports = Arbre;
  * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
  * C'est aussi la définition d'une branche ou d'une feuille
  *
+ * La présence d'un attribut oid, laisse supposer titre et typeTechnique sont renseignés,
+ * sinon ref doit être renseigné pour aller les chercher
+ *
  * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel Arbre
  * @constructor
  */

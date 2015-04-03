@@ -44,6 +44,8 @@ require('lassi')(__dirname +'/..')
 // nos loggers
 GLOBAL.log = require('./tools/log.js')
 
+GLOBAL.isProd = ((lassi.settings.application.staging === 'production'))
+
 // les déclarations de nos components
 require('./static')
 require('./ressource')
@@ -81,23 +83,23 @@ sesatheque.config(function($cache, $settings) {
   // on ajoute memcache si précisé dans les settings
   var memcache = $settings.get('memcache')
   if (memcache) {
+    if (typeof memcache !== 'string') {
+      throw new Error("L'application sesatheque ne peut pas tourner avec un cluster memcache" +
+                      " car elle utilise memcache comme stockage commun aux différents workers nodejs (pour lastIdOrigine)")
+    }
     $cache.addEngine('', 'memcache', memcache);
     log('Memcache ajouté sur ' +memcache)
-  } else {
-    log.error("Il manque memcache en config, on s'en passera mais il vaudrait mieux l'ajouter")
+  } else if (process.env.NODE_UNIQUE_ID) {
+    // @see https://nodejs.org/api/cluster.html#cluster_cluster_ismaster
+    throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
   }
-  // on met ce flag en global
-  GLOBAL.isProd = ($settings.get('application.staging') === 'production')
+
+  // on ajoute nos listeners
+  require('./listeners')()
+
   // log("sesatheque en fin de config", sesatheque)
   log("FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
 })
-
-
-// on déclenchera ça quand le boot sera fini
-lassi.on('bootstrap', function () {
-  console.log("Boot de l'application " + sesatheque.name)
-  log.debug('BOOT')
-});
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
 /* * /

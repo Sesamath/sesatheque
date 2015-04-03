@@ -40,60 +40,6 @@
  */
 var staticComponent = lassi.component('static')
 
-// On configure le layout des erreurs lors de l'init du composant
-staticComponent.config(function() {
-  // la définition du layout à utiliser si c'est une erreur ou si c'est forcé (sinon, c'est au contrôleur de le faire)
-  lassi.on('beforeTransport', function(context, data) {
-    var req = context.request.method +' ' +context.request.originalUrl
-    log.debug('on beforeTransport (dans static), sur '  +req +' (' +context.contentType +' ' +context.status +') avec les data ', data, 'beforeTransport')
-
-    // l'api gère ses erreurs toute seule sur ses urls
-    if (context.contentType !== 'application/json') {
-      // mais si c'est une url qu'elle ne gère pas on le fait pour elle
-      if (context.request.originalUrl.substr(0, 5) === '/api/') {
-        log.error(new Error("requete " +req +" et contentType non json " +context.contentType), data)
-        context.status = 404
-        context.contentType = 'application/json'
-        if (!data.error) data.error = 'not found'
-      } else {
-        // ça devrait être du html, on fixe 404 si pas de contenu
-        if (!data.contentBloc && !context.status) {
-          log.error('pas de status ni content => 404')
-          context.status = 404
-        }
-
-        // et on ne gère que les erreurs
-        if (context.status && context.status > 400) {
-          // lassi a mis du plain sur les erreurs
-          context.contentType = 'text/html'
-          // et une string dans data
-          if (typeof data !== 'object') data = {}
-          // ou data.content
-          if (data.content) delete data.content
-          // on ajoute layout et vue pour cette erreur
-          if (!data.$metas) data.$metas = {}
-          data.$views = __dirname +'/views'
-          if (!data.$layout) data.$layout = 'layout-page'
-          if (!data.contentBloc) data.contentBloc = {}
-          data.contentBloc.$view = 'error'
-
-          // reste à choisir le texte d'erreur à afficher
-          var msg
-          switch (context.status) {
-            case 404: msg = "Cette page n'existe pas"; break
-            case 403: msg = "Authentification requise"; break
-            default: msg = "Ooops, une erreur est survenue (" +context.status +')'
-          }
-          data.contentBloc.error = msg
-          data.$metas.title = msg
-          log.debug(req +" en erreur " +context.status +", les data après modif", data)
-          //log.debug("et le contexte", context)
-        }
-      }
-    }
-  })
-})
-
   /**
    * On ajoute un dust.helper à l'initialisation du framework
    * Cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
@@ -109,49 +55,8 @@ staticComponent.config(function() {
   }); /**/
 
 
-staticComponent.controller(function ($flashMessages, $settings) {
-  var baseData = {
-    $metas : {},
-    $views : __dirname +'/views',
-    $layout : 'layout-page'
-  }
-  var isProd = $settings.get('application.staging', 'dev') === 'production';
-
-  // nos ressources statiques génériques
-  this.serve(__dirname +'/public')
-isProd = true
-  // pour nos tests qx
-  if (isProd) {
-    //this.serve('qx/script',   __dirname +'/../qxApps/tree/build/script');
-    //this.serve('qx/resource', __dirname +'/../qxApps/tree/build/resource');
-    this.serve('qx', __dirname +'/../qxApps/tree/build');
-  } else {
-    this.serve('qooxdoo',            __dirname +'/../qxApps/qooxdoo');
-    this.serve('qx/script', __dirname +'/../qxApps/tree/source/script');
-    this.serve('qx/resource',        __dirname +'/../qxApps/tree/source/resource');
-    this.serve('qx/source/class',    __dirname +'/../qxApps/tree/source/class');
-  }
-
-  // home
-  this.get('/', function (context) {
-    var data = baseData
-    // log('le contexte dans le controleur de static, action /',context)
-    data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
-    // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
-    data.contentBloc = {
-      $view : 'home',
-      // ce content est la variable passée au template dust
-      content : "Ce site est encore un prototype expérimental."
-    }
-    context.html(data)
-  })
-
-  // gestion des messages flash
-  this.get('*', function (context) {
-    if (context.request.url.indexOf('/api/') === 0) return context.next()
-    var data = $flashMessages.getData(context)
-    context.next(null, data)
-  })
+staticComponent.controller(function ($flashMessages) {
+  require('./controllerMain')(this, $flashMessages)
 })
 
 staticComponent.service('$flashMessages', function() {
@@ -185,7 +90,7 @@ staticComponent.service('$flashMessages', function() {
 /**
  * En dev on ajoute des routes de debug
  */
-if (lassi.settings.application.staging !== 'production') {
+if (isProd) {
   staticComponent.controller(function () {
     require('./controllerDebug')(this)
   })

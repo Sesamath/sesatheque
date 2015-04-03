@@ -38,41 +38,70 @@
  */
 module.exports = function ($settings) {
   var routes = $settings.get('components.ressource.constantes.routes')
+  var $routes = {}
 
-  return {
-    /**
-     * Retourne la route (sans préfixe de controleur) d'une action
-     * Les arguments supplémentaires sont concaténé avec /
-     * @memberOf $routes
-     *
-     * @param {String} action
-     * @returns {String} La route
-     */
-    get : function(action) {
-      var route = routes[action]
-      if (arguments.length > 1) route += '/' +Array.prototype.slice.call(arguments, 1).join('/')
+  /**
+   * Retourne la route (sans préfixe de controleur) d'une action
+   * Les arguments supplémentaires sont concaténé avec /
+   * @memberOf $routes
+   *
+   * @param {String} action
+   * @returns {String} La route
+   */
+  $routes.get = function(action) {
+    var route = routes[action]
+    if (arguments.length > 1) route += '/' +Array.prototype.slice.call(arguments, 1).join('/')
 
-      return route
-    },
+    return route
+  }
 
-    /**
-     * Retourne la route absolue (commence par /) d'une action (avec public ou ressource au début suivant la ressource)
-     * Les arguments supplémentaires sont concaténé avec /
-     * @memberOf $routes
-     *
-     * @param {String} action (display|describe|preview)
-     * @param {Ressource} ressource
-     * @returns {String}
-     */
-    getAbs : function(action, ressource) {
-      var route
-      if (['display', 'describe', 'preview'].indexOf(action) > -1) {
-        route = $settings.get('basePath', '/')
+  /**
+   * Retourne la route absolue (commence par /) d'une action (avec public ou ressource au début suivant la ressource)
+   * Les arguments supplémentaires sont concaténé avec /
+   * @memberOf $routes
+   *
+   * @param {String} action (display|describe|preview)
+   * @param {Ressource} ressource
+   * @returns {String}
+   */
+  $routes.getAbs = function(action, ressource) {
+    var route
+    if (['display', 'describe', 'preview'].indexOf(action) > -1) {
+      route = $settings.get('basePath', '/')
+      if (ressource.id && ressource.description) {
         route += (ressource.restriction === 0) ? 'public/' : 'ressource/'
         route += this.get(action, ressource.id)
-      } else log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
+      } else {
+        var oid = parseInt(ressource, 10)
+        if (oid > 0) route += this.get(action, oid)
+        else {
+          log.error(new Error("appel de $routes.getAbs avec un argument ressource incorrect", ressource))
+          route = null
+        }
+      }
+    } else log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
 
-      return route
-    }
+    return route
   }
+
+  /**
+   * Retourne un tag html a avec une url locale absolue (qui commence avec /)
+   * @param actionName
+   * @param ressource
+   * @param {string} [label=ressource.nom] Le texte du lien
+   * @returns {*}
+   */
+  $routes.getTagA = function (actionName, ressource, label) {
+    var html
+    var route = $routes.getAbs(actionName, ressource)
+    if (route) {
+      html =  '<a href="' +route +'">'
+      html += label || ressource.nom
+      html += '</a>'
+    }
+
+    return html
+  }
+
+  return $routes
 }

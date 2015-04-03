@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-"use strict";
+"use strict"
 
 module.exports = function (Personne) {
   Personne.construct = function () {

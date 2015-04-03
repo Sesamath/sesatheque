@@ -36,6 +36,8 @@
  * POST /api/ressourceMerge
  */
 'use strict'
+var Memcached = require('memcached');
+var mc = new Memcached('127.0.0.1:11211')
 
 /**
  * Le controleur json du composant ressource (sur /api/)
@@ -44,10 +46,12 @@
  * @param $ressourceConverter
  * @param $accessControl
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $ressourceControl, $cache, Ressource) {
 
   var _ = require('lodash')
   var flow = require('seq')
+
+  var tools = require('../tools')
 
   /**
    * Équivalent de context.denied en json
@@ -72,15 +76,20 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Ajoute la propriété url à chaque elt du tableau de ressource
-   * @param {Array} ressources
-   * @returns {Array} Le nouveau tableau de ressources
+   * Callback générique de sortie
+   * @param context
+   * @param error
+   * @param data
    */
-  function addUrls(ressources) {
-    ressources.forEach(function (ressource) {
-      if (ressource.restriction === 0) ressource.url = '/api/public/' +ressource.oid
-      else ressource.url = '/api/' +ressource.oid
-    })
+  function sendJson(context, error, data) {
+    if (error) {
+      log.error(error);
+      log.debug("sendJson va renvoyer l'erreur", error, 'api')
+      context.json({error: error.toString()})
+    } else {
+      log.debug('sendJson va renvoyer', data, 'api')
+      context.json(data)
+    }
   }
 
   /**
@@ -116,6 +125,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.debug("titre de " +ressource.oid +" changé : " +ressource.titre +' => ' +newTitre)
         ressource.titre = newTitre
         ressource.store()
+    }
+  }
+
+  /**
+   * Met à jour une ressource issue de la bdd et appelle write pour l'enregistrer et sortir
+   * ou sort avant avec une erreur
+   * @param context
+   * @param error
+   * @param ressourceBdd
+   * @param ressourceNew
+   * @param {Function} [final=write] Une fct next (sinon ce sera write)
+   */
+  function updateAndOut(context, error, ressourceBdd, ressourceNew, final) {
+    if (error) {
+      sendJson(context, error)
+    } else {
+      // attention, le merge de lodash n'est pas récursif et n'écrase que les propriétés qui existent en destination
+      _.merge(ressourceBdd, ressourceNew)
+      if (final) final(context, ressourceBdd)
+      else write(context, ressourceBdd)
     }
   }
 
@@ -207,72 +236,51 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Vérifie les droits et enregistre la ressource
+   * Vérifie la validité de la ressource, les droits et enregistre la ressource
    * @param context
    * @param ressource
    */
   function write(context, ressource) {
     var permission = ressource.oid ? 'update' : 'create'
-    if ($accessControl.hasPermission(permission, context, ressource)) {
-      $ressourceRepository.write(ressource, function (error, ressource) {
-        // oid - convertPost - valide+setVersion - store - store2 - fin
-        //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
-        //log.errorData(lassi.tmp[context.post.oid].m)
-        log.debug("dans cb api write on récupère", ressource)
-        if (error) sendJson(context, error)
-        else {
-          var data = {oid: ressource.oid}
-          if (!_.isEmpty(ressource.warnings)) {
-            data.warnings = ressource.warnings
+    $ressourceControl.valide(ressource, function (error, ressource) {
+      if (error) sendJson(context, error)
+      else if ($accessControl.hasPermission(permission, context, ressource)) {
+        $ressourceRepository.write(ressource, function (error, ressource) {
+          // oid - convertPost - valide+setVersion - store - store2 - fin
+          //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
+          //log.errorData(lassi.tmp[context.post.oid].m)
+          log.debug("dans cb api write on récupère", ressource)
+          if (error) sendJson(context, error)
+          else {
+            var data = {oid: ressource.oid}
+            if (!_.isEmpty(ressource.warnings)) {
+              data.warnings = ressource.warnings
+            }
+            sendJson(context, null, data)
           }
-          sendJson(context, null, data)
-        }
-      })
-    } else {
-      var errorMsg = "Droits insuffisants"
-      if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
-      else errorMsg += " pour ajouter une ressource"
-      denied(errorMsg, context)
-    }
-  }
-
-  /**
-   * Callback générique de sortie
-   * @param context
-   * @param error
-   * @param data
-   */
-  function sendJson(context, error, data) {
-    if (error) {
-      log.error(error);
-      log.debug("sendJson va renvoyer l'erreur", error, 'api')
-      context.json({error: error.toString()})
-    } else {
-      log.debug('sendJson va renvoyer', data, 'api')
-      context.json(data)
-    }
+        })
+      } else {
+        var errorMsg = "Droits insuffisants"
+        if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
+        else errorMsg += " pour ajouter une ressource"
+        denied(errorMsg, context)
+      }
+    })
   }
 
   /**
    * Create / update une ressource
-   * Si le titre et la catégorie sont manquants on merge avec la ressource existante que l'on update, sinon on écrase
+   * Si le titre et la catégorie sont manquants (mais avec id) on merge avec la ressource existante que l'on update,
+   * sinon on écrase ou on créé
    * @callback api_ressource POST api/ressource
    * @param context
    */
   controller.post('ressource', function (context) {
-    // partiel si on a id (ou idOrigine) sans titre ni catégorie
+    // partiel si on a oid (ou idOrigine) sans titre ni catégorie
     var partial = !context.post.titre && !context.post.categories &&
         (context.post.id || (context.post.origine && context.post.idOrigine))
-    var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
 
-    function update(error, ressourceLoaded) {
-      if (error) {
-        sendJson(context, error)
-      } else {
-        ressourceLoaded.udate(ressource)
-        write(context, ressourceLoaded)
-      }
-    }
+    var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
 
     log.debug("dans /api/ressource on récupère en post", context.post, 'api')
 
@@ -290,8 +298,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
       if (partial) {
         // faut la charger
-        if (ressource.oid) $ressourceRepository.load(ressource.oid, update)
-        else $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, update)
+        if (ressource.oid) {
+          $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
+            updateAndOut(context, error, ressourceBdd, ressource)
+          })
+        } else {
+          $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
+            updateAndOut(context, error, ressourceBdd, ressource)
+          })
+        }
       } else write(context, ressource)
 
     } catch (error) {
@@ -301,7 +316,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   
   /**
    * Merge de nouvelles valeurs avec une ressource existante (ou pas, et dans ce cas idem 'ressource')
-   * Si le titre et la catégorie sont manquants on merge avec la ressource existante que l'on update, sinon on écrase
    */
   controller.post('ressourceMerge', function (context) {
         var part = $ressourceConverter.getRessourceFromPost(context.post, true)
@@ -497,17 +511,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var final = (context.get.populate) ? populateArbre : write
     var ressource = $ressourceConverter.getRessourceFromPostedArbre(context.post, partial)
 
-    function update(error, ressourceLoaded) {
-      if (error) sendJson(context, error)
-      else {
-        ressourceLoaded.udate(ressource)
-        final(context, ressource)
-      }
-    }
-
     // log.debug("dans api arbre on récupère", ressource)
     try {
-
       /* debug, mesure de perfs, init du chrono */
       /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs * /
       var msg = oid
@@ -517,8 +522,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       lassi.tmp[context.post.ref].m += '\tcv ' + log.getElapsed(lassi.tmp[context.post.ref].s)
       /* fin mesures de perfs */
 
-      if (partial) $ressourceRepository.load(oid, update)
-      else final(context, ressource);
+      if (partial) {
+        $ressourceRepository.load(oid, function (error, ressourceBdd) {
+          updateAndOut(context, error, ressourceBdd, ressource, final)
+        })
+      } else {
+        final(context, ressource);
+      }
     } catch (error) {
       sendJson(context, error)
     }
@@ -544,6 +554,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       } else {
         notFound("La ressource d'identifiant " + oid + " n'existe pas", context)
       }
+    })
+  })
+
+  var firstFreeId = 1
+  $cache.set('cpt', firstFreeId, 3600, function(){})
+
+  controller.get('cpt', function (context) {
+    //mc.incr('cpt', )
+    mc.incr('cpt', 1, function (err, val) {
+      context.json({cpt:firstFreeId++, err:err, val:val})
+
     })
   })
 }

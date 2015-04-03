@@ -73,16 +73,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Vérifie que le token du post correspond à celui en session
-   * @param ctx
+   * @param context
    * @param next
    */
-  function checkToken(ctx, next) {
-    if (!ctx.post.token || ctx.post.token !== ctx.session.token) {
-      if (ctx.session.token) delete ctx.session.token
-      log.debug('pb de token', ctx.post)
-      ctx.accessDenied("Paramètres invalides")
+  function checkToken(context, next) {
+    if (!context.post.token || context.post.token !== context.session.token) {
+      if (context.session.token) delete context.session.token
+      log.debug('pb de token', context.post)
+      context.accessDenied("Paramètres invalides")
     } else next()
   }
+
 
   /**
    * Vérifie que l'on a un user en session, affiche une 401 sinon

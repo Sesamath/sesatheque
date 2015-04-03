@@ -34,6 +34,7 @@
 /**
  * Nos loggers maison
  * @todo utiliser https://www.npmjs.org/package/winston
+ * @todo utiliser https://nodejs.org/api/util.html#util_util_debuglog_section
  */
 
 var fs = require('fs')

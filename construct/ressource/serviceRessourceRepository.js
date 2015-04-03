@@ -34,7 +34,7 @@
 /**
  * Init de notre service $ressourceRepository
  */
-module.exports = function (Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource) {
+module.exports = function (Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource, $cache) {
   /**
    * Service d'accès aux ressources, utilisé par les différents contrôleurs
    * @namespace $ressourceRepository
@@ -52,13 +52,37 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
 
   /**
+   * Le dernier (plus grand) idOrigine utilisé pour l'origine "local"
+   * @type {number}
+   */
+  var lastLocalId = 0
+
+  /**
    * Fonctions privées, helper des méthodes du service
    */
+
+  /**
+   * Initialise idOrigine s'il est absent sur une ressource local
+   * @param ressource
+   * @param next
+   */
+  function initIdOrigine(ressource, next) {
+    if (ressource.origine === 'local' && !ressource.idOrigine) {
+      $ressourceRepository.getLastLocalId(function (error, id) {
+        if (error) next(error)
+        else {
+          ressource.idOrigine = id
+          next(null, ressource)
+        }
+      })
+    } else next(null, ressource)
+  }
 
   /**
    * Incrémente le n° de version si la ressource a une propriété versionNeedIncrement
    * ou si une des propriétés listées dans config.versionTriggers a changée de valeur
    * Affecte la propriété oid si la ressource existait mais qu'on ne l'avait pas chargée depuis le cache ou la bdd
+   * Ajoute l'idOrigine si inexistant avec origine local
    * @param {Ressource} ressource
    * @param {Function} next
    * @private
@@ -121,6 +145,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
     } else {
       next(new Error("ressource sans oid ni idOrigine"))
     }
+
   }
 
   /**
@@ -209,26 +234,23 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    * @param next
    */
   $ressourceRepository.archive = function (ressource, next) {
-    if (!ressource.oid) {
-      next(new Error("Impossible d'archiver une ressource qui n'existe pas encore"))
-    } else {
-      // debug
-      if (!ressource.store) {
-        log.error(new Error("La ressource " +ressource.oid +" n'a pas de méthode store"))
-        next(null, ressource)
-        return
-      }
-      // on archive
+    try {
+      if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n'existe pas encore")
+      if (!ressource.store) throw new Error("La ressource " + ressource.oid + " n'a pas de méthode store")
+      if (ressource.origine === 'local' && !ressource.idOrigine) throw new Error("La ressource " + ressource.oid + " est locale mais n'a pas d'idOrigine, impossible de l'archiver")
+
       Archive.create(ressource).store(function (error, archive) {
         if (error) next(error)
         else {
+          // archive ok, on màj la ressource
           log.debug("On a archivé la ressource " + ressource.oid + " (avec l'oid en archive " + archive.oid + ')')
-          //updateRessource(archive)
           ressource.archiveOid = archive.oid
           ressource.version++
           ressource.store(next)
         }
       })
+    } catch (error) {
+      next(error)
     }
   }
 
@@ -254,6 +276,9 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       })
       .seq(function (ressource) {
         updateVersion(ressource, this)
+      })
+      .seq(function (ressource) {
+        initIdOrigine(ressource, this)
       })
       .seq(function (ressource) {
         // t.m += '\tvsv ' +log.getElapsed(t.s);
@@ -396,7 +421,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   /**
    * Récupère un liste de ressource d'après critères
    * @param {string}   [visibilite=public] peut valoir public|prof|perso|tout
-   * @param {Context}  [ctx]     facultatif si visibilite n'est pas précisé
+   * @param {Context}  [context]     facultatif si visibilite n'est pas précisé
    * @param {Object}   options Un objet (ou son json) avec éventuellement les propriétés
    *                             filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
    *                                       où valeur peut être undefined ou un tableau de valeurs
@@ -409,7 +434,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    *                                       (sinon on renvoie tout sauf elle)
    * @param {Function} next    La callback qui sera appelée en lui passant la liste de ressources en argument
    */
-  $ressourceRepository.getListe = function(visibilite, ctx, options, next) {
+  $ressourceRepository.getListe = function(visibilite, context, options, next) {
     try {
       // on normalise les arguments
       var publicOnly
@@ -418,7 +443,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         if (arguments.length == 3) throw new Error("nombre d'arguments incorrect")
         // 2 args
         options = visibilite
-        next = ctx
+        next = context
         publicOnly = true
       } else if (visibilite === 'public') {
         publicOnly = true
@@ -476,18 +501,18 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         query = query.match('restriction').equals(0)
 
       } else if (visibilite == 'prof') {
-        if (!$accessControl.hasPermission('corrections', ctx)) {
+        if (!$accessControl.hasPermission('corrections', context)) {
           return next(new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources"))
         }
         query = query.match('restriction').equals(1)
 
       } else if (visibilite == 'perso') {
-        if (!ctx.session.user || !ctx.session.user.id)
+        if (!context.session.user || !context.session.user.id)
           return next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
-        query = query.match('auteurs').equals(ctx.session.user.id)
+        query = query.match('auteurs').equals(context.session.user.id)
 
       } else if (visibilite == 'tout') {
-        if (!ctx.session.user.roles || !ctx.session.user.roles.admin)
+        if (!context.session.user.roles || !context.session.user.roles.admin)
           return next(new Error("Il faut être admin pour tout voir"))
 
       } else {
@@ -521,6 +546,68 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       if (error.userMessage) next(new Error(error.userMessage))
       else next(error)
     }
+  }
+
+  $ressourceRepository.update = function (ressourceInitiale, ressourceNew, next) {
+    //_.merge(ress)
+  }
+
+  $ressourceRepository.getLastLocalId = function (next) {
+    var ttl = 3600 * 24 * 7
+    var nbTest = 0
+
+    /**
+     * Récupère le dernier id en bdd (0 si aucune ressource local)
+     * @param cb callback appelée avec cb(error, id)
+     */
+    function getFromDb(cb) {
+      Ressource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function (error, entity) {
+        if (error) cb(error)
+        else if (entity) cb(null, entity.idOrigine)
+        else cb(null, 0) // aucune ressource d'origine local
+      })
+    }
+
+    /**
+     * appelle next(error, id) ou elle même (10x max)
+     */
+    function getReserved() {
+      nbTest ++
+      if (nbTest > 10) return next(new Error("impossible de récupérer le dernier idOrigine pour l'origine 'local'"))
+
+      $cache.get('lastLocalId', function (error, id) {
+        if (error) next(error)
+        else if (id && id >= lastLocalId) {
+          // ça pourrait être le bon, on réserve, incrémente et vérifie
+          var idReserved = id + 1
+          lastLocalId = idReserved
+          $cache.set('lastLocalId', idReserved, ttl, function (error) {
+            if (error) next(error)
+            else {
+              $cache.get('lastLocalId', function (error, id) {
+                if (error) next(error)
+                else if (id && id === idReserved) next(null, idReserved)
+                else getReserved() // faut recommencer
+              })
+            }
+          })
+        } else {
+          if (error) next(error)
+          else {
+            // faut aller en db
+            getFromDb(function (error, id) {
+              if (error) next(error)
+              else {
+                lastLocalId = id
+                $cache.set('lastLocalId', id, ttl, getReserved)
+              }
+            })
+          }
+        }
+      })
+    }
+
+    getReserved()
   }
 
   return $ressourceRepository

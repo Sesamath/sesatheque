@@ -44,12 +44,14 @@
     "predef": [
       "GLOBAL",
       "lassi",
-      "log"
+      "log",
+      "isProd"
     ],
     "globals": [
       "GLOBAL",
       "lassi",
-      "log"
+      "log",
+      "isProd"
     ],
     "ignore": [
       "construct/qxApps/tree/build/script/bundle.js"

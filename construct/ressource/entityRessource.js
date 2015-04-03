@@ -41,21 +41,11 @@ module.exports = function (Ressource, $ressourceControl) {
   var _ = require('lodash')
   var tools = require('../tools')
 
-  // on regarde à la déclaration du service quel est le dernier idOrigine utilisé pour l'origine 'local'
-  var firstFreeId
-  Ressource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function(error, entity) {
-    if (error) throw error
-    firstFreeId = 1
-    if (entity) firstFreeId += entity.idOrigine
-  })
-
   /**
    * Retourne le 1er id dispo à utiliser comme idOrigine pour l'origine "local"
-   * @returns {number}
+   * Sera initialisé dans $ressourceRepository (une fois l'entité ressource construite)
    */
-  function getFreeId() {
-    return firstFreeId++;
-  }
+  Ressource.getFreeId = function () {}
 
   /**
    * L'entity Ressource
@@ -217,7 +207,7 @@ module.exports = function (Ressource, $ressourceControl) {
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
     if (_.isEmpty(this.warnings)) delete this.warnings
     // et l'idOrigine pour une origine locale si la ressource n'en a pas encore un
-    if (this.origine === 'local' && !this.idOrigine) this.idOrigine = getFreeId()
+    if (this.origine === 'local' && !this.idOrigine) this.idOrigine = Ressource.getFreeId()
     next()
   })
 
@@ -240,5 +230,4 @@ module.exports = function (Ressource, $ressourceControl) {
     .defineIndex('restriction', 'integer')
     .defineIndex('dateCreation', 'date')
     .defineIndex('dateMiseAJour', 'date')
-
 }
