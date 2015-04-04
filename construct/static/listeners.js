@@ -31,24 +31,27 @@
 
 'use strict'
 
-module.exports = function() {
+module.exports = function($flashMessage) {
+  var _ = require('lodash')
+
   /**
-   * Le listener de l'event beforeTransport, pour gérer les pages d'erreur
+   * Le listener de l'event beforeTransport, pour gérer les pages d'erreur et ajouter les msg flash
    */
   lassi.on('beforeTransport', function(context, data) {
-    var req = context.request.method +' ' +context.request.originalUrl
-    log.debug('on beforeTransport (dans static), sur '  +req +' (' +context.contentType +' ' +context.status +') avec les data ', data, 'beforeTransport')
+    var reqHttp = context.request.method +' ' +context.request.originalUrl
+    log.debug('listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ', data, 'beforeTransport')
 
     // l'api gère ses erreurs toute seule sur ses urls
     if (context.contentType !== 'application/json') {
       // mais si c'est une url qu'elle ne gère pas on le fait pour elle
       if (context.request.originalUrl.substr(0, 5) === '/api/') {
-        log.error(new Error("requete " +req +" et contentType non json " +context.contentType), data)
+        log.error(new Error("requete " +reqHttp +" et contentType non json " +context.contentType), data)
         context.status = 404
         context.contentType = 'application/json'
         if (!data.error) data.error = 'not found'
-      } else if (context.request.originalUrl.substr(0, 5) === '/debug/') {
+      } else if (context.request.originalUrl.substr(0, 7) !== '/debug/') {
         // debug peut renvoyer ce qu'il veut on y touche pas
+
         // ça devrait être du html, on fixe 404 si pas de contenu
         if (!data.contentBloc && !context.status) {
           log.error('pas de status ni content => 404')
@@ -79,8 +82,14 @@ module.exports = function() {
           }
           data.contentBloc.error = msg
           data.$metas.title = msg
-          log.debug(req +" en erreur " +context.status +", les data après modif", data)
+          log.debug(reqHttp +" en erreur " +context.status +", les data après modif", data)
           //log.debug("et le contexte", context)
+        }
+
+        // on ajoute d'éventuels messages flash si on est en html
+        if (context.contentType === 'text/html') {
+          var flashData = $flashMessage.getAndPurge(context)
+          if (flashData) _.merge(data, flashData)
         }
       }
     }

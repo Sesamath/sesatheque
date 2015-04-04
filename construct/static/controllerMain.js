@@ -32,7 +32,7 @@
 
 /* global isProd */
 
-module.exports = function (controller, $flashMessages) {
+module.exports = function (controller) {
   var baseData = {
     $metas : {},
     $views : __dirname +'/views',
@@ -66,12 +66,5 @@ module.exports = function (controller, $flashMessages) {
       content : "Ce site est encore un prototype expérimental."
     }
     context.html(data)
-  })
-
-  // gestion des messages flash
-  controller.get('*', function (context) {
-    if (context.request.url.indexOf('/api/') === 0) return context.next()
-    var data = $flashMessages.getData(context)
-    context.next(null, data)
   })
 }

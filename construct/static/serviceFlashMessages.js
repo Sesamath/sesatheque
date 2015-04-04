@@ -32,29 +32,42 @@
 'use strict'
 
 module.exports = function () {
-  return {
-    add : function (context, message, level) {
-      var cssClass = 'flash'
-      if (level) cssClass += '-' +level
-      if (!context.session.flashMessages) context.session.flashMessages = []
-      context.session.flashMessages.push({
-        cssClass : cssClass,
-        value : message
-      })
-    },
-    getData : function (context) {
-      var data
-      if (context.session.flashMessages) {
-        data = {
-          flashBloc : {
-            $view : 'flash',
-            messages : context.session.flashMessages
-          }
-        }
-        delete context.session.flashMessages
-      }
+  var $flashMessages = {}
 
-      return data
-    }
+  /**
+   * Ajoute un message en session
+   * @param context
+   * @param message
+   * @param level
+   */
+  $flashMessages.add = function (context, message, level) {
+    var cssClass = 'flash'
+    if (level) cssClass += '-' +level
+    if (!context.session.flashMessages) context.session.flashMessages = []
+    context.session.flashMessages.push({
+      cssClass : cssClass,
+      value : message
+    })
   }
+
+  /**
+   * Retourne les messages en session et les efface
+   * @param context
+   */
+  $flashMessages.getAndPurge = function (context) {
+    var data
+    if (context.session.flashMessages) {
+      data = {
+        flashBloc : {
+          $view : 'flash',
+          messages : context.session.flashMessages
+        }
+      }
+      delete context.session.flashMessages
+    }
+
+    return data
+  }
+
+  return $flashMessages
 }

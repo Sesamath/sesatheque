@@ -33,7 +33,7 @@
 
 /**
  * Component qui défini
- * - le service $flashMessages
+ * - le service $flashMessage
  * - le layout et les vues pour le html
  * - les controleurs des pages statiques
  * - des controleurs de debug en dev
@@ -55,11 +55,11 @@ var staticComponent = lassi.component('static')
   }); /**/
 
 staticComponent.service('$flashMessages', function() {
-  return require('./serviceFlashMessage')()
+  return require('./serviceFlashMessages')()
 })
 
-staticComponent.controller(function ($flashMessages) {
-  require('./controllerMain')(this, $flashMessages)
+staticComponent.controller(function () {
+  require('./controllerMain')(this)
 })
 
 /**
@@ -70,3 +70,8 @@ if (isProd) {
     require('./controllerDebug')(this)
   })
 }
+
+staticComponent.config(function($flashMessages) {
+  // le listener beforeTransport est ajouté dans le composant static qui défini $flashMessage
+  require('./listeners')($flashMessages)
+})

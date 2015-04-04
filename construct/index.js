@@ -94,8 +94,7 @@ sesatheque.config(function($cache, $settings) {
     throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
   }
 
-  // on ajoute nos listeners
-  require('./listeners')()
+  // le listener beforeTransport est ajouté dans le composant static qui défini $flashMessage
 
   // log("sesatheque en fin de config", sesatheque)
   log("FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
