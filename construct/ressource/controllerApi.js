@@ -270,7 +270,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Create / update une ressource
-   * Si le titre et la catégorie sont manquants (mais avec id) on merge avec la ressource existante que l'on update,
+   * Si le titre et la catégorie sont manquants (mais avec oid) on merge avec la ressource existante que l'on update,
    * sinon on écrase ou on créé
    * @callback api_ressource POST api/ressource
    * @param context
@@ -278,7 +278,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post('ressource', function (context) {
     // partiel si on a oid (ou idOrigine) sans titre ni catégorie
     var partial = !context.post.titre && !context.post.categories &&
-        (context.post.id || (context.post.origine && context.post.idOrigine))
+        (context.post.oid || (context.post.origine && context.post.idOrigine))
 
     var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
 
@@ -286,14 +286,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     try {
       /*
-       var oid = context.post.id || 0
+       var oid = context.post.oid || 0
        var msg = oid
        // init du chrono
        var start = log.getElapsed(0)
        /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs * /
        if (!lassi.tmp) lassi.tmp = {}
-       lassi.tmp[context.post.id] = {m:msg,s:start}
-       lassi.tmp[context.post.id].m += '\tcv ' +log.getElapsed(lassi.tmp[context.post.id].s)
+       lassi.tmp[context.post.oid] = {m:msg,s:start}
+       lassi.tmp[context.post.oid].m += '\tcv ' +log.getElapsed(lassi.tmp[context.post.oid].s)
        //log.debug("que l'on a transformé en", ressource) /* */
 
       if (partial) {
@@ -329,35 +329,35 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
         }
 
-        if (part.id) $ressourceRepository.load(context.post.id, merge)
+        if (part.oid) $ressourceRepository.load(context.post.oid, merge)
         else if (context.post.origine && context.post.idOrigine)
             $ressourceRepository.loadByOrigin(part.origine, part.idOrigine, merge)
-        else sendJson(context, new Error("Il faut fournir id ou origine+idOrigine"))
+        else sendJson(context, new Error("Il faut fournir oid ou origine+idOrigine"))
       })
 
   // read
-  controller.get('ressource/:id', function (context) {
-    var id = context.arguments.id
-    $ressourceRepository.load(id, function (error, ressource) {
-      // log.debug("dans api get " +id, ressource)
+  controller.get('ressource/:oid', function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.load(oid, function (error, ressource) {
+      // log.debug("dans api get " +oid, ressource)
       if (error) sendJson(context, error)
       else if (ressource) {
         // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
         if ($accessControl.hasReadPermission(context, ressource)) sendJson(context, null, ressource)
-        else denied("Droits insuffisants pour accéder à la ressource d'identifiant " + id, context)
-      } else notFound("La ressource d'identifiant " + id + " n'existe pas", context)
+        else denied("Droits insuffisants pour accéder à la ressource d'identifiant " + oid, context)
+      } else notFound("La ressource d'identifiant " + oid + " n'existe pas", context)
     })
   })
 
   // delete
-  controller.delete('ressource/:id', function (context) {
-    var id = context.arguments.id
+  controller.delete('ressource/:oid', function (context) {
+    var oid = context.arguments.oid
 
     function del() {
-      $ressourceRepository.del(id, function (error, nbObjects, nbIndexes) {
+      $ressourceRepository.del(oid, function (error, nbObjects, nbIndexes) {
         if (error) sendJson(context, error)
-        else if (nbObjects > 0) sendJson(context, null, {deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else sendJson(context, new Error("Aucune ressource d'identifiant " + id))
+        else if (nbObjects > 0) sendJson(context, null, {deletedOid: oid, nbObjects: nbObjects, nbIndexes: nbIndexes})
+        else sendJson(context, new Error("Aucune ressource d'identifiant " + oid))
       });
     }
 
@@ -365,18 +365,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       del()
     } else {
       // faut charger la ressource pour le savoir
-      $ressourceRepository.load(id, function (error, ressource) {
+      $ressourceRepository.load(oid, function (error, ressource) {
         if (error) sendJson(context, error)
-        else if (!ressource) notFound("la ressource d'identifiant " + id + " n'existe pas", context)
+        else if (!ressource) notFound("la ressource d'identifiant " + oid + " n'existe pas", context)
         else if ($accessControl.hasPermission('delete', context, ressource)) del()
-        else denied("Droits insuffisants pour supprimer la ressource d'identifiant " + id, context)
+        else denied("Droits insuffisants pour supprimer la ressource d'identifiant " + oid, context)
       })
     }
   })
 
   // Read byOrigine
-  controller.get('ressource/:origine/:id', function (context) {
-    var idOrigine = context.arguments.id
+  controller.get('ressource/:origine/:oid', function (context) {
+    var idOrigine = context.arguments.oid
     var origine = context.arguments.origine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       // log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
@@ -392,9 +392,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   // delete by origine
-  controller.delete('ressource/:origine/:id', function (context) {
-    var idOrigine = context.arguments.id
+  controller.delete('ressource/:origine/:idOrigine', function (context) {
     var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
 
     /**
      * Efface la ressource d'après les params origine & idOrigine de la requete
@@ -409,13 +409,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     /**
      * Fct à privilégier car l'effacement du cache est nettement plus performant
-     * @param id
+     * @param oid
      */
-    function del(id) {
-      $ressourceRepository.del(id, function (error, nbObjects, nbIndexes) {
+    function del(oid) {
+      $ressourceRepository.del(oid, function (error, nbObjects, nbIndexes) {
         if (error) sendJson(context, error)
-        else if (nbObjects > 0) sendJson(context, null, {deletedId: id, nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else notFound("Aucune ressource d'identifiant " + id, context)
+        else if (nbObjects > 0) sendJson(context, null, {deletedOId: oid, nbObjects: nbObjects, nbIndexes: nbIndexes})
+        else notFound("Aucune ressource d'identifiant " + oid, context)
       })
     }
 

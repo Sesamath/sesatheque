@@ -240,7 +240,7 @@ function addRessource(ressource, next) {
       if (body.error) {
         addError(ressource.idOrigine, body.error)
       } else {
-        if (body.id) { // on ne récupère que ça, c'est pas le idOrigine posté
+        if (body.oid) { // on ne récupère que ça, c'est pas le idOrigine posté
           idsOk.push(ressource.idOrigine)
           if (logOk) log(ressource.idOrigine +' ok avec ' +ressource.idOrigine)
         } else {

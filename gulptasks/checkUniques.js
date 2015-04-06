@@ -36,9 +36,12 @@ function log(msg, objToDump) {
  * @param {Function} next fct à appeler quand tous les mep auront été importés
  */
 function checkId(next) {
-  var query = "SELECT _integer AS id, count( * ) AS nb FROM ressource_index WHERE name = 'id' "
-  if (idsAsked) query += "AND _integer IN (" +idsAsked +')'
-  query += " GROUP BY _integer HAVING nb >1 ORDER BY _integer DESC"
+  var query = "SELECT _string AS id, count( * ) AS nb FROM ressource_index ri" +
+              " INNER JOIN  ressource_index ri2 USING(oid) " +
+              " WHERE ri2.name = 'origine' AND ri2._string = 'em'" +
+              " AND ri.name = 'idOrigine' "
+  if (idsAsked) query += "AND ri._string IN (" +idsAsked +')'
+  query += " GROUP BY _string HAVING nb > 1 ORDER BY _string DESC"
   kdb.raw(query).exec(function (error, rows) {
     if (error) next(error)
     else {

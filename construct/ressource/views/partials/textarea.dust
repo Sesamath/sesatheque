@@ -18,7 +18,7 @@
         width
 !}
 <textarea name="{o.name}"
-          id="{o.id}"
+          {?o.id}id="{o.id}"{/o.id}
           class="{?o.class}{o.class}{:else}form-control{/o.class}"
           {?maxlength}maxlength="{maxlength}"{/maxlength}
           {?cols}cols="{cols}"{/cols}

@@ -109,7 +109,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param data
    */
   function addMenu(context, data, ressource) {
-    var id = ressource ? ressource.id : null
+    var oid = ressource ? ressource.oid : null
     // les liens du menu
     var links = []
     // lien ajout
@@ -117,12 +117,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       links.push(tools.link(basePath +$routes.get('add'), 'Ajouter une ressource'))
     }
     // si on est sur une ressource on ajoute les liens contextuels pour cette ressource (auxquels on a droit)
-    if (id) {
-      if ($accessControl.hasPermission('update', context, id))
-        links.push(tools.link(basePath +$routes.get('edit', id), 'Modifier cette ressource'))
+    if (oid) {
+      if ($accessControl.hasPermission('update', context, oid))
+        links.push(tools.link(basePath +$routes.get('edit', oid), 'Modifier cette ressource'))
       if ($accessControl.hasPermission('delete', context))
-        links.push(tools.link(basePath +$routes.get('delete', id), 'Supprimer cette ressource'))
-      if ($accessControl.hasPermission('read', context, id)) {
+        links.push(tools.link(basePath +$routes.get('delete', oid), 'Supprimer cette ressource'))
+      if ($accessControl.hasPermission('read', context, oid)) {
         links.push(tools.link($routes.getAbs('preview', ressource), 'Voir la ressource'))
         links.push(tools.link($routes.getAbs('display', ressource), 'Voir la ressource (pleine page)'))
       }
@@ -217,7 +217,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     data.contentBloc = $ressourceConverter.getFormViewData(null, null)
     // on vire ou modifie ce qui nous intéresse pour la recherche
     var fd = data.contentBloc // raccourci d'écriture (form data)
-    delete fd.id
+    delete fd.oid
     delete fd.version.value
     delete fd.version.readonly
     delete fd.parametres
@@ -236,9 +236,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   // describe
-  controller.get($routes.get('describe', ':id'), function (context) {
-    var id = context.arguments.id
-    $ressourceRepository.load(id, function (error, ressource) {
+  controller.get($routes.get('describe', ':oid'), function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.load(oid, function (error, ressource) {
       printForRead(error, ressource, context, 'describe')
     })
   })
@@ -253,13 +253,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // display : Voir la ressource pleine page (pour iframe)
-  controller.get($routes.get('display', ':id'), function (context) {
-    var id = context.arguments.id
-    log("appel de l'action display pour " +id)
+  controller.get($routes.get('display', ':oid'), function (context) {
+    var oid = context.arguments.oid
+    log("appel de l'action display pour " +oid)
     /* ça fonctionne en affichant bien l'erreur sans repasser une 2e fois ici
-    printForRead(new Error("display " +id), null, context, 'display', {$layout: './../static/views/layout-iframe'})
+    printForRead(new Error("display " +oid), null, context, 'display', {$layout: './../static/views/layout-iframe'})
     return */
-    $ressourceRepository.load(id, function (error, ressource) {
+    $ressourceRepository.load(oid, function (error, ressource) {
       log("load de display")
       printForRead(error, ressource, context, 'display', {$layout: '../../static/views/layout-iframe'})
     })
@@ -275,9 +275,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // preview : Voir la ressource dans le site
-  controller.get($routes.get('preview', ':id'), function (context) {
-    var id = context.arguments.id
-    $ressourceRepository.load(id, function (error, ressource) {
+  controller.get($routes.get('preview', ':oid'), function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.load(oid, function (error, ressource) {
       printForRead(error, ressource, context, 'display')
     })
   })
@@ -307,20 +307,20 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var options = {$metas: {title: 'Ajouter une ressource'}}
           printForm(error, ressource, context, options)
         } else {
-          log.debug("Après le save on récupère l'id " + ressource.id + ", on lance le redirect")
+          log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
           var prefix = basePath
           prefix += (ressource.restriction === 0) ? 'public' : 'ressource'
-          context.redirect(prefix +$routes.get('describe', ressource.id))
+          context.redirect(prefix +$routes.get('describe', ressource.oid))
         }
       }) // write
     }) // checkToken
   })
 
 // Uptate, affichage du form
-  controller.get($routes.get('edit', ':id'), function (context) {
+  controller.get($routes.get('edit', ':oid'), function (context) {
     if (checkSession(context)) {
-      var id = context.arguments.id
-      $ressourceRepository.load(id, function (error, ressource) {
+      var oid = context.arguments.oid
+      $ressourceRepository.load(oid, function (error, ressource) {
         $accessControl.checkPermission('update', context, ressource, function () {
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
           printForm(error, ressource, context, options)
@@ -344,23 +344,23 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
           printForm(error, ressource, context, options)
         } else {
-          log.debug("update " + ressource.id + " ok, on lance le redirect")
-          context.redirect(basePath +$routes.get('describe', ressource.id))
+          log.debug("update " + ressource.oid + " ok, on lance le redirect")
+          context.redirect(basePath +$routes.get('describe', ressource.oid))
         }
       }) // write
     }) // checkToken
   })
 
   // Delete, demande de confirmation
-  controller.get($routes.get('del', ':id'), function (context) {
-    var id = context.arguments.id
-    $ressourceRepository.load(id, function (error, ressource) {
+  controller.get($routes.get('del', ':oid'), function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.load(oid, function (error, ressource) {
       $accessControl.checkPermission('delete', context, ressource, function () {
         var options = {
           $metas : {title: 'Supprimer la ressource : ' + ressource.titre},
           contentBloc: {$view: 'delete'}
         }
-        context.session['del' + id] = true
+        context.session['del' + oid] = true
         printForm(error, ressource, context, options)
       })
     })
@@ -380,8 +380,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
           printForm(error, ressource, context, options)
         } else {
-          log.debug("update " + ressource.id + " ok, on lance le redirect")
-          context.redirect(basePath +$routes.get('describe',ressource.id))
+          log.debug("update " + ressource.oid + " ok, on lance le redirect")
+          context.redirect(basePath +$routes.get('describe',ressource.oid))
         }
       })
     })
@@ -408,7 +408,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var value = context.arguments.value
     var options = {
       filters: [{index: index, values: [value]}],
-      orderBy: 'id',
+      orderBy: 'oid',
       start  : parseInt(context.arguments.start),
       nb     : parseInt(context.arguments.nb)
     }
@@ -421,9 +421,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       data.$metas.title = 'Résultats de recherche'
       if (error) data.error = error.toString()
       else {
-        data.contentBloc = $ressourceConverter.addUrlsToList(ressources)
-        data.contentBloc.$view = 'liste'
+        data.contentBloc = {
+          $view : 'liste',
+          ressources : $ressourceConverter.addUrlsToList(ressources)
+        }
       }
+      console.log(data.contentBloc.ressources)
       context.html(data)
     })
   })

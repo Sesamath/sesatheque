@@ -73,7 +73,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (!error && !ressource) {
       context.notFound("Cette ressource n'existe pas ou n'est pas publique")
     } else if (ressource.restriction !== 0) {
-      log.error(new Error("ressource non publique (" +ressource.id +") prête à être envoyée (bug dans le contrôleur)"))
+      log.error(new Error("ressource non publique (" +ressource.oid +") prête à être envoyée (bug dans le contrôleur)"))
       context.notFound("Cette ressource n'est pas publique")
     } else {
       data = getDefaultData()
@@ -91,25 +91,25 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   // describe
-  controller.get($routes.get('describe', ':id'), function (context) {
-    var id = context.arguments.id
-    $ressourceRepository.loadPublic(id, function (error, ressource) {
+  controller.get($routes.get('describe', ':oid'), function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.loadPublic(oid, function (error, ressource) {
       prepareAndSend(context, error, ressource, 'describe')
     })
   })
 
   // display : Voir la ressource pleine page (pour iframe)
-  controller.get($routes.get('display', ':id'), function (context) {
-    var id = context.arguments.id
-    $ressourceRepository.loadPublic(id, function (error, ressource) {
+  controller.get($routes.get('display', ':oid'), function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.loadPublic(oid, function (error, ressource) {
       prepareAndSend(context, error, ressource, 'display', {$layout:'../../static/views/layout-iframe'})
     })
   })
 
   // preview : Voir la ressource avec header et menu
-  controller.get($routes.get('preview', ':id'), function (context) {
-    var id = context.arguments.id
-    $ressourceRepository.loadPublic(id, function (error, ressource) {
+  controller.get($routes.get('preview', ':oid'), function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.loadPublic(oid, function (error, ressource) {
       prepareAndSend(context, error, ressource, 'display')
     })
   })
@@ -134,7 +134,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         {index: 'restriction', value: 0},
         {index: index, values: values}
       ],
-      orderBy: 'id',
+      orderBy: 'oid',
       start  : parseInt(context.arguments.start),
       nb     : parseInt(context.arguments.nb)
     }

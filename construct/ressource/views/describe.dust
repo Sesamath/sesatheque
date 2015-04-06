@@ -15,10 +15,9 @@
         {:else}Public{/restriction.value}</span>
     <h2>{titre.value}</h2>
     <p>
-    {id.title} : {id.value}{~s}
+    oid : {oid}, {origine.value} {idOrigine.value},
     ({typeTechnique.title} : {typeTechnique.value},{~s}
-    {version.title} {version.value},{~s}
-    oid : {oid}, {origine.value} {idOrigine.value})<br />
+    {version.title} {version.value},{~s},<br />
     {dateCreation.title} : {dateCreation.value}<br />
     {dateMiseAJour.title} : {dateMiseAJour.value}<br />
     {niveaux.title} : {niveaux.value}<br />

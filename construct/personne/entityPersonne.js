@@ -33,7 +33,6 @@
 
 module.exports = function (Personne) {
   Personne.construct = function () {
-    this.id = 0
     /**
      * Prénom
      * @type {string}
@@ -74,7 +73,6 @@ module.exports = function (Personne) {
   }
 
   Personne
-      .defineIndex('id', 'integer')
       .defineIndex('nom', 'string')
       .defineIndex('email', 'string')
 }

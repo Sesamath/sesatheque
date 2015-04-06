@@ -94,7 +94,7 @@ ressourceComponent.controller('api', function ($ressourceRepository, $ressourceC
 /**
  * En dev on ajoute des routes de debug
  */
-if (lassi.settings.application.staging !== 'production') {
+if (!isProd) {
   ressourceComponent.controller('debug/ressource', function ($ressourceRepository) {
     require('./controllerDebug')(this, $ressourceRepository)
   })

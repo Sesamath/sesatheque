@@ -116,6 +116,7 @@ module.exports = function (Ressource, $routes) {
    * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
    * @param {Ressource} ressource La ressource qui sort d'un load
    * @returns {object} L'objet à passser à la vue dust
+   * @memberOf $ressourceConverter
    */
   $ressourceConverter.getViewData = function (error, ressource) {
     var viewData = {}
@@ -140,14 +141,14 @@ module.exports = function (Ressource, $routes) {
                 lien : $routes.get('describe', relation[1])
               })
             })
-            log.debug('relations ajoutée pour ' +ressource.id, viewData.relations)
+            log.debug('relations ajoutée pour ' +ressource.oid, viewData.relations)
 
           } else if (config.listes[key]) {
             // faut remplacer des ids par des labels
             buffer = [];
             _.each(value, function (id) {
               if (config.listes[key][id])  buffer.push(config.listes[key][id])
-              else log.error("La ressource " + ressource.id + " a une valeur " + id +
+              else log.error("La ressource " + ressource.oid + " a une valeur " + id +
                   " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
             });
             viewData[key].value = buffer.join(', ');
@@ -204,6 +205,7 @@ module.exports = function (Ressource, $routes) {
    * @param error
    * @param ressource
    * @returns {object} Les data pour la vue dust, avec le token
+   * @memberOf $ressourceConverter
    */
   $ressourceConverter.getFormViewData = function (error, ressource) {
     var viewData = {warnings:[]};
@@ -278,14 +280,13 @@ module.exports = function (Ressource, $routes) {
     }); // fin each propriété
 
     // on ajoute nos cas particulier
-    if (viewData.id) viewData.id.readonly = true
     viewData.version.readonly = true
     // l'oid
     if (ressource && ressource.oid) {
       viewData.oid = {
         name  : 'oid',
         value : ressource.oid,
-        hidden: true
+        readonly: true
       }
     }
     // et un token
@@ -305,6 +306,7 @@ module.exports = function (Ressource, $routes) {
    * @param {boolean=} partial Passer true pour ne pas générer d'erreur sur des champs requis manquants
    * @return {Ressource}
    * @throws {Error} En cas de données invalides
+   * @memberOf $ressourceConverter
    */
   $ressourceConverter.getRessourceFromPost = function (data, partial) {
     var ressource = Ressource.create();
@@ -429,6 +431,7 @@ module.exports = function (Ressource, $routes) {
    * @param data
    * @param partial
    * @returns {Ressource}
+   * @memberOf $ressourceConverter
    */
   $ressourceConverter.getRessourceFromPostedArbre = function (data, partial) {
     // on transforme le post pour ressembler à un post de ressource
@@ -471,6 +474,7 @@ module.exports = function (Ressource, $routes) {
    * Ajoute les propriétés urlXXX à chaque elt du tableau de ressource
    * @param {Array} ressources
    * @returns {Array} ressources
+   * @memberOf $ressourceConverter
    */
   $ressourceConverter.addUrlsToList = function (ressources) {
     if (ressources && ressources.length) ressources.forEach(function (ressource) {
@@ -485,13 +489,14 @@ module.exports = function (Ressource, $routes) {
   /**
    * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
    * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
+   * @memberOf $ressourceConverter
    */
   $ressourceConverter.toArbre = function (ressource) {
     if (ressource.typeTechnique !== 'arbre') return undefined
     var clone = _.clone(ressource)
 
     return {
-      id : clone.id,
+      oid : clone.oid,
       titre : clone.titre,
       typeTechnique : 'arbre',
       attributes : clone.parametres.attributes || {},

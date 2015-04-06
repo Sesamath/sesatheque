@@ -155,7 +155,7 @@ lassi.on('beforeRailUse', function (name, settings) {
 lassi.on('afterRailUse', function (rail, name) {
   // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
   if (name === 'cookie') {
-    if (lassi.settings.application.staging !== 'production') {
+    if (!isProd) {
       // on ajoute les requetes http en console
       rail.use('/', function(req, res, next) {
         log(req.method +' ' +req.originalUrl)

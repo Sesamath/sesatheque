@@ -55,14 +55,14 @@ personneComponent.service('$cachePersonne', function($cache, $settings) {
   var ttl = $settings.get('components.personne.cacheTTL', 20*60)
 
   return {
-    get: function (id, next) {
-      $cache.get('personne_' +id, next)
+    get: function (oid, next) {
+      $cache.get('personne_' +oid, next)
     },
     set: function (personne, next) {
-      $cache.set('personne_' + personne.id, personne, ttl, next)
+      $cache.set('personne_' + personne.oid, personne, ttl, next)
     },
-    delete : function (id, next) {
-      $cache.delete('personne_', id, next)
+    delete : function (oid, next) {
+      $cache.delete('personne_', oid, next)
     }
   }
 })
@@ -76,8 +76,8 @@ personneComponent.service('$cacheGroupe', function($cache, $settings) {
   var ttl = $settings.get('components.personne.cacheTTL', 20*60)
 
   return {
-    get: function (id, next) {
-      $cache.get('groupe_' +id, next)
+    get: function (oid, next) {
+      $cache.get('groupe_' +oid, next)
     },
     getByNom: function (nom, next) {
       var key = 'groupeNom_' +tools.sanitizeHashKey(nom)
@@ -86,17 +86,17 @@ personneComponent.service('$cacheGroupe', function($cache, $settings) {
     set: function (groupe, next) {
       var nom = tools.sanitizeHashKey(groupe.nom)
       $cache.set('groupeNom_' +nom, groupe, ttl)
-      $cache.set('groupe_' +groupe.id, groupe, ttl, next)
+      $cache.set('groupe_' +groupe.oid, groupe, ttl, next)
     },
-    delete : function (id, next) {
+    delete : function (oid, next) {
       // faut aller le chercher en cache pour trouver le nom
-      $cache.get('groupe_' +id, function (error, groupe) {
+      $cache.get('groupe_' +oid, function (error, groupe) {
         if (groupe && groupe.nom) {
           var key = 'groupeNom_' +tools.sanitizeHashKey(groupe.nom)
           $cache.delete(key)
         }
       })
-      $cache.delete('groupe_', id, next)
+      $cache.delete('groupe_', oid, next)
     }
   }
 })

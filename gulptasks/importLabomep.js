@@ -404,6 +404,7 @@ function getIdComb(ressource) {
  * @param next
  */
 function modifyUrl(ressource, next) {
+  var idComb = ressource.origine +'/' +ressource.idOrigine
   try {
     // il faut échapper d'éventuels & qui ne sont pas sous la forme &amp;
     // on pourrait passer l'option strict:false mais on préfère planter en cas de xml bancal
@@ -464,7 +465,7 @@ function modifyUrl(ressource, next) {
       }
     })
   } catch (error) {
-    addError(ressource.id, "le parsing du xml a planté " +xmlSrc)
+    addError(idComb, "le parsing du xml a planté " +xmlSrc)
   }
 }
 
@@ -548,7 +549,7 @@ function addRessource(ressource, next) {
       if (body.error) {
         addError(ressource.idOrigine, body.error)
       } else {
-        if (body.id) { // on ne récupère que ça, c'est pas le idOrigine posté
+        if (body.oid) { // on ne récupère que ça, c'est pas le idOrigine posté
           idsOk.push(ressource.idOrigine)
           if (logOk) log(ressource.idOrigine +' ok avec ' +ressource.idOrigine)
         } else {

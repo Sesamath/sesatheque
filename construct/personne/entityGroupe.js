@@ -38,11 +38,6 @@ module.exports = function (Groupe, $cacheGroupe) {
    */
   Groupe.construct = function() {
     /**
-     * Id
-     * @type {Number}
-     */
-    this.id = 0;
-    /**
      * Nom
      * @type {string}
      */
@@ -67,7 +62,6 @@ module.exports = function (Groupe, $cacheGroupe) {
   })
 
   Groupe
-    .defineIndex('id', 'integer')
     .defineIndex('nom', 'string')
     .defineIndex('open', 'boolean')
 }

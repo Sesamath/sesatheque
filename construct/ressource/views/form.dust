@@ -14,10 +14,8 @@
                #oid:oid, cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting
             !}
             {>wrapper widget="text" o=token /}
-            {! id et oid n'existe pas encore à l'affichage du add !}
+            {! oid n'existe pas encore à l'affichage du add !}
             {?oid.value}{#oid:oid}{>wrapper widget="text" o=. /}{/oid}{/oid.value}
-            {@gt key=id.value value=0}{>wrapper widget="text" o=id width="50px" /}{/gt}
-            {! {>wrapper widget="text" o=id width="50px" /} !}
             {>wrapper widget="text" o=titre /}
             {>wrapper widget="select" o=typeTechnique size=2 /}
             {>wrapper widget="checkboxes" o=publie /}

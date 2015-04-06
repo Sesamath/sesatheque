@@ -48,7 +48,7 @@ module.exports = function (Archive) {
     ressource = tools.clone(ressource)
     // on vire warnings
     if (ressource.warnings) {
-      if (ressource.warnings.length) log.error("Archivage de la ressource " +ressource.oid +" (id " +ressource.id +
+      if (ressource.warnings.length) log.error("Archivage de la ressource " +ressource.oid +" (oid " +ressource.oid +
         ") qui comportait des erreurs : " +ressource.warnings.join('\n'))
       delete ressource.warnings
     }

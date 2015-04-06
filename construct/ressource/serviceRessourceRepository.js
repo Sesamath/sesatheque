@@ -507,9 +507,9 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         query = query.match('restriction').equals(1)
 
       } else if (visibilite == 'perso') {
-        if (!context.session.user || !context.session.user.id)
+        if (!context.session.user || !context.session.user.oid)
           return next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
-        query = query.match('auteurs').equals(context.session.user.id)
+        query = query.match('auteurs').equals(context.session.user.oid)
 
       } else if (visibilite == 'tout') {
         if (!context.session.user.roles || !context.session.user.roles.admin)

@@ -81,7 +81,7 @@ function getCreateDeniedMessage(context) {
 function getDeleteDeniedMessage(context, ressource) {
   var msg
   // on regarde si c'est l'auteur
-  if (_.contains(ressource.auteurs, context.session.user.id)) {
+  if (_.contains(ressource.auteurs, context.session.user.oid)) {
     // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
     // (sinon d'autres peuvent s'en servir)
     if (ressource.auteurs.length > 1)
@@ -122,8 +122,8 @@ function getReadDeniedMessage(context, ressource) {
 
     // réservée au groupe
     case restriction.groupe:
-      if (_.contains(ressource.auteurs, context.session.user.id)) return
-      if (_.contains(ressource.contributeurs, context.session.user.id)) return
+      if (_.contains(ressource.auteurs, context.session.user.oid)) return
+      if (_.contains(ressource.contributeurs, context.session.user.oid)) return
       if (ressource.parametres.allow && ressource.parametres.allow.groupes &&
           !_.empty(_.intersection(ressource.parametres.allow.groupes, context.session.user.groupes))) return
       msg = "Ressource restreinte"
@@ -131,8 +131,8 @@ function getReadDeniedMessage(context, ressource) {
 
     // privée
     case restriction.prive:
-      if (_.contains(ressource.auteurs, context.session.user.id)) return
-      if (_.contains(ressource.contributeurs, context.session.user.id)) return
+      if (_.contains(ressource.auteurs, context.session.user.oid)) return
+      if (_.contains(ressource.contributeurs, context.session.user.oid)) return
       msg = "Ressource privée"
       break
 
@@ -150,9 +150,9 @@ function getReadDeniedMessage(context, ressource) {
  */
 function getUpdateDeniedMessage(context, ressource) {
   // on regarde si c'est l'auteur
-  if (_.contains(ressource.auteurs, context.session.user.id)) return
+  if (_.contains(ressource.auteurs, context.session.user.oid)) return
   // un contributeur
-  if (_.contains(ressource.contributeurs, context.session.user.id)) return
+  if (_.contains(ressource.contributeurs, context.session.user.oid)) return
   // pour le moment tout le reste est interdit
 
   return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
@@ -289,7 +289,7 @@ $accessControl.hasReadPermission = function (context, ressource) {
  * @returns {boolean}
  */
 $accessControl.isAuthenticated = function (context) {
-  return (context.session && context.session.user && context.session.user.id > 0) // id=-1 avec une ip locale
+  return (context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale
 }
 
 
@@ -338,13 +338,13 @@ $accessControl.addGroupeByName = function (personne, groupeNom, next) {
     if (error) {
       next(error, personne)
     } else if (groupe) {
-      personne.groupes[groupe.id] = true
+      personne.groupes[groupe.oid] = true
       next(null, personne)
     } else {
       // on le créé au passage
       Groupe.create({nom:groupeNom}).store(function (error, groupe) {
         log.debug('après store ', groupe)
-        if (groupe) personne.groupes[groupe.id] = true
+        if (groupe) personne.groupes[groupe.oid] = true
         next(error, personne)
       })
     }

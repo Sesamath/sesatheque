@@ -45,8 +45,8 @@ module.exports = function ($settings) {
    * Les arguments supplémentaires sont concaténé avec /
    * @memberOf $routes
    *
-   * @param {String} action
-   * @returns {String} La route
+   * @param {string} action
+   * @returns {string} La route
    */
   $routes.get = function(action) {
     var route = routes[action]
@@ -60,17 +60,17 @@ module.exports = function ($settings) {
    * Les arguments supplémentaires sont concaténé avec /
    * @memberOf $routes
    *
-   * @param {String} action (display|describe|preview)
+   * @param {string} action (display|describe|preview)
    * @param {Ressource} ressource
-   * @returns {String}
+   * @returns {string}
    */
   $routes.getAbs = function(action, ressource) {
     var route
     if (['display', 'describe', 'preview'].indexOf(action) > -1) {
-      route = $settings.get('basePath', '/')
-      if (ressource.id && ressource.description) {
+      route = $settings.get('basePath', '') +'/'
+      if (ressource.oid && ressource.description) {
         route += (ressource.restriction === 0) ? 'public/' : 'ressource/'
-        route += this.get(action, ressource.id)
+        route += this.get(action, ressource.oid)
       } else {
         var oid = parseInt(ressource, 10)
         if (oid > 0) route += this.get(action, oid)

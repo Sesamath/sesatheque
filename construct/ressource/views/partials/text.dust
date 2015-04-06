@@ -18,7 +18,8 @@
 
 <input type="{?o.hidden}hidden{:else}text{/o.hidden}"
        name="{o.name}"
-       {?o.id}id="form-{o.id}"{:else}{?id}id="form-{id}"{/id}{/o.id}
+       {! on prend o.id, et sinon id s'il existe !}
+       {?o.id}id="input-{o.id}"{:else}{?id}id="input-{id}"{/id}{/o.id}
        class="{?class}{class}{:else}form-control{/class}"
        {?o.label}placeholder="{o.label}"{/o.label}
        {?o.value}value="{o.value}"{/o.value}

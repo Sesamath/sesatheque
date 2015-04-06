@@ -96,7 +96,7 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
    * @param {EntityInstance~StoreCallback} next
    */
   $personneRepository.loadGroupe = function (groupeId, next) {
-    if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.id doit être entier"))
+    if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.oid doit être entier"))
     $cacheGroupe.get(groupeId, function (error, groupe) {
       if (groupe) return next(null, groupe)
       Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {

@@ -198,7 +198,7 @@ var ressourceConfig = {
 
   // les libellés que l'on affiche pour chaque champ de notre entité
   labels           : {
-    id               : "Identifiant",
+    oid               : "Identifiant",
     version          : "Version",
     origine           : 'Origine',
     idOrigine         : "Identifiant d'origine",
@@ -228,7 +228,7 @@ var ressourceConfig = {
   // les types requis, Attention, le code suppose que tous les Array sont des tableaux d'entiers,
   // faudra modifier postToRessource dans edit.js si ça change
   typesVar         : {
-    id               : 'Number',
+    oid               : 'Number',
     origine          : 'String',
     idOrigine        : 'String',
     typeTechnique    : 'String',

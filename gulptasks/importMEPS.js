@@ -218,10 +218,10 @@ function initRessourceMep(row) {
   // raccourci
   var id = row.mep_id;
   // parametres
-  parametres.nbq_defaut = row.mep_nbq_defaut; // obligatoire
-  parametres.mep_modele = getMepModele(row)
+  parametres.nbq_defaut    = row.mep_nbq_defaut; // obligatoire
+  parametres.mep_modele    = getMepModele(row)
   parametres.mep_langue_id = row.mep_langue_id || 'fr' // le swf veut le code langue à 2 lettres
-  if (row.mep_swf_id !== id)            parametres.swf_id          = row.mep_swf_id;
+  parametres.swf_id        = row.mep_swf_id;
   if (row.mep_projet !== 'mep')         parametres.projet          = row.mep_projet;
   if (row.mep_old)                      parametres.old             = row.mep_old;
   if (row.mep_suite_formateur !== 'o')  parametres.suite_formateur = row.mep_suite_formateur;
@@ -309,7 +309,7 @@ function importMEPS(next, ids) {
   nextStep = next
 
   // la liste des ids à traiter
-  if (ids === 'all') where = ' LIMIT 1'
+  if (ids === 'all') where = ' LIMIT 100'
   else if (ids) where = ' WHERE mep_id IN (' + ids + ')'
   else {
     log("Pas d'import mep à faire")
@@ -339,8 +339,8 @@ function importMEPS(next, ids) {
           nbToRec += ressources.length
           ressources.forEach(function(row) {
             ressourceCourante = initRessourceMep(row);
-            idsParsed.push(ressourceCourante.id);
-            if (logProcess) log('processing mep ' + ressourceCourante.id)
+            idsParsed.push(ressourceCourante.idOrigine);
+            if (logProcess) log('processing mep ' + ressourceCourante.idOrigine)
             defer(ressourceCourante)
           })
       })
@@ -381,8 +381,8 @@ function importAIDES(next, ids) {
         nbRessToParse += rows[0].length
         rows[0].forEach(function(row) {
             ressourceCourante = initRessourceAm(row)
-            idsParsed.push(ressourceCourante.id);
-            if (logProcess) log('processing aide ' + ressourceCourante.id)
+            idsParsed.push(ressourceCourante.idOrigine);
+            if (logProcess) log('processing aide ' + ressourceCourante.idOrigine)
             addRessource(ressourceCourante, checkEnd);
         })
       })
@@ -429,8 +429,8 @@ function flushPendingRelations(next) {
                 origine = idComb.substr(0, pos)
                 idOrigine = parseInt(idComb.substr(pos+1), 10)
                 getRessource(origine, idOrigine, function (ressource) {
-                  if (ressource && ressource.id) {
-                    newRel[1] = ressource.id
+                  if (ressource && ressource.oid) {
+                    newRel[1] = ressource.oid
                     nextSeq(newRel)
                   } else {
                     errors[idComb] = 'une relation pointait vers ' +origine +'-' +idOrigine +" qui n'existe pas"
@@ -440,7 +440,7 @@ function flushPendingRelations(next) {
               }
             })
             .seq(function(newRelations) {
-                mergeRessource({id:ressource.id, relations:newRelations}, this)
+                mergeRessource({origine: ressource.origine, idOrigine:ressource.idOrigine, relations:newRelations}, this)
             })
             .seq(depile)
             .catch(depile)
@@ -518,7 +518,7 @@ function addRessource(ressource, next) {
     json: true,
     body: ressource
   }
-  var idMix = ressource.id ? ressource.id : ressource.origine +'-' +ressource.idOrigine
+  var idMix = ressource.origine +'-' +ressource.idOrigine
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (error || body.error) {
@@ -526,10 +526,10 @@ function addRessource(ressource, next) {
       idsFailed.push(idMix)
       errors[idMix] = errorString
       log('erreur api sur ' +idMix +' : ' +errorString, options)
-    } else if (body.id) {
-      idsOk.push(body.id)
+    } else if (body.oid) {
+      idsOk.push(body.oid)
       // on note la correspondance pour éviter de retourner le chercher
-      if (!ressource.id) ids[idMix] = body.id
+      if (!ressource.oid) ids[idMix] = body.oid
       nbRec++
       if (logOk) log(idMix +' ok')
     } else {
@@ -559,12 +559,12 @@ function mergeRessource(ressourcePartielle, next) {
 
   request.post(options, function (error, response, body) {
     nbLaunched--
-    if (body && body.id) {
-      idsOk.push(body.id)
-      if (logOk) log('màj ' +body.id +' ok')
+    if (body && body.oid) {
+      idsOk.push(body.oid)
+      if (logOk) log('màj ' +body.oid +' ok')
     } else {
       var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
-      var idErr = ressourcePartielle.id || ressourcePartielle.origine +'-' +ressourcePartielle.idOrigine || 0
+      var idErr = ressourcePartielle.origine +'-' +ressourcePartielle.idOrigine || 0
       idsFailed.push(idErr)
       errors[idErr] = (errors[idErr] ? errors[idErr] +'\n' : '') +errStr
       log(errStr)

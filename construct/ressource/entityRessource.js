@@ -200,7 +200,7 @@ module.exports = function (Ressource, $ressourceControl) {
     }
     // cohérence de la restriction
     if (this.restriction === 2 && (!this.parametres.allow || !this.parametres.allow.groupes)) {
-      log.error("Ressource " +this.id +" restreinte à des groupes sans préciser lesquels, on la passe privée")
+      log.error("Ressource " +this.oid +" restreinte à des groupes sans préciser lesquels, on la passe privée")
       this.restriction = 3
     }
     // si le tableau d'erreur est vide (devrait toujours être le cas,
