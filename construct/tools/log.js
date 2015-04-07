@@ -77,18 +77,16 @@ var logDebug
  * @param filter
  * @param stream
  */
-function out(message, objectToDump, filter, stream) {
+function out(message, objectToDump, filter, stream, options) {
   if (!filter || !exclusions[filter]) {
     // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
     if (message instanceof Error) message = message.stack + '\n'
-    else {
-      if (objectToDump) {
-        if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
-        else {
-          var dump = tools.stringify(objectToDump, 2)
-          if (dump.length > 200) dump = dump.substr(0, 200) + '…'
-          message += '\n' +dump  + "\n";
-        }
+    if (objectToDump) {
+      if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
+      else {
+        var dump = tools.stringify(objectToDump, 2)
+        if ((!options || !options.noTrim) && dump.length > 200) dump = dump.substr(0, 200) + '…'
+        message += '\n' +dump  + "\n";
       }
     }
     message = '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] ' +message
@@ -107,8 +105,8 @@ if (env !== 'production' && config.logs.debug) {
    * @param objectToDump
    * @param filter
    */
-  logDebug = function(message, objectToDump, filter) {
-    out(message, objectToDump, filter, debugOutputStream)
+  logDebug = function(message, objectToDump, filter, options) {
+    out(message, objectToDump, filter, debugOutputStream, options)
   }
 
   /**

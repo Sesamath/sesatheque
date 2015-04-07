@@ -37,6 +37,7 @@ module.exports = function (Ressource, $routes) {
   // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
   // car on a l'autocomplétion sur les noms de propriété
   var config = require('./config')
+  var tools = require('../tools')
 
   /**
    * Service qui regroupe les fonctions de transformation de données pour les vues
@@ -163,7 +164,7 @@ module.exports = function (Ressource, $routes) {
 
         } else if (_.isObject(value)) {
           try {
-            viewData[key].value = lassi.tools.stringify(value)
+            viewData[key].value = tools.stringify(value)
           } catch (error) {
             viewData[key].value = error.toString()
           }
@@ -309,7 +310,7 @@ module.exports = function (Ressource, $routes) {
    * @memberOf $ressourceConverter
    */
   $ressourceConverter.getRessourceFromPost = function (data, partial) {
-    var ressource = Ressource.create();
+    var ressource = {};
     var warnings = [];
     var buffer;
     var msg;
@@ -323,11 +324,9 @@ module.exports = function (Ressource, $routes) {
         } catch (e) {
           throw e // pas la peine d'insister
         }
-        log.debug("On nous a envoyé une ressource en json", data)
       }
-      // si la ressource précédende avait des erreurs
 
-      // vérif présence et type
+      // vérif présence et type de chaque propriété
       _.each(config.typesVar, function (typeVar, key) {
         var value = data[key]
 
@@ -349,21 +348,21 @@ module.exports = function (Ressource, $routes) {
             }
 
           } else if (typeVar === 'Date') {
-            if (value == parseInt(value, 10)) {
-              // timestamp
-              var ts = value
+            if (value > 0) {
+              // c'est un timestamp
+              var ts = parseInt(value, 10)
               if (ts < 11001001001) ts = ts * 1000 // c'était des s, on passe en ms
               // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
-              buffer = moment(new Date(ts), config.formats.jour, true);
+              buffer = moment(new Date(ts), config.formats.jour, 'fr', true);
             } else {
               // une string, on impose d'abord un parsing strict d'après notre format
-              buffer = moment(value, config.formats.jour, true);
+              buffer = moment(value, config.formats.jour, 'fr', true);
               // mais aussi un formatage ISO standart (pour l'api), http://momentjs.com/docs/#/parsing/string/
-              if (!buffer.isValid) buffer = moment(value)
+              if (!buffer.isValid()) buffer = moment(value, moment.ISO_8601, 'fr')
             }
             if (buffer.isValid()) {
-              // faut repasser la sortie de moment au constructeur de date pour avoir une vraie date js
-              ressource[key] = new Date(buffer); // pb car _.isDate(buffer) renvoie false !
+              // pb car _.isDate(buffer) renvoie false, faut repasser la sortie de moment au constructeur de date pour avoir une vraie date js
+              ressource[key] = new Date(buffer);
             } else {
               // moment est censé faire ça pour les dates qu'il ne reconnait pas, mais dans ce cas isValid reste false
               // et on sait pas trop ce qu'il renvoie
@@ -415,7 +414,7 @@ module.exports = function (Ressource, $routes) {
 
       }) // each
       // data est complet, on créé l'entity
-      ressource = Ressource.create(data)
+      ressource = Ressource.create(ressource)
     }
 
     if (warnings.length) {

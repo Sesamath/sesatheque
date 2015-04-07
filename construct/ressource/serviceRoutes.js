@@ -61,14 +61,14 @@ module.exports = function ($settings) {
    * @memberOf $routes
    *
    * @param {string} action (display|describe|preview)
-   * @param {Ressource} ressource
+   * @param {Ressource|number} ressource ou oid de ressource
    * @returns {string}
    */
   $routes.getAbs = function(action, ressource) {
     var route
     if (['display', 'describe', 'preview'].indexOf(action) > -1) {
-      route = $settings.get('basePath', '') +'/'
-      if (ressource.oid && ressource.description) {
+      route = $settings.get('basePath', '/')
+      if (ressource.oid) {
         route += (ressource.restriction === 0) ? 'public/' : 'ressource/'
         route += this.get(action, ressource.oid)
       } else {

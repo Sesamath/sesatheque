@@ -134,7 +134,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Prepare les data pour la vue dust et appelle html avec
+   * Prepare les data pour la vue dust et appelle html(data)
    * @param error
    * @param ressource
    * @param context
@@ -151,12 +151,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     addMenu(context, data, ressource)
     data.contentBloc.$view = view
     // le titre
-    data.$metas.title = (ressource && ressource.titre) ? ressource.titre : "Ressource introuvable"
+    if (ressource) {
+      if (ressource.titre) data.$metas.title = ressource.titre
+      else data.$metas.title = "Ressource sans titre"
+    } else data.$metas.title = "Ressource introuvable"
     // et d'éventuels overrides
     if (options) tools.merge(data, options)
-    // avant d'envoyer on vérifie que ça bégaye pas
-    if (context.next) context.html(data)
-    else log.error(new Error("prepareAndSend est appelé une 2e fois, on ignore"))
+    context.html(data)
   }
 
   /**
@@ -352,7 +353,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   // Delete, demande de confirmation
-  controller.get($routes.get('del', ':oid'), function (context) {
+  controller.get($routes.get('delete', ':oid'), function (context) {
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
       $accessControl.checkPermission('delete', context, ressource, function () {
@@ -367,7 +368,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   // Delete, traitement du post
-  controller.post($routes.get('del'), function (context) {
+  controller.post($routes.get('delete'), function (context) {
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
       // et rediriger vers le describe ou vers le form avec les erreurs

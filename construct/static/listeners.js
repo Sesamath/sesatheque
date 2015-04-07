@@ -39,7 +39,12 @@ module.exports = function($flashMessage) {
    */
   lassi.on('beforeTransport', function(context, data) {
     var reqHttp = context.request.method +' ' +context.request.originalUrl
-    log.debug('listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ', data, 'beforeTransport')
+    log.debug(
+        'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
+        data,
+        'beforeTransport',
+        {noTrim:true}
+    )
     console.log('listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +')')
 
     // l'api gère ses erreurs toute seule sur ses urls

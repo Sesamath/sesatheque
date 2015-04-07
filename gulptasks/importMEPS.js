@@ -309,7 +309,7 @@ function importMEPS(next, ids) {
   nextStep = next
 
   // la liste des ids à traiter
-  if (ids === 'all') where = ' LIMIT 100'
+  if (ids === 'all') where = ''
   else if (ids) where = ' WHERE mep_id IN (' + ids + ')'
   else {
     log("Pas d'import mep à faire")
@@ -408,7 +408,7 @@ function flushPendingRelations(next) {
       var relations = task[1]
       var pos =  idComb.indexOf('-')
       var origine = idComb.substr(0, pos)
-      var idOrigine = parseInt(idComb.substr(pos+1), 10)
+      var idOrigine = idComb.substr(pos+1)
       // on récupère la ressource avec l'api
       getRessource(origine, idOrigine, function (ressource) {
         // error loggée dans get, on traite pas ici
@@ -427,7 +427,7 @@ function flushPendingRelations(next) {
                 // faut aller chercher l'id de cette ressource liée
                 pos =  idComb.indexOf('-')
                 origine = idComb.substr(0, pos)
-                idOrigine = parseInt(idComb.substr(pos+1), 10)
+                idOrigine = idComb.substr(pos+1)
                 getRessource(origine, idOrigine, function (ressource) {
                   if (ressource && ressource.oid) {
                     newRel[1] = ressource.oid
@@ -497,7 +497,9 @@ function getRessource(origine, idOrigine, next) {
       errors[idComb] = ressource.error
       next(null)
     } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
-      errors[idComb] = "ressource " +idComb +" incohérente : " +JSON.stringify(ressource)
+      errors[idComb] = "ressource " +idComb +" incohérente : " +
+                       JSON.stringify(origine) +'-' +JSON.stringify(idOrigine) +
+                       '\n' +JSON.stringify(ressource)
       next(null)
     } else next(null, ressource)
   })
@@ -636,9 +638,9 @@ module.exports = function () {
       .seq(function () {
         importMEPS(this, mepIds)
       })
-      //.seq(function () {
-      //  importAIDES(this, aideIds)
-      //})
+      .seq(function () {
+        importAIDES(this, aideIds)
+      })
       .seq(function () {
         flushPendingRelations(this)
       })

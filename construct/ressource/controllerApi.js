@@ -282,8 +282,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
 
-    log.debug("dans /api/ressource on récupère en post", context.post, 'api')
-
     try {
       /*
        var oid = context.post.oid || 0

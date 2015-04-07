@@ -70,8 +70,8 @@ module.exports = function () {
         // le type pour les autres champs présents
         if (value) {
           if (!_['is' + typeVar](value)) {
-            errors.push("Le champ " + config.labels[key] + " ne contient pas le type attendu");
-            log.debug("à la validation on a reçu pour " + key, value)
+            errors.push("Le champ " + config.labels[key] + " ne contient pas le type attendu (" +typeVar +')');
+            log.debug("à la validation on a reçu pour " + key +' (pas ' +typeVar +')', value)
           } else if (typeVar === 'Number') {
             // on vérifie entier positif
             if (parseInt(value, 10) !== value) errors.push("Le champ " + config.labels[key] + " ne contient pas un entier");

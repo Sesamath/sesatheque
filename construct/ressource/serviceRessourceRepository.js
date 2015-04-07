@@ -39,8 +39,11 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    * Service d'accès aux ressources, utilisé par les différents contrôleurs
    * @namespace $ressourceRepository
    * @requires Ressource
+   * @requires Archive
+   * @requires $ressourceControl
    * @requires $accessControl
    * @requires $cacheRessource
+   * @requires $cache
    */
   var $ressourceRepository = {}
 
@@ -430,8 +433,6 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    *                             order   : asc ou desc
    *                             start   : L'indice de la 1re valeur à remonter
    *                             nb      : Le nombre de ressources à remonter
-   *                             full    : Préciser true si on veut aussi la propriété parametres des ressources
-   *                                       (sinon on renvoie tout sauf elle)
    * @param {Function} next    La callback qui sera appelée en lui passant la liste de ressources en argument
    */
   $ressourceRepository.getListe = function(visibilite, context, options, next) {
@@ -534,10 +535,6 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         nb = config.limites.maxSql
       }
       query.grab(nb, start, function(error, ressources) {
-        // on vire les param sauf si on les réclame
-        if (!error && ressources && !options.full) ressources.forEach(function(ressource) {
-          if (ressource.parametres) delete ressource.parametres
-        })
         cacheAndNext(error, ressources, next)
       })
 

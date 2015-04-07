@@ -53,7 +53,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         css: ['/styles/ressources.css'],
         js : ['/vendors/requirejs/require.2.1.js']
       },
-      $layout: 'layout-page',
+      $layout: '../../static/views/layout-page',
       contentBloc : {}
     }
   }
