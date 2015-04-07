@@ -49,6 +49,8 @@ var debugOutputStream
 var errorOutputStream = fs.createWriteStream(config.logs.error, {'flags': 'a'});
 /** un log spécifique pour les erreurs liées à des datas incohérentes */
 var errorDataOutputStream = fs.createWriteStream(config.logs.errorData, {'flags': 'a'});
+/** un log pour mesure de performances */
+var perfOutputStream
 
 var env = process.env.NODE_ENV || 'development';
 
@@ -122,20 +124,40 @@ if (env !== 'production' && config.logs.debug) {
     console.log(objectToDump)*/
   }
 
-  console.log("fonction de log activée avec l'environnement : " +env)
   if (config.logs.debugExclusions) {
     config.logs.debugExclusions.forEach(function (filter) {
       exclusions[filter] = true
     })
   }
-  
+
+  lassi.log('app', "fonction de log activée avec l'environnement : " +env)
+
 } else {
   logDebug = function() {};
   log = function () {} // jshint ignore:line
-  console.log("fonction de log déactivée avec l'environnement : " +env)
+  lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
 }
 
 log.debug = logDebug
+
+if (config.logs.perf) {
+  lassi.log('app', 'log des perfs dans ' +config.logs.perf)
+  perfOutputStream = fs.createWriteStream(config.logs.perf, {'flags': 'a'})
+  log.perf = function (context, strToAdd) {
+    if (context.perf) {
+      if (context.perf.msg) context.perf.msg += '\t'
+      context.perf.msg += strToAdd +' ' +log.getElapsed(context.perf.start)
+    }
+  }
+  log.perf.out = function (context) {
+    if (context.perf) {
+      log.perf(context, 'end')
+      out(context.method +' ' +context.request.originalUrl +' ' +(context.status||'000') +'\t' +context.perf.msg, null, null, perfOutputStream)
+    }
+  }
+} else {
+  log.perf = function () {}
+}
 
 // on ajoute nos fct comme méthodes de la fct principale exportée
 
@@ -144,6 +166,8 @@ log.debug = logDebug
  * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
  */
 log.getElapsed = function (start) {
+  start = start || 0
+
   return (new Date()).getTime() -start
 }
 

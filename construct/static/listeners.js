@@ -31,8 +31,13 @@
 
 'use strict'
 
+
 module.exports = function($flashMessage) {
   var _ = require('lodash')
+
+  /**
+   * Le listener sur afterRailUse est dans construct/index.js (il ajoute la gestion de CORS)
+   */
 
   /**
    * Le listener de l'event beforeTransport, pour gérer les pages d'erreur et ajouter les msg flash
@@ -97,7 +102,23 @@ module.exports = function($flashMessage) {
           var flashData = $flashMessage.getAndPurge(context)
           if (flashData) _.merge(data, flashData)
         }
+
       }
     }
+
+    // et la mesure de perf dans le log
+    if (context.perf && context.perf.msg) log.perf.out(context)
+  })
+
+  /**
+   * Listener context pour mesure de perf (si on a précisé un log de perf dans la conf)
+   */
+  lassi.on('context', function(context) {
+    if (log.perf.out) {
+      context.perf = {
+        msg  : '', // message envoyé à log.debug() dans le listener beforeTransport
+        start: log.getElapsed(0)
+      }
+    }   
   })
 }

@@ -415,7 +415,7 @@ function flushPendingRelations(next) {
         if (ressource) {
           // faut récupérer les id de toutes ses relations (dont on a que les idComb dans relations)
           flow(relations)
-            .parMap(function(relation) {
+            .parMap(maxLaunched, function(relation) {
               // avec parMap la stack sera composée de tous les retours passé à this()
               var newRel = [relation[0]] // le 1er param change pas, c'est la nature de la relation
               var idComb = relation[1]
@@ -621,6 +621,7 @@ module.exports = function () {
     log('On ne traitera que les id mep ' +mepIds)
     logProcess = true
     logRelations = true
+    
   } else if (argv[0] === '--aide') {
     aideIds = argv.slice(1)[0]
     checkListOfInt(aideIds)

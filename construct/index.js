@@ -59,19 +59,19 @@ var privateConfig = require('../_private/config')
 // des modules sup à charger
 if (privateConfig.extraModules) {
   privateConfig.extraModules.forEach(function (module) {
-    log("ajout du module supplémentaire " + module)
+    lassi.log('app', "ajout du module supplémentaire " + module)
     require(module)
   })
 }
 if (privateConfig.extraDependenciesFirst) {
   privateConfig.extraDependenciesFirst.forEach(function(dependency) {
-    log("ajout en premier de la dépendance supplémentaire " + dependency)
+    lassi.log('app', "ajout en premier de la dépendance supplémentaire " + dependency)
     dependancies.unshift(dependency)
   })
 }
 if (privateConfig.extraDependenciesLast) {
   privateConfig.extraDependenciesLast.forEach(function(dependency) {
-    log("ajout en dernier de la dépendance supplémentaire " + dependency)
+    lassi.log('app', "ajout en dernier de la dépendance supplémentaire " + dependency)
     dependancies.push(dependency)
   })
 }
@@ -88,7 +88,7 @@ sesatheque.config(function($cache, $settings) {
                       " car elle utilise memcache comme stockage commun aux différents workers nodejs (pour lastIdOrigine)")
     }
     $cache.addEngine('', 'memcache', memcache);
-    log('Memcache ajouté sur ' +memcache)
+    lassi.log('app', 'Memcache ajouté sur ' +memcache)
   } else if (process.env.NODE_UNIQUE_ID) {
     // @see https://nodejs.org/api/cluster.html#cluster_cluster_ismaster
     throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
@@ -97,7 +97,7 @@ sesatheque.config(function($cache, $settings) {
   // le listener beforeTransport est ajouté dans le composant static qui défini $flashMessage
 
   // log("sesatheque en fin de config", sesatheque)
-  log("FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
+  lassi.log('app', "FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
 })
 
 // pour les logs morgan, on ajoute nos tokens et le WriteStream ici
@@ -185,7 +185,6 @@ lassi.on('afterRailUse', function (rail, name) {
     })
   }
 })
-/* */
 
 // et on lance le boot
 sesatheque.bootstrap()

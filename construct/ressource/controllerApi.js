@@ -36,8 +36,6 @@
  * POST /api/ressourceMerge
  */
 'use strict'
-var Memcached = require('memcached');
-var mc = new Memcached('127.0.0.1:11211')
 
 /**
  * Le controleur json du composant ressource (sur /api/)
@@ -45,13 +43,14 @@ var mc = new Memcached('127.0.0.1:11211')
  * @param $ressourceRepository
  * @param $ressourceConverter
  * @param $accessControl
+ * @param $ressourceControl
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $ressourceControl, $cache, Ressource) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $ressourceControl) {
 
   var _ = require('lodash')
   var flow = require('seq')
 
-  var tools = require('../tools')
+  //var tools = require('../tools')
 
   /**
    * Équivalent de context.denied en json
@@ -141,6 +140,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (error) {
       sendJson(context, error)
     } else {
+      if (context.perf) log.perf(context, 'loaded')
       // attention, le merge de lodash n'est pas récursif et n'écrase que les propriétés qui existent en destination
       _.merge(ressourceBdd, ressourceNew)
       if (final) final(context, ressourceBdd)
@@ -252,6 +252,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           log.debug("dans cb api write on récupère", ressource)
           if (error) sendJson(context, error)
           else {
+            if (context.perf) log.perf(context, 'written')
             var data = {oid: ressource.oid}
             if (!_.isEmpty(ressource.warnings)) {
               data.warnings = ressource.warnings
@@ -276,6 +277,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param context
    */
   controller.post('ressource', function (context) {
+    if (context.perf) {
+      var msg = 'start-'
+      if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
+      else msg += context.post.oid
+      log.perf(context, msg)
+    }
     // partiel si on a oid (ou idOrigine) sans titre ni catégorie
     var partial = !context.post.titre && !context.post.categories &&
         (context.post.oid || (context.post.origine && context.post.idOrigine))
@@ -283,17 +290,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
 
     try {
-      /*
-       var oid = context.post.oid || 0
-       var msg = oid
-       // init du chrono
-       var start = log.getElapsed(0)
-       /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs * /
-       if (!lassi.tmp) lassi.tmp = {}
-       lassi.tmp[context.post.oid] = {m:msg,s:start}
-       lassi.tmp[context.post.oid].m += '\tcv ' +log.getElapsed(lassi.tmp[context.post.oid].s)
-       //log.debug("que l'on a transformé en", ressource) /* */
-
       if (partial) {
         // faut la charger
         if (ressource.oid) {
@@ -316,26 +312,30 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Merge de nouvelles valeurs avec une ressource existante (ou pas, et dans ce cas idem 'ressource')
    */
   controller.post('ressourceMerge', function (context) {
-        var part = $ressourceConverter.getRessourceFromPost(context.post, true)
+    if (context.perf) log.perf(context, 'start')
 
-        function merge(error, ressource) {
-          if (error) {
-            sendJson(context, error)
-          } else {
-            ressource.merge(part)
-            write(context, ressource)
-          }
-        }
+    var part = $ressourceConverter.getRessourceFromPost(context.post, true)
 
-        if (part.oid) $ressourceRepository.load(context.post.oid, merge)
-        else if (context.post.origine && context.post.idOrigine)
-            $ressourceRepository.loadByOrigin(part.origine, part.idOrigine, merge)
-        else sendJson(context, new Error("Il faut fournir oid ou origine+idOrigine"))
-      })
+    function merge(error, ressource) {
+      if (error) {
+        sendJson(context, error)
+      } else {
+        ressource.merge(part)
+        write(context, ressource)
+      }
+    }
+
+    if (part.oid) $ressourceRepository.load(context.post.oid, merge)
+    else if (context.post.origine && context.post.idOrigine)
+        $ressourceRepository.loadByOrigin(part.origine, part.idOrigine, merge)
+    else sendJson(context, new Error("Il faut fournir oid ou origine+idOrigine"))
+  })
 
   // read
   controller.get('ressource/:oid', function (context) {
     var oid = context.arguments.oid
+    if (context.perf) log.perf(context, 'start')
+
     $ressourceRepository.load(oid, function (error, ressource) {
       // log.debug("dans api get " +oid, ressource)
       if (error) sendJson(context, error)
@@ -350,6 +350,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // delete
   controller.delete('ressource/:oid', function (context) {
     var oid = context.arguments.oid
+    if (context.perf) log.perf(context, 'start')
 
     function del() {
       $ressourceRepository.del(oid, function (error, nbObjects, nbIndexes) {
@@ -376,6 +377,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get('ressource/:origine/:oid', function (context) {
     var idOrigine = context.arguments.oid
     var origine = context.arguments.origine
+    if (context.perf) log.perf(context, 'start')
+
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       // log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
       // log.debug("dans api get " +origine +'/' +idOrigine, ressource)
@@ -393,6 +396,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
+    if (context.perf) log.perf(context, 'start')
 
     /**
      * Efface la ressource d'après les params origine & idOrigine de la requete
@@ -436,6 +440,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Read public (sans session)
   controller.get('public/:oid', function (context) {
     var oid = context.arguments.oid
+    if (context.perf) log.perf(context, 'start')
     $ressourceRepository.loadPublic(oid, function (error, ressource) {
       if (error) sendJson(context, error)
       else if (ressource) sendJson(context, null, ressource)
@@ -445,8 +450,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // Read public (sans session) par origine
   controller.get('public/:origine/:idOrigine', function (context) {
+    if (context.perf) log.perf(context, 'start')
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
+
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       if (error) sendJson(context, error)
       else if (ressource) {
@@ -469,7 +476,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - nb : nb de résultats voulus
    */
   controller.post('public/by', function (context) {
+    if (context.perf) log.perf(context, 'start')
     log.debug('api.public.by reçoit', context.post)
+
     $ressourceRepository.getListe('public', context, context.post, function (error, ressources) {
       if (error) sendJson(context, error)
       else sendJson(context, null, ressources)
@@ -477,21 +486,21 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   controller.post('prof/by', function (context) {
-    if (!$accessControl.isAuthenticated(context))
-        denied("Il faut être authentifié pour accéder aux ressources prof", context)
-    else $ressourceRepository.getListe('prof', context, context.post, function (error, ressources) {
+    if (context.perf) log.perf(context, 'start')
+    if ($accessControl.isAuthenticated(context)) $ressourceRepository.getListe('prof', context, context.post, function (error, ressources) {
       if (error) sendJson(context, error)
       else sendJson(context, null, ressources)
     })
+    else denied("Il faut être authentifié pour accéder aux ressources prof", context)
   })
 
   controller.post('perso/by', function (context) {
-    if (!$accessControl.isAuthenticated(context))
-        denied("Il faut être authentifié pour accéder à ses ressources", context)
-    else $ressourceRepository.getListe('perso', context, context.post, function (error, ressources) {
+    if (context.perf) log.perf(context, 'start')
+    if ($accessControl.isAuthenticated(context)) $ressourceRepository.getListe('perso', context, context.post, function (error, ressources) {
       if (error) sendJson(context, error)
       else sendJson(context, null, ressources)
     })
+    else denied("Il faut être authentifié pour accéder à ses ressources", context)
   })
 
   /**
@@ -503,23 +512,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post('arbre', function (context) {
     var partial = context.post.ref && !context.post.childrens
     var oid = parseInt(context.post.ref, 10) || 0
+    if (context.perf) log.perf(context, 'start-' +oid)
+    log.debug('post avec populate ' + context.get.populate)
+
     // si on passe ?populate=1 dans l'url on parse les enfants pour récupérer titre et type
     // sinon on laisse en l'état
-    log.debug('post avec populate ' + context.get.populate)
     var final = (context.get.populate) ? populateArbre : write
     var ressource = $ressourceConverter.getRessourceFromPostedArbre(context.post, partial)
 
     // log.debug("dans api arbre on récupère", ressource)
     try {
-      /* debug, mesure de perfs, init du chrono */
-      /** lassi.tmp sert à stocker des dates pour debug et mesures de perfs * /
-      var msg = oid
-      var start = log.getElapsed(0)
-      if (!lassi.tmp) lassi.tmp = {}
-      lassi.tmp[context.post.ref] = {m: msg, s: start}
-      lassi.tmp[context.post.ref].m += '\tcv ' + log.getElapsed(lassi.tmp[context.post.ref].s)
-      /* fin mesures de perfs */
-
       if (partial) {
         $ressourceRepository.load(oid, function (error, ressourceBdd) {
           updateAndOut(context, error, ressourceBdd, ressource, final)
@@ -535,6 +537,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Read arbre
   controller.get('arbre/:oid', function (context) {
     var oid = context.arguments.oid
+    if (context.perf) log.perf(context, 'start')
+
     $ressourceRepository.load(oid, function (error, ressource) {
       // log.debug("dans api get " +oid, ressource)
       if (error) {
@@ -555,14 +559,4 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  var firstFreeId = 1
-  $cache.set('cpt', firstFreeId, 3600, function(){})
-
-  controller.get('cpt', function (context) {
-    //mc.incr('cpt', )
-    mc.incr('cpt', 1, function (err, val) {
-      context.json({cpt:firstFreeId++, err:err, val:val})
-
-    })
-  })
 }
