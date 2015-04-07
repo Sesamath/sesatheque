@@ -325,15 +325,6 @@ function importMEPS(next, ids) {
           " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateMiseAJour" +
         " FROM MEPS m" +where)
       .then(function (rows) {
-        /*
-        var fs = require('fs'), tmpFile, writeStream
-        for (var i = 0; i < rows.length; i++) {
-          tmpFile = __dirname + '/../logs/tmp' +i +'.dump';
-          writeStream = fs.createWriteStream(tmpFile);
-          writeStream.write(JSON.stringify(rows[i]))
-          writeStream.end();
-        } /* */
-
           var ressources = rows[0]
           nbRessToParse += ressources.length
           nbToRec += ressources.length
@@ -377,13 +368,14 @@ function importAIDES(next, ids) {
           " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateMiseAJour" +
           " FROM AIDES a " +where)
       .then(function (rows) {
-        nbToRec += rows[0].length
-        nbRessToParse += rows[0].length
-        rows[0].forEach(function(row) {
-            ressourceCourante = initRessourceAm(row)
-            idsParsed.push(ressourceCourante.idOrigine);
-            if (logProcess) log('processing aide ' + ressourceCourante.idOrigine)
-            addRessource(ressourceCourante, checkEnd);
+        var ressources = rows[0]
+        nbRessToParse += ressources.length
+        nbToRec += ressources.length
+        ressources.forEach(function(row) {
+          ressourceCourante = initRessourceAm(row);
+          idsParsed.push(ressourceCourante.idOrigine +4000);
+          if (logProcess) log('processing aide ' + ressourceCourante.idOrigine)
+          defer(ressourceCourante)
         })
       })
       .catch(function(e) {
@@ -616,15 +608,15 @@ module.exports = function () {
   // sauf si on précise l'un ou l'autre (on impose le log dans ce cas
   if (argv[0] === '--mep') {
     mepIds = argv.slice(1)[0]
-    checkListOfInt(mepIds)
+    if (mepIds !== 'all') checkListOfInt(mepIds)
     aideIds = undefined
     log('On ne traitera que les id mep ' +mepIds)
     logProcess = true
     logRelations = true
-    
+
   } else if (argv[0] === '--aide') {
     aideIds = argv.slice(1)[0]
-    checkListOfInt(aideIds)
+    if (aideIds !== 'all') checkListOfInt(aideIds)
     mepIds = undefined
     log('On ne traitera que les id aide ' +aideIds)
     logProcess = true
