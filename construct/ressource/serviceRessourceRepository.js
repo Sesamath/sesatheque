@@ -258,7 +258,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   }
 
   /**
-   * Ajoute ou modifie une ressource
+   * Ajoute ou modifie une ressource (contrôle la validité avant)
    * @param {Ressource} ressource
    * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
    */
@@ -267,12 +267,6 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       log.debug("cast en Ressource dans write")
       ressource = Ressource.create(ressource)
     }
-    /* mesure de perfs * /
-     var t
-     if (ressource.oid && lassi.tmp && lassi.tmp[ressource.oid]) t = lassi.tmp[ressource.oid]
-     else t = {m:'',s:0}
-     /* fin mesures (avec la ligne t.m += ... un peu plus bas) */
-    //log.debug("avant validation dans write", ressource)
     flow()
       .seq(function() {
         $ressourceControl.valide(ressource, this)
@@ -284,12 +278,11 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         initIdOrigine(ressource, this)
       })
       .seq(function (ressource) {
-        // t.m += '\tvsv ' +log.getElapsed(t.s);
+        log.debug('on va enregistrer ' +ressource.origine +'/' +ressource.idOrigine)
         ressource.store(this)
       })
       .seq(function (ressource) {
         // mise en cache et passage au suivant
-        // t.m += '\tst ' +log.getElapsed(t.s)
         if (!ressource.oid) this(new Error("Après un write la ressource n'a toujours pas d'oid"))
         else {
           $cacheRessource.set(ressource)

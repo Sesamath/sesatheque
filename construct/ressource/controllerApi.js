@@ -242,31 +242,29 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function write(context, ressource) {
     var permission = ressource.oid ? 'update' : 'create'
-    $ressourceControl.valide(ressource, function (error, ressource) {
-      if (error) sendJson(context, error)
-      else if ($accessControl.hasPermission(permission, context, ressource)) {
-        $ressourceRepository.write(ressource, function (error, ressource) {
-          // oid - convertPost - valide+setVersion - store - store2 - fin
-          //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
-          //log.errorData(lassi.tmp[context.post.oid].m)
-          log.debug("dans cb api write on récupère", ressource)
-          if (error) sendJson(context, error)
-          else {
-            if (context.perf) log.perf(context, 'written')
-            var data = {oid: ressource.oid}
-            if (!_.isEmpty(ressource.warnings)) {
-              data.warnings = ressource.warnings
-            }
-            sendJson(context, null, data)
+    if ($accessControl.hasPermission(permission, context, ressource)) {
+      $ressourceRepository.write(ressource, function (error, ressource) {
+        // oid - convertPost - valide+setVersion - store - store2 - fin
+        //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
+        //log.errorData(lassi.tmp[context.post.oid].m)
+        log.debug("dans cb api write on récupère", ressource)
+        if (error) sendJson(context, error)
+        else {
+          if (context.perf) log.perf(context, 'written')
+          var data = {oid: ressource.oid}
+          if (!_.isEmpty(ressource.warnings)) {
+            data.warnings = ressource.warnings
           }
-        })
-      } else {
-        var errorMsg = "Droits insuffisants"
-        if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
-        else errorMsg += " pour ajouter une ressource"
-        denied(errorMsg, context)
-      }
-    })
+          sendJson(context, null, data)
+        }
+      })
+    } else {
+      // denied
+      var errorMsg = "Droits insuffisants"
+      if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
+      else errorMsg += " pour ajouter une ressource"
+      denied(errorMsg, context)
+    }
   }
 
   /**

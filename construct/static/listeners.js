@@ -60,9 +60,9 @@ module.exports = function($flashMessage) {
         context.status = 404
         context.contentType = 'application/json'
         if (!data.error) data.error = 'not found'
-      } else if (context.request.originalUrl.substr(0, 7) !== '/debug/') {
-        // debug peut renvoyer ce qu'il veut on y touche pas
 
+      } else if (context.request.originalUrl.substr(0, 7) !== '/debug/') {
+        // debug peut renvoyer ce qu'il veut on y touche pas, sinon
         // ça devrait être du html, on fixe 404 si pas de contenu
         if (!data.contentBloc && !context.status) {
           log.error('pas de status ni content => 404')
