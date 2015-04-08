@@ -241,13 +241,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function write(context, ressource) {
+    log.debug("dans cb api write on récupère", ressource)
     var permission = ressource.oid ? 'update' : 'create'
     if ($accessControl.hasPermission(permission, context, ressource)) {
       $ressourceRepository.write(ressource, function (error, ressource) {
+        log.debug("et après store", ressource, 'repository')
+        if (error) log.debug("avec l'erreur", error, 'repository')
         // oid - convertPost - valide+setVersion - store - store2 - fin
         //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
         //log.errorData(lassi.tmp[context.post.oid].m)
-        log.debug("dans cb api write on récupère", ressource)
         if (error) sendJson(context, error)
         else {
           if (context.perf) log.perf(context, 'written')
@@ -269,8 +271,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Create / update une ressource
-   * Si le titre et la catégorie sont manquants (mais avec oid) on merge avec la ressource existante que l'on update,
-   * sinon on écrase ou on créé
+   * Si le titre et la catégorie sont manquants (mais avec oid), ou que l'on passe merge=1 en paramètre,
+   * on merge avec la ressource existante que l'on update,sinon on écrase ou on créé
+   * Attention, c'est un merge au sens lodash du terme (chaque propriété présente écrase la précédente)
    * @callback api_ressource POST api/ressource
    * @param context
    */
@@ -281,52 +284,32 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       else msg += context.post.oid
       log.perf(context, msg)
     }
-    // partiel si on a oid (ou idOrigine) sans titre ni catégorie
-    var partial = !context.post.titre && !context.post.categories &&
-        (context.post.oid || (context.post.origine && context.post.idOrigine))
-
-    var ressource = $ressourceConverter.getRessourceFromPost(context.post, partial)
-
-    try {
-      if (partial) {
-        // faut la charger
-        if (ressource.oid) {
-          $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
-            updateAndOut(context, error, ressourceBdd, ressource)
-          })
-        } else {
-          $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
-            updateAndOut(context, error, ressourceBdd, ressource)
-          })
-        }
-      } else write(context, ressource)
-
-    } catch (error) {
-      sendJson(context, error)
+    // partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
+    var partial = !!context.get.partial
+    if (!partial && !context.post.titre && !context.post.categories) {
+      partial = (context.post.oid > 0 || (context.post.origine && context.post.idOrigine))
     }
-  })
-  
-  /**
-   * Merge de nouvelles valeurs avec une ressource existante (ou pas, et dans ce cas idem 'ressource')
-   */
-  controller.post('ressourceMerge', function (context) {
-    if (context.perf) log.perf(context, 'start')
 
-    var part = $ressourceConverter.getRessourceFromPost(context.post, true)
+    $ressourceConverter.valideRessourceFromPost(context.post, partial, function (error, ressource) {
+      try {
+        if (error) throw error
+        if (partial) {
+          // faut la charger
+          if (ressource.oid) {
+            $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
+              updateAndOut(context, error, ressourceBdd, ressource)
+            })
+          } else {
+            $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
+              updateAndOut(context, error, ressourceBdd, ressource)
+            })
+          }
+        } else write(context, ressource)
 
-    function merge(error, ressource) {
-      if (error) {
+      } catch (error) {
         sendJson(context, error)
-      } else {
-        ressource.merge(part)
-        write(context, ressource)
       }
-    }
-
-    if (part.oid) $ressourceRepository.load(context.post.oid, merge)
-    else if (context.post.origine && context.post.idOrigine)
-        $ressourceRepository.loadByOrigin(part.origine, part.idOrigine, merge)
-    else sendJson(context, new Error("Il faut fournir oid ou origine+idOrigine"))
+    })
   })
 
   // read
@@ -516,20 +499,22 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     // si on passe ?populate=1 dans l'url on parse les enfants pour récupérer titre et type
     // sinon on laisse en l'état
     var final = (context.get.populate) ? populateArbre : write
-    var ressource = $ressourceConverter.getRessourceFromPostedArbre(context.post, partial)
-
-    // log.debug("dans api arbre on récupère", ressource)
-    try {
-      if (partial) {
-        $ressourceRepository.load(oid, function (error, ressourceBdd) {
-          updateAndOut(context, error, ressourceBdd, ressource, final)
-        })
-      } else {
-        final(context, ressource);
+    $ressourceConverter.valideRessourceFromPostedArbre(context.post, partial, function (error, ressource) {
+      // log.debug("dans api arbre on récupère", ressource)
+      try {
+        if (error) throw error
+        if (partial) {
+          $ressourceRepository.load(oid, function (error, ressourceBdd) {
+            updateAndOut(context, error, ressourceBdd, ressource, final)
+          })
+        } else {
+          final(context, ressource);
+        }
+      } catch (error) {
+        sendJson(context, error)
       }
-    } catch (error) {
-      sendJson(context, error)
-    }
+    })
+
   })
 
   // Read arbre

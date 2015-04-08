@@ -31,7 +31,7 @@
 
 'use strict';
 
-module.exports = function (Ressource, $routes) {
+module.exports = function (Ressource, $routes, $ressourceControl) {
   var _ = require('lodash')
   var moment = require('moment')
   // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
@@ -83,24 +83,6 @@ module.exports = function (Ressource, $routes) {
     });
 
     return choices;
-  }
-
-  /**
-   * Parcours récursivement tab et remplace toutes les chaînes représentant des entiers en entiers
-   * @param {Array} tab
-   * @returns {Array} Le tableau modifié
-   */
-  function integerify(tab) {
-    tab.forEach(function (value) {
-      var i
-      if (_.isArray(value)) value = integerify(value)
-      else {
-        i = parseInt(value, 10)
-        if (value == i) value = i
-      }
-    });
-
-    return tab
   }
 
   /**
@@ -309,130 +291,42 @@ module.exports = function (Ressource, $routes) {
    * @throws {Error} En cas de données invalides
    * @memberOf $ressourceConverter
    */
-  $ressourceConverter.getRessourceFromPost = function (data, partial) {
-    var ressource = {};
-    var warnings = [];
-    var buffer;
-    var msg;
-    if (_.isEmpty(data)) {
-      warnings.push("Ressource vide");
-    } else {
+  $ressourceConverter.valideRessourceFromPost = function (data, partial, next) {
+    try {
+      if (_.isEmpty(data)) throw new Error("Ressource vide")
+
       if (data.ressource) {
-        // on nous envoie tout le json dans une string
+        // on nous envoie la ressource en json dans une string
         try {
           data = JSON.parse(data.ressource)
         } catch (e) {
-          throw e // pas la peine d'insister
+          throw new Error("json invalide dans la propriété ressource postée")
         }
       }
 
-      // vérif présence et type de chaque propriété
-      _.each(config.typesVar, function (typeVar, key) {
-        var value = data[key]
+      // on peut tenter une validation
+      $ressourceControl.valide(data, !partial, function (error, ressource) {
+        // en cas de pb de validation on renvoie aussi la ressource à l'origine du pb
+        if (error) next(error, ressource)
+        // si partiel, faut pas retourner un objet ressource complet
+        else if (partial) next(null, ressource)
+        // mais sinon on renvoie une vraie "Ressource"
+        else next(null, Ressource.create(ressource))
+      })
 
-        // propriétés obligatoires
-        if (!partial && _.isEmpty(value) && config.required[key]) {
-          warnings.push("Le champ " + config.labels[key] + " est obligatoire");
-        }
-
-        // les cast
-        if (value) {
-
-          if (typeVar === 'String') {
-            if (_.isString(value)) {
-              ressource[key] = value;
-            } else {
-              // on tolère les nombres et on fait le cast en string
-              if (typeof value === 'number') ressource[key] = value.toString()
-              else warnings.push("Le champ " + config.labels[key] + " n'est pas une chaine de caractères");
-            }
-
-          } else if (typeVar === 'Date') {
-            if (value > 0) {
-              // c'est un timestamp
-              var ts = parseInt(value, 10)
-              if (ts < 11001001001) ts = ts * 1000 // c'était des s, on passe en ms
-              // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
-              buffer = moment(new Date(ts), config.formats.jour, 'fr', true);
-            } else {
-              // une string, on impose d'abord un parsing strict d'après notre format
-              buffer = moment(value, config.formats.jour, 'fr', true);
-              // mais aussi un formatage ISO standart (pour l'api), http://momentjs.com/docs/#/parsing/string/
-              if (!buffer.isValid()) buffer = moment(value, moment.ISO_8601, 'fr')
-            }
-            if (buffer.isValid()) {
-              // pb car _.isDate(buffer) renvoie false, faut repasser la sortie de moment au constructeur de date pour avoir une vraie date js
-              ressource[key] = new Date(buffer);
-            } else {
-              // moment est censé faire ça pour les dates qu'il ne reconnait pas, mais dans ce cas isValid reste false
-              // et on sait pas trop ce qu'il renvoie
-              buffer = Date.parse(value)
-              if (buffer > 0) ressource[key] = new Date(buffer);
-              else warnings.push("Le champ " + config.labels[key] +' vaut ' +value +
-                  " qui n'est pas une date valide (" + config.formats.jour +')');
-            }
-
-          } else if (typeVar === 'Number') {
-            ressource[key] = parseInt(value, 10);
-
-          } else if (typeVar === 'Boolean') {
-            ressource[key] = !!value;
-
-          } else if (typeVar === 'Array') {
-            // on tolère une string "[1,2]"
-            if (_.isString(value) && value.substr(0,1) === '[' && value.substr(-1) === ']') {
-              try {
-                buffer = JSON.parse(value)
-                value = buffer // c'était du json valide
-              } catch (e) { /* on laisse faire la suite sans modifier value */ }
-            }
-
-            if (_.isArray(value)) {
-              ressource[key] = integerify(value)
-            } else {
-              warnings.push("Le champ " + config.labels[key] + " n'est pas une liste");
-            }
-
-          } else if (typeVar === 'Object') {
-            if (_.isString(value)) {
-              try {
-                ressource[key] = JSON.parse(value);
-              } catch (e) {
-                warnings.push("Le champ " + config.labels[key] + " n'est pas du json valide : " + e.toString());
-                log.debug('pb parsing', value)
-              }
-            }
-            else
-            if (_.isObject(value)) ressource[key] = value
-            else warnings.push("Le champ " + config.labels[key] + " est invalide : ");
-          } else {
-            msg = "Le champ " + config.labels[key] + " est d'un type non prévu (" +typeVar +')';
-            warnings.push(msg);
-            log.error(msg);
-          }
-        } // cast
-
-      }) // each
-      // data est complet, on créé l'entity
-      ressource = Ressource.create(ressource)
+    } catch (error) {
+      next(error)
     }
-
-    if (warnings.length) {
-      log.debug('warnings à la fin getRessourceFromPost', warnings)
-      ressource.warnings = warnings
-    }
-
-    return ressource;
   }
 
   /**
-   * Modifie le post d'un arbre pour en déléguer l'analyse à getRessourceFromPost
+   * Modifie le post d'un arbre pour le faire ressembler à une ressource et le refiler à valideRessourceFromPost
    * @param data
    * @param partial
-   * @returns {Ressource}
+   * @param {Function} next
    * @memberOf $ressourceConverter
    */
-  $ressourceConverter.getRessourceFromPostedArbre = function (data, partial) {
+  $ressourceConverter.valideRessourceFromPostedArbre = function (data, partial, next) {
     // on transforme le post pour ressembler à un post de ressource
     var ressource = {}
 
@@ -456,17 +350,17 @@ module.exports = function (Ressource, $routes) {
         delete data[prop]
       }
     })
+    // faut ajouter les enfants éventuels
+    if (data.enfants) ressource.enfants = data.enfants;
     // ces propriétés sont imposées
     ressource.typeTechnique = 'arbre'
     ressource.categories = [config.constantes.categories.liste]
+
     // on ne gère pas de relations avec les enfants des arbres,
     // pour certaines ressources on en aurait des centaines
     // on verra si on passe une tâche de fond pour ajouter ces relations sur certains arbres
-    var arbre = $ressourceConverter.getRessourceFromPost(ressource, partial)
-    // faut ajouter les enfants qui passent pas le filtre getRessourceFromPost (car pas une propriété de l'entité)
-    if (data.enfants) arbre.enfants = data.enfants;
 
-    return arbre
+    $ressourceConverter.valideRessourceFromPost(ressource, partial, next)
   }
 
   /**

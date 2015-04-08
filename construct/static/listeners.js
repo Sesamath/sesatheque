@@ -106,7 +106,7 @@ module.exports = function($flashMessage) {
       }
     }
 
-    // et la mesure de perf dans le log
+    // la mesure de perf dans le log
     if (context.perf && context.perf.msg) log.perf.out(context)
   })
 

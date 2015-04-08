@@ -33,7 +33,7 @@
 
 /**
  * Entity Ressource
- * @param Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
+ * @param {Entity} Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
  * @param $ressourceControl
  */
 module.exports = function (Ressource, $ressourceControl) {
@@ -183,12 +183,16 @@ module.exports = function (Ressource, $ressourceControl) {
     // Attention, oid aussi (faut le virer avant si c'est l'oid d'une autre entité, archive par ex)
     if (initObj) {
       var tmp = tools.clone(this)
+      // cast éventuel en Date
+      if (tmp.dateCreation && !tmp.dateCreation instanceof Date) tmp.dateCreation = tools.toDate(tmp.dateCreation)
+      if (tmp.dateMiseAJour && !tmp.dateMiseAJour instanceof Date) tmp.dateMiseAJour = tools.toDate(tmp.dateMiseAJour)
       tools.merge(tmp, initObj)
-      $ressourceControl.validate(tmp, function (error) {
+      $ressourceControl.valide(tmp, false, function (error) {
         if (error) log.error(new Error("Objet invalide passé au constructeur Ressource,\n" +error.toString(), initObj))
         else tools.merge(this, initObj)
       })
     }
+
   })
 
 

@@ -295,29 +295,36 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
 // Create, traitement du post
   controller.post($routes.get('add'), function (context) {
-    var ressource
+    function rePrintForm(error, ressource) {
+      var options = {$metas: {title: 'Ajouter une ressource'}}
+      printForm(error, ressource, context, options)
+    }
+
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
       // et rediriger vers le describe ou vers le form avec les erreurs
       //log.debug('post dans add', controller.post);
-      ressource = $ressourceConverter.getRessourceFromPost(context.post)
-      // il validera avant d'enregistrer
-      $ressourceRepository.write(ressource, function (error, ressource) {
-        if (error || !_.isEmpty(ressource.warnings)) {
-          // faut réafficher le form
-          var options = {$metas: {title: 'Ajouter une ressource'}}
-          printForm(error, ressource, context, options)
-        } else {
-          log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
-          var prefix = basePath
-          prefix += (ressource.restriction === 0) ? 'public' : 'ressource'
-          context.redirect(prefix +$routes.get('describe', ressource.oid))
+      $ressourceConverter.valideRessourceFromPost(context.post, false, function (error, ressource) {
+        if (error || !_.isEmpty(ressource.warnings)) rePrintForm(error, ressource)
+        else {
+          $ressourceRepository.write(ressource, function (error, ressource) {
+            if (error || !_.isEmpty(ressource.warnings)) {
+              // là c'est un bug dans notre code
+              log.error(new Error("on a une erreur au write mais pas au valide précédent"))
+              rePrintForm(error, ressource)
+            } else {
+              log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
+              var prefix = basePath
+              prefix += (ressource.restriction === 0) ? 'public' : 'ressource'
+              context.redirect(prefix + $routes.get('describe', ressource.oid))
+            }
+          }) // write
         }
-      }) // write
+      }) // valideRessourceFromPost
     }) // checkToken
   })
 
-// Uptate, affichage du form
+  // Uptate, affichage du form
   controller.get($routes.get('edit', ':oid'), function (context) {
     if (checkSession(context)) {
       var oid = context.arguments.oid
@@ -331,25 +338,29 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   // Uptate, traitement du form
-  controller.post($routes.get('add'), function (context) {
-    var ressource
+  controller.post($routes.get('update'), function (context) {
+    function rePrintForm(error, ressource) {
+      var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
+      printForm(error, ressource, context, options)
+    }
+
     checkToken(context, function () {
       // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
       // et rediriger vers le describe ou vers le form avec les erreurs
       //log.debug('post dans add', controller.post);
-      ressource = $ressourceConverter.getRessourceFromPost(context.post)
-      // il validera avant d'enregistrer
-      $ressourceRepository.write(ressource, function (error, ressource) {
-        if (error || !_.isEmpty(ressource.warnings)) {
-          // faut réafficher le form
-          var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
-          printForm(error, ressource, context, options)
-        } else {
-          log.debug("update " + ressource.oid + " ok, on lance le redirect")
-          context.redirect(basePath +$routes.get('describe', ressource.oid))
+      $ressourceConverter.valideRessourceFromPost(context.post, false, function (error, ressource) {
+        if (error || !_.isEmpty(ressource.warnings)) rePrintForm(error, ressource)
+        else {
+          $ressourceRepository.write(ressource, function (error, ressource) {
+            if (error || !_.isEmpty(ressource.warnings)) rePrintForm(error, ressource)
+            else {
+              log.debug("update " + ressource.oid + " ok, on lance le redirect")
+              context.redirect(basePath +$routes.get('describe', ressource.oid))
+            }
+          })
         }
-      }) // write
-    }) // checkToken
+      })
+    })
   })
 
   // Delete, demande de confirmation
@@ -369,21 +380,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // Delete, traitement du post
   controller.post($routes.get('delete'), function (context) {
+    // @todo ajouter un printErreur en html
+    if (!context.post.oid) throw new Error("id manquant")
+
     checkToken(context, function () {
-      // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
-      // et rediriger vers le describe ou vers le form avec les erreurs
-      //log.debug('post dans add', controller.post);
-      var ressource = $ressourceConverter.getRessourceFromPost(context.post)
-      // il validera avant d'enregistrer
-      $ressourceRepository.write(ressource, function (error, ressource) {
-        if (error || !_.isEmpty(ressource.warnings)) {
-          // faut réafficher le form
-          var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
-          printForm(error, ressource, context, options)
-        } else {
-          log.debug("update " + ressource.oid + " ok, on lance le redirect")
-          context.redirect(basePath +$routes.get('describe',ressource.oid))
-        }
+      $ressourceRepository.del(context.post.oid, function (error, nbObj) {
+        // @todo gérer l'erreur et une page de confirmation d'effacement
+        context.redirect(basePath)
       })
     })
   })

@@ -67,8 +67,8 @@ ressourceComponent.service('$ressourceRepository', function(Ressource, Archive, 
   return require('./serviceRessourceRepository')(Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource)
 })
 
-ressourceComponent.service('$ressourceConverter', function (Ressource, $routes) {
-  return require('./serviceRessourceConverter')(Ressource, $routes)
+ressourceComponent.service('$ressourceConverter', function (Ressource, $routes, $ressourceControl) {
+  return require('./serviceRessourceConverter')(Ressource, $routes, $ressourceControl)
 })
 
 // nos ressources statiques

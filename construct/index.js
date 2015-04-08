@@ -159,9 +159,11 @@ lassi.on('afterRailUse', function (rail, name) {
       // on ajoute les requetes http en console
       rail.use('/', function(req, res, next) {
         log(req.method +' ' +req.originalUrl)
+        log.debug(req.method +' ' +req.originalUrl)
         next()
       })
     }
+
     lassi.log('$rail', "adding", "cors".blue.underline, "middleware")
     rail.use('/', function(req, res, next) {
       var origin = req.header('Origin')

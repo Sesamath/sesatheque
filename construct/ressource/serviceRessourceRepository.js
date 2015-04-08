@@ -162,15 +162,13 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    */
   function cacheAndNext(error, ressources, next) {
     /**
-     * Helper qui process une ressource
+     * Helper qui process une ressource et la met en cache
      * @param ressource
      */
     function processOne(ressource) {
       if (!ressource || !ressource.oid) throw new Error("Paramètre invalide (ressource attendue)")
-      // faut transformer les dates en objets date
-      if (ressource.dateCreation) ressource.dateCreation = new Date(ressource.dateCreation);
-      if (ressource.dateMiseAJour) ressource.dateMiseAJour = new Date(ressource.dateMiseAJour);
-      // on regarde si on a un xml et rien d'autre
+      // pour ec2 on regarde si on a un xml et rien d'autre pour le mettre directement en parametres
+      // (car c'est pas du xml mais du json)
       if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
         convertXmlEc2(ressource)
       }
@@ -267,21 +265,16 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       log.debug("cast en Ressource dans write")
       ressource = Ressource.create(ressource)
     }
-    flow()
-      .seq(function() {
+    flow().seq(function() {
         $ressourceControl.valide(ressource, this)
-      })
-      .seq(function (ressource) {
+      }).seq(function (ressource) {
         updateVersion(ressource, this)
-      })
-      .seq(function (ressource) {
+      }).seq(function (ressource) {
         initIdOrigine(ressource, this)
-      })
-      .seq(function (ressource) {
+      }).seq(function (ressource) {
         log.debug('on va enregistrer ' +ressource.origine +'/' +ressource.idOrigine)
         ressource.store(this)
-      })
-      .seq(function (ressource) {
+      }).seq(function (ressource) {
         // mise en cache et passage au suivant
         if (!ressource.oid) this(new Error("Après un write la ressource n'a toujours pas d'oid"))
         else {
@@ -289,8 +282,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
           log.debug('write ' + ressource.oid + ' ok')
           if (next) next(null, ressource)
         }
-      })
-      .catch(function(error) {
+      }).catch(function(error) {
         log.error(error)
         if (next) next(error);
       })
@@ -357,10 +349,8 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    * @returns {undefined}
    */
   $ressourceRepository.load = function(oid, next) {
-    log.debug('load ressource_' +oid)
-    log('load ressource_' +oid)
+    log.debug('load ressource_' +oid, null, 'repository')
     $cacheRessource.get(oid, function (error, ressourceCached) {
-      log("retour de cache ressource_" +oid, [error, ressourceCached])
       if (ressourceCached) next(null, ressourceCached)
       else Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
         cacheAndNext(error, ressource, next)

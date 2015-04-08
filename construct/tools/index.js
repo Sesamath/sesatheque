@@ -32,23 +32,77 @@
 'use strict'
 
 var _ = require('lodash')
+var moment = require('moment')
 
 var tools = {}
 
 /**
- * Update object en y ajoutant toutes les propriétés de addition
+ * Clone un objet
  * @param object
- * @param addition
  * @returns {object}
  */
-tools.update = function(object, addition) {
-  Object.getOwnPropertyNames(addition).forEach(function(property) {
-    Object.defineProperty(
-        object,
-        property,
-        Object.getOwnPropertyDescriptor(addition, property)
-    );
-  });
+tools.clone = function(object) {
+  var copy = Object.create(Object.getPrototypeOf(object));
+  tools.update(copy, object);
+
+  return copy;
+}
+
+/**
+ * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
+ * @param int La valeur à contrôler
+ * @param min Le minimum exigé
+ * @param max Le maximum exigé
+ * @param label Un label pour le message d'erreur (qui indique ce qui a été recadré)
+ * @returns {Integer}
+ */
+tools.encadre = function (int, min, max, label) {
+  var value = parseInt(int)
+  if (value < min) {
+    log.error(label +" trop petit (" +value +"), on le fixe à " +min)
+    value = min
+  }
+  if (value > max) {
+    log.error(label +" trop grand (" +value +"), on le fixe à " +max)
+    value = max
+  }
+  return value
+}
+
+/**
+ * Parcours récursivement tab et remplace toutes les chaînes représentant des entiers en entiers
+ * @param {Array} tab
+ * @returns {Array} Le tableau modifié
+ */
+tools.integerify = function (tab) {
+  if (tab instanceof Object) {
+    tab.forEach(function (value) {
+      var i
+      if (_.isArray(value)) value = tools.integerify(value)
+      else {
+        i = parseInt(value, 10)
+        if (value == i) value = i
+      }
+    })
+  }
+
+  return tab
+}
+
+/**
+ * Génère le code html d'un lien
+ * @param route La route (après "ressources/", cf config.routes)
+ * @param texte Le texte à afficher
+ * @param {string|array} [args] Des arguments à ajouter à la route (séparateur slash)
+ * @returns {string} Le code html du tag a
+ */
+tools.link = function (route, texte, args) {
+  if (args) {
+    if (_.isArray(args)) route += '/' +args.join('/')
+    else route += '/' +args
+  }
+
+  return '<a href="' +route +'">' +texte +'</a>'
 }
 
 /**
@@ -65,7 +119,7 @@ tools.merge = function(object, newValues, strict) {
     for (s = 0; s < arSrc.length; s++) {
       found = false
       for (d = 0; d < arDest.length; d++) {
-        if (_.equals(arSrc[s], arDest[d])) {
+        if (_.isEqual(arSrc[s], arDest[d])) {
           found = true
           break
         }
@@ -86,27 +140,6 @@ tools.merge = function(object, newValues, strict) {
   if (object instanceof Array && newValues instanceof Array) mergeArray(object, newValues)
   else if (object instanceof Object && newValues instanceof Object) mergeObj(object, newValues)
   else if (strict) throw new Error('tools.merge réclame 2 Object ou 2 Array')
-}
-
-/**
- * Clone un objet
- * @param object
- * @returns {object}
- */
-tools.clone = function(object) {
-  var copy = Object.create(Object.getPrototypeOf(object));
-  tools.update(copy, object);
-
-  return copy;
-}
-
-/**
- * Elimine les tags d'une string
- * @param {string} source
- * @returns {string}
- */
-tools.stripTags = function (source) {
-  return source.replace(/(<([^>]+)>)/ig,"");
 }
 
 /**
@@ -152,40 +185,59 @@ tools.stringify = function(obj, indent) {
 }
 
 /**
- * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
- * @param int La valeur à contrôler
- * @param min Le minimum exigé
- * @param max Le maximum exigé
- * @param label Un label pour le message d'erreur (qui indique ce qui a été recadré)
- * @returns {Integer}
+ * Elimine les tags html d'une string
+ * @param {string} source
+ * @returns {string}
  */
-tools.encadre = function (int, min, max, label) {
-  var value = parseInt(int)
-  if (value < min) {
-    log.error(label +" trop petit (" +value +"), on le fixe à " +min)
-    value = min
-  }
-  if (value > max) {
-    log.error(label +" trop grand (" +value +"), on le fixe à " +max)
-    value = max
-  }
-  return value
+tools.stripTags = function (source) {
+  return source.replace(/(<([^>]+)>)/ig,"");
 }
 
 /**
- * Génère le code html d'un lien
- * @param route La route (après "ressources/", cf config.routes)
- * @param texte Le texte à afficher
- * @param {string|array} [args] Des arguments à ajouter à la route (séparateur slash)
- * @returns {string} Le code html du tag a
+ * Converti un timestamp ou un chaine en objet Date
+ * @param {number|string} value Un timestamp (en ms ou s) ou une chaine ('DD/MM/YYYY' ou ISO_8601)
+ * @returns {Date} L'objet Date ou undefined si la conversion a échoué (value invalide)
  */
-tools.link = function (route, texte, args) {
-  if (args) {
-    if (_.isArray(args)) route += '/' +args.join('/')
-    else route += '/' +args
+tools.toDate = function (value) {
+  var buffer
+  if (value > 0) {
+    // c'est un timestamp
+    var ts = parseInt(value, 10)
+    if (ts < 11001001001) ts = ts * 1000 // c'était des s, on passe en ms
+    // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
+    buffer = new Date(ts)
+  } else {
+    buffer = moment(value, ['DD/MM/YYYY', moment.ISO_8601], true)
+    if (buffer.isValid()) buffer = buffer.utc().toDate()
+    else buffer = undefined
   }
 
-  return '<a href="' +route +'">' +texte +'</a>'
+  return buffer
+}
+
+/**
+ * Formate un objet Date en DD/MM/YYYY
+ * @param {Date} date
+ * @returns {string} Le jour au format DD/MM/YYYY
+ */
+tools.toJour = function (date) {
+  return moment(date).format('DD/MM/YYYY')
+}
+
+/**
+ * Update object en y ajoutant toutes les propriétés de addition
+ * @param object
+ * @param addition
+ * @returns {object}
+ */
+tools.update = function(object, addition) {
+  Object.getOwnPropertyNames(addition).forEach(function(property) {
+    Object.defineProperty(
+        object,
+        property,
+        Object.getOwnPropertyDescriptor(addition, property)
+    );
+  });
 }
 
 module.exports = tools

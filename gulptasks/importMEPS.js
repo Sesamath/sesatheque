@@ -18,13 +18,15 @@ var logRelations = false
 /** pour loguer le processing (un point par ressource sinon) */
 var logProcess = false
 /** pour loguer les ressources dont le retour est ok */
-var logOk = false
+var logOk = true
 
 var knex = require('knex');
 var _ = require('lodash');
 var request = require('request');
 var moment = require('moment')
-var flow          = require('seq');
+var flow = require('seq');
+
+var tools = require('../construct/tools')
 
 // conf de l'appli
 var confSesatheque = require('../_private/config')
@@ -55,8 +57,8 @@ var idsOk = []
 var idsFailed = [];
 var errors = {}
 var pendingRelations = {};
-/** liste idComb:id */
-var ids = {}
+/** liste idComb:oid */
+var oids = {}
 
 /**
  * Retourne le nb de ms écoulées depuis start
@@ -104,7 +106,7 @@ function checkEnd() {
       addRessource(waitingRessource.shift(), checkEnd)
     }
   } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées (on en est à ' +nbRec +'/' +nbToRec)
+    log('toutes les ressources de cette étape ont été traitées (on en est à ' +nbRec +'/' +nbToRec +')')
     clearTimeout(timerId)
     nextStep()
   }
@@ -198,11 +200,11 @@ function checkListOfInt (ids) {
 
 /**
  * Note dans la var globale pendingRelations une relation à ajouter plus tard
- * @param idComb id combiné origine-idOrigine
+ * @param idComb id combiné origine/idOrigine
  * @param relation [relationCode, idCombLié]
  */
 function addPendingRelation(idComb, relation) {
-  if (logRelations) log('on ajoute pour plus tard la relation ' +idComb +' >' +relation[0] +'> ' +relation[1])
+  if (logRelations) log('on ajoute pour plus tard sur ' +idComb +' la relation ' +relation[0] +' > ' +relation[1])
   if (!pendingRelations[idComb]) pendingRelations[idComb] = [relation];
   else pendingRelations[idComb].push(relation);
 }
@@ -229,18 +231,18 @@ function initRessourceMep(row) {
   if (row.mep_nb_wnk)                   parametres.nb_wnk          = row.mep_nb_wnk;
 
   // parametres + relations
-  var idComb = 'em-' +id
+  var idComb = 'em/' +id
   // aide
   if (row.mep_aide_id) {
     parametres.aide_id         = row.mep_aide_id;
-    addPendingRelation(idComb, [relCode.requiert, 'am-' +row.mep_aide_id]);
-    addPendingRelation('am-' +row.mep_aide_id, [relCode.estRequisPar, idComb]);
+    addPendingRelation(idComb, [relCode.requiert, 'am/' +row.mep_aide_id]);
+    addPendingRelation('am/' +row.mep_aide_id, [relCode.estRequisPar, idComb]);
   }
   // traduction
   if (row.mep_id_fr !== id) {
     parametres.id_fr = row.mep_id_fr;
-    addPendingRelation(idComb, [relCode.estTraductionDe, 'em-' +row.mep_id_fr]);
-    addPendingRelation('em-' +row.mep_id_fr, [relCode.estTraduitAvec, idComb]);
+    addPendingRelation(idComb, [relCode.estTraductionDe, 'em/' +row.mep_id_fr]);
+    addPendingRelation('em/' +row.mep_id_fr, [relCode.estTraduitAvec, idComb]);
   }
 
   // @todo regarder mep_swf_utilisateur_id pour récupérer les auteurs
@@ -393,61 +395,6 @@ function importAIDES(next, ids) {
 function flushPendingRelations(next) {
   var pile = []
 
-  function depile() {
-    if (pile.length) {
-      var task = pile.shift()
-      var idComb = task[0]
-      var relations = task[1]
-      var pos =  idComb.indexOf('-')
-      var origine = idComb.substr(0, pos)
-      var idOrigine = idComb.substr(pos+1)
-      // on récupère la ressource avec l'api
-      getRessource(origine, idOrigine, function (ressource) {
-        // error loggée dans get, on traite pas ici
-        if (ressource) {
-          // faut récupérer les id de toutes ses relations (dont on a que les idComb dans relations)
-          flow(relations)
-            .parMap(maxLaunched, function(relation) {
-              // avec parMap la stack sera composée de tous les retours passé à this()
-              var newRel = [relation[0]] // le 1er param change pas, c'est la nature de la relation
-              var idComb = relation[1]
-              var nextSeq = this
-              if (ids[idComb]) {
-                newRel[1] = ids[idComb]
-                nextSeq(newRel)
-              } else {
-                // faut aller chercher l'id de cette ressource liée
-                pos =  idComb.indexOf('-')
-                origine = idComb.substr(0, pos)
-                idOrigine = idComb.substr(pos+1)
-                getRessource(origine, idOrigine, function (ressource) {
-                  if (ressource && ressource.oid) {
-                    newRel[1] = ressource.oid
-                    nextSeq(newRel)
-                  } else {
-                    errors[idComb] = 'une relation pointait vers ' +origine +'-' +idOrigine +" qui n'existe pas"
-                    nextSeq()
-                  }
-                })
-              }
-            })
-            .seq(function(newRelations) {
-                mergeRessource({origine: ressource.origine, idOrigine:ressource.idOrigine, relations:newRelations}, this)
-            })
-            .seq(depile)
-            .catch(depile)
-        } else {
-          // pb mais on continue
-          depile()
-        }
-      })
-
-    } else {
-      // la pile est vide, on peut passer à l'étape suivante
-      next()
-    }
-  } // depile
-
   if (_.isEmpty(pendingRelations)) {
     log('Rien à faire dans flushPendingRelations')
     next()
@@ -455,13 +402,90 @@ function flushPendingRelations(next) {
     log('start flushPendingRelations')
 
     // on remplit la pile avec nos relations en attente
-    _.each(pendingRelations, function (relations, id) {
+    _.each(pendingRelations, function (relations, idComb) {
       nbToRec++
-      pile.push([id, relations])
+      pile.push([idComb, relations])
     })
 
-    // et on lance sa vidange
-    depile()
+    // et on lance sa vidange (on peut tester cette fct avec em/3501 qui a deux relations)
+    flow(pile).seqEach(function (task) {
+      var thisFlow = this
+      var idComb = task[0]
+      var relations = task[1]
+      // on récupère la ressource avec l'api (pour oid et relations éventuelles)
+      log('on va chercher ' + idComb)
+      getRessource(idComb, function (ressource) {
+        // error loggée dans getRessource, on traite pas ici
+        var subFlow = require('seq')
+        if (ressource) {
+          // on gère notre accumulateur, car parMap ou seqMap ne passent pas l'ensemble des résultats au seq suivant
+          // (qui doit lire this.stack pour tout récupérer), et ça rend l'ensemble plus lisible
+          var newRelations = []
+          log(idComb + ' est ' + ressource.oid + ' et va lui ajouter les relations ', relations)
+
+          // faut récupérer les oid de toutes ses relations (dont on a que les idComb dans relations)
+          subFlow(relations).seqMap(function (relation) {
+            var thisSubFlow = this
+            //log('dans subFlow on a le 1er elt de la pile', thisSubFlow.stack[0])
+            //log('dans subFlow on a le 1er elt de la pile parente', thisFlow.stack[0])
+            log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
+            // avec parMap la stack sera composée de tous les retours passé à this()
+            // le 1er param change pas, c'est la nature de la relation
+            var newRel = relation.slice(0, 1)
+            var idCombLie = relation[1]
+            if (oids[idCombLie]) {
+              newRel[1] = oids[idCombLie]
+              log('on connaissait ' +idCombLie +' qui est ' +newRel[1])
+              newRelations.push(newRel)
+              thisSubFlow()
+            } else if (idCombLie) {
+              // faut aller chercher l'oid de cette ressource liée
+              getRessource(idCombLie, function (ressource) {
+                if (ressource && ressource.oid) {
+                  newRel[1] = ressource.oid
+                  log(idCombLie +' est ' +newRel[1])
+                  newRelations.push(newRel)
+                  thisSubFlow()
+                } else {
+                  errors[idCombLie] = 'une relation pointait vers ' + idCombLie + " qui n'existe pas"
+                  log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
+                  thisSubFlow()
+                }
+              })
+            } else {
+              errors[idComb] += (errors[idComb]?'\n':'') +" on avait une relation " +newRel +" vers rien"
+            }
+          }).seq(function () {
+            log('on va merger dans ' + ressource.oid, newRelations)
+            var mergedRelations = ressource.relations || []
+            tools.merge(mergedRelations, newRelations)
+            mergeRessource({oid: ressource.oid, relations: mergedRelations}, this)
+          }).seq(function () {
+            // fin de subFlow
+            log('fin relations de ' +idComb)
+            thisFlow()
+          }).catch(function (error) {
+            log('error dans le traitement des relations de ' +idComb, error.stack || error)
+            errors[idComb] = error
+            thisFlow()
+          })
+          // fin du subFlow
+
+        } else {
+          log('on a rien récupéré pour ' + idComb)
+          thisFlow()
+        }
+      }) // getRessource
+
+    }).seq(function () {
+      log('fin du traitement des relations en attente')
+      next()
+
+    }).catch(function (error) {
+      log('erreur dans le traitement de la pile de relations', error)
+      next()
+    })
+    // fin du flow
   }
 }
 
@@ -472,16 +496,34 @@ function flushPendingRelations(next) {
  * @param next appelé avec la ressource (ou rien en cas de pb, que l'on log ici)
  */
 function getRessource(origine, idOrigine, next) {
-  var idComb = origine +'-' +idOrigine
+  var idComb
+  if (next) {
+    idComb = origine +'/' +idOrigine
+  } else {
+    next = idOrigine
+    idComb = origine
+    if (_.isString(idComb)) {
+      var pos = idComb.indexOf('/')
+      origine = idComb.substr(0, pos)
+      idOrigine = idComb.substr(pos +1)
+    } else {
+      // on nous passe un oid
+      origine = null
+      idOrigine = null
+    }
+  }
   var options = {
-    url         : urlBibli +'/' + origine +'/' +idOrigine,
+    url         : urlBibli +'/' +idComb,
     headers : {
       "X-ApiToken" : confMeps.apiToken
     },
     json        : true,
     content_type: 'charset=UTF-8'
   }
+  //log('dans getRessource ' +idComb)
   request.get(options, function (error, response, ressource) {
+    //log("on récupère l'erreur", error)
+    //log("et la ressource", ressource)
     if (error) {
       errors[idComb] = error.toString()
       next(null)
@@ -490,10 +532,12 @@ function getRessource(origine, idOrigine, next) {
       next(null)
     } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
       errors[idComb] = "ressource " +idComb +" incohérente : " +
-                       JSON.stringify(origine) +'-' +JSON.stringify(idOrigine) +
+                       JSON.stringify(origine) +'/' +JSON.stringify(idOrigine) +
                        '\n' +JSON.stringify(ressource)
       next(null)
-    } else next(null, ressource)
+    } else {
+      next(ressource)
+    }
   })
 }
 
@@ -512,18 +556,19 @@ function addRessource(ressource, next) {
     json: true,
     body: ressource
   }
-  var idMix = ressource.origine +'-' +ressource.idOrigine
+  var idMix = ressource.origine +'/' +ressource.idOrigine
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (error || body.error) {
       var errorString = error ? error.toString() : body.error
       idsFailed.push(idMix)
       errors[idMix] = errorString
-      log('erreur api sur ' +idMix +' : ' +errorString, options)
+      log('erreur api sur ' +idMix +' : ' +errorString)
     } else if (body.oid) {
-      idsOk.push(body.oid)
       // on note la correspondance pour éviter de retourner le chercher
-      if (!ressource.oid) ids[idMix] = body.oid
+      oids[idMix] = body.oid
+      // et le fait que c'est bon
+      idsOk.push(body.oid)
       nbRec++
       if (logOk) log(idMix +' ok')
     } else {
@@ -543,7 +588,7 @@ function addRessource(ressource, next) {
 function mergeRessource(ressourcePartielle, next) {
   nbLaunched++
   var options = {
-    url : urlBibli +'/ressourceMerge',
+    url : urlBibli +'?merge=1',
     headers : {
       "X-ApiToken" : confMeps.apiToken
     },
@@ -558,10 +603,10 @@ function mergeRessource(ressourcePartielle, next) {
       if (logOk) log('màj ' +body.oid +' ok')
     } else {
       var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
-      var idErr = ressourcePartielle.origine +'-' +ressourcePartielle.idOrigine || 0
+      var idErr = ressourcePartielle.oid || 0
       idsFailed.push(idErr)
       errors[idErr] = (errors[idErr] ? errors[idErr] +'\n' : '') +errStr
-      log(errStr)
+      log('pb au retour du merge ' +errStr, ressourcePartielle)
     }
     next()
   })
@@ -578,22 +623,23 @@ function displayResult(next) {
   log(idsOk.length +' ressources enregistrées')
   log('à enregistrer : ' +nbToRec)
   log('enregistrées : ' +nbRec)
-  if (idsFailed.length) {
+  if (errors) {
     var fs = require('fs')
     var logfile = __dirname + '/../logs/import.error.log'
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
     log(idsFailed.length +' ressources avec erreurs :')
     writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
-    idsFailed.forEach(function (id) {
-      log(id +' : ' +errors[id])
-      writeStream.write(id +' : ' +errors[id])
+    _.each(errors, function (error, id) {
+      log(id +' : ' +error)
+      writeStream.write(id +' : ' +error)
     })
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
     writeStream.end();
   } else log('Aucune erreur rencontrée')
   log('Durée : ' +getElapsed(topDepart)/1000 +'s')
   if (next) next()
+  else process.exit()
 }
 
 module.exports = function () {
@@ -635,6 +681,7 @@ module.exports = function () {
         importAIDES(this, aideIds)
       })
       .seq(function () {
+        // knex.destroy() // impossible de fermer la connexion de ce #@§ knex
         flushPendingRelations(this)
       })
       .seq(function () {
