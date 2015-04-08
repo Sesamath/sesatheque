@@ -136,10 +136,10 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
       context.html(data)
     }
 
-    // faut aller chercher d'éventuels titres de ressources liées
-    if (!error && ressource && !_.isEmpty(ressource.relations)) {
+    // faut aller chercher d'éventuels titres de ressources liées pour la vue describe
+    if (!error && view === 'describe' && ressource && !_.isEmpty(ressource.relations)) {
       log.debug('faut ajouter des titres de relations', ressource.relations)
-      
+
       seq(ressource.relations).parEach(5, function (relation, index) {
         var nextSeq = this
         $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
