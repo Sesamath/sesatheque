@@ -30,10 +30,6 @@
     <p>{commentaires.title} : {commentaires.value|s}</p>
     <p>{parametres.title} : <pre>{parametres.value}</pre></p>
 
-    {?relations.value}<ul>{relations.title} : {#relations.value}
-        <li>{.|s}</li>
-    {/relations.value}</ul>{/relations.value}
-
     {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}
         <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
     {/auteurs.value}</ul>{/auteurs.value}
@@ -42,7 +38,9 @@
         <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
     {/contributeurs.value}</ul>{/contributeurs.value}
 
-    {?relations.value}<ul>{relations.title} {#relations.value}<li>{predicat} {lien|s}</li>{/relations.value}</ul>{/relations.value}<br />
+    {?relations.value}<ul>{relations.title}
+        {#relations.value}<li>{predicat} {lien|s} ({oid})</li>{/relations.value}
+    </ul>{/relations.value}<br />
 
 {/error}
 </div>

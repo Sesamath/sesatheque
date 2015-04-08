@@ -115,13 +115,14 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         if (_.isArray(value)) {
 
           // cas particulier de tableau de tableaux
-          // @todo passer en tableau d'objets pour avoir titre et url
           if (key === 'relations' && value.length) {
             viewData.relations.value = []
             value.forEach(function (relation) {
               viewData.relations.value.push({
                 predicat : config.listes.relations[relation[0]],
-                lien : $routes.get('describe', relation[1])
+                oid : relation[1],
+                lien : relation[2],
+                typeTechnique : relation[3]
               })
             })
             log.debug('relations ajoutée pour ' +ressource.oid, viewData.relations)

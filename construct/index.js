@@ -159,7 +159,8 @@ lassi.on('afterRailUse', function (rail, name) {
       // on ajoute les requetes http en console
       rail.use('/', function(req, res, next) {
         log(req.method +' ' +req.originalUrl)
-        log.debug(req.method +' ' +req.originalUrl)
+        // on ajoute les requetes non statiques en debug
+        if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) log.debug(req.method +' ' +req.originalUrl)
         next()
       })
     }

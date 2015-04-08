@@ -41,6 +41,11 @@ ressourceComponent.config(function($settings, Ressource) {
   if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")
   else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
   else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
+
+  // on désactive la compression dust en dev
+  if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression) {
+    lassi.transports.html.engine.disableWhiteSpaceCompression()
+  }
 })
 
 ressourceComponent.entity('Archive', function () {
@@ -71,19 +76,23 @@ ressourceComponent.service('$ressourceConverter', function (Ressource, $routes, 
   return require('./serviceRessourceConverter')(Ressource, $routes, $ressourceControl)
 })
 
+ressourceComponent.service('$views', function ($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+  return require('./serviceViews')($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings)
+})
+
 // nos ressources statiques
 ressourceComponent.controller(function () {
   this.serve(__dirname + '/public')
 })
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) { // jshint ignore:line
-  require('./controllerHtml')(this, $ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings)
+ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $accessControl, $views, $routes, $settings) { // jshint ignore:line
+  require('./controllerHtml')(this, $ressourceRepository, $ressourceConverter, $accessControl, $views, $routes, $settings)
 })
 
 // un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $routes, $settings) {
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $routes, $settings)
+ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $views, $routes, $settings) {
+  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $views, $routes, $settings)
 })
 
 // l'api json

@@ -38,38 +38,12 @@
  * @param $ressourceConverter
  * @param $accessControl
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) {
-  var tools = require('../tools')
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $views, $routes, $settings) {
   var _ = require('lodash')
+  //var tools = require('../tools')
+  //var seq = require('seq')
+
   var basePath = $settings.get('basePath', '/')
-
-  // on désactive la compression dust en dev
-  if ($settings.get('application.staging') !== 'production' &&
-      lassi.transports.html.engine.disableWhiteSpaceCompression)
-        lassi.transports.html.engine.disableWhiteSpaceCompression()
-  
-  function getDefaultData() {
-    return {
-      $views : __dirname + '/views',
-      $metas : {
-        css: ['/styles/ressources.css'],
-        js : ['/vendors/requirejs/require.2.1.js']
-      },
-      $layout: '../../static/views/layout-page',
-      contentBloc : {}
-    }
-  }
-
-  function addJsVars(data, ressource) {
-    if (ressource) {
-      data.contentBloc.pluginBaseUrl = '/plugins/' + ressource.typeTechnique
-      data.contentBloc.vendorsBaseUrl= '../../vendors'
-      data.contentBloc.pluginName    = ressource.typeTechnique
-      data.contentBloc.isDev         = ($settings.get('lassi.application.staging') !== 'production')
-      // une string pour que dust le mette dans le source
-      data.contentBloc.ressource     = tools.stringify(ressource)
-    }
-  }
 
   /**
    * Vérifie que le token du post correspond à celui en session
@@ -84,7 +58,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } else next()
   }
 
-
   /**
    * Vérifie que l'on a un user en session, affiche une 401 sinon
    * @param context
@@ -92,7 +65,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function checkSession(context) {
     if (!context.session || !context.session.user) {
-      var data = getDefaultData()
+      var data = $views.getDefaultData()
       data.error = "Authentification requise"
       context.status = 401
       context.html(data)
@@ -103,144 +76,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     return true
   }
 
-  /**
-   * Init des liens de menu
-   * @param context
-   * @param data
-   */
-  function addMenu(context, data, ressource) {
-    var oid = ressource ? ressource.oid : null
-    // les liens du menu
-    var links = []
-    // lien ajout
-    if ($accessControl.hasPermission('create', context)) {
-      links.push(tools.link(basePath +$routes.get('add'), 'Ajouter une ressource'))
-    }
-    // si on est sur une ressource on ajoute les liens contextuels pour cette ressource (auxquels on a droit)
-    if (oid) {
-      if ($accessControl.hasPermission('update', context, oid))
-        links.push(tools.link(basePath +$routes.get('edit', oid), 'Modifier cette ressource'))
-      if ($accessControl.hasPermission('delete', context))
-        links.push(tools.link(basePath +$routes.get('delete', oid), 'Supprimer cette ressource'))
-      if ($accessControl.hasPermission('read', context, oid)) {
-        links.push(tools.link($routes.getAbs('preview', ressource), 'Voir la ressource'))
-        links.push(tools.link($routes.getAbs('display', ressource), 'Voir la ressource (pleine page)'))
-      }
-    }
-    data.menuBloc = {
-      $view : 'menu',
-      links : links
-    }
-  }
-
-  /**
-   * Prepare les data pour la vue dust et appelle html(data)
-   * @param error
-   * @param ressource
-   * @param context
-   * @param view
-   * @param options
-   */
-  function prepareAndSend(error, ressource, context, view, options) {
-    var data = getDefaultData()
-    // et la ressource (ou erreur)
-    data.contentBloc = $ressourceConverter.getViewData(error, ressource)
-    // pour display on ajoute les variables js
-    if (view === 'display') addJsVars(data, ressource)
-    // le menu pour tous, car preview utilise la vue display, petit gaspillage de data
-    addMenu(context, data, ressource)
-    data.contentBloc.$view = view
-    // le titre
-    if (ressource) {
-      if (ressource.titre) data.$metas.title = ressource.titre
-      else data.$metas.title = "Ressource sans titre"
-    } else data.$metas.title = "Ressource introuvable"
-    // et d'éventuels overrides
-    if (options) tools.merge(data, options)
-    context.html(data)
-  }
-
-  /**
-   * Envoie la ressource à la vue
-   * @param error
-   * @param ressource
-   * @param context
-   * @param view
-   * @param options
-   */
-  function printForRead(error, ressource, context, view, options) {
-    if (error) {
-      prepareAndSend(error, null, context, view, options)
-    } else if (ressource) {
-      $accessControl.checkPermission('read', context, ressource, function (ressource) {
-        prepareAndSend(error, ressource, context, view, options)
-      })
-    } else {
-      context.status = 404
-      error = new Error("Ressource introuvable")
-      prepareAndSend(error, null, context, view, options)
-    }
-  }
-
-  /**
-   * Prepare les data pour le form dust et appelle html avec
-   * @param error
-   * @param ressource
-   * @param context
-   * @param options
-   */
-  function printForm(error, ressource, context, options) {
-    var data = getDefaultData()
-    // on ajoute le menu
-    addMenu(context, data, ressource)
-    // les datas pour le form
-    data.contentBloc = $ressourceConverter.getFormViewData(error, ressource)
-    data.contentBloc.$view = 'form'
-    // le titre
-    data.$metas.title = 'Éditer une ressource'
-    // et d'éventuels overrides
-    if (options) tools.merge(data, options)
-    // on ajoute le token, en session, pour éviter des post multiples et ne pas vérifier les droits au post
-    context.session.token = data.contentBloc.token.value
-    // avant d'envoyer
-    context.html(data)
-  }
-
-  /**
-   * Prepare les data pour le form dust et appelle html avec
-   * @param context
-   */
-  function printSearchForm(context) {
-    var data = getDefaultData()
-    // on ajoute le menu
-    addMenu(context, data, null)
-    // les datas pour le form
-    data.contentBloc = $ressourceConverter.getFormViewData(null, null)
-    // on vire ou modifie ce qui nous intéresse pour la recherche
-    var fd = data.contentBloc // raccourci d'écriture (form data)
-    delete fd.oid
-    delete fd.version.value
-    delete fd.version.readonly
-    delete fd.parametres
-    delete fd.dateCreation
-    delete fd.dateMiseAJour
-    delete fd.oid
-
-    fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
-    data.contentBloc.$view = 'form'
-    // le titre
-    data.$metas.title = 'Recherche de ressources'
-    // on ajoute le token, en session, pour éviter des post multiples et ne pas vérifier les droits au post
-    context.session.token = data.contentBloc.token.value
-    // avant d'envoyer
-    context.html(data)
-  }
-
   // describe
   controller.get($routes.get('describe', ':oid'), function (context) {
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
-      printForRead(error, ressource, context, 'describe')
+      $views.printForRead(error, ressource, context, 'describe')
     })
   })
 
@@ -249,7 +89,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      printForRead(error, ressource, context, 'describe')
+      $views.printForRead(error, ressource, context, 'describe')
     })
   })
 
@@ -262,7 +102,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     return */
     $ressourceRepository.load(oid, function (error, ressource) {
       log("load de display")
-      printForRead(error, ressource, context, 'display', {$layout: '../../static/views/layout-iframe'})
+      $views.printForRead(error, ressource, context, 'display', {$layout: '../../static/views/layout-iframe'})
     })
   })
 
@@ -271,7 +111,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      printForRead(error, ressource, context, 'display', {$layout: '../../static/views/layout-iframe'})
+      $views.printForRead(error, ressource, context, 'display', {$layout: '../../static/views/layout-iframe'})
     })
   })
 
@@ -279,7 +119,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('preview', ':oid'), function (context) {
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
-      printForRead(error, ressource, context, 'display')
+      $views.printForRead(error, ressource, context, 'display')
     })
   })
 
@@ -288,7 +128,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (checkSession()) {
       $accessControl.checkPermission('create', context, null, function () {
         var options = {$metas: {title: 'Ajouter une ressource'}}
-        printForm(null, null, context, options)
+        $views.printForm(null, null, context, options)
       })
     }
   })
@@ -297,7 +137,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post($routes.get('add'), function (context) {
     function rePrintForm(error, ressource) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
-      printForm(error, ressource, context, options)
+      $views.printForm(error, ressource, context, options)
     }
 
     checkToken(context, function () {
@@ -331,7 +171,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $ressourceRepository.load(oid, function (error, ressource) {
         $accessControl.checkPermission('update', context, ressource, function () {
           var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
-          printForm(error, ressource, context, options)
+          $views.printForm(error, ressource, context, options)
         })
       })
     }
@@ -341,7 +181,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post($routes.get('update'), function (context) {
     function rePrintForm(error, ressource) {
       var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
-      printForm(error, ressource, context, options)
+      $views.printForm(error, ressource, context, options)
     }
 
     checkToken(context, function () {
@@ -373,7 +213,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           contentBloc: {$view: 'delete'}
         }
         context.session['del' + oid] = true
-        printForm(error, ressource, context, options)
+        $views.printForm(error, ressource, context, options)
       })
     })
   })
@@ -393,12 +233,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // form de recherche
   controller.get($routes.get('search'), function (context) {
-    printSearchForm(context)
+    $views.printSearchForm(context)
   })
 
   // résultats
   controller.post($routes.get('search'), function (context) {
-    printSearchForm(context)
+    $views.printSearchForm(context)
   })
 
   /**

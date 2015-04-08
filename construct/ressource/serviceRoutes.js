@@ -96,7 +96,7 @@ module.exports = function ($settings) {
     var route = $routes.getAbs(actionName, ressource)
     if (route) {
       html =  '<a href="' +route +'">'
-      html += label || ressource.nom
+      html += label || ressource.titre || 'sans titre'
       html += '</a>'
     }
 
