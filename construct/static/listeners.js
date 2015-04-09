@@ -36,14 +36,15 @@ module.exports = function($flashMessage) {
   var _ = require('lodash')
 
   /**
-   * Le listener sur afterRailUse est dans construct/index.js (il ajoute la gestion de CORS)
+   * Le listener sur afterRailUse est dans construct/index.js (il ajoute la gestion de CORS
+   * et en dev ajoute les requêtes http en console
    */
 
   /**
    * Le listener de l'event beforeTransport, pour gérer les pages d'erreur et ajouter les msg flash
    */
   lassi.on('beforeTransport', function(context, data) {
-    var reqHttp = context.request.method +' ' +context.request.originalUrl
+    var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
     log.debug(
         'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
         data,
@@ -114,6 +115,17 @@ module.exports = function($flashMessage) {
    * Listener context pour mesure de perf (si on a précisé un log de perf dans la conf)
    */
   lassi.on('context', function(context) {
+    // on passe par les contrôleurs public si on a pas de user en session
+    if (!context.user) {
+      try {
+        if (context.request.parsedUrl.pathname.indexOf('/ressource/') > -1) {
+          context.request.parsedUrl.pathname = context.request.parsedUrl.pathname.replace(/\/ressource\//, '/public/')
+          log("pas de user en session, on modifie l'url pour prendre le controleur public")
+          log('=> ' +context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||''))
+        }
+      } catch(error) { }
+    }
+    // on ajoute la mesure de perfs si on le réclame
     if (log.perf.out) {
       context.perf = {
         msg  : '', // message envoyé à log.debug() dans le listener beforeTransport

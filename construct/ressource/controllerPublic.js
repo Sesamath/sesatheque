@@ -54,6 +54,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // describe
   controller.get($routes.get('describe', ':oid'), function (context) {
+    log('public describe')
     affiche(context, 'describe')
   })
 

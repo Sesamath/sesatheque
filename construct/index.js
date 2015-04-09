@@ -46,6 +46,9 @@ GLOBAL.log = require('./tools/log.js')
 
 GLOBAL.isProd = ((lassi.settings.application.staging === 'production'))
 
+var moment = require('moment')
+var staticTtl = 3600 * 24
+
 // les déclarations de nos components
 require('./static')
 require('./ressource')
@@ -183,6 +186,18 @@ lassi.on('afterRailUse', function (rail, name) {
           msg += ' refusé'
         }
         log(msg)
+      }
+      next()
+    })
+
+    lassi.log('$rail', "adding", "expires".blue.underline, "middleware")
+    rail.use('/', function(req, res, next) {
+      if (/\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(req.url)) {
+        // faut mettre ça au format de la RFC 1123
+        res.header('Expires', moment().utc().add(staticTtl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
+        res.header('Cache-Control', 'public, max-age=' +staticTtl)
+        // @todo regarder If-Modified-Since et répondre 304 Not Modified si c'est le cas
+        // mais c'est vraiment pas très urgent si on a un varnish devant nous
       }
       next()
     })
