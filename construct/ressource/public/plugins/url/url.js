@@ -71,7 +71,7 @@ var isBasic;
 function display(ressource, opt, next) {
   log('url.display avec les options', opt);
   //les params minimaux
-  if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.adresse)
+  if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.adresse)
     throw new Error("Ressource incomplète");
   if (!opt.baseUrl || !opt.container || !opt.errorsContainer) throw new Error("Paramètres manquants");
 
@@ -84,7 +84,7 @@ function display(ressource, opt, next) {
   container = opt.container;
   errorsContainer = opt.errorsContainer;
   if (typeof opt.resultCallback === 'function') resultCallback = opt.resultCallback;
-  ressId = ressource.id;
+  ressId = ressource.oid;
   startDate = new Date();
 
   // raccourcis

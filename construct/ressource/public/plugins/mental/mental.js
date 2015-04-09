@@ -73,7 +73,7 @@ function display(ressource, options, next) {
 
   try {
     //les params minimaux
-    if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
+    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
       throw new Error("Paramètres manquants");
     }
     // base et swf
@@ -85,7 +85,7 @@ function display(ressource, options, next) {
       window.com_mental_resultat = function (nbQuestions, numQuestion, reponse) {
         // reponse est de la forme o/n
         histoReponses.push([nbQuestions, reponse]);
-        // labomep recevait aussi type_tag : 'mental', node_type: 'mental', idres : ressource.id, origine & seance_id,
+        // labomep recevait aussi type_tag : 'mental', node_type: 'mental', idres : ressource.oid, origine & seance_id,
         // l'appelant devra le mettre dans la callback qu'il nous donne s'il en a besoin
         options.resultCallback({
           reponse: histoReponses

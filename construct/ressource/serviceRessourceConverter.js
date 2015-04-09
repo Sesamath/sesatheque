@@ -98,10 +98,11 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
    * Retourne un objet pour dust à partir d'une entité ressource
    * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
    * @param {Ressource} ressource La ressource qui sort d'un load
+   * @param {string}    [view=''] Le nom de la vue (pour ajouter les relations sur describe seulement)
    * @returns {object} L'objet à passser à la vue dust
    * @memberOf $ressourceConverter
    */
-  $ressourceConverter.getViewData = function (error, ressource) {
+  $ressourceConverter.getViewData = function (error, ressource, view) {
     var viewData = {}
     var buffer;
     if (error) viewData.error = error.toString();
@@ -115,7 +116,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         if (_.isArray(value)) {
 
           // cas particulier de tableau de tableaux
-          if (key === 'relations' && value.length) {
+          if (view === 'describe' && key === 'relations' && value.length) {
             viewData.relations.value = []
             value.forEach(function (relation) {
               viewData.relations.value.push({
@@ -125,7 +126,6 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
                 typeTechnique : relation[3]
               })
             })
-            log.debug('relations ajoutée pour ' +ressource.oid, viewData.relations)
 
           } else if (config.listes[key]) {
             // faut remplacer des ids par des labels

@@ -43,7 +43,7 @@ var baseUrl;
 /** Le conteneur html pour afficher la ressource */
 var container = window.document.getElementById('display');
 /** Le conteneur html pour afficher d'éventuelles erreurs */
-var errorsContainer = window.document.getElementById('errors');
+var errorsContainer = window.document.getElementById('warnings');
 
 /** Le conteneur du picto enregistrement */
 var divFeedback = window.document.getElementById('pictoFeedback');

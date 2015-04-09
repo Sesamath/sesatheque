@@ -81,6 +81,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
       if ($accessControl.hasPermission('delete', context))
         links.push(tools.link(basePath +$routes.get('delete', oid), 'Supprimer cette ressource'))
       if ($accessControl.hasPermission('read', context, oid)) {
+        links.push(tools.link($routes.getAbs('describe', ressource), 'Description de la ressource'))
         links.push(tools.link($routes.getAbs('preview', ressource), 'Voir la ressource'))
         links.push(tools.link($routes.getAbs('display', ressource), 'Voir la ressource (pleine page)'))
       }
@@ -120,7 +121,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
 
     function termine() {
       // et la ressource (ou erreur)
-      data.contentBloc = $ressourceConverter.getViewData(error, ressource)
+      data.contentBloc = $ressourceConverter.getViewData(error, ressource, view)
       // pour display on ajoute les variables js
       if (view === 'display') addJsVars(data, ressource)
       // le menu pour tous, car preview utilise la vue display, petit gaspillage de data

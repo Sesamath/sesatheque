@@ -70,11 +70,11 @@ define(['swfobject'], function () {
       var wd = window.document;
       // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
       var divId = 'mepRess' +(new Date()).getTime();
-      ressId = ressource.id
+      ressId = ressource.oid
 
       log('start mep display avec la ressource (+options)', ressource, options)
       //les params minimaux
-      if (!ressource.id || !ressource.titre || !params) {
+      if (!ressource.oid || !ressource.titre || !params) {
         throw new Error("Paramètres manquants");
       }
 
@@ -83,7 +83,7 @@ define(['swfobject'], function () {
       container.className = cssClass;
 
       // le message en attendant le chargement
-      w.addElement(container, "div", {id:divId}, "Chargement de la ressource " +ressource.id +" en cours.");
+      w.addElement(container, "div", {id:divId}, "Chargement de la ressource " +ressource.oid +" en cours.");
 
       // notre base
       if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf =  ressource.baseUrl;

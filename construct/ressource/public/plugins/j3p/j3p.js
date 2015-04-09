@@ -58,7 +58,7 @@ define(['head'], function () {
     display   : function (ressource, opt, next) {
       log('j3p.display avec ressource et options', ressource, opt);
       //les params minimaux
-      if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
+      if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
         throw new Error("Ressource incomplète");
       if (!opt.baseUrl || !opt.container || !opt.errorsContainer) throw new Error("Paramètres manquants");
 

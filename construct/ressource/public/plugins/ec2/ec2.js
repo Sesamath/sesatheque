@@ -66,7 +66,7 @@ function display(ressource, options, next) {
 
   log('start ec2 display avec la ressource', ressource)
   //les params minimaux
-  if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
+  if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
     throw new Error("Paramètres manquants");
   }
   // le swf

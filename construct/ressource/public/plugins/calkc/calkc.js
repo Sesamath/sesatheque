@@ -77,7 +77,7 @@ define(['sesaswf'], function (module) {
 
       log('start calkc display avec la ressource', ressource)
       //les params minimaux
-      if (!ressource.id || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
+      if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
         throw new Error("Paramètres manquants");
       }
 

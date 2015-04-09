@@ -103,7 +103,7 @@ function display(ressource, options, next) {
 
   log('start am display avec la ressource', ressource)
   //les params minimaux
-  if (!ressource.id || !ressource.titre || !params) {
+  if (!ressource.oid || !ressource.titre || !params) {
     throw new Error("Paramètres manquants");
   }
 

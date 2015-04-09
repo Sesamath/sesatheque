@@ -16,7 +16,7 @@
     <h2>{titre.value}</h2>
     <p>
     oid : {oid} ({origine.value}/{idOrigine.value},
-    ({typeTechnique.title} : {typeTechnique.value},{~s}
+    {typeTechnique.title} {typeTechnique.value},{~s}
     {version.title} {version.value})<br />
     {dateCreation.title} : {dateCreation.value}<br />
     {dateMiseAJour.title} : {dateMiseAJour.value}<br />
