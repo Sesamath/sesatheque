@@ -96,8 +96,8 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $accessControl, $ressourceControl, $cache, Ressource) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $accessControl, $ressourceControl, $cache, Ressource)
+ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $accessControl, $routes) {
+  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $accessControl, $routes)
 })
 
 /**

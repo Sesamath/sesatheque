@@ -66,20 +66,17 @@ module.exports = function ($settings) {
    */
   $routes.getAbs = function(action, ressource) {
     var route
-    if (['display', 'describe', 'preview'].indexOf(action) > -1) {
+    var oid = ressource.oid || parseInt(ressource, 10)
+    if (!oid) {
+      log.error(new Error("appel de $routes.getAbs sans ressource ni oid"))
+    } else if (routes.hasOwnProperty(action)) {
       route = $settings.get('basePath', '/')
-      if (ressource.oid) {
-        route += (ressource.restriction === 0) ? 'public/' : 'ressource/'
-        route += this.get(action, ressource.oid)
-      } else {
-        var oid = parseInt(ressource, 10)
-        if (oid > 0) route += this.get(action, oid)
-        else {
-          log.error(new Error("appel de $routes.getAbs avec un argument ressource incorrect", ressource))
-          route = null
-        }
-      }
-    } else log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
+      if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
+      route += (ressource.restriction === 0) ? 'public/' : 'ressource/'
+      route += this.get(action, ressource.oid)
+    } else {
+      log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
+    }
 
     return route
   }

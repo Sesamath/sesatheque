@@ -4,30 +4,30 @@
  * soit BIBS (origine = labomepBIBS, avec --bibs)
  * l'origine est donc commune à toutes les ressources traitées par le script
  */
-'use strict';
+'use strict'
+
+
+var knex = require('knex')
+//var _ = require('lodash')
+//var request = require('request')
+var moment = require('moment')
+var flow   = require('seq')
+var xml2js = require('xml2js')
+
+// nos méthodes mutualisées
+var common = require('./modules/common')
+// raccourcis
+var log = common.log // jshint ignore:line
 
 /** le timestamp en ms du lancement de ce script */
 var topDepart = (new Date()).getTime()
 /** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
 var origine
-/** timeout en ms */
-var timeout = 10000
-/** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
-var maxLaunched = 10
 
 /** pour logguer les relations */
 var logRelations = false
 /** pour loguer le processing (un point par ressource sinon) */
 var logProcess = false
-/** pour loguer les ressources dont le retour est ok */
-var logOk = false
-
-var knex = require('knex')
-var _ = require('lodash')
-var request = require('request')
-var moment = require('moment')
-var flow   = require('seq')
-var xml2js = require('xml2js')
 
 // conf de l'appli
 var config = require('../construct/ressource/config.js');
@@ -58,7 +58,7 @@ var idsParsed = [];
 /** ids des ressources sur la pile d'envoi */
 var idsToSend = [];
 /** ids des ressources envoyées */
-var idsSent = [];
+//var idsSent = [];
 /** ids des ressources avec une réponse de l'api */
 var idsResp = []
 /** ids des ressources enregistrées par l'api */
@@ -68,32 +68,6 @@ var idsFailed = [];
 
 /** la liste des erreurs rencontrées (la clé est l'id, 0 pour les erreurs générées ici hors ressource) */
 var errors = {}
-/** La liste des relations à ajouter ensuite */
-var pendingRelations = {};
-
-// Les variables globales de checkEnd, pour chaque étape (pour décider de passer à la suivante)
-var nbLaunched = 0
-var waitingRessource = []
-var nextStep
-var timerId
-
-/**
- * Retourne le nb de ms écoulées depuis start
- * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
- */
-function getElapsed(start) {
-  return (new Date()).getTime() -start
-}
-
-/**
- * Écrit en console avec le moment en préfixe
- * @param msg
- */
-function log(msg, objToDump) {
-  var prefix = '[' +moment().format('HH:mm:ss.SSS') +'] '
-  console.log(prefix + msg)
-  if (objToDump) console.log(objToDump)
-}
 
 /**
  * Ajoute une erreur à la liste qui sera affichée à la fin
@@ -113,257 +87,131 @@ function addError(id, error) {
 }
 
 /**
- * Lance l'étape suivante si toutes les ressources ont été traitées ou si on reste plus de timeout ms sans être rappelé
- */
-function checkEnd() {
-  // le timeout
-  if (timerId) clearTimeout(timerId)
-  timerId = setTimeout(function () {
-    var msg = 'timeout, ' +Math.floor(timeout / 1000) +
-        "s sans rien depuis le dernier retour de l'api, il restait " +nbLaunched +
-        " ressources en attente de réponse de l'api et " +waitingRessource.length +" en attente d'envoi"
-    addError(0, msg)
-    log(msg)
-    nextStep()
-  }, timeout)
-
-  // on regarde s'il en reste en attente et si c'est terminé
-  if (waitingRessource.length) {
-    while (nbLaunched < maxLaunched && waitingRessource.length) {
-      addRessource(waitingRessource.shift(), checkEnd)
-    }
-  } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées')
-    clearTimeout(timerId)
-    nextStep()
-  }
-}
-
-/**
- * Lance l'ajout d'une ressource via l'api si on est pas au max et la met en attente sinon
- * @param ressource
- */
-function deferAdd(ressource) {
-  if (ressource && ressource.titre) {
-    idsToSend.push(ressource.idOrigine);
-    if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
-    else waitingRessource.push(ressource)
-  } else {
-    idsFailed.push(ressource.idOrigine)
-    addError(ressource.idOrigine, "ressource sans titre ou invalide, non postée")
-    log(ressource)
-  }
-}
-
-/**
- * Convertie un timestamp (en s ou ms) en objet Date
- * Retourne null si le timestamp est dans le futur (+2h) ou avant le 01/01/2004
- * @param ts
- * @returns {Date}
- */
-function getDate(ts) {
-  if (logProcess) log('getDate avec ' +ts)
-  if (ts > 10001001001001) ts = Math.round(ts / 1000) // c'était des ms, on passe en s
-  // 7260 en cas de décalage horaire (fuseau mal réglé)
-  if (ts > 1072911600 && ts < (new Date()).getTime() / 1000 + 7260) {
-    return new Date(ts * 1000);
-  } else {
-    return null;
-  }
-}
-
-/**
- * Converti un timestamp (ms ou s) en string (JJ/DD/YYYY, suivant la conf)
- * @param ts le timestamp
- * @returns {String}
- */
-function getJour(ts) {
-  // log('getJour avec ' +ts)
-  // si c'est des s, on passe en ms
-  // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
-  if (ts < 11001001001) ts = ts * 1000
-
-  return ts ? moment.utc(new Date(ts)).format(config.formats.jour) : null
-}
-
-/**
- * Vérifie qu'une chaine est une liste d'entiers séparés par des virgules
- * @param {String} ids
- */
-function checkListOfInt (ids) {
-  if (_.isString(ids)) {
-    if (ids == parseInt(ids, 10)) return
-    else {
-      var a = ids.split(',')
-      a.forEach(function (elt) {
-        if (elt != parseInt(elt, 10)) throw new Error("L'élément " + elt + " n'est pas un entier")
-      })
-    }
-  } else {
-    throw new Error("La liste d'ids n'est pas une chaine")
-  }
-}
-
-/**
- * Note dans la var globale pendingRelations une relation à ajouter plus tard
- * Attention, les relations contiennent un id combiné,
- * il faudra récupérer l'id réel de la ressource au moment d'ajouter la relation
- * @param idOrigine
- * @param relation [relationCode, idComb]
- */
-function addPendingRelation(idOrigine, relation) {
-  if (logRelations) log('on ajoute pour plus tard la relation ' +idOrigine +' >' +relation[0] +'> ' +relation[1])
-  if (!pendingRelations[idOrigine]) pendingRelations[idOrigine] = [relation];
-  else pendingRelations[idOrigine].push(relation);
-}
-
-/**
- * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
+ * Ajoute à la ressource categorie, typePedagogiques et typeDocumentaires pour un exo interactif
  * @param ressource
  */
 function addCatExoInteractif(ressource) {
-    ressource.categories       = [catCode.exerciceInteractif]
+    ressource.categorie        = [catCode.exerciceInteractif]
     ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation]
     ressource.typeDocumentaires= [tdCode.interactif]
 }
 
 /**
- * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un contenu fixe
+ * Ajoute à la ressource categorie, typePedagogiques et typeDocumentaires pour un contenu fixe
  * dont on sait pas si c'est un cours ou un exo (on met les 2)
  * @param ressource
  */
 function addCoursExoFixe(ressource) {
   // ne sachant pas trop on met cours et exercice
-  ressource.categories        = [catCode.coursFixe, catCode.exerciceFixe]
+  ressource.categorie         = [catCode.coursFixe, catCode.exerciceFixe]
   ressource.typeDocumentaires = [tdCode.imageFixe, tdCode.texte]
   ressource.typePedagogiques  = [tpCode.cours, tpCode.exercice]
 }
 
+//noinspection FunctionWithMoreThanThreeNegationsJS,OverlyComplexFunctionJS,FunctionTooLongJS
 /**
- * Convertit un recordset en objet Ressource que l'on pourra poster à l'api
- * @param row
- * @returns {Ressource}
+ * Convertit un recordset en objet Ressource et le pousse vers l'api
+ * @param {Object} row
  */
 function parseRessource(row) {
   var ressource = initRessourceGenerique(row)
   var ajout = true
-  switch (row.type_id) {
-    case 1: // Message ou question, qcm basique
-      ressource.typeTechnique = 'qts'
-      if (!ressource.titre) ressource.titre = "Message ou question"
-      addCatExoInteractif(ressource)
-      break
-    case 2:
-      ressource.typeTechnique = 'tep'
-      if (!ressource.titre) ressource.titre = "Figure TracenPoche"
-      addCatExoInteractif(ressource)
-      break
-    case 4: // Test diagnostique (IREM Nancy)
-      ressource.typeTechnique = 'testd'
-      if (!ressource.titre) ressource.titre = "Test diagnostique"
-      addCatExoInteractif(ressource)
-      break
-    case 6:
-      ressource.typeTechnique = 'poseur'
-      if (!ressource.titre) ressource.titre = "Opération posée"
-      addCatExoInteractif(ressource)
-      break
-    case 7:
-      ressource.typeTechnique = 'calkc'
-      if (!ressource.titre) ressource.titre = "Exercice avec la calculatrice cassée"
-      addCatExoInteractif(ressource)
-      break
-    case 9: // exercice GeoGebra (java)
-      ressource.typeTechnique = 'ggb'
-      if (!ressource.titre) ressource.titre = "Figure GeoGebra"
-      addCatExoInteractif(ressource)
-      break
-    case 10: // page externe (avec consigne ou pas)
-      ressource.typeTechnique = 'url'
-      // @todo affiner la catégorie suivant consigne et réponse ou pas
-      if (!ressource.titre) ressource.titre = "Page externe"
-      addCatExoInteractif(ressource)
-      break
-    case 11:
-      ressource.typeTechnique = 'mental'
-      if (!ressource.titre) ressource.titre = "Exercice de calcul mental"
-      addCatExoInteractif(ressource)
-      break
-    case 13:
-      ressource.typeTechnique = 'ebeps'
-      if (!ressource.titre) ressource.titre = "Animation interactive"
-      ressource.categories       = [catCode.activiteAnimee]
-      ressource.typePedagogiques = [tpCode.exercice, tpCode.cours]
-      ressource.typeDocumentaires= [tdCode.interactif]
-      break
-    case 14:
-      ressource.typeTechnique = 'msqcm'
-      if (!ressource.titre) ressource.titre = "QCM interactif"
-      addCatExoInteractif(ressource)
-      break
-    case 15:
-      ressource.typeTechnique = 'msatdj'
-      if (!ressource.titre) ressource.titre = "Exercice corrigé"
-      ressource.categories       = [catCode.exerciceInteractif]
-      ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation, tpCode.corrigeExercice]
-      ressource.typeDocumentaires= [tdCode.interactif]
-      break
-    case 16: // qcm en js
-      ressource.typeTechnique = 'qcmlz'
-      if (!ressource.titre) ressource.titre = "QCM"
-      addCatExoInteractif(ressource)
-      break
-    case 17:
-      ressource.typeTechnique = 'iep'
-      if (!ressource.titre) ressource.titre = "Animation instrumenpoche"
-      ressource.categories       = [catCode.activiteAnimee]
-      ressource.typePedagogiques = [tpCode.exercice, tpCode.cours]
-      ressource.typeDocumentaires= [tdCode.interactif]
-      break
-    case 18: // outil Labomep et ses composants
-      ressource.typeTechnique = 'gen'
-      if (!ressource.titre) ressource.titre = "Titre manquant"
-      addCatExoInteractif(ressource)
-      break
-    case 19:
-      log("Pas d'import j3p depuis labomep (ils sont dans oldbibli et ont leur procédure d'import")
-      ajout = false
-      break
-    case 20: // test diagnostique Lingot
-      ressource.typeTechnique = 'lingotpd'
-      if (!ressource.titre) ressource.titre = "Test diagnostique d'algèbre"
-      addCatExoInteractif(ressource)
-      break
-    case 21:
-      ressource.typeTechnique = 'ec2'
-      if (!ressource.titre) ressource.titre = "Exercice Calcul@TICE"
-      addCatExoInteractif(ressource)
-      break
 
-    default :
-      log("type " +row.type_id +" inconnu")
-      ajout = false
+  //noinspection IfStatementWithTooManyBranchesJS
+  if (row.type_id === 1) {
+    ressource.typeTechnique = 'qts'
+    if (!ressource.titre) ressource.titre = "Message ou question"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 2) {
+    ressource.typeTechnique = 'tep'
+    if (!ressource.titre) ressource.titre = "Figure TracenPoche"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 4) {
+    ressource.typeTechnique = 'testd'
+    if (!ressource.titre) ressource.titre = "Test diagnostique"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 6) {
+    ressource.typeTechnique = 'poseur'
+    if (!ressource.titre) ressource.titre = "Opération posée"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 7) {
+    ressource.typeTechnique = 'calkc'
+    if (!ressource.titre) ressource.titre = "Exercice avec la calculatrice cassée"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 9) {
+    ressource.typeTechnique = 'ggb'
+    if (!ressource.titre) ressource.titre = "Figure GeoGebra"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 10) {
+    ressource.typeTechnique = 'url'
+    if (!ressource.titre) ressource.titre = "Page externe"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 11) {
+    ressource.typeTechnique = 'mental'
+    if (!ressource.titre) ressource.titre = "Exercice de calcul mental"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 13) {
+    ressource.typeTechnique = 'ebeps'
+    if (!ressource.titre) ressource.titre = "Animation interactive"
+    ressource.categorie  = catCode.activiteAnimee
+    ressource.typePedagogiques = config.categoriesToTypes[catCode.activiteAnimee].typePedagogiques
+    ressource.typeDocumentaires = config.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires
+  } else if (row.type_id === 14) {
+    ressource.typeTechnique = 'msqcm'
+    if (!ressource.titre) ressource.titre = "QCM interactif"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 15) {
+    ressource.typeTechnique = 'msatdj'
+    if (!ressource.titre) ressource.titre = "Exercice corrigé"
+    ressource.categorie = catCode.exerciceInteractif
+    ressource.typePedagogiques = config.categoriesToTypes[catCode.exerciceInteractif].typePedagogiques
+    ressource.typeDocumentaires = config.categoriesToTypes[catCode.exerciceInteractif].typeDocumentaires
+  } else if (row.type_id === 16) {
+    ressource.typeTechnique = 'qcmlz'
+    if (!ressource.titre) ressource.titre = "QCM"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 17) {
+    ressource.typeTechnique = 'iep'
+    if (!ressource.titre) ressource.titre = "Animation instrumenpoche"
+    ressource.categorie = catCode.activiteAnimee
+    ressource.typePedagogiques = config.categoriesToTypes[catCode.activiteAnimee].typePedagogiques
+    ressource.typeDocumentaires = config.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires
+  } else if (row.type_id === 18) {
+    ressource.typeTechnique = 'gen'
+    if (!ressource.titre) ressource.titre = "Titre manquant"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 19) {ajout = false} else if (row.type_id === 20) {
+    ressource.typeTechnique = 'lingotpd'
+    if (!ressource.titre) ressource.titre = "Test diagnostique d'algèbre"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 21) {
+    ressource.typeTechnique = 'ec2'
+    if (!ressource.titre) ressource.titre = "Exercice Calcul@TICE"
+    addCatExoInteractif(ressource)
+  } else {
+    log("type " + row.type_id + " inconnu")
+    ajout = false
   }
+
   if (ajout) {
     idsParsed.push(ressource.idOrigine);
     if (logProcess) log('processing ' + ressource.idOrigine)
     // on transforme le xml en objet js pour certains
     switch (ressource.typeTechnique) {
       case 'url':
-          modifyUrl(ressource, deferAdd)
+          modifyUrl(ressource, common.pushRessource)
         break
       /* case '':
           xml2js.parseString(ressource.xml, function(error, result) {
             if (error) addError(ressource.idOrigine)
             else {
               ressource.parametres = result
-              deferAdd(ressource)
+              common.pushRessource(ressource)
             }
           })
         break */
-      default : deferAdd(ressource)
+      default : common.pushRessource(ressource)
     }
-
   }
 }
 
@@ -387,15 +235,6 @@ function initRessourceGenerique(row) {
   if (row.user_sslsesa_id) ressource.auteurs =  [row.user_sslsesa_id]
 
   return ressource
-}
-
-/**
- * Renvoie l'id combiné origine - idOrigine
- * @param ressource
- * @returns {string}
- */
-function getIdComb(ressource) {
-  return origine + '-' + ressource.idOrigine
 }
 
 /**
@@ -436,7 +275,7 @@ function modifyUrl(ressource, next) {
             ressource.parametres = {adresse: p.adresse}
             // ne sachant pas trop on met rien...
             // (0 pour que l'api accepte l'import, il faudra compléter à la prochaine édition)
-            ressource.categories = [0]
+            ressource.categorie = 0
             // un cas particulier sur toutes ces diapos qui devraient exister par ailleurs
             if (p.adresse.indexOf("http://mep-outils.sesamath.net/manuel_numerique/diapo.php?atome=") === 0) {
               var test = /diapo.php\?atome=([0-9]+)/.exec(result.adresse)
@@ -470,98 +309,6 @@ function modifyUrl(ressource, next) {
 }
 
 /**
- * Passe en revue les relations qui n'auraient pas été affectées, mais une par une
- * (plusieurs relations peuvent affecter les même ressources, deux updates en // marchent pas)
- * @param next
- */
-function flushPendingRelations(next) {
-  var pile = []
-
-  function depile() {
-    var task, options, idOrigine, relations
-    if (pile.length) {
-      task = pile.shift()
-      idOrigine = task[0]
-      relations = task[1]
-      // on récupère la ressource avec l'api
-      options = {
-        url         : urlBibli +origine +'/' + idOrigine,
-        json        : true,
-        content_type: 'charset=UTF-8'
-      }
-      log('relations de '+idOrigine +' ' +JSON.stringify(relations))
-      request.get(options, function (error, response, ressource) {
-        if (ressource.error) {
-          errors['0'] += "Erreur sur la récupération de " + idOrigine + ' : ' + ressource.error
-          log('erreur ' +ressource.error)
-          depile()
-        } else if (ressource.origine != origine || ressource.idOrigine != idOrigine) {
-          errors['0'] += "Erreur sur la récupération de " + idOrigine + " (ressource incohérente)"
-          log('erreur cohérence')
-          depile()
-        } else {
-          log(idOrigine +' récupérée')
-          if (!_.isArray(ressource.relations) || _.isEmpty(ressource.relations)) ressource.relations = relations
-          else ressource.relations = ressource.relations.concat(relations)
-          addRessource(ressource, depile)
-        }
-      })
-
-    } else {
-      next()
-    }
-  } // depile
-
-  if (_.isEmpty(pendingRelations)) {
-    log('Rien à faire dans flushPendingRelations')
-    next()
-  } else {
-    log('start flushPendingRelations')
-
-    // on remplit la pile
-    _.each(pendingRelations, function (relations, idOrigine) {
-      pile.push([idOrigine, relations])
-    })
-
-    // et on lance sa vidange
-    depile()
-  }
-}
-
-/**
- * Ajoute une ressource dans la bibli en appelant l'api en http
- * @param ressource
- * @param next
- */
-function addRessource(ressource, next) {
-  nbLaunched++
-  idsSent.push(ressource.idOrigine)
-  var options = {
-    url : urlBibli,
-    json: true,
-    body: ressource
-  }
-  request.post(options, function (error, response, body) {
-    nbLaunched--
-    idsResp.push(ressource.idOrigine)
-    if (error) addError(ressource.idOrigine, error.toString())
-    else {
-      if (body.error) {
-        addError(ressource.idOrigine, body.error)
-      } else {
-        if (body.oid) { // on ne récupère que ça, c'est pas le idOrigine posté
-          idsOk.push(ressource.idOrigine)
-          if (logOk) log(ressource.idOrigine +' ok avec ' +ressource.idOrigine)
-        } else {
-          addError(ressource.idOrigine, "L'api renvoie " +JSON.stringify(body))
-        }
-      }
-    }
-    next()
-  })
-}
-
-/**
  * Affiche la compilation des résultats
  * @param next
  */
@@ -585,8 +332,9 @@ function displayResult(next) {
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
     writeStream.end();
   } else log('Aucune erreur rencontrée')
-  log('Durée : ' +getElapsed(topDepart)/1000 +'s')
+  log('Durée : ' +common.next(topDepart)/1000 +'s')
   if (next) next()
+  else process.exit()
 }
 
 module.exports = function () {
@@ -615,7 +363,7 @@ module.exports = function () {
   // on regarde s'il faut se limiter à certains ids
   ids = argv.slice(1)[0]
   if (ids) {
-    checkListOfInt(ids)
+    common.checkListOfInt(ids)
     logProcess = true
     logRelations = true
     log('On ne traitera que les id ' + ids)
@@ -628,28 +376,25 @@ module.exports = function () {
   process.on('SIGINT', displayResult);
 
   // yapluka
-  flow()
-      .seq(function () {
-        nextStep = this
-        klabomep
-            .raw(query)
-            .exec(function(error, rows) {
-              if (error) throw error
-              if (rows[0]) rows[0].forEach(parseRessource)
-              else log("Pas de ressources avec " +query)
-            })
-      })
-      .seq(function () {
-        flushPendingRelations(this)
-      })
-      .seq(function () {
-        displayResult(this)
-      })
-      .seq(function () {
-        log('END')
-        process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
-      })
-      .catch(function (error) {
-        log('Erreur dans le flow :', error);
-      })
+  flow().seq(function () {
+    // la cb quand toutes les ressources seront enregistrées
+    common.setAfterAllCb(this)
+    klabomep
+        .raw(query)
+        .exec(function (error, rows) {
+                if (error) throw error
+                if (rows[0]) rows[0].forEach(parseRessource)
+                else log("Pas de ressources avec " + query)
+              })
+  }).seq(function () {
+    common.flushPendingRelations(this)
+  }).seq(function () {
+    displayResult(this)
+  }).seq(function () {
+    log('END')
+    process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
+  }).catch(function (error) {
+    log('Erreur dans le flow :', error)
+    displayResult()
+  })
 }

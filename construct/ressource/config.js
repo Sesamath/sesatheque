@@ -189,10 +189,11 @@ var ressourceConfig = {
   },
 
   // les propriétés obligatoires
+  // attention, si on rend obligatoire autre chose que string|number, faut aller changer le code de $ressourceControl.valide
   required         : {
     'titre' : true,
     'typeTechnique' : true,
-    'categories' : true
+    'categorie' : true
     //'auteurs'
   },
 
@@ -209,7 +210,7 @@ var ressourceConfig = {
     commentaires     : "Commentaires",
     parametres       : "Paramètres",
     niveaux          : "Niveau",
-    categories       : "Catégorie",
+    categorie        : "Catégorie",
     typePedagogiques : "Type pédagogique",
     typeDocumentaires: "Type documentaire",
     relations        : "Ressources liées",
@@ -228,7 +229,7 @@ var ressourceConfig = {
   // les types requis, Attention, le code suppose que tous les Array sont des tableaux d'entiers,
   // faudra modifier postToRessource dans edit.js si ça change
   typesVar         : {
-    oid               : 'Number',
+    oid              : 'Number',
     origine          : 'String',
     idOrigine        : 'String',
     typeTechnique    : 'String',
@@ -237,7 +238,7 @@ var ressourceConfig = {
     description      : 'String',
     commentaires     : 'String',
     niveaux          : 'Array',
-    categories       : 'Array',
+    categorie        : 'Number',
     typePedagogiques : 'Array',
     typeDocumentaires: 'Array',
     relations        : 'Array',
@@ -319,6 +320,7 @@ var ressourceConfig = {
     },
     // des constantes pour nos routes
     routes : {
+      api : '',
       display:'voir',
       preview:'apercu',
       add : 'ajouter',

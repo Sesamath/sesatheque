@@ -32,7 +32,7 @@
 /**
  * Module pour get/set des ressources sur l'api de la bibli courante
  * Attention, les urls sont en dur et supposent que la bibliotheque est installée à la racine du domaine,
- * il faut modifier prefix si ce n'est pas le cas
+ * il faut utiliser setPrefix() avant les autres méthodes si ce n'est pas le cas
  */
 /*global define, XMLHttpRequest */
 'use strict';
@@ -98,7 +98,7 @@ function callBibli(data, next) {
   if (data.hasOwnProperty('titre')) {
     isGet = true;
     method = 'GET';
-    url = prefix + 'api/ressource/' + data.id;
+    url = prefix + 'api/ressource/' + data.oid;
   } else {
     isGet = false;
     method = 'POST';

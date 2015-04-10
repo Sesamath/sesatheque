@@ -385,9 +385,9 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
    */
   $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
-    if (!idOrigine) {
-      log.error('loadByOrigin sans idOrigine')
-      return next(null, undefined)
+    if (!origine || !idOrigine) {
+      log.error('origine ou idOrigine manquant dans loadByOrigin')
+      return next()
     }
 
     $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {

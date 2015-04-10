@@ -43,9 +43,9 @@
  * @param $ressourceRepository
  * @param $ressourceConverter
  * @param $accessControl
- * @param $ressourceControl
+ * @param $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $ressourceControl) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $routes) {
 
   var _ = require('lodash')
   var flow = require('seq')
@@ -98,32 +98,35 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function updateTitre(ressource, newTitre) {
     // on regarde si l'arbre nous apporte un titre que l'on aurait pas
-    if (newTitre) switch (ressource.titre) {
-      // titres par défaut mis par importMEPS
-      case 'Exercice mathenpoche':
-      case 'Aide mathenpoche':
-      // titres par défaut mis par importLabomep
-      case 'Message ou question':
-      case 'Figure TracenPoche':
-      case 'Test diagnostique':
-      case 'Opération posée':
-      case 'Exercice avec la calculatrice cassée':
-      case 'Figure GeoGebra':
-      case 'Page externe':
-      case 'Exercice de calcul mental':
-      case 'Animation interactive':
-      case 'QCM interactif':
-      case 'Exercice corrigé':
-      case 'QCM':
-      case 'Animation instrumenpoche':
-      case 'Titre manquant':
-      case 'Parcours interactif':
-      case "Test diagnostique d'algèbre":
-      case 'Exercice Calcul@TICE':
-        // on sauvegarde le nouveau titre
-        log.debug("titre de " +ressource.oid +" changé : " +ressource.titre +' => ' +newTitre)
-        ressource.titre = newTitre
-        ressource.store()
+    if (newTitre) {
+      //noinspection SwitchStatementWithNoDefaultBranchJS
+      switch (ressource.titre) {
+            // titres par défaut mis par importMEPS
+            case 'Exercice mathenpoche':
+            case 'Aide mathenpoche':
+            // titres par défaut mis par importLabomep
+            case 'Message ou question':
+            case 'Figure TracenPoche':
+            case 'Test diagnostique':
+            case 'Opération posée':
+            case 'Exercice avec la calculatrice cassée':
+            case 'Figure GeoGebra':
+            case 'Page externe':
+            case 'Exercice de calcul mental':
+            case 'Animation interactive':
+            case 'QCM interactif':
+            case 'Exercice corrigé':
+            case 'QCM':
+            case 'Animation instrumenpoche':
+            case 'Titre manquant':
+            case 'Parcours interactif':
+            case "Test diagnostique d'algèbre":
+            case 'Exercice Calcul@TICE':
+              // on sauvegarde le nouveau titre
+              log.debug("titre de " +ressource.oid +" changé : " +ressource.titre +' => ' +newTitre)
+              ressource.titre = newTitre
+              ressource.store()
+          }
     }
   }
 
@@ -148,6 +151,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   }
 
+  //noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Parse les enfants de l'arbre et remplace
    * @param context
@@ -269,6 +273,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   }
 
+  //noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Create / update une ressource
    * Si le titre et la catégorie sont manquants (mais avec oid), ou que l'on passe merge=1 en paramètre,
@@ -289,6 +294,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (!partial && !context.post.titre && !context.post.categories) {
       partial = (context.post.oid > 0 || (context.post.origine && context.post.idOrigine))
     }
+
+    log.debug('post /api/ressource a reçu', context.post, 'api')
 
     $ressourceConverter.valideRessourceFromPost(context.post, partial, function (error, ressource) {
       try {
@@ -373,6 +380,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
+  // getRef pour récupérer seulement oid, titre et typeTechnique
+  controller.get('ressource/getRef/:origine/:idOrigine', function (context) {
+    if (context.perf) log.perf(context, 'start')
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      if (error) sendJson(context, error)
+      else if (ressource) {
+        sendJson(context, null, {
+          ref : ressource.oid,
+          titre : ressource.titre,
+          typeTechnique : ressource.typeTechnique,
+          dataUri : $routes.getAbs('api', ressource),
+          displayUri : $routes.getAbs('display', ressource)
+        })
+      } else notFound("La ressource " + origine + '/' + idOrigine + " n'existe pas", context)
+    })
+  })
+
   // delete by origine
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     var origine = context.arguments.origine
@@ -439,6 +466,27 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (error) sendJson(context, error)
       else if (ressource) {
         if (ressource.restriction === 0) sendJson(context, null, ressource)
+        else  denied("Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine, context)
+      } else notFound("La ressource " + origine + '/' + idOrigine + " n'existe pas", context)
+    })
+  })
+
+  // read public pour récupérer seulement oid, titre et typeTechnique
+  controller.get('public/getRef/:origine/:idOrigine', function (context) {
+    if (context.perf) log.perf(context, 'start')
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      if (error) sendJson(context, error)
+      else if (ressource) {
+        if (ressource.restriction === 0) {
+          sendJson(context, null, {
+             ref : ressource.oid,
+             titre : ressource.titre,
+             typeTechnique : ressource.typeTechnique
+          })
+        }
         else  denied("Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine, context)
       } else notFound("La ressource " + origine + '/' + idOrigine + " n'existe pas", context)
     })

@@ -267,7 +267,7 @@ function init(options) {
       jqueryUi1111: vbu +'/jqueryUi/jquery-ui-1.11.1/jquery-ui.min'
     }
     // pour jQueryUi faut charger les css, on pourrait créer un miniModule qui s'en charge pour chaque version
-    // mais c'est assez lourd, faut lui passer le chemin toussa, on laisse celui qui charge s'en occuper
+    // mais c'est assez lourd, faut lui passer le chemin toussa, on laisse celui qui nous charge s'en occuper
     /*
     , shim :{
       jqueryUi    : {

@@ -76,9 +76,12 @@ module.exports = function () {
         var buffer
 
         // propriétés obligatoires
-        if (strict && _.isEmpty(value) && config.required[key]) {
+        // on utilise pas _.isEmpty(value) qui renvoie true sur number, pas grave tant que les required ne sont pas des array
+        if (strict && config.required[key] && !value) {
           errors.push("Le champ " + config.labels[key] + " est obligatoire")
+          log.debug('on a eu ' +key +' => ' +value)
         }
+        if (key === 'categorie') log.debug('on a la catégorie ' +value +' pour ' +ressource.origine +'/' +ressource.idOrigine)
 
         // vérif des types et cast éventuel
         if (value) {

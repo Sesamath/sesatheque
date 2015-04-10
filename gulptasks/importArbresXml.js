@@ -4,15 +4,21 @@
  */
 'use strict';
 
+var common = require('./modules/common')
+var log = common.log // jshint ignore:line
+common.setOptions({
+  /** timeout en ms */
+  timeout : 21000,
+  maxLaunched : 1, // les arbres sont gros et l'api doit retrouver tous les enfants...
+  /** pour loguer les ressources dont le retour est ok */
+  logOk : true
+})
+
 /** le timestamp en ms du lancement de ce script */
 var topDepart = (new Date()).getTime()
 /** origine par défaut (si on la précise pas via --origine), sauf em et am qui ont l'origine du même nom */
 var defaultOrigine = "labomepBIBS" // des ressources
-var origineArbre = 'sesamath'
-/** timeout en ms */
-var defaultTimeout = 21000
-/** Nb max de requetes http lancées vers l'api (qq get non pris en compte) */
-var maxLaunched = 1 // les arbres sont gros et l'api doit retrouver tous les enfants...
+var origineArbre = 'sesaxml'
 
 /**
  * La liste des xml qui doivent être découpés
@@ -31,14 +37,12 @@ function needToSplit(xmlName) {
 
 /** pour loguer le processing (un point par ressource sinon) */
 var logProcess = true
-/** pour loguer les ressources dont le retour est ok */
-var logOk = true
 
 var fs = require('fs')
 var _ = require('lodash')
-var request = require('request')
 var moment = require('moment')
 var flow   = require('seq')
+
 /*
 xml2js ne conserve pas l'ordre des enfants, gênant pour une liste
 cf https://github.com/Leonidas-from-XIV/node-xml2js/issues/31
@@ -63,6 +67,9 @@ urlApiBibli += ':'
 urlApiBibli += serverConf.$server && serverConf.$server.port || '3000'
 urlApiBibli += '/api'
 
+var ressConf = require('../construct/ressource/config')
+var arbreCateg = ressConf.constantes.categories.liste
+
 /**
  * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
  * pour les avoir sous la static pour éventuel debug
@@ -70,15 +77,15 @@ urlApiBibli += '/api'
 /** ids des ressources traitées ici */
 var idsParsed = [];
 /** ids des ressources sur la pile d'envoi */
-var idsToSend = [];
+//var idsToSend = [];
 /** Liste des ressources en attentes qu'il faut appeler avec noPopulate */
 var idsNoPopulate = {}
 /** ids des ressources envoyées */
-var idsSent = [];
+//var idsSent = [];
 /** ids des ressources avec une réponse de l'api */
-var idsResp = []
+//var idsResp = []
 /** ids des ressources enregistrées par l'api */
-var idsOk = []
+//var idsOk = []
 /** ids des ressources dont l'enregistrement a planté */
 var idsFailed = [];
 
@@ -107,30 +114,6 @@ var lastArbres = [
   }
 ]
 
-// Les variables globales de checkEnd, pour chaque étape (pour décider de passer à la suivante)
-var nbLaunched = 0
-var waitingRessource = []
-var nextStep
-var timerId
-
-/**
- * Retourne le nb de ms écoulées depuis start
- * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
- */
-function getElapsed(start) {
-  return (new Date()).getTime() -start
-}
-
-/**
- * Écrit en console avec le moment en préfixe
- * @param msg
- */
-function log(msg, objToDump) {
-  var prefix = '[' +moment().format('HH:mm:ss.SSS') +'] '
-  console.log(prefix + msg)
-  if (objToDump) console.log(objToDump)
-}
-
 /**
  * Ajoute une erreur à la liste qui sera affichée à la fin
  * (et affiche la stack en console si c'est une erreur de notre code)
@@ -146,53 +129,6 @@ function addError(id, error) {
   else errors[id] = ''
   errors[id] += error
   if (id) idsFailed.push(id)
-}
-
-/**
- * Lance l'étape suivante si toutes les ressources ont été traitées ou si on reste plus de timeout ms sans être rappelé
- */
-function checkEnd() {
-  // le timeout
-  if (timerId) clearTimeout(timerId)
-  timerId = setTimeout(function () {
-    var msg = 'timeout, ' +Math.floor(defaultTimeout / 1000) +
-        "s sans rien depuis le dernier retour de l'api, il restait " +nbLaunched +
-        " ressources en attente de réponse de l'api et " +waitingRessource.length +" en attente d'envoi"
-    addError(0, msg)
-    log(msg)
-    nextStep()
-  }, defaultTimeout)
-
-  // on regarde s'il en reste en attente et si c'est terminé
-  if (waitingRessource.length) {
-    while (nbLaunched < maxLaunched && waitingRessource.length) {
-      addRessource(waitingRessource.shift(), checkEnd)
-    }
-  } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées\n')
-    clearTimeout(timerId)
-    nextStep()
-  }
-}
-
-/**
- * Lance l'ajout d'une ressource via l'api si on est pas au max et la met en attente sinon
- * @param ressource
- */
-function deferAdd(ressource) {
-  //log("deferAdd" +ressource.idOrigine +" " +nbLaunched +' / ' +maxLaunched)
-  if (ressource && ressource.titre) {
-    idsToSend.push(ressource.idOrigine);
-    if (nbLaunched < maxLaunched) {
-      addRessource(ressource, checkEnd)
-    } else {
-      waitingRessource.push(ressource)
-    }
-  } else {
-    idsFailed.push(ressource.idOrigine)
-    addError(ressource.idOrigine, "ressource sans titre ou invalide, non postée")
-    log(ressource)
-  }
 }
 
 /**
@@ -232,12 +168,12 @@ function parseXml(xmlFile) {
 }
 
 /**
- * Regarde s'il faut découper l'arbre en branches avant de passer à convert
- * @param arbre
+ * Regarde s'il faut découper l'arbre en branches avant de passer à convertAndPush
+ * @param arbre objet en sortie de parseXml
  * @param xmlName
  */
 function splitOrNotToSplit(arbre, xmlName) {
-  // on l'ajoute au lastArbres[0] (ressources sésamath)
+  // on l'ajoute au lastArbres[0] (toutes les ressources sésamath)
   lastArbres[0].enfants.push({
     titre        : arbre.titre,
     typeTechnique: 'arbre',
@@ -264,20 +200,17 @@ function splitOrNotToSplit(arbre, xmlName) {
       typeTechnique: 'arbre',
       origine      : origineArbre,
       idOrigine    : xmlName,
-      publie       : true,
-      restriction  : 0,
       enfants      : [],
-      // servira d'idOrigine pour récupérer l'id des children quand il auront été enregistrés
-      branches     : []
+      // pour stocker des idOrigine qui serviront à récupérer les oid des children quand il auront été enregistrés
+      idOrigineEnfants     : []
     }
     var num = 0
     // on découpe en branches
     arbre._children.forEach(function (branche) {
       num++
-      if (branche.tag !== 'd') return addError(xmlName, "doit être découpé mais on a trouvé un " + branche.tag +
-          " à la racine")
+      if (branche.tag !== 'd') return addError(xmlName, "doit être découpé mais on a trouvé un " + branche.tag +" à la racine")
       var file = xmlName +'.part' + num
-      root.branches.push(file)
+      root.idOrigineEnfants.push(file)
       if (branche.attrib.n) {
         branche.titre = branche.attrib.n
         delete branche.attrib.n
@@ -285,38 +218,50 @@ function splitOrNotToSplit(arbre, xmlName) {
         addError(file, 'sans titre')
         branche.titre = file
       }
-      convert(branche, file)
+      // on envoie cette branche
+      convertAndPush(branche, file)
     })
+    // faudra l'enregistrer après ses enfants
     log('push ' +xmlName +' dans lastArbres')
     lastArbres.push(root)
   } else {
-    convert(arbre, xmlName)
+    convertAndPush(arbre, xmlName)
   }
 }
 
 /**
- * Converti un arbre en ressource à poster (qu'on passe à deferAdd)
+ * Converti un arbre en ressource à poster (qu'on passe à common.pushRessource)
  * @param arbre
  * @param xmlName
  */
-function convert(arbre, xmlName) {
-  //log("convert " +xmlName)
+function convertAndPush(arbre, xmlName) {
+  //log("convertAndPush " +xmlName)
+  
   var ressource = {
-    titre        : arbre.titre,
-    typeTechnique: 'arbre',
     origine      : origineArbre,
     idOrigine    : xmlName,
+    titre        : arbre.titre,
+    typeTechnique: 'arbre',
+    categorie    : arbreCateg,
+    typePedagogiques :ressConf.categoriesToTypes[arbreCateg].typePedagogiques,
+    typeDocumentaires :ressConf.categoriesToTypes[arbreCateg].typeDocumentaires,
     publie       : true,
     restriction  : 0,
     enfants      : getEnfants(arbre, xmlName)
   }
-  deferAdd(ressource)
+  common.pushRessource(ressource)
+}
+
+function recupBranchesAndPush(arbre) {
+  if (arbre.idOrigineEnfants && arbre.idOrigineEnfants.length) {
+
+  }
 }
 
 /**
  * Passe en revue l'objet issu du xml pour en faire une ressource
  * @param {Object} arbre
- * @param {string} xmlName Le xml (nom du fichier sans extension qui sera idOrigine, éventuellement avec un suffixe)
+ * @param {string} [xmlName] Le xml (nom du fichier sans extension qui sera idOrigine, éventuellement avec un suffixe)
  */
 function getEnfants(arbre, xmlName) {
   var enfants = []
@@ -361,71 +306,6 @@ function getEnfants(arbre, xmlName) {
 }
 
 /**
- * Récupère une ressource via l'api
- * @param origine
- * @param idOrigine
- * @param next appelé avec la ressource (ou rien en cas de pb, que l'on log ici)
- */
-function getRessource(origine, idOrigine, next) {
-  var idComb = origine +'-' +idOrigine
-  var options = {
-    url         : urlApiBibli +'/ressource/' + origine +'/' +idOrigine,
-    json        : true,
-    content_type: 'charset=UTF-8'
-  }
-  request.get(options, function (error, response, ressource) {
-    if (error) {
-      errors[idComb] = error.toString()
-      next(null)
-    } else if (ressource.error) {
-      errors[idComb] = ressource.error
-      next(null)
-    } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
-      errors[idComb] = "ressource " +idComb +" incohérente : " +JSON.stringify(ressource)
-      next(null)
-    } else next(null, ressource)
-  })
-}
-
-/**
- * Ajoute une ressource dans la bibli en appelant l'api en http
- * @param ressource
- * @param next
- */
-function addRessource(ressource, next) {
-  //log("addRessource " +ressource.idOrigine)
-  var suffix = ''
-  nbLaunched++
-  idsSent.push(ressource.idOrigine)
-  if (!idsNoPopulate[ressource.idOrigine]) suffix = '?populate=1'
-  var options = {
-    url : urlApiBibli +'/arbre' +suffix,
-    json: true,
-    body: ressource,
-    timeout:defaultTimeout
-  }
-  //log("appel de " +options.url +" avec " +ressource.idOrigine)
-  request.post(options, function (error, response, body) {
-    nbLaunched--
-    idsResp.push(ressource.idOrigine)
-    if (error) addError(ressource.idOrigine, error.toString())
-    else {
-      if (body.error) {
-        addError(ressource.idOrigine, body.error)
-      } else {
-        if (body.oid) { // on ne récupère que ça, c'est pas le idOrigine posté
-          idsOk.push(ressource.idOrigine)
-          if (logOk) log(ressource.idOrigine +' ok avec ' +ressource.idOrigine)
-        } else {
-          addError(ressource.idOrigine, "L'api renvoie " +JSON.stringify(body))
-        }
-      }
-    }
-    next()
-  })
-}
-
-/**
  * Affiche la compilation des résultats
  * @param next
  */
@@ -448,7 +328,7 @@ function displayResult(next) {
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
     writeStream.end();
   } else log('Aucune erreur rencontrée')
-  log('Durée : ' +getElapsed(topDepart)/1000 +'s')
+  log('Durée : ' +common.getElapsed(topDepart)/1000 +'s')
   if (next) next()
 }
 
@@ -488,42 +368,40 @@ module.exports = function () {
   process.on('SIGINT', stop);
 
   // yapluka
-  flow()
-      .seq(function () {
-        nextStep = this
+  flow().seq(function () {
+        common.setAfterAllCb(this)
+        // plusieurs fct, convertAndPush fera un push à la fin
         xmls.forEach(parseXml)
-      })
-      .seq(function () {
+      }).seq(function () {
+        common.setAfterAllCb(this)
         // on regarde les arbres qu'il fallait envoyer en dernier
-        nextStep = this
         if (doCompil) {
-          // on envoie tel quel les 2 premiers (on préfère garder les ref avec origine, plus lisibles,
-          // et il faudrait les remettre en fin de pile pour récupérer des ids)
-          deferAdd(lastArbres.shift(), true)
-          deferAdd(lastArbres.shift(), true)
+          // on met en dernier les 2 premiers
+          lastArbres.push(lastArbres.shift())
+          lastArbres.push(lastArbres.shift())
         } else {
-          // faut virer les 2 1ers destinés à la compil globale
+          // faut virer les 2 premiers
           lastArbres.shift()
           lastArbres.shift()
         }
         log('On traite les ' +lastArbres.length +' ressources de lastArbres')
-        // pour le reste on remplace par des ids
+        // on remplace par des ids
         if (lastArbres.length) {
           lastArbres.forEach(function (root) {
-            log(root.idOrigine)
+            log("traitement de " +root.idOrigine)
             // faut récupérer les ids des idOrigine de chaque branche
             flow(root.branches)
                 .seqEach(function (idOrigine) {
                   var nextSeq = this
-                  // monstrueux de récupérer toute la ressource pour si peu, mais ça tourne pas souvent
-                  getRessource(origineArbre, idOrigine, function (error, ressource) {
-                    if (ressource && ressource.oid)
+                  // c'est du gaspillage de bp de récupérer toute la ressource pour si peu, mais ce script tourne pas souvent
+                  common.getRessource(origineArbre, idOrigine, function (error, ressource) {
+                    if (ressource && ressource.oid) {
                       root.enfants.push({
                         ref          : ressource.oid,
                         titre        : ressource.titre,
                         typeTechnique: ressource.typeTechnique
                       })
-                    else {
+                    } else {
                       addError(idOrigine, 'info de la branche pas récupérée')
                       log('à la place de ' + idOrigine + ' on récupère', error ? error.stack : ressource)
                     }
@@ -534,25 +412,25 @@ module.exports = function () {
                   // tous les enfants ont été récupérés
                   delete root.branches
                   root.idOrigine = root.idOrigine.replace('.xml', '') // on vire le suffixe pour la racine de ces arbres
-                  deferAdd(root, true)
+                  common.pushRessource(root, true)
                   this()
                 })
                 .catch(function (error) {
-                  addError(root.idOrigine, 'seq a planté pendant la récup des ids des branches : '.error.toString())
+                  addError(root.idOrigine, 'seq a planté pendant la récup des ids des branches : ' +error.toString())
                 })
           })
         } else {
-          nextStep()
+          this()
         }
-      })
-      .seq(function () {
+
+      }).seq(function () {
         displayResult(this)
-      })
-      .seq(function () {
+
+      }).seq(function () {
         log('END')
         process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
-      })
-      .catch(function (error) {
+
+      }).catch(function (error) {
         log('Erreur dans le flow :', error);
       })
 }

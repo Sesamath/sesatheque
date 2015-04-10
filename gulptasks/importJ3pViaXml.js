@@ -171,11 +171,11 @@ function deferAdd(ressource) {
 }
 
 /**
- * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
+ * Ajoute à la ressource categorie, typePedagogiques et typeDocumentaires pour un exo interactif
  * @param ressource
  */
 function addCatExoInteractif(ressource) {
-    ressource.categories       = [catCode.exerciceInteractif]
+    ressource.categorie        = [catCode.exerciceInteractif]
     ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation]
     ressource.typeDocumentaires= [tdCode.interactif]
 }

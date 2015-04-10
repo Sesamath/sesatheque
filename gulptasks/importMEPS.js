@@ -18,7 +18,7 @@ var logRelations = false
 /** pour loguer le processing (un point par ressource sinon) */
 var logProcess = false
 /** pour loguer les ressources dont le retour est ok */
-var logOk = true
+var logOk = false
 
 var knex = require('knex');
 var _ = require('lodash');
@@ -117,6 +117,7 @@ function checkEnd() {
  * @param ressource
  */
 function defer(ressource) {
+  // log('on va envoyer ', ressource)
   if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
   else waitingRessource.push(ressource)
 }
@@ -257,7 +258,7 @@ function initRessourceMep(row) {
     description      : '',
     commentaires     : row.mep_commentaire || '',
     niveaux          : [],
-    categories       : [catCode.exerciceInteractif],
+    categorie        : catCode.exerciceInteractif,
     typePedagogiques : [tpCode.exercice, tpCode.autoEvaluation],
     typeDocumentaires: [tdCode.interactif],
     relations        : relations,
@@ -283,9 +284,9 @@ function initRessourceAm(row) {
     idOrigine        : row.aide_id,
     typeTechnique    : 'am',
     titre            : row.aide_titre || 'Aide mathenpoche',
-    categories       : [7],
-    typePedagogiques : [3],
-    typeDocumentaires: [9],
+    categorie        : catCode.activiteAnimee,
+    typePedagogiques : confRessource.categoriesToTypes[catCode.activiteAnimee].typePedagogiques,
+    typeDocumentaires: confRessource.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires,
     relations        : [],
     parametres       : {},
     // auteurs
@@ -331,7 +332,7 @@ function importMEPS(next, ids) {
           nbRessToParse += ressources.length
           nbToRec += ressources.length
           ressources.forEach(function(row) {
-            ressourceCourante = initRessourceMep(row);
+            ressourceCourante = initRessourceMep(row)
             idsParsed.push(ressourceCourante.idOrigine);
             if (logProcess) log('processing mep ' + ressourceCourante.idOrigine)
             defer(ressourceCourante)
@@ -413,7 +414,7 @@ function flushPendingRelations(next) {
       var idComb = task[0]
       var relations = task[1]
       // on récupère la ressource avec l'api (pour oid et relations éventuelles)
-      log('on va chercher ' + idComb)
+      if (logRelations) log('on va chercher ' + idComb)
       getRessource(idComb, function (ressource) {
         // error loggée dans getRessource, on traite pas ici
         var subFlow = require('seq')
@@ -421,21 +422,21 @@ function flushPendingRelations(next) {
           // on gère notre accumulateur, car parMap ou seqMap ne passent pas l'ensemble des résultats au seq suivant
           // (qui doit lire this.stack pour tout récupérer), et ça rend l'ensemble plus lisible
           var newRelations = []
-          log(idComb + ' est ' + ressource.oid + ' et va lui ajouter les relations ', relations)
+          if (logRelations) log(idComb + ' est ' + ressource.oid + ' et va lui ajouter les relations ', relations)
 
           // faut récupérer les oid de toutes ses relations (dont on a que les idComb dans relations)
           subFlow(relations).seqMap(function (relation) {
             var thisSubFlow = this
             //log('dans subFlow on a le 1er elt de la pile', thisSubFlow.stack[0])
             //log('dans subFlow on a le 1er elt de la pile parente', thisFlow.stack[0])
-            log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
+            if (logRelations) log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
             // avec parMap la stack sera composée de tous les retours passé à this()
             // le 1er param change pas, c'est la nature de la relation
             var newRel = relation.slice(0, 1)
             var idCombLie = relation[1]
             if (oids[idCombLie]) {
               newRel[1] = oids[idCombLie]
-              log('on connaissait ' +idCombLie +' qui est ' +newRel[1])
+              if (logRelations) log('on connaissait ' +idCombLie +' qui est ' +newRel[1])
               newRelations.push(newRel)
               thisSubFlow()
             } else if (idCombLie) {
@@ -443,12 +444,12 @@ function flushPendingRelations(next) {
               getRessource(idCombLie, function (ressource) {
                 if (ressource && ressource.oid) {
                   newRel[1] = ressource.oid
-                  log(idCombLie +' est ' +newRel[1])
+                  if (logRelations) log(idCombLie +' est ' +newRel[1])
                   newRelations.push(newRel)
                   thisSubFlow()
                 } else {
                   errors[idCombLie] = 'une relation pointait vers ' + idCombLie + " qui n'existe pas"
-                  log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
+                  if (logRelations) log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
                   thisSubFlow()
                 }
               })
@@ -456,13 +457,13 @@ function flushPendingRelations(next) {
               errors[idComb] += (errors[idComb]?'\n':'') +" on avait une relation " +newRel +" vers rien"
             }
           }).seq(function () {
-            log('on va merger dans ' + ressource.oid, newRelations)
+            if (logRelations) log('on va merger dans ' + ressource.oid, newRelations)
             var mergedRelations = ressource.relations || []
             tools.merge(mergedRelations, newRelations)
             mergeRessource({oid: ressource.oid, relations: mergedRelations}, this)
           }).seq(function () {
             // fin de subFlow
-            log('fin relations de ' +idComb)
+            if (logRelations) log('fin relations de ' +idComb)
             thisFlow()
           }).catch(function (error) {
             log('error dans le traitement des relations de ' +idComb, error.stack || error)
