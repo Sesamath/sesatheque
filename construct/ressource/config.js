@@ -189,11 +189,10 @@ var ressourceConfig = {
   },
 
   // les propriétés obligatoires
-  // attention, si on rend obligatoire autre chose que string|number, faut aller changer le code de $ressourceControl.valide
   required         : {
-    'titre' : true,
-    'typeTechnique' : true,
-    'categorie' : true
+    titre         : true,
+    typeTechnique : true,
+    categories    : true
     //'auteurs'
   },
 
@@ -210,7 +209,7 @@ var ressourceConfig = {
     commentaires     : "Commentaires",
     parametres       : "Paramètres",
     niveaux          : "Niveau",
-    categorie        : "Catégorie",
+    categories       : "Catégories",
     typePedagogiques : "Type pédagogique",
     typeDocumentaires: "Type documentaire",
     relations        : "Ressources liées",
@@ -226,8 +225,7 @@ var ressourceConfig = {
   // les propriétés dont la modif déclenche un upgrade de version
   versionTriggers : ['origine', 'idOrigine', 'parametres', 'auteurs', 'contributeurs'],
 
-  // les types requis, Attention, le code suppose que tous les Array sont des tableaux d'entiers,
-  // faudra modifier postToRessource dans edit.js si ça change
+  // les types requis
   typesVar         : {
     oid              : 'Number',
     origine          : 'String',
@@ -238,7 +236,7 @@ var ressourceConfig = {
     description      : 'String',
     commentaires     : 'String',
     niveaux          : 'Array',
-    categorie        : 'Number',
+    categories       : 'Array',
     typePedagogiques : 'Array',
     typeDocumentaires: 'Array',
     relations        : 'Array',

@@ -4,29 +4,20 @@
  * Ça lui permettra d'être déplacé sur un autre serveur et de tourner de manière autonome
  * sans l'appli bibliothèque ni lassi
  */
-'use strict';
+'use strict'
 
-/** le timestamp en ms du lancement de ce script */
-var topDepart = (new Date()).getTime()
-/** timeout en ms */
-var timeout = 3000
-/** Le nb max de requetes vers l'api en attente de réponse */
-var maxLaunched = 5
-
-/** pour logguer les relations */
+/** pour logguer les relations (sera mis à true si on demande des ids particuliers) */
 var logRelations = false
-/** pour loguer le processing (un point par ressource sinon) */
-var logProcess = false
-/** pour loguer les ressources dont le retour est ok */
-var logOk = false
+var logApiCalls = false
 
-var knex = require('knex');
-var _ = require('lodash');
-var request = require('request');
-var moment = require('moment')
-var flow = require('seq');
+var knex = require('knex')
+//var _ = require('lodash')
+//var moment = require('moment')
+var flow = require('seq')
 
 var tools = require('../construct/tools')
+var common = require('./modules/common')
+var log = common.log // jshint ignore:line
 
 // conf de l'appli
 var confSesatheque = require('../_private/config')
@@ -38,89 +29,15 @@ urlBibli += '/api/ressource'
 
 // constantes
 var confRessource = require('../construct/ressource/config')
-var tdCode = confRessource.constantes.typeDocumentaires;
-var tpCode = confRessource.constantes.typePedagogiques;
-var catCode = confRessource.constantes.categories;
-var relCode = confRessource.constantes.relations;
+var tdCode = confRessource.constantes.typeDocumentaires
+var tpCode = confRessource.constantes.typePedagogiques
+var catCode = confRessource.constantes.categories
+var relCode = confRessource.constantes.relations
 
 // databases
-var confMeps = require('../_private/config/mepcol');
+var confMeps = require('../_private/config/mepcol')
 // les connexions aux bases
-var kmepcol = knex(confMeps);
-
-// les ids traités
-var nbRessToParse = 0
-var nbToRec = 0
-var nbRec = 0
-var idsParsed = [];
-var idsOk = []
-var idsFailed = [];
-var errors = {}
-var pendingRelations = {};
-/** liste idComb:oid */
-var oids = {}
-
-/**
- * Retourne le nb de ms écoulées depuis start
- * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
- */
-function getElapsed(start) {
-  return (new Date()).getTime() -start
-}
-
-/**
- * Écrit en console avec le moment en préfixe
- * @param msg
- */
-function log(msg, objToDump) {
-  var prefix = '[' +moment().format('HH:mm:ss.SSS') +'] '
-  console.log(prefix + msg)
-  if (objToDump) console.log(objToDump)
-}
-
-// pour passer à l'étape suivante
-var nbLaunched = 0
-var waitingRessource = []
-var nextStep
-var timerId
-
-/**
- * Lance l'étape suivante si toutes les ressources ont été traitées ou si on reste plus de timeout ms sans être rappelé
- */
-function checkEnd() {
-  // le timeout
-  if (timerId) clearTimeout(timerId)
-  timerId = setTimeout(function () {
-    var msg = 'timeout, ' +Math.floor(timeout / 1000) +
-        's sans rien depuis le dernier retour de bdd, il restait ' +nbLaunched +' ressources en cours et ' +
-        waitingRessource.length+' en attente de traitement\n' +
-        'trouvées ' +nbRessToParse +', parsed ' +idsParsed.length +', failed ' +idsFailed.length
-    errors['0'] += msg +'\n'
-    log(msg)
-    nextStep()
-  }, timeout)
-
-  // on regarde s'il en reste en attente et si c'est terminé
-  if (waitingRessource.length) {
-    while (nbLaunched < maxLaunched && waitingRessource.length) {
-      addRessource(waitingRessource.shift(), checkEnd)
-    }
-  } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées (on en est à ' +nbRec +'/' +nbToRec +')')
-    clearTimeout(timerId)
-    nextStep()
-  }
-}
-
-/**
- * Lance l'ajout d'une ressource via l'api si on est pas au max et la met en attente sinon
- * @param ressource
- */
-function defer(ressource) {
-  // log('on va envoyer ', ressource)
-  if (nbLaunched < maxLaunched) addRessource(ressource, checkEnd)
-  else waitingRessource.push(ressource)
-}
+var kmepcol = knex(confMeps)
 
 /**
  * Renvoie le codeTechnique d'un resultSet Mep
@@ -129,15 +46,13 @@ function defer(ressource) {
  */
 function getMepModele(mepRow) {
   if (mepRow.mep_modele === '1') {
-    return 'mep1';
+    return 'mep1'
   } else if (mepRow.mep_modele === '2' && mepRow.mep_modele2 === 'college') {
-    return 'mep2col';
+    return 'mep2col'
   } else if (mepRow.mep_modele === '2' && mepRow.mep_modele2 === 'lycee') {
-    return 'mep2lyc';
+    return 'mep2lyc'
   } else {
-    var msg = "mep_modele incohérent " + mepRow.mep_modele + ' ' + mepRow.mep_modele2
-    if (!errors[mepRow.mep_id]) errors[mepRow.mep_id] = msg
-    else errors[mepRow.mep_id] += msg
+    common.addError(mepRow.mep_id, "mep_modele incohérent " + mepRow.mep_modele + ' ' + mepRow.mep_modele2)
   }
 }
 
@@ -158,57 +73,15 @@ function getLangue(mep_langue_id) {
     'fr': 'fra',
     'it': 'ita',
     'pt': 'por'
-  };
+  }
   if (corres[mep_langue_id]) {
-    return corres[mep_langue_id];
+    return corres[mep_langue_id]
   } else {
-    console.error(mep_langue_id + " n'est pas un code connu");
-    return 'fra';
+    console.error(mep_langue_id + " n'est pas un code connu")
+    return 'fra'
   }
 }
 
-/**
- * Converti un timestamp (ms ou s) en string (JJ/DD/YYYY, suivant la conf)
- * @param ts le timestamp
- * @returns {String}
- */
-function getJour(ts) {
-  // log('getJour avec ' +ts)
-  // si c'est des s, on passe en ms
-  // 11001001001 est arbitraire, correspond à 1970 en ms et 2318 en s)
-  if (ts < 11001001001) ts = ts * 1000
-
-  return ts ? moment.utc(new Date(ts)).format(confRessource.formats.jour) : null
-}
-
-/**
- * Vérifie qu'une chaine est une liste d'entiers séparés par des virgules
- * @param {String} ids
- */
-function checkListOfInt (ids) {
-  if (_.isString(ids)) {
-    if (ids == parseInt(ids, 10)) return
-    else {
-      var a = ids.split(',')
-      a.forEach(function (elt) {
-        if (elt != parseInt(elt, 10)) throw new Error("L'élément " + elt + " n'est pas un entier")
-      })
-    }
-  } else {
-    throw new Error("La liste d'ids n'est pas une chaine")
-  }
-}
-
-/**
- * Note dans la var globale pendingRelations une relation à ajouter plus tard
- * @param idComb id combiné origine/idOrigine
- * @param relation [relationCode, idCombLié]
- */
-function addPendingRelation(idComb, relation) {
-  if (logRelations) log('on ajoute pour plus tard sur ' +idComb +' la relation ' +relation[0] +' > ' +relation[1])
-  if (!pendingRelations[idComb]) pendingRelations[idComb] = [relation];
-  else pendingRelations[idComb].push(relation);
-}
 
 /**
  * Convertit un recordset MEPS en objet Ressource que l'on pourra poster à l'api
@@ -216,34 +89,34 @@ function addPendingRelation(idComb, relation) {
  * @returns {Ressource}
  */
 function initRessourceMep(row) {
-  var relations = [];
-  var parametres = {};
+  var relations = []
+  var parametres = {}
   // raccourci
-  var id = row.mep_id;
+  var id = row.mep_id
   // parametres
-  parametres.nbq_defaut    = row.mep_nbq_defaut; // obligatoire
+  parametres.nbq_defaut    = row.mep_nbq_defaut // obligatoire
   parametres.mep_modele    = getMepModele(row)
   parametres.mep_langue_id = row.mep_langue_id || 'fr' // le swf veut le code langue à 2 lettres
-  parametres.swf_id        = row.mep_swf_id;
-  if (row.mep_projet !== 'mep')         parametres.projet          = row.mep_projet;
-  if (row.mep_old)                      parametres.old             = row.mep_old;
-  if (row.mep_suite_formateur !== 'o')  parametres.suite_formateur = row.mep_suite_formateur;
-  if (row.mep_aide_formateur !== 'o')   parametres.aide_formateur  = row.mep_aide_formateur;
-  if (row.mep_nb_wnk)                   parametres.nb_wnk          = row.mep_nb_wnk;
+  parametres.swf_id        = row.mep_swf_id
+  if (row.mep_projet !== 'mep')         parametres.projet          = row.mep_projet
+  if (row.mep_old)                      parametres.old             = row.mep_old
+  if (row.mep_suite_formateur !== 'o')  parametres.suite_formateur = row.mep_suite_formateur
+  if (row.mep_aide_formateur !== 'o')   parametres.aide_formateur  = row.mep_aide_formateur
+  if (row.mep_nb_wnk)                   parametres.nb_wnk          = row.mep_nb_wnk
 
   // parametres + relations
   var idComb = 'em/' +id
   // aide
   if (row.mep_aide_id) {
-    parametres.aide_id         = row.mep_aide_id;
-    addPendingRelation(idComb, [relCode.requiert, 'am/' +row.mep_aide_id]);
-    addPendingRelation('am/' +row.mep_aide_id, [relCode.estRequisPar, idComb]);
+    parametres.aide_id         = row.mep_aide_id
+    common.addPendingRelation(idComb, [relCode.requiert, 'am/' +row.mep_aide_id])
+    common.addPendingRelation('am/' +row.mep_aide_id, [relCode.estRequisPar, idComb])
   }
   // traduction
   if (row.mep_id_fr !== id) {
-    parametres.id_fr = row.mep_id_fr;
-    addPendingRelation(idComb, [relCode.estTraductionDe, 'em/' +row.mep_id_fr]);
-    addPendingRelation('em/' +row.mep_id_fr, [relCode.estTraduitAvec, idComb]);
+    parametres.id_fr = row.mep_id_fr
+    common.addPendingRelation(idComb, [relCode.estTraductionDe, 'em/' +row.mep_id_fr])
+    common.addPendingRelation('em/' +row.mep_id_fr, [relCode.estTraduitAvec, idComb])
   }
 
   // @todo regarder mep_swf_utilisateur_id pour récupérer les auteurs
@@ -258,7 +131,7 @@ function initRessourceMep(row) {
     description      : '',
     commentaires     : row.mep_commentaire || '',
     niveaux          : [],
-    categorie        : catCode.exerciceInteractif,
+    categories       : [catCode.exerciceInteractif],
     typePedagogiques : [tpCode.exercice, tpCode.autoEvaluation],
     typeDocumentaires: [tdCode.interactif],
     relations        : relations,
@@ -266,11 +139,11 @@ function initRessourceMep(row) {
     // auteurs
     // contributeurs
     langue           : getLangue(row.mep_langue_id),
-    publie           : (row.mep_statut_public === 'en_public' ? true : false),
+    publie           : (row.mep_statut_public === 'en_public'),
     restriction      : 0,
-    dateCreation     : getJour(row.dateCreation),
-    dateMiseAJour    : getJour(row.dateMiseAJour)
-  };
+    dateCreation     : tools.toDate(row.dateCreation),
+    dateMiseAJour    : tools.toDate(row.dateMiseAJour)
+  }
 }
 
 /**
@@ -284,7 +157,7 @@ function initRessourceAm(row) {
     idOrigine        : row.aide_id,
     typeTechnique    : 'am',
     titre            : row.aide_titre || 'Aide mathenpoche',
-    categorie        : catCode.activiteAnimee,
+    categories       : [catCode.activiteAnimee],
     typePedagogiques : confRessource.categoriesToTypes[catCode.activiteAnimee].typePedagogiques,
     typeDocumentaires: confRessource.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires,
     relations        : [],
@@ -294,31 +167,22 @@ function initRessourceAm(row) {
     langue           : 'fra',
     publie           : true,
     restriction      : 0,
-    dateCreation     : getJour(row.dateCreation),
-    dateMiseAJour    : getJour(row.dateMiseAJour)
-  };
+    dateCreation     : tools.toDate(row.dateCreation),
+    dateMiseAJour    : tools.toDate(row.dateMiseAJour)
+  }
 }
 
 /**
  * Importe la table MEPS dans les ressource
- *
- * @param {Function} next fct à appeler quand tous les mep auront été importés
- * @param {String}   ids  ids mep à traiter, séparés par des virgules sans espace (passer 'all' pour les faire tous)
+ * @param {string}   ids  ids mep à traiter, séparés par des virgules sans espace (passer 'all' pour les faire tous)
+ * @param {Function} next Callback à appeler quand toutes les ressources auront été envoyées à pushRessource
  */
-function importMEPS(next, ids) {
-  var ressourceCourante, where
+function importMEPS(ids, next) {
+  var ressourceCourante, where = ''
   log('Starting importMEPS')
-  nbLaunched = 0
-  nextStep = next
 
   // la liste des ids à traiter
-  if (ids === 'all') where = ''
-  else if (ids) where = ' WHERE mep_id IN (' + ids + ')'
-  else {
-    log("Pas d'import mep à faire")
-    next()
-    return
-  }
+  if (common.checkListOfInt(ids)) where = ' WHERE mep_id IN (' + ids + ')'
 
   kmepcol
       .raw("SELECT *" +
@@ -329,370 +193,123 @@ function importMEPS(next, ids) {
         " FROM MEPS m" +where)
       .then(function (rows) {
           var ressources = rows[0]
-          nbRessToParse += ressources.length
-          nbToRec += ressources.length
           ressources.forEach(function(row) {
             ressourceCourante = initRessourceMep(row)
-            idsParsed.push(ressourceCourante.idOrigine);
-            if (logProcess) log('processing mep ' + ressourceCourante.idOrigine)
-            defer(ressourceCourante)
+            common.pushRessource(ressourceCourante)
           })
+          next()
       })
       .catch(function(e) {
         log(e.stack)
+        next()
       })
   log('Select importMEPS lancé')
 }
 
 /**
  * Importe la table AIDES dans ressource
+ * @param ids
+ * @param next
  */
-function importAIDES(next, ids) {
+function importAIDES(ids, next) {
   var ressourceCourante,
       where = ''
   log('Starting importAIDES')
-  nbLaunched = 0
-  nextStep = next
 
   // la liste des ids à traiter
-  if (ids === 'all') where = ''
-  else if (ids) where = ' WHERE aide_id IN (' +ids +')'
-  else {
-    log("Pas d'import aide à faire")
-    next()
-    return
+  if (ids) {
+    common.checkListOfInt(ids)
+    where = ' WHERE aide_id IN (' + ids + ')'
   }
+  var query = "SELECT *" +
+              ", (SELECT MIN( dev_file_date ) FROM DEV_FILES" +
+                " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') AS dateCreation" +
+              ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
+              " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') AS dateMiseAJour" +
+              " FROM AIDES a " +where
 
   kmepcol
-      .raw("SELECT *" +
-          ", (SELECT MIN( dev_file_date ) FROM DEV_FILES" +
-          " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateCreation" +
-          ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
-          " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') dateMiseAJour" +
-          " FROM AIDES a " +where)
+      .raw(query)
       .then(function (rows) {
         var ressources = rows[0]
-        nbRessToParse += ressources.length
-        nbToRec += ressources.length
+        log(query +"\nremonte " +ressources.length +' résultats')
         ressources.forEach(function(row) {
-          ressourceCourante = initRessourceAm(row);
-          idsParsed.push(ressourceCourante.idOrigine +4000);
-          if (logProcess) log('processing aide ' + ressourceCourante.idOrigine)
-          defer(ressourceCourante)
+          ressourceCourante = initRessourceAm(row)
+          common.pushRessource(ressourceCourante)
         })
+        next()
       })
       .catch(function(e) {
         log(e.stack)
+        next()
       })
 
-  log('Select importAIDES lancé')
+  log('Select importAIDES lancé\n' +query)
 }
 
 /**
  * Passe en revue les relations qui n'auraient pas été affectées, mais une par une
  * (plusieurs relations peuvent affecter les même ressources, deux updates en // marchent pas)
- * @param next
  */
-function flushPendingRelations(next) {
-  var pile = []
 
-  if (_.isEmpty(pendingRelations)) {
-    log('Rien à faire dans flushPendingRelations')
-    next()
-  } else {
-    log('start flushPendingRelations')
-
-    // on remplit la pile avec nos relations en attente
-    _.each(pendingRelations, function (relations, idComb) {
-      nbToRec++
-      pile.push([idComb, relations])
-    })
-
-    // et on lance sa vidange (on peut tester cette fct avec em/3501 qui a deux relations)
-    flow(pile).seqEach(function (task) {
-      var thisFlow = this
-      var idComb = task[0]
-      var relations = task[1]
-      // on récupère la ressource avec l'api (pour oid et relations éventuelles)
-      if (logRelations) log('on va chercher ' + idComb)
-      getRessource(idComb, function (ressource) {
-        // error loggée dans getRessource, on traite pas ici
-        var subFlow = require('seq')
-        if (ressource) {
-          // on gère notre accumulateur, car parMap ou seqMap ne passent pas l'ensemble des résultats au seq suivant
-          // (qui doit lire this.stack pour tout récupérer), et ça rend l'ensemble plus lisible
-          var newRelations = []
-          if (logRelations) log(idComb + ' est ' + ressource.oid + ' et va lui ajouter les relations ', relations)
-
-          // faut récupérer les oid de toutes ses relations (dont on a que les idComb dans relations)
-          subFlow(relations).seqMap(function (relation) {
-            var thisSubFlow = this
-            //log('dans subFlow on a le 1er elt de la pile', thisSubFlow.stack[0])
-            //log('dans subFlow on a le 1er elt de la pile parente', thisFlow.stack[0])
-            if (logRelations) log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
-            // avec parMap la stack sera composée de tous les retours passé à this()
-            // le 1er param change pas, c'est la nature de la relation
-            var newRel = relation.slice(0, 1)
-            var idCombLie = relation[1]
-            if (oids[idCombLie]) {
-              newRel[1] = oids[idCombLie]
-              if (logRelations) log('on connaissait ' +idCombLie +' qui est ' +newRel[1])
-              newRelations.push(newRel)
-              thisSubFlow()
-            } else if (idCombLie) {
-              // faut aller chercher l'oid de cette ressource liée
-              getRessource(idCombLie, function (ressource) {
-                if (ressource && ressource.oid) {
-                  newRel[1] = ressource.oid
-                  if (logRelations) log(idCombLie +' est ' +newRel[1])
-                  newRelations.push(newRel)
-                  thisSubFlow()
-                } else {
-                  errors[idCombLie] = 'une relation pointait vers ' + idCombLie + " qui n'existe pas"
-                  if (logRelations) log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
-                  thisSubFlow()
-                }
-              })
-            } else {
-              errors[idComb] += (errors[idComb]?'\n':'') +" on avait une relation " +newRel +" vers rien"
-            }
-          }).seq(function () {
-            if (logRelations) log('on va merger dans ' + ressource.oid, newRelations)
-            var mergedRelations = ressource.relations || []
-            tools.merge(mergedRelations, newRelations)
-            mergeRessource({oid: ressource.oid, relations: mergedRelations}, this)
-          }).seq(function () {
-            // fin de subFlow
-            if (logRelations) log('fin relations de ' +idComb)
-            thisFlow()
-          }).catch(function (error) {
-            log('error dans le traitement des relations de ' +idComb, error.stack || error)
-            errors[idComb] = error
-            thisFlow()
-          })
-          // fin du subFlow
-
-        } else {
-          log('on a rien récupéré pour ' + idComb)
-          thisFlow()
-        }
-      }) // getRessource
-
-    }).seq(function () {
-      log('fin du traitement des relations en attente')
-      next()
-
-    }).catch(function (error) {
-      log('erreur dans le traitement de la pile de relations', error)
-      next()
-    })
-    // fin du flow
-  }
-}
-
-/**
- * Récupère une ressource via l'api
- * @param origine
- * @param idOrigine
- * @param next appelé avec la ressource (ou rien en cas de pb, que l'on log ici)
- */
-function getRessource(origine, idOrigine, next) {
-  var idComb
-  if (next) {
-    idComb = origine +'/' +idOrigine
-  } else {
-    next = idOrigine
-    idComb = origine
-    if (_.isString(idComb)) {
-      var pos = idComb.indexOf('/')
-      origine = idComb.substr(0, pos)
-      idOrigine = idComb.substr(pos +1)
-    } else {
-      // on nous passe un oid
-      origine = null
-      idOrigine = null
-    }
-  }
-  var options = {
-    url         : urlBibli +'/' +idComb,
-    headers : {
-      "X-ApiToken" : confMeps.apiToken
-    },
-    json        : true,
-    content_type: 'charset=UTF-8'
-  }
-  //log('dans getRessource ' +idComb)
-  request.get(options, function (error, response, ressource) {
-    //log("on récupère l'erreur", error)
-    //log("et la ressource", ressource)
-    if (error) {
-      errors[idComb] = error.toString()
-      next(null)
-    } else if (ressource.error) {
-      errors[idComb] = ressource.error
-      next(null)
-    } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
-      errors[idComb] = "ressource " +idComb +" incohérente : " +
-                       JSON.stringify(origine) +'/' +JSON.stringify(idOrigine) +
-                       '\n' +JSON.stringify(ressource)
-      next(null)
-    } else {
-      next(ressource)
-    }
-  })
-}
-
-/**
- * Ajoute une ressource dans la bibli en appelant l'api en http
- * @param ressource
- * @param next
- */
-function addRessource(ressource, next) {
-  nbLaunched++
-  var options = {
-    url : urlBibli,
-    headers : {
-      "X-ApiToken" : confMeps.apiToken
-    },
-    json: true,
-    body: ressource
-  }
-  var idMix = ressource.origine +'/' +ressource.idOrigine
-  request.post(options, function (error, response, body) {
-    nbLaunched--
-    if (error || body.error) {
-      var errorString = error ? error.toString() : body.error
-      idsFailed.push(idMix)
-      errors[idMix] = errorString
-      log('erreur api sur ' +idMix +' : ' +errorString)
-    } else if (body.oid) {
-      // on note la correspondance pour éviter de retourner le chercher
-      oids[idMix] = body.oid
-      // et le fait que c'est bon
-      idsOk.push(body.oid)
-      nbRec++
-      if (logOk) log(idMix +' ok')
-    } else {
-      idsFailed.push(idMix)
-      errors[idMix] = JSON.stringify(body)
-      log('PB, ' +idMix +" renvoie à l'enregistrement " +JSON.stringify(body))
-    }
-    next()
-  })
-}
-
-/**
- * Ajoute des propriétés à une ressource de la bibli via l'api
- * @param ressourcePartielle
- * @param next
- */
-function mergeRessource(ressourcePartielle, next) {
-  nbLaunched++
-  var options = {
-    url : urlBibli +'?merge=1',
-    headers : {
-      "X-ApiToken" : confMeps.apiToken
-    },
-    json: true,
-    body: ressourcePartielle
-  }
-
-  request.post(options, function (error, response, body) {
-    nbLaunched--
-    if (body && body.oid) {
-      idsOk.push(body.oid)
-      if (logOk) log('màj ' +body.oid +' ok')
-    } else {
-      var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
-      var idErr = ressourcePartielle.oid || 0
-      idsFailed.push(idErr)
-      errors[idErr] = (errors[idErr] ? errors[idErr] +'\n' : '') +errStr
-      log('pb au retour du merge ' +errStr, ressourcePartielle)
-    }
-    next()
-  })
-}
-
-/**
- * Affiche la compilation des résultats
- * @param next
- */
-function displayResult(next) {
-  // attendues 4109 + 1613
-  log(nbRessToParse +' ressources trouvées en bdd')
-  log(idsParsed.length +' ressources traitées')
-  log(idsOk.length +' ressources enregistrées')
-  log('à enregistrer : ' +nbToRec)
-  log('enregistrées : ' +nbRec)
-  if (errors) {
-    var fs = require('fs')
-    var logfile = __dirname + '/../logs/import.error.log'
-    var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
-    log('erreurs vers '+logfile)
-    log(idsFailed.length +' ressources avec erreurs :')
-    writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
-    _.each(errors, function (error, id) {
-      log(id +' : ' +error)
-      writeStream.write(id +' : ' +error)
-    })
-    writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
-    writeStream.end();
-  } else log('Aucune erreur rencontrée')
-  log('Durée : ' +getElapsed(topDepart)/1000 +'s')
-  if (next) next()
-  else process.exit()
-}
 
 module.exports = function () {
   // les 3 premiers args sont node, /path/2/gulp, importMEPS
   var argv = process.argv.slice(3)
   // tout par défaut
-  var mepIds = 'all',
-      aideIds = 'all'
+  var mepIds, aideIds, i
 
-  log('task ' + __filename);
+  log('task ' + __filename)
 
   // sauf si on précise l'un ou l'autre (on impose le log dans ce cas
-  if (argv[0] === '--mep') {
-    mepIds = argv.slice(1)[0]
-    if (mepIds !== 'all') checkListOfInt(mepIds)
-    aideIds = undefined
-    log('On ne traitera que les id mep ' +mepIds)
-    logProcess = true
+  i = argv.indexOf('--mep')
+  if (i > -1) {
+    mepIds = argv[i + 1]
+    aideIds = null
+    log('On ne traitera que les id mep ' + mepIds)
     logRelations = true
-
-  } else if (argv[0] === '--aide') {
-    aideIds = argv.slice(1)[0]
-    if (aideIds !== 'all') checkListOfInt(aideIds)
-    mepIds = undefined
-    log('On ne traitera que les id aide ' +aideIds)
-    logProcess = true
-    logRelations = true
+    logApiCalls = true
   }
 
-  // en cas d'interruption on veut le résultat quand même
-  process.on('SIGTERM', displayResult);
-  process.on('SIGINT', displayResult);
+  i = argv.indexOf('--aide')
+  if (i > -1) {
+    aideIds = argv[i + 1]
+    if (!mepIds) mepIds = null
+    log('On ne traitera que les id aide ' +aideIds)
+    logRelations = true
+    logApiCalls = true
+  }
 
-  flow()
-      .seq(function () {
-        importMEPS(this, mepIds)
-      })
-      .seq(function () {
-        importAIDES(this, aideIds)
-      })
-      .seq(function () {
-        // knex.destroy() // impossible de fermer la connexion de ce #@§ knex
-        flushPendingRelations(this)
-      })
-      .seq(function () {
-        displayResult(this)
-      })
-      .seq(function () {
-        log('END')
-        process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
-      })
-      .catch(function (error) {
-        console.error('Erreur dans le flow : \n' + error.stack);
-      })
+  common.setOptions({
+    logRelations : logRelations,
+    logApiCalls : logApiCalls
+  })
+
+  // en cas d'interruption on veut le résultat quand même
+  process.on('SIGTERM', common.displayResult)
+  process.on('SIGINT', common.displayResult)
+
+  flow().seq(function () {
+    if (mepIds === null) this()
+    else importMEPS(mepIds, this)
+
+  }).seq(function () {
+    if (aideIds === null) this()
+    else importAIDES(aideIds, this)
+
+  }).seq(function () {
+    // knex.destroy() // impossible de fermer la connexion de ce #@§ knex
+    common.flushPendingRelations(this)
+
+  }).seq(function () {
+    common.displayResult(this)
+
+  }).seq(function () {
+    log('END')
+    process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
+
+  }).catch(function (error) {
+    console.error('Erreur dans le flow : \n' + error.stack)
+    common.displayResult()
+  })
 }

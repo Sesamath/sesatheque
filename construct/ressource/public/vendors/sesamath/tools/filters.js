@@ -37,55 +37,91 @@
 
 /* global define, module*/
 
-var filters = {
+var filters = {}
 
-  /**
-   * Retourne le tableau passé en argument ou un tableau vide si l'argument n'était pas un Array
-   * @param {Array} arg L'array à controler
-   * @returns {Array}
-   */
-  array : function (arg) {
-    return (arg instanceof Array) ? arg : [];
-  },
+/**
+ * Retourne le tableau passé en argument ou un tableau vide si l'argument n'était pas un Array
+ * @param {Array} arg L'array à controler
+ * @returns {Array}
+ */
+filters.array = function (arg) {
+  return (arg instanceof Array) ? arg : [];
+}
 
-  /**
-   * Retourne la chaine passée en argument ou une chaine vide
-   * si l'argument est undefined ou ne peut pas être casté avec String()
-   * @param arg
-   * @returns {string}
-   */
-  string : function (arg) {
-    var retour = '';
-    if (typeof arg === 'string') retour = arg;
-    else if (arg) {
-      retour = String(arg);
-      if (retour === 'undefined' || retour === '[object Object]') retour = ''
-    }
-    return retour;
-  },
-
-  /**
-   * Retourne l'entier positif fourni ou 0
-   * @param {number|string} arg
-   * @returns {number}
-   */
-  int : function (arg) {
-    var int = parseInt(arg, 10);
-    if (int < 1 || int != arg) int = 0;
-    return int
-  },
-
-  /**
-   * Retourne un objet Date (on tente un cast si on nous fourni une string ou un entier) ou undefined
-   * @param arg
-   * @returns {Date|undefined}
-   */
-  date : function (arg) {
-    var retour;
-    if (arg instanceof Date) retour = arg;
-    else if (arg && (typeof arg === 'string' || typeof arg === 'number')) retour = new Date(arg);
-    return retour
+/**
+ * Retourne le tableau passé en argument ou un tableau vide si l'argument n'était pas un Array
+ * Tous les éléments qui ne sont pas des entiers positifs (0 accepté) seront éliminés
+ * @param {Array} arg L'array à controler
+ * @returns {Array}
+ */
+filters.arrayInt = function (arg) {
+  arg = filters.array(arg)
+  // IE < 9 connait pas filter
+  if (arg.filter) {
+    arg = arg.filter(function (elt) {
+      return (parseInt(elt, 10) === elt && elt > -1);
+    })
   }
+  return arg;
+}
+
+/**
+ * Retourne le tableau passé en argument ou un tableau vide si l'argument n'était pas un Array
+ * Tous les éléments qui ne sont pas des entiers positifs seront éliminés
+ * @param {Array} arg L'array à controler
+ * @returns {Array}
+ */
+filters.arrayString = function (arg) {
+  arg = filters.array(arg)
+  // IE < 9 connait pas filter
+  if (arg.filter) {
+    arg = arg.filter(function (elt) {
+      return (typeof elt === 'string');
+    })
+  }
+  return arg;
+}
+
+
+/**
+ * Retourne l'entier positif fourni ou 0
+ * @param {number|string} arg
+ * @returns {number}
+ */
+filters.int = function (arg) {
+  var int = 0;
+  if (typeof arg === 'string') int = parseInt(arg, 10);
+  else if (typeof arg === 'number') int = Math.floor(arg)
+  if (int < 1 || int != arg) int = 0;
+  return int
+}
+
+/**
+ * Retourne un objet Date (on tente un cast si on nous fourni une string ou un entier) ou undefined
+ * @param arg
+ * @returns {Date|undefined}
+ */
+filters.date = function (arg) {
+  var retour;
+  if (arg instanceof Date) retour = arg;
+  else if (arg && (typeof arg === 'string' || typeof arg === 'number')) retour = new Date(arg);
+  return retour
+}
+
+/**
+ * Retourne la chaine passée en argument ou une chaine vide
+ * si l'argument est undefined ou ne peut pas être casté avec String()
+ * @param arg
+ * @returns {string}
+ */
+filters.string = function (arg) {
+  var retour = '';
+  if (typeof arg === 'string') retour = arg;
+  else if (arg) {
+    retour = String(arg);
+    if (retour === 'undefined' || retour === '[object Object]') retour = ''
+  }
+  return retour;
 }
 
 // suivant que l'on est coté serveur ou client

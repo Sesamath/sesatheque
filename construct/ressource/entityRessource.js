@@ -98,10 +98,17 @@ module.exports = function (Ressource, $ressourceControl) {
     .defineIndex('idOrigine', 'string')
     .defineIndex('typeTechnique', 'string')
     .defineIndex('niveaux', 'integer')
-    .defineIndex('categorie', 'integer')
+    .defineIndex('categories', 'integer')
     .defineIndex('typePedagogiques', 'integer')
     .defineIndex('typeDocumentaires', 'integer')
-    //.defineIndex('relations', 'integer') // chaque relation est un tableau, faudra voir si on peut indexer ça
+    // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir une callback qui la remplace
+    // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
+    .defineIndex('relations', 'integer', function() {
+      return this.relations
+          .map(function(relation) {
+            return relation[1]
+          })
+    })
     .defineIndex('auteurs', 'integer')
     .defineIndex('contributeurs', 'integer')
     .defineIndex('langue', 'string')

@@ -332,7 +332,7 @@ function displayResult(next) {
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
     writeStream.end();
   } else log('Aucune erreur rencontrée')
-  log('Durée : ' +common.next(topDepart)/1000 +'s')
+  log('Durée : ' +common.getElapsed(topDepart)/1000 +'s')
   if (next) next()
   else process.exit()
 }

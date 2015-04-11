@@ -37,14 +37,22 @@ var moment = require('moment')
 var tools = {}
 
 /**
- * Clone un objet
+ * Clone un objet en conservant son prototype
  * @param object
  * @returns {object}
  */
 tools.clone = function(object) {
-  var copy = Object.create(Object.getPrototypeOf(object));
-  tools.update(copy, object);
-
+  var copy = object
+  if (object instanceof Array) {
+    copy = object.slice()
+  } else if (object instanceof Date) {
+    copy = new Date(object)
+  } else if (object instanceof RegExp) {
+    copy = new RegExp(object)
+  } else if (object instanceof Object) {
+    copy = Object.create(Object.getPrototypeOf(object));
+    tools.update(copy, object);
+  }
   return copy;
 }
 
@@ -153,10 +161,10 @@ tools.sanitizeHashKey = function(source) {
 }
 
 /**
- * Idem JSON.stringify mais en cas de ref circulaire sur une propriété on renvoie quand même les autres
+ * Idem JSON.stringify mais sans planter, en cas de ref circulaire sur une propriété on renvoie quand même les autres
  * (avec le message d'erreur de JSON.stringify sur la propriété à pb)
  * @param obj
- * @param {number} indent Le nb d'espaces d'indentation
+ * @param {number} [indent=2] Le nb d'espaces d'indentation
  * @returns {string}
  */
 tools.stringify = function(obj, indent) {

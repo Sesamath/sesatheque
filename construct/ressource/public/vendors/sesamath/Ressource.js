@@ -42,6 +42,7 @@ var filters = (function () {
   function foo(arg) {return arg;}
   return {
     array : foo,
+    arrayInt : foo,
     string : foo,
     date : foo,
     int : foo
@@ -78,7 +79,7 @@ function Ressource(initObj) {
    * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
    * Viré au save s'il est vide
    */
-  this.warnings = filters.array(initObj.warnings)
+  this.warnings = filters.arrayString(initObj.warnings)
   /**
    * identifiant du dépôt d'origine (où est stockée et géré la ressource), reste null si créé ici
    * @type {String}
@@ -118,16 +119,12 @@ function Ressource(initObj) {
    * Niveaux scolaire de la ressource, dans son système éducatif par défaut, fr_FR s'il n'est pas précisé
    * @type {Array}
    */
-  this.niveaux = filters.array(initObj.niveaux);
+  this.niveaux = filters.arrayInt(initObj.niveaux);
   /**
    * Une catégorie correspond à un recoupement de types, par ex "exercice interactif"
    * @type {Array}
    */
-  this.categorie = filters.int(initObj.categorie);
-  // pour conversion éventuelle, on fera le contraire si on rend ce champ multivalué
-  if (initObj.categories && initObj.categories instanceof Array && !this.categorie) {
-    this.categorie = filters.int(initObj.categories.shift());
-  }
+  this.categories = filters.arrayInt(initObj.categorie);
 
   /**
    * Type pédagogique (5.2 - scolomfr-voc-010) : cours, exercice...
@@ -135,14 +132,14 @@ function Ressource(initObj) {
    * @see "http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=62"
    * @type {Array}
    */
-  this.typePedagogiques = filters.array(initObj.typePedagogiques);
+  this.typePedagogiques = filters.arrayInt(initObj.typePedagogiques);
   /**
    * type documentaire (1.9 - scolomfr-voc-004) : image, ressource interactive, son, texte
    * Idem, conditionné par la catégorie mais à priori seulement
    * @see http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=49
    * @type {Array}
    */
-  this.typeDocumentaires = filters.array(initObj.typeDocumentaires);
+  this.typeDocumentaires = filters.arrayInt(initObj.typeDocumentaires);
   /**
    * Liste des ressources liées, une liaison étant un array [idLiaison, idRessourceLiée]
    * @type {Array}
@@ -153,16 +150,26 @@ function Ressource(initObj) {
    * @type {Object}
    */
   this.parametres = (initObj.parametres instanceof Object) ? initObj.parametres : {};
+  // on accepte une chaîne json
+  if (initObj.parametres && typeof initObj.parametres === 'string') {
+    try {
+      var parametres = JSON.parse(initObj.parametres);
+      this.parametres = parametres;
+    } catch(error) {
+      if (console && console.error) console.error(error);
+    }
+  }
+
   /**
    * Liste d'id d'auteurs
    * @type {Array}
    */
-  this.auteurs = filters.array(initObj.auteurs);
+  this.auteurs = filters.arrayInt(initObj.auteurs);
   /**
    * Liste d'id de contributeurs
    * @type {Array}
    */
-  this.contributeurs = filters.array(initObj.contributeurs);
+  this.contributeurs = filters.arrayInt(initObj.contributeurs);
   /**
    * code langue ISO 639-2 (http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2)
    * @type {String}

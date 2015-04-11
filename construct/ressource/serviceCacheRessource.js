@@ -70,8 +70,8 @@ module.exports = function ($cache, $settings, Ressource) {
 
   /**
    * Envoie une ressource du cache à next
-   * @param {String}         origine
-   * @param {String}         idOrigine
+   * @param {string}         origine
+   * @param {string}         idOrigine
    * @param {SimpleCallback} next
    * @memberOf $cacheRessource
    */

@@ -105,9 +105,9 @@ function truncate(s, n) {
 }
 
 function getMessage(self) {
-  return truncate(JSON.stringify(self.actual, replacer), 128) + ' ' +
+  return truncate(JSON.stringify(self.actual), 128) + ' ' +
          self.operator + ' ' +
-         truncate(JSON.stringify(self.expected, replacer), 128);
+         truncate(JSON.stringify(self.expected), 128);
 }
 
 // At present only the three keys mentioned above are used and

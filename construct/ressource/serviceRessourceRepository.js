@@ -380,8 +380,8 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
 
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next
-   * @param {String}   origine
-   * @param {String}   idOrigine
+   * @param {string}   origine
+   * @param {string}   idOrigine
    * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
    */
   $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {

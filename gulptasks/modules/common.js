@@ -1,14 +1,16 @@
 /**
  * Module avec les méthodes communes de nos différents scripts d'import
  */
-'use strict';
+'use strict'
 
-var _ = require('lodash');
-var request = require('request');
+var fs = require('fs')
+var _ = require('lodash')
+var request = require('request')
 var moment = require('moment')
-var flow = require('seq');
+var flow = require('seq')
 
 var tools = require('../../construct/tools')
+var CounterMulti = require('../../construct/tools/CounterMulti')
 
 // conf de l'appli
 var confSesatheque = require('../../_private/config')
@@ -19,47 +21,59 @@ urlBibli += confSesatheque.$server && confSesatheque.$server.port || '3000'
 urlBibli += '/api/ressource'
 var apiToken = confSesatheque.apiTokens[0]
 
-// conf des logs
-var logOk = false
+/**
+ * La conf par défaut de ce module, modifié par setOptions
+ */
+var opt = {
+  /** timeout en ms */
+  timeout     : 3000,
+  /** Le nb max de requetes vers l'api en attente de réponse */
+  maxLaunched : 5,
+  /** pour logguer les relations en console */
+  logRelations: false,
+  /** pour loguer les résultat des appels de l'api */
+  logApiCalls : false
+}
 
-/** timeout en ms */
-var timeout = 3000
-/** Le nb max de requetes vers l'api en attente de réponse */
-var maxLaunched = 5
-
+/**
+ * Nos variables globales à ce module
+ */
 // pour passer à l'étape suivante ou pas
 var nbLaunched = 0
+/** la liste des ids de ressources en attente */
 var waitingRessource = []
+/** le timer pour arrêter l'import si on a pas de réponse pendant timeout s */
 var timerId
+/** La callback a appeler quand toutes les ressources ont été postées et que l'on a les réponses (ou timeout) */
 var afterAllCb = function () {
   throw new Error("il fallait appeler setAfterAllCb avant de lancer des enregistrements")
 }
 
 // les ids traités
-var nbRessToParse = 0
-var nbToRec = 0
-var nbRec = 0
-var idsParsed = [];
-var idsOk = []
-var idsFailed = [];
+var idsToRec  = new CounterMulti()
+var idsRec    = new CounterMulti()
+var idsFailed = new CounterMulti()
 var errors = {}
-var pendingRelations = {};
+var pendingRelations = {}
 /** liste idComb:oid */
 var oids = {}
 
-// notre module
+// le moment du lancement de ce module
+var topDepart = (new Date()).getTime()
+
+/**
+ * Notre module, collection de méthodes pour les imports
+ * @static
+ */
 var common = {}
 
 /**
- * Les fonctions privées
- */
-
-/**
  * Ajoute une ressource dans la bibli en appelant l'api en http
+ * @private
  * @param ressource
  * @param next
  */
-function addRessource(ressource, next) {
+function addRessource (ressource, next) {
   nbLaunched++
   var options = {
     url    : urlBibli,
@@ -72,26 +86,38 @@ function addRessource(ressource, next) {
   var idMix = ressource.origine + '/' + ressource.idOrigine
   request.post(options, function (error, response, body) {
     nbLaunched--
-    if (error || body.error) {
-      var errorString = error ? error.toString() : body.error
-      idsFailed.push(idMix)
-      errors[idMix] = errorString
-      log('erreur api sur ' + idMix + ' : ' + errorString)
-    } else if (body.oid) {
-      // on note la correspondance pour éviter de retourner le chercher
-      oids[idMix] = body.oid
-      // et le fait que c'est bon
-      idsOk.push(body.oid)
-      nbRec++
-      if (logOk) log(idMix + ' ok')
+    if (error || body.error || !body.oid) {
+      // KO
+      idsFailed.inc(idMix)
+      // le msg d'erreur
+      var errorString
+      if (error) errorString = error.toString()
+      else if (body.error) errorString = body.error
+      else errorString = tools.stringify(body)
+      addError(idMix, errorString)
+      if (opt.logApiCalls) log(idMix + ' KO : ' + errorString)
     } else {
-      idsFailed.push(idMix)
-      errors[idMix] = JSON.stringify(body)
-      log('PB, ' + idMix + " renvoie à l'enregistrement " + JSON.stringify(body))
+      // OK
+      idsToRec.dec(idMix)
+      idsRec.inc(idMix)
+      // on note la correspondance pour éviter de retourner le chercher juste pour ça
+      oids[idMix] = body.oid
+      if (opt.logApiCalls) log(idMix + ' ok')
     }
     next()
   })
 }
+
+/**
+ * Ajoute une erreur pour cet id
+ * @param id
+ * @param {string} errorString
+ */
+function addError(id, errorString) {
+  if (errors[id]) errors[id] += '\n' +errorString
+  else errors[id] = errorString
+}
+common.addError = addError
 
 /**
  * Note dans la var globale pendingRelations une relation à ajouter plus tard
@@ -111,22 +137,22 @@ common.checkEnd = function () {
   // le timeout
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(function () {
-    var msg = 'timeout, ' + Math.floor(timeout / 1000) +
-              's sans rien depuis le dernier retour de bdd, il restait ' + nbLaunched + ' ressources en cours et ' +
-              waitingRessource.length + ' en attente de traitement\n' +
-              'trouvées ' + nbRessToParse + ', parsed ' + idsParsed.length + ', failed ' + idsFailed.length
-    errors['0'] += msg + '\n'
+    var msg = 'timeout, ' +Math.floor(opt.timeout / 1000) +
+              's sans rien depuis le dernier retour de bdd, il restait ' +nbLaunched +' ressources en cours et ' +
+              waitingRessource.length +' en attente de traitement\n' +
+              'enregistrées ' +idsRec.length  +', failed ' +idsFailed.length
+    addError(0, msg)
     log(msg)
     afterAllCb()
-  }, timeout)
+  }, opt.timeout)
 
   // on regarde s'il en reste en attente et si c'est terminé
   if (waitingRessource.length) {
-    while (nbLaunched < maxLaunched && waitingRessource.length) {
+    while (nbLaunched < opt.maxLaunched && waitingRessource.length) {
       addRessource(waitingRessource.shift(), common.checkEnd)
     }
   } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées (on en est à ' + nbRec + '/' + nbToRec + ')')
+    log('toutes les ressources de cette étape ont été traitées (on en est à ' + idsRec.length + '/' + idsToRec.length + ')')
     clearTimeout(timerId)
     afterAllCb()
   }
@@ -151,6 +177,31 @@ common.checkListOfInt = function (ids) {
 }
 
 /**
+ * Affiche la compilation des résultats
+ * @param next
+ */
+common.displayResult = function (next) {
+  log(idsRec.length +' ressources enregistrées en ' +idsRec.total() +' appels')
+  log('sur ' +idsToRec.length +' à enregistrer (reste ' +idsToRec.total() +' appels à faire)')
+  if (errors) {
+    var logfile = __dirname + '/../logs/import.error.log'
+    var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
+    log('erreurs vers '+logfile)
+    log(idsFailed.length +' ressources avec erreurs :')
+    writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
+    _.each(errors, function (error, id) {
+      log(id +' : ' +error)
+      writeStream.write(id +' : ' +error)
+    })
+    writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
+    writeStream.end()
+  } else log('Aucune erreur rencontrée')
+  log('Durée : ' +common.getElapsed(topDepart)/1000 +'s')
+  if (next) next()
+  else process.exit()
+}
+
+/**
  * Passe en revue les relations qui n'auraient pas été affectées, mais une par une
  * (plusieurs relations peuvent affecter les même ressources, deux updates en // marchent pas)
  * @param next
@@ -166,7 +217,7 @@ common.flushPendingRelations = function (next) {
 
     // on remplit la pile avec nos relations en attente
     _.each(pendingRelations, function (relations, idComb) {
-      nbToRec++
+      idsToRec.inc(idComb)
       pile.push([idComb, relations])
     })
 
@@ -176,7 +227,7 @@ common.flushPendingRelations = function (next) {
       var idComb = task[0]
       var relations = task[1]
       // on récupère la ressource avec l'api (pour oid et relations éventuelles)
-      log('on va chercher ' + idComb)
+      if (opt.logRelations) log('on va chercher ' + idComb)
       common.getRessource(idComb, function (ressource) {
         // error loggée dans getRessource, on traite pas ici
         var subFlow = require('seq')
@@ -184,21 +235,21 @@ common.flushPendingRelations = function (next) {
           // on gère notre accumulateur, car parMap ou seqMap ne passent pas l'ensemble des résultats au seq suivant
           // (qui doit lire this.stack pour tout récupérer), et ça rend l'ensemble plus lisible
           var newRelations = []
-          log(idComb + ' est ' + ressource.oid + ' et va lui ajouter les relations ', relations)
+          if (opt.logRelations) log(idComb + ' est ' + ressource.oid + ' et va lui ajouter les relations ', relations)
 
           // faut récupérer les oid de toutes ses relations (dont on a que les idComb dans relations)
           subFlow(relations).seqMap(function (relation) {
             var thisSubFlow = this
             //log('dans subFlow on a le 1er elt de la pile', thisSubFlow.stack[0])
             //log('dans subFlow on a le 1er elt de la pile parente', thisFlow.stack[0])
-            log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
+            if (opt.logRelations) log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
             // avec parMap la stack sera composée de tous les retours passé à this()
             // le 1er param change pas, c'est la nature de la relation
             var newRel = relation.slice(0, 1)
             var idCombLie = relation[1]
             if (oids[idCombLie]) {
               newRel[1] = oids[idCombLie]
-              log('on connaissait ' + idCombLie + ' qui est ' + newRel[1])
+              if (opt.logRelations) log('on connaissait ' +idCombLie +' qui est ' +newRel[1])
               newRelations.push(newRel)
               thisSubFlow()
             } else if (idCombLie) {
@@ -206,30 +257,30 @@ common.flushPendingRelations = function (next) {
               common.getRessource(idCombLie, function (ressource) {
                 if (ressource && ressource.oid) {
                   newRel[1] = ressource.oid
-                  log(idCombLie + ' est ' + newRel[1])
+                  if (opt.logRelations) log(idCombLie +' est ' +newRel[1])
                   newRelations.push(newRel)
                   thisSubFlow()
                 } else {
-                  errors[idCombLie] = 'une relation pointait vers ' + idCombLie + " qui n'existe pas"
-                  log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
+                  addError(idCombLie, 'une relation pointait vers ' + idCombLie + " qui n'existe pas")
+                  if (opt.logRelations) log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
                   thisSubFlow()
                 }
               })
             } else {
-              errors[idComb] += (errors[idComb] ? '\n' : '') + " on avait une relation " + newRel + " vers rien"
+              addError(idComb, " on avait une relation " + newRel + " vers rien")
             }
           }).seq(function () {
-            log('on va merger dans ' + ressource.oid, newRelations)
+            if (opt.logRelations) log('on va merger dans ' + ressource.oid, newRelations)
             var mergedRelations = ressource.relations || []
             tools.merge(mergedRelations, newRelations)
             common.mergeRessource({oid: ressource.oid, relations: mergedRelations}, this)
           }).seq(function () {
             // fin de subFlow
-            log('fin relations de ' + idComb)
+            if (opt.logRelations) log('fin relations de ' +idComb)
             thisFlow()
           }).catch(function (error) {
-            log('error dans le traitement des relations de ' + idComb, error.stack || error)
-            errors[idComb] = error
+            log('error dans le traitement des relations de ' +idComb, error.stack || error)
+            addError(idComb, error.toString())
             thisFlow()
           })
           // fin du subFlow
@@ -258,6 +309,15 @@ common.flushPendingRelations = function (next) {
  */
 common.getElapsed = function (start) {
   return (new Date()).getTime() -start
+}
+
+/**
+ * Retourne l'id combiné origine/idOrigine
+ * @param {Ressource} ressource
+ * @returns {string}
+ */
+common.getIdComb = function (ressource) {
+  return ressource.origine +'/' +ressource.idOrigine
 }
 
 /**
@@ -296,22 +356,21 @@ common.getRessource = function (origine, idOrigine, next) {
     //log("on récupère l'erreur", error)
     //log("et la ressource", ressource)
     if (error) {
-      errors[idComb] = error.toString()
+      addError(idComb, error.toString())
       next(null)
     } else if (ressource.error) {
-      errors[idComb] = ressource.error
+      addError(idComb, ressource.error)
       next(null)
     } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
-      errors[idComb] = "ressource " + idComb + " incohérente : " +
+      addError(idComb, "ressource " + idComb + " incohérente : " +
                        JSON.stringify(origine) + '/' + JSON.stringify(idOrigine) +
-                       '\n' + JSON.stringify(ressource)
+                       '\n' + JSON.stringify(ressource))
       next(null)
     } else {
       next(ressource)
     }
   })
 }
-
 
 /**
  * Récupère une ref via l'api
@@ -330,18 +389,19 @@ common.getRef = function (origine, idOrigine, next) {
   }
   //log('dans getRessource ' +idComb)
   request.get(options, function (error, response, ressource) {
+    var idComb = common.getIdComb(ressource)
     //log("on récupère l'erreur", error)
     //log("et la ressource", ressource)
     if (error) {
-      errors[idComb] = error.toString()
+      addError(idComb, error.toString())
       next(null)
     } else if (ressource.error) {
-      errors[idComb] = ressource.error
+      addError(idComb, ressource.error)
       next(null)
     } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
-      errors[idComb] = "ressource " + idComb + " incohérente : " +
+      addError(idComb, "ressource " + idComb + " incohérente : " +
                        JSON.stringify(origine) + '/' + JSON.stringify(idOrigine) +
-                       '\n' + JSON.stringify(ressource)
+                       '\n' + JSON.stringify(ressource))
       next(null)
     } else {
       next(ressource)
@@ -380,13 +440,13 @@ common.mergeRessource = function (ressourcePartielle, next) {
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (body && body.oid) {
-      idsOk.push(body.oid)
-      if (logOk) log('màj ' + body.oid + ' ok')
+      idsRec.inc(body.oid)
+      if (opt.logApiCalls) log('màj ' + body.oid + ' ok')
     } else {
       var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
       var idErr = ressourcePartielle.oid || 0
-      idsFailed.push(idErr)
-      errors[idErr] = (errors[idErr] ? errors[idErr] + '\n' : '') + errStr
+      idsFailed.inc(idErr)
+      addError(idErr, errStr)
       log('pb au retour du merge ' + errStr, ressourcePartielle)
     }
     next()
@@ -398,7 +458,8 @@ common.mergeRessource = function (ressourcePartielle, next) {
  * @param ressource
  */
 common.pushRessource = function (ressource) {
-  if (nbLaunched < maxLaunched) addRessource(ressource, common.checkEnd)
+  idsToRec.inc(common.getIdComb(ressource))
+  if (nbLaunched < opt.maxLaunched) addRessource(ressource, common.checkEnd)
   else waitingRessource.push(ressource)
 }
 
@@ -410,17 +471,13 @@ common.setAfterAllCb = function (cb) {
   afterAllCb = cb
 }
 
+
 /**
- * Affecte les options (propriétés à choisir parmi timeout, maxLaunched, logOk)
+ * Affecte les options (propriétés à choisir parmi timeout, maxLaunched, logApiCalls, log)
  * @param options
  */
 common.setOptions = function (options) {
-  if (options.timeout) {
-    if (options.timeout > 50 && timeout < 60000) timeout = options.timeout
-    else log("Erreur : le timeout doit être donné en ms")
-  }
-  if (options.maxLaunched) maxLaunched = options.maxLaunched
-  if (options.hasOwnProperty('logOk')) logOk = !!options.logOk
+  tools.merge(opt, options)
 }
 
 module.exports = common

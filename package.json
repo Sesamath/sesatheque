@@ -13,8 +13,7 @@
     "mysql": "^2.6.0",
     "request": "^2.39.0",
     "seq": "git://github.com/yoran-brault/node-seq.git",
-    "sesasso-bibli": "git+ssh://git@src.sesamath.net:npm-sesasso-bibli",
-    "xml2js": "^0.4.4"
+    "sesasso-bibli": "git+ssh://git@src.sesamath.net:npm-sesasso-bibli"
   },
   "devDependencies": {
     "elementtree": "^0.1.6",
@@ -25,9 +24,11 @@
     "js-beautify": "^1.5.1",
     "jsdoc": "^3.3.0-beta1",
     "jshint-stylish": "^0.3.0",
-    "knex": "^0.5.14",
+    "knex": "^0.7.6",
     "merge-stream": "^0.1.1",
-    "through2": "^0.4.2"
+    "mocha": "^2.2.4",
+    "through2": "^0.4.2",
+    "xml2js": "^0.4.4"
   },
   "jshintConfig": {
     "node": true,
