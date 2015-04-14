@@ -40,7 +40,8 @@ var opt = {
   /** pour logguer les relations en console */
   logRelations: false,
   /** pour loguer les résultat des appels de l'api */
-  logApiCalls : false
+  logApiCalls : false,
+  logProcess : false
 }
 
 /**
@@ -101,26 +102,26 @@ function addRessource (ressource, next) {
     json   : true,
     body   : ressource
   }
-  var idMix = ressource.origine + '/' + ressource.idOrigine
+  var idComb = common.getIdComb(ressource)
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (error || body.error || !body.oid) {
       // KO
-      idsFailed.inc(idMix)
+      idsFailed.inc(idComb)
       // le msg d'erreur
       var errorString
       if (error) errorString = error.toString()
       else if (body.error) errorString = body.error
       else errorString = tools.stringify(body)
-      addError(idMix, errorString)
-      if (opt.logApiCalls) log(idMix + ' KO : ' + errorString)
+      addError(idComb, errorString)
+      if (opt.logApiCalls) log(idComb + ' KO : ' + errorString)
     } else {
       // OK
-      idsToRec.dec(idMix)
-      idsRec.inc(idMix)
+      idsToRec.dec(idComb)
+      idsRec.inc(idComb)
       // on note la correspondance pour éviter de retourner le chercher juste pour ça
-      oids[idMix] = body.oid
-      if (opt.logApiCalls) log(idMix + ' ok')
+      oids[idComb] = body.oid
+      if (opt.logApiCalls) log(idComb + ' ok')
     }
     next()
   })
@@ -203,7 +204,7 @@ common.displayResult = function (next) {
   log(idsRec.length +' ressources enregistrées en ' +idsRec.total() +' appels')
   log('sur ' +idsToRec.length +' à enregistrer (reste ' +idsToRec.total() +' appels à faire)')
   if (errors.length) {
-    var logfile = __dirname + '/../logs/import.error.log'
+    var logfile = __dirname + '/../../logs/import.error.log'
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
     log(idsFailed.length +' ressources avec erreurs :')
@@ -479,7 +480,9 @@ common.mergeRessource = function (ressourcePartielle, next) {
  * @param ressource
  */
 common.pushRessource = function (ressource) {
-  idsToRec.inc(common.getIdComb(ressource))
+  var idComb = common.getIdComb(ressource)
+  if (opt.logProcess) log('push ' +idComb)
+  idsToRec.inc(idComb)
   if (nbLaunched < opt.maxLaunched) addRessource(ressource, common.checkEnd)
   else waitingRessource.push(ressource)
 }

@@ -1,0 +1,3841 @@
+<?xml version="1.0" standalone="yes"?>
+<labomep_profil_suisse>
+    <d n="9e Harmos">
+        <d n="Nombres et op&#xE9;rations">
+            <d n="Nombres naturels et d&#xE9;cimaux">
+                <d n="R&#xE9;activer certaines connaissances">
+                    <d n="Ecriture des entiers">
+                        <em i="208"/>
+                        <em i="4934"/>
+                        <em i="4936"/>
+                        <em i="209"/>
+                        <em i="210"/>
+                        <em i="212"/>
+                        <em i="213"/>
+                    </d>
+                    <d n="Comparaisons">
+                        <em i="228"/>
+                        <em i="229"/>
+                        <em i="230"/>
+                        <em i="231"/>
+                        <em i="232"/>
+                        <em i="233"/>
+                        <em i="234"/>
+                        <em i="235"/>
+                    </d>
+                    <d n="Ecriture des d&#xE9;cimaux">
+                        <em i="215"/>
+                        <em i="216"/>
+                        <em i="217"/>
+                        <em i="218"/>
+                        <em i="219"/>
+                        <em i="220"/>
+                        <em i="223"/>
+                    </d>
+                    <d n="Rep&#xE9;rage sur un axe">
+                        <em i="236"/>
+                        <em i="237"/>
+                        <em i="238"/>
+                        <em i="239"/>
+                        <em i="240"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="241"/>
+                        <em i="242"/>
+                    </d>
+                </d>
+                <d n="Entiers et Op&#xE9;rations">
+                    <d n="Calcul Mental">
+                        <em i="243"/>
+                        <em i="244"/>
+                        <em i="245"/>
+                        <em i="246"/>
+                        <em i="247"/>
+                        <em i="248"/>
+                        <em i="249"/>
+                        <em i="250"/>
+                        <em i="251"/>
+                        <em i="252"/>
+                        <em i="253"/>
+                        <em i="254"/>
+                        <em i="255"/>
+                        <em i="256"/>
+                        <em i="257"/>
+                    </d>
+                    <d n="+, - , x et les Entiers">
+                        <em i="258"/>
+                        <em i="259"/>
+                        <em i="260"/>
+                        <em i="261"/>
+                        <em i="262"/>
+                        <em i="263"/>
+                    </d>
+                    <d n="Op&#xE9;rations &#xE0; trous">
+                        <em i="264"/>
+                        <em i="265"/>
+                        <em i="266"/>
+                        <em i="267"/>
+                        <em i="268"/>
+                    </d>
+                    <d n="Division Euclidienne">
+                        <em i="269"/>
+                        <em i="270"/>
+                        <em i="271"/>
+                        <em i="272"/>
+                        <em i="273"/>
+                        <em i="274"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="280"/>
+                    </d>
+                </d>
+                <d n="priorit&#xE9;s">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="561"/>
+                        <em i="562"/>
+                        <em i="563"/>
+                        <em i="564"/>
+                    </d>
+                    <d n="Conna&#xEE;tre les priorit&#xE9;s op&#xE9;ratoires">
+                        <em i="3991"/>
+                        <em i="3992"/>
+                        <em i="4023"/>
+                        <em i="4025"/>
+                        <em i="4030"/>
+                        <em i="4034"/>
+                        <em i="4039"/>
+                        <em i="4040"/>
+                    </d>
+                    <d n="&#xC9;crire une expression correspondant &#xE0; une succession donn&#xE9;e d'op&#xE9;rations">
+                        <em i="4052"/>
+                        <em i="4053"/>
+                        <em i="4054"/>
+                        <em i="4056"/>
+                        <em i="4057"/>
+                        <em i="4059"/>
+                        <em i="4060"/>
+                        <em i="4063"/>
+                        <em i="4064"/>
+                    </d>
+                    <d n="Priorit&#xE9;s op&#xE9;ratoires">
+                        <em i="565"/>
+                        <em i="566"/>
+                        <em i="567"/>
+                        <em i="568"/>
+                        <em i="569"/>
+                        <em i="570"/>
+                        <em i="572"/>
+                        <em i="573"/>
+                        <em i="574"/>
+                    </d>
+                    <d n="Distributivit&#xE9;">
+                        <em i="577"/>
+                        <em i="578"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="579"/>
+                        <em i="580"/>
+                        <em i="581"/>
+                        <em i="582"/>
+                        <em i="583"/>
+                    </d>
+                </d>
+                <d n="nombres premiers, ppmc et pgdc">
+                    <d n="Diviseurs et Multiples">
+                        <em i="275"/>
+                        <em i="276"/>
+                        <em i="277"/>
+                        <em i="278"/>
+                        <em i="279"/>
+                        <em i="4263"/>
+                        <em i="2866"/>
+                        <em i="2868"/>
+                    </d>
+                    <d n="pgdc">
+                        <em i="2869"/>
+                        <em i="2870"/>
+                        <em i="2871"/>
+                        <em i="2872"/>
+                        <em i="2873"/>
+                        <em i="2876"/>
+                        <em i="2882"/>
+                    </d>
+                    <em i="2881"/>
+                </d>
+                <d n="D&#xE9;cimaux et Op&#xE9;rations">
+                    <d n="Calcul Mental, vocabulaire">
+                        <em i="281"/>
+                        <em i="282"/>
+                        <em i="283"/>
+                        <em i="284"/>
+                        <em i="285"/>
+                        <em i="286"/>
+                        <em i="287"/>
+                        <em i="288"/>
+                        <em i="289"/>
+                        <em i="290"/>
+                    </d>
+                    <d n="+, -, x et les D&#xE9;cimaux">
+                        <em i="291"/>
+                        <em i="292"/>
+                        <em i="293"/>
+                        <em i="294"/>
+                        <em i="295"/>
+                    </d>
+                    <d n="Op&#xE9;rations &#xE0; trous">
+                        <em i="296"/>
+                        <em i="297"/>
+                    </d>
+                    <d n="Divisions et d&#xE9;cimaux">
+                        <em i="298"/>
+                        <em i="299"/>
+                        <em i="300"/>
+                    </d>
+                    <d n="Avec la calculatrice">
+                        <em i="301"/>
+                        <em i="302"/>
+                        <em i="303"/>
+                        <em i="304"/>
+                    </d>
+                    <d n="Probl&#xE8;mes">
+                        <em i="305"/>
+                        <em i="306"/>
+                        <em i="307"/>
+                        <em i="308"/>
+                        <em i="309"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="310"/>
+                        <em i="311"/>
+                        <em i="312"/>
+                        <em i="313"/>
+                        <em i="314"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Nombres relatifs">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="617"/>
+                    <em i="618"/>
+                    <em i="619"/>
+                    <em i="620"/>
+                    <em i="621"/>
+                    <em i="622"/>
+                    <em i="623"/>
+                </d>
+                <d n="Sur un axe gradu&#xE9;">
+                    <em i="624"/>
+                    <em i="625"/>
+                    <em i="4414"/>
+                    <em i="4415"/>
+                    <em i="627"/>
+                    <em i="628"/>
+                    <em i="629"/>
+                    <em i="630"/>
+                </d>
+                <d n="Dans un rep&#xE8;re">
+                    <em i="631"/>
+                    <em i="632"/>
+                    <em i="4424"/>
+                    <em i="634"/>
+                    <em i="635"/>
+                    <em i="4426"/>
+                    <em i="637"/>
+                    <em i="638"/>
+                    <em i="639"/>
+                </d>
+                <d n="Comparer">
+                    <em i="640"/>
+                    <em i="641"/>
+                    <em i="642"/>
+                    <em i="643"/>
+                    <em i="644"/>
+                    <em i="645"/>
+                    <em i="646"/>
+                </d>
+                <d n="Ajouter, soustraire">
+                    <em i="647"/>
+                    <em i="648"/>
+                    <em i="4481"/>
+                    <em i="649"/>
+                    <em i="650"/>
+                    <em i="651"/>
+                    <em i="652"/>
+                    <em i="653"/>
+                    <em i="4482"/>
+                    <em i="654"/>
+                </d>
+                <d n="Somme alg&#xE9;brique">
+                    <em i="655"/>
+                    <em i="656"/>
+                    <em i="657"/>
+                    <em i="658"/>
+                    <em i="659"/>
+                    <em i="660"/>
+                    <em i="661"/>
+                </d>
+                <d n="Distance sur une droite">
+                    <em i="4490"/>
+                    <em i="663"/>
+                    <em i="664"/>
+                </d>
+                <d n="Multiplication et division de nombres relatifs">
+                    <d n="Multiplication">
+                        <em i="2422"/>
+                        <em i="2423"/>
+                        <em i="2424"/>
+                        <em i="2425"/>
+                        <em i="2426"/>
+                        <em i="2427"/>
+                        <em i="2428"/>
+                        <em i="2429"/>
+                    </d>
+                    <d n="Division">
+                        <em i="2430"/>
+                        <em i="2431"/>
+                        <em i="2432"/>
+                        <em i="2433"/>
+                        <em i="2434"/>
+                        <em i="2435"/>
+                        <em i="2436"/>
+                        <em i="2437"/>
+                    </d>
+                    <d n="Calculs">
+                        <em i="2438"/>
+                        <em i="2439"/>
+                        <em i="2440"/>
+                        <em i="2441"/>
+                        <em i="2442"/>
+                        <em i="2443"/>
+                        <em i="2444"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="2445"/>
+                        <em i="2446"/>
+                        <em i="2447"/>
+                        <em i="2448"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Nombres rationnels">
+                <d n="Ecriture Fractionnaire">
+                    <em i="224"/>
+                    <em i="225"/>
+                    <em i="226"/>
+                    <em i="227"/>
+                </d>
+                <d n="Fractions et parts">
+                    <em i="315"/>
+                    <em i="316"/>
+                    <em i="317"/>
+                    <em i="318"/>
+                    <em i="319"/>
+                    <em i="320"/>
+                    <em i="321"/>
+                    <em i="322"/>
+                    <em i="590"/>
+                </d>
+                <d n="Amplification, simplifications">
+                    <em i="4264"/>
+                    <em i="4265"/>
+                    <em i="4267"/>
+                    <em i="4268"/>
+                    <em i="324"/>
+                    <em i="323"/>
+                    <em i="325"/>
+                    <em i="326"/>
+                    <em i="329"/>
+                    <em i="330"/>
+                </d>
+                <d n="Fraction d'un nombre">
+                    <em i="4262"/>
+                    <em i="332"/>
+                    <em i="333"/>
+                    <em i="334"/>
+                    <em i="335"/>
+                    <em i="336"/>
+                    <em i="337"/>
+                </d>
+                <d n="Fractions et pourcentages">
+                    <em i="338"/>
+                    <em i="339"/>
+                </d>
+                <d n="Comparer">
+                    <em i="591"/>
+                    <em i="592"/>
+                    <em i="4271"/>
+                    <em i="4269"/>
+                    <em i="4270"/>
+                    <em i="4277"/>
+                    <em i="596"/>
+                </d>
+                <d n="Ajouter, soustraire">
+                    <em i="597"/>
+                    <em i="598"/>
+                    <em i="599"/>
+                    <em i="600"/>
+                    <em i="601"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="341"/>
+                    <em i="342"/>
+                    <em i="344"/>
+                    <em i="345"/>
+                </d>
+            </d>
+            <d n="Nombres r&#xE9;els">
+                <d n="Prendre un bon d&#xE9;part"/>
+                <d n="Puissances">
+                    <em i="2504"/>
+                    <em i="2505"/>
+                    <em i="2508"/>
+                    <em i="2509"/>
+                </d>
+            </d>
+        </d>
+        <d n="Fonctions et alg&#xE8;bre">
+            <d n="Fonctions et diagrammes">
+                <d n="Lecture et repr&#xE9;sentation">
+                    <d n="Lire des donn&#xE9;es">
+                        <em i="364"/>
+                        <em i="365"/>
+                        <em i="366"/>
+                    </d>
+                    <em i="370"/>
+                    <em i="743"/>
+                    <em i="745"/>
+                </d>
+                <d n="Proportionnalit&#xE9;">
+                    <d n="R&#xE9;activer">
+                        <em i="346"/>
+                        <em i="347"/>
+                        <em i="348"/>
+                        <em i="349"/>
+                        <em i="350"/>
+                        <em i="351"/>
+                    </d>
+                    <d n="Situations de proportionnalit&#xE9;">
+                        <em i="352"/>
+                        <em i="353"/>
+                        <em i="355"/>
+                        <em i="706"/>
+                        <em i="707"/>
+                        <em i="708"/>
+                        <em i="709"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="711"/>
+                        <em i="362"/>
+                        <em i="710"/>
+                        <em i="363"/>
+                        <em i="712"/>
+                        <em i="715"/>
+                        <em i="716"/>
+                    </d>
+                </d>
+                <d n="Diagrammes">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="734"/>
+                        <em i="735"/>
+                        <em i="736"/>
+                        <em i="737"/>
+                        <em i="738"/>
+                        <em i="739"/>
+                        <em i="740"/>
+                    </d>
+                    <d n="Lecture">
+                        <em i="741"/>
+                        <em i="742"/>
+                        <em i="743"/>
+                        <em i="744"/>
+                    </d>
+                    <d n="Construire, compl&#xE9;ter">
+                        <em i="367"/>
+                        <em i="368"/>
+                    </d>
+                    <d n="Repr&#xE9;sentation">
+                        <em i="745"/>
+                        <em i="746"/>
+                        <em i="747"/>
+                    </d>
+                    <d n="Interpr&#xE9;tation">
+                        <em i="750"/>
+                        <em i="751"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="752"/>
+                        <em i="753"/>
+                        <em i="754"/>
+                        <em i="755"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Calcul litt&#xE9;ral">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="668"/>
+                    <em i="669"/>
+                    <em i="670"/>
+                    <em i="671"/>
+                    <em i="672"/>
+                    <em i="673"/>
+                    <em i="674"/>
+                </d>
+                <d n="Expression litt&#xE9;rale">
+                    <em i="675"/>
+                    <em i="676"/>
+                    <em i="677"/>
+                    <em i="678"/>
+                    <em i="679"/>
+                    <em i="680"/>
+                    <em i="681"/>
+                </d>
+            </d>
+        </d>
+        <d n="Espace">
+            <d n="Figures g&#xE9;om&#xE9;triques planes">
+                <d n="El&#xE9;ments de G&#xE9;om&#xE9;trie">
+                    <d n="Points">
+                        <em i="12"/>
+                        <em i="13"/>
+                        <em i="14"/>
+                        <em i="15"/>
+                        <em i="16"/>
+                        <em i="17"/>
+                    </d>
+                    <d n="Droites, segments">
+                        <em i="18"/>
+                        <em i="19"/>
+                        <em i="20"/>
+                        <em i="21"/>
+                        <em i="22"/>
+                        <em i="23"/>
+                        <em i="24"/>
+                        <em i="25"/>
+                        <em i="26"/>
+                    </d>
+                    <d n="Notion d'appartenance">
+                        <em i="27"/>
+                        <em i="28"/>
+                        <em i="29"/>
+                        <em i="30"/>
+                    </d>
+                    <d n="Cercles">
+                        <em i="31"/>
+                        <em i="32"/>
+                        <em i="33"/>
+                        <em i="34"/>
+                        <em i="35"/>
+                        <em i="36"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="37"/>
+                        <em i="38"/>
+                        <em i="39"/>
+                        <em i="40"/>
+                    </d>
+                </d>
+                <d n="Reconna&#xEE;tre, nommer, construire des droites">
+                    <d n="Vocabulaire et codage">
+                        <em i="41"/>
+                        <em i="42"/>
+                        <em i="43"/>
+                        <em i="44"/>
+                        <em i="45"/>
+                        <em i="46"/>
+                        <em i="47"/>
+                        <em i="48"/>
+                        <em i="49"/>
+                        <em i="50"/>
+                    </d>
+                    <d n="Construction">
+                        <em i="51"/>
+                        <em i="52"/>
+                        <em i="53"/>
+                        <em i="54"/>
+                        <em i="55"/>
+                    </d>
+                    <d n="Les 3 propri&#xE9;t&#xE9;s">
+                        <em i="56"/>
+                        <em i="57"/>
+                        <em i="58"/>
+                    </d>
+                    <d n="Petites d&#xE9;monstrations">
+                        <em i="59"/>
+                        <em i="60"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="61"/>
+                        <em i="62"/>
+                    </d>
+                </d>
+                <d n="Reconna&#xEE;tre, nommer, noter et construire des angles">
+                    <d n="Nommer et reconna&#xEE;tre">
+                        <em i="98"/>
+                        <em i="99"/>
+                        <em i="100"/>
+                        <em i="101"/>
+                        <em i="102"/>
+                        <em i="103"/>
+                        <em i="104"/>
+                        <em i="105"/>
+                        <em i="106"/>
+                        <em i="107"/>
+                    </d>
+                    <d n="Vocabulaire">
+                        <em i="520"/>
+                        <em i="521"/>
+                        <em i="522"/>
+                        <em i="523"/>
+                        <em i="524"/>
+                    </d>
+                    <d n="Propri&#xE9;t&#xE9;s">
+                        <em i="525"/>
+                        <em i="526"/>
+                        <em i="527"/>
+                        <em i="528"/>
+                        <em i="529"/>
+                    </d>
+                    <d n="Mesure d'angle">
+                        <em i="108"/>
+                        <em i="109"/>
+                        <em i="110"/>
+                        <em i="111"/>
+                        <em i="112"/>
+                        <em i="113"/>
+                        <em i="114"/>
+                        <em i="115"/>
+                    </d>
+                    <d n="Angles aigus, obtus">
+                        <em i="116"/>
+                        <em i="117"/>
+                        <em i="118"/>
+                        <em i="119"/>
+                        <em i="120"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="121"/>
+                        <em i="530"/>
+                        <em i="531"/>
+                        <em i="532"/>
+                        <em i="533"/>
+                    </d>
+                </d>
+                <d n="Reconna&#xEE;tre, nommer, d&#xE9;crire et construire des triangles">
+                    <d n="(T) Vocabulaire">
+                        <em i="63"/>
+                        <em i="64"/>
+                        <em i="65"/>
+                        <em i="66"/>
+                    </d>
+                    <d n="Vocabulaire, d&#xE9;finitions">
+                        <em i="410"/>
+                        <em i="411"/>
+                        <em i="412"/>
+                    </d>
+                    <d n="(T) Figures, codage">
+                        <em i="74"/>
+                        <em i="75"/>
+                        <em i="76"/>
+                        <em i="77"/>
+                    </d>
+                    <d n="(T) Constructions">
+                        <em i="84"/>
+                        <em i="85"/>
+                        <em i="86"/>
+                        <em i="87"/>
+                        <em i="97"/>
+                    </d>
+                    <d n="Constructions">
+                        <em i="422"/>
+                        <em i="423"/>
+                        <em i="424"/>
+                        <em i="425"/>
+                        <em i="426"/>
+                        <em i="427"/>
+                    </d>
+                    <d n="Droites remarquables">
+                        <em i="428"/>
+                        <em i="429"/>
+                        <em i="430"/>
+                        <em i="431"/>
+                        <em i="432"/>
+                        <em i="433"/>
+                        <em i="434"/>
+                    </d>
+                    <d n="In&#xE9;galit&#xE9; triangulaire">
+                        <em i="417"/>
+                        <em i="418"/>
+                        <em i="419"/>
+                        <em i="420"/>
+                        <em i="421"/>
+                    </d>
+                    <d n="Somme des angles">
+                        <em i="413"/>
+                        <em i="414"/>
+                        <em i="415"/>
+                        <em i="416"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="435"/>
+                        <em i="436"/>
+                        <em i="437"/>
+                        <em i="438"/>
+                    </d>
+                </d>
+                <d n="Reconna&#xEE;tre, nommer, d&#xE9;crire et construire des quadrilat&#xE8;res">
+                    <d n="(Q) Vocabulaire">
+                        <em i="67"/>
+                        <em i="68"/>
+                        <em i="69"/>
+                        <em i="70"/>
+                        <em i="71"/>
+                        <em i="72"/>
+                        <em i="73"/>
+                    </d>
+                    <d n="(Q) Figures, codage">
+                        <em i="78"/>
+                        <em i="79"/>
+                        <em i="80"/>
+                        <em i="81"/>
+                        <em i="82"/>
+                        <em i="83"/>
+                    </d>
+                    <d n="(Q) Constructions">
+                        <em i="88"/>
+                        <em i="89"/>
+                        <em i="90"/>
+                        <em i="91"/>
+                        <em i="92"/>
+                        <em i="93"/>
+                        <em i="94"/>
+                        <em i="95"/>
+                        <em i="96"/>
+                    </d>
+                    <d n="Parall&#xE9;logrammes">
+                        <d n="Prendre un bon d&#xE9;part">
+                            <em i="439"/>
+                            <em i="440"/>
+                            <em i="441"/>
+                            <em i="442"/>
+                            <em i="443"/>
+                        </d>
+                        <d n="Propri&#xE9;t&#xE9;s (quelconques)">
+                            <em i="444"/>
+                            <em i="445"/>
+                            <em i="446"/>
+                            <em i="447"/>
+                            <em i="448"/>
+                        </d>
+                        <d n="Propri&#xE9;t&#xE9;s (particuliers)">
+                            <em i="449"/>
+                            <em i="450"/>
+                            <em i="451"/>
+                            <em i="452"/>
+                            <em i="453"/>
+                            <em i="454"/>
+                            <em i="455"/>
+                            <em i="456"/>
+                        </d>
+                        <d n="Constructions (quelconques)">
+                            <em i="457"/>
+                            <em i="458"/>
+                            <em i="459"/>
+                            <em i="460"/>
+                            <em i="461"/>
+                            <em i="462"/>
+                            <em i="463"/>
+                            <em i="465"/>
+                        </d>
+                        <d n="Constructions (particuliers)">
+                            <em i="466"/>
+                            <em i="467"/>
+                            <em i="468"/>
+                            <em i="469"/>
+                        </d>
+                        <d n="D&#xE9;monstrations (quelconques)">
+                            <em i="470"/>
+                            <em i="471"/>
+                            <em i="472"/>
+                            <em i="473"/>
+                        </d>
+                        <d n="D&#xE9;monstrations (particuliers)">
+                            <em i="474"/>
+                            <em i="475"/>
+                            <em i="476"/>
+                            <em i="477"/>
+                            <em i="478"/>
+                        </d>
+                        <d n="Pour aller plus loin ...">
+                            <em i="479"/>
+                            <em i="480"/>
+                            <em i="481"/>
+                        </d>
+                    </d>
+                </d>
+                <d n="Axes de sym&#xE9;trie">
+                    <d n="Figures quelconques">
+                        <em i="145"/>
+                        <em i="146"/>
+                        <em i="147"/>
+                        <em i="148"/>
+                    </d>
+                    <d n="M&#xE9;diatrice d'un segment">
+                        <em i="149"/>
+                        <em i="150"/>
+                        <em i="151"/>
+                        <em i="152"/>
+                        <em i="153"/>
+                        <em i="154"/>
+                        <em i="155"/>
+                    </d>
+                    <d n="Bissectrice d'un angle">
+                        <em i="156"/>
+                        <em i="157"/>
+                        <em i="158"/>
+                    </d>
+                    <d n="Figures particuli&#xE8;res">
+                        <em i="159"/>
+                        <em i="160"/>
+                        <em i="161"/>
+                        <em i="162"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="163"/>
+                        <em i="164"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Repr&#xE9;sentations de solides">
+                <d n="Vocabulaire">
+                    <em i="165"/>
+                    <em i="166"/>
+                    <em i="167"/>
+                    <em i="536"/>
+                    <em i="538"/>
+                    <em i="539"/>
+                </d>
+                <d n="Perspectives et d&#xE9;veloppements">
+                    <em i="168"/>
+                    <em i="169"/>
+                    <em i="170"/>
+                    <d n="Patrons du pav&#xE9; droit">
+                        <em i="171"/>
+                        <em i="172"/>
+                        <em i="173"/>
+                        <em i="174"/>
+                        <em i="175"/>
+                    </d>
+                    <em i="540"/>
+                    <em i="541"/>
+                    <em i="542"/>
+                    <em i="544"/>
+                </d>
+            </d>
+            <d n="Transformations g&#xE9;om&#xE9;triques">
+                <d n="Sym&#xE9;trie Axiale">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="122"/>
+                        <em i="123"/>
+                        <em i="124"/>
+                        <em i="125"/>
+                        <em i="126"/>
+                        <em i="127"/>
+                        <em i="128"/>
+                        <em i="129"/>
+                    </d>
+                    <d n="Construction de points">
+                        <em i="130"/>
+                        <em i="131"/>
+                        <em i="132"/>
+                        <em i="133"/>
+                    </d>
+                    <d n="Construction de figures">
+                        <em i="134"/>
+                        <em i="135"/>
+                        <em i="136"/>
+                        <em i="137"/>
+                    </d>
+                    <d n="Propri&#xE9;t&#xE9;s">
+                        <em i="138"/>
+                        <em i="139"/>
+                        <em i="140"/>
+                        <em i="141"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="142"/>
+                        <em i="143"/>
+                        <em i="144"/>
+                    </d>
+                </d>
+                <d n="Sym&#xE9;trie centrale">
+                    <d n="Utiliser la d&#xE9;finition de la sym&#xE9;trie centrale">
+                        <em i="4200"/>
+                        <em i="4201"/>
+                        <em i="4232"/>
+                        <em i="4233"/>
+                        <em i="4234"/>
+                        <em i="4235"/>
+                        <em i="4236"/>
+                        <em i="4237"/>
+                    </d>
+                    <d n="Associer la sym&#xE9;trie centrale &#xE0; la notion de demi-tour (constructions sur quadrillage ou calque)">
+                        <em i="4238"/>
+                        <em i="4239"/>
+                        <em i="4240"/>
+                        <em i="4241"/>
+                        <em i="4242"/>
+                        <em i="4243"/>
+                        <em i="4244"/>
+                        <em i="4245"/>
+                    </d>
+                    <d n="Construire l'image d'un point, d'un segment, d'une droite, d'un cercle, d'une demi-droite par une sym&#xE9;trie centrale">
+                        <em i="4246"/>
+                        <em i="4247"/>
+                        <em i="4248"/>
+                        <em i="4249"/>
+                        <em i="4250"/>
+                        <em i="4251"/>
+                    </d>
+                    <d n="Conna&#xEE;tre et utiliser les propri&#xE9;t&#xE9;s de conservation de la sym&#xE9;trie centrale">
+                        <em i="4252"/>
+                        <em i="4253"/>
+                        <em i="4254"/>
+                        <em i="4255"/>
+                        <em i="4256"/>
+                    </d>
+                    <d n="Trouver le centre de sym&#xE9;trie &#xE9;ventuel d'une figure">
+                        <em i="4257"/>
+                        <em i="4258"/>
+                        <em i="4259"/>
+                    </d>
+                    <d n="Construire ou compl&#xE9;ter la figure sym&#xE9;trique par une sym&#xE9;trie centrale, ou une figure poss&#xE9;dant un centre de sym&#xE9;trie">
+                        <em i="4260"/>
+                        <em i="4261"/>
+                    </d>
+                    <!--
+ANCIENS EXOS<d n="Prendre un bon départ">
+<em i="382"/>
+<em i="383"/>
+<em i="384"/>
+<em i="385"/>
+<em i="386"/>
+<em i="387"/>
+</d>
+<d n="Constructions avec trame">
+<em i="388"/>
+<em i="389"/>
+<em i="390"/>
+<em i="391"/>
+<em i="392"/>
+</d>
+<d n="Constructions">
+<em i="393"/>
+<em i="394"/>
+<em i="395"/>
+<em i="396"/>
+<em i="397"/>
+<em i="398"/>
+</d>
+<d n="Propriétes">
+<em i="399"/>
+<em i="400"/>
+<em i="401"/>
+</d>
+<d n="Centre de symétrie">
+<em i="402"/>
+<em i="403"/>
+<em i="404"/>
+<em i="405"/>
+</d>
+<d n="Pour aller plus loin ...">
+<em i="406"/>
+<em i="407"/>
+<em i="408"/>
+<em i="409"/>
+</d>-->
+                </d>
+            </d>
+        </d>
+        <d n="Grandeurs et mesures">
+            <d n="Lignes et surfaces">
+                <d n="P&#xE9;rim&#xE8;tres et aires">
+                    <d n="P&#xE9;rim&#xE8;tres par comptage">
+                        <em i="187"/>
+                        <em i="188"/>
+                        <em i="189"/>
+                        <em i="190"/>
+                    </d>
+                    <d n="Aires par comptage">
+                        <em i="182"/>
+                        <em i="183"/>
+                        <em i="184"/>
+                        <em i="185"/>
+                        <em i="186"/>
+                    </d>
+                </d>
+                <d n="Calculs de p&#xE9;rim&#xE8;tres">
+                    <em i="197"/>
+                </d>
+                <d n="Calculs d'aires">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="484"/>
+                        <em i="485"/>
+                    </d>
+                    <d n="Formules d'aires">
+                        <em i="486"/>
+                        <em i="487"/>
+                        <em i="488"/>
+                    </d>
+                    <d n="Aires de triangles">
+                        <em i="490"/>
+                        <em i="491"/>
+                        <em i="492"/>
+                        <em i="493"/>
+                        <em i="494"/>
+                        <em i="495"/>
+                        <em i="496"/>
+                    </d>
+                    <d n="Aires de quadrilat&#xE8;res">
+                        <em i="497"/>
+                        <em i="498"/>
+                        <em i="499"/>
+                        <em i="500"/>
+                        <em i="501"/>
+                        <em i="502"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="507"/>
+                        <em i="510"/>
+                        <em i="511"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Solides">
+                <d n="Volumes">
+                    <em i="176"/>
+                    <em i="177"/>
+                    <em i="181"/>
+                    <em i="552"/>
+                    <em i="553"/>
+                    <em i="554"/>
+                    <em i="559"/>
+                    <em i="560"/>
+                </d>
+                <d n="Aires lat&#xE9;rales">
+                    <em i="547"/>
+                    <em i="548"/>
+                    <em i="549"/>
+                    <em i="555"/>
+                </d>
+            </d>
+            <d n="Transformation d'unit&#xE9;s">
+                <em i="200"/>
+                <em i="201"/>
+                <em i="195"/>
+                <em i="196"/>
+                <em i="178"/>
+                <em i="534"/>
+            </d>
+        </d>
+    </d>
+    <d n="10e Harmos">
+        <d n="Nombres et op&#xE9;rations">
+            <d n="Nombres naturels et d&#xE9;cimaux">
+                <d n="Nombres premiers, ppmc et pgdc">
+                    <em i="275"/>
+                    <em i="276"/>
+                    <em i="277"/>
+                    <em i="278"/>
+                    <em i="279"/>
+                    <em i="2866"/>
+                    <em i="2867"/>
+                    <em i="2868"/>
+                    <em i="2881"/>
+                    <d n="PGCD">
+                        <em i="2869"/>
+                        <em i="2870"/>
+                        <em i="2871"/>
+                        <em i="2872"/>
+                        <em i="2873"/>
+                        <em i="2875"/>
+                        <em i="2876"/>
+                        <em i="2882"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Nombres relatifs">
+                <d n="Addition et soustraction de nombres relatifs">
+                    <d n="Ajouter, soustraire">
+                        <em i="647"/>
+                        <em i="648"/>
+                        <em i="649"/>
+                        <em i="650"/>
+                        <em i="651"/>
+                        <em i="652"/>
+                        <em i="653"/>
+                        <em i="654"/>
+                    </d>
+                    <d n="Somme alg&#xE9;brique">
+                        <em i="655"/>
+                        <em i="656"/>
+                        <em i="657"/>
+                        <em i="658"/>
+                        <em i="659"/>
+                        <em i="660"/>
+                        <em i="661"/>
+                    </d>
+                    <d n="Distance sur une droite">
+                        <em i="662"/>
+                        <em i="663"/>
+                        <em i="664"/>
+                        <em i="665"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="666"/>
+                        <em i="667"/>
+                    </d>
+                </d>
+                <d n="Multiplication et division de nombres relatifs">
+                    <d n="Multiplication">
+                        <em i="2422"/>
+                        <em i="2423"/>
+                        <em i="2424"/>
+                        <em i="2425"/>
+                        <em i="2426"/>
+                        <em i="2427"/>
+                        <em i="2428"/>
+                        <em i="2429"/>
+                    </d>
+                    <d n="Division">
+                        <em i="2430"/>
+                        <em i="2431"/>
+                        <em i="2432"/>
+                        <em i="2433"/>
+                        <em i="2434"/>
+                        <em i="2435"/>
+                        <em i="2436"/>
+                        <em i="2437"/>
+                    </d>
+                    <d n="Calculs">
+                        <em i="2438"/>
+                        <em i="2439"/>
+                        <em i="2440"/>
+                        <em i="2441"/>
+                        <em i="2442"/>
+                        <em i="2443"/>
+                        <em i="2444"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="2445"/>
+                        <em i="2446"/>
+                        <em i="2447"/>
+                        <em i="2448"/>
+                    </d>
+                </d>
+                <d n="Encore quelques probl&#xE8;mes"/>
+            </d>
+            <d n="Nombres r&#xE9;els">
+                <d n="Fraction d'un nombre">
+                    <em i="331"/>
+                    <em i="332"/>
+                    <em i="333"/>
+                    <em i="334"/>
+                    <em i="335"/>
+                    <em i="336"/>
+                    <em i="337"/>
+                </d>
+                <d n="Fractions et pourcentages">
+                    <em i="338"/>
+                    <em i="339"/>
+                    <em i="340"/>
+                </d>
+                <d n="Addition et soustraction de fractions">
+                    <em i="597"/>
+                    <em i="598"/>
+                    <em i="599"/>
+                    <em i="615"/>
+                    <em i="600"/>
+                    <em i="601"/>
+                </d>
+                <d n="Multiplication et division de fractions">
+                    <d n="Produits">
+                        <em i="2477"/>
+                        <em i="2478"/>
+                        <em i="2479"/>
+                        <em i="2480"/>
+                        <em i="2481"/>
+                        <em i="2482"/>
+                        <em i="2483"/>
+                        <em i="3013"/>
+                        <em i="3014"/>
+                    </d>
+                    <d n="Quotients">
+                        <em i="2484"/>
+                        <em i="2485"/>
+                        <em i="2486"/>
+                        <em i="2487"/>
+                        <em i="2488"/>
+                        <em i="2489"/>
+                        <em i="2490"/>
+                        <em i="2491"/>
+                        <em i="2492"/>
+                    </d>
+                    <d n="Synth&#xE8;se et probl&#xE8;mes">
+                        <em i="2493"/>
+                        <em i="2494"/>
+                        <em i="2495"/>
+                        <em i="2496"/>
+                        <em i="2497"/>
+                        <em i="2498"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="2500"/>
+                        <em i="2502"/>
+                        <em i="2503"/>
+                    </d>
+                </d>
+                <d n="Puissances">
+                    <d n="Notation, calculs">
+                        <em i="2508"/>
+                        <em i="2509"/>
+                        <em i="2510"/>
+                        <em i="2511"/>
+                        <em i="2512"/>
+                        <em i="2513"/>
+                        <em i="2514"/>
+                        <em i="2515"/>
+                    </d>
+                    <d n="Calcul mental">
+                        <em i="2516"/>
+                        <em i="2517"/>
+                        <em i="2518"/>
+                        <em i="2519"/>
+                        <em i="2520"/>
+                        <em i="2521"/>
+                        <em i="2522"/>
+                    </d>
+                    <d n="Formules (d&#xE9;couverte)">
+                        <em i="2524"/>
+                        <em i="2525"/>
+                        <em i="2526"/>
+                        <em i="2527"/>
+                        <em i="2528"/>
+                        <em i="2529"/>
+                        <em i="2530"/>
+                    </d>
+                    <d n="Formules (application)">
+                        <em i="2531"/>
+                        <em i="2532"/>
+                        <em i="2533"/>
+                        <em i="2534"/>
+                        <em i="2535"/>
+                        <em i="2536"/>
+                        <em i="2537"/>
+                        <em i="2538"/>
+                        <em i="2539"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="2551"/>
+                        <em i="2552"/>
+                        <em i="2553"/>
+                        <em i="2554"/>
+                        <em i="2555"/>
+                    </d>
+                </d>
+                <d n="Racines">
+                    <em i="2922"/>
+                    <em i="2923"/>
+                    <em i="2924"/>
+                    <em i="2926"/>
+                </d>
+                <d n="Notation scientifique">
+                    <em i="2540"/>
+                    <em i="2541"/>
+                    <em i="2542"/>
+                    <em i="2543"/>
+                    <em i="2544"/>
+                    <em i="2545"/>
+                    <em i="2546"/>
+                    <em i="2547"/>
+                    <em i="2548"/>
+                    <em i="2549"/>
+                    <em i="2550"/>
+                    <em i="3012"/>
+                </d>
+            </d>
+            <d n="Probabilit&#xE9;">
+                <em i="3111"/>
+                <em i="3112"/>
+                <em i="3113"/>
+                <em i="3114"/>
+                <em i="4976"/>
+                <em i="4978"/>
+            </d>
+        </d>
+        <d n="Fonctions et alg&#xE8;bre">
+            <d n="Fonctions et diagrammes">
+                <d n="Notion de fonction">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="3051"/>
+                        <em i="3027"/>
+                        <em i="3030"/>
+                        <em i="3031"/>
+                        <em i="3032"/>
+                        <em i="3033"/>
+                    </d>
+                    <d n="Lectures graphiques">
+                        <em i="3034"/>
+                        <em i="3035"/>
+                        <em i="3036"/>
+                        <em i="3037"/>
+                        <em i="3038"/>
+                        <em i="3039"/>
+                        <em i="3330"/>
+                        <em i="3040"/>
+                    </d>
+                    <d n="Calculs">
+                        <em i="3041"/>
+                        <em i="3042"/>
+                        <em i="3043"/>
+                        <em i="3044"/>
+                        <em i="3088"/>
+                        <em i="3045"/>
+                        <em i="3046"/>
+                        <em i="3047"/>
+                        <em i="3041"/>
+                        <em i="3082"/>
+                    </d>
+                </d>
+                <d n="Courbe repr&#xE9;sentative et tableau de valeurs">
+                    <em i="3032"/>
+                    <em i="3033"/>
+                    <em i="3038"/>
+                    <em i="3065"/>
+                    <em i="3330"/>
+                    <em i="3071"/>
+                    <em i="3040"/>
+                    <em i="3045"/>
+                </d>
+                <d n="Fonctions lin&#xE9;aires, affines, constantes et quadratiques">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="3028"/>
+                        <em i="3029"/>
+                        <em i="3052"/>
+                        <em i="3053"/>
+                        <em i="3054"/>
+                        <em i="3055"/>
+                    </d>
+                    <d n="Lin&#xE9;aires (lecture)">
+                        <em i="3056"/>
+                        <em i="3057"/>
+                        <em i="3058"/>
+                        <em i="3059"/>
+                        <em i="3060"/>
+                        <em i="4862"/>
+                        <em i="3061"/>
+                        <em i="3062"/>
+                    </d>
+                    <d n="Affines (lecture)">
+                        <em i="3063"/>
+                        <em i="3064"/>
+                        <em i="3065"/>
+                        <em i="3066"/>
+                        <em i="3067"/>
+                        <em i="3068"/>
+                        <em i="3069"/>
+                        <em i="4864"/>
+                        <em i="3070"/>
+                        <em i="3071"/>
+                    </d>
+                    <d n="Lin&#xE9;aires (calcul)">
+                        <em i="3072"/>
+                        <em i="3073"/>
+                        <em i="3074"/>
+                        <em i="3075"/>
+                        <em i="3076"/>
+                    </d>
+                    <d n="Affines (calcul)">
+                        <em i="3077"/>
+                        <em i="3078"/>
+                        <em i="3079"/>
+                        <em i="3081"/>
+                        <em i="3082"/>
+                        <em i="3083"/>
+                        <em i="3084"/>
+                        <em i="3085"/>
+                        <em i="3086"/>
+                        <em i="3087"/>
+                        <em i="3088"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="3089"/>
+                        <em i="3090"/>
+                        <em i="3091"/>
+                        <em i="3092"/>
+                        <em i="3093"/>
+                    </d>
+                </d>
+                <d n="Proportionnalit&#xE9;">
+                    <d n="Echelles">
+                        <em i="717"/>
+                        <em i="718"/>
+                        <em i="719"/>
+                        <em i="720"/>
+                        <em i="360"/>
+                        <em i="721"/>
+                    </d>
+                    <d n="Grandeurs">
+                        <em i="722"/>
+                        <em i="723"/>
+                        <em i="724"/>
+                        <em i="725"/>
+                        <em i="726"/>
+                        <em i="727"/>
+                        <em i="728"/>
+                        <em i="729"/>
+                    </d>
+                    <d n="Pourcentages">
+                        <em i="2640"/>
+                        <em i="2641"/>
+                        <em i="2642"/>
+                        <em i="2643"/>
+                        <em i="2644"/>
+                        <em i="2645"/>
+                        <em i="2646"/>
+                        <em i="2647"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="730"/>
+                        <em i="731"/>
+                        <em i="732"/>
+                        <em i="733"/>
+                        <em i="2655"/>
+                    </d>
+                </d>
+                <d n="Diagrammes">
+                    <em i="744"/>
+                    <em i="748"/>
+                    <em i="749"/>
+                    <d n="Pour aller plus loin ...">
+                        <em i="752"/>
+                        <em i="753"/>
+                        <em i="754"/>
+                        <em i="755"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Calcul litt&#xE9;ral">
+                <d n="Pour approcher le calcul litt&#xE9;ral">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="668"/>
+                        <em i="669"/>
+                        <em i="670"/>
+                        <em i="671"/>
+                        <em i="672"/>
+                        <em i="673"/>
+                        <em i="674"/>
+                    </d>
+                    <d n="Expression litt&#xE9;rale">
+                        <em i="675"/>
+                        <em i="676"/>
+                        <em i="677"/>
+                        <em i="678"/>
+                        <em i="679"/>
+                        <em i="680"/>
+                        <em i="681"/>
+                    </d>
+                    <d n="Egalit&#xE9;s, tests">
+                        <em i="692"/>
+                        <em i="693"/>
+                        <em i="694"/>
+                        <em i="695"/>
+                        <em i="696"/>
+                        <em i="697"/>
+                        <em i="698"/>
+                    </d>
+                    <em i="690"/>
+                    <em i="691"/>
+                </d>
+                <d n="R&#xE9;duction d'expressions litt&#xE9;rales">
+                    <em i="686"/>
+                    <em i="687"/>
+                    <em i="2562"/>
+                    <em i="2563"/>
+                    <em i="2564"/>
+                    <em i="2565"/>
+                    <em i="2566"/>
+                </d>
+                <d n="Multiplication de mon&#xF4;mes et de polyn&#xF4;mes">
+                    <em i="2567"/>
+                    <em i="682"/>
+                    <em i="683"/>
+                    <em i="684"/>
+                    <em i="685"/>
+                    <em i="688"/>
+                    <em i="2568"/>
+                    <em i="2569"/>
+                </d>
+                <d n="Addition et soustraction de polyn&#xF4;mes"/>
+                <d n="Multiplication de polyn&#xF4;mes">
+                    <em i="2570"/>
+                    <em i="2571"/>
+                    <em i="2572"/>
+                    <d n="D&#xE9;velopper, r&#xE9;duire">
+                        <em i="2575"/>
+                        <em i="2576"/>
+                        <em i="2577"/>
+                        <em i="2578"/>
+                        <em i="2579"/>
+                        <em i="2580"/>
+                        <em i="2581"/>
+                    </d>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="2582"/>
+                    <em i="2583"/>
+                    <em i="2584"/>
+                    <em i="2585"/>
+                    <em i="2586"/>
+                    <em i="2587"/>
+                    <em i="2588"/>
+                    <em i="2589"/>
+                    <em i="2590"/>
+                    <em i="2591"/>
+                    <em i="2592"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="2593"/>
+                    <em i="2594"/>
+                    <em i="2595"/>
+                    <em i="2596"/>
+                </d>
+            </d>
+            <d n="Equations">
+                <d n="Pour approcher les &#xE9;quations">
+                    <em i="692"/>
+                    <em i="693"/>
+                    <em i="694"/>
+                    <em i="695"/>
+                    <em i="696"/>
+                    <em i="697"/>
+                    <em i="698"/>
+                </d>
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="2597"/>
+                    <em i="2598"/>
+                    <em i="2599"/>
+                    <em i="2600"/>
+                </d>
+                <d n="R&#xE9;soudre des &#xE9;quations">
+                    <d n="M&#xE9;thodes">
+                        <em i="2601"/>
+                        <em i="2602"/>
+                        <em i="2603"/>
+                        <em i="2604"/>
+                        <em i="2605"/>
+                        <em i="2606"/>
+                    </d>
+                    <d n="R&#xE9;solution">
+                        <em i="2607"/>
+                        <em i="2608"/>
+                        <em i="2609"/>
+                        <em i="2610"/>
+                        <em i="2611"/>
+                        <em i="2612"/>
+                    </d>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="2613"/>
+                    <em i="2614"/>
+                    <em i="2615"/>
+                    <em i="2616"/>
+                </d>
+            </d>
+        </d>
+        <d n="Espace">
+            <d n="Figures g&#xE9;om&#xE9;triques planes">
+                <d n="Mesures">
+                    <em i="37"/>
+                    <em i="38"/>
+                    <em i="39"/>
+                    <em i="40"/>
+                </d>
+                <d n="Points">
+                    <em i="12"/>
+                    <em i="14"/>
+                    <em i="13"/>
+                    <em i="15"/>
+                    <em i="16"/>
+                    <em i="17"/>
+                </d>
+                <d n="Droites parall&#xE8;les et perpendiculaires">
+                    <em i="44"/>
+                    <d n="Identifier et tracer des droites parall&#xE8;les">
+                        <em i="45"/>
+                        <em i="48"/>
+                        <em i="42"/>
+                        <em i="61"/>
+                    </d>
+                    <d n="Identifier et tracer des droites perpendiculaires">
+                        <em i="41"/>
+                        <em i="46"/>
+                        <em i="49"/>
+                        <em i="41"/>
+                        <em i="62"/>
+                    </d>
+                    <d n="Droites parall&#xE8;les et perpendiculaires">
+                        <em i="43"/>
+                        <em i="44"/>
+                        <em i="47"/>
+                        <em i="50"/>
+                    </d>
+                    <d n="Construction de parall&#xE8;les et perpendiculaires">
+                        <em i="51"/>
+                        <em i="52"/>
+                        <em i="53"/>
+                        <em i="54"/>
+                        <em i="55"/>
+                    </d>
+                </d>
+                <d n="Droites, segments et demi-droites">
+                    <em i="18"/>
+                    <em i="19"/>
+                    <em i="20"/>
+                    <em i="21"/>
+                    <em i="22"/>
+                    <em i="23"/>
+                    <em i="24"/>
+                    <em i="25"/>
+                    <em i="26"/>
+                </d>
+                <d n="Cercles">
+                    <em i="31"/>
+                    <d n="Construire et identifier un cercle">
+                        <em i="32"/>
+                        <em i="33"/>
+                        <em i="34"/>
+                    </d>
+                    <em i="33"/>
+                    <em i="32"/>
+                    <em i="36"/>
+                    <em i="35"/>
+                </d>
+                <d n="Triangles">
+                    <d n="Identifier les triangles">
+                        <em i="63"/>
+                        <em i="64"/>
+                        <em i="410"/>
+                        <em i="65"/>
+                        <em i="75"/>
+                        <em i="74"/>
+                        <em i="76"/>
+                        <em i="77"/>
+                    </d>
+                    <d n="Construire des triangles">
+                        <em i="66"/>
+                        <em i="84"/>
+                        <em i="85"/>
+                        <em i="86"/>
+                        <em i="87"/>
+                        <em i="423"/>
+                        <em i="424"/>
+                        <em i="422"/>
+                        <em i="425"/>
+                        <em i="426"/>
+                        <em i="427"/>
+                    </d>
+                    <d n="Mesures des angles d'un triangle">
+                        <em i="121"/>
+                    </d>
+                    <d n="Somme des angles">
+                        <em i="413"/>
+                        <em i="513"/>
+                        <em i="514"/>
+                        <em i="414"/>
+                        <em i="415"/>
+                        <em i="416"/>
+                    </d>
+                </d>
+                <d n="Quadrilat&#xE8;res">
+                    <em i="67"/>
+                    <em i="68"/>
+                    <em i="69"/>
+                    <em i="79"/>
+                    <em i="78"/>
+                    <em i="80"/>
+                    <em i="82"/>
+                    <em i="83"/>
+                    <em i="70"/>
+                    <em i="81"/>
+                    <em i="71"/>
+                    <em i="72"/>
+                    <em i="73"/>
+                    <d n="Construire des quadrilat&#xE8;res">
+                        <em i="88"/>
+                        <em i="89"/>
+                        <em i="90"/>
+                        <em i="91"/>
+                        <em i="95"/>
+                        <em i="94"/>
+                        <em i="96"/>
+                    </d>
+                    <d n="Parall&#xE9;logrammes">
+                        <d n="Prendre un bon d&#xE9;part">
+                            <em i="439"/>
+                            <em i="440"/>
+                            <em i="441"/>
+                            <em i="442"/>
+                            <em i="443"/>
+                        </d>
+                        <d n="Propri&#xE9;t&#xE9;s (quelconques)">
+                            <em i="444"/>
+                            <em i="445"/>
+                            <em i="446"/>
+                            <em i="447"/>
+                            <em i="448"/>
+                        </d>
+                        <d n="Propri&#xE9;t&#xE9;s (particuliers)">
+                            <em i="449"/>
+                            <em i="450"/>
+                            <em i="451"/>
+                            <em i="452"/>
+                            <em i="453"/>
+                            <em i="454"/>
+                            <em i="455"/>
+                            <em i="456"/>
+                        </d>
+                        <d n="Constructions (quelconques)">
+                            <em i="457"/>
+                            <em i="458"/>
+                            <em i="459"/>
+                            <em i="460"/>
+                            <em i="461"/>
+                            <em i="462"/>
+                            <em i="463"/>
+                            <em i="465"/>
+                        </d>
+                        <d n="Constructions (particuliers)">
+                            <em i="466"/>
+                            <em i="467"/>
+                            <em i="468"/>
+                            <em i="469"/>
+                        </d>
+                        <d n="D&#xE9;monstrations (quelconques)">
+                            <em i="470"/>
+                            <em i="471"/>
+                            <em i="472"/>
+                            <em i="473"/>
+                        </d>
+                        <d n="D&#xE9;monstrations (particuliers)">
+                            <em i="474"/>
+                            <em i="475"/>
+                            <em i="476"/>
+                            <em i="477"/>
+                            <em i="478"/>
+                        </d>
+                        <d n="Pour aller plus loin ...">
+                            <em i="479"/>
+                            <em i="480"/>
+                            <em i="481"/>
+                        </d>
+                    </d>
+                </d>
+                <d n="Angles">
+                    <em i="3317"/>
+                    <d n="Nommer et reconna&#xEE;tre">
+                        <em i="98"/>
+                        <em i="99"/>
+                        <em i="100"/>
+                        <em i="101"/>
+                        <em i="102"/>
+                        <em i="103"/>
+                        <em i="104"/>
+                        <em i="105"/>
+                        <em i="106"/>
+                        <em i="107"/>
+                    </d>
+                    <d n="Mesure d'angle">
+                        <em i="108"/>
+                        <em i="109"/>
+                        <em i="110"/>
+                        <em i="111"/>
+                        <em i="112"/>
+                        <em i="113"/>
+                        <em i="114"/>
+                        <em i="115"/>
+                    </d>
+                    <d n="Angles aigus, obtus">
+                        <em i="116"/>
+                        <em i="117"/>
+                        <em i="118"/>
+                        <em i="119"/>
+                        <em i="120"/>
+                    </d>
+                </d>
+                <d n="Droites remarquables">
+                    <em i="412"/>
+                    <em i="430"/>
+                    <em i="431"/>
+                    <em i="432"/>
+                    <em i="2678"/>
+                    <em i="435"/>
+                    <em i="436"/>
+                    <em i="434"/>
+                    <d n="M&#xE9;diatrice d'un segment">
+                        <em i="149"/>
+                        <em i="150"/>
+                        <em i="151"/>
+                        <em i="152"/>
+                        <em i="153"/>
+                        <em i="154"/>
+                        <em i="155"/>
+                        <em i="428"/>
+                    </d>
+                    <d n="Bissectrice d'un angle">
+                        <em i="156"/>
+                        <em i="429"/>
+                        <em i="157"/>
+                        <em i="158"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Transformations g&#xE9;om&#xE9;triques">
+                <d n="Axes de sym&#xE9;trie">
+                    <em i="4513"/>
+                    <em i="145"/>
+                    <em i="146"/>
+                    <em i="159"/>
+                    <em i="160"/>
+                    <em i="162"/>
+                    <em i="161"/>
+                </d>
+                <d n="Sym&#xE9;trie axiale">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="122"/>
+                        <em i="123"/>
+                        <em i="124"/>
+                        <em i="125"/>
+                        <em i="126"/>
+                        <em i="127"/>
+                        <em i="128"/>
+                        <em i="129"/>
+                    </d>
+                    <d n="Construction de points">
+                        <em i="130"/>
+                        <em i="131"/>
+                        <em i="132"/>
+                        <em i="133"/>
+                    </d>
+                    <d n="Construction de figures">
+                        <em i="134"/>
+                        <em i="135"/>
+                        <em i="136"/>
+                        <em i="137"/>
+                    </d>
+                    <d n="Propri&#xE9;t&#xE9;s">
+                        <em i="138"/>
+                        <em i="139"/>
+                        <em i="140"/>
+                        <em i="141"/>
+                    </d>
+                </d>
+                <d n="Sym&#xE9;trique dans un quadrillage">
+                    <em i="4521"/>
+                    <em i="4522"/>
+                    <em i="4523"/>
+                    <em i="4524"/>
+                    <em i="4526"/>
+                    <em i="4527"/>
+                    <em i="4525"/>
+                    <em i="4528"/>
+                </d>
+                <d n="Sym&#xE9;trie centrale">
+                    <d n="Utiliser la d&#xE9;finition de la sym&#xE9;trie centrale">
+                        <em i="4200"/>
+                        <em i="4201"/>
+                        <em i="4232"/>
+                        <em i="4233"/>
+                        <em i="4234"/>
+                        <em i="4235"/>
+                        <em i="4236"/>
+                        <em i="4237"/>
+                    </d>
+                    <d n="Associer la sym&#xE9;trie centrale &#xE0; la notion de demi-tour">
+                        <em i="4238"/>
+                        <em i="4239"/>
+                        <em i="4240"/>
+                        <em i="4241"/>
+                        <em i="4242"/>
+                        <em i="4243"/>
+                        <em i="4244"/>
+                        <em i="4245"/>
+                    </d>
+                    <d n="Construire l'image d'un point, d'un segment... par une sym&#xE9;trie centrale">
+                        <em i="4246"/>
+                        <em i="4247"/>
+                        <em i="4248"/>
+                        <em i="4249"/>
+                        <em i="4250"/>
+                        <em i="4251"/>
+                    </d>
+                    <d n="Conna&#xEE;tre et utiliser les propri&#xE9;t&#xE9;s de conservation de la sym&#xE9;trie centrale">
+                        <em i="4252"/>
+                        <em i="4253"/>
+                        <em i="4254"/>
+                        <em i="4255"/>
+                        <em i="4256"/>
+                    </d>
+                    <d n="Trouver le centre de sym&#xE9;trie &#xE9;ventuel d'une figure">
+                        <em i="4257"/>
+                        <em i="4258"/>
+                        <em i="4259"/>
+                    </d>
+                    <d n="Construire ou compl&#xE9;ter la figure sym&#xE9;trique">
+                        <em i="4260"/>
+                        <em i="4261"/>
+                    </d>
+                    <!--
+ANCIENS EXOS<d n="Prendre un bon départ">
+<em i="382"/>
+<em i="383"/>
+<em i="384"/>
+<em i="385"/>
+<em i="386"/>
+<em i="387"/>
+</d>
+<d n="Constructions avec trame">
+<em i="388"/>
+<em i="389"/>
+<em i="390"/>
+<em i="391"/>
+<em i="392"/>
+</d>
+<d n="Constructions">
+<em i="393"/>
+<em i="394"/>
+<em i="395"/>
+<em i="396"/>
+<em i="397"/>
+<em i="398"/>
+</d>
+<d n="Propriétes">
+<em i="399"/>
+<em i="400"/>
+<em i="401"/>
+</d>
+<d n="Centre de symétrie">
+<em i="402"/>
+<em i="403"/>
+<em i="404"/>
+<em i="405"/>
+</d>
+<d n="Pour aller plus loin ...">
+<em i="406"/>
+<em i="407"/>
+<em i="408"/>
+<em i="409"/>
+</d>-->
+                </d>
+            </d>
+            <d n="Repr&#xE9;sentations de solides">
+                <d n="Reconnaissance,d&#xE9;nomination et description de solides">
+                    <em i="536"/>
+                    <em i="166"/>
+                    <em i="167"/>
+                    <em i="165"/>
+                </d>
+                <d n="Repr&#xE9;sentation de solides en perspective">
+                    <em i="170"/>
+                    <em i="169"/>
+                </d>
+                <d n="Solides et d&#xE9;veloppement">
+                    <em i="171"/>
+                    <em i="172"/>
+                    <em i="175"/>
+                    <em i="174"/>
+                    <em i="173"/>
+                    <em i="175"/>
+                </d>
+            </d>
+        </d>
+        <d n="Grandeurs et mesures">
+            <d n="Polygones">
+                <em i="511"/>
+                <em i="507"/>
+                <em i="2796"/>
+                <em i="502"/>
+                <em i="510"/>
+                <em i="495"/>
+            </d>
+            <d n="Cercles et disques">
+                <em i="503"/>
+                <em i="504"/>
+                <em i="505"/>
+                <em i="506"/>
+                <em i="3185"/>
+            </d>
+            <d n="Arcs et secteurs">
+                <em i="508"/>
+                <em i="509"/>
+            </d>
+            <d n="Th&#xE9;or&#xE8;me de Pythagore">
+                <em i="2675"/>
+                <em i="2676"/>
+                <em i="2679"/>
+                <em i="2680"/>
+                <em i="2686"/>
+                <em i="2677"/>
+                <em i="2687"/>
+                <em i="2689"/>
+                <em i="2690"/>
+                <em i="2688"/>
+                <em i="2691"/>
+                <em i="2692"/>
+                <em i="2694"/>
+                <em i="2695"/>
+                <em i="2693"/>
+                <em i="2699"/>
+                <d n="R&#xE9;ciproque">
+                    <em i="2696"/>
+                    <em i="2697"/>
+                    <em i="2698"/>
+                </d>
+            </d>
+            <d n="Cylindres">
+                <d n="Aire lat&#xE9;rale">
+                    <em i="545"/>
+                    <em i="546"/>
+                </d>
+                <d n="Volume">
+                    <em i="550"/>
+                    <em i="551"/>
+                </d>
+                <d n="D&#xE9;veloppement">
+                    <em i="543"/>
+                    <em i="541"/>
+                </d>
+            </d>
+            <d n="Conversions d'unit&#xE9;">
+                <d n="temps"/>
+                <d n="Volume et capacit&#xE9;">
+                    <em i="179"/>
+                    <em i="178"/>
+                    <em i="534"/>
+                    <em i="180"/>
+                    <em i="535"/>
+                </d>
+                <d n="vitesse">
+                    <em i="2648"/>
+                    <em i="2649"/>
+                    <em i="2650"/>
+                    <em i="2651"/>
+                    <em i="2652"/>
+                    <em i="2653"/>
+                    <em i="2654"/>
+                </d>
+            </d>
+            <d n="Solides">
+                <em i="558"/>
+                <em i="176"/>
+                <em i="177"/>
+                <em i="3183"/>
+            </d>
+        </d>
+    </d>
+    <d n="11e Harmos">
+        <d n="Nombres et op&#xE9;rations">
+            <d n="Nombres r&#xE9;els">
+                <d n="Nombres relatifs">
+                    <d n="Soustraction">
+                        <em i="651"/>
+                        <em i="652"/>
+                        <em i="653"/>
+                        <em i="654"/>
+                        <em i="661"/>
+                        <em i="2417"/>
+                        <em i="2418"/>
+                        <em i="2419"/>
+                        <em i="2421"/>
+                    </d>
+                    <d n="Multiplication et division de relatifs">
+                        <em i="2422"/>
+                        <em i="2423"/>
+                        <em i="2424"/>
+                        <em i="2425"/>
+                        <em i="2426"/>
+                        <em i="2427"/>
+                        <em i="2428"/>
+                        <em i="2429"/>
+                        <em i="2430"/>
+                        <em i="2431"/>
+                        <em i="2432"/>
+                        <em i="2433"/>
+                        <em i="2436"/>
+                        <em i="2437"/>
+                    </d>
+                    <d n="Calculs et priorit&#xE9;s">
+                        <em i="2439"/>
+                        <em i="2440"/>
+                        <em i="2441"/>
+                        <em i="2442"/>
+                        <em i="2443"/>
+                        <em i="2444"/>
+                    </d>
+                </d>
+                <d n="Nombres rationnels">
+                    <d n="Multiplication de fractions">
+                        <em i="602"/>
+                        <em i="603"/>
+                        <em i="604"/>
+                        <em i="605"/>
+                        <em i="606"/>
+                        <em i="607"/>
+                        <em i="608"/>
+                        <em i="609"/>
+                        <em i="2477"/>
+                        <em i="2478"/>
+                        <em i="2479"/>
+                        <em i="2480"/>
+                        <em i="2481"/>
+                        <em i="2483"/>
+                    </d>
+                    <d n="Division de fractions">
+                        <em i="2484"/>
+                        <em i="2485"/>
+                        <em i="2486"/>
+                        <em i="2487"/>
+                        <em i="2488"/>
+                        <em i="2489"/>
+                        <em i="2490"/>
+                        <em i="2491"/>
+                        <em i="2492"/>
+                    </d>
+                    <d n="Priorit&#xE9;s">
+                        <em i="2493"/>
+                        <em i="2494"/>
+                        <em i="2495"/>
+                        <em i="2498"/>
+                        <em i="2877"/>
+                        <em i="2878"/>
+                    </d>
+                </d>
+                <d n="Notation scientifique">
+                    <em i="2545"/>
+                    <em i="2546"/>
+                    <em i="2547"/>
+                    <em i="2548"/>
+                    <em i="2549"/>
+                    <em i="2550"/>
+                    <em i="2552"/>
+                    <em i="2554"/>
+                    <em i="3012"/>
+                </d>
+                <d n="Racines">
+                    <em i="2922"/>
+                    <em i="2923"/>
+                    <em i="2924"/>
+                    <em i="2926"/>
+                    <em i="2927"/>
+                    <em i="2928"/>
+                    <em i="2929"/>
+                    <em i="2930"/>
+                    <em i="2931"/>
+                    <em i="2932"/>
+                    <em i="2933"/>
+                    <em i="2937"/>
+                    <em i="2938"/>
+                    <em i="2939"/>
+                    <em i="2940"/>
+                    <em i="2941"/>
+                    <em i="2942"/>
+                    <em i="2943"/>
+                    <em i="2944"/>
+                    <em i="2945"/>
+                </d>
+            </d>
+            <d n="Situations al&#xE9;atoires">
+                <em i="3111"/>
+                <em i="3112"/>
+                <em i="3113"/>
+                <em i="3114"/>
+                <em i="4976"/>
+                <em i="4978"/>
+            </d>
+            <d n="Nombres, op&#xE9;rations... et probl&#xE8;mes">
+                <em i="2496"/>
+                <em i="2497"/>
+                <em i="2502"/>
+                <em i="2503"/>
+                <em i="2446"/>
+                <em i="2447"/>
+                <em i="2448"/>
+                <em i="2959"/>
+                <em i="2960"/>
+                <em i="2961"/>
+            </d>
+        </d>
+        <d n="Fonctions et alg&#xE8;bre">
+            <d n="Fonctions et diagrammes">
+                <d n="Fonctions">
+                    <em i="3051"/>
+                    <em i="3027"/>
+                    <em i="3030"/>
+                    <em i="3031"/>
+                    <em i="3032"/>
+                    <em i="3033"/>
+                </d>
+                <d n="Proportionnalit&#xE9;">
+                    <em i="3032"/>
+                    <em i="3033"/>
+                    <d n="Lectures graphiques">
+                        <em i="3034"/>
+                        <em i="3035"/>
+                        <em i="3036"/>
+                        <em i="3037"/>
+                        <em i="3038"/>
+                        <em i="3039"/>
+                        <em i="3330"/>
+                        <em i="3040"/>
+                    </d>
+                    <d n="Calculs">
+                        <em i="3041"/>
+                        <em i="3042"/>
+                        <em i="3043"/>
+                        <em i="3088"/>
+                        <em i="3044"/>
+                        <em i="3045"/>
+                        <em i="3046"/>
+                        <em i="3047"/>
+                    </d>
+                </d>
+                <d n="Repr&#xE9;sentation s de fonctions affines">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="3028"/>
+                        <em i="3029"/>
+                        <em i="3052"/>
+                        <em i="3053"/>
+                        <em i="3054"/>
+                        <em i="3055"/>
+                    </d>
+                    <d n="Lin&#xE9;aires (lecture)">
+                        <em i="3056"/>
+                        <em i="3057"/>
+                        <em i="3058"/>
+                        <em i="3059"/>
+                        <em i="3060"/>
+                        <em i="4862"/>
+                        <em i="3061"/>
+                        <em i="3062"/>
+                    </d>
+                    <d n="Affines (lecture)">
+                        <em i="3063"/>
+                        <em i="3064"/>
+                        <em i="3065"/>
+                        <em i="3066"/>
+                        <em i="3067"/>
+                        <em i="3068"/>
+                        <em i="3069"/>
+                        <em i="4864"/>
+                        <em i="3070"/>
+                        <em i="3071"/>
+                    </d>
+                    <d n="Lin&#xE9;aires (calcul)">
+                        <em i="3072"/>
+                        <em i="3073"/>
+                        <em i="3074"/>
+                        <em i="3075"/>
+                        <em i="3076"/>
+                    </d>
+                    <d n="Affines (calcul)">
+                        <em i="3077"/>
+                        <em i="3078"/>
+                        <em i="3079"/>
+                        <em i="3081"/>
+                        <em i="3082"/>
+                        <em i="3083"/>
+                        <em i="3084"/>
+                        <em i="3085"/>
+                        <em i="3086"/>
+                        <em i="3087"/>
+                        <em i="3088"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="3089"/>
+                        <em i="3090"/>
+                        <em i="3091"/>
+                        <em i="3092"/>
+                        <em i="3093"/>
+                    </d>
+                    <d n="Equations de droites">
+                        <d n="Equations">
+                            <em i="4445"/>
+                            <em i="4446"/>
+                            <em i="4447"/>
+                            <em i="4448"/>
+                            <em i="4449"/>
+                            <em i="4450"/>
+                            <em i="4451"/>
+                            <em i="4721"/>
+                        </d>
+                        <d n="Positions relatives de deux droites">
+                            <em i="4452"/>
+                            <em i="4453"/>
+                            <em i="4454"/>
+                            <em i="4455"/>
+                            <em i="4456"/>
+                        </d>
+                    </d>
+                </d>
+                <d n="Situation mod&#xE9;lisables par des fonctions">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="2636"/>
+                        <em i="2637"/>
+                    </d>
+                    <d n="Vitesse moyenne">
+                        <em i="2648"/>
+                        <em i="2649"/>
+                        <em i="2650"/>
+                        <em i="2651"/>
+                        <em i="2652"/>
+                        <em i="2653"/>
+                        <em i="2654"/>
+                    </d>
+                    <d n="Pour aller plus loin">
+                        <em i="2656"/>
+                    </d>
+                </d>
+                <d n="Repr&#xE9;sentation graphique et expressions fonctionnelles">
+                    <em i="744"/>
+                    <em i="748"/>
+                    <em i="749"/>
+                    <d n="Pour aller plus loin ...">
+                        <em i="752"/>
+                        <em i="753"/>
+                        <em i="754"/>
+                        <em i="755"/>
+                    </d>
+                </d>
+                <d n="Probl&#xE8;mes et fonctions"/>
+                <d n="Diagrammes"/>
+                <d n="Repr&#xE9;sentations de fonctions affines"/>
+            </d>
+            <d n="Calcul litt&#xE9;ral">
+                <d n="Ecrire et r&#xE9;duire des expressions litt&#xE9;rales">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="668"/>
+                        <em i="669"/>
+                        <em i="670"/>
+                        <em i="671"/>
+                        <em i="672"/>
+                        <em i="673"/>
+                        <em i="674"/>
+                    </d>
+                    <d n="Expression litt&#xE9;rale">
+                        <em i="675"/>
+                        <em i="676"/>
+                        <em i="677"/>
+                        <em i="678"/>
+                        <em i="679"/>
+                        <em i="680"/>
+                        <em i="681"/>
+                        <em i="2557"/>
+                        <em i="2567"/>
+                    </d>
+                    <em i="686"/>
+                    <em i="687"/>
+                    <em i="689"/>
+                    <em i="690"/>
+                    <em i="691"/>
+                </d>
+                <d n="Addition et soustraction de polyn&#xF4;mes">
+                    <em i="2562"/>
+                    <em i="2563"/>
+                    <em i="2564"/>
+                    <em i="2565"/>
+                    <em i="2566"/>
+                </d>
+                <d n="Op&#xE9;rations avec des polyn&#xF4;mes">
+                    <d n="D&#xE9;velopper, r&#xE9;duire">
+                        <em i="2575"/>
+                        <em i="2576"/>
+                        <em i="2577"/>
+                        <em i="2578"/>
+                        <em i="2579"/>
+                        <em i="2580"/>
+                        <em i="2581"/>
+                    </d>
+                    <d n="Distributivit&#xE9;">
+                        <em i="2567"/>
+                        <em i="2568"/>
+                        <em i="2569"/>
+                        <em i="2570"/>
+                        <em i="2571"/>
+                        <em i="2572"/>
+                        <em i="2573"/>
+                        <em i="2574"/>
+                    </d>
+                    <em i="2595"/>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="2582"/>
+                    <em i="2583"/>
+                    <em i="2584"/>
+                    <em i="2585"/>
+                    <em i="2586"/>
+                    <em i="2587"/>
+                    <em i="2588"/>
+                    <em i="2589"/>
+                    <em i="2590"/>
+                    <em i="2591"/>
+                    <em i="2592"/>
+                </d>
+                <d n="Identit&#xE9;s remarquables">
+                    <d n="Identit&#xE9;, d&#xE9;couverte">
+                        <em i="2888"/>
+                        <em i="2889"/>
+                        <em i="2890"/>
+                        <em i="2891"/>
+                    </d>
+                    <d n="D&#xE9;velopper">
+                        <em i="2892"/>
+                        <em i="2893"/>
+                        <em i="2894"/>
+                        <em i="2895"/>
+                        <em i="2896"/>
+                        <em i="2897"/>
+                        <em i="2898"/>
+                        <em i="2899"/>
+                        <em i="2900"/>
+                        <em i="2901"/>
+                    </d>
+                    <d n="D&#xE9;veloppements">
+                        <em i="2951"/>
+                        <em i="2952"/>
+                        <em i="2953"/>
+                        <em i="2954"/>
+                        <em i="2955"/>
+                        <em i="2956"/>
+                        <em i="2962"/>
+                    </d>
+                </d>
+                <d n="Factorisation">
+                    <em i="2596"/>
+                    <em i="2902"/>
+                    <em i="2903"/>
+                    <em i="2904"/>
+                    <em i="2905"/>
+                    <em i="2906"/>
+                    <em i="2907"/>
+                    <em i="2908"/>
+                    <em i="2909"/>
+                    <em i="2910"/>
+                    <em i="2911"/>
+                </d>
+                <d n="Synth&#xE8;se">
+                    <em i="2916"/>
+                    <em i="2917"/>
+                    <em i="2918"/>
+                    <em i="2919"/>
+                </d>
+            </d>
+            <d n="Equations">
+                <d n="Pour approcher les &#xE9;quations">
+                    <em i="2597"/>
+                    <em i="2598"/>
+                    <em i="2599"/>
+                    <em i="2600"/>
+                </d>
+                <d n="R&#xE9;soudre des &#xE9;quations">
+                    <d n="M&#xE9;thodes">
+                        <em i="2601"/>
+                        <em i="2602"/>
+                        <em i="2603"/>
+                        <em i="2604"/>
+                        <em i="2605"/>
+                        <em i="2606"/>
+                    </d>
+                    <d n="R&#xE9;solution">
+                        <em i="2607"/>
+                        <em i="2608"/>
+                        <em i="2609"/>
+                        <em i="2610"/>
+                        <em i="2611"/>
+                        <em i="2612"/>
+                        <em i="3049"/>
+                    </d>
+                    <d n="Equation produit nul">
+                        <em i="2912"/>
+                        <em i="2913"/>
+                        <em i="2914"/>
+                        <em i="2915"/>
+                    </d>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="2613"/>
+                    <em i="2614"/>
+                    <em i="2615"/>
+                    <em i="2616"/>
+                    <em i="2627"/>
+                    <em i="2628"/>
+                    <em i="2629"/>
+                </d>
+                <d n="Syst&#xE8;mes d'&#xE9;quations">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="2974"/>
+                        <em i="2975"/>
+                        <em i="2976"/>
+                        <em i="2977"/>
+                        <em i="2978"/>
+                    </d>
+                    <d n="R&#xE9;solution">
+                        <em i="2979"/>
+                        <em i="2980"/>
+                        <em i="2982"/>
+                        <em i="2983"/>
+                        <em i="2984"/>
+                        <em i="2985"/>
+                    </d>
+                    <d n="Probl&#xE8;mes">
+                        <em i="2986"/>
+                        <em i="2987"/>
+                        <em i="4465"/>
+                        <em i="4467"/>
+                        <em i="4468"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="2990"/>
+                        <em i="2991"/>
+                        <em i="2992"/>
+                    </d>
+                </d>
+                <d n="Equations du deuxi&#xE8;me degr&#xE9;">
+                    <em i="2920"/>
+                    <em i="2921"/>
+                </d>
+            </d>
+        </d>
+        <d n="Espace">
+            <d n="Figures g&#xE9;om&#xE9;triques planes">
+                <d n="Angles isom&#xE9;triques">
+                    <em i="525"/>
+                    <em i="526"/>
+                    <em i="527"/>
+                    <em i="528"/>
+                    <em i="529"/>
+                    <em i="530"/>
+                    <em i="531"/>
+                    <em i="533"/>
+                </d>
+                <d n="Angle inscrit">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="3215"/>
+                        <em i="3216"/>
+                        <em i="3217"/>
+                        <em i="3218"/>
+                    </d>
+                    <em i="3219"/>
+                    <em i="3220"/>
+                    <em i="3221"/>
+                    <em i="3222"/>
+                    <em i="3223"/>
+                    <em i="3224"/>
+                    <em i="3225"/>
+                    <em i="3226"/>
+                </d>
+                <d n="Tangente et cercle de Thal&#xE8;s">
+                    <d n="Tangente">
+                        <em i="2753"/>
+                        <em i="2754"/>
+                        <em i="2755"/>
+                        <em i="2756"/>
+                        <em i="2757"/>
+                        <em i="2758"/>
+                        <em i="2759"/>
+                        <em i="3231"/>
+                    </d>
+                    <d n="Cercle">
+                        <em i="2681"/>
+                        <em i="2682"/>
+                        <em i="2683"/>
+                        <em i="2684"/>
+                        <em i="2685"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Repr&#xE9;sentations de solides">
+                <d n="Pyramide, cylindre, c&#xF4;ne, sph&#xE8;re et boule">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="2797"/>
+                        <em i="3305"/>
+                        <em i="2798"/>
+                        <em i="2799"/>
+                        <em i="2800"/>
+                        <em i="2801"/>
+                        <em i="2802"/>
+                        <em i="2803"/>
+                    </d>
+                    <d n="Patrons">
+                        <em i="2804"/>
+                        <em i="2805"/>
+                        <em i="2806"/>
+                        <em i="2807"/>
+                        <em i="2808"/>
+                        <em i="2809"/>
+                        <em i="543"/>
+                    </d>
+                </d>
+            </d>
+            <d n="Transformations g&#xE9;om&#xE9;triques">
+                <d n="Homoth&#xE9;ties">
+                    <em i="2725"/>
+                    <em i="2726"/>
+                    <em i="2727"/>
+                    <em i="2728"/>
+                </d>
+            </d>
+        </d>
+        <d n="Grandeurs et mesures">
+            <d n="Lignes, surfaces et th&#xE9;or&#xE8;mes">
+                <em i="510">
+                    <em i="508"/>
+                    <em i="509"/>
+                    <em i="511"/>
+                </em>
+                <d n="Th&#xE9;or&#xE8;mes">
+                    <em i="2675"/>
+                    <em i="2676"/>
+                    <em i="2686"/>
+                    <em i="2687"/>
+                    <em i="2688"/>
+                    <em i="2689"/>
+                    <em i="2690"/>
+                    <em i="2691"/>
+                    <em i="2692"/>
+                    <em i="2693"/>
+                    <em i="2694"/>
+                    <em i="2699"/>
+                    <em i="2700"/>
+                    <em i="2701"/>
+                    <em i="2826"/>
+                    <em i="2827"/>
+                </d>
+                <d n="Pythagore">
+                    <em i="2695"/>
+                    <em i="2696"/>
+                    <em i="2697"/>
+                    <em i="2698"/>
+                </d>
+                <d n="Pythagore (r&#xE9;ciproque et contrapos&#xE9;e)">
+                    <em i="2716"/>
+                    <em i="2717"/>
+                    <em i="2718"/>
+                    <em i="2719"/>
+                    <em i="2720"/>
+                    <em i="2721"/>
+                    <em i="2722"/>
+                    <em i="2723"/>
+                    <em i="2724"/>
+                    <em i="2727"/>
+                    <em i="2729"/>
+                    <em i="2731"/>
+                    <em i="2732"/>
+                    <em i="2733"/>
+                    <em i="3116"/>
+                    <em i="3117"/>
+                    <em i="3118"/>
+                    <em i="3119"/>
+                    <em i="3120"/>
+                    <em i="3121"/>
+                    <em i="3122"/>
+                    <em i="3123"/>
+                    <em i="3124"/>
+                    <em i="3125"/>
+                    <em i="3132"/>
+                    <em i="3138"/>
+                    <em i="3139"/>
+                    <em i="3140"/>
+                    <em i="3142"/>
+                </d>
+                <d n="Thal&#xE8;s (r&#xE9;ciproque)">
+                    <em i="3126"/>
+                    <em i="3127"/>
+                    <em i="3128"/>
+                    <em i="3129"/>
+                    <em i="3130"/>
+                    <em i="3131"/>
+                </d>
+                <d n="Thal&#xE8;s (r&#xE9;ciproque et contrapos&#xE9;e)"/>
+            </d>
+            <d n="Solides">
+                <em i="550"/>
+                <em i="551"/>
+                <em i="555"/>
+                <em i="558"/>
+                <em i="2833"/>
+                <em i="2834"/>
+                <em i="2835"/>
+                <em i="2811"/>
+                <em i="3308"/>
+                <em i="2817"/>
+                <em i="2818"/>
+                <em i="2819"/>
+                <em i="2821"/>
+                <em i="2822"/>
+                <em i="2823"/>
+                <em i="2824"/>
+                <em i="2825"/>
+                <em i="2831"/>
+                <em i="2832"/>
+                <em i="3183"/>
+                <em i="3192" n="v2.3G3s2ex6 : Aire de la sph&#xE8;re"/>
+                <em i="3193" n="v2.3G3s2ex7 : Volume de la sph&#xE8;re"/>
+                <em i="3194"/>
+                <em i="3205"/>
+                <em i="3209"/>
+                <em i="3212"/>
+                <em i="4686"/>
+            </d>
+            <d n="Diverses mesures">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="2636"/>
+                    <em i="2637"/>
+                </d>
+                <d n="Vitesse moyenne">
+                    <em i="2648"/>
+                    <em i="2649"/>
+                    <em i="2650"/>
+                    <em i="2651"/>
+                    <em i="2652"/>
+                    <em i="2653"/>
+                    <em i="2654"/>
+                </d>
+                <d n="Volumes, capacit&#xE9;s">
+                    <em i="179"/>
+                    <em i="180"/>
+                </d>
+            </d>
+        </d>
+    </d>
+    <d n="PO gymnasiale 1e">
+        <d n="Calcul num&#xE9;rique">
+            <d n="Prendre un bon d&#xE9;part">
+                <em i="2865"/>
+                <em i="2866"/>
+                <em i="2867"/>
+                <em i="2868"/>
+            </d>
+            <d n="PGCD">
+                <em i="2869"/>
+                <em i="2870"/>
+                <em i="2871"/>
+                <em i="2872"/>
+                <em i="2873"/>
+                <em i="2874"/>
+                <em i="2880"/>
+                <em i="2882"/>
+                <em i="2876"/>
+            </d>
+            <em i="2881"/>
+            <em i="3012"/>
+        </d>
+        <d n="Des nombres aux lettres">
+            <d n="Probl&#xE8;mes">
+                <em i="2582"/>
+                <em i="2583"/>
+                <em i="2584"/>
+                <em i="2585"/>
+                <em i="2586"/>
+                <em i="2587"/>
+                <em i="2588"/>
+                <em i="2589"/>
+                <em i="2590"/>
+                <em i="2591"/>
+                <em i="2592"/>
+            </d>
+        </d>
+        <d n="Argumenter"/>
+        <d n="D'autres nombres">
+            <d n="Proportionnalit&#xE9;">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="2632"/>
+                    <em i="2633"/>
+                    <em i="2634"/>
+                    <em i="2635"/>
+                    <em i="2638"/>
+                    <em i="2639"/>
+                </d>
+                <d n="Pourcentages">
+                    <em i="2640"/>
+                    <em i="2641"/>
+                    <em i="2642"/>
+                    <em i="2643"/>
+                    <em i="2644"/>
+                    <em i="2645"/>
+                    <em i="2646"/>
+                    <em i="2647"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="3321"/>
+                    <em i="2655"/>
+                </d>
+            </d>
+            <d n="Fractions">
+                <d n="R&#xE9;viser">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="2449"/>
+                        <em i="2450"/>
+                        <em i="2451"/>
+                        <em i="2452"/>
+                        <em i="2453"/>
+                        <em i="2454"/>
+                        <em i="2455"/>
+                    </d>
+                    <d n="Comparaison">
+                        <em i="2456"/>
+                        <em i="2457"/>
+                        <em i="2458"/>
+                        <em i="2459"/>
+                        <em i="2460"/>
+                        <em i="2461"/>
+                        <em i="2462"/>
+                        <em i="2463"/>
+                        <em i="2464"/>
+                        <em i="2465"/>
+                        <em i="2466"/>
+                    </d>
+                    <d n="Additions, soustractions">
+                        <em i="2467"/>
+                        <em i="2468"/>
+                        <em i="2469"/>
+                        <em i="2470"/>
+                        <em i="2471"/>
+                        <em i="2472"/>
+                        <em i="2473"/>
+                        <em i="2474"/>
+                        <em i="2475"/>
+                        <em i="2476"/>
+                    </d>
+                    <d n="Produits">
+                        <em i="2477"/>
+                        <em i="2478"/>
+                        <em i="2479"/>
+                        <em i="2480"/>
+                        <em i="2481"/>
+                        <em i="2482"/>
+                        <em i="2483"/>
+                    </d>
+                    <d n="Quotients">
+                        <em i="2484"/>
+                        <em i="2485"/>
+                        <em i="2486"/>
+                        <em i="2487"/>
+                        <em i="2488"/>
+                        <em i="2489"/>
+                        <em i="2490"/>
+                        <em i="2491"/>
+                        <em i="2492"/>
+                    </d>
+                    <d n="Synth&#xE8;se et probl&#xE8;mes">
+                        <em i="2493"/>
+                        <em i="2494"/>
+                        <em i="2495"/>
+                        <em i="2496"/>
+                        <em i="2497"/>
+                        <em i="2498"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="2499"/>
+                        <em i="2500"/>
+                        <em i="2501"/>
+                        <em i="2502"/>
+                        <em i="2503"/>
+                    </d>
+                </d>
+                <em i="2877"/>
+                <em i="2878"/>
+                <em i="2875"/>
+            </d>
+            <d n="Racines carr&#xE9;es">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="2922"/>
+                    <em i="2923"/>
+                    <em i="2924"/>
+                </d>
+                <d n="D&#xE9;finitions, propri&#xE9;t&#xE9;s">
+                    <em i="2926"/>
+                    <em i="2927"/>
+                    <em i="2928"/>
+                    <em i="2929"/>
+                    <em i="2930"/>
+                    <em i="2931"/>
+                    <em i="2932"/>
+                </d>
+                <d n="Calculs">
+                    <em i="2933"/>
+                    <em i="2934"/>
+                    <em i="2935"/>
+                    <em i="2936"/>
+                    <em i="2937"/>
+                    <em i="2938"/>
+                    <em i="2939"/>
+                    <em i="2940"/>
+                </d>
+                <d n="Simplifications">
+                    <em i="2941"/>
+                    <em i="2942"/>
+                    <em i="2943"/>
+                    <em i="2944"/>
+                    <em i="2945"/>
+                    <em i="2946"/>
+                </d>
+                <d n="R&#xE9;ductions de sommes">
+                    <em i="2947"/>
+                    <em i="2948"/>
+                    <em i="2949"/>
+                    <em i="2950"/>
+                </d>
+                <d n="D&#xE9;veloppements">
+                    <em i="2951"/>
+                    <em i="2952"/>
+                    <em i="2953"/>
+                    <em i="2954"/>
+                    <em i="2955"/>
+                    <em i="2956"/>
+                </d>
+                <d n="G&#xE9;om&#xE9;trie">
+                    <em i="2957"/>
+                    <em i="2958"/>
+                    <em i="2959"/>
+                    <em i="2960"/>
+                    <em i="2961"/>
+                    <em i="2962"/>
+                </d>
+                <d n="Substituer,&#xE9;quations">
+                    <em i="2963"/>
+                    <em i="2964"/>
+                    <em i="2965"/>
+                    <em i="2966"/>
+                    <em i="2967"/>
+                    <em i="2968"/>
+                </d>
+                <d n="pour aller plus loin ...">
+                    <em i="2969"/>
+                    <em i="2970"/>
+                    <em i="2971"/>
+                    <em i="2972"/>
+                    <em i="2973"/>
+                </d>
+            </d>
+            <d n="Puissances">
+                <d n="R&#xE9;viser">
+                    <d n="Prendre un bon d&#xE9;part">
+                        <em i="2504"/>
+                        <em i="2505"/>
+                        <em i="2506"/>
+                        <em i="2507"/>
+                    </d>
+                    <d n="Notation, calculs">
+                        <em i="2508"/>
+                        <em i="2509"/>
+                        <em i="2510"/>
+                        <em i="2511"/>
+                        <em i="2512"/>
+                        <em i="2513"/>
+                        <em i="2514"/>
+                        <em i="2515"/>
+                    </d>
+                    <d n="Calcul mental">
+                        <em i="2516"/>
+                        <em i="2517"/>
+                        <em i="2518"/>
+                        <em i="2519"/>
+                        <em i="2520"/>
+                        <em i="2521"/>
+                        <em i="2522"/>
+                    </d>
+                    <d n="Formules (d&#xE9;couverte)">
+                        <em i="2524"/>
+                        <em i="2525"/>
+                        <em i="2526"/>
+                        <em i="2527"/>
+                        <em i="2528"/>
+                        <em i="2529"/>
+                        <em i="2530"/>
+                    </d>
+                    <d n="Formules (application)">
+                        <em i="2531"/>
+                        <em i="2532"/>
+                        <em i="2533"/>
+                        <em i="2534"/>
+                        <em i="2535"/>
+                        <em i="2536"/>
+                        <em i="2537"/>
+                        <em i="2538"/>
+                        <em i="2539"/>
+                    </d>
+                    <d n="Ecriture x10^n">
+                        <em i="2540"/>
+                        <em i="2541"/>
+                        <em i="2542"/>
+                        <em i="2543"/>
+                        <em i="2544"/>
+                        <em i="2545"/>
+                        <em i="2546"/>
+                        <em i="2547"/>
+                        <em i="2548"/>
+                        <em i="2549"/>
+                        <em i="2550"/>
+                    </d>
+                    <d n="Pour aller plus loin ...">
+                        <em i="2551"/>
+                        <em i="2552"/>
+                        <em i="2553"/>
+                        <em i="2554"/>
+                        <em i="2555"/>
+                    </d>
+                </d>
+                <em i="3013"/>
+                <em i="3014"/>
+            </d>
+            <d n="Grandeurs quotients">
+                <em i="3015"/>
+                <em i="3016"/>
+                <em i="3017"/>
+                <em i="3018"/>
+                <em i="3019"/>
+                <em i="3020"/>
+                <em i="3021"/>
+                <d n="Pour aller plus loin ...">
+                    <em i="3022"/>
+                    <em i="3023"/>
+                    <em i="3024"/>
+                    <em i="3025"/>
+                    <em i="3026"/>
+                </d>
+            </d>
+        </d>
+        <d n="Calcul litt&#xE9;ral">
+            <d n="Prendre un bon d&#xE9;part">
+                <em i="2883"/>
+                <em i="2884"/>
+                <em i="2885"/>
+                <d n="Distributivit&#xE9;">
+                    <em i="2567"/>
+                    <em i="2568"/>
+                    <em i="2569"/>
+                    <em i="2570"/>
+                    <em i="2571"/>
+                    <em i="2572"/>
+                    <em i="2573"/>
+                    <em i="2574"/>
+                </d>
+                <em i="2886"/>
+                <d n="D&#xE9;velopper, r&#xE9;duire">
+                    <em i="2575"/>
+                    <em i="2576"/>
+                    <em i="2577"/>
+                    <em i="2578"/>
+                    <em i="2579"/>
+                    <em i="2580"/>
+                    <em i="2581"/>
+                </d>
+                <em i="2594"/>
+            </d>
+            <d n="Identit&#xE9;, d&#xE9;couverte">
+                <em i="2888"/>
+                <em i="2889"/>
+                <em i="2890"/>
+                <em i="2891"/>
+            </d>
+            <d n="D&#xE9;velopper">
+                <em i="2892"/>
+                <em i="2893"/>
+                <em i="2894"/>
+                <em i="2895"/>
+                <em i="2896"/>
+                <em i="2897"/>
+                <em i="2898"/>
+                <em i="2899"/>
+                <em i="2900"/>
+                <em i="2901"/>
+                <em i="2593"/>
+                <em i="2595"/>
+            </d>
+            <d n="Factoriser">
+                <em i="2596"/>
+                <em i="2902"/>
+                <em i="2903"/>
+                <em i="2904"/>
+                <em i="2905"/>
+                <em i="2906"/>
+                <em i="2907"/>
+                <em i="2908"/>
+                <em i="2909"/>
+                <em i="2910"/>
+                <em i="2911"/>
+            </d>
+        </d>
+        <d n="Ensembles">
+            <em i="2879"/>
+        </d>
+        <d n="Equations">
+            <d n="Prendre un bon d&#xE9;part">
+                <em i="2597"/>
+                <em i="2598"/>
+                <em i="2599"/>
+                <em i="2600"/>
+            </d>
+            <d n="Equations de degr&#xE9; 1">
+                <d n="M&#xE9;thodes">
+                    <em i="2601"/>
+                    <em i="2602"/>
+                    <em i="2603"/>
+                    <em i="2604"/>
+                    <em i="2605"/>
+                    <em i="2606"/>
+                </d>
+                <d n="R&#xE9;solution">
+                    <em i="2887"/>
+                    <em i="2607"/>
+                    <em i="2608"/>
+                    <em i="2609"/>
+                    <em i="2610"/>
+                    <em i="2611"/>
+                    <em i="2612"/>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="2613"/>
+                    <em i="2614"/>
+                    <em i="2615"/>
+                    <em i="2616"/>
+                    <em i="2627"/>
+                    <em i="2628"/>
+                </d>
+            </d>
+            <d n="Equation produit nul">
+                <em i="2912"/>
+                <em i="2913"/>
+                <em i="2914"/>
+                <em i="2915"/>
+            </d>
+            <em i="2920"/>
+            <em i="2921"/>
+            <d n="Synth&#xE8;se">
+                <em i="2916"/>
+                <em i="2917"/>
+                <em i="2918"/>
+                <em i="2919"/>
+            </d>
+        </d>
+        <d n="Thal&#xE8;s">
+            <d n="Th&#xE9;or&#xE8;me de Thal&#xE8;s">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="3116"/>
+                    <em i="3117"/>
+                    <em i="3118"/>
+                </d>
+                <d n="Th&#xE9;or&#xE8;me direct">
+                    <em i="3119"/>
+                    <em i="3120"/>
+                    <em i="3121"/>
+                    <em i="3122"/>
+                    <em i="3123"/>
+                    <em i="3124"/>
+                    <em i="3125"/>
+                </d>
+                <d n="R&#xE9;ciproque">
+                    <em i="3126"/>
+                    <em i="3127"/>
+                    <em i="3128"/>
+                    <em i="3129"/>
+                    <em i="3130"/>
+                    <em i="3131"/>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="3132"/>
+                    <em i="3133"/>
+                    <em i="3134"/>
+                    <em i="3135"/>
+                    <em i="3136"/>
+                    <em i="3137"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="3138"/>
+                    <em i="3139"/>
+                    <em i="3140"/>
+                    <em i="3141"/>
+                    <em i="3142"/>
+                </d>
+            </d>
+        </d>
+        <d n="Pythagore">
+            <d n="Triangle rectangle">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="2675"/>
+                    <em i="2676"/>
+                    <em i="2677"/>
+                    <em i="2678"/>
+                    <em i="2679"/>
+                    <em i="2680"/>
+                </d>
+                <d n="Cercle">
+                    <em i="2681"/>
+                    <em i="2682"/>
+                    <em i="2683"/>
+                    <em i="2684"/>
+                    <em i="2685"/>
+                </d>
+                <d n="Th&#xE9;or&#xE8;me de Pythagore">
+                    <em i="2686"/>
+                    <em i="2687"/>
+                    <em i="2688"/>
+                    <em i="2689"/>
+                    <em i="2690"/>
+                    <em i="2691"/>
+                    <em i="2692"/>
+                    <em i="2693"/>
+                    <em i="2694"/>
+                    <em i="2695"/>
+                </d>
+                <d n="R&#xE9;ciproque">
+                    <em i="2696"/>
+                    <em i="2697"/>
+                    <em i="2698"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="2699"/>
+                    <em i="2700"/>
+                    <em i="2701"/>
+                    <em i="2702"/>
+                </d>
+            </d>
+            <d n="Droites remarquables (synth&#xE8;se)">
+                <em i="2842"/>
+                <em i="3306"/>
+                <em i="2843"/>
+                <em i="2844"/>
+                <em i="2845"/>
+                <em i="2846"/>
+                <em i="2847"/>
+                <em i="2848"/>
+                <em i="2860"/>
+                <em i="2861"/>
+                <em i="2862"/>
+                <em i="2863"/>
+                <em i="2864"/>
+                <em i="3307"/>
+            </d>
+        </d>
+        <d n="Espace [pas au programme officiel]">
+            <d n="Prendre un bon d&#xE9;part">
+                <em i="3184"/>
+                <em i="3186"/>
+            </d>
+            <d n="Boule, sph&#xE8;re">
+                <em i="3187"/>
+                <em i="3188"/>
+                <em i="3189"/>
+                <em i="3190"/>
+                <em i="3191"/>
+            </d>
+            <d n="Sections">
+                <em i="3199"/>
+                <em i="3200"/>
+                <em i="3201"/>
+                <em i="3202"/>
+                <em i="3203"/>
+                <em i="3204"/>
+            </d>
+            <d n="Synth&#xE8;se">
+                <em i="3206"/>
+                <em i="3207"/>
+            </d>
+            <d n="Pour aller plus loin ...">
+                <em i="3213"/>
+                <em i="3214"/>
+            </d>
+        </d>
+        <d n="Cercles">
+            <em i="3228"/>
+        </d>
+        <d n="Trigonom&#xE9;trie dans le triangle rectangle">
+            <d n="Prendre un bon d&#xE9;part">
+                <em i="3143"/>
+                <em i="3144"/>
+                <em i="3145"/>
+                <em i="3146"/>
+                <em i="3147"/>
+                <em i="3148"/>
+                <em i="3149"/>
+            </d>
+            <d n="Sinus">
+                <em i="3150"/>
+                <em i="3151"/>
+                <em i="3152"/>
+                <em i="3153"/>
+                <em i="3154"/>
+                <em i="3155"/>
+            </d>
+            <d n="Cosinus">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="2766"/>
+                    <em i="2767"/>
+                    <em i="2768"/>
+                    <em i="2769"/>
+                    <em i="2770"/>
+                    <em i="2771"/>
+                </d>
+                <d n="D&#xE9;finition">
+                    <em i="2772"/>
+                    <em i="2773"/>
+                    <em i="2774"/>
+                    <em i="2775"/>
+                    <em i="2776"/>
+                    <em i="2777"/>
+                </d>
+                <d n="Calculs">
+                    <em i="2778"/>
+                    <em i="2779"/>
+                    <em i="2780"/>
+                    <em i="2781"/>
+                    <em i="2782"/>
+                    <em i="2783"/>
+                    <em i="2784"/>
+                    <em i="2785"/>
+                    <em i="2786"/>
+                    <em i="2787"/>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="2788"/>
+                    <em i="2789"/>
+                    <em i="2790"/>
+                    <em i="2791"/>
+                    <em i="2792"/>
+                    <em i="2793"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="2794"/>
+                    <em i="2795"/>
+                </d>
+            </d>
+            <d n="Tangente">
+                <em i="3156"/>
+                <em i="3157"/>
+                <em i="3158"/>
+                <em i="3159"/>
+                <em i="3160"/>
+                <em i="3161"/>
+            </d>
+            <d n="Synth&#xE8;se">
+                <em i="3162"/>
+                <em i="3163"/>
+                <em i="3164"/>
+                <em i="3165"/>
+                <em i="3166"/>
+                <em i="3167"/>
+                <em i="3168"/>
+                <em i="3169"/>
+            </d>
+            <d n="Probl&#xE8;mes">
+                <em i="3170"/>
+                <em i="3171"/>
+                <em i="3172"/>
+                <em i="3173"/>
+                <em i="3174"/>
+            </d>
+            <d n="Propri&#xE9;t&#xE9;s">
+                <em i="3175"/>
+                <em i="3176"/>
+                <em i="3177"/>
+                <em i="3178"/>
+            </d>
+        </d>
+        <d n="G&#xE9;om&#xE9;trie cart&#xE9;sienne">
+            <d n="Rep&#xE9;rage : distance et milieu">
+                <d n="Rep&#xE8;res du plan">
+                    <em i="4174"/>
+                    <em i="4175"/>
+                    <em i="4176"/>
+                    <em i="4177"/>
+                    <em i="4178"/>
+                    <em i="4179"/>
+                </d>
+                <d n="Milieu d'un segment">
+                    <em i="4180"/>
+                    <em i="4181"/>
+                    <em i="4182"/>
+                    <em i="4183"/>
+                    <em i="4184"/>
+                </d>
+                <d n="Longueur d'un segment">
+                    <em i="4185"/>
+                    <em i="4186"/>
+                    <em i="4187"/>
+                    <em i="4188"/>
+                </d>
+                <d n="Probl&#xE8;mes">
+                    <em i="4191"/>
+                    <em i="4192"/>
+                    <em i="4193"/>
+                    <em i="4194"/>
+                    <em i="4195"/>
+                </d>
+            </d>
+            <d n="Equations de droites">
+                <d n="Equations">
+                    <em i="4445"/>
+                    <em i="4446"/>
+                    <em i="4447"/>
+                    <em i="4448"/>
+                    <em i="4449"/>
+                    <em i="4450"/>
+                    <em i="4451"/>
+                    <em i="4721"/>
+                </d>
+                <d n="Positions relatives de deux droites">
+                    <em i="4452"/>
+                    <em i="4453"/>
+                    <em i="4454"/>
+                    <em i="4455"/>
+                    <em i="4456"/>
+                </d>
+                <d n="Syst&#xE8;mes d'&#xE9;quations">
+                    <em i="4457"/>
+                    <em i="4458"/>
+                    <em i="4459"/>
+                    <em i="4460"/>
+                    <em i="4461"/>
+                    <em i="4462"/>
+                    <em i="4463"/>
+                    <em i="4464"/>
+                </d>
+                <d n="Probl&#xE8;mes d'application">
+                    <em i="4465"/>
+                    <em i="4466"/>
+                    <em i="4467"/>
+                    <em i="4468"/>
+                </d>
+                <j3p i="3021467" e="1" ico="j3p_s"/>
+                <j3p i="3021469" e="1" ico="j3p_s"/>
+                <j3p i="3021471" e="1" ico="j3p_s"/>
+                <j3p i="3021473" e="1" ico="j3p_s"/>
+                <j3p i="3021475" e="1" ico="j3p_s"/>
+                <j3p i="3021535" e="1" ico="j3p_s"/>
+                <j3p i="3021537" e="1" ico="j3p_s"/>
+            </d>
+        </d>
+        <d n="Syst&#xE8;mes d'&#xE9;quations">
+            <d n="Prendre un bon d&#xE9;part">
+                <em i="2974"/>
+                <em i="2975"/>
+                <em i="2976"/>
+                <em i="2977"/>
+                <em i="2978"/>
+            </d>
+            <d n="R&#xE9;solution">
+                <em i="2979"/>
+                <em i="2980"/>
+                <em i="2982"/>
+                <em i="2983"/>
+                <em i="2984"/>
+                <em i="2985"/>
+            </d>
+            <d n="Probl&#xE8;mes">
+                <em i="2986"/>
+                <em i="2987"/>
+            </d>
+            <d n="Pour aller plus loin ...">
+                <em i="2990"/>
+                <em i="2991"/>
+                <em i="2992"/>
+            </d>
+        </d>
+        <d n="Fonctions">
+            <d n="Notion de fonction">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="3051"/>
+                    <em i="3027"/>
+                    <em i="3030"/>
+                    <em i="3031"/>
+                    <em i="3032"/>
+                    <em i="3033"/>
+                </d>
+                <d n="Lectures graphiques">
+                    <em i="3034"/>
+                    <em i="3035"/>
+                    <em i="3036"/>
+                    <em i="3037"/>
+                    <em i="3038"/>
+                    <em i="3039"/>
+                    <em i="3330"/>
+                    <em i="3040"/>
+                </d>
+                <d n="Calculs">
+                    <em i="3041"/>
+                    <em i="3042"/>
+                    <em i="3043"/>
+                    <em i="3044"/>
+                    <em i="3045"/>
+                    <em i="3046"/>
+                    <em i="3047"/>
+                    <em i="3048"/>
+                    <em i="3050"/>
+                </d>
+                <em i="3049"/>
+                <d n="Pour aller plus loin ..."/>
+            </d>
+            <d n="Fonctions : images, ant&#xE9;c&#xE9;dents, courbes repr&#xE9;sentatives">
+                <d n="Notion de fonction">
+                    <em i="3041"/>
+                    <em i="3082"/>
+                    <em i="3042"/>
+                    <em i="3044"/>
+                    <em i="3088"/>
+                </d>
+                <d n="Courbe repr&#xE9;sentative et tableau de valeurs">
+                    <em i="3032"/>
+                    <em i="3033"/>
+                    <em i="3038"/>
+                    <em i="3065"/>
+                    <em i="3330"/>
+                    <em i="3071"/>
+                    <em i="3040"/>
+                    <em i="3045"/>
+                </d>
+                <d n="Equations">
+                    <em i="3049"/>
+                    <em i="2607"/>
+                    <em i="2608"/>
+                    <em i="2914"/>
+                </d>
+            </d>
+            <d n="Variations et extrema de fonctions">
+                <d n="Notion de sens de variation d'une fonction">
+                    <em i="4205"/>
+                    <em i="4206"/>
+                    <em i="4207"/>
+                    <em i="4208"/>
+                </d>
+                <d n="Courbe repr&#xE9;sentative et tableau de variations">
+                    <em i="4209"/>
+                    <em i="4210"/>
+                    <em i="4211"/>
+                    <em i="4212"/>
+                </d>
+                <d n="Maximum et minimum d'une fonction">
+                    <em i="4213"/>
+                    <em i="4214"/>
+                    <em i="4303"/>
+                    <em i="4215"/>
+                    <em i="4216"/>
+                    <em i="4304"/>
+                    <em i="4217"/>
+                </d>
+                <d n="Comparaison d'images &#xE0; l'aide du tableau de variations">
+                    <em i="4218"/>
+                    <em i="4219"/>
+                </d>
+            </d>
+            <d n="Fonctions affines">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="3028"/>
+                    <em i="3029"/>
+                    <em i="3052"/>
+                    <em i="3053"/>
+                    <em i="3054"/>
+                    <em i="3055"/>
+                </d>
+                <d n="Lin&#xE9;aires (lecture)">
+                    <em i="3056"/>
+                    <em i="3057"/>
+                    <em i="3058"/>
+                    <em i="3059"/>
+                    <em i="3060"/>
+                    <em i="4862"/>
+                    <em i="3061"/>
+                    <em i="3062"/>
+                </d>
+                <d n="Affines (lecture)">
+                    <em i="3063"/>
+                    <em i="3064"/>
+                    <em i="3065"/>
+                    <em i="3066"/>
+                    <em i="3067"/>
+                    <em i="3068"/>
+                    <em i="3069"/>
+                    <em i="4864"/>
+                    <em i="3070"/>
+                    <em i="3071"/>
+                </d>
+                <d n="Lin&#xE9;aires (calcul)">
+                    <em i="3072"/>
+                    <em i="3073"/>
+                    <em i="3074"/>
+                    <em i="3075"/>
+                    <em i="3076"/>
+                </d>
+                <d n="Affines (calcul)">
+                    <em i="3077"/>
+                    <em i="3078"/>
+                    <em i="3079"/>
+                    <em i="3081"/>
+                    <em i="3082"/>
+                    <em i="3083"/>
+                    <em i="3084"/>
+                    <em i="3085"/>
+                    <em i="3086"/>
+                    <em i="3087"/>
+                    <em i="3088"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="3089"/>
+                    <em i="3090"/>
+                    <em i="3091"/>
+                    <em i="3092"/>
+                    <em i="3093"/>
+                </d>
+                <j3p i="3021545" e="1" ico="j3p_s"/>
+            </d>
+        </d>
+        <d n="Statistiques [pas au programme officiel]">
+            <d n="Prendre un bon d&#xE9;part">
+                <em i="3094"/>
+                <em i="2658"/>
+                <em i="2659"/>
+                <em i="2660"/>
+                <em i="3095"/>
+                <em i="3096"/>
+                <em i="3097"/>
+                <em i="3098"/>
+                <em i="2657"/>
+            </d>
+            <d n="Fr&#xE9;quences">
+                <em i="2661"/>
+                <em i="2662"/>
+                <em i="2663"/>
+                <em i="2664"/>
+            </d>
+            <d n="Moyenne">
+                <em i="2665"/>
+                <em i="2666"/>
+                <em i="2667"/>
+                <em i="2668"/>
+                <em i="2669"/>
+                <em i="2670"/>
+                <em i="2671"/>
+            </d>
+            <d n="M&#xE9;diane, &#xE9;tendue, quartiles">
+                <em i="3099"/>
+                <em i="3100"/>
+                <em i="3101"/>
+                <em i="3102"/>
+                <em i="3103"/>
+                <em i="3104"/>
+                <em i="3105"/>
+                <em i="3106"/>
+                <em i="4926"/>
+                <em i="4928"/>
+                <em i="4930"/>
+                <em i="4932"/>
+            </d>
+            <d n="Synth&#xE8;se">
+                <em i="3107"/>
+                <em i="3108"/>
+                <em i="3109"/>
+                <em i="3110"/>
+            </d>
+        </d>
+    </d>
+    <d n="PO gymnasiale 2e">
+        <d n="Fonctions"/>
+        <d n="Fonctions polynomiales"/>
+        <d n="Pour aller plus loin ...">
+            <em i="3179"/>
+            <em i="3180"/>
+            <em i="3181"/>
+            <em i="3182"/>
+        </d>
+        <d n="Trigonom&#xE9;trie du triangle quelconque"/>
+        <d n="Fonctions rationnelles"/>
+        <d n="In&#xE9;quations">
+            <d n="In&#xE9;galit&#xE9;s, In&#xE9;quations">
+                <d n="Prendre un bon d&#xE9;part">
+                    <em i="2993"/>
+                    <em i="2994"/>
+                    <em i="2995"/>
+                    <em i="2996"/>
+                </d>
+                <d n="Solutions">
+                    <em i="2997"/>
+                    <em i="2998"/>
+                    <em i="2999"/>
+                    <em i="3000"/>
+                    <em i="3001"/>
+                </d>
+                <d n="R&#xE9;solution">
+                    <em i="3002"/>
+                    <em i="3003"/>
+                    <em i="3004"/>
+                    <em i="3005"/>
+                    <em i="3006"/>
+                    <em i="3007"/>
+                </d>
+                <d n="Pour aller plus loin ...">
+                    <em i="3008"/>
+                    <em i="3009"/>
+                    <em i="3010"/>
+                    <em i="3011"/>
+                </d>
+            </d>
+            <d n="R&#xE9;soudre une (in)&#xE9;quation">
+                <j3p i="3021541" e="1" ico="j3p_s"/>
+                <j3p i="3021543" e="1" ico="j3p_s"/>
+                <j3p i="3021547" e="1" ico="j3p_s"/>
+            </d>
+        </d>
+        <d n="Fonctions trigonom&#xE9;triques"/>
+        <d n="Composition et r&#xE9;ciproques"/>
+        <d n="Exponentielles"/>
+        <d n="Logarithmes">
+            <j3p i="3021394" e="1" ico="j3p_s"/>
+            <em i="4191"/>
+        </d>
+    </d>
+    <d n="PO gymnasiale 3e">
+        <d n="Vecteurs">
+            <d n="D&#xE9;finition et &#xE9;galit&#xE9; de vecteurs">
+                <em i="4766"/>
+                <em i="4768"/>
+                <em i="4770"/>
+                <em i="4772"/>
+                <em i="4774"/>
+                <em i="4776"/>
+                <em i="4778"/>
+                <em i="4780"/>
+                <em i="4782"/>
+                <em i="4784"/>
+                <em i="4786"/>
+                <em i="4788"/>
+            </d>
+            <d n="Sommes de vecteurs">
+                <em i="4834"/>
+                <em i="4836"/>
+                <em i="4838"/>
+                <em i="4840"/>
+                <em i="4842"/>
+                <em i="4844"/>
+                <em i="4846"/>
+                <em i="4848"/>
+                <em i="4850"/>
+                <em i="4852"/>
+                <em i="4854"/>
+            </d>
+            <d n="Produit d'un vecteur par un nombre">
+                <em i="4866"/>
+                <em i="4868"/>
+                <em i="4870"/>
+                <em i="4872"/>
+                <em i="4874"/>
+                <em i="4906"/>
+                <em i="4876"/>
+                <em i="4878"/>
+            </d>
+            <d n="Colin&#xE9;arit&#xE9;">
+                <em i="4908"/>
+                <em i="4910"/>
+                <em i="4912"/>
+                <em i="4914"/>
+                <em i="4916"/>
+                <em i="4918"/>
+                <em i="4920"/>
+            </d>
+            <d n="Pour aller plus loin">
+                <em i="4946"/>
+                <em i="4922"/>
+                <em i="4924"/>
+            </d>
+        </d>
+        <d n="Probabilit&#xE9;s-Statistiques">
+            <d n="Notion de probabilit&#xE9;s">
+                <em i="3111"/>
+                <em i="3112"/>
+                <em i="3113"/>
+                <em i="3114"/>
+            </d>
+            <d n="Probabilit&#xE9; sur un ensemble fini">
+                <d n="Situations d'&#xE9;quiprobabilit&#xE9;">
+                    <em i="4976"/>
+                    <em i="4978"/>
+                </d>
+                <d n="Propri&#xE9;t&#xE9;s">
+                    <em i="4980"/>
+                    <em i="4982"/>
+                    <em i="4984"/>
+                    <em i="4986"/>
+                </d>
+            </d>
+        </d>
+        <d n="D&#xE9;rivation">
+            <d n="Nombre d&#xE9;riv&#xE9;">
+                <j3p i="3021400" e="1" ico="j3p_s"/>
+            </d>
+            <d n="Calculs de d&#xE9;riv&#xE9;es">
+                <j3p i="3021419" e="1" ico="j3p_s"/>
+                <j3p i="3021421" e="1" ico="j3p_s"/>
+                <j3p i="3021423" e="1" ico="j3p_s"/>
+                <j3p i="3021425" e="1" ico="j3p_s"/>
+                <j3p i="3021427" e="1" ico="j3p_s"/>
+                <j3p i="3021429" e="1" ico="j3p_s"/>
+                <j3p i="3021431" e="1" ico="j3p_s"/>
+                <j3p i="3021433" e="1" ico="j3p_s"/>
+                <j3p i="3021435" e="1" ico="j3p_s"/>
+                <j3p i="3021437" e="1" ico="j3p_s"/>
+                <j3p i="3021439" e="1" ico="j3p_s"/>
+                <j3p i="3021441" e="1" ico="j3p_s"/>
+                <j3p i="3021447" e="1" ico="j3p_s"/>
+            </d>
+            <d n="&#xC9;quation de la tangente">
+                <j3p i="3021449" e="1" ico="j3p_s"/>
+                <j3p i="3021453" e="1" ico="j3p_s"/>
+            </d>
+        </d>
+    </d>
+    <d n="PO gymnasiale 4e">
+        <d n="Complexes [pas au programme N]">
+            <d n="Ecriture alg&#xE9;brique">
+                <j3p i="3021374" e="1" ico="j3p_s"/>
+                <j3p i="3021376" e="1" ico="j3p_s"/>
+                <j3p i="3021378" e="1" ico="j3p_s"/>
+                <!-- <j3p i="3021380" e="1" ico="j3p_s"/>
+                    <j3p i="3021382" e="1" ico="j3p_s"/>-->
+                <j3p i="3021384" e="1" ico="j3p_s"/>
+                <j3p i="3021404" e="1" ico="j3p_s"/>
+                <j3p i="3021406" e="1" ico="j3p_s"/>
+                <j3p i="3021408" e="1" ico="j3p_s"/>
+                <j3p i="3021459" e="1" ico="j3p_s"/>
+            </d>
+            <d n="Module d\'un nombre complexe">
+                <j3p i="3021386" e="1" ico="j3p_s"/>
+                <j3p i="3021388" e="1" ico="j3p_s"/>
+                <j3p i="3021390" e="1" ico="j3p_s"/>
+            </d>
+        </d>
+        <d n="Int&#xE9;gration">
+            <j3p i="3021394" e="1" ico="j3p_s"/>
+        </d>
+        <d n="Log/exp en analyse">
+            <d n="Calculs de d&#xE9;riv&#xE9;es et fonction exponentielle">
+                <j3p i="3021443" e="1" ico="j3p_s"/>
+                <j3p i="3021445" e="1" ico="j3p_s"/>
+                <j3p i="3021457" e="1" ico="j3p_s"/>
+            </d>
+            <d n="Exponentielle et tangente">
+                <j3p i="3021451" e="1" ico="j3p_s"/>
+            </d>
+            <d n="ln et tangente">
+                <j3p i="3021455" e="1" ico="j3p_s"/>
+                <em i="3326"/>
+            </d>
+        </d>
+    </d>
+</labomep_profil_suisse>
