@@ -54,6 +54,7 @@ var perfOutputStream
 
 var env = process.env.NODE_ENV || 'development';
 
+if (typeof lassi === 'undefined') var lassi = false
 
 /** 
  * Les messages à exclure
@@ -130,18 +131,18 @@ if (env !== 'production' && config.logs.debug) {
     })
   }
 
-  lassi.log('app', "fonction de log activée avec l'environnement : " +env)
+  if (lassi) lassi.log('app', "fonction de log activée avec l'environnement : " +env)
 
 } else {
   logDebug = function() {};
   log = function () {} // jshint ignore:line
-  lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
+  if (lassi) lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
 }
 
 log.debug = logDebug
 
 if (config.logs.perf) {
-  lassi.log('app', 'log des perfs dans ' +config.logs.perf)
+  if (lassi) lassi.log('app', 'log des perfs dans ' +config.logs.perf)
   perfOutputStream = fs.createWriteStream(config.logs.perf, {'flags': 'a'})
   log.perf = function (context, strToAdd) {
     if (context.perf) {

@@ -78,23 +78,24 @@ tools.encadre = function (int, min, max, label) {
 }
 
 /**
- * Parcours récursivement tab et remplace toutes les chaînes représentant des entiers en entiers
- * @param {Array} tab
- * @returns {Array} Le tableau modifié
+ * Renvoie une copie de tab où toutes les chaînes représentant des entiers sont des entiers (récursivement)
+ * @param {Array} tab Le tableau à analyser
+ * @returns {Array} Le tableau copié et éventuellement modifié
  */
 tools.integerify = function (tab) {
-  if (tab instanceof Object) {
+  var i, tabCopy = []
+  if (tab instanceof Array) {
     tab.forEach(function (value) {
-      var i
-      if (_.isArray(value)) value = tools.integerify(value)
+      if (_.isArray(value)) tabCopy.push(tools.integerify(value))
       else {
         i = parseInt(value, 10)
-        if (value == i) value = i
+        if (value == i) tabCopy.push(i)
+        else tabCopy.push(value)
       }
     })
   }
 
-  return tab
+  return tabCopy
 }
 
 /**

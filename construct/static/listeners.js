@@ -116,11 +116,11 @@ module.exports = function($flashMessage) {
    */
   lassi.on('context', function(context) {
     // on passe par les contrôleurs public si on a pas de user en session
-    if (!context.user) {
+    if (!context.user && !context.request.header('X-ApiToken')) {
       try {
         if (context.request.parsedUrl.pathname.indexOf('/ressource/') > -1) {
           context.request.parsedUrl.pathname = context.request.parsedUrl.pathname.replace(/\/ressource\//, '/public/')
-          log("pas de user en session, on modifie l'url pour prendre le controleur public")
+          log("pas de user en session ni de token, on modifie l'url pour prendre le controleur public")
           log('=> ' +context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||''))
         }
       } catch(error) { }

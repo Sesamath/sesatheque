@@ -36,6 +36,9 @@
 var assert = require("assert")
 var _ = require('lodash')
 var tools = require('../../construct/tools')
+// tools fait du log.error
+GLOBAL.log = require('../../construct/tools/log')
+
 var CounterMulti = require('../../construct/tools/CounterMulti')
 //var flow = require('seq');
 //var request = require('request')
@@ -68,6 +71,138 @@ describe('tools', function () {
       cmCloned.inc('foo')
       assert.strictEqual(2, cmCloned.foo)
       assert.strictEqual(1, cmCloned.length)
+    })
+  })
+
+  describe('encadre', function () {
+    it("retourne la valeur fournie si dans l'intervalle", function () {
+      assert.strictEqual(42, tools.encadre(42, -2, 48))
+    })
+    it("retourne la borne inf si trop petit", function () {
+      assert.strictEqual(42, tools.encadre(-2, 42, 48))
+    })
+    it("retourne la borne sup si trop grand", function () {
+      assert.strictEqual(42, tools.encadre(52, 2, 42))
+    })
+  })
+
+  describe('integerify', function () {
+    it("retourne le tableau avec les chaines représentant des entiers en entiers", function () {
+      var tabResult = tools.integerify([0, "-2", 3, "4", "cinq", 6])
+      var tabExpected = [0, -2, 3, 4, "cinq", 6]
+      for (var i = 0; i < tabResult.length; i++) {
+        assert.strictEqual(tabResult[i], tabExpected[i])
+      }
+      assert.strictEqual(tabResult.length, tabExpected.length)
+    })
+  })
+
+  describe('merge', function () {
+    var src = [0, "-2", 3, "4", "cinq", 6]
+    var srcClone = tools.clone(src)
+    var addons = [3, 8, -2, 'foo']
+    var expected = [0, "-2", 3, "4", "cinq", 6, 8, -2, 'foo']
+    tools.merge(src, addons)
+    it("tableaux simple", function () {
+      assert(!_.isEqual(src, srcClone))
+      for (var i = 0; i < expected.length; i++) {
+        assert.strictEqual(src[i], expected[i])
+      }
+      assert.strictEqual(src.length, expected.length)
+    })
+    it("tableaux mixtes", function () {
+      src = [6, {foo:'bar', baz:'42'}, [1,2], {foo:'bar'}]
+      addons = [{foo:'bar', baz:'42'}, {baz:'42'}, [3, 4, 5], [1,2], {foo:'baz'}]
+      expected = [6, {foo:'bar', baz:'42'}, [1,2], {foo:'bar'}, {baz:'42'}, [3, 4, 5], {foo:'baz'}]
+      tools.merge(src, addons)
+      for (var i = 0; i < expected.length; i++) {
+        if (typeof expected[i] === 'object') assert.ok(_.isEqual(src[i], expected[i]))
+        else assert.strictEqual(src[i], expected[i])
+      }
+      assert.strictEqual(src.length, expected.length)
+    })
+    it("d'objets", function () {
+      src = {
+        foo: 'bar',
+        arr: [1, 3, 'qat'],
+        baz: '42',
+        bar : {
+          titi : {
+            toto : 'foo',
+            tata : 'bar',
+            tutu : 42
+          }
+        }
+      }
+      addons = {
+        baz: 43,
+        bar : {
+          titi : {
+            tata : 'bartabac',
+            tyty : 2
+          }
+        },
+        arr : [3, 'cinq', -2],
+        tutu : 'foo'
+      }
+      expected = {
+        arr: [1, 3, 'qat', 'cinq', -2],
+        foo: 'bar',
+        baz: 43,
+        bar : {
+          titi : {
+            toto : 'foo',
+            tata : 'bartabac',
+            tutu : 42,
+            tyty : 2
+          }
+        },
+        tutu : 'foo'
+      }
+      tools.merge(src, addons)
+      assert.ok(_.isEqual(src, expected))
+    })
+  })
+
+  describe('update', function () {
+    it("d'objets", function () {
+      var src = {
+        foo: 'bar',
+        arr: [1, 3, 'qat'],
+        baz: '42',
+        bar : {
+          titi : {
+            toto : 'foo',
+            tata : 'bar',
+            tutu : 42
+          }
+        }
+      }
+      var addons = {
+        baz: 43,
+        bar : {
+          titi : {
+            tata : 'bartabac',
+            tyty : 2
+          }
+        },
+        arr : [3, 'cinq', -2],
+        tutu : 'foo'
+      }
+      var expected = {
+        foo: 'bar',
+        arr: [3, 'cinq', -2],
+        baz: 43,
+        bar : {
+          titi : {
+            tata : 'bartabac',
+            tyty : 2
+          }
+        },
+        tutu : 'foo'
+      }
+      tools.update(src, addons)
+      assert.ok(_.isEqual(src, expected))
     })
   })
 })
