@@ -66,7 +66,7 @@ module.exports = function($flashMessage) {
         // debug peut renvoyer ce qu'il veut on y touche pas, sinon
         // ça devrait être du html, on fixe 404 si pas de contenu
         if (!data.contentBloc && !context.status) {
-          log.error('pas de status ni content => 404')
+          log.error(reqHttp +' : pas de status ni content => 404')
           context.status = 404
         }
 

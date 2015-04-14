@@ -85,7 +85,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
     var options = {
       filters: [
-        {index: 'restriction', value: 0},
+        {index: 'restriction', values: [0]},
         {index: index, values: values}
       ],
       orderBy: 'oid',
@@ -93,9 +93,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       nb     : parseInt(context.arguments.nb)
     }
     $ressourceRepository.getListe(options, function (error, ressources) {
-      var data = $views.getDefaultData()
+      var data = $views.getDefaultData('liste')
+      data.$metas.title = 'Résultats de la recherche'
       if (error) data.contentBloc.error = error.toString()
       else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
+      context.html(data)
     })
   })
 
@@ -112,7 +114,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.post('by', function (context) {
     $ressourceRepository.getListe(context.post, function (error, ressources) {
-      var data = $views.getDefaultData()
+      var data = $views.getDefaultData('liste')
+      data.$metas.title = 'Résultats de la recherche'
       if (error) data.contentBloc.error = error.toString()
       else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
     })
@@ -131,7 +134,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.get('by/:json', function (context) {
     var options
-    var data = $views.getDefaultData()
+    var data = $views.getDefaultData('liste')
+    data.$metas.title = 'Résultats de la recherche'
     try {
       options = JSON.parse(context.arguments.json)
       $ressourceRepository.getListe(context.post, function (error, ressources) {

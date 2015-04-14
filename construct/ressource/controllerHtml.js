@@ -261,16 +261,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (context.get.all && context.session.user && context.session.user.roles && context.session.user.roles.admin)
       visibilite = "tout"
     $ressourceRepository.getListe(visibilite, context, options, function (error, ressources) {
-      var data = getDefaultData()
-      data.$metas.title = 'Résultats de recherche'
+      var data = $views.getDefaultData('liste')
+      data.$metas.title = 'Résultats de la recherche'
       if (error) data.error = error.toString()
-      else {
-        data.contentBloc = {
-          $view : 'liste',
-          ressources : $ressourceConverter.addUrlsToList(ressources)
-        }
-      }
-      console.log(data.contentBloc.ressources)
+      else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
       context.html(data)
     })
   })

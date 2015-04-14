@@ -21,6 +21,14 @@ urlBibli += confSesatheque.$server && confSesatheque.$server.port || '3000'
 urlBibli += '/api/ressource'
 var apiToken = confSesatheque.apiTokens[0]
 
+// conf ressource
+// conf des ressources
+var confRessource = require('../../construct/ressource/config')
+// constantes
+var tdCode = confRessource.constantes.typeDocumentaires
+var tpCode = confRessource.constantes.typePedagogiques
+var catCode = confRessource.constantes.categories
+
 /**
  * La conf par défaut de ce module, modifié par setOptions
  */
@@ -53,7 +61,7 @@ var afterAllCb = function () {
 var idsToRec  = new CounterMulti()
 var idsRec    = new CounterMulti()
 var idsFailed = new CounterMulti()
-var errors = {}
+var errors = {length:0}
 var pendingRelations = {}
 /** liste idComb:oid */
 var oids = {}
@@ -66,6 +74,16 @@ var topDepart = (new Date()).getTime()
  * @static
  */
 var common = {}
+
+/**
+ * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
+ * @param ressource
+ */
+common.addCatExoInteractif = function (ressource) {
+  ressource.categories       = [catCode.exerciceInteractif]
+  ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation]
+  ressource.typeDocumentaires= [tdCode.interactif]
+}
 
 /**
  * Ajoute une ressource dans la bibli en appelant l'api en http
@@ -116,6 +134,7 @@ function addRessource (ressource, next) {
 function addError(id, errorString) {
   if (errors[id]) errors[id] += '\n' +errorString
   else errors[id] = errorString
+  errors.length++
 }
 common.addError = addError
 
@@ -183,15 +202,17 @@ common.checkListOfInt = function (ids) {
 common.displayResult = function (next) {
   log(idsRec.length +' ressources enregistrées en ' +idsRec.total() +' appels')
   log('sur ' +idsToRec.length +' à enregistrer (reste ' +idsToRec.total() +' appels à faire)')
-  if (errors) {
+  if (errors.length) {
     var logfile = __dirname + '/../logs/import.error.log'
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
     log(idsFailed.length +' ressources avec erreurs :')
     writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
     _.each(errors, function (error, id) {
-      log(id +' : ' +error)
-      writeStream.write(id +' : ' +error)
+      if (id !== 'length') {
+        log(id + ' : ' + error)
+        writeStream.write(id + ' : ' + error)
+      }
     })
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
     writeStream.end()

@@ -87,11 +87,11 @@ function addError(id, error) {
 }
 
 /**
- * Ajoute à la ressource categorie, typePedagogiques et typeDocumentaires pour un exo interactif
+ * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
  * @param ressource
  */
 function addCatExoInteractif(ressource) {
-    ressource.categorie        = [catCode.exerciceInteractif]
+    ressource.categories       = [catCode.exerciceInteractif]
     ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation]
     ressource.typeDocumentaires= [tdCode.interactif]
 }
@@ -103,7 +103,7 @@ function addCatExoInteractif(ressource) {
  */
 function addCoursExoFixe(ressource) {
   // ne sachant pas trop on met cours et exercice
-  ressource.categorie         = [catCode.coursFixe, catCode.exerciceFixe]
+  ressource.categories        = [catCode.coursFixe, catCode.exerciceFixe]
   ressource.typeDocumentaires = [tdCode.imageFixe, tdCode.texte]
   ressource.typePedagogiques  = [tpCode.cours, tpCode.exercice]
 }
@@ -153,7 +153,7 @@ function parseRessource(row) {
   } else if (row.type_id === 13) {
     ressource.typeTechnique = 'ebeps'
     if (!ressource.titre) ressource.titre = "Animation interactive"
-    ressource.categorie  = catCode.activiteAnimee
+    ressource.categories  = catCode.activiteAnimee
     ressource.typePedagogiques = config.categoriesToTypes[catCode.activiteAnimee].typePedagogiques
     ressource.typeDocumentaires = config.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires
   } else if (row.type_id === 14) {
@@ -163,7 +163,7 @@ function parseRessource(row) {
   } else if (row.type_id === 15) {
     ressource.typeTechnique = 'msatdj'
     if (!ressource.titre) ressource.titre = "Exercice corrigé"
-    ressource.categorie = catCode.exerciceInteractif
+    ressource.categories = catCode.exerciceInteractif
     ressource.typePedagogiques = config.categoriesToTypes[catCode.exerciceInteractif].typePedagogiques
     ressource.typeDocumentaires = config.categoriesToTypes[catCode.exerciceInteractif].typeDocumentaires
   } else if (row.type_id === 16) {
@@ -173,7 +173,7 @@ function parseRessource(row) {
   } else if (row.type_id === 17) {
     ressource.typeTechnique = 'iep'
     if (!ressource.titre) ressource.titre = "Animation instrumenpoche"
-    ressource.categorie = catCode.activiteAnimee
+    ressource.categories = catCode.activiteAnimee
     ressource.typePedagogiques = config.categoriesToTypes[catCode.activiteAnimee].typePedagogiques
     ressource.typeDocumentaires = config.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires
   } else if (row.type_id === 18) {

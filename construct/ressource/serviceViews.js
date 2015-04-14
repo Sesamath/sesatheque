@@ -36,6 +36,8 @@
  * @param $ressourceRepository
  * @param $ressourceConverter
  * @param $accessControl
+ * @param $routes
+ * @param $settings
  */
 module.exports = function ($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) {
   var tools = require('../tools')
@@ -65,6 +67,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
    * Init des liens de menu
    * @param context
    * @param data
+   * @param {Ressource} ressource
    */
   function addMenu(context, data, ressource) {
     var oid = ressource ? ressource.oid : null
@@ -94,9 +97,11 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
 
   /**
    * Retourne les valeurs par défaut pour une vue ressource
+   * @param {string} [view=error]
    * @returns {{$views: string, $metas: {css: string[], js: string[]}, $layout: string, contentBloc: {}}}
    */
-  $views.getDefaultData = function () {
+  $views.getDefaultData = function (view) {
+    if (!view) view = 'error'
     return {
       $views : __dirname + '/views',
       $metas : {
@@ -104,7 +109,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
         js : ['/vendors/requirejs/require.2.1.js']
       },
       $layout: '../../static/views/layout-page',
-      contentBloc : {}
+      contentBloc : {$view:view}
     }
   }
 
@@ -117,7 +122,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
    * @param options
    */
   $views.prepareAndSend = function (error, ressource, context, view, options) {
-    var data = $views.getDefaultData()
+    var data = $views.getDefaultData(view)
 
     function termine() {
       // et la ressource (ou erreur)
@@ -126,7 +131,6 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
       if (view === 'display') addJsVars(data, ressource)
       // le menu pour tous, car preview utilise la vue display, petit gaspillage de data
       addMenu(context, data, ressource)
-      data.contentBloc.$view = view
       // le titre
       if (ressource) {
         if (ressource.titre) data.$metas.title = ressource.titre
@@ -199,12 +203,11 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
    * @param options
    */
   $views.printForm = function (error, ressource, context, options) {
-    var data = getDefaultData()
+    var data = $views.getDefaultData('form')
     // on ajoute le menu
     addMenu(context, data, ressource)
     // les datas pour le form
     data.contentBloc = $ressourceConverter.getFormViewData(error, ressource)
-    data.contentBloc.$view = 'form'
     // le titre
     data.$metas.title = 'Éditer une ressource'
     // et d'éventuels overrides
@@ -220,7 +223,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
    * @param context
    */
   $views.printSearchForm = function (context) {
-    var data = getDefaultData()
+    var data = $views.getDefaultData('search')
     // on ajoute le menu
     addMenu(context, data, null)
     // les datas pour le form

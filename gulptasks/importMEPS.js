@@ -182,22 +182,26 @@ function importMEPS(ids, next) {
   log('Starting importMEPS')
 
   // la liste des ids à traiter
-  if (common.checkListOfInt(ids)) where = ' WHERE mep_id IN (' + ids + ')'
+  if (ids) {
+    common.checkListOfInt(ids)
+    where = ' WHERE mep_id IN (' + ids + ')'
+  }
+  var query = "SELECT *" +
+              ", (SELECT MIN( dev_file_date ) FROM DEV_FILES" +
+              " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateCreation" +
+              ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
+              " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateMiseAJour" +
+              " FROM MEPS m" +where
+  log('la requete sql ', query)
 
   kmepcol
-      .raw("SELECT *" +
-        ", (SELECT MIN( dev_file_date ) FROM DEV_FILES" +
-            " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateCreation" +
-        ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
-          " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateMiseAJour" +
-        " FROM MEPS m" +where)
+      .raw(query)
       .then(function (rows) {
           var ressources = rows[0]
           ressources.forEach(function(row) {
             ressourceCourante = initRessourceMep(row)
             common.pushRessource(ressourceCourante)
           })
-          next()
       })
       .catch(function(e) {
         log(e.stack)
@@ -227,6 +231,7 @@ function importAIDES(ids, next) {
               ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
               " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') AS dateMiseAJour" +
               " FROM AIDES a " +where
+  log('la requete sql AIDES', query)
 
   kmepcol
       .raw(query)
@@ -237,7 +242,6 @@ function importAIDES(ids, next) {
           ressourceCourante = initRessourceAm(row)
           common.pushRessource(ressourceCourante)
         })
-        next()
       })
       .catch(function(e) {
         log(e.stack)
@@ -290,10 +294,12 @@ module.exports = function () {
   process.on('SIGINT', common.displayResult)
 
   flow().seq(function () {
+    common.setAfterAllCb(this)
     if (mepIds === null) this()
     else importMEPS(mepIds, this)
 
   }).seq(function () {
+    common.setAfterAllCb(this)
     if (aideIds === null) this()
     else importAIDES(aideIds, this)
 

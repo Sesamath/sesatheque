@@ -116,16 +116,18 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         if (_.isArray(value)) {
 
           // cas particulier de tableau de tableaux
-          if (view === 'describe' && key === 'relations' && value.length) {
-            viewData.relations.value = []
-            value.forEach(function (relation) {
-              viewData.relations.value.push({
-                predicat : config.listes.relations[relation[0]],
-                oid : relation[1],
-                lien : relation[2],
-                typeTechnique : relation[3]
+          if (key === 'relations' && value.length) {
+            if (view === 'describe') {
+              viewData.relations.value = []
+              value.forEach(function (relation) {
+                viewData.relations.value.push({
+                  predicat     : config.listes.relations[relation[0]],
+                  oid          : relation[1],
+                  lien         : relation[2],
+                  typeTechnique: relation[3]
+                })
               })
-            })
+            } // sinon on l'ajoute pas
 
           } else if (config.listes[key]) {
             // faut remplacer des ids par des labels
@@ -138,7 +140,8 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
             viewData[key].value = buffer.join(', ');
 
           } else {
-            viewData[key].value = value.join(', ')
+            // une clé inconnue, on laisse tel quel (une ressource avec des propriétés supplémentaires)
+            viewData[key].value = value
           }
 
 
@@ -146,13 +149,10 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
           viewData[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
 
         } else if (_.isObject(value)) {
-          try {
-            viewData[key].value = tools.stringify(value)
-          } catch (error) {
-            viewData[key].value = error.toString()
-          }
+            viewData[key].value = tools.stringify(value, 2)
 
         } else {
+          // une clé inconnue, on laisse tel quel (une ressource avec des propriétés supplémentaires)
           viewData[key].value = value;
         }
       }); // fin each propriété
@@ -163,6 +163,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
       // pas d'erreur mais pas de ressource non plus
       viewData.error = "Aucune ressource";
     }
+    if (view) viewData.$view = view
 
     return viewData
   }

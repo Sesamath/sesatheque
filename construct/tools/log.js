@@ -117,12 +117,11 @@ if (env !== 'production' && config.logs.debug) {
    * @param message
    * @param objectToDump
    * @param filter
+   * @param options
    */
-  log = function(message, objectToDump, filter) { // jshint ignore:line
+  log = function(message, objectToDump, filter, options) { // jshint ignore:line
     // (log étant défini en global dans la conf jshint il râle si on le redéfini)
-    out(message, objectToDump, filter)
-    /* console.log(message)
-    console.log(objectToDump)*/
+    out(message, objectToDump, filter, null, options)
   }
 
   if (config.logs.debugExclusions) {

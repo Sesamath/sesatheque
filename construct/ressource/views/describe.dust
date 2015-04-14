@@ -28,7 +28,7 @@
     <p>{resume.title} : {resume.value|s}</p>
     <p>{description.title} : {description.value|s}</p>
     <p>{commentaires.title} : {commentaires.value|s}</p>
-    <p>{parametres.title} : <pre>{parametres.value}</pre></p>
+    <p>{parametres.title} : <pre>{parametres.value|s}</pre></p>
 
     {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}
         <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>

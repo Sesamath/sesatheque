@@ -2,7 +2,7 @@
 {?error}
     <p class="has-error">{error}</p>
 {:else}
-    <ul class="liste">
+    <ul class="liste">{ressources.length} ressource{?ressources.length}s{/ressources.length}
     {#ressources}
     <li>{oid} : {titre}
         <span class="links">(
