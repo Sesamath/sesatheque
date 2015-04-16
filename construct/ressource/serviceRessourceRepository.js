@@ -110,7 +110,10 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
                     '\navant : ' + JSON.parse(ressourceBdd[prop]) +
                     '\naprès : ' + JSON.parse(ressource[prop]))
               } catch (e) {
-                log.debug('le parsing de ressource[' +prop +'] a planté ' +ressource.oid +' ' +ressource.origine +'/' +ressource.idOrigine)
+                log.debug(
+                    'le parsing de ressource[' +prop +'] a planté ' +ressource.oid +' ' +ressource.origine +'/' +ressource.idOrigine,
+                    [ressourceBdd[prop], ressource[prop]]
+                )
               }
             }
             needIncrement = true

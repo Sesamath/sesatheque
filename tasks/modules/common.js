@@ -89,11 +89,13 @@ common.addCatExoInteractif = function (ressource) {
 
 /**
  * Ajoute une ressource dans la bibli en appelant l'api en http
- * @private
+ * @public
  * @param ressource
  * @param next
  */
-function addRessource (ressource, next) {
+function addRessource(ressource, next) {
+  var idComb = common.getIdComb(ressource)
+  idsToRec.inc(idComb)
   nbLaunched++
   var options = {
     url    : urlBibli,
@@ -103,7 +105,6 @@ function addRessource (ressource, next) {
     json   : true,
     body   : ressource
   }
-  var idComb = common.getIdComb(ressource)
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (error || body.error || !body.oid) {
@@ -125,8 +126,9 @@ function addRessource (ressource, next) {
     next()
   })
 }
+common.addRessource = addRessource
 
-/**
+    /**
  * Ajoute une erreur pour cet id
  * @param id
  * @param {string} errorString
@@ -178,7 +180,8 @@ common.checkEnd = function (cb) {
       addRessource(waitingRessource.shift(), checkAndNext) // jshint ignore:line
     }
   } else if (nbLaunched === 0) {
-    log('toutes les ressources de cette étape ont été traitées (on en est à ' + idsRec.length + '/' + idsToRec.length + ')')
+    log('toutes les ressources de cette étape ont été traitées (on en est à ' + idsRec.length + '/' + idsToRec.length +
+        ' et ' +waitingRessource.length +' en attente)')
     clearTimeout(timerId)
     next()
   }
@@ -245,7 +248,6 @@ common.flushPendingRelations = function (next) {
 
     // on remplit la pile avec nos relations en attente
     _.each(pendingRelations, function (relations, idComb) {
-      idsToRec.inc(idComb)
       pile.push([idComb, relations])
     })
 
@@ -480,7 +482,6 @@ common.mergeRessource = function (ressourcePartielle, next) {
 common.pushRessource = function (ressource) {
   var idComb = common.getIdComb(ressource)
   if (opt.logProcess) log('push ' +idComb)
-  idsToRec.inc(idComb)
   if (nbLaunched < opt.maxLaunched) addRessource(ressource, common.checkEnd)
   else waitingRessource.push(ressource)
 }
@@ -490,7 +491,6 @@ common.pushRessource = function (ressource) {
  * @param ressource
  */
 common.deferRessource = function (ressource) {
-  idsToRec.inc(common.getIdComb(ressource))
   waitingRessource.push(ressource)
 }
 

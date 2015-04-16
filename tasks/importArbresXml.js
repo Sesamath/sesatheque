@@ -38,7 +38,8 @@ function needToSplit(xmlName) {
       // /^tous_les_manuels(\.part[0-9]+)?$/
 
       // lui a différents suffixes possibles
-      /^animations_interactives([^\.]+)?(\.part[0-9]+)?$/,
+      /^animations_interactives([^\.]+)?$/,
+      /^animations_interactives\.part[0-9]+$/,
       /^exercices_interactifs$/,
       /^exercices_non(\.part[0-9]+)?$/
   ]
@@ -50,12 +51,16 @@ function needToSplit(xmlName) {
 
 /**
  * Affecte certains titre et remplace _ par ' ' pour les autres
+ * @param arbreXml
  * @param xmlName
  * @returns {*}
  */
 function getTitre(arbreXml, xmlName) {
-  var titre = arbreXml.attrib && arbreXml.attrib.n || arbreXml.titre || xmlName.replace(/_/g, ' ')
+  var titre
   if (titre === 'exercices_non') titre = 'Tous les manuels et cahiers'
+  else if (arbreXml.attrib && arbreXml.attrib.n) titre = arbreXml.attrib.n
+  else titre = arbreXml.titre || xmlName.replace(/_/g, ' ')
+
   return titre
 }
 
@@ -116,8 +121,9 @@ function getArbreDefaultValues(idOrigine, titre) {
 }
 
 /**
- * Parse un xml (et appelle splitOrNotToSplit avec le résultat)
+ * Parse un xml (et appelle processArbreXml avec le résultat)
  * @param xmlFile
+ * @param next
  */
 function parseXml(xmlFile, next) {
   var file = __dirname +'/arbresXml/' +xmlFile
@@ -144,7 +150,7 @@ function parseXml(xmlFile, next) {
     } else {
       arbreXml = arbreXml._root
     }
-    splitOrNotToSplit(arbreXml, xmlName, next)
+    processArbreXml(arbreXml, xmlName, next)
 
   } catch (error) {
     common.addError(xmlName, "le parsing du xml " +xmlFile +" a planté : " +error.toString())
@@ -155,8 +161,9 @@ function parseXml(xmlFile, next) {
  * Regarde s'il faut découper l'arbreXml en branches avant de passer à convertAndDefer
  * @param arbreXml objet en sortie de parseXml
  * @param xmlName
+ * @param next
  */
-function splitOrNotToSplit(arbreXml, xmlName, next) {
+function processArbreXml(arbreXml, xmlName, next) {
   // si manuel ou cahier on ajoute à lastArbres[1] (tous les manuels)
   //if (/^Manuel/.test(xmlName) || /^Cahier/.test(xmlName)) {
   //  lastArbres[1].push(getArbreDefaultValues(xmlName, arbreXml.titre))
@@ -166,22 +173,22 @@ function splitOrNotToSplit(arbreXml, xmlName, next) {
     if (logProcess) log("split " +xmlName)
     var arbre = getArbreDefaultValues(xmlName, getTitre(arbreXml, xmlName))
     arbre.idOrigine = xmlName
-    // pour stocker des idOrigine qui serviront à récupérer les oid des branches quand elles auront été enregistrées
+    // pour stocker les idOrigine des branches qui serviront à récupérer les oid quand elles auront été enregistrées
     arbre.idOrigineBranches = []
 
-    var num = 0
+    var num = 1
     // on découpe en branches
     flow(arbreXml._children).seqEach(function (branche) {
-      log('découpage de ' +xmlName +', branche ' +branche)
       var nextBranche = this
+      var brancheName = xmlName + '.part' + num
       num++
-      if (branche.tag !== 'd') {
+      log('découpage de ' +xmlName +', branche ' +brancheName)
+      if (branche.tag === 'd') {
+        arbre.idOrigineBranches.push(brancheName)
+        processArbreXml(branche, brancheName, nextBranche)
+      } else {
         common.addError(xmlName, "doit être découpé mais on a trouvé un " + branche.tag + " à la racine")
         nextBranche()
-      } else {
-        var brancheName = xmlName + '.part' + num
-        arbre.idOrigineBranches.push(brancheName)
-        splitOrNotToSplit(branche, brancheName, nextBranche)
       }
 
     }).seq(function () {
@@ -196,11 +203,16 @@ function splitOrNotToSplit(arbreXml, xmlName, next) {
 
     }).seq(function () {
       // faut enregistrer l'arbre maintenant car on est peut-être en récursif
-      common.deferRessource(arbre)
-      common.checkEnd(next)
+      if (logProcess) log("envoi de l'arbre complété " +xmlName)
+      common.addRessource(arbre, this)
+
+    }).seq(function () {
+      if (logProcess) log('fin du traitement de ' +xmlName)
+      next()
 
     }).catch(function (error) {
       log('erreur dans le traitement des branches de ' +xmlName +', il ne sera pas ajouté', error)
+      next()
     })
 
   } else {
@@ -216,13 +228,18 @@ function splitOrNotToSplit(arbreXml, xmlName, next) {
  * @param next
  */
 function convertAndDefer(arbreXml, xmlName, next) {
+  function end () {
+    common.deferRessource(arbre)
+    next()
+  }
+
   var arbre = getArbreDefaultValues(xmlName, getTitre(arbreXml, xmlName))
   arbre.typePedagogiques = ressConf.categoriesToTypes[arbreCateg].typePedagogiques
   arbre.typeDocumentaires =ressConf.categoriesToTypes[arbreCateg].typeDocumentaires
   getEnfants(arbreXml, xmlName, function (enfants) {
     arbre.enfants = enfants
-    common.deferRessource(arbre)
-    next()
+    if (arbre.idOrigineBranches) getRefEnfants(arbre, end)
+    else end()
   })
 }
 
@@ -316,7 +333,13 @@ function getEnfants(arbreXml, xmlName, next) {
             }
             // on lui ajoute ses attributs éventuels
             delete child.attrib.i
-            if (!_.isEmpty(child.attrib)) enfant.attributes = child.attrib
+            try {
+              if (!_.isEmpty(child.attrib)) enfant.attributes = child.attrib
+            } catch(error) {
+              var msg = "L'affectation dans attributes de l'enfant " +(enfant.ref || enfant.idOrigine) +' a planté'
+              log(msg, error)
+              log.error(msg, error)
+            }
             // on vérifie qu'il a pas d'enfants
             if (child._children.length) common.addError(xmlName, "L'élément " +child.tag +" a des enfants, n° d'ordre " +child._id)
             enfants.push(enfant)
@@ -335,7 +358,7 @@ function getEnfants(arbreXml, xmlName, next) {
       next(enfants)
     }).catch(function (error) {
       log('plantage dans seq de getEnfants', error)
-      common.addError(xmlName, error.toString())
+      common.addError(xmlName, 'plantage dans seq de getEnfants : ' +error)
       next(enfants)
     })
   }
