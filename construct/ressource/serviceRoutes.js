@@ -50,7 +50,10 @@ module.exports = function ($settings) {
    */
   $routes.get = function(action) {
     var route = routes[action]
-    if (arguments.length > 1) route += '/' +Array.prototype.slice.call(arguments, 1).join('/')
+    if (arguments.length > 1) {
+      if (route) route += '/'
+      route += Array.prototype.slice.call(arguments, 1).join('/')
+    }
 
     return route
   }

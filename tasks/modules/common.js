@@ -53,6 +53,8 @@ var nbLaunched = 0
 var waitingRessource = []
 /** le timer pour arrêter l'import si on a pas de réponse pendant timeout s */
 var timerId
+/** la pile de callbacks */
+var callbacks = []
 /** La callback a appeler quand toutes les ressources ont été postées et que l'on a les réponses (ou timeout) */
 var afterAllCb = function () {
   throw new Error("il fallait appeler setAfterAllCb avant de lancer des enregistrements")
@@ -61,7 +63,6 @@ var afterAllCb = function () {
 // les ids traités
 var idsToRec  = new CounterMulti()
 var idsRec    = new CounterMulti()
-var idsFailed = new CounterMulti()
 var errors = {length:0}
 var pendingRelations = {}
 /** liste idComb:oid */
@@ -106,9 +107,7 @@ function addRessource (ressource, next) {
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (error || body.error || !body.oid) {
-      // KO
-      idsFailed.inc(idComb)
-      // le msg d'erreur
+      // KO, le msg d'erreur
       var errorString
       if (error) errorString = error.toString()
       else if (body.error) errorString = body.error
@@ -134,8 +133,10 @@ function addRessource (ressource, next) {
  */
 function addError(id, errorString) {
   if (errors[id]) errors[id] += '\n' +errorString
-  else errors[id] = errorString
-  errors.length++
+  else {
+    errors[id] = errorString
+    errors.length++
+  }
 }
 common.addError = addError
 
@@ -153,28 +154,33 @@ common.addPendingRelation = function (idComb, relation) {
  * Lance l'étape suivante (précisée avec setAfterAllCb) si toutes les ressources ont été traitées
  * ou si on reste plus de timeout ms sans être rappelé
  */
-common.checkEnd = function () {
+common.checkEnd = function (cb) {
+  var next = cb || afterAllCb
+  function checkAndNext() {
+    common.checkEnd(next)
+  }
+
   // le timeout
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(function () {
     var msg = 'timeout, ' +Math.floor(opt.timeout / 1000) +
               's sans rien depuis le dernier retour de bdd, il restait ' +nbLaunched +' ressources en cours et ' +
               waitingRessource.length +' en attente de traitement\n' +
-              'enregistrées ' +idsRec.length  +', failed ' +idsFailed.length
+              'enregistrées ' +idsRec.length  +', failed ' +errors.length
     addError(0, msg)
     log(msg)
-    afterAllCb()
+    next()
   }, opt.timeout)
 
   // on regarde s'il en reste en attente et si c'est terminé
   if (waitingRessource.length) {
     while (nbLaunched < opt.maxLaunched && waitingRessource.length) {
-      addRessource(waitingRessource.shift(), common.checkEnd)
+      addRessource(waitingRessource.shift(), checkAndNext) // jshint ignore:line
     }
   } else if (nbLaunched === 0) {
     log('toutes les ressources de cette étape ont été traitées (on en est à ' + idsRec.length + '/' + idsToRec.length + ')')
     clearTimeout(timerId)
-    afterAllCb()
+    next()
   }
 }
 
@@ -207,7 +213,7 @@ common.displayResult = function (next) {
     var logfile = __dirname + '/../../logs/import.error.log'
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
-    log(idsFailed.length +' ressources avec erreurs :')
+    log(errors.length +' ressources avec erreurs :')
     writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
     _.each(errors, function (error, id) {
       if (id !== 'length') {
@@ -343,6 +349,36 @@ common.getIdComb = function (ressource) {
 }
 
 /**
+ * Récupère une ref via l'api
+ * @param origine
+ * @param idOrigine
+ * @param next appelé avec {ref, titre, typeTechnique}
+ */
+common.getRef = function (origine, idOrigine, next) {
+  var idComb = origine +'/' +idOrigine
+  var options = {
+    url         : urlBibli + '/getRef/' +idComb,
+    headers     : {
+      "X-ApiToken": apiToken
+    },
+    json        : true,
+    content_type: 'charset=UTF-8'
+  }
+  //log('dans getRessource ' +idComb)
+  request.get(options, function (error, response, ref) {
+    if (error) {
+      addError(idComb, error.toString())
+      next(null)
+    } else if (ref.error) {
+      addError(idComb, ref.error)
+      next(null)
+    } else {
+      next(ref)
+    }
+  })
+}
+
+/**
  * Récupère une ressource via l'api
  * @param origine
  * @param idOrigine
@@ -375,43 +411,6 @@ common.getRessource = function (origine, idOrigine, next) {
   }
   //log('dans getRessource ' +idComb)
   request.get(options, function (error, response, ressource) {
-    //log("on récupère l'erreur", error)
-    //log("et la ressource", ressource)
-    if (error) {
-      addError(idComb, error.toString())
-      next(null)
-    } else if (ressource.error) {
-      addError(idComb, ressource.error)
-      next(null)
-    } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
-      addError(idComb, "ressource " + idComb + " incohérente : " +
-                       JSON.stringify(origine) + '/' + JSON.stringify(idOrigine) +
-                       '\n' + JSON.stringify(ressource))
-      next(null)
-    } else {
-      next(ressource)
-    }
-  })
-}
-
-/**
- * Récupère une ref via l'api
- * @param origine
- * @param idOrigine
- * @param next appelé avec {ref, titre, typeTechnique}
- */
-common.getRef = function (origine, idOrigine, next) {
-  var options = {
-    url         : urlBibli + '/getRef/' +origine +'/' +idOrigine,
-    headers     : {
-      "X-ApiToken": apiToken
-    },
-    json        : true,
-    content_type: 'charset=UTF-8'
-  }
-  //log('dans getRessource ' +idComb)
-  request.get(options, function (error, response, ressource) {
-    var idComb = common.getIdComb(ressource)
     //log("on récupère l'erreur", error)
     //log("et la ressource", ressource)
     if (error) {
@@ -467,7 +466,6 @@ common.mergeRessource = function (ressourcePartielle, next) {
     } else {
       var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
       var idErr = ressourcePartielle.oid || 0
-      idsFailed.inc(idErr)
       addError(idErr, errStr)
       log('pb au retour du merge ' + errStr, ressourcePartielle)
     }
@@ -488,20 +486,49 @@ common.pushRessource = function (ressource) {
 }
 
 /**
+ * Ajoute une ressource à la file d'attente
+ * @param ressource
+ */
+common.deferRessource = function (ressource) {
+  idsToRec.inc(common.getIdComb(ressource))
+  waitingRessource.push(ressource)
+}
+
+/**
  * Fixe la callback à rappeler quand la pile de ressource à envoyer à l'api sera vide
  * @param cb
  */
 common.setAfterAllCb = function (cb) {
+  callbacks.push(afterAllCb)
+  log('on ajoute à la pile de cb', afterAllCb)
   afterAllCb = cb
 }
 
+/**
+ * Retourne la callback à rappeler quand la pile de ressource à envoyer à l'api sera vide
+ */
+common.getAfterAllCb = function () {
+  return afterAllCb
+}
+
+/**
+ * Remet la callback précédente
+ * @param cb
+ */
+common.setPreviousAfterAllCb = function () {
+  if (callbacks.length) {
+    afterAllCb = callbacks.pop()
+    log('récupère de la pile de cb', afterAllCb)
+  }
+  else throw new Error("Plus de callbacks dans la pile, il doit manquer un appel de setAfterAllCb")
+}
 
 /**
  * Affecte les options (propriétés à choisir parmi timeout, maxLaunched, logApiCalls, log)
  * @param options
  */
 common.setOptions = function (options) {
-  tools.merge(opt, options)
+  tools.update(opt, options)
 }
 
 module.exports = common
