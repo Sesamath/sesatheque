@@ -32,28 +32,40 @@
 "use strict"
 
 module.exports = function (Personne) {
+  /**
+   * Retourne la liste des propriétés vraies d'un objet
+   * @param obj
+   * @returns {Array}
+   */
+  function truePropertiesList(obj) {
+    var list = []
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop) && obj.prop) list.push(prop)
+    }
+    return list
+  }
+
   Personne.construct = function () {
+    /**
+     * Id de la source d'authentification
+     * @type {string}
+     */
+    this.id = null
     /**
      * Prénom
      * @type {string}
      */
-    this.prenom = '';
+    this.prenom = ''
     /**
      * Nom
      * @type {string}
      */
-    this.nom = '';
+    this.nom = ''
     /**
      * Adresse email
      * @type {string}
      */
     this.email = ''
-
-    /**
-     * La liste des permissions {permission:boolean} n'est pas une propriété stockée de l'entity mais définie par init
-     * @type {Object}
-     */
-
     /**
      * La liste des roles {role:boolean}
      * @type {Object}
@@ -69,10 +81,24 @@ module.exports = function (Personne) {
      * suivant le source d'authentification par ex.
      * @type {string}
      */
-    this.infos = '';
+    this.infos = ''
+
+    /**
+     * En session, on a une propriété "permissions" supplémentaire, ajouté au moment du login et de la mise en session,
+     * elle est déduite des roles avec $accessControl.getPermissions(personne)
+     */
   }
 
   Personne
+      .defineIndex('id', 'string')
       .defineIndex('nom', 'string')
       .defineIndex('email', 'string')
+      // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
+      // une callback qui renvoie la valeur (ou un tableau de valeurs)
+      .defineIndex('roles', 'string', function () {
+        return truePropertiesList(this.roles)
+      })
+      .defineIndex('groupes', 'string', function () {
+        return truePropertiesList(this.groupes)
+      })
 }
