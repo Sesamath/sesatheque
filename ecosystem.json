@@ -1,5 +1,6 @@
 /**
  * fichier de conf pour pm2
+ * à dupliquer dans _private pour l'adapter à votre configuration
  */
 {
   "apps": [
@@ -19,7 +20,7 @@
       "merge_logs" : true,
       // on veut pas de watch dans tous les environnements, pour l'avoir lancer la commande
       // pm2 startOrGracefulReload pm2.json5 --env dev --watch '["construct", "config"]' --ignore-watch '["construct/qxApps", "construct/*/public"]'
-      // ou bien dupliquer ce fichier (par ex dans _private pour le laisser or git) en incluant ces deux directives
+      // ou bien dupliquer ce fichier
       // "watch": ["construct", "config"],
       // "ignore_watch" : ["construct/qxApps", "construct/*/public"],
       "env": {
@@ -49,10 +50,7 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque",
       path : "/var/www/bibli", // deploy setup va créer un dossier source
-      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrGracefulReload ecosystem.json",
-      env  : {
-        NODE_ENV: "production"
-      }
+      post-deploy : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrGracefulReload ecosystem.json --env production"
     },
     dev : {
       user : "bibli",
@@ -60,10 +58,7 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque",
       path : "/var/www/bibli",
-      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrRestart ecosystem.json",
-      env  : {
-        NODE_ENV: "dev"
-      }
+      post-deploy : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrRestart ecosystem.json --env dev"
     }
   }
 }
