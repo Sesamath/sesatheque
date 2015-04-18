@@ -1,0 +1,69 @@
+/**
+ * fichier de conf pour pm2
+ */
+{
+  "apps": [
+    {
+      "name": "sesatheque",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss.SSS",
+      // bizarrement, ce cluster mode est ignoré par `pm2 start` et pris en compte par `pm2 startOrRestart`
+      // les autres directives aussi sont ignorées avec du start seul...
+      "exec_mode": "cluster_mode",
+      "instances": "2",
+      "exec_interpreter": "node",
+      "script": "construct/index.js",
+      "node_args": [],
+      "pid_file": "./logs/sesatheque.pid",
+      "error_file": "./logs/error.log",
+      "out_file": "./logs/out.log",
+      "merge_logs" : true,
+      // on veut pas de watch dans tous les environnements, pour l'avoir lancer la commande
+      // pm2 startOrGracefulReload pm2.json5 --env dev --watch '["construct", "config"]' --ignore-watch '["construct/qxApps", "construct/*/public"]'
+      // ou bien dupliquer ce fichier (par ex dans _private pour le laisser or git) en incluant ces deux directives
+      // "watch": ["construct", "config"],
+      // "ignore_watch" : ["construct/qxApps", "construct/*/public"],
+      "env": {
+        "LOGDIR": "logs",
+        "PORT"  : 3001
+      },
+      "env_dev" : {
+        "NODE_ENV": "dev",
+        "watch": false
+      },
+      "env_production" : {
+        "NODE_ENV": "production",
+        "watch" : false
+      },
+      // créé pour mettre dedans le watch, mais ça marche pas
+      // (pris en compte seulement si déclaré au niveau sup, pas dans env_* {})
+      "env_local" : {
+        "NODE_ENV": "dev"
+      }
+    }
+  ],
+  // cf https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#deployment-pm2--090
+  deploy : {
+    production : {
+      user : "bibli",
+      host : "bibliprod", // cf ~/.ssh/config
+      ref  : "origin/master",
+      repo : "git@src.sesamath.net:sesatheque",
+      path : "/var/www/bibli", // deploy setup va créer un dossier source
+      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrGracefulReload ecosystem.json5",
+      env  : {
+        NODE_ENV: "production"
+      }
+    },
+    dev : {
+      user : "bibli",
+      host : "biblidev",
+      ref  : "origin/master",
+      repo : "git@src.sesamath.net:sesatheque",
+      path : "/var/www/bibli",
+      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrRestart ecosystem.json5",
+      env  : {
+        NODE_ENV: "dev"
+      }
+    }
+  }
+}
