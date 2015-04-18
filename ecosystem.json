@@ -49,7 +49,7 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque",
       path : "/var/www/bibli", // deploy setup va créer un dossier source
-      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrGracefulReload ecosystem.json5",
+      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrGracefulReload ecosystem.json",
       env  : {
         NODE_ENV: "production"
       }
@@ -60,7 +60,7 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque",
       path : "/var/www/bibli",
-      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrRestart ecosystem.json5",
+      "post-deploy" : "npm install && npm install sesasso-bibli git+ssh://git@src.sesamath.net:npm-sesasso-bibli && pm2 startOrRestart ecosystem.json",
       env  : {
         NODE_ENV: "dev"
       }
