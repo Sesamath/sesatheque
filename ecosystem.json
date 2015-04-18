@@ -7,7 +7,7 @@
     {
       "name": "sesatheque",
       "log_date_format": "YYYY-MM-DD HH:mm:ss.SSS",
-      // bizarrement, ce cluster mode est ignoré par `pm2 start` et pris en compte par `pm2 startOrRestart`
+      // bizarrement, ce cluster mode est ignoré par `pm2 start` et pris en compte par `pm2 startOrRestart` ou `pm2 startOrReload`
       // les autres directives aussi sont ignorées avec du start seul...
       "exec_mode": "cluster_mode",
       "instances": "2",
@@ -20,20 +20,17 @@
       "merge_logs" : true,
       // on veut pas de watch dans tous les environnements, pour l'avoir lancer la commande
       // pm2 startOrGracefulReload pm2.json5 --env dev --watch '["construct", "config"]' --ignore-watch '["construct/qxApps", "construct/*/public"]'
-      // ou bien dupliquer ce fichier
+      // mais c'est plus simple de dupliquer la partie apps de ce fichier en plusieurs _private/pm2-*.json suivant les cas
       // "watch": ["construct", "config"],
       // "ignore_watch" : ["construct/qxApps", "construct/*/public"],
       "env": {
-        "LOGDIR": "logs",
         "PORT"  : 3001
       },
       "env_dev" : {
-        "NODE_ENV": "dev",
-        "watch": false
+        "NODE_ENV": "dev"
       },
       "env_production" : {
-        "NODE_ENV": "production",
-        "watch" : false
+        "NODE_ENV": "production"
       },
       // créé pour mettre dedans le watch, mais ça marche pas
       // (pris en compte seulement si déclaré au niveau sup, pas dans env_* {})

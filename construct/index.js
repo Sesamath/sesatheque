@@ -37,6 +37,8 @@
  * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
  * - boot de l'appli
  */
+console.log("Démarrage de l'application avec l'environnement")
+console.log(process.env)
 
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')

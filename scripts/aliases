@@ -1,0 +1,4 @@
+# alias qui peuvent être ajouté à un ~/.bash_aliases par ex
+alias pm2watch="pm2 startOrGracefulReload ecosystem.json --env dev --watch '[\"construct\", \"config\"]' --ignore-watch '[\"construct/qxApps\", \"construct/*/public\"]'"
+alias pm2restart="pm2 startOrGracefulReload ecosystem.json --env dev --watch false"
+alias pm2stop="pm2 kill"
