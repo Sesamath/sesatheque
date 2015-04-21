@@ -86,6 +86,10 @@ module.exports = function (Ressource, $ressourceControl) {
     // si le tableau d'erreur est vide (devrait toujours être le cas,
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
     if (_.isEmpty(this.warnings)) delete this.warnings
+    // on vire aussi les uri, déduite du reste par le constructeur
+    delete this.displayUri
+    delete this.describeUri
+    delete this.dataUri
     // et l'idOrigine pour une origine locale si la ressource n'en a pas encore un
     if (this.origine === 'local' && !this.idOrigine) this.idOrigine = Ressource.getFreeId()
     next()

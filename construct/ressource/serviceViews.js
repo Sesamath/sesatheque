@@ -44,6 +44,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
   var _ = require('lodash')
   var seq = require('seq')
   var basePath = $settings.get('basePath', '/')
+  var ressourcePath = basePath + 'ressource/'
 
   var $views = {}
 
@@ -75,14 +76,15 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
     var links = []
     // lien ajout
     if ($accessControl.hasPermission('create', context)) {
-      links.push(tools.link(basePath +$routes.get('add'), 'Ajouter une ressource'))
+      links.push(tools.link(ressourcePath +$routes.get('add'), 'Ajouter une ressource'))
+      log('path ' +ressourcePath +$routes.get('add'))
     }
     // si on est sur une ressource on ajoute les liens contextuels pour cette ressource (auxquels on a droit)
     if (oid) {
       if ($accessControl.hasPermission('update', context, oid))
-        links.push(tools.link(basePath +$routes.get('edit', oid), 'Modifier cette ressource'))
+        links.push(tools.link(ressourcePath +$routes.get('edit', oid), 'Modifier cette ressource'))
       if ($accessControl.hasPermission('delete', context))
-        links.push(tools.link(basePath +$routes.get('delete', oid), 'Supprimer cette ressource'))
+        links.push(tools.link(ressourcePath +$routes.get('delete', oid), 'Supprimer cette ressource'))
       if ($accessControl.hasPermission('read', context, oid)) {
         links.push(tools.link($routes.getAbs('describe', ressource), 'Description de la ressource'))
         links.push(tools.link($routes.getAbs('preview', ressource), 'Voir la ressource'))
@@ -174,6 +176,19 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
   }
 
   /**
+   * Affiche un message d'erreur
+   * @param context
+   * @param errorMsg
+   * @param {number} [status=200]
+   */
+  $views.printError = function (context, errorMsg, status) {
+    var data = $views.getDefaultData()
+    data.error = errorMsg
+    context.status = status || 200
+    context.html(data)
+  }
+
+  /**
    * Envoie la ressource à la vue
    * @param error
    * @param ressource
@@ -207,7 +222,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
     // on ajoute le menu
     addMenu(context, data, ressource)
     // les datas pour le form
-    data.contentBloc = $ressourceConverter.getFormViewData(error, ressource)
+    tools.merge(data.contentBloc, $ressourceConverter.getFormViewData(error, ressource))
     // le titre
     data.$metas.title = 'Éditer une ressource'
     // et d'éventuels overrides

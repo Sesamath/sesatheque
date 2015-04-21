@@ -43,8 +43,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   //var tools = require('../tools')
   //var seq = require('seq')
 
-  var basePath = $settings.get('basePath', '/')
-
   /**
    * Vérifie que le token du post correspond à celui en session
    * @param context
@@ -54,7 +52,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (!context.post.token || context.post.token !== context.session.token) {
       if (context.session.token) delete context.session.token
       log.debug('pb de token', context.post)
-      context.accessDenied("Paramètres invalides")
+      $views.printError(context, "Jeton invalide (probablement une deuxième soummission du formulaire)", 403)
     } else next()
   }
 
@@ -63,16 +61,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param context
    * @returns {boolean} true si authentifié
    */
-  function checkSession(context) {
+  function checkAuthenticated(context) {
     if (!context.session || !context.session.user) {
-      var data = $views.getDefaultData()
-      data.error = "Authentification requise"
-      context.status = 401
-      context.html(data)
-
+      $views.printError(context, "Authentification requise", 401)
       return false
     }
-
     return true
   }
 
@@ -85,7 +78,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
 // describeByOrigin
-  controller.get($routes.get('describe ', ':origine', ':idOrigine'), function (context) {
+  controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -123,9 +116,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-// Create, affichage du form de saisie
+// Ajouter, affichage du form de saisie
   controller.get($routes.get('add'), function (context) {
-    if (checkSession()) {
+    if (checkAuthenticated(context)) {
       $accessControl.checkPermission('create', context, null, function () {
         var options = {$metas: {title: 'Ajouter une ressource'}}
         $views.printForm(null, null, context, options)
@@ -133,8 +126,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
-// Create, traitement du post
+// Ajouter, traitement du post
   controller.post($routes.get('add'), function (context) {
+    log('ctrl add')
     function rePrintForm(error, ressource) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
       $views.printForm(error, ressource, context, options)
@@ -154,9 +148,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               rePrintForm(error, ressource)
             } else {
               log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
-              var prefix = basePath
-              prefix += (ressource.restriction === 0) ? 'public' : 'ressource'
-              context.redirect(prefix + $routes.get('describe', ressource.oid))
+              context.redirect($routes.getAbs('describe', ressource.oid))
             }
           }) // write
         }
@@ -164,9 +156,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }) // checkToken
   })
 
-  // Uptate, affichage du form
+  // Modifier, affichage du form
   controller.get($routes.get('edit', ':oid'), function (context) {
-    if (checkSession(context)) {
+    if (checkAuthenticated(context)) {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
         $accessControl.checkPermission('update', context, ressource, function () {
@@ -177,9 +169,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
-  // Uptate, traitement du form
-  controller.post($routes.get('update'), function (context) {
+  // Modifier, traitement du form
+  controller.post($routes.get('edit', ':oid'), function (context) {
     function rePrintForm(error, ressource) {
+      if (error) log.debug('une erreur au post update', error)
+      else log.debug('des warnings au post update', ressource.warnings)
       var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
       $views.printForm(error, ressource, context, options)
     }
@@ -192,10 +186,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (error || !_.isEmpty(ressource.warnings)) rePrintForm(error, ressource)
         else {
           $ressourceRepository.write(ressource, function (error, ressource) {
-            if (error || !_.isEmpty(ressource.warnings)) rePrintForm(error, ressource)
-            else {
-              log.debug("update " + ressource.oid + " ok, on lance le redirect")
-              context.redirect(basePath +$routes.get('describe', ressource.oid))
+            if (error || !_.isEmpty(ressource.warnings)) {
+              rePrintForm(error, ressource)
+            } else {
+              var url = $routes.getAbs('describe', ressource)
+              log.debug("update " + ressource.oid + " ok, on lance le redirect vers " +url)
+              context.redirect(url)
             }
           })
         }
@@ -212,7 +208,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $metas : {title: 'Supprimer la ressource : ' + ressource.titre},
           contentBloc: {$view: 'delete'}
         }
-        context.session['del' + oid] = true
+        context.session.currentDelete = {
+          oid : ressource.oid,
+          titre : ressource.titre
+        }
         $views.printForm(error, ressource, context, options)
       })
     })
@@ -220,15 +219,31 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // Delete, traitement du post
   controller.post($routes.get('delete'), function (context) {
-    // @todo ajouter un printErreur en html
-    if (!context.post.oid) throw new Error("id manquant")
-
-    checkToken(context, function () {
-      $ressourceRepository.del(context.post.oid, function (error, nbObj) {
-        // @todo gérer l'erreur et une page de confirmation d'effacement
-        context.redirect(basePath)
+    var data = {
+      $metas     : {title: 'Suppression de ressource'},
+      contentBloc: {$view: 'delete'}
+    }
+    if (context.session.currentDelete && context.post.oid && context.post.oid == context.session.currentDelete.oid) {
+      // on peut effacer
+      var titre = context.session.currentDelete.titre
+      var oid = context.post.oid
+      checkToken(context, function () {
+        $ressourceRepository.del(context.post.oid, function (error, nbObj) {
+          if (error) {
+            log.error(error)
+            data.error = "Erreur lors de la suppression de la ressource " + titre + ' (' + oid + ') : <br />' + error.toString()
+          } else {
+            log.debug('suppression de ' +oid +' ok')
+            data.contentBloc.deletedId = oid
+            data.contentBloc.titre = titre
+          }
+          context.html(data)
+        })
       })
-    })
+    } else {
+      data.contentBloc.error = "Post avec informations manquantes"
+      context.html(data)
+    }
   })
 
   // form de recherche

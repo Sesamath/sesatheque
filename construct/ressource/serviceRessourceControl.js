@@ -100,7 +100,7 @@ module.exports = function () {
 
             } else if (typeVar === 'Number') {
               buffer = parseInt(value, 10)
-              if (buffer == value && buffer > 0) ressource[key] = buffer
+              if (buffer == value && buffer > -1) ressource[key] = buffer
               else errors.push("Le champ " + champ +' vaut ' +value +" qui n'est pas un entier positif")
 
             } else if (typeVar === 'Boolean') {
@@ -109,16 +109,19 @@ module.exports = function () {
               else errors.push("Le champ " + champ +' vaut ' +value +" qui n'est pas un booléen")
 
             } else if (typeVar === 'Array') {
-              // on tolère une string "[1,2]"
-              if (_.isString(value) && value.substr(0,1) === '[' && value.substr(-1) === ']') {
+              if (_.isArray(value)) {
+                ressource[key] = tools.integerify(value)
+              } else if (_.isString(value) && value.substr(0,1) === '[' && value.substr(-1) === ']') {
+                // on tolère une string "[1,2]"
                 try {
                   buffer = JSON.parse(value)
                   ressource[key] = tools.integerify(buffer) // c'était du json valide
                 } catch (e) {
                   errors.push("Le champ " + champ +' vaut ' +value +" qui n'est pas une liste");
                 }
+              } else {
+                errors.push("Le champ " + champ + " n'est pas une liste");
               }
-              else errors.push("Le champ " + champ + " n'est pas une liste");
 
             } else if (typeVar === 'Object') {
               if (_.isString(value)) {
@@ -137,16 +140,17 @@ module.exports = function () {
               log.error(msg);
             } // cast
 
-            log.debug("à la validation on a reçu pour " + key +' (pas ' +typeVar +') la valeur : ', value)
+            //log.debug("à la validation on a reçu pour " + key +' (pas ' +typeVar +') la valeur : ', value)
 
             // pour le reste c'est le bon type, mais on ajoute qq vérifs ou traitement
 
           } else if (typeVar === 'Number') {
-            // on vérifie quand même entier positif
+            // c'est bien un number mais on vérifie quand même entier positif
             if (parseInt(value, 10) !== value) errors.push("Le champ " + config.labels[key] + " ne contient pas un entier");
             if (value < 0) errors.push("Le champ " + config.labels[key] + " ne contient pas un entier positif");
 
           } else if (typeVar === 'Array') {
+            // et pour les array on passe les strings d'entiers en entiers
             ressource[key] = tools.integerify(value)
           }
         }

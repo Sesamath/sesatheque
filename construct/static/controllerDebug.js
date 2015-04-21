@@ -50,11 +50,13 @@ module.exports = function (controller) {
    * Une route pour afficher des objets en dev (debug)
    */
   controller.get('session', function(context) {
+    log('ctrl session ')
     // on ajoute un compteur pour vérifier que ça s'incrémente de 1 à chaque affichage
     if (context.session.compteur) context.session.compteur++
     else context.session.compteur = 1
     var data = getDefaultData()
-    data.contentBloc.debug = tools.stringify(context.session)
+    data.$metas = {title : 'La session courante'}
+    data.contentBloc.debug = tools.stringify(context.session, 2)
     context.html(data)
   })
 
@@ -78,17 +80,17 @@ module.exports = function (controller) {
   })
 
   // renvoie en json ce que l'on reçoit en post
-  controller.get('post', function (context) {
+  controller.post('ping', function (context) {
     context.json(context.post)
   })
 
   // Renvoie {result:"ok"}
-  controller.get('post', function (context) {
+  controller.get('resultOk', function (context) {
     context.json({result:"ok"})
   })
 
   // Renvoie {error:"Une erreur déclenchée exprès"}
-  controller.get('post', function (context) {
+  controller.get('resultKo', function (context) {
     context.json({error:"Une erreur déclenchée exprès"})
   })
 }

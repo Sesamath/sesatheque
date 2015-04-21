@@ -65,8 +65,8 @@ staticComponent.controller(function () {
 /**
  * En dev on ajoute des routes de debug
  */
-if (isProd) {
-  staticComponent.controller(function () {
+if (!isProd) {
+  staticComponent.controller('debug', function () {
     require('./controllerDebug')(this)
   })
 }

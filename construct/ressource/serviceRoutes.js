@@ -41,7 +41,7 @@ module.exports = function ($settings) {
   var $routes = {}
 
   /**
-   * Retourne la route (sans préfixe de controleur) d'une action
+   * Retourne la route (sans préfixe de controleur ni slash de début) d'une action
    * Les arguments supplémentaires sont concaténé avec /
    * @memberOf $routes
    *
@@ -73,10 +73,11 @@ module.exports = function ($settings) {
     if (!oid) {
       log.error(new Error("appel de $routes.getAbs sans ressource ni oid"))
     } else if (routes.hasOwnProperty(action)) {
-      route = $settings.get('basePath', '/')
+      route = '/'
       if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
-      route += (ressource.restriction === 0) ? 'public/' : 'ressource/'
-      route += this.get(action, ressource.oid)
+      // si on avait qu'un oid ce sera toujours ressource/
+      route += (ressource && ressource.restriction === 0) ? 'public/' : 'ressource/'
+      route += $routes.get(action, oid)
     } else {
       log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
     }

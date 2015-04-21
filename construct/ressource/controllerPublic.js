@@ -42,7 +42,6 @@
  * @param $routes
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $views, $routes) {
-  log('controller ressourcePublic')
   //var tools = require('../tools')
 
   function affiche(context, view, options) {

@@ -107,7 +107,7 @@ tools.integerify = function (tab) {
  */
 tools.link = function (route, texte, args) {
   if (args) {
-    if (_.isArray(args)) route += '/' +args.join('/')
+    if (_.isArray(args)) route += args.join('/')
     else route += '/' +args
   }
 

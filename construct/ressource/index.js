@@ -35,7 +35,7 @@
 /** {Component} Composant de gestion des types de contenu "Ressource" */
 var ressourceComponent = lassi.component('ressource')
 
-ressourceComponent.config(function($settings, Ressource) {
+ressourceComponent.config(function($settings) {
   // on vérifie que l'on a un cache avec des valeur acceptables
   var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
   if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")

@@ -1,4 +1,4 @@
 <p>Debug</p>
 <pre>
-{debug}
+{debug|s}
 </pre>

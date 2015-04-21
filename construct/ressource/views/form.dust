@@ -49,6 +49,11 @@
             {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
         </div>
         {/parametres}
+        {?enfants}
+        <div class="form-group">
+            {>wrapper widget="textarea" o=enfants cols=50 rows=5 /}
+        </div>
+        {/enfants}
 
         {! todo widget auteurs et contributeurs !}
 

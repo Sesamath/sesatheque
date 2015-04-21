@@ -209,6 +209,12 @@ function Ressource(initObj) {
    * L'oid de l'archive correspondant à la version précédente
    */
   this.archiveOid = filters.int(initObj.archiveOid)
+  /** Uri d'affichage */
+  this.displayUri = (this.restriction ? '/ressource' : '/public') +'/voir/' +(this.oid ? this.oid : this.origine +'/' +this.idOrigine)
+  /** Uri de la description */
+  this.describeUri = (this.restriction ? '/ressource' : '/public') +'/voir/' +(this.oid ? this.oid : this.origine +'/' +this.idOrigine)
+  /** Uri des datas (json) */
+  this.dataUri = '/api' +(this.restriction ? '/ressource' : '/public') +(this.oid ? this.oid : this.origine +'/' +this.idOrigine)
 }
 
 /**

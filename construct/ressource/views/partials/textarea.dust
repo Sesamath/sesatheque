@@ -25,4 +25,4 @@
           {?rows}rows="{rows}"{/rows}
           {?width}width="{width}"{/width}
           {?height}height="{height}"{/height}
-          {?o.label}placeholder="{o.label}"{/o.label}>{o.value}</textarea>
+          {?o.label}placeholder="{o.label}"{/o.label}>{o.value|s}</textarea>

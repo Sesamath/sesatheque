@@ -56,11 +56,14 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
    * @returns {Array}
    */
   function arrayToDust(key, selectedValues, isUnique) {
+    //log.debug("arrayToDust de " +key, selectedValues)
+    if (selectedValues && !_.isArray(selectedValues)) throw new Error("La propriété " + key + " de la ressource n'est pas un tableau");
     var choices = [];
     var i = 0;
     _.each(config.listes[key], function (label, cbValue) {
-      // cbValue est une string (le nom de la propriété), on veut la valeur entière éventuelle
-      //if (cbValue == parseInt(cbValue, 10)) cbValue = parseInt(cbValue, 10)
+      // cbValue est toujours une string (propriété de l'objet)
+      var intValue = parseInt(cbValue, 10)
+      if (intValue == cbValue) cbValue = intValue
       var choice = {
         label: label,
         value: cbValue
@@ -71,16 +74,12 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         i++;
       }
       // et on ajoute les selected s'il y en a
-      if (!_.isEmpty(selectedValues)) {
-        if (!_.isArray(selectedValues)) {
-          throw new Error("La propriété " + key + " de la ressource n'est pas un tableau");
-        }
-        if (selectedValues.indexOf(cbValue) > -1) {
-          choice.selected = true;
-        }
+      if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
+        choice.selected = true
       }
       choices.push(choice);
     });
+    //log.debug("renvoie ", choices)
 
     return choices;
   }
@@ -254,7 +253,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
 
         } else if (_.isObject(value)) {
           try {
-            value = JSON.stringify(value)
+            value = JSON.stringify(value, 2)
           } catch (error) {
             value = error.toString()
           }
@@ -281,15 +280,28 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
       value:token,
       hidden:true
     }
+    // et en attendant l'édition d'arbre, on le colle dans parametres
+    if (ressource.enfants && ressource.enfants.length) {
+      if (ressource.typeTechnique !== 'arbre') {
+        log.error(new Error("ressource avec enfants qui n'est pas un arbre"), ressource)
+      } else {
+        viewData.parametres.label = "Enfants"
+        try {
+          viewData.parametres.value = JSON.stringify(ressource.enfants, undefined, 2)
+        } catch (error) {
+          viewData.parametres.value = error.toString()
+        }
+      }
+    }
 
     return viewData
   }
 
   /**
    * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
-   * @param data
-   * @param {boolean=} partial Passer true pour ne pas générer d'erreur sur des champs requis manquants
-   * @return {Ressource}
+   * @param {object} data Le post
+   * @param {boolean} [partial=false] Passer true pour ne pas générer d'erreur sur des champs requis manquants
+   * @param {function} next
    * @throws {Error} En cas de données invalides
    * @memberOf $ressourceConverter
    */
@@ -301,8 +313,18 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         // on nous envoie la ressource en json dans une string
         try {
           data = JSON.parse(data.ressource)
-        } catch (e) {
+        } catch (error) {
+          log.error(error)
           throw new Error("json invalide dans la propriété ressource postée")
+        }
+      }
+      if (data.typeTechnique && data.typeTechnique === 'arbre') {
+        try {
+          data.enfants = JSON.parse(data.parametres)
+          data.parametres = {}
+        } catch (e) {
+          if (!data.warnings) data.warnings = []
+          data.warnings.push("Erreurs enfants : json invalide");
         }
       }
 

@@ -2,7 +2,7 @@
     {?error}<p class="has-error">{error}</p>{/error}
 
 {?deletedId}
-    La ressource {oid} a été définitivement supprimée
+    La ressource « {titre} » ({oid}) a été définitivement supprimée
 {:else}
     {?id}
     Supprimer cette ressource définitivement ?
