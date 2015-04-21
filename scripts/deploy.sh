@@ -1,0 +1,51 @@
+#!/bin/bash
+
+dirInitial="$PWD"
+dirApp=$(dirname $0)/../
+PM2=_private/pm2.json5
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  echo "deploie l'application sesatheque en utilisant "
+  echo "options obligatoire (il en faut une des deux)"
+  echo "  -d : pour déployer en développement"
+  echo "  -p : pour déployer en production"
+  echo "option facultative"
+  echo "  -c : pour indiquer un autre fichier de déploiement que $PM2"
+  exit 0
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+# check des options
+dest=''
+while getopts "c:dp" OPTION
+do
+  case $OPTION in
+    c ) PM2="$OPTARG";;
+    d ) dest='dev';;
+    p ) dest='production';;
+    * ) usage;;
+  esac
+done
+
+[ -z "$dest" ] && usage
+
+cd "$dirApp"
+
+[ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && exit 1
+
+if [ "$dest" == "production" ]
+then
+  echo "Vous allez déployer en PRODUCTION, sûr ? [o/N]"
+  read rep
+  [ "$rep" != "o" ] && echo "Abandon" && exit 0
+fi
+
+pm2 deploy $PM2 $dest
+
+fin
