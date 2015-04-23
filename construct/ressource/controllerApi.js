@@ -283,6 +283,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param context
    */
   controller.post('ressource', function (context) {
+    /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+    log.error(new Error('une trace pour ' +reqHttp)) */
     if (context.perf) {
       var msg = 'start-'
       if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
@@ -299,14 +301,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     $ressourceConverter.valideRessourceFromPost(context.post, partial, function (error, ressource) {
       try {
-        if (error) throw error
-        if (partial) {
+        if (error) {
+          sendJson(context, error)
+        } else if (partial) {
           // faut la charger
-          if (ressource.oid) {
+          if (ressource.oid) { // par oid
             $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
               updateAndOut(context, error, ressourceBdd, ressource)
             })
-          } else {
+          } else { // ou par origine/idOrigine
             $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
               updateAndOut(context, error, ressourceBdd, ressource)
             })
@@ -550,8 +553,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $ressourceConverter.valideRessourceFromPostedArbre(context.post, partial, function (error, ressource) {
       // log.debug("dans api arbre on récupère", ressource)
       try {
-        if (error) throw error
-        if (partial) {
+        if (error) {
+          sendJson(context, error)
+        } else if (partial) {
           $ressourceRepository.load(oid, function (error, ressourceBdd) {
             updateAndOut(context, error, ressourceBdd, ressource, final)
           })

@@ -178,11 +178,15 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       $cacheRessource.set(ressource)
     }
 
-    if (error) next(error)
-    else {
-      if (_.isArray(ressources)) ressources.forEach(processOne)
-      else if (ressources) processOne(ressources)
-      next(null, ressources)
+    try {
+      if (error) next(error)
+      else {
+        if (_.isArray(ressources)) ressources.forEach(processOne)
+        else if (ressources) processOne(ressources)
+        next(null, ressources)
+      }
+    } catch(error) {
+      next(error)
     }
   }
 
@@ -443,7 +447,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         try {
           options = JSON.parse(options)
         } catch (error) {
-          error.userMessage = "options de recherche invalides"
+          error.message = "options de recherche invalides (erreur de syntaxe json)"
           throw error
         }
       }
@@ -489,23 +493,23 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
 
       } else if (visibilite == 'prof') {
         if (!$accessControl.hasPermission('corrections', context)) {
-          return next(new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources"))
+          throw new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources")
         }
         query = query.match('restriction').equals(1)
 
       } else if (visibilite == 'perso') {
         if (!context.session.user || !context.session.user.oid)
-          return next(new Error("Autentification nécéssaire pour consulter vos propres ressources"))
+          throw new Error("Autentification nécéssaire pour consulter vos propres ressources")
         query = query.match('auteurs').equals(context.session.user.oid)
 
       } else if (visibilite == 'tout') {
         if (!context.session.user.roles || !context.session.user.roles.admin)
-          return next(new Error("Il faut être admin pour tout voir"))
+          throw new Error("Il faut être admin pour tout voir")
 
       } else {
         // on a pas mis de restriction, c'est pas normal
         log.error(new Error("Appel de getListe avec visibilite " +visibilite))
-        return next(new Error("Appel de getListe incorrect"))
+        throw new Error("Appel de getListe incorrect")
       }
 
       // orderBy
@@ -526,8 +530,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
 
     } catch (error) {
       log.debug(error)
-      if (error.userMessage) next(new Error(error.userMessage))
-      else next(error)
+      next(error)
     }
   }
 
@@ -556,7 +559,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
      */
     function getReserved() {
       nbTest ++
-      if (nbTest > 10) return next(new Error("impossible de récupérer le dernier idOrigine pour l'origine 'local'"))
+      if (nbTest > 10) throw new Error("impossible de récupérer le dernier idOrigine pour l'origine 'local'")
 
       $cache.get('lastLocalId', function (error, id) {
         if (error) next(error)
@@ -589,8 +592,12 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         }
       })
     }
-
-    getReserved()
+    // et on lance la recherche
+    try {
+      getReserved()
+    } catch(error) {
+      next(error)
+    }
   }
 
   return $ressourceRepository

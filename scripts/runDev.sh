@@ -8,7 +8,7 @@ function fin() {
 }
 
 function usage() {
-  echo "Lance l'application en mode dev avec node construct/index.js"
+  echo "Lance l'application en mode dev avec node --stack_trace_limit=100 --stack-size=2048 construct/index.js"
   echo "(ce script n'est là que pour donner la commande à lancer)"
   exit 0
 }
@@ -18,6 +18,6 @@ trap fin EXIT
 
 cd "$dirApp"
 
-node construct/index.js
+node --stack_trace_limit=100 --stack-size=2048 construct/index.js
 
 fin

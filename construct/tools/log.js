@@ -88,7 +88,8 @@ function out(message, objectToDump, filter, stream, options) {
       if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
       else {
         var dump = tools.stringify(objectToDump)
-        if ((!options || !options.noTrim) && dump.length > 200) dump = dump.substr(0, 200) + '…'
+        var max = options.max || 200
+        if (dump.length > max) dump = dump.substr(0, max) + '…'
         message += '\n' +dump  + "\n";
       }
     }

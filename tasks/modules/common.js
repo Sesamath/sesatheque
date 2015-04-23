@@ -109,10 +109,10 @@ function addRessource(ressource, next) {
     nbLaunched--
     if (error || body.error || !body.oid) {
       // KO, le msg d'erreur
-      var errorString
-      if (error) errorString = error.toString()
-      else if (body.error) errorString = body.error
-      else errorString = tools.stringify(body)
+      var errorString = 'erreur sur le post '+options.url +' : '
+      if (error) errorString += error.toString()
+      else if (body.error) errorString += body.error
+      else errorString += tools.stringify(body)
       addError(idComb, errorString)
       if (opt.logApiCalls) log(idComb + ' KO : ' + errorString)
     } else {
@@ -134,6 +134,13 @@ common.addRessource = addRessource
  * @param {string} errorString
  */
 function addError(id, errorString) {
+  if (!_.isString(errorString)) errorString = errorString.toString()
+  if (!errorString || errorString === 'undefined') errorString = (new Error("addError sans message d'erreur")).stack
+  // on a un message non vide
+  if (!id) {
+    id = 'general'
+    errorString += '\n' +(new Error('id undefined')).stack
+  }
   if (errors[id]) errors[id] += '\n' +errorString
   else {
     errors[id] = errorString
@@ -217,15 +224,16 @@ common.displayResult = function (next) {
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
     log('erreurs vers '+logfile)
     log(errors.length +' ressources avec erreurs :')
-    writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
-    _.each(errors, function (error, id) {
-      if (id !== 'length') {
-        log(id + ' : ' + error)
-        writeStream.write(id + ' : ' + error)
+    writeStream.write("Erreurs d'importation de " +__filename +' à ' +moment().format('YYYY-MM-DD HH:mm:ss'))
+    var id, msg
+    for (id in errors) {
+      if (errors.hasOwnProperty(id) && id !=='length') {
+        msg = id + ' : ' + errors[id]
+        log(msg)
+        writeStream.write(msg)
       }
-    })
+    }
     writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
-    writeStream.end()
   } else log('Aucune erreur rencontrée')
   log('Durée : ' +common.getElapsed(topDepart)/1000 +'s')
   if (next) next()
@@ -309,8 +317,8 @@ common.flushPendingRelations = function (next) {
             if (opt.logRelations) log('fin relations de ' +idComb)
             thisFlow()
           }).catch(function (error) {
-            log('error dans le traitement des relations de ' +idComb, error.stack || error)
-            addError(idComb, error.toString())
+            log('erreur dans le traitement des relations de ' +idComb, error.stack || error)
+            addError(idComb, 'erreur de relations : ' +error.toString())
             thisFlow()
           })
           // fin du subFlow
@@ -369,10 +377,10 @@ common.getRef = function (origine, idOrigine, next) {
   //log('dans getRessource ' +idComb)
   request.get(options, function (error, response, ref) {
     if (error) {
-      addError(idComb, error.toString())
+      addError(idComb, 'erreur sur le get '+options.url +' : ' +error.toString())
       next(null)
     } else if (ref.error) {
-      addError(idComb, ref.error)
+      addError(idComb, 'erreur renvoyé par get '+options.url +' : ' +ref.error)
       next(null)
     } else {
       next(ref)
@@ -416,10 +424,10 @@ common.getRessource = function (origine, idOrigine, next) {
     //log("on récupère l'erreur", error)
     //log("et la ressource", ressource)
     if (error) {
-      addError(idComb, error.toString())
+      addError(idComb, 'erreur sur le get '+options.url +' : ' +error.toString())
       next(null)
     } else if (ressource.error) {
-      addError(idComb, ressource.error)
+      addError(idComb, 'erreur retournée par get '+options.url +' : ' +ressource.error)
       next(null)
     } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
       addError(idComb, "ressource " + idComb + " incohérente : " +
@@ -468,7 +476,7 @@ common.mergeRessource = function (ressourcePartielle, next) {
     } else {
       var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
       var idErr = ressourcePartielle.oid || 0
-      addError(idErr, errStr)
+      addError(idErr, 'erreur sur le post '+options.url +' : ' +errStr)
       log('pb au retour du merge ' + errStr, ressourcePartielle)
     }
     next()

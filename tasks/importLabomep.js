@@ -10,7 +10,7 @@
 var knex = require('knex')
 //var _ = require('lodash')
 //var request = require('request')
-var moment = require('moment')
+//var moment = require('moment')
 var flow   = require('seq')
 var xml2js = require('xml2js')
 
@@ -19,8 +19,6 @@ var common = require('./modules/common')
 // raccourcis
 var log = common.log // jshint ignore:line
 
-/** le timestamp en ms du lancement de ce script */
-var topDepart = (new Date()).getTime()
 /** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
 var origine
 
@@ -48,43 +46,6 @@ var catCode = config.constantes.categories;
 var dbConfigLabomep = require(__dirname + '/../_private/config/labomep');
 // les connexions aux bases
 var klabomep = knex(dbConfigLabomep);
-
-/**
- * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
- * pour les avoir sous la static pour éventuel debug
- */
-/** ids des ressources traitées ici */
-var idsParsed = [];
-/** ids des ressources sur la pile d'envoi */
-var idsToSend = [];
-/** ids des ressources envoyées */
-//var idsSent = [];
-/** ids des ressources avec une réponse de l'api */
-var idsResp = []
-/** ids des ressources enregistrées par l'api */
-var idsOk = []
-/** ids des ressources dont l'enregistrement a planté */
-var idsFailed = [];
-
-/** la liste des erreurs rencontrées (la clé est l'id, 0 pour les erreurs générées ici hors ressource) */
-var errors = {}
-
-/**
- * Ajoute une erreur à la liste qui sera affichée à la fin
- * (et affiche la stack en console si c'est une erreur de notre code)
- * @param id
- * @param error
- */
-function addError(id, error) {
-  if (error instanceof Error) {
-    log(error.stack)
-    error = error.toString()
-  }
-  if (errors[id]) errors[id] += '\n'
-  else errors[id] = ''
-  errors[id] += error
-  if (id) idsFailed.push(id)
-}
 
 /**
  * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
@@ -194,7 +155,6 @@ function parseRessource(row) {
   }
 
   if (ajout) {
-    idsParsed.push(ressource.idOrigine);
     if (logProcess) log('processing ' + ressource.idOrigine)
     // on transforme le xml en objet js pour certains
     switch (ressource.typeTechnique) {
@@ -257,9 +217,9 @@ function modifyUrl(ressource, next) {
     }
     xml2js.parseString(xmlSrc, options, function (error, result) {
       if (error) {
-        log(error.stack)
         log("le parsing du xml a planté " +xmlSrc)
-        addError(ressource.idOrigine, "le parsing du xml a planté " +ressource.parametres.xml)
+        log(error.stack)
+        common.addError(ressource.idOrigine, "le parsing du xml a planté " +ressource.parametres.xml)
       } else {
         // log('le xml', xmlSrc)
         // log('donne', result)
@@ -295,106 +255,75 @@ function modifyUrl(ressource, next) {
                 .replace(/\&amp;/g, '&')
                 .replace(/\&lt;/g, '<')
                 .replace(/\&gt;/g, '>')
-            console.log(p.consigne)
+            // log('la consigne : ' +p.consigne)
           }
         } else {
-          return addError(ressource.idOrigine, "Url sans adresse")
+          return common.addError(ressource.idOrigine, "Url sans adresse")
         }
         next(ressource)
       }
     })
   } catch (error) {
-    addError(idComb, "le parsing du xml a planté " +xmlSrc)
+    common.addError(idComb, "le parsing du xml a planté " +xmlSrc)
   }
 }
 
-/**
- * Affiche la compilation des résultats
- * @param next
- */
-function displayResult(next) {
-  // attendues 4109 + 1613
-  log(idsParsed.length +' ressources traitées')
-  log(idsToSend.length +' ressources à poster')
-  log(idsResp.length +" réponses de l'api")
-  log(idsOk.length +' ressources enregistrées')
-  if (idsFailed.length) {
-    var fs = require('fs')
-    var logfile = __dirname + '/../logs/importLabomep.error.log'
-    var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
-    log('erreurs vers '+logfile)
-    log(idsFailed.length +' ressources avec erreurs :' +idsFailed.join(','))
-    writeStream.write("Erreurs d'importation de " +moment().format('YYYY-MM-DD HH:mm:ss'))
-    idsFailed.forEach(function (idOrigine) {
-      log(idOrigine +' : ' +errors[idOrigine])
-      writeStream.write(idOrigine +' : ' +errors[idOrigine])
-    })
-    writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
-    writeStream.end();
-  } else log('Aucune erreur rencontrée')
-  log('Durée : ' +common.getElapsed(topDepart)/1000 +'s')
-  if (next) next()
-  else process.exit()
+// on vire node et ce fichier passé en 1er arg
+var argv = process.argv.slice(2)
+var ids
+var query
+
+log('task ' + __filename);
+
+// on doit préciser persos ou bibs
+if (argv[0] === '--persos') {
+  query = "SELECT perso_id AS id, perso_type_id AS type_id, perso_titre AS titre, perso_descriptif AS descriptif," +
+      " perso_commentaire AS commentaire, perso_xml AS xml, su.user_id AS sslsesa_user_id FROM PERSOS" +
+      " INNER JOIN sslsesa_user su ON perso_util_id = user_labomep_id LIMIT 1000"
+  origine = 'labomepPERSOS'
+} else if (argv[0] === '--bibs') {
+  query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
+      " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS"
+  origine = 'labomepBIBS'
+} else {
+  throw new Error("il faut ajouter l'argument --persos ou --bibs " +
+      "(suivi éventuellement d'une liste d'ids séparés par des virgules)")
 }
 
-module.exports = function () {
-  // les 3 premiers args sont node, /path/2/gulp, nomDeLaTache
-  var argv = process.argv.slice(3)
-  var ids
-  var query
-
-  log('task ' + __filename);
-
-  // on doit préciser persos ou bibs
-  if (argv[0] === '--persos') {
-    query = "SELECT perso_id AS id, perso_type_id AS type_id, perso_titre AS titre, perso_descriptif AS descriptif," +
-        " perso_commentaire AS commentaire, perso_xml AS xml, su.user_id AS sslsesa_user_id FROM PERSOS" +
-        " INNER JOIN sslsesa_user su ON perso_util_id = user_labomep_id"
-    origine = 'labomepPERSOS'
-  } else if (argv[0] === '--bibs') {
-    query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
-        " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS"
-    origine = 'labomepBIBS'
-  } else {
-    throw new Error("il faut ajouter l'argument --persos ou --bibs " +
-        "(suivi éventuellement d'une liste d'ids séparés par des virgules)")
-  }
-
-  // on regarde s'il faut se limiter à certains ids
-  ids = argv.slice(1)[0]
-  if (ids) {
-    common.checkListOfInt(ids)
-    logProcess = true
-    logRelations = true
-    log('On ne traitera que les id ' + ids)
-    if (origine === 'labomepPERSOS') query += " WHERE perso_id IN(" +ids +")"
-    else query += " WHERE bib_id IN(" +ids +")"
-  }
-
-  // en cas d'interruption on veut le résultat quand même
-  process.on('SIGTERM', displayResult);
-  process.on('SIGINT', displayResult);
-
-  // yapluka
-  flow().seq(function () {
-    // la cb quand toutes les ressources seront enregistrées
-    common.setAfterAllCb(this)
-    klabomep
-        .raw(query)
-        .exec(function (error, rows) {
-                if (error) throw error
-                if (rows[0]) rows[0].forEach(parseRessource)
-                else log("Pas de ressources avec " + query)
-              })
-  }).seq(function () {
-    common.flushPendingRelations(this)
-  }).seq(function () {
-    displayResult(this)
-  }).seq(function () {
-    log('END')
-    process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
-  }).catch(function (error) {
-    log('Erreur dans le flow :', error)
-    displayResult()
-  })
+// on regarde s'il faut se limiter à certains ids
+ids = argv.slice(1)[0]
+if (ids) {
+  common.checkListOfInt(ids)
+  logProcess = true
+  logRelations = true
+  log('On ne traitera que les id ' + ids)
+  if (origine === 'labomepPERSOS') query += " WHERE perso_id IN(" +ids +")"
+  else query += " WHERE bib_id IN(" +ids +")"
 }
+
+// en cas d'interruption on veut le résultat quand même
+process.on('SIGTERM', common.displayResult);
+process.on('SIGINT', common.displayResult);
+
+// yapluka
+flow().seq(function () {
+  // la cb quand toutes les ressources seront enregistrées
+  common.setAfterAllCb(this)
+  klabomep
+      .raw(query)
+      .exec(function (error, rows) {
+              if (error) throw error
+              if (rows[0]) rows[0].forEach(parseRessource)
+              else log("Pas de ressources avec " + query)
+            })
+}).seq(function () {
+  common.flushPendingRelations(this)
+}).seq(function () {
+  common.displayResult(this)
+}).seq(function () {
+  log('END')
+  process.exit()
+}).catch(function (error) {
+  log('Erreur dans le flow :', error)
+  common.displayResult()
+})

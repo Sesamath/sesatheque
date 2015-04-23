@@ -34,6 +34,7 @@
 
 module.exports = function($flashMessage) {
   var _ = require('lodash')
+  var tools = require('../tools')
 
   /**
    * Le listener sur afterRailUse est dans construct/index.js (il ajoute la gestion de CORS
@@ -45,74 +46,102 @@ module.exports = function($flashMessage) {
    */
   lassi.on('beforeTransport', function(context, data) {
     var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-    log.debug(
+    var isApi = (context.request.originalUrl.substr(0, 5) === '/api/')
+
+    /**
+     * Ajoute à data nos params par défaut s'il n'existent pas et met le contentType html
+     * @param title Le titre à mettre s'il n'y en avait pas
+     * @param errorMsg Le message d'erreur s'il n'y en avait pas
+     */
+    function prepareErrorHtmlData(title, errorMsg) {
+      var defaultData = {
+        $metas     : {
+          title: title
+        },
+        $views     : __dirname + '/views',
+        $layout    : 'layout-page',
+        contentBloc: {
+          $view: 'error',
+          error: errorMsg
+        }
+      }
+      tools.complete(data, defaultData)
+      context.contentType = 'text/html'
+      log.debug('on a généré des data pour une erreur ' +context.status, data, 'beforeTransport', {max:2000})
+    }
+
+    /* on envoie toutes les réponses dans le log de debug */
+    if (!isProd) log.debug(
         'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
         data,
         'beforeTransport',
-        {noTrim:true}
-    )
-    console.log('listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +')')
+        {max:2000}
+    ) /* */
 
-    // l'api gère ses erreurs toute seule sur ses urls
-    if (context.contentType !== 'application/json') {
-      // mais si c'est une url qu'elle ne gère pas on le fait pour elle
-      if (context.request.originalUrl.substr(0, 5) === '/api/') {
-        log.error(new Error("requete " +reqHttp +" et contentType non json " +context.contentType), data)
-        context.status = 404
+    /**
+     * Gestion des erreurs (lassi ne l'a pas encore fait)
+     */
+    // erreurs 500
+    if (context.error) {
+      // un truc a planté et c'est lassi qui l'a récupéré mais pas notre code
+      // (il doit manipuler les data mais pas affecter context.error)
+      log.error('erreur 500 sur ' +reqHttp, context.error)
+      context.status = 500
+      // on façonne notre erreur 500
+      if (isApi) {
         context.contentType = 'application/json'
-        if (!data.error) data.error = 'not found'
+        if (!data.error) data.error = context.error.toString()
+      } else {
+        prepareErrorHtmlData('Erreur interne', 'Erreur interne :\n' +context.error.toString().replace('Error: ', ''))
+      }
+      delete context.error //pour que lassi ne génère pas son erreur 500 en text/plain
 
-      } else if (context.request.originalUrl.substr(0, 7) !== '/debug/') {
-        // debug peut renvoyer ce qu'il veut on y touche pas, sinon
-        // ça devrait être du html, on fixe 404 si pas de contenu
-        if (!data.contentBloc && !context.status) {
-          log.error(reqHttp +' : pas de status ni content => 404')
-          context.status = 404
+    } else {
+      // erreur 404 ?
+      if (!context.status && _.isEmpty(data)) {
+        context.status = 404
+        data = {}
+        log.error(reqHttp + ' : pas de status ni content => 404')
+      }
+      // et on gère ici les erreurs à rendre en html
+      if (context.status && context.status > 400) {
+        var msg
+        switch (context.status) {
+          case 404:
+            msg = "Cette page n'existe pas"
+            break
+          case 401:
+          case 403:
+            msg = "Authentification requise"
+            break
+          default:
+            msg = "Ooops, une erreur " + context.status + ' est survenue'
         }
-
-        // et on ne gère que les erreurs
-        if (context.status && context.status > 400) {
-          // lassi a mis du plain sur les erreurs
-          context.contentType = 'text/html'
-          // et une string dans data
-          if (typeof data !== 'object') data = {}
-          // ou data.content
-          if (data.content) delete data.content
-          // on ajoute layout et vue pour cette erreur
-          if (!data.$metas) data.$metas = {}
-          data.$views = __dirname +'/views'
-          if (!data.$layout) data.$layout = 'layout-page'
-          if (!data.contentBloc) data.contentBloc = {}
-          data.contentBloc.$view = 'error'
-
-          // reste à choisir le texte d'erreur à afficher
-          var msg
-          switch (context.status) {
-            case 404: msg = "Cette page n'existe pas"; break
-            case 403: msg = "Authentification requise"; break
-            default: msg = "Ooops, une erreur est survenue (" +context.status +')'
-          }
-          data.contentBloc.error = msg
-          data.$metas.title = msg
-          log.debug(reqHttp +" en erreur " +context.status +", les data après modif", data)
-          //log.debug("et le contexte", context)
+        if (isApi) {
+          context.contentType = 'application/json'
+          if (!data.error) data.error = msg
+        } else {
+          prepareErrorHtmlData(msg, msg)
         }
-
-        // on ajoute d'éventuels messages flash si on est en html
-        if (context.contentType === 'text/html') {
-          var flashData = $flashMessage.getAndPurge(context)
-          if (flashData) _.merge(data, flashData)
-        }
-
       }
     }
+    // fin du traitement des erreurs
 
-    // la mesure de perf dans le log
+    // on ajoute d'éventuels messages flash si on est en html (erreur ou pas)
+    if (context.contentType === 'text/html') {
+      var flashData = $flashMessage.getAndPurge(context)
+      if (flashData) _.merge(data, flashData)
+    }
+
+    // et la mesure de perf dans le log
     if (context.perf && context.perf.msg) log.perf.out(context)
+    log('fin de beforeTransport avec les data', data, 'beforeTransport', {trim:5000})
   })
 
   /**
-   * Listener context pour mesure de perf (si on a précisé un log de perf dans la conf)
+   * Listener context pour
+   * - utiliser le controleur public si on est pas authentifié et qu'il n'y a pas de token
+   * - mesure de perf (si on a précisé un log de perf dans la conf)
    */
   lassi.on('context', function(context) {
     // on passe par les contrôleurs public si on a pas de user en session

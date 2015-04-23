@@ -93,4 +93,9 @@ module.exports = function (controller) {
   controller.get('resultKo', function (context) {
     context.json({error:"Une erreur déclenchée exprès"})
   })
+
+  // déclenche une erreur 500
+  controller.get('erreur500', function () {
+    throw new Error("Une erreur 500 provoquée")
+  })
 }

@@ -146,9 +146,10 @@ tools.merge = function(object, newValues, strict) {
       else obj[key] = value
     })
   }
+
   if (object instanceof Array && newValues instanceof Array) mergeArray(object, newValues)
   else if (object instanceof Object && newValues instanceof Object) mergeObj(object, newValues)
-  else if (strict) throw new Error('tools.merge réclame 2 Object ou 2 Array')
+  else if (strict) log.error(new Error('tools.merge réclame 2 Object ou 2 Array'))
 }
 
 /**
@@ -237,7 +238,6 @@ tools.toJour = function (date) {
  * Update object en y ajoutant toutes les propriétés de addition
  * @param object
  * @param addition
- * @returns {object}
  */
 tools.update = function(object, addition) {
   Object.getOwnPropertyNames(addition).forEach(function(property) {
@@ -247,6 +247,21 @@ tools.update = function(object, addition) {
         Object.getOwnPropertyDescriptor(addition, property)
     );
   });
+}
+
+/**
+ * Update object en y ajoutant toutes les propriétés de default qui n'existait pas dans object
+ * @param object
+ * @param defaultValues
+ */
+tools.complete = function(object, defaultValues) {
+  function completeObj(obj, values) {
+    _.each(values, function(value, key) {
+      if (!obj[key]) obj[key] = value
+      else if (_.isObject(obj[key]) && _.isObject(value)) completeObj(obj[key], value)
+    })
+  }
+  if (object instanceof Object && defaultValues instanceof Object) completeObj(object, defaultValues)
 }
 
 module.exports = tools

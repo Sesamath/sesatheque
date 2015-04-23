@@ -48,6 +48,20 @@ GLOBAL.log = require('./tools/log.js')
 
 GLOBAL.isProd = ((lassi.settings.application.staging === 'production'))
 
+/**
+ * Gestion des traces
+ * Attention, ce module m'a déjà joué des tours avec une erreur qui plante node (reproductible, sur une 404)
+ *   Uncaught Error: Can't set headers after they are sent.
+ *   ...
+ *   /sesamath/dev/projets_git/sesatheque/node_modules/long-stack-traces/lib/long-stack-traces.js:80
+ *      throw ""; // TODO: throw the original error, or undefined?
+ * le désactiver a réglé le problème
+ *
+ * Pour augmenter les traces, préférer les options node
+ * --stack_trace_limit=100 --stack-size=2048
+ */
+/* if (!isProd) /* * / require('long-stack-traces') /* */
+
 var moment = require('moment')
 var staticTtl = 3600 * 24
 

@@ -54,6 +54,7 @@ module.exports = function () {
    * Fait du cast sans râler quand les propriétés de ressource sont "presque" du bon type
    * @param {Ressource} ressource
    * @param {boolean} [strict=true] Passer false pour ne faire que les conversion de type
+   *                                sans renvoyer une erreur pour les champs manquants
    * @param {Function} next Callback appelé en synchrone qui recevra les arguments (error, ressource)
    */
   $ressourceControl.valide = function(ressource, strict, next) {

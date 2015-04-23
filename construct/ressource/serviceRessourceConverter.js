@@ -57,29 +57,32 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
    */
   function arrayToDust(key, selectedValues, isUnique) {
     //log.debug("arrayToDust de " +key, selectedValues)
-    if (selectedValues && !_.isArray(selectedValues)) throw new Error("La propriété " + key + " de la ressource n'est pas un tableau");
     var choices = [];
-    var i = 0;
-    _.each(config.listes[key], function (label, cbValue) {
-      // cbValue est toujours une string (propriété de l'objet)
-      var intValue = parseInt(cbValue, 10)
-      if (intValue == cbValue) cbValue = intValue
-      var choice = {
-        label: label,
-        value: cbValue
-      };
-      if (!isUnique) {
-        // faut du name sur chaque checkbox
-        choice.name = key + '[' + i + ']';
-        i++;
-      }
-      // et on ajoute les selected s'il y en a
-      if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
-        choice.selected = true
-      }
-      choices.push(choice);
-    });
-    //log.debug("renvoie ", choices)
+    if (selectedValues && !_.isArray(selectedValues)) {
+      log.error(new Error("La propriété " + key + " de la ressource n'est pas un tableau"))
+    } else {
+      var i = 0;
+      _.each(config.listes[key], function (label, cbValue) {
+        // cbValue est toujours une string (propriété de l'objet)
+        var intValue = parseInt(cbValue, 10)
+        if (intValue == cbValue) cbValue = intValue
+        var choice = {
+          label: label,
+          value: cbValue
+        };
+        if (!isUnique) {
+          // faut du name sur chaque checkbox
+          choice.name = key + '[' + i + ']';
+          i++;
+        }
+        // et on ajoute les selected s'il y en a
+        if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
+          choice.selected = true
+        }
+        choices.push(choice);
+      });
+      //log.debug("renvoie ", choices)
+    }
 
     return choices;
   }
@@ -302,20 +305,18 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
    * @param {object} data Le post
    * @param {boolean} [partial=false] Passer true pour ne pas générer d'erreur sur des champs requis manquants
    * @param {function} next
-   * @throws {Error} En cas de données invalides
    * @memberOf $ressourceConverter
    */
   $ressourceConverter.valideRessourceFromPost = function (data, partial, next) {
     try {
-      if (_.isEmpty(data)) throw new Error("Ressource vide")
+      if (_.isEmpty(data)) return next(new Error("Ressource vide"))
 
       if (data.ressource) {
         // on nous envoie la ressource en json dans une string
         try {
           data = JSON.parse(data.ressource)
         } catch (error) {
-          log.error(error)
-          throw new Error("json invalide dans la propriété ressource postée")
+          return next(new Error("json invalide dans la propriété ressource postée"))
         }
       }
       if (data.typeTechnique && data.typeTechnique === 'arbre') {
@@ -360,8 +361,8 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         // on nous envoie tout le json dans une string
         try {
           data = JSON.parse(data.arbre)
-        } catch (e) {
-          throw e // pas la peine d'insister
+        } catch (error) {
+          return next(error) // pas la peine d'insister
         }
         //log.debug("On nous a envoyé un arbre en json", data)
       }

@@ -25,12 +25,8 @@
     <div class="row">
 
         <div class="col-md-3" id="sidebar">
-            <div id="auth">
-                {#authBloc}{.|s}{:else}pas de authBloc{/authBloc}
-            </div>
-            <div id="menu">
-            {#menuBloc}{.|s}{/menuBloc}
-            </div>
+            <div id="auth">{#authBloc}{.|s}{/authBloc}</div>
+            <div id="menu">{#menuBloc}{.|s}{/menuBloc}</div>
         </div>
 
         {#flashBloc}{.|s}{/flashBloc}
