@@ -9,7 +9,7 @@ function fin() {
 }
 
 function usage() {
-  echo "Lance l'application en mode production (avec $PM2)"
+  echo "Lance ou recharge l'application en mode production (avec $PM2)"
   echo "option facultative"
   echo "  -c : pour indiquer un autre fichier de déploiement que $PM2"
   echo "  -h : afficher cette aide"

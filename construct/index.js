@@ -37,13 +37,32 @@
  * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
  * - boot de l'appli
  */
-console.log("Démarrage de l'application avec l'environnement")
-console.log(process.env)
+console.log("Démarrage de l'application avec l'environnement", process.env)
+
+/**
+ * On ajoute un access.log avant d'appeler lassi
+ * En dev on a un access.log avec le contenu des POST
+ */
+var fs = require('fs')
+var _ = require('lodash')
+var morgan = require('morgan')
+var moment = require('moment')
+var tools = require('./tools')
+var settings = require('../config')
 
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
 
-// nos loggers
+/* attention, ici GLOBAL.lassi existe mais pas encore lassi !!!
+if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
+else console.log('lassi existe dès le départ')
+for (var i = 10; i < 1000; i +=100) {
+  setTimeout(function () {
+    if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
+  }, i)
+}
+/* */
+// nos loggers (mais lassi n'est pas encore en global ici...)
 GLOBAL.log = require('./tools/log.js')
 
 GLOBAL.isProd = ((lassi.settings.application.staging === 'production'))
@@ -119,72 +138,31 @@ sesatheque.config(function($cache, $settings) {
   lassi.log('app', "FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
 })
 
-// pour les logs morgan, on ajoute nos tokens et le WriteStream ici
-/* * /
-lassi.on('beforeRailUse', function (name, settings) {
-  console.log('dans construct, beforeRailUse de ' +name)
-  if (name=='logger') {
-    console.log('beforeRailUse logger')
-    // sert à rien de modifier settings, pas pris en compte car asynchrone
-    // on laisse tout ça là quand même pour le passer éventuellement dans une fct + tard
-    // sinon faudrait utiliser seq pour ne pas sortir de la fct tant qu'on a pas notre stream
-    return
-
-    log.debug('settings morgan dans beforeRailUse', settings)
-    // les settings pour morgan
-    var fs = require('fs')
-    var logAccess = sesatheque.settings.logs.access
-    var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'})
-    // les tokens
-    var moment = require('moment')
-    var morgan = lassi.require('morgan')
-    morgan.token('post', function (req) {
-      return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
-    })
-    morgan.token('moment', function () {
-      return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
-    })
-    settings = {
-      format: ':moment :method :url :status :response-time ms - :res[content-length] :post',
-      options : {
-        skip  : function (req) {
-          var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
-          var i = req.url.lastIndexOf('.')
-          var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
-          return (suffix && excluded.indexOf(suffix) > -1)
-        },
-        stream: logAccessWriteStream
-      }
-    }
-    log.debug('settings modifiés', settings)
-  } // on pourrait préciser la limite d'upload ici (name === 'body-parser') mais elle est dans la conf
-})
-
-/* sesatheque.on('loaded', function (type, name, instance) {
-  if (type === 'middleware' && name === 'logger') {
-    console.log(instance.toString())
-  }
-}) */
-
 /**
- * On ajoute le CORS après cookie
+ * On ajoute nos middleware (CORS, expires et access.log) après cookie
  * @param {Object} rail le rail express
  * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
  */
 lassi.on('afterRailUse', function (rail, name) {
   // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
   if (name === 'cookie') {
+    /**
+     * En dev, ajout des requetes http en console et dans le log de debug
+     */
     if (!isProd) {
-      // on ajoute les requetes http en console
       rail.use('/', function(req, res, next) {
+        // toutes les requetes en console
         log(req.method +' ' +req.originalUrl)
-        // on ajoute les requetes non statiques en debug
+        // et on ajoute aussi les requetes non statiques en debug
         if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) log.debug(req.method +' ' +req.originalUrl)
         next()
       })
     }
 
-    lassi.log('$rail', "adding", "cors".blue.underline, "middleware")
+    /**
+     * Ajout du CORS
+     */
+    lassi.log('$rail', "app is adding", "cors".blue.underline, "middleware")
     rail.use('/', function(req, res, next) {
       var origin = req.header('Origin')
       if (origin) {
@@ -206,9 +184,12 @@ lassi.on('afterRailUse', function (rail, name) {
       next()
     })
 
-    lassi.log('$rail', "adding", "expires".blue.underline, "middleware")
+    /**
+     * headers expires sur le statique ou le json public
+     */
+    lassi.log('$rail', "app is adding", "expires".blue.underline, "middleware")
     rail.use('/', function(req, res, next) {
-      if (/\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(req.url)) {
+      if (/\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(req.url) || /^\/api\/public\//.exec(req.url)) {
         // faut mettre ça au format de la RFC 1123
         res.header('Expires', moment().utc().add(staticTtl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
         res.header('Cache-Control', 'public, max-age=' +staticTtl)
@@ -217,6 +198,41 @@ lassi.on('afterRailUse', function (rail, name) {
       }
       next()
     })
+
+    /**
+     * access.log
+     */
+    var accessLog = settings.logs.dir +'/' +settings.logs.access
+    try {
+      var logAccessWriteStream = fs.createWriteStream(accessLog, {'flags': 'a'});
+      lassi.log('$rail', "app is adding", "access.log".blue.underline, "middleware with " +accessLog)
+      var format = ':moment :method :url :status :response-time ms - :res[content-length]'
+      var options = {
+        skip  : function (req) {
+          var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
+          var i = req.url.lastIndexOf('.')
+          var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
+          return (suffix && excluded.indexOf(suffix) > -1)
+        },
+        stream: logAccessWriteStream
+      }
+      morgan.token('moment', function () {
+        return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
+      })
+      // en dev on ajoute les var postées
+      if (settings.application.staging === 'dev') {
+        morgan.token('post', function (req) {
+          return (_.isEmpty(req.body)) ? '' : tools.stringify(req.body)
+        })
+        format += ' :post'
+      }
+      morgan(format, options)
+      lassi.on('shutdown', function () {
+        logAccessWriteStream.end()
+      })
+    } catch(error) {
+      console.log(error.stack)
+    }
   }
 })
 

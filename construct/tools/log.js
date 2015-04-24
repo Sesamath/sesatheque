@@ -42,19 +42,57 @@ var moment = require('moment')
 var config = require('../../config/index') // jshint ignore:line
 var tools = require('./index') // jshint ignore:line
 
+var _lassi = (typeof GLOBAL.lassi === 'undefined') ? false : GLOBAL.lassi
+if (_lassi) console.log('lassi existe dans log')
+
+/**
+ * une pile pour les streams que l'on créé (pour les fermer au shutdown)
+ * @type {stream.Writable[]}
+ */
+var streamsQuiet = []
+var streamsVerbose = []
+
+/**
+ * Retourne une writeStream sur le fichier passé en arguments (qui sera ouvert dans le dossier de log défini dans la conf)
+ * @param log Nom du log (sans dossier parent)
+ * @returns {stream.Writable}
+ */
+function getLogStream(log, verbose) {
+  var file = config.logs.dir +'/' +log
+  var options = {'flags': 'a', mode:'0644'}
+  var stream
+  try {
+    stream = fs.createWriteStream(file, options)
+    if (stream) {
+      if (verbose) {
+        streamsVerbose.push(stream)
+        stream.write(getPrefix() +'log opened by pid ' +process.pid +'\n')
+      } else {
+        streamsQuiet.push(stream)
+      }
+      console.log('app', 'ouverture du log ' +file)
+    } else {
+      console.log('app', 'ouverture du log ' +file +' KO')
+    }
+  } catch(error) {
+    console.log("ERROR : impossible d'ouvrir " +file)
+  }
+
+  return stream
+}
+
 // les streams vers nos logs, celui de dev est ouvert plus loin si on est en dev
 var debugOutputStream
 // ces logs dans tous les cas
 /** un log d'erreur actif en prod */
-var errorOutputStream = fs.createWriteStream(config.logs.error, {'flags': 'a'});
+var errorOutputStream = getLogStream(config.logs.error, true)
 /** un log spécifique pour les erreurs liées à des datas incohérentes */
-var errorDataOutputStream = fs.createWriteStream(config.logs.errorData, {'flags': 'a'});
+var errorDataOutputStream = getLogStream(config.logs.errorData, true)
 /** un log pour mesure de performances */
 var perfOutputStream
 
-var env = process.env.NODE_ENV || 'development';
+var env = process.env.NODE_ENV || 'dev';
 
-if (typeof lassi === 'undefined') var lassi = false
 
 /** 
  * Les messages à exclure
@@ -73,6 +111,10 @@ var log // jshint ignore:line
  */
 var logDebug
 
+function getPrefix() {
+  return '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] '
+}
+
 /**
  * Formate le message et l'envoie dans un log ou en console (si stream est null)
  * @param message
@@ -88,23 +130,23 @@ function out(message, objectToDump, filter, stream, options) {
       if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
       else {
         var dump = tools.stringify(objectToDump)
-        var max = options.max || 200
+        var max = options && options.max || 200
         if (dump.length > max) dump = dump.substr(0, max) + '…'
         message += '\n' +dump  + "\n";
       }
     }
-    message = '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] ' +message
+    message = getPrefix() +message
     if (!stream) console.log(message)
     else stream.write(message + "\n")
   }
 }
 
 if (env !== 'production' && config.logs.debug) {
-  // notre stream vers development.log
-  debugOutputStream = fs.createWriteStream(config.logs.debug, {'flags': 'a'})
+  // notre stream vers dev.log
+  debugOutputStream = getLogStream(config.logs.debug, true)
 
   /**
-   * Écrit dans development.log, pour raconter sa vie ou envoyer des objets
+   * Écrit dans dev.log, pour raconter sa vie ou envoyer des objets
    * @param message
    * @param objectToDump
    * @param filter
@@ -131,19 +173,18 @@ if (env !== 'production' && config.logs.debug) {
     })
   }
 
-  if (lassi) lassi.log('app', "fonction de log activée avec l'environnement : " +env)
+  if (_lassi) _lassi.log('app', "fonction de log activée avec l'environnement : " +env)
 
 } else {
   logDebug = function() {};
   log = function () {} // jshint ignore:line
-  if (lassi) lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
+  if (_lassi) _lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
 }
 
 log.debug = logDebug
 
 if (config.logs.perf) {
-  if (lassi) lassi.log('app', 'log des perfs dans ' +config.logs.perf)
-  perfOutputStream = fs.createWriteStream(config.logs.perf, {'flags': 'a'})
+  perfOutputStream = getLogStream(config.logs.perf)
   log.perf = function (context, strToAdd) {
     if (context.perf) {
       if (context.perf.msg) context.perf.msg += '\t'
@@ -164,12 +205,13 @@ if (config.logs.perf) {
 
 /**
  * Retourne le nb de ms écoulées depuis start
- * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
+ * @param {number} [start=0] Passer un top de départ (timestamp en ms)
  */
 log.getElapsed = function (start) {
-  start = start || 0
+  var ts = (new Date()).getTime()
+  if (start) ts -= start
 
-  return (new Date()).getTime() -start
+  return ts
 }
 
 /**
@@ -204,6 +246,37 @@ log.exclude = function (filter) {
  */
 log.include = function (filter) {
   exclusions[filter] = false
+}
+
+/**
+ * Et on fermera nos streams au shutdown
+ */
+if (_lassi) {
+  _lassi.on('shutdown', function () {
+    var seq = require('seq')
+    var next
+    seq().seq(function () {
+      next = this
+      if (streamsQuiet.length) {
+        seq(streamsQuiet).seqEach(function (stream) {
+          stream.end(this)
+        }).seq(next).catch(next)
+      } else {
+        next()
+      }
+    }).seq(function () {
+      next = this
+      if (streamsVerbose.length) {
+        seq(streamsVerbose).seqEach(function (stream) {
+          stream.end(getPrefix() +'log closed by pid ' +process.pid +' on shutdown\n', this)
+        }).seq(next).catch(next)
+      } else {
+        next()
+      }
+    }).seq(function () {
+      console.log('all logs closed')
+    })
+  })
 }
 
 module.exports = log

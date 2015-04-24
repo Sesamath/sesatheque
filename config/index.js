@@ -34,9 +34,6 @@
 /**
  * Configuration de l'application
  */
-var _ = require('lodash')
-var fs = require('fs');
-var moment = require('moment')
 var tools = require('../construct/tools')
 var localConfig = require('../_private/config')
 var ressourceConfig = require('../construct/ressource/config')
@@ -46,45 +43,12 @@ var root  = __dirname + '/..';
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
- * Il peut valoir production, integration ou development (les valeurs de lassi.Staging) et sera
- * mis à development par défaut
+ * Il peut valoir production, integration ou dev (les valeurs de lassi.Staging) et sera
+ * mis à dev par défaut
  */
-var staging = process.env.NODE_ENV || 'development'
+var staging = process.env.NODE_ENV || 'dev'
 
-/**
- * Ce serait mieux de mettre ça ailleurs pour ne garder que du déclaratif ici,
- * mais une fois le logger renvoyé (par son constructeur appelé par lassi)
- * on peut plus lui changer ses params, faut donc créer ce writeStream avant d'appeler lassi
- */
-var logAccess = root + '/logs/' + staging + '.access.log';
-var logAccessWriteStream = fs.createWriteStream(logAccess, {'flags': 'a'});
-var morganSettings
-
-/**
- * En dev on a un access.log avec le contenu des POST
- */
-if (staging === 'development') {
-  require('morgan').token('post', function (req) {
-    return (_.isEmpty(req.body)) ? '': JSON.stringify(req.body)
-  })
-  require('morgan').token('moment', function () {
-    return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
-  })
-  morganSettings = {
-    format: ':moment :method :url :status :response-time ms - :res[content-length] :post',
-    skip  : function (req) {
-      var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
-      var i = req.url.lastIndexOf('.')
-      var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
-      return (suffix && excluded.indexOf(suffix) > -1)
-    },
-    stream: logAccessWriteStream
-  }
-} else {
-    morganSettings = {format:'default', options : {stream : logAccessWriteStream}, buffer:true}
-}
-
-/** La config exportée */
+/** La config */
 var settings = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application : {
@@ -103,7 +67,6 @@ var settings = {
   }
    */
   $rail    : {
-    logger        : morganSettings, // passé tel quel à morgan()
     public        : true,
     //compression : {},
     cookie: {
@@ -145,10 +108,11 @@ var settings = {
 
   // les différents logs
   logs : {
-    access    : root + '/logs/' + staging + '.access.log',
-    error     : root + '/logs/' + staging + '.error.log',
-    errorData : root + '/logs/' + staging + '.errorData.log',
-    debug     : root + '/logs/debug.log',
+    dir       : process.env.LOGS || root + '/logs',
+    access    : 'access.log',
+    error     : 'error.log',
+    errorData : staging + 'errorData.log',
+    debug     : 'debug.log',
     // ajouter les exclusions voulues parmi ['cache', 'resssourceRepository', 'personneRepository', 'accessControl']
     debugExclusions : []
   }
@@ -157,14 +121,6 @@ var settings = {
 // on ajoute nos params locaux (accès à la base et port,
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
 if (localConfig) tools.merge(settings, localConfig)
-
-// on met les sessions dans memcache si déclaré
-if (settings.memcache) {
-  settings.$rail.session.storage = {
-    type: 'memcache',
-    servers: settings.memcache
-  }
-}
 
 // on enlève le debug mysql en prod
 if (settings.application.staging === 'production' && settings.$entities.database.connection.debug) {
