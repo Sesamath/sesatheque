@@ -39,11 +39,11 @@
 
 var fs = require('fs')
 var moment = require('moment')
+var _ = require('lodash')
 var config = require('../../config/index') // jshint ignore:line
 var tools = require('./index') // jshint ignore:line
 
-var _lassi = (typeof GLOBAL.lassi === 'undefined') ? false : GLOBAL.lassi
-if (_lassi) console.log('lassi existe dans log')
+var _lassi = (typeof GLOBAL.lassi === 'undefined') ? console : GLOBAL.lassi
 
 /**
  * une pile pour les streams que l'on créé (pour les fermer au shutdown)
@@ -70,12 +70,12 @@ function getLogStream(log, verbose) {
       } else {
         streamsQuiet.push(stream)
       }
-      console.log('app', 'ouverture du log ' +file)
+      _lassi.log('app', 'ouverture du log ' +file)
     } else {
-      console.log('app', 'ouverture du log ' +file +' KO')
+      _lassi.log('app', 'ouverture du log ' +file +' KO')
     }
   } catch(error) {
-    console.log("ERROR : impossible d'ouvrir " +file)
+    _lassi.log('app', "ERROR : impossible d'ouvrir " +file)
   }
 
   return stream
@@ -136,7 +136,7 @@ function out(message, objectToDump, filter, stream, options) {
       }
     }
     message = getPrefix() +message
-    if (!stream) console.log(message)
+    if (!stream) _lassi.log('app', message)
     else stream.write(message + "\n")
   }
 }
@@ -251,31 +251,20 @@ log.include = function (filter) {
 /**
  * Et on fermera nos streams au shutdown
  */
-if (_lassi) {
+if (_lassi.on) {
   _lassi.on('shutdown', function () {
-    var seq = require('seq')
-    var next
-    seq().seq(function () {
-      next = this
-      if (streamsQuiet.length) {
-        seq(streamsQuiet).seqEach(function (stream) {
-          stream.end(this)
-        }).seq(next).catch(next)
-      } else {
-        next()
-      }
-    }).seq(function () {
-      next = this
-      if (streamsVerbose.length) {
-        seq(streamsVerbose).seqEach(function (stream) {
-          stream.end(getPrefix() +'log closed by pid ' +process.pid +' on shutdown\n', this)
-        }).seq(next).catch(next)
-      } else {
-        next()
-      }
-    }).seq(function () {
-      console.log('all logs closed')
-    })
+    _lassi.log('app', 'shutdown event in log')
+
+    if (streamsQuiet.length) {
+      _.each(streamsQuiet, function (stream) {
+        stream.end()
+      })
+    }
+    if (streamsVerbose.length) {
+      _.each(streamsVerbose, function (stream) {
+        stream.end(getPrefix() +'log closed by pid ' +process.pid +' on shutdown\n', this)
+      })
+    }
   })
 }
 

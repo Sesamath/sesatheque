@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set -u
+
+dirInitial="$PWD"
+dirApp=$(dirname $0)/../
+PM2=_private/pm2.json5
+nodeEnv=${NODE_ENV:-dev}
+pm2opts=''
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  local exitCode=${1:-0}
+  echo "Lance ou recharge l'application (en mode dev par défaut)"
+  echo "option facultative"
+  echo "  -c : pour indiquer un autre fichier de déploiement que $PM2 (à mettre avant les actions)"
+  echo "  -d : lancement avec $PM2 en mode dev (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
+  echo "  -h : afficher cette aide"
+  echo "  -n : lancement avec node directement en mode dev"
+  echo "  -o : pour passer des options à pm2 (à mettre avant les actions)"
+  echo "  -p : lancement avec $PM2 en mode production (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
+  echo "  -x : arrête les process pm2 sesatheque qui pourraient tourner"
+  echo "  -w : lancement avec $PM2 en mode dev avec watch"
+  exit $exitCode
+}
+
+function getConf() {
+  [ $# -lt 1 ] && return 1
+  local default="${2:-}"
+  local value="$(sed -nre "s/^[^#]*$1[ \"':\t]+([^\"',]+).*/\1/p;" $PM2 |head -1)"
+  [ -z "$value" ] && value="$default"
+  echo $value
+}
+
+function del() {
+  local name="$(getConf name sesatheque)"
+  pm2 delete $name
+  exit $?
+}
+
+function runNode() {
+  NODE_ENV=$nodeEnv node construct/index.js
+}
+
+function runPm2() {
+  [ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && usage 1
+  pm2 startOrGracefulReload $PM2 --env $nodeEnv $pm2opts
+  exit $?
+}
+
+function runPm2Watch() {
+  [ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && usage 1
+  # pénible car les options passées en ligne de commande n'écrasent pas celle de la conf
+  # donc on passe par du start (toujours en fork mode apparemment)
+  local name="$(getConf name sesatheque)"
+  # le merge sert à rien en fork mode
+  local merge="$(getConf merge_logs)"
+  [ -n "$merge" ] && [ "$merge" != 'false' ] && pm2opts="$pm2opts -m"
+  local out="$(getConf out_file $name.log)"
+  local error="$(getConf error_file $name.error.log)"
+  local pid="$(getConf pid_file $name.pid)"
+  # le scale 2 sert à rien, toujours du fork
+  local cmd="pm2 start construct/index.js scale $name 2 --env dev $pm2opts -o '$out' -e '$error' -p '$pid' --watch construct --ignore-watch 'node_modules construct/qxApps'"
+  echo $cmd
+  eval $cmd
+  exit $?
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+cd "$dirApp"
+
+# sans options on lance en dev
+[ $# -lt 1 ] && nodeEnv='dev' && runPm2
+
+# check des options
+while getopts "c:dhno:pxw" OPTION
+do
+  case $OPTION in
+    c) PM2="$OPTARG";;
+    d) nodeEnv='dev'; runPm2;; # on laisse NODE_ENV tel qu'il est dans l'environnement mais on impose dev
+    h) usage;;
+    n) runNode;;
+    o) pm2opts="$OPTARG";;
+    p) nodeEnv='production'; runPm2;;
+    x) del;;
+    w) runPm2Watch;;
+    #w) pm2opts="--watch '[\"construct\", \"config\"]' --ignore-watch '[\"construct/qxApps\", \"construct/*/public\"]'"; runPm2;;
+    *) usage 1;;
+  esac
+done

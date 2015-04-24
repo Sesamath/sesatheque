@@ -37,7 +37,7 @@
  * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
  * - boot de l'appli
  */
-console.log("Démarrage de l'application avec l'environnement", process.env)
+//console.log("Démarrage de l'application avec l'environnement", process.env)
 
 /**
  * On ajoute un access.log avant d'appeler lassi
@@ -53,7 +53,7 @@ var settings = require('../config')
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
 
-/* attention, ici GLOBAL.lassi existe mais pas encore lassi !!!
+/* attention, ici GLOBAL.lassi existe mais pas toujours lassi !!!
 if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
 else console.log('lassi existe dès le départ')
 for (var i = 10; i < 1000; i +=100) {
@@ -62,10 +62,12 @@ for (var i = 10; i < 1000; i +=100) {
   }, i)
 }
 /* */
+GLOBAL.isProd = ((lassi.settings.application.staging === 'production'))
+lassi.log('app', "Démarrage de l'application avec l'environnement", (isProd?'production':'dev').red)
+
 // nos loggers (mais lassi n'est pas encore en global ici...)
 GLOBAL.log = require('./tools/log.js')
 
-GLOBAL.isProd = ((lassi.settings.application.staging === 'production'))
 
 /**
  * Gestion des traces

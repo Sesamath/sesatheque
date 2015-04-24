@@ -98,4 +98,8 @@ module.exports = function (controller) {
   controller.get('erreur500', function () {
     throw new Error("Une erreur 500 provoquée")
   })
+
+  controller.get('exit', function () {
+    process.exit(0)
+  })
 }
