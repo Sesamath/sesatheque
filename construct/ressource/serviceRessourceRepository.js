@@ -50,6 +50,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   var _ = require('lodash')
   var flow          = require('seq')
   var elementtree = require('elementtree')
+  var util = require('util')
 
   var config = require('./config')
   var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
@@ -93,9 +94,11 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   function updateVersion(ressource, next) {
     /**
      * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
+     * @param ressource
      * @param ressourceBdd
+     * @param next
      */
-    function analyse(ressourceBdd) {
+    function compare(ressource, ressourceBdd, next) {
       var needIncrement = !!ressource.versionNeedIncrement
       // on regarde si nos champs qui déclenchent un changement de version on changé
       if (!needIncrement && ressourceBdd.oid) {
@@ -107,11 +110,11 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
             if (!GLOBAL.isProd) {
               try {
                 log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
-                    '\navant : ' + JSON.parse(ressourceBdd[prop]) +
-                    '\naprès : ' + JSON.parse(ressource[prop]))
+                    '\navant : ' +(ressourceBdd[prop] === undefined) ? undefined : JSON.parse(ressourceBdd[prop]) +
+                    '\naprès : ' +(ressourceBdd[prop] === undefined) ? undefined : JSON.parse(ressource[prop]))
               } catch (e) {
                 log.debug(
-                    'le parsing de ressource[' +prop +'] a planté ' +ressource.oid +' ' +ressource.origine +'/' +ressource.idOrigine,
+                    'le parsing de ressource[' +prop +'] a planté pour ' +ressource.oid +' ' +ressource.origine +'/' +ressource.idOrigine,
                     [ressourceBdd[prop], ressource[prop]]
                 )
               }
@@ -121,13 +124,22 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
           }
         })
       }
-      // on recopie version et oid (pour écrasement éventuel de l'ancienne ressource)
-      ressource.version = ressourceBdd.version
+      // on recopie l'oid (pour écrasement éventuel de l'ancienne ressource)
       ressource.oid = ressourceBdd.oid
+      ressource.version = ressourceBdd.version
 
-      if (needIncrement) $ressourceRepository.archive(ressourceBdd, next)
+      if (needIncrement) {
+        $ressourceRepository.archive(ressourceBdd, function (error, archive) {
+          if (error) next(error)
+          else {
+            ressource.version++
+            ressource.archiveOid = archive.oid
+            next(null, ressource)
+          }
+        })
+      }
       else next(null, ressource)
-    } // analyse
+    } // compare
 
     if (ressource.oid) {
       // pas le cas au create ou sur un update via l'api
@@ -135,17 +147,13 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       // le n° de version actuel et l'oid éventuel
       $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
         if (error) next(error)
-        else if (ressourceBdd) analyse(ressourceBdd)
-        else {
-          log.error(new Error("updateVersion a reçu une ressource avec oid " +ressource.oid +" qui n'existait pas en base"))
-          ressource.oid = 0
-          next(null, ressource)
-        }
+        else if (ressourceBdd) compare(ressource, ressourceBdd, next)
+        else next(new Error("updateVersion a reçu une ressource qui n'existait pas (oid=" +ressource.oid +')'))
       })
     } else if (ressource.idOrigine) {
       $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
         if (error) next(error)
-        else if (ressourceBdd) analyse(ressourceBdd)
+        else if (ressourceBdd) compare(ressource, ressourceBdd, next)
         else next(null, ressource)
       })
     } else {
@@ -236,8 +244,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    */
 
   /**
-   * Enregistre la ressource en archive, màj archiveOid et incrémente la version sur la ressource
-   * puis la passe à next
+   * Enregistre la ressource en archive et appelle next avec, mais ne modifie pas la ressource
    * @param {Ressource} ressource
    * @param next
    */
@@ -245,18 +252,8 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
     try {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n'existe pas encore")
       if (!ressource.store) throw new Error("La ressource " + ressource.oid + " n'a pas de méthode store")
-      if (ressource.origine === 'local' && !ressource.idOrigine) throw new Error("La ressource " + ressource.oid + " est locale mais n'a pas d'idOrigine, impossible de l'archiver")
 
-      Archive.create(ressource).store(function (error, archive) {
-        if (error) next(error)
-        else {
-          // archive ok, on màj la ressource
-          log.debug("On a archivé la ressource " + ressource.oid + " (avec l'oid en archive " + archive.oid + ')')
-          ressource.archiveOid = archive.oid
-          ressource.version++
-          ressource.store(next)
-        }
-      })
+      Archive.create(ressource).store(next)
     } catch (error) {
       next(error)
     }
@@ -268,7 +265,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
    * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
    */
   $ressourceRepository.write = function(ressource, next) {
-    if (ressource.constructor.name !== 'Ressource') {
+    if (ressource.constructor.name !== 'Entity') {
       log.debug("cast en Ressource dans write")
       ressource = Ressource.create(ressource)
     }

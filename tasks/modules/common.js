@@ -88,6 +88,37 @@ common.addCatExoInteractif = function (ressource) {
 }
 
 /**
+ * Ajoute une personne via l'api
+ * @param personne
+ * @param next
+ */
+common.addPersonne = function (personne, next) {
+  var options = {
+    url    : urlBibli.replace('ressource', 'personne') +'/add',
+    headers: {
+      "X-ApiToken": apiToken
+    },
+    json   : true,
+    body   : personne
+  }
+  request.post(options, function (error, response, body) {
+    if (error || body.error || !body.oid) {
+      log("error, on avait envoyé", options.body)
+      var errorString = 'erreur sur le post '+options.url +' : '
+      if (error) errorString += error.toString()
+      else if (body.error) errorString += body.error
+      else errorString += tools.stringify(body)
+      next(new Error(errorString))
+    } else if (body.oid) {
+      personne.oid = body.oid
+      next(null, personne)
+    } else {
+      next(new Error("ni erreur ni oid en réponse à un post sur " +options.url))
+    }
+  })
+}
+
+/**
  * Ajoute une ressource dans la bibli en appelant l'api en http
  * @public
  * @param ressource
@@ -176,7 +207,7 @@ common.checkEnd = function (cb) {
               's sans rien depuis le dernier retour de bdd, il restait ' +nbLaunched +' ressources en cours et ' +
               waitingRessource.length +' en attente de traitement\n' +
               'enregistrées ' +idsRec.length  +', failed ' +errors.length
-    addError(0, msg)
+    addError('general', msg)
     log(msg)
     next()
   }, opt.timeout)

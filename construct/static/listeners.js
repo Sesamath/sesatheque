@@ -115,8 +115,10 @@ module.exports = function($flashMessage) {
             msg = "Authentification requise"
             break
           default:
-            msg = "Ooops, une erreur " + context.status + ' est survenue'
+            msg = context.content || "Ooops, une erreur " + context.status + ' est survenue'
         }
+        // si lassi a mis ça on le vire (on vient de gérer msg)
+        if (context.content) delete context.content
         if (isApi) {
           context.contentType = 'application/json'
           if (!data.error) data.error = msg

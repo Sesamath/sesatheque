@@ -125,6 +125,7 @@ module.exports = function ($cache, $settings, Ressource) {
     })
   }
 
+
   /**
    * Efface une ressource du cache d'après idOrigine
    * @param origine
@@ -142,5 +143,11 @@ module.exports = function ($cache, $settings, Ressource) {
     })
   }
 
+  // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne fassent rien
+  if ($settings.get('noCache', false)) {
+    lassi.log('app', '$cacheRessource désactivé')
+    $cacheRessource.get = function (oid, next) { next() }
+    $cacheRessource.getByOrigine = function (origine, idOrigine, next) { next() }
+  }
   return $cacheRessource
 }

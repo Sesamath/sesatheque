@@ -49,15 +49,15 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
 
   /**
    * Récupère une personne (en cache ou en bdd)
-   * @param id
+   * @param oid Id de la personne (à priori dans son référentiel, donc ≠ oid)
    * @param next
    */
-  $personneRepository.load = function (id, next) {
-    log.debug('load ' + id)
-    $cachePersonne.get(id, function (error, personneCached) {
+  $personneRepository.load = function (oid, next) {
+    log.debug('load ' + oid)
+    $cachePersonne.get(oid, function (error, personneCached) {
       if (personneCached) next(null, personneCached)
       else {
-        Personne.match('id').equals(id).grabOne(function (error, personne) {
+        Personne.match('oid').equals(oid).grabOne(function (error, personne) {
           //log.debug('personne load remonte ', personne)
           if (error) next(error)
           else if (personne) {
@@ -91,15 +91,15 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
   }
 
   /**
-   * Récupère un groupe d'après son id (si erreur on la log)
-   * @param {int} id
+   * Récupère un groupe d'après son oid (si erreur on la log)
+   * @param {int} oid
    * @param {EntityInstance~StoreCallback} next
    */
-  $personneRepository.loadGroupe = function (groupeId, next) {
-    if (parseInt(groupeId, 10) !== groupeId) return next(new Error("Type mismatch, groupe.oid doit être entier"))
-    $cacheGroupe.get(groupeId, function (error, groupe) {
+  $personneRepository.loadGroupe = function (oid, next) {
+    if (parseInt(oid, 10) !== oid) return next(new Error("Type mismatch, groupe.oid doit être entier"))
+    $cacheGroupe.get(oid, function (error, groupe) {
       if (groupe) return next(null, groupe)
-      Groupe.match('id').equals(groupeId).grabOne(function (error, groupe) {
+      Groupe.match('oid').equals(oid).grabOne(function (error, groupe) {
         if (error) log.error(error)
         if (groupe) {
           $cacheGroupe.set(groupe)

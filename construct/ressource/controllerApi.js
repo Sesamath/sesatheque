@@ -249,7 +249,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var permission = ressource.oid ? 'update' : 'create'
     if ($accessControl.hasPermission(permission, context, ressource)) {
       $ressourceRepository.write(ressource, function (error, ressource) {
-        log.debug("et après store", ressource, 'repository')
+        log.debug("et après $ressourceRepository.write", ressource, 'repository')
         if (error) log.debug("avec l'erreur", error, 'repository')
         // oid - convertPost - valide+setVersion - store - store2 - fin
         //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
@@ -297,7 +297,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       partial = (context.post.oid > 0 || (context.post.origine && context.post.idOrigine))
     }
 
-    log.debug('post /api/ressource a reçu', context.post, 'api')
+    log.debug('post /api/ressource a reçu', context.post, 'api', {max:1000})
 
     $ressourceConverter.valideRessourceFromPost(context.post, partial, function (error, ressource) {
       try {

@@ -115,9 +115,10 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         viewData[key] = {
           title: label
         };
+        // on traite chaque type de contenu
         if (_.isArray(value)) {
 
-          // cas particulier de tableau de tableaux
+          // cas particulier de relations qui est un tableau de tableaux que l'on remplace par un objet
           if (key === 'relations' && value.length) {
             if (view === 'describe') {
               viewData.relations.value = []
@@ -142,7 +143,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
             viewData[key].value = buffer.join(', ');
 
           } else {
-            // une clé inconnue, on laisse tel quel (une ressource avec des propriétés supplémentaires)
+            // un tableau qui n'est pas une liste d'ids on le laisse tel quel (auteurs & co ou des propriétés supplémentaires)
             viewData[key].value = value
           }
 
@@ -150,11 +151,8 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         } else if (_.isDate(value)) {
           viewData[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
 
-        } else if (_.isObject(value)) {
-            viewData[key].value = tools.stringify(value, 2)
-
         } else {
-          // une clé inconnue, on laisse tel quel (une ressource avec des propriétés supplémentaires)
+          // Object ou string ou number ou boolean, on laisse tel quel
           viewData[key].value = value;
         }
       }); // fin each propriété

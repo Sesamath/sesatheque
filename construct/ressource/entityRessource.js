@@ -63,7 +63,7 @@ module.exports = function (Ressource, $ressourceControl) {
     }
     // on récupère un objet Ressource correctement typé et initialisé
     var ressource = new RessourceConstructor(initObj)
-    // que l'on merge à notre Entity
+    // que l'on merge à notre objet Entity
     tools.merge(entity, ressource)
     // et on ajoute les éventuelles propriétés supplémentaire de notre objet initial
     _.each(initObj, function (value, key) {

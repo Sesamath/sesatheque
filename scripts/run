@@ -63,7 +63,8 @@ function runPm2Watch() {
   local error="$(getConf error_file $name.error.log)"
   local pid="$(getConf pid_file $name.pid)"
   # le scale 2 sert à rien, toujours du fork
-  local cmd="pm2 start construct/index.js scale $name 2 --env dev $pm2opts -o '$out' -e '$error' -p '$pid' --watch construct --ignore-watch 'node_modules construct/qxApps'"
+  # * pas géré dans le --ignore-watch, on met du construct/ressource/public à la place d'un construct/*/public générique
+  local cmd="pm2 start construct/index.js scale $name 2 --env dev $pm2opts -o '$out' -e '$error' -p '$pid' --watch construct --ignore-watch 'node_modules construct/qxApps construct/ressource/public'"
   echo $cmd
   eval $cmd
   exit $?

@@ -94,7 +94,7 @@ function Ressource(initObj) {
    * Le code du plugin qui gère la ressource
    * @type {String}
    */
-  this.typeTechnique = filters.string(initObj);
+  this.typeTechnique = filters.string(initObj.typeTechnique);
   /**
    * Titre
    * @type {string}
@@ -124,7 +124,7 @@ function Ressource(initObj) {
    * Une catégorie correspond à un recoupement de types, par ex "exercice interactif"
    * @type {Array}
    */
-  this.categories = filters.arrayInt(initObj.categorie);
+  this.categories = filters.arrayInt(initObj.categories);
 
   /**
    * Type pédagogique (5.2 - scolomfr-voc-010) : cours, exercice...
@@ -170,6 +170,11 @@ function Ressource(initObj) {
    * @type {Array}
    */
   this.contributeurs = filters.arrayInt(initObj.contributeurs);
+  /**
+   * Liste de noms de groupes partageant cette ressource
+   * @type {Array}
+   */
+  this.groupes = filters.arrayInt(initObj.groupes);
   /**
    * code langue ISO 639-2 (http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2)
    * @type {String}

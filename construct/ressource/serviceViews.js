@@ -39,7 +39,7 @@
  * @param $routes
  * @param $settings
  */
-module.exports = function ($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+module.exports = function ($ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
   var tools = require('../tools')
   var _ = require('lodash')
   var seq = require('seq')
@@ -121,18 +121,19 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
    * @param ressource
    * @param context
    * @param view
-   * @param options
+   * @param options Objet de données qui sera mergé avec data avant envoi au rendu
    */
   $views.prepareAndSend = function (error, ressource, context, view, options) {
+    log.debug('on prépare les datas pour dust ' +view, ressource, 'dust', {max:1000})
     var data = $views.getDefaultData(view)
 
     function termine() {
       // et la ressource (ou erreur)
       data.contentBloc = $ressourceConverter.getViewData(error, ressource, view)
-      // pour display on ajoute les variables js
+      // pour display on ajoute les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
       if (view === 'display') addJsVars(data, ressource)
-      // le menu pour tous, car preview utilise la vue display, petit gaspillage de data
-      addMenu(context, data, ressource)
+      // et le menu si on en a besoin
+      if (data.$layout === 'layout-page') addMenu(context, data, ressource)
       // le titre
       if (ressource) {
         if (ressource.titre) data.$metas.title = ressource.titre
@@ -143,33 +144,106 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
       context.html(data)
     }
 
-    // faut aller chercher d'éventuels titres de ressources liées pour la vue describe
-    if (!error && view === 'describe' && ressource && !_.isEmpty(ressource.relations)) {
-      log.debug('faut ajouter des titres de relations', ressource.relations)
+    if (!error && ressource && view === 'describe') {
+      // faut aller chercher en asynchrone les infos complémentaires pour la vue describe
+      // (éventuels titres de ressources liées, auteurs ou groupes)
+      var fluxComplements = seq() 
 
-      seq(ressource.relations).parEach(5, function (relation, index) {
-        var nextSeq = this
-        $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
-          if (error) {
-            ressource.warnings.push(error)
+      // étape relations
+      fluxComplements.seq(function () {
+        var nextComplement = this
+        if (_.isEmpty(ressource.relations)) {
+          nextComplement()
+        } else {
+          log.debug('faut ajouter des titres de relations', ressource.relations)
+          var fluxRelations = seq(ressource.relations)
+          fluxRelations.parEach(2, function (relation, index) {
+            var nextSeq = this
+            $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
+              if (error) {
+                log.error(error)
+                ressource.warnings.push(error)
+              } else if (ressourceLiee) {
+                // on ajoute le tag a et le type technique
+                ressource.relations[index].push($routes.getTagA('describe', ressourceLiee))
+                ressource.relations[index].push(ressourceLiee.typeTechnique)
+              } else {
+                log.errorData(error)
+                ressource.warnings.push("la ressource liée " + relation[1] + " n'existe pas")
+              }
+              nextSeq()
+            })
+          })
+          // on a tout chargé
+          fluxRelations.seq(function () {
+            log.debug('on a ajouté les titres des relations', ressource.relations)
+            nextComplement()
+          })
+          fluxRelations.catch(function (e) {
+            log.error(e)
+            error = e
+            nextComplement()
+          })
+        }
+      })
 
-          } else if (ressourceLiee) {
-            // on ajoute le tag a et le type technique
-            ressource.relations[index].push($routes.getTagA('describe', ressourceLiee))
-            ressource.relations[index].push(ressourceLiee.typeTechnique)
+      // étape auteurs, on remplace les ids par des objets
+      var auteurs = []
+      fluxComplements.seq(function () {
+        var nextComplement = this
+        if (_.isEmpty(ressource.auteurs)) {
+          nextComplement()
+        } else {
+          var fluxAuteurs = seq(ressource.auteurs)
+          fluxAuteurs.seqEach(function (auteurId) {
+            var nextSeq = this
+            $personneRepository.load(auteurId, function (error, personne) {
+              if (error) log.error(error)
+              else if (personne) auteurs.push({ nom: personne.prenom +' ' +personne.nom})
+              else auteurs.push({nom: 'auteur ' +auteurId + " inconnu"})
+              nextSeq()
+            })
+          })
+          fluxAuteurs.seq(function () {
+            if (auteurs.length) ressource.auteurs = auteurs
+            nextComplement()
+          })
+          fluxAuteurs.catch(function (error) {
+            log.error("erreur dans le flux auteurs de la ressource " +ressource.oid, error)
+            nextComplement()
+          })
+        }
+      })
 
-          } else {
-            ressource.warnings.push("la ressource liée " +relation[1] +" n'existe pas")
-          }
-          nextSeq()
-        })
+      // étape contributeurs
+      fluxComplements.seq(function () {
+        var nextComplement = this
+        if (_.isEmpty(ressource.contributeurs)) {
+          nextComplement()
+        } else {
+          var fluxContributeurs = seq(ressource.contributeurs)
+          fluxContributeurs.parSeq(2, function (contributeurId, index) {
+            var nextSeq = this
+            $personneRepository.load(contributeurId, function (error, personne) {
+              if (error) log.error(error)
+              else if (personne) ressource.contributeurs[index] = {nom: personne.prenom + ' ' + personne.nom}
+              else ressource.contributeurs[index] = {nom: 'contributeur ' +contributeurId +' inconnu'}
+              nextSeq()
+            })
+          })
+          fluxContributeurs.seq(nextComplement)
+          fluxContributeurs.catch(function (error) {
+            log.error("erreur dans le flux contributeurs de la ressource " +ressource.oid, error)
+            nextComplement()
+          })
+        }
+      })
 
-      }).seq(function () {
-        log.debug('on a ajouté les titres des relations', ressource.relations)
-        termine()
-      }).catch(function (e) {
-        log.error(e)
-        error = e
+      // on a tout, on peut envoyer
+      fluxComplements.seq(termine)
+      // en cas d'erreur dans seq on envoie quand même
+      fluxComplements.catch(function (error) {
+        log.error("erreur dans la recherche de compléments d'une ressource", error)
         termine()
       })
     } else termine()
@@ -197,6 +271,7 @@ module.exports = function ($ressourceRepository, $ressourceConverter, $accessCon
    * @param options
    */
   $views.printForRead = function (error, ressource, context, view, options) {
+    log.debug('dans printForRead ' +view, ressource, 'dust', {max:1000})
     if (error) {
       $views.prepareAndSend(error, null, context, view, options)
     } else if (ressource) {

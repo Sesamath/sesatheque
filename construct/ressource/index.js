@@ -76,8 +76,8 @@ ressourceComponent.service('$ressourceConverter', function (Ressource, $routes, 
   return require('./serviceRessourceConverter')(Ressource, $routes, $ressourceControl)
 })
 
-ressourceComponent.service('$views', function ($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings) {
-  return require('./serviceViews')($ressourceRepository, $ressourceConverter, $accessControl, $routes, $settings)
+ressourceComponent.service('$views', function ($ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+  return require('./serviceViews')($ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings)
 })
 
 // nos ressources statiques

@@ -215,6 +215,7 @@ var ressourceConfig = {
     relations        : "Ressources liées",
     auteurs          : "Auteurs",
     contributeurs    : "Contributeurs",
+    groupes          : "Groupes",
     langue           : "Langue",
     publie           : "Publié",
     restriction      : "Restriction",

@@ -136,7 +136,7 @@ function out(message, objectToDump, filter, stream, options) {
       }
     }
     message = getPrefix() +message
-    if (!stream) _lassi.log('app', message)
+    if (!stream) console.log(message)
     else stream.write(message + "\n")
   }
 }
@@ -173,12 +173,12 @@ if (env !== 'production' && config.logs.debug) {
     })
   }
 
-  if (_lassi) _lassi.log('app', "fonction de log activée avec l'environnement : " +env)
+  _lassi.log('app', "fonction de log activée avec l'environnement : " +env)
 
 } else {
   logDebug = function() {};
   log = function () {} // jshint ignore:line
-  if (_lassi) _lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
+  _lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
 }
 
 log.debug = logDebug

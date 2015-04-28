@@ -134,7 +134,19 @@ sesatheque.config(function($cache, $settings) {
     throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
   }
 
-  // le listener beforeTransport est ajouté dans le composant static qui défini $flashMessage
+  // le listener beforeTransport est ajouté dans le composant static
+
+  // on ajoute nos filtres perso pour dust
+  try {
+    lassi.transports.html.engine.addFilter('js2', function (value) {
+      return tools.stringify(value, 2)
+    })
+    lassi.transports.html.engine.addFilter('nl2br', function (value) {
+      return value.replace('\n', '<br />\n')
+    })
+  } catch(error) {
+    log.error("impossible d'ajouter nos filtres à dust", error)
+  }
 
   // log("sesatheque en fin de config", sesatheque)
   lassi.log('app', "FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
@@ -153,10 +165,11 @@ lassi.on('afterRailUse', function (rail, name) {
      */
     if (!isProd) {
       rail.use('/', function(req, res, next) {
-        // toutes les requetes en console
-        log(req.method +' ' +req.originalUrl)
-        // et on ajoute aussi les requetes non statiques en debug
-        if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) log.debug(req.method +' ' +req.originalUrl)
+        // les requetes non statiques en console et debug
+        if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
+          log(req.method +' ' +req.originalUrl)
+          log.debug(req.method +' ' +req.originalUrl)
+        }
         next()
       })
     }
@@ -207,31 +220,36 @@ lassi.on('afterRailUse', function (rail, name) {
     var accessLog = settings.logs.dir +'/' +settings.logs.access
     try {
       var logAccessWriteStream = fs.createWriteStream(accessLog, {'flags': 'a'});
-      lassi.log('$rail', "app is adding", "access.log".blue.underline, "middleware with " +accessLog)
-      var format = ':moment :method :url :status :response-time ms - :res[content-length]'
-      var options = {
-        skip  : function (req) {
-          var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
-          var i = req.url.lastIndexOf('.')
-          var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
-          return (suffix && excluded.indexOf(suffix) > -1)
-        },
-        stream: logAccessWriteStream
-      }
-      morgan.token('moment', function () {
-        return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
-      })
-      // en dev on ajoute les var postées
-      if (settings.application.staging === 'dev') {
-        morgan.token('post', function (req) {
-          return (_.isEmpty(req.body)) ? '' : tools.stringify(req.body)
+      if (logAccessWriteStream) {
+        // et la fermeture du log
+        lassi.on('shutdown', function () {
+          logAccessWriteStream.end()
         })
-        format += ' :post'
+        lassi.log('$rail', "app is adding", "access.log".blue.underline, "middleware with " + accessLog)
+        var format = ':moment :method :url :status :response-time ms - :res[content-length]'
+        var options = {
+          skip  : function (req) {
+            var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
+            var i = req.url.lastIndexOf('.')
+            var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
+            return (suffix && excluded.indexOf(suffix) > -1)
+          },
+          stream: logAccessWriteStream
+        }
+        morgan.token('moment', function () {
+          return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
+        })
+        // en dev on ajoute les var postées
+        if (settings.application.staging === 'dev') {
+          morgan.token('post', function (req) {
+            return (_.isEmpty(req.body)) ? '' : tools.stringify(req.body)
+          })
+          format += ' :post'
+        }
+        rail.use('/', morgan(format, options))
+      } else {
+        lassi.log('$rail', "Impossible d'ouvrir le log " +accessLog)
       }
-      morgan(format, options)
-      lassi.on('shutdown', function () {
-        logAccessWriteStream.end()
-      })
     } catch(error) {
       console.log(error.stack)
     }

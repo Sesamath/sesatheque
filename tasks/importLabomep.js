@@ -6,13 +6,63 @@
  */
 'use strict'
 
+var thomas = {
+  id     : 1,
+  valide : true,
+  nom    : "CRESPIN",
+  prenom : "Thomas",
+  email  : "thomas.crespin@sesamath.net",
+  roles  : {
+    prof                                          : true,
+    acces_correction                              : true,
+    sesamath_gestionnaire                         : true,
+    sesamath_salarie                              : true,
+    sesamath_membre                               : true,
+    interface_collaborative_user                  : true,
+    interface_collaborative_admin                 : true,
+    interface_collaborative_admin_complements     : true,
+    interface_collaborative_admin_xml             : true,
+    interface_collaborative_flash                 : true,
+    interface_collaborative_iep                   : true,
+    interface_collaborative_ooo_cahier_mathenpoche: true,
+    interface_collaborative_ooo_corrections       : true,
+    interface_collaborative_ooo_lycee             : true,
+    interface_collaborative_ooo_manuel_sesamath   : true,
+    interface_collaborative_tableur               : true,
+    interface_collaborative_tep                   : true,
+    interface_collaborative_labomep_gt_j3p        : true,
+    sesamath_dezoneur                             : true
+  },
+  groupes: {
+    wiki_interne_user                  : true,
+    wiki_interne_membre                : true,
+    wiki_interne_dev                   : true,
+    wiki_interne_adminsite             : true,
+    wiki_interne_salarie               : true,
+    wiki_interne_serveur               : true,
+    wiki_interne_admin                 : true,
+    wiki_externe_user                  : true,
+    wiki_externe_membre                : true,
+    wiki_externe_sesaprof              : true,
+    wiki_externe_admin                 : true,
+    wiki_externe_nxmanuel              : true,
+    wiki_externe_redmine               : true,
+    wiki_externe_dev_www               : true,
+    wiki_externe_labomep               : true,
+    mathenpoche_developpeur_user       : true,
+    mathenpoche_developpeur_developpeur: true,
+    mathenpoche_developpeur_admin      : true
+  }
+}
 
 var knex = require('knex')
-//var _ = require('lodash')
-//var request = require('request')
-//var moment = require('moment')
+var _ = require('lodash')
+var request = require('request')
 var flow   = require('seq')
 var xml2js = require('xml2js')
+// pour ec2, fct piquée dans le repository
+var elementtree = require('elementtree')
+var tools = require('../construct/tools')
 
 // nos méthodes mutualisées
 var common = require('./modules/common')
@@ -24,11 +74,11 @@ var origine
 
 /** pour logguer les relations */
 var logRelations = false
-/** pour loguer le processing (un point par ressource sinon) */
+/** pour loguer le processing */
 var logProcess = false
 
 // conf de l'appli
-var config = require('../construct/ressource/config.js');
+var config = require('../construct/ressource/config.js')
 // conf de l'appli
 var serverConf = require('../_private/config')
 var urlBibli = 'http://'
@@ -38,14 +88,19 @@ urlBibli += serverConf.$server && serverConf.$server.port || '3000'
 urlBibli += '/api/ressource'
 
 // constantes
-var tdCode = config.constantes.typeDocumentaires;
-var tpCode = config.constantes.typePedagogiques;
-var catCode = config.constantes.categories;
+var tdCode = config.constantes.typeDocumentaires
+var tpCode = config.constantes.typePedagogiques
+var catCode = config.constantes.categories
 
 // databases
-var dbConfigLabomep = require(__dirname + '/../_private/config/labomep');
+var dbConfigLabomep = require('../_private/config/labomep')
 // les connexions aux bases
-var klabomep = knex(dbConfigLabomep);
+var klabomep = knex(dbConfigLabomep)
+var kbibli = knex(serverConf.$entities.database)
+
+// une liste id => oid des auteurs
+var listeAuteurs = {}
+
 
 /**
  * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
@@ -156,21 +211,120 @@ function parseRessource(row) {
 
   if (ajout) {
     if (logProcess) log('processing ' + ressource.idOrigine)
-    // on transforme le xml en objet js pour certains
-    switch (ressource.typeTechnique) {
-      case 'url':
-          modifyUrl(ressource, common.pushRessource)
-        break
-      /* case '':
-          xml2js.parseString(ressource.xml, function(error, result) {
-            if (error) addError(ressource.idOrigine)
-            else {
-              ressource.parametres = result
-              common.pushRessource(ressource)
-            }
-          })
-        break */
-      default : common.pushRessource(ressource)
+    addAuteurs(ressource, function () {
+      // on transforme le xml en objet js pour certains
+      switch (ressource.typeTechnique) {
+        case 'url':
+            modifyUrl(ressource, common.pushRessource)
+          break
+        case 'ec2':
+          convertXmlEc2(ressource)
+          common.pushRessource(ressource)
+          break
+        default : common.pushRessource(ressource)
+      }
+    })
+  }
+}
+
+/**
+ * Remplace les id auteurs par des oid et passe la ressource à next
+ * @param ressource
+ * @param next
+ */
+function addAuteurs(ressource, next) {
+  if (_.isEmpty(ressource.auteurs)) next(ressource)
+  else {
+    // on regarde si on le connait déjà
+    var idComb = common.getIdComb(ressource)
+    var auteurs = []
+    flow(ressource.auteurs).seqEach(function (idAuteur) {
+      if (logProcess) log("on va chercher l'id auteur" +idAuteur)
+      var nextAuteur = this
+      if (listeAuteurs[idAuteur]) {
+        // on l'a déjà croisé dans ce script
+        auteurs.push(listeAuteurs[idAuteur])
+        nextAuteur()
+      } else {
+        // on regarde en bdd
+        kbibli
+            .raw("SELECT oid FROM personne_index WHERE name='id' AND _string='" + idAuteur + "' LIMIT 1")
+            .exec(function (error, rows) {
+              if (error) {
+                log('erreur sur la récup personne_index ' + idAuteur)
+                nextAuteur()
+              } else if (rows[0] && rows[0][0] && rows[0][0].oid) {
+                var oid = rows[0][0].oid
+                // on le connait, on remplace id par oid
+                auteurs.push(oid)
+                // on le note pour une prochaine fois
+                listeAuteurs[idAuteur] = oid
+                nextAuteur()
+              } else {
+                // on le connait pas, faut aller le chercher en http
+                /*
+                var options = {
+                  url    : 'https://ssl.sesamath.net/sesamath/requete_externe.php?fonction=getUserInfos&format=json&id=' + idAuteur,
+                  json   : true
+                }
+                request.get(options, function (error, response, data) {
+                  if (error || data.error || !data.id) {
+                    // KO, le msg d'erreur
+                    var errorString = 'erreur sur le get ' + options.url + ' : '
+                    if (error) errorString += error.toString()
+                    else if (data.error) errorString += data.error
+                    else errorString += tools.stringify(data)
+                    common.addError(idComb, errorString)
+                    nextAuteur()
+                  } else if (data.id && data.id == idAuteur) {
+                    // OK, on l'enregistre ici */
+                var data = thomas
+                    common.addPersonne(data, function (error, personne) {
+                      log("après addPersonne", personne)
+                      if (error) {
+                        common.addError(idComb, error)
+                      } else if (personne && personne.oid) {
+                        auteurs.push(personne.oid)
+                        listeAuteurs[idAuteur] = personne.oid
+                      } else {
+                        common.addError(idComb, "erreur inconnue sur personne/add")
+                      }
+                      nextAuteur()
+                    })
+/*                  }
+                }) */
+              }
+            })
+      }
+    }).seq(function () {
+      log('on a récupéré les oid des auteurs', auteurs)
+      ressource.auteurs = auteurs
+      next(null, ressource)
+    }).catch(function (error) {
+      log("erreur sur la récup des auteurs de " +ressource.idOrigine +" on va remplacer les id", ressource.auteurs)
+      log("par les oid", auteurs)
+      common.addError(idComb, error)
+      ressource.auteurs = auteurs
+      next(null, ressource)
+    })
+  }
+}
+
+/**
+ * vire parametres.xml pour ne mettre que les params json
+ * @param ressource
+ */
+function convertXmlEc2(ressource) {
+  if (ressource.parametres && ressource.parametres.xml) {
+    var config = elementtree.parse(ressource.parametres.xml)
+    var params = {}
+    if (config._root && config._root.tag === 'config' && config._root._children) {
+      config._root._children.forEach(function (child) {
+        if (child.tag) {
+          params[child.tag] = child.text
+        }
+      })
+      ressource.parametres = params
     }
   }
 }
@@ -192,7 +346,8 @@ function initRessourceGenerique(row) {
     publie           : true,
     restriction      : (origine == 'labomepBIBS') ? 0 : 3
   }
-  if (row.user_sslsesa_id) ressource.auteurs =  [row.user_sslsesa_id]
+  if (row.titre) ressource.titre = row.titre
+  if (row.sslsesa_user_id) ressource.auteurs =  [row.sslsesa_user_id]
 
   return ressource
 }
@@ -273,13 +428,13 @@ var argv = process.argv.slice(2)
 var ids
 var query
 
-log('task ' + __filename);
+log('task ' + __filename)
 
 // on doit préciser persos ou bibs
 if (argv[0] === '--persos') {
   query = "SELECT perso_id AS id, perso_type_id AS type_id, perso_titre AS titre, perso_descriptif AS descriptif," +
       " perso_commentaire AS commentaire, perso_xml AS xml, su.user_id AS sslsesa_user_id FROM PERSOS" +
-      " INNER JOIN sslsesa_user su ON perso_util_id = user_labomep_id LIMIT 1000"
+      " INNER JOIN sslsesa_user su ON perso_util_id = user_labomep_id"
   origine = 'labomepPERSOS'
 } else if (argv[0] === '--bibs') {
   query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
@@ -299,16 +454,23 @@ if (ids) {
   log('On ne traitera que les id ' + ids)
   if (origine === 'labomepPERSOS') query += " WHERE perso_id IN(" +ids +")"
   else query += " WHERE bib_id IN(" +ids +")"
-}
+} // else query += ' LIMIT 1000'
+
+common.setOptions({
+  timeout : 2000,
+  maxLaunched : 1,
+  logApiCalls : logProcess,
+  logProcess : logProcess,
+  logRelations : logRelations
+})
+
 
 // en cas d'interruption on veut le résultat quand même
-process.on('SIGTERM', common.displayResult);
-process.on('SIGINT', common.displayResult);
+process.on('SIGTERM', common.displayResult)
+process.on('SIGINT', common.displayResult)
 
 // yapluka
 flow().seq(function () {
-  // la cb quand toutes les ressources seront enregistrées
-  common.setAfterAllCb(this)
   klabomep
       .raw(query)
       .exec(function (error, rows) {
@@ -316,6 +478,9 @@ flow().seq(function () {
               if (rows[0]) rows[0].forEach(parseRessource)
               else log("Pas de ressources avec " + query)
             })
+  log("lancement de la requete \n" +query)
+  // la cb quand toutes les ressources seront enregistrées
+  common.setAfterAllCb(this)
 }).seq(function () {
   common.flushPendingRelations(this)
 }).seq(function () {

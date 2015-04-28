@@ -57,8 +57,6 @@ function hasGenericPermission(permission, context) {
       context.session.user.permissions[permission]
 }
 
-
-
 /**
  * Helper de checkAccess pour la permission add
  * @param {Context}   context
@@ -171,38 +169,6 @@ function isOnLan(ip) {
 }
 
 /**
- * Renvoie true si c'est du json (api) appelé par une ip locale
- * @see http://expressjs.com/guide/behind-proxies.html
- * @see http://expressjs.com/api.html#req.ip
- * @param {Context} context
- */
-function isAllRightsIp(context) {
-  var token = context.request.header('X-ApiToken')
-  if (token && context.request.originalUrl.indexOf('/api/') === 0) {
-    // on vérifie déjà le token
-    if ($settings.get('apiTokens', []).indexOf(token) > -1) {
-      // token ok on vérifie l'ip
-      var ip = context.request.ip
-      log("token ok dans isAllRightsIp avec l'ip " + ip)
-      if (isOnLan(ip)) {
-        // on regarde si par hasard ce serait pas l'ip du proxy
-        var ipClient = ip
-        if (context.ips && context.ips.length) ipClient = context.ips[0]
-        else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
-        else if (context.request.headers['x-forwarded-for'])
-          ipClient = context.request.header('x-forwarded-for').split(',')[0]
-        if (ipClient && ipClient !== ip) log.debug("L'appli est derrière un proxy mais trust proxy n'a pas été déclaré")
-
-        return isOnLan(ipClient)
-      }
-    }
-
-  }
-
-  return false
-}
-
-/**
  * Appelle context.accessDenied si l'utilisateur courant n'a pas la permission demandée pour la ressource
  * (et appelle next(null,ressource) sinon)
  * @param permission
@@ -215,7 +181,7 @@ $accessControl.checkPermission = function (permission, context, ressource, next)
   // pas la peine de continuer si c'est pour voir une ressource publique
   if (permission === 'read' && ressource.restriction === 0 ||
         // ni si c'est l'api appelée par un de nos serveurs
-      isAllRightsIp(context) ||
+      hasAllRights(context) ||
         // ni si l'utilisateur a les droits génériques
       hasGenericPermission(permission, context)
   ) {
@@ -243,6 +209,41 @@ $accessControl.checkPermission = function (permission, context, ressource, next)
   }
 }
 
+
+/**
+ * Renvoie true si c'est du json (api) appelé par une ip locale
+ * @see http://expressjs.com/guide/behind-proxies.html
+ * @see http://expressjs.com/api.html#req.ip
+ * @param {Context} context
+ */
+$accessControl.hasAllRights = function (context) {
+  var token = context.request.header('X-ApiToken')
+  if (token && context.request.originalUrl.indexOf('/api/') === 0) {
+    // on vérifie déjà le token
+    if ($settings.get('apiTokens', []).indexOf(token) > -1) {
+      // token ok on vérifie l'ip
+      var ip = context.request.ip
+      log("token ok dans hasAllRights avec l'ip " + ip)
+      if (isOnLan(ip)) {
+        // on regarde si par hasard ce serait pas l'ip du proxy
+        var ipClient = ip
+        if (context.ips && context.ips.length) ipClient = context.ips[0]
+        else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
+        else if (context.request.headers['x-forwarded-for'])
+          ipClient = context.request.header('x-forwarded-for').split(',')[0]
+        if (ipClient && ipClient !== ip) log.debug("L'appli est derrière un proxy mais trust proxy n'a pas été déclaré")
+
+        return isOnLan(ipClient)
+      }
+    }
+
+  }
+
+  return false
+}
+// alias
+var hasAllRights = $accessControl.hasAllRights
+
 /**
  * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
  * (ou sur toutes les ressources si ressource n'est pas fournie)
@@ -253,7 +254,7 @@ $accessControl.checkPermission = function (permission, context, ressource, next)
  */
 $accessControl.hasPermission = function (permission, context, ressource) {
   if (hasGenericPermission(permission, context)) return true
-  if (isAllRightsIp(context)) return true
+  if (hasAllRights(context)) return true
   if (!ressource) return false
 
   // read n'a pas forcément besoin de session
@@ -277,7 +278,7 @@ $accessControl.hasPermission = function (permission, context, ressource) {
  */
 $accessControl.hasReadPermission = function (context, ressource) {
   if (!ressource.restriction) return true
-  if (isAllRightsIp(context)) return true
+  if (hasAllRights(context)) return true
   if (!$accessControl.isAuthenticated(context)) return false
   if (hasGenericPermission('read', context)) return true
   return (getReadDeniedMessage(context, ressource) === '')

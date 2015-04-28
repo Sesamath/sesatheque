@@ -45,49 +45,50 @@ module.exports = function (Personne) {
     return list
   }
 
-  Personne.construct = function () {
+  Personne.construct(function (initObj) {
+    if (!initObj) initObj = {}
     /**
      * Id de la source d'authentification
      * @type {string}
      */
-    this.id = null
+    this.id = initObj.id || null
     /**
      * Prénom
      * @type {string}
      */
-    this.prenom = ''
+    this.prenom = initObj.prenom || ''
     /**
      * Nom
      * @type {string}
      */
-    this.nom = ''
+    this.nom = initObj.nom || ''
     /**
      * Adresse email
      * @type {string}
      */
-    this.email = ''
+    this.email = initObj.email || ''
     /**
      * La liste des roles {role:boolean}
      * @type {Object}
      */
-    this.roles = {}
+    this.roles = initObj.roles || {}
     /**
      * La liste des groupes {groupe:boolean}
      * @type {Object}
      */
-    this.groupes = {}
+    this.groupes = initObj.groupes || {}
     /**
      * D'autres champs stockés en json, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
      * suivant le source d'authentification par ex.
      * @type {string}
      */
-    this.infos = ''
+    this.infos = initObj.infos || ''
 
     /**
      * En session, on a une propriété "permissions" supplémentaire, ajouté au moment du login et de la mise en session,
      * elle est déduite des roles avec $accessControl.getPermissions(personne)
      */
-  }
+  })
 
   Personne
       .defineIndex('id', 'string')

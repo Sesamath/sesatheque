@@ -8,9 +8,8 @@
         {:else}
             {restriction.title} :
             {@eq key=restriction.value value=1} prof{/eq}
-            {@eq key=restriction.value value=2} auteur
-                {:else} {restriction.value} inconnue
-            {/eq}
+            {@eq key=restriction.value value=2} groupe{/eq}
+            {@eq key=restriction.value value=3} auteur{:else} {restriction.value} inconnue{/eq}
         {/eq}
         {:else}Public{/restriction.value}</span>
     <h2>{titre.value}</h2>
@@ -25,22 +24,22 @@
     {typePedagogiques.title} : {typePedagogiques.value}<br />
     {typeDocumentaires.title} : {typeDocumentaires.value}<br />
     </p>
-    <p>{resume.title} : {resume.value|s}</p>
-    <p>{description.title} : {description.value|s}</p>
-    <p>{commentaires.title} : {commentaires.value|s}</p>
-    <p>{parametres.title} : <pre>{parametres.value|s}</pre></p>
+    <p>{resume.title} : {resume.value|nl2br}</p>
+    <p>{description.title} : {description.value|nl2br}</p>
+    <p>{commentaires.title} : {commentaires.value|nl2br}</p>
+    <p>{parametres.title} : <pre>{parametres.value|js2}</pre></p>
 
     {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}
-        <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
+        <li>{?url}<a href="{url}">{nom}</a>{:else}{nom}{/url}</li>
     {/auteurs.value}</ul>{/auteurs.value}
 
     {?contributeurs.value}<ul>{contributeurs.titre} : {#contributeurs.value}
-        <li>{?url}<a href="{url}">{nom}</a> {:else}{nom}{/url}</li>
+        <li>{?url}<a href="{url}">{nom}</a>{:else}{nom}{/url}</li>
     {/contributeurs.value}</ul>{/contributeurs.value}
 
     {?relations.value}<ul>{relations.title}
         {#relations.value}<li>{predicat} {lien|s} ({oid})</li>{/relations.value}
-    </ul>{/relations.value}<br />
+    </ul>{/relations.value}
 
 {/error}
 </div>
