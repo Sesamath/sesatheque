@@ -105,25 +105,29 @@ module.exports = function($flashMessage) {
       }
       // et on gère ici les erreurs à rendre en html
       if (context.status && context.status > 400) {
-        var msg
+        var title, msg
         switch (context.status) {
           case 404:
-            msg = "Cette page n'existe pas"
+            msg = data.content || "Cette page n'existe pas"
             break
           case 401:
           case 403:
-            msg = "Authentification requise"
+            if (data.content) msg = data.content
+            else if (context.session && context.session.user) msg = 'Droits insuffisants'
+            else msg = "Authentification requise"
             break
           default:
-            msg = context.content || "Ooops, une erreur " + context.status + ' est survenue'
+            title = 'erreur ' +context.status
+            msg = data.content || "Ooops, une erreur " +context.status +' est survenue'
         }
+        if (!title) title = msg
         // si lassi a mis ça on le vire (on vient de gérer msg)
-        if (context.content) delete context.content
+        if (data.content) delete data.content
         if (isApi) {
           context.contentType = 'application/json'
           if (!data.error) data.error = msg
         } else {
-          prepareErrorHtmlData(msg, msg)
+          prepareErrorHtmlData(title, msg)
         }
       }
     }

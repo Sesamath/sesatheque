@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 module.exports = function (Ressource, $routes, $ressourceControl) {
   var _ = require('lodash')
@@ -57,11 +57,11 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
    */
   function arrayToDust(key, selectedValues, isUnique) {
     //log.debug("arrayToDust de " +key, selectedValues)
-    var choices = [];
+    var choices = []
     if (selectedValues && !_.isArray(selectedValues)) {
       log.error(new Error("La propriété " + key + " de la ressource n'est pas un tableau"))
     } else {
-      var i = 0;
+      var i = 0
       _.each(config.listes[key], function (label, cbValue) {
         // cbValue est toujours une string (propriété de l'objet)
         var intValue = parseInt(cbValue, 10)
@@ -69,22 +69,22 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         var choice = {
           label: label,
           value: cbValue
-        };
+        }
         if (!isUnique) {
           // faut du name sur chaque checkbox
-          choice.name = key + '[' + i + ']';
-          i++;
+          choice.name = key + '[' + i + ']'
+          i++
         }
         // et on ajoute les selected s'il y en a
         if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
           choice.selected = true
         }
-        choices.push(choice);
-      });
+        choices.push(choice)
+      })
       //log.debug("renvoie ", choices)
     }
 
-    return choices;
+    return choices
   }
 
   /**
@@ -106,15 +106,15 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
    */
   $ressourceConverter.getViewData = function (error, ressource, view) {
     var viewData = {}
-    var buffer;
-    if (error) viewData.error = error.toString();
+    var buffer
+    if (error) viewData.error = error.toString()
     else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
       _.each(config.labels, function (label, key) {
-        var value = ressource[key];
+        var value = ressource[key]
         viewData[key] = {
           title: label
-        };
+        }
         // on traite chaque type de contenu
         if (_.isArray(value)) {
 
@@ -134,13 +134,13 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
 
           } else if (config.listes[key]) {
             // faut remplacer des ids par des labels
-            buffer = [];
+            buffer = []
             _.each(value, function (id) {
               if (config.listes[key][id])  buffer.push(config.listes[key][id])
               else log.error("La ressource " + ressource.oid + " a une valeur " + id +
-                  " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration");
-            });
-            viewData[key].value = buffer.join(', ');
+                  " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration")
+            })
+            viewData[key].value = buffer.join(', ')
 
           } else {
             // un tableau qui n'est pas une liste d'ids on le laisse tel quel (auteurs & co ou des propriétés supplémentaires)
@@ -149,19 +149,19 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
 
 
         } else if (_.isDate(value)) {
-          viewData[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue';
+          viewData[key].value = value ? moment(value).format(config.formats.jour) : 'inconnue'
 
         } else {
           // Object ou string ou number ou boolean, on laisse tel quel
-          viewData[key].value = value;
+          viewData[key].value = value
         }
-      }); // fin each propriété
+      }) // fin each propriété
 
       // on ajoute oid
       if (ressource.oid) viewData.oid = ressource.oid
     } else {
       // pas d'erreur mais pas de ressource non plus
-      viewData.error = "Aucune ressource";
+      viewData.error = "Aucune ressource transmise pour affichage"
     }
     if (view) viewData.$view = view
 
@@ -193,7 +193,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
    * @memberOf $ressourceConverter
    */
   $ressourceConverter.getFormViewData = function (error, ressource) {
-    var viewData = {warnings:[]};
+    var viewData = {warnings:[]}
     if (ressource && ressource.warnings) {
       viewData.warnings = ressource.warnings
     }
@@ -213,14 +213,14 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
 
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
     _.each(config.labels, function (label, key) {
-      var value = ressource[key];
-      var isUnique = config.uniques[key];
+      var value = ressource[key]
+      var isUnique = config.uniques[key]
 
       // pour tout le monde
       viewData[key] = {
         id   : key, // le template ajoutera un préfixe de son choix
         label: label
-      };
+      }
       // required ?
       if (config.required[key]) viewData[key].required = true
       if (isUnique) viewData[key].unique = true
@@ -230,7 +230,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
         // et la liste des possibles dans config.prop
         if (isUnique) {
-          value = [value]; // arrayToDust veut un array
+          value = [value] // arrayToDust veut un array
           // faut ça sur le select et pas les choices
           viewData[key].name = key
         }
@@ -262,7 +262,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
 
         viewData[key].value = value
       }
-    }); // fin each propriété
+    }) // fin each propriété
 
     // on ajoute nos cas particulier
     viewData.version.readonly = true
@@ -323,7 +323,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
           data.parametres = {}
         } catch (e) {
           if (!data.warnings) data.warnings = []
-          data.warnings.push("Erreurs enfants : json invalide");
+          data.warnings.push("Erreurs enfants : json invalide")
         }
       }
 
@@ -374,7 +374,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
       }
     })
     // faut ajouter les enfants éventuels
-    if (data.enfants) ressource.enfants = data.enfants;
+    if (data.enfants) ressource.enfants = data.enfants
     // ces propriétés sont imposées
     ressource.typeTechnique = 'arbre'
     ressource.categories = [config.constantes.categories.liste]

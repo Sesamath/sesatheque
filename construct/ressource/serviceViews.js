@@ -56,7 +56,7 @@ module.exports = function ($ressourceRepository, $personneRepository, $ressource
   function addJsVars(data, ressource) {
     if (ressource) {
       data.contentBloc.pluginBaseUrl = '/plugins/' + ressource.typeTechnique
-      data.contentBloc.vendorsBaseUrl= '../../vendors'
+      data.contentBloc.vendorsBaseUrl= '/vendors'
       data.contentBloc.pluginName    = ressource.typeTechnique
       data.contentBloc.isDev         = ($settings.get('lassi.application.staging') !== 'production')
       // une string pour que dust le mette dans le source

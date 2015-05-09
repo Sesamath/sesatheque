@@ -49,15 +49,15 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
 
   /**
    * Récupère une personne (en cache ou en bdd)
-   * @param oid Id de la personne (à priori dans son référentiel, donc ≠ oid)
+   * @param id Id de la personne (à priori dans son référentiel, donc ≠ oid)
    * @param next
    */
-  $personneRepository.load = function (oid, next) {
-    log.debug('load ' + oid)
-    $cachePersonne.get(oid, function (error, personneCached) {
+  $personneRepository.load = function (id, next) {
+    log.debug('load ' + id)
+    $cachePersonne.get(id, function (error, personneCached) {
       if (personneCached) next(null, personneCached)
       else {
-        Personne.match('oid').equals(oid).grabOne(function (error, personne) {
+        Personne.match('id').equals(id).grabOne(function (error, personne) {
           //log.debug('personne load remonte ', personne)
           if (error) next(error)
           else if (personne) {

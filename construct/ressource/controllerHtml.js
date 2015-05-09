@@ -116,6 +116,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
+  // previewByOrigin
+  controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      $views.printForRead(error, ressource, context, 'display')
+    })
+  })
+
 // Ajouter, affichage du form de saisie
   controller.get($routes.get('add'), function (context) {
     if (checkAuthenticated(context)) {
