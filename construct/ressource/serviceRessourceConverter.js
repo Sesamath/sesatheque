@@ -225,8 +225,8 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
       if (config.required[key]) viewData[key].required = true
       if (isUnique) viewData[key].unique = true
 
-      // c'est un tableau ou une valeur unique (donc prise dans une liste => select ou checkboxes)
       if (_.isArray(value) || config.uniques[key]) {
+        // c'est un tableau ou une valeur unique (donc prise dans une liste => select ou checkboxes)
         // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
         // et la liste des possibles dans config.prop
         if (isUnique) {
@@ -236,8 +236,8 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         }
         viewData[key].choices = arrayToDust(key, value, isUnique)
 
-        // checkbox tout seul (pas de label, c'est le parent qui le porte)
       } else if (_.isBoolean(value)) {
+        // checkbox tout seul (pas de label, c'est le parent qui le porte)
         viewData[key].choices = [
           {
             name : key,
@@ -246,8 +246,9 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         ]
         if (value) viewData[key].choices[0].selected = true
 
-        // propriété scalaire => input ou textarea
       } else {
+        // objet ou scalaire => input ou textarea
+        // on formate en strings (date formatée ou objet en json)
         viewData[key].name = key
         if (_.isDate(value)) {
           value = moment(value).format(config.formats.jour)
@@ -258,7 +259,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
           } catch (error) {
             value = error.toString()
           }
-        }
+        } // else pas de transformation
 
         viewData[key].value = value
       }

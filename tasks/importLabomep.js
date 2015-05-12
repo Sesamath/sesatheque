@@ -324,7 +324,7 @@ function initRessourceGenerique(row) {
     description      : '',
     commentaires     : row.commentaire || '',
     parametres       : {xml:row.xml},
-    langue           : 'fre',
+    langue           : 'fra',
     publie           : true,
     restriction      : (origine == 'labomepBIBS') ? 0 : 3
   }

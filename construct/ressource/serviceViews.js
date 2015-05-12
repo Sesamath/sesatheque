@@ -133,7 +133,7 @@ module.exports = function ($ressourceRepository, $personneRepository, $ressource
       // pour display on ajoute les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
       if (view === 'display') addJsVars(data, ressource)
       // et le menu si on en a besoin
-      if (data.$layout === 'layout-page') addMenu(context, data, ressource)
+      if (data.$layout.indexOf('layout-page') > -1) addMenu(context, data, ressource)
       // le titre
       if (ressource) {
         if (ressource.titre) data.$metas.title = ressource.titre

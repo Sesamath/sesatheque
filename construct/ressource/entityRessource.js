@@ -34,9 +34,9 @@
 /**
  * Entity Ressource
  * @param {Entity} Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
- * @param $ressourceControl
+ * @param $settings
  */
-module.exports = function (Ressource, $ressourceControl) {
+module.exports = function (Ressource, $settings) {
 
   var _ = require('lodash')
   var tools = require('../tools')
@@ -69,6 +69,11 @@ module.exports = function (Ressource, $ressourceControl) {
     _.each(initObj, function (value, key) {
       if (!entity.hasOwnProperty(key) && typeof value !== 'function') entity[key] = value
     })
+    // la langue par défaut
+    if (!this.langue) {
+      var langueDefaut = $settings.get('application.ressource.langueDefaut')
+      if (langueDefaut) this.langue = langueDefaut
+    } else if (this.langue === 'fre') this.langue = 'fra' // on rectifie fre en fra
   })
 
 

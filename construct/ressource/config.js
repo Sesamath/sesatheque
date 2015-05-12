@@ -35,6 +35,7 @@
  * Nos listes de types & co, qui changent rarement
  */
 var ressourceConfig = {
+  langueDefaut : 'fra',
   /**
    * Les listes de choix pour nos propriétés dont on enregistre des ids
    */

@@ -19,6 +19,7 @@
     {version.title} {version.value})<br />
     {dateCreation.title} : {dateCreation.value}<br />
     {dateMiseAJour.title} : {dateMiseAJour.value}<br />
+    {langue.title} : {langue.value}<br />
     {niveaux.title} : {niveaux.value}<br />
     {categories.title} : {categories.value}<br />
     {typePedagogiques.title} : {typePedagogiques.value}<br />

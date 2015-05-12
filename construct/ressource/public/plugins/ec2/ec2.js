@@ -92,7 +92,7 @@ function display(ressource, options, next) {
   options = {
     largeur : 735,
     hauteur : 450,
-    base : baseEc2,
+    base : baseEc2 +'/',
     flashvars : {
       contexte: 'LaboMEP', // encore utile ça ?
       statut: 'eleve'

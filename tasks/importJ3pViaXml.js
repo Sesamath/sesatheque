@@ -46,7 +46,7 @@ function parseRessource(row) {
     description      : row.description || '',
     commentaires     : row.commentaire || '',
     parametres       : { },
-    langue           : 'fre',
+    langue           : 'fra',
     publie           : true,
     restriction      : 0
   }
