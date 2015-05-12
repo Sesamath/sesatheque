@@ -88,6 +88,22 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
   }
 
   /**
+   * Retourne la série de labels (propriété => libellé) pour une ressource
+   * (remplace parametres par enfants pour les arbres)
+   * @param ressource
+   */
+  function getLabels(ressource) {
+    var labels = config.labels
+    // avec pour les arbres la propriété parametres remplacée par enfants
+    if (ressource && ressource.typeTechnique && ressource.typeTechnique === 'arbre') {
+      delete labels.parametres
+      labels.enfants = 'Enfants'
+    }
+
+    return labels
+  }
+
+  /**
    * Renvoie un token aléatoire
    * pas aussi random que l'usage de crypto ou d'un module npm dédié mais suffisant pour notre besoin
    * @returns {string}
@@ -110,7 +126,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
     if (error) viewData.error = error.toString()
     else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
-      _.each(config.labels, function (label, key) {
+      _.each(getLabels(ressource), function (label, key) {
         var value = ressource[key]
         viewData[key] = {
           title: label
@@ -212,13 +228,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
     //log.debug('ressource traitée par sendFormData', ressource)
 
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
-    var labels = config.labels
-    // avec pour les arbres la propriété parametres remplacée par enfants
-    if (ressource && ressource.typeTechnique && ressource.typeTechnique === 'arbre') {
-      delete labels.parametres
-      labels.enfants = 'Enfants'
-    }
-    _.each(labels, function (label, key) {
+    _.each(getLabels(), function (label, key) {
       var value = ressource[key]
       var isUnique = config.uniques[key]
 

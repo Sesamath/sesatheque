@@ -130,8 +130,25 @@ module.exports = function ($ressourceRepository, $personneRepository, $ressource
     function termine() {
       // et la ressource (ou erreur)
       data.contentBloc = $ressourceConverter.getViewData(error, ressource, view)
-      // pour display on ajoute les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
-      if (view === 'display') addJsVars(data, ressource)
+      // pour display faut ajouter les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
+      if (view === 'display') {
+        addJsVars(data, ressource)
+      } else if (view === 'describe' && ressource.typeTechnique === 'arbre') {
+        // on ajoute la liste des urls des enfants
+        if (ressource.enfants && ressource.enfants.length) {
+          var enfantsDescribe = []
+          ressource.enfants.forEach(function (enfant) {
+            if (enfant.ref) {
+              enfantsDescribe.push({
+                oid  : enfant.ref,
+                titre: enfant.titre,
+                url  : $routes.getAbs('describe', enfant.ref)
+              })
+            }
+          })
+          data.contentBloc.enfantsDescribe = enfantsDescribe
+        }
+      }
       // et le menu si on en a besoin
       if (data.$layout.indexOf('layout-page') > -1) addMenu(context, data, ressource)
       // le titre
@@ -238,7 +255,6 @@ module.exports = function ($ressourceRepository, $personneRepository, $ressource
           })
         }
       })
-
       // on a tout, on peut envoyer
       fluxComplements.seq(termine)
       // en cas d'erreur dans seq on envoie quand même
