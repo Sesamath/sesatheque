@@ -9,24 +9,24 @@
     {
       "titre"        : "animations interactives",
       "typeTechnique": "arbre",
-      "refOrigine"      : "sesamath",
-      "ref"    : "animations_interactives"
+      "origine"      : "sesamath",
+      "idOrigine"    : "animations_interactives"
     },
     {
       "titre"        : "exercices interactifs",
       "typeTechnique": "arbre",
-      "refOrigine"      : "sesamath",
-      "ref"    : "exercices_interactifs"
+      "origine"      : "sesamath",
+      "idOrigine"    : "exercices_interactifs"
     },
     {
       "titre"        : "tests diagnostiques",
       "typeTechnique": "arbre",
-      "refOrigine"      : "sesamath",
-      "ref"    : "tests_diagnostiques"
+      "origine"      : "sesamath",
+      "idOrigine"    : "tests_diagnostiques"
     },
     {
-      "ref"          : "Cahier_CM2_2013",
-      "refOrigine"   : "sesamath",
+      "idOrigine"          : "Cahier_CM2_2013",
+      "origine"   : "sesamath",
       "titre"        : "Cahier CM2 2013",
       "typeTechnique": "arbre"
     }

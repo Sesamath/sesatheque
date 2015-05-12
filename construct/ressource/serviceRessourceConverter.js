@@ -212,7 +212,13 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
     //log.debug('ressource traitée par sendFormData', ressource)
 
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
-    _.each(config.labels, function (label, key) {
+    var labels = config.labels
+    // avec pour les arbres la propriété parametres remplacée par enfants
+    if (ressource && ressource.typeTechnique && ressource.typeTechnique === 'arbre') {
+      delete labels.parametres
+      labels.enfants = 'Enfants'
+    }
+    _.each(labels, function (label, key) {
       var value = ressource[key]
       var isUnique = config.uniques[key]
 
@@ -282,16 +288,16 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
       value:token,
       hidden:true
     }
-    // et en attendant l'édition d'arbre, on le colle dans parametres
+
     if (ressource.enfants && ressource.enfants.length) {
       if (ressource.typeTechnique !== 'arbre') {
         log.error(new Error("ressource avec enfants qui n'est pas un arbre"), ressource)
       } else {
-        viewData.parametres.label = "Enfants"
+        viewData.enfants.label = "Enfants"
         try {
-          viewData.parametres.value = JSON.stringify(ressource.enfants, undefined, 2)
+          viewData.enfants.value = JSON.stringify(ressource.enfants, undefined, 2)
         } catch (error) {
-          viewData.parametres.value = error.toString()
+          viewData.enfants.value = error.toString()
         }
       }
     }
@@ -318,7 +324,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
           return next(new Error("json invalide dans la propriété ressource postée"))
         }
       }
-      if (data.typeTechnique && data.typeTechnique === 'arbre') {
+      if (data.typeTechnique && data.typeTechnique === 'arbre' && !data.enfants) {
         try {
           data.enfants = JSON.parse(data.parametres)
           data.parametres = {}

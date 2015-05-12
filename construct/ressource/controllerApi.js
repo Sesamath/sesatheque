@@ -173,47 +173,64 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
      * @param nextStep
      */
     function populateEnfants(parent, nextStep) {
+      /**
+       * Met à jour un enfant chez son parent d'après une ressource récupérée en bdd
+       * @param enfantIndex
+       * @param ressourceBdd
+       * @param next
+       */
+      function updateEnfant(enfantIndex, ressourceBdd, next) {
+        var enfant = parent.enfants[enfantIndex]
+        if (ressourceBdd) {
+          updateTitre(ressourceBdd, enfant.titre)
+          var newEnfant = {
+            oid          : ressourceBdd.oid,
+            titre        : ressourceBdd.titre,
+            typeTechnique: ressourceBdd.typeTechnique
+          }
+          if (enfant.contenu) newEnfant.contenu = enfant.contenu
+          if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
+          // visiblement seq casse les références,
+          // on affecte directement à la variable parent restée hors du flux
+          parent.enfants[enfantIndex] = newEnfant
+        } else {
+          // sinon on laisse en l'état mais on logue
+          log.errorData("On a pas trouvé la ressource " +enfant.idOrigine +' ' +enfant.id)
+          parent.enfants[enfantIndex].titre += ' (non trouvé)'
+        }
+        populateEnfants(parent.enfants[enfantIndex], next)
+      }
+
       if (parent.enfants && parent.enfants.length) {
         flow(parent.enfants)
           // seqEach passe au suivant de la boucle quand la cb appelle this
           // et au seq suivant quand la dernière cb appele this
           .seqEach(function (enfant, enfantIndex) {
             var finEach = this
-            if (enfant.ref && enfant.refOrigine) {
+            // pour permettre de récupérer des objets d'après leur ref d'origine, on accepte aussi id et idOrigine (à la place de ref)
+            if (enfant.origine && enfant.idOrigine) {
               // on le cherche en db
-              //var logSuffix = enfant.refOrigine + ' - ' + enfant.ref
+              //var logSuffix = enfant.idOrigine + ' - ' + enfant.id
               //log('load ' + logSuffix)
-              $ressourceRepository.loadByOrigin(enfant.refOrigine, enfant.ref, function (error, ressource) {
-                //log('load retour' +logSuffix)
-                if (ressource) {
-                  updateTitre(ressource, enfant.titre)
-                  var newEnfant = {
-                    oid          : ressource.oid,
-                    titre        : ressource.titre,
-                    typeTechnique: ressource.typeTechnique
-                  }
-                  if (enfant.contenu) newEnfant.contenu = enfant.contenu
-                  if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
-                  // visiblement seq casse les références,
-                  // on affecte directement à la variable parent restée hors du flux
-                  parent.enfants[enfantIndex] = newEnfant
-                } else {
-                  // sinon on laisse en l'état mais on logue
-                  log.errorData("On a pas trouvé la ressource " +enfant.refOrigine +' ' +enfant.ref)
-                  parent.enfants[enfantIndex].titre += ' (non trouvé)'
-                }
-                populateEnfants(parent.enfants[enfantIndex], finEach)
+              $ressourceRepository.loadByOrigin(enfant.origine, enfant.idOrigine, function (error, ressource) {
+                log("on traite l'enfant " +enfant.titre +" et on a récupéré ", ressource)
+                updateEnfant(enfantIndex, ressource, finEach)
+              })
+            } else if (enfant.ref) {
+              $ressourceRepository.load(enfant.ref, function (error, ressource) {
+                updateEnfant(enfantIndex, ressource, finEach)
               })
             } else {
-              // pas de ref, on regarde quand même s'il y a des enfants éventuels
+              // pas de ref ni idOrigine
               populateEnfants(enfant, finEach)
             }
-          }) // parEach
+          }) // seqEach
           .seq(function () {
             nextStep()
           })
-          .catch(function() {
-            log.error("L'analyse de l'arbre a planté", parent)
+          .catch(function(error) {
+            log.error(new Error("L'analyse de l'arbre a planté (cf aussi erreur suivante)"), parent)
+            log.error(error)
             nextStep()
           })
       } else {
@@ -221,13 +238,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
     } // populateEnfants
 
-    // debug
-    if (ressource.idOrigine == "exercices_interactifs.part1") log.debug('populateArbre de', ressource)
-
     // checks
-    if (ressource.typeTechnique !== 'arbre')
-        sendJson(context, new Error("Impossible de peupler une ressource autre qu'un arbre"))
-    else if (!ressource.enfants ||
+    if (ressource.typeTechnique !== 'arbre') {
+      sendJson(context, new Error("Impossible de peupler une ressource autre qu'un arbre"))
+    } else if (!ressource.enfants ||
         !ressource.enfants instanceof Array ||
         !ressource.enfants.length
     ) {
@@ -542,7 +556,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Avec une ref et des enfants on écrase l'ancien s'il existait ou on signale l'erreur (ref incorrecte)
    */
   controller.post('arbre', function (context) {
-    var partial = context.post.ref && !context.post.childrens
+    var partial = context.post.ref && !context.post.enfants
     var oid = parseInt(context.post.ref, 10) || 0
     if (context.perf) log.perf(context, 'start-' +oid)
     log.debug('post avec populate ' + context.get.populate)

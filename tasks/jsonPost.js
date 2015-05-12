@@ -17,6 +17,7 @@ var urlBibli = 'http://'
 urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlBibli += ':'
 urlBibli += serverConf.$server && serverConf.$server.port || '3000'
+var apiToken = serverConf.apiTokens[0]
 
 /**
  * Écrit en console avec le moment en préfixe
@@ -36,6 +37,9 @@ function log(msg, objToDump) {
 function postJson(url, obj) {
   var options = {
     url : url,
+    headers: {
+      "X-ApiToken": apiToken
+    },
     json: true,
     body: obj
   }
@@ -53,32 +57,33 @@ function usage(exitCode, message) {
   process.exit(exitCode || 0)
 }
 
-module.exports = function () {
-  // les 3 premiers args sont node, /path/2/gulp, importMEPS
-  var argv = process.argv.slice(3)
-  var uri
+/**
+ * Main
+ */
 
-  log('task ' + __filename);
+var argv = process.argv.slice(2)
+var uri
 
-  switch (argv[0]) {
-    case '--arbre': uri = '/api/arbre'; break;
-    case '--arbreFull': uri = '/api/arbre?populate=1'; break;
-    case '--ressource': uri = '/api/ressource'; break;
-    default : usage(1)
-  }
-  if (argv.length < 2) usage(1)
-  var jsonFile = __dirname + '/' +argv[1]
-  if (!fs.existsSync(jsonFile)) usage(1, jsonFile +" n'existe pas")
+log('task ' + __filename);
 
-  var url = urlBibli + uri
-  log('post de ' +jsonFile +' vers ' +url)
-  fs.readFile(jsonFile, function(error, jsonString) {
-    try {
-      if (error) throw error
-      var objToPost = JSON.parse(jsonString)
-      postJson(url, objToPost)
-    } catch (error) {
-      usage(1, jsonFile +" ne contient pas de json valide : " +error.toString())
-    }
-  })
+switch (argv[0]) {
+  case '--arbre': uri = '/api/arbre'; break;
+  case '--arbreFull': uri = '/api/arbre?populate=1'; break;
+  case '--ressource': uri = '/api/ressource'; break;
+  default : usage(1)
 }
+if (argv.length < 2) usage(1)
+var jsonFile = __dirname + '/' +argv[1]
+if (!fs.existsSync(jsonFile)) usage(1, jsonFile +" n'existe pas")
+
+var url = urlBibli + uri
+log('post de ' +jsonFile +' vers ' +url)
+fs.readFile(jsonFile, function(error, jsonString) {
+  try {
+    if (error) throw error
+    var objToPost = JSON.parse(jsonString)
+    postJson(url, objToPost)
+  } catch (error) {
+    usage(1, jsonFile +" ne contient pas de json valide : " +error.toString())
+  }
+})

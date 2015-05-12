@@ -28,7 +28,8 @@
     <p>{resume.title} : {resume.value|nl2br}</p>
     <p>{description.title} : {description.value|nl2br}</p>
     <p>{commentaires.title} : {commentaires.value|nl2br}</p>
-    <p>{parametres.title} : <pre>{parametres.value|js2}</pre></p>
+    {?enfants}<p>{enfants.title} : <pre>{enfants.value|js2}</pre></p>
+    {:else}<p>{parametres.title} : <pre>{parametres.value|js2}</pre></p>{/enfants}
 
     {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}
         <li>{?url}<a href="{url}">{nom}</a>{:else}{nom}{/url}</li>

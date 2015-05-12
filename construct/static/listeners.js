@@ -100,8 +100,7 @@ module.exports = function($flashMessage) {
       // erreur 404 ?
       if (!context.status && _.isEmpty(data)) {
         context.status = 404
-        data = {}
-        log.error(reqHttp + ' : pas de status ni content => 404')
+        log.debug(reqHttp + ' : pas de status ni content => 404')
       }
       // et on gère ici les erreurs à rendre en html
       if (context.status && context.status > 400) {
