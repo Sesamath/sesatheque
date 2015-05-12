@@ -5,7 +5,7 @@
  *   si vide dans BIBS on prend sinon on ignore
  * (Alexis avait complété ces champs à la main dans l'ancienne bibli symfony)
  */
-'use strict';
+'use strict'
 
 var knex = require('knex')
 var fs = require('fs')
@@ -52,7 +52,7 @@ function parseRessource(row) {
   }
   // on ajoute le graphe qu'il faut transformer
   try {
-    var json = graphe2Json(row.graphe);
+    var json = graphe2Json(row.graphe)
     ressource.parametres.g = JSON.parse(json)
   } catch (error) {
     common.addError(common.getIdComb(ressource), 'graphe invalide : ' +error)
@@ -70,7 +70,7 @@ function parseJ3pXml() {
   var xmlName = 'exercices_interactifs' // sans l'extension
   log('processing xml ' + xmlName)
   try {
-    var xmlString = fs.readFileSync(__dirname +'/arbresXml/' +xmlName +'.xml').toString();
+    var xmlString = fs.readFileSync(__dirname +'/arbresXml/' +xmlName +'.xml').toString()
     var arbre = elementtree.parse(xmlString)
     if (!arbre._root) throw new Error("arbre sans racine")
     if (!arbre._root._children || !arbre._root._children.length) throw new Error("arbre vide")
@@ -124,9 +124,9 @@ function purgeJ3pAndExit() {
 
   var query = "DELETE ressource, ri2 FROM ressource_index ri INNER JOIN ressource USING(oid)" +
       " INNER JOIN ressource_index ri2 USING(oid)" +
-      " WHERE ri.name = 'typeTechnique' AND ri._string = 'j3p'";
-  var dbConfigBibli = require(__dirname + '/../_private/config');
-  var kBibli = knex(dbConfigBibli.entities.database);
+      " WHERE ri.name = 'typeTechnique' AND ri._string = 'j3p'"
+  var dbConfigBibli = require(__dirname + '/../_private/config')
+  var kBibli = knex(dbConfigBibli.entities.database)
   flow()
       .seq(function () {
         log('on va lancer la requete de purge')
@@ -137,7 +137,7 @@ function purgeJ3pAndExit() {
               if (error) throw error
               // la suite est jamais affichée :-/ (mais suffit de passer une fois la requete ci-dessus à la static)
               else {
-                log('retour', rows);
+                log('retour', rows)
                 next()
               }
             })
@@ -151,70 +151,63 @@ function purgeJ3pAndExit() {
       })
 }
 
-function exit(exitCode) {
-  var code = exitCode || 0
-  process.exit(code)
-}
+log('task ' + __filename)
 
-module.exports = function () {
-  log('task ' + __filename);
+// les 3 premiers args sont node, /path/2/gulp, nomDeLaTache
+var argv = process.argv.slice(3)
+if (argv[0] === '--purge') {
+  purgeJ3pAndExit()
+} else {
+  // en cas d'interruption on veut le résultat quand même
+  process.on('SIGTERM', function () {
+    common.displayResult()
+  })
+  process.on('SIGINT', function () {
+    common.displayResult()
+  })
 
-  // les 3 premiers args sont node, /path/2/gulp, nomDeLaTache
-  var argv = process.argv.slice(3)
-  if (argv[0] === '--purge') {
-    purgeJ3pAndExit()
+  if (argv[0] === '--id') {
+    idsFound = argv[1].split(',')
   } else {
-    // en cas d'interruption on veut le résultat quand même
-    process.on('SIGTERM', function () {
-      common.displayResult();
-    })
-    process.on('SIGINT', function () {
-      common.displayResult();
-    })
-
-    if (argv[0] === '--id') {
-      idsFound = argv[1].split(',');
-    } else {
-      // on parse le xml
-      idsFound = parseJ3pXml()
-    }
-    if (idsFound) {
-      idsFound.forEach(function (id) {
-        flow().seq(function () {
-          var row,
-              query = "SELECT bib_id AS id, bib_titre AS titre, bib_descriptif AS descriptif," +
-                  " bib_commentaire AS commentaire, bib_xml AS graphe FROM BIBS"
-          common.setAfterAllCb(this)
-          kLabomep.raw(query +" WHERE bib_id = " + id).exec(function (error, rows) {
-            if (error) throw error
-            if (rows[0] && rows[0][0]) {
-              row = rows[0][0]
-              // faut voir si on complète avec les infos de oldBibli
-              if (!row.bib_descriptif || !row.bib_commentaire) {
-                kOldBibli.raw("SELECT description, commentaires FROM Ressource WHERE id = " + id).exec(function (error, rows) {
-                  var result
-                  if (error) throw error
-                  if (rows[0]) {
-                    result = rows[0][0]
-                    if (result && !row.descriptif && result.description) row.descriptif = result.description
-                    if (result && !row.commentaire && result.commentaires) row.commentaire = result.commentaires
-                  }
-                  else log("Pas de ressources avec " + query)
-                })
-              }
-              parseRessource(row)
-            } else log("Pas de ressources dans BIBS d'id " + id)
-          })
-
-        }).seq(function () {
-          common.displayResult()
-
-        }).catch(function (error) {
-          log('Erreur dans le flow :', error);
+    // on parse le xml
+    idsFound = parseJ3pXml()
+  }
+  if (idsFound) {
+    idsFound.forEach(function (id) {
+      flow().seq(function () {
+        var row,
+            query = "SELECT bib_id AS id, bib_titre AS titre, bib_descriptif AS descriptif," +
+                " bib_commentaire AS commentaire, bib_xml AS graphe FROM BIBS"
+        common.setAfterAllCb(this)
+        kLabomep.raw(query +" WHERE bib_id = " + id).exec(function (error, rows) {
+          if (error) throw error
+          if (rows[0] && rows[0][0]) {
+            row = rows[0][0]
+            // faut voir si on complète avec les infos de oldBibli
+            if (!row.bib_descriptif || !row.bib_commentaire) {
+              kOldBibli.raw("SELECT description, commentaires FROM Ressource WHERE id = " + id).exec(function (error, rows) {
+                var result
+                if (error) throw error
+                if (rows[0]) {
+                  result = rows[0][0]
+                  if (result && !row.descriptif && result.description) row.descriptif = result.description
+                  if (result && !row.commentaire && result.commentaires) row.commentaire = result.commentaires
+                }
+                else log("Pas de ressources avec " + query)
+              })
+            }
+            parseRessource(row)
+          } else log("Pas de ressources dans BIBS d'id " + id)
         })
+
+      }).seq(function () {
+        common.displayResult()
+
+      }).catch(function (error) {
+        log('Erreur dans le flow :', error)
       })
-    } else {
-      log("Aucune ressource j3p trouvée dans le xml")
-    }
+    })
+  } else {
+    log("Aucune ressource j3p trouvée dans le xml")
   }
 }

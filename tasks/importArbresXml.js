@@ -387,10 +387,6 @@ if (argv[0] === '--xml') {
 
 log('On va parser les xml : ' +xmls.join(', '))
 
-// en cas d'interruption on veut le résultat quand même
-process.on('SIGTERM', common.displayResult)
-process.on('SIGINT', common.displayResult)
-
 // yapluka
 flow().seq(function () {
   /**

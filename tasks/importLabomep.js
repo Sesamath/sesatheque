@@ -6,54 +6,7 @@
  */
 'use strict'
 
-var thomas = {
-  id     : 1,
-  valide : true,
-  nom    : "CRESPIN",
-  prenom : "Thomas",
-  email  : "thomas.crespin@sesamath.net",
-  roles  : {
-    prof                                          : true,
-    acces_correction                              : true,
-    sesamath_gestionnaire                         : true,
-    sesamath_salarie                              : true,
-    sesamath_membre                               : true,
-    interface_collaborative_user                  : true,
-    interface_collaborative_admin                 : true,
-    interface_collaborative_admin_complements     : true,
-    interface_collaborative_admin_xml             : true,
-    interface_collaborative_flash                 : true,
-    interface_collaborative_iep                   : true,
-    interface_collaborative_ooo_cahier_mathenpoche: true,
-    interface_collaborative_ooo_corrections       : true,
-    interface_collaborative_ooo_lycee             : true,
-    interface_collaborative_ooo_manuel_sesamath   : true,
-    interface_collaborative_tableur               : true,
-    interface_collaborative_tep                   : true,
-    interface_collaborative_labomep_gt_j3p        : true,
-    sesamath_dezoneur                             : true
-  },
-  groupes: {
-    wiki_interne_user                  : true,
-    wiki_interne_membre                : true,
-    wiki_interne_dev                   : true,
-    wiki_interne_adminsite             : true,
-    wiki_interne_salarie               : true,
-    wiki_interne_serveur               : true,
-    wiki_interne_admin                 : true,
-    wiki_externe_user                  : true,
-    wiki_externe_membre                : true,
-    wiki_externe_sesaprof              : true,
-    wiki_externe_admin                 : true,
-    wiki_externe_nxmanuel              : true,
-    wiki_externe_redmine               : true,
-    wiki_externe_dev_www               : true,
-    wiki_externe_labomep               : true,
-    mathenpoche_developpeur_user       : true,
-    mathenpoche_developpeur_developpeur: true,
-    mathenpoche_developpeur_admin      : true
-  }
-}
+// cf ex d'un auteur de retour du ssl dans le commit 0154483f007fe3fa397e2b1a0762b24e44c487db
 
 var knex = require('knex')
 var _ = require('lodash')
@@ -75,7 +28,7 @@ var origine
 /** pour logguer les relations */
 var logRelations = false
 /** pour loguer le processing */
-var logProcess = false
+var logProcess = true
 
 // conf de l'appli
 var config = require('../construct/ressource/config.js')
@@ -101,6 +54,7 @@ var kbibli = knex(serverConf.$entities.database)
 // une liste id => oid des auteurs
 var listeAuteurs = {}
 
+var ressource2rec = []
 
 /**
  * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
@@ -131,6 +85,7 @@ function addCoursExoFixe(ressource) {
  */
 function parseRessource(row) {
   var ressource = initRessourceGenerique(row)
+  if (logProcess) log('parsing ' + ressource.idOrigine)
   var ajout = true
 
   //noinspection IfStatementWithTooManyBranchesJS
@@ -196,7 +151,11 @@ function parseRessource(row) {
     ressource.typeTechnique = 'gen'
     if (!ressource.titre) ressource.titre = "Titre manquant"
     addCatExoInteractif(ressource)
-  } else if (row.type_id === 19) {ajout = false} else if (row.type_id === 20) {
+  } else if (row.type_id === 19) {
+    ressource.typeTechnique = 'j3p'
+    if (!ressource.titre) ressource.titre = "Titre manquant"
+    addCatExoInteractif(ressource)
+  } else if (row.type_id === 20) {
     ressource.typeTechnique = 'lingotpd'
     if (!ressource.titre) ressource.titre = "Test diagnostique d'algèbre"
     addCatExoInteractif(ressource)
@@ -209,22 +168,36 @@ function parseRessource(row) {
     ajout = false
   }
 
-  if (ajout) {
+  if (ajout) ressource2rec.push(ressource)
+}
+
+function flushRessources(next) {
+  flow(ressource2rec).seqEach(function (ressource) {
+    var nextRess = this
     if (logProcess) log('processing ' + ressource.idOrigine)
     addAuteurs(ressource, function () {
       // on transforme le xml en objet js pour certains
       switch (ressource.typeTechnique) {
         case 'url':
-            modifyUrl(ressource, common.pushRessource)
+          modifyUrl(ressource, common.deferRessource)
           break
         case 'ec2':
-          convertXmlEc2(ressource)
-          common.pushRessource(ressource)
+          convertXmlEc2(ressource, common.deferRessource)
           break
-        default : common.pushRessource(ressource)
+        default : common.deferRessource(ressource)
       }
+      nextRess()
     })
-  }
+  }).seq(function () {
+    log('flush envoyé')
+    common.setAfterAllCb(this)
+    common.checkEnd()
+  }).seq(function () {
+    log('flush terminé')
+    next()
+  }).catch(function (error) {
+    log("erreur lors du flush", error)
+  })
 }
 
 /**
@@ -238,33 +211,36 @@ function addAuteurs(ressource, next) {
     // on regarde si on le connait déjà
     var idComb = common.getIdComb(ressource)
     var auteurs = []
-    flow(ressource.auteurs).seqEach(function (idAuteur) {
-      if (logProcess) log("on va chercher l'id auteur" +idAuteur)
+    flow(ressource.auteurs).seqEach(function (idSslSesa) {
+      if (logProcess) log("on va chercher l'id auteur " +idSslSesa)
       var nextAuteur = this
-      if (listeAuteurs[idAuteur]) {
+      if (listeAuteurs[idSslSesa]) {
         // on l'a déjà croisé dans ce script
-        auteurs.push(listeAuteurs[idAuteur])
+        log("auteur " +idSslSesa +" déjà rencontré avec l'oid " +listeAuteurs[idSslSesa])
+        auteurs.push(listeAuteurs[idSslSesa])
         nextAuteur()
       } else {
         // on regarde en bdd
         kbibli
-            .raw("SELECT oid FROM personne_index WHERE name='id' AND _string='" + idAuteur + "' LIMIT 1")
+            .raw("SELECT oid FROM personne_index WHERE name='id' AND _string='" + idSslSesa + "' LIMIT 1")
             .exec(function (error, rows) {
               if (error) {
-                log('erreur sur la récup personne_index ' + idAuteur)
+                log('erreur sur la récup personne_index ' + idSslSesa)
                 nextAuteur()
               } else if (rows[0] && rows[0][0] && rows[0][0].oid) {
                 var oid = rows[0][0].oid
+                log("auteur " +idSslSesa +" trouvé en bdd avec l'oid " +oid)
                 // on le connait, on remplace id par oid
                 auteurs.push(oid)
                 // on le note pour une prochaine fois
-                listeAuteurs[idAuteur] = oid
+                listeAuteurs[idSslSesa] = oid
                 nextAuteur()
               } else {
+                log("auteur " +idSslSesa +" inconnu, on va le chercher sur ssl")
                 // on le connait pas, faut aller le chercher en http
-                /*
+                /* */
                 var options = {
-                  url    : 'https://ssl.sesamath.net/sesamath/requete_externe.php?fonction=getUserInfos&format=json&id=' + idAuteur,
+                  url    : 'https://ssl.sesamath.net/sesamath/requete_externe.php?fonction=getUserInfos&format=json&id=' + idSslSesa,
                   json   : true
                 }
                 request.get(options, function (error, response, data) {
@@ -276,23 +252,27 @@ function addAuteurs(ressource, next) {
                     else errorString += tools.stringify(data)
                     common.addError(idComb, errorString)
                     nextAuteur()
-                  } else if (data.id && data.id == idAuteur) {
-                    // OK, on l'enregistre ici */
-                var data = thomas
+                  } else if (data.id && data.id == idSslSesa) {
+                    // OK, on l'enregistre ici * /
                     common.addPersonne(data, function (error, personne) {
-                      log("après addPersonne", personne)
+                      //log("après addPersonne", personne)
                       if (error) {
+                        log("erreur lors de la récup de l'auteur " +idSslSesa, error)
                         common.addError(idComb, error)
                       } else if (personne && personne.oid) {
+                        log("on a récupéré sur ssl l'auteur " +idSslSesa +" enregistré localement sous l'oid " +personne.oid)
                         auteurs.push(personne.oid)
-                        listeAuteurs[idAuteur] = personne.oid
+                        listeAuteurs[idSslSesa] = personne.oid
                       } else {
                         common.addError(idComb, "erreur inconnue sur personne/add")
                       }
                       nextAuteur()
                     })
-/*                  }
-                }) */
+                  } else {
+                    log("En cherchant l'id " +idSslSesa +" sur ssl on a récupéré l'id " +data.id)
+                    nextAuteur()
+                  }
+                })
               }
             })
       }
@@ -313,8 +293,9 @@ function addAuteurs(ressource, next) {
 /**
  * vire parametres.xml pour ne mettre que les params json
  * @param ressource
+ * @param next
  */
-function convertXmlEc2(ressource) {
+function convertXmlEc2(ressource, next) {
   if (ressource.parametres && ressource.parametres.xml) {
     var config = elementtree.parse(ressource.parametres.xml)
     var params = {}
@@ -327,6 +308,7 @@ function convertXmlEc2(ressource) {
       ressource.parametres = params
     }
   }
+  next(ressource)
 }
 
 /**
@@ -464,23 +446,21 @@ common.setOptions({
   logRelations : logRelations
 })
 
-
-// en cas d'interruption on veut le résultat quand même
-process.on('SIGTERM', common.displayResult)
-process.on('SIGINT', common.displayResult)
-
 // yapluka
 flow().seq(function () {
+  log("lancement de la requete \n" +query)
+  // la cb quand toutes les ressources seront enregistrées
+  var nextStep = this
   klabomep
       .raw(query)
       .exec(function (error, rows) {
               if (error) throw error
               if (rows[0]) rows[0].forEach(parseRessource)
               else log("Pas de ressources avec " + query)
+              nextStep()
             })
-  log("lancement de la requete \n" +query)
-  // la cb quand toutes les ressources seront enregistrées
-  common.setAfterAllCb(this)
+}).seq(function () {
+  flushRessources(this)
 }).seq(function () {
   common.flushPendingRelations(this)
 }).seq(function () {

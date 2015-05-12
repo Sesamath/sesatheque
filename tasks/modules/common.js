@@ -244,6 +244,14 @@ common.checkListOfInt = function (ids) {
 }
 
 /**
+ * Ajoute une ressource à la file d'attente
+ * @param ressource
+ */
+common.deferRessource = function (ressource) {
+  waitingRessource.push(ressource)
+}
+
+/**
  * Affiche la compilation des résultats
  * @param next
  */
@@ -370,6 +378,13 @@ common.flushPendingRelations = function (next) {
     })
     // fin du flow
   }
+}
+
+/**
+ * Retourne la callback à rappeler quand la pile de ressource à envoyer à l'api sera vide
+ */
+common.getAfterAllCb = function () {
+  return afterAllCb
 }
 
 /**
@@ -526,28 +541,13 @@ common.pushRessource = function (ressource) {
 }
 
 /**
- * Ajoute une ressource à la file d'attente
- * @param ressource
- */
-common.deferRessource = function (ressource) {
-  waitingRessource.push(ressource)
-}
-
-/**
  * Fixe la callback à rappeler quand la pile de ressource à envoyer à l'api sera vide
  * @param cb
  */
 common.setAfterAllCb = function (cb) {
   callbacks.push(afterAllCb)
-  log('on ajoute à la pile de cb', afterAllCb)
+  //log('on ajoute à la pile de cb', afterAllCb)
   afterAllCb = cb
-}
-
-/**
- * Retourne la callback à rappeler quand la pile de ressource à envoyer à l'api sera vide
- */
-common.getAfterAllCb = function () {
-  return afterAllCb
 }
 
 /**
@@ -569,5 +569,9 @@ common.setPreviousAfterAllCb = function () {
 common.setOptions = function (options) {
   tools.update(opt, options)
 }
+
+// en cas d'interruption on veut le résultat quand même
+process.on('SIGTERM', common.displayResult)
+process.on('SIGINT', common.displayResult)
 
 module.exports = common

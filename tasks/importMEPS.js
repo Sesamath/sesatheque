@@ -252,70 +252,61 @@ function importAIDES(ids, next) {
 }
 
 /**
- * Passe en revue les relations qui n'auraient pas été affectées, mais une par une
- * (plusieurs relations peuvent affecter les même ressources, deux updates en // marchent pas)
+ * MAIN
  */
+// les 3 premiers args sont node, /path/2/gulp, importMEPS
+var argv = process.argv.slice(3)
+// tout par défaut
+var mepIds, aideIds, i
 
+log('task ' + __filename)
 
-module.exports = function () {
-  // les 3 premiers args sont node, /path/2/gulp, importMEPS
-  var argv = process.argv.slice(3)
-  // tout par défaut
-  var mepIds, aideIds, i
-
-  log('task ' + __filename)
-
-  // sauf si on précise l'un ou l'autre (on impose le log dans ce cas
-  i = argv.indexOf('--mep')
-  if (i > -1) {
-    mepIds = argv[i + 1]
-    aideIds = null
-    log('On ne traitera que les id mep ' + mepIds)
-    logRelations = true
-    logApiCalls = true
-  }
-
-  i = argv.indexOf('--aide')
-  if (i > -1) {
-    aideIds = argv[i + 1]
-    if (!mepIds) mepIds = null
-    log('On ne traitera que les id aide ' +aideIds)
-    logRelations = true
-    logApiCalls = true
-  }
-
-  common.setOptions({
-    logRelations : logRelations,
-    logApiCalls : logApiCalls
-  })
-
-  // en cas d'interruption on veut le résultat quand même
-  process.on('SIGTERM', common.displayResult)
-  process.on('SIGINT', common.displayResult)
-
-  flow().seq(function () {
-    common.setAfterAllCb(this)
-    if (mepIds === null) this()
-    else importMEPS(mepIds, this)
-
-  }).seq(function () {
-    common.setAfterAllCb(this)
-    if (aideIds === null) this()
-    else importAIDES(aideIds, this)
-
-  }).seq(function () {
-    // knex.destroy() // impossible de fermer la connexion de ce #@§ knex
-    common.flushPendingRelations(this)
-
-  }).seq(function () {
-    common.displayResult(this)
-
-  }).seq(function () {
-    log('END')
-    process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
-
-  }).catch(function (error) {
-    console.error('Erreur dans le flow : \n' + error.stack)
-    common.displayResult()
-  })
+// sauf si on précise l'un ou l'autre (on impose le log dans ce cas
+i = argv.indexOf('--mep')
+if (i > -1) {
+  mepIds = argv[i + 1]
+  aideIds = null
+  log('On ne traitera que les id mep ' + mepIds)
+  logRelations = true
+  logApiCalls = true
 }
+
+i = argv.indexOf('--aide')
+if (i > -1) {
+  aideIds = argv[i + 1]
+  if (!mepIds) mepIds = null
+  log('On ne traitera que les id aide ' +aideIds)
+  logRelations = true
+  logApiCalls = true
+}
+
+common.setOptions({
+  logRelations : logRelations,
+  logApiCalls : logApiCalls
+})
+
+flow().seq(function () {
+  common.setAfterAllCb(this)
+  if (mepIds === null) this()
+  else importMEPS(mepIds, this)
+
+}).seq(function () {
+  common.setAfterAllCb(this)
+  if (aideIds === null) this()
+  else importAIDES(aideIds, this)
+
+}).seq(function () {
+  // knex.destroy() // impossible de fermer la connexion de ce #@§ knex
+  common.flushPendingRelations(this)
+
+}).seq(function () {
+  common.displayResult(this)
+
+}).seq(function () {
+  log('END')
+  process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
+
+}).catch(function (error) {
+  console.error('Erreur dans le flow : \n' + error.stack)
+  common.displayResult()
+})
