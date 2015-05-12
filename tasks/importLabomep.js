@@ -420,10 +420,18 @@ if (argv[0] === '--persos') {
   origine = 'labomepPERSOS'
 } else if (argv[0] === '--bibs') {
   query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
-      " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS"
+          " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS"
   origine = 'labomepBIBS'
+} else if (argv[0] === '--bibs2menus') {
+  query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
+          " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS WHERE "
+  origine = 'labomepBIBS'
+} else if (argv[0] === '--menus') {
+  query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
+          " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS"
+  origine = 'labomepMENUS'
 } else {
-  throw new Error("il faut ajouter l'argument --persos ou --bibs " +
+  throw new Error("il faut ajouter l'argument --persos ou --bibs ou --menus " +
       "(suivi éventuellement d'une liste d'ids séparés par des virgules)")
 }
 

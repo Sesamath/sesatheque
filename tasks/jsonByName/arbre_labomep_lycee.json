@@ -9,26 +9,32 @@
     {
       "titre"        : "animations interactives",
       "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
+      "origine"      : "sesamath",
       "idOrigine"    : "animations_interactives"
     },
     {
       "titre"        : "exercices interactifs",
       "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
+      "origine"      : "sesamath",
       "idOrigine"    : "exercices_interactifs"
     },
     {
       "titre"        : "tests diagnostiques",
       "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
-      "idOrigine"    : "tests_algebre"
+      "origine"      : "sesamath",
+      "idOrigine"    : "tests_diagnostiques"
     },
     {
-      "titre": "Manuel 2de 2014",
-      "idOrigine": "exercices_non.part16",
-      "origine": "sesaxml",
-      "typeTechnique": "arbre"
+      "titre"        : "Cahier 2de Pro 2014",
+      "typeTechnique": "arbre",
+      "origine"      : "sesamath",
+      "idOrigine"    : "Cahier_2de_Pro_2014"
+    },
+    {
+      "titre"        : "Manuel 2de 2014",
+      "typeTechnique": "arbre",
+      "origine"      : "sesamath",
+      "idOrigine"    : "Manuel_2de_2014"
     }
   ]
 }

@@ -1,40 +1,34 @@
 {
-  "titre"        : "Ressources pour la Suisse",
+  "titre": "Ressources pour la Suisse",
   "typeTechnique": "arbre",
-  "origine"      : "sesamath",
-  "idOrigine"    : "labomep_suisse",
-  "publie"       : true,
-  "restriction"  : 0,
-  "enfants"      : [
+  "origine": "sesamath",
+  "idOrigine": "labomep_suisse",
+  "publie": true,
+  "restriction": 0,
+  "enfants": [
     {
-      "titre"        : "animations interactives",
+      "titre": "animations interactives",
       "typeTechnique": "arbre",
-      "origine"   : "sesamath",
-      "idOrigine"          : "animations_interactives"
+      "origine": "sesaxml",
+      "idOrigine": "animations_interactives"
     },
     {
-      "titre"        : "exercices interactifs",
+      "titre": "Sélection d'exercices interactifs",
       "typeTechnique": "arbre",
-      "origine"   : "sesamath",
-      "idOrigine"          : "exercices_interactifs"
+      "origine": "sesaxml",
+      "idOrigine": "labomep_profil_suisse"
     },
     {
-      "titre"        : "tests diagnostiques",
+      "titre": "exercices interactifs",
       "typeTechnique": "arbre",
-      "origine"   : "sesamath",
-      "idOrigine"          : "tests_diagnostiques"
+      "origine": "sesaxml",
+      "idOrigine": "labomep_profil_suisse"
     },
     {
-      "titre"        : "Manuel 9e Suisse 2010",
+      "titre": "tests diagnostiques",
       "typeTechnique": "arbre",
-      "origine"      : "sesamath",
-      "origine"    : "Manuel_9e_Suisse_2010"
-    },
-    {
-      "titre"        : "Cahier exercices complementaires 9e Suisse",
-      "typeTechnique": "arbre",
-      "origine"      : "sesamath",
-      "origine"    : "Cahier_exercices_complementaires_9e_Suisse"
+      "origine": "sesaxml",
+      "idOrigine": "tests_algebre"
     }
   ]
 }

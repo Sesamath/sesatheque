@@ -1,41 +1,41 @@
 {
-  "titre"        : "Ressources Sésamath",
+  "titre": "Ressources Sésamath",
   "typeTechnique": "arbre",
-  "publie"       : true,
-  "restriction"  : 0,
-  "indexable"    : true,
-  "origine"      : "sesamath",
-  "idOrigine"    : "labomep_default",
-    "enfants": [
-      {
-        "idOrigine"          : "animations_interactives",
-        "origine"   : "sesamath",
-        "titre"        : "Animations interactives",
-        "typeTechnique": "arbre"
-      },
-      {
-        "idOrigine"          : "exercices_interactifs",
-        "origine"   : "sesamath",
-        "titre"        : "Exercices interactifs",
-        "typeTechnique": "arbre"
-      },
-      {
-        "idOrigine"          : "tests_diagnostiques",
-        "origine"   : "sesamath",
-        "titre"        : "Tests diagnostiques",
-        "typeTechnique": "arbre"
-      },
-      {
-        "idOrigine"          : "tous_manuels_cahiers",
-        "origine"   : "sesamath",
-        "titre"        : "Tous les manuels et cahiers",
-        "typeTechnique": "arbre"
-      },
-      {
-        "idOrigine"          : "labomep_suisse",
-        "origine"   : "sesamath",
-        "titre"        : "Sélection de ressources pour le curriculum Suisse",
-        "typeTechnique": "arbre"
-      }
-    ]
+  "publie": true,
+  "restriction": 0,
+  "indexable": true,
+  "origine": "sesamath",
+  "idOrigine": "labomep_default",
+  "enfants": [
+    {
+      "idOrigine": "animations_interactives",
+      "origine": "sesaxml",
+      "titre": "Animations interactives",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine": "exercices_interactifs",
+      "origine": "sesaxml",
+      "titre": "Exercices interactifs",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine": "tests_algebre",
+      "origine": "sesaxml",
+      "titre": "Tests diagnostiques",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine": "tous_manuels_cahiers",
+      "origine": "sesamath",
+      "titre": "Tous les manuels et cahiers",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine": "labomep_suisse",
+      "origine": "sesamath",
+      "titre": "Sélection de ressources pour le curriculum Suisse",
+      "typeTechnique": "arbre"
+    }
+  ]
 }

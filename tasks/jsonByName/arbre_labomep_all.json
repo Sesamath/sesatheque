@@ -1,0 +1,169 @@
+{
+  "titre"        : "Ressources Sésamath",
+  "resume"       : "Liste des arbres disponibles dans le panneau « Ressources Sésamath » de Labomep",
+  "typeTechnique": "arbre",
+  "categorie"    : 8,
+  "publie"       : true,
+  "restriction"  : 0,
+  "indexable"    : true,
+  "origine"      : "sesabibli",
+  "idOrigine"    : "labomep_all",
+  "enfants": [
+    {
+      "idOrigine"          : "animations_interactives",
+      "origine"   : "sesaxml",
+      "titre"        : "Animations interactives",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "exercices_interactifs",
+      "origine"   : "sesaxml",
+      "titre"        : "Exercices interactifs",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "tests_diagnostiques",
+      "origine"   : "sesamath",
+      "titre"        : "Tests diagnostiques",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "tous_les_manuels",
+      "origine"   : "sesamath",
+      "titre"        : "Tous les manuels et cahiers",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "labomep_ecole",
+      "origine"   : "sesamath",
+      "titre"        : "Toutes les ressources école",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "labomep_college",
+      "origine"   : "sesamath",
+      "titre"        : "Toutes les ressources collège",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "labomep_lycee",
+      "origine"   : "sesamath",
+      "titre"        : "Toutes les ressources lycée",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "labomep_suisse",
+      "origine"   : "sesamath",
+      "titre"        : "Sélection de ressources pour le curriculum Suisse",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "tous_les_manuels",
+      "origine"   : "sesamath",
+      "titre"        : "Tous les manuels et cahiers",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Cahier_CM2_2013",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier CM2 2013",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_6e_2009",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 6e 2009",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_6e_2013",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 6e 2013",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Cahier_6e_2009",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier 6e 2009",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_5e_2006",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 5e 2006",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_5e_2010",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 5e 2010",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Cahier_5e_2010",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier 5e 2010",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_4e_2007",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 4e 2007",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_4e_2011",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 4e 2011",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Cahier_4e_2007",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier 4e 2007",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Cahier_4e_2011",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier 4e 2011",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_3e_2008",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 3e 2008",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Manuel_3e_2012",
+      "origine"   : "sesamath",
+      "titre"        : "Manuel 3e 2012",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Cahier_3e_2008",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier 3e 2008",
+      "typeTechnique": "arbre"
+    },
+    {
+      "idOrigine"          : "Cahier_3e_2012",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier 3e 2012",
+      "typeTechnique": "arbre"
+    },
+    {
+      "titre": "Manuel 2de 2014",
+      "typeTechnique": "arbre",
+      "origine": "sesamath",
+      "origine": "Manuel_2de_2014"
+    },
+    {
+      "titre": "Cahier 2de Pro 2014",
+      "typeTechnique": "arbre",
+      "origine": "sesamath",
+      "origine": "Cahier_2de_Pro_2014"
+    }
+  ]
+}

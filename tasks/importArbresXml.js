@@ -319,6 +319,7 @@ function getEnfants(arbreXml, xmlName, next) {
           var origine
           if (child.tag == 'em') origine = 'em'
           else if (child.tag == 'am') origine = 'am'
+          else if (child.tag == 'mn') origine = 'labomepMENUS'
           else origine = defaultOrigine
           common.getRef(origine, child.attrib.i, function (ref) {
             if (ref) {

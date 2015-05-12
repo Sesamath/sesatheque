@@ -1,28 +1,18 @@
 {
-  "titre"        : "Ressources collège",
+  "titre": "Tous les manuels et cahiers Sésamath",
   "typeTechnique": "arbre",
-  "origine"      : "sesamath",
-  "idOrigine"    : "labomep_college",
-  "publie"       : true,
-  "restriction"  : 0,
-  "enfants"      : [
+  "categorie": 8,
+  "publie": true,
+  "restriction": 0,
+  "indexable": true,
+  "origine": "sesamath",
+  "idOrigine": "tous_les_manuels_cahiers",
+  "enfants": [
     {
-      "titre"        : "animations interactives",
-      "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
-      "idOrigine"    : "animations_interactives"
-    },
-    {
-      "titre"        : "exercices interactifs",
-      "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
-      "idOrigine"    : "exercices_interactifs"
-    },
-    {
-      "titre"        : "tests diagnostiques",
-      "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
-      "idOrigine"    : "tests_algebre"
+      "titre": "Cahier CM2 2013",
+      "idOrigine": "exercices_non.part15",
+      "origine": "sesaxml",
+      "typeTechnique": "arbre"
     },
     {
       "titre": "Manuel 6e 2009",
@@ -105,6 +95,12 @@
     {
       "titre": "Cahier 3e 2012",
       "idOrigine": "exercices_non.part13",
+      "origine": "sesaxml",
+      "typeTechnique": "arbre"
+    },
+    {
+      "titre": "Manuel 2de 2014",
+      "idOrigine": "exercices_non.part16",
       "origine": "sesaxml",
       "typeTechnique": "arbre"
     }

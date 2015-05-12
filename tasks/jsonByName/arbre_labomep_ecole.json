@@ -9,25 +9,25 @@
     {
       "titre"        : "animations interactives",
       "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
+      "origine"      : "sesamath",
       "idOrigine"    : "animations_interactives"
     },
     {
       "titre"        : "exercices interactifs",
       "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
+      "origine"      : "sesamath",
       "idOrigine"    : "exercices_interactifs"
     },
     {
       "titre"        : "tests diagnostiques",
       "typeTechnique": "arbre",
-      "origine"      : "sesaxml",
-      "idOrigine"    : "tests_algebre"
+      "origine"      : "sesamath",
+      "idOrigine"    : "tests_diagnostiques"
     },
     {
-      "titre": "Cahier CM2 2013",
-      "idOrigine": "exercices_non.part15",
-      "origine": "sesaxml",
+      "idOrigine"          : "Cahier_CM2_2013",
+      "origine"   : "sesamath",
+      "titre"        : "Cahier CM2 2013",
       "typeTechnique": "arbre"
     }
   ]
