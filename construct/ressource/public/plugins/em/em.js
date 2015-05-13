@@ -113,7 +113,11 @@ define(['swfobject'], function () {
         idMep: Number(ressource.idOrigine),
         modeleMep : (params.mep_modele === "mep1") ? "1" : "2",
         abreviationLangue: params.mep_langue_id,
-        idSwf : idSwf
+        idSwf : idSwf,
+        // si n on a pas de chiffrement de la réponse qui sera une string au format "vrrp..."
+        // (sinon c'est un nombre qui correspond à cette réponse chiffrée)
+        // et la propriété score est ajoutée (un entier donnant le nb de bonnes réponses)
+        ch : options.ch || 'n'
       };
       // ensuite le facultatif si présent
       if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;

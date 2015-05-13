@@ -32,13 +32,15 @@
 /**
  * Script autonome pour afficher un résultat de type em
  * On peut être chargé sur n'importe quelle appli, donc on a aucune dépendance à une lib externe
- * et on exporte deux fonctions en global
- * - sesatheque.em.getHtmlReponse(resultat, baseUrl)
- * - sesatheque.em.getHtmlScore(resultat)
- * - sesatheque.em.showResult(resultat, element, baseUrl)
+ * et on exporte 3 fonctions,
+ * - soit pour requireJs (si define existe)
+ * - soit en module amd (module.exports),
+ * - soit en global dans window.sesatheque.emResult
  */
 /*global window*/
 (function () {
+  "use strict";
+
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
   if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
@@ -47,6 +49,8 @@
 
   /** Raccourci pour window.document */
   var wd = window.document;
+  /** Notre module exporté */
+  var emResult = {};
 
   /**
    * Retourne le code html qui affiche le bilan (ici les carrés colorés)
@@ -54,7 +58,7 @@
    * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin
    * @returns {string} Le code html
    */
-  window.sesatheque.em.getHtmlReponse = function (resultat, baseUrl) {
+  emResult.getHtmlReponse = function (resultat, baseUrl) {
     var output = "";
     // pour em on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
     if (typeof resultat.reponse === "string") {
@@ -65,6 +69,7 @@
     } else {
       output = "pas de réponse ou réponse à un mauvais format";
     }
+
     return output;
   };
 
@@ -73,7 +78,7 @@
    * @param {Resultat} resultat
    * @returns {string} Le code html
    */
-  window.sesatheque.em.getHtmlScore = function (resultat) {
+  emResult.getHtmlScore = function (resultat) {
     var output = "";
     var nbok = 0;
     var nbq, lettre;
@@ -88,6 +93,7 @@
     } else {
       output = "pas de réponse ou réponse à un mauvais format";
     }
+
     return output;
   };
 
@@ -97,10 +103,20 @@
    * @param element
    * @param baseUrl
    */
-  window.sesatheque.em.showResult = function (resultat, element, baseUrl) {
+  emResult.showResult = function (resultat, element, baseUrl) {
     var html = window.sesatheque.em.getHtmlScore(resultat) +' ' +
         window.sesatheque.em.getHtmlReponse(resultat, baseUrl);
     element.addChild(wd.createTextNode(html));
   };
+
+  // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
+  if (typeof define === 'function') {
+    define(emResult); // jshint ignore:line
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = emResult;
+  } else {
+    if (typeof window.sesatheque === "undefined") window.sesatheque = {};
+    window.sesatheque.emResult = emResult;
+  }
 
 })();

@@ -31,17 +31,23 @@
 
 /**
  * Script autonome pour afficher un résultat de type url
+ * On peut être chargé sur n'importe quelle appli, donc on a aucune dépendance à une lib externe
+ * et on exporte 3 fonctions,
+ * - soit pour requireJs (si define existe)
+ * - soit en module amd (module.exports),
+ * - soit en global dans window.sesatheque.urlResult
  */
 /*global window*/
 (function () {
+  "use strict";
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
   if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
-  if (typeof window.sesatheque === "undefined") window.sesatheque = {};
-  if (typeof window.sesatheque.em === "undefined") window.sesatheque.em = {};
 
   /** Raccourci pour window.document */
   var wd = window.document;
+  /** Notre module exporté */
+  var urlResult = {};
 
   /**
    * Retourne le code html qui affiche le bilan (ici la durée d'affichage)
@@ -49,7 +55,7 @@
    * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin
    * @returns {string} Le code html
    */
-  window.sesatheque.em.getHtmlReponse = function (resultat, baseUrl) {
+  urlResult.getHtmlReponse = function (resultat) {
     var output = "";
     // pour url on a pas de resultat.reponse, seule la durée peut servir
     if (resultat.duree > 0) {
@@ -66,11 +72,11 @@
   };
 
   /**
-   * Retourne le code html qui affiche le score (ici x/y)
+   * Retourne le code html qui affiche le score (ici "affiché")
    * @param {Resultat} resultat
    * @returns {string} Le code html
    */
-  window.sesatheque.em.getHtmlScore = function (resultat) {
+  urlResult.getHtmlScore = function (resultat) {
     return "affiché";
   };
 
@@ -80,9 +86,19 @@
    * @param element
    * @param baseUrl
    */
-  window.sesatheque.em.showResult = function (resultat, element, baseUrl) {
-    var html = window.sesatheque.em.getHtmlReponse(resultat, baseUrl);
+  urlResult.showResult = function (resultat, element, baseUrl) {
+    var html = urlResult.getHtmlReponse(resultat, baseUrl);
     element.addChild(wd.createTextNode(html));
   };
+
+  // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
+  if (typeof define === 'function') {
+    define(urlResult); // jshint ignore:line
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = urlResult;
+  } else {
+    if (typeof window.sesatheque === "undefined") window.sesatheque = {};
+    window.sesatheque.urlResult = urlResult;
+  }
 
 })();
