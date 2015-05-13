@@ -90,6 +90,7 @@ var staticTtl = 3600 * 24
 require('./static')
 require('./ressource')
 require('./personne')
+var tools = require('./tools')
 
 //var _ = require('lodash');
 var dependancies = ['static', 'personne', 'ressource']
@@ -181,35 +182,37 @@ lassi.on('afterRailUse', function (rail, name) {
     rail.use('/', function(req, res, next) {
       var origin = req.header('Origin')
       if (origin) {
-        var msg = 'cors avec ' + origin
-        if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin)) {
-          res.header('Access-Control-Allow-Origin', origin)
-          res.header("Access-Control-Allow-Headers", "X-Requested-With")
-          msg += ' accepté'
-        } else if (origin.substr(0, 4) !== 'http') {
-          // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
-          res.header('Access-Control-Allow-Origin', '*')
-          res.header("Access-Control-Allow-Headers", "X-Requested-With")
-          msg += ' toléré'
-        } else {
-          msg += ' refusé'
+        // le public est mis en cache, on autorise pour tout le monde (sinon faut filtrer sur varnish)
+        if (tools.isStaticOrPublicApi(req.url)) res.header('Access-Control-Allow-Origin', '*')
+        else {
+          // ça dépend de l'appelant
+          if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin)) {
+            res.header('Access-Control-Allow-Origin', origin)
+            res.header("Access-Control-Allow-Headers", "X-Requested-With")
+          } else if (origin.substr(0, 4) !== 'http') {
+            // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
+            res.header('Access-Control-Allow-Origin', '*')
+            res.header("Access-Control-Allow-Headers", "X-Requested-With")
+          } else {
+            log('cors avec ' + origin +' refusé')
+          }
         }
-        log(msg)
       }
       next()
     })
 
     /**
      * headers expires sur le statique ou le json public
+     * @todo le mettre aussi sur le html public (quand le source sera indépendant de la session)
      */
     lassi.log('$rail', "app is adding", "expires".blue.underline, "middleware")
     rail.use('/', function(req, res, next) {
-      if (/\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(req.url) || /^\/api\/public\//.exec(req.url)) {
+      if (tools.isStaticOrPublicApi(req.url)) {
         // faut mettre ça au format de la RFC 1123
         res.header('Expires', moment().utc().add(staticTtl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
         res.header('Cache-Control', 'public, max-age=' +staticTtl)
         // @todo regarder If-Modified-Since et répondre 304 Not Modified si c'est le cas
-        // mais c'est vraiment pas très urgent si on a un varnish devant nous
+        // mais c'est vraiment pas très urgent si on a un varnish devant nous il le gère
       }
       next()
     })

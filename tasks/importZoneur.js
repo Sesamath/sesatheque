@@ -1,8 +1,6 @@
 /**
- * Ce script passe en revue les ressources de Labomep,
- * soit la table PERSOS (origine = labomepPERSOS, avec --persos),
- * soit BIBS (origine = labomepBIBS, avec --bibs)
- * l'origine est donc commune à toutes les ressources traitées par le script
+ * Ce script passe en revue les atomes du zoneur (les exercices papier, dans la base ressources)
+ * pour les importer dans la bibli (en général pour remplacer des ressources de type url déjà importées de BIBS)
  */
 'use strict'
 
@@ -22,8 +20,8 @@ var common = require('./modules/common')
 // raccourcis
 var log = common.log // jshint ignore:line
 
-/** origine commune à toutes les ressources traitées ici, labomepPERSOS|labomepBIBS */
-var origine
+/** origine commune à toutes les ressources traitées ici */
+var origine = 'ato'
 
 /** pour logguer les relations */
 var logRelations = false
@@ -46,25 +44,14 @@ var tpCode = config.constantes.typePedagogiques
 var catCode = config.constantes.categories
 
 // databases
-var dbConfigLabomep = require('../_private/config/labomep')
+var dbConfigRessources = require('../_private/config/ressources')
 // les connexions aux bases
-var klabomep = knex(dbConfigLabomep)
-var kbibli = knex(serverConf.$entities.database)
+var kressources = knex(dbConfigRessources)
 
 // une liste id => oid des auteurs
 var listeAuteurs = {}
 
 var ressource2rec = []
-
-/**
- * Ajoute à la ressource categories, typePedagogiques et typeDocumentaires pour un exo interactif
- * @param ressource
- */
-function addCatExoInteractif(ressource) {
-    ressource.categories       = [catCode.exerciceInteractif]
-    ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation]
-    ressource.typeDocumentaires= [tdCode.interactif]
-}
 
 /**
  * Ajoute à la ressource categorie, typePedagogiques et typeDocumentaires pour un contenu fixe
@@ -412,39 +399,6 @@ var query
 
 log('task ' + __filename)
 
-// on doit préciser persos ou bibs
-if (argv[0] === '--persos') {
-  query = "SELECT perso_id AS id, perso_type_id AS type_id, perso_titre AS titre, perso_descriptif AS descriptif," +
-      " perso_commentaire AS commentaire, perso_xml AS xml, su.user_id AS sslsesa_user_id FROM PERSOS" +
-      " INNER JOIN sslsesa_user su ON perso_util_id = user_labomep_id"
-  origine = 'labomepPERSOS'
-} else if (argv[0] === '--bibs') {
-  query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
-          " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS"
-  origine = 'labomepBIBS'
-/* } else if (argv[0] === '--bibs2menus') {
-  query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
-          " bib_commentaire AS commentaire, bib_xml AS xml FROM BIBS WHERE "
-  origine = 'labomepBIBS'
-} else if (argv[0] === '--menus') {
-  query = "SELECT bib_id AS id, bib_type_id AS type_id, bib_titre AS titre, bib_descriptif AS descriptif," +
-          " bib_commentaire AS commentaire, bib_xml AS xml FROM MENUS"
-  origine = 'labomepMENUS' /* */
-} else {
-  throw new Error("il faut ajouter l'argument --persos ou --bibs ou --menus " +
-      "(suivi éventuellement d'une liste d'ids séparés par des virgules)")
-}
-
-// on regarde s'il faut se limiter à certains ids
-ids = argv.slice(1)[0]
-if (ids) {
-  common.checkListOfInt(ids)
-  logProcess = true
-  logRelations = true
-  log('On ne traitera que les id ' + ids)
-  if (origine === 'labomepPERSOS') query += " WHERE perso_id IN(" +ids +")"
-  else query += " WHERE bib_id IN(" +ids +")"
-} // else query += ' LIMIT 1000'
 
 common.setOptions({
   timeout : 2000,
@@ -454,23 +408,39 @@ common.setOptions({
   logRelations : logRelations
 })
 
-// yapluka
-flow().seq(function () {
-  log("lancement de la requete \n" +query)
-  // la cb quand toutes les ressources seront enregistrées
-  var nextStep = this
-  klabomep
-      .raw(query)
-      .exec(function (error, rows) {
-              if (error) throw error
-              if (rows[0]) rows[0].forEach(parseRessource)
-              else log("Pas de ressources avec " + query)
-              nextStep()
+// on va les chercher les manuels
+query = "SELECT vign_ouvrage_nom AS nom, vign_ouvrage_code AS code FROM vign_ouvrages" +
+        " WHERE vign_ouvrage_feuilletable <> 'desactive' AND vign_ouvrage_code <> 'tests'"
+var ouvrages = []
+log("lancement de la requete \n" +query)
+kressources
+    .raw(query)
+    .exec(function (error, rows) {
+            if (error) throw error
+            if (rows[0]) rows[0].forEach(function (row) {
+              ouvrages.push(row)
             })
-}).seq(function () {
-  flushRessources(this)
-}).seq(function () {
-  common.flushPendingRelations(this)
+            else log("Rien récupéré avec " + query)
+          })
+// et on boucle dessus
+flow(ouvrages).seqEach(function (ouvrage) {
+  log('traitement de ' +ouvrage.nom +' (' +ouvrage.code +')')
+  var nextOuvrage = this
+  query = "SELECT * FROM vign_atomes WHERE vign_atome_ouvrage_code = '" +ouvrage.code +"' ORDER BY vign_atome_ref1"
+  kressources
+    .raw(query)
+    .exec(function (error, rows) {
+            if (error) throw error
+            if (rows[0]) {
+              flow(rows[0]).seqEach(function (row) {
+                parseAtome(row, this)
+              }).seq(function () {
+                log('tous les atomes de ' +ouvrage.code +" ont été parsés")
+                nextOuvrage()
+              })
+            }
+            else log("Rien récupéré avec " + query)
+          })
 }).seq(function () {
   common.displayResult(this)
 }).seq(function () {

@@ -99,6 +99,25 @@ tools.integerify = function (tab) {
 }
 
 /**
+ * Retourne true si l'url est sur l'api
+ * @param url
+ * @returns {boolean}
+ */
+tools.isApi = function (url) {
+  return /^\/api\//.exec(url)
+}
+
+/**
+ * Retourne true si l'url concerne un fichier statique ou du json public (donc à priori mis en cache)
+ * (statique i.e. les extensions susceptibles d'exister dans sesatheque, c'est pas exaustif)
+ * @param url
+ * @returns {boolean}
+ */
+tools.isStaticOrPublicApi = function (url) {
+  return (/\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(url) || /^\/api\/public\//.exec(url))
+}
+
+/**
  * Génère le code html d'un lien
  * @param route La route (après "ressources/", cf config.routes)
  * @param texte Le texte à afficher
