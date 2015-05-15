@@ -64,6 +64,20 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Renvoie l'id trouvé dans le post ou le get (en acceptant les propriétés id, oid ou origine&idOrigine)
+   * @param context
+   * @returns {string} oid ou origine/idOrigine ou undefined
+   */
+  function extractId(context) {
+    var id
+    if (context.post.origine && context.post.idOrigine) id = context.post.origine + '/' + context.post.idOrigine
+    else if (context.get.origine && context.get.idOrigine) id = context.get.origine + '/' + context.get.idOrigine
+    else id = context.post.oid || context.post.id || context.get.oid || context.get.id
+
+    return id
+  }
+
+  /**
    * Équivalent de context.notFound en json
    * @param msg
    * @param context
@@ -77,18 +91,41 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Callback générique de sortie
    * @param context
-   * @param error
+   * @param {string|Error} error
    * @param data
    */
   function sendJson(context, error, data) {
     if (error) {
-      log.error(error);
       log.debug("sendJson va renvoyer l'erreur", error, 'api')
-      context.json({error: error.toString()})
+      // on logge l'erreur si s'en est vraiment une (pas les strings simples)
+      if (error.stack) {
+        log.error(error)
+        error = error.toString()
+      }
+      context.json({error: error})
     } else {
       log.debug('sendJson va renvoyer', data, 'api')
       context.json(data)
     }
+  }
+
+  /**
+   * Formate la réponse pour renvoyer une ref
+   * @param context
+   * @param error
+   * @param ressource
+   */
+  function sendRef(context, error, ressource) {
+    if (error) sendJson(context, error)
+    else if (ressource) {
+      sendJson(context, null, {
+        ref          : ressource.oid,
+        titre        : ressource.titre,
+        typeTechnique: ressource.typeTechnique,
+        dataUri      : $routes.getAbs('api', ressource),
+        displayUri   : $routes.getAbs('display', ressource)
+      })
+    } else notFound('Aucune trouvée pour la référencer', context)
   }
 
   /**
@@ -271,11 +308,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (error) sendJson(context, error)
         else {
           if (context.perf) log.perf(context, 'written')
-          var data = {oid: ressource.oid}
-          if (!_.isEmpty(ressource.warnings)) {
-            data.warnings = ressource.warnings
+          if (context.get.format === 'ref') {
+            // on veut une ref en réponse
+            sendRef(context, null, ressource)
+          } else {
+            // on ne renvoie que l'oid et des warnings éventuels
+            var data = {oid: ressource.oid}
+            if (!_.isEmpty(ressource.warnings)) {
+              data.warnings = ressource.warnings
+            }
+            sendJson(context, null, data)
           }
-          sendJson(context, null, data)
         }
       })
     } else {
@@ -334,6 +377,47 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         sendJson(context, error)
       }
     })
+  })
+
+  // ajoute des relations (on tolère dans le post les propriétés oid ou origine+idOrigine ou id (en plus de relations)
+  controller.post('ressource/addRelations', function (context) {
+    if (context.perf) {
+      var msg = 'start-'
+      if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
+      else msg += context.post.oid
+      log.perf(context, msg)
+    }
+    log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
+    var relations = context.post.relations
+    if (relations && relations.length) {
+      var id = extractId(context)
+
+      if (id) {
+        $ressourceRepository.load(id, function (error, ressource) {
+          if (error) sendJson(context, error)
+          else if (ressource) {
+            var errors = $ressourceConverter.addRelations(ressource, relations)
+            // rien changé
+            if (errors === false) sendJson(context, null, {success: true, oid:ressource.oid})
+            // y'a eu des erreurs
+            else if (errors.length) sendJson(context, errors)
+            // ni l'un ni l'autre, faut sauvegarder
+            else {
+              $ressourceRepository.write(ressource, function (error, ressource) {
+                if (error) sendJson(context, error)
+                else sendJson(context, null, {success: true, oid:ressource.oid})
+              })
+            }
+          } else {
+            notFound("La ressource " + id + " n'existe pas")
+          }
+        })
+      } else {
+        sendJson(context, "pas d'identifiant de ressource")
+      }
+    } else {
+      sendJson(context, 'relations manquantes')
+    }
   })
 
   // read
@@ -397,23 +481,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  // getRef pour récupérer seulement oid, titre et typeTechnique
+  // getRef (pour récupérer une ref à la ressource à mettre en enfant d'un arbre)
+  controller.get('ressource/getRef/:oid', function (context) {
+    if (context.perf) log.perf(context, 'start')
+    $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
+      sendRef(context, error, ressource)
+    })
+  })
+  // getRef par origine/idOrigine
   controller.get('ressource/getRef/:origine/:idOrigine', function (context) {
     if (context.perf) log.perf(context, 'start')
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      if (error) sendJson(context, error)
-      else if (ressource) {
-        sendJson(context, null, {
-          ref : ressource.oid,
-          titre : ressource.titre,
-          typeTechnique : ressource.typeTechnique,
-          dataUri : $routes.getAbs('api', ressource),
-          displayUri : $routes.getAbs('display', ressource)
-        })
-      } else notFound("La ressource " + origine + '/' + idOrigine + " n'existe pas", context)
+    $ressourceRepository.loadByOrigin(context.arguments.origine, context.arguments.idOrigine, function (error, ressource) {
+      sendRef(context, error, ressource)
     })
   })
 

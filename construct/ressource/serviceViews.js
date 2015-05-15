@@ -133,7 +133,7 @@ module.exports = function ($ressourceRepository, $personneRepository, $ressource
       // pour display faut ajouter les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
       if (view === 'display') {
         addJsVars(data, ressource)
-      } else if (view === 'describe' && ressource.typeTechnique === 'arbre') {
+      } else if (view === 'describe' && ressource && ressource.typeTechnique === 'arbre') {
         // on ajoute la liste des urls des enfants
         if (ressource.enfants && ressource.enfants.length) {
           var enfantsDescribe = []

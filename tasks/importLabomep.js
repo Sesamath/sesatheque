@@ -47,9 +47,14 @@ var catCode = config.constantes.categories
 
 // databases
 var dbConfigLabomep = require('../_private/config/labomep')
-// les connexions aux bases
+// les connexions aux bases, labomep
 var klabomep = knex(dbConfigLabomep)
-var kbibli = knex(serverConf.$entities.database)
+// et bibli, pour aller chercher les auteurs
+var confKnex = {
+  client: "mysql",
+  connection: serverConf.$entities.database
+}
+var kbibli = knex(confKnex)
 
 // une liste id => oid des auteurs
 var listeAuteurs = {}

@@ -43,7 +43,7 @@ var root  = __dirname + '/..';
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
- * Il peut valoir production, integration ou dev (les valeurs de lassi.Staging) et sera
+ * Il peut valoir production, integration ou dev et sera
  * mis à dev par défaut
  */
 var staging = process.env.NODE_ENV || 'dev'
@@ -59,7 +59,7 @@ var settings = {
   /* dans localConf
   $entities: {
     database: {
-      client...
+      host...
     }
   },
   $server {

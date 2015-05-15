@@ -81,7 +81,7 @@ define(['swfobject'], function () {
     }
 
     // Ajout css
-    if (options.baseUrl) addCss(options.baseUrl + '/mep.css'); // si on a pas tant pis pour le css
+    if (options.baseUrl) addCss('mep.css'); // si on a pas tant pis pour le css
     container.className = cssClass;
 
     // le message en attendant le chargement

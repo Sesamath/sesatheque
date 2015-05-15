@@ -126,7 +126,11 @@ function purgeJ3pAndExit() {
       " INNER JOIN ressource_index ri2 USING(oid)" +
       " WHERE ri.name = 'typeTechnique' AND ri._string = 'j3p'"
   var dbConfigBibli = require(__dirname + '/../_private/config')
-  var kBibli = knex(dbConfigBibli.entities.database)
+  var confKnex = {
+    client: "mysql",
+    connection: dbConfigBibli.entities.database
+  }
+  var kBibli = knex(confKnex)
   flow()
       .seq(function () {
         log('on va lancer la requete de purge')

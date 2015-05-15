@@ -113,6 +113,48 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
   }
 
   /**
+   * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
+   * dont le 1er est un id de relation valide
+   * @param ressource
+   * @param relations
+   * @returns {Array} Les erreurs éventuelles, ou false si y'a pas eu d'erreur mais que l'on a rien modifié (la relation y était déjà)
+   */
+  $ressourceConverter.addRelations = function (ressource, relations) {
+    var errors = []
+    var isModif = false
+    if (_.isArray(relations)) {
+      relations.forEach(function (relation) {
+        if (relation && relation.length === 2) {
+          var idRelation = relation[0]
+          if (relation[1] == ressource.oid || relation[1] === (ressource.origine +'/' +ressource.idOrigine))
+              errors.push("Impossible de lier une ressource à elle-même")
+          else if (config.listes.relations[idRelation]) {
+            // on regarde si cette relation n'y est pas déjà...
+            var exists = false
+            _.each(ressource.relations, function (relationExistante) {
+              if (relationExistante[0] == relation[0] && relationExistante[1] == relation[1]) {
+                exists = true
+                return false // pas la peine de continuer
+              }
+            })
+            if (!exists) {
+              ressource.relations.push(relation)
+              isModif = true
+            }
+          }
+          else errors.push(idRelation +" n'est pas un identifiant de relation valide")
+        } else {
+          errors.push("une relation doit être un tableau à deux éléments (idRelation, idRessource, ce dernier peut être un oid ou une chaine origine/idOrigine")
+        }
+      })
+    } else errors.push('relations incorrectes')
+
+    if (!errors.length && !isModif) errors = false
+
+    return errors
+  }
+
+  /**
    * Retourne un objet pour dust à partir d'une entité ressource
    * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
    * @param {Ressource} ressource La ressource qui sort d'un load

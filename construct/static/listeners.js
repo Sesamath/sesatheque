@@ -47,6 +47,7 @@ module.exports = function($flashMessage) {
   lassi.on('beforeTransport', function(context, data) {
     var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
     var isApi = (context.request.originalUrl.substr(0, 5) === '/api/')
+    var isHtml = (context.contentType === 'text/html')
 
     /**
      * Ajoute à data nos params par défaut s'il n'existent pas et met le contentType html
@@ -98,12 +99,13 @@ module.exports = function($flashMessage) {
 
     } else {
       // erreur 404 ?
-      if (!context.status && _.isEmpty(data)) {
+      if (!context.status && isHtml && _.isEmpty(data.contentBloc)) {
         context.status = 404
         log.debug(reqHttp + ' : pas de status ni content => 404')
       }
-      // et on gère ici les erreurs à rendre en html
-      if (context.status && context.status > 400) {
+      // et on gère ici les erreurs à rendre en html ou en json
+      if (context.status && context.status > 400 && (isApi || isHtml)) {
+        log.debug('erreur ' +context.status +(isApi ? ' api' : ' html'), data)
         var title, msg
         switch (context.status) {
           case 404:

@@ -11,7 +11,11 @@ var moment = require('moment')
 var flow          = require('seq')
 
 var dbConfig = require(__dirname + '/../_private/config')
-var kdb = knex(dbConfig.$entities.database)
+var confKnex = {
+  client: "mysql",
+  connection: dbConfig.$entities.database
+}
+var kdb = knex(confKnex)
 
 /** La liste d'ids passés en argument avec --dump (séparateur virgule sans espaces) */
 var idsAsked = ''

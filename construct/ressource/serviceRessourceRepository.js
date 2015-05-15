@@ -347,19 +347,25 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
 
   /**
    * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
-   * @param {number|String} oid  L'identifiant de la ressource
+   * @param {number|String} oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
    * @param {Function}      next La callback qui sera appelée avec (error, ressource)
    *                             Attention, ressource peut avoir perdu son prototype s'il vient du cache
    * @returns {undefined}
    */
   $ressourceRepository.load = function(oid, next) {
     log.debug('load ressource_' +oid, null, 'repository')
-    $cacheRessource.get(oid, function (error, ressourceCached) {
-      if (ressourceCached) next(null, ressourceCached)
-      else Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
-        cacheAndNext(error, ressource, next)
+    if (_.isString(oid) && oid.indexOf('/') > 0) {
+      var p = oid.split('/')
+      if (p.length === 2) $ressourceRepository.loadByOrigin(p[0], p[1], next)
+      else next(new Error("identifiant invalide : " +oid))
+    } else {
+      $cacheRessource.get(oid, function (error, ressourceCached) {
+        if (ressourceCached) next(null, ressourceCached)
+        else Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
+          cacheAndNext(error, ressource, next)
+        })
       })
-    })
+    }
   }
 
   /**
