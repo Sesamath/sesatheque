@@ -29,26 +29,31 @@
  * pour une explication en français)
  */
 
-/**
- * @file Affiche un arbre
- */
-
-/* global define, module*/
-define(['jquery211', 'jqueryUi1111DialogRedmond'], function () {
-  "use strict";
-  var arbre = {};
-
+(function () {
+  'use strict'
   /**
-   * Affiche l'arbre
-   * @param {Object}   ressource  L'arbre dans son format "ressource"
-   * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                              et éventuellement resultCallback)
-   * @param {Function} next       La fct à appeler quand la ressource sera chargée (sans argument ou avec une erreur)
+   * Un retour de l'api http (surtout pour documenter le format utilisé dans sesatheque|sesalab)
+   * @param {object} values
+   * @constructor
    */
-  arbre.display = function (ressource, options, next) {
-   // @todo à implémenter de la même manière que dans labomep
-  };
-
-  return arbre;
-});
+  function Feedback(values) {
+    if (typeof values !== 'object') values = {}
+    /**
+     * Statut du retour
+     * @type {boolean}
+     */
+    this.ok = !!values.ok;
+    /**
+     * Message éventuel (si ok = false c'est un message d'erreur et sinon une info)
+     * @type {*|string}
+     */
+    this.message = values.error || '';
+  }
+  // export
+  if (typeof define === 'function') {
+    define(Feedback); // jshint ignore:line
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = Feedback;
+  }
+})();
 

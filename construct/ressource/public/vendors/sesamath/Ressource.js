@@ -32,7 +32,7 @@
 "use strict";
 
 /**
- * @file Format d'une Ref, pouvant être utilisé comme enfant d'un Arbre
+ * @file Définition d'une ressource
  */
 
 /* global define, module*/
@@ -142,6 +142,7 @@ function Ressource(initObj) {
   this.typeDocumentaires = filters.arrayInt(initObj.typeDocumentaires);
   /**
    * Liste des ressources liées, une liaison étant un array [idLiaison, idRessourceLiée]
+   * idRessourceLiée peut être un oid ou une string origine/idOrigine
    * @type {Array}
    */
   this.relations = filters.array(initObj.relations);

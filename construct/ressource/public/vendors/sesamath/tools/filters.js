@@ -32,7 +32,7 @@
 "use strict";
 
 /**
- * @file Format d'une Ref, pouvant être utilisé comme enfant d'un Arbre
+ * @file Collection de fonctions permettant de filtrer une variable d'après le type attendu
  */
 
 /* global define, module*/

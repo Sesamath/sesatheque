@@ -52,9 +52,12 @@
  * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
  */
 /*global define, log */
-'use strict';
 
 define(['sesaswf'], function (sesaswf) {
+  'use strict';
+  /** notre module exporté avec sa méthode display */
+  var am = {};
+
   /** Le moment où ce module a été chargé dans le navigateur */
   var startDate = new Date();
   
@@ -69,7 +72,8 @@ define(['sesaswf'], function (sesaswf) {
       score : 1
     }
   }
-  
+
+
   /**
    * Affiche la ressource dans l'élément d'id mepRess
    * @param {Ressource} ressource  L'objet ressource (sans forcément son prototype)
@@ -77,17 +81,20 @@ define(['sesaswf'], function (sesaswf) {
    *                               et éventuellement resultCallback)
    * @param {Function}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
    */
-  function display(ressource, options, next) {
+  am.display = function (ressource, options, next) {
     var baseSwf, swfUrl, swfOpt;
     var container = options.container;
     if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+
+    // on enverra le résultat à la fermeture
     if (options.resultCallback && container.addEventListener) {
       container.addEventListener('unload', function () {
-        options.resultCallback(getResultat());
+        var resultat = getResultat();
+        options.resultCallback(resultat);
       })
     }
     var params = ressource.parametres;
-  
+
     log('start am display avec la ressource', ressource)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !params) {
@@ -98,7 +105,7 @@ define(['sesaswf'], function (sesaswf) {
 
     // On réinitialise le conteneur
     container.innerHTML = '';
-  
+
     // notre base
     if (ressource.origine !== 'am' && ressource.baseUrl) baseSwf =  ressource.baseUrl;
     else baseSwf = "http://mep-col.sesamath.net/dev/aides/" +(params.mep_langue_id ? params.mep_langue_id : 'fr');
@@ -107,27 +114,14 @@ define(['sesaswf'], function (sesaswf) {
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
     container.setAttribute("width", 735);
     container.style.width = '735px';
-  
+
     swfOpt = {
       base    : baseSwf + "/",
       largeur : 735,
       hauteur : 450
     }
     sesaswf.load(container, swfUrl, swfOpt, next);
-  }
+  };
   
-  /**
-   * Affiche un résultat sauvegardé préalablement
-   * @param {Object}      result Le résultat tel qu'il a été passé à saveResult au préalable
-   * @param {HTMLElement} elt    L'élément html (https://developer.mozilla.org/fr/docs/Web/API/HTMLElement)
-   */
-  function showResult(result, elt) {
-    log('showResult', result)
-    log("dans l'élément", elt)
-  }
-  
-  return {
-    display   : display,
-    showResult: showResult
-  }
+  return am;
 });

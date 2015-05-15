@@ -314,7 +314,7 @@ function addSaveResultat(options, urlResultat, Resultat) {
       // la fct de retour est facultative, mais on affiche toujours le picto
       function feedback(retour) {
         log('feedback', retour);
-        if (retour && retour.result && retour.result === 'ok') feedbackOk();
+        if (retour && retour.ok && retour.ok === true) feedbackOk();
         else {
           if (retour && retour.error) w.setError(retour.error);
           feedbackKo();

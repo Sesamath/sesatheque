@@ -31,7 +31,7 @@
 "use strict";
 
 /**
- * @file Format d'une Ref, pouvant être utilisé comme enfant d'un Arbre
+ * @file Format d'une Ref, référence à une ressource, pouvant être utilisé comme enfant d'un arbre
  */
 
 /* global define, module*/
@@ -69,10 +69,10 @@ function Ref(initObj) {
    */
   this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : [];
   /**
-   * Les enfants, un tableaux d'objets Arbre (qui peuvent n'être que des références, ou un mix)
-   * @type {Arbre[]}
+   * Les enfants éventuels, un tableaux d'objets qui peuvent être un mix de Ref et Ressource
+   * @type {Object[]}
    */
-  this.enfants = (initObj.enfants && initObj.enfants instanceof Array) ? initObj.enfants : [];
+  if (initObj.enfants && initObj.enfants instanceof Array) this.enfants = initObj.enfants;
 }
 
 /**

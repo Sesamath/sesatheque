@@ -30,12 +30,12 @@
  */
 
 /**
- * Script autonome pour afficher un résultat de type am
+ * @file Script autonome pour afficher un résultat de type am
  * On peut être chargé sur n'importe quelle appli, donc on a aucune dépendance à une lib externe
  * et on exporte 3 fonctions,
  * - soit pour requireJs (si define existe)
  * - soit en module amd (module.exports),
- * - soit en global dans window.sesatheque.amResult
+ * et sinon on ne fait rien...
  */
 /*global window*/
 (function () {
@@ -96,8 +96,5 @@
     define(amResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
     module.exports = amResult;
-  } else {
-    if (typeof window.sesatheque === "undefined") window.sesatheque = {};
-    window.sesatheque.amResult = amResult;
   }
 })();

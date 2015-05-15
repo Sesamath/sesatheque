@@ -35,7 +35,7 @@
  * et on exporte 3 fonctions,
  * - soit pour requireJs (si define existe)
  * - soit en module amd (module.exports),
- * - soit en global dans window.sesatheque.urlResult
+ * et sinon on ne fait rien...
  */
 /*global window*/
 (function () {
@@ -96,9 +96,6 @@
     define(urlResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
     module.exports = urlResult;
-  } else {
-    if (typeof window.sesatheque === "undefined") window.sesatheque = {};
-    window.sesatheque.urlResult = urlResult;
   }
 
 })();
