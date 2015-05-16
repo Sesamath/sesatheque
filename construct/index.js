@@ -188,10 +188,12 @@ lassi.on('afterRailUse', function (rail, name) {
           // ça dépend de l'appelant
           if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin)) {
             res.header('Access-Control-Allow-Origin', origin)
+            res.header('Access-Control-Allow-Credentials', 'true')
             res.header("Access-Control-Allow-Headers", "X-Requested-With")
           } else if (origin.substr(0, 4) !== 'http') {
             // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
             res.header('Access-Control-Allow-Origin', '*')
+            res.header('Access-Control-Allow-Credentials', 'true')
             res.header("Access-Control-Allow-Headers", "X-Requested-With")
           } else {
             log('cors avec ' + origin +' refusé')
