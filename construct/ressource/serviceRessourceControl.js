@@ -50,6 +50,27 @@ module.exports = function () {
   var config = require('./config')
 
   /**
+   * Ajoute les propriétés qui peuvent être déduites (deductions définies dans la configuration)
+   * - categories si vide et que typeTechnique permet de le deviner
+   * - typePedagogiques et typeDocumentaires si categories n'en contient qu'une et qu'elle permet de les déduire
+   * @param ressource
+   */
+  $ressourceControl.addDeductions = function (ressource) {
+    // on essaie de déduire categories de typeTechnique
+    if (ressource && ressource.typeTechnique && _.isEmpty(ressource.categories) && config.typeTechniqueToCategories[ressource.typeTechnique]) {
+      ressource.categories = config.typeTechniqueToCategories[ressource.typeTechnique]
+    }
+    // typePedagogiques et typeDocumentaires d'après catégories (si une seule)
+    if (ressource && ressource.categories && ressource.categories.length === 1) {
+      var categorie = ressource.categories[0]
+      if (config.categoriesToTypes[categorie]) {
+        if (_.isEmpty(ressource.typePedagogiques)) ressource.typePedagogiques = config.categoriesToTypes[categorie].typePedagogiques
+        if (_.isEmpty(ressource.typeDocumentaires)) ressource.typeDocumentaires = config.categoriesToTypes[categorie].typeDocumentaires
+      }
+    }
+  }
+
+  /**
    * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
    * Fait du cast sans râler quand les propriétés de ressource sont "presque" du bon type
    * @param {Ressource} ressource
@@ -70,6 +91,7 @@ module.exports = function () {
     if (_.isEmpty(ressource)) {
       errors.push("Ressource vide");
     } else {
+      $ressourceControl.addDeductions(ressource)
       // vérif présence et type
       _.each(config.typesVar, function (typeVar, key) {
         var champ = config.labels[key]

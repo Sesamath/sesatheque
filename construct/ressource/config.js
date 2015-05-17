@@ -145,6 +145,18 @@ var ressourceConfig = {
   }, // fin des listes
 
   /**
+   * Donne la catégorie induite par le typeTechnique, mais ça peut être surchargé par l'utilisateur qui renseigne categories
+   */
+  typeTechniqueToCategories : {
+    'am'    : [2],
+    'arbre' : [8],
+    'calkc' : [7],
+    'ec2'   : [7],
+    'em'    : [7],
+    'mental': [7]
+  },
+
+  /**
    * Donne les types induits par la catégorie, mais ça peut être surchargé par l'utilisateur qui renseigne les champs
    */
   categoriesToTypes: {

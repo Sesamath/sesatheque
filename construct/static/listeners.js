@@ -99,7 +99,7 @@ module.exports = function($flashMessage) {
 
     } else {
       // erreur 404 ?
-      if (!context.status && isHtml && _.isEmpty(data.contentBloc)) {
+      if (!context.status && ( (isHtml && _.isEmpty(data.contentBloc)) || (isApi && _.isEmpty(data)) ) ) {
         context.status = 404
         log.debug(reqHttp + ' : pas de status ni content => 404')
       }

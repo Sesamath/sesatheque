@@ -218,6 +218,7 @@ module.exports = function (Groupe, $settings, $personneRepository) {
    */
   $accessControl.hasAllRights = function (context) {
     var token = context.request.header('X-ApiToken')
+    log("token " +token)
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
       if ($settings.get('apiTokens', []).indexOf(token) > -1) {

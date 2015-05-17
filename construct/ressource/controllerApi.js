@@ -80,7 +80,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Équivalent de context.notFound en json
    * @param msg
-   * @param context
+   * @param {Context} context
    */
   function notFound(msg, context) {
     if (!msg) msg = "Contenu inexistant"
@@ -125,7 +125,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         dataUri      : $routes.getAbs('api', ressource),
         displayUri   : $routes.getAbs('display', ressource)
       })
-    } else notFound('Aucune trouvée pour la référencer', context)
+    } else notFound('Aucune ressource à référencer trouvée', context)
   }
 
   /**
