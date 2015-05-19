@@ -72,7 +72,8 @@ var ressourceConfig = {
       5: "Exercice fixe",
       6: "Exercice avec animation",
       7: "Exercice interactif",
-      8: "Liste de ressources"
+      8: "Liste de ressources",
+      9: "À déterminer"
     },
     typePedagogiques : {
       // id de scolomfr-voc-010, « on s'en sert pour faire quoi ? »

@@ -213,38 +213,51 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
       $accessControl.checkPermission('delete', context, ressource, function () {
+        var token = $ressourceConverter.getToken()
         var options = {
           $metas : {title: 'Supprimer la ressource : ' + ressource.titre},
-          contentBloc: {$view: 'delete'}
+          contentBloc: {
+            $view: 'delete',
+            token : {
+              name  : 'token',
+              value : token,
+              hidden: true
+            }
+          }
         }
+        context.session.token = token
         context.session.currentDelete = {
           oid : ressource.oid,
           titre : ressource.titre
         }
-        $views.printForm(error, ressource, context, options)
+        // la vue delete inclue la vue describe
+        $views.printForRead(error, ressource, context, 'describe', options)
       })
     })
   })
 
   // Delete, traitement du post
-  controller.post($routes.get('delete'), function (context) {
+  controller.post($routes.get('delete', ':oid'), function (context) {
+    var oid = context.arguments.oid
     var data = {
-      $metas     : {title: 'Suppression de ressource'},
+      $views : __dirname + '/views',
+      $metas : {title: 'Suppression de ressource'},
+      $layout: '../../static/views/layout-page',
       contentBloc: {$view: 'delete'}
     }
-    if (context.session.currentDelete && context.post.oid && context.post.oid == context.session.currentDelete.oid) {
+    if (context.session.currentDelete && oid > 0 && context.session.currentDelete.oid == oid) {
       // on peut effacer
       var titre = context.session.currentDelete.titre
-      var oid = context.post.oid
       checkToken(context, function () {
-        $ressourceRepository.del(context.post.oid, function (error, nbObj) {
+        $ressourceRepository.del(oid, function (error, nbDel) {
           if (error) {
             log.error(error)
             data.error = "Erreur lors de la suppression de la ressource " + titre + ' (' + oid + ') : <br />' + error.toString()
-          } else {
-            log.debug('suppression de ' +oid +' ok')
-            data.contentBloc.deletedId = oid
+          } else if (nbDel === 1) {
+            data.contentBloc.deletedOid = oid
             data.contentBloc.titre = titre
+          } else {
+            data.error = "La ressource " +titre +' (' +oid +") n'existait pas (ou plus)"
           }
           context.html(data)
         })

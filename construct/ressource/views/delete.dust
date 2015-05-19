@@ -1,12 +1,12 @@
 <div class="block del ressource">
     {?error}<p class="has-error">{error}</p>{/error}
 
-{?deletedId}
-    La ressource « {titre} » ({oid}) a été définitivement supprimée
+{?deletedOid}
+    La ressource « {titre} » ({deletedOid}) a été définitivement supprimée
 {:else}
-    {?id}
+    {?oid}
     Supprimer cette ressource définitivement ?
-    {>"../describe" /}
+    {>"../describe" /}{!on est en relatif à ???!}
 
     <form method="post" id="formRessource">
         {>wrapper widget="text" o=token /}
@@ -14,6 +14,8 @@
             <input class="btn btn-primary" type="submit" value="Supprimer" />
         </div>
     </form>
-    {/id}
+    {:else}
+        Paramètres manquants pour une suppression (probablement un post sans .
+    {/oid}
 {/deletedId}
 </div>

@@ -293,30 +293,29 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   }
 
   /**
-   * Efface l'entity par son oid (on peut passer un tableau)
-   * @param {number|Array} oid  Le ou les oid à supprimer
+   * Efface l'entity par son oid
+   * @param {number} oid  Le ou les oid à supprimer
    * @param {Function}     next La callback qui sera appelée en lui passant (error, nbObjects, nbIndexes)
    * @returns {undefined}
    */
   $ressourceRepository.del = function(oid, next) {
     log.debug("La ressource " +oid + " va être effacée")
-    var query
-    if (_.isArray(oid)) query = Ressource.match('oid').in(oid)
-    else query = Ressource.match('oid').equals(oid)
-    query.delete(function(error, nbObjects, nbIndexes) {
-      if (error) next(error, nbObjects, nbIndexes)
-      else {
-        // faut effacer aussi en cache
-        if (_.isArray(oid)) {
-          oid.forEach(function (idToDel) {
-            $cacheRessource.delete(idToDel)
-          })
-        } else {
-          $cacheRessource.delete(oid)
-        }
-        next(error, nbObjects, nbIndexes)
+    // pour effacer faut d'abord charger, c'est stupide mais lassi nous propose pas autre chose
+    $ressourceRepository.load(oid, function (error, ressource) {
+      if (error) next(error)
+      else if (ressource) {
+        ressource.delete(function (error) {
+          if (error) next(error)
+          else {
+            $cacheRessource.delete(oid)
+            log.debug("La ressource " +oid + " a été effacée")
+            next(null, 1)
+          }
+        })
+      } else {
+        log.debug("La ressource " +oid +" n'existait pas, on a rien effacé")
+        next(null, 0)
       }
-      log.debug("La ressource " +oid + " a été effacée (" +nbObjects +" versions et " +nbIndexes +" index)")
     })
   }
 

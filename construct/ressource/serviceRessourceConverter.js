@@ -104,15 +104,6 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
   }
 
   /**
-   * Renvoie un token aléatoire
-   * pas aussi random que l'usage de crypto ou d'un module npm dédié mais suffisant pour notre besoin
-   * @returns {string}
-   */
-  function getToken() {
-    return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
-  }
-
-  /**
    * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
    * dont le 1er est un id de relation valide
    * @param ressource
@@ -152,6 +143,15 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
     if (!errors.length && !isModif) errors = false
 
     return errors
+  }
+
+  /**
+   * Renvoie un token aléatoire
+   * pas aussi random que l'usage de crypto ou d'un module npm dédié mais suffisant pour notre besoin
+   * @returns {string}
+   */
+  $ressourceConverter.getToken = function () {
+    return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
   }
 
   /**
@@ -334,7 +334,7 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
       }
     }
     // et un token
-    var token = getToken()
+    var token = $ressourceConverter.getToken()
     viewData.token = {
       name:'token',
       value:token,
