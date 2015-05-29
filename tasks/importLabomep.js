@@ -335,6 +335,20 @@ function initRessourceGenerique(row) {
   }
   if (row.titre) ressource.titre = row.titre
   if (row.sslsesa_user_id) ressource.auteurs =  [row.sslsesa_user_id]
+  // on rectifie origine et idOrigine pour les ressources qui viennent en fait d'ailleurs
+  if (row.id > 1000000) {
+    if (row.id < 2000000) {
+      ressource.origine = 'ato';
+      ressource.idOrigine = row.id - 1000000
+    } else if (row.id < 3000000) {
+      ressource.origine = 'mep_coll';
+      ressource.idOrigine = row.id - 2000000
+    } else if (row.id < 4000000) {
+      ressource.origine = 'accomp';
+      ressource.idOrigine = row.id - 3000000
+    }
+    // au delà de 4M c'est normalement que du j3p ajouté à la main par Alexis, on y touche pas
+  }
 
   return ressource
 }
