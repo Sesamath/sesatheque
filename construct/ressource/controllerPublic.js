@@ -91,7 +91,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       start  : parseInt(context.arguments.start),
       nb     : parseInt(context.arguments.nb)
     }
-    $ressourceRepository.getListe(options, function (error, ressources) {
+    $ressourceRepository.getListe('public', options, function (error, ressources) {
       var data = $views.getDefaultData('liste')
       data.$metas.title = 'Résultats de la recherche'
       if (error) data.contentBloc.error = error.toString()
@@ -112,7 +112,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - nb : nb de résultats voulus
    */
   controller.post('by', function (context) {
-    $ressourceRepository.getListe(context.post, function (error, ressources) {
+    $ressourceRepository.getListe('public', context.post, function (error, ressources) {
       var data = $views.getDefaultData('liste')
       data.$metas.title = 'Résultats de la recherche'
       if (error) data.contentBloc.error = error.toString()
@@ -137,7 +137,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     data.$metas.title = 'Résultats de la recherche'
     try {
       options = JSON.parse(context.arguments.json)
-      $ressourceRepository.getListe(context.post, function (error, ressources) {
+      $ressourceRepository.getListe('public', options, function (error, ressources) {
         if (error) data.contentBloc.error = error.toString()
         else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
       })

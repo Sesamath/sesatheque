@@ -218,14 +218,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $metas : {title: 'Supprimer la ressource : ' + ressource.titre},
           contentBloc: {
             $view: 'delete',
-            token : {
+            /* token : {
               name  : 'token',
               value : token,
               hidden: true
-            }
+            } */
           }
         }
         context.session.token = token
+        // on mettait ça du temps où y'avait pas besoin de charger la ressource pour l'effacer
+        // on le garde pour avoir le titre en cas d'effacements concurrents
         context.session.currentDelete = {
           oid : ressource.oid,
           titre : ressource.titre
@@ -248,18 +250,34 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (context.session.currentDelete && oid > 0 && context.session.currentDelete.oid == oid) {
       // on peut effacer
       var titre = context.session.currentDelete.titre
+      delete context.session.currentDelete
       checkToken(context, function () {
-        $ressourceRepository.del(oid, function (error, nbDel) {
+        // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
+        $ressourceRepository.load(oid, function (error, ressource) {
           if (error) {
             log.error(error)
-            data.error = "Erreur lors de la suppression de la ressource " + titre + ' (' + oid + ') : <br />' + error.toString()
-          } else if (nbDel === 1) {
-            data.contentBloc.deletedOid = oid
-            data.contentBloc.titre = titre
+            data.contentBloc.error = "Impossible d'accéder à la ressource " +titre +' (' +oid +")"
+          } else if (ressource) {
+            if ($accessControl.hasPermission('delete', context, ressource)) {
+              $ressourceRepository.delete(ressource, function (error) {
+                if (error) {
+                  log.error(error)
+                  data.contentBloc.error = "Erreur lors de la suppression de la ressource " + titre + ' (' + oid + ')'
+                } else {
+                  data.contentBloc.deletedOid = oid
+                  data.contentBloc.titre = titre
+                }
+                context.html(data)
+              })
+            } else {
+              log.debug("droits insuffisant pour effacer la ressource " +oid)
+              data.contentBloc.error = "droits insuffisant pour effacer la ressource "  + titre + ' (' + oid + ')'
+              context.html(data)
+            }
           } else {
-            data.error = "La ressource " +titre +' (' +oid +") n'existait pas (ou plus)"
+            data.contentBloc.error = "La ressource "  + titre + ' (' + oid + ") n'existait pas"
+            context.html(data)
           }
-          context.html(data)
         })
       })
     } else {
@@ -302,7 +320,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       data.$metas.title = 'Résultats de la recherche'
       log.debug('liste avec les options', options)
       log.debug('qui remonte', ressources)
-      if (error) data.error = error.toString()
+      if (error) data.contentBloc.error = error.toString()
       else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
       context.html(data)
     })

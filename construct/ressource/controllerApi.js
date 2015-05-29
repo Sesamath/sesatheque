@@ -53,11 +53,40 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   //var tools = require('../tools')
 
   /**
-   * Équivalent de context.denied en json
-   * @param msg
+   * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @param context
+   * @param id
    */
-  function denied(msg, context) {
+  function deleteAndSend(context, id) {
+    log.debug("dans cb api deleteRessource " +id)
+    // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
+    $ressourceRepository.load(id, function (error, ressource) {
+      if (error) {
+        sendJson(context, error)
+      } else if (ressource) {
+        if ($accessControl.hasPermission('delete', context, ressource)) {
+          $ressourceRepository.delete(ressource, function (error) {
+            if (error) sendJson(context, error)
+            else sendJson(context, null, {deleted:id})
+          })
+        } else {
+          var errorMsg = "droits insuffisant pour effacer la ressource " +id
+          log.debug(errorMsg)
+          denied(context, errorMsg)
+        }
+      } else {
+        log.debug("La ressource " +id +" n'existait pas, on a rien effacé")
+        sendJson(context, new Error("Aucune ressource d'identifiant " + id))
+      }
+    })
+  }
+
+  /**
+   * Équivalent de context.denied en json
+   * @param context
+   * @param msg
+   */
+  function denied(context, msg) {
     if (!msg) msg = "Accès refusé"
     context.status = 403;
     context.json({error: msg})
@@ -79,10 +108,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Équivalent de context.notFound en json
-   * @param msg
    * @param {Context} context
+   * @param {string}  msg
    */
-  function notFound(msg, context) {
+  function notFound(context, msg) {
     if (!msg) msg = "Contenu inexistant"
     context.status = 404;
     context.json({error: msg})
@@ -125,7 +154,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         dataUri      : $routes.getAbs('api', ressource),
         displayUri   : $routes.getAbs('display', ressource)
       })
-    } else notFound('Aucune ressource à référencer trouvée', context)
+    } else notFound(context, 'Aucune ressource à référencer trouvée')
   }
 
   /**
@@ -326,7 +355,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var errorMsg = "Droits insuffisants"
       if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
       else errorMsg += " pour ajouter une ressource"
-      denied(errorMsg, context)
+      denied(context, errorMsg)
     }
   }
 
@@ -339,7 +368,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @callback api_ressource POST api/ressource
    * @param context
    */
-  controller.post('ressource', function (context) {
+  function postRessource(context) {
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
     log.error(new Error('une trace pour ' +reqHttp)) */
     if (context.perf) {
@@ -348,6 +377,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       else msg += context.post.oid
       log.perf(context, msg)
     }
+    // 1s ne suffit pas toujours en local, à cause d'insert mysql très lents, on met 2s dans le listener
+
     // partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
     var partial = !!context.get.partial
     if (!partial && !context.post.titre && !context.post.categories) {
@@ -377,10 +408,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         sendJson(context, error)
       }
     })
-  })
+  }
+  postRessource.timeout = 5000
+  controller.post('ressource', postRessource)
 
   // ajoute des relations (on tolère dans le post les propriétés oid ou origine+idOrigine ou id (en plus de relations)
-  controller.post('ressource/addRelations', function (context) {
+  function postRessourceAddRelations (context) {
     if (context.perf) {
       var msg = 'start-'
       if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
@@ -409,7 +442,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               })
             }
           } else {
-            notFound("La ressource " + id + " n'existe pas")
+            notFound(context, "La ressource " + id + " n'existe pas")
           }
         })
       } else {
@@ -418,12 +451,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } else {
       sendJson(context, 'relations manquantes')
     }
-  })
+  }
+  postRessourceAddRelations.timeout = 5000
+  controller.post('ressource/addRelations', postRessourceAddRelations)
 
   // read
   controller.get('ressource/:oid', function (context) {
     var oid = context.arguments.oid
-    if (context.perf) log.perf(context, 'start')
 
     $ressourceRepository.load(oid, function (error, ressource) {
       // log.debug("dans api get " +oid, ressource)
@@ -431,42 +465,27 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       else if (ressource) {
         // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
         if ($accessControl.hasReadPermission(context, ressource)) sendJson(context, null, ressource)
-        else denied("Droits insuffisants pour accéder à la ressource d'identifiant " + oid, context)
-      } else notFound("La ressource d'identifiant " + oid + " n'existe pas", context)
+        else denied(context, "Droits insuffisants pour accéder à la ressource d'identifiant " + oid)
+      } else notFound(context, "La ressource d'identifiant " + oid + " n'existe pas")
     })
   })
 
   // delete
   controller.delete('ressource/:oid', function (context) {
-    var oid = context.arguments.oid
-    if (context.perf) log.perf(context, 'start')
+    deleteAndSend(context, context.arguments.oid)
+  })
 
-    function del() {
-      $ressourceRepository.del(oid, function (error, nbObjects, nbIndexes) {
-        if (error) sendJson(context, error)
-        else if (nbObjects > 0) sendJson(context, null, {deletedOid: oid, nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else sendJson(context, new Error("Aucune ressource d'identifiant " + oid))
-      });
-    }
 
-    if ($accessControl.hasPermission('delete', context)) {
-      del()
-    } else {
-      // faut charger la ressource pour le savoir
-      $ressourceRepository.load(oid, function (error, ressource) {
-        if (error) sendJson(context, error)
-        else if (!ressource) notFound("la ressource d'identifiant " + oid + " n'existe pas", context)
-        else if ($accessControl.hasPermission('delete', context, ressource)) del()
-        else denied("Droits insuffisants pour supprimer la ressource d'identifiant " + oid, context)
-      })
-    }
+  // delete by origine
+  controller.delete('ressource/:origine/:idOrigine', function (context) {
+    var id = context.arguments.origine +'/' +context.arguments.idOrigine
+    deleteAndSend(context, id)
   })
 
   // Read byOrigine
   controller.get('ressource/:origine/:oid', function (context) {
     var idOrigine = context.arguments.oid
     var origine = context.arguments.origine
-    if (context.perf) log.perf(context, 'start')
 
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       // log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
@@ -474,87 +493,37 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (error) sendJson(context, error)
       else if (ressource) {
         if ($accessControl.hasReadPermission(context, ressource)) sendJson(context, null, ressource)
-        else  denied("Droits insuffisants pour accéder à la ressource d'origine " +
-            origine + " et d'identifiant " + idOrigine, context)
-      } else notFound("La ressource d'origine " + origine + " et d'identifiant " + idOrigine +
-          " n'existe pas", context)
+        else  denied(context, "Droits insuffisants pour accéder à la ressource d'origine " +
+            origine + " et d'identifiant " + idOrigine)
+      } else notFound(context, "La ressource d'origine " + origine + " et d'identifiant " + idOrigine + " n'existe pas")
     })
   })
 
   // getRef (pour récupérer une ref à la ressource à mettre en enfant d'un arbre)
   controller.get('ressource/getRef/:oid', function (context) {
-    if (context.perf) log.perf(context, 'start')
     $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
       sendRef(context, error, ressource)
     })
   })
   // getRef par origine/idOrigine
   controller.get('ressource/getRef/:origine/:idOrigine', function (context) {
-    if (context.perf) log.perf(context, 'start')
     $ressourceRepository.loadByOrigin(context.arguments.origine, context.arguments.idOrigine, function (error, ressource) {
       sendRef(context, error, ressource)
     })
   })
 
-  // delete by origine
-  controller.delete('ressource/:origine/:idOrigine', function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    if (context.perf) log.perf(context, 'start')
-
-    /**
-     * Efface la ressource d'après les params origine & idOrigine de la requete
-     */
-    function delByOrigine() {
-      $ressourceRepository.delByOrigine(origine, idOrigine, function (error, nbObjects, nbIndexes) {
-        if (error) sendJson(context, error)
-        else if (nbObjects > 0) sendJson(context, null, {nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else notFound("Aucune ressource d'origine " + origine + " et d'identifiant " + idOrigine, context)
-      })
-    }
-
-    /**
-     * Fct à privilégier car l'effacement du cache est nettement plus performant
-     * @param oid
-     */
-    function del(oid) {
-      $ressourceRepository.del(oid, function (error, nbObjects, nbIndexes) {
-        if (error) sendJson(context, error)
-        else if (nbObjects > 0) sendJson(context, null, {deletedOId: oid, nbObjects: nbObjects, nbIndexes: nbIndexes})
-        else notFound("Aucune ressource d'identifiant " + oid, context)
-      })
-    }
-
-
-    if ($accessControl.hasPermission('delete', context)) {
-      delByOrigine()
-    } else {
-      // faut charger la ressource pour le savoir
-      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-        if (error) sendJson(context, error)
-        else if (!ressource) notFound("La ressource d'origine " + origine + " et d'identifiant " + idOrigine +
-            " n'existe pas", context)
-        else if ($accessControl.hasPermission('delete', context, ressource)) del(ressource.oid)
-        else denied("Droits insuffisants pour accéder à la ressource d'origine " +
-            origine + " et d'identifiant " + idOrigine, context)
-      })
-    }
-  })
-
   // Read public (sans session)
   controller.get('public/:oid', function (context) {
     var oid = context.arguments.oid
-    if (context.perf) log.perf(context, 'start')
     $ressourceRepository.loadPublic(oid, function (error, ressource) {
       if (error) sendJson(context, error)
       else if (ressource) sendJson(context, null, ressource)
-      else notFound("La ressource " + oid + " n'existe pas ou n'est pas publique", context)
+      else notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
     })
   })
 
   // Read public (sans session) par origine
   controller.get('public/:origine/:idOrigine', function (context) {
-    if (context.perf) log.perf(context, 'start')
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
 
@@ -562,14 +531,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (error) sendJson(context, error)
       else if (ressource) {
         if (ressource.restriction === 0) sendJson(context, null, ressource)
-        else  denied("Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine, context)
-      } else notFound("La ressource " + origine + '/' + idOrigine + " n'existe pas", context)
+        else  denied(context, "Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine)
+      } else notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas")
     })
   })
 
   // read public pour récupérer seulement oid, titre et typeTechnique
   controller.get('public/getRef/:origine/:idOrigine', function (context) {
-    if (context.perf) log.perf(context, 'start')
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
 
@@ -583,8 +551,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
              typeTechnique : ressource.typeTechnique
           })
         }
-        else  denied("Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine, context)
-      } else notFound("La ressource " + origine + '/' + idOrigine + " n'existe pas", context)
+        else  denied(context, "Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine)
+      } else notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas")
     })
   })
 
@@ -601,31 +569,34 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - nb : nb de résultats voulus
    */
   controller.post('public/by', function (context) {
-    if (context.perf) log.perf(context, 'start')
     log.debug('api.public.by reçoit', context.post)
 
-    $ressourceRepository.getListe('public', context, context.post, function (error, ressources) {
+    $ressourceRepository.getListe('public', context.post, function (error, ressources) {
       if (error) sendJson(context, error)
       else sendJson(context, null, ressources)
     })
   })
 
   controller.post('prof/by', function (context) {
-    if (context.perf) log.perf(context, 'start')
-    if ($accessControl.isAuthenticated(context)) $ressourceRepository.getListe('prof', context, context.post, function (error, ressources) {
-      if (error) sendJson(context, error)
-      else sendJson(context, null, ressources)
-    })
-    else denied("Il faut être authentifié pour accéder aux ressources prof", context)
+    if ($accessControl.hasGenericPermission('correction', context)) {
+      $ressourceRepository.getListe('correction', context.post, function (error, ressources) {
+        if (error) sendJson(context, error)
+        else sendJson(context, null, ressources)
+      })
+    }
+    else denied(context, "Il faut être authentifié pour accéder aux ressources prof")
   })
 
   controller.post('perso/by', function (context) {
-    if (context.perf) log.perf(context, 'start')
-    if ($accessControl.isAuthenticated(context)) $ressourceRepository.getListe('perso', context, context.post, function (error, ressources) {
-      if (error) sendJson(context, error)
-      else sendJson(context, null, ressources)
-    })
-    else denied("Il faut être authentifié pour accéder à ses ressources", context)
+    var oid = $accessControl.currentUserOid
+    if (oid) {
+      $ressourceRepository.getListe('auteur/' +oid, context.post, function (error, ressources) {
+        if (error) sendJson(context, error)
+        else sendJson(context, null, ressources)
+      })
+    } else {
+      denied(context, "Il faut être authentifié pour accéder à ses ressources")
+    }
   })
 
   /**
@@ -665,7 +636,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Read arbre
   controller.get('arbre/:oid', function (context) {
     var oid = context.arguments.oid
-    if (context.perf) log.perf(context, 'start')
 
     $ressourceRepository.load(oid, function (error, ressource) {
       // log.debug("dans api get " +oid, ressource)
@@ -676,13 +646,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if ($accessControl.hasReadPermission(context, ressource)) {
             sendJson(context, null, $ressourceConverter.toArbre(ressource))
           } else {
-            denied("Droits insuffisants pour accéder à la ressource " + oid, context)
+            denied(context, "Droits insuffisants pour accéder à la ressource " + oid)
           }
         } else {
-          notFound("La ressource d'identifiant " + oid + " n'est pas un arbre", context)
+          notFound(context, "La ressource d'identifiant " + oid + " n'est pas un arbre")
         }
       } else {
-        notFound("La ressource d'identifiant " + oid + " n'existe pas", context)
+        notFound(context, "La ressource d'identifiant " + oid + " n'existe pas")
       }
     })
   })

@@ -34,14 +34,13 @@
 /**
  * Init de notre service $ressourceRepository
  */
-module.exports = function (Ressource, Archive, $ressourceControl, $accessControl, $cacheRessource, $cache) {
+module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessource, $cache) {
   /**
    * Service d'accès aux ressources, utilisé par les différents contrôleurs
    * @namespace $ressourceRepository
    * @requires Ressource
    * @requires Archive
    * @requires $ressourceControl
-   * @requires $accessControl
    * @requires $cacheRessource
    * @requires $cache
    */
@@ -50,7 +49,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   var _ = require('lodash')
   var flow          = require('seq')
   var elementtree = require('elementtree')
-  var util = require('util')
+  //var util = require('util')
 
   var config = require('./config')
   var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
@@ -293,55 +292,27 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
   }
 
   /**
-   * Efface l'entity par son oid
-   * @param {number} oid  Le ou les oid à supprimer
-   * @param {Function}     next La callback qui sera appelée en lui passant (error, nbObjects, nbIndexes)
+   * Efface une ressource (et ses index)
+   * @param {Ressource} ressource
+   * @param {Function}  next      La callback qui sera appelée en lui passant error ou undefined
    * @returns {undefined}
    */
-  $ressourceRepository.del = function(oid, next) {
-    log.debug("La ressource " +oid + " va être effacée")
-    // pour effacer faut d'abord charger, c'est stupide mais lassi nous propose pas autre chose
-    $ressourceRepository.load(oid, function (error, ressource) {
-      if (error) next(error)
-      else if (ressource) {
-        ressource.delete(function (error) {
-          if (error) next(error)
-          else {
-            $cacheRessource.delete(oid)
-            log.debug("La ressource " +oid + " a été effacée")
-            next(null, 1)
-          }
-        })
-      } else {
-        log.debug("La ressource " +oid +" n'existait pas, on a rien effacé")
-        next(null, 0)
-      }
-    })
-  }
-
-  /**
-   * Efface l'entity par son idOrigine
-   * @param {string} origine
-   * @param {Integer} idOrigine
-   * @param {Function} next La callback qui sera appelée en lui passant (error, nbObjects, nbIndexes)
-   * @returns {undefined}
-   */
-  $ressourceRepository.delByOrigine = function(origine, idOrigine, next) {
-    log.debug("La ressource " +origine +'/' +idOrigine + " va être effacée")
-    Ressource
-        .match('origine').equals(origine)
-        .match('idOrigine').equals(idOrigine)
-        .delete(function(error, nbObjects, nbIndexes) {
-          if (nbObjects) {
-            if (nbObjects > 1) {
-              log.error(new Error("On avait " +nbObjects +" exemplaires de " +origine +'/' +idOrigine) +' (tous effacés)')
-            }
-            log.debug("La ressource " + origine + '/' + idOrigine + " a été effacée (" + nbIndexes + " indexes)")
-          }
-          next(error, nbObjects, nbIndexes)
-        })
-    // et on efface le cache
-    $cacheRessource.deleteByOrigine(origine, idOrigine)
+  $ressourceRepository.delete = function(ressource, next) {
+    if (ressource && ressource.oid) {
+      log.debug("La ressource " + ressource.oid + " va être effacée")
+      ressource.delete(function (error) {
+        // on vire du cache de toute façon
+        $cacheRessource.delete(ressource.oid)
+        if (error) {
+          next(error)
+        } else {
+          log.debug("La ressource " + ressource.oid + ' (' + ressource.oid + ") a été effacée")
+          next()
+        }
+      })
+    } else {
+      next(new Error("delete appelé sans ressource"))
+    }
   }
 
   /**
@@ -415,37 +386,26 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
 
   /**
    * Récupère un liste de ressource d'après critères
-   * @param {string}   [visibilite=public] peut valoir public|prof|perso|tout
-   * @param {Context}  [context]     facultatif si visibilite n'est pas précisé
-   * @param {Object}   options Un objet (ou son json) avec éventuellement les propriétés
-   *                             filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
-   *                                       où valeur peut être undefined ou un tableau de valeurs
-   *                                       (si non précisé filtrera sur les ressources ayant cet index)
-   *                             orderBy : L'index sur lequel trier
-   *                             order   : asc ou desc
-   *                             start   : L'indice de la 1re valeur à remonter
-   *                             nb      : Le nombre de ressources à remonter
-   * @param {Function} next    La callback qui sera appelée en lui passant la liste de ressources en argument
+   * @param {string}   visibilite peut valoir public | correction | all | auteur/id | groupe/nom
+   * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
+   *                                filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
+   *                                          où valeur peut être undefined ou un tableau de valeurs
+   *                                          (si non précisé filtrera sur les ressources ayant cet index)
+   *                                orderBy : L'index sur lequel trier
+   *                                order   : asc ou desc
+   *                                start   : L'indice de la 1re valeur à remonter
+   *                                nb      : Le nombre de ressources à remonter
+   * @param {Function} next       La callback qui sera appelée en lui passant la liste de ressources en argument
    */
-  $ressourceRepository.getListe = function(visibilite, context, options, next) {
+  $ressourceRepository.getListe = function(visibilite, options, next) {
     try {
       // on normalise les arguments
       var publicOnly
 
-      if (arguments.length < 4) {
-        if (arguments.length == 3) throw new Error("nombre d'arguments incorrect")
-        // 2 args
-        options = visibilite
-        next = context
-        publicOnly = true
-      } else if (visibilite === 'public') {
-        publicOnly = true
-      } else {
-        publicOnly = false
-      }
+      if (arguments.length < 3) throw new Error("nombre d'arguments incorrect")
 
-      // on converti si json si besoin
-      if (options && _.isString(options)) {
+      // on converti le json si besoin
+      if (_.isString(options)) {
         try {
           options = JSON.parse(options)
         } catch (error) {
@@ -470,14 +430,20 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
           if (filter.index !== 'restriction') optionsSafe.filters.push(filter)
         })
 
-      } else optionsSafe.filters.push({index: 'idOrigine'}) // donc tous, mais faut un argument à match
+      } else {
+        // donc tous, mais faut un argument à match
+        optionsSafe.filters.push({index: 'idOrigine'})
+      }
       // le reste
       if (options.orderBy && !_.isString(options.orderBy)) throw new Error('orderBy invalide')
       optionsSafe.orderBy = options.orderBy || 'oid'
       if (options.order === 'desc') optionsSafe.order = 'desc'
       start = parseInt(options.start, 10) || 0
       nb = parseInt(options.nb, 10) || 10
-      if (nb > limitMax) nb = limitMax
+      if (nb > limitMax) {
+        log.error(new Error("nb de résultats demandés supérieur à la limite max " +nb +'>' +limitMax))
+        nb = limitMax
+      }
 
       // si on est toujours là on peut construire la requete
       var query = Ressource
@@ -489,29 +455,26 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         } else query = query.match(filter.index)
       })
 
-      // restriction d'après les droits
-      if (publicOnly) {
+      // restriction d'après la visibilité
+      if (visibilite == 'public') {
         query = query.match('restriction').equals(0)
-
-      } else if (visibilite == 'prof') {
-        if (!$accessControl.hasPermission('corrections', context)) {
-          throw new Error("Vous n'avez pas les droits suffisants pour consulter ces ressources")
+      } else if (visibilite == 'correction') {
+        query = query.match('restriction').lowerThan(2)
+      } else if (visibilite.indexOf('/')) {
+        var fragments = visibilite.split('/', 2)
+        if (fragments[0] === 'auteur') {
+          query = query.match('auteurs').equals(fragments[1])
+        } else if (fragments[0] === 'groupe') {
+          query = query.match('groupes').equals(fragments[1])
+        } else {
+          throw new Error('Clé de recherche ' +visibilite +' incorrecte')
         }
-        query = query.match('restriction').equals(1)
-
-      } else if (visibilite == 'perso') {
-        if (!context.session.user || !context.session.user.oid)
-          throw new Error("Autentification nécéssaire pour consulter vos propres ressources")
-        query = query.match('auteurs').equals(context.session.user.oid)
-
-      } else if (visibilite == 'tout') {
-        if (!context.session.user.roles || !context.session.user.roles.admin)
-          throw new Error("Il faut être admin pour tout voir")
-
+      } else if (visibilite == 'all') {
+        log.debug('recherche sur tout')
       } else {
-        // on a pas mis de restriction, c'est pas normal
+        // on a pas mis de restriction, c'est pas normal, on met public
+        query = query.match('restriction').equals(0)
         log.error(new Error("Appel de getListe avec visibilite " +visibilite))
-        throw new Error("Appel de getListe incorrect")
       }
 
       // orderBy
@@ -520,12 +483,6 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
         else query = query.sort(optionsSafe.orderBy)
       }
 
-      // limit
-      if (nb > config.limites.maxSql) {
-        log.error("La limite de cette requete sql (" + nb + ") dépasse le maximum autorisé par la configuration (" +
-        config.limites.maxSql + ")")
-        nb = config.limites.maxSql
-      }
       query.grab(nb, start, function(error, ressources) {
         cacheAndNext(error, ressources, next)
       })
@@ -534,10 +491,6 @@ module.exports = function (Ressource, Archive, $ressourceControl, $accessControl
       log.debug(error)
       next(error)
     }
-  }
-
-  $ressourceRepository.update = function (ressourceInitiale, ressourceNew, next) {
-    //_.merge(ress)
   }
 
   $ressourceRepository.getLastLocalId = function (next) {

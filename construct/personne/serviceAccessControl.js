@@ -44,20 +44,6 @@ module.exports = function (Groupe, $settings, $personneRepository) {
   var $accessControl = {}
 
   /**
-   * Retourne true si le user en session a la permission générique demandée
-   * @param {Context} context
-   * @param {string} permission
-   * @returns {boolean}
-   */
-  function hasGenericPermission(permission, context) {
-    return context &&
-        context.session &&
-        context.session.user &&
-        context.session.user.permissions &&
-        context.session.user.permissions[permission]
-  }
-
-  /**
    * Helper de checkAccess pour la permission add
    * @param {Context}   context
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
@@ -246,6 +232,21 @@ module.exports = function (Groupe, $settings, $personneRepository) {
   var hasAllRights = $accessControl.hasAllRights
 
   /**
+   * Retourne true si le user en session a la permission générique demandée
+   * @param {Context} context
+   * @param {string} permission
+   * @returns {boolean}
+   */
+  $accessControl.hasGenericPermission = function(permission, context) {
+    return context &&
+           context.session &&
+           context.session.user &&
+           context.session.user.permissions &&
+           context.session.user.permissions[permission]
+  }
+  var hasGenericPermission = $accessControl.hasGenericPermission
+
+  /**
    * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
    * (ou sur toutes les ressources si ressource n'est pas fournie)
    * @param {string} permission create|read|update|delete
@@ -308,6 +309,17 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     })
 
     return permissions
+  }
+
+  /**
+   * Retourne l'oid du user courant ou undefined
+   * @param {Context} context
+   */
+  $accessControl.currentUserOid = function(context) {
+    var oid
+    if (context && context.session && context.session.user && context.session.user.oid) oid = context.session.user.oid
+
+    return oid
   }
 
   /**
