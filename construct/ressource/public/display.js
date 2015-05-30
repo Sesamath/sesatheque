@@ -70,7 +70,6 @@ var ajaxTimeout = 10000;
  * log est ajouté par init (dépend du contexte)
  */
 
-
 /**
  * Ajoute une css dans le <head> courant
  * @param {string}   file              le chemin du fichier css relatif au dossier du plugin
@@ -229,8 +228,8 @@ function getURLParameter(name) {
 function init(options) {
   // le ctx.metas.addCss('styles/ressourceDisplay.css') marche pas, on ajoute notre css ici
   w.addCss('styles/ressourceDisplay.css', true);
-  baseUrl = options.baseUrl;
-  var vbu = options.vendorsBaseUrl;
+  baseUrl = options.baseUrl || options.sesathequeBase +'/plugins';
+  var vbu = options.vendorsBaseUrl || options.sesathequeBase +'/vendors';
   // on exporte aux plugins ces fcts que l'on met dans de dom global
   /** en prod on envoie rien en console */
   if (options.isDev) w.log = log;

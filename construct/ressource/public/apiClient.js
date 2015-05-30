@@ -30,8 +30,9 @@
  */
 
 /**
- * Module pour get/set des ressources sur l'api de la bibli courante
- * Attention, les urls sont en dur et supposent que la bibliotheque est installée à la racine du domaine,
+ * Module pour get/set des ressources sur l'api de la sesatheque courante
+ * Attention, les urls sont en dur et supposent que la sesatheque est installée à la racine du domaine,
+ * 
  * il faut utiliser setPrefix() avant les autres méthodes si ce n'est pas le cas
  */
 /*global define, XMLHttpRequest */
@@ -62,13 +63,13 @@ define({
   },
   /**
    * Récupère une ressource sur la bibliothèque en ajax
-   * @param id
-   * @param next
+   * @param id peut être un oid de la sesatheque ou origine/idOrigine
+   * @param next sera appelé avec (error, ressource)
    */
   getRessource: function (id, next) {
     if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
     if (!id) return next(new Error("Il faut fournir un identifiant"));
-    if (parseInt(id, 10) != id) return next(new Error("L'identifiant fourni n'est pas un entier"));
+    if (parseInt(id, 10) != id && !id.indexOf('/')) return next(new Error("L'identifiant fourni n'est pas un entier"));
     callBibli(id, next)
   },
   /**
