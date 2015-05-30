@@ -93,7 +93,7 @@ define({
  * @private
  */
 function callBibli(data, next) {
-  var request, method, url, isGet;
+  var xhr, method, url, isGet;
 
   try {
     // post ou get ?
@@ -113,50 +113,50 @@ function callBibli(data, next) {
 
     if (typeof XMLHttpRequest !== undefined) {
       // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-      request = new XMLHttpRequest();
+      xhr = new XMLHttpRequest();
     } else {
       return next(new Error("votre navigateur ne supporte pas les appels ajax"));
     }
 
     // on prépare la requete
-    request.timeout = ajaxTimeout;
+    xhr.timeout = ajaxTimeout;
 
     // les différentes callback
-    request.onload = function () {
-      if (request.status >= 200 && request.status < 400) {
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 400) {
         try {
-          var reponse = JSON.parse(request.responseText);
+          var reponse = JSON.parse(xhr.responseText);
           next(null, reponse);
         } catch (error) {
           var errMsg = isGet ?
-              "La ressource renvoyée par la bibliotheque est invalide" :
+              "La ressource renvoyée par la bibliotheque n'est pas du json valide" :
               "La réponse du serveur n'est pas du json valide";
-          next(new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +request.responseText));
+          next(new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText));
         }
       } else {
         // On a une réponse mais c'est une erreur
         // il faudra gérer les 301 & 302 éventuels, mais pour le moment l'api n'en renvoie pas
-        next(new Error('Error ' + request.status + ' : ' + request.responseText));
+        next(new Error('Error ' + xhr.status + ' : ' + xhr.responseText));
       }
     };
 
-    request.onerror = function () {
+    xhr.onerror = function () {
       // Pb de connexion au serveur
       var errMsg = "Le serveur a renvoyé une erreur";
-      if (request.status) errMsg += ' ' +request.status;
-      errMsg += ' : ' +request.responseText;
+      if (xhr.status) errMsg += ' ' +xhr.status;
+      errMsg += ' : ' +xhr.responseText;
       next(new Error(errMsg));
     };
 
-    request.ontimeout = function () {
+    xhr.ontimeout = function () {
       next(new Error("Le serveur n'a pas répondu après " +Math.floor(timeout/1000) +"s d'attente."));
     };
 
     // et on envoie
     console.log('on va envoyer ' +method +' ' +url)
     console.log(data)
-    request.open(method, url, true);
-    request.send(data);
+    xhr.open(method, url, true);
+    xhr.send(data);
   } catch (error) {
     next(new Error("votre navigateur n'a pas fait l'appel ajax : " +error.toString()));
   }

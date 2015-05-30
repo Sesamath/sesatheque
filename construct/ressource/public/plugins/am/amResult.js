@@ -52,7 +52,6 @@
   /**
    * Retourne le code html qui affiche le bilan (ici la durée d'affichage)
    * @param {Resultat} resultat L'objet Resultat dont on veut le bilan
-   * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin
    * @returns {string} Le code html
    */
   amResult.getHtmlReponse = function (resultat) {
@@ -84,10 +83,9 @@
    * Affiche score et réponse dans un HTMLElement
    * @param resultat
    * @param element
-   * @param baseUrl
    */
-  amResult.showResult = function (resultat, element, baseUrl) {
-    var html = amResult.getHtmlReponse(resultat, baseUrl);
+  amResult.showResult = function (resultat, element) {
+    var html = amResult.getHtmlReponse(resultat);
     element.addChild(wd.createTextNode(html));
   };
 

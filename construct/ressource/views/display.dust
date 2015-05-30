@@ -25,7 +25,7 @@ Chargement en cours</div>
             display.load(
                 {ressource|s},
                 {
-                    baseUrl : '{pluginBaseUrl}',
+                    pluginBaseUrl : '{pluginBaseUrl}',
                     vendorsBaseUrl: '{vendorsBaseUrl}',
                     pluginName: '{pluginName}',
                     isDev :{?isDev}{isDev}{:else}false{/isDev}

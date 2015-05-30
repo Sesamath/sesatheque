@@ -81,7 +81,7 @@ define(['swfobject'], function () {
     }
 
     // Ajout css
-    if (options.baseUrl) addCss('mep.css'); // si on a pas tant pis pour le css
+    if (options.baseUrl) addCss(options.baseUrl +'mep.css'); // si on a pas tant pis pour le css
     container.className = cssClass;
 
     // le message en attendant le chargement
@@ -110,23 +110,22 @@ define(['swfobject'], function () {
     else container.setAttribute("width", largeur + 'px'); // marche pas avec chrome ou ff
 
     /** @see http://redmine.sesamath.net/projects/alibaba/wiki/ExosMep pour les flashvars à passer */
-      // les flashvars pour le swf obligatoires à tous
-    flashvars = {
-      idMep            : Number(ressource.idOrigine),
-      modeleMep        : (params.mep_modele === "mep1") ? "1" : "2",
-      abreviationLangue: params.mep_langue_id,
-      idSwf            : idSwf,
+    flashvars = options.flashvars || {};
+      // ces flashvars pour le swf sont obligatoires et on les impose ici
+    flashvars.idMep             = Number(ressource.idOrigine);
+    flashvars.modeleMep         = (params.mep_modele === "mep1") ? "1" : "2";
+    flashvars.abreviationLangue = params.mep_langue_id;
+    flashvars.idSwf             = idSwf;
       // si n on a pas de chiffrement de la réponse qui sera une string au format "vrrp..."
       // (sinon c'est un nombre qui correspond à cette réponse chiffrée)
       // et la propriété score est ajoutée (un entier donnant le nb de bonnes réponses)
-      ch               : options.ch || 'n'
-    };
+    flashvars.ch                = options.ch || 'n';
     // ensuite le facultatif si présent
     if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;
-    if (params.aide_id) flashvars.idAide = Number(params.aide_id);
-    if (params.aide_formateur) flashvars.isBoutonAide = params.aide_formateur;
+    if (params.aide_id)         flashvars.idAide        = Number(params.aide_id);
+    if (params.aide_formateur)  flashvars.isBoutonAide  = params.aide_formateur;
     // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
-    if (params.nb_wnk) flashvars.mep_nb_wnk = params.nb_wnk;
+    if (params.nb_wnk)          flashvars.mep_nb_wnk    = params.nb_wnk;
 
     // traitement du résultat éventuel (il faudra que l'appelant passe un idUtilisateur)
     if (options.saveResultat) {
