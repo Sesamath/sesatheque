@@ -148,10 +148,12 @@ define({
    * @param options
    */
   load: function (ressource, options) {
-    log('display.load avec la ressource', ressource)
-    log('et les options', options);
+    console.log('display.load appelé avec les options')
+    console.log(options)
     // init du dom
     init(options);
+    log('display.load avec la ressource', ressource)
+    log('et les options', options);
 
     // tente de charger le plugin du type de ressource
     var name = options.pluginName;
@@ -228,8 +230,10 @@ function getURLParameter(name) {
 function init(options) {
   // le ctx.metas.addCss('styles/ressourceDisplay.css') marche pas, on ajoute notre css ici
   w.addCss('styles/ressourceDisplay.css', true);
-  baseUrl = options.baseUrl || options.sesathequeBase +'/plugins';
-  var vbu = options.vendorsBaseUrl || options.sesathequeBase +'/vendors';
+  if (!options.baseUrl &&  options.sesathequeBase) options.baseUrl = options.sesathequeBase +'/plugins';
+  if (!options.vendorsBaseUrl &&  options.sesathequeBase) options.vendorsBaseUrl = options.sesathequeBase +'/vendors';
+  baseUrl = options.baseUrl;
+  var vbu = options.vendorsBaseUrl;
   // on exporte aux plugins ces fcts que l'on met dans de dom global
   /** en prod on envoie rien en console */
   if (options.isDev) w.log = log;

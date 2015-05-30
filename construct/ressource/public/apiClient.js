@@ -60,6 +60,7 @@ define({
    */
   setPrefix: function (bibliPrefix) {
     prefix = bibliPrefix;
+    if (prefix.substr(-1) !== '/') prefix += '/';
   },
   /**
    * Récupère une ressource sur la bibliothèque en ajax
@@ -69,8 +70,7 @@ define({
   getRessource: function (id, next) {
     if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
     if (!id) return next(new Error("Il faut fournir un identifiant"));
-    if (parseInt(id, 10) != id && !id.indexOf('/')) return next(new Error("L'identifiant fourni n'est pas un entier"));
-    callBibli(id, next)
+    callBibli({id:id}, next);
   },
   /**
    * Enregistre une ressource sur la bibliotheque
@@ -80,7 +80,7 @@ define({
   setRessource: function (ressource, next) {
     if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
     if (!ressource) return next(new Error("Il faut fournir une ressource"));
-    if (!ressource.titre || !ressource.categories) return next(new Error("Ressource invalide"));
+    if (!ressource.titre || !ressource.categories) return next(new Error("Ressource invalide (titre et categories sont obligatoires)"));
     callBibli(ressource, next);
   }
 })
@@ -95,24 +95,29 @@ define({
 function callBibli(data, next) {
   var request, method, url, isGet;
 
-  // post ou get ?
-  if (data.hasOwnProperty('titre')) {
-    isGet = true;
-    method = 'GET';
-    url = prefix + 'api/ressource/' + data.oid;
-  } else {
-    isGet = false;
-    method = 'POST';
-    url = prefix + 'api/ressource/';
-  }
-
-  if (typeof XMLHttpRequest !== undefined) {
-    // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-    request = new XMLHttpRequest();
-  } else {
-    return next(new Error("votre navigateur ne supporte pas les appels ajax"));
-  }
   try {
+    // post ou get ?
+    if (data.hasOwnProperty('titre')) {
+      isGet = false;
+      method = 'POST';
+      url = prefix + 'api/ressource/';
+    } else {
+      isGet = true;
+      method = 'GET';
+      var id = data.oid || data.id;
+      if (!id && data.origine && data.idOrigine) id = data.origine +'/' +data.idOrigine;
+      if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (propriétés oid ou id ou origine+idOrigine");
+      url = prefix + 'api/ressource/' + id;
+      data = {};
+    }
+
+    if (typeof XMLHttpRequest !== undefined) {
+      // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+      request = new XMLHttpRequest();
+    } else {
+      return next(new Error("votre navigateur ne supporte pas les appels ajax"));
+    }
+
     // on prépare la requete
     request.timeout = ajaxTimeout;
 
@@ -126,7 +131,7 @@ function callBibli(data, next) {
           var errMsg = isGet ?
               "La ressource renvoyée par la bibliotheque est invalide" :
               "La réponse du serveur n'est pas du json valide";
-          next(new Error(errMsg +' : ' +request.responseText));
+          next(new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +request.responseText));
         }
       } else {
         // On a une réponse mais c'est une erreur
@@ -148,9 +153,11 @@ function callBibli(data, next) {
     };
 
     // et on envoie
+    console.log('on va envoyer ' +method +' ' +url)
+    console.log(data)
     request.open(method, url, true);
     request.send(data);
   } catch (error) {
-    next(new Error("votre navigateur ne supporte pas les appels ajax, erreur : " +error.toString()));
+    next(new Error("votre navigateur n'a pas fait l'appel ajax : " +error.toString()));
   }
 }
