@@ -82,7 +82,7 @@ module.exports = function (controller, Personne, $personneRepository, $accessCon
      log.error(new Error('une trace pour ' +reqHttp)) */
     if (context.perf) {
       var msg = 'start-pers-' + context.post.id
-      log.perf(context, msg)
+      log.perf(context.response, msg)
     }
     //log.debug('post /api/personne a reçu', context.post, 'api', {max: 1000})
     log.debug('post /api/personne a reçu', context.post, 'api')

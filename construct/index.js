@@ -154,112 +154,150 @@ sesatheque.config(function($cache, $settings) {
 })
 
 /**
- * On ajoute nos middleware (CORS, expires et access.log) après cookie
+ * On ajoute nos middleware
  * @param {Object} rail le rail express
  * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
  */
 lassi.on('afterRailUse', function (rail, name) {
   // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
-  if (name === 'cookie') {
-    /**
-     * En dev, ajout des requetes http en console et dans le log de debug
-     */
-    if (!isProd) {
-      rail.use('/', function(req, res, next) {
-        // les requetes non statiques en console et debug
-        if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
-          log(req.method +' ' +req.originalUrl)
-          log.debug(req.method +' ' +req.originalUrl)
-        }
-        next()
-      })
-    }
-
-    /**
-     * Ajout du CORS
-     */
-    lassi.log('$rail', "app is adding", "cors".blue.underline, "middleware")
-    rail.use('/', function(req, res, next) {
-      var origin = req.header('Origin')
-      if (origin) {
-        // le public est mis en cache, on autorise pour tout le monde (sinon faut filtrer sur varnish)
-        if (tools.isStaticOrPublicApi(req.url)) res.header('Access-Control-Allow-Origin', '*')
-        else {
-          // ça dépend de l'appelant
-          if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin)) {
-            res.header('Access-Control-Allow-Origin', origin)
-            res.header('Access-Control-Allow-Credentials', 'true')
-            res.header("Access-Control-Allow-Headers", "X-Requested-With")
-          } else if (origin.substr(0, 4) !== 'http') {
-            // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
-            res.header('Access-Control-Allow-Origin', '*')
-            res.header('Access-Control-Allow-Credentials', 'true')
-            res.header("Access-Control-Allow-Headers", "X-Requested-With")
-          } else {
-            log('cors avec ' + origin +' refusé')
-          }
-        }
-      }
-      next()
-    })
-
-    /**
-     * headers expires sur le statique ou le json public
-     * @todo le mettre aussi sur le html public (quand le source sera indépendant de la session)
-     */
-    lassi.log('$rail', "app is adding", "expires".blue.underline, "middleware")
-    rail.use('/', function(req, res, next) {
-      if (tools.isStaticOrPublicApi(req.url)) {
-        // faut mettre ça au format de la RFC 1123
-        res.header('Expires', moment().utc().add(staticTtl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
-        res.header('Cache-Control', 'public, max-age=' +staticTtl)
-        // @todo regarder If-Modified-Since et répondre 304 Not Modified si c'est le cas
-        // mais c'est vraiment pas très urgent si on a un varnish devant nous il le gère
-      }
-      next()
-    })
-
-    /**
-     * access.log
-     */
-    var accessLog = settings.logs.dir +'/' +settings.logs.access
-    try {
-      var logAccessWriteStream = fs.createWriteStream(accessLog, {'flags': 'a'});
-      if (logAccessWriteStream) {
-        // et la fermeture du log
-        lassi.on('shutdown', function () {
-          logAccessWriteStream.end()
-        })
-        lassi.log('$rail', "app is adding", "access.log".blue.underline, "middleware with " + accessLog)
-        var format = ':moment :method :url :status :response-time ms - :res[content-length]'
-        var options = {
-          skip  : function (req) {
-            var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
-            var i = req.url.lastIndexOf('.')
-            var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
-            return (suffix && excluded.indexOf(suffix) > -1)
-          },
-          stream: logAccessWriteStream
-        }
-        morgan.token('moment', function () {
-          return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
-        })
-        // en dev on ajoute les var postées
-        if (settings.application.staging === 'dev') {
-          morgan.token('post', function (req) {
-            return (_.isEmpty(req.body)) ? '' : tools.stringify(req.body)
-          })
-          format += ' :post'
-        }
-        rail.use('/', morgan(format, options))
-      } else {
-        lassi.log('$rail', "Impossible d'ouvrir le log " +accessLog)
-      }
-    } catch(error) {
-      console.log(error.stack)
-    }
-  }
+  if (name === 'session') afterRailSession(rail)
 })
+
+/**
+ * Ajoute sur le rail les requetes en console (en dev), CORS, expires, access.log et perf.log
+ * @param {Object} rail le rail express
+ */
+function afterRailSession(rail) {
+  /**
+   * En dev, ajout des requetes http en console et dans le log de debug
+   */
+  if (!isProd) {
+    lassi.log('$rail', "app is adding", "request log".blue.underline, "middleware (dev only)")
+    rail.use('/', function(req, res, next) {
+      // les requetes non statiques en console et debug
+      if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
+        log(req.method +' ' +req.originalUrl)
+        log.debug(req.method +' ' +req.originalUrl)
+      }
+      next()
+    })
+  }
+
+  /**
+   * Ajout du CORS
+   */
+  lassi.log('$rail', "app is adding", "cors".blue.underline, "middleware")
+  rail.use('/', function(req, res, next) {
+    var origin = req.header('Origin')
+    if (origin) {
+      // le public est mis en cache, on autorise pour tout le monde (sinon faut filtrer sur varnish)
+      if (tools.isStaticOrPublicApi(req.url)) res.header('Access-Control-Allow-Origin', '*')
+      else {
+        // ça dépend de l'appelant
+        if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin)) {
+          res.header('Access-Control-Allow-Origin', origin)
+          res.header('Access-Control-Allow-Credentials', 'true')
+          res.header("Access-Control-Allow-Headers", "X-Requested-With")
+        } else if (origin.substr(0, 4) !== 'http') {
+          // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
+          res.header('Access-Control-Allow-Origin', '*')
+          res.header('Access-Control-Allow-Credentials', 'true')
+          res.header("Access-Control-Allow-Headers", "X-Requested-With")
+        } else {
+          log('cors avec ' + origin +' refusé')
+        }
+      }
+    }
+    next()
+  })
+
+  /**
+   * headers expires sur le statique ou le json public
+   * @todo le mettre aussi sur le html public (quand le source sera indépendant de la session)
+   */
+  lassi.log('$rail', "app is adding", "expires".blue.underline, "middleware")
+  rail.use('/', function(req, res, next) {
+    if (tools.isStaticOrPublicApi(req.url)) {
+      // faut mettre ça au format de la RFC 1123
+      res.header('Expires', moment().utc().add(staticTtl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
+      res.header('Cache-Control', 'public, max-age=' +staticTtl)
+      // @todo regarder If-Modified-Since et répondre 304 Not Modified si c'est le cas
+      // mais c'est vraiment pas très urgent si on a un varnish devant nous il le gère
+    }
+    next()
+  })
+
+  /**
+   * access.log (mis sur le rail relativement au début mais il utilise on-finished pour écrire à la fin)
+   */
+  var accessLog = settings.logs.dir +'/' +settings.logs.access
+  try {
+    var logAccessWriteStream = fs.createWriteStream(accessLog, {'flags': 'a'});
+    if (logAccessWriteStream) {
+      // et la fermeture du log
+      lassi.on('shutdown', function () {
+        logAccessWriteStream.end()
+      })
+      /** le format morgan */
+      var format = ':moment :method :url :status :res[content-length] :response-time ms'
+      // def de notre token moment
+      morgan.token('moment', function () {
+        return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
+      })
+      /** Les options morgan */
+      var options = {
+        skip  : function (req) {
+          var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
+          var i = req.url.lastIndexOf('.')
+          var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
+          return (suffix && excluded.indexOf(suffix) > -1)
+        },
+        stream: logAccessWriteStream
+      }
+      // en dev on ajoute les var postées
+      if (settings.application.staging === 'dev') {
+        morgan.token('post', function (req) {
+          return (_.isEmpty(req.body)) ? '' : tools.stringify(req.body)
+        })
+        format += ' :post'
+      }
+      lassi.log('$rail', "app is adding", "access.log".blue.underline, "middleware with " + accessLog)
+      rail.use('/', morgan(format, options))
+    } else {
+      lassi.log('$rail', "Impossible d'ouvrir le log " +accessLog)
+    }
+  } catch(error) {
+    console.log(error.stack)
+  }
+
+
+  /**
+   * perf.log
+   */
+  if (log.perf.out) {
+    // on veut logger les perfs, on ajoute response.perf, msg sera écrit dans le log après les contrôleurs
+    lassi.log('$rail', "app is adding", "perf.log".blue.underline, "middleware")
+    rail.use('/', function(request, response, next) {
+      response.perf = {
+        // message stocké en context qui sera écrit dans le listener beforeTransport
+        msg  : request.method +' ' +request.originalUrl,
+        start: log.getElapsed(0)
+      }
+      // on est après body-parser (-2 pour le {} ajouté au stringify)
+      //if (request.body) response.perf.msg += '\treceived: ' +(tools.stringify(request.body).length -2)
+      var received = request.headers['content-length']
+      if (received) response.perf.msg += '\treceived: ' +received
+      // on peut pas mettre de middleware après les controlleur, car response.end() sera appelé et les middleware ignorés
+      // on ajoute donc un listener sur finish (appelé sans arguments, et c'est le seul event de response)
+      response.on('finish', function () {
+        var cl = this.get('Content-Length')
+        if (cl) response.perf.msg += '\tsent:' +cl
+        log.perf.out(response)
+      })
+      next()
+    })
+  }
+}
 
 // et on lance le boot
 sesatheque.bootstrap()

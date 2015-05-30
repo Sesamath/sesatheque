@@ -50,7 +50,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var _ = require('lodash')
   var flow = require('seq')
 
-  //var tools = require('../tools')
+  var tools = require('../tools')
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
@@ -134,6 +134,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       context.json({error: error})
     } else {
       log.debug('sendJson va renvoyer', data, 'api')
+      // pas la peine de faire le stringify pour rien, on teste avant
+      // if (log.perf.out) log.perf(context.response, 'jsonSentLength ' +tools.stringify(data).length, true)
+      // commenté car Content-Length dispo dans le onFinish, sauf 204 et 304 (logique)
       context.json(data)
     }
   }
@@ -209,7 +212,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (error) {
       sendJson(context, error)
     } else {
-      if (context.perf) log.perf(context, 'loaded')
+      log.perf(context.response, 'loaded')
       // attention, le merge de lodash n'est pas récursif et n'écrase que les propriétés qui existent en destination
       _.merge(ressourceBdd, ressourceNew)
       if (final) final(context, ressourceBdd)
@@ -336,7 +339,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         //log.errorData(lassi.tmp[context.post.oid].m)
         if (error) sendJson(context, error)
         else {
-          if (context.perf) log.perf(context, 'written')
+          log.perf(context.response, 'written')
           if (context.get.format === 'ref') {
             // on veut une ref en réponse
             sendRef(context, null, ressource)
@@ -375,7 +378,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var msg = 'start-'
       if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
       else msg += context.post.oid
-      log.perf(context, msg)
+      log.perf(context.response, msg)
     }
     // 1s ne suffit pas toujours en local, à cause d'insert mysql très lents, on met 2s dans le listener
 
@@ -418,7 +421,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var msg = 'start-'
       if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
       else msg += context.post.oid
-      log.perf(context, msg)
+      log.perf(context.response, msg)
     }
     log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
     var relations = context.post.relations
@@ -608,7 +611,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post('arbre', function (context) {
     var partial = context.post.ref && !context.post.enfants
     var oid = parseInt(context.post.ref, 10) || 0
-    if (context.perf) log.perf(context, 'start-' +oid)
+    log.perf(context.response, 'start-' +oid)
     log.debug('post avec populate ' + context.get.populate)
 
     // si on passe ?populate=1 dans l'url on parse les enfants pour récupérer titre et type

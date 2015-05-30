@@ -123,8 +123,8 @@ var settings = {
 if (localConfig) tools.merge(settings, localConfig)
 
 // on enlève le debug mysql en prod
-if (settings.application.staging === 'production' && settings.$entities.database.connection.debug) {
-  delete settings.$entities.database.connection.debug
+if (settings.application.staging === 'production' && settings.$entities.database.debug) {
+  delete settings.$entities.database.debug
 }
 
 // Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,

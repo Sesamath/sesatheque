@@ -185,16 +185,24 @@ log.debug = logDebug
 
 if (config.logs.perf) {
   perfOutputStream = getLogStream(config.logs.perf)
-  log.perf = function (context, strToAdd) {
-    if (context.perf) {
-      if (context.perf.msg) context.perf.msg += '\t'
-      context.perf.msg += strToAdd +' ' +log.getElapsed(context.perf.start)
+  out('start log (démarrage appli)', null, null, perfOutputStream)
+  /**
+   * Ajoute une chaine avec un timer (depuis la réception de la requete) au message de perf courant
+   * @param response
+   * @param strToAdd
+   * @param {boolean} [noTimer=false] passer true pour ne pas ajouter la mesure de temps
+   */
+  log.perf = function (response, strToAdd, noTimer) {
+    var timer = !noTimer
+    if (response.perf && response.perf.msg) {
+      response.perf.msg += '\t' +strToAdd
+      if (timer) response.perf.msg += ' ' +log.getElapsed(response.perf.start)
     }
   }
-  log.perf.out = function (context) {
-    if (context.perf) {
-      log.perf(context, 'end')
-      out(context.method +' ' +context.request.originalUrl +' ' +(context.status||'000') +'\t' +context.perf.msg, null, null, perfOutputStream)
+  log.perf.out = function (response) {
+    if (response.perf) {
+      log.perf(response, 'end')
+      out((response.statusCode||'000') +'\t' +response.perf.msg, null, null, perfOutputStream)
     }
   }
 } else {

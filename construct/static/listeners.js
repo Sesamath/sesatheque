@@ -36,15 +36,16 @@ module.exports = function($flashMessage) {
   var _ = require('lodash')
   var tools = require('../tools')
 
-  /**
-   * Le listener sur afterRailUse est dans construct/index.js (il ajoute la gestion de CORS
-   * et en dev ajoute les requêtes http en console
+  /********************************************************************************************************
+   * Le listener sur afterRailUse est dans construct/index.js car il ajoute des trucs au rail (CORS & logs)
    */
 
   /**
-   * Le listener de l'event beforeTransport, pour gérer les pages d'erreur et ajouter les msg flash
+   * Gére les pages d'erreur et ajoute les msg flash
+   * @param context
+   * @param data
    */
-  lassi.on('beforeTransport', function(context, data) {
+  function beforeTransportListener(context, data) {
     var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
     var isApi = (context.request.originalUrl.substr(0, 5) === '/api/')
     var isHtml = (context.contentType === 'text/html')
@@ -140,17 +141,14 @@ module.exports = function($flashMessage) {
       if (flashData) _.merge(data, flashData)
     }
 
-    // et la mesure de perf dans le log
-    if (context.perf && context.perf.msg) log.perf.out(context)
     log('fin de beforeTransport avec les data', data, 'beforeTransport', {trim:5000})
-  })
+  }
 
   /**
-   * Listener context pour
-   * - utiliser le controleur public si on est pas authentifié et qu'il n'y a pas de token
-   * - mesure de perf (si on a précisé un log de perf dans la conf)
+   * Modifie request pour utiliser le controleur public si on est pas authentifié et qu'il n'y a pas de token
+   * (on gagnerait à mettre ça dans varnish mais faudrait des routes ≠ pour les requetes authentifiées)
    */
-  lassi.on('context', function(context) {
+  function contextListener(context) {
     // on passe par les contrôleurs public si on a pas de user en session
     if (!context.session.user && !context.request.header('X-ApiToken')) {
       try {
@@ -161,12 +159,9 @@ module.exports = function($flashMessage) {
         }
       } catch(error) { }
     }
-    // on ajoute la mesure de perfs si on le réclame
-    if (log.perf.out) {
-      context.perf = {
-        msg  : '', // message envoyé à log.debug() dans le listener beforeTransport
-        start: log.getElapsed(0)
-      }
-    }   
-  })
+  }
+
+  lassi.on('beforeTransport', beforeTransportListener)
+
+  lassi.on('context', contextListener)
 }
