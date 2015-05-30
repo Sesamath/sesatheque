@@ -404,7 +404,7 @@
       // tente de charger le plugin du type de ressource
       var name = ressource.typeTechnique;
       var modules = [name];
-      var traiteResultat = getURLParameter("urlScoreCallback");
+      var traiteResultat = getURLParameter("urlScoreCallback") || options.urlScoreCallback;
       if (!traiteResultat && options.saveResultat) traiteResultat = options.saveResultat;
       if (traiteResultat) modules.push('Resultat');
       require(modules, function (plugin, Resultat) {
