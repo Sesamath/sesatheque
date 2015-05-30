@@ -188,49 +188,51 @@
       }
     }
 
-    // si on nous passe une fct on la passe au suivant sans rien faire d'autre
-    if (isFunction(traiteResult)) {
-      options.saveResultat = traiteResult;
-    } else {
-      // c'est une url, on gère l'envoi
-      if (!isString(traiteResult) || traiteResult.substr(0, 4) !== 'http') {
-        throw new Error("Il faut fournir une url absolue pour envoyer des résultats");
-      }
-      if (typeof XMLHttpRequest === "undefined") {
-        // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-        throw new Error("Le navigateur ne supporte pas les appels ajax, impossible d'envoyer des résultats");
-      }
+    // vérif minimale
+    if (!isFunction(traiteResult) && !isString(traiteResult) || traiteResult.substr(0, 4) !== 'http') {
+      throw new Error("Il faut fournir une url absolue pour envoyer des résultats");
+    }
+
+    /**
+     * Envoi un résultat en ajax pour sauvegarde
+     * @param result       {object}   Le résultat à envoyer
+     * @param [retourUser] {function} La fonction à rappeler avec le retour de l'appel ajax
+     */
+    options.saveResultat = function (result, retourUser) {
       /**
-       * Envoi un résultat en ajax pour sauvegarde
-       * @param result       {object}   Le résultat à envoyer
-       * @param [retourUser] {function} La fonction à rappeler avec le retour de l'appel ajax
+       * Gère l'affichage du feedback
+       * @param retour Le retour de l'envoi du score
        */
-      options.saveResultat = function (result, retourUser) {
-        /**
-         * Gère l'affichage du feedback
-         * @param retour Le retour de l'envoi du score
-         */
-        function feedback(retour) {
-          log('feedback', retour);
-          if (retour && retour.ok && retour.ok === true) {
-            feedbackOk();
-          } else {
-            if (retour && retour.error) w.setError(retour.error);
-            feedbackKo();
-          }
-          // et on appelle retourUser si on nous l'a fourni
-          if (retourUser) retourUser(retour);
+      function feedback(retour) {
+        log('feedback', retour);
+        if (retour && retour.ok && retour.ok === true) {
+          feedbackOk();
+        } else {
+          if (retour && retour.error) w.setError(retour.error);
+          feedbackKo();
         }
+        // et on appelle retourUser si on nous l'a fourni
+        if (retourUser) retourUser(retour);
+      }
 
-        log("saveResultat", result);
-        // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
-        ["biblioName", "userOrigine", "userId"].forEach(function (paramName) {
-          var paramValue = getURLParameter(paramName);
-          if (paramValue) result[paramName] = paramValue;
-        });
-        var resultat = new Resultat(result);
-        // @todo ajouter des vérifs minimales
+      log("saveResultat", result);
+      // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
+      ["biblioName", "userOrigine", "userId"].forEach(function (paramName) {
+        var paramValue = getURLParameter(paramName);
+        if (paramValue) result[paramName] = paramValue;
+      });
+      var resultat = new Resultat(result);
+      // @todo ajouter des vérifs minimales
 
+      // si on nous a passé une fct on lui envoie le résultat
+      if (isFunction(traiteResult)) {
+        traiteResult(resultat);
+      } else {
+        // c'est une url, on gère l'envoi
+        if (typeof XMLHttpRequest === "undefined") {
+          // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+          throw new Error("Le navigateur ne supporte pas les appels ajax, impossible d'envoyer des résultats");
+        }
         // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
         var request = new XMLHttpRequest();
         // pour que le navigateur envoie les cookies
@@ -277,8 +279,8 @@
         } catch (error) {
           feedback({error: "Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
         }
-      }; // fin affectation options.saveResultat
-    } // else url
+      } // fin else ajax
+    } // fin définition options.saveResultat
   } // addSaveResultat
 
   /**
