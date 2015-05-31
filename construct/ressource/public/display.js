@@ -189,8 +189,11 @@
     }
 
     // vérif minimale
-    if (!isFunction(traiteResult) && !isString(traiteResult) || traiteResult.substr(0, 4) !== 'http') {
-      throw new Error("Il faut fournir une url absolue pour envoyer des résultats");
+    if (traiteResult && !isFunction(traiteResult) && !isString(traiteResult)) {
+      throw new Error("option de traitement du score incorrecte.");
+    }
+    if (isString(traiteResult) && traiteResult.substr(0, 4) !== 'http') {
+      throw new Error("Il faut fournir une url absolue pour envoyer des résultats.");
     }
 
     /**
