@@ -61,11 +61,11 @@ function Resultat(initObj) {
   this.id = initObj.id || undefined;
 
   /**
-   * La bibliothèque de la ressource qui a généré le résultat
+   * La sesatheque de la ressource qui a généré le résultat
    * (là où on a chargé la ressource et son plugin, ajouté par celui qui récupère le résultat)
    * @type {number|string|undefined}
    */
-  this.biblioName = initObj.biblioName|| undefined;
+  this.sesatheque = initObj.sesatheque || undefined;
 
   /**
    * L'identifiant de la ressource (dans son référentiel d'origine)
@@ -120,15 +120,10 @@ function Resultat(initObj) {
   this.reponse = initObj.reponse || reponse;
 
   /**
-   * Toute autre caractéristique du résultat, spécifique au type de ressource
-   * @type {Object}
-   */
-  this.content = (initObj.content && initObj.content instanceof Object) ? initObj.content : {};
-  /**
    * L'objet initial qu'on nous a passé
    * @type {Object}
    */
-  this.orgiginalResult = initObj;
+  this.original = initObj;
 }
 
 /**
