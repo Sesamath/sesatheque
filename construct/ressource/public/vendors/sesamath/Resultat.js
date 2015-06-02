@@ -52,7 +52,7 @@ function Resultat(initObj) {
   // on accepte une simple chaine, que l'on mettra dans la propriété reponse du résultat construit
   var reponse = (typeof initObj === 'string') ? initObj : '';
   // on s'assure d'avoir un objet
-  if (! initObj instanceof Object) initObj = {}
+  if (typeof initObj !== 'object') initObj = {}
 
   /**
    * L'identifiant du résultat, pour celui qui va le stocker

@@ -218,36 +218,38 @@
         if (retourUser) retourUser(retour);
       }
 
-      log("saveResultat", result);
-      // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
-      ["biblioName", "userOrigine", "userId"].forEach(function (paramName) {
-        var paramValue = getURLParameter(paramName);
-        if (paramValue) result[paramName] = paramValue;
-      });
+      log("saveResultat a reçu", result);
       var resultat = new Resultat(result);
+      // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
+      ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
+        var paramValue = getURLParameter(paramName) || options[paramName];
+        if (paramValue) resultat[paramName] = paramValue;
+      });
       // @todo ajouter des vérifs minimales
 
       // si on nous a passé une fct on lui envoie le résultat
       if (isFunction(traiteResult)) {
+        log('on envoie ce résultat à la fct qui nous a été passé en param', resultat);
         traiteResult(resultat);
       } else {
+        log("on va poster ce résultat vers " + traiteResult, resultat);
         // c'est une url, on gère l'envoi
         if (typeof XMLHttpRequest === "undefined") {
           // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
           throw new Error("Le navigateur ne supporte pas les appels ajax, impossible d'envoyer des résultats");
         }
         // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-        var request = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
         // pour que le navigateur envoie les cookies
-        request.withCredentials = true;
+        xhr.withCredentials = true;
 
 
-        request.timeout = ajaxTimeout;
+        xhr.timeout = ajaxTimeout;
         // les différentes callback
-        request.onload = function () {
-          if (request.status >= 200 && request.status < 400) {
+        xhr.onload = function () {
+          if (xhr.status >= 200 && xhr.status < 400) {
             try {
-              var retour = JSON.parse(request.responseText);
+              var retour = JSON.parse(xhr.responseText);
               feedback(retour);
             } catch (error) {
               feedback({error: "La réponse de l'enregistrement du résultat est invalide"});
@@ -256,17 +258,17 @@
             // On a une réponse mais c'est une erreur
             feedback({
               error: "La réponse de l'enregistrement du résultat est une erreur " +
-                     request.status + ' : ' + request.responseText
+                     xhr.status + ' : ' + xhr.responseText
             });
           }
         };
 
-        request.onerror = function () {
+        xhr.onerror = function () {
           // Pb de connexion au serveur
           feedback({error: "Impossible d'envoyer le résultat (à " + traiteResult + ")"});
         };
 
-        request.ontimeout = function () {
+        xhr.ontimeout = function () {
           feedback({
             error: "Pas de réponse de l'enregistrement du résultat après " +
                    Math.floor(ajaxTimeout / 1000) + "s d'attente."
@@ -274,11 +276,10 @@
         };
 
         // et on envoie
-        log("on poste à " + traiteResult, resultat);
-        request.open('POST', traiteResult, true);
-        request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.open('POST', traiteResult, true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
         try {
-          request.send(JSON.stringify(resultat));
+          xhr.send(JSON.stringify(resultat));
         } catch (error) {
           feedback({error: "Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
         }

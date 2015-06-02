@@ -266,8 +266,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
           if (enfant.contenu) newEnfant.contenu = enfant.contenu
           if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
-          // visiblement seq casse les références,
-          // on affecte directement à la variable parent restée hors du flux
+          // visiblement seq casse les références, on affecte directement à la variable parent restée hors du flux
           parent.enfants[enfantIndex] = newEnfant
         } else {
           // sinon on laisse en l'état mais on logue
