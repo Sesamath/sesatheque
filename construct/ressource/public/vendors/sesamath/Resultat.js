@@ -124,6 +124,11 @@ function Resultat(initObj) {
    * @type {Object}
    */
   this.content = (initObj.content && initObj.content instanceof Object) ? initObj.content : {};
+  /**
+   * L'objet initial qu'on nous a passé
+   * @type {Object}
+   */
+  this.orgiginalResult = initObj;
 }
 
 /**

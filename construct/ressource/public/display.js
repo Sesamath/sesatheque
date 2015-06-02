@@ -158,9 +158,9 @@
 
   /**
    * Ajoute une méthode saveResultat aux options si besoin
-   * @param {object}   options      L'objet sur lequel on ajoutera la methode saveResultat
-   * @param {string|function} traiteResult   L'url vers laquelle poster, ou une fct de callback
-   * @param Resultat    {function} Le constructeur Resultat
+   * @param {object}          options      L'objet sur lequel on ajoutera la methode saveResultat
+   * @param {string|function} traiteResult L'url vers laquelle poster, ou une fct de callback
+   * @param {function}        Resultat     Le constructeur Resultat
    */
   function addSaveResultat(options, traiteResult, Resultat) {
     /*global XMLHttpRequest*/
