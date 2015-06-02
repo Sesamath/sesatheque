@@ -73,3 +73,9 @@ Il faut envoyer un objet avec les propriétés (toutes facultatives)
 * POST   /api/arbre         Permet d'enregistrer une ressource en passant un json au format [Arbre](Arbre.html)
 * GET    /api/arbre/:id     Récupère la ressource :id au format Arbre
 
+### Scripts
+
+Regarder le contenu du dossier script pour voir la liste des tâches automatisées
+(lancer l'appli, la déployer, la tester, générer la doc, etc.)
+
+Il y a aussi le dossier tasks avec les tâches d'import (à priori spécifique à l'instance sesatheque de Sésamath)

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -u
+
+dirInitial="$PWD"
+dirApp=$(dirname $0)/../
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  local exitCode=${1:-0}
+  echo "Lance les tests"
+  echo "Une option obligatoire parmi"
+  echo "  -a : tous les tests"
+  echo "  -h : afficher cette aide"
+  echo "  -p : tests de l'api"
+  echo "  -u : tests unitaires"
+  echo " pour lancer individuellement un seul test, utiliser la commande 'mocha path/to/fileTest.js'"
+  exit $exitCode
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+cd "$dirApp"
+
+# sans options on l'aide
+[ $# -lt 1 ] && usage
+
+# check des options
+while getopts "ahpu" OPTION
+do
+  case $OPTION in
+    a) mocha --recursive test;;
+    h) usage;;
+    p) mocha --recursive test/api;;
+    s) mocha --recursive test/tools;;
+    *) usage 1;;
+  esac
+done
+
+fin

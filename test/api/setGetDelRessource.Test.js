@@ -29,6 +29,13 @@
  * pour une explication en français)
  */
 
+/**
+ * Ce test crée une ressource puis la supprime
+ * l'appeler directement en lui passant --prod ou --dev pour tester la bibliotheque de prod ou dev
+ * ou --token pour lui passer un token
+ *
+ */
+
 'use strict'
 /*global describe,it*/
 
@@ -39,10 +46,19 @@ var request = require('request')
 
 var config = require('../../config')
 var apiToken = config.apiTokens[0]
+if (process.argv.indexOf('--token') > -1) {
+  apiToken = process.argv[process.argv.indexOf('--token')]
+}
 var urlBibli = 'http://'
-urlBibli += config.$server && config.$server.hostname || 'localhost'
-urlBibli += ':'
-urlBibli += config.$server && config.$server.port || '3000'
+if (process.argv.indexOf('--prod') > -1) {
+  urlBibli += 'bibliotheque.sesamath.net'
+} else if (process.argv.indexOf('--dev') > -1) {
+  urlBibli += 'bibliotheque.devsesamath.net'
+} else {
+  urlBibli += config.$server && config.$server.hostname || 'localhost'
+  urlBibli += ':'
+  urlBibli += config.$server && config.$server.port || '3000'
+}
 urlBibli += '/api/ressource'
 
 
@@ -61,12 +77,22 @@ var ressTest = {
   // typePedagogiques
   // typeDocumentaires
   relations:[[1,1],[14,2]],
-  parametres:{foo:'bar'} // ajouter des vrais params pour tester le display
+  parametres:{foo:'bar'}, // ajouter des vrais params pour tester le display
+  publie : false
   // auteurs
   // contributeurs
   // langue
-  // publie
   // indexable, restriction, dateCreation, dateMiseAJour, version, archiveOid
+}
+
+function logInfo() {
+  var arg
+  var prefix = '        '
+  for (var i = 0; i < arguments.length; i++) {
+    arg = arguments[i]
+    if (typeof arg === 'string') arg = prefix +arg
+    console.log(arg)
+  }
 }
 
 describe('api set', function () {
@@ -79,11 +105,12 @@ describe('api set', function () {
       json   : true,
       body   : ressTest
     }
+    logInfo('on va poster vers ' +urlBibli)
     request.post(options, function (error, response, body) {
       assert.ok(!error)
       assert.ok(!body.error)
       assert.ok(body.oid)
-      oid = body.oid
+      oid = body.oid // string
       assert.deepEqual(body, {oid:oid})
       // si ce test est passé on a l'oid
       var ressCloned = tools.clone(ressTest)
@@ -101,6 +128,7 @@ describe('api set', function () {
             for (var key in ressCloned) {
               if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
             }
+            //logInfo('la ressource récupérée', ressource)
             doneGet()
           })
         })
@@ -148,7 +176,7 @@ describe('api set', function () {
           request.del(options, function (error, response, ressource) {
             assert.ok(!error)
             assert.ok(!ressource.error)
-            assert.strictEqual(oid, ressource.deletedOid)
+            assert.equal(oid, ressource.deleted)
             done()
           })
         })

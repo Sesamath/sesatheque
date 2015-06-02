@@ -6,7 +6,7 @@
   "source"   : {
     "include":["./construct", "./README.md"],
     "includePattern": ".+\\.(js|md)",
-    "excludePattern": "(node_modules|public|.+\\.bak\\.js)"
+    "excludePattern": "(node_modules|public|qxApps|.+\\.bak\\.js)"
   },
   "plugins"  : ["plugins/markdown"],
   "markdown" : {

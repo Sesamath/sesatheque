@@ -59,26 +59,33 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function deleteAndSend(context, id) {
     log.debug("dans cb api deleteRessource " +id)
-    // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
-    $ressourceRepository.load(id, function (error, ressource) {
-      if (error) {
-        sendJson(context, error)
-      } else if (ressource) {
-        if ($accessControl.hasPermission('delete', context, ressource)) {
-          $ressourceRepository.delete(ressource, function (error) {
-            if (error) sendJson(context, error)
-            else sendJson(context, null, {deleted:id})
-          })
+    // on donne pas d'info sur l'existence de la ressource
+    var deniedMsg = "droits insuffisant pour effacer cette ressource"
+    // avant d'aller plus loin on vérifie qu'on a une chance d'avoir les droits
+    if (!$accessControl.isAuthenticated(context) && !$accessControl.hasAllRights(context)) {
+      denied(context, deniedMsg)
+    } else {
+      // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
+      $ressourceRepository.load(id, function (error, ressource) {
+        if (error) {
+          sendJson(context, error)
+        } else if (ressource) {
+          if ($accessControl.hasPermission('delete', context, ressource)) {
+            $ressourceRepository.delete(ressource, function (error) {
+              if (error) sendJson(context, error)
+              else sendJson(context, null, {deleted: id})
+            })
+          } else {
+            log.debug(deniedMsg + ' (' + id + ')')
+            denied(context, deniedMsg)
+          }
         } else {
-          var errorMsg = "droits insuffisant pour effacer la ressource " +id
-          log.debug(errorMsg)
-          denied(context, errorMsg)
+          log.debug("La ressource " + id + " n'existait pas, on a rien effacé")
+          // pas de ressource, on vérifie qu'il avait certains droits
+          sendJson(context, new Error("Aucune ressource d'identifiant " + id))
         }
-      } else {
-        log.debug("La ressource " +id +" n'existait pas, on a rien effacé")
-        sendJson(context, new Error("Aucune ressource d'identifiant " + id))
-      }
-    })
+      })
+    }
   }
 
   /**
@@ -485,6 +492,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     deleteAndSend(context, id)
   })
 
+  // les même avec du denied sur les routes publiques (rerouting from ressource si on a ni session ni token)
+  controller.delete('public/:origine/:idOrigine', function (context) {
+    denied(context, "droits insuffisant pour effacer cette ressource")
+  })
+  controller.delete('public/:oid', function (context) {
+    denied(context, "droits insuffisant pour effacer cette ressource")
+  })
+
   // Read byOrigine
   controller.get('ressource/:origine/:oid', function (context) {
     var idOrigine = context.arguments.oid
@@ -501,6 +516,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       } else notFound(context, "La ressource d'origine " + origine + " et d'identifiant " + idOrigine + " n'existe pas")
     })
   })
+
+
 
   // getRef (pour récupérer une ref à la ressource à mettre en enfant d'un arbre)
   controller.get('ressource/getRef/:oid', function (context) {

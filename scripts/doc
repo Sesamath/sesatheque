@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -u
+
+dirInitial="$PWD"
+dirApp=$(dirname $0)/../
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  local exitCode=${1:-0}
+  echo "Lance la génération de la documentation"
+  echo "Une option obligatoire parmi"
+  echo "  -h : afficher cette aide"
+  echo "  -p : documentation du code serveur"
+  echo "  -s : documentation des plugins"
+  exit $exitCode
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+cd "$dirApp"
+
+# sans options on l'aide
+[ $# -lt 1 ] && usage
+
+# check des options
+while getopts "hsp" OPTION
+do
+  case $OPTION in
+    h) usage;;
+    p) jsdoc -c jsdoc/jsdocPlugins.json;;
+    s) jsdoc -c jsdoc/jsdocApp.json;;
+    *) usage 1;;
+  esac
+done
+
+fin
