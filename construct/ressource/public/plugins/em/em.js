@@ -74,7 +74,7 @@ define(['swfobject'], function () {
     var divId = 'mepRess' + (new Date()).getTime();
     ressId = ressource.oid
 
-    log('start mep display avec la ressource (+options)', ressource, options)
+    log('start display em avec la ressource (+options)', ressource, options)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !params) {
       throw new Error("Paramètres manquants");
@@ -132,15 +132,18 @@ define(['swfobject'], function () {
       // faut une fonction qui va transformer le résultat au format attendu
       // et la pour rendre accessible au swf dans son dom
       window.saveResultat = function (resultat) {
+        log("saveResultat em reçoit", resultat);
         options.saveResultat({
           reponse : resultat.reponse,
-          nbq     : params.nbq_defaut,
+          nbq     : resultat.nbq || params.nbq_defaut,
           // le score sera calculé d'après la réponse juste avant enregistrement en bdd
-          // (après déchiffrement coté serveur)
+          // (après déchiffrement coté serveur), mais si c'est j3p qui charge il veut l'intercepter
+          score   : resultat.score,
           ressId  : ressId,
           ressType: ressType,
           date    : startDate,
-          duree   : Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000)
+          duree   : Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
+          original: resultat
         });
       }
       flashvars.nomFonctionCallback = 'saveResultat';

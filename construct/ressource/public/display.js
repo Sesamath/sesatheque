@@ -197,7 +197,7 @@
     }
 
     /**
-     * Envoi un résultat en ajax pour sauvegarde
+     * Envoi un résultat en ajax (ou à la callback) pour sauvegarde
      * @param result       {object}   Le résultat à envoyer
      * @param [retourUser] {function} La fonction à rappeler avec le retour de l'appel ajax
      */

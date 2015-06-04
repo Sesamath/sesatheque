@@ -49,67 +49,71 @@ else if (typeof module === 'object') module.exports = Resultat;
  * @constructor
  */
 function Resultat(initObj) {
+  var values = {};
   // on accepte une simple chaine, que l'on mettra dans la propriété reponse du résultat construit
-  var reponse = (typeof initObj === 'string') ? initObj : '';
-  // on s'assure d'avoir un objet
-  if (typeof initObj !== 'object') initObj = {}
+  if (typeof initObj === 'string') values.reponse = initObj;
+  else if (typeof initObj !== 'object') {
+    for (var p in initObj) {
+      if (initObj.hasOwnProperty(p)) values[p] = initObj[p];
+    }
+  }
 
   /**
    * L'identifiant du résultat, pour celui qui va le stocker
    * @type {number|string|undefined}
    */
-  this.id = initObj.id || undefined;
+  this.id = values.id || undefined;
 
   /**
    * La sesatheque de la ressource qui a généré le résultat
    * (là où on a chargé la ressource et son plugin, ajouté par celui qui récupère le résultat)
    * @type {number|string|undefined}
    */
-  this.sesatheque = initObj.sesatheque || undefined;
+  this.sesatheque = values.sesatheque || undefined;
 
   /**
    * L'identifiant de la ressource (dans son référentiel d'origine)
    * @type {number|string|undefined}
    */
-  this.ressId = initObj.ressId || undefined;
+  this.ressId = values.ressId || undefined;
   
   /**
    * Le type de la ressource (le nom de code du plugin qui la gère, et saura afficher le résultat)
    * @type {number|string|undefined}
    */
-  this.ressType = initObj.ressType || undefined;
+  this.ressType = values.ressType || undefined;
   
   /**
    * L'origine du l'utilisateur
    * (à priori complété par celui qui récupère le résultat)
    * @type {number|string|undefined}
    */
-  this.userOrigine = initObj.userOrigine  || undefined;
+  this.userOrigine = values.userOrigine  || undefined;
   
   /**
    * L'id de l'utilisateur (l'auteur du résultat) dans son référentiel d'origine
    * (à priori complété par celui qui récupère le résultat)
    * @type {number|string|undefined}
    */
-  this.userId = initObj.userId  || undefined;
+  this.userId = values.userId  || undefined;
 
   /**
    * La date du résultat
    * @type {*|Date}
    */
-  this.date = initObj.date || new Date();
+  this.date = values.date || new Date();
 
   /**
    * La durée en seconde entre le début de l'affichage de la ressource et l'envoi de ce résultat
    * @type {number}
    */
-  this.duree = initObj.duree || 0;
+  this.duree = values.duree || 0;
 
   /**
    * Le score numérique, entre 0 et 1
    * @type {number}
    */
-  this.score = initObj.score || null;
+  this.score = values.score || null;
   if (this.score < 0) this.score = null;
   if (this.score > 1) this.score = null;
 
@@ -117,13 +121,13 @@ function Resultat(initObj) {
    * Le résultat sous une forme qualitative (rrvb pour mep, phrase d'état pour j3p, etc.)
    * @type {string|*}
    */
-  this.reponse = initObj.reponse || reponse;
+  this.reponse = values.reponse || '';
 
   /**
-   * L'objet initial qu'on nous a passé
+   * L'objet initial qu'on nous a passé (ou qu'on avait passé à celui qui nous appelle)
    * @type {Object}
    */
-  this.original = initObj;
+  this.original = values.original || initObj;
 }
 
 /**
