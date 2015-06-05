@@ -218,7 +218,7 @@
         if (retourUser) retourUser(retour);
       }
 
-      log("saveResultat a reçu", result);
+      log("saveResultat display a reçu", result);
       var resultat = new Resultat(result);
       // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
       ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {

@@ -52,7 +52,7 @@ function Resultat(initObj) {
   var values = {};
   // on accepte une simple chaine, que l'on mettra dans la propriété reponse du résultat construit
   if (typeof initObj === 'string') values.reponse = initObj;
-  else if (typeof initObj !== 'object') {
+  else if (typeof initObj === 'object') {
     for (var p in initObj) {
       if (initObj.hasOwnProperty(p)) values[p] = initObj[p];
     }

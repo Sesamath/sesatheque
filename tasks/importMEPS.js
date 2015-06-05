@@ -156,10 +156,10 @@ function initRessourceAm(row) {
     origine          : 'am',
     idOrigine        : row.aide_id,
     typeTechnique    : 'am',
-    titre            : row.aide_titre || 'Aide mathenpoche',
+    titre            : row.aide_titre,
     categories       : [catCode.activiteAnimee],
-    typePedagogiques : confRessource.categoriesToTypes[catCode.activiteAnimee].typePedagogiques,
-    typeDocumentaires: confRessource.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires,
+    typePedagogiques : [confRessource.constantes.typePedagogiques.tutoriel],
+    typeDocumentaires: [confRessource.constantes.typeDocumentaires.animation],
     relations        : [],
     parametres       : {},
     // auteurs
