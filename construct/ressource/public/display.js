@@ -391,9 +391,10 @@
     /**
      * Charge une ressource et le plugin qui la gère, puis appelle la methode display du plugin
      * @param ressource
-     * @param options
+     * @param {} [options]
+     * @param {function} [next] Fct appelée à la fin du chargement avec une erreur ou undefined
      */
-    displayModule.load = function (ressource, options) {
+    displayModule.load = function (ressource, options, next) {
       log('display.load avec la ressource', ressource)
       log('et les options', options);
       // init du dom
@@ -428,8 +429,13 @@
           // on regarde s'il faut ajouter une fct de sauvegarde des résultats
           if (Resultat) addSaveResultat(options, traiteResultat, Resultat);
           // on peut afficher
-          plugin.display(ressource, options, function (arg) {
-            log("le display a terminé et a renvoyé", arg);
+          plugin.display(ressource, options, function (error) {
+            if (error) {
+              log("le display a terminé mais renvoyé l'erreur", error);
+            } else {
+              log("le display a terminé sans erreur");
+            }
+            if (next) next(error);
           });
         } catch(error) {
           w.setError(error.toString());
