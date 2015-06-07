@@ -113,7 +113,7 @@ function Resultat(initObj) {
    * Le score numérique, entre 0 et 1
    * @type {number}
    */
-  this.score = values.score || null;
+  this.score = values.score;
   if (this.score < 0) this.score = null;
   if (this.score > 1) this.score = null;
 

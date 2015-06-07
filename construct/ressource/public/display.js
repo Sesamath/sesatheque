@@ -79,12 +79,14 @@
    */
   function log() {
     var arg;
-    if (console && console.log) {
+    try {
       for (var i = 0; i < arguments.length; i++) {
         arg = arguments[i];
-        if (arg && arg.stack && console.error) console.error(arg.stack);
-        else console.log(arg);
+        if (arg instanceof Error) console.error.call(console, arg);
+        else console.log.call(console, arg);
       }
+    } catch (e) {
+      // rien, fallait un navigateur décent...
     }
   }
 
@@ -95,7 +97,6 @@
    * @returns Sa valeur (ou null s'il n'existait pas)
    */
   function getURLParameter(name) {
-    // log("getURLParameter(" +name +") sur " +window.location.search);
     var regexp = new RegExp('[?|&]' + name + '=([^&#]+?)(&|#|$)');
     var param = regexp.exec(window.location.search)
     if (param) {
@@ -373,8 +374,7 @@
     window.hideTitle = function () {
       var titre = wd.getElementById('titre');
       if (titre) titre.style = "display: none";
-      /* log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
-      log(titre); */
+      w.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
     }
 
     /**
@@ -395,12 +395,12 @@
      * @param {function} [next] Fct appelée à la fin du chargement avec une erreur ou undefined
      */
     displayModule.load = function (ressource, options, next) {
-      log('display.load avec la ressource', ressource)
-      log('et les options', options);
+      w.log('display.load avec la ressource', ressource)
+      w.log('et les options', options);
       // init du dom
       if (!isInitDone) {
         displayModule.init(options);
-        log('options après init', options);
+        w.log('options après init', options);
       }
 
       // ajoute de la css commune à toutes les ressources ici
@@ -433,7 +433,7 @@
             if (error) {
               log("le display a terminé mais renvoyé l'erreur", error);
             } else {
-              log("le display a terminé sans erreur");
+              w.log("le display a terminé sans erreur");
             }
             if (next) next(error);
           });

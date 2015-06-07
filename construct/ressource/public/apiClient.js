@@ -130,7 +130,7 @@ function callBibli(data, next) {
         } catch (error) {
           var errMsg = isGet ?
               "La ressource renvoyée par la bibliotheque n'est pas du json valide" :
-              "La réponse du serveur n'est pas du json valide";
+              "La réponse du serveur au post n'est pas du json valide";
           next(new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText));
         }
       } else {
@@ -153,8 +153,6 @@ function callBibli(data, next) {
     };
 
     // et on envoie
-    console.log('on va envoyer ' +method +' ' +url)
-    console.log(data)
     xhr.open(method, url, true);
     xhr.send(data);
   } catch (error) {
