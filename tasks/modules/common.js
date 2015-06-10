@@ -36,7 +36,7 @@ var opt = {
   /** timeout en ms */
   timeout     : 3000,
   /** Le nb max de requetes vers l'api en attente de réponse */
-  maxLaunched : 5,
+  maxLaunched : 1,
   /** pour logguer les relations en console */
   logRelations: false,
   /** pour loguer les résultat des appels de l'api */
@@ -280,6 +280,26 @@ common.displayResult = function (next) {
 }
 
 /**
+ * Rectifie l'origine labomepBIBS et retire l'offset d'idOrigine pour les ato, mep_coll et accomp
+ * @param ressource
+ */
+common.fixLabomepBIBS = function (ressource) {
+  if (ressource.origine === 'labomepBIBS' && ressource.idOrigine > 1000000) {
+    if (ressource.idOrigine < 2000000) {
+      ressource.origine = 'ato';
+      ressource.idOrigine -= 1000000
+    } else if (ressource.idOrigine < 3000000) {
+      ressource.origine = 'mep_coll';
+      ressource.idOrigine -= 2000000
+    } else if (ressource.idOrigine < 4000000) {
+      ressource.origine = 'accomp';
+      ressource.idOrigine -= 3000000
+    }
+    // au delà de 4M c'est normalement que du j3p ajouté à la main par Alexis, on y touche pas
+  }
+}
+
+/**
  * Passe en revue les relations qui n'auraient pas été affectées, mais une par une
  * (plusieurs relations peuvent affecter les même ressources, deux updates en // marchent pas)
  * @param next
@@ -448,6 +468,7 @@ common.getRessource = function (origine, idOrigine, next) {
     next = idOrigine
     idComb = origine
     if (_.isString(idComb)) {
+      // c'était déjà un id combiné
       var pos = idComb.indexOf('/')
       origine = idComb.substr(0, pos)
       idOrigine = idComb.substr(pos + 1)
@@ -475,9 +496,8 @@ common.getRessource = function (origine, idOrigine, next) {
     } else if (ressource.error) {
       addError(idComb, 'erreur retournée par get '+options.url +' : ' +ressource.error)
       next(null)
-    } else if (ressource.origine !== origine || ressource.idOrigine !== idOrigine) {
-      addError(idComb, "ressource " + idComb + " incohérente : " +
-                       JSON.stringify(origine) + '/' + JSON.stringify(idOrigine) +
+    } else if (ressource.origine != origine || ressource.idOrigine != idOrigine) {
+      addError(idComb, "ressource récupérée " +origine +'/' +idOrigine +" incohérente avec la demande " +idComb +
                        '\n' + JSON.stringify(ressource))
       next(null)
     } else {

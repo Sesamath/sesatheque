@@ -46,7 +46,7 @@ var request = require('request')
 var config = require('../../config')
 var apiToken = config.apiTokens[0]
 if (process.argv.indexOf('--token') > -1) {
-  apiToken = process.argv[process.argv.indexOf('--token')]
+  apiToken = process.argv[process.argv.indexOf('--token') +1]
 }
 var urlBibli = 'http://'
 if (process.argv.indexOf('--prod') > -1) {

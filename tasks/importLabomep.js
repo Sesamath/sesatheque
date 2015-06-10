@@ -177,32 +177,41 @@ function parseRessource(row) {
 }
 
 function flushRessources(next) {
-  flow(ressource2rec).seqEach(function (ressource) {
-    var nextRess = this
-    if (logProcess) log('processing ' + ressource.idOrigine)
-    addAuteurs(ressource, function () {
-      // on transforme le xml en objet js pour certains
-      switch (ressource.typeTechnique) {
-        case 'url':
-          modifyUrl(ressource, common.deferRessource)
-          break
-        case 'ec2':
-          convertXmlEc2(ressource, common.deferRessource)
-          break
-        default : common.deferRessource(ressource)
-      }
-      nextRess()
-    })
-  }).seq(function () {
-    log('flush envoyé')
-    common.setAfterAllCb(this)
-    common.checkEnd()
-  }).seq(function () {
-    log('flush terminé')
-    next()
-  }).catch(function (error) {
-    log("erreur lors du flush", error)
-  })
+  if (ressource2rec.length) {
+    // faut découper en tranches de 100 pour éviter RangeError: Maximum call stack size exceeded
+    var paquet
+    for (var i = 0; i < ressource2rec.length; i +=100) {
+      paquet = ressource2rec.slice(i, i + 100)
+      // on lance ça
+      flow(paquet).seqEach(function (ressource) {
+        var nextRess = this
+        if (logProcess) log('processing ' + ressource.idOrigine)
+        addAuteurs(ressource, function () {
+          // on transforme le xml en objet js pour certains
+          switch (ressource.typeTechnique) {
+            case 'url':
+              modifyUrl(ressource, common.deferRessource)
+              break
+            case 'ec2':
+              convertXmlEc2(ressource, common.deferRessource)
+              break
+            default :
+              common.deferRessource(ressource)
+          }
+          nextRess()
+        })
+      }).seq(function () {
+        log('flush envoyé')
+        common.setAfterAllCb(this)
+        common.checkEnd()
+      }).seq(function () {
+        log('flush terminé')
+        next()
+      }).catch(function (error) {
+        log("erreur lors du flush", error)
+      })
+    }
+  }
 }
 
 /**
@@ -331,24 +340,12 @@ function initRessourceGenerique(row) {
     parametres       : {xml:row.xml},
     langue           : 'fra',
     publie           : true,
-    restriction      : (origine == 'labomepBIBS') ? 0 : 3
+    restriction      : (origine === 'labomepBIBS') ? 0 : 3
   }
   if (row.titre) ressource.titre = row.titre
   if (row.sslsesa_user_id) ressource.auteurs =  [row.sslsesa_user_id]
   // on rectifie origine et idOrigine pour les ressources qui viennent en fait d'ailleurs
-  if (row.id > 1000000) {
-    if (row.id < 2000000) {
-      ressource.origine = 'ato';
-      ressource.idOrigine = row.id - 1000000
-    } else if (row.id < 3000000) {
-      ressource.origine = 'mep_coll';
-      ressource.idOrigine = row.id - 2000000
-    } else if (row.id < 4000000) {
-      ressource.origine = 'accomp';
-      ressource.idOrigine = row.id - 3000000
-    }
-    // au delà de 4M c'est normalement que du j3p ajouté à la main par Alexis, on y touche pas
-  }
+  common.fixLabomepBIBS(ressource)
 
   return ressource
 }

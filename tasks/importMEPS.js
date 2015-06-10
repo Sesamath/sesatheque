@@ -191,9 +191,9 @@ function importMEPS(ids, next) {
               " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateCreation" +
               ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
               " WHERE dev_file_identifiant = m.mep_swf_id AND dev_file_type LIKE 'ex%') dateMiseAJour" +
-              " FROM MEPS m" +where
+              " FROM MEPS m" +where +' ORDER BY mep_id'
+  // query += ' LIMIT 50'
   log('la requete sql ', query)
-
   kmepcol
       .raw(query)
       .then(function (rows) {
@@ -230,7 +230,8 @@ function importAIDES(ids, next) {
                 " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') AS dateCreation" +
               ", (SELECT MAX( dev_file_date ) FROM DEV_FILES" +
               " WHERE dev_file_identifiant = a.aide_id AND dev_file_type LIKE 'aide%') AS dateMiseAJour" +
-              " FROM AIDES a " +where
+              " FROM AIDES a " +where +' ORDER BY aide_id'
+  // query += ' LIMIT 50'
   log('la requete sql AIDES', query)
 
   kmepcol
@@ -255,7 +256,7 @@ function importAIDES(ids, next) {
  * MAIN
  */
 // les 3 premiers args sont node, /path/2/gulp, importMEPS
-var argv = process.argv.slice(3)
+var argv = process.argv.slice(2)
 // tout par défaut
 var mepIds, aideIds, i
 

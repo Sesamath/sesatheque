@@ -58,6 +58,7 @@ function parseRessource(row) {
     common.addError(common.getIdComb(ressource), 'graphe invalide : ' +error)
     return
   }
+  common.fixLabomepBIBS(ressource)
   common.addCatExoInteractif(ressource)
   //log('qui donne', ressource)
   common.pushRessource(ressource)
