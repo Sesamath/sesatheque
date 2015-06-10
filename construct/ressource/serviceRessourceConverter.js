@@ -37,7 +37,8 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
   // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
   // car on a l'autocomplétion sur les noms de propriété
   var config = require('./config')
-  var tools = require('../tools')
+  //var tools = require('../tools')
+  var Ref = require('./public/vendors/sesamath/Ref')
 
   /**
    * Service qui regroupe les fonctions de transformation de données pour les vues
@@ -377,12 +378,17 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
         }
       }
       if (data.typeTechnique && data.typeTechnique === 'arbre' && !data.enfants) {
+        // pas de propriété enfants, on regarde les parametres
         try {
-          data.enfants = JSON.parse(data.parametres)
-          data.parametres = {}
+          if (data.parametres) data.enfants = JSON.parse(data.parametres)
         } catch (e) {
           if (!data.warnings) data.warnings = []
-          data.warnings.push("Erreurs enfants : json invalide")
+          data.warnings.push("Erreurs enfants : json invalide dans paramètres " +data)
+        }
+        data.parametres = {}
+        if (!data.enfants || !data.enfants.length) {
+          if (!data.warnings) data.warnings = []
+          data.warnings.push("arbre sans enfants")
         }
       }
 
@@ -476,6 +482,33 @@ module.exports = function (Ressource, $routes, $ressourceControl) {
       typeTechnique : 'arbre',
       attributes : clone.parametres.attributes || {},
       enfants : clone.enfants || []
+    }
+  }
+
+  /**
+   * Renvoie une Ref à une ressource (avec tous les enfants)
+   * @param ressource
+   * @return {Ref|exports|module.exports}
+   */
+  $ressourceConverter.toRef = function (ressource) {
+    return new Ref(ressource)
+  }
+
+  /**
+   * Renvoie la ressource au format compact (oid, origine, idOrigine, titre, typeTechnique, categories, restriction, dataUri)
+   * @param ressource
+   * @return {object}
+   */
+  $ressourceConverter.toCompactFormat = function (ressource) {
+    return {
+      oid          : ressource.oid,
+      origine      : ressource.origine,
+      idOrigine    : ressource.idOrigine,
+      titre        : ressource.titre,
+      typeTechnique: ressource.typeTechnique,
+      categories   : ressource.categories,
+      restriction  : ressource.restriction,
+      dataUri      : ressource.dataUri || $routes.getAbs('api', ressource)
     }
   }
 

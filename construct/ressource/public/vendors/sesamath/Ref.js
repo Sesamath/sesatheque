@@ -52,7 +52,7 @@ function Ref(initObj) {
    * L'oid de la ressource que l'on référence
    * @type {number}
    */
-  this.ref = parseInt(initObj.ref, 10) || undefined;
+  this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
   /**
    * Le nom
    * @type {string}

@@ -149,6 +149,33 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Envoie une liste de ressources
+   * @param context
+   * @param error
+   * @param ressources
+   * @param {string} [format] compact|ref (ignoré sinon)
+   */
+  function sendListe(context, error, ressources, format) {
+    if (format && ["compact", "ref"].indexOf(format) > -1) {
+      // on veut pas les ressources complètes mais seulement une partie
+      if (!error && ressources && ressources.length) {
+        var liste = []
+        ressources.forEach(function (ressource) {
+          if (format === 'compact') liste.push($ressourceConverter.toCompactFormat(ressource))
+          else liste.push($ressourceConverter.toRef(ressource))
+        })
+        sendJson(context, error, {liste:liste})
+      } else {
+        // erreur ou liste vide
+        sendJson(context, error, {liste:ressources})
+      }
+    } else {
+      // les ressources complètes
+      sendJson(context, error, {liste:ressources})
+    }
+  }
+
+  /**
    * Formate la réponse pour renvoyer une ref
    * @param context
    * @param error
@@ -334,11 +361,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function write(context, ressource) {
-    log.debug("dans cb api write on récupère", ressource)
+    log.debug("dans cb api write on récupère", ressource, 'api', {max:500})
     var permission = ressource.oid ? 'update' : 'create'
     if ($accessControl.hasPermission(permission, context, ressource)) {
       $ressourceRepository.write(ressource, function (error, ressource) {
-        log.debug("et après $ressourceRepository.write", ressource, 'repository')
+        log.debug("et après $ressourceRepository.write", ressource, 'repository', {max:500})
         if (error) log.debug("avec l'erreur", error, 'repository')
         // oid - convertPost - valide+setVersion - store - store2 - fin
         //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
@@ -676,4 +703,49 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
+  /**
+   * Liste d'après les filtres postés en json (qui peuvent être multiple)
+   * Le json doit contenir
+   * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
+   *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
+   * et peut contenir
+   * - orderBy : un nom d'index
+   * - order : 'desc' si on veut l'ordre descendant
+   * - start : offset
+   * - nb : nb de résultats voulus
+   * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
+   */
+  controller.post('by', function (context) {
+    $ressourceRepository.getListe('public', context.post, function (error, ressources) {
+      sendListe(context, error, ressources, context.post.format)
+    })
+  })
+
+  /**
+   * Liste d'après les filtres en json (qui peuvent être multiple), que l'on rend aussi dispo aussi en get
+   * Le json doit contenir
+   * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
+   *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
+   * et peut contenir
+   * - orderBy : un nom d'index
+   * - order : 'desc' si on veut l'ordre descendant
+   * - start : offset
+   * - nb : nb de résultats voulus
+   * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
+   */
+  controller.get('by/:json', function (context) {
+    var options
+    try {
+      options = JSON.parse(context.arguments.json)
+      $ressourceRepository.getListe('public', options, function (error, ressources) {
+        sendListe(context, error, ressources, options.format)
+      })
+    } catch (error) {
+      sendJson(context, null, {error:'json invalide : ' +context.arguments.json})
+    }
+  })
+/*
+  controller.get('test', function (context) {
+    sendJson(context, null, "un message")
+  }) */
 }

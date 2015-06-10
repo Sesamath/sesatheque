@@ -37,7 +37,9 @@
  * @requires $settings
  */
 module.exports = function ($settings) {
-  var routes = $settings.get('components.ressource.constantes.routes')
+  var configRessource = require('./config')
+  var routes = configRessource.constantes.routes
+  var restriction = configRessource.constantes.restriction
   var $routes = {}
 
   /**
@@ -76,7 +78,7 @@ module.exports = function ($settings) {
       route = '/'
       if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
       // si on avait qu'un oid ce sera toujours ressource/
-      route += (ressource && ressource.restriction === 0) ? 'public/' : 'ressource/'
+      route += (ressource && ressource.restriction === restriction.aucune) ? 'public/' : 'ressource/'
       route += $routes.get(action, oid)
     } else {
       log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))

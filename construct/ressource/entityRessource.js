@@ -41,6 +41,7 @@ module.exports = function (Ressource, $settings) {
   var _ = require('lodash')
   var tools = require('../tools')
   var RessourceConstructor = require('./public/vendors/sesamath/Ressource')
+  var configRessource = require('./config')
 
   /**
    * Retourne le 1er id dispo à utiliser comme idOrigine pour l'origine "local"
@@ -84,9 +85,9 @@ module.exports = function (Ressource, $settings) {
       this.dateMiseAJour = new Date()
     }
     // cohérence de la restriction
-    if (this.restriction === 2 && (!this.parametres.allow || !this.parametres.allow.groupes)) {
+    if (this.restriction === configRessource.constantes.restriction.groupe && (!this.parametres.allow || !this.parametres.allow.groupes)) {
       log.error("Ressource " +this.oid +" restreinte à des groupes sans préciser lesquels, on la passe privée")
-      this.restriction = 3
+      this.restriction = configRessource.constantes.restriction.prive
     }
     // si le tableau d'erreur est vide (devrait toujours être le cas,
     // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)

@@ -350,7 +350,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
       else {
         Ressource
             .match('oid').equals(oid)
-            .match('restriction').equals(0)
+            .match('restriction').equals(config.constantes.restriction.aucune)
             .grabOne(function (error, ressource) {
               cacheAndNext(error, ressource, next)
             })
@@ -444,6 +444,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
         log.error(new Error("nb de résultats demandés supérieur à la limite max " +nb +'>' +limitMax))
         nb = limitMax
       }
+      // le format est géré par le controleur
 
       // si on est toujours là on peut construire la requete
       var query = Ressource
@@ -457,9 +458,9 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
       // restriction d'après la visibilité
       if (visibilite == 'public') {
-        query = query.match('restriction').equals(0)
+        query = query.match('restriction').equals(config.constantes.restriction.aucune)
       } else if (visibilite == 'correction') {
-        query = query.match('restriction').lowerThan(2)
+        query = query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
       } else if (visibilite.indexOf('/')) {
         var fragments = visibilite.split('/', 2)
         if (fragments[0] === 'auteur') {
@@ -473,7 +474,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
         log.debug('recherche sur tout')
       } else {
         // on a pas mis de restriction, c'est pas normal, on met public
-        query = query.match('restriction').equals(0)
+        query = query.match('restriction').equals(config.constantes.restriction.aucune)
         log.error(new Error("Appel de getListe avec visibilite " +visibilite))
       }
 

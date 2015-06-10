@@ -131,20 +131,26 @@ define(['swfobject'], function () {
     if (options.saveResultat) {
       // faut une fonction qui va transformer le résultat au format attendu
       // et la pour rendre accessible au swf dans son dom
-      window.saveResultat = function (resultat) {
-        log("saveResultat em reçoit", resultat);
-        options.saveResultat({
-          reponse : resultat.reponse,
-          nbq     : resultat.nbq || params.nbq_defaut,
-          // le score sera calculé d'après la réponse juste avant enregistrement en bdd
-          // (après déchiffrement coté serveur), mais si c'est j3p qui charge il veut l'intercepter
-          score   : resultat.score,
+      window.saveResultat = function (result) {
+        log("saveResultat em reçoit", result);
+        var resultMod = {
+          reponse : result.reponse,
+          nbq     : result.nbq || params.nbq_defaut,
           ressId  : ressId,
           ressType: ressType,
           date    : startDate,
           duree   : Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
-          original: resultat
-        });
+          original: result
+        };
+        // le score sera calculé d'après la réponse juste avant enregistrement en bdd
+        // (après déchiffrement coté serveur), mais si c'est j3p qui charge il veut l'intercepter
+        if (resultMod.nbq) {
+          resultMod.score = result.score / resultMod.nbq;
+        } else {
+          resultMod.score = null;
+        }
+
+        options.saveResultat(resultMod);
       }
       flashvars.nomFonctionCallback = 'saveResultat';
     }
