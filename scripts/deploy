@@ -2,7 +2,7 @@
 
 dirInitial="$PWD"
 dirApp=$(dirname $0)/../
-PM2=_private/pm2App.json5
+PM2=_private/pm2Deploy.json5
 
 function fin() {
   cd "$dirInitial"
