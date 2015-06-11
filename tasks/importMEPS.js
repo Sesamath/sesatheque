@@ -35,7 +35,7 @@ var catCode = confRessource.constantes.categories
 var relCode = confRessource.constantes.relations
 
 // databases
-var confMeps = require('../_private/config/mepcol')
+var confMeps = require('../_private/bddConfigs/mepcol')
 // les connexions aux bases
 var kmepcol = knex(confMeps)
 

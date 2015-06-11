@@ -715,11 +715,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - nb : nb de résultats voulus
    * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
    */
-  controller.post('by', function (context) {
+  function postBy(context) {
     $ressourceRepository.getListe('public', context.post, function (error, ressources) {
       sendListe(context, error, ressources, context.post.format)
     })
-  })
+  }
+  postBy.timeout = 3000
+  controller.post('by', postBy)
 
   /**
    * Liste d'après les filtres en json (qui peuvent être multiple), que l'on rend aussi dispo aussi en get
@@ -733,7 +735,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - nb : nb de résultats voulus
    * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
    */
-  controller.get('by/:json', function (context) {
+  function getBy(context) {
     var options
     try {
       options = JSON.parse(context.arguments.json)
@@ -743,7 +745,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } catch (error) {
       sendJson(context, null, {error:'json invalide : ' +context.arguments.json})
     }
-  })
+  }
+  getBy.timeout = 3000
+  controller.get('by/:json', getBy)
 /*
   controller.get('test', function (context) {
     sendJson(context, null, "un message")

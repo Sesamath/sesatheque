@@ -43,10 +43,9 @@ var root  = __dirname + '/..';
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
- * Il peut valoir production, integration ou dev et sera
- * mis à dev par défaut
+ * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
  */
-var staging = process.env.NODE_ENV || 'dev'
+var staging = (process.env.NODE_ENV === 'prod') ? 'prod' : 'dev'
 
 /** La config */
 var settings = {
@@ -123,7 +122,7 @@ var settings = {
 if (localConfig) tools.merge(settings, localConfig)
 
 // on enlève le debug mysql en prod
-if (settings.application.staging === 'production' && settings.$entities.database.debug) {
+if (settings.application.staging === 'prod' && settings.$entities.database.debug) {
   delete settings.$entities.database.debug
 }
 

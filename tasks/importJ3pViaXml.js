@@ -1,7 +1,7 @@
 /**
  * Ce script passe en revue les ressources j3p du xml issu de labomep (à copier dans
- * gulptasks/arbresXml/exercices_interactifs.xml) et regarde dans labomep.BIBS (cf _private/config/labomep) les infos
- * si aussi dans oldbibli (_private/config/oldbibli), on regarde les champs commentaires et description,
+ * gulptasks/arbresXml/exercices_interactifs.xml) et regarde dans labomep.BIBS (cf _private/bddConfigs/labomep) les infos
+ * si aussi dans oldbibli (_private/bddConfigs/oldbibli), on regarde les champs commentaires et description,
  *   si vide dans BIBS on prend sinon on ignore
  * (Alexis avait complété ces champs à la main dans l'ancienne bibli symfony)
  */
@@ -20,8 +20,8 @@ var log = common.log // jshint ignore:line
 var graphe2Json = require('./modules/j3pGraphe2json')
 
 // databases
-var dbConfigOldBibli = require(__dirname + '/../_private/config/oldbibli')
-var dbConfigLabomep = require(__dirname + '/../_private/config/labomep')
+var dbConfigOldBibli = require(__dirname + '/../_private/bddConfigs/oldbibli')
+var dbConfigLabomep = require(__dirname + '/../_private/bddConfigs/labomep')
 // les connexions aux bases
 var kOldBibli = knex(dbConfigOldBibli)
 var kLabomep = knex(dbConfigLabomep)

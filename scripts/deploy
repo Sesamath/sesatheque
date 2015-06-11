@@ -28,7 +28,7 @@ do
   case $OPTION in
     c ) PM2="$OPTARG";;
     d ) dest='dev';;
-    p ) dest='production';;
+    p ) dest='prod';;
     * ) usage;;
   esac
 done
@@ -39,7 +39,7 @@ cd "$dirApp"
 
 [ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && exit 1
 
-if [ "$dest" == "production" ]
+if [ "$dest" == "prod" ]
 then
   echo "Vous allez déployer en PRODUCTION, sûr ? [o/N]"
   read rep

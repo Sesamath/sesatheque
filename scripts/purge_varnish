@@ -1,0 +1,50 @@
+#!/bin/bash
+
+LAST_FILE=_private/purge_varnish.last
+CONFIG=../_private/config.js
+
+dirInitial="$PWD"
+dirApp=$(dirname $0)/../
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  echo "Purge toutes les urls des fichiers modifiés depuis la date du fichier $LAST_FILE"
+  echo "en prenant le nom de host trouvé dans la propriété baseUrl de $CONFIG"
+  exit 0
+}
+
+function purge_varnish() {
+  local file
+  local url
+  local vhost=$(sed -nre "/baseUrl/ s/^.*:[^\"']*[\"']([^\"']+)[\"'].*\$/\1/p" $CONFIG)
+  if [ -z "$vhost" ]
+  then
+    echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
+  else
+    find construct/*/public -type f -mmin -10 | while read file
+    do
+      url=$vhost${f#*public} # on démarre au / qui suit build
+      echo -n "$url : "
+      curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
+      echo
+    done
+  fi
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+# check des options
+dest=''
+while getopts "h" OPTION
+do
+  case $OPTION in
+    * ) usage;;
+  esac
+done
+
+cd "$dirApp"
+purge_varnish

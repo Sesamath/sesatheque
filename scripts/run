@@ -21,7 +21,7 @@ function usage() {
   echo "  -h : afficher cette aide"
   echo "  -n : lancement avec node directement en mode dev"
   echo "  -o : pour passer des options à pm2 (à mettre avant les actions)"
-  echo "  -p : lancement avec $PM2 en mode production (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
+  echo "  -p : lancement avec $PM2 en mode prod (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
   echo "  -x : arrête les process pm2 sesatheque qui pourraient tourner"
   echo "  -w : lancement avec $PM2 en mode dev avec watch"
   exit $exitCode
@@ -87,7 +87,7 @@ do
     h) usage;;
     n) runNode;;
     o) pm2opts="$OPTARG";;
-    p) nodeEnv='production'; runPm2;;
+    p) nodeEnv='prod'; runPm2;;
     x) del;;
     w) runPm2Watch;;
     #w) pm2opts="--watch '[\"construct\", \"config\"]' --ignore-watch '[\"construct/qxApps\", \"construct/*/public\"]'"; runPm2;;

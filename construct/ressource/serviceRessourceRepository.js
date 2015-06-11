@@ -425,7 +425,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
         if (!_.isArray(options.filters)) throw new Error("Filtres incorrects")
         options.filters.forEach(function (filter) {
           if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant')
-          if (!_.isArray(filter.values)) throw new Error('valeurs invalides')
+          if (!_.isArray(filter.values)) throw new Error('values invalides pour filter')
           // on ignore le filtre restriction, c'est visibilite qui l'impose éventuellement
           if (filter.index !== 'restriction') optionsSafe.filters.push(filter)
         })

@@ -141,7 +141,7 @@ function out(message, objectToDump, filter, stream, options) {
   }
 }
 
-if (env !== 'production' && config.logs.debug) {
+if (env !== 'prod' && config.logs.debug) {
   // notre stream vers dev.log
   debugOutputStream = getLogStream(config.logs.debug, true)
 

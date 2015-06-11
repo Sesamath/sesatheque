@@ -62,8 +62,8 @@ for (var i = 10; i < 1000; i +=100) {
   }, i)
 }
 /* */
-GLOBAL.isProd = ((lassi.settings.application.staging === 'production'))
-lassi.log('app', "Démarrage de l'application avec l'environnement", (isProd?'production':'dev').red)
+GLOBAL.isProd = ((lassi.settings.application.staging === 'prod'))
+lassi.log('app', "Démarrage de l'application avec l'environnement", (lassi.settings.application.staging).red)
 
 // nos loggers (mais lassi n'est pas encore en global ici...)
 GLOBAL.log = require('./tools/log.js')

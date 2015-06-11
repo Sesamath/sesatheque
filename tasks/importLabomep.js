@@ -46,7 +46,7 @@ var tpCode = config.constantes.typePedagogiques
 var catCode = config.constantes.categories
 
 // databases
-var dbConfigLabomep = require('../_private/config/labomep')
+var dbConfigLabomep = require('../_private/bddConfigs/labomep')
 // les connexions aux bases, labomep
 var klabomep = knex(dbConfigLabomep)
 // et bibli, pour aller chercher les auteurs
