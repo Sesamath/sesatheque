@@ -514,7 +514,10 @@ common.getRessource = function (origine, idOrigine, next) {
 function log(msg, objToDump) {
   var prefix = '[' +moment().format('HH:mm:ss.SSS') +'] '
   console.log(prefix + msg)
-  if (objToDump) console.log(objToDump)
+  if (objToDump) {
+    if (objToDump.stack) console.error(objToDump.stack)
+    else console.log(objToDump)
+  }
 }
 common.log = log
 

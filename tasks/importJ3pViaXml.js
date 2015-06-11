@@ -17,7 +17,7 @@ var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
 // la moulinette d'Alexis
-var graphe2Json = require('./j3p/convertGraphe2json')
+var graphe2Json = require('./modules/j3pGraphe2json')
 
 // databases
 var dbConfigOldBibli = require(__dirname + '/../_private/config/oldbibli')

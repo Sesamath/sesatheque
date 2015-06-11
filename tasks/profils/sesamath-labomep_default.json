@@ -8,33 +8,33 @@
   "idOrigine": "labomep_default",
   "enfants": [
     {
-      "idOrigine": "animations_interactives",
-      "origine": "sesaxml",
       "titre": "Animations interactives",
+      "origine": "sesaxml",
+      "idOrigine": "animations_interactives",
       "typeTechnique": "arbre"
     },
     {
-      "idOrigine": "exercices_interactifs",
-      "origine": "sesaxml",
       "titre": "Exercices interactifs",
-      "typeTechnique": "arbre"
-    },
-    {
-      "idOrigine": "tests_algebre",
       "origine": "sesaxml",
+      "idOrigine": "exercices_interactifs",
+      "typeTechnique": "arbre"
+    },
+    {
       "titre": "Tests diagnostiques",
+      "origine": "sesaxml",
+      "idOrigine": "tests_algebre",
       "typeTechnique": "arbre"
     },
     {
-      "idOrigine": "tous_manuels_cahiers",
-      "origine": "sesamath",
       "titre": "Tous les manuels et cahiers",
+      "origine": "ouvrage",
+      "idOrigine": "tous_les_manuels_cahiers",
       "typeTechnique": "arbre"
     },
     {
-      "idOrigine": "labomep_suisse",
-      "origine": "sesamath",
       "titre": "Sélection de ressources pour le curriculum Suisse",
+      "origine": "sesaxml",
+      "idOrigine": "labomep_profil_suisse",
       "typeTechnique": "arbre"
     }
   ]

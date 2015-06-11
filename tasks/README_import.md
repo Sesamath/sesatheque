@@ -36,6 +36,13 @@ importe les arbres xml de labomep
 Le lancer après les autres imports (sauf persos qui est indépendant) pour éviter d'avoir des enfants inconnus
 
  `node tasks/importArbresXml.js`
+
+ajout des arbres de ressources dispo par profil
+-----------------------------------------------
+
+Ajoute les arbres profils/sesamath-labomep_<profil>
+
+`node tasks/importProfils.js`
  
 importLabomep PERSOS
 --------------------

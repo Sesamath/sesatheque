@@ -57,7 +57,7 @@ function needToSplit(xmlName) {
  */
 function getTitre(arbreXml, xmlName) {
   var titre
-  if (titre === 'exercices_non') titre = 'Tous les manuels et cahiers'
+  if (xmlName === 'exercices_non') titre = 'Exercices non interactifs'
   else if (arbreXml.attrib && arbreXml.attrib.n) titre = arbreXml.attrib.n
   else titre = arbreXml.titre || xmlName.replace(/_/g, ' ')
 
@@ -98,8 +98,6 @@ var arbreCateg = ressConf.constantes.categories.liste
 
 /** une liste d'arbre à envoyer après tous les autres, le 1er aura une ref vers chacun des autres */
 var lastArbres = []
-var allArbres = getArbreDefaultValues('labomep_all', 'Tous les arbres xml de Labomep')
-//lastArbres.push(getArbreDefaultValues('tous_les_manuels', 'Manuels Sésamath'))
 
 /**
  * Renvoie les valeurs par défaut pour un arbre
@@ -368,7 +366,6 @@ function getEnfants(arbreXml, xmlName, next) {
 // on vire node et ce fichier passé en 1er arg
 var argv = process.argv.slice(2)
 var xmls = []
-var doCompil = false
 
 log('task ' + __filename)
 
@@ -383,7 +380,6 @@ if (argv[0] === '--xml') {
       xmls.push(file)
     }
   })
-  if (xmls.length) doCompil = true
 }
 
 log('On va parser les xml : ' +xmls.join(', '))
@@ -417,11 +413,6 @@ flow().seq(function () {
   /**
    * Etape 2, traitement de lastArbres
    */
-  if (doCompil) {
-    // on met en dernier le global
-    lastArbres.push(allArbres)
-    //lastArbres.push(lastArbres.shift())
-  }
   if (lastArbres.length) {
     // on remplace par des ids
     log('On traite les ' +lastArbres.length +' ressources de lastArbres')

@@ -1,4 +1,6 @@
 /**
+ * Module js qui exporte une fonction qui prend une chaîne (graphe au format bizarre) et renvoie un graphe en json
+ *
  * Moulinette qui transforme un graphe au format J3P en json (utile pour la bibli)
  * code envoyé par Alexis le 20/01/15 à 16:17, avec correctif du 04/03/15 à 09:56
  */

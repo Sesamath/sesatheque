@@ -1,0 +1,34 @@
+{
+  "titre"        : "Ressources école",
+  "typeTechnique": "arbre",
+  "origine"      : "sesamath",
+  "idOrigine"    : "labomep_ecole",
+  "publie"       : true,
+  "restriction"  : 0,
+  "enfants"      : [
+    {
+      "titre"        : "Animations interactives",
+      "origine"      : "sesaxml",
+      "idOrigine"    : "animations_interactives",
+      "typeTechnique": "arbre"
+    },
+    {
+      "titre"        : "Exercices interactifs",
+      "origine"      : "sesaxml",
+      "idOrigine"    : "exercices_interactifs",
+      "typeTechnique": "arbre"
+    },
+    {
+      "titre"        : "Tests diagnostiques",
+      "origine"      : "sesaxml",
+      "idOrigine"    : "tests_algebre",
+      "typeTechnique": "arbre"
+    },
+    {
+      "titre": "Cahier CM2 2013",
+      "origine": "ouvrage",
+      "idOrigine": "cscm2_2012",
+      "typeTechnique": "arbre"
+    }
+  ]
+}
