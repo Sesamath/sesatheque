@@ -30,7 +30,7 @@ function purge_varnish() {
 
     find construct/*/public -type f $findOpt | while read file
     do
-      url=$vhost${f#*public} # on démarre au / qui suit build
+      url=$vhost${file#*public} # on démarre au / qui suit build
       echo -n "$url : "
       curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
       echo
