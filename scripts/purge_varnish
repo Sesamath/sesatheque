@@ -1,7 +1,8 @@
 #!/bin/bash
+set -u
 
 LAST_FILE=_private/purge_varnish.last
-CONFIG=../_private/config.js
+CONFIG=_private/config.js
 
 dirInitial="$PWD"
 dirApp=$(dirname $0)/../
@@ -20,11 +21,14 @@ function purge_varnish() {
   local file
   local url
   local vhost=$(sed -nre "/baseUrl/ s/^.*:[^\"']*[\"']([^\"']+)[\"'].*\$/\1/p" $CONFIG)
+  local findOpt=''
+  [ -f $LAST_FILE ] && findOpt="-newer '$LAST_FILE'"
   if [ -z "$vhost" ]
   then
     echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
   else
-    find construct/*/public -type f -mmin -10 | while read file
+
+    find construct/*/public -type f $findOpt | while read file
     do
       url=$vhost${f#*public} # on démarre au / qui suit build
       echo -n "$url : "
