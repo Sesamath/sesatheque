@@ -372,9 +372,11 @@
      * Cache le titre (en global pour que les plugins puissent le faire)
      */
     window.hideTitle = function () {
-      var titre = wd.getElementById('titre');
-      if (titre) titre.style = "display: none";
-      w.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
+      try {
+        var titre = wd.getElementById('titre');
+        if (titre && titre.style) titre.style.display = "none";
+        w.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
+      } catch (e) { /* tant pis */ }
     }
 
     /**
