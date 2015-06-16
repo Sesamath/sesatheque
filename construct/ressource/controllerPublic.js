@@ -44,10 +44,16 @@
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $views, $routes) {
   //var tools = require('../tools')
 
+  /**
+   * Charge une ressource publique et l'affiche
+   * @param context
+   * @param view
+   * @param options
+   */
   function affiche(context, view, options) {
     var oid = context.arguments.oid
     $ressourceRepository.loadPublic(oid, function (error, ressource) {
-      $views.prepareAndSend(error, ressource, context, view, options)
+      $views.prepareAndSend(context, error, ressource, view, options)
     })
   }
 

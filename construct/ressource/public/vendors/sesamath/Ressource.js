@@ -68,153 +68,183 @@ if (typeof define === 'function') {
  * @constructor Ressource
  */
 function Ressource(initObj) {
-  if (!initObj) initObj = {}
+  var values
+  if (initObj) {
+    // clonage du fainéant (on veut que les propriétés sans prototype)
+    try {
+      values = JSON.parse(JSON.stringify(initObj));
+    } catch (e) {
+      if (console && typeof console.error === 'function') console.error(e)
+      values = {}
+    }
+  }else {
+    values = {}
+  }
   /**
    * L'identifiant interne à cette Sésathèque
    * @type {number}
    */
-  this.oid = filters.int(initObj.oid) || undefined; // on préfère l'absence de propriété à 0
-  /**
-   * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
-   * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
-   * Viré au save s'il est vide
-   */
-  this.warnings = filters.arrayString(initObj.warnings)
+  this.oid = filters.int(values.oid) || undefined; // on préfère l'absence de propriété à 0
   /**
    * identifiant du dépôt d'origine (où est stockée et géré la ressource), reste null si créé ici
    * @type {String}
    */
-  this.origine = filters.string(initObj.origine);
+  this.origine = filters.string(values.origine);
   /**
    * Id de la ressource dans son dépôt d'origine
    * @type {String}
    */
-  this.idOrigine = filters.string(initObj.idOrigine);
+  this.idOrigine = filters.string(values.idOrigine);
   /**
    * Le code du plugin qui gère la ressource
    * @type {String}
    */
-  this.typeTechnique = filters.string(initObj.typeTechnique);
+  this.typeTechnique = filters.string(values.typeTechnique);
   /**
    * Titre
    * @type {string}
    */
-  this.titre = filters.string(initObj.titre);
+  this.titre = filters.string(values.titre);
   /**
    * Résumé qui apparait souvent au survol du titre ou dans les descriptions brèves, destiné à tous
    * @type {String}
    */
-  this.resume = filters.string(initObj.resume);
+  this.resume = filters.string(values.resume);
   /**
    *  Description plus complète, facultative (préférer le résumé)
    *  @type {String}
    */
-  this.description = filters.string(initObj.description);
+  this.description = filters.string(values.description);
   /**
    * Commentaires destinés aux éditeurs, ou au prescipteur de la ressource mais pas à l'utilisateur
    * @type {String}
    */
-  this.commentaires = filters.string(initObj.commentaires);
+  this.commentaires = filters.string(values.commentaires);
+  if (this.typeTechnique === 'arbre') {
+    /**
+     * Les enfants de l'arbre (à la place de la propriété parametres
+     * @type {Object}
+     */
+    this.enfants = (values.enfants instanceof Object) ? values.enfants : {};
+    // on accepte une chaîne json
+    if (values.enfants && typeof values.enfants === 'string') {
+      try {
+        var enfants = JSON.parse(values.enfants);
+        this.enfants = enfants;
+      } catch (error) {
+        if (console && console.error) console.error(error);
+      }
+    }
+  } else {
+    /**
+     * Contenu qui dépend du type technique (toutes les autres infos concernant la ressource de ce type)
+     * @type {Object}
+     */
+    this.parametres = (values.parametres instanceof Object) ? values.parametres : {};
+    // on accepte une chaîne json
+    if (values.parametres && typeof values.parametres === 'string') {
+      try {
+        var parametres = JSON.parse(values.parametres);
+        this.parametres = parametres;
+      } catch (error) {
+        if (console && console.error) console.error(error);
+      }
+    }
+  }
   /**
    * Niveaux scolaire de la ressource, dans son système éducatif par défaut, fr_FR s'il n'est pas précisé
    * @type {Array}
    */
-  this.niveaux = filters.arrayInt(initObj.niveaux);
+  this.niveaux = filters.arrayInt(values.niveaux);
   /**
    * Une catégorie correspond à un recoupement de types, par ex "exercice interactif"
    * @type {Array}
    */
-  this.categories = filters.arrayInt(initObj.categories);
-
+  this.categories = filters.arrayInt(values.categories);
   /**
    * Type pédagogique (5.2 - scolomfr-voc-010) : cours, exercice...
    * C'est un champ conditionné par la catégorie, mais à priori seulement, l'utilisateur peut modifier / enrichir
    * @see "http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=62"
    * @type {Array}
    */
-  this.typePedagogiques = filters.arrayInt(initObj.typePedagogiques);
+  this.typePedagogiques = filters.arrayInt(values.typePedagogiques);
   /**
    * type documentaire (1.9 - scolomfr-voc-004) : image, ressource interactive, son, texte
    * Idem, conditionné par la catégorie mais à priori seulement
    * @see http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=49
    * @type {Array}
    */
-  this.typeDocumentaires = filters.arrayInt(initObj.typeDocumentaires);
+  this.typeDocumentaires = filters.arrayInt(values.typeDocumentaires);
   /**
    * Liste des ressources liées, une liaison étant un array [idLiaison, idRessourceLiée]
    * idRessourceLiée peut être un oid ou une string origine/idOrigine
    * @type {Array}
    */
-  this.relations = filters.array(initObj.relations);
-  /**
-   * Contenu qui dépend du type technique (toutes les autres infos concernant la ressource de ce type)
-   * @type {Object}
-   */
-  this.parametres = (initObj.parametres instanceof Object) ? initObj.parametres : {};
-  // on accepte une chaîne json
-  if (initObj.parametres && typeof initObj.parametres === 'string') {
-    try {
-      var parametres = JSON.parse(initObj.parametres);
-      this.parametres = parametres;
-    } catch(error) {
-      if (console && console.error) console.error(error);
-    }
-  }
-
+  this.relations = filters.array(values.relations);
   /**
    * Liste d'id d'auteurs
    * @type {Array}
    */
-  this.auteurs = filters.arrayInt(initObj.auteurs);
+  this.auteurs = filters.arrayInt(values.auteurs);
   /**
    * Liste d'id de contributeurs
    * @type {Array}
    */
-  this.contributeurs = filters.arrayInt(initObj.contributeurs);
+  this.contributeurs = filters.arrayInt(values.contributeurs);
   /**
    * Liste de noms de groupes partageant cette ressource
    * @type {Array}
    */
-  this.groupes = filters.arrayInt(initObj.groupes);
+  this.groupes = filters.arrayInt(values.groupes);
   /**
    * code langue ISO 639-2 (http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2)
    * @type {String}
    */
-  this.langue = filters.string(initObj.langue) || 'fra';
+  this.langue = filters.string(values.langue) || 'fra';
   /**
    * Vrai si la ressource est publiée (les non-publiées sont visibles par leur auteur et ceux ayant les droits ad hoc)
    * @type {boolean=false}
    */
-  this.publie = !!initObj.publie;
+  this.publie = !!values.publie;
+  /**
+   * Restriction sur la ressource, cf lassi.settings.ressource.constantes.restriction
+   */
+  this.restriction = filters.int(values.restriction)
+  /**
+   * Date de création
+   * @type {Date}
+   */
+  this.dateCreation = filters.date(values.dateCreation) || new Date();
+  /**
+   * Date de mise à jour
+   * @type {Date=undefined}
+   */
+  this.dateMiseAJour = filters.date(values.dateMiseAJour);
+  /**
+   * Version de la ressource
+   * {integer}
+   */
+  this.version = filters.int(values.version) || 1;
   /**
    * Vrai si la ressource est indexable (peut sortir sur des résultats de recherche)
    * Sert à distinguer des ressources "obsolètes" car remplacées par d'autres mais toujours publiées car utilisées.
    * @type {boolean=true}
    */
-  this.indexable = initObj.hasOwnProperty('indexable') ? !!initObj.indexable : true;
+  this.indexable = values.hasOwnProperty('indexable') ? !!values.indexable : true;
   /**
-   * Restriction sur la ressource, cf lassi.settings.ressource.constantes.restriction
+   * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
+   * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
+   * Viré au save s'il est vide
    */
-  this.restriction = filters.int(initObj.restriction)
+  this.warnings = filters.arrayString(values.warnings)
   /**
-   * Date de création
-   * @type {Date}
+   * idem pour des erreurs (qui empêchent le save)
    */
-  this.dateCreation = filters.date(initObj.dateCreation) || new Date();
-  /**
-   * Date de mise à jour
-   * @type {Date=undefined}
-   */
-  this.dateMiseAJour = filters.date(initObj.dateMiseAJour);
-  /**
-   * Version de la ressource
-   * {integer}
-   */
-  this.version = filters.int(initObj.version) || 1;
+  this.errors = filters.arrayString(values.errors)
   /**
    * L'oid de l'archive correspondant à la version précédente
    */
-  this.archiveOid = filters.int(initObj.archiveOid)
+  this.archiveOid = filters.int(values.archiveOid)
   /** Uri d'affichage */
   this.displayUri = (this.restriction ? '/ressource' : '/public') +'/voir/' +(this.oid ? this.oid : this.origine +'/' +this.idOrigine)
   /** Uri de la description */

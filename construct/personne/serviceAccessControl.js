@@ -155,12 +155,11 @@ module.exports = function (Groupe, $settings, $personneRepository) {
   }
 
   /**
-   * Appelle context.accessDenied si l'utilisateur courant n'a pas la permission demandée pour la ressource
-   * (et appelle next(null,ressource) sinon)
+   * Vérifie la permission pour l'utilisateur courant et cette ressource
    * @param permission
    * @param {Context} context
    * @param {Ressource} ressource
-   * @param {Function} next callback qui sera appelée si tout va bien (avec la ressource qu'on nous a donné)
+   * @param {Function} next callback qui sera appelée avec un message d'érreur éventuel (sans arguments sinon)
    */
   $accessControl.checkPermission = function (permission, context, ressource, next) {
     var msg
@@ -171,12 +170,11 @@ module.exports = function (Groupe, $settings, $personneRepository) {
         // ni si l'utilisateur a les droits génériques
         hasGenericPermission(permission, context)
     ) {
-      next(ressource)
-    }
-    // on regarde donc ce user pour cette ressource
-    else if (!$accessControl.isAuthenticated(context)) {
-      context.accessDenied("Authentification requise")
+      next(null, ressource)
+    } else if (!$accessControl.isAuthenticated(context)) {
+      msg = "Authentification requise"
     } else {
+      // on regarde donc ce user pour cette ressource
       switch (permission) {
         // sinon on délègue suivant la permission
         case 'create':
@@ -190,8 +188,7 @@ module.exports = function (Groupe, $settings, $personneRepository) {
         default:
           msg = "Permission " + permission + " inconnue, refusée par défaut"
       }
-      if (msg) context.accessDenied(msg)
-      else next(ressource)
+      next(msg)
     }
   }
 

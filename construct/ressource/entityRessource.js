@@ -36,18 +36,12 @@
  * @param {Entity} Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
  * @param $settings
  */
-module.exports = function (Ressource, $settings) {
+module.exports = function (Ressource) {
 
   var _ = require('lodash')
   var tools = require('../tools')
   var RessourceConstructor = require('./public/vendors/sesamath/Ressource')
   var configRessource = require('./config')
-
-  /**
-   * Retourne le 1er id dispo à utiliser comme idOrigine pour l'origine "local"
-   * Sera initialisé dans $ressourceRepository (une fois l'entité ressource construite)
-   */
-  Ressource.getFreeId = function () {}
 
   /**
    * L'entity Ressource
@@ -57,7 +51,8 @@ module.exports = function (Ressource, $settings) {
    */
   Ressource.construct(function (initObj) {
     var entity = this
-    // on cast d'abord les dates avec notre tools.toDate() qui gère mieux les fuseaux
+    // on cast d'abord les dates avec notre tools.toDate() qui gère mieux les fuseaux,
+    // plus pratique ici que dans le constructeur qui ne peut faire de require
     if (initObj) {
       if (initObj.dateCreation && !initObj.dateCreation instanceof Date) initObj.dateCreation = tools.toDate(initObj.dateCreation)
       if (initObj.dateMiseAJour && !initObj.dateMiseAJour instanceof Date) initObj.dateMiseAJour = tools.toDate(initObj.dateMiseAJour)
@@ -71,37 +66,15 @@ module.exports = function (Ressource, $settings) {
       if (!entity.hasOwnProperty(key) && typeof value !== 'function') entity[key] = value
     })
     // la langue par défaut
-    if (!this.langue) {
-      var langueDefaut = $settings.get('application.ressource.langueDefaut')
-      if (langueDefaut) this.langue = langueDefaut
-    } else if (this.langue === 'fre') this.langue = 'fra' // on rectifie fre en fra
+    if (this.langue) {
+      // on rectifie fre en fra
+      if (this.langue === 'fre') this.langue = 'fra'
+    } else {
+      this.langue = configRessource.langueDefaut
+    }
   })
 
-
-  Ressource.beforeStore(function (next) {
-    // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
-    // et pas de celle de son indexation ici
-    if (!this.dateMiseAJour) {
-      this.dateMiseAJour = new Date()
-    }
-    // cohérence de la restriction
-    if (this.restriction === configRessource.constantes.restriction.groupe && (!this.parametres.allow || !this.parametres.allow.groupes)) {
-      log.error("Ressource " +this.oid +" restreinte à des groupes sans préciser lesquels, on la passe privée")
-      this.restriction = configRessource.constantes.restriction.prive
-    }
-    // si le tableau d'erreur est vide (devrait toujours être le cas,
-    // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-    if (_.isEmpty(this.warnings)) delete this.warnings
-    // on vire aussi les uri, déduite du reste par le constructeur
-    delete this.displayUri
-    delete this.describeUri
-    delete this.dataUri
-    // et l'idOrigine pour une origine locale si la ressource n'en a pas encore un
-    if (this.origine === 'local' && !this.idOrigine) this.idOrigine = Ressource.getFreeId()
-    next()
-  })
-
-  // on peut pas mettre du $cacheRessource en afterStore car il est pas encore défini (il dépend de nous)
+  // on laisse tomber beforeStore et afterStore ici car ils dépendent de nous, c'est le repository qui gère
 
   Ressource
     .defineIndex('origine', 'string')

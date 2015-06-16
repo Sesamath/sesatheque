@@ -17,5 +17,5 @@
     {:else}
         Paramètres manquants pour une suppression (probablement un post sans .
     {/oid}
-{/deletedId}
+{/deletedOid}
 </div>

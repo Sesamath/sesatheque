@@ -210,12 +210,11 @@ var ressourceConfig = {
     //'auteurs'
   },
 
-  // les libellés que l'on affiche pour chaque champ de notre entité
+  /** libellés que l'on affiche pour chaque champ obligatoire (les fonctions qui peuplent les vues bouclent dessus) */
   labels           : {
-    oid               : "Identifiant",
-    version          : "Version",
-    origine           : 'Origine',
-    idOrigine         : "Identifiant d'origine",
+    oid              : "Identifiant",
+    origine          : 'Origine',
+    idOrigine        : "Identifiant d'origine",
     typeTechnique    : "Type technique",
     titre            : "Titre",
     resume           : "Résumé",
@@ -234,13 +233,21 @@ var ressourceConfig = {
     publie           : "Publié",
     restriction      : "Restriction",
     dateCreation     : "Date de création",
-    dateMiseAJour    : "Date de mise à jour"
+    dateMiseAJour    : "Date de mise à jour",
+    version          : "Version",
+    indexable        : "Indexable",
+    archiveOid       : 'Version précédente',
+    displayUri       : 'Voir la ressource',
+    describeUri      : 'Voir la description',
+    dataUri          : 'url des données',
+    // facultatifs
+    enfants          : 'Enfants', // utilisé seulement pour les arbres (à la place de parametres)
   },
 
   // les propriétés dont la modif déclenche un upgrade de version
-  versionTriggers : ['origine', 'idOrigine', 'parametres', 'auteurs', 'contributeurs'],
+  versionTriggers : ['origine', 'idOrigine', 'parametres', 'enfants', 'auteurs', 'contributeurs'],
 
-  // les types requis
+  // les types requis (il faut la même liste de propriétés que labels, et des valeurs * dont _.is* existe)
   typesVar         : {
     oid              : 'Number',
     origine          : 'String',
@@ -250,21 +257,30 @@ var ressourceConfig = {
     resume           : 'String',
     description      : 'String',
     commentaires     : 'String',
+    parametres       : 'Object',
     niveaux          : 'Array',
     categories       : 'Array',
     typePedagogiques : 'Array',
     typeDocumentaires: 'Array',
     relations        : 'Array',
-    parametres       : 'Object',
     auteurs          : 'Array',
     contributeurs    : 'Array',
+    groupes          : 'Array',
     langue           : 'String',
     publie           : 'Boolean',
-    version          : 'Number',
     restriction      : 'Number',
     dateCreation     : 'Date',
-    dateMiseAJour    : 'Date'
+    dateMiseAJour    : 'Date',
+    version          : 'Number',
+    indexable        : 'Boolean',
+    archiveOid       : 'Number',
+    displayUri       : 'String',
+    describeUri      : 'String',
+    dataUri          : 'String',
+    // facultatifs
+    enfants          : 'Object', // en fait un Array, mais pas un array d'id, et comme un Array est aussi un Object...
   },
+
   /**
    * Des constantes pour rendre le code plus lisible
    * (en gros un reverse sur les listes d'ids de nos propriétés)
@@ -278,7 +294,8 @@ var ressourceConfig = {
       exerciceFixe      : 5,
       exerciceAnime     : 6,
       exerciceInteractif: 7,
-      liste             : 8
+      liste             : 8,
+      aucune            : 9 // déclenchera un warning dans $ressourceControl.valide
     },
     typePedagogiques : {
       cours            : 3,

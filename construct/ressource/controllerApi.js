@@ -42,15 +42,54 @@
  * @param {Controller} controller
  * @param $ressourceRepository
  * @param $ressourceConverter
+ * @param $ressourceControl
  * @param $accessControl
  * @param $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $accessControl, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $routes) {
 
   var _ = require('lodash')
   var flow = require('seq')
 
-  var tools = require('../tools')
+  //var tools = require('../tools')
+
+  /**
+   * Transforme un arbre de la bibli en objet pour jstree
+   * @param arbre
+   */
+  function arbreToJstreeData (arbre) {
+    var jstData
+    if (arbre.typeTechnique === 'arbre') {
+      // arbre jstree
+      jstData = {
+        data    : {
+          title: arbre.titre,
+          icon : "folder"
+        },
+        state   : 'open',
+        children: []
+      }
+      if (arbre.enfants && arbre.enfants.length) {
+        arbre.enfants.forEach(function (enfant) {
+          var child
+          if (enfant.typeTechnique === 'arbre') {
+            child = arbreToJstreeData(enfant)
+          } else {
+            child = {
+              data: {title: enfant.titre},
+            }
+            if (enfant.displayUri) child.data.attr = {href: enfant.displayUri}
+          }
+          jstData.children.push(child);
+        });
+      }
+    } else {
+      console.error("arbreToJstreeData appelé avec autre chose qu'un arbre :", arbre);
+      jstData = { error: "La ressource n'était pas un arbre"}
+    }
+
+    return jstData
+  }
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
@@ -228,7 +267,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // on sauvegarde le nouveau titre
               log.debug("titre de " +ressource.oid +" changé : " +ressource.titre +' => ' +newTitre)
               ressource.titre = newTitre
-              ressource.store()
+              $ressourceRepository.write(ressource) // pas de next, on laisse comme c'était si ça plante
           }
     }
   }
@@ -251,107 +290,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       _.merge(ressourceBdd, ressourceNew)
       if (final) final(context, ressourceBdd)
       else write(context, ressourceBdd)
-    }
-  }
-
-  //noinspection FunctionWithMoreThanThreeNegationsJS
-  /**
-   * Parse les enfants de l'arbre et remplace
-   * @param context
-   * @param ressource
-   */
-  function populateArbre(context, ressource) {
-
-    /**
-     * Enregistre la ressource avant de répondre ok ou error
-     */
-    function suite() {
-      write(context, ressource)
-    }
-
-    /**
-     * Parcours les enfants de parent pour les transformer et appeler nextStep
-     * (sans argument, nextStep peut être le this de seq)
-     * @param parent
-     * @param nextStep
-     */
-    function populateEnfants(parent, nextStep) {
-      /**
-       * Met à jour un enfant chez son parent d'après une ressource récupérée en bdd
-       * @param enfantIndex
-       * @param ressourceBdd
-       * @param next
-       */
-      function updateEnfant(enfantIndex, ressourceBdd, next) {
-        var enfant = parent.enfants[enfantIndex]
-        if (ressourceBdd) {
-          updateTitre(ressourceBdd, enfant.titre)
-          var newEnfant = {
-            oid          : ressourceBdd.oid,
-            titre        : ressourceBdd.titre,
-            typeTechnique: ressourceBdd.typeTechnique
-          }
-          if (enfant.contenu) newEnfant.contenu = enfant.contenu
-          if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
-          // visiblement seq casse les références, on affecte directement à la variable parent restée hors du flux
-          parent.enfants[enfantIndex] = newEnfant
-        } else {
-          // sinon on laisse en l'état mais on logue
-          log.errorData("On a pas trouvé la ressource " +enfant.idOrigine +' ' +enfant.id)
-          parent.enfants[enfantIndex].titre += ' (non trouvé)'
-        }
-        populateEnfants(parent.enfants[enfantIndex], next)
-      }
-
-      if (parent.enfants && parent.enfants.length) {
-        flow(parent.enfants)
-          // seqEach passe au suivant de la boucle quand la cb appelle this
-          // et au seq suivant quand la dernière cb appele this
-          .seqEach(function (enfant, enfantIndex) {
-            var finEach = this
-            // pour permettre de récupérer des objets d'après leur ref d'origine, on accepte aussi id et idOrigine (à la place de ref)
-            if (enfant.origine && enfant.idOrigine) {
-              // on le cherche en db
-              //var logSuffix = enfant.idOrigine + ' - ' + enfant.id
-              //log('load ' + logSuffix)
-              $ressourceRepository.loadByOrigin(enfant.origine, enfant.idOrigine, function (error, ressource) {
-                log("on traite l'enfant " +enfant.titre +" et on a récupéré ", ressource)
-                updateEnfant(enfantIndex, ressource, finEach)
-              })
-            } else if (enfant.ref) {
-              $ressourceRepository.load(enfant.ref, function (error, ressource) {
-                updateEnfant(enfantIndex, ressource, finEach)
-              })
-            } else {
-              // pas de ref ni idOrigine
-              populateEnfants(enfant, finEach)
-            }
-          }) // seqEach
-          .seq(function () {
-            nextStep()
-          })
-          .catch(function(error) {
-            log.error(new Error("L'analyse de l'arbre a planté (cf aussi erreur suivante)"), parent)
-            log.error(error)
-            nextStep()
-          })
-      } else {
-        nextStep()
-      }
-    } // populateEnfants
-
-    // checks
-    if (ressource.typeTechnique !== 'arbre') {
-      sendJson(context, new Error("Impossible de peupler une ressource autre qu'un arbre"))
-    } else if (!ressource.enfants ||
-        !ressource.enfants instanceof Array ||
-        !ressource.enfants.length
-    ) {
-      log.debug('arbre vide', ressource)
-      sendJson(context, new Error("Impossible de peupler un arbre vide"))
-    } else {
-      // go
-      populateEnfants(ressource, suite)
     }
   }
 
@@ -423,7 +361,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     log.debug('post /api/ressource a reçu', context.post, 'api', {max:1000})
 
-    $ressourceConverter.valideRessourceFromPost(context.post, partial, function (error, ressource) {
+    $ressourceControl.valideRessourceFromPost(context.post, partial, function (error, ressource) {
       try {
         if (error) {
           sendJson(context, error)
@@ -587,18 +525,48 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
 
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+    $ressourceRepository.loadPublicByOrigin(origine, idOrigine, function (error, ressource) {
       if (error) sendJson(context, error)
-      else if (ressource) {
-        if (ressource.restriction === 0) {
-          sendJson(context, null, {
-             ref : ressource.oid,
-             titre : ressource.titre,
-             typeTechnique : ressource.typeTechnique
-          })
-        }
-        else  denied(context, "Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine)
-      } else notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas")
+      else if (ressource && ressource.restriction === 0) {
+        sendJson(context, null, {
+           ref : ressource.oid,
+           titre : ressource.titre,
+           typeTechnique : ressource.typeTechnique
+        })
+      } else {
+        notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
+      }
+    })
+  })
+
+  controller.get('getJsTree/:origine/:idOrigine', function (context) {
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+
+    $ressourceRepository.loadPublicByOrigin(origine, idOrigine, function (error, ressource) {
+      if (error) {
+        sendJson(context, error)
+      } else if (ressource && ressource.typeTechnique === 'arbre' && $accessControl.hasReadPermission(context, ressource)) {
+        sendJson(context, null, arbreToJstreeData(ressource))
+      } else {
+        notFound(context, "Impossible de récupérer l'arbre " + origine + '/' + idOrigine +
+                          " (elle n'existe pas ou n'est pas un arbre ou vous n'avez pas suffisamment de droits pour y accéder)")
+      }
+    })
+  })
+
+  controller.get('getJsTree/:oid', function (context) {
+    var oid = context.arguments.oid
+
+    $ressourceRepository.load(oid, function (error, ressource) {
+      if (error) {
+        sendJson(context, error)
+      } else if (ressource && ressource.typeTechnique === 'arbre' && $accessControl.hasReadPermission(context, ressource)) {
+        sendJson(context, null, arbreToJstreeData(ressource))
+      } else {
+        notFound(context, "Impossible de récupérer l'arbre " + oid +
+                          " (elle n'existe pas ou n'est pas un arbre ou vous n'avez pas suffisamment de droits pour y accéder)")
+      }
     })
   })
 
@@ -643,64 +611,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } else {
       denied(context, "Il faut être authentifié pour accéder à ses ressources")
     }
-  })
-
-  /**
-   * Create / update une ressource à partir du post d'un arbre
-   * Si l'arbre posté contient une ref mais pas d'enfant, on tentera de mettre à jour 
-   * la racine de l'arbre en référence
-   * Avec une ref et des enfants on écrase l'ancien s'il existait ou on signale l'erreur (ref incorrecte)
-   */
-  controller.post('arbre', function (context) {
-    var partial = context.post.ref && !context.post.enfants
-    var oid = parseInt(context.post.ref, 10) || 0
-    log.perf(context.response, 'start-' +oid)
-    log.debug('post avec populate ' + context.get.populate)
-
-    // si on passe ?populate=1 dans l'url on parse les enfants pour récupérer titre et type
-    // sinon on laisse en l'état
-    var final = (context.get.populate) ? populateArbre : write
-    $ressourceConverter.valideRessourceFromPostedArbre(context.post, partial, function (error, ressource) {
-      // log.debug("dans api arbre on récupère", ressource)
-      try {
-        if (error) {
-          sendJson(context, error)
-        } else if (partial) {
-          $ressourceRepository.load(oid, function (error, ressourceBdd) {
-            updateAndOut(context, error, ressourceBdd, ressource, final)
-          })
-        } else {
-          final(context, ressource);
-        }
-      } catch (error) {
-        sendJson(context, error)
-      }
-    })
-
-  })
-
-  // Read arbre
-  controller.get('arbre/:oid', function (context) {
-    var oid = context.arguments.oid
-
-    $ressourceRepository.load(oid, function (error, ressource) {
-      // log.debug("dans api get " +oid, ressource)
-      if (error) {
-        sendJson(context, error)
-      } else if (ressource) {
-        if (ressource.typeTechnique === 'arbre') {
-          if ($accessControl.hasReadPermission(context, ressource)) {
-            sendJson(context, null, $ressourceConverter.toArbre(ressource))
-          } else {
-            denied(context, "Droits insuffisants pour accéder à la ressource " + oid)
-          }
-        } else {
-          notFound(context, "La ressource d'identifiant " + oid + " n'est pas un arbre")
-        }
-      } else {
-        notFound(context, "La ressource d'identifiant " + oid + " n'existe pas")
-      }
-    })
   })
 
   /**

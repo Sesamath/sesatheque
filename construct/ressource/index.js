@@ -52,12 +52,9 @@ ressourceComponent.entity('Archive', function () {
   require('./entityArchive')(this)
 })
 
-ressourceComponent.service('$ressourceControl', function() {
-  return require('./serviceRessourceControl')()
-})
 
-ressourceComponent.entity('Ressource', function ($ressourceControl) {
-  require('./entityRessource')(this, $ressourceControl)
+ressourceComponent.entity('Ressource', function () {
+  require('./entityRessource')(this)
 })
 
 ressourceComponent.service('$cacheRessource', function($cache, $settings, Ressource) {
@@ -72,12 +69,16 @@ ressourceComponent.service('$ressourceRepository', function(Ressource, Archive, 
   return require('./serviceRessourceRepository')(Ressource, Archive, $ressourceControl, $cacheRessource)
 })
 
-ressourceComponent.service('$ressourceConverter', function (Ressource, $routes, $ressourceControl) {
-  return require('./serviceRessourceConverter')(Ressource, $routes, $ressourceControl)
+ressourceComponent.service('$ressourceControl', function(Ressource) {
+  return require('./serviceRessourceControl')(Ressource)
 })
 
-ressourceComponent.service('$views', function ($ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
-  return require('./serviceViews')($ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings)
+ressourceComponent.service('$ressourceConverter', function (Ressource, $ressourceRepository, $routes) {
+  return require('./serviceRessourceConverter')(Ressource, $ressourceRepository, $routes)
+})
+
+ressourceComponent.service('$views', function (Ressource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+  return require('./serviceViews')(Ressource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings)
 })
 
 // nos ressources statiques
@@ -86,8 +87,8 @@ ressourceComponent.controller(function () {
 })
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $accessControl, $views, $routes, $settings) { // jshint ignore:line
-  require('./controllerHtml')(this, $ressourceRepository, $ressourceConverter, $accessControl, $views, $routes, $settings)
+ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) { // jshint ignore:line
+  require('./controllerHtml')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes)
 })
 
 // un controleur html pour des pages publiques sans session
@@ -96,8 +97,8 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $accessControl, $routes) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $accessControl, $routes)
+ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $routes) {
+  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $routes)
 })
 
 /**

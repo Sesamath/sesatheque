@@ -31,16 +31,11 @@
 
 'use strict';
 
-/**
- * Init de notre service $ressourceControl
- */
-module.exports = function () {
+module.exports = function (Ressource) {
   /**
-   * Service de validation d'une ressource
+   * Service de validation / controle du contenu d'une ressource
    * @namespace $ressourceControl
    * @requires Ressource
-   * @requires $accessControl
-   * @requires $cacheRessource
    */
   var $ressourceControl = {}
 
@@ -53,21 +48,111 @@ module.exports = function () {
    * Ajoute les propriétés qui peuvent être déduites (deductions définies dans la configuration)
    * - categories si vide et que typeTechnique permet de le deviner
    * - typePedagogiques et typeDocumentaires si categories n'en contient qu'une et qu'elle permet de les déduire
-   * @param ressource
+   * @param {Ressource} ressource une ressource (ou des datas qui y ressemblent)
    */
-  $ressourceControl.addDeductions = function (ressource) {
-    // on essaie de déduire categories de typeTechnique
+  function addDeductions(ressource) {
+    // on normalise ces champs pour être sûr d'avoir des array
+    if (!_.isArray(ressource.categories))        ressource.categories = []
+    if (!_.isArray(ressource.typePedagogiques))  ressource.typePedagogiques = []
+    if (!_.isArray(ressource.typeDocumentaires)) ressource.typeDocumentaires = []
+    // si categories absent on essaie de le déduire de typeTechnique
     if (ressource && ressource.typeTechnique && _.isEmpty(ressource.categories) && config.typeTechniqueToCategories[ressource.typeTechnique]) {
       ressource.categories = config.typeTechniqueToCategories[ressource.typeTechnique]
     }
-    // typePedagogiques et typeDocumentaires d'après catégories (si une seule)
-    if (ressource && ressource.categories && ressource.categories.length === 1) {
-      var categorie = ressource.categories[0]
-      if (config.categoriesToTypes[categorie]) {
-        if (_.isEmpty(ressource.typePedagogiques)) ressource.typePedagogiques = config.categoriesToTypes[categorie].typePedagogiques
-        if (_.isEmpty(ressource.typeDocumentaires)) ressource.typeDocumentaires = config.categoriesToTypes[categorie].typeDocumentaires
+    // puis typePedagogiques et typeDocumentaires d'après catégories
+    if (ressource && ressource.categories && ressource.categories.length) {
+      var noTp = _.isEmpty(ressource.typePedagogiques)
+      var noTd = _.isEmpty(ressource.typeDocumentaires)
+      if (noTp || noTd) {
+
+        // on se penche sur la question
+        ressource.categories.forEach(function (categorie) {
+          if (config.categoriesToTypes[categorie]) {
+            if (noTp) {
+              config.categoriesToTypes[categorie].typePedagogiques.forEach(function (tp) {
+                ressource.typePedagogiques.push(tp)
+              })
+            }
+            if (noTd) {
+              if (!_.isArray(ressource.typeDocumentaires)) ressource.typeDocumentaires = []
+              config.categoriesToTypes[categorie].typeDocumentaires.forEach(function (tp) {
+                ressource.typeDocumentaires.push(tp)
+              })
+            }
+          }
+        })
+
       }
     }
+  }
+
+  /**
+   * Ajoute des warnings éventuels (arbre sans enfants ou catégorie mise à "non défini")
+   * @param ressource
+   */
+  function addWarnings(ressource) {
+    function addWarning(warning) {
+      if (!ressource.warnings) ressource.warnings = []
+      ressource.warnings.push(warning)
+    }
+    // on ajoute un warning pour les enfants
+    if (ressource.typeTechnique === 'arbre' && (!ressource.enfants || !ressource.enfants.length)) {
+      addWarning('arbre sans enfants')
+    }
+    // la catégorie non définie
+    if (!ressource.categories || ressource.categories[0] === config.constantes.categories.aucune) {
+      addWarning('pas de catégorie définie')
+    }
+  }
+
+  /**
+   * Vérifie que tous les champs qui doivent être des array le sont et met des tableaux vides sinon
+   * ajoute warnings et errors, qui seront éventuellement virés s'ils sont vides avant envoi à la vue
+   * @param {Ressource} ressource
+   */
+  function normalizeArrays(ressource) {
+    _.each(config.typesVar, function (typeVar, key) {
+      if (typeVar === 'Array') {
+        if (!_.isArray(ressource[key])) ressource[key] = []
+      }
+    })
+  }
+
+  /**
+   * Retourne la liste des erreurs rencontrées lors du parsing des enfants
+   * @param enfants
+   * @param titreParent Pour rendre les messages d'erreurs plus précis
+   * @return {Array}
+   */
+  $ressourceControl.getEnfantsErrors = function (enfants, titreParent) {
+    var errors = []
+    titreParent = titreParent || 'la racine'
+    if (_.isArray(enfants)) {
+      enfants.forEach(function (enfant, i) {
+        if (!enfant.titre) errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de titre")
+        if (!enfant.typeTechnique) errors.push("L'enfant d'index " + i + " n'a pas de typeTechnique")
+        if (!enfant.ref) errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
+        else if (enfant.ref < 1 && (typeof enfant.ref !== 'string' || !/^[\w]+\/[\w]+$/.exec(enfant.ref)))
+          errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
+        if (enfant.enfants && enfant.enfants.length) {
+          var newErrors = $ressourceControl.getEnfantsErrors(enfant.enfants, enfant.titre)
+          if (newErrors.length) Array.prototype.push.apply(errors, newErrors)
+        }
+      })
+    } else {
+      errors.push("Enfants doit être un tableau d'objets Ref")
+    }
+
+    return errors
+  }
+
+  /**
+   * Renvoie un token aléatoire
+   * pas aussi random que l'usage de crypto ou d'un module npm dédié mais suffisant pour notre besoin
+   * @returns {string}
+   */
+  $ressourceControl.getToken = function () {
+    return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
   }
 
   /**
@@ -77,22 +162,27 @@ module.exports = function () {
    * @param {boolean} [strict=true] Passer false pour ne faire que les conversion de type
    *                                sans renvoyer une erreur pour les champs manquants
    * @param {Function} next Callback appelé en synchrone qui recevra les arguments (error, ressource)
+   *                        Si error est vide, la ressource est valide
+   *                        Sinon renvoie la ressource avec ses errors (+warnings éventuels, cast éventuels effectués)
    */
   $ressourceControl.valide = function(ressource, strict, next) {
+    /** erreur qui sera passée à next */
+    var error = null
+    /** tableau de messages d'erreur qui sera concaténé dans error */
+    var errors = []
     if (!next) {
       next = strict
       strict = true
     }
     if (!next) throw new Error('pas de callback fournie')
 
-    /** tableau d'erreurs qui sera concaténé et passé à next si non vide */
-    var errors = []
 
     if (_.isEmpty(ressource)) {
       errors.push("Ressource vide");
     } else {
-      $ressourceControl.addDeductions(ressource)
-      // vérif présence et type
+      normalizeArrays(ressource)
+      addDeductions(ressource)
+      // vérif présence et type, on boucle sur typesVar
       _.each(config.typesVar, function (typeVar, key) {
         var champ = config.labels[key]
         var value = ressource[key]
@@ -100,6 +190,7 @@ module.exports = function () {
 
         // propriétés obligatoires
         if (strict && config.required[key]) {
+          // un checkbox false est [false]
           if (!value || (value instanceof Array && !value.length)) {
             errors.push("Le champ " + config.labels[key] + " est obligatoire ")
             log.errorData(ressource.oid +' a une valeur requise manquante : ' +key +' => ' +tools.stringify(value))
@@ -107,9 +198,9 @@ module.exports = function () {
         }
 
         // vérif des types et cast éventuel
-        if (value) {
+        if (typeof value !== 'undefined') {
           if (!_['is' + typeVar](value)) {
-            // on tente du cast
+            // pas le bon type, on tente du cast
 
             if (typeVar === 'String') {
               // on tolère les nombres
@@ -132,10 +223,8 @@ module.exports = function () {
               else errors.push("Le champ " + champ +' vaut ' +value +" qui n'est pas un booléen")
 
             } else if (typeVar === 'Array') {
-              if (_.isArray(value)) {
-                ressource[key] = tools.integerify(value)
-              } else if (_.isString(value) && value.substr(0,1) === '[' && value.substr(-1) === ']') {
-                // on tolère une string "[1,2]"
+              // on tolère une string "[1,2]"
+              if (_.isString(value) && value.substr(0,1) === '[' && value.substr(-1) === ']') {
                 try {
                   buffer = JSON.parse(value)
                   ressource[key] = tools.integerify(buffer) // c'était du json valide
@@ -149,7 +238,18 @@ module.exports = function () {
             } else if (typeVar === 'Object') {
               if (_.isString(value)) {
                 try {
-                  ressource[key] = JSON.parse(value);
+                  buffer = JSON.parse(value);
+                  if (key === 'enfants') {
+                    var errEnfants = $ressourceControl.getEnfantsErrors(buffer, ressource.titre)
+                    if (errEnfants && errEnfants.length) {
+                      ressource[key] = value
+                      Array.prototype.push.apply(errors, errEnfants);
+                    } else {
+                      ressource[key] = buffer
+                    }
+                  } else {
+                    ressource[key] = buffer
+                  }
                 } catch (e) {
                   errors.push("Le champ " + champ + " n'est pas du json valide : " + e.toString());
                 }
@@ -161,7 +261,7 @@ module.exports = function () {
               var msg = "Le champ " + champ + " est d'un type non prévu (" +typeVar +')';
               errors.push(msg);
               log.error(msg);
-            } // cast
+            } // fin des cast
 
             //log.debug("à la validation on a reçu pour " + key +' (pas ' +typeVar +') la valeur : ', value)
 
@@ -178,11 +278,62 @@ module.exports = function () {
           }
         }
       }) // fin each
-    }
+      addWarnings(ressource)
+      //log.debug('après addWarnings', ressource.warnings)
+      //log.debug('après addWarnings, enfants de ' +ressource.typeTechnique, ressource.enfants)
+    } // else non vide
 
-    if (errors.length) errors = new Error("Ressource invalide : \n" + errors.join("\n"))
-    else errors = null
-    next(errors, ressource)
+    if (errors.length) {
+      if (ressource) ressource.errors = errors
+      error = new Error("Ressource invalide : \n" + errors.join("\n"))
+    }
+    // nettoyage
+    if (ressource.errors && !ressource.errors.length) delete ressource.errors
+    if (ressource.warnings && !ressource.warnings.length) delete ressource.warnings
+
+    next(error, ressource)
+  }
+
+
+  /**
+   * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
+   * Ajoute des choses dans ressource.warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
+   *
+   * @param {object} data Le post
+   * @param {boolean} [partial=false] Passer true pour ne pas générer d'erreur sur des champs requis manquants
+   * @param {function} next Si appelé sans error, la ressource est valide,
+   *                        sinon y'a une error et des warnings|errors ajouté à la ressource initiale qui est renvoyée modifiée
+   * @memberOf $ressourceControl
+   */
+  $ressourceControl.valideRessourceFromPost = function (data, partial, next) {
+    try {
+      if (_.isEmpty(data)) throw new Error("Ressource vide")
+      //log.debug('data reçues en post', data, 'html', {max:500})
+      if (data.ressource) {
+        // on nous envoie la ressource en json dans une string
+        try {
+          data = JSON.parse(data.ressource)
+        } catch (error) {
+          throw new Error("json invalide dans la propriété ressource postée")
+        }
+      }
+
+      // on peut tenter une validation
+      $ressourceControl.valide(data, !partial, function (error, ressource) {
+        // en cas de pb de validation on renvoie aussi la ressource à l'origine du pb, éventuellement un peu nettoyée
+        if (error) next(error, ressource)
+        // si partiel, faut pas retourner un objet ressource complet mais seulement ce que l'on a construit à partir des datas
+        else if (partial) next(null, ressource)
+        // mais sinon on renvoie une vraie "Ressource"
+        else {
+          var objRessource = Ressource.create(ressource)
+          next(null, objRessource)
+        }
+      })
+
+    } catch (error) {
+      next(error, data)
+    }
   }
 
   return $ressourceControl

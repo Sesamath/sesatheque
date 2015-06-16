@@ -123,13 +123,14 @@ function getPrefix() {
  * @param stream
  */
 function out(message, objectToDump, filter, stream, options) {
+  if (!options) options = {}
   if (!filter || !exclusions[filter]) {
     // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
     if (message instanceof Error) message = message.stack + '\n'
     if (objectToDump) {
       if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
       else {
-        var dump = tools.stringify(objectToDump)
+        var dump = tools.stringify(objectToDump, options.indent)
         var max = options && options.max || 200
         if (dump.length > max) dump = dump.substr(0, max) + '…'
         message += '\n' +dump  + "\n";

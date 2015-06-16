@@ -28,23 +28,34 @@
     <p>{resume.title} : {resume.value|nl2br}</p>
     <p>{description.title} : {description.value|nl2br}</p>
     <p>{commentaires.title} : {commentaires.value|nl2br}</p>
+
     {?enfants}
       {! on ajoute une liste de liens vers chaque enfant !}
-      <ul>Liens vers les enfants :{#enfantsDescribe}<li><a href="{url}">{titre}</a></li>{/enfantsDescribe}<ul>
+      <ul>Liens vers les enfants :
+        {#enfantsDescribe}<li><a href="{url}">{titre}</a></li>{/enfantsDescribe}
+      </ul>
       <p>{enfants.title} : <pre>{enfants.value|js2}</pre></p>
-    {:else}<p>{parametres.title} : <pre>{parametres.value|js2}</pre></p>{/enfants}
+    {:else}
+      <p>{parametres.title} : <pre>{parametres.value|js2}</pre></p>
+    {/enfants}
 
-    {?auteurs.value}<ul>{auteurs.title} : {#auteurs.value}
-        <li>{?url}<a href="{url}">{nom}</a>{:else}{nom}{/url}</li>
-    {/auteurs.value}</ul>{/auteurs.value}
+    {?auteurs.value}
+      <ul>{auteurs.title} :
+        {#auteurs.value}<li>{?url}<a href="{url}">{nom}</a>{:else}{nom}{/url}</li>{/auteurs.value}
+      </ul>
+    {/auteurs.value}
 
-    {?contributeurs.value}<ul>{contributeurs.titre} : {#contributeurs.value}
-        <li>{?url}<a href="{url}">{nom}</a>{:else}{nom}{/url}</li>
-    {/contributeurs.value}</ul>{/contributeurs.value}
+    {?contributeurs.value}
+      <ul>{contributeurs.title} :
+        {#contributeurs.value}<li>{?url}<a href="{url}">{nom}</a>{:else}{nom}{/url}</li>{/contributeurs.value}
+      </ul>
+    {/contributeurs.value}
 
-    {?relations.value}<ul>{relations.title}
-        {#relations.value}<li>{predicat} {lien|s} ({oid})</li>{/relations.value}
-    </ul>{/relations.value}
+    {?relations.value}
+        <ul>{relations.title}
+            {#relations.value}<li>{predicat} {lien|s} ({oid})</li>{/relations.value}
+        </ul>
+    {/relations.value}
 
 {/error}
 </div>

@@ -1,8 +1,5 @@
 /**
- * Ce script récupère tous le prend un fichier json en argument et le poste vers l'api
- * --arbre fichier.json envoie vers /api/arbre
- * --arbreFull fichier.json envoie vers /api/arbre?populate=1 (ira chercher les enfants pour remplacer les références)
- * --ressource fichier.json envoie vers /api/ressource
+ * Ce script envoie les profils/*.json vers la bibli et construit le labomep_all
  */
 'use strict';
 
@@ -21,16 +18,11 @@ var urlBibli = 'http://'
 urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlBibli += ':'
 urlBibli += serverConf.$server && serverConf.$server.port || '3000'
-var apiToken = serverConf.apiTokens[0]
 
 /** Les enfants que l'on mettra dans sesamath-labomep_all.json */
 var allEnfants = []
 /** Les ids origine/idOrigine que l'on a déjà mis */
 var allEnfantsIds = {}
-
-function parse(arbre) {
-
-}
 
 // en cas d'interruption on veut le résultat quand même
 process.on('SIGTERM', function () {

@@ -1,5 +1,6 @@
 /**
  * Ce script prend un fichier json en argument et le poste vers l'api
+ * @deprecated Ces urls ne sont plus gérée par la bibli
  * --arbre fichier.json envoie vers /api/arbre
  * --arbreFull fichier.json envoie vers /api/arbre?populate=1 (ira chercher les enfants pour remplacer les références)
  * --ressource fichier.json envoie vers /api/ressource

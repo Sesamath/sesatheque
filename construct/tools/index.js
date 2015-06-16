@@ -87,10 +87,12 @@ tools.integerify = function (tab) {
   if (tab instanceof Array) {
     tab.forEach(function (value) {
       if (_.isArray(value)) tabCopy.push(tools.integerify(value))
-      else {
+      else if (typeof value === 'string' || typeof value === 'number') {
         i = parseInt(value, 10)
         if (value == i) tabCopy.push(i)
         else tabCopy.push(value)
+      } else {
+        tabCopy.push(value)
       }
     })
   }
@@ -185,7 +187,7 @@ tools.sanitizeHashKey = function(source) {
  * Idem JSON.stringify mais sans planter, en cas de ref circulaire sur une propriété on renvoie quand même les autres
  * (avec le message d'erreur de JSON.stringify sur la propriété à pb)
  * @param obj
- * @param {number} [indent=2] Le nb d'espaces d'indentation
+ * @param {number} [indent] Le nb d'espaces d'indentation
  * @returns {string}
  */
 tools.stringify = function(obj, indent) {

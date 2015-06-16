@@ -81,9 +81,9 @@ describe('api get', function () {
     request.get(options, function (error, response, ressource) {
       assert.ok(!error)
       assert.ok(!ressource.error)
-      assert.strictEqual(ressource.titre, 'Droites visiblement perpendiculaires')
+      assert.strictEqual(ressource.titre, 'Droites visiblement parallèles')
       assert.strictEqual(ressource.origine, 'em')
-      assert.strictEqual(ressource.idOrigine, '41')
+      assert.strictEqual(ressource.idOrigine, '42')
       doneGet()
     })
   })

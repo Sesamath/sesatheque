@@ -95,8 +95,9 @@ function logInfo() {
   }
 }
 
-describe('api set', function () {
-  it("retourne l'oid de la ressource stockée", function (doneSet) {
+describe('api set, get & del', function () {
+
+  describe('api set', function () {
     var options = {
       url    : urlBibli,
       headers: {
@@ -107,82 +108,84 @@ describe('api set', function () {
     }
     logInfo('on va poster vers ' +urlBibli)
     request.post(options, function (error, response, body) {
-      assert.ok(!error)
-      assert.ok(!body.error)
-      assert.ok(body.oid)
-      oid = body.oid // string
-      assert.deepEqual(body, {oid:oid})
-      // si ce test est passé on a l'oid
-      var ressCloned = tools.clone(ressTest)
-      ressCloned.oid = oid
-
-      describe('api get', function () {
-        it("récupère la ressource em/5000 envoyée précédemment", function (doneGet) {
-          var options = {
-            url    : urlBibli +'/em/5000',
-            json   : true
-          }
-          request.get(options, function (error, response, ressource) {
-            assert.ok(!error)
-            assert.ok(!ressource.error)
-            for (var key in ressCloned) {
-              if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
-            }
-            //logInfo('la ressource récupérée', ressource)
-            doneGet()
-          })
-        })
+      it("retourne l'oid de la ressource stockée", function (doneSet) {
+        assert.ok(!error)
+        assert.ok(!body.error)
+        assert.ok(body.oid)
+        oid = body.oid // string
+        assert.deepEqual(body, {oid: oid})
+        // si ce test est passé on a l'oid
+        var ressCloned = tools.clone(ressTest)
+        ressCloned.oid = oid
+        doneSet()
       })
-
-      describe('api get', function () {
-        it("récupère la ressource " +oid +" envoyée précédemment", function (doneGet) {
-          var options = {
-            url    : urlBibli +'/' +oid,
-            json   : true
-          }
-          request.get(options, function (error, response, ressource) {
-            assert.ok(!error)
-            assert.ok(!ressource.error)
-            for (var key in ressCloned) {
-              if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
-            }
-            doneGet()
-          })
-        })
-      })
-
-      describe('api del', function () {
-        it("prend un 403 si on veut effacer sans token", function (done) {
-          var options = {
-            url    : urlBibli +'/' +oid,
-            json   : true
-          }
-          request.del(options, function (error, response, ressource) {
-            assert.ok(!error)
-            assert.ok(ressource.error)
-            assert.equal(403, response.statusCode)
-            done()
-          })
-        })
-
-        it("vire la ressource " +oid +" envoyée précédemment", function (done) {
-          var options = {
-            url    : urlBibli +'/' +oid,
-            headers: {
-              "X-ApiToken": apiToken
-            },
-            json   : true
-          }
-          request.del(options, function (error, response, ressource) {
-            assert.ok(!error)
-            assert.ok(!ressource.error)
-            assert.equal(oid, ressource.deleted)
-            done()
-          })
-        })
-      })
-
-      doneSet()
     })
+
+    describe('api get', function () {
+      it("récupère la ressource em/5000 envoyée précédemment", function (doneGet) {
+        var options = {
+          url    : urlBibli +'/em/5000',
+          json   : true
+        }
+        request.get(options, function (error, response, ressource) {
+          assert.ok(!error)
+          assert.ok(!ressource.error)
+          for (var key in ressCloned) {
+            if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
+          }
+          //logInfo('la ressource récupérée', ressource)
+          doneGet()
+        })
+      })
+    })
+
+    describe('api get', function () {
+      it("récupère la ressource " +oid +" envoyée précédemment", function (doneGet) {
+        var options = {
+          url    : urlBibli +'/' +oid,
+          json   : true
+        }
+        request.get(options, function (error, response, ressource) {
+          assert.ok(!error)
+          assert.ok(!ressource.error)
+          for (var key in ressCloned) {
+            if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
+          }
+          doneGet()
+        })
+      })
+    })
+
+    describe('api del', function () {
+      it("prend un 403 si on veut effacer sans token", function (done) {
+        var options = {
+          url    : urlBibli +'/' +oid,
+          json   : true
+        }
+        request.del(options, function (error, response, ressource) {
+          assert.ok(!error)
+          assert.ok(ressource.error)
+          assert.equal(403, response.statusCode)
+          done()
+        })
+      })
+
+      it("vire la ressource " +oid +" envoyée précédemment", function (done) {
+        var options = {
+          url    : urlBibli +'/' +oid,
+          headers: {
+            "X-ApiToken": apiToken
+          },
+          json   : true
+        }
+        request.del(options, function (error, response, ressource) {
+          assert.ok(!error)
+          assert.ok(!ressource.error)
+          assert.equal(oid, ressource.deleted)
+          done()
+        })
+      })
+    })
+
   })
 })
