@@ -26,7 +26,7 @@ trap fin EXIT
 
 cd "$dirApp"
 
-# sans options on l'aide
+# sans options on affiche l'aide
 [ $# -lt 1 ] && usage
 
 # check des options

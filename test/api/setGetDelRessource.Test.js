@@ -30,162 +30,167 @@
  */
 
 /**
- * Ce test crée une ressource puis la supprime
- * l'appeler directement en lui passant --prod ou --dev pour tester la bibliotheque de prod ou dev
+ * Ce test crée une ressource puis la supprime, options possibles :
+ * l'appeler directement en lui passant --prod ou --dev pour tester la bibliotheque de prod ou dev,
+ * (sinon c'est la bibli locale)
  * ou --token pour lui passer un token
- *
  */
 
 'use strict'
 /*global describe,it*/
 
-var assert = require("assert")
-var _ = require('lodash')
-var tools = require('../../construct/tools')
-var request = require('request')
-
-var config = require('../../config')
-var apiToken = config.apiTokens[0]
-if (process.argv.indexOf('--token') > -1) {
-  apiToken = process.argv[process.argv.indexOf('--token')]
-}
-var urlBibli = 'http://'
-if (process.argv.indexOf('--prod') > -1) {
-  urlBibli += 'bibliotheque.sesamath.net'
-} else if (process.argv.indexOf('--dev') > -1) {
-  urlBibli += 'bibliotheque.devsesamath.net'
-} else {
-  urlBibli += config.$server && config.$server.hostname || 'localhost'
-  urlBibli += ':'
-  urlBibli += config.$server && config.$server.port || '3000'
-}
-urlBibli += '/api/ressource'
-
-
-var oid
-/** {Ressource} Ressource de test */
-var ressTest = {
-  origine : 'em',
-  idOrigine : '5000', // celle là est pas près d'exister
-  titre : "Ressource pour tester l'api",
-  typeTechnique:'em',
-  resume:'Un résumé bidon sur\ndeux lignes',
-  description:'Une description bidon sur\ndeux lignes',
-  commentaires:'Un commentaire bidon sur\ndeux lignes',
-  niveaux:[10,6],
-  categories:[1,2],
-  // typePedagogiques
-  // typeDocumentaires
-  relations:[[1,1],[14,2]],
-  parametres:{foo:'bar'}, // ajouter des vrais params pour tester le display
-  publie : false
-  // auteurs
-  // contributeurs
-  // langue
-  // indexable, restriction, dateCreation, dateMiseAJour, version, archiveOid
+/**
+ * Affiche les options possibles
+ */
+function usage() {
+  console.log("Ce test enregistre une ressource sur l'api, puis la récupère pour vérifier et l'efface.\n" +
+              "Les options possibles sont :\n" +
+              "--token : passe un token (sinon on prend le 1er trouvé dans la conf de cette appli)\n" +
+              "--prod ou --dev : pour tester bibliotheque.sesamath.net ou bibliotheque.devsesamath.net (sinon locale)\n" +
+              "--debug : affiche qq infos sur ce que l'api retourne\n" +
+              "-h ou --help : affiche cette aide")
+  process.exit()
 }
 
+/**
+ * Log des infos en console si --debug
+ */
 function logInfo() {
-  var arg
-  var prefix = '        '
-  for (var i = 0; i < arguments.length; i++) {
-    arg = arguments[i]
-    if (typeof arg === 'string') arg = prefix +arg
-    console.log(arg)
+  if (isDebug) {
+    var arg
+    var prefix = '        '
+    for (var i = 0; i < arguments.length; i++) {
+      arg = arguments[i]
+      if (typeof arg === 'string') arg = prefix + arg
+      console.log(arg)
+    }
   }
 }
 
-describe('api set, get & del', function () {
+// aide
+if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
+  usage()
+} else {
+  var assert = require("assert")
+  var _ = require('lodash')
+  var tools = require('../../construct/tools')
+  var request = require('request')
 
-  describe('api set', function () {
-    var options = {
-      url    : urlBibli,
-      headers: {
-        "X-ApiToken": apiToken
-      },
-      json   : true,
-      body   : ressTest
-    }
-    logInfo('on va poster vers ' +urlBibli)
-    request.post(options, function (error, response, body) {
-      it("retourne l'oid de la ressource stockée", function (doneSet) {
+  // conf de l'appli
+  var config = require('../../config')
+  // token
+  var apiToken = config.apiTokens[0]
+  if (process.argv.indexOf('--token') > -1) {
+    apiToken = process.argv[process.argv.indexOf('--token')]
+  }
+// url bibli
+  var urlBibli = 'http://'
+  if (process.argv.indexOf('--prod') > -1) {
+    urlBibli += 'bibliotheque.sesamath.net'
+  } else if (process.argv.indexOf('--dev') > -1) {
+    urlBibli += 'bibliotheque.devsesamath.net'
+  } else {
+    urlBibli += config.$server && config.$server.hostname || 'localhost'
+    urlBibli += ':'
+    urlBibli += config.$server && config.$server.port || '3000'
+  }
+  urlBibli += '/api/ressource'
+
+  var isDebug = (process.argv.indexOf('--debug') > -1)
+
+  var oid
+  /** {Ressource} Ressource de test */
+  var ressTest = {
+    origine      : 'em',
+    idOrigine    : '5000', // celle là est pas près d'exister
+    titre        : "Ressource pour tester l'api",
+    typeTechnique: 'em',
+    resume       : 'Un résumé bidon sur\ndeux lignes',
+    description  : 'Une description bidon sur\ndeux lignes',
+    commentaires : 'Un commentaire bidon sur\ndeux lignes',
+    niveaux      : [10, 6],
+    categories   : [1, 2],
+    // typePedagogiques
+    // typeDocumentaires
+    relations    : [[1, 1], [14, 2]],
+    parametres   : {foo: 'bar'}, // ajouter des vrais params pour tester le display
+    publie       : false
+    // auteurs
+    // contributeurs
+    // langue
+    // indexable, restriction, dateCreation, dateMiseAJour, version, archiveOid
+  }
+
+  describe('api set, get & del', function () {
+    var ressCloned = tools.clone(ressTest)
+
+    it("set retourne l'oid de la ressource stockée", function (doneSet) {
+      var options = {
+        url    : urlBibli,
+        headers: {
+          "X-ApiToken": apiToken
+        },
+        json   : true,
+        body   : ressTest
+      }
+      //logInfo('on va poster vers ' + urlBibli)
+      request.post(options, function (error, response, body) {
+        //logInfo('retour du post pour set', body)
         assert.ok(!error)
         assert.ok(!body.error)
         assert.ok(body.oid)
         oid = body.oid // string
         assert.deepEqual(body, {oid: oid})
-        // si ce test est passé on a l'oid
-        var ressCloned = tools.clone(ressTest)
+        // si ce test est passé on a l'oid que l'on ajoute pour les tests suivants
         ressCloned.oid = oid
         doneSet()
       })
     })
 
-    describe('api get', function () {
-      it("récupère la ressource em/5000 envoyée précédemment", function (doneGet) {
-        var options = {
-          url    : urlBibli +'/em/5000',
-          json   : true
+    it("récupère la ressource em/5000 envoyée précédemment", function (done) {
+      var options = {
+        url : urlBibli + '/em/5000',
+        json: true
+      }
+      request.get(options, function (error, response, ressource) {
+        assert.ok(!error)
+        assert.ok(!ressource.error)
+        for (var key in ressCloned) {
+          if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
         }
-        request.get(options, function (error, response, ressource) {
-          assert.ok(!error)
-          assert.ok(!ressource.error)
-          for (var key in ressCloned) {
-            if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
-          }
-          //logInfo('la ressource récupérée', ressource)
-          doneGet()
-        })
+        //logInfo('la ressource récupérée', ressource)
+        done()
       })
     })
 
-    describe('api get', function () {
-      it("récupère la ressource " +oid +" envoyée précédemment", function (doneGet) {
-        var options = {
-          url    : urlBibli +'/' +oid,
-          json   : true
-        }
-        request.get(options, function (error, response, ressource) {
-          assert.ok(!error)
-          assert.ok(!ressource.error)
-          for (var key in ressCloned) {
-            if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
-          }
-          doneGet()
-        })
+    it("prend un 403 si on veut effacer sans token", function (done) {
+      var options = {
+        url : urlBibli + '/' + oid,
+        json: true
+      }
+      request.del(options, function (error, response, ressource) {
+        assert.ok(!error)
+        assert.ok(ressource.error)
+        assert.equal(403, response.statusCode)
+        done()
       })
     })
 
-    describe('api del', function () {
-      it("prend un 403 si on veut effacer sans token", function (done) {
-        var options = {
-          url    : urlBibli +'/' +oid,
-          json   : true
-        }
-        request.del(options, function (error, response, ressource) {
-          assert.ok(!error)
-          assert.ok(ressource.error)
-          assert.equal(403, response.statusCode)
-          done()
-        })
-      })
-
-      it("vire la ressource " +oid +" envoyée précédemment", function (done) {
-        var options = {
-          url    : urlBibli +'/' +oid,
-          headers: {
-            "X-ApiToken": apiToken
-          },
-          json   : true
-        }
-        request.del(options, function (error, response, ressource) {
-          assert.ok(!error)
-          assert.ok(!ressource.error)
-          assert.equal(oid, ressource.deleted)
-          done()
-        })
+    it("vire la ressource " +ressCloned.oid + " précédente", function (done) {
+      var options = {
+        url    : urlBibli + '/' + oid,
+        headers: {
+          "X-ApiToken": apiToken
+        },
+        json   : true
+      }
+      request.del(options, function (error, response, ressource) {
+        assert.ok(!error)
+        assert.ok(!ressource.error)
+        assert.equal(oid, ressource.deleted)
+        done()
       })
     })
 
   })
-})
+}
