@@ -19,8 +19,7 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque#master",
       path : "/var/www/sesatheque",
-      "post-deploy" : "npm install && pm2 startOrRestart _private/pm2App.json5 --env dev"
-
+      "post-deploy" : "npm install && pm2 startOrGracefulReload _private/pm2App.json5 --env dev"
     }
   }
 }
