@@ -493,7 +493,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       $views : __dirname + '/views',
       $metas : {
         css: ['/styles/ressources.css'],
-        js : ['/vendors/requirejs/require.2.1.js']
+        js : ['/vendors/requirejs/require.2.1.18.min.js']
       },
       $layout: '../../static/views/layout-page',
       contentBloc : {$view:viewName}

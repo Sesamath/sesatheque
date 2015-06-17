@@ -124,8 +124,35 @@ Arbre.prototype.toRessource = function () {
   return r;
 }
 
-Arbre.prototype.fromRessource = function (ressource) {
-  var a = new Arbre(ressource)
-  // on ajoute id et idOrigine si besoin
+Arbre.prototype.toJstree = function(arbre) {
+  var jstData
+  if (this.typeTechnique === 'arbre') {
+    jstData = {
+      data    : {
+        title: this.titre,
+        icon : "folder"
+      },
+      state   : 'open',
+      children: []
+    }
+    if (this.enfants && this.enfants.length) {
+      this.enfants.forEach(function (enfant) {
+        var child
+        if (enfant.typeTechnique === 'arbre') {
+          child = arbreToJstreeData(enfant)
+        } else {
+          child = {
+            data: {title: enfant.titre},
+          }
+          if (enfant.displayUri) child.data.attr = {href: enfant.displayUri}
+        }
+        jstData.children.push(child);
+      });
+    }
+  } else {
+    console.error("arbreToJstreeData appelé avec autre chose qu'un arbre :", this);
+    jstData = { error: "La ressource n'était pas un arbre"}
+  }
 
+  return jstData
 }

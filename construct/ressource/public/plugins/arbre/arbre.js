@@ -32,23 +32,44 @@
 /**
  * @file Affiche un arbre
  */
+/* global define, window, $ */
 
-/* global define, module*/
-define(['jquery211', 'jqueryUi1111DialogRedmond'], function () {
-  "use strict";
-  var arbre = {};
+try {
+  define(['jquery1', 'jstree', 'Arbre'], function (jq, jstree, Arbre) {
+    "use strict";
+    /** Notre module */
+    var moduleArbre = {};
+    var w = window;
 
-  /**
-   * Affiche l'arbre
-   * @param {Object}   ressource  L'arbre dans son format "ressource"
-   * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                              et éventuellement resultCallback)
-   * @param {Function} next       La fct à appeler quand la ressource sera chargée (sans argument ou avec une erreur)
-   */
-  arbre.display = function (ressource, options, next) {
-   // @todo à implémenter de la même manière que dans labomep
-  };
+    /**
+     * Affiche l'arbre
+     * @param {Object}   ressource  L'arbre dans son format "ressource"
+     * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
+     *                              et éventuellement resultCallback)
+     * @param {Function} next       La fct à appeler quand la ressource sera chargée (sans argument ou avec une erreur)
+     */
+    moduleArbre.display = function (ressource, options, next) {
+      var container = options.container;
+      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+      var errorsContainer = options.errorsContainer;
+      if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
+      // Ajout css
+      if (options.baseUrl) w.addCss(options.baseUrl + 'jstree/themes/default/style.min.css'); // si on a pas tant pis pour le css
 
-  return arbre;
-});
+      // le message en attendant le chargement
+      w.addElement(container, "div", {id: 'jstree'}, "Chargement de l'arbre " + ressource.oid + " en cours.");
+
+      var ressArbre = new Arbre(ressource)
+      var jstData = ressArbre.toJstree()
+      if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
+      $('#jstree').jstree(jstData);
+
+    };
+
+    return moduleArbre;
+  });
+} catch (error) {
+  if (typeof window.setError !== 'undefined') window.setError(error.toString())
+  if (typeof console !== 'undefined' && console.error) console.error(error)
+}
 

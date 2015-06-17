@@ -4,20 +4,86 @@
 <head lang="fr">
     <meta charset="UTF-8">
     <title>Page statique de test</title>
-    <script type="application/javascript">
-var toto = {
-  saveResult: function (result) {
-    console.log("Le saveResult du parent a reçu l'objet");
-    console.log(result);
-  }
-};
-    </script>
+    <link rel="stylesheet" href="/vendors/jstree/dist/themes/default/style.min.css" />
+    <link rel="stylesheet" href="/styles/ressources.css" />
+    <script type="application/javascript" src="/vendors/jquery/jquery.1.11.3.min.js"></script>
+    <script type="application/javascript" src="/vendors/jstree/dist/jstree.min.js"></script>
     <style type="text/css">
-html{height: 100%;}
-body {margin: 0;padding: 0;min-height: 100%;}
+body {font-family: Verdana, sans-serif}
+li {margin: 0;padding: 0;}
     </style>
 </head>
 <body>
-<iframe id="iframeParent" src="/ressource/voir/2417" name="toto" width="100%" height="100%" />
+    <div id="content">
+        <div id="jstree">Chargement en cours...</div>
+    </div>
+    <script type="application/javascript">
+//"use strict";
+try {
+    if (typeof $ === 'undefined') throw new Error("Pb de chargement de jquery")
+    if (!$.jstree) throw new Error("Pb de chargement de jstree")
+    /* */
+    var types = ['am', 'arbre', 'calkc', 'ec2', 'em', 'j3p', 'mental', 'url']
+    var jstreeType = {}
+    types.forEach(function (type) {
+        jstreeType[type] = {icon:type +'Item'}
+    })
+    $('#jstree').jstree({
+        'core' : {
+            "animation" : 0,
+            "check_callback" : true,
+            'data' : {
+                'url' : function (node) {
+                    // jstree est pas capable d'utiliser tout seul une url qu'on lui file...
+                    return node.data && node.data.url || '/api/jstree?id=sesaxml/exercices_interactifs'
+                }
+            }
+        },
+        plugins : ["contextmenu", "dnd", "search", "types"],
+//        types : jstreeType
+    })
+    /* * /
+    $('#jstree').on('open_node.jstree', function (ev, data) {
+        console.log(data.node)
+    }) /* */
+    $('#jstree').on('load_node.jstree', function (ev, data) {
+      console.log('le node chargé ' +data.status)
+      console.log(data.node)
+    })
+
+    /** /
+    var rep1 = {"text":"exercices interactifs","icon":"folder","children":[{"text":"Didacticiel","icon":"folder","children":true,"url":"/api/jstree/49726"},{"text":"Exercices de calcul mental Calcul@TICE","icon":"folder","children":true,"url":"/api/jstree/49727"},{"text":"Matou matheux CM2","icon":"folder","children":true,"url":"/api/jstree/49728"},{"text":"Exercices CM2","icon":"folder","children":true,"url":"/api/jstree/49729"},{"text":"Exercices 6e","icon":"folder","children":true,"url":"/api/jstree/49730"},{"text":"Exercices 5e","icon":"folder","children":true,"url":"/api/jstree/49731"},{"text":"Nouveaux exercices CM2/6e/5e","icon":"folder","children":true,"url":"/api/jstree/49732"},{"text":"Exercices 4e","icon":"folder","children":true,"url":"/api/jstree/49733"},{"text":"Exercices 3e","icon":"folder","children":true,"url":"/api/jstree/49734"},{"text":"Exercices 2nde","icon":"folder","children":true,"url":"/api/jstree/49735"},{"text":"Exercices en anglais","icon":"folder","children":true,"url":"/api/jstree/49736"},{"text":"Exercices en allemand","icon":"folder","children":true,"url":"/api/jstree/49737"},{"text":"Exercices en basque","icon":"folder","children":true,"url":"/api/jstree/49738"},{"text":"Exercices pour suisses et belges","icon":"folder","children":true,"url":"/api/jstree/49739"},{"text":"Exercices en espagnol","icon":"folder","children":true,"url":"/api/jstree/49740"},{"text":"Ressources J3P","icon":"folder","children":true,"url":"/api/jstree/49741"}]}
+    var rep2 = [{
+        "id":1,"text":"Root node","children":[
+            {"id":2,"text":"Child node 1"},
+            {"id":3,"text":"Child node 2"}
+        ]
+    }]
+    var rep3 = [{
+        "text"    : "Root node",
+        "state"   : {"opened": true},
+        "children": [
+            {
+                "text" : "Child node 1",
+                "state": {"selected": true},
+                "icon" : "glyphicon glyphicon-flash"
+            },
+            {"text": "Child node 2", "state": {"disabled": true}}
+        ]
+    }]
+    $('#jstree').jstree({
+        'core' : {
+            "animation" : 0,
+            "check_callback" : true,
+            'data' : rep1,
+        },
+        plugins : ["contextmenu", "dnd", "search"]
+    })
+    /**/
+} catch (error) {
+    if (console && console.error) console.error(error);
+    document.getElementById('jstree').innerHTML = error.toString();
+}
+    </script>
 </body>
 </html>

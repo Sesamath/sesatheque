@@ -253,5 +253,61 @@ module.exports = function (Ressource, $ressourceRepository, $routes) {
     }
   }
 
+  $ressourceConverter.getJstreeChildren = function (ressource) {
+    var children = []
+    if (ressource.typeTechnique === 'arbre' && ressource.enfants) {
+      ressource.enfants.forEach(function (enfant) {
+        var child
+        if (enfant.typeTechnique === 'arbre') {
+          child = $ressourceConverter.toJstree(enfant)
+        } else {
+          child = {
+            text: enfant.titre
+          }
+          if (enfant.displayUri) child.a_attr = {href: enfant.displayUri}
+          // faut passer par les types sinon jstree écrase notre background css
+          // if (enfant.typeTechnique) child.li_attr = {class:enfant.typeTechnique +'Item'}
+          //if (enfant.typeTechnique) child.type = enfant.typeTechnique
+          if (enfant.typeTechnique) child.icon = enfant.typeTechnique +'Item'
+        }
+        children.push(child);
+      });
+    }
+
+    return children
+  }
+
+  /**
+   * Transforme un ressource de la bibli en objet pour jstree
+   * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
+   * @param ressource Une ressource ou une ref
+   * @returns {Array}
+   */
+  $ressourceConverter.toJstree = function (ressource) {
+    // arbre jstree, cf http://www.jstree.com/docs/json/ pour le format
+    var jstData = {
+      text: ressource.titre
+    }
+    if (ressource.typeTechnique === 'arbre') {
+      jstData.icon = "arbreItem"
+      if (ressource.enfants && ressource.enfants.length) {
+        jstData.children = $ressourceConverter.getJstreeChildren(ressource)
+      } else {
+        jstData.children = true
+        jstData.data = {}
+        if (ressource.oid) jstData.data.url = '/api/jstree?id=' +ressource.oid
+        else if (ressource.ref) jstData.data.url = '/api/jstree?id=' +ressource.ref
+        else if (ressource.origine && ressource.idOrigine) jstData.data.url = '/api/jstree?id=' +ressource.origine +'/' +ressource.idOrigine
+        else jstData.children = false
+        if (jstData.data.url) jstData.data.url += '&children=1'
+      }
+    } else {
+      jstData.a_attr = {href : $routes.getAbs(config.constantes.routes.display, ressource)}
+    }
+    jstData.type = ressource.typeTechnique
+
+    return jstData
+  }
+
   return $ressourceConverter
 }

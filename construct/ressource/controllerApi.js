@@ -49,47 +49,9 @@
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $routes) {
 
   var _ = require('lodash')
-  var flow = require('seq')
+  //var flow = require('seq')
 
   //var tools = require('../tools')
-
-  /**
-   * Transforme un arbre de la bibli en objet pour jstree
-   * @param arbre
-   */
-  function arbreToJstreeData (arbre) {
-    var jstData
-    if (arbre.typeTechnique === 'arbre') {
-      // arbre jstree
-      jstData = {
-        data    : {
-          title: arbre.titre,
-          icon : "folder"
-        },
-        state   : 'open',
-        children: []
-      }
-      if (arbre.enfants && arbre.enfants.length) {
-        arbre.enfants.forEach(function (enfant) {
-          var child
-          if (enfant.typeTechnique === 'arbre') {
-            child = arbreToJstreeData(enfant)
-          } else {
-            child = {
-              data: {title: enfant.titre},
-            }
-            if (enfant.displayUri) child.data.attr = {href: enfant.displayUri}
-          }
-          jstData.children.push(child);
-        });
-      }
-    } else {
-      console.error("arbreToJstreeData appelé avec autre chose qu'un arbre :", arbre);
-      jstData = { error: "La ressource n'était pas un arbre"}
-    }
-
-    return jstData
-  }
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
@@ -188,6 +150,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Retourne un array pour jstree
+   * @param context
+   * @param error
+   * @param data
+   */
+  function sendJsonJstreeArray(context, error, data) {
+    var errorMsg
+    if (error) {
+      errorMsg = (typeof error === 'string') ? error : error.toString()
+      sendJson(context, null, {arrayOnly:[{text:"Erreur : " +errorMsg}]})
+    } else if (!data instanceof Array) {
+      log.error(new Error("sendJsonJstreeArray appelé avec autre chose qu'un array"))
+      sendJson(context, error, data)
+    } else {
+      log.debug('sendJson va renvoyer le tableau', data, 'api')
+      sendJson(context, error, {arrayOnly:data})
+    }
+  }
+
+  /**
    * Envoie une liste de ressources
    * @param context
    * @param error
@@ -237,7 +219,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Met éventuellement à jour un titre bateau si on en a un meilleur (asynchrone, lance la màj en bdd et rend la main)
    * @param ressource
    * @param newTitre
-   */
+   * /
   function updateTitre(ressource, newTitre) {
     // on regarde si l'arbre nous apporte un titre que l'on aurait pas
     if (newTitre) {
@@ -270,7 +252,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $ressourceRepository.write(ressource) // pas de next, on laisse comme c'était si ça plante
           }
     }
-  }
+  } /* */
 
   /**
    * Met à jour une ressource issue de la bdd et appelle write pour l'enregistrer et sortir
@@ -539,33 +521,28 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  controller.get('getJsTree/:origine/:idOrigine', function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-
-    $ressourceRepository.loadPublicByOrigin(origine, idOrigine, function (error, ressource) {
+  controller.get('jstree', function (context) {
+    var id = context.get.id
+    var onlyChildren = !!context.get.children
+    if (!id) sendJsonJstreeArray(context, "il faut fournir un id de ressource")
+    $ressourceRepository.load(id, function (error, ressource) {
       if (error) {
-        sendJson(context, error)
-      } else if (ressource && ressource.typeTechnique === 'arbre' && $accessControl.hasReadPermission(context, ressource)) {
-        sendJson(context, null, arbreToJstreeData(ressource))
+        sendJsonJstreeArray(context, error)
+      } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
+        var jstData
+        if (onlyChildren) {
+          if (ressource.typeTechnique === 'arbre') {
+            jstData = $ressourceConverter.getJstreeChildren(ressource)
+            sendJsonJstreeArray(context, null, jstData)
+          } else {
+            sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
+          }
+        } else {
+          jstData = $ressourceConverter.toJstree(ressource)
+          sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array
+        }
       } else {
-        notFound(context, "Impossible de récupérer l'arbre " + origine + '/' + idOrigine +
-                          " (elle n'existe pas ou n'est pas un arbre ou vous n'avez pas suffisamment de droits pour y accéder)")
-      }
-    })
-  })
-
-  controller.get('getJsTree/:oid', function (context) {
-    var oid = context.arguments.oid
-
-    $ressourceRepository.load(oid, function (error, ressource) {
-      if (error) {
-        sendJson(context, error)
-      } else if (ressource && ressource.typeTechnique === 'arbre' && $accessControl.hasReadPermission(context, ressource)) {
-        sendJson(context, null, arbreToJstreeData(ressource))
-      } else {
-        notFound(context, "Impossible de récupérer l'arbre " + oid +
-                          " (elle n'existe pas ou n'est pas un arbre ou vous n'avez pas suffisamment de droits pour y accéder)")
+        if (!id) sendJsonJstreeArray(context, "la ressource " +id +" n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
       }
     })
   })
