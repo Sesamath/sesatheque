@@ -6,17 +6,20 @@
   <title>Page statique de test</title>
   <link rel="stylesheet" href="/vendors/jstree/dist/themes/default/style.min.css" />
   <link rel="stylesheet" href="/styles/ressources.css" />
-  <script type="application/javascript" src="/vendors/jquery/jquery.1.11.3.min.js"></script>
+  <!--<script type="application/javascript" src="/vendors/jquery/jquery.1.11.3.min.js"></script>-->
+  <script type="application/javascript" src="/vendors/jquery/dist/jquery.min.js"></script>-->
   <script type="application/javascript" src="/vendors/jstree/dist/jstree.min.js"></script>
   <style type="text/css">
     #arbres {display:table-row}
     #src {display: table-cell; width: 50%}
     #dst {display: table-cell; width: 50%}
+    #jstreeRecup {height: 2em; border: solid thin #008;}
   </style>
 </head>
 <body>
   <div id="content">
-    Vous pouvez faire glisser des éléments de l'arbre de gauche vers celui de droite (lui enlever des éléments ne le modifie que sur cette page)
+    Vous pouvez faire glisser des éléments de l'arbre de gauche vers celui de droite
+    <!-- plus la peine avec dnd.always_copy=true (lui enlever des éléments ne le modifie que sur cette page) -->
     <div>Mettre en valeur les éléments qui contiennent <br /><input id="jstSearch" type="text" maxlength="20" /></div>
     <div id="arbres">
       <div id="src">
@@ -27,6 +30,8 @@
         <button id="saveDst">Sauvegarder</button>
       </div>
     </div>
+    Balancer ici des nodes pour voir ce que l'on récupère en js
+    <div id="recup"><div id="jstreeRecup"></div></div>
   </div>
   <script type="application/javascript">
 try {
@@ -34,23 +39,26 @@ try {
   if (!$.jstree) throw new Error("Pb de chargement de jstree")
 
   $('#jstreeSrc').jstree({
-      core : {
-          animation : 0,
-          check_callback : function (operation, node, node_parent, node_position, more) {
-            // operation can be 'create_node', 'rename_node', 'delete_node', 'move_node' or 'copy_node'
-            // in case of 'rename_node' node_position is filled with the new node name
-            console.log('src operation ' +operation)
-            console.log(node)
-            return true;
-          },
-          data : {
-              url : function (node) {
-                  // jstree est pas capable d'utiliser tout seul une url qu'on lui file...
-                  return node.data && node.data.url || '/api/jstree?id=sesaxml/exercices_interactifs'
-              }
-          }
+    core : {
+      animation     : 0,
+      check_callback: function (operation, node, node_parent, node_position, more) {
+        // operation can be 'create_node', 'rename_node', 'delete_node', 'move_node' or 'copy_node'
+        // in case of 'rename_node' node_position is filled with the new node name
+        console.log('src operation ' + operation)
+        console.log(node)
+        return true;
       },
-      plugins : ["dnd", "search"]
+      data          : {
+        url: function (node) {
+          // jstree est pas capable d'utiliser tout seul une url qu'on lui file...
+          return node.data && node.data.url || '/api/jstree?id=sesaxml/exercices_interactifs'
+        }
+      }
+    },
+    plugins : ["dnd", "search"],
+    dnd : {
+      always_copy:true
+    }
   })
 
   $('#jstreeDst').jstree({
@@ -58,15 +66,15 @@ try {
       animation : 0,
       check_callback : function (operation, node, node_parent, node_position, more) {
         console.log('dst operation ' +operation)
-        console.log(node)
+        console.log(node.data)
         return true;
       },
       data : {
-        text : 'nouvel arbre',
+        text : 'arbre à sauvegarder',
         icon : 'arbreItem'
       }
     },
-    plugins : ["dnd"]
+    plugins : ["dnd", "checkbox"]
   })
 
   // pour la recherche, on écoute la modif de l'input
@@ -87,6 +95,39 @@ try {
     console.log('faut sauvegarder ce truc')
     console.log(tree)
   })
+
+  // un arbre caché pour la récup
+  $('#jstreeRecup').jstree({
+    core : {
+      check_callback:true
+    },
+    plugins : ["dnd"]
+  })
+
+  /* pb car l'événement dnd_stop.vakata a une target sur le document entier,
+     on peut donc pas filtrer sur la target, sauf à remonter jqObj.data.obj.0.parentNode.parentNode…
+  */
+  $(document).on('dnd_stop.vakata', function (event, jqObj) {
+    console.log("On récupère les nodes")
+    // console.log(event) // pas grand chose d'intéressant là-dedans, et c'est dispo dans jqObj.event
+    // la liste des nodes du drop est là
+    console.log(jqObj.data.nodes)
+    jqObj.data.nodes.forEach(function (nodeId) {
+      // pour récupérer nos data faut aller fouiner dans
+      console.log("Le node jstree droppé")
+      var node = jqObj.data.origin._model.data[nodeId];
+      console.log(node)
+      // le get_json renvoie toujours l'arbre complet !
+      var fullTree = $('#' +nodeId).jstree('get_json')
+      console.log("Mais impossible d'avoir sa représentation json sans parser l'arbre entier…")
+      console.log(fullTree)
+      console.log("On peut déduire son id d'après son url (plutôt crade car couplage fort avec la gestion des urls de la bibli) :" +node.a_attr.href)
+      console.log("Et son origine d'après sa propriété icon (encore plus crade) :" +node.icon)
+    })
+
+  });
+ /* */
+
 } catch (error) {
   if (console && console.error) console.error(error);
   document.getElementById('jstree').innerHTML = error.toString();

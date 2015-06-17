@@ -44,7 +44,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes) {
   // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
   // car on a l'autocomplétion sur les noms de propriété
   var config = require('./config')
-  //var tools = require('../tools')
+  var tools = require('../tools')
   var Ref = require('./public/vendors/sesamath/Ref')
 
   /**
@@ -290,11 +290,21 @@ module.exports = function (Ressource, $ressourceRepository, $routes) {
     }
     if (ressource.typeTechnique === 'arbre') {
       jstData.icon = "arbreItem"
+      // un objet qui sera conservé attaché à l'élément jstree, en y met une Ref
+      if (ressource.oid) jstData.data = $ressourceConverter.toRef(ressource)
+      else if (ressource.ref) jstData.data = tools.clone(ressource)
+      else if (ressource.typeTechnique === 'arbre') {
+        // c'est un élément intermédiaire de l'arbre, un groupe d'enfants avec un nom
+        // mais qui n'a pas d'existence hors de l'arbre parent
+        jstData.data = {}
+      } else {
+        jstData.data = {error:"Ni une ressource ni une ref ni un groupe de ref", content:ressource}
+      }
       if (ressource.enfants && ressource.enfants.length) {
         jstData.children = $ressourceConverter.getJstreeChildren(ressource)
       } else {
         jstData.children = true
-        jstData.data = {}
+        // url pour récupérer les enfants
         if (ressource.oid) jstData.data.url = '/api/jstree?id=' +ressource.oid
         else if (ressource.ref) jstData.data.url = '/api/jstree?id=' +ressource.ref
         else if (ressource.origine && ressource.idOrigine) jstData.data.url = '/api/jstree?id=' +ressource.origine +'/' +ressource.idOrigine
