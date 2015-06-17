@@ -11,7 +11,7 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque#master",
       path : "/var/www/sesatheque", // pm2 deploy _private/pm2Deploy.json5 prod setup va créer un sous-dossier source
-      "post-deploy" : "npm install && pm2 startOrRestart _private/pm2App.json5 --env prod"
+      "post-deploy" : "npm install && pm2 startOrRestart _private/pm2App.json5 --env prod && ./scripts/purge_varnish"
     },
     dev : {
       user : "sesatheque",
@@ -19,7 +19,7 @@
       ref  : "origin/master",
       repo : "git@src.sesamath.net:sesatheque#master",
       path : "/var/www/sesatheque",
-      "post-deploy" : "npm install && pm2 startOrGracefulReload _private/pm2App.json5 --env dev"
+      "post-deploy" : "npm install && pm2 startOrGracefulReload _private/pm2App.json5 --env dev && ./scripts/purge_varnish"
     }
   }
 }

@@ -36,6 +36,11 @@
  * @see http://knexjs.org/#Installation-client pour la syntaxe de entities.database
  */
 module.exports = {
+  application : {
+    baseUrl : 'http://example.com:xxxx',
+    mail : "user@example.com",
+    staging: 'prod' // ou dev
+  },
   $entities : {
     database: {
       /* pour mysql */

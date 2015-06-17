@@ -52,10 +52,12 @@ var settings = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application : {
     name : "bibliotheque",
-    mail : "tech@sesamath.net",
-    staging: staging
+    /* mis dans _private/config.js car dépendant de l'instance
+    baseUrl      : 'http://...',
+    mail : "user@example.com", */
+    staging: 'prod' // devrait être surchargé dans _private
   },
-  /* dans localConf
+  /* dans _private aussi
   $entities: {
     database: {
       host...
