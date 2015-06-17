@@ -2,87 +2,94 @@
 <!-- faut un doctype html4 pour permettre la hauteur en % -->
 <html>
 <head lang="fr">
-    <meta charset="UTF-8">
-    <title>Page statique de test</title>
-    <link rel="stylesheet" href="/vendors/jstree/dist/themes/default/style.min.css" />
-    <link rel="stylesheet" href="/styles/ressources.css" />
-    <script type="application/javascript" src="/vendors/jquery/jquery.1.11.3.min.js"></script>
-    <script type="application/javascript" src="/vendors/jstree/dist/jstree.min.js"></script>
-    <style type="text/css">
-body {font-family: Verdana, sans-serif}
-li {margin: 0;padding: 0;}
-    </style>
+  <meta charset="UTF-8">
+  <title>Page statique de test</title>
+  <link rel="stylesheet" href="/vendors/jstree/dist/themes/default/style.min.css" />
+  <link rel="stylesheet" href="/styles/ressources.css" />
+  <script type="application/javascript" src="/vendors/jquery/jquery.1.11.3.min.js"></script>
+  <script type="application/javascript" src="/vendors/jstree/dist/jstree.min.js"></script>
+  <style type="text/css">
+    #arbres {display:table-row}
+    #src {display: table-cell; width: 50%}
+    #dst {display: table-cell; width: 50%}
+  </style>
 </head>
 <body>
-    <div id="content">
-        <div id="jstree">Chargement en cours...</div>
+  <div id="content">
+    Vous pouvez faire glisser des éléments de l'arbre de gauche vers celui de droite (lui enlever des éléments ne le modifie que sur cette page)
+    <div>Mettre en valeur les éléments qui contiennent <br /><input id="jstSearch" type="text" maxlength="20" /></div>
+    <div id="arbres">
+      <div id="src">
+        <div id="jstreeSrc">Chargement en cours...</div>
+      </div>
+      <div id="dst">
+        <div id="jstreeDst"></div>
+        <button id="saveDst">Sauvegarder</button>
+      </div>
     </div>
-    <script type="application/javascript">
-//"use strict";
+  </div>
+  <script type="application/javascript">
 try {
-    if (typeof $ === 'undefined') throw new Error("Pb de chargement de jquery")
-    if (!$.jstree) throw new Error("Pb de chargement de jstree")
-    /* */
-    var types = ['am', 'arbre', 'calkc', 'ec2', 'em', 'j3p', 'mental', 'url']
-    var jstreeType = {}
-    types.forEach(function (type) {
-        jstreeType[type] = {icon:type +'Item'}
-    })
-    $('#jstree').jstree({
-        'core' : {
-            "animation" : 0,
-            "check_callback" : true,
-            'data' : {
-                'url' : function (node) {
-                    // jstree est pas capable d'utiliser tout seul une url qu'on lui file...
-                    return node.data && node.data.url || '/api/jstree?id=sesaxml/exercices_interactifs'
-                }
-            }
-        },
-        plugins : ["contextmenu", "dnd", "search", "types"],
-//        types : jstreeType
-    })
-    /* * /
-    $('#jstree').on('open_node.jstree', function (ev, data) {
-        console.log(data.node)
-    }) /* */
-    $('#jstree').on('load_node.jstree', function (ev, data) {
-      console.log('le node chargé ' +data.status)
-      console.log(data.node)
-    })
+  if (typeof $ === 'undefined') throw new Error("Pb de chargement de jquery")
+  if (!$.jstree) throw new Error("Pb de chargement de jstree")
 
-    /** /
-    var rep1 = {"text":"exercices interactifs","icon":"folder","children":[{"text":"Didacticiel","icon":"folder","children":true,"url":"/api/jstree/49726"},{"text":"Exercices de calcul mental Calcul@TICE","icon":"folder","children":true,"url":"/api/jstree/49727"},{"text":"Matou matheux CM2","icon":"folder","children":true,"url":"/api/jstree/49728"},{"text":"Exercices CM2","icon":"folder","children":true,"url":"/api/jstree/49729"},{"text":"Exercices 6e","icon":"folder","children":true,"url":"/api/jstree/49730"},{"text":"Exercices 5e","icon":"folder","children":true,"url":"/api/jstree/49731"},{"text":"Nouveaux exercices CM2/6e/5e","icon":"folder","children":true,"url":"/api/jstree/49732"},{"text":"Exercices 4e","icon":"folder","children":true,"url":"/api/jstree/49733"},{"text":"Exercices 3e","icon":"folder","children":true,"url":"/api/jstree/49734"},{"text":"Exercices 2nde","icon":"folder","children":true,"url":"/api/jstree/49735"},{"text":"Exercices en anglais","icon":"folder","children":true,"url":"/api/jstree/49736"},{"text":"Exercices en allemand","icon":"folder","children":true,"url":"/api/jstree/49737"},{"text":"Exercices en basque","icon":"folder","children":true,"url":"/api/jstree/49738"},{"text":"Exercices pour suisses et belges","icon":"folder","children":true,"url":"/api/jstree/49739"},{"text":"Exercices en espagnol","icon":"folder","children":true,"url":"/api/jstree/49740"},{"text":"Ressources J3P","icon":"folder","children":true,"url":"/api/jstree/49741"}]}
-    var rep2 = [{
-        "id":1,"text":"Root node","children":[
-            {"id":2,"text":"Child node 1"},
-            {"id":3,"text":"Child node 2"}
-        ]
-    }]
-    var rep3 = [{
-        "text"    : "Root node",
-        "state"   : {"opened": true},
-        "children": [
-            {
-                "text" : "Child node 1",
-                "state": {"selected": true},
-                "icon" : "glyphicon glyphicon-flash"
-            },
-            {"text": "Child node 2", "state": {"disabled": true}}
-        ]
-    }]
-    $('#jstree').jstree({
-        'core' : {
-            "animation" : 0,
-            "check_callback" : true,
-            'data' : rep1,
-        },
-        plugins : ["contextmenu", "dnd", "search"]
-    })
-    /**/
+  $('#jstreeSrc').jstree({
+      core : {
+          animation : 0,
+          check_callback : function (operation, node, node_parent, node_position, more) {
+            // operation can be 'create_node', 'rename_node', 'delete_node', 'move_node' or 'copy_node'
+            // in case of 'rename_node' node_position is filled with the new node name
+            console.log('src operation ' +operation)
+            console.log(node)
+            return true;
+          },
+          data : {
+              url : function (node) {
+                  // jstree est pas capable d'utiliser tout seul une url qu'on lui file...
+                  return node.data && node.data.url || '/api/jstree?id=sesaxml/exercices_interactifs'
+              }
+          }
+      },
+      plugins : ["dnd", "search"],
+  })
+
+  $('#jstreeDst').jstree({
+    core : {
+      animation : 0,
+      check_callback : function (operation, node, node_parent, node_position, more) {
+        console.log('dst operation ' +operation)
+        console.log(node)
+        return true;
+      },
+      data : {
+        text : 'nouvel arbre',
+        icon : 'arbreItem'
+      }
+    },
+    plugins : ["dnd"],
+  })
+
+  // pour la recherche, on écoute la modif de l'input
+  var timer;
+  $("#jstSearch").keyup(function () {
+    // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
+    // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
+    if (timer) { clearTimeout(timer); }
+    timer = setTimeout(function () {
+      var v = $('#jstSearch').val();
+      $('#jstreeSrc').jstree(true).search(v);
+    }, 250);
+  });
+
+  // pour la sauvegarde
+  $('#saveDst').click(function () {
+    var tree = $('#jstreeDst').jstree('get_json')
+    console.log('faut sauvegarder ce truc')
+    console.log(tree)
+  })
 } catch (error) {
-    if (console && console.error) console.error(error);
-    document.getElementById('jstree').innerHTML = error.toString();
+  if (console && console.error) console.error(error);
+  document.getElementById('jstree').innerHTML = error.toString();
 }
     </script>
 </body>
