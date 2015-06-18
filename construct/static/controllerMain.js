@@ -46,12 +46,15 @@ module.exports = function (controller) {
   if (isProd) {
     //controller.serve('qx/script',   __dirname +'/../qxApps/tree/build/script');
     //controller.serve('qx/resource', __dirname +'/../qxApps/tree/build/resource');
-    controller.serve('qx', __dirname +'/../qxApps/tree/build');
+    controller.serve('qx', __dirname +'/../qxApps/test1/build');
   } else {
-    controller.serve('qooxdoo',            __dirname +'/../qxApps/qooxdoo');
-    controller.serve('qx/script', __dirname +'/../qxApps/tree/source/script');
-    controller.serve('qx/resource',        __dirname +'/../qxApps/tree/source/resource');
-    controller.serve('qx/source/class',    __dirname +'/../qxApps/tree/source/class');
+    // cf http://manual.qooxdoo.org/current/pages/desktop/develop_how_to.html#running-the-source-version-through-a-web-server
+    // doc accessible localement via /qooxdoo/documentation/manual/
+    controller.serve('qooxdoo',            __dirname +'/../qxApps/qooxdoo-5.0-sdk');
+    controller.serve('qx', __dirname +'/../qxApps');
+    /* controller.serve('qx/script', __dirname +'/../qxApps/test1/source/script');
+    controller.serve('qx/resource',        __dirname +'/../qxApps/test1/source/resource');
+    controller.serve('qx/source/class',    __dirname +'/../qxApps/test1/source/class'); */
   }
 
   // home
