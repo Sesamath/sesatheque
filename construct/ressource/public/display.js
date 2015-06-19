@@ -34,7 +34,7 @@
  * appelé avant les plugins (c'est sa fct load qui chargera le bon)
  *
  * Son chargement ajoute en global les méthodes addCss, addElement, getElement, setError, hideTitle
- * et log (qui ne fait rien sauf si on appelle init avec options.isDev à true)
+ * et log (qui ne fait rien sauf si on appelle init avec options.isDev à true), log.error affiche toujours
  *
  */
 /* global window, define, require, alert */
@@ -96,7 +96,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      */
     function getURLParameter(name) {
       var regexp = new RegExp('[?|&]' + name + '=([^&#]+?)(&|#|$)');
-      var param = regexp.exec(window.location.search)
+      var param = regexp.exec(window.location.search);
       if (param) {
         param = decodeURIComponent(param[1].replace(/\+/g, '%20'));
       }
@@ -163,13 +163,13 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
       /** Éteint le feedback */
       function feedbackOff() {
-        if (divFeedback) divFeedback.className = 'feedbackOff'
+        if (divFeedback) divFeedback.className = 'feedbackOff';
       }
 
       /** Allume le feedback OK pour 4s */
       function feedbackOk() {
         if (divFeedback) {
-          divFeedback.className = 'feedbackOk'
+          divFeedback.className = 'feedbackOk';
           setTimeout(feedbackOff, 4000);
         }
       }
@@ -177,7 +177,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       /** Allume le feedback KO pour 4s */
       function feedbackKo() {
         if (divFeedback) {
-          divFeedback.className = 'feedbackKo'
+          divFeedback.className = 'feedbackKo';
           setTimeout(feedbackOff, 4000);
         }
       }
@@ -278,7 +278,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             feedback({error: "Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
           }
         } // fin else ajax
-      } // fin définition options.saveResultat
+      }; // fin définition options.saveResultat
     } // addSaveResultat
 
     /**************************************
@@ -299,7 +299,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       elt.type = "text/css";
       elt.href = (isPluginDirRelative ? pluginsBaseUrl + '/' : '') + file;
       wd.getElementsByTagName("head")[0].appendChild(elt);
-    }
+    };
 
     /**
      * Ajoute un élément html de type tag à parent
@@ -312,11 +312,11 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      */
     window.addElement = function (parent, tag, attrs, content) {
       if (!parent || !parent.appendChild) throw new Error("parent n'est pas un HTMLElement " + parent);
-      var elt = w.getElement(tag, attrs, content)
+      var elt = w.getElement(tag, attrs, content);
       parent.appendChild(elt);
 
-      return elt
-    }
+      return elt;
+    };
 
     /**
      * Retourne un élément html de type tag (non inséré dans le dom)
@@ -325,20 +325,39 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      * @param {string=} txtContent
      */
     window.getElement = function (tag, attrs, txtContent) {
-      if (!isString(tag)) throw new Error("tag n'est pas une string " + tag)
+      if (!isString(tag)) throw new Error("tag n'est pas une string " + tag);
       var elt = wd.createElement(tag);
-      var attr
+      var attr;
       if (attrs) for (attr in attrs) {
         if (attrs.hasOwnProperty(attr)) {
-          if (attr === 'class') elt.className = attrs[attr]
-          else elt[attr] = attrs[attr]
+          if (attr === 'class') elt.className = attrs[attr];
+          else elt[attr] = attrs[attr];
         }
 
       }
       if (txtContent) elt.appendChild(wd.createTextNode(txtContent));
 
       return elt;
-    }
+    };
+
+    /**
+     * Retourne un id qui n'existe pas encore dans le dom (mais ne le créé pas)
+     */
+    window.getNewId = (function () {
+      // une closure pour conserver la valeur de cette variable privée entre 2 appels
+      var lastId = 0;
+      return function () {
+        var id;
+        var found = false;
+        while (!found && lastId < 10000) { // au dela de 10000 id dans un dom y'a un pb !
+          found = !wd.getElementById('sesa' +lastId);
+          lastId++;
+        }
+        if (found) id = 'sesa' +lastId;
+
+        return id;
+      };
+    })();
 
     /**
      * Cache le titre (en global pour que les plugins puissent le faire)
@@ -349,48 +368,41 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         if (titre && titre.style) titre.style.display = "none";
         w.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
       } catch (e) { /* tant pis */ }
-    }
+    };
 
     /**
      * Une fonction de log qui ne fait rien tant qu'on a pas appelé init avec isDev
      * (dans ce cas c'est un console.log qui accepte un 2e argument facultatif, un objet à mettre en console aussi)
      */
-    window.log = function () {}
+    window.log = function () {};
+    /**
+     * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser log pour le dev seulement)
+     * @param … autant qu'on veut (console.error appelée une fois par argument)
+     */
+    window.log.error = function () {
+      if (console && console.error) {
+        for (var i = 0; i < arguments.length; i++) {
+          console.error(arguments[i]);
+        }
+      }
+    };
 
     /**
      * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent)
-     * @param errorMsg {string} Le message à afficher
+     * @param {string|Error} error Le message à afficher
      */
-    window.setError = function (errorMsg) {
+    window.setError = function (error) {
+      var errorMsg = (error instanceof Error) ? "Une erreur est survenue (voir la console pour les détails)" : error;
       if (errorsContainer) {
         // on ajoute un peu de margin à ce div qui n'en avait pas
         if (!errorsContainer.style) errorsContainer.style = {};
-        errorsContainer.style.margin = "0.2em"
+        errorsContainer.style.margin = "0.2em";
         errorsContainer.textContent = errorMsg;
-        log(errorMsg);
+        log(error);
       } else {
         log("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg);
       }
-    }
-
-    /**
-     * Retourne un id qui n'existe pas encore dans le dom (mais ne le créé pas)
-     */
-    window.getNewId = (function () {
-      // une closure pour conserver la valeur de cette variable privée entre 2 appels
-      var lastId = 0;
-      return function () {
-        var id
-        var found = false;
-        while (!found && lastId < 10000) { // au dela de 10000 id dans un dom y'a un pb !
-          found = !window.getElementById('sesa' +lastId)
-          lastId++
-        }
-        if (found) id = 'sesa' +lastId
-
-        return id
-      }
-    })()
+    };
 
     try {
       // deux raccourcis
@@ -435,7 +447,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
         // en dev on active la fct de log
         if (options.isDev) w.log = log;
-
         // on vérifie que l'on a nos containers et on les créé sinon
         if (!errorsContainer) errorsContainer = w.addElement(wd.getElementsByTagName('body')[0], 'div',
                                                              {id: 'errors', class: 'error'});
@@ -446,7 +457,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         // reste la conf de require
         initRequire(pluginsBaseUrl, options.vendorsBaseUrl);
         isInitDone = true;
-      }
+      };
 
       /**
        * Charge une ressource et le plugin qui la gère, puis appelle la methode display du plugin
@@ -455,7 +466,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
        * @param {function} [next] Fct appelée à la fin du chargement avec une erreur ou undefined
        */
       displayModule.load = function (ressource, options, next) {
-        w.log('display.load avec la ressource', ressource)
+        w.log('display.load avec la ressource', ressource);
         w.log('et les options', options);
         // init du dom
         if (!isInitDone) {
@@ -495,6 +506,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             plugin.display(ressource, options, function (error) {
               if (error) {
                 log("le display a terminé mais renvoyé l'erreur", error);
+                w.setError(error);
               } else {
                 w.log("le display a terminé sans erreur");
               }

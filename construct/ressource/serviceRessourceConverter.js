@@ -46,6 +46,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   var config = require('./config')
   //var tools = require('../tools')
   var Ref = require('./public/vendors/sesamath/Ref')
+  var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
 
   /**
    * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
@@ -91,6 +92,12 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
    * @namespace $ressourceConverter
    */
   var $ressourceConverter = {}
+  // les 2 méthodes jstree
+  if (jstreeConverter) {
+    jstreeConverter.setBaseUrl($settings.get('application.baseUrl', ''))
+    $ressourceConverter.getJstreeChildren = jstreeConverter.getJstreeChildren
+    $ressourceConverter.toJstree = jstreeConverter.toJstree
+  }
 
   /**
    * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments

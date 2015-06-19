@@ -1,7 +1,6 @@
 {
-  "extends": "../../../.jshintrc",
-  "browser": true,
-  "asi": false,
+  "node": true,
+  "asi": true,
   "bitwise": true,
   "forin": true,
   "freeze": true,
@@ -11,6 +10,6 @@
   "undef": true,
   "unused": true,
   "indent": 2,
-  "predef" : ["define", "require", "log"],
-  "globals": ["define", "require", "log"]
+  "predef": ["GLOBAL", "lassi", "log", "isProd"],
+  "globals": ["GLOBAL", "lassi", "log","isProd"]
 }

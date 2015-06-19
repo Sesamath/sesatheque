@@ -32,12 +32,14 @@
 /**
  * @file Affiche un arbre avec jstree
  */
-/* jshint jquery:true */
 try {
-  define(['jquery1', 'jstree', 'Arbre'], function (jq, jstree, Arbre) {
+  define(['../../vendors/sesamath/tools/jstreeConverter.js', 'jquery1', 'jstree'], function (jstreeConverter) {
     "use strict";
+    if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
+    /* jshint jquery:true */
+
     /** Notre module */
-    var moduleArbre = {};
+    var arbre = {};
     var w = window;
 
     /**
@@ -47,28 +49,87 @@ try {
      *                              et éventuellement resultCallback)
      * @param {Function} next       La fct à appeler quand la ressource sera chargée (sans argument ou avec une erreur)
      */
-    moduleArbre.display = function (ressource, options, next) {
-      var container = options.container;
-      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
-      var errorsContainer = options.errorsContainer;
-      if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
-      // Ajout css
-      if (options.baseUrl) w.addCss(options.baseUrl + 'jstree/themes/default/style.min.css'); // si on a pas tant pis pour le css
+    arbre.display = function (ressource, options, next) {
+      var error;
+      try {
+        log('arbre.display avec', ressource);
+        var container = options.container;
+        if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+        var errorsContainer = options.errorsContainer;
+        if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
+        // Ajout css, si on a pas tant pis pour le css mais ça va être moche
+        if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
 
-      // le message en attendant le chargement
-      w.addElement(container, "div", {id: 'jstree'}, "Chargement de l'arbre " + ressource.oid + " en cours.");
+        // le message en attendant le chargement
+        var searchContainer = w.getElement("div", {class: 'search'});
+        var searchId = w.getNewId();
+        searchContainer.appendChild(w.getElement('span', null, 'Mettre en valeur les titres contenant '));
+        searchContainer.appendChild(w.getElement('input', {id: searchId}));
+        container.appendChild(searchContainer);
+        var treeId = w.getNewId();
+        w.addElement(container, "div", {id: treeId});
+        // l'élément root, pas encore un array
+        var rootElt = jstreeConverter.toJstree(ressource);
+        rootElt.state = {opened: true};
+        rootElt.animation = 1;
 
-      var ressArbre = new Arbre(ressource)
-      var jstData = ressArbre.toJstree()
-      if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
-      $('#jstree').jstree(jstData);
+        var jstData = {
+          'core': {
+            'data': function (node, next) {
+               //log('fct data', node);
+               if(node.id == '#') {
+                 next(rootElt);
+               } else {
+                 // faut faire l'appel ajax nous même car jstree peut pas mixer json initial + ajax ensuite
+                 // @see http://git.net/jstree/msg12107.html
+                 $.ajax({
+                   url : node.data.url,
+                   timeout : options.timeout || 10000,
+                   dataType : 'json',
+                   xhrFields: {
+                     withCredentials: true
+                   }
+                 }).success(next).error(function (jqXHR, textStatus, error) {
+                   next(["Erreur lors de l'appel ajax pour récupérer les éléments"]);
+                   log(error);
+                 });
+               }
+            }
+          },
+          plugins : ["search"]
+        };
 
+        var jqTree = $('#' + treeId);
+        jqTree.jstree(jstData);
+
+        // pour la recherche, on écoute la modif de l'input
+        var timer;
+        var jqSearch = $("#" + searchId);
+        jqSearch.keyup(function () {
+          // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
+          // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
+          if (timer) { clearTimeout(timer); }
+          timer = setTimeout(function () {
+            var v = jqSearch.val();
+            jqTree.jstree(true).search(v);
+          }, 250);
+        });
+
+        /**
+         * Ajout de liens vers un autre onglet
+         */
+
+      } catch(e) {
+        error = e;
+      }
+
+      next(error);
     };
 
-    return moduleArbre;
+    return arbre;
   });
 } catch (error) {
-  if (typeof window.setError !== 'undefined') window.setError(error.toString())
-  if (typeof console !== 'undefined' && console.error) console.error(error)
+  if (typeof window.setError !== 'undefined') window.setError(error.toString());
+  if (typeof console !== 'undefined' && console.error) console.error(error);
 }
 

@@ -30,33 +30,5 @@
     "mysql": "^2.6.0",
     "through2": "^0.4.2",
     "xml2js": "^0.4.4"
-  },
-  "jshintConfig": {
-    "node": true,
-    "asi": true,
-    "bitwise": true,
-    "forin": true,
-    "freeze": true,
-    "immed": true,
-    "maxlen": 160,
-    "newcap": true,
-    "undef": true,
-    "unused": true,
-    "indent": 2,
-    "predef": [
-      "GLOBAL",
-      "lassi",
-      "log",
-      "isProd"
-    ],
-    "globals": [
-      "GLOBAL",
-      "lassi",
-      "log",
-      "isProd"
-    ],
-    "ignore": [
-      "construct/qxApps/tree/build/script/bundle.js"
-    ]
   }
 }
