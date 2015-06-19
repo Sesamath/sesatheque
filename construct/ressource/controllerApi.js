@@ -539,7 +539,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
         } else {
           jstData = $ressourceConverter.toJstree(ressource)
-          sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array
+          sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
         }
       } else {
         if (!id) sendJsonJstreeArray(context, "la ressource " +id +" n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")

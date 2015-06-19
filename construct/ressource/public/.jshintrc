@@ -1,0 +1,15 @@
+{
+  "browser": true,
+  "asi": false,
+  "bitwise": true,
+  "forin": true,
+  "freeze": true,
+  "immed": true,
+  "maxlen": 160,
+  "newcap": true,
+  "undef": true,
+  "unused": true,
+  "indent": 2,
+  "predef" : ["define", "require", "log"],
+  "globals": ["define", "require", "log"]
+}

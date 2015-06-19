@@ -89,6 +89,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     /**
      * Récupère un paramètre de l'url courante
      * Inspiré de http://stackoverflow.com/a/11582513
+     * Attention, les + sont transformés en espace (RFC 1738), les %20 aussi (RFC 3986),
+     * pour récupérer des + faut qu'ils soient correctement encodés en %2B
      * @param name Le nom du paramètre
      * @returns Sa valeur (ou null s'il n'existait pas)
      */
@@ -317,7 +319,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     }
 
     /**
-     * Retourne un élément html de type tag
+     * Retourne un élément html de type tag (non inséré dans le dom)
      * @param {string} tag
      * @param {Object=} attrs Les attributs
      * @param {string=} txtContent
@@ -339,6 +341,23 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     }
 
     /**
+     * Cache le titre (en global pour que les plugins puissent le faire)
+     */
+    window.hideTitle = function () {
+      try {
+        var titre = wd.getElementById('titre');
+        if (titre && titre.style) titre.style.display = "none";
+        w.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
+      } catch (e) { /* tant pis */ }
+    }
+
+    /**
+     * Une fonction de log qui ne fait rien tant qu'on a pas appelé init avec isDev
+     * (dans ce cas c'est un console.log qui accepte un 2e argument facultatif, un objet à mettre en console aussi)
+     */
+    window.log = function () {}
+
+    /**
      * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent)
      * @param errorMsg {string} Le message à afficher
      */
@@ -355,22 +374,23 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     }
 
     /**
-     * Cache le titre (en global pour que les plugins puissent le faire)
+     * Retourne un id qui n'existe pas encore dans le dom (mais ne le créé pas)
      */
-    window.hideTitle = function () {
-      try {
-        var titre = wd.getElementById('titre');
-        if (titre && titre.style) titre.style.display = "none";
-        w.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
-      } catch (e) { /* tant pis */ }
-    }
+    window.getNewId = (function () {
+      // une closure pour conserver la valeur de cette variable privée entre 2 appels
+      var lastId = 0;
+      return function () {
+        var id
+        var found = false;
+        while (!found && lastId < 10000) { // au dela de 10000 id dans un dom y'a un pb !
+          found = !window.getElementById('sesa' +lastId)
+          lastId++
+        }
+        if (found) id = 'sesa' +lastId
 
-    /**
-     * Une fonction de log qui ne fait rien tant qu'on a pas appelé init avec isDev
-     * (dans ce cas c'est un console.log qui accepte un 2e argument facultatif, un objet à mettre en console aussi)
-     */
-    window.log = function () {
-    }
+        return id
+      }
+    })()
 
     try {
       // deux raccourcis

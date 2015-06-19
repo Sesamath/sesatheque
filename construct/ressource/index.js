@@ -73,8 +73,8 @@ ressourceComponent.service('$ressourceControl', function(Ressource) {
   return require('./serviceRessourceControl')(Ressource)
 })
 
-ressourceComponent.service('$ressourceConverter', function (Ressource, $ressourceRepository, $routes) {
-  return require('./serviceRessourceConverter')(Ressource, $ressourceRepository, $routes)
+ressourceComponent.service('$ressourceConverter', function (Ressource, $ressourceRepository, $routes, $settings) {
+  return require('./serviceRessourceConverter')(Ressource, $ressourceRepository, $routes, $settings)
 })
 
 ressourceComponent.service('$views', function (Ressource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {

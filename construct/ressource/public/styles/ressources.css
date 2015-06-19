@@ -70,11 +70,11 @@
   width: 16px;
   height: 24px !important;
 }
-.amItem {background-image: url("/plugins/am/am.gif") !important;}
-.arbreItem {background-image: url("/plugins/arbre/arbre.gif") !important;}
-.calkcItem { background-image: url("/plugins/calkc/calkc.gif") !important;}
-.ec2Item { background-image: url("/plugins/ec2/ec2.gif") !important;}
-.emItem { background-image: url("/plugins/em/em.gif") !important;}
-.j3pItem { background-image: url("/plugins/j3p/j3p.gif") !important;}
-.mentalItem { background-image: url("/plugins/mental/mental.gif") !important;}
-.urlItem { background-image: url("/plugins/url/url.gif") !important;}
+.amJstNode {background-image: url("/plugins/am/am.gif") !important;}
+.arbreJstNode {background-image: url("/plugins/arbre/arbre.gif") !important;}
+.calkcJstNode { background-image: url("/plugins/calkc/calkc.gif") !important;}
+.ec2JstNode { background-image: url("/plugins/ec2/ec2.gif") !important;}
+.emJstNode { background-image: url("/plugins/em/em.gif") !important;}
+.j3pJstNode { background-image: url("/plugins/j3p/j3p.gif") !important;}
+.mentalJstNode { background-image: url("/plugins/mental/mental.gif") !important;}
+.urlJstNode { background-image: url("/plugins/url/url.gif") !important;}

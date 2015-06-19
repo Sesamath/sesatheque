@@ -53,6 +53,7 @@ function Ref(initObj) {
    * @type {number}
    */
   this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
+  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine +'/' +initObj.idOrigine
   /**
    * Le nom
    * @type {string}
@@ -73,6 +74,12 @@ function Ref(initObj) {
    * @type {Object[]}
    */
   if (initObj.enfants && initObj.enfants instanceof Array) this.enfants = initObj.enfants;
+  /** affichage */
+  this.displayUri = initObj.displayUri
+  this.displayUrl = initObj.displayUrl
+  /** Uri des datas (json) */
+  this.dataUri = initObj.dataUri
+  this.dataUrl = initObj.dataUrl
 }
 
 /**

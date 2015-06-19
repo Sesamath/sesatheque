@@ -37,15 +37,53 @@
  * @param $ressourceRepository Pour étoffer une ressource en allant chercher des infos en base
  * @param $routes
  */
-module.exports = function (Ressource, $ressourceRepository, $routes) {
+module.exports = function (Ressource, $ressourceRepository, $routes, $settings) {
   var _ = require('lodash')
   var flow = require('seq')
   //var moment = require('moment')
   // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
   // car on a l'autocomplétion sur les noms de propriété
   var config = require('./config')
-  var tools = require('../tools')
+  //var tools = require('../tools')
   var Ref = require('./public/vendors/sesamath/Ref')
+
+  /**
+   * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
+   * @see http://www.jstree.com/docs/json/ pour le format
+   * @param {Ressource} ressource
+   */
+  function getJstNode (ressource) {
+    /**
+     * Retourne les datas qui nous intéressent à mettre sur le tag a
+     * (pour a_attr : data-id, data-typeTechnique, href et alt)
+     * @param {Ressource} ressource
+     * @return {Object}
+     */
+    function getAttr() {
+      var attr = {}
+      // id
+      if (ressource.oid) attr['data-id'] = ressource.oid
+      else if (ressource.ref) attr['data-id'] = ressource.ref
+      else if (ressource.origine && ressource.idOrigine) attr['data-id'] = ressource.origine +'/' +ressource.idOrigine
+      // url complète
+      if (ressource.displayUri) attr.href = $settings.get('application.baseUrl', '') +ressource.displayUri
+      if (ressource.typeTechnique) attr['data-typeTechnique'] = ressource.typeTechnique
+      if (ressource.resume) attr.alt = ressource.resume
+
+      return attr
+    }
+
+    var node
+    if (ressource) {
+      node = {
+        text  : ressource.titre,
+        a_attr: getAttr(),
+        icon  : ressource.typeTechnique + 'JstNode'
+      }
+    } else log.error(new Error("getJstNode appelé sans ressource"))
+
+    return node
+  }
 
   /**
    * Service qui regroupe les fonctions de transformation de données pour les vues
@@ -253,6 +291,11 @@ module.exports = function (Ressource, $ressourceRepository, $routes) {
     }
   }
 
+  /**
+   * Retourne un tableau children au format jstree
+   * @param ressource
+   * @return {Array} Le tableau des enfants
+   */
   $ressourceConverter.getJstreeChildren = function (ressource) {
     var children = []
     if (ressource.typeTechnique === 'arbre' && ressource.enfants) {
@@ -261,14 +304,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes) {
         if (enfant.typeTechnique === 'arbre') {
           child = $ressourceConverter.toJstree(enfant)
         } else {
-          child = {
-            text: enfant.titre
-          }
-          if (enfant.displayUri) child.a_attr = {href: enfant.displayUri}
-          // faut passer par les types sinon jstree écrase notre background css
-          // if (enfant.typeTechnique) child.li_attr = {class:enfant.typeTechnique +'Item'}
-          //if (enfant.typeTechnique) child.type = enfant.typeTechnique
-          if (enfant.typeTechnique) child.icon = enfant.typeTechnique +'Item'
+          child = getJstNode(enfant)
         }
         children.push(child);
       });
@@ -278,45 +314,30 @@ module.exports = function (Ressource, $ressourceRepository, $routes) {
   }
 
   /**
-   * Transforme un ressource de la bibli en objet pour jstree
+   * Transforme un ressource de la bibli en node pour jstree
    * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
-   * @param ressource Une ressource ou une ref
-   * @returns {Array}
+   * @param {Ressource|Ref} ressource Une ressource ou une ref à une ressource
+   * @returns {Object}
    */
   $ressourceConverter.toJstree = function (ressource) {
-    // arbre jstree, cf http://www.jstree.com/docs/json/ pour le format
-    var jstData = {
-      text: ressource.titre
-    }
+    var node = getJstNode(ressource)
     if (ressource.typeTechnique === 'arbre') {
-      jstData.icon = "arbreItem"
-      // un objet qui sera conservé attaché à l'élément jstree, en y met une Ref
-      if (ressource.oid) jstData.data = $ressourceConverter.toRef(ressource)
-      else if (ressource.ref) jstData.data = tools.clone(ressource)
-      else if (ressource.typeTechnique === 'arbre') {
-        // c'est un élément intermédiaire de l'arbre, un groupe d'enfants avec un nom
-        // mais qui n'a pas d'existence hors de l'arbre parent
-        jstData.data = {}
-      } else {
-        jstData.data = {error:"Ni une ressource ni une ref ni un groupe de ref", content:ressource}
-      }
       if (ressource.enfants && ressource.enfants.length) {
-        jstData.children = $ressourceConverter.getJstreeChildren(ressource)
+        node.children = $ressourceConverter.getJstreeChildren(ressource)
       } else {
-        jstData.children = true
         // url pour récupérer les enfants
-        if (ressource.oid) jstData.data.url = '/api/jstree?id=' +ressource.oid
-        else if (ressource.ref) jstData.data.url = '/api/jstree?id=' +ressource.ref
-        else if (ressource.origine && ressource.idOrigine) jstData.data.url = '/api/jstree?id=' +ressource.origine +'/' +ressource.idOrigine
-        else jstData.children = false
-        if (jstData.data.url) jstData.data.url += '&children=1'
+        var url
+        if (ressource.oid) url = '/api/jstree?id=' + ressource.oid
+        else if (ressource.ref) url = '/api/jstree?id=' + ressource.ref
+        else if (ressource.origine && ressource.idOrigine) url = '/api/jstree?id=' + ressource.origine + '/' + ressource.idOrigine
+        if (url) {
+          node.children = true
+          node.data = {url: url + '&children=1'}
+        }
       }
-    } else {
-      jstData.a_attr = {href : $routes.getAbs(config.constantes.routes.display, ressource)}
     }
-    jstData.type = ressource.typeTechnique
 
-    return jstData
+    return node
   }
 
   return $ressourceConverter

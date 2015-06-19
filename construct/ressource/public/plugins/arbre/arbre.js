@@ -30,10 +30,9 @@
  */
 
 /**
- * @file Affiche un arbre
+ * @file Affiche un arbre avec jstree
  */
-/* global define, window, $ */
-
+/* jshint jquery:true */
 try {
   define(['jquery1', 'jstree', 'Arbre'], function (jq, jstree, Arbre) {
     "use strict";
