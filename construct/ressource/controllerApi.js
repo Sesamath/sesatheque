@@ -49,7 +49,7 @@
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $routes) {
 
   var _ = require('lodash')
-  //var flow = require('seq')
+  //var flow = require('an-flow')
 
   //var tools = require('../tools')
 

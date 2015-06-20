@@ -6,7 +6,7 @@
 
 var fs = require('fs')
 var _ = require('lodash')
-var flow   = require('seq')
+var flow = require('an-flow')
 
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line

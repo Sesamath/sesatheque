@@ -43,7 +43,7 @@
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) {
   var _ = require('lodash')
   //var tools = require('../tools')
-  //var seq = require('seq')
+  //var seq = require('an-flow')
 
   /**
    * Crée un formToken et l'ajoute à la ressource et en session

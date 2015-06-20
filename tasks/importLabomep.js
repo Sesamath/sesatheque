@@ -11,7 +11,7 @@
 var knex = require('knex')
 var _ = require('lodash')
 var request = require('request')
-var flow   = require('seq')
+var flow = require('an-flow')
 var xml2js = require('xml2js')
 // pour ec2, fct piquée dans le repository
 var elementtree = require('elementtree')

@@ -8,7 +8,7 @@ var maxDumps = 50
 
 var knex = require('knex')
 var moment = require('moment')
-var flow          = require('seq')
+var flow = require('an-flow')
 
 var dbConfig = require(__dirname + '/../_private/config')
 var confKnex = {

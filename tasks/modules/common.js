@@ -7,7 +7,7 @@ var fs = require('fs')
 var _ = require('lodash')
 var request = require('request')
 var moment = require('moment')
-var flow = require('seq')
+var flow = require('an-flow')
 
 var tools = require('../../construct/tools')
 var CounterMulti = require('../../construct/tools/CounterMulti')
@@ -327,7 +327,7 @@ common.flushPendingRelations = function (next) {
       if (opt.logRelations) log('on va chercher ' + idComb)
       common.getRessource(idComb, function (ressource) {
         // error loggée dans getRessource, on traite pas ici
-        var subFlow = require('seq')
+        var subFlow = require('an-flow')
         if (ressource) {
           // on gère notre accumulateur, car parMap ou seqMap ne passent pas l'ensemble des résultats au seq suivant
           // (qui doit lire this.stack pour tout récupérer), et ça rend l'ensemble plus lisible
