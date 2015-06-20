@@ -331,6 +331,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       if (attrs) for (attr in attrs) {
         if (attrs.hasOwnProperty(attr)) {
           if (attr === 'class') elt.className = attrs[attr];
+          else if (attr === 'style') w.setStyles(elt, attrs[attr]);
           else elt[attr] = attrs[attr];
         }
 
@@ -401,6 +402,37 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         log(error);
       } else {
         log("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg);
+      }
+    };
+
+    /**
+     * Affecte des styles à un élément html (on peut pas affecter elt.style directement car read only)
+     * sans planter en cas de pb (on le signale juste en console)
+     * @param {HTMLElement} elt
+     * @param {string|object} styles
+     */
+    window.setStyles = function(elt, styles) {
+      try {
+        if (elt && elt.style) {
+          if (typeof styles === 'string') {
+            styles = styles.split(';');
+            styles.forEach(function (paire) {
+              paire = /([\w]+):(.+)/.exec(paire);
+              if (paire && paire.length === 3) {
+                var key = paire[0];
+                elt.style[key] = paire[1];
+              }
+            });
+          } else if (typeof styles === 'object') {
+            for (var prop in styles) {
+              if (styles.hasOwnProperty(prop)) {
+                elt.style[prop] = styles[prop];
+              }
+            }
+          }
+        }
+      } catch (error) {
+        log.error(error);
       }
     };
 
