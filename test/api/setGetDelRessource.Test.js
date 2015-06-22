@@ -176,7 +176,7 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
       })
     })
 
-    it("vire la ressource " +ressCloned.oid + " précédente", function (done) {
+    it("vire la ressource que l'on vient d'enregistrer", function (done) {
       var options = {
         url    : urlBibli + '/' + oid,
         headers: {

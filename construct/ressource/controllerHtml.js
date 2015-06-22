@@ -99,11 +99,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $views.printError(context, message, 404)
   }
 
+  /**
+   * Vérifie les droits avant d'appeler $views.prepareAndSend
+   * @param context
+   * @param error
+   * @param ressource
+   * @param view
+   * @param options
+   */
+  function send(context, error, ressource, view, options) {
+    if (ressource && !$ressourceControl.hasReadPermission(context, ressource)) {
+      ressource = null // prepare & send renverra son 404 habituel
+    }
+    $views.prepareAndSend(context, error, ressource, view, options)
+  }
+
   // describe
   controller.get($routes.get('describe', ':oid'), function (context) {
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
-      $views.prepareAndSend(context, error, ressource, 'describe')
+      send(context, error, ressource, 'describe')
     })
   })
 
@@ -112,7 +127,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      $views.prepareAndSend(context, error, ressource, 'describe')
+      send(context, error, ressource, 'describe')
     })
   })
 
@@ -120,7 +135,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('display', ':oid'), function (context) {
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
-      $views.prepareAndSend(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
+      send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
     })
   })
 
@@ -129,7 +144,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      $views.prepareAndSend(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
+      send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
     })
   })
 
@@ -137,7 +152,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('preview', ':oid'), function (context) {
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
-      $views.prepareAndSend(context, error, ressource, 'display')
+      send(context, error, ressource, 'display')
     })
   })
 
@@ -146,7 +161,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      $views.prepareAndSend(context, error, ressource, 'display')
+      send(context, error, ressource, 'display')
     })
   })
 
@@ -303,7 +318,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 }
               }
               // la vue delete inclue la vue describe, faut les datas de describe
-              $views.prepareAndSend(context, error, ressource, 'describe', options)
+              send(context, error, ressource, 'describe', options)
             }
           })
         } else {

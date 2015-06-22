@@ -40,16 +40,15 @@
   function getJstNode(ressource) {
     /**
      * Retourne les datas qui nous intéressent à mettre sur le tag a
-     * (pour a_attr : data-id, data-typeTechnique, href et alt)
-     * @param {Ressource} ressource
+     * (pour a_attr : data-ref, data-typeTechnique, href et alt)
      * @return {Object}
      */
     function getAttr() {
       var attr = {};
-      // id
-      if (ressource.oid) attr['data-id'] = ressource.oid;
-      else if (ressource.ref) attr['data-id'] = ressource.ref;
-      else if (ressource.origine && ressource.idOrigine) attr['data-id'] = ressource.origine + '/' + ressource.idOrigine;
+      // ref
+      if (ressource.oid) attr['data-ref'] = ressource.oid;
+      else if (ressource.ref) attr['data-ref'] = ressource.ref;
+      else if (ressource.origine && ressource.idOrigine) attr['data-ref'] = ressource.origine + '/' + ressource.idOrigine;
       // url complète
       if (ressource.displayUri) attr.href = baseUrl + ressource.displayUri;
       if (ressource.typeTechnique) attr['data-typeTechnique'] = ressource.typeTechnique;
@@ -118,9 +117,9 @@
       } else {
         // url pour récupérer les enfants
         var url;
-        if (ressource.oid) url = '/api/jstree?id=' + ressource.oid;
-        else if (ressource.ref) url = '/api/jstree?id=' + ressource.ref;
-        else if (ressource.origine && ressource.idOrigine) url = '/api/jstree?id=' + ressource.origine + '/' + ressource.idOrigine;
+        if (ressource.oid) url = '/api/jstree?ref=' + ressource.oid;
+        else if (ressource.ref) url = '/api/jstree?ref=' + ressource.ref;
+        else if (ressource.origine && ressource.idOrigine) url = '/api/jstree?ref=' + ressource.origine + '/' + ressource.idOrigine;
         if (url) {
           node.children = true;
           node.data = {url: url + '&children=1'};

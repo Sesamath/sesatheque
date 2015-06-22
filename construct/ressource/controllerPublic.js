@@ -45,7 +45,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   //var tools = require('../tools')
 
   /**
-   * Charge une ressource publique et l'affiche
+   * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
    * @param context
    * @param view
    * @param options
@@ -57,20 +57,53 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   }
 
+  /**
+   * Vérifie qu'une ressource est publique puis l'envoie à la vue
+   * @param context
+   * @param error
+   * @param ressource
+   * @param view
+   * @param options
+   */
+  function checkAndAffiche(context, error, ressource, view, options) {
+    if (error) $views.printError(context, "Problème d'accès à la base de données", 500)
+    else if (ressource && ressource.restriction === 0) $views.prepareAndSend(context, error, ressource, view, options)
+    else $views.printError(context, "La ressource n'existe pas ou n'est pas publique", 404)
+  }
+
   // describe
   controller.get($routes.get('describe', ':oid'), function (context) {
-    log('public describe')
     affiche(context, 'describe')
+  })
+  controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      checkAndAffiche(context, error, ressource, 'describe')
+    })
   })
 
   // display : Voir la ressource pleine page (pour iframe)
   controller.get($routes.get('display', ':oid'), function (context) {
     affiche(context, 'display', {$layout:'../../static/views/layout-iframe'})
   })
-
+  controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      checkAndAffiche(context, error, ressource, 'display', {$layout:'../../static/views/layout-iframe'})
+    })
+  })
   // preview : Voir la ressource avec header et menu
   controller.get($routes.get('preview', ':oid'), function (context) {
     affiche(context, 'display')
+  })
+  controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      checkAndAffiche(context, error, ressource, 'preview')
+    })
   })
 
   /**
@@ -84,6 +117,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var index = context.arguments.index
     var value = context.arguments.value
     var values
+    // value est forcément une string
     if (value !== "undefined") {
       if (value.indexOf(',')) values = value.split(',')
       else values = [value]
@@ -118,6 +152,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - nb : nb de résultats voulus
    */
   controller.post('by', function (context) {
+    if (!context.post.filters) context.post.filters = {}
+    if (!context.post.filters) context.post.filters = {}
     $ressourceRepository.getListe('public', context.post, function (error, ressources) {
       var data = $views.getDefaultData('liste')
       data.$metas.title = 'Résultats de la recherche'

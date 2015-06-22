@@ -136,6 +136,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           sesalog  : vendorsBaseUrl + '/sesamath/log',
           Resultat : vendorsBaseUrl + '/sesamath/Resultat',
           Arbre    : vendorsBaseUrl + '/sesamath/Arbre',
+          // d'autres trucs à nous
+          jstreeConverter : vendorsBaseUrl + '/sesamath/tools/jstreeConverter'
         }
         // pour jQueryUi faut charger les css, on pourrait créer un miniModule qui s'en charge pour chaque version
         // mais c'est assez lourd, faut lui passer le chemin toussa, on laisse celui qui nous charge s'en occuper
@@ -393,15 +395,19 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      * @param {string|Error} error Le message à afficher
      */
     window.setError = function (error) {
-      var errorMsg = (error instanceof Error) ? "Une erreur est survenue (voir la console pour les détails)" : error;
+      var errorMsg = (error instanceof Error) ? error.toString() : error;
+      if (/^TypeError:/.test(errorMsg)) {
+        // on envoie qqchose de plus compréhensible
+        errorMsg = "Une erreur est survenue (voir la console pour les détails)";
+      }
       if (errorsContainer) {
         // on ajoute un peu de margin à ce div qui n'en avait pas
         if (!errorsContainer.style) errorsContainer.style = {};
         errorsContainer.style.margin = "0.2em";
         errorsContainer.textContent = errorMsg;
-        log(error);
+        log.error(error);
       } else {
-        log("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg);
+        log.error(new Error("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg));
       }
     };
 
@@ -413,7 +419,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      */
     window.setStyles = function(elt, styles) {
       try {
-        if (elt && elt.style) {
+        if (elt) {
+          if (!elt.style) elt.style = {};
           if (typeof styles === 'string') {
             styles = styles.split(';');
             styles.forEach(function (paire) {

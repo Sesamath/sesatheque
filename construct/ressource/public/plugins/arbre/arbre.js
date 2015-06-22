@@ -33,7 +33,7 @@
  * @file Affiche un arbre avec jstree
  */
 try {
-  define(['../../vendors/sesamath/tools/jstreeConverter.js', 'jquery1', 'jstree'], function (jstreeConverter) {
+  define(['jstreeConverter', 'jquery1', 'jstree'], function (jstreeConverter) {
     "use strict";
     if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
     /* jshint jquery:true */

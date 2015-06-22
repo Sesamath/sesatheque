@@ -1,6 +1,6 @@
 {
   "name": "Bibliotheque",
-  "version":"0.0.2",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "start": "./scripts/run"
@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "bower": "^1.4.1",
+    "casperjs": "^1.1.0-beta3",
     "elementtree": "^0.1.6",
     "express-debug": "^1.1.0",
     "gulp": "^3.8.7",
@@ -28,7 +29,9 @@
     "merge-stream": "^0.1.1",
     "mocha": "^2.2.4",
     "mysql": "^2.6.0",
+    "phantomjs": "^1.9.17",
     "through2": "^0.4.2",
-    "xml2js": "^0.4.4"
+    "xml2js": "^0.4.4",
+    "zombie": "^2.5.1"
   }
 }

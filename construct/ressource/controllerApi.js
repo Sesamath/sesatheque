@@ -170,49 +170,46 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Envoie une liste de ressources
+   * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
    * @param context
    * @param error
    * @param ressources
-   * @param {string} [format] compact|ref (ignoré sinon)
    */
-  function sendListe(context, error, ressources, format) {
-    if (format && ["compact", "ref"].indexOf(format) > -1) {
-      // on veut pas les ressources complètes mais seulement une partie
-      if (!error && ressources && ressources.length) {
-        var liste = []
-        ressources.forEach(function (ressource) {
+  function sendListe(context, error, ressources) {
+    if (error) {
+      sendJson(context, error)
+    } else if (ressources && ressources.length) {
+      var format = context.post.format || context.get.format
+      var liste = []
+      ressources.forEach(function (ressource) {
+        if ($ressourceControl.hasReadPermission(context, ressource)) {
           if (format === 'compact') liste.push($ressourceConverter.toCompactFormat(ressource))
-          else liste.push($ressourceConverter.toRef(ressource))
-        })
-        sendJson(context, error, {liste:liste})
-      } else {
-        // erreur ou liste vide
-        sendJson(context, error, {liste:ressources})
-      }
+          else if (format === 'ref') liste.push($ressourceConverter.toRef(ressource))
+          else liste.push(ressource)
+        }
+      })
+      sendJson(context, null, {success:true, liste:liste})
     } else {
-      // les ressources complètes
-      sendJson(context, error, {liste:ressources})
+      // liste vide
+      sendJson(context, null, {success:true, liste:[]})
     }
   }
 
   /**
-   * Formate la réponse pour renvoyer une ref
+   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, au format de context.get.format
    * @param context
    * @param error
    * @param ressource
    */
-  function sendRef(context, error, ressource) {
+  function sendRessource(context, error, ressource) {
     if (error) sendJson(context, error)
-    else if (ressource) {
-      sendJson(context, null, {
-        ref          : ressource.oid,
-        titre        : ressource.titre,
-        typeTechnique: ressource.typeTechnique,
-        dataUri      : $routes.getAbs('api', ressource),
-        displayUri   : $routes.getAbs('display', ressource)
-      })
-    } else notFound(context, 'Aucune ressource à référencer trouvée')
+    else if (ressource && $ressourceControl.hasReadPermission(context, ressource)) {
+      var format = context.get.format
+      if (format === 'ref') sendJson(context, null, $ressourceConverter.toRef(ressource))
+      if (format === 'compact') sendJson(context, null, $ressourceConverter.toCompactFormat(ressource))
+      else sendJson(context, null, ressource)
+    }
+    else notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
   }
 
   /**
@@ -294,8 +291,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         else {
           log.perf(context.response, 'written')
           if (context.get.format === 'ref') {
-            // on veut une ref en réponse
-            sendRef(context, null, ressource)
+            // on veut une ref en réponse, sendRessource gère le format
+            sendRessource(context, null, ressource)
           } else {
             // on ne renvoie que l'oid et des warnings éventuels
             var data = {oid: ressource.oid}
@@ -315,13 +312,91 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   }
 
+
+  /**
+   * Read (accepte ?format=ref|compact)
+   * @callback GET /api/ressource/:oid
+   */
+  controller.get('ressource/:oid', function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.load(oid, function (error, ressource) {
+      sendRessource(context, error, ressource)
+    })
+  })
+  /**
+   * Read byOrigine (accepte ?format=ref|compact)
+   * @callback GET /api/ressource/:origine/:idOrigine
+   */
+  controller.get('ressource/:origine/:idOrigine', function (context) {
+    var idOrigine = context.arguments.idOrigine
+    var origine = context.arguments.origine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      sendRessource(context, error, ressource)
+    })
+  })
+  /**
+   * Read public (sans session, accepte ?format=ref|compact)
+   * @callback GET /api/public/:oid
+   */
+  controller.get('public/:oid', function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.loadPublic(oid, function (error, ressource) {
+      if (error) sendJson(context, error)
+      else if (ressource) sendJson(context, null, ressource)
+      else notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
+    })
+  })
+  /**
+   * Read public byOrigine (sans session)
+   * @callback GET /api/public/:origine/:idOrigine
+   */
+  controller.get('public/:origine/:idOrigine', function (context) {
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      if (error) sendJson(context, error)
+      else if (ressource && ressource.restriction === 0) sendJson(context, null, ressource)
+      else notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
+    })
+  })
+
+  /**
+   * Read au format jstree (accepte children=1 pour récupérer les enfants seulement)
+   * @callback GET /api/jstree?ref=xx[&children=1]
+   */
+  controller.get('jstree', function (context) {
+    var ref = context.get.ref || context.get.id
+    var onlyChildren = !!context.get.children
+    if (!ref) sendJsonJstreeArray(context, "il faut fournir une ref de ressource")
+    $ressourceRepository.load(ref, function (error, ressource) {
+      if (error) {
+        sendJsonJstreeArray(context, error)
+      } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
+        var jstData
+        if (onlyChildren) {
+          if (ressource.typeTechnique === 'arbre') {
+            jstData = $ressourceConverter.getJstreeChildren(ressource)
+            sendJsonJstreeArray(context, null, jstData)
+          } else {
+            sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
+          }
+        } else {
+          jstData = $ressourceConverter.toJstree(ressource)
+          sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
+        }
+      } else {
+        sendJsonJstreeArray(context, "la ressource " +ref +" n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
+      }
+    })
+  })
+
   //noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Create / update une ressource
    * Si le titre et la catégorie sont manquants (mais avec oid), ou que l'on passe merge=1 en paramètre,
    * on merge avec la ressource existante que l'on update,sinon on écrase ou on créé
    * Attention, c'est un merge au sens lodash du terme (chaque propriété présente écrase la précédente)
-   * @callback api_ressource POST api/ressource
+   * @callback POST /api/ressource
    * @param context
    */
   function postRessource(context) {
@@ -368,7 +443,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   postRessource.timeout = 5000
   controller.post('ressource', postRessource)
 
-  // ajoute des relations (on tolère dans le post les propriétés oid ou origine+idOrigine ou id (en plus de relations)
+  /**
+   * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
+   * @param context
+   * @callback POST /api/ressource/addRelations
+   */
   function postRessourceAddRelations (context) {
     if (context.perf) {
       var msg = 'start-'
@@ -379,10 +458,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
     var relations = context.post.relations
     if (relations && relations.length) {
-      var id = extractId(context)
+      var ref = extractId(context)
 
-      if (id) {
-        $ressourceRepository.load(id, function (error, ressource) {
+      if (ref) {
+        $ressourceRepository.load(ref, function (error, ressource) {
           if (error) sendJson(context, error)
           else if (ressource) {
             var errors = $ressourceConverter.addRelations(ressource, relations)
@@ -398,7 +477,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               })
             }
           } else {
-            notFound(context, "La ressource " + id + " n'existe pas")
+            notFound(context, "La ressource " + ref + " n'existe pas")
           }
         })
       } else {
@@ -411,140 +490,34 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   postRessourceAddRelations.timeout = 5000
   controller.post('ressource/addRelations', postRessourceAddRelations)
 
-  // read
-  controller.get('ressource/:oid', function (context) {
-    var oid = context.arguments.oid
-
-    $ressourceRepository.load(oid, function (error, ressource) {
-      // log.debug("dans api get " +oid, ressource)
-      if (error) sendJson(context, error)
-      else if (ressource) {
-        // l'entité passe pas le JSON.stringify, à cause de la propriété _entity, d'où le toObject
-        if ($accessControl.hasReadPermission(context, ressource)) sendJson(context, null, ressource)
-        else denied(context, "Droits insuffisants pour accéder à la ressource d'identifiant " + oid)
-      } else notFound(context, "La ressource d'identifiant " + oid + " n'existe pas")
-    })
-  })
-
-  // delete
+  /**
+   * Delete
+   * @callback DEL /api/ressource/:oid
+   */
   controller.delete('ressource/:oid', function (context) {
     deleteAndSend(context, context.arguments.oid)
   })
-
-
-  // delete by origine
+  /**
+   * Delete par origine
+   * @callback DEL /api/ressource/:origine/:idOrigine
+   */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
-    var id = context.arguments.origine +'/' +context.arguments.idOrigine
-    deleteAndSend(context, id)
+    var ref = context.arguments.origine +'/' +context.arguments.idOrigine
+    deleteAndSend(context, ref)
   })
-
-  // les même avec du denied sur les routes publiques (rerouting from ressource si on a ni session ni token)
+  /**
+   * Delete denied sur api/public (rerouting from ressource si on a ni session ni token)
+   * @callback DEL /api/public/:origine/:idOrigine
+   */
   controller.delete('public/:origine/:idOrigine', function (context) {
     denied(context, "droits insuffisant pour effacer cette ressource")
   })
+  /**
+   * Delete denied sur api/public (rerouting from ressource si on a ni session ni token)
+   * @callback DEL /api/public/:oid
+   */
   controller.delete('public/:oid', function (context) {
     denied(context, "droits insuffisant pour effacer cette ressource")
-  })
-
-  // Read byOrigine
-  controller.get('ressource/:origine/:oid', function (context) {
-    var idOrigine = context.arguments.oid
-    var origine = context.arguments.origine
-
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      // log('api.readByOrigine ' +origine +' ' +idOrigine +' récupère ', ressource)
-      // log.debug("dans api get " +origine +'/' +idOrigine, ressource)
-      if (error) sendJson(context, error)
-      else if (ressource) {
-        if ($accessControl.hasReadPermission(context, ressource)) sendJson(context, null, ressource)
-        else  denied(context, "Droits insuffisants pour accéder à la ressource d'origine " +
-            origine + " et d'identifiant " + idOrigine)
-      } else notFound(context, "La ressource d'origine " + origine + " et d'identifiant " + idOrigine + " n'existe pas")
-    })
-  })
-
-
-
-  // getRef (pour récupérer une ref à la ressource à mettre en enfant d'un arbre)
-  controller.get('ressource/getRef/:oid', function (context) {
-    $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
-      sendRef(context, error, ressource)
-    })
-  })
-  // getRef par origine/idOrigine
-  controller.get('ressource/getRef/:origine/:idOrigine', function (context) {
-    $ressourceRepository.loadByOrigin(context.arguments.origine, context.arguments.idOrigine, function (error, ressource) {
-      sendRef(context, error, ressource)
-    })
-  })
-
-  // Read public (sans session)
-  controller.get('public/:oid', function (context) {
-    var oid = context.arguments.oid
-    $ressourceRepository.loadPublic(oid, function (error, ressource) {
-      if (error) sendJson(context, error)
-      else if (ressource) sendJson(context, null, ressource)
-      else notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
-    })
-  })
-
-  // Read public (sans session) par origine
-  controller.get('public/:origine/:idOrigine', function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      if (error) sendJson(context, error)
-      else if (ressource) {
-        if (ressource.restriction === 0) sendJson(context, null, ressource)
-        else  denied(context, "Droits insuffisants pour accéder à la ressource " + origine + '/' + idOrigine)
-      } else notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas")
-    })
-  })
-
-  // read public pour récupérer seulement oid, titre et typeTechnique
-  controller.get('public/getRef/:origine/:idOrigine', function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-
-    $ressourceRepository.loadPublicByOrigin(origine, idOrigine, function (error, ressource) {
-      if (error) sendJson(context, error)
-      else if (ressource && ressource.restriction === 0) {
-        sendJson(context, null, {
-           ref : ressource.oid,
-           titre : ressource.titre,
-           typeTechnique : ressource.typeTechnique
-        })
-      } else {
-        notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
-      }
-    })
-  })
-
-  controller.get('jstree', function (context) {
-    var id = context.get.id
-    var onlyChildren = !!context.get.children
-    if (!id) sendJsonJstreeArray(context, "il faut fournir un id de ressource")
-    $ressourceRepository.load(id, function (error, ressource) {
-      if (error) {
-        sendJsonJstreeArray(context, error)
-      } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
-        var jstData
-        if (onlyChildren) {
-          if (ressource.typeTechnique === 'arbre') {
-            jstData = $ressourceConverter.getJstreeChildren(ressource)
-            sendJsonJstreeArray(context, null, jstData)
-          } else {
-            sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
-          }
-        } else {
-          jstData = $ressourceConverter.toJstree(ressource)
-          sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
-        }
-      } else {
-        if (!id) sendJsonJstreeArray(context, "la ressource " +id +" n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
-      }
-    })
   })
 
   /**
@@ -558,26 +531,30 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - order : 'desc' si on veut l'ordre descendant
    * - start : offset
    * - nb : nb de résultats voulus
+   * @callback POST /api/public/by
    */
   controller.post('public/by', function (context) {
     log.debug('api.public.by reçoit', context.post)
-
     $ressourceRepository.getListe('public', context.post, function (error, ressources) {
-      if (error) sendJson(context, error)
-      else sendJson(context, null, ressources)
+      sendListe(context, error, ressources)
     })
   })
-
+  /**
+   * Idem en incluant les corrections
+   * @callback POST /api/prof/by
+   */
   controller.post('prof/by', function (context) {
     if ($accessControl.hasGenericPermission('correction', context)) {
       $ressourceRepository.getListe('correction', context.post, function (error, ressources) {
-        if (error) sendJson(context, error)
-        else sendJson(context, null, ressources)
+        sendListe(context, error, ressources)
       })
     }
     else denied(context, "Il faut être authentifié pour accéder aux ressources prof")
   })
-
+  /**
+   * Idem pour les ressources du user courant
+   * @callback POST /api/perso/by
+   */
   controller.post('perso/by', function (context) {
     var oid = $accessControl.currentUserOid
     if (oid) {
@@ -601,10 +578,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - start : offset
    * - nb : nb de résultats voulus
    * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
+   * @callback POST /api/all/by
    */
   function postBy(context) {
-    $ressourceRepository.getListe('public', context.post, function (error, ressources) {
-      sendListe(context, error, ressources, context.post.format)
+    $ressourceRepository.getListe('all', context.post, function (error, ressources) {
+      sendListe(context, error, ressources)
     })
   }
   postBy.timeout = 3000
@@ -612,7 +590,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Liste d'après les filtres en json (qui peuvent être multiple), que l'on rend aussi dispo aussi en get
-   * Le json doit contenir
+   * Les arguments peuvent être
    * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
    *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
    * et peut contenir
@@ -621,22 +599,34 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * - start : offset
    * - nb : nb de résultats voulus
    * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
+   * et peuvent éventuellement être regroupés dans un seul argument json=
+   * @callback GET /api/by
    */
   function getBy(context) {
-    var options
-    try {
-      options = JSON.parse(context.arguments.json)
+    var options, errorMsg
+    if (context.get.json) {
+      try {
+        options = JSON.parse(context.get.json)
+        // faut l'ajouter ici pour que sendListe l'utilise
+        if (options.format && !context.get.format) context.get.format = options.format
+      } catch (error) {
+        errorMsg = 'json invalide : ' +context.arguments.json
+      }
+    } else {
+        options = context.get
+    }
+    if (_.isEmpty(options)) {
+      errorMsg = "Il faut passer des critères de recherche"
+    }
+    if (errorMsg) {
+      sendJson(context, null, {error:errorMsg})
+    } else {
       $ressourceRepository.getListe('public', options, function (error, ressources) {
-        sendListe(context, error, ressources, options.format)
+        sendListe(context, error, ressources)
       })
-    } catch (error) {
-      sendJson(context, null, {error:'json invalide : ' +context.arguments.json})
     }
   }
   getBy.timeout = 3000
-  controller.get('by/:json', getBy)
-/*
-  controller.get('test', function (context) {
-    sendJson(context, null, "un message")
-  }) */
+  controller.get('by', getBy)
+
 }

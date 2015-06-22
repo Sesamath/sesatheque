@@ -40,7 +40,6 @@
 /*global describe,it*/
 
 var assert = require("assert")
-var _ = require('lodash')
 var request = require('request')
 
 var config = require('../../config')
@@ -48,92 +47,72 @@ var apiToken = config.apiTokens[0]
 if (process.argv.indexOf('--token') > -1) {
   apiToken = process.argv[process.argv.indexOf('--token') +1]
 }
-var urlApiBibli = 'http://'
+var urlBibli = 'http://'
 if (process.argv.indexOf('--prod') > -1) {
-  urlApiBibli += 'bibliotheque.sesamath.net'
+  urlBibli += 'bibliotheque.sesamath.net'
 } else if (process.argv.indexOf('--dev') > -1) {
-  urlApiBibli += 'bibliotheque.devsesamath.net'
+  urlBibli += 'bibliotheque.devsesamath.net'
 } else {
-  urlApiBibli += config.$server && config.$server.hostname || 'localhost'
-  urlApiBibli += ':'
-  urlApiBibli += config.$server && config.$server.port || '3000'
-}
-urlApiBibli += '/api'
-
-
-function logInfo() {
-  var arg
-  var prefix = '        '
-  for (var i = 0; i < arguments.length; i++) {
-    arg = arguments[i]
-    if (typeof arg === 'string') arg = prefix +arg
-    console.log(arg)
-  }
+  urlBibli += config.$server && config.$server.hostname || 'localhost'
+  urlBibli += ':'
+  urlBibli += config.$server && config.$server.port || '3000'
 }
 
-describe('api get public by oid', function () {
-  it("récupère public/42", function (doneGet) {
+describe('get 404', function () {
+  it("prend un 404 sur /public/foo/bar", function (done) {
     var options = {
-      url    : urlApiBibli +'/public/42',
-      json   : true
+      url : urlBibli + '/public/foo/bar'
     }
     request.get(options, function (error, response, ressource) {
-      assert.ok(!error)
-      assert.ok(!ressource.error)
-      assert.strictEqual(ressource.titre, 'Droites visiblement parallèles')
-      assert.strictEqual(ressource.origine, 'em')
-      assert.strictEqual(ressource.idOrigine, '42')
-      doneGet()
+      //console.log(response)
+      console.log(ressource)
+      assert.ok(ressource)
+      assert.equal(404, response.statusCode)
+      done()
+    })
+  })
+
+  it("prend un 404 sur /ressource/foo/bar", function (done) {
+    var options = {
+      url : urlBibli + '/ressource/foo/bar'
+    }
+    request.get(options, function (error, response, ressource) {
+      assert.ok(response.body)
+      assert.equal(404, response.statusCode)
+      done()
+    })
+  })
+
+  it("prend un 404 sur /public/foo", function (done) {
+    var options = {
+      url : urlBibli + '/public/foo'
+    }
+    request.get(options, function (error, response, ressource) {
+      assert.ok(response.body)
+      assert.equal(404, response.statusCode)
+      done()
+    })
+  })
+
+  it("prend un 404 sur /ressource/foo", function (done) {
+    var options = {
+      url : urlBibli + '/ressource/foo'
+    }
+    request.get(options, function (error, response, ressource) {
+      assert.ok(response.body)
+      assert.equal(404, response.statusCode)
+      done()
+    })
+  })
+
+  it("prend un 404 sur /foo/bar", function (done) {
+    var options = {
+      url : urlBibli + '/foo/bar'
+    }
+    request.get(options, function (error, response, ressource) {
+      assert.ok(response.body)
+      assert.equal(404, response.statusCode)
+      done()
     })
   })
 })
-
-describe('api get ressource by oid', function () {
-  it("récupère ressource/42", function (doneGet) {
-    var options = {
-      url    : urlApiBibli +'/ressource/42',
-      json   : true
-    }
-    request.get(options, function (error, response, ressource) {
-      assert.ok(!error)
-      assert.ok(!ressource.error)
-      assert.strictEqual(ressource.titre, 'Droites visiblement parallèles')
-      assert.strictEqual(ressource.origine, 'em')
-      assert.strictEqual(ressource.idOrigine, '42')
-      doneGet()
-    })
-  })
-})
-
-describe('api get public by origin', function () {
-  it("récupère public/sesaxml/exercices_interactifs", function (doneGet) {
-    var options = {
-      url    : urlApiBibli +'/public/sesaxml/exercices_interactifs',
-      json   : true
-    }
-    request.get(options, function (error, response, ressource) {
-      assert.ok(!error)
-      assert.ok(!ressource.error)
-      assert.strictEqual(ressource.origine, 'sesaxml')
-      assert.strictEqual(ressource.idOrigine, 'exercices_interactifs')
-      doneGet()
-    })
-  })
-})
-
-describe('api get ressource by origin', function () {
-  it("récupère ressource/sesaxml/exercices_interactifs", function (doneGet) {
-    var options = {
-      url    : urlApiBibli +'/ressource/sesaxml/exercices_interactifs',
-      json   : true
-    }
-    request.get(options, function (error, response, ressource) {
-      assert.ok(!error)
-      assert.ok(!ressource.error)
-      assert.strictEqual(ressource.origine, 'sesaxml')
-      assert.strictEqual(ressource.idOrigine, 'exercices_interactifs')
-      doneGet()
-    })
-  })
-})
-

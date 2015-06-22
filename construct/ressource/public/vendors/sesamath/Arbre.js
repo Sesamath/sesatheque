@@ -37,52 +37,9 @@
 /* global define, module*/
 
 // suivant que l'on est coté serveur ou client
-if (typeof define === 'function') define(function () {return Arbre});
+if (typeof define === 'function') define(function () {return Arbre;});
 else if (typeof module === 'object') module.exports = Arbre;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
-
-/**
- * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
- * duplication de la même fct de $ressourceConverter
- * @see http://www.jstree.com/docs/json/ pour le format
- * @param {Ressource} ressource
- */
-function getJstNode (ressource) {
-  /**
-   * Retourne les datas qui nous intéressent à mettre sur le tag a
-   * (pour a_attr : data-id, data-typeTechnique, href et alt)
-   * @param {Ressource} ressource
-   * @return {Object}
-   */
-  function getAttr() {
-    var attr = {};
-    // id
-    if (ressource.oid) attr['data-ref'] = ressource.oid;
-    else if (ressource.ref) attr['data-ref'] = ressource.ref;
-    else if (ressource.origine && ressource.idOrigine) attr['data-ref'] = ressource.origine +'/' +ressource.idOrigine;
-    // url complète
-    if (ressource.displayUri) {
-      attr.href = ressource.displayUri;
-      attr.target = "displayRessource";
-    }
-    if (ressource.typeTechnique) attr['data-typeTechnique'] = ressource.typeTechnique;
-    if (ressource.resume) attr.alt = ressource.resume;
-
-    return attr;
-  }
-
-  var node;
-  if (ressource) {
-    node = {
-      text  : ressource.titre,
-      a_attr: getAttr(),
-      icon  : ressource.typeTechnique + 'JstNode'
-    };
-  } else log.error(new Error("getJstNode appelé sans ressource"));
-
-  return node;
-}
-
 
 /**
  * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
@@ -124,7 +81,7 @@ function Arbre(initObj) {
    * qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {(Number|string|undefined)}
    */
-  this.typeTechnique = initObj.typeTechnique || 'arbre'
+  this.typeTechnique = initObj.typeTechnique || 'arbre';
   /**
    * Des attributs du node (ou la racine de l'arbre), ça peut être ico pour une icone particulière
    * @type {Object}
@@ -143,7 +100,7 @@ function Arbre(initObj) {
  */
 Arbre.prototype.toString = function () {
   return this.titre;
-}
+};
 
 /**
  * Formate un arbre en ressource
@@ -169,49 +126,4 @@ Arbre.prototype.toRessource = function () {
   r.parametres = a;
   
   return r;
-}
-
-/**
- * Retourne un tableau children au format jstree
- * duplication de $ressourceConverter.getJstreeChildren
- * @param ressource
- * @return {Array} Le tableau des enfants
- */
-Arbre.prototype.getJstreeChildren = function() {
-  var children = [];
-  if (this.enfants) {
-    this.enfants.forEach(function (enfant) {
-      var child;
-      if (enfant.typeTechnique === 'arbre') {
-        child = Arbre.prototype.getJstreeChildren.call(enfant);
-      } else {
-        child = getJstNode(enfant);
-      }
-      children.push(child);
-    });
-  }
-
-  return children;
-}
-
-/**
- * Retourne un arbre pour jstree (array d'un node unique)
- * @returns {Array}
- */
-Arbre.prototype.toJstree = function() {
-  var node = getJstNode(this);
-  if (this.enfants && this.enfants.length) {
-    node.children = this.getJstreeChildren();
-  } else {
-    // url pour récupérer les enfants
-    var url;
-    if (this.oid) url = '/api/jstree?id=' + this.oid;
-    else if (this.ref) url = '/api/jstree?id=' + this.ref;
-    if (url) {
-      node.children = true;
-      node.data = {url: url + '&children=1'};
-    }
-  }
-
-  return [node];
-}
+};

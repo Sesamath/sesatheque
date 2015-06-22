@@ -433,7 +433,7 @@ common.getIdComb = function (ressource) {
 common.getRef = function (origine, idOrigine, next) {
   var idComb = origine +'/' +idOrigine
   var options = {
-    url         : urlBibli + '/getRef/' +idComb,
+    url         : urlBibli + '/' +idComb +'?format=ref',
     headers     : {
       "X-ApiToken": apiToken
     },
