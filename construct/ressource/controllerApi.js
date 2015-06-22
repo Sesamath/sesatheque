@@ -44,12 +44,11 @@
  * @param $ressourceConverter
  * @param $ressourceControl
  * @param $accessControl
- * @param $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl) {
 
   var _ = require('lodash')
-  //var flow = require('seq')
+  //var flow = require('an-flow')
 
   //var tools = require('../tools')
 
@@ -628,5 +627,4 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
   getBy.timeout = 3000
   controller.get('by', getBy)
-
 }

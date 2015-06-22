@@ -40,7 +40,7 @@ var tools = require('../../construct/tools')
 GLOBAL.log = require('../../construct/tools/log')
 
 var CounterMulti = require('../../construct/tools/CounterMulti')
-//var flow = require('seq');
+//var flow = require('an-flow');
 //var request = require('request')
 
 describe('tools', function () {

@@ -9,7 +9,7 @@
 
 var knex = require('knex')
 var fs = require('fs')
-var flow   = require('seq')
+var flow = require('an-flow')
 var elementtree = require('elementtree')
 
 var common = require('./modules/common')

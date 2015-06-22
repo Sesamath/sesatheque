@@ -13,7 +13,7 @@ var logApiCalls = false
 var knex = require('knex')
 //var _ = require('lodash')
 //var moment = require('moment')
-var flow = require('seq')
+var flow = require('an-flow')
 
 var tools = require('../construct/tools')
 var common = require('./modules/common')

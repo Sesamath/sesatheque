@@ -44,7 +44,7 @@
 module.exports = function (Ressource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
   var tools = require('../tools')
   var _ = require('lodash')
-  var seq = require('seq')
+  var seq = require('an-flow')
   var moment = require('moment')
   var basePath = $settings.get('basePath', '/')
   // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
