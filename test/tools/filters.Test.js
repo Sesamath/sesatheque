@@ -36,7 +36,7 @@
 var assert = require("assert")
 var _ = require('lodash')
 var filters = require('../../construct/ressource/public/vendors/sesamath/tools/filters')
-//var flow = require('seq');
+//var flow = require('an-flow');
 //var request = require('request')
 
 describe('filters', function () {

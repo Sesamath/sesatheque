@@ -39,7 +39,7 @@
  */
 module.exports = function (Ressource, $ressourceRepository, $routes, $settings) {
   var _ = require('lodash')
-  var flow = require('seq')
+  var flow = require('an-flow')
   //var moment = require('moment')
   // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
   // car on a l'autocomplétion sur les noms de propriété

@@ -47,7 +47,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
   var $ressourceRepository = {}
 
   var _ = require('lodash')
-  var flow          = require('seq')
+  var flow          = require('an-flow')
   var elementtree = require('elementtree')
   //var util = require('util')
 
