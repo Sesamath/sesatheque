@@ -202,13 +202,19 @@ try {
         $tree.on('select_node.jstree', function (e, data) {
           var jstNode = data.node.original;
           log("on veut l'aperçu du node", jstNode);
-          if (jstNode && jstNode.a_attr && jstNode.a_attr['data-typeTechnique'] !== 'arbre') {
-            if (isApercu === null) initApercu();
-            // on resize avant chargement
-            agrandir();
-            // et on lui file une url à charger
-            log("on va charger " +jstNode.a_attr.href);
-            iframeApercu.src = jstNode.a_attr.href;
+          if (jstNode && jstNode.a_attr) {
+            if (jstNode.a_attr['data-typeTechnique'] === 'arbre') {
+              // on fait du toggle
+              if ($tree.jstree('is_open', data.node)) $tree.jstree('close_node', data.node);
+              else $tree.jstree('open_node', data.node);
+            } else {
+              if (isApercu === null) initApercu();
+              // on resize avant chargement
+              agrandir();
+              // et on lui file une url à charger
+              log("on va charger " + jstNode.a_attr.href);
+              iframeApercu.src = jstNode.a_attr.href;
+            }
           }
           /*
           var href = data.rslt.obj.children("a").attr("href");
