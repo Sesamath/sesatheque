@@ -108,7 +108,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param options
    */
   function send(context, error, ressource, view, options) {
-    if (ressource && !$ressourceControl.hasReadPermission(context, ressource)) {
+    if (ressource && !$accessControl.hasReadPermission(context, ressource)) {
       ressource = null // prepare & send renverra son 404 habituel
     }
     $views.prepareAndSend(context, error, ressource, view, options)

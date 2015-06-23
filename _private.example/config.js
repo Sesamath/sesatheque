@@ -33,41 +33,39 @@
  * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git
  *
  * Dans un fichier js (et pas json) pour pouvoir mettre des commentaires
- * @see http://knexjs.org/#Installation-client pour la syntaxe de entities.database
  */
 module.exports = {
   application : {
     baseUrl : 'http://example.com:xxxx',
     mail : "user@example.com",
-    staging: 'prod' // ou dev
+    staging: 'prod' // prod ou dev
   },
   $entities : {
     database: {
-      /* pour mysql */
-      client: "mysql",
-      connection: {
-        host: "xxx",
-        port: "3306",
-        user: "xxx",
-        password: "xxx",
-        database: "xxx",
-        debug: ['ComQueryPacket']
-      }
-      /* pour pgsql * /
-       client    : "pg",
-       connection: {
-       host    : "xxx",
-       port    : "5432",
-       user    : "xxx",
-       password: "xxx",
-       database: "xxx"
-       } /* */
+      host: "xxx",
+      port: "3306",
+      user: "xxx",
+      password: "xxx",
+      database: "xxx",
+      // cf https://github.com/felixge/node-mysql/#pool-options
+      connectTimeout : 1000,
+      trace : true, // true par défaut, mettre false en prod ?
+      connectionLimit : 50,
+      waitForConnections : true, // avec true, si les 50 sont occupées on met en queue jusqu'à queueLimit
+      acquireTimeout : 1000,
+      queueLimit : 100,
+      debug : true // mysql2 distingue pas
+      // debug: ['ComQueryPacket', 'ErrorPacket'] // Cf node_modules/mysql/lib/protocol/packets/ pour la liste
     }
   },
   $server : {
     hostname : 'foo.bar', // utilisé par des tâches gulp en dev, mis à localhost si absent
     port:process.env.PORT || 3001
   },
+  logs : {
+    debugExclusions : ['cache'],
+    perf : 'perf.log'
+  }, /* */
   memcache : '127.0.0.1:11211',
   // des modules à précharger avant bootstrap
   extraModules : ['fooModule'],

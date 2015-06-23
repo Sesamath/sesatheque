@@ -70,6 +70,11 @@ module.exports = function($flashMessage) {
       tools.complete(data, defaultData)
       context.contentType = 'text/html'
       log.debug('on a généré des data pour une erreur ' +context.status, data, 'beforeTransport', {max:2000})
+      if (data.error) {
+        // on veut pas que le layout l'affiche aussi
+        log.debug('on a mis ' +context.error +' et viré ' +data.error)
+        delete data.error
+      }
     }
 
     /* on envoie toutes les réponses dans le log de debug */
@@ -120,7 +125,7 @@ module.exports = function($flashMessage) {
             break
           default:
             title = 'erreur ' +context.status
-            msg = data.content || "Ooops, une erreur " +context.status +' est survenue'
+            msg = data.content || data.error || "Ooops, une erreur " +context.status +' est survenue'
         }
         if (!title) title = msg
         // si lassi a mis ça on le vire (on vient de gérer msg)

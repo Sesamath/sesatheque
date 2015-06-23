@@ -181,7 +181,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var format = context.post.format || context.get.format
       var liste = []
       ressources.forEach(function (ressource) {
-        if ($ressourceControl.hasReadPermission(context, ressource)) {
+        if ($accessControl.hasReadPermission(context, ressource)) {
           if (format === 'compact') liste.push($ressourceConverter.toCompactFormat(ressource))
           else if (format === 'ref') liste.push($ressourceConverter.toRef(ressource))
           else liste.push(ressource)
@@ -202,7 +202,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function sendRessource(context, error, ressource) {
     if (error) sendJson(context, error)
-    else if (ressource && $ressourceControl.hasReadPermission(context, ressource)) {
+    else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
       var format = context.get.format
       if (format === 'ref') sendJson(context, null, $ressourceConverter.toRef(ressource))
       if (format === 'compact') sendJson(context, null, $ressourceConverter.toCompactFormat(ressource))
@@ -562,7 +562,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         else sendJson(context, null, ressources)
       })
     } else {
-      denied(context, "Il faut être authentifié pour accéder à ses ressources")
+      // on redirige vers l'authentification qui nous rappellera ensuite
+      // @todo le module d'authentification devrait fournir une méthode pour ça
+      var urlConnexion = context.request.originalUrl
+      urlConnexion += context.request.originalUrl.indexOf('?') ? '&' : '?'
+      urlConnexion += 'connexion'
+      context.redirect(urlConnexion)
     }
   })
 
