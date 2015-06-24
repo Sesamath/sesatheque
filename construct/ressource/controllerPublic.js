@@ -38,11 +38,13 @@
  * @param {Controller} controller
  * @param $ressourceRepository
  * @param $ressourceConverter
- * @param $accessControl
+ * @param $views
  * @param $routes
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $views, $routes) {
-  //var tools = require('../tools')
+  var tools = require('../tools')
+  var _ = require('lodash')
+  var config = require('./config')
 
   /**
    * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
@@ -106,85 +108,68 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  /**
-   * Liste d'après les critères passés
-   * index : nom du champ à filtrer
-   * value : valeurs possibles
-   * en 1er param (puis valeur, offset & nb)
-   */
-  controller.get('by/:index/:value/:start/:nb', function (context) {
-    log.debug('liste avec les args', context.arguments)
-    var index = context.arguments.index
-    var value = context.arguments.value
-    var values
-    // value est forcément une string
-    if (value !== "undefined") {
-      if (value.indexOf(',')) values = value.split(',')
-      else values = [value]
-    }
-    var options = {
-      filters: [
-        {index: 'restriction', values: [0]},
-        {index: index, values: values}
-      ],
-      orderBy: 'oid',
-      start  : parseInt(context.arguments.start),
-      nb     : parseInt(context.arguments.nb)
-    }
-    $ressourceRepository.getListe('public', options, function (error, ressources) {
-      var data = $views.getDefaultData('liste')
-      data.$metas.title = 'Résultats de la recherche'
-      if (error) data.contentBloc.error = error.toString()
-      else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
-      context.html(data)
-    })
-  })
 
   /**
-   * Liste d'après les filtres postés en json (qui peuvent être multiple)
-   * Le json doit contenir
-   * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
-   *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
-   * et peut contenir
-   * - orderBy : un nom d'index
-   * - order : 'desc' si on veut l'ordre descendant
-   * - start : offset
-   * - nb : nb de résultats voulus
+   * La recherche (form et résultats)
    */
-  controller.post('by', function (context) {
-    if (!context.post.filters) context.post.filters = {}
-    if (!context.post.filters) context.post.filters = {}
-    $ressourceRepository.getListe('public', context.post, function (error, ressources) {
-      var data = $views.getDefaultData('liste')
-      data.$metas.title = 'Résultats de la recherche'
-      if (error) data.contentBloc.error = error.toString()
-      else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
-    })
-  })
+  controller.get($routes.get('search'), function (context) {
+    if (_.isEmpty(context.get)) {
+      // form de recherche
+      $views.printSearchForm(context)
+    } else {
+      // résultats
+      log.debug('search reçoit', context.get)
+      // faut passer en revue les critères
+      var filters = []
+      var crit = context.get
+      var filter
 
-  /**
-   * Liste d'après les filtres en json (qui peuvent être multiple), que l'on rend aussi dispo aussi en get
-   * Le json doit contenir
-   * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
-   *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
-   * et peut contenir
-   * - orderBy : un nom d'index
-   * - order : 'desc' si on veut l'ordre descendant
-   * - start : offset
-   * - nb : nb de résultats voulus
-   */
-  controller.get('by/:json', function (context) {
-    var options
-    var data = $views.getDefaultData('liste')
-    data.$metas.title = 'Résultats de la recherche'
-    try {
-      options = JSON.parse(context.arguments.json)
-      $ressourceRepository.getListe('public', options, function (error, ressources) {
-        if (error) data.contentBloc.error = error.toString()
-        else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
-      })
-    } catch (error) {
-      data.contentBloc.error = error.toString()
+      // les filtres, parmi les propriétés défini en conf
+      for (var prop in crit) {
+        if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
+          filter = {
+            index: prop,
+            values: _.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
+          }
+          filters.push(filter)
+        }
+      }
+      log.debug("traduits en filters", filters)
+      // @todo ajouter des critères de tri
+      if (filters.length) {
+        var options = {
+          filters: filters
+        }
+        // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
+        options.start = parseInt(crit.start, 10) || 0
+        options.nb = parseInt(crit.nb, 10) || 25
+        options.orderBy = crit.orderBy || 'oid'
+        $ressourceRepository.getListe('public', options, function (error, ressources) {
+          var data = $views.getDefaultData('liste')
+          data.$metas.title = 'Résultats de la recherche'
+          log.debug('liste avec les options', options)
+          log.debug('qui remonte', ressources)
+          if (error) data.contentBloc.error = error.toString()
+          else {
+            if (ressources.length == options.nb) {
+              crit.start = options.start +options.nb
+              data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
+            }
+            if (options.start) {
+              crit.start = options.start - options.nb
+              if (crit.start < 0) crit.start = 0
+              data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
+            }
+            if (ressources.length) data.contentBloc.pagination = '(' +(options.start +1) +' à ' +(options.start +1 +ressources.length) +')'
+            data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
+          }
+          context.html(data)
+        })
+      } else {
+        context.error = "il faut choisir au moins un critère"
+        $views.printSearchForm(context)
+      }
     }
   })
+
 }

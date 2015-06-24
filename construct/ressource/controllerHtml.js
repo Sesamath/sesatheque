@@ -42,8 +42,9 @@
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) {
   var _ = require('lodash')
-  //var tools = require('../tools')
+  var tools = require('../tools')
   //var seq = require('an-flow')
+  var config = require('./config')
 
   /**
    * Crée un formToken et l'ajoute à la ressource et en session
@@ -373,43 +374,72 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
-  // form de recherche
-  controller.get($routes.get('search'), function (context) {
-    $views.printSearchForm(context)
-  })
-
-  // résultats
-  controller.post($routes.get('search'), function (context) {
-    $views.printSearchForm(context)
-  })
-
   /**
-   * Liste d'après le critère passé en 1er param (puis valeur, offset & nb)
-   * Ne remonte que les ressources publiques
-   * SELECT _string, COUNT(*) AS nb  FROM ressource_index WHERE name = 'typeTechnique' GROUP BY _string
+   * La recherche (form et résultats)
    */
-  controller.get('by/:index/:value/:start/:nb', function (context) {
-    log.debug('liste avec les args', context.arguments)
-    var index = context.arguments.index
-    var value = context.arguments.value
-    var options = {
-      filters: [{index: index, values: [value]}],
-      orderBy: 'oid',
-      start  : parseInt(context.arguments.start),
-      nb     : parseInt(context.arguments.nb)
+  controller.get($routes.get('search'), function (context) {
+    if (_.isEmpty(context.get)) {
+      // form de recherche
+      $views.printSearchForm(context)
+    } else {
+      // résultats
+      log.debug('search reçoit', context.get)
+      // faut passer en revue les critères
+      var filters = []
+      var crit = context.get
+      var filter
+
+      // les filtres, parmi les propriétés défini en conf
+      for (var prop in crit) {
+        if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
+          filter = {
+            index: prop,
+            values: _.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
+          }
+          filters.push(filter)
+        }
+      }
+      log.debug("traduits en filters", filters)
+      // @todo ajouter des critères de tri
+      if (filters.length) {
+        var options = {
+          filters: filters
+        }
+        // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
+        options.start = parseInt(crit.start, 10) || 0
+        options.nb = parseInt(crit.nb, 10) || 25
+        options.orderBy = crit.orderBy || 'oid'
+        var visibilite = 'public'
+        // avec une exception pour l'admin qui peut passer ?all=1
+        if (context.get.all && $accessControl.hasAllRights(context)) visibilite = "all"
+        $ressourceRepository.getListe(visibilite, options, function (error, ressources) {
+          var data = $views.getDefaultData('liste')
+          data.$metas.title = 'Résultats de la recherche'
+          log.debug('liste avec les options', options)
+          log.debug('qui remonte', ressources)
+          if (error) data.contentBloc.error = error.toString()
+          else {
+            if (ressources.length == options.nb) {
+              crit.start = options.start +options.nb
+              data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
+            }
+            if (options.start) {
+              crit.start = options.start - options.nb
+              if (crit.start < 0) crit.start = 0
+              data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
+            }
+            data.contentBloc.pagination = '(' +(options.start +1) +' à ' +(options.start +1 +options.nb) +')'
+            // on filtre d'après les droits en lecture
+            ressources = $accessControl.getListeLisible(context, ressources)
+            // et on ajoute des liens
+            data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
+          }
+          context.html(data)
+        })
+      } else {
+        context.error = "il faut choisir au moins un critère"
+        $views.printSearchForm(context)
+      }
     }
-    var visibilite = 'public'
-    // avec une exception pour l'admin qui peut passer ?all=1
-    if (context.get.all && context.session.user && context.session.user.roles && context.session.user.roles.admin)
-      visibilite = "tout"
-    $ressourceRepository.getListe(visibilite, context, options, function (error, ressources) {
-      var data = $views.getDefaultData('liste')
-      data.$metas.title = 'Résultats de la recherche'
-      log.debug('liste avec les options', options)
-      log.debug('qui remonte', ressources)
-      if (error) data.contentBloc.error = error.toString()
-      else data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
-      context.html(data)
-    })
   })
 }

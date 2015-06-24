@@ -21,7 +21,7 @@
                On peut le faire en donnant cette valeur id ou en masquant le contexte comme avec
                #oid:oid, cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting
             !}
-            {>wrapper widget="text" o=token /}
+            {?token}{>wrapper widget="text" o=token /}{/token}
             {! oid n'existe pas encore à l'affichage du add !}
             {?oid.value}{#oid:oid}{>wrapper widget="text" o=. /}{/oid}{/oid.value}
             {>wrapper widget="text" o=titre /}

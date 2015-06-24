@@ -192,6 +192,22 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     }
   }
 
+  /**
+   * Retourne la liste de ressources fournie expurgée de celles que l'on a pas le droit de voir
+   * @param {Context} context
+   * @param {Ressource[]} ressources Liste de ressources
+   * @return {Ressource[]} Liste de ressources sur lesquelles on a les droits de lecture
+   */
+  $accessControl.getListeLisible = function (context, ressources) {
+    var liste = []
+    if (ressources && ressources.length) {
+      ressources.forEach(function (ressource) {
+        if ($accessControl.hasReadPermission(context, ressource)) liste.push(ressource)
+      })
+    }
+
+    return liste
+  }
 
   /**
    * Renvoie true si c'est du json (api) appelé par une ip locale

@@ -30,9 +30,20 @@
  */
 'use strict';
 
-/* global isProd */
-
 module.exports = function (controller) {
+  /**
+   * Ajoute un menu minimal
+   * @param data
+   */
+  function addMenu (data) {
+    data.menuBloc = {
+      $view : 'menu',
+      links : [tools.link('/public/recherche', 'Recherche')]
+    }
+  }
+
+  var tools = require('../tools')
+
   var baseData = {
     $metas : {},
     $views : __dirname +'/views',
@@ -41,21 +52,6 @@ module.exports = function (controller) {
 
   // nos ressources statiques génériques
   controller.serve(__dirname +'/public')
-
-  // pour nos tests qx
-  if (isProd) {
-    //controller.serve('qx/script',   __dirname +'/../qxApps/tree/build/script');
-    //controller.serve('qx/resource', __dirname +'/../qxApps/tree/build/resource');
-    controller.serve('qx', __dirname +'/../qxApps/test1/build');
-  } else {
-    // cf http://manual.qooxdoo.org/current/pages/desktop/develop_how_to.html#running-the-source-version-through-a-web-server
-    // doc accessible localement via /qooxdoo/documentation/manual/
-    controller.serve('qooxdoo',            __dirname +'/../qxApps/qooxdoo-5.0-sdk');
-    controller.serve('qx', __dirname +'/../qxApps');
-    /* controller.serve('qx/script', __dirname +'/../qxApps/test1/source/script');
-    controller.serve('qx/resource',        __dirname +'/../qxApps/test1/source/resource');
-    controller.serve('qx/source/class',    __dirname +'/../qxApps/test1/source/class'); */
-  }
 
   // home
   controller.get('/', function (context) {
@@ -68,6 +64,7 @@ module.exports = function (controller) {
       // ce content est la variable passée au template dust
       content : "Ce site est encore un prototype expérimental."
     }
+    addMenu(data)
     context.html(data)
   })
 }

@@ -1,17 +1,20 @@
 <p>Résultats de la recherche</p>
 {?error}
-    <p class="has-error">{error}</p>
+  <p class="has-error">{error}</p>
 {:else}
-    <ul class="liste">{ressources.length} ressource{?ressources.length}s{/ressources.length}
+    <ul class="liste">
+        {linkPagePrev|s}
+        {ressources.length} ressource{?ressources.length}s{/ressources.length}
+        {pagination}
+        {linkPageNext|s}
     {#ressources}
     <li>{oid} : {titre}
-        <span class="links">(
-            <a href="{urlDescribe}">description</a>
-            , <a href="{urlPreview}">aperçu</a>
-            , <a href="{urlDisplay}">voir en pleine page</a>
-        )</span></li>
+        <span class="links">(<a href="{urlDescribe}">description</a>,
+            <a href="{urlPreview}">aperçu</a>,
+            <a href="{urlDisplay}">voir en pleine page</a>)
+        </span></li>
     {:else}
     <p>Aucune ressource</p>
     {/ressources}
-    </ul>
+</ul>
 {/error}

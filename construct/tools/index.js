@@ -121,18 +121,37 @@ tools.isStaticOrPublicApi = function (url) {
 
 /**
  * Génère le code html d'un lien
- * @param route La route (après "ressources/", cf config.routes)
+ * @param path Le path (absolu ou relatif)
  * @param texte Le texte à afficher
- * @param {string|array} [args] Des arguments à ajouter à la route (séparateur slash)
+ * @param {string|array} [args] Des arguments à ajouter au path (séparateur slash)
  * @returns {string} Le code html du tag a
  */
-tools.link = function (route, texte, args) {
+tools.link = function (path, texte, args) {
   if (args) {
-    if (_.isArray(args)) route += args.join('/')
-    else route += '/' +args
+    if (_.isArray(args)) path += args.join('/')
+    else path += '/' +args
   }
 
-  return '<a href="' +route +'">' +texte +'</a>'
+  return '<a href="' +path +'">' +texte +'</a>'
+}
+
+/**
+ * Génère le code html d'un lien avec les args en queryString
+ * @param path Le path (absolu ou relatif)
+ * @param texte Le texte à afficher
+ * @param {object} [args] Des arguments à ajouter en queryString
+ * @returns {string} Le code html du tag a
+ */
+tools.linkQs = function (path, texte, args) {
+  if (args) {
+    var paires = []
+    for (var p in args) {
+      if (args.hasOwnProperty(p)) paires.push(p +'=' +encodeURIComponent(args[p]))
+    }
+    if (paires.length) path += '?' +paires.join('&')
+  }
+
+  return '<a href="' +path +'">' +texte +'</a>'
 }
 
 /**

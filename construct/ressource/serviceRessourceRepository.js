@@ -531,21 +531,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
    */
   $ressourceRepository.getListe = function(visibilite, options, next) {
     try {
-      // on normalise les arguments
-      var publicOnly
-
-      if (arguments.length < 3) throw new Error("nombre d'arguments incorrect")
-
-      // on converti le json si besoin
-      if (_.isString(options)) {
-        try {
-          options = JSON.parse(options)
-        } catch (error) {
-          error.message = "options de recherche invalides (erreur de syntaxe json)"
-          throw error
-        }
-      }
-      log.debug('getListe visibilite :' +visibilite, options)
+      log.debug('getListe avec visibilite : ' +visibilite, options, next)
 
       // avant de construire la query on fait un minimum de vérifications
       var start, nb
@@ -557,9 +543,9 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
         if (!_.isArray(options.filters)) throw new Error("Filtres incorrects")
         options.filters.forEach(function (filter) {
           if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant')
-          if (!_.isArray(filter.values)) throw new Error('values invalides pour filter')
-          // on ignore le filtre restriction, c'est visibilite qui l'impose éventuellement
-          if (filter.index !== 'restriction') optionsSafe.filters.push(filter)
+          if (!_.isArray(filter.values)) throw new Error('values invalides (pas un tableau) pour filter ' +filter.index)
+          // on ne prend que ce que l'on connait, et on ignore le filtre restriction (c'est visibilite qui l'impose éventuellement)
+          if (config.labels[filter.index] && filter.index !== 'restriction') optionsSafe.filters.push(filter)
         })
 
       } else {

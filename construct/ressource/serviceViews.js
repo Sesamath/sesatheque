@@ -97,6 +97,9 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
         links.push(tools.link($routes.getAbs('display', ressource), 'Voir la ressource (pleine page)'))
       }
     }
+    // un lien vers la recherche
+    links.push(tools.link($routes.get('search'), 'Recherche'))
+
     data.menuBloc = {
       $view : 'menu',
       links : links
@@ -290,7 +293,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    */
   function getFormViewData(error, ressource) {
     var formData = {
-      errors: ressource.errors || []
+      errors: ressource && ressource.errors || []
     }
 
     if (error) {
@@ -301,7 +304,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     // on s'assure que l'on a un objet, sinon on en créé un vide (ou si on nous le réclame avec new)
     if (!ressource || ressource.new) {
       // on en créé une vide, mais on regarde si on avait un token
-      var token = ressource.token
+      var token = ressource && ressource.token
       log.debug('dans sendFormData on lance un create')
       ressource = Ressource.create()
       if (token) ressource.token = token
@@ -613,20 +616,35 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     // on ajoute le menu
     addMenu(context, data, null)
     // les datas pour le form
-    data.contentBloc = getFormViewData(null, null)
+    tools.complete(data.contentBloc, getFormViewData(null, Ressource.create()))
     // on vire ou modifie ce qui nous intéresse pour la recherche
     var fd = data.contentBloc // raccourci d'écriture (form data)
-    delete fd.oid
-    delete fd.version.value
-    delete fd.version.readonly
+    delete fd.version
+    // ces champs ne sont pas indexés
     delete fd.parametres
+    delete fd.enfants
+    delete fd.resume
+    delete fd.description
+    delete fd.commentaires
+    // @todo ajouter ces critères, mais en gérant des fourchettes
     delete fd.dateCreation
     delete fd.dateMiseAJour
-    delete fd.oid
-    // on ajoute un choix "pas de choix"
+    if (!$accessControl.isAuthenticated(context)) {
+      delete fd.restriction
+    }
+    // on ajoute un choix "pas de choix" pour typeTechnique et langue
     fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
-    data.contentBloc.$view = 'form'
+    // pour la langue on vire le select actuel
+    fd.langue.choices.forEach(function (choice) {
+      if (choice.selected) choice.selected = false
+    })
+    fd.langue.choices.unshift({label:'peu importe', value:''})
+    // titre de la page
     data.$metas.title = 'Recherche de ressources'
+    if (context.error) {
+      data.error = context.error
+      delete context.error
+    }
     context.html(data)
   }
 

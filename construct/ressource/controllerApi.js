@@ -177,20 +177,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function sendListe(context, error, ressources) {
     if (error) {
       sendJson(context, error)
-    } else if (ressources && ressources.length) {
-      var format = context.post.format || context.get.format
+    } else {
       var liste = []
-      ressources.forEach(function (ressource) {
-        if ($accessControl.hasReadPermission(context, ressource)) {
+      ressources = $accessControl.getListeLisible(context, ressources)
+      if (ressources && ressources.length) {
+        // on regarde le format reçu en get ou post
+        var format = context.post.format || context.get.format
+        ressources.forEach(function (ressource) {
           if (format === 'compact') liste.push($ressourceConverter.toCompactFormat(ressource))
           else if (format === 'ref') liste.push($ressourceConverter.toRef(ressource))
           else liste.push(ressource)
-        }
-      })
-      sendJson(context, null, {success:true, liste:liste})
-    } else {
-      // liste vide
-      sendJson(context, null, {success:true, liste:[]})
+        })
+      }
+      sendJson(context, null, {success: true, liste: liste})
     }
   }
 
