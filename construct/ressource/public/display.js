@@ -140,6 +140,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           head_load: vendorsBaseUrl + '/headjs/head.load.1.0',
           jquery   : vendorsBaseUrl + '/jquery/dist/jquery.min',
           jquery1  : vendorsBaseUrl + '/jquery/jquery-1.11.3.min',
+          jqueryUi : vendorsBaseUrl + '/jqueryUi/jquery-ui-1.11.1/jquery-ui.min',
+          jqueryUiRedmond : vendorsBaseUrl + '/jqueryUi/jquery-ui-1.11.1.dialogRedmond/jquery-ui.min',
           jstree   : vendorsBaseUrl + '/jstree/dist/jstree.min',
           lodash   : vendorsBaseUrl + '/lodash/lodash.min',
           swfobject: vendorsBaseUrl + '/swfobject/swfobject.2.2',
