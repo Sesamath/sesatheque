@@ -92,35 +92,43 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     if (hasAllRights(context)) return
 
     var msg
-    var restriction = $settings.get('components.ressource.constantes.restriction')
+    if (ressource.publie) {
+      var restriction = $settings.get('components.ressource.constantes.restriction')
 
-    switch (ressource.restriction) {
-      // public
-      case restriction.aucune: return
+      switch (ressource.restriction) {
+        // public
+        case restriction.aucune:
+          return
 
-      // correction
-      case restriction.correction:
-        if (hasGenericPermission('correction', context)) return
-        else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
-        break
+        // correction
+        case restriction.correction:
+          if (hasGenericPermission('correction', context)) return
+          else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
+          break
 
-      // réservée au groupe
-      case restriction.groupe:
-        if (_.contains(ressource.auteurs, context.session.user.oid)) return
-        if (_.contains(ressource.contributeurs, context.session.user.oid)) return
-        if (ressource.parametres.allow && ressource.parametres.allow.groupes &&
-            !_.empty(_.intersection(ressource.parametres.allow.groupes, context.session.user.groupes))) return
-        msg = "Ressource restreinte"
-        break
+        // réservée au groupe
+        case restriction.groupe:
+          if (_.contains(ressource.auteurs, context.session.user.oid)) return
+          if (_.contains(ressource.contributeurs, context.session.user.oid)) return
+          if (ressource.parametres.allow && ressource.parametres.allow.groupes && !_.empty(_.intersection(ressource.parametres.allow.groupes, context.session.user.groupes))) return
+          msg = "Ressource restreinte"
+          break
 
-      // privée
-      case restriction.prive:
-        if (_.contains(ressource.auteurs, context.session.user.id)) return
-        if (_.contains(ressource.contributeurs, context.session.user.id)) return
-        msg = "Ressource privée"
-        break
+        // privée
+        case restriction.prive:
+          if (_.contains(ressource.auteurs, context.session.user.id)) return
+          if (_.contains(ressource.contributeurs, context.session.user.id)) return
+          msg = "Ressource privée"
+          break
 
-      default: msg = "restriction non gérée"
+        default:
+          msg = "restriction non gérée"
+      }
+    } else {
+      // pas publié, faut avoir les droits d'édition pour la voir
+      msg = getUpdateDeniedMessage(context, ressource)
+      // mais avec un message adapté
+      if (msg) msg = "Ressource non publiée"
     }
 
     return msg
@@ -295,8 +303,8 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     if (!ressource.restriction) return true
     if (hasAllRights(context)) return true
     if (!$accessControl.isAuthenticated(context)) return false
-    if (hasGenericPermission('read', context)) return true
-    return (getReadDeniedMessage(context, ressource) === '')
+    if (hasGenericPermission('read', context) && ressource.publie) return true
+    return (!getReadDeniedMessage(context, ressource))
   }
 
   /**
