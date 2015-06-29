@@ -23,7 +23,6 @@ common.setOptions({
 })
 
 /** origine par défaut (si on la précise pas via --origine), sauf em et am qui ont l'origine du même nom */
-var defaultOrigine = "labomepBIBS" // des ressources
 var origineArbre = 'sesaxml'
 
 /**
@@ -292,6 +291,7 @@ function getEnfants(arbreXml, xmlName, next) {
     flow(arbreXml._children).seqEach(function (child) {
       var nextSeq = this
       var enfant = {}
+      var idOrigine = child.attrib.i
       // un titre si on le trouve dans les attributs
       if (child.attrib.n) {
         enfant.titre = child.attrib.n
@@ -313,27 +313,42 @@ function getEnfants(arbreXml, xmlName, next) {
 
       } else {
         // une ref vers une ressource
-        if (child.attrib.i) {
+        if (idOrigine) {
           var origine
           if (child.tag == 'em') origine = 'em'
           else if (child.tag == 'am') origine = 'am'
           else if (child.tag == 'mn') origine = 'labomepMENUS'
-          else origine = defaultOrigine
-          common.getRef(origine, child.attrib.i, function (ref) {
+          else {
+            if (idOrigine > 1000000 && idOrigine < 2000000) {
+              origine = 'ato';
+              idOrigine -= 1000000
+            } else if (idOrigine < 3000000) {
+              origine = 'coll_doc';
+              idOrigine -= 2000000
+            } else if (idOrigine < 4000000) {
+              origine = 'accomp';
+              idOrigine -= 3000000
+            } else {
+              origine = 'labomepBIBS'
+            }
+          }
+          common.getRef(origine, idOrigine, function (ref) {
             if (ref) {
               enfant = ref
             } else {
               enfant = {
                 typeTechnique: child.tag,
                 origine      : origine,
-                idOrigine    : child.attrib.i,
+                idOrigine    : idOrigine,
                 titre        : "Erreur, n'existait pas dans la bibliothèque au moment de l'import" + ' (' + (enfant.titre || '') + ')'
               }
             }
             // on lui ajoute ses attributs éventuels
-            delete child.attrib.i
             try {
-              if (!_.isEmpty(child.attrib)) enfant.attributes = child.attrib
+              if (!_.isEmpty(child.attrib)) {
+                delete child.attrib.i
+                enfant.attributes = child.attrib
+              }
             } catch(error) {
               var msg = "L'affectation dans attributes de l'enfant " +(enfant.ref || enfant.idOrigine) +' a planté'
               log(msg, error)
@@ -372,7 +387,6 @@ log('task ' + __filename)
 // on peut préciser un ou des nom(s) de fichier
 if (argv[0] === '--xml') {
     xmls = argv[1].split(',')
-    if (argv[2] === '--origine') defaultOrigine = argv[3]
 } else {
   // on prend ceux du dossier arbresXml
   fs.readdirSync(__dirname +'/arbresXml').forEach(function (file) {

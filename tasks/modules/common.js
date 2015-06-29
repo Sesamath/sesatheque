@@ -14,11 +14,12 @@ var CounterMulti = require('../../construct/tools/CounterMulti')
 
 // conf de l'appli
 var confSesatheque = require('../../_private/config')
-var urlBibli = 'http://'
-urlBibli += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
-urlBibli += ':'
-urlBibli += confSesatheque.$server && confSesatheque.$server.port || '3000'
-urlBibli += '/api/ressource'
+var urlApi = 'http://'
+urlApi += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
+urlApi += ':'
+urlApi += confSesatheque.$server && confSesatheque.$server.port || '3000'
+urlApi += '/api'
+var urlBibli = urlApi +'/ressource'
 var apiToken = confSesatheque.apiTokens[0]
 
 // conf ressource
@@ -280,7 +281,7 @@ common.displayResult = function (next) {
 }
 
 /**
- * Rectifie l'origine labomepBIBS et retire l'offset d'idOrigine pour les ato, mep_coll et accomp
+ * Rectifie l'origine labomepBIBS et retire l'offset d'idOrigine pour les ato, coll_doc et accomp
  * @param ressource
  */
 common.fixLabomepBIBS = function (ressource) {
@@ -289,7 +290,7 @@ common.fixLabomepBIBS = function (ressource) {
       ressource.origine = 'ato';
       ressource.idOrigine -= 1000000
     } else if (ressource.idOrigine < 3000000) {
-      ressource.origine = 'mep_coll';
+      ressource.origine = 'coll_doc';
       ressource.idOrigine -= 2000000
     } else if (ressource.idOrigine < 4000000) {
       ressource.origine = 'accomp';
@@ -425,6 +426,33 @@ common.getIdComb = function (ressource) {
 }
 
 /**
+ * Récupère une liste via l'api
+ * @param qsOptions Les paramètres à ajouter en queryString, cf GET /api/by pour le détail
+ * @param next appelé avec (error, liste), liste étant un array de ressources
+ */
+common.getListe = function (qsOptions, next) {
+  var options = {
+    url         : urlApi + '/by',
+    qs          : qsOptions,
+    headers     : {
+      "X-ApiToken": apiToken
+    },
+    json        : true,
+    content_type: 'charset=UTF-8'
+  }
+  //log('dans getRessource ' +idComb)
+  request.get(options, function (error, response, result) {
+    if (error) next(error)
+    else if (result.error) next("Sur l'url " +options.url +" on a eu l'erreur " +result.error)
+    else if (result.success) next(null, result.liste)
+    else {
+      log("Réponse inattendue : ", response)
+      next(new Error("l'url " +options.url +" n'a pas répondu correctement" ))
+    }
+  })
+}
+
+/**
  * Récupère une ref via l'api
  * @param origine
  * @param idOrigine
@@ -456,8 +484,8 @@ common.getRef = function (origine, idOrigine, next) {
 
 /**
  * Récupère une ressource via l'api
- * @param origine
- * @param idOrigine
+ * @param {string|number} origine     L'origine ou un oid
+ * @param {string}        [idOrigine] idOrigine ou rien (2 arguments dans ce cas) si on a passé un oid ou une ref en origine
  * @param next appelé avec la ressource (ou rien en cas de pb, que l'on log ici)
  */
 common.getRessource = function (origine, idOrigine, next) {
@@ -467,16 +495,6 @@ common.getRessource = function (origine, idOrigine, next) {
   } else {
     next = idOrigine
     idComb = origine
-    if (_.isString(idComb)) {
-      // c'était déjà un id combiné
-      var pos = idComb.indexOf('/')
-      origine = idComb.substr(0, pos)
-      idOrigine = idComb.substr(pos + 1)
-    } else {
-      // on nous passe un oid
-      origine = null
-      idOrigine = null
-    }
   }
   var options = {
     url         : urlBibli + '/' + idComb,
@@ -496,12 +514,10 @@ common.getRessource = function (origine, idOrigine, next) {
     } else if (ressource.error) {
       addError(idComb, 'erreur retournée par get '+options.url +' : ' +ressource.error)
       next(null)
-    } else if (ressource.origine != origine || ressource.idOrigine != idOrigine) {
-      addError(idComb, "ressource récupérée " +origine +'/' +idOrigine +" incohérente avec la demande " +idComb +
-                       '\n' + JSON.stringify(ressource))
-      next(null)
-    } else {
+    } else if (ressource.oid) {
       next(ressource)
+    } else {
+      next(new Error("La ressource récupérée avec " +idComb +" n'a pas d'oid " +tools.stringify(ressource)))
     }
   })
 }
