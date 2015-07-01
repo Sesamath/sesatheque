@@ -200,14 +200,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function sendRessource(context, error, ressource) {
-    if (error) sendJson(context, error)
-    else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
+    if (error) {
+      sendJson(context, error)
+    } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
       var format = context.get.format
       if (format === 'ref') sendJson(context, null, $ressourceConverter.toRef(ressource))
       if (format === 'compact') sendJson(context, null, $ressourceConverter.toCompactFormat(ressource))
       else sendJson(context, null, ressource)
+    } else {
+      notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
     }
-    else notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
   }
 
   /**

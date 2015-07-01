@@ -87,6 +87,18 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     }
 
     /**
+     * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser log pour le dev seulement)
+     * @param … autant qu'on veut (console.error appelée une fois par argument)
+     */
+    log.error = function () {
+      if (console && console.error) {
+        for (var i = 0; i < arguments.length; i++) {
+          console.error(arguments[i]);
+        }
+      }
+    };
+
+    /**
      * Récupère un paramètre de l'url courante
      * Inspiré de http://stackoverflow.com/a/11582513
      * Attention, les + sont transformés en espace (RFC 1738), les %20 aussi (RFC 3986),
@@ -128,6 +140,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           head_load: vendorsBaseUrl + '/headjs/head.load.1.0',
           jquery   : vendorsBaseUrl + '/jquery/dist/jquery.min',
           jquery1  : vendorsBaseUrl + '/jquery/jquery-1.11.3.min',
+          jqueryUi : vendorsBaseUrl + '/jqueryUi/jquery-ui-1.11.1/jquery-ui.min',
+          jqueryUiRedmond : vendorsBaseUrl + '/jqueryUi/jquery-ui-1.11.1.dialogRedmond/jquery-ui.min',
           jstree   : vendorsBaseUrl + '/jstree/dist/jstree.min',
           lodash   : vendorsBaseUrl + '/lodash/lodash.min',
           swfobject: vendorsBaseUrl + '/swfobject/swfobject.2.2',
@@ -378,17 +392,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      * (dans ce cas c'est un console.log qui accepte un 2e argument facultatif, un objet à mettre en console aussi)
      */
     window.log = function () {};
-    /**
-     * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser log pour le dev seulement)
-     * @param … autant qu'on veut (console.error appelée une fois par argument)
-     */
-    window.log.error = function () {
-      if (console && console.error) {
-        for (var i = 0; i < arguments.length; i++) {
-          console.error(arguments[i]);
-        }
-      }
-    };
 
     /**
      * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent)
@@ -485,7 +488,14 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         options.sesathequeBase = rootPah;
 
         // en dev on active la fct de log
-        if (options.isDev) w.log = log;
+        if (options.isDev) {
+          w.log = log;
+        } else {
+          // en prod elle fait rien
+          w.log = function () {};
+          // mais log.error garde son comportement normal
+          w.log.error = log.error;
+        }
         // on vérifie que l'on a nos containers et on les créé sinon
         if (!errorsContainer) errorsContainer = w.addElement(wd.getElementsByTagName('body')[0], 'div',
                                                              {id: 'errors', class: 'error'});

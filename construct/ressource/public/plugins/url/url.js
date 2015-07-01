@@ -39,7 +39,7 @@
 
 //define(['jquery171', 'jqueryUi18c'], function () {
 // faudra ajouter le css au début de display
-define(['jquery211', 'jqueryUi1111DialogRedmond'], function () {
+define(['jquery1', 'jqueryUiRedmond'], function () {
   'use strict';
   /** notre module exporté avec sa méthode display */
   var url = {};
