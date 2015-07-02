@@ -87,11 +87,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // display : Voir la ressource pleine page (pour iframe)
   controller.get($routes.get('display', ':oid'), function (context) {
+    context.noMenu = true
     affiche(context, 'display', {$layout:'../../static/views/layout-iframe'})
   })
   controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
+    context.noMenu = true
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       checkAndAffiche(context, error, ressource, 'display', {$layout:'../../static/views/layout-iframe'})
     })
@@ -104,7 +106,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      checkAndAffiche(context, error, ressource, 'preview')
+      checkAndAffiche(context, error, ressource, 'display')
     })
   })
 

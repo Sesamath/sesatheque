@@ -41,7 +41,9 @@
 /* titres centrés * /
 #formRessource .input-group div, #formRessource .input-group label {font-weight: bold; width: 100%; text-align: center; float: none; }
 /* #form-oid, #form-typeTechnique {width: 5em;} fait passer le titre à droite.... */
-/* description */
+#formRessource #srcGroup, #formRessource #dstGroup {float:left; width: 47%;}
+
+  /* description */
 .ressource span.publie, .ressource span.restriction {
   display: block;
   float: right;

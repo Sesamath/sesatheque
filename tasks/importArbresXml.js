@@ -7,6 +7,7 @@
 var fs = require('fs')
 var _ = require('lodash')
 var flow = require('an-flow')
+var request = require('request')
 
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
@@ -24,6 +25,25 @@ common.setOptions({
 
 /** origine par défaut (si on la précise pas via --origine), sauf em et am qui ont l'origine du même nom */
 var origineArbre = 'sesaxml'
+
+var isOnlineSrc = false
+var urlProd = 'http://www.labomep.net/config/xml/'
+
+/** Les url des xml relatives à urlProd */
+var urls = {
+  animations_interactives : 'exercicesInteractifs/animations_interactives.xml',
+  bibliotheque_iep: 'exercicesInteractifs/bibliotheque_iep.xml',
+  exercices_interactifs_hors : 'exercicesInteractifs/exercices_interactifs_hors.xml',
+  exercices_interactifs : 'exercicesInteractifs/exercices_interactifs.xml',
+  exercices_non : 'exercices_non.xml',
+  labomep_gt_copirelem : 'labomepGT/labomep_gt_copirelem.xml',
+  labomep_gt_geogebra : 'labomepGT/labomep_gt_geogebra.xml',
+  labomep_gt_suisse : 'labomepGT/labomep_gt_suisse.xml',
+  labomep_profil_primaire : 'labomepProfils/labomep_profil_primaire.xml',
+  labomep_profil_suisse : 'labomepProfils/labomep_profil_suisse.xml',
+  partagees : 'partagees.xml',
+  tests_algebre: 'bibliotheque.xml'
+}
 
 /**
  * La liste des xml qui doivent être découpés
@@ -123,22 +143,17 @@ function getArbreDefaultValues(idOrigine, titre) {
  * @param next
  */
 function parseXml(xmlFile, next) {
-  var file = __dirname +'/arbresXml/' +xmlFile
-  var xmlName = xmlFile.substr(0, xmlFile.length -4) // sans l'extension
-
-  if (logProcess) log('processing ' + xmlName)
-
-  try {
-    if (!fs.existsSync(file)) {
-      console.log('Abandon, ' +file +" n'existe pas")
-      process.exit()
-    }
-    var xmlString = fs.readFileSync(file).toString()
+  /**
+   * Cherche les enfants de root pour les filer à processArbreXml
+   * @param xmlString
+   */
+  function analyse(xmlString) {
+    //log('analyse de ' +xmlString)
     var arbreXml = elementtree.parse(xmlString)
     if (!arbreXml._root) throw new Error("arbreXml sans racine")
     if (!arbreXml._root._children || !arbreXml._root._children.length) throw new Error("arbreXml vide")
     /* log(JSON.stringify(arbreXml, null, 2))
-    process.exit() */
+     process.exit() */
     // si l'arbreXml n'a qu'un fils qui est un tag d avec enfants c'est lui qu'on prend comme racine
     if (arbreXml._root._children.length === 1 && arbreXml._root._children[0].tag === 'd') {
       if (arbreXml._root._children[0]._children.length) {
@@ -148,10 +163,40 @@ function parseXml(xmlFile, next) {
       arbreXml = arbreXml._root
     }
     processArbreXml(arbreXml, xmlName, next)
+  }
+
+  var xmlName = xmlFile.substr(0, xmlFile.length -4) // sans l'extension .xml
+
+  try {
+    if (logProcess) log('processing ' + xmlName)
+
+    if (isOnlineSrc) {
+      if (urls[xmlName]) {
+        var url = urlProd +urls[xmlName]
+        log("On va chercher " +url)
+        request.get(url, function (error, response) {
+          if (error) next(error)
+          else analyse(response.body)
+        })
+
+      } else {
+        log(xmlName +" n'a pas d'url connue")
+        common.checkEnd()
+      }
+    } else {
+      var file = __dirname +'/arbresXml/' +xmlFile
+      if (!fs.existsSync(file)) {
+        console.log('Abandon, ' +file +" n'existe pas")
+        process.exit()
+      }
+      var xmlString = fs.readFileSync(file).toString()
+      analyse(xmlString)
+    }
 
   } catch (error) {
     common.addError(xmlName, "le parsing du xml " +xmlFile +" a planté : " +error.toString())
   }
+
 }
 
 /**
@@ -318,19 +363,19 @@ function getEnfants(arbreXml, xmlName, next) {
           if (child.tag == 'em') origine = 'em'
           else if (child.tag == 'am') origine = 'am'
           else if (child.tag == 'mn') origine = 'labomepMENUS'
-          else {
-            if (idOrigine > 1000000 && idOrigine < 2000000) {
+          else if (idOrigine > 1000000 && idOrigine < 4000000) {
+            if (idOrigine < 2000000) {
               origine = 'ato';
               idOrigine -= 1000000
             } else if (idOrigine < 3000000) {
               origine = 'coll_doc';
               idOrigine -= 2000000
-            } else if (idOrigine < 4000000) {
+            } else {
               origine = 'accomp';
               idOrigine -= 3000000
-            } else {
-              origine = 'labomepBIBS'
             }
+          } else {
+              origine = 'labomepBIBS'
           }
           common.getRef(origine, idOrigine, function (ref) {
             if (ref) {
@@ -386,7 +431,7 @@ log('task ' + __filename)
 
 // on peut préciser un ou des nom(s) de fichier
 if (argv[0] === '--xml') {
-    xmls = argv[1].split(',')
+  xmls = argv[1].split(',')
 } else {
   // on prend ceux du dossier arbresXml
   fs.readdirSync(__dirname +'/arbresXml').forEach(function (file) {
@@ -394,6 +439,11 @@ if (argv[0] === '--xml') {
       xmls.push(file)
     }
   })
+}
+
+if (argv[0] === '--prod') {
+  log('mode prod, on ira chercher les xml sur ' +urlProd)
+  isOnlineSrc = true
 }
 
 log('On va parser les xml : ' +xmls.join(', '))

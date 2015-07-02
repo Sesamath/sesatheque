@@ -53,13 +53,16 @@
 
         {! todo widget relations !}
         {?parametres}
-        <div class="form-group">
+        <div class="form-group" id="groupParametres">
             {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
         </div>
         {/parametres}
         {?enfants}
-        <div class="form-group">
+        <div class="form-group" id="groupEnfants">
             {>wrapper widget="textarea" o=enfants cols=50 rows=5 /}
+        </div>
+        <div class="form-group">
+            {>"../editArbre" /}
         </div>
         {/enfants}
 
@@ -74,9 +77,9 @@
 
         {! Les types, devraient disparaitrent car conditionnés par la catégorie ! }
 
-        {! submit !}
+        {! submit, attention #saveButton est utilisé par editArbre !}
         <div class="form-group buttons">
-            <input class="btn btn-primary" type="submit" value="Enregistrer" />
+            <input id="saveButton" class="btn btn-primary" type="submit" value="Enregistrer" />
         </div>
     </form>
     {/noForm}

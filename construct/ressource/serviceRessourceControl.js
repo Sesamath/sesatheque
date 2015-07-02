@@ -129,9 +129,9 @@ module.exports = function (Ressource) {
     titreParent = titreParent || 'la racine'
     if (_.isArray(enfants)) {
       enfants.forEach(function (enfant, i) {
-        if (!enfant.titre) errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de titre")
+        if (!enfant.titre) errors.push("L'enfant d'index " + i + " de « " +titreParent +" » n'a pas de titre")
         if (!enfant.typeTechnique) errors.push("L'enfant d'index " + i + " n'a pas de typeTechnique")
-        if (!enfant.ref) errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
+        if (enfant.typeTechnique !== 'arbre' && !enfant.ref) errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
         else if (enfant.ref < 1 && (typeof enfant.ref !== 'string' || !/^[\w]+\/[\w]+$/.exec(enfant.ref)))
           errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
         if (enfant.enfants && enfant.enfants.length) {
@@ -278,6 +278,20 @@ module.exports = function (Ressource) {
           }
         }
       }) // fin each
+
+      // pour les arbres, on switch parametres / enfants si besoin
+      if (ressource.typeTechnique === 'arbre') {
+        if (!_.isEmpty(ressource.parametres) && _.isEmpty(ressource.enfants)) {
+          ressource.enfants = ressource.parametres;
+          delete ressource.parametres;
+        }
+      } else {
+        if (_.isEmpty(ressource.parametres) && !_.isEmpty(ressource.enfants)) {
+          log("Bizarre, arbre transformé en " +ressource.typeTechnique);
+          ressource.parametres = ressource.enfants;
+          delete ressource.enfants;
+        }
+      }
       addWarnings(ressource)
       //log.debug('après addWarnings', ressource.warnings)
       //log.debug('après addWarnings, enfants de ' +ressource.typeTechnique, ressource.enfants)
@@ -285,7 +299,7 @@ module.exports = function (Ressource) {
 
     if (errors.length) {
       if (ressource) ressource.errors = errors
-      error = new Error("Ressource invalide : \n" + errors.join("\n"))
+      //error = new Error("Ressource invalide : \n" + errors.join("\n"))
     }
     // nettoyage
     if (ressource.errors && !ressource.errors.length) delete ressource.errors

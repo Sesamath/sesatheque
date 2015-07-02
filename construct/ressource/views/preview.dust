@@ -1,5 +1,0 @@
-{?error}
-    <p class="has-error">{error}</p>
-{:else}
-<iframe src="{url}" width="100%" height="100%" />
-{/error}

@@ -492,7 +492,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    */
   $views.getDefaultData = function (viewName) {
     if (!viewName) viewName = 'error'
-    return {
+    var data = {
       $views : __dirname + '/views',
       $metas : {
         css: ['/styles/ressources.css'],
@@ -501,6 +501,9 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       $layout: '../../static/views/layout-page',
       contentBloc : {$view:viewName}
     }
+    if (viewName === 'form') data.$metas.js.push('/formRessource.js')
+
+    return data
   }
 
   /**
@@ -512,7 +515,10 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @param options Objet de données qui sera mergé avec data avant envoi au rendu
    */
   $views.prepareAndSend = function (context, error, ressource, view, options) {
-    // envoie la ressource à la vue
+    /**
+     * envoie la ressource à la vue (en ajoutant menu si besoin
+     * @param error
+     */
     function termine(error) {
       // et la ressource (ou erreur)
       data.contentBloc = getViewData(error, ressource, view)
@@ -550,14 +556,14 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       if (options) tools.merge(data, options)
       //log.debug('envoi à ' + view, data, 'dust', {max: 10000, indent:2})
       context.html(data)
-    }
+    } // termine
 
     if (error) {
       log.error(error)
       // on est appelé avec ce qui sort d'un load
       $views.printError(context, "Problème d'accès à la base de données", 500)
     } else if (ressource) {
-      log.debug('on prépare les datas pour dust ' + view, ressource, 'dust', {max: 1000})
+      log.debug('prepareAndSend pour la vue ' + view +' avec la ressource', ressource, 'dust', {max: 1000})
       var data = $views.getDefaultData(view)
 
       if (view === 'describe') {
@@ -581,6 +587,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     var data = $views.getDefaultData()
     addMenu(context, data, ressource)
     data.$views = __dirname + '/../static/views'
+    if (context.noMenu) data.$layout = '../../static/views/layout-iframe'
     data.error = (typeof error === 'string') ? error : error.toString()
     context.status = status || 200
     context.html(data)
@@ -603,6 +610,11 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     data.$metas.title = 'Modifier la ressource ' +ressource.titre
     // et d'éventuels overrides
     if (options) tools.merge(data, options)
+    if (ressource.typeTechnique === 'arbre') {
+      // pour les arbres, c'est la vue editArbre qui ajoute nos js, mais faut lui donner la ressource complète
+      // et les variable comme pour display
+      addJsVars(data, ressource)
+    }
     // avant d'envoyer
     context.html(data)
   }

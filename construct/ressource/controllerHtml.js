@@ -135,6 +135,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 // display : Voir la ressource pleine page (pour iframe)
   controller.get($routes.get('display', ':oid'), function (context) {
     var oid = context.arguments.oid
+    context.noMenu = true
     $ressourceRepository.load(oid, function (error, ressource) {
       send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
     })
@@ -144,6 +145,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
+    context.noMenu = true
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
     })
@@ -200,6 +202,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (errorMsg) {
             denied(context, errorMsg)
           } else {
+            // on fixe la date de màj avant validation
+            if (!context.post.dateMiseAJour) context.post.dateMiseAJour = new Date();
             $ressourceControl.valideRessourceFromPost(context.post, false, function (error, ressource) {
               // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
               // et rediriger vers le describe ou vers le form avec les erreurs

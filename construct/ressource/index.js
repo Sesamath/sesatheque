@@ -65,8 +65,8 @@ ressourceComponent.service('$routes', function($settings) {
   return require('./serviceRoutes')($settings)
 })
 
-ressourceComponent.service('$ressourceRepository', function(Ressource, Archive, $ressourceControl, $cacheRessource) {
-  return require('./serviceRessourceRepository')(Ressource, Archive, $ressourceControl, $cacheRessource)
+ressourceComponent.service('$ressourceRepository', function(Ressource, Archive, $ressourceControl, $cacheRessource, $cache) {
+  return require('./serviceRessourceRepository')(Ressource, Archive, $ressourceControl, $cacheRessource, $cache)
 })
 
 ressourceComponent.service('$ressourceControl', function(Ressource) {

@@ -83,7 +83,7 @@ define({
     if (!ressource.titre || !ressource.categories) return next(new Error("Ressource invalide (titre et categories sont obligatoires)"));
     callBibli(ressource, next);
   }
-})
+});
 
 
 /**

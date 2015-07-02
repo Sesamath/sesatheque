@@ -65,34 +65,38 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
    */
 
   function beforeStore(ressource, next) {
-    // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
-    // et pas de celle de son indexation ici
-    if (!ressource.dateMiseAJour) {
-      ressource.dateMiseAJour = new Date()
-    }
-    // cohérence de la restriction
-    if (ressource.restriction === config.constantes.restriction.groupe && (!ressource.parametres.allow || !ressource.parametres.allow.groupes)) {
-      log.error("Ressource " +ressource.oid +" restreinte à des groupes sans préciser lesquels, on la passe privée")
-      ressource.restriction = config.constantes.restriction.prive
-    }
-    // si le tableau d'erreur est vide (devrait toujours être le cas),
-    // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-    if (_.isEmpty(ressource.warnings)) delete ressource.warnings
-    // on vire aussi les uri, déduite du reste par le constructeur
-    delete ressource.displayUri
-    delete ressource.describeUri
-    delete ressource.dataUri
-    // on vérifie que l'on peut sauvegarder
-    if (ressource.origine && ressource.idOrigine && (!ressource.errors || !ressource.errors.length)) {
-      next(null, ressource)
+    if (ressource) {
+      // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
+      // et pas de celle de son indexation ici
+      if (!ressource.dateMiseAJour) {
+        ressource.dateMiseAJour = new Date()
+      }
+      // cohérence de la restriction
+      if (ressource.restriction === config.constantes.restriction.groupe && (!ressource.parametres.allow || !ressource.parametres.allow.groupes)) {
+        log.error("Ressource " + ressource.oid + " restreinte à des groupes sans préciser lesquels, on la passe privée")
+        ressource.restriction = config.constantes.restriction.prive
+      }
+      // si le tableau d'erreur est vide (devrait toujours être le cas),
+      // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
+      if (_.isEmpty(ressource.warnings)) delete ressource.warnings
+      // on vire aussi les uri, déduite du reste par le constructeur
+      delete ressource.displayUri
+      delete ressource.describeUri
+      delete ressource.dataUri
+      // on vérifie que l'on peut sauvegarder
+      if (ressource.origine && ressource.idOrigine && (!ressource.errors || !ressource.errors.length)) {
+        next(null, ressource)
+      } else {
+        // on bloque le save en renvoyant une erreur à next
+        var error
+        if (!ressource.origine) error = new Error("propriété origine obligatoire")
+        else if (!ressource.idOrigine) error = new Error("propriété idOrigine obligatoire")
+        else error = new Error("Il reste des erreurs qui empêchent la sauvegarde : \n".ressource.errors.join("\n"))
+        log.error("erreur au beforeStore", error)
+        next(error)
+      }
     } else {
-      // on bloque le save en renvoyant une erreur à next
-      var error
-      if (!ressource.origine) error = new Error("propriété origine obligatoire")
-      else if (!ressource.idOrigine) error = new Error("propriété idOrigine obligatoire")
-      else error = new Error("Il reste des erreurs qui empêchent la sauvegarde : \n".ressource.errors.join("\n"))
-      log.error("erreur au beforeStore", error)
-      next(error)
+      next(new Error("beforeStore n'a pas reçu de ressource"))
     }
   }
 
@@ -122,46 +126,49 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
      */
     function getReserved(next) {
       nbTest ++
-      if (nbTest > 10) throw new Error("impossible de récupérer le dernier idOrigine pour l'origine 'local'")
-
-      $cache.get('lastLocalId', function (error, id) {
-        if (error) next(error)
-        else if (id && id >= lastLocalId) {
-          // ça pourrait être le bon, on réserve, incrémente et vérifie que personne n'a modifié ça pendant ce temps là
-          // sinon on recommence car c'est la faute à pas de chance (demandes simultanées à qq ms près)
-          var idReserved = id + 1
-          lastLocalId = idReserved
-          $cache.set('lastLocalId', idReserved, ttl, function (error) {
-            if (error) next(error)
-            else {
-              $cache.get('lastLocalId', function (error, id) {
-                if (error) next(error)
-                else if (id && id === idReserved) next(null, idReserved)
-                else getReserved() // faut recommencer
-              })
-            }
-          })
-        } else {
+      if (nbTest > 10) next(new Error("impossible de récupérer le dernier idOrigine pour l'origine 'local'"))
+      else {
+        $cache.get('lastLocalId', function (error, id) {
           if (error) next(error)
-          else {
+          else if (id >= lastLocalId) {
+            log("lastLocalId valait " +id +" en cache")
+            // ça pourrait être le bon, on réserve, incrémente et vérifie que personne n'a modifié ça pendant ce temps là
+            // sinon on recommence car c'est la faute à pas de chance (demandes simultanées à qq ms près)
+            var idReserved = id + 1
+            lastLocalId = idReserved
+            $cache.set('lastLocalId', lastLocalId, ttl, function (error) {
+              if (error) next(error)
+              else {
+                $cache.get('lastLocalId', function (error, id) {
+                  if (error) next(error)
+                  else if (id && id === idReserved) next(null, idReserved)
+                  else getReserved(next) // faut recommencer car qqun a incrémenté entre temps
+                })
+              }
+            })
+          } else {
             // faut aller en db
             getFromDb(function (error, id) {
               if (error) next(error)
               else {
+                log("lastLocalId valait " +id +" en db")
                 lastLocalId = id
-                $cache.set('lastLocalId', id, ttl, getReserved)
+                $cache.set('lastLocalId', lastLocalId, ttl, function (error) {
+                  if (error) next(error)
+                  else getReserved(next)
+                })
               }
             })
           }
-        }
-      })
+        })
+      }
     } // getReserved
 
-    // et on lance la recherche
+    // et on lance la recherche éventuelle
     try {
       if (ressource.origine === 'local' && !ressource.idOrigine) {
         getReserved(function (error, id) {
-          if (error, ressource) {
+          if (error) {
             next(error)
           } else {
             ressource.idOrigine = id
@@ -250,8 +257,8 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
         else if (ressourceBdd) compare(ressource, ressourceBdd, next)
         else next(null, ressource)
       })
-    } else {
-      next(new Error("ressource sans oid ni idOrigine"))
+    } else { // normal à la création
+      next(null, ressource)
     }
 
   }
