@@ -36,6 +36,7 @@ function purge_varnish() {
       echo
     done
   fi
+  touch "$LAST_FILE"
 }
 
 # on veut exécuter fin avant de sortir
