@@ -75,11 +75,11 @@ function Ref(initObj) {
    */
   if (initObj.enfants && initObj.enfants instanceof Array) this.enfants = initObj.enfants;
   /** affichage */
-  this.displayUri = initObj.displayUri
-  this.displayUrl = initObj.displayUrl
+  this.displayUri = initObj.displayUri;
+  this.displayUrl = initObj.displayUrl;
   /** Uri des datas (json) */
-  this.dataUri = initObj.dataUri
-  this.dataUrl = initObj.dataUrl
+  this.dataUri = initObj.dataUri;
+  this.dataUrl = initObj.dataUrl;
 }
 
 /**
@@ -88,4 +88,4 @@ function Ref(initObj) {
  */
 Ref.prototype.toString = function () {
   return this.titre;
-}
+};

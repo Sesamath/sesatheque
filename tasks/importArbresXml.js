@@ -45,6 +45,41 @@ var urls = {
   tests_algebre: 'bibliotheque.xml'
 }
 
+/*
+ xml2js ne conserve pas l'ordre des enfants, gênant pour une liste
+ cf https://github.com/Leonidas-from-XIV/node-xml2js/issues/31
+ var xml2js = require('xml2js')
+
+ htmlparser devrait marcher, mais il renvoie un objet un peu plus complexe que elementtree,
+ avec des trucs à éliminer comme
+ {
+ "raw": "\n        ",
+ "data": "\n        ",
+ "type": "text"
+ },
+ var htmlparser = require('htmlparser')
+ */
+var elementtree = require('elementtree')
+
+// url bibliotheque d'après conf de l'appli
+var serverConf = require('../_private/config')
+var urlApiBibli = 'http://'
+urlApiBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
+urlApiBibli += ':'
+urlApiBibli += serverConf.$server && serverConf.$server.port || '3000'
+urlApiBibli += '/api'
+
+var ressConf = require('../construct/ressource/config')
+var arbreCateg = ressConf.constantes.categories.liste
+
+/**
+ * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
+ * pour les avoir sous la static pour éventuel debug
+ */
+
+/** une liste d'arbre à envoyer après tous les autres, le 1er aura une ref vers chacun des autres */
+var lastArbres = []
+
 /**
  * La liste des xml qui doivent être découpés
  * @param xmlName
@@ -57,9 +92,8 @@ function needToSplit(xmlName) {
       // /^tous_les_manuels(\.part[0-9]+)?$/
 
       // lui a différents suffixes possibles
-      /^animations_interactives([^\.]+)?$/,
-      /^animations_interactives\.part[0-9]+$/,
-      /^exercices_interactifs$/,
+      /^animations_interactives$/,  // on a des enfants de niveau 1 sans niveau 2
+      /^exercices_interactifs(\.part[0-9]+)?$/,
       /^exercices_non(\.part[0-9]+)?$/
   ]
   for (var i = 0; i < regexps.length; i++) {
@@ -82,41 +116,6 @@ function getTitre(arbreXml, xmlName) {
 
   return titre
 }
-
-/*
-xml2js ne conserve pas l'ordre des enfants, gênant pour une liste
-cf https://github.com/Leonidas-from-XIV/node-xml2js/issues/31
-var xml2js = require('xml2js')
-
-htmlparser devrait marcher, mais il renvoie un objet un peu plus complexe que elementtree,
-avec des trucs à éliminer comme
- {
- "raw": "\n        ",
- "data": "\n        ",
- "type": "text"
- },
-var htmlparser = require('htmlparser')
-*/
-var elementtree = require('elementtree')
-
-// url bibliotheque d'après conf de l'appli
-var serverConf = require('../_private/config')
-var urlApiBibli = 'http://'
-urlApiBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
-urlApiBibli += ':'
-urlApiBibli += serverConf.$server && serverConf.$server.port || '3000'
-urlApiBibli += '/api'
-
-var ressConf = require('../construct/ressource/config')
-var arbreCateg = ressConf.constantes.categories.liste
-
-/**
- * On pourrait se contenter d'incrémeter des nombres, mais on enregistre les listes d'id
- * pour les avoir sous la static pour éventuel debug
- */
-
-/** une liste d'arbre à envoyer après tous les autres, le 1er aura une ref vers chacun des autres */
-var lastArbres = []
 
 /**
  * Renvoie les valeurs par défaut pour un arbre
@@ -165,6 +164,7 @@ function parseXml(xmlFile, next) {
     processArbreXml(arbreXml, xmlName, next)
   }
 
+  // on va chercher xmlString pour l'analyser
   var xmlName = xmlFile.substr(0, xmlFile.length -4) // sans l'extension .xml
 
   try {
@@ -214,7 +214,6 @@ function processArbreXml(arbreXml, xmlName, next) {
   if (needToSplit(xmlName)) {
     if (logProcess) log("split " +xmlName)
     var arbre = getArbreDefaultValues(xmlName, getTitre(arbreXml, xmlName))
-    arbre.idOrigine = xmlName
     // pour stocker les idOrigine des branches qui serviront à récupérer les oid quand elles auront été enregistrées
     arbre.idOrigineBranches = []
 
@@ -254,6 +253,7 @@ function processArbreXml(arbreXml, xmlName, next) {
 
     }).catch(function (error) {
       log('erreur dans le traitement des branches de ' +xmlName +', il ne sera pas ajouté', error)
+      common.addError(xmlName, 'erreur dans le traitement des branches, il ne sera pas ajouté')
       next()
     })
 
@@ -264,7 +264,7 @@ function processArbreXml(arbreXml, xmlName, next) {
 }
 
 /**
- * Converti un arbreXml en ressource à poster (qu'on passe à common.pushRessource)
+ * Converti un arbreXml en ressource à poster (qu'on passe à common.deferRessource)
  * @param arbreXml
  * @param xmlName
  * @param next
@@ -278,27 +278,36 @@ function convertAndDefer(arbreXml, xmlName, next) {
   var arbre = getArbreDefaultValues(xmlName, getTitre(arbreXml, xmlName))
   arbre.typePedagogiques = ressConf.categoriesToTypes[arbreCateg].typePedagogiques
   arbre.typeDocumentaires =ressConf.categoriesToTypes[arbreCateg].typeDocumentaires
-  getEnfants(arbreXml, xmlName, function (enfants) {
-    arbre.enfants = enfants
-    if (arbre.idOrigineBranches) getRefEnfants(arbre, end)
-    else end()
-  })
+  if (arbre.idOrigineBranches) {
+    log(xmlName +' KO, il reste des idOrigineBranches, pas ajouté')
+    common.addError(xmlName, 'KO, il reste des idOrigineBranches, pas ajouté')
+    next()
+  } else {
+    getEnfants(arbreXml, xmlName, function (enfants) {
+      arbre.enfants = enfants
+      end()
+    })
+  }
 }
 
 /**
  * Ajoute à arbre.enfants les ref que l'on récupère via l'api d'après arbres.idOrigineBranches
  * (que l'on efface à la fin des récup de ref)
  * @param arbre
- * @param next
+ * @param next appelé avec (error, arbre)
  */
 function getRefEnfants(arbre, next) {
   // faut récupérer les refs des idOrigine de chaque branche
   if (arbre.idOrigineBranches) {
+    arbre.enfants = []
     flow(arbre.idOrigineBranches).seqEach(function (idOrigine) {
       var nextEnfant = this
       common.getRef(origineArbre, idOrigine, function (ref) {
-        if (ref) arbre.enfants.push(ref)
-        else {
+        if (ref) {
+          // on veut pas ses enfants s'il en a
+          if (ref.enfants) delete ref.enfants
+          arbre.enfants.push(ref)
+        } else {
           arbre.enfants.push({
             titre        : "erreur, ressource inexistante au moment de l'import",
             origine      : origineArbre,
@@ -312,14 +321,14 @@ function getRefEnfants(arbre, next) {
       // tous les enfants ont été récupérés
       log('fin conversion des idOrigineBranches de ' +arbre.idOrigine)
       delete arbre.idOrigineBranches
-      next()
+      next(null, arbre)
 
     }).catch(function (error) {
       common.addError(arbre.idOrigine, 'seq a planté pendant la récup des ref de ses branches : ' +error.toString())
-      next()
+      next(error)
     })
   } else {
-    next()
+    next(null, arbre)
   }
 }
 

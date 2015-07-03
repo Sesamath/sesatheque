@@ -36,7 +36,7 @@ module.exports = function($flashMessage) {
   var _ = require('lodash')
   var tools = require('../tools')
 
-  var config = require('../ressource/config')
+  //var config = require('../ressource/config')
 
   /********************************************************************************************************
    * Le listener sur afterRailUse est dans construct/index.js car il ajoute des trucs au rail (CORS & logs)

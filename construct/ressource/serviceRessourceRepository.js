@@ -495,7 +495,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
       }
 
     })
-  }
+  } // loadByOrigin
 
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next

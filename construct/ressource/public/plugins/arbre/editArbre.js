@@ -137,33 +137,25 @@ try {
       return false; // sinon il submit le form !
     } // loadSrc
 
+    function modifIco(jstNode) {
+      //log("modifIco", jstree);
+      if (jstNode.children) {
+        jstNode.children.forEach(function (child) {
+          if (child.children && child.children.length) {
+            child.children.forEach(modifIco);
+          } else if (child.a_attr && child.a_attr['data-typeTechnique'] === 'arbre' && child.a_attr['data-ref']) child.icon = 'arbreJstNodeRef';
+        });
+      }
+    }
+
     function load($tree, arbre, isSrc) {
       var rootElt = jstreeConverter.toJstree(arbre);
       rootElt.state = {opened: true};
-
+      modifIco(rootElt);
       var jstData = {
-        'core' : {
+        core : {
           check_callback : true,
-          'data': function (node, next) {
-            //log('fct data', node);
-            if (node.id == '#') {
-              next(rootElt);
-            } else {
-              // faut faire l'appel ajax nous même car jstree peut pas mixer json initial + ajax ensuite
-              // @see http://git.net/jstree/msg12107.html
-              $.ajax({
-                url      : node.data.url,
-                timeout  : timeout || 10000,
-                dataType : 'json',
-                xhrFields: {
-                  withCredentials: true
-                }
-              }).success(next).error(function (jqXHR, textStatus, error) {
-                next(["Erreur lors de l'appel ajax pour récupérer les éléments"]);
-                log(error);
-              });
-            }
-          }
+          data: rootElt
         },
         plugins: ["dnd"]
       };
