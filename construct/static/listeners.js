@@ -74,10 +74,10 @@ module.exports = function($flashMessage) {
       log.debug('on a généré des data pour une erreur ' +context.status, data, 'beforeTransport', {max:2000})
       if (data.error) {
         // on veut pas que le layout l'affiche aussi
-        log.debug('on a mis ' +context.error +' et viré ' +data.error)
+        log.debug('on a context.error ' +context.error +' et viré data.error ' +data.error)
         delete data.error
       }
-    }
+    } // prepareErrorHtmlData
 
     /* on envoie toutes les réponses dans le log de debug */
     if (!isProd) log.debug(
@@ -122,7 +122,7 @@ module.exports = function($flashMessage) {
           case 401:
           case 403:
             if (data.content) msg = data.content
-            else if (context.session && context.session.user) msg = 'Droits insuffisants'
+            else if (context.session && context.session.user && context.session.user.oid) msg = 'Droits insuffisants'
             else msg = "Authentification requise"
             break
           default:
@@ -154,7 +154,7 @@ module.exports = function($flashMessage) {
   /**
    * Modifie request pour utiliser le controleur public si on est pas authentifié et qu'il n'y a pas de token
    * (on gagnerait à mettre ça dans varnish mais faudrait des routes ≠ pour les requetes authentifiées)
-   */
+   * /
   function contextListener(context) {
     // on passe par les contrôleurs public si on a pas de user en session
     if (!context.session.user && !context.request.header('X-ApiToken')) {
@@ -166,9 +166,9 @@ module.exports = function($flashMessage) {
         }
       } catch(error) { }
     }
-  }
+  } /* */
 
   lassi.on('beforeTransport', beforeTransportListener)
 
-  lassi.on('context', contextListener)
+  //lassi.on('context', contextListener)
 }

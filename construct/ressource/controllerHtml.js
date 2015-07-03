@@ -170,19 +170,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // Ajouter, affichage du form de saisie
   controller.get($routes.get('add'), function (context) {
-    if ($accessControl.isAuthenticated(context)) {
-      $accessControl.checkPermission('create', context, null, function (errorMsg) {
-        var options = {$metas: {title: 'Ajouter une ressource'}}
-        if (errorMsg) denied(context, errorMsg)
-        else {
-          var fake = {new:true}
-          addToken(context, fake)
-          $views.printForm(context, null, fake, options)
-        }
-      })
-    } else {
-      denied(context)
-    }
+    $accessControl.checkPermission('create', context, null, function (errorMsg) {
+      var options = {$metas: {title: 'Ajouter une ressource'}}
+      if (errorMsg) denied(context, errorMsg)
+      else {
+        var fake = {new:true}
+        addToken(context, fake)
+        $views.printForm(context, null, fake, options)
+      }
+    })
   })
 
   // Ajouter, traitement du post

@@ -50,8 +50,8 @@ module.exports = function (Groupe, $settings, $personneRepository) {
    */
   function getCreateDeniedMessage(context) {
     var msg
-    if (!context.session.user.permissions || ! context.session.user.permissions.add)
-        msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    if (!context.session.user) msg = "Vous devez vous identifier avant de créer une ressource"
+    else if (!context.session.user.permissions || !context.session.user.permissions.add) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
 
     return msg
   }
@@ -64,8 +64,9 @@ module.exports = function (Groupe, $settings, $personneRepository) {
    */
   function getDeleteDeniedMessage(context, ressource) {
     var msg
-    // on regarde si c'est l'auteur
-    if (_.contains(ressource.auteurs, context.session.user.oid)) {
+    if (!context.session.user) {
+      msg = "Vous devez vous identifier avant de supprimer une ressource"
+    } else if (_.contains(ressource.auteurs, context.session.user.oid)) {
       // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
       // (sinon d'autres peuvent s'en servir)
       if (ressource.auteurs.length > 1)
@@ -94,35 +95,39 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     var msg
     if (ressource.publie) {
       var restriction = $settings.get('components.ressource.constantes.restriction')
+      if (ressource.restriction === restriction.aucune) return
+      else if (!$accessControl.isAuthenticated(context)) msg = "Vous devez être authentifié pour consulter cette ressource"
+      else {
+        switch (ressource.restriction) {
+          // public
+          case restriction.aucune:
+            return
 
-      switch (ressource.restriction) {
-        // public
-        case restriction.aucune:
-          return
+          // correction
+          case restriction.correction:
+            if (hasGenericPermission('correction', context)) return
+            else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
+            break
 
-        // correction
-        case restriction.correction:
-          if (hasGenericPermission('correction', context)) return
-          else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
-          break
+          // réservée au groupe
+          case restriction.groupe:
+            if (_.contains(ressource.auteurs, context.session.user.oid)) return
+            if (_.contains(ressource.contributeurs, context.session.user.oid)) return
+            if (ressource.parametres.allow && ressource.parametres.allow.groupes && !_.empty(_.intersection(ressource.parametres.allow.groupes,
+                                                                                                            context.session.user.groupes))) return
+            msg = "Ressource restreinte"
+            break
 
-        // réservée au groupe
-        case restriction.groupe:
-          if (_.contains(ressource.auteurs, context.session.user.oid)) return
-          if (_.contains(ressource.contributeurs, context.session.user.oid)) return
-          if (ressource.parametres.allow && ressource.parametres.allow.groupes && !_.empty(_.intersection(ressource.parametres.allow.groupes, context.session.user.groupes))) return
-          msg = "Ressource restreinte"
-          break
+          // privée
+          case restriction.prive:
+            if (_.contains(ressource.auteurs, context.session.user.id)) return
+            if (_.contains(ressource.contributeurs, context.session.user.id)) return
+            msg = "Ressource privée"
+            break
 
-        // privée
-        case restriction.prive:
-          if (_.contains(ressource.auteurs, context.session.user.id)) return
-          if (_.contains(ressource.contributeurs, context.session.user.id)) return
-          msg = "Ressource privée"
-          break
-
-        default:
-          msg = "restriction non gérée"
+          default:
+            msg = "Restriction non gérée"
+        }
       }
     } else {
       // pas publié, faut avoir les droits d'édition pour la voir
@@ -141,13 +146,15 @@ module.exports = function (Groupe, $settings, $personneRepository) {
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getUpdateDeniedMessage(context, ressource) {
+    var msg
+    if (!$accessControl.isAuthenticated(context)) msg = "Vous devez être authentifié pour modifier cette ressource"
     // on regarde si c'est l'auteur
-    if (_.contains(ressource.auteurs, context.session.user.oid)) return
+    else if (_.contains(ressource.auteurs, context.session.user.oid)) return
     // un contributeur
-    if (_.contains(ressource.contributeurs, context.session.user.oid)) return
+    else if (_.contains(ressource.contributeurs, context.session.user.oid)) return
     // pour le moment tout le reste est interdit
-
-    return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
+    else msg = "Vous n'avez pas de droits suffisants pour modifier cette ressource"
+    return msg
   }
 
   /**
