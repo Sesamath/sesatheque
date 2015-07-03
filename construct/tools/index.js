@@ -110,15 +110,23 @@ tools.isApi = function (url) {
 }
 
 /**
- * Retourne true si l'url concerne un fichier statique ou du json public (donc à priori mis en cache)
+ * Retourne true si l'url concerne un fichier statique
  * (statique i.e. les extensions susceptibles d'exister dans sesatheque, c'est pas exaustif)
  * @param url
  * @returns {boolean}
  */
-tools.isStaticOrPublicApi = function (url) {
-  return (/\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(url) || /^\/api\/public\//.exec(url))
+tools.isStatic = function (url) {
+  return /\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(url)
 }
 
+/**
+ * Retourne true si l'url concerne une url publique (avec /public/ dedans, html ou json)
+ * @param url
+ * @returns {boolean}
+ */
+tools.isPublic = function (url) {
+  return /\/public\//.exec(url)
+}
 /**
  * Génère le code html d'un lien
  * @param path Le path (absolu ou relatif)

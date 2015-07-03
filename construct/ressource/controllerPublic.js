@@ -114,7 +114,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * La recherche (form et résultats)
    */
-  controller.get($routes.get('search'), function (context) {
+  function search(context) {
     if (_.isEmpty(context.get)) {
       // form de recherche
       $views.printSearchForm(context)
@@ -172,6 +172,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $views.printSearchForm(context)
       }
     }
-  })
+  }
+  search.timeout = 3000
+  controller.get($routes.get('search'), search)
 
 }

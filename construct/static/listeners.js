@@ -151,24 +151,5 @@ module.exports = function($flashMessage) {
     log('fin de beforeTransport avec les data', data, 'beforeTransport', {trim:5000})
   }
 
-  /**
-   * Modifie request pour utiliser le controleur public si on est pas authentifié et qu'il n'y a pas de token
-   * (on gagnerait à mettre ça dans varnish mais faudrait des routes ≠ pour les requetes authentifiées)
-   * /
-  function contextListener(context) {
-    // on passe par les contrôleurs public si on a pas de user en session
-    if (!context.session.user && !context.request.header('X-ApiToken')) {
-      try {
-        if (context.request.parsedUrl.pathname.indexOf('/ressource/') > -1) {
-          context.request.parsedUrl.pathname = context.request.parsedUrl.pathname.replace(/\/ressource\//, '/public/')
-          log("pas de user en session ni de token, on modifie l'url pour prendre le controleur public")
-          log('=> ' +context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||''))
-        }
-      } catch(error) { }
-    }
-  } /* */
-
   lassi.on('beforeTransport', beforeTransportListener)
-
-  //lassi.on('context', contextListener)
 }

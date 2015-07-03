@@ -85,6 +85,7 @@ GLOBAL.log = require('./tools/log.js')
 
 var moment = require('moment')
 var staticTtl = 3600 * 24
+var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
 
 // les déclarations de nos components
 require('./static')
@@ -191,7 +192,7 @@ function afterRailSession(rail) {
     var origin = req.header('Origin')
     if (origin) {
       // le public est mis en cache, on autorise pour tout le monde (sinon faut filtrer sur varnish)
-      if (tools.isStaticOrPublicApi(req.url)) res.header('Access-Control-Allow-Origin', '*')
+      if (tools.isStatic(req.url) || tools.isPublic(req.url)) res.header('Access-Control-Allow-Origin', '*')
       else {
         // ça dépend de l'appelant
         if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local)(:[0-9]+)?(\/|$)/.exec(origin)) {
@@ -217,10 +218,13 @@ function afterRailSession(rail) {
    */
   lassi.log('$rail', "app is adding", "expires".blue.underline, "middleware")
   rail.use('/', function(req, res, next) {
-    if (tools.isStaticOrPublicApi(req.url)) {
+    var ttl
+    if (tools.isStatic(req.url)) ttl = staticTtl
+    else if (tools.isPublic(req.url)) ttl = publicTtl
+    if (ttl) {
       // faut mettre ça au format de la RFC 1123
-      res.header('Expires', moment().utc().add(staticTtl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
-      res.header('Cache-Control', 'public, max-age=' +staticTtl)
+      res.header('Expires', moment().utc().add(ttl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
+      res.header('Cache-Control', 'public, max-age=' +ttl)
       // @todo regarder If-Modified-Since et répondre 304 Not Modified si c'est le cas
       // mais c'est vraiment pas très urgent si on a un varnish devant nous il le gère
     }

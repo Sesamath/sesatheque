@@ -101,6 +101,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Appelle next si on est authentifié ou redirige vers la même url en public
+   * @param {Context}  context Le contexte
+   * @param {function} next    Sera appelée sans arguments si on est authentifié
+   */
+  function redirectOrContinue(context, next) {
+    if ($accessControl.isAuthenticated(context)) next()
+    else context.redirect(context.request.originalUrl.replace('ressource/', 'public/'), 302)
+  }
+
+  /**
    * Vérifie les droits avant d'appeler $views.prepareAndSend
    * @param context
    * @param error
@@ -117,54 +127,66 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // describe
   controller.get($routes.get('describe', ':oid'), function (context) {
-    var oid = context.arguments.oid
-    $ressourceRepository.load(oid, function (error, ressource) {
-      send(context, error, ressource, 'describe')
+    redirectOrContinue(context, function () {
+      var oid = context.arguments.oid
+      $ressourceRepository.load(oid, function (error, ressource) {
+        send(context, error, ressource, 'describe')
+      })
     })
   })
 
 // describeByOrigin
   controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      send(context, error, ressource, 'describe')
+    redirectOrContinue(context, function () {
+      var origine = context.arguments.origine
+      var idOrigine = context.arguments.idOrigine
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        send(context, error, ressource, 'describe')
+      })
     })
   })
 
 // display : Voir la ressource pleine page (pour iframe)
   controller.get($routes.get('display', ':oid'), function (context) {
-    var oid = context.arguments.oid
-    context.noMenu = true
-    $ressourceRepository.load(oid, function (error, ressource) {
-      send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
+    redirectOrContinue(context, function () {
+      var oid = context.arguments.oid
+      context.noMenu = true
+      $ressourceRepository.load(oid, function (error, ressource) {
+        send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
+      })
     })
   })
 
 // displayByOrigin : Voir la ressource pleine page (pour iframe)
   controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    context.noMenu = true
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
+    redirectOrContinue(context, function () {
+      var origine = context.arguments.origine
+      var idOrigine = context.arguments.idOrigine
+      context.noMenu = true
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
+      })
     })
   })
 
 // preview : Voir la ressource dans le site
   controller.get($routes.get('preview', ':oid'), function (context) {
-    var oid = context.arguments.oid
-    $ressourceRepository.load(oid, function (error, ressource) {
-      send(context, error, ressource, 'display')
+    redirectOrContinue(context, function () {
+      var oid = context.arguments.oid
+      $ressourceRepository.load(oid, function (error, ressource) {
+        send(context, error, ressource, 'display')
+      })
     })
   })
 
   // previewByOrigin
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      send(context, error, ressource, 'display')
+    redirectOrContinue(context, function () {
+      var origine = context.arguments.origine
+      var idOrigine = context.arguments.idOrigine
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        send(context, error, ressource, 'display')
+      })
     })
   })
 
@@ -378,68 +400,70 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * La recherche (form et résultats)
    */
   controller.get($routes.get('search'), function (context) {
-    if (_.isEmpty(context.get)) {
-      // form de recherche
-      $views.printSearchForm(context)
-    } else {
-      // résultats
-      log.debug('search reçoit', context.get)
-      // faut passer en revue les critères
-      var filters = []
-      var crit = context.get
-      var filter
-
-      // les filtres, parmi les propriétés défini en conf
-      for (var prop in crit) {
-        if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
-          filter = {
-            index: prop,
-            values: _.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
-          }
-          filters.push(filter)
-        }
-      }
-      log.debug("traduits en filters", filters)
-      // @todo ajouter des critères de tri
-      if (filters.length) {
-        var options = {
-          filters: filters
-        }
-        // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
-        options.start = parseInt(crit.start, 10) || 0
-        options.nb = parseInt(crit.nb, 10) || 25
-        options.orderBy = crit.orderBy || 'oid'
-        var visibilite = 'public'
-        // avec une exception pour l'admin qui peut passer ?all=1
-        if (context.get.all && $accessControl.hasAllRights(context)) visibilite = "all"
-        $ressourceRepository.getListe(visibilite, options, function (error, ressources) {
-          var data = $views.getDefaultData('liste')
-          data.$metas.title = 'Résultats de la recherche'
-          log.debug('liste avec les options', options)
-          log.debug('qui remonte', ressources)
-          if (error) data.contentBloc.error = error.toString()
-          else {
-            if (ressources.length == options.nb) {
-              crit.start = options.start +options.nb
-              data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
-            }
-            if (options.start) {
-              crit.start = options.start - options.nb
-              if (crit.start < 0) crit.start = 0
-              data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
-            }
-            data.contentBloc.pagination = '(' +(options.start +1) +' à ' +(options.start +1 +options.nb) +')'
-            // on filtre d'après les droits en lecture
-            ressources = $accessControl.getListeLisible(context, ressources)
-            // et on ajoute des liens
-            data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
-          }
-          context.html(data)
-        })
-      } else {
-        context.error = "il faut choisir au moins un critère"
+    redirectOrContinue(context, function () {
+      if (_.isEmpty(context.get)) {
+        // form de recherche
         $views.printSearchForm(context)
+      } else {
+        // résultats
+        log.debug('search reçoit', context.get)
+        // faut passer en revue les critères
+        var filters = []
+        var crit = context.get
+        var filter
+
+        // les filtres, parmi les propriétés défini en conf
+        for (var prop in crit) {
+          if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
+            filter = {
+              index : prop,
+              values: _.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
+            }
+            filters.push(filter)
+          }
+        }
+        log.debug("traduits en filters", filters)
+        // @todo ajouter des critères de tri
+        if (filters.length) {
+          var options = {
+            filters: filters
+          }
+          // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
+          options.start = parseInt(crit.start, 10) || 0
+          options.nb = parseInt(crit.nb, 10) || 25
+          options.orderBy = crit.orderBy || 'oid'
+          var visibilite = 'public'
+          // avec une exception pour l'admin qui peut passer ?all=1
+          if (context.get.all && $accessControl.hasAllRights(context)) visibilite = "all"
+          $ressourceRepository.getListe(visibilite, options, function (error, ressources) {
+            var data = $views.getDefaultData('liste')
+            data.$metas.title = 'Résultats de la recherche'
+            log.debug('liste avec les options', options)
+            log.debug('qui remonte', ressources)
+            if (error) data.contentBloc.error = error.toString()
+            else {
+              if (ressources.length == options.nb) {
+                crit.start = options.start + options.nb
+                data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
+              }
+              if (options.start) {
+                crit.start = options.start - options.nb
+                if (crit.start < 0) crit.start = 0
+                data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
+              }
+              data.contentBloc.pagination = '(' + (options.start + 1) + ' à ' + (options.start + 1 + options.nb) + ')'
+              // on filtre d'après les droits en lecture
+              ressources = $accessControl.getListeLisible(context, ressources)
+              // et on ajoute des liens
+              data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
+            }
+            context.html(data)
+          })
+        } else {
+          context.error = "il faut choisir au moins un critère"
+          $views.printSearchForm(context)
+        }
       }
-    }
+    })
   })
 }
