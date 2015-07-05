@@ -38,20 +38,38 @@ try {
     "use strict";
 
     // nos fcts internes
+    /**
+     * Charge l'arbre source, initialise le dom et les comportements 
+     * @param options
+     */
     function initDom(options) {
+      /**
+       * Passe en mode texte
+       */
       function showTxt() {
         $linkShowTxt.hide();
         $container.hide();
+        dstTreeToTextarea();
         $textarea.show();
         $linkShowGraphic.show();
+        isTextMode = true;
       }
 
+      /**
+       * passe en mode graphique
+       */
       function showGraphic() {
         $linkShowGraphic.hide();
         $textarea.hide();
+        if (arbreInitial) {
+          arbreInitial.enfants = $enfants.val();
+          loadDst(arbreInitial);
+        }
         $container.show();
         $linkShowTxt.show();
+        isTextMode = false;
       }
+      
 
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
       if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
@@ -110,11 +128,11 @@ try {
           if (error) {
             w.setError("Erreur au chargement de " + ref + " : " + error.toString(), 5);
           } else if (ressource && ressource.typeTechnique === 'arbre') {
-
+            arbreInitial = ressource;
             // on charge
             load($srcTree, ressource, true);
 
-            // pour la recherche, on remet le comportement sur la modif de l'input
+            // pour la recherche, on remet le comportement de la modif de l'input sur l'arbre
             var timer;
             var $searchInput = $(searchInput);
             $searchInput.keyup(function () {
@@ -139,7 +157,7 @@ try {
 
     function modifIco(jstNode) {
       //log("modifIco", jstree);
-      if (jstNode.children) {
+      if (jstNode.children && jstNode.children.forEach) {
         jstNode.children.forEach(function (child) {
           if (child.children && child.children.length) {
             child.children.forEach(modifIco);
@@ -182,36 +200,42 @@ try {
     function loadDst(arbre) {
       load($dstTree, arbre);
     }
-
-    /**
-     * Récupère l'arbre jstree et complète le champ enfants avec
-     */
-    function saveDst() {
+    
+    function dstTreeToTextarea() {
       var jstree = $.jstree.reference($dstTree);
       var enfants;
-      var retour = false; // passer true pour valider le form
       log("saveDst avec", jstree);
       try {
         // on veut pas les enfants de # (un seul, l'arbre complet), mais ceux de notre arbre, 1er (et seul) enfant de root
         var nodeId = jstree._model.data['#'].children[0];
         enfants = jstreeConverter.getEnfants(nodeId, jstree);
-      } catch(error) {
+      } catch (error) {
         log.error(error);
       }
       log("On récupère les enfants", enfants);
-      var $enfants = $('#enfants');
       var enfantsStr = '';
       try {
         enfantsStr = JSON.stringify(enfants, null, 2);
-      } catch(error) {
+      } catch (error) {
         log.error("Le parsing json a planté", error, enfants);
       }
+      var $enfants = $('#enfants');
       if ($enfants) {
         $enfants.val(enfantsStr);
-        retour = true;
+      } else {
+        w.setError("zone de texte enfants non trouvée");
+      }
+    }
+
+    /**
+     * Récupère l'arbre jstree et complète le champ enfants avec
+     */
+    function saveDst() {
+      if (!isTextMode) {
+        dstTreeToTextarea();
       }
 
-      return retour;
+      return true;
     }
 
     if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
@@ -224,6 +248,10 @@ try {
     // quasi les mêmes jquerifiée
     var $container, $inputRef, $loadLink, $srcTree, $dstTree, $saveButton, $enfants;
     var timeout;
+    var isTextMode = true;
+    var arbreInitial;
+    // le textarea enfants
+    var $enfants = $('#enfants');
 
     return {
       init: function (arbre, options) {

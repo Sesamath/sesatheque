@@ -124,15 +124,16 @@ function callBibli(data, next) {
     // les différentes callback
     xhr.onload = function () {
       if (xhr.status >= 200 && xhr.status < 400) {
+        var erreur, reponse;
         try {
-          var reponse = JSON.parse(xhr.responseText);
-          next(null, reponse);
+          reponse = JSON.parse(xhr.responseText);
         } catch (error) {
           var errMsg = isGet ?
               "La ressource renvoyée par la bibliotheque n'est pas du json valide" :
               "La réponse du serveur au post n'est pas du json valide";
-          next(new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText));
+          erreur = new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText);
         }
+        next(erreur, reponse);
       } else {
         // On a une réponse mais c'est une erreur
         // il faudra gérer les 301 & 302 éventuels, mais pour le moment l'api n'en renvoie pas

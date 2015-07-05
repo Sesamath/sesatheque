@@ -56,16 +56,16 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   function getJstNode (ressource) {
     /**
      * Retourne les datas qui nous intéressent à mettre sur le tag a
-     * (pour a_attr : data-id, data-typeTechnique, href et alt)
+     * (pour a_attr : data-ref, data-typeTechnique, href et alt)
      * @param {Ressource} ressource
      * @return {Object}
      */
     function getAttr() {
       var attr = {}
       // id
-      if (ressource.oid) attr['data-id'] = ressource.oid
-      else if (ressource.ref) attr['data-id'] = ressource.ref
-      else if (ressource.origine && ressource.idOrigine) attr['data-id'] = ressource.origine +'/' +ressource.idOrigine
+      if (ressource.oid) attr['data-ref'] = ressource.oid
+      else if (ressource.ref) attr['data-ref'] = ressource.ref
+      else if (ressource.origine && ressource.idOrigine) attr['data-ref'] = ressource.origine +'/' +ressource.idOrigine
       // url complète
       if (ressource.displayUri) attr.href = $settings.get('application.baseUrl', '') +ressource.displayUri
       if (ressource.typeTechnique) attr['data-typeTechnique'] = ressource.typeTechnique

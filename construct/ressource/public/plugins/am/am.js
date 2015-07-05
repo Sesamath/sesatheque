@@ -70,7 +70,7 @@ define(['sesaswf'], function (sesaswf) {
       date:startDate,
       duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
       score : 1
-    }
+    };
   }
 
 
@@ -91,7 +91,7 @@ define(['sesaswf'], function (sesaswf) {
       container.addEventListener('unload', function () {
         var resultat = getResultat();
         options.resultCallback(resultat);
-      })
+      });
     }
     var params = ressource.parametres;
 
@@ -119,7 +119,7 @@ define(['sesaswf'], function (sesaswf) {
       base    : baseSwf + "/",
       largeur : 735,
       hauteur : 450
-    }
+    };
     sesaswf.load(container, swfUrl, swfOpt, next);
   };
   

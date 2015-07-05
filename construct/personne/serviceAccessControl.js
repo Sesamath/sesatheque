@@ -187,7 +187,7 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     ) {
       next(null, ressource)
     } else if (!$accessControl.isAuthenticated(context)) {
-      msg = "Authentification requise"
+      next("Authentification requise")
     } else {
       // on regarde donc ce user pour cette ressource
       switch (permission) {
