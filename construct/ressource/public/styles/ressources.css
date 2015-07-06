@@ -81,3 +81,11 @@
 .j3pJstNode { background-image: url("/plugins/j3p/j3p.gif") !important;}
 .mentalJstNode { background-image: url("/plugins/mental/mental.gif") !important;}
 .urlJstNode { background-image: url("/plugins/url/url.gif") !important;}
+
+#display #apercu {
+  width: 100%;
+  min-height: 500px;
+  resize: both;
+  overflow:auto;
+  border:1px solid black
+}

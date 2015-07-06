@@ -174,6 +174,16 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     };
 
     /**
+     * Vide un élément html de tous ses enfants
+     * @param {HTMLElement} element
+     */
+    window.empty = function (element) {
+      if (element && element.firstChild) {
+        while(element.firstChild) element.removeChild(element.firstChild);
+      }
+    };
+
+    /**
      * Retourne un élément html de type tag (non inséré dans le dom)
      * @param {string} tag
      * @param {Object=} attrs Les attributs
