@@ -71,15 +71,17 @@ module.exports = function ($settings) {
    */
   $routes.getAbs = function(action, ressource) {
     var route
-    var oid = ressource.oid || parseInt(ressource, 10)
-    if (!oid) {
-      log.error(new Error("appel de $routes.getAbs sans ressource ni oid"))
-    } else if (routes.hasOwnProperty(action)) {
+    var oid
+    if (ressource) oid = ressource.oid || parseInt(ressource, 10)
+    if (routes.hasOwnProperty(action)) {
       route = '/'
       if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
-      // si on avait qu'un oid ce sera toujours ressource/
-      route += (ressource && ressource.restriction === restriction.aucune) ? 'public/' : 'ressource/'
-      route += $routes.get(action, oid)
+      // ce qui concerne l'édition est toujours sur /ressource
+      if (['add', 'delete', 'edit'].indexOf(action) > -1) route += 'ressource/'
+      else route += (ressource && ressource.restriction === restriction.aucune) ? 'public/' : 'ressource/'
+      // et on ajoute l'oid éventuel
+      if (oid) route += $routes.get(action, oid)
+      else route += $routes.get(action)
     } else {
       log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
     }

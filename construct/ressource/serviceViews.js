@@ -81,9 +81,11 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     // les liens du menu
     var links = []
     // lien ajout
+    log($routes.getAbs('add') +' ' +$routes.get('add'))
     if ($accessControl.hasPermission('create', context)) {
       links.push(tools.link(ressourcePath +$routes.get('add'), 'Ajouter une ressource'))
-      log('path ' +ressourcePath +$routes.get('add'))
+      if (oid && $accessControl.hasPermission('read', context, oid))
+          links.push(tools.link($routes.getAbs('add') +'?clone=' +oid, 'Dupliquer la ressource'))
     }
     // si on est sur une ressource on ajoute les liens contextuels pour cette ressource (auxquels on a droit)
     if (oid) {

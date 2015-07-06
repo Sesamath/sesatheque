@@ -193,12 +193,30 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Ajouter, affichage du form de saisie
   controller.get($routes.get('add'), function (context) {
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
+      function termine (ressource) {
+        $views.printForm(context, null, ressource, options)
+      }
+
       var options = {$metas: {title: 'Ajouter une ressource'}}
       if (errorMsg) denied(context, errorMsg)
       else {
-        var fake = {new:true}
-        addToken(context, fake)
-        $views.printForm(context, null, fake, options)
+        if (context.get.clone) {
+          $ressourceRepository.load(context.get.clone, function (error, ressource) {
+            if (error) {
+              $views.printError(context, error)
+            } else if (ressource) {
+              delete ressource.oid
+              delete ressource.idOrigine
+              termine(ressource)
+            } else {
+              $views.printError(context, "Ressource à dupliquer inexistante ou droits insuffisants pour la lire", 404)
+            }
+          })
+        } else {
+          var fake = {new: true}
+          addToken(context, fake)
+          termine(fake)
+        }
       }
     })
   })
