@@ -243,7 +243,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
        */
       displayModule.init = function (options) {
         if (!isInitDone) {
-          init.do(options);
+          init(options);
           w.log('options après init', options);
           isInitDone = true;
         }

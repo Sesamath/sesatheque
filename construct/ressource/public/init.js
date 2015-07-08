@@ -328,17 +328,15 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       var container = window.document.getElementById('display');
       /** Le conteneur html pour afficher d'éventuelles erreurs */
       var errorsContainer = window.document.getElementById('errors');
-      /**
-       * Notre module js que l'on exportera
-       */
-      var init = {};
 
       /**
+       * Notre module js que l'on exportera, une seule fonction
+       *
        * Initialise les chemins des librairies pour les require des plugins, ainsi que les containers html
        * Complète options si besoin
        * @param options
        */
-      init.do = function (options) {
+      var init = function (options) {
         log('init avec les options', options);
         rootPath = options.sesathequeBase || '/';
         // on ajoute le slash de fin s'il manque

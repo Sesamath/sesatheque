@@ -253,9 +253,9 @@ module.exports = function (Ressource) {
                 } catch (e) {
                   errors.push("Le champ " + champ + " n'est pas du json valide : " + e.toString());
                 }
-              } else {
+              } else if (ressource.oid) {
                 errors.push("Le champ " + champ + " est invalide : ");
-              }
+              } // else normal qu'il en manque à la création
 
             } else {
               var msg = "Le champ " + champ + " est d'un type non prévu (" +typeVar +')';

@@ -59,7 +59,7 @@ define(['jquery1', 'jqueryUiRedmond'], function () {
     // url source (non cliquable) en footer
     w.addElement(container, 'p', {id: 'urlSrc'}, "source : " + params.adresse);
     // on redimensionne tout de suite
-    resizePage()
+    resizePage();
     // et à chaque changement de la taille de la fenêtre
     $(window).resize(resizePage)
 
@@ -68,8 +68,8 @@ define(['jquery1', 'jqueryUiRedmond'], function () {
       // on attend que $ ai fini de manipuler le dom
       $(function () {
         main.start(params.question_option, params.answer_option);
-      })
-    })
+      });
+    });
   }
 
   /**
@@ -143,8 +143,8 @@ define(['jquery1', 'jqueryUiRedmond'], function () {
           ressType:'url',
           date : startDate,
           duree : Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000)
-        })
-      })
+        });
+      });
     } else if (!isBasic) {
       // pas seulement la page
       w.addElement(elt, "div", {id: "lienreponse"}, "Réponse");
@@ -166,7 +166,7 @@ define(['jquery1', 'jqueryUiRedmond'], function () {
       if (params.answer_option !== 'off') {
         // la ressource attend une réponse
         if (resultCallback) {
-          log('aj du form')
+          log('aj du form');
           elt3 = w.getElement('div', {}, "Ta réponse ici :"); // form obligatoire ?
           w.addElement(elt3, 'br');
           w.addElement(elt3, 'textarea', {id: 'answer', name: 'answer', cols: 45, rows: 9});

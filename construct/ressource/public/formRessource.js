@@ -30,44 +30,65 @@
  */
 
 /**
- * Script pour modif du form dynamique (remplacer parametres par enfants)
+ * Script pour le form (charger init et ajouter des comportements de modif dynamique du form)
+ * appelé dans le head
  */
 /* global window, define, require, alert, $ */
-if (typeof define === 'undefined' || typeof require === 'undefined') {
-  alert("requireJs doit être chargé avant ce fichier");
-} else if (typeof window === 'undefined') {
-  throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
-} else {
-  try {
-    // faut charger init seul avant de lancer un autre require...
-    require(['/init.js'], function (init) {
-      "use strict";
-      init.do({});
-      require(['jquery1'], function () {
-        function onTypeChange() {
-          var $label = $groupParametres.filter('label');
-          var $textarea = $groupParametres.filter('textarea');
-          var typeTechnique = $typeTechnique.val();
-          console.log("type change : " +typeTechnique +' ' +$label.text());
-          console.log($label);
-          if (typeTechnique === 'arbre') {
-            $label.text('Enfants');
-            $textarea.attr('placeholder', 'Enfants');
-          }
-          else $label.text('Paramètres');
-        }
+(function () {
+  "use strict";
+  var delayedOptions;
+  var afterInit;
 
-        // comportement sur le titre de parametres suivant le choix de typeTechnique
-        var $typeTechnique = $('#typeTechnique');
-        var $groupParametres = $('#groupParametres');
-        if ($typeTechnique && $groupParametres) {
-          $typeTechnique.change(onTypeChange);
-          onTypeChange();
-        }
+  if (typeof define === 'undefined' || typeof require === 'undefined') {
+    alert("requireJs n'est pas chargé");
+  } else if (typeof window === 'undefined') {
+    throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
+  } else {
+    // ça doit exister tout de suite
+    window.sesatheque = {
+      init   : function (options, next) {
+        // si on est appelé c'est qu'on a pas encore été écrasé par le chargement d'init, on met ça de coté
+        delayedOptions = options;
+        afterInit = next;
+      }
+    };
+    try {
+      // faut charger init seul avant de lancer un autre require...
+      require(['/init.js'], function (init) {
+        // on le met en global pour qu'il puisse être lancé dans la vue avec les options
+        window.sesatheque.init = function (options, next) {
+          init(options);
+          require(['jquery1'], function () {
+            function onTypeChange() {
+              var $label = $groupParametres.filter('label');
+              var $textarea = $groupParametres.filter('textarea');
+              var typeTechnique = $typeTechnique.val();
+              console.log("type change : " + typeTechnique + ' ' + $label.text());
+              console.log($label);
+              if (typeTechnique === 'arbre') {
+                $label.text('Enfants');
+                $textarea.attr('placeholder', 'Enfants');
+              }
+              else $label.text('Paramètres');
+            }
+
+            // comportement sur le titre de parametres suivant le choix de typeTechnique
+            var $typeTechnique = $('#typeTechnique');
+            var $groupParametres = $('#groupParametres');
+            if ($typeTechnique && $groupParametres) {
+              $typeTechnique.change(onTypeChange);
+              onTypeChange();
+            }
+
+            next();
+          });
+        };
+        // on regarde si init avait été appelé avant qu'on l'affecte et le lance au besoin
+        if (delayedOptions) window.sesatheque.init(delayedOptions, afterInit);
       });
-    });
-  } catch (error) {
-    if (window.setError) window.setError(error);
-    else if (log.error) log.error(error);
+    } catch (error) {
+      if (window.setError) window.setError(error);
+      else if (log.error) log.error(error);
+    }
   }
-}
+})();

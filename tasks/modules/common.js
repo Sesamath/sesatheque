@@ -35,7 +35,7 @@ var catCode = confRessource.constantes.categories
  */
 var opt = {
   /** timeout en ms */
-  timeout     : 3000,
+  timeout     : 6000,
   /** Le nb max de requetes vers l'api en attente de réponse */
   maxLaunched : 1,
   /** pour logguer les relations en console */
@@ -359,7 +359,7 @@ common.flushPendingRelations = function (next) {
                   newRelations.push(newRel)
                   thisSubFlow()
                 } else {
-                  addError(idCombLie, 'une relation pointait vers ' + idCombLie + " qui n'existe pas")
+                  addError(idComb, 'une relation pointait vers ' + idCombLie + " qui n'existe pas")
                   if (opt.logRelations) log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
                   thisSubFlow()
                 }

@@ -52,7 +52,7 @@ function postJson(url, obj) {
 }
 
 function usage(exitCode, message) {
-  log("Il faut appeler ce scrit avec --arbre ou --arbreFull ou --ressource, suivi d'un fichier json " +
+  log("Il faut appeler ce scrit avec --arbre ou --arbreFull ou --ressource ou --merge, suivi d'un fichier json " +
       "(relatif au script)")
   if (message) log(message)
   process.exit(exitCode || 0)
@@ -71,6 +71,7 @@ switch (argv[0]) {
   case '--arbre': uri = '/api/arbre'; break;
   case '--arbreFull': uri = '/api/arbre?populate=1'; break;
   case '--ressource': uri = '/api/ressource'; break;
+  case '--merge': uri = '/api/ressource?merge=1'; break;
   default : usage(1)
 }
 if (argv.length < 2) usage(1)

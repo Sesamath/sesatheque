@@ -117,30 +117,39 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @returns {Array}
    */
   function arrayToDust(key, selectedValues, isUnique) {
+    function addChoice(label, cbValue) {
+      // cbValue est toujours une string (propriété de l'objet)
+      var intValue = parseInt(cbValue, 10)
+      if (intValue == cbValue) cbValue = intValue
+      var choice = {
+        label: label,
+        value: cbValue
+      }
+      if (!isUnique) {
+        // faut du name sur chaque checkbox
+        choice.name = key + '[' + i + ']'
+        i++
+      }
+      // et on ajoute les selected s'il y en a
+      if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
+        choice.selected = true
+      }
+      choices.push(choice)
+    }
+
     //log.debug("arrayToDust de " +key, selectedValues)
     var choices = []
+    var i = 0
     if (selectedValues && !_.isArray(selectedValues)) {
       log.error(new Error("La propriété " + key + " de la ressource n'est pas un tableau"))
+    } else if (config.listesOrdonnees[key]) {
+      _.each(config.listesOrdonnees [key], function (cbValue) {
+        addChoice(config.listes[key][cbValue], cbValue)
+      })
     } else {
-      var i = 0
+      // dans l'ordre où ça vient
       _.each(config.listes[key], function (label, cbValue) {
-        // cbValue est toujours une string (propriété de l'objet)
-        var intValue = parseInt(cbValue, 10)
-        if (intValue == cbValue) cbValue = intValue
-        var choice = {
-          label: label,
-          value: cbValue
-        }
-        if (!isUnique) {
-          // faut du name sur chaque checkbox
-          choice.name = key + '[' + i + ']'
-          i++
-        }
-        // et on ajoute les selected s'il y en a
-        if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
-          choice.selected = true
-        }
-        choices.push(choice)
+        addChoice(label, cbValue)
       })
       //log.debug("renvoie ", choices)
     }
@@ -368,18 +377,28 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
 
     // on ajoute nos cas particulier
     formData.version.readonly = true
-    // l'oid
+
+    // si modif
     if (ressource && ressource.oid) {
       formData.oid = {
         name  : 'oid',
         value : ressource.oid,
+        label : labels.oid,
         readonly: true
       }
-    }
-    // origine & idOrigine en lecture seule pour modif mais pas création
-    if (ressource.oid) {
+      // c'est une modif, on ne peut plus changer le typeTechnique, on remplace le select par un text
+      formData.typeTechnique = {
+        name : "typeTechnique",
+        value : ressource.typeTechnique,
+        label : labels.typeTechnique,
+        readonly : true
+      }
+      // origine & idOrigine en lecture seule pour modif mais pas création
       formData.origine.readonly = true;
       formData.idOrigine.readonly = true;
+      formData.$view = 'form'
+    } else {
+      formData.$view = 'formCreate'
     }
     // un token si y'en a un dans la ressource
     if (ressource.token) {
@@ -404,6 +423,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       }
       //if (ressource.force) formData.force.choices[0].selected = true
     }
+
     // on vire le champ si y'a pas d'erreurs
     if (!formData.errors.length) delete formData.errors
     //log.debug('formData pour le form', formData.warnings, 'htmlform', {max:50000, indent:2})
@@ -612,11 +632,10 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     data.$metas.title = 'Modifier la ressource ' +ressource.titre
     // et d'éventuels overrides
     if (options) tools.merge(data, options)
-    if (ressource.typeTechnique === 'arbre') {
-      // pour les arbres, c'est la vue editArbre qui ajoute nos js, mais faut lui donner la ressource complète
-      // et les variable comme pour display
-      addJsVars(data, ressource)
-    }
+    // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source, donc on passe ici du json)
+    addJsVars(data, ressource)
+    // faut aussi ajouter ça pour les vues dust (data.contentBloc.typeTechnique existe déjà mais c'est un select)
+    data.contentBloc.editeur = ressource.typeTechnique
     // avant d'envoyer
     context.html(data)
   }

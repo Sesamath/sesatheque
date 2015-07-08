@@ -193,6 +193,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Ajouter, affichage du form de saisie
   controller.get($routes.get('add'), function (context) {
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
+      // envoi des valeur au form
       function termine (ressource) {
         $views.printForm(context, null, ressource, options)
       }
@@ -255,7 +256,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                     rePrintForm(error, ressource)
                   } else {
                     log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
-                    context.redirect($routes.getAbs('describe', ressource.oid))
+                    context.redirect($routes.getAbs('edit', ressource.oid))
                   }
                 }) // write
               }

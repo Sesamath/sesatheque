@@ -1,0 +1,6 @@
+<div class="form-group" id="groupParametres">
+  Pour modifier ces valeurs (mais aussi le titre ou les relations), il faut le faire sur <a href="http://mep-col.sesamath.net/interface_dev/">http://mep-col.sesamath.net/interface_dev/</a>.
+  {#parametres readonly="true"}
+    {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
+  {/parametres}
+</div>

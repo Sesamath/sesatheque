@@ -143,6 +143,12 @@ var ressourceConfig = {
       2: 'groupe',
       3: 'privé'
     }
+  },
+  // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
+  listesOrdonnees : {
+    niveaux: [11,10,9,8,7,6,5,4,3,2,1,12],
+    typeDocumentaires: [9,5,6,12,11,1,2],
+    typePedagogiques : [3,9,91,92,191,7,2,81,82,13,141,151,21,22]
   }, // fin des listes
 
   /**

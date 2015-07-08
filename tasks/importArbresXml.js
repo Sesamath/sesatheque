@@ -96,9 +96,13 @@ function needToSplit(xmlName) {
       /^exercices_interactifs(\.part[0-9]+)?$/,
       /^exercices_non(\.part[0-9]+)?$/
   ]
+  // des cas particuliers
+  if (xmlName === 'exercices_interactifs.part14') return false
+  // test des regex
   for (var i = 0; i < regexps.length; i++) {
     if (regexps[i].test(xmlName)) return true
   }
+  // sinon on coupe pas
   return false
 }
 
