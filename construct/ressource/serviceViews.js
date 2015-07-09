@@ -510,7 +510,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
   /**
    * Retourne les valeurs par défaut pour une vue ressource
    * @param {string} viewName Le nom de la vue (donc du fichier dust)
-   * @returns {{$views: string, $metas: {css: string[], js: string[]}, $layout: string, contentBloc: {}}}
+   * @returns {{$views: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
    */
   $views.getDefaultData = function (viewName) {
     if (!viewName) viewName = 'error'
@@ -520,7 +520,6 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
         css: ['/styles/ressources.css'],
         js : ['/vendors/requirejs/require.2.1.18.min.js']
       },
-      $layout: '../../static/views/layout-page',
       contentBloc : {$view:viewName}
     }
     if (viewName === 'form') data.$metas.js.push('/formRessource.js')
@@ -564,7 +563,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
         }
       }
       // et le menu si on en a besoin
-      if (data.$layout.indexOf('layout-page') > -1) addMenu(context, data, ressource)
+      if (context.layout === 'page') addMenu(context, data, ressource)
       // le titre s'il n'est pas fourni en options
       if (!options || !options.$metas || !options.$metas.title) {
         if (ressource) {
@@ -609,7 +608,6 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     var data = $views.getDefaultData()
     addMenu(context, data, ressource)
     data.$views = __dirname + '/../static/views'
-    if (context.noMenu) data.$layout = '../../static/views/layout-iframe'
     data.error = (typeof error === 'string') ? error : error.toString()
     context.status = status || 200
     context.html(data)

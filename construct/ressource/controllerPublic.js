@@ -75,9 +75,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // describe
   controller.get($routes.get('describe', ':oid'), function (context) {
+    context.layout = 'page'
     affiche(context, 'describe')
   })
   controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
+    context.layout = 'page'
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -87,22 +89,24 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   // display : Voir la ressource pleine page (pour iframe)
   controller.get($routes.get('display', ':oid'), function (context) {
-    context.noMenu = true
-    affiche(context, 'display', {$layout:'../../static/views/layout-iframe'})
+    context.layout = 'iframe'
+    affiche(context, 'display')
   })
   controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
+    context.layout = 'iframe'
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
-    context.noMenu = true
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      checkAndAffiche(context, error, ressource, 'display', {$layout:'../../static/views/layout-iframe'})
+      checkAndAffiche(context, error, ressource, 'display')
     })
   })
   // preview : Voir la ressource avec header et menu
   controller.get($routes.get('preview', ':oid'), function (context) {
+    context.layout = 'page'
     affiche(context, 'display')
   })
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
+    context.layout = 'page'
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -115,6 +119,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * La recherche (form et résultats)
    */
   function search(context) {
+    context.layout = 'page'
     if (_.isEmpty(context.get)) {
       // form de recherche
       $views.printSearchForm(context)

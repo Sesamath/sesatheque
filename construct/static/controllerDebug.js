@@ -39,7 +39,6 @@ module.exports = function (controller) {
   function getDefaultData() {
     return {
       $views : __dirname + '/views',
-      $layout: 'layout-page',
       contentBloc : {
         $view : 'debug'
       }
@@ -50,6 +49,7 @@ module.exports = function (controller) {
    * Une route pour afficher des objets en dev (debug)
    */
   controller.get('session', function(context) {
+    context.layout = 'page'
     log('ctrl session ')
     // on ajoute un compteur pour vérifier que ça s'incrémente de 1 à chaque affichage
     if (context.session.compteur) context.session.compteur++
@@ -61,12 +61,14 @@ module.exports = function (controller) {
   })
 
   controller.get('request', function (context) {
+    context.layout = 'page'
     var data = getDefaultData()
     data.contentBloc.debug = tools.stringify(context.request)
     context.html(data)
   })
 
   controller.get('response', function (context) {
+    context.layout = 'page'
     var data = getDefaultData()
     data.contentBloc.debug = tools.stringify(context.response)
     context.html(data)
@@ -74,6 +76,7 @@ module.exports = function (controller) {
 
   // un controleur tout prêt pour tout et n'importe quoi
   controller.get('test', function (context) {
+    context.layout = 'page'
     var data = getDefaultData()
     data.contentBloc.debug = tools.stringify({foo:'bar'})
     context.html(data)
@@ -95,11 +98,8 @@ module.exports = function (controller) {
   })
 
   // déclenche une erreur 500
-  controller.get('erreur500', function () {
+  controller.get('erreur500', function (context) {
+    context.layout = 'page'
     throw new Error("Une erreur 500 provoquée")
-  })
-
-  controller.get('exit', function () {
-    process.exit(0)
   })
 }

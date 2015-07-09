@@ -46,8 +46,7 @@ module.exports = function (controller) {
 
   var baseData = {
     $metas : {},
-    $views : __dirname +'/views',
-    $layout : 'layout-page'
+    $views : __dirname +'/views'
   }
 
   // nos ressources statiques génériques

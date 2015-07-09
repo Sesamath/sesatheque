@@ -50,9 +50,14 @@ module.exports = function($flashMessage) {
   function beforeTransportListener(context, data) {
     var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
     var isApi = (context.request.originalUrl.substr(0, 5) === '/api/')
-    var isHtml = (context.contentType === 'text/html')
+    var isHtml = !!context.layout
+    // on fixe déjà ça
+    if (isHtml) {
+      if (context.contentType !== 'text/html') context.contentType = 'text/html'
+      data.$layout = 'layout-' +context.layout
+    }
 
-    /**
+                                                       /**
      * Ajoute à data nos params par défaut s'il n'existent pas et met le contentType html
      * @param title Le titre à mettre s'il n'y en avait pas
      * @param errorMsg Le message d'erreur s'il n'y en avait pas
@@ -63,7 +68,6 @@ module.exports = function($flashMessage) {
           title: title
         },
         $views     : __dirname + '/views',
-        $layout    : 'layout-page',
         contentBloc: {
           $view: 'error',
           error: errorMsg
