@@ -462,15 +462,21 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             if (error) data.contentBloc.error = error.toString()
             else {
               if (ressources.length == options.nb) {
+                // il en reste
                 crit.start = options.start + options.nb
                 data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
               }
               if (options.start) {
+                // on démarre pas à 0, donc y'a des précédents
                 crit.start = options.start - options.nb
                 if (crit.start < 0) crit.start = 0
                 data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
               }
-              data.contentBloc.pagination = '(' + (options.start + 1) + ' à ' + (options.start + 1 + options.nb) + ')'
+              if (ressources.length) {
+                data.contentBloc.pagination = '(' + (options.start + 1) + ' à ' + (options.start + 1 + options.nb) + ')'
+              } else {
+                data.contentBloc.pagination = ''
+              }
               // on filtre d'après les droits en lecture
               ressources = $accessControl.getListeLisible(context, ressources)
               // et on ajoute des liens

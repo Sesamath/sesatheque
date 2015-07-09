@@ -97,15 +97,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       // faut donc lister tous nos modules ici...
       var requireConfig = {
         paths: {
-          am       : pluginsBaseUrl + '/am/am',
-          arbre    : pluginsBaseUrl + '/arbre/arbre',
-          calkc    : pluginsBaseUrl + '/calkc/calkc',
-          ec2      : pluginsBaseUrl + '/ec2/ec2',
-          em       : pluginsBaseUrl + '/em/em',
-          j3p      : pluginsBaseUrl + '/j3p/j3p',
-          mental   : pluginsBaseUrl + '/mental/mental',
-          url      : pluginsBaseUrl + '/url/url',
-          // et les modules de vendors
+          // les modules de vendors
           head     : vendorsBaseUrl + '/headjs/head.1.0',
           head_load: vendorsBaseUrl + '/headjs/head.load.1.0',
           jquery   : vendorsBaseUrl + '/jquery/dist/jquery.min',
@@ -117,10 +109,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           swfobject: vendorsBaseUrl + '/swfobject/swfobject.2.2',
           // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
           sesaswf  : vendorsBaseUrl + '/sesamath/swf',
+          // autres modules génériques sesamath
           sesalog  : vendorsBaseUrl + '/sesamath/log',
           Resultat : vendorsBaseUrl + '/sesamath/Resultat',
           Arbre    : vendorsBaseUrl + '/sesamath/Arbre',
-          // d'autres trucs à nous
           jstreeConverter : vendorsBaseUrl + '/sesamath/tools/jstreeConverter'
         }
         // pour jQueryUi faut charger les css, on pourrait créer un miniModule qui s'en charge pour chaque version
@@ -132,6 +124,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
          }
          } /* */
       };
+      // on ajoute nos plugins
+      ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "em", "j3p", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
+        requireConfig.paths[plugin] = pluginsBaseUrl +'/' +plugin +'/' +plugin;
+      });
       w.log('la conf passée à require', requireConfig);
       require.config(requireConfig);
     }
@@ -195,8 +191,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       var attr;
       if (attrs) for (attr in attrs) {
         if (attrs.hasOwnProperty(attr)) {
-          if (attr === 'class') elt.className = attrs[attr];
-          else if (attr === 'style') w.setStyles(elt, attrs[attr]);
+          if (attr === 'class') elt.className = attrs.class;
+          else if (attr === 'style') w.setStyles(elt, attrs.style);
           else elt[attr] = attrs[attr];
         }
 
@@ -243,11 +239,12 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     window.log = function () {};
 
     /**
-     * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent)
+     * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent) ET dans log.error
      * @param {string|Error} error Le message à afficher
      * @param {number} [delay] Un éventuel délai d'affichage en secondes
      */
     window.setError = function (error, delay) {
+      log.error(error);
       var errorMsg = (error instanceof Error) ? error.toString() : error;
       if (/^TypeError:/.test(errorMsg)) {
         // on envoie qqchose de plus compréhensible
@@ -268,7 +265,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         } else {
           errorsContainer.textContent = errorMsg;
         }
-        log.error(error);
       } else {
         log.error(new Error("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg));
       }
@@ -289,8 +285,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             styles.forEach(function (paire) {
               paire = /([\w]+):(.+)/.exec(paire);
               if (paire && paire.length === 3) {
-                var key = paire[0];
-                elt.style[key] = paire[1];
+                var key = paire[1];
+                elt.style[key] = paire[2];
               }
             });
           } else if (typeof styles === 'object') {

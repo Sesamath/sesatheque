@@ -105,7 +105,10 @@ define(function () {
     window.empty(container);
 
     var url = "http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=" +ressource.idOrigine;
-    window.addElement(container, 'iframe', {src:url, style:"width:100%;height:100%", onload:next});
+    var iframe = window.addElement(container, 'iframe', {src:url, style:"width:100%;height:100%"});
+    iframe.addEventListener("load", function () {
+      next();
+    });
   };
   
   return ato;
