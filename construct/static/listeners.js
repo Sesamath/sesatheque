@@ -54,7 +54,7 @@ module.exports = function($flashMessage) {
     // on fixe déjà ça
     if (isHtml) {
       if (context.contentType !== 'text/html') context.contentType = 'text/html'
-      data.$layout = 'layout-' +context.layout
+      data.$layout = __dirname +'/views/layout-' +context.layout
     }
 
                                                        /**
@@ -147,12 +147,13 @@ module.exports = function($flashMessage) {
     // fin du traitement des erreurs
 
     // on ajoute d'éventuels messages flash si on est en html (erreur ou pas)
-    if (context.contentType === 'text/html') {
+    if (isHtml) {
       var flashData = $flashMessage.getAndPurge(context)
       if (flashData) _.merge(data, flashData)
     }
 
     log('fin de beforeTransport avec les data', data, 'beforeTransport', {trim:5000})
+    log('fin de beforeTransport avec le layout' + data.$layout, 'beforeTransport')
   }
 
   lassi.on('beforeTransport', beforeTransportListener)
