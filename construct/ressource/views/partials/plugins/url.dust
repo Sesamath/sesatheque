@@ -1,4 +1,4 @@
 <div class="form-group" id="parametres">
-  {adresse.name adresse.value=parametres.adresse}
+  {adresse.id="adresse" adresse.value=parametres.adresse}
   {>wrapper widget="text" o=adresse size=80 /}
 </div>
