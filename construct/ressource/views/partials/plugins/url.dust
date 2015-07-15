@@ -1,4 +1,3 @@
 <div class="form-group" id="parametres">
-  {adresse.id="adresse" adresse.value=parametres.adresse}
-  {>wrapper widget="text" o=adresse size=80 /}
+  {>edit /}
 </div>

@@ -222,8 +222,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       var wd = window.document;
       /** Le chemin racine de la sésathèque, avec slash de fin */
       var rootPath = '/';
-      /** Le préfixe à utiliser pour charger des éléments dans le dossier du plugin (sans slash final) */
-      var pluginsBaseUrl;
       /** Un flag pour savoir si l'init a déjà été fait */
       var isInitDone = false;
       /**
@@ -285,8 +283,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             if (options.hasOwnProperty('showTitle') && !options.showTitle || /\?.*showTitle=0/.test(wd.URL)) {
               w.hideTitle();
             }
-            // on file au plugin une référence vers sa base
-            options.baseUrl = pluginsBaseUrl + '/' + name + '/';
             // on regarde s'il faut ajouter une fct de sauvegarde des résultats
             if (Resultat) addSaveResultat(options, traiteResultat, Resultat);
             // on peut afficher

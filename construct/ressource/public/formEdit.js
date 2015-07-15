@@ -83,7 +83,7 @@
             next();
           });
         };
-        // on regarde si init avait été appelé avant qu'on l'affecte et le lance au besoin
+        // on regarde si init avait été appelé avant qu'on l'affecte et le lance si c'est le cas
         if (delayedOptions) window.sesatheque.init(delayedOptions, afterInit);
       });
     } catch (error) {

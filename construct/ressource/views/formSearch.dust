@@ -16,7 +16,7 @@
             {>wrapper widget="text" o=idOrigine /}
             {>wrapper widget="text" o=titre /}
             {>wrapper widget="select" o=typeTechnique size=2 /}
-            {>wrapper widget="checkboxes" o=publie /}
+            {>wrapper widget="select" o=publie /}
             {>wrapper widget="select" o=langue /}
         </div>
 

@@ -289,7 +289,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             if (errorMsg) {
               denied(context, errorMsg)
             } else {
-              var options = {$metas: {title: 'Modifier la ressource : ' + ressource.titre}}
+              var options = {
+                $metas: {title: 'Modifier la ressource : ' + ressource.titre},
+                js : ['']
+              }
               addToken(context, ressource)
               $views.printForm(context, error, ressource, options)
             }

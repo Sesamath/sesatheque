@@ -48,16 +48,7 @@ module.exports = function($flashMessage) {
    * @param data
    */
   function beforeTransportListener(context, data) {
-    var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-    var isApi = (context.request.originalUrl.substr(0, 5) === '/api/')
-    var isHtml = !!context.layout
-    // on fixe déjà ça
-    if (isHtml) {
-      if (context.contentType !== 'text/html') context.contentType = 'text/html'
-      data.$layout = __dirname +'/views/layout-' +context.layout
-    }
-
-                                                       /**
+    /**
      * Ajoute à data nos params par défaut s'il n'existent pas et met le contentType html
      * @param title Le titre à mettre s'il n'y en avait pas
      * @param errorMsg Le message d'erreur s'il n'y en avait pas
@@ -82,6 +73,15 @@ module.exports = function($flashMessage) {
         delete data.error
       }
     } // prepareErrorHtmlData
+
+    var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+    var isApi = (context.request.originalUrl.substr(0, 5) === '/api/')
+    var isHtml = !!context.layout
+    // on fixe déjà ça
+    if (isHtml) {
+      if (context.contentType !== 'text/html') context.contentType = 'text/html'
+      data.$layout = __dirname +'/views/layout-' +context.layout
+    }
 
     /* on envoie toutes les réponses dans le log de debug */
     if (!isProd) log.debug(
@@ -152,8 +152,9 @@ module.exports = function($flashMessage) {
       if (flashData) _.merge(data, flashData)
     }
 
-    log('fin de beforeTransport avec les data', data, 'beforeTransport', {trim:5000})
-    log('fin de beforeTransport avec le layout' + data.$layout, 'beforeTransport')
+    log('fin de beforeTransport avec les data', data, {trim:5000})
+    //log('fin de beforeTransport avec le layout' + data.$layout)
+    //log('fin de beforeTransport avec la session', context.session, {trim:5000})
   }
 
   lassi.on('beforeTransport', beforeTransportListener)

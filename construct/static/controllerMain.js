@@ -34,12 +34,14 @@ module.exports = function (controller) {
   /**
    * Ajoute un menu minimal
    * @param data
+   * @param context
    */
-  function addMenu (data) {
+  function addMenu (data, context) {
     data.menuBloc = {
-      $view : 'menu',
-      links : [tools.link('/public/recherche', 'Recherche')]
+      $view : 'menu'
     }
+    var prefix = (context && context.user && context.user.oid) ? '/ressource/' : '/public/'
+    data.menuBloc.links = [tools.link(prefix +'recherche', 'Recherche')]
   }
 
   var tools = require('../tools')
@@ -54,6 +56,7 @@ module.exports = function (controller) {
 
   // home
   controller.get('/', function (context) {
+    context.layout = 'page';
     var data = baseData
     // log('le contexte dans le controleur de static, action /',context)
     data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
@@ -63,7 +66,7 @@ module.exports = function (controller) {
       // ce content est la variable passée au template dust
       content : "Ce site est encore un prototype expérimental."
     }
-    addMenu(data)
+    addMenu(data, context)
     context.html(data)
   })
 }

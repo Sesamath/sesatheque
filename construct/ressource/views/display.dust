@@ -25,6 +25,7 @@ Chargement en cours</div>
             display.load(
                 {ressource|s},
                 {
+                    saveResult : function (resultat, next) {log('saveResult', resultat); next();}, // DEBUG
                     pluginBaseUrl : '{pluginBaseUrl}',
                     vendorsBaseUrl: '{vendorsBaseUrl}',
                     pluginName: '{pluginName}',

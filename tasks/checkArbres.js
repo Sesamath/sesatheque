@@ -12,17 +12,30 @@ var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 var logfile = './logs/checkArbres.log'
 
+/**
+ * Log une erreur
+ * @param msg
+ */
 function logError(msg) {
   msg = '[' +moment().format('YYYY-MM-DD HH:mm:ss') +'] ' +msg +"\n"
   writeStream.write(msg)
   log(msg)
 }
 
+/**
+ * Retourne une chaine qui résume l'arbre (oid, origine/idOrigine titre)
+ * @param arbre
+ * @return {string}
+ */
 function getResume(arbre) {
   return arbre.oid +' ' +arbre.origine +'/' +arbre.idOrigine +' ' +arbre.titre
 }
 
-
+/**
+ * Vérifie que toutes les ref des enfants existent
+ * @param arbre
+ * @param next
+ */
 function checkArbre(arbre, next) {
   var idArbre = arbre.oid ? getResume(arbre) : lastArbre +' > ' +arbre.titre
   if (arbre.enfants && arbre.enfants instanceof Array) {
@@ -56,6 +69,11 @@ function checkArbre(arbre, next) {
   }
 }
 
+/**
+ * Récupère nb arbres et appelle checkArbre sur chacun
+ * @param start
+ * @param next
+ */
 function getPaquet(start, next) {
   var qsOptions = {
     filters: [

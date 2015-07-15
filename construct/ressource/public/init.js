@@ -77,20 +77,18 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser log pour le dev seulement)
      * @param … autant qu'on veut (console.error appelée une fois par argument)
      */
-    log.error = function () {
+    function logError() {
       if (console && console.error) {
         for (var i = 0; i < arguments.length; i++) {
           console.error(arguments[i]);
         }
       }
-    };
+    }
 
     /**
      * Helper de init pour initialise les chemins de require
-     * @param pluginsBaseUrl
-     * @param vendorsBaseUrl
      */
-    function initRequire(pluginsBaseUrl, vendorsBaseUrl) {
+    function initRequire() {
       // et on configure requireJs avec une liste de librairies que l'on met à dispo des plugins
       // et les plugins eux-même, mais sans affecter baseUrl pour pas perturber un appelant qui
       // aurait déjà require avec son baseUrl
@@ -98,35 +96,47 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       var requireConfig = {
         paths: {
           // les modules de vendors
-          head     : vendorsBaseUrl + '/headjs/head.1.0',
-          head_load: vendorsBaseUrl + '/headjs/head.load.1.0',
-          jquery   : vendorsBaseUrl + '/jquery/dist/jquery.min',
-          jquery1  : vendorsBaseUrl + '/jquery/jquery-1.11.3.min',
-          jqueryUi : vendorsBaseUrl + '/jqueryUi/jquery-ui-1.11.1/jquery-ui.min',
-          jqueryUiRedmond : vendorsBaseUrl + '/jqueryUi/jquery-ui-1.11.1.dialogRedmond/jquery-ui.min',
-          jstree   : vendorsBaseUrl + '/jstree/dist/jstree.min',
-          lodash   : vendorsBaseUrl + '/lodash/lodash.min',
-          swfobject: vendorsBaseUrl + '/swfobject/swfobject.2.2',
+          ckeditor : vendorsDir + '/ckeditor/ckeditor',
+          head     : vendorsDir + '/headjs/head.1.0',
+          head_load: vendorsDir + '/headjs/head.load.1.0',
+          jquery   : vendorsDir + '/jquery/dist/jquery.min',
+          jquery1  : vendorsDir + '/jquery/jquery-1.11.3.min',
+          jqueryUi : vendorsDir + '/jqueryUi/1.11.1/jquery-ui.min',
+          jqueryUiDialog : vendorsDir + '/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
+          jstree   : vendorsDir + '/jstree/dist/jstree.min',
+          lodash   : vendorsDir + '/lodash/lodash.min',
+          mathjax  : vendorsDir + '/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
+          mathquill: vendorsDir + '/mathquill-0.9.4/mathquill.min',
+          swfobject: vendorsDir + '/swfobject/swfobject.2.2',
           // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
-          sesaswf  : vendorsBaseUrl + '/sesamath/swf',
+          sesaswf  : vendorsDir + '/sesamath/swf',
           // autres modules génériques sesamath
-          sesalog  : vendorsBaseUrl + '/sesamath/log',
-          Resultat : vendorsBaseUrl + '/sesamath/Resultat',
-          Arbre    : vendorsBaseUrl + '/sesamath/Arbre',
-          jstreeConverter : vendorsBaseUrl + '/sesamath/tools/jstreeConverter'
+          sesalog  : vendorsDir + '/sesamath/log',
+          Resultat : vendorsDir + '/sesamath/Resultat',
+          Arbre    : vendorsDir + '/sesamath/Arbre',
+          jstreeConverter : vendorsDir + '/sesamath/tools/jstreeConverter'
+        },
+        shim :{
+          // pour jQueryUi faut charger les css, on pourrait créer un miniModule qui s'en charge pour chaque version
+          // mais c'est assez lourd, faut lui passer le chemin toussa, on laisse celui qui nous charge s'en occuper
+          jqueryUi    : {
+            init : function () {
+              w.addCss(vendorsDir +'/jqueryUi/1.11.1/jquery-ui.min.css');
+            }
+          },
+          mathjax : {
+            exports: "MathJax",
+            init: function () {
+              //MathJax.Hub.Config({ /* Your configuration here */ });
+              //MathJax.Hub.Startup.onload();
+              return MathJax;
+            }
+          }
         }
-        // pour jQueryUi faut charger les css, on pourrait créer un miniModule qui s'en charge pour chaque version
-        // mais c'est assez lourd, faut lui passer le chemin toussa, on laisse celui qui nous charge s'en occuper
-        /*
-         , shim :{
-         jqueryUi    : {
-         deps : [vbu +'/jqueryUi/jquery-ui-1.11.1/loadCss']
-         }
-         } /* */
       };
       // on ajoute nos plugins
       ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "em", "j3p", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
-        requireConfig.paths[plugin] = pluginsBaseUrl +'/' +plugin +'/' +plugin;
+        requireConfig.paths[plugin] = pluginsDir +'/' +plugin +'/' +plugin;
       });
       w.log('la conf passée à require', requireConfig);
       require.config(requireConfig);
@@ -148,7 +158,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       var elt = window.document.createElement("link");
       elt.rel = "stylesheet";
       elt.type = "text/css";
-      elt.href = (isPluginDirRelative ? pluginsBaseUrl + '/' : '') + file;
+      elt.href = (isPluginDirRelative ? pluginBaseUrl + '/' : '') + file;
       wd.getElementsByTagName("head")[0].appendChild(elt);
     };
 
@@ -167,6 +177,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       parent.appendChild(elt);
 
       return elt;
+    };
+
+    window.addText = function (elt, text) {
+      elt.appendChild(wd.createTextNode(text));
     };
 
     /**
@@ -197,7 +211,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         }
 
       }
-      if (txtContent) elt.appendChild(wd.createTextNode(txtContent));
+      if (txtContent) window.addText(elt, txtContent);
 
       return elt;
     };
@@ -255,7 +269,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         log("errorContainer n'existait pas, on l'a recherché dans le dom", errorsContainer);
       }
       if (errorsContainer) {
-        // on ajoute un peu de margin à ce div qui n'en avait pas
+        // on ajoute un peu de margin à ce div s'il n'en a pas
         if (!errorsContainer.style) errorsContainer.style = {margin : "0.2em"};
         if (delay) {
           var tmpSpan = w.addElement(errorsContainer, 'span', null, errorMsg);
@@ -318,8 +332,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       var wd = window.document;
       /** Le chemin racine de la sésathèque, avec slash de fin */
       var rootPath = '/';
-      /** Le préfixe à utiliser pour charger des éléments dans le dossier du plugin (sans slash final) */
-      var pluginsBaseUrl;
+      var pluginsDir = rootPath +'plugins';
+      var vendorsDir = rootPath +'vendors';
+      var pluginBaseUrl;
       /** Le conteneur html pour afficher la ressource */
       var container = window.document.getElementById('display');
       /** Le conteneur html pour afficher d'éventuelles erreurs */
@@ -334,25 +349,27 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
        */
       var init = function (options) {
         log('init avec les options', options);
-        rootPath = options.sesathequeBase || '/';
-        // on ajoute le slash de fin s'il manque
-        if (rootPath.substr(-1) !== '/') rootPath += '/';
-        pluginsBaseUrl = options.baseUrl || options.pluginsBaseUrl || (rootPath + 'plugins');
-        // on vire l'éventuel slash de fin
-        if (pluginsBaseUrl.substr(-1) === '/') pluginsBaseUrl = pluginsBaseUrl.substr(0, pluginsBaseUrl.length - 1);
-
-        options.pluginsBaseUrl = pluginsBaseUrl;
-        options.vendorsBaseUrl = options.vendorsBaseUrl || (rootPath + 'vendors');
-        options.sesathequeBase = rootPath;
+        if (options.sesathequeBase) {
+          rootPath = options.sesathequeBase;
+          if (rootPath.substr(-1) !== '/') rootPath += '/';
+          pluginsDir = rootPath +'plugins';
+          vendorsDir = rootPath +'vendors';
+        } else {
+          options.sesathequeBase = rootPath;
+        }
+        if (!options.pluginBaseUrl) options.pluginBaseUrl = pluginsDir +'/' +options.pluginName;
+        if (!options.vendorsBaseUrl) options.vendorsBaseUrl = vendorsDir;
+        pluginBaseUrl = options.pluginBaseUrl; // pour addCss
 
         // en dev on active la fct de log
         if (options.isDev) {
           w.log = log;
+          w.log.error = logError;
         } else {
           // en prod elle fait rien
           w.log = function () {};
-          // mais log.error garde son comportement normal
-          w.log.error = log.error;
+          // mais log.error garde son comportement
+          w.log.error = logError;
         }
         // on vérifie que l'on a nos containers et on les créé sinon
         if (!errorsContainer) errorsContainer = w.addElement(wd.getElementsByTagName('body')[0], 'div',
@@ -362,7 +379,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         options.container = container;
         options.errorsContainer = errorsContainer;
         // reste la conf de require
-        initRequire(pluginsBaseUrl, options.vendorsBaseUrl);
+        initRequire();
       };
 
       return init;

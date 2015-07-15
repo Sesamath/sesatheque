@@ -81,7 +81,6 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     // les liens du menu
     var links = []
     // lien ajout
-    log($routes.getAbs('add') +' ' +$routes.get('add'))
     if ($accessControl.hasPermission('create', context)) {
       links.push(tools.link(ressourcePath +$routes.get('add'), 'Ajouter une ressource'))
       if (oid && $accessControl.hasPermission('read', context, oid))
@@ -100,7 +99,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       }
     }
     // un lien vers la recherche
-    links.push(tools.link($routes.get('search'), 'Recherche'))
+    links.push(tools.link($routes.getAbs('search', null, context), 'Recherche'))
 
     data.menuBloc = {
       $view : 'menu',
@@ -352,7 +351,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
 
       } else if (config.typesVar[key] === 'Boolean') {
         // checkbox tout seul (pas de label dans les choices, c'est le parent qui le porte)
-        formData[key].choices = [{name : key, value: [value]}]
+        formData[key].choices = [{name : key, value: [true]}]
         if (value) formData[key].choices[0].selected = true
 
       } else {
@@ -396,7 +395,8 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       // origine & idOrigine en lecture seule pour modif mais pas création
       formData.origine.readonly = true;
       formData.idOrigine.readonly = true;
-      formData.$view = 'form'
+      // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
+      formData.$view = 'formEdit'
     } else {
       formData.$view = 'formCreate'
     }
@@ -423,7 +423,6 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       }
       //if (ressource.force) formData.force.choices[0].selected = true
     }
-
     // on vire le champ si y'a pas d'erreurs
     if (!formData.errors.length) delete formData.errors
     //log.debug('formData pour le form', formData.warnings, 'htmlform', {max:50000, indent:2})
@@ -522,7 +521,8 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       },
       contentBloc : {$view:viewName}
     }
-    if (viewName === 'form') data.$metas.js.push('/formRessource.js')
+    // charge init et crée sesatheque.init en global
+    if (viewName === 'formEdit') data.$metas.js.push('/formEdit.js')
 
     return data
   }
@@ -621,7 +621,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @param options
    */
   $views.printForm = function (context, error, ressource, options) {
-    var data = $views.getDefaultData('form')
+    var data = $views.getDefaultData('formEdit')
     // on ajoute le menu
     addMenu(context, data, ressource)
     // les datas pour le form
@@ -643,7 +643,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @param context
    */
   $views.printSearchForm = function (context) {
-    var data = $views.getDefaultData('search')
+    var data = $views.getDefaultData('formSearch')
     // on ajoute le menu
     addMenu(context, data, null)
     // les datas pour le form
@@ -670,6 +670,17 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       if (choice.selected) choice.selected = false
     })
     fd.langue.choices.unshift({label:'peu importe', value:''})
+    // pour le booléen publié, on transforme en select
+    fd.publie = {
+      id:"publie",
+      label:"Publié",
+      name : "publie",
+      choices : [
+        {label:'peu importe', value:''},
+        {label:'oui', value:'true'},
+        {label:'non', value:'false'},
+      ]
+    }
     // titre de la page
     data.$metas.title = 'Recherche de ressources'
     if (context.error) {

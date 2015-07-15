@@ -69,22 +69,28 @@ module.exports = function ($settings) {
    * @param {Ressource|number} ressource ou oid de ressource
    * @returns {string}
    */
-  $routes.getAbs = function(action, ressource) {
-    var route
-    var oid
-    if (ressource) oid = ressource.oid || parseInt(ressource, 10)
+  $routes.getAbs = function(action, ressource, context) {
+    var route, oid, isPublic = true
+    if (ressource) {
+      oid = ressource.oid || parseInt(ressource, 10)
+      if (ressource.restriction !== restriction.aucune) isPublic = false
+      if (action === 'search' && context && context.session && context.session.user && context.session.user.id) isPublic = false
+    } else if (context && context.session && context.session.user && context.session.user.id) {
+      isPublic = false
+    }
     if (routes.hasOwnProperty(action)) {
       route = '/'
       if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
       // ce qui concerne l'édition est toujours sur /ressource
       if (['add', 'delete', 'edit'].indexOf(action) > -1) route += 'ressource/'
-      else route += (ressource && ressource.restriction === restriction.aucune) ? 'public/' : 'ressource/'
+      else route += isPublic ? 'public/' : 'ressource/'
       // et on ajoute l'oid éventuel
       if (oid) route += $routes.get(action, oid)
       else route += $routes.get(action)
     } else {
       log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
     }
+    //log("getAbs " +action +" va retourner " +route)
 
     return route
   }

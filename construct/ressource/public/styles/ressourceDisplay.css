@@ -1,5 +1,5 @@
 html, body {padding: 0; margin: 0;height: 100%;}
-#errors  {margin: 0; padding: 0;color: #c82829; background-color: #fff; text-align: center; font-size: 1.2em; font-family: Verdana, sans-serif;}
+#errors, .error  {margin: 0; padding: 0;color: #c82829; background-color: #fff; text-align: center; font-size: 1.2em; font-family: Verdana, sans-serif;}
 /*faut du 100% de haut sur chaque parent de display*/
 #body, #body .row, #content, #display {height: 100%;}
 #display {margin: 0 auto; padding: 0;}

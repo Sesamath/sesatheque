@@ -5,7 +5,7 @@
     </div>
     {/errors}
 
-    <form method="post" id="formRessource">
+    <form name="editRessource" method="post" id="formRessource">
 
         {?warnings}
         <div class="control-group has-error">
@@ -52,7 +52,7 @@
 
         {! todo widget relations !}
 
-      {>"plugins/{typeTechnique.value}" /}
+        {>"plugins/{typeTechnique.value}" /}
 
         {! todo widget auteurs et contributeurs !}
 
