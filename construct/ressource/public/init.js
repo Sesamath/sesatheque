@@ -107,6 +107,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           lodash   : vendorsDir + '/lodash/lodash.min',
           mathjax  : vendorsDir + '/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
           mathquill: vendorsDir + '/mathquill-0.9.4/mathquill.min',
+          mqEditor : vendorsDir + '/sesamath/mqEditor/mqEditor',
           swfobject: vendorsDir + '/swfobject/swfobject.2.2',
           // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
           sesaswf  : vendorsDir + '/sesamath/swf',

@@ -187,8 +187,10 @@ define(["jquery1"], function () {
        */
       var dependances = [options.pluginBaseUrl +'/urlUi.js', "jqueryUiDialog"];
       var hasCkeditor = (params.answer_editor && params.answer_editor.indexOf('ckeditor') === 0);
+      var hasMqEditor = (params.answer_editor === 'mqEditor');
       if (hasCkeditor) dependances.push('ckeditor');
-      require(dependances, function (urlUi) {
+      else if (hasMqEditor) dependances.push("mqEditor");
+      require(dependances, function (urlUi, jqUi, editor) {
         function sendReponse() {
           if (!isResultatSent) {
             var reponse = $(textarea).val();
@@ -244,6 +246,8 @@ define(["jquery1"], function () {
               removeButtons : 'Styles,Source',
               customConfig : '' // on veut pas charger le config.js
             });
+          } else if (hasMqEditor) {
+            editor(form, params.mqEditorConfig, options);
           }
           if (resultCallback) {
             var isResultatSent = false;

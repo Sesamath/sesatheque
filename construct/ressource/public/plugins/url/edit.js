@@ -39,7 +39,7 @@
  * answer_editor   Quel type d'éditeur pour la réponse (textarea, ckeditor, ckeditorTex), cette propriété n'existait pas dans labomep1
  */
 try {
-  define(['jquery1', 'ckeditor', 'mathquill'], function () {
+  define(['jquery1', 'mqEditor'], function (none, mqEditor) {
     /* jshint jquery:true */
     /* global alert,CKEDITOR */
     //"use strict";
@@ -67,7 +67,7 @@ try {
       if (url) iframeApercu.href = url;
     }
 
-    function addOptions(blocParam, parametres) {
+    function addOptions(blocParam, parametres, options) {
       function addLabel(id, label) {
         w.addElement(blocParam, 'label', {for:id}, label);
       }
@@ -80,17 +80,49 @@ try {
         addLabel(id, txt);
       }
       w.addText(blocParam, "Consigne : ");
+      var editorToggleButton = w.addElement(blocParam, 'button', null, "Éditeur de texte enrichi");
       var consigne = parametres.consigne || '';
-      var divEditor = w.addElement(blocParam, 'div');
-      var $editor = $(divEditor);
-      editor = w.addElement(divEditor, 'textarea', {name:"parametres[consigne]", id:"ckeditor"}, consigne);
-      addOption("question_option", "aucune", "off", $editor.hide);
-      addOption("question_option", "avant", "before", $editor.show);
-      addOption("question_option", "pendant", "while", $editor.show);
-      addOption("question_option", "après", "after", $editor.show);
+      var divConsigne = w.addElement(blocParam, 'div');
+      var $divConsigne = $(divConsigne);
+      var editor = w.addElement(divConsigne, 'textarea', {name:"parametres[consigne]", id:"editor"}, consigne);
+      var $editor = $(editor);
+      $editorToggleButton = $(editorToggleButton);
+      $editorToggleButton.click(function () {
+        function toCk() {
+          $divConsigne.hide();
+          $editorToggleButton.text("Éditeur d'équation simplifié");
+          CKEDITOR.replace('editor', {
+            customConfig : '' // on veut pas charger le config.js
+          });
+          $divConsigne.show();
+        }
+        if (isMqEditor) {
+          if (typeof CKEDITOR === "undefined") {
+            require(["ckeditor"], function () {
+              if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor');
+              initCKEditor();
+              toCk();
+            })
+          } else {
+            toCk();
+          }
+        } else {
+          $divConsigne.hide();
+          // on vire le html
+          var contenu = $editor.text()
+          $editor.text(contenu);
+          mqEditor.init(divConsigne, parametres.mqEditorConfig, options);
+          $divConsigne.show();
+        }
+      });
+      addOption("question_option", "aucune", "off", $divConsigne.hide);
+      addOption("question_option", "avant", "before", $divConsigne.show);
+      addOption("question_option", "pendant", "while", $divConsigne.show);
+      addOption("question_option", "après", "after", $divConsigne.show);
       w.addText(blocParam, " (l'affichage de la page)");
       w.addElement(blocParam, 'br');
-      initCKEditor();
+      //initCKEditor();
+      mqEditor.init(divConsigne, parametres.mqEditorConfig, options);
       w.addElement(blocParam, 'br');
       w.addText(blocParam, "Réponse :");
       addOption("answer_option", "aucune", "off");
@@ -102,10 +134,15 @@ try {
       w.addText(blocParam, " Type d'éditeur pour la réponse : ");
       addOption("answer_editor", "zone de texte", "textarea");
       addOption("answer_editor", "texte enrichi", "ckeditor");
+      addOption("answer_editor", "texte avec éditeur d'équation simplifié", "mqEditor");
       addOption("answer_editor", "texte enrichi avec LaTeX possible", "ckeditorTex");
     }
 
+    /**
+     * Initialise la conf de ckeditor (mais il faudra appeler CKEDITOR.replace ensuite)
+     */
     function initCKEditor() {
+      if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/ckeditor/contents.css');
       if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) CKEDITOR.tools.enableHtml5Elements( document );
       // The trick to keep the editor in the sample quite small unless user specified own height.
       CKEDITOR.config.height = 150;
@@ -133,19 +170,11 @@ try {
       // mathedit et eqneditor utilisent des appels à CodeCogs pour faire des images, on laisse tomber
       // @todo s'inspirer de mathedit pour faire un plugin mathquill only
       CKEDITOR.config.extraPlugins = 'mathjax';
-      // @see http://ckeditor.com/comment/123266#comment-123266
-      /* sauf que ça marche pas, faut aller modifier config.js
-      if (CKEDITOR.config.removeButtons) CKEDITOR.config.removeButtons += ',';
-      else CKEDITOR.config.removeButtons = '';
-      CKEDITOR.config.removeButtons += 'Styles,Bold'; */
+      // @see http://ckeditor.com/comment/123266#comment-123266, sauf que ça marche pas, faut aller modifier config.js
       // ou TeX-AMS_HTML ou TeX-AMS-MML_SVG, cf http://docs.mathjax.org/en/latest/configuration.html#loading
       CKEDITOR.config.mathJaxLib = "/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-      CKEDITOR.replace('ckeditor', {
-        customConfig : '' // on veut pas charger le config.js
-      });
       //w.log('ckeditor', CKEDITOR);
     }
-
 
     /**
      * Charge l'arbre source, initialise le dom et les comportements 
@@ -154,7 +183,6 @@ try {
     function initDom(parametres, options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
       //if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/editUrl.css');
-      if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/ckeditor/contents.css');
       // nos éléments html
       var blocParam = window.document.getElementById('parametres');
       if (!blocParam) throw new Error("Élément #parametres manquant");
@@ -173,7 +201,7 @@ try {
       //w.addText(blocParam, "Le symbole ");
       //w.addElement(blocParam, 'img', {src: options.pluginBaseUrl +"/images/forward.png"});
       //w.addText(blocParam, " indique que les affichages seront proposés successivements et non simultanément.");
-      addOptions(blocParam, parametres);
+      addOptions(blocParam, parametres, options);
       w.addText(blocParam, "Vous pouvez forcer une dimension d'affichage (déconseillé pour une page, mieux vaut laisser vide et laisser le navigateur s'adapter, mais cela peut être utile pour une image).");
       w.addElement(blocParam, 'br');
       w.addElement(blocParam, 'label', {for:"largeur"}, "largeur (en pixels)");
@@ -182,7 +210,7 @@ try {
       w.addElement(blocParam, 'input', {id:"hauteur", name:"parametres[hauteur]",size:4, value:parametres.hauteur});
       w.addElement(blocParam, 'br');
 
-      w.addElement(container, 'button', {onClick:adresseOnChange}, "Prévisualiser la page");
+      w.addElement(blocParam, 'button', {onClick:adresseOnChange}, "Prévisualiser la page");
       iframeApercu = w.addElement(container, 'iframe',{id:"iframeApercu"});
     }
 
@@ -191,14 +219,14 @@ try {
      * MAIN
      */
     if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
-    if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor');
 
     var w = window;
     var exclus = ["euler.ac-versailles.fr"];
     // les containers (variables locales au module), qui seront affectés par initDom()
     var iframeApercu, container, editor;
     // quasi les mêmes jquerifiée
-    var $adresse, $blocParam;
+    var $adresse, $blocParam, $editorToggleButton;
+    var isMqEditor = true;
 
     return {
       init: function (ressource, options) {
