@@ -59,19 +59,11 @@ module.exports = function($flashMessage) {
           title: title
         },
         $views     : __dirname + '/views',
-        contentBloc: {
-          $view: 'error',
-          error: errorMsg
-        }
+        errors: [errorMsg]
       }
       tools.complete(data, defaultData)
       context.contentType = 'text/html'
       log.debug('on a généré des data pour une erreur ' +context.status, data, 'beforeTransport', {max:2000})
-      if (data.error) {
-        // on veut pas que le layout l'affiche aussi
-        log.debug('on a context.error ' +context.error +' et viré data.error ' +data.error)
-        delete data.error
-      }
     } // prepareErrorHtmlData
 
     var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
@@ -131,7 +123,7 @@ module.exports = function($flashMessage) {
             break
           default:
             title = 'erreur ' +context.status
-            msg = data.content || data.error || "Ooops, une erreur " +context.status +' est survenue'
+            msg = data.content || "Ooops, une erreur " +context.status +' est survenue'
         }
         if (!title) title = msg
         // si lassi a mis ça on le vire (on vient de gérer msg)
@@ -146,10 +138,13 @@ module.exports = function($flashMessage) {
     }
     // fin du traitement des erreurs
 
-    // on ajoute d'éventuels messages flash si on est en html (erreur ou pas)
     if (isHtml) {
+      // on ajoute d'éventuels messages flash si on est en html (erreur ou pas)
       var flashData = $flashMessage.getAndPurge(context)
       if (flashData) _.merge(data, flashData)
+      // et vérifie que errors et warnings on une vue en absolu
+      if (data.errors) data.errors.$view = __dirname +'/views/errors'
+      if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
     }
 
     log('fin de beforeTransport avec les data', data, {trim:5000})

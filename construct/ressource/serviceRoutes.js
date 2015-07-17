@@ -65,8 +65,9 @@ module.exports = function ($settings) {
    * Les arguments supplémentaires sont concaténé avec /
    * @memberOf $routes
    *
-   * @param {string} action (display|describe|preview)
-   * @param {Ressource|number} ressource ou oid de ressource
+   * @param {string}           action (display|describe|preview)
+   * @param {Ressource|number} [ressource] ou oid de ressource
+   * @param {Context}          [context]
    * @returns {string}
    */
   $routes.getAbs = function(action, ressource, context) {
@@ -74,7 +75,6 @@ module.exports = function ($settings) {
     if (ressource) {
       oid = ressource.oid || parseInt(ressource, 10)
       if (ressource.restriction !== restriction.aucune) isPublic = false
-      if (action === 'search' && context && context.session && context.session.user && context.session.user.id) isPublic = false
     } else if (context && context.session && context.session.user && context.session.user.id) {
       isPublic = false
     }

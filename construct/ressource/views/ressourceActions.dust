@@ -1,0 +1,11 @@
+<div class="mdl-layout__header-row">
+  <span class="mdl-layout-title">{title}</span>
+  <div class="mdl-layout-spacer"></div>
+  <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+  {#links}
+    <a {?href}href="{href}"{/href} class="mdl-layout__tab{?selected} is-active{/selected}" {attrs}>
+      {?icon}<i class="material-icons">{icon}</i> {/icon}
+      <span class="mdl-layout--large-screen-only">{value}</span>
+    </a>
+  {/links}
+</div>

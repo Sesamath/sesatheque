@@ -140,6 +140,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 // describeByOrigin
   controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
+    context.tab = 'describe'
     redirectOrContinue(context, function () {
       var origine = context.arguments.origine
       var idOrigine = context.arguments.idOrigine
@@ -175,6 +176,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 // preview : Voir la ressource dans le site
   controller.get($routes.get('preview', ':oid'), function (context) {
     context.layout = 'page'
+    context.tab = 'preview'
     redirectOrContinue(context, function () {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
@@ -186,6 +188,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // previewByOrigin
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
+    context.tab = 'preview'
     redirectOrContinue(context, function () {
       var origine = context.arguments.origine
       var idOrigine = context.arguments.idOrigine
@@ -198,6 +201,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Ajouter, affichage du form de saisie
   controller.get($routes.get('add'), function (context) {
     context.layout = 'page'
+    context.tab = 'add'
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       // envoi des valeur au form
       function termine (ressource) {
@@ -231,6 +235,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Ajouter, traitement du post
   controller.post($routes.get('add'), function (context) {
     context.layout = 'page'
+    context.tab = 'add'
     // réaffiche le form en cas d'erreur ou warnings
     function rePrintForm(error, ressource) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
@@ -277,6 +282,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Modifier, affichage du form
   controller.get($routes.get('edit', ':oid'), function (context) {
     context.layout = 'page'
+    context.tab = 'edit'
     // pas la peine de la charger si on est pas authentifié
     if ($accessControl.isAuthenticated(context)) {
       var oid = context.arguments.oid
@@ -309,6 +315,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Modifier, traitement du form
   controller.post($routes.get('edit', ':oid'), function (context) {
     context.layout = 'page'
+    context.tab = 'edit'
     function rePrintForm(error, ressource) {
       if (error) log.error('une erreur au post update', error)
       if (ressource.errors) log.debug('errors au post update', ressource.errors)
@@ -347,6 +354,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Delete, affichage d'une demande de confirmation
   controller.get($routes.get('delete', ':oid'), function (context) {
     context.layout = 'page'
+    context.tab = 'delete'
     if ($accessControl.isAuthenticated(context)) {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
@@ -388,6 +396,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // Delete, traitement du post
   controller.post($routes.get('delete', ':oid'), function (context) {
     context.layout = 'page'
+    context.tab = 'delete'
     if ($accessControl.isAuthenticated(context)) {
       var oid = context.arguments.oid
       var data = {

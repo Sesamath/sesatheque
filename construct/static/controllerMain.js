@@ -36,12 +36,14 @@ module.exports = function (controller) {
    * @param data
    * @param context
    */
-  function addMenu (data, context) {
-    data.menuBloc = {
-      $view : 'menu'
+  function addNavigation (data, context) {
+    var isAuthenticated = (context && context.user && context.user.oid)
+    var prefix = isAuthenticated ? '/ressource/' : '/public/'
+    data.navigation = {
+      links : [{href:prefix +'recherche', value:'Recherche', icon:'search'}]
     }
-    var prefix = (context && context.user && context.user.oid) ? '/ressource/' : '/public/'
-    data.menuBloc.links = [tools.link(prefix +'recherche', 'Recherche')]
+    // @todo créer un service menu avec addBuilder(name, fn), fn(context, data) et build(context, data)
+    if (isAuthenticated) data.navigation.links.push({href:'/ressource/ajouter', value:'Ajouter une ressource', icon:'note_add'})
   }
 
   var tools = require('../tools')
@@ -66,7 +68,7 @@ module.exports = function (controller) {
       // ce content est la variable passée au template dust
       content : "Ce site est encore un prototype expérimental."
     }
-    addMenu(data, context)
+    addNavigation(data, context)
     context.html(data)
   })
 }

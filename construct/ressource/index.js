@@ -109,3 +109,11 @@ if (!isProd) {
     require('./controllerDebug')(this, $ressourceRepository)
   })
 }
+
+// nos listener
+ressourceComponent.config(function($accessControl, $routes) {
+  var listeners = require('./listeners')($accessControl, $routes)
+  for (var eventName in listeners) {
+    lassi.on(eventName, listeners[eventName])
+  }
+})

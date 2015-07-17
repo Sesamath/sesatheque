@@ -12,7 +12,6 @@
             {@eq key=restriction.value value=3} auteur{:else} {restriction.value} inconnue{/eq}
         {/eq}
         {:else}Public{/restriction.value}</span>
-    <h2>{titre.value}</h2>
     <p>
     oid : {oid} ({origine.value}/{idOrigine.value},
     {typeTechnique.title} {typeTechnique.value},{~s}

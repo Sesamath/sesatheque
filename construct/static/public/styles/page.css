@@ -1,0 +1,28 @@
+body {min-width: 500px;}
+
+header a {margin: 0.2rem 1rem;text-decoration: none; }
+a.mdl-button {color: inherit;}
+.mdl-layout__header-row {padding-left: 0; }
+
+#content {
+    padding: 10px; }
+
+.debug {
+    border: 1px #ff0000 solid;
+    margin: 1em;
+    padding: 0.5em; }
+
+.material-icons {vertical-align: middle;}
+
+.main-card {width: 90%; margin: 1rem auto;}
+
+.error {margin: 1em; background-color: #fff; color: #b00;}
+.warning {margin: 1em; background-color: #fff; color: #c33;}
+.flash {margin: 1em; background-color: #fff; color: #b42;}
+.flash-warning {margin: 1em; background-color: #fff; color: #e22;}
+.flash-error {margin: 1em; background-color: #fff; color: #b00; font-weight: bold;}
+
+.mdl-mini-footer {padding: 0.2rem 0.7rem; background-color: #2D3773; color: #fff; }
+.mdl-mini-footer a:hover {text-decoration: underline; }
+
+#searchForm #submit {width: 10rem; margin: 0 auto;}

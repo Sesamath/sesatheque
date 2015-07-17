@@ -76,10 +76,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // describe
   controller.get($routes.get('describe', ':oid'), function (context) {
     context.layout = 'page'
+    context.tab = 'describe'
     affiche(context, 'describe')
   })
   controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
+    context.tab = 'describe'
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -103,10 +105,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   // preview : Voir la ressource avec header et menu
   controller.get($routes.get('preview', ':oid'), function (context) {
     context.layout = 'page'
+    context.tab = 'preview'
     affiche(context, 'display')
   })
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
+    context.tab = 'preview'
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {

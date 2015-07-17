@@ -1,0 +1,1 @@
+{#errors}<p class="error"><i class="material-icons">error</i> {.}</p>{/errors}

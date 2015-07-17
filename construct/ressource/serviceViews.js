@@ -71,43 +71,6 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
   }
 
   /**
-   * Init des liens de menu
-   * @param context
-   * @param data
-   * @param {Ressource} ressource
-   */
-  function addMenu(context, data, ressource) {
-    var oid = ressource ? ressource.oid : null
-    // les liens du menu
-    var links = []
-    // lien ajout
-    if ($accessControl.hasPermission('create', context)) {
-      links.push(tools.link(ressourcePath +$routes.get('add'), 'Ajouter une ressource'))
-      if (oid && $accessControl.hasPermission('read', context, oid))
-          links.push(tools.link($routes.getAbs('add') +'?clone=' +oid, 'Dupliquer la ressource'))
-    }
-    // si on est sur une ressource on ajoute les liens contextuels pour cette ressource (auxquels on a droit)
-    if (oid) {
-      if ($accessControl.hasPermission('update', context, oid))
-        links.push(tools.link(ressourcePath +$routes.get('edit', oid), 'Modifier cette ressource'))
-      if ($accessControl.hasPermission('delete', context))
-        links.push(tools.link(ressourcePath +$routes.get('delete', oid), 'Supprimer cette ressource'))
-      if ($accessControl.hasPermission('read', context, oid)) {
-        links.push(tools.link($routes.getAbs('describe', ressource), 'Description de la ressource'))
-        links.push(tools.link($routes.getAbs('preview', ressource), 'Voir la ressource'))
-        links.push(tools.link($routes.getAbs('display', ressource), 'Voir la ressource (pleine page)'))
-      }
-    }
-    // un lien vers la recherche
-    links.push(tools.link($routes.getAbs('search', null, context), 'Recherche'))
-
-    data.menuBloc = {
-      $view : 'menu',
-      links : links
-    }
-  }
-
-  /**
    * Créé les infos pour une liste de choix dans dust
    * @param key le nom de la propriété de la ressource
    * @param {Array} selectedValues Les valeurs pour cette ressource
@@ -507,6 +470,17 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
   }
 
   /**
+   * Ajoute une erreur à la liste qui sera envoyée à la vue
+   * @param error
+   * @param data
+   */
+  $views.addError = function (error, data) {
+    if (!data.errors) data.errors = []
+    var errorMsg = (typeof error === "string") ? error : error.toString()
+    data.errors.push(errorMsg)
+  }
+
+  /**
    * Retourne les valeurs par défaut pour une vue ressource
    * @param {string} viewName Le nom de la vue (donc du fichier dust)
    * @returns {{$views: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
@@ -562,8 +536,8 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
           data.contentBloc.enfantsDescribe = enfantsDescribe
         }
       }
-      // et le menu si on en a besoin
-      if (context.layout === 'page') addMenu(context, data, ressource)
+      // pour le menu qui en aura besoin
+      if (context.layout === 'page' && ressource) context.ressource = ressource
       // le titre s'il n'est pas fourni en options
       if (!options || !options.$metas || !options.$metas.title) {
         if (ressource) {
@@ -606,9 +580,9 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    */
   $views.printError = function (context, error, status, ressource) {
     var data = $views.getDefaultData()
-    addMenu(context, data, ressource)
+    if (context.layout === 'page' && ressource) context.ressource = ressource
     data.$views = __dirname + '/../static/views'
-    data.error = (typeof error === 'string') ? error : error.toString()
+    $views.addError(error, data)
     context.status = status || 200
     context.html(data)
   }
@@ -622,8 +596,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    */
   $views.printForm = function (context, error, ressource, options) {
     var data = $views.getDefaultData('formEdit')
-    // on ajoute le menu
-    addMenu(context, data, ressource)
+    if (context.layout === 'page' && ressource) context.ressource = ressource
     // les datas pour le form
     tools.merge(data.contentBloc, getFormViewData(error, ressource))
     // le titre
@@ -644,8 +617,6 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    */
   $views.printSearchForm = function (context) {
     var data = $views.getDefaultData('formSearch')
-    // on ajoute le menu
-    addMenu(context, data, null)
     // les datas pour le form
     tools.complete(data.contentBloc, getFormViewData(null, Ressource.create()))
     // on vire ou modifie ce qui nous intéresse pour la recherche

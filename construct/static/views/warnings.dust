@@ -1,1 +1,1 @@
-{#warnings}<p class="has-error">{.}</p>{/warnings}
+{#warnings}<p class="warning"><i class="material-icons">warning</i> {.}</p>{/warnings}

@@ -1,38 +1,31 @@
-<div class="block edit ressource">
-    {?errors}
-    <div class="control-group has-error">
-        {#errors}<div class="help-block">{.}</div>{/errors}
-    </div>
-    {/errors}
-
-    <form method="get" id="formRessource">
-        <div class="form-group">
-            {! Attention à masquer l'élément id du form si l'objet passé n'a pas de propriété id
-               On peut le faire en donnant cette valeur id ou en masquant le contexte comme avec
-               #oid:oid, cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting
-            !}
-            {>wrapper widget="text" o=oid /}
-            {>wrapper widget="text" o=origine /}
-            {>wrapper widget="text" o=idOrigine /}
-            {>wrapper widget="text" o=titre /}
-            {>wrapper widget="select" o=typeTechnique size=2 /}
-            {>wrapper widget="select" o=publie /}
-            {>wrapper widget="select" o=langue /}
-        </div>
-
-        <div class="form-group">
-            {>wrapper widget="checkboxes" o=categories /}
-            {>wrapper widget="checkboxes" o=niveaux /}
-            {>wrapper widget="checkboxes" o=typePedagogiques /}
-            {>wrapper widget="checkboxes" o=typeDocumentaires /}
-        </div>
-
-        {! submit !}
-        <div class="form-group buttons">
-            <input class="btn btn-primary" type="submit" value="Rechercher" />
-        </div>
-    </form>
+<form method="get" id="formRessource">
+<div class="mdl-card__title">
+  <h1 class="mdl-card__title-text">Recherche</h1>
 </div>
+<div class="mdl-card--border"></div>
+  <div class="mdl-card__supporting-text">
+    <div class="form-group">
+      {>wrapper widget="text" o=oid /}
+      {>wrapper widget="text" o=origine /}
+      {>wrapper widget="text" o=idOrigine /}
+      {>wrapper widget="text" o=titre /}
+      {>wrapper widget="select" o=typeTechnique size=2 /}
+      {>wrapper widget="select" o=publie /}
+      {>wrapper widget="select" o=langue /}
+    </div>
+
+    <div class="form-group">
+      {>wrapper widget="checkboxes" o=categories /}
+      {>wrapper widget="checkboxes" o=niveaux /}
+      {>wrapper widget="checkboxes" o=typePedagogiques /}
+      {>wrapper widget="checkboxes" o=typeDocumentaires /}
+    </div>
+
+    <div class="form-group mdl-card__actions">
+      <input id="submit" type="submit" value="Rechercher" />
+    </div>
+  </div>
+</form>
 {! <pre>
 {@contextDump key="oid" to="output"/}
 </pre> !}
