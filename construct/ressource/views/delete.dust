@@ -5,7 +5,7 @@
     La ressource « {titre} » ({deletedOid}) a été définitivement supprimée
 {:else}
     {?oid}
-    Supprimer cette ressource définitivement ?
+    <p class="warning h2-like">Supprimer cette ressource définitivement ?</p>
     {>"../describe" /}{!on est en relatif à ???!}
 
     <form method="post" id="formRessource">

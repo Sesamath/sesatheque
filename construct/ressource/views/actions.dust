@@ -1,0 +1,24 @@
+<div id="actions">
+  <ul>
+  {#links}
+    {?spacer}
+      <li class="tab-spacer"></li>
+    {:else}
+      <li {?selected}class="selected"{/selected}>
+        {?html}
+          {html|s}
+        {:else}
+          <a {?href}href="{href}"{/href} {attrs} {?icon}title="{value}"{/icon}>
+            {?icon}
+              <i class="material-icons">{icon}</i> <span class="gt-medium-only">{value}</span>
+            {:else}
+              {value}
+            {/icon}
+          </a>
+        {/html}
+      </li>
+    {/spacer}
+  {/links}
+  </ul>
+  <div class="clearfix"></div>
+</div>

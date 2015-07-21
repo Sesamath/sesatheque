@@ -298,6 +298,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               var options = {
                 $metas: {title: 'Modifier la ressource : ' + ressource.titre}
               }
+              options.titre = ressource.titre
               addToken(context, ressource)
               $views.printForm(context, error, ressource, options)
             }
@@ -370,6 +371,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // le token, présent pour delete qui utilise aussi la vue describe
               var options = {
                 $metas     : {title: 'Supprimer la ressource : ' + ressource.titre},
+                titre : ressource.titre,
                 contentBloc: {
                   $view: 'delete',
                   token : {
@@ -483,27 +485,38 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             log.debug('qui remonte', ressources)
             if (error) data.contentBloc.error = error.toString()
             else {
-              if (ressources.length == options.nb) {
-                // il en reste
-                crit.start = options.start + options.nb
-                data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
+              var nbInit = ressources.length
+              // on filtre d'après les droits en lecture
+              // @todo ajouter le filtrage dans la requete de recherche...
+              ressources = $accessControl.getListeLisible(context, ressources)
+              if (ressources.length < nbInit) {
+                log.error((nbInit - ressources.length) +" ressources de la liste ont été filtrées par les droits avec " +context.request.originalUrl)
               }
+              // les actions (en float right, dust sait pas boucler en partant de la fin, faudrait écrire un helper, on empile de droite à gauche)
+              data.actions = {links:[]}
+              // lien suivant (si on est au max)
+              if (ressources.length == options.nb) {
+                crit.start = options.start + options.nb
+                data.actions.links.push({html :tools.linkQs($routes.get('search'), 'Résultats suivants', crit)})
+              }
+              // "titre" avec le nb de ressources
+              var html = ressources.length +' ressource'
+              if (ressources.length) {
+                html += 's (' + (options.start + 1) + ' à ' + (options.start + 1 + options.nb) + ')'
+              }
+              data.actions.links.push({html :html, selected:true})
+              // liens précédents
               if (options.start) {
                 // on démarre pas à 0, donc y'a des précédents
                 crit.start = options.start - options.nb
                 if (crit.start < 0) crit.start = 0
-                data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
+                data.actions.links.push({html : tools.linkQs($routes.get('search'), 'Résultats précédents', crit)})
               }
-              if (ressources.length) {
-                data.contentBloc.pagination = '(' + (options.start + 1) + ' à ' + (options.start + 1 + options.nb) + ')'
-              } else {
-                data.contentBloc.pagination = ''
-              }
+              // un spacer
+              data.actions.links.push({spacer:true})
               // le lien pour modifier les critères
-              data.contentBloc.urlModify = context.request.originalUrl +'&modify=1'
-              // on filtre d'après les droits en lecture
-              ressources = $accessControl.getListeLisible(context, ressources)
-              // et on ajoute des liens
+              data.actions.links.push({href: context.request.originalUrl +'&modify=1', value:"Modifier cette recherche"})
+              // et on ajoute des liens sur chaque ressource
               data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
             }
             context.html(data)

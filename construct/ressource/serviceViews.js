@@ -46,11 +46,9 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
   var _ = require('lodash')
   var seq = require('an-flow')
   var moment = require('moment')
-  var basePath = $settings.get('basePath', '/')
-  // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
+  // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
   // car on a l'autocomplétion sur les noms de propriété
   var config = require('./config')
-  var ressourcePath = basePath + 'ressource/'
 
   var $views = {}
 
@@ -480,9 +478,12 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @param data
    */
   $views.addError = function (error, data) {
-    if (!data.errors) data.errors = []
+    if (!data.errors) data.errors = {
+      $view : __dirname +'/../static/views/errors',
+      errors : []
+    }
     var errorMsg = (typeof error === "string") ? error : error.toString()
-    data.errors.push(errorMsg)
+    data.errors.errors.push(errorMsg)
   }
 
   /**
@@ -491,7 +492,6 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @returns {{$views: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
    */
   $views.getDefaultData = function (viewName) {
-    if (!viewName) viewName = 'error'
     var data = {
       $views : __dirname + '/views',
       $metas : {
@@ -585,7 +585,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @param {Ressource}    [ressource] pour ajouter d'éventuels lien de menu contextuels à cette ressource
    */
   $views.printError = function (context, error, status, ressource) {
-    var data = $views.getDefaultData()
+    var data = $views.getDefaultData('errors')
     if (context.layout === 'page' && ressource) context.ressource = ressource
     data.$views = __dirname + '/../static/views'
     $views.addError(error, data)

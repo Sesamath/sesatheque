@@ -59,7 +59,10 @@ module.exports = function($flashMessage) {
           title: title
         },
         $views     : __dirname + '/views',
-        errors: [errorMsg]
+        errors: {
+          $view : __dirname + '/views/errors',
+          errors :[errorMsg]
+        }
       }
       tools.complete(data, defaultData)
       context.contentType = 'text/html'
@@ -145,8 +148,10 @@ module.exports = function($flashMessage) {
       // et vérifie que errors et warnings on une vue en absolu
       if (data.errors) data.errors.$view = __dirname +'/views/errors'
       if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
-      // on met le titre en data pour que le layout l'affiche aussi
-      if (data.$metas && data.$metas.title) data.title = data.$metas.title
+      // s'il n'y est pas déjà, on met le titre en data pour que le layout l'affiche aussi
+      if (data.$metas && data.$metas.title && !data.titre) {
+        data.titre = data.$metas.title
+      }
       if (!data.$metas.css) data.$metas.css = []
       if (context.layout === 'iframe') data.$metas.css.push('/styles/iframe.css')
       else data.$metas.css.push('/styles/page.css')

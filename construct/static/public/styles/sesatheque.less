@@ -28,18 +28,39 @@ body {min-width: 300px;}
 
 /* Couleurs */
 .error {
-  &::before {content: '<i class="material-icons">error</i> '}
+  &::before {
+    content: 'error';
+    .material-icons();
+    margin-right: 1rem;
+  }
   margin: 1em;
   background-color: @base-background;
   color: @error-color;
 }
 .warning {
-  &::before {content: '<i class="material-icons">warning</i> '}
+  &::before {
+    content: 'warning';
+    .material-icons();
+    margin-right: 1rem;
+  }
   margin: 1em;
   background-color: @base-background;
   color: @warning-color;
 }
-.flash {margin: 1em; background-color: @base-background; color: @flash-color; border: solid thin @error-color; }
+.info {
+  &::before {
+    content: 'info';
+    .material-icons();
+    margin-right: 1rem;
+  }
+  margin: 1em;
+  background-color: @base-background;
+}
+.flash {
+  .info();
+  color: @flash-color;
+  border: solid thin @error-color;
+}
 .cartouche { /* texte secondary sur fond foncé primary */
   background-color: @primary-color;
   color: @secondary-color-light;
@@ -124,7 +145,7 @@ body {min-width: 300px;}
 }
 #main > h1 {margin-bottom: 0;}
 
-#actions {
+#actions ul {
   float: right;
   font-size: @h4-size;
   line-height: @h1-size;
@@ -135,7 +156,7 @@ body {min-width: 300px;}
   li {
     float: right;
     .border-tab();
-    padding: @tiny-value;
+    padding: @tiny-value @small-value;
     margin-right: -1px;
   }
   li.selected {
@@ -149,7 +170,7 @@ body {min-width: 300px;}
   }
 }
 
-#main > div.clearfix {
+#actions div.clearfix {
   border-bottom: @border-primary;
   position: relative;
   bottom: 1px;

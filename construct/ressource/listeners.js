@@ -46,7 +46,7 @@ module.exports = function ($accessControl, $routes) {
         var links = []
         // lien ajout
         if ($accessControl.hasPermission('create', context)) {
-          links.push({href:$routes.get('add'), value :'Ajouter une ressource', icon : "note_add"})
+          links.push({href:$routes.getAbs('add'), value :'Ajouter une ressource', icon : "note_add"})
         }
         // un lien vers la recherche
         links.push({href: $routes.getAbs('search', null, context), value: 'Recherche', icon : 'search'})
@@ -61,11 +61,10 @@ module.exports = function ($accessControl, $routes) {
           links = []
           var ressource = context.ressource
           var oid       = context.ressource.oid
-          var ressourceActions = []
           if ($accessControl.hasPermission('read', context, oid)) {
             links.push({href:$routes.getAbs('describe', ressource), value :'Description', icon:'description', selected:(context.tab === 'describe')})
             links.push({href:$routes.getAbs('preview', ressource), value :'Aperçu', icon:'pageview', selected:(context.tab === 'preview')})
-            links.push({href:$routes.getAbs('display', ressource), value :'Voir', icon:'open_in_new', attrs:'target="_blank"', selected:(context.tab === 'describe')})
+            links.push({href:$routes.getAbs('display', ressource), value :'Voir', icon:'open_in_new', attrs:'target="_blank"'})
           }
           if ($accessControl.hasPermission('update', context, oid))
             links.push({href:$routes.getAbs('edit', oid), value :'Modifier', icon:"mode_edit", selected:(context.tab === 'edit')})
@@ -78,8 +77,8 @@ module.exports = function ($accessControl, $routes) {
           if ($accessControl.hasPermission('delete', context))
             links.push({href:$routes.getAbs('delete', oid), value :'Supprimer', icon:'delete', selected:(context.tab === 'delete')})
 
-          data.ressourceActions = {
-            $view : __dirname +'/views/ressourceActions',
+          data.actions = {
+            $view : __dirname +'/views/actions',
             links : links
           }
         } // liens contextuels

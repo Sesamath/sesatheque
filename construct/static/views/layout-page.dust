@@ -20,7 +20,9 @@
 </header>
 
 <div id="main" role="document">
-  {?title}<h1 class="fl">{title}</h1>{/title}
+  {!titre flottant seulement si on a des actions, qui devront alors gérer le clearfix!}
+  {?titre}<h1 {?actions}class="fl"{/actions}>{titre}</h1>{/titre}
+  {actions|s}
   {errors|s}
   {warnings|s}
   {flashBloc|s}

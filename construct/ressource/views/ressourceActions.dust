@@ -1,8 +1,0 @@
-<div id="ressActions">
-  {#links}
-    <a {?href}href="{href}"{/href} {?selected}class="selected"{/selected} {attrs}>
-      {?icon}<i class="material-icons">{icon}</i> {/icon}
-      <span>{value}</span>
-    </a>
-  {/links}
-</div>
