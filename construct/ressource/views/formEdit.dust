@@ -8,9 +8,9 @@
     <form name="editRessource" method="post" id="formRessource">
 
         {?warnings}
-        <div class="control-group has-error">
+        <div>
         Avertissement{@gt key=warnings.length value=1}s{/gt} :
-        {#warnings}<div class="help-block">{.}</div>{/warnings}
+        {#warnings}<div class="warning">{.}</div>{/warnings}
         {>wrapper widget="checkboxes" o=force /}
         </div>
         {/warnings}
@@ -37,17 +37,15 @@
         <div class="form-group">
             {>wrapper widget="checkboxes" o=categories /}
             {>wrapper widget="checkboxes" o=niveaux /}
+            {! Les types, devraient disparaitrent car conditionnés par la catégorie !}
+            {>wrapper widget="checkboxes" o=typePedagogiques /}
+            {>wrapper widget="checkboxes" o=typeDocumentaires /}
         </div>
 
         <div class="form-group">
             {>wrapper widget="textarea" o=resume cols=50 rows=5 /}
             {>wrapper widget="textarea" o=description cols=50 rows=5 /}
             {>wrapper widget="textarea" o=commentaires cols=50 rows=5 /}
-        </div>
-
-        <div class="form-group">
-            {>wrapper widget="checkboxes" o=typePedagogiques /}
-            {>wrapper widget="checkboxes" o=typeDocumentaires /}
         </div>
 
         {! todo widget relations !}
@@ -62,11 +60,10 @@
             {?dateMiseAJour}{>wrapper widget="text" o=dateMiseAJour /}{/dateMiseAJour}
         </div>
 
-        {! Les types, devraient disparaitrent car conditionnés par la catégorie ! }
 
         {! submit, attention #saveButton est utilisé par editArbre !}
-        <div class="form-group buttons">
-            <input id="saveButton" class="btn btn-primary" type="submit" value="Enregistrer" />
+        <div class="form-group">
+            <input id="saveButton" type="submit" value="Enregistrer" />
         </div>
     </form>
 </div>

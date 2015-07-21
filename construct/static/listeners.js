@@ -147,6 +147,9 @@ module.exports = function($flashMessage) {
       if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
       // on met le titre en data pour que le layout l'affiche aussi
       if (data.$metas && data.$metas.title) data.title = data.$metas.title
+      if (!data.$metas.css) data.$metas.css = []
+      if (context.layout === 'iframe') data.$metas.css.push('/styles/iframe.css')
+      else data.$metas.css.push('/styles/page.css')
     }
 
     log('fin de beforeTransport avec les data', data, {trim:5000})

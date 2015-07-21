@@ -119,6 +119,11 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     return choices
   }
 
+  /**
+   * Ajoute des infos à la ressource sur ses relations (titre & co)
+   * @param ressource
+   * @param next
+   */
   function enhance(ressource, next) {
 
     // faut aller chercher en asynchrone les infos complémentaires pour la vue describe
@@ -490,7 +495,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     var data = {
       $views : __dirname + '/views',
       $metas : {
-        css: ['/styles/ressources.css'],
+        // css ajouté par le listener d'après context.layout
         js : ['/vendors/requirejs/require.2.1.18.min.js']
       },
       contentBloc : {$view:viewName}
@@ -562,6 +567,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       var data = $views.getDefaultData(view)
 
       if (view === 'describe') {
+        // faut ajouter des infos sur les relations
         enhance(ressource, termine)
       } else {
         termine()

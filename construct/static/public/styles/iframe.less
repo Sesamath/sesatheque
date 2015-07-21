@@ -1,0 +1,23 @@
+/**
+ * gère la compilation de iframe.css (pour les pages prévues pour être en iframe)
+ */
+/*! Ne pas modifier le fichier css compilé par less mais la source iframe.less */
+/*!
+ * www.KNACSS.com V4.3.2 (8 juillet 2015) @author: Raphael Goetter, Alsacreations
+ * Licence WTFPL http://www.wtfpl.net/
+ */
+@import "_00-roboto"; /* police roboto */
+
+@import "_00-config-sesatheque"; /* Nos polices couleurs et tailles */
+
+// normalize include
+@import "knacssSrc/_01a-normalize"; // normalize
+
+// LESS base styles
+@import "knacssSrc/_01b-base"; // reset and basic styles
+@import "knacssSrc/_08-print"; // print quick reset
+
+@import "sesatheque-display";
+
+/* le layout-iframe n'inclue pas ce qui est défini dans les sesatheque-* hors display mais il a besoin de ça */
+.error {margin: 1em; background-color: @base-background; color: @error-color;}
