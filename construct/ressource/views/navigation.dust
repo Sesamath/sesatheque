@@ -1,7 +1,7 @@
 {#links}
-  <a href="{href}" class="mdl-button{?selected} is-active{/selected}" {?icon}title="{value}"{/icon} {attrs}>
+  <a href="{href}" {?selected}class="selected"{/selected} {?icon}title="{value}"{/icon} {attrs}>
     {?icon}
-      <i class="material-icons md-48">{icon}</i> <span class="mdl-layout--large-screen-only">{value}</span>
+      <i class="material-icons">{icon}</i> <span>{value}</span>
     {:else}
       {value}
     {/icon}

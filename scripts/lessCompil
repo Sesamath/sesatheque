@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -u
+
+dirInitial="$PWD"
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  local exitCode=${1:-0}
+  echo "Compile notre css à partir de construct/static/public/styles/page.less"
+  echo "en allant chercher les imports dans construct/static/public/styles et construct/static/public/vendors/knacss/less"
+  exit $exitCode
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+cd $(dirname $0)/../
+dirApp=$PWD
+cd "construct/static/public/styles"
+
+# sans options on lance en dev
+#lessc --clean-css="--s1 --advanced --compatibility=ie8" --include-path="construct/static/public/styles:construct/static/public/vendors/knacss/less" construct/static/public/styles/page.less construct/static/public/styles/page.css \
+#./node_modules/.bin/lessc --clean-css="--compatibility=ie8" --include-path="construct/static/public/styles:construct/static/public/vendors/knacss/less" --source-map=construct/static/public/styles/page.map construct/static/public/styles/page.less construct/static/public/styles/page.css \
+$dirApp/node_modules/less/bin/lessc --clean-css="--compatibility=ie8" --source-map=page.map page.less page.css \
+  && echo "OK" \
+  || echo "KO"
