@@ -12,7 +12,7 @@
 
 {!Cf http://www.w3.org/TR/wai-aria/roles pour la liste des roles possibles !}
 <header id="header" role="banner">
-  <a href="/"><img src="/images/sesatheque.png" width="245" height="40" alt="logo"></a>
+  <a href="/"><img src="/images/sesatheque.png" width="250" height="48" alt="logo"></a>
   <nav class="navigation fr" role="navigation">
     {navigation|s}
     {authBloc|s}
@@ -20,10 +20,11 @@
 </header>
 
 <div id="main" role="document">
-    {errors|s}
-    {warnings|s}
-    {flashBloc|s}
-    {contentBloc|s}
+  {?title}<h1 class="fl">{title}</h1>{/title}
+  {errors|s}
+  {warnings|s}
+  {flashBloc|s}
+  {contentBloc|s}
 </div>
 
 <footer id="footer">

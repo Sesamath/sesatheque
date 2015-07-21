@@ -1,29 +1,23 @@
 <form method="get" id="formRessource">
-<div class="mdl-card__title">
-  <h1 class="mdl-card__title-text">Recherche</h1>
-</div>
-<div class="mdl-card--border"></div>
-  <div class="mdl-card__supporting-text">
-    <div class="form-group">
-      {>wrapper widget="text" o=oid /}
-      {>wrapper widget="text" o=origine /}
-      {>wrapper widget="text" o=idOrigine /}
-      {>wrapper widget="text" o=titre /}
-      {>wrapper widget="select" o=typeTechnique size=2 /}
-      {>wrapper widget="select" o=publie /}
-      {>wrapper widget="select" o=langue /}
-    </div>
+  <div class="form-group">
+    {>wrapper widget="text" o=oid /}
+    {>wrapper widget="text" o=origine /}
+    {>wrapper widget="text" o=idOrigine /}
+    {>wrapper widget="text" o=titre /}
+    {>wrapper widget="select" o=typeTechnique size=2 /}
+    {>wrapper widget="select" o=publie /}
+    {>wrapper widget="select" o=langue /}
+  </div>
 
-    <div class="form-group">
-      {>wrapper widget="checkboxes" o=categories /}
-      {>wrapper widget="checkboxes" o=niveaux /}
-      {>wrapper widget="checkboxes" o=typePedagogiques /}
-      {>wrapper widget="checkboxes" o=typeDocumentaires /}
-    </div>
+  <div class="form-group">
+    {>wrapper widget="checkboxes" o=categories /}
+    {>wrapper widget="checkboxes" o=niveaux /}
+    {>wrapper widget="checkboxes" o=typePedagogiques /}
+    {>wrapper widget="checkboxes" o=typeDocumentaires /}
+  </div>
 
-    <div class="form-group mdl-card__actions">
-      <input id="submit" type="submit" value="Rechercher" />
-    </div>
+  <div class="form-group">
+    <input id="submit" type="submit" value="Rechercher" />
   </div>
 </form>
 {! <pre>

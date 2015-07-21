@@ -1,20 +1,27 @@
-<p>Résultats de la recherche</p>
 {?error}
   <p class="has-error">{error}</p>
 {:else}
-    <ul class="liste">
-        {linkPagePrev|s}
+    <ul id="actions">
+      {!on est en float right donc faut mettre en ordre inversé!}
+      {?linkPageNext}<li>{linkPageNext|s}</li>{/linkPageNext}
+      <li class="selected">
         {ressources.length} ressource{?ressources.length}s{/ressources.length}
         {pagination}
-        {linkPageNext|s}
-    {#ressources}
-    <li>{oid} : {titre}
+      </li>
+      {?linkPagePrev}<li>{linkPagePrev|s}</li>{/linkPagePrev}
+      <li class="tab-spacer">&nbsp;</li>
+      <li><a href="{urlModify}">Modifier cette recherche</a></li>
+    </ul>
+    <div class="clearfix"></div>
+    <ul class="liste">
+      {#ressources}
+      <li>{oid} : {titre}
         <span class="links">(<a href="{urlDescribe}">description</a>,
             <a href="{urlPreview}">aperçu</a>,
             <a href="{urlDisplay}">voir en pleine page</a>)
         </span></li>
-    {:else}
-    <p>Aucune ressource</p>
-    {/ressources}
-</ul>
+      {:else}
+        <p>Aucune ressource</p>
+      {/ressources}
+    </ul>
 {/error}

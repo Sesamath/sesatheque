@@ -20,7 +20,7 @@ et l'on génère ce code (à partir du icons.css original de mdl)
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  /* font-size: 24px; utiliser mi24 ou mi36 ou mi48 définis dans sesatheque.less*/
+  font-size: 24px; // pour changer la taille utiliser les styles mi-(s|m|l|xl) définis ci-dessous
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -33,3 +33,21 @@ et l'on génère ce code (à partir du icons.css original de mdl)
 Pour insérer une icone, trouver son nom sur https://www.google.com/design/icons/ et insérer le code html
 <i class="material-icons">{le nom de l'icone}</i>
 */
+
+/* tailles pour material icons */
+.mi-s {
+  .material-icons();
+  font-size: 18px;
+}
+.mi-m {
+  .material-icons();
+  font-size: 24px;
+}
+.mi-l {
+  .material-icons();
+  font-size: 36px;
+}
+.mi-xl {
+  .material-icons();
+  font-size: 48px;
+}

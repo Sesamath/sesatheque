@@ -1,19 +1,45 @@
+// en dessous en ajoute du scroll horizontal, faut pas pousser…
 body {min-width: 300px;}
 
-/* on ajoute ça pour cacher pour tiny et medium et afficher pour les autres */
+// responsive, .gt-medium-only pour les écrans à partir de medium et lt-medium-only pour les plus petits seulement
 @media (max-width: (@medium-screen)) { // tiny et small
-  .gt-medium-only, #header a span { display: none; }
+  .gt-medium-only,
+  #header a span,
+  #ressActions span
+    { display: none; }
   .lt-medium-only { display: block; }
 }
 @media (min-width: (@medium-screen + 1)) { // medium, large et au delà
   .gt-medium-only { display: block;}
-  #header a span { display: inline;}
+  #header a span,
+  #ressActions span
+    { display: inline;}
   .lt-medium-only { display: none; }
 }
 
-#auth {float: right;}
+/**
+ * Couleurs
+ */
+.debug {
+  border: 1px #ff0000 solid;
+  margin: 1em;
+  padding: 0.5em;
+}
 
 /* Couleurs */
+.error {
+  &::before {content: '<i class="material-icons">error</i> '}
+  margin: 1em;
+  background-color: @base-background;
+  color: @error-color;
+}
+.warning {
+  &::before {content: '<i class="material-icons">warning</i> '}
+  margin: 1em;
+  background-color: @base-background;
+  color: @warning-color;
+}
+.flash {margin: 1em; background-color: @base-background; color: @flash-color; border: solid thin @error-color; }
 .cartouche { /* texte secondary sur fond foncé primary */
   background-color: @primary-color;
   color: @secondary-color-light;
@@ -22,6 +48,19 @@ body {min-width: 300px;}
     color: @secondary-color-link;
   };
 }
+
+.border-tab {
+  border: @border-primary;
+  .selected {
+    border-bottom: none;
+  }
+}
+
+
+/**
+ * layout
+ */
+#auth {float: right;}
 
 #header {
   .cartouche();
@@ -83,6 +122,39 @@ body {min-width: 300px;}
 #main, #content {
   .pam();
 }
+#main > h1 {margin-bottom: 0;}
+
+#actions {
+  float: right;
+  font-size: @h4-size;
+  line-height: @h1-size;
+  padding: 0 ;
+  text-align: center;
+  list-style: none;
+  margin: 0 0 0 1rem;
+  li {
+    float: right;
+    .border-tab();
+    padding: @tiny-value;
+    margin-right: -1px;
+  }
+  li.selected {
+    border-bottom: thin solid @base-background;
+  }
+  li.tab-spacer {
+    border-top: none;
+    border-bottom: none;
+    width: @medium-value;
+    z-index: 2;
+  }
+}
+
+#main > div.clearfix {
+  border-bottom: @border-primary;
+  position: relative;
+  bottom: 1px;
+  z-index: -1;
+}
 
 #footer {
   .cartouche();
@@ -102,40 +174,9 @@ body {min-width: 300px;}
     text-decoration: underline;
   }
 }
-.debug {
-  border: 1px #ff0000 solid;
-  margin: 1em;
-  padding: 0.5em;
-}
 
-
-.main-card {width: 90%; margin: 1rem auto;}
-
-.error {margin: 1em; background-color: #fff; color: #b00;}
-.warning {margin: 1em; background-color: #fff; color: #c33;}
-.flash {margin: 1em; background-color: #fff; color: #b42;}
-.flash-warning {margin: 1em; background-color: #fff; color: #e22;}
-.flash-error {margin: 1em; background-color: #fff; color: #b00; font-weight: bold;}
-
-.mdl-mini-footer {padding: 0.2rem 0.7rem; background-color: #2D3773; color: #fff; }
-.mdl-mini-footer a:hover {text-decoration: underline; }
+/**
+ * réglages de pages particulières
+ */
 
 #searchForm #submit {width: 10rem; margin: 0 auto;}
-
-/* styles pour material icons */
-.mi-s {
-  &:extend(.material-icons);
-  font-size: 18px;
-}
-.mi-m {
-  &:extend(.material-icons);
-  font-size: 24px;
-}
-.mi-l {
-  &:extend(.material-icons);
-  font-size: 36px;
-}
-.mi-xl {
-  &:extend(.material-icons);
-  font-size: 48px;
-}

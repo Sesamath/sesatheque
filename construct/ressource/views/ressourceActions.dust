@@ -1,11 +1,8 @@
-<div class="mdl-layout__header-row">
-  <span class="mdl-layout-title">{title}</span>
-  <div class="mdl-layout-spacer"></div>
-  <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+<div id="ressActions">
   {#links}
-    <a {?href}href="{href}"{/href} class="mdl-layout__tab{?selected} is-active{/selected}" {attrs}>
+    <a {?href}href="{href}"{/href} {?selected}class="selected"{/selected} {attrs}>
       {?icon}<i class="material-icons">{icon}</i> {/icon}
-      <span class="mdl-layout--large-screen-only">{value}</span>
+      <span>{value}</span>
     </a>
   {/links}
 </div>

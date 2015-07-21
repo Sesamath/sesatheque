@@ -618,11 +618,13 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
   $views.printSearchForm = function (context) {
     var data = $views.getDefaultData('formSearch')
     // les datas pour le form
-    tools.complete(data.contentBloc, getFormViewData(null, Ressource.create()))
+    var fakeRessource = Ressource.create(context.get)
+    //log.debug("ressource d'après get", fakeRessource)
+    tools.complete(data.contentBloc, getFormViewData(null, fakeRessource))
     // on vire ou modifie ce qui nous intéresse pour la recherche
     var fd = data.contentBloc // raccourci d'écriture (form data)
     delete fd.version
-    // ces champs ne sont pas indexés
+    // ces champs ne sont pas indexés, pas la peine de les chercher…
     delete fd.parametres
     delete fd.enfants
     delete fd.resume

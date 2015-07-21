@@ -296,8 +296,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               denied(context, errorMsg)
             } else {
               var options = {
-                $metas: {title: 'Modifier la ressource : ' + ressource.titre},
-                js : ['']
+                $metas: {title: 'Modifier la ressource : ' + ressource.titre}
               }
               addToken(context, ressource)
               $views.printForm(context, error, ressource, options)
@@ -443,7 +442,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function search(context) {
     context.layout = 'page'
     redirectOrContinue(context, function () {
-      if (_.isEmpty(context.get)) {
+      if (_.isEmpty(context.get) || context.get.modify) {
         // form de recherche
         $views.printSearchForm(context)
       } else {
@@ -500,6 +499,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               } else {
                 data.contentBloc.pagination = ''
               }
+              // le lien pour modifier les critères
+              data.contentBloc.urlModify = context.request.originalUrl +'&modify=1'
               // on filtre d'après les droits en lecture
               ressources = $accessControl.getListeLisible(context, ressources)
               // et on ajoute des liens

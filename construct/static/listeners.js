@@ -145,6 +145,8 @@ module.exports = function($flashMessage) {
       // et vérifie que errors et warnings on une vue en absolu
       if (data.errors) data.errors.$view = __dirname +'/views/errors'
       if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
+      // on met le titre en data pour que le layout l'affiche aussi
+      if (data.$metas && data.$metas.title) data.title = data.$metas.title
     }
 
     log('fin de beforeTransport avec les data', data, {trim:5000})
