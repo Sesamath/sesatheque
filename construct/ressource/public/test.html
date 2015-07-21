@@ -34,7 +34,7 @@ faut un doctype html4 si on veut permettre la hauteur en % pour un div
     });
     });
     } catch(error) {
-      if (window.setError) window.setError(error.toString());
+      if (window.addError) window.addError(error.toString());
       if (console && console.error) console.error(error)
     }
   </script>

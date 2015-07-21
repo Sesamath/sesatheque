@@ -238,7 +238,7 @@ try {
     };
   });
 } catch (error) {
-  if (typeof window.setError !== 'undefined') window.setError(error);
+  if (typeof window.addError !== 'undefined') window.addError(error);
   if (typeof console !== 'undefined' && console.error) console.error(error);
 }
 

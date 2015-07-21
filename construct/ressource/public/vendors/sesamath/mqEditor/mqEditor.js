@@ -167,7 +167,7 @@ define(["jquery1", "mathquill"], function () {
     };
 
   } catch (error) {
-    if (w.setError) w.setError(error);
+    if (w.addError) w.addError(error);
     else if (console && console.error) console.error(error);
   }
 

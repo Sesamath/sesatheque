@@ -1,5 +1,5 @@
 <div class="block del ressource">
-    {?error}<p class="has-error">{error}</p>{/error}
+    {?error}<p class="error">{error}</p>{/error}
 
 {?deletedOid}
     La ressource « {titre} » ({deletedOid}) a été définitivement supprimée

@@ -33,7 +33,7 @@
  * Le chargeur générique pour l'affichage de toutes les ressources
  * appelé avant les plugins (c'est sa fct load qui chargera le bon)
  *
- * Son chargement ajoute en global les méthodes addCss, addElement, getElement, setError, hideTitle
+ * Son chargement ajoute en global les méthodes addCss, addElement, getElement, addError, hideTitle
  * et log (qui ne fait rien sauf si on appelle init avec options.isDev à true), log.error affiche toujours
  *
  */
@@ -140,7 +140,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           if (retour && retour.ok && retour.ok === true) {
             feedbackOk();
           } else {
-            if (retour && retour.error) w.setError(retour.error);
+            if (retour && retour.error) w.addError(retour.error);
             feedbackKo();
           }
           // et on appelle retourUser si on nous l'a fourni
@@ -255,9 +255,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
        */
       displayModule.load = function (ressource, options, next) {
         w.log('display.load avec la ressource', ressource);
-        w.log('et les options', options);
         // init du dom, des options et des fcts globales
         displayModule.init(options);
+        w.log('et les options après init', options);
 
         // ajoute de la css commune à toutes les ressources ici
         w.addCss(rootPath + 'styles/ressourceDisplay.css');
@@ -278,7 +278,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             w.log('plugin ' + name + ' chargé');
             if (options.container) options.container.innerHTML = '';
             if (options.errorsContainer) options.errorsContainer.innerHTML = '';
-
+log("errorsContainer", options.errorsContainer)
             // On vire le titre si on nous le demande via les options ou un param dans l'url
             if (options.hasOwnProperty('showTitle') && !options.showTitle || /\?.*showTitle=0/.test(wd.URL)) {
               w.hideTitle();
@@ -289,14 +289,14 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             plugin.display(ressource, options, function (error) {
               if (error) {
                 log("le display a terminé mais renvoyé l'erreur", error);
-                w.setError(error);
+                w.addError(error);
               } else {
                 w.log("le display a terminé sans erreur");
               }
               if (next) next(error);
             });
           } catch (error) {
-            w.setError(error.toString());
+            w.addError(error.toString());
           }
         });
       };
@@ -304,7 +304,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       return displayModule;
 
     } catch (error) {
-      w.setError(error);
+      w.addError(error);
     }
   });
 }

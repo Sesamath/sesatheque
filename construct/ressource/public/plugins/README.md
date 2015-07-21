@@ -46,7 +46,7 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  *                                 (lui passer le fichier relativement au dossier du plugin)
  * {Function}    addElement(eltContainer, tag, attributes, innerText) : ajoute un HTMLElement dans eltContainer
  * {Function}    getElement(tag, attributes, innerText)               : renvoie un HTMLElement créé d'après les arguments
- * {Function}    setError(errorMsg) : Affiche une erreur dans errorsContainer (ça efface la précédente s'il y en avait une)
+ * {Function}    addError(errorMsg) : Ajoute une erreur dans errorsContainer
  */
  // une variable privée de ce module mais globale pour nos fonctions
  var toto;

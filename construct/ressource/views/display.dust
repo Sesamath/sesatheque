@@ -7,9 +7,9 @@
       ressource      : l'objet ressource
 !}
 {?error}
-    <p class="has-error">{error}</p>
+    <p class="error">{error}</p>
 {:else}
-<div id="warnings" class="has-error"></div>
+<div id="errors"></div>
 <div id="pictoFeedback" class="feedbackOff"></div>
 <h1 id="titre">{titre.value}</h1>
 <div id="display">Vous devez avoir un navigateur avec javascript activé pour voir ce contenu.<br />
@@ -33,7 +33,7 @@ Chargement en cours</div>
                 }
             );
         } catch(error) {
-          document.getElementById('warnings').innerHTML = error.toString();
+          document.getElementById('errors').innerHTML = error.toString();
           if (console && console.error) console.error(error)
         }
     });

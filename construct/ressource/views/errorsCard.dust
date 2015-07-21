@@ -1,2 +1,0 @@
-{! on est appelé si data.error contient un tableau (autre chose qu'une string), sinon c'est le layout qui gère la string !}
-{#error}<p class="has-error">{.}</p>{/error}

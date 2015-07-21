@@ -87,7 +87,7 @@
         if (delayedOptions) window.sesatheque.init(delayedOptions, afterInit);
       });
     } catch (error) {
-      if (window.setError) window.setError(error);
+      if (window.addError) window.addError(error);
       else if (log.error) log.error(error);
     }
   }

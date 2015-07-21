@@ -68,7 +68,7 @@ module.exports = function ($accessControl, $routes) {
           }
           if ($accessControl.hasPermission('update', context, oid))
             links.push({href:$routes.getAbs('edit', oid), value :'Modifier', icon:"mode_edit", selected:(context.tab === 'edit')})
-          if (oid && $accessControl.hasPermission('read', context, oid))
+          if (oid && $accessControl.hasPermission('read', context, oid) && $accessControl.hasPermission('create', context))
             links.push({
               href:$routes.getAbs('add') +'?clone=' +oid,
               value :'Dupliquer', icon:'call_split',

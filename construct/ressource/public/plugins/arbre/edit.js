@@ -69,7 +69,7 @@ try {
       loadLink = w.addElement(container, 'a', {href:'#'}, ' afficher');
       $(loadLink).click(loadSrc);
       // un div pour les erreurs
-      var loadError = w.addElement(container, 'p', {class:"has-errors"});
+      var loadError = w.addElement(container, 'p', {class:"error"});
       $loadError = $(loadError);
     }
 
@@ -98,7 +98,7 @@ try {
       if ($textarea) {
         $textarea.val(enfantsStr);
       } else {
-        w.setError("zone de texte enfants non trouvée");
+        w.addError("zone de texte enfants non trouvée");
       }
     }
 
@@ -255,7 +255,7 @@ try {
       if (ref) {
         apiClient.getRessource(ref, function (error, ressource) {
           if (error) {
-            w.setError("Erreur au chargement de " + ref + " : " + error.toString(), 5);
+            w.addError("Erreur au chargement de " + ref + " : " + error.toString(), 5);
           } else if (ressource && ressource.typeTechnique === 'arbre') {
             arbreInitial = ressource;
             // on charge
@@ -437,7 +437,7 @@ try {
     };
   });
 } catch (error) {
-  if (typeof window.setError !== 'undefined') window.setError(error);
+  if (typeof window.addError !== 'undefined') window.addError(error);
   if (typeof console !== 'undefined' && console.error) console.error(error);
 }
 

@@ -58,6 +58,23 @@ define({
  * @param {function} next
  */
 function load(container, url, options, next) {
+  /**
+   * Callback appelée après le chargement de swfobject
+   * @param e
+   */
+  function callbackFn(e) {
+    var retour
+    if (e.success) {
+      log("Lancement de " + url +' réussi');
+    } else {
+      window.addError("Javascript fonctionne" +
+          " mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource.")
+    }
+    if (next && typeof next === "function") {
+      next();
+    }
+  }
+
   var wd = window.document;
   var htmlElt, largeur, hauteur, flashversion, flashvars, swfParams, swfAttributes;
   // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
@@ -90,20 +107,4 @@ function load(container, url, options, next) {
   // swfobject.embedSWF (swfUrl, htmlId, largeur, hauteur, version_requise,
   //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
   swfobject.embedSWF(url, divId, largeur, hauteur, flashversion, null, flashvars, swfParams, swfAttributes, callbackFn);
-
-  function callbackFn(e) {
-    var retour
-    if (e.success) {
-      log("Lancement de " + url +' réussi');
-    } else {
-      htmlElt = wd.createElement("p");
-      htmlElt.appendChild(wd.createTextNode("Javascript fonctionne" +
-          " mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource."));
-      errorsContainer.appendChild(htmlElt)
-      retour = new Error('Le chargement de ' + url + ' a échoué');
-    }
-    if (next && typeof next === "function") {
-      next(retour);
-    }
-  }
 }

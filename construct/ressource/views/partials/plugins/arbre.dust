@@ -3,7 +3,7 @@
 </div>
 
 <div class="form-group">
-  <div id="warnings"></div>
+  <div id="errors"></div>
   <div id="display"></div>
   {>edit /}
 </div>

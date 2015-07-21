@@ -30,7 +30,7 @@
  */
 
 /**
- * Script d'init générique pour ajouter en global les méthodes addCss, addElement, getElement, setError, hideTitle
+ * Script d'init générique pour ajouter en global les méthodes addCss, addElement, getElement, addError, hideTitle
  * et log (qui ne fait rien sauf si on appelle init avec options.isDev à true), log.error affiche toujours
  */
 /* global window, define, require, alert */
@@ -258,7 +258,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      * @param {string|Error} error Le message à afficher
      * @param {number} [delay] Un éventuel délai d'affichage en secondes
      */
-    window.setError = function (error, delay) {
+    window.addError = function (error, delay) {
       log.error(error);
       var errorMsg = (error instanceof Error) ? error.toString() : error;
       if (/^TypeError:/.test(errorMsg)) {
@@ -272,13 +272,11 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       if (errorsContainer) {
         // on ajoute un peu de margin à ce div s'il n'en a pas
         if (!errorsContainer.style) errorsContainer.style = {margin : "0.2em"};
+        var errorBlock = w.addElement(errorsContainer, 'p', {class:"error"}, errorMsg);
         if (delay) {
-          var tmpSpan = w.addElement(errorsContainer, 'span', null, errorMsg);
           setTimeout(function () {
-            errorsContainer.remove(tmpSpan);
+            errorsContainer.remove(errorBlock);
           }, delay *1000);
-        } else {
-          errorsContainer.textContent = errorMsg;
         }
       } else {
         log.error(new Error("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg));
@@ -373,8 +371,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           w.log.error = logError;
         }
         // on vérifie que l'on a nos containers et on les créé sinon
-        if (!errorsContainer) errorsContainer = w.addElement(wd.getElementsByTagName('body')[0], 'div',
-                                                             {id: 'errors', class: 'error'});
+        if (!errorsContainer) errorsContainer = w.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'errors'});
         if (!container) container = w.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'display'});
         // et on ajoute ces deux éléments aux options
         options.container = container;

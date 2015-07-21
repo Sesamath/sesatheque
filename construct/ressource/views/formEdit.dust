@@ -1,6 +1,6 @@
 <div class="block edit ressource">
     {?errors}
-    <div class="control-group has-error">
+    <div class="error">
         {#errors}<div class="help-block">{.}</div>{/errors}
     </div>
     {/errors}

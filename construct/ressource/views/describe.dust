@@ -1,6 +1,6 @@
 <div class="block ressource">
 {?error}
-    <p class="has-error">{error}</p>
+    <p class="error">{error}</p>
 {:else}
     <span class="publie">{?publie.value} Publié{:else} NON PUBLIÉ{/publie.value}</span>
     <span class="restriction">{?restriction.value}
