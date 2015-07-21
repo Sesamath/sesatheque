@@ -31,11 +31,11 @@
 
 <footer id="footer">
   <ul class="fl" role="navigation">
-    <li><a href="#">Infos légales</a></li>
+    <li><a href="#" onclick="alert('Cette page reste à rédiger')">Infos légales</a></li>
     <li><a href="http://www.sesamath.net">Association Sésamath</a></li>
   </ul>
   <p class="fr">
-    Propulsé par <a href="http://sesatheque.sesamath.net">Sésathèque</a>
+    Propulsé par <a href="#" onclick="alert('Le site http://sesatheque.sesamath.net va venir')">Sésathèque</a>
   </p>
 </footer>
 
