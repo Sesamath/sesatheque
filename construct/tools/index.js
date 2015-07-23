@@ -201,6 +201,23 @@ tools.merge = function(object, newValues, strict) {
 }
 
 /**
+ * Idem JSON.parse mais renvoie undefined en cas de plantage
+ * @param jsonString La string à parser
+ * @return {object}
+ */
+tools.parse = function (jsonString) {
+  var obj
+  if (typeof jsonString === "string") {
+    try {
+      obj = JSON.parse(jsonString)
+    } catch (e) {
+      log.error(e)
+    }
+  }
+  return obj
+}
+
+/**
  * Vire les espaces et les caractères de contrôle d'une chaine
  * @see http://unicode-table.com/en/
  * @param {string} source La chaîne à nettoyer

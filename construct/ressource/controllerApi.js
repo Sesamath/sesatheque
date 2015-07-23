@@ -50,7 +50,75 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var _ = require('lodash')
   //var flow = require('an-flow')
 
-  //var tools = require('../tools')
+  var tools = require('../tools')
+
+  var testConnexionDelay = 10*60*1000 // 10 min en ms
+
+  /**
+   * Met à jour une ressource issue de la bdd et appelle checkWriteAndOut pour vérifier les droits, l'enregistrer et sortir
+   * ou sort avant avec une erreur
+   * @param context
+   * @param error
+   * @param ressourceBdd
+   * @param ressourceNew
+   */
+  function checkUpdateAndOut(context, error, ressourceBdd, ressourceNew) {
+    if (error) {
+      sendJson(context, error)
+    } else {
+      log.perf(context.response, 'loaded')
+      if (ressourceBdd) _.merge(ressourceBdd, ressourceNew)
+      else ressourceBdd = ressourceNew
+      checkWriteAndOut(context, ressourceBdd)
+    }
+  }
+
+  /**
+   * Vérifie la validité de la ressource, les droits et enregistre la ressource
+   * @param context
+   * @param ressource
+   */
+  function checkWriteAndOut(context, ressource) {
+    log.debug("dans cb api checkWriteAndOut on récupère", ressource, 'api', {max:500})
+    var permission = ressource.oid ? 'update' : 'create'
+    // hasPermission et pas checkPermission pour être synchrone et gérer nos messages
+    if ($accessControl.hasPermission(permission, context, ressource)) {
+      // on ajoute celui qui poste comme auteur, sauf si c'est un admin
+      if (!$accessControl.hasAllRights(context)) {
+        var userOid = $accessControl.getCurrentUserOid(context)
+        if (!ressource.auteurs) ressource.auteurs = [userOid]
+        else if (ressource.auteurs.indexOf(userOid) === -1) ressource.auteurs.push(userOid)
+      }
+      $ressourceRepository.write(ressource, function (error, ressource) {
+        log.debug("et après $ressourceRepository.write", ressource, 'repository', {max:500})
+        if (error) log.debug("avec l'erreur", error, 'repository')
+        // oid - convertPost - valide+setVersion - store - store2 - fin
+        //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
+        //log.errorData(lassi.tmp[context.post.oid].m)
+        if (error) sendJson(context, error)
+        else {
+          log.perf(context.response, 'written')
+          if (context.get.format) {
+            // on veut une ref (ou un autre format) en réponse, sendRessource le gère
+            sendRessource(context, null, ressource)
+          } else {
+            // on ne renvoie que l'oid et des warnings éventuels
+            var data = {oid: ressource.oid}
+            if (!_.isEmpty(ressource.warnings)) {
+              data.warnings = ressource.warnings
+            }
+            sendJson(context, null, data)
+          }
+        }
+      })
+    } else {
+      // denied
+      var errorMsg = "Droits insuffisants"
+      if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
+      else errorMsg += " pour ajouter une ressource"
+      denied(context, errorMsg)
+    }
+  }
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
@@ -100,7 +168,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Renvoie l'id trouvé dans le post ou le get (en acceptant les propriétés id, oid ou origine&idOrigine)
+   * Renvoie l'id trouvé dans le post ou le get (en acceptant les propriétés id, oid ou origine&idOrigine, en GET ou POST)
    * @param context
    * @returns {string} oid ou origine/idOrigine ou undefined
    */
@@ -114,6 +182,30 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
+   * @param context
+   * @param visibility
+   */
+  function grabListe(context, visibility) {
+    log.debug("grabListe " +visibility)
+    var args
+    if (context.get.json) {
+      args = tools.parse(context.get.json)
+    } else {
+      args = context.get
+      // en get on a des string, faut parser ce qui devrait être un objet
+      if (args.filters) {
+        args.filters = tools.parse(args.filters)
+      }
+    }
+    tools.merge(args, context.post)
+    log.debug("grabListe " +visibility, args)
+    $ressourceRepository.getListe(visibility, args, function (error, ressources) {
+      sendListe(context, error, ressources)
+    })
+  }
+
+  /**
    * Équivalent de context.notFound en json
    * @param {Context} context
    * @param {string}  msg
@@ -122,6 +214,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (!msg) msg = "Contenu inexistant"
     context.status = 404;
     context.json({error: msg})
+  }
+
+  function optionsOk(context) {
+    context.setHeader('Access-Control-Allow-Methods', 'POST OPTIONS');
+    // et on laisse le middleware CORS faire son boulot
+    context.next(null, '');
   }
 
   /**
@@ -175,9 +273,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressources
    */
   function sendListe(context, error, ressources) {
-    if (error) {
-      sendJson(context, error)
-    } else {
+    if (error) sendJson(context, error)
+    else {
       var liste = []
       ressources = $accessControl.getListeLisible(context, ressources)
       if (ressources && ressources.length) {
@@ -252,68 +349,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   } /* */
 
   /**
-   * Met à jour une ressource issue de la bdd et appelle write pour l'enregistrer et sortir
-   * ou sort avant avec une erreur
-   * @param context
-   * @param error
-   * @param ressourceBdd
-   * @param ressourceNew
-   * @param {Function} [final=write] Une fct next (sinon ce sera write)
-   */
-  function updateAndOut(context, error, ressourceBdd, ressourceNew, final) {
-    if (error) {
-      sendJson(context, error)
-    } else {
-      log.perf(context.response, 'loaded')
-      // attention, le merge de lodash n'est pas récursif et n'écrase que les propriétés qui existent en destination
-      _.merge(ressourceBdd, ressourceNew)
-      if (final) final(context, ressourceBdd)
-      else write(context, ressourceBdd)
-    }
-  }
-
-  /**
-   * Vérifie la validité de la ressource, les droits et enregistre la ressource
-   * @param context
-   * @param ressource
-   */
-  function write(context, ressource) {
-    log.debug("dans cb api write on récupère", ressource, 'api', {max:500})
-    var permission = ressource.oid ? 'update' : 'create'
-    if ($accessControl.hasPermission(permission, context, ressource)) {
-      $ressourceRepository.write(ressource, function (error, ressource) {
-        log.debug("et après $ressourceRepository.write", ressource, 'repository', {max:500})
-        if (error) log.debug("avec l'erreur", error, 'repository')
-        // oid - convertPost - valide+setVersion - store - store2 - fin
-        //lassi.tmp[context.post.oid].m += '\tretSt ' +log.getElapsed(lassi.tmp[context.post.oid].s)
-        //log.errorData(lassi.tmp[context.post.oid].m)
-        if (error) sendJson(context, error)
-        else {
-          log.perf(context.response, 'written')
-          if (context.get.format === 'ref') {
-            // on veut une ref en réponse, sendRessource gère le format
-            sendRessource(context, null, ressource)
-          } else {
-            // on ne renvoie que l'oid et des warnings éventuels
-            var data = {oid: ressource.oid}
-            if (!_.isEmpty(ressource.warnings)) {
-              data.warnings = ressource.warnings
-            }
-            sendJson(context, null, data)
-          }
-        }
-      })
-    } else {
-      // denied
-      var errorMsg = "Droits insuffisants"
-      if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
-      else errorMsg += " pour ajouter une ressource"
-      denied(context, errorMsg)
-    }
-  }
-
-
-  /**
    * Read (accepte ?format=ref|compact)
    * @callback GET /api/ressource/:oid
    */
@@ -340,11 +375,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.get('public/:oid', function (context) {
     var oid = context.arguments.oid
-    $ressourceRepository.loadPublic(oid, function (error, ressource) {
-      if (error) sendJson(context, error)
-      else if (ressource) sendJson(context, null, ressource)
-      else notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
-    })
+    if (oid !== 'by') {
+      $ressourceRepository.loadPublic(oid, function (error, ressource) {
+        if (error) sendJson(context, error)
+        else if (ressource) sendJson(context, null, ressource)
+        else notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
+      })
+    }
   })
   /**
    * Read public byOrigine (sans session)
@@ -422,18 +459,23 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       try {
         if (error) {
           sendJson(context, error)
-        } else if (partial) {
-          // faut la charger
+        } else {
+          // faut la charger, ne serait-ce que pour savoir si elle existe
           if (ressource.oid) { // par oid
             $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
-              updateAndOut(context, error, ressourceBdd, ressource)
+              checkUpdateAndOut(context, error, ressourceBdd, ressource)
             })
-          } else { // ou par origine/idOrigine
+          } else if (ressource.origine && ressource.idOrigine) { // ou par origine/idOrigine
             $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
-              updateAndOut(context, error, ressourceBdd, ressource)
+              checkUpdateAndOut(context, error, ressourceBdd, ressource)
             })
+          } else if (ressource.origine === "local") {
+            // seul cas autorisé où l'idOrigine n'est pas obligatoire ($ressourceRepository.write le créera)
+            checkWriteAndOut(context, ressource)
+          } else {
+            throw new Error("Il faut fournir oid ou origine/idOrigine")
           }
-        } else write(context, ressource)
+        }
 
       } catch (error) {
         sendJson(context, error)
@@ -442,6 +484,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
   postRessource.timeout = 5000
   controller.post('ressource', postRessource)
+  controller.options('ressource', optionsOk)
 
   /**
    * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
@@ -470,12 +513,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             // y'a eu des erreurs
             else if (errors.length) sendJson(context, errors)
             // ni l'un ni l'autre, faut sauvegarder
-            else {
-              $ressourceRepository.write(ressource, function (error, ressource) {
-                if (error) sendJson(context, error)
-                else sendJson(context, null, {success: true, oid:ressource.oid})
-              })
-            }
+            else checkWriteAndOut(context, ressource)
           } else {
             notFound(context, "La ressource " + ref + " n'existe pas")
           }
@@ -489,6 +527,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
   postRessourceAddRelations.timeout = 5000
   controller.post('ressource/addRelations', postRessourceAddRelations)
+  controller.options('ressource/addRelations', optionsOk)
 
   /**
    * Delete
@@ -521,116 +560,122 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Liste d'après les filtres en json (qui peuvent être multiple)
-   *
-   * Le json doit contenir
-   * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
-   *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
-   * et peut contenir
-   * - orderBy : un nom d'index
-   * - order : 'desc' si on veut l'ordre descendant
-   * - start : offset
-   * - nb : nb de résultats voulus
-   * @callback POST /api/public/by
+   * Liste de ressources publiques d'après les filtres demandés (Cf README pour les filtres possibles)
+   * @callback GET /api/liste/public
    */
-  controller.post('public/by', function (context) {
-    log.debug('api.public.by reçoit', context.post)
-    $ressourceRepository.getListe('public', context.post, function (error, ressources) {
-      sendListe(context, error, ressources)
-    })
+  controller.get('liste/public', function (context) {
+    grabListe(context, 'public')
   })
+
   /**
-   * Idem en incluant les corrections
-   * @callback POST /api/prof/by
+   * Liste de ressources publiques d'après les filtres demandés
+   * Cf GET /api/public pour le format de la demande
+   * @callback POST /api/liste/public
    */
-  controller.post('prof/by', function (context) {
+  controller.post('liste/public', function (context) {
+    grabListe(context, 'public')
+  })
+  controller.options('liste/public', optionsOk)
+
+  /**
+   * Liste de ressources publique corrections incluses
+   * @callback GET /api/liste/prof
+   */
+  controller.get('liste/prof', function (context) {
     if ($accessControl.hasGenericPermission('correction', context)) {
-      $ressourceRepository.getListe('correction', context.post, function (error, ressources) {
-        sendListe(context, error, ressources)
-      })
-    }
-    else denied(context, "Il faut être authentifié pour accéder aux ressources prof")
-  })
-  /**
-   * Idem pour les ressources du user courant
-   * @callback POST /api/perso/by
-   */
-  controller.post('perso/by', function (context) {
-    var oid = $accessControl.currentUserOid
-    if (oid) {
-      $ressourceRepository.getListe('auteur/' +oid, context.post, function (error, ressources) {
-        if (error) sendJson(context, error)
-        else sendJson(context, null, ressources)
-      })
+      grabListe(context, 'correction')
+    } else if ($accessControl.isAuthenticated(context)) {
+      denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
     } else {
-      // on redirige vers l'authentification qui nous rappellera ensuite
-      // @todo le module d'authentification devrait fournir une méthode pour ça
+      denied(context, "Il faut être authentifié pour accéder aux corrigés")
+    }
+  })
+
+  /**
+   * Liste de ressources publique corrections incluses
+   * @callback POST /api/liste/prof
+   */
+  controller.post('liste/prof', function (context) {
+    if ($accessControl.hasGenericPermission('correction', context)) {
+      grabListe(context, 'correction')
+    } else if ($accessControl.isAuthenticated(context)) {
+      denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
+    } else {
+      denied(context, "Il faut être authentifié pour accéder aux corrigés")
+    }
+  })
+  controller.options('liste/prof', optionsOk)
+
+  /**
+   * Idem pour les ressources du user courant, mais on va faire un test sur le serveur sso si on est pas authentifié
+   * @callback GET /api/liste/perso
+   */
+  controller.get('liste/perso', function (context) {
+    log.debug("controleur GET /api/liste/perso", context.session)
+    // cette url est suceptible d'être appelée
+    var oid = $accessControl.getCurrentUserOid(context)
+    log.debug("oid : " +oid)
+    if (oid) {
+      grabListe(context, 'auteur/' +oid)
+    } else if (context.session.user && context.session.lastCheck && context.session.lastCheck > ((new Date()).getTime() - testConnexionDelay)) {
+      // on redirige vers l'authentification qui nous rappellera ensuite avec un ticket
       var urlConnexion = context.request.originalUrl
-      urlConnexion += context.request.originalUrl.indexOf('?') ? '&' : '?'
-      urlConnexion += 'connexion'
+      urlConnexion += context.request.originalUrl.indexOf('?') > 0 ? '&' : '?'
+      urlConnexion += 'testConnexion'
+      log.debug("GET api/perso redirige vers " +urlConnexion)
       context.redirect(urlConnexion)
     }
   })
 
   /**
-   * Liste d'après les filtres postés en json (qui peuvent être multiple)
-   * Le json doit contenir
-   * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
-   *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
-   * et peut contenir
-   * - orderBy : un nom d'index
-   * - order : 'desc' si on veut l'ordre descendant
-   * - start : offset
-   * - nb : nb de résultats voulus
-   * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
-   * @callback POST /api/all/by
+   * Idem pour les ressources du user courant
+   * @callback POST /api/liste/perso
    */
-  function postBy(context) {
-    $ressourceRepository.getListe('all', context.post, function (error, ressources) {
-      sendListe(context, error, ressources)
-    })
-  }
-  postBy.timeout = 3000
-  controller.post('by', postBy)
+  controller.post('liste/perso', function (context) {
+    var oid = $accessControl.getCurrentUserOid(context)
+    if (oid) {
+      grabListe(context, 'auteur/' +oid)
+    } else {
+      // on redirige vers l'authentification qui nous rappellera ensuite, mais on est en post
+      // donc faut reconstruire l'url en GET d'après cette demande en post
+      var urlConnexion = context.request.originalUrl
+      urlConnexion += context.request.originalUrl.indexOf('?') ? '&' : '?'
+      var queryString = ''
+      for (var prop in context.post) {
+        if (context.post.hasOwnProperty(prop)) queryString += '&' +prop +'=' +encodeURIComponent(context.post[prop])
+      }
+      queryString += '&connexion'
+      if (context.request.originalUrl.indexOf('?')) urlConnexion += queryString
+      // faut virer notre premier & (on est sûr qu'il existe même si y'avait pas de post grace au &connexion)
+      else urlConnexion += '?' +queryString.substr(1)
+      context.redirect(urlConnexion)
+    }
+  })
+  controller.options('liste/perso', optionsOk)
 
   /**
-   * Liste d'après les filtres en json (qui peuvent être multiple), que l'on rend aussi dispo aussi en get
-   * Les arguments peuvent être
-   * - filters : array d'objets {index:nomIndex, values:tableauValeurs},
-   *        tableauValeurs peut être undefined et ça remontera toutes les ressources ayant cet index
-   * et peut contenir
-   * - orderBy : un nom d'index
-   * - order : 'desc' si on veut l'ordre descendant
-   * - start : offset
-   * - nb : nb de résultats voulus
-   * - format : compact|ref pour n'avoir que des refs ou le format compact (Cf $ressourceConverter.toCompactFormat)
-   * et peuvent éventuellement être regroupés dans un seul argument json=
-   * @callback GET /api/by
+   * Pour récupérer aussi toutes les ressources privées, faut avoir tous les droits
+   * @callback GET /api/liste/all
    */
-  function getBy(context) {
-    var options, errorMsg
-    if (context.get.json) {
-      try {
-        options = JSON.parse(context.get.json)
-        // faut l'ajouter ici pour que sendListe l'utilise
-        if (options.format && !context.get.format) context.get.format = options.format
-      } catch (error) {
-        errorMsg = 'json invalide : ' +context.arguments.json
-      }
-    } else {
-        options = context.get
-    }
-    if (_.isEmpty(options)) {
-      errorMsg = "Il faut passer des critères de recherche"
-    }
-    if (errorMsg) {
-      sendJson(context, null, {error:errorMsg})
-    } else {
-      $ressourceRepository.getListe('public', options, function (error, ressources) {
-        sendListe(context, error, ressources)
-      })
-    }
+  function getAllBy(context) {
+    // si on lance la requete faut filtrer d'après les droits avec $accessControl.getListeLisible,
+    // donc il récupèrera pas forcément nb résultats :-/
+    // franchement pas terrible, donc on laisse tomber et on vérifie les droits all avant de lancer la requete
+    if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
+    else denied("Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
   }
-  getBy.timeout = 3000
-  controller.get('by', getBy)
+  getAllBy.timeout = 3000
+  controller.get('liste/all', getAllBy)
+
+  /**
+   * Pour récupérer aussi toutes les ressources privées, faut avoir tous les droits
+   * @callback POST /api/liste/all
+   */
+  function postAllBy(context) {
+    if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
+    else denied("Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
+  }
+  postAllBy.timeout = 3000
+  controller.post('liste/all', postAllBy)
+  controller.options('liste/all', optionsOk)
 }

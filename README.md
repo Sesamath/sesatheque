@@ -45,7 +45,7 @@ Les commandes qui nécessitent des droits les vérifient via l'ip (qui doit êtr
 
 À privilégier pour les appel de ressources qui sont dans les arbres public (de gauche).
 
-*  POST   /api/ressource     Enregistre une nouvelle ressource ou la met à jour
+*  POST   /api/ressource     Enregistre une nouvelle ressource ou la met à jour (retourne success, oid ou error, voire une Ref si on demande format:ref dans le post)
 *  DELETE /api/ressource/:id Efface une ressource
 *  DELETE /api/ressource/:origine/:id
 *  POST   /api/ressourceMerge Pour les envois partiels (genre le titre qui change)

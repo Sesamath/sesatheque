@@ -35,20 +35,17 @@
  * @fileOverview Définition de l'application
  * - chargement lassi
  * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
+ * - ajout d'éventuels composants en prérequi|postrequis définis dans la conf
+ * - ajout de middleware sur le rail (CORS, Expire & co)
  * - boot de l'appli
  */
-//console.log("Démarrage de l'application avec l'environnement", process.env)
 
-/**
- * On ajoute un access.log avant d'appeler lassi
- * En dev on a un access.log avec le contenu des POST
- */
 var fs = require('fs')
 var _ = require('lodash')
 var morgan = require('morgan')
 var moment = require('moment')
 var tools = require('./tools')
-var settings = require('../config')
+var config = require('../config')
 
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
@@ -65,7 +62,7 @@ for (var i = 10; i < 1000; i +=100) {
 GLOBAL.isProd = ((lassi.settings.application.staging === 'prod'))
 lassi.log('app', "Démarrage de l'application avec l'environnement", (lassi.settings.application.staging).red)
 
-// nos loggers (mais lassi n'est pas encore en global ici...)
+// nos loggers
 GLOBAL.log = require('./tools/log.js')
 
 
@@ -234,7 +231,7 @@ function afterRailSession(rail) {
   /**
    * access.log (mis sur le rail relativement au début mais il utilise on-finished pour écrire à la fin)
    */
-  var accessLog = settings.logs.dir +'/' +settings.logs.access
+  var accessLog = config.logs.dir +'/' +config.logs.access
   try {
     var logAccessWriteStream = fs.createWriteStream(accessLog, {'flags': 'a'});
     if (logAccessWriteStream) {
@@ -259,7 +256,7 @@ function afterRailSession(rail) {
         stream: logAccessWriteStream
       }
       // en dev on ajoute les var postées
-      if (settings.application.staging === 'dev') {
+      if (config.application.staging === 'dev') {
         morgan.token('post', function (req) {
           return (_.isEmpty(req.body)) ? '' : tools.stringify(req.body)
         })

@@ -373,7 +373,8 @@ var ressourceConfig = {
     jour : 'DD/MM/YYYY'
   },
   limites : {
-    maxSql : 500
+    maxSql : 500,
+    listeNbDefault : 25
   },
   cacheTTL : 3600
 };

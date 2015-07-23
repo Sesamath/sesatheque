@@ -75,7 +75,7 @@ module.exports = function ($settings) {
     if (ressource) {
       oid = ressource.oid || parseInt(ressource, 10)
       if (ressource.restriction !== restriction.aucune) isPublic = false
-    } else if (context && context.session && context.session.user && context.session.user.id) {
+    } else if (context && context.session && context.session.user && context.session.user.oid) {
       isPublic = false
     }
     if (routes.hasOwnProperty(action)) {

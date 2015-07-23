@@ -79,12 +79,17 @@ module.exports = function($flashMessage) {
     }
 
     /* on envoie toutes les réponses dans le log de debug */
-    if (!isProd) log.debug(
-        'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
-        data,
-        'beforeTransport',
-        {max:2000}
-    ) /* */
+    if (!isProd) {
+      log.debug(
+          'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
+          data,
+          'beforeTransport',
+          {max:2000}
+      )
+      if (isHtml) log.debug("html vide ? " +_.isEmpty(data.contentBloc))
+      else if (isApi) log.debug("api vide ? " +_.isEmpty(data))
+      else log.debug("statique")
+    } /* */
 
     /**
      * Gestion des erreurs (lassi ne l'a pas encore fait)
@@ -106,7 +111,9 @@ module.exports = function($flashMessage) {
 
     } else {
       // erreur 404 ?
-      if (!context.status && ( (isHtml && _.isEmpty(data.contentBloc)) || (isApi && _.isEmpty(data)) ) ) {
+      var isVide = isHtml ? _.isEmpty(data.contentBloc) : isApi ? _.isEmpty(data) : false
+      log.debug("isVide " +isVide)
+      if (!context.status && isVide) {
         context.status = 404
         log.debug(reqHttp + ' : pas de status ni content => 404')
       }

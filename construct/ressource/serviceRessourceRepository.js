@@ -53,6 +53,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
   var config = require('./config')
   var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
+  var listeNbDefault = config.limites.listeNbDefault || 10
 
   /**
    * Le dernier (plus grand) idOrigine utilisé pour l'origine "local"
@@ -564,7 +565,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
       optionsSafe.orderBy = options.orderBy || 'oid'
       if (options.order === 'desc') optionsSafe.order = 'desc'
       start = parseInt(options.start, 10) || 0
-      nb = parseInt(options.nb, 10) || 10
+      nb = parseInt(options.nb, 10) || listeNbDefault
       if (nb > limitMax) {
         log.error(new Error("nb de résultats demandés supérieur à la limite max " +nb +'>' +limitMax))
         nb = limitMax

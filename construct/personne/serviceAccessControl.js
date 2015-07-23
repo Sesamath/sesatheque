@@ -170,6 +170,49 @@ module.exports = function (Groupe, $settings, $personneRepository) {
   }
 
   /**
+   * Ajoute un groupe d'après son id (vérifie qu'il existe)
+   * @param {Personne} personne
+   * @param {int} groupeId
+   * @param {EntityInstance~StoreCallback} next
+   */
+  $accessControl.addGroupeById = function (personne, groupeId, next) {
+    if (!personne.groupes[groupeId]) {
+      $personneRepository.loadGroupe(groupeId, function (error, groupe) {
+        if (error) next(error)
+        else {
+          if (groupe) personne.groupes[groupeId] = true
+          else log.error("Aucun groupe d'id " +groupeId)
+          next(null, personne)
+        }
+      })
+    }
+  }
+
+  /**
+   * Ajoute un groupe à la personne (en le créant s'il n'existait pas)
+   * @param {Personne} personne
+   * @param {string} groupeNom Le nom
+   * @param {EntityInstance~StoreCallback} next
+   */
+  $accessControl.addGroupeByName = function (personne, groupeNom, next) {
+    $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
+      if (error) {
+        next(error, personne)
+      } else if (groupe) {
+        personne.groupes[groupe.oid] = true
+        next(null, personne)
+      } else {
+        // on le créé au passage
+        Groupe.create({nom:groupeNom}).store(function (error, groupe) {
+          log.debug('après store ', groupe)
+          if (groupe) personne.groupes[groupe.oid] = true
+          next(error, personne)
+        })
+      }
+    })
+  }
+
+  /**
    * Vérifie la permission pour l'utilisateur courant et cette ressource
    * @param permission
    * @param {Context} context
@@ -205,6 +248,17 @@ module.exports = function (Groupe, $settings, $personneRepository) {
       }
       next(msg)
     }
+  }
+
+  /**
+   * Retourne l'oid du user courant ou undefined
+   * @param {Context} context
+   */
+  $accessControl.getCurrentUserOid = function(context) {
+    var oid
+    if (context.session.user && context.session.user.oid) oid = context.session.user.oid
+
+    return oid
   }
 
   /**
@@ -340,57 +394,20 @@ module.exports = function (Groupe, $settings, $personneRepository) {
   }
 
   /**
-   * Retourne l'oid du user courant ou undefined
-   * @param {Context} context
+   * Connecte un user (le met en session)
+   * @param context
+   * @param personne
    */
-  $accessControl.currentUserOid = function(context) {
-    var oid
-    if (context && context.session && context.session.user && context.session.user.oid) oid = context.session.user.oid
-
-    return oid
+  $accessControl.login = function (context, personne) {
+    context.session.user = personne;
   }
 
   /**
-   * Ajoute un groupe d'après son id (vérifie qu'il existe)
-   * @param {Personne} personne
-   * @param {int} groupeId
-   * @param {EntityInstance~StoreCallback} next
+   * Déconnecte l'utilisateur courant
+   * @param context
    */
-  $accessControl.addGroupeById = function (personne, groupeId, next) {
-    if (!personne.groupes[groupeId]) {
-      $personneRepository.loadGroupe(groupeId, function (error, groupe) {
-        if (error) next(error)
-        else {
-          if (groupe) personne.groupes[groupeId] = true
-          else log.error("Aucun groupe d'id " +groupeId)
-          next(null, personne)
-        }
-      })
-    }
-  }
-
-  /**
-   * Ajoute un groupe à la personne (en le créant s'il n'existait pas)
-   * @param {Personne} personne
-   * @param {string} groupeNom Le nom
-   * @param {EntityInstance~StoreCallback} next
-   */
-  $accessControl.addGroupeByName = function (personne, groupeNom, next) {
-    $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
-      if (error) {
-        next(error, personne)
-      } else if (groupe) {
-        personne.groupes[groupe.oid] = true
-        next(null, personne)
-      } else {
-        // on le créé au passage
-        Groupe.create({nom:groupeNom}).store(function (error, groupe) {
-          log.debug('après store ', groupe)
-          if (groupe) personne.groupes[groupe.oid] = true
-          next(error, personne)
-        })
-      }
-    })
+  $accessControl.logout = function (context) {
+    context.session.user = {}
   }
 
   return $accessControl
