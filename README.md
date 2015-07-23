@@ -1,4 +1,4 @@
-Application Bibliothèque
+Application Sésathèque
 ========================
 
 <!--
@@ -52,22 +52,23 @@ Les commandes qui nécessitent des droits les vérifient via l'ip (qui doit êtr
 
 ### Les listes
 
-* POST   /api/public/by     Pour récupérer une liste de ressources publiques (poster en json les params, cf le jsdoc du code)
-* POST   /api/prof/by       Pour récupérer une liste de ressources réservées aux prof
-* POST   /api/my/by         Pour récupérer les ressources de l'utilisateur
+* GET|POST /api/liste/public     Pour récupérer une liste de ressources publiques
+* GET|POST /api/liste/prof       Pour récupérer une liste de ressources incluant les corrigés (donc réservées aux profs du SSO Sésamath)
+* GET|POST /api/liste/perso      Pour récupérer les ressources de l'utilisateur (en GET ajouter &connexion évitera une redirection interne éventuelle pour l'ajouter si on est pas connecté)
 
-Il faut envoyer un objet avec les propriétés (toutes facultatives)
-
-*  filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
-            où valeur peut être undefined ou un tableau de valeurs
-            (si non précisé filtrera sur les ressources ayant cet index)
-*  orderBy : L'index sur lequel trier
-*  order   : asc ou desc
-*  start   : L'indice de la 1re valeur à remonter
-*  nb      : Le nombre de ressources à remonter
-*  full    : Préciser true si on veut aussi la propriété parametres des ressources
-            (sinon on renvoie tout sauf elle)
+Les arguments du GET ou du POST peuvent contenir
+* filters : array d'objets {index:nomIndex, values:tableauValeurs}, values peut être omis et ça remontera toutes les ressources ayant cet index
+* orderBy : un nom d'index
+* order   : préciser 'desc' si on veut l'ordre descendant
+* start   : offset
+* nb      : nb de résultats voulus (par défaut settings.ressource.limites.listeNbDefault, à priori 25), sera ramené à settings.ressource.limites.maxSql (à priori 500) si supérieur
+* format  : ref|compact|full|default, par défaut on remonte chaque ressource avec toutes ses propriétés sauf paramètres 
+(préciser full si on les veut, cf $ressourceConverter.(toRef|toCompact) pour les formats ref et compact, ou regarder par ex le résultat de GET /api/liste/public/by?filters=[{%22index%22:%22typeTechnique%22,%22values%22:[%22am%22]}]&format=compact
             
+En GET, on peut préciser tous les arguments dans une seule chaine json avec ?json=…
+
+Il y a toujours un merge avec le POST, qui prend donc l'ascendant si le même paramètre est précisé en GET et en POST
+
 ### Les arbres
 
 * POST   /api/arbre         Permet d'enregistrer une ressource en passant un json au format [Arbre](Arbre.html)
