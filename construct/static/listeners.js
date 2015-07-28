@@ -155,13 +155,20 @@ module.exports = function($flashMessage) {
       // et vérifie que errors et warnings on une vue en absolu
       if (data.errors) data.errors.$view = __dirname +'/views/errors'
       if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
-      // s'il n'y est pas déjà, on met le titre en data pour que le layout l'affiche aussi
+      // s'il n'y en a pas, on met le titre en data pour que le layout l'affiche aussi
       if (data.$metas && data.$metas.title && !data.titre) {
         data.titre = data.$metas.title
       }
       if (!data.$metas.css) data.$metas.css = []
       if (context.layout === 'iframe') data.$metas.css.push('/styles/iframe.css')
       else data.$metas.css.push('/styles/page.css')
+    }
+
+    if (isHtml && !isProd) {
+      for (var bloc in data) {
+        if (data.hasOwnProperty(bloc) && bloc.substr(0, 1) !== '$' && typeof data[bloc] !== 'string' && !data[bloc].$view)
+          log.error(new Error("Le bloc " +bloc +" n'a pas de $view"))
+      }
     }
 
     log('fin de beforeTransport avec les data', data, {trim:5000})

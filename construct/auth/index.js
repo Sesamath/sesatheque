@@ -28,47 +28,16 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-'use strict';
+'use strict'
+console.log("start comp auth")
+var authComponent = lassi.component('auth')
 
-module.exports = function (controller) {
-  /**
-   * Ajoute un menu minimal
-   * @param data
-   * @param context
-   */
-  function addNavigation (data, context) {
-    var isAuthenticated = (context && context.user && context.user.oid)
-    var prefix = isAuthenticated ? '/ressource/' : '/public/'
-    data.navigation = {
-      links : [{href:prefix +'recherche', value:'Recherche', icon:'search'}]
-    }
-    // @todo créer un service menu avec addBuilder(name, fn), fn(context, data) et build(context, data)
-    if (isAuthenticated) data.navigation.links.push({href:'/ressource/ajouter', value:'Ajouter une ressource', icon:'note_add'})
-  }
+authComponent.service('$auth', function($accessControl, $views) {
+  return require('./serviceAuth')($accessControl, $views)
+})
 
-  //var tools = require('../tools')
-
-  var baseData = {
-    $metas : {},
-    $views : __dirname +'/views'
-  }
-
-  // nos ressources statiques génériques
-  controller.serve(__dirname +'/public')
-
-  // home
-  controller.get('/', function (context) {
-    context.layout = 'page';
-    var data = baseData
-    // log('le contexte dans le controleur de static, action /',context)
-    data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
-    // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
-    data.contentBloc = {
-      $view : __dirname +'/views/home',
-      // ce content est la variable passée au template dust
-      content : "Ce site est encore un prototype expérimental."
-    }
-    addNavigation(data, context)
-    context.html(data)
-  })
-}
+authComponent.controller(function ($auth, $accessControl, $views, $flashMessages) {
+  require('./controllerAuth')(this, $auth, $accessControl, $views, $flashMessages)
+})
+// rien à faire en config
+authComponent.config(function() {})

@@ -1,1 +1,1 @@
-{#errors}<p class="error">{.}</p>{/errors}
+{#errorMessages}<p class="error">{.}</p>{/errorMessages}

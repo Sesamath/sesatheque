@@ -31,22 +31,19 @@
 
 'use strict'
 
-/**
- * Service pour récupérer les routes d'affichage des ressources
- * @namespace $routes
- * @requires $settings
- */
-module.exports = function ($settings) {
+module.exports = function () {
   var configRessource = require('./config')
   var routes = configRessource.constantes.routes
   var restriction = configRessource.constantes.restriction
+  /**
+   * Service pour récupérer les routes d'affichage des ressources
+   * @service $routes
+   */
   var $routes = {}
 
   /**
    * Retourne la route (sans préfixe de controleur ni slash de début) d'une action
    * Les arguments supplémentaires sont concaténé avec /
-   * @memberOf $routes
-   *
    * @param {string} action
    * @returns {string} La route
    */
@@ -63,12 +60,10 @@ module.exports = function ($settings) {
   /**
    * Retourne la route absolue (commence par /) d'une action (avec public ou ressource au début suivant la ressource)
    * Les arguments supplémentaires sont concaténé avec /
-   * @memberOf $routes
-   *
    * @param {string}           action (display|describe|preview)
    * @param {Ressource|number} [ressource] ou oid de ressource
    * @param {Context}          [context]
-   * @returns {string}
+   * @returns {string} La route absolue
    */
   $routes.getAbs = function(action, ressource, context) {
     var route, oid, isPublic = true
@@ -100,7 +95,7 @@ module.exports = function ($settings) {
    * @param actionName
    * @param ressource
    * @param {string} [label=ressource.nom] Le texte du lien
-   * @returns {*}
+   * @returns {string} Le code html du lien
    */
   $routes.getTagA = function (actionName, ressource, label) {
     var html

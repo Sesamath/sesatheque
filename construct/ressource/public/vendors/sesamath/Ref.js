@@ -65,20 +65,34 @@ function Ref(initObj) {
    */
   this.typeTechnique = (initObj.typeTechnique && typeof initObj.typeTechnique === 'string') ? initObj.typeTechnique : 'arbre';
   /**
-   * Un id de catégorie éventuel (pour un picto)
-   * @type {number}
+   * Un ou des id de catégorie(s) éventuel (pour un picto)
+   * @type {Array}
    */
   this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : [];
   /**
    * Les enfants éventuels, un tableaux d'objets qui peuvent être un mix de Ref et Ressource
-   * @type {Object[]}
+   * @type {Ref[]|Ressource[]}
    */
   if (initObj.enfants && initObj.enfants instanceof Array) this.enfants = initObj.enfants;
-  /** affichage */
+  /**
+   * Uri d'affichage (facultatif), commence par /public/ ou /ressource/
+   * @type {string}
+   */
   this.displayUri = initObj.displayUri;
+  /**
+   * Url absolue d'affichage (facultatif)
+   * @type {string}
+   */
   this.displayUrl = initObj.displayUrl;
-  /** Uri des datas (json) */
+  /**
+   * Uri des data en json (facultatif), commence par /public/ ou /ressource/
+   * @type {string}
+   */
   this.dataUri = initObj.dataUri;
+  /**
+   * Url absolue des data en json (facultatif)
+   * @type {string}
+   */
   this.dataUrl = initObj.dataUrl;
 }
 

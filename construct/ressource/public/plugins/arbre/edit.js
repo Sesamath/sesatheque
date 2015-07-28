@@ -166,12 +166,12 @@ try {
           // cf $.jstree.defaults.contextmenu sur
           // https://github.com/vakata/jstree/blob/master/src/jstree.contextmenu.js#L58
           /**
-           *
-           * @param node Le node, avec les propriétés {a_attr, icon, text}
+           * La liste de nos éléments de menu
+           * @see http://www.jstree.com/api/#/?q=$.jstree.defaults&f=$.jstree.defaults.contextmenu.items
+           * @param node Le node, avec les propriétés a_attr, icon, text
            * @param cb à rappeler avec les items du menu contextuel pour ce node
            */
           items : function (node, cb) {
-            // cf http://www.jstree.com/api/#/?q=$.jstree.defaults&f=$.jstree.defaults.contextmenu.items
             // on met une fct car le résultat dépend de l'item sur lequel on fait un clic droit
             var items = {};
             var isRacine = (node.parent === '#');

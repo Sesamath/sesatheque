@@ -31,13 +31,10 @@
 
 'use strict';
 
-/**
- * Init de notre service $ressourceRepository
- */
 module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessource, $cache) {
   /**
    * Service d'accès aux ressources, utilisé par les différents contrôleurs
-   * @namespace $ressourceRepository
+   * @service $ressourceRepository
    * @requires Ressource
    * @requires Archive
    * @requires $ressourceControl
@@ -57,14 +54,17 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
   /**
    * Le dernier (plus grand) idOrigine utilisé pour l'origine "local"
+   * @private
    * @type {number}
    */
   var lastLocalId = 0
 
   /**
-   * Fonctions privées, helper des méthodes du service
+   * Fait un peu de nettoyage avant d'enregistrer en base de données
+   * @private
+   * @param ressource
+   * @param next
    */
-
   function beforeStore(ressource, next) {
     if (ressource) {
       // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
@@ -103,6 +103,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
   /**
    * Récupère un idOrigine dispo pour l'origine local
+   * @private
    * @param ressource
    * @param next
    */
@@ -112,6 +113,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
     /**
      * Récupère le dernier id en bdd (0 si aucune ressource local)
+     * @private
      * @param cb callback appelée avec cb(error, id)
      */
     function getFromDb(cb) {
@@ -124,6 +126,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
     /**
      * appelle next(error, id) ou elle même (10x max)
+     * @private
      */
     function getReserved(next) {
       nbTest ++
@@ -189,13 +192,14 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
    * ou si une des propriétés listées dans config.versionTriggers a changée de valeur
    * Affecte la propriété oid si la ressource existait mais qu'on ne l'avait pas chargée depuis le cache ou la bdd
    * Ajoute l'idOrigine si inexistant avec origine local
+   * @private
    * @param {Ressource} ressource
    * @param {Function} next
-   * @private
    */
   function updateVersion(ressource, next) {
     /**
      * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
+     * @private
      * @param ressource
      * @param ressourceBdd
      * @param next
@@ -276,6 +280,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
   function cacheAndNext(error, ressources, next) {
     /**
      * Helper qui process une ressource et la met en cache (et rend la main sans attendre le résultat)
+     * @private
      * @param ressource
      */
     function processOne(ressource) {
@@ -355,54 +360,10 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
   $ressourceRepository.archive = function (ressource, next) {
     try {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n'existe pas encore")
-      if (!ressource.store) throw new Error("La ressource " + ressource.oid + " n'a pas de méthode store")
-
       Archive.create(ressource).store(next)
     } catch (error) {
       next(error)
     }
-  }
-
-  /**
-   * Ajoute ou modifie une ressource (contrôle la validité avant)
-   * @param {Ressource} ressource
-   * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
-   */
-  $ressourceRepository.write = function(ressource, next) {
-    if (ressource.constructor.name !== 'Entity') {
-      log.debug("cast en Ressource dans write")
-      ressource = Ressource.create(ressource)
-    }
-    flow().seq(function() {
-        $ressourceControl.valide(ressource, this)
-
-      }).seq(function (ressource) {
-        updateVersion(ressource, this)
-
-      }).seq(function (ressource) {
-        setLastLocalId(ressource, this)
-
-      }).seq(function (ressource) {
-        beforeStore(ressource, this)
-
-      }).seq(function (ressource) {
-        log.debug('on va enregistrer ' +ressource.origine +'/' +ressource.idOrigine)
-        ressource.store(this)
-
-      }).seq(function (ressource) {
-        // mise en cache et passage au suivant
-        if (!ressource.oid) this(new Error("Après un write la ressource n'a toujours pas d'oid"))
-        else {
-          $cacheRessource.set(ressource)
-          log.debug('write ' + ressource.oid + ' ok')
-          if (next) next(null, ressource)
-        }
-
-      }).catch(function(error, ressKo) {
-        var ressRenvoyee = ressKo || ressource
-        log.error(error)
-        if (next) next(error, ressRenvoyee) // on passe quand même la ressource dans l'état où elle était avant le pb
-      })
   }
 
   /**
@@ -427,101 +388,6 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
     } else {
       next(new Error("delete appelé sans ressource"))
     }
-  }
-
-  /**
-   * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
-   * @param {number|String} oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
-   * @param {Function}      next La callback qui sera appelée avec (error, ressource)
-   *                             Attention, ressource peut avoir perdu son prototype s'il vient du cache
-   * @returns {undefined}
-   */
-  $ressourceRepository.load = function(oid, next) {
-    log.debug('load ressource_' +oid, null, 'repository')
-    if (_.isString(oid) && oid.indexOf('/') > 0) {
-      var p = oid.split('/')
-      if (p.length === 2) $ressourceRepository.loadByOrigin(p[0], p[1], next)
-      else next(new Error("identifiant invalide : " +oid))
-    } else {
-      $cacheRessource.get(oid, function (error, ressourceCached) {
-        if (ressourceCached) next(null, ressourceCached)
-        else Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
-          cacheAndNext(error, ressource, next)
-        })
-      })
-    }
-  }
-
-  /**
-   * Récupère une ressource publique et la passe à next (seulement une erreur si elle n'existe pas)
-   * @param {number|String} oid  L'identifiant de la ressource
-   * @param {Function}      next La callback qui sera appelée avec (error, ressource).
-   * @returns {undefined}
-   */
-  $ressourceRepository.loadPublic = function(oid, next) {
-    $cacheRessource.get(oid, function (error, ressourceCached) {
-      if (ressourceCached) next(null, ressourceCached)
-      else {
-        Ressource
-            .match('oid').equals(oid)
-            .match('restriction').equals(config.constantes.restriction.aucune)
-            .grabOne(function (error, ressource) {
-              cacheAndNext(error, ressource, next)
-            })
-      }
-    })
-  }
-
-  /**
-   * Récupère une ressource d'après son idOrigine et la passe à next
-   * @param {string}   origine
-   * @param {string}   idOrigine
-   * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
-   */
-  $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
-    if (!origine || !idOrigine) {
-      log.error('origine ou idOrigine manquant dans loadByOrigin')
-      return next()
-    }
-
-    $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
-      if (ressourceCached) next(null, ressourceCached)
-      else {
-        Ressource
-            .match('origine').equals(origine)
-            .match('idOrigine').equals(idOrigine)
-            .grabOne(function (error, ressource) {
-              cacheAndNext(error, ressource, next)
-            })
-      }
-
-    })
-  } // loadByOrigin
-
-  /**
-   * Récupère une ressource d'après son idOrigine et la passe à next
-   * @param {string}   origine
-   * @param {string}   idOrigine
-   * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
-   */
-  $ressourceRepository.loadPublicByOrigin = function(origine, idOrigine, next) {
-    if (!origine || !idOrigine) {
-      log.error('origine ou idOrigine manquant dans loadByOrigin')
-      return next()
-    }
-
-    $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
-      if (ressourceCached) next(null, ressourceCached)
-      else {
-        Ressource
-          .match('origine').equals(origine)
-          .match('idOrigine').equals(idOrigine)
-          .match('restriction').equals(0)
-          .grabOne(function (error, ressource) {
-            cacheAndNext(error, ressource, next)
-          })
-      }
-    })
   }
 
   /**
@@ -618,6 +484,143 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
       log.debug(error)
       next(error)
     }
+  } // getListe
+
+  /**
+   * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
+   * @param {number|String} oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
+   * @param {Function}      next La callback qui sera appelée avec (error, ressource)
+   *                             Attention, ressource peut avoir perdu son prototype s'il vient du cache
+   * @returns {undefined}
+   */
+  $ressourceRepository.load = function(oid, next) {
+    log.debug('load ressource_' +oid, null, 'repository')
+    if (_.isString(oid) && oid.indexOf('/') > 0) {
+      var p = oid.split('/')
+      if (p.length === 2) $ressourceRepository.loadByOrigin(p[0], p[1], next)
+      else next(new Error("identifiant invalide : " +oid))
+    } else {
+      $cacheRessource.get(oid, function (error, ressourceCached) {
+        if (ressourceCached) next(null, ressourceCached)
+        else Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
+          cacheAndNext(error, ressource, next)
+        })
+      })
+    }
+  }
+
+  /**
+   * Récupère une ressource d'après son idOrigine et la passe à next
+   * @param {string}   origine
+   * @param {string}   idOrigine
+   * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
+   */
+  $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
+    if (!origine || !idOrigine) {
+      log.error('origine ou idOrigine manquant dans loadByOrigin')
+      return next()
+    }
+
+    $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
+      if (ressourceCached) next(null, ressourceCached)
+      else {
+        Ressource
+            .match('origine').equals(origine)
+            .match('idOrigine').equals(idOrigine)
+            .grabOne(function (error, ressource) {
+              cacheAndNext(error, ressource, next)
+            })
+      }
+
+    })
+  } // loadByOrigin
+
+  /**
+   * Récupère une ressource publique et la passe à next (seulement une erreur si elle n'existe pas)
+   * @param {number|String} oid  L'identifiant de la ressource
+   * @param {Function}      next La callback qui sera appelée avec (error, ressource).
+   * @returns {undefined}
+   */
+  $ressourceRepository.loadPublic = function(oid, next) {
+    $cacheRessource.get(oid, function (error, ressourceCached) {
+      if (ressourceCached) next(null, ressourceCached)
+      else {
+        Ressource
+            .match('oid').equals(oid)
+            .match('restriction').equals(config.constantes.restriction.aucune)
+            .grabOne(function (error, ressource) {
+              cacheAndNext(error, ressource, next)
+            })
+      }
+    })
+  }
+
+  /**
+   * Récupère une ressource d'après son idOrigine et la passe à next
+   * @param {string}   origine
+   * @param {string}   idOrigine
+   * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
+   */
+  $ressourceRepository.loadPublicByOrigin = function(origine, idOrigine, next) {
+    if (!origine || !idOrigine) {
+      log.error('origine ou idOrigine manquant dans loadByOrigin')
+      return next()
+    }
+
+    $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
+      if (ressourceCached) next(null, ressourceCached)
+      else {
+        Ressource
+          .match('origine').equals(origine)
+          .match('idOrigine').equals(idOrigine)
+          .match('restriction').equals(0)
+          .grabOne(function (error, ressource) {
+            cacheAndNext(error, ressource, next)
+          })
+      }
+    })
+  }
+
+  /**
+   * Ajoute ou modifie une ressource (contrôle la validité avant)
+   * @param {Ressource} ressource
+   * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
+   */
+  $ressourceRepository.write = function(ressource, next) {
+    if (ressource.constructor.name !== 'Entity') {
+      log.debug("cast en Ressource dans write")
+      ressource = Ressource.create(ressource)
+    }
+    flow().seq(function() {
+      $ressourceControl.valide(ressource, this)
+
+    }).seq(function (ressource) {
+      updateVersion(ressource, this)
+
+    }).seq(function (ressource) {
+      setLastLocalId(ressource, this)
+
+    }).seq(function (ressource) {
+      beforeStore(ressource, this)
+
+    }).seq(function (ressource) {
+      log.debug('on va enregistrer ' +ressource.origine +'/' +ressource.idOrigine)
+      ressource.store(this)
+
+    }).seq(function (ressource) {
+      // mise en cache et passage au suivant
+      if (!ressource.oid) this(new Error("Après un write la ressource n'a toujours pas d'oid"))
+      else {
+        $cacheRessource.set(ressource)
+        log.debug('write ' + ressource.oid + ' ok')
+        if (next) next(null, ressource)
+      }
+
+    }).catch(function(error, ressKo) {
+      var ressRenvoyee = ressKo || ressource
+      log.error(error)
+      if (next) next(error, ressRenvoyee) // on passe quand même la ressource dans l'état où elle était avant le pb
+    })
   }
 
   return $ressourceRepository

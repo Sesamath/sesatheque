@@ -30,26 +30,20 @@
  */
 
 /**
- * @file Controleur de la route api/*
- * POST /api/ressource
- * GET  /api/ressource/:oid Renvoie la ressource d'oid :oid
- * POST /api/ressourceMerge
+ * @file Controleur de la route /api/
  */
 'use strict'
 
 /**
- * Le controleur json du composant ressource (sur /api/)
- * @param {Controller} controller
- * @param $ressourceRepository
- * @param $ressourceConverter
- * @param $ressourceControl
- * @param $accessControl
+ * Le controleur de la route /api/ (qui répond en json)
+ * Toutes les routes contenant /public/ sont sans tenir compte de la session (cookies viré par varnish,
+ * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
+ * @Controller /api/
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl) {
 
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl) {
   var _ = require('lodash')
   //var flow = require('an-flow')
-
   var tools = require('../tools')
 
   var testConnexionDelay = 10*60*1000 // 10 min en ms
@@ -57,6 +51,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Met à jour une ressource issue de la bdd et appelle checkWriteAndOut pour vérifier les droits, l'enregistrer et sortir
    * ou sort avant avec une erreur
+   * @private
    * @param context
    * @param error
    * @param ressourceBdd
@@ -75,6 +70,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Vérifie la validité de la ressource, les droits et enregistre la ressource
+   * @private
    * @param context
    * @param ressource
    */
@@ -122,6 +118,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
+   * @private
    * @param context
    * @param id
    */
@@ -158,6 +155,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Équivalent de context.denied en json
+   * @private
    * @param context
    * @param msg
    */
@@ -169,6 +167,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Renvoie l'id trouvé dans le post ou le get (en acceptant les propriétés id, oid ou origine&idOrigine, en GET ou POST)
+   * @private
    * @param context
    * @returns {string} oid ou origine/idOrigine ou undefined
    */
@@ -183,6 +182,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
+   * @private
    * @param context
    * @param visibility
    */
@@ -207,6 +207,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Équivalent de context.notFound en json
+   * @private
    * @param {Context} context
    * @param {string}  msg
    */
@@ -217,6 +218,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   function optionsOk(context) {
+    log.debug("appel options avec le context", context)
     context.setHeader('Access-Control-Allow-Methods', 'POST OPTIONS');
     // et on laisse le middleware CORS faire son boulot
     context.next(null, '');
@@ -224,6 +226,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Callback générique de sortie
+   * @private
    * @param context
    * @param {string|Error} error
    * @param data
@@ -236,7 +239,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.error(error)
         error = error.toString()
       }
-      context.json({error: error})
+      context.json({success:false, error: error})
     } else {
       log.debug('sendJson va renvoyer', data, 'api')
       // pas la peine de faire le stringify pour rien, on teste avant
@@ -248,6 +251,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Retourne un array pour jstree
+   * @private
    * @param context
    * @param error
    * @param data
@@ -268,6 +272,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
+   * @private
    * @param context
    * @param error
    * @param ressources
@@ -282,8 +287,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         var format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
           if (format === 'compact') liste.push($ressourceConverter.toCompactFormat(ressource))
-          else if (format === 'ref') liste.push($ressourceConverter.toRef(ressource))
-          else liste.push(ressource)
+          else if (format === 'full') liste.push(ressource)
+          else liste.push($ressourceConverter.toRef(ressource))
         })
       }
       sendJson(context, null, {success: true, liste: liste})
@@ -291,7 +296,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, au format de context.get.format
+   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format
+   * @private
    * @param context
    * @param error
    * @param ressource
@@ -313,7 +319,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Met éventuellement à jour un titre bateau si on en a un meilleur (asynchrone, lance la màj en bdd et rend la main)
    * @param ressource
    * @param newTitre
-   * /
+   */ /*
   function updateTitre(ressource, newTitre) {
     // on regarde si l'arbre nous apporte un titre que l'on aurait pas
     if (newTitre) {
@@ -349,8 +355,25 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   } /* */
 
   /**
-   * Read (accepte ?format=ref|compact)
-   * @callback GET /api/ressource/:oid
+   * La réponse à une demande de ressource, la liste des autres propriétés dépend du format demandé,
+   * toutes les propriétés de la ressource par défaut. Cf {@link $ressourceConverter.toRef}
+   * @typedef reponseRessource
+   * @type {Object}
+   * @property {boolean}   success
+   * @property {string}    [error]        Message d'erreur éventuel
+   * @property {Integer}   oid
+   * @property {Integer}   [ref]          Si on a demandé le format ref
+   * @property {string}    titre
+   * @property {Integer[]} categories
+   * @property {string}    typeTechnique
+   * @property …
+   */
+
+  /**
+   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
+   * @Route GET /api/ressource/:oid
+   * @param {Integer} oid
+   * @return {reponseRessource}
    */
   controller.get('ressource/:oid', function (context) {
     var oid = context.arguments.oid
@@ -359,8 +382,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
   /**
-   * Read byOrigine (accepte ?format=ref|compact)
-   * @callback GET /api/ressource/:origine/:idOrigine
+   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
+   * @route GET /api/ressource/:origine/:idOrigine
+   * @param {string} :origine
+   * @param {string} :idOrigine
+   * @return {reponseRessource}
    */
   controller.get('ressource/:origine/:idOrigine', function (context) {
     var idOrigine = context.arguments.idOrigine
@@ -370,8 +396,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
   /**
-   * Read public (sans session, accepte ?format=ref|compact)
-   * @callback GET /api/public/:oid
+   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(ref|compact)
+   * @route GET /api/public/:oid
+   * @param {Integer} oid
+   * @return {reponseRessource}
    */
   controller.get('public/:oid', function (context) {
     var oid = context.arguments.oid
@@ -384,8 +412,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
   /**
-   * Read public byOrigine (sans session)
-   * @callback GET /api/public/:origine/:idOrigine
+   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(ref|compact)
+   * @route GET /api/public/:origine/:idOrigine
+   * @param {string} :origine
+   * @param {string} :idOrigine
+   * @return {reponseRessource}
    */
   controller.get('public/:origine/:idOrigine', function (context) {
     var origine = context.arguments.origine
@@ -398,8 +429,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Read au format jstree (accepte children=1 pour récupérer les enfants seulement)
-   * @callback GET /api/jstree?ref=xx[&children=1]
+   * Récupère un arbre au format jstree (children=1 pour récupérer les enfants seulement)
+   * @route GET /api/jstree?ref=xx[&children=1]
+   * @returns {Object} Un objet pour jstree (Cf le plugin arbre pour un exemple d'utilisation)
    */
   controller.get('jstree', function (context) {
     var ref = context.get.ref || context.get.id
@@ -427,13 +459,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
+  /**
+   * @typedef reponseRessourceOid
+   * @type {Object}
+   * @property {boolean}  success
+   * @property {Integer}  oid
+   * @property {string}   [error]    Message d'erreur éventuel
+   * @property {string[]} [warnings] Avertissements éventuels sur la ressource (incohérences ne justifiant pas une erreur et le rejet de l'enregistrement)
+   */
+  /**
+   * @typedef reponseRessourceRef
+   * @type {Object}
+   * @property {boolean} success
+   * @property {Integer} oid
+   * @property {string} [error]
+   */
+
   //noinspection FunctionWithMoreThanThreeNegationsJS
   /**
-   * Create / update une ressource
-   * Si le titre et la catégorie sont manquants (mais avec oid), ou que l'on passe merge=1 en paramètre,
-   * on merge avec la ressource existante que l'on update,sinon on écrase ou on créé
-   * Attention, c'est un merge au sens lodash du terme (chaque propriété présente écrase la précédente)
-   * @callback POST /api/ressource
+   * Traite la ressource postée
+   * @private
    * @param context
    */
   function postRessource(context) {
@@ -483,13 +528,24 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   }
   postRessource.timeout = 5000
+  /**
+   * Create / update une ressource
+   * Prend un objet ressource, éventuellement incomplète mais oid ou origine/idOrigine sont obligatoires
+   * Si le titre et la catégorie sont manquants, ou que l'on passe ?merge=1 à l'url, ça merge avec la ressource
+   * existante que l'on update,sinon on écrase (ou on créé si elle n'existait pas)
+   * C'est un merge au sens lodash du terme (chaque propriété présente écrase celle qui existait)
+   *
+   * Retourne d'autres propriétés de la ressource enregistrée si on le réclame avec ?format=(ref|compact)
+   * @route POST /api/ressource
+   * @returns {reponseRessourceOid|reponseRessourceRef}
+   */
   controller.post('ressource', postRessource)
   controller.options('ressource', optionsOk)
 
   /**
-   * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
+   * Ajoute des relations
+   * @private
    * @param context
-   * @callback POST /api/ressource/addRelations
    */
   function postRessourceAddRelations (context) {
     if (context.perf) {
@@ -526,62 +582,103 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   }
   postRessourceAddRelations.timeout = 5000
+  /**
+   * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
+   * @param {Integer} [oid]
+   * @param {string} [origine]
+   * @param {string} [idOrigine]
+   * @param {string} [ref]
+   * @param {string} relations
+   * @route POST /api/ressource/addRelations
+   */
   controller.post('ressource/addRelations', postRessourceAddRelations)
   controller.options('ressource/addRelations', optionsOk)
 
   /**
-   * Delete
-   * @callback DEL /api/ressource/:oid
+   * Delete par oid
+   * @route DEL /api/ressource/:oid
    */
   controller.delete('ressource/:oid', function (context) {
     deleteAndSend(context, context.arguments.oid)
   })
   /**
-   * Delete par origine
-   * @callback DEL /api/ressource/:origine/:idOrigine
+   * Delete par id d'origine
+   * @route DEL /api/ressource/:origine/:idOrigine
    */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     var ref = context.arguments.origine +'/' +context.arguments.idOrigine
     deleteAndSend(context, ref)
   })
   /**
-   * Delete denied sur api/public (rerouting from ressource si on a ni session ni token)
-   * @callback DEL /api/public/:origine/:idOrigine
+   * Denied (rerouting interne ressource => public si on a ni session ni token)
+   * @internal
+   * @route DEL /api/public/:origine/:idOrigine
    */
   controller.delete('public/:origine/:idOrigine', function (context) {
     denied(context, "droits insuffisant pour effacer cette ressource")
   })
   /**
-   * Delete denied sur api/public (rerouting from ressource si on a ni session ni token)
-   * @callback DEL /api/public/:oid
+   * Denied (rerouting interne ressource => public si on a ni session ni token)
+   * @internal
+   * @route DEL /api/public/:oid
    */
   controller.delete('public/:oid', function (context) {
     denied(context, "droits insuffisant pour effacer cette ressource")
   })
 
   /**
-   * Liste de ressources publiques d'après les filtres demandés (Cf README pour les filtres possibles)
-   * @callback GET /api/liste/public
+   * Format de la réponse à une demande de liste
+   * @typedef reponseListe
+   * @type {object}
+   * @property {boolean}                     success
+   * @property {Ref[]|Compact[]|Ressource[]} liste
+   * @property {string}                      [error] Message d'erreur éventuel
+   */
+
+  /**
+   * Arguments à donner à une requête qui renvoie une liste de ressources
+   * @typedef requeteListe
+   * @type {object}
+   * @property {string}   [json]    Tous les paramètres qui suivent dans une chaîne json (GET seulement, ignoré en POST)
+   * @property {filter[]} [filters] Les filtres à appliquer
+   * @property {string}   [orderBy] Un nom d'index
+   * @property {string}   [order]   Préciser 'desc' si on veut l'ordre descendant
+   * @property {Integer}  [start]   offset
+   * @property {Integer}  [nb]      Nombre de résultats voulus (Cf settings.ressource.limites.listeNbDefault, à priori 25),
+   *                                  sera ramené à settings.ressource.limites.maxSql si supérieur (à priori 500)
+   * @property {string}   [format]  compact|full par défaut on remonte les ressource au format ref
+   */
+
+  /**
+   * Format d'un filtre
+   * @typedef filter
+   * @type {object}
+   * @property {string} index  Le nom de l'index
+   * @property {Array}  [values] Une liste de valeurs à chercher (avec des ou), remontera toutes les ressource ayant index si omis
+   */
+
+  /**
+   * Cherche parmi les ressources publiques publiées
+   * @route GET /api/liste/public
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
   controller.get('liste/public', function (context) {
     grabListe(context, 'public')
   })
 
   /**
-   * Liste de ressources publiques d'après les filtres demandés
-   * Cf GET /api/public pour le format de la demande
-   * @callback POST /api/liste/public
+   * Cherche parmi les ressources publiques publiées
+   * @route POST /api/liste/public
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
   controller.post('liste/public', function (context) {
     grabListe(context, 'public')
   })
   controller.options('liste/public', optionsOk)
 
-  /**
-   * Liste de ressources publique corrections incluses
-   * @callback GET /api/liste/prof
-   */
-  controller.get('liste/prof', function (context) {
+  function getListeAvecCorriges(context) {
     if ($accessControl.hasGenericPermission('correction', context)) {
       grabListe(context, 'correction')
     } else if ($accessControl.isAuthenticated(context)) {
@@ -589,26 +686,29 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } else {
       denied(context, "Il faut être authentifié pour accéder aux corrigés")
     }
-  })
-
+  }
+  getListeAvecCorriges.timeout = 3000
   /**
-   * Liste de ressources publique corrections incluses
-   * @callback POST /api/liste/prof
+   * Cherche parmi les ressources publiques ou les corrections
+   * @route GET /api/liste/prof
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
-  controller.post('liste/prof', function (context) {
-    if ($accessControl.hasGenericPermission('correction', context)) {
-      grabListe(context, 'correction')
-    } else if ($accessControl.isAuthenticated(context)) {
-      denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
-    } else {
-      denied(context, "Il faut être authentifié pour accéder aux corrigés")
-    }
-  })
+  controller.get('liste/prof', getListeAvecCorriges)
+  /**
+   * Cherche parmi les ressources publiques ou les corrections
+   * @route POST /api/liste/prof
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.post('liste/prof', getListeAvecCorriges)
   controller.options('liste/prof', optionsOk)
 
   /**
-   * Idem pour les ressources du user courant, mais on va faire un test sur le serveur sso si on est pas authentifié
-   * @callback GET /api/liste/perso
+   * Cherche parmi les ressources du user courant (fera un check sur le serveur d'authentification s'il n'est pas connecté ici)
+   * @route GET /api/liste/perso
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
   controller.get('liste/perso', function (context) {
     log.debug("controleur GET /api/liste/perso", context.session)
@@ -628,8 +728,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Idem pour les ressources du user courant
-   * @callback POST /api/liste/perso
+   * Cherche parmi les ressources du user courant (fera un check sur le serveur d'authentification s'il n'est pas connecté ici)
+   * @route POST /api/liste/perso
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
   controller.post('liste/perso', function (context) {
     var oid = $accessControl.getCurrentUserOid(context)
@@ -653,10 +755,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
   controller.options('liste/perso', optionsOk)
 
-  /**
-   * Pour récupérer aussi toutes les ressources privées, faut avoir tous les droits
-   * @callback GET /api/liste/all
-   */
   function getAllBy(context) {
     // si on lance la requete faut filtrer d'après les droits avec $accessControl.getListeLisible,
     // donc il récupèrera pas forcément nb résultats :-/
@@ -665,17 +763,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     else denied("Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
   }
   getAllBy.timeout = 3000
-  controller.get('liste/all', getAllBy)
-
   /**
-   * Pour récupérer aussi toutes les ressources privées, faut avoir tous les droits
-   * @callback POST /api/liste/all
+   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
+   * @route GET /api/liste/all
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
-  function postAllBy(context) {
-    if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
-    else denied("Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
-  }
-  postAllBy.timeout = 3000
-  controller.post('liste/all', postAllBy)
+  controller.get('liste/all', getAllBy)
+  /**
+   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
+   * @route POST /api/liste/all
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.post('liste/all', getAllBy)
   controller.options('liste/all', optionsOk)
 }

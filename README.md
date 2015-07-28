@@ -11,7 +11,7 @@ Pour générer la doc, lancer depuis la racine
 Framework Lassi
 ---------------
 
-Cf [lassi](../node_modules/lassi/documentation/index.html)
+Cf [lassi](lassi/index.html)
 
 Plugins
 -------

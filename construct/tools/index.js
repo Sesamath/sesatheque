@@ -34,6 +34,11 @@
 var _ = require('lodash')
 var moment = require('moment')
 
+/**
+ * Un assemblage de fonctions utilitaires
+ * @module tools
+ * @type {{}}
+ */
 var tools = {}
 
 /**
@@ -329,4 +334,5 @@ tools.complete = function(object, defaultValues) {
   if (object instanceof Object && defaultValues instanceof Object) completeObj(object, defaultValues)
 }
 
+/** fonctions utilitaires */
 module.exports = tools

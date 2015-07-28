@@ -362,9 +362,9 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       formData.origine.readonly = true;
       formData.idOrigine.readonly = true;
       // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
-      formData.$view = 'formEdit'
+      formData.$view = __dirname +'/views/formEdit'
     } else {
-      formData.$view = 'formCreate'
+      formData.$view = __dirname +'/views/formCreate'
     }
     // un token si y'en a un dans la ressource
     if (ressource.token) {
@@ -400,13 +400,13 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * Retourne un objet pour dust à partir d'une entité ressource
    * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
    * @param {Ressource} ressource La ressource qui sort d'un load
-   * @param {string}    [view=''] Le nom de la vue (pour ajouter les relations sur describe seulement)
+   * @param {string}    [view=''] Le nom de la vue (en absolu ou relatif)
    * @returns {object} L'objet à passser à la vue dust
    */
   function getViewData(error, ressource, view) {
     var viewData = {}
     var buffer
-    if (error) viewData.error = error.toString()
+    if (error) $views.addError(error, viewData)
     else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
       var labels = getLabels(ressource)
@@ -465,9 +465,9 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       if (ressource.errors && ressource.errors.length) viewData.errors = ressource.errors
     } else {
       // pas d'erreur mais pas de ressource non plus
-      viewData.error = "Aucune ressource transmise pour affichage"
+      $views.addError("Aucune ressource transmise pour affichage", viewData)
     }
-    if (view) viewData.$view = view
+    if (view) viewData.$view = __dirname +"/views/" +view
 
     return viewData
   }
@@ -478,17 +478,18 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @param data
    */
   $views.addError = function (error, data) {
-    if (!data.errors) data.errors = {
+    if (!data.errors || !data.errors.errorMessages) data.errors = {
       $view : __dirname +'/../static/views/errors',
-      errors : []
+      errorMessages : []
     }
     var errorMsg = (typeof error === "string") ? error : error.toString()
-    data.errors.errors.push(errorMsg)
+    data.errors.errorMessages.push(errorMsg)
+    log.error(error)
   }
 
   /**
    * Retourne les valeurs par défaut pour une vue ressource
-   * @param {string} viewName Le nom de la vue (donc du fichier dust)
+   * @param {string} viewName Le nom de la vue (dans ressource/views)
    * @returns {{$views: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
    */
   $views.getDefaultData = function (viewName) {
@@ -497,9 +498,11 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       $metas : {
         // css ajouté par le listener d'après context.layout
         js : ['/vendors/requirejs/require.2.1.18.min.js']
-      },
-      contentBloc : {$view:viewName}
+      }
     }
+    // les erreurs sont pas dans le bloc contenu
+    if (viewName === 'errors') data.errors = {$view:viewName}
+    else data.contentBloc = {$view:viewName}
     // charge init et crée sesatheque.init en global
     if (viewName === 'formEdit') data.$metas.js.push('/formEdit.js')
 
@@ -511,7 +514,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    * @param context
    * @param error
    * @param ressource
-   * @param view
+   * @param {string} view le nom de la vue dans ressource/views/
    * @param options Objet de données qui sera mergé avec data avant envoi au rendu
    */
   $views.prepareAndSend = function (context, error, ressource, view, options) {
@@ -586,8 +589,8 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
    */
   $views.printError = function (context, error, status, ressource) {
     var data = $views.getDefaultData('errors')
+    if (!context.layout) context.layout = 'page'
     if (context.layout === 'page' && ressource) context.ressource = ressource
-    data.$views = __dirname + '/../static/views'
     $views.addError(error, data)
     context.status = status || 200
     context.html(data)

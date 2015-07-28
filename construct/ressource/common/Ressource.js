@@ -1,0 +1,1 @@
+../public/vendors/sesamath/Ressource.js

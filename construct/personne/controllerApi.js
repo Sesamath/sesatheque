@@ -89,15 +89,15 @@ module.exports = function (controller, Personne, $personneRepository, $accessCon
     if ($accessControl.hasAllRights(context)) {
       // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
       // pour garantir l'intégrité des données
-      var personne = Personne.create(context.post)
-      if (personne.id) {
+      if (context.post.origine && context.post.idOrigine) {
+        var personne = Personne.create(context.post)
         personne.store(function (error, personneBdd) {
           if (error) sendJson(context, error)
           else if (personneBdd && personneBdd.oid) sendJson(context, null, {oid: personneBdd.oid})
           else sendJson(context, new Error("Erreur interne (personne.store ne renvoie pas d'objet avec oid)"))
         })
       } else {
-        sendJson(context, new Error("id manquant"))
+        sendJson(context, new Error("origine ou idOrigine manquant"))
       }
     } else {
       denied(context)

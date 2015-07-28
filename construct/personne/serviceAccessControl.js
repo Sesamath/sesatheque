@@ -31,7 +31,7 @@
 
 'use strict'
 
-module.exports = function (Groupe, $settings, $personneRepository) {
+module.exports = function (Personne, Groupe, $settings, $personneRepository) {
 
   var _ = require('lodash')
   var tools = require('../tools')
@@ -262,6 +262,18 @@ module.exports = function (Groupe, $settings, $personneRepository) {
   }
 
   /**
+   * Retourne le user courant ou undefined
+   * @param {Context} context
+   * @return {Personne|undefined} Le user
+   */
+  $accessControl.getCurrentUser = function(context) {
+    var personne
+    if (context.session.user && context.session.user.oid) personne = context.session.user
+
+    return personne
+  }
+
+  /**
    * Retourne la liste de ressources fournie expurgée de celles que l'on a pas le droit de voir
    * @param {Context} context
    * @param {Ressource[]} ressources Liste de ressources
@@ -276,6 +288,21 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     }
 
     return liste
+  }
+
+  /**
+   * Calcule et renvoie les permissions d'une personne en fonction de ses rôles
+   * @param {Personne} personne
+   */
+  $accessControl.getPermissions = function(personne) {
+    var permissions = {}
+    var config = $settings.get('components.personne')
+    _.each(personne.roles, function(hasRole, role) {
+      // on ajoute les permissions définies pour ce role en config
+      if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
+    })
+
+    return permissions
   }
 
   /**
@@ -377,29 +404,26 @@ module.exports = function (Groupe, $settings, $personneRepository) {
     return (context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale
   }
 
-
   /**
-   * Calcule et renvoie les permissions d'une personne en fonction de ses rôles
-   * @param {Personne} personne
+   * Connecte un user (regarde s'il existe et s'il faut le mettre à jour et le met en session)
+   * @param {lassi#Context}     context
+   * @param {Personne(object)}  personne
+   * @param {personneCallback}  next
    */
-  $accessControl.getPermissions = function(personne) {
-    var permissions = {}
-    var config = $settings.get('components.personne')
-    _.each(personne.roles, function(hasRole, role) {
-      // on ajoute les permissions définies pour ce role en config
-      if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
-    })
-
-    return permissions
-  }
-
-  /**
-   * Connecte un user (le met en session)
-   * @param context
-   * @param personne
-   */
-  $accessControl.login = function (context, personne) {
-    context.session.user = personne;
+  $accessControl.login = function (context, personne, next) {
+    function setSession (error, personne) {
+      if (personne) {
+        context.session.user = personne;
+        context.session.user.lastCheck = new Date()
+      } else if (!error) {
+        context.session.user = {
+          oid:0,
+          lastSsoCheck : new Date()
+        }
+      }
+      next(error, personne)
+    }
+    $personneRepository.update(personne, setSession)
   }
 
   /**

@@ -39,15 +39,22 @@
 module.exports = function ($cache, $settings) {
   var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
 
-  return {
-    get   : function (oid, next) {
-      $cache.get('personne_' + oid, next)
-    },
-    set   : function (personne, next) {
-      $cache.set('personne_' + personne.oid, personne, ttl, next)
-    },
-    delete: function (oid, next) {
-      $cache.delete('personne_', oid, next)
-    }
+  /**
+   * Service de mise en cache de personne
+   * @service $cachePersonne
+   * @type {lassi#Service}
+   */
+  var $cachePersonne = {}
+
+  $cachePersonne.get = function (oid, next) {
+    $cache.get('personne_' + oid, next)
   }
+  $cachePersonne.set = function (personne, next) {
+    $cache.set('personne_' + personne.oid, personne, ttl, next)
+  }
+  $cachePersonne.delete = function (oid, next) {
+    $cache.delete('personne_', oid, next)
+  }
+
+  return $cachePersonne
 }

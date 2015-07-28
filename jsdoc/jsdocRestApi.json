@@ -1,0 +1,40 @@
+{
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": [ "./construct/ressource/controllerApi.js"]
+  },
+  "plugins": [
+    "plugins_sup/ngdoc"
+  ],
+  "templates": {
+    "default": {
+        "outputSourceFiles": true
+    },
+    "applicationName": "Sésathèque - API REST",
+    "disqus": "",
+    "googleAnalytics": "",
+    "openGraph": {
+      "title": "",
+      "type": "website",
+      "image": "",
+      "site_name": "",
+      "url": ""
+    },
+    "meta": {
+      "title": "",
+      "description": "",
+      "keyword": ""
+    }
+
+  },
+  "opts": {
+    "destination": "./documentation/restApi",
+    "recurse": true,
+    "template" : "./jaguarjs-jsdoc",
+    "private" : false
+  }
+}
+
+

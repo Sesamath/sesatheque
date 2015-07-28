@@ -31,23 +31,25 @@
 
 'use strict';
 
-/**
- * Le controleur html /public/ (sans authentification) du composant ressource
- *
- * La session ne doit pas être utilisée ici (pour que varnish puisse virer les cookies en amont)
- * @param {Controller} controller
- * @param $ressourceRepository
- * @param $ressourceConverter
- * @param $views
- * @param $routes
- */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $views, $routes) {
+  /**
+   * Le controleur html /public/ (pages sans authentification) du composant ressource
+   *
+   * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
+   * @name controller
+   * @controller /public/
+   * @requires $ressourceRepository
+   * @requires $ressourceConverter
+   * @requires $views
+   * @requires $routes
+   */
   var tools = require('../tools')
   var _ = require('lodash')
   var config = require('./config')
 
   /**
    * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
+   * @private
    * @param context
    * @param view
    * @param options
@@ -61,6 +63,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Vérifie qu'une ressource est publique puis l'envoie à la vue
+   * @private
    * @param context
    * @param error
    * @param ressource
@@ -73,12 +76,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     else $views.printError(context, "La ressource n'existe pas ou n'est pas publique", 404)
   }
 
-  // describe
+  /**
+   * Page describe
+   * @route GET /public/decrire/:oid
+   */
   controller.get($routes.get('describe', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'describe'
     affiche(context, 'describe')
   })
+  /**
+   * Page describe
+   * @route GET /public/decrire/:origine/:idOrigine
+   */
   controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
     context.tab = 'describe'
@@ -89,11 +99,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  // display : Voir la ressource pleine page (pour iframe)
+  /**
+   * Page display (pleine page, prévu pour iframe)
+   * @route GET /public/voir/:oid
+   */
   controller.get($routes.get('display', ':oid'), function (context) {
     context.layout = 'iframe'
     affiche(context, 'display')
   })
+  /**
+   * Page display (pleine page, prévu pour iframe)
+   * @route GET /public/voir/:origine/:idOrigine
+   */
   controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
     context.layout = 'iframe'
     var origine = context.arguments.origine
@@ -102,12 +119,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       checkAndAffiche(context, error, ressource, 'display')
     })
   })
-  // preview : Voir la ressource avec header et menu
+  /**
+   * Page preview (avec le layout du site)
+   * @route GET /public/apercu/:oid
+   */
   controller.get($routes.get('preview', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'preview'
     affiche(context, 'display')
   })
+  /**
+   * Page preview (avec le layout du site)
+   * @route GET /public/apercu/:origine/:idOrigine
+   */
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
     context.tab = 'preview'
@@ -121,6 +145,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * La recherche (form et résultats)
+   * @private
    */
   function search(context) {
     context.layout = 'page'
@@ -183,6 +208,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   }
   search.timeout = 3000
+  /**
+   * Formulaire de recherche et affichage des résultats
+   * @route GET /public/recherche
+   */
   controller.get($routes.get('search'), search)
 
 }

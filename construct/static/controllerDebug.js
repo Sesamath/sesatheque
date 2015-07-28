@@ -40,7 +40,7 @@ module.exports = function (controller) {
     return {
       $views : __dirname + '/views',
       contentBloc : {
-        $view : 'debug'
+        $view : __dirname +'/views/debug'
       }
     }
   }

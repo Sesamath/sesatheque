@@ -4,20 +4,17 @@
     "allowUnknownTags": true
   },
   "source"   : {
-    "include":["./construct", "./README.md"],
+    "include": [ "./node_modules/lassi/classes", "./node_modules/lassi/example", "./node_modules/lassi/README.md"],
     "includePattern": ".+\\.(js|md)$",
-    "excludePattern": "(node_modules|public|qxApps|.+\\.bak\\.js)"
+    "excludePattern": "node_modules/lassi/node_modules"
   },
-  "plugins"  : [
-    "plugins/markdown",
-    "plugins_sup/ngdoc"
-  ],
+  "plugins"  : ["plugins/markdown"],
   "markdown" : {
     "parser"  : "gfm",
     "hardwrap": true
   },
   "templates": {
-    "applicationName": "sesatheque",
+    "applicationName": "Lassi",
     "disqus"         : "",
     "googleAnalytics": "",
     "openGraph"      : {
@@ -35,7 +32,7 @@
 
   },
   "opts"     : {
-    "destination": "./documentation",
+    "destination": "./documentation/lassi",
     "recurse"    : true,
     "template"   : "./jaguarjs-jsdoc",
     "private"    : false

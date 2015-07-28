@@ -31,12 +31,6 @@
 
 'use strict'
 
-/**
- * Service de gestion du cache des ressources (helper de $ressourceRepository)
- * @module $cacheRessource
- * @requires $cache
- * @requires $settings
- */
 module.exports = function ($cache, $settings, Ressource) {
   var ttl = $settings.get('components.ressource.cacheTTL', 3600)
 
@@ -48,6 +42,12 @@ module.exports = function ($cache, $settings, Ressource) {
     return origine ? prefixRessByOrigine +origine +'_' +id : prefixRessource +id
   }
 
+  /**
+   * Service de gestion du cache des ressources (helper de $ressourceRepository)
+   * @service $cacheRessource
+   * @requires $cache
+   * @requires $settings
+   */
   var $cacheRessource = {}
 
   /**
@@ -92,7 +92,7 @@ module.exports = function ($cache, $settings, Ressource) {
   /**
    * Met en cache une ressource
    * @param {Ressource}      ressource
-   * @param {SimpleCallback} next
+   * @param {errorCallback} next
    * @memberOf $cacheRessource
    */
   $cacheRessource.set = function (ressource, next) {

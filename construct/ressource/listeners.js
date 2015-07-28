@@ -1,5 +1,5 @@
 /**
- * controller file is part of Sesatheque.
+ * This file is part of Sesatheque.
  *   Copyright 2014-2015, Association Sésamath
  *
  * Sesatheque is free software: you can redistribute it and/or modify
@@ -31,14 +31,25 @@
 
 'use strict'
 
+module.exports =
 /**
- * Un service de gestion des menus, pour que chaque composant puisse ajouter des entrées à un menu
- * et calculer le tout au beforeTransport
- * L'ajout doit être fait dans chaque composant car les entrées dépendent souvent de service du composant
- * (donc on ne peut pas avoir un controleur dans main pour gérer les menus car les services sont pas encore dispo).
+ * Gère les menus contextuels à une ressource en écoutant beforeTransport
+ * Ne fait rien si on a pas context.layout === page
+ *
+ * Cet ajout est fait dans le composant car on a besoin de services du composant qui ne seraient pas dispos
+ * dans un controleur * du composant principal
+ * @module listeners
+ * @param $accessControl
+ * @param $routes
+ * @returns {{beforeTransport: Function}}
  */
-module.exports = function ($accessControl, $routes) {
+function ($accessControl, $routes) {
   return {
+    /**
+     * @listens lassi#event:beforeTransport
+     * @param {lassi#Context} context
+     * @param {object} data
+     */
     beforeTransport : function (context, data) {
       // on ne s'occupe que des pages html avec layout pour ajouter nos menus
       if (context.layout === 'page') {

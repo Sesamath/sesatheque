@@ -13,9 +13,12 @@ function usage() {
   local exitCode=${1:-0}
   echo "Lance la génération de la documentation"
   echo "Une option obligatoire parmi"
+  echo "  -a : toutes les documentations"
   echo "  -h : afficher cette aide"
-  echo "  -p : documentation du code serveur"
-  echo "  -s : documentation des plugins"
+  echo "  -l : documentation de lassi"
+  echo "  -p : documentation des plugins"
+  echo "  -r : documentation de l'api REST"
+  echo "  -s : documentation du code serveur"
   exit $exitCode
 }
 
@@ -28,11 +31,14 @@ cd "$dirApp"
 [ $# -lt 1 ] && usage
 
 # check des options
-while getopts "hsp" OPTION
+while getopts "ahlprs" OPTION
 do
   case $OPTION in
+    a) for f in jsdoc/jsdoc*.json; do jsdoc -c $f ; done ;;
     h) usage;;
+    l) jsdoc -c jsdoc/jsdocLassi.json;;
     p) jsdoc -c jsdoc/jsdocPlugins.json;;
+    r) jsdoc -c jsdoc/jsdocRestApi.json;;
     s) jsdoc -c jsdoc/jsdocApp.json;;
     *) usage 1;;
   esac

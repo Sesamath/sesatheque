@@ -31,13 +31,17 @@
 
 'use strict'
 
-/**
- * Un service pour changer de format les ressources, ou les étoffer
- * @param Ressource
- * @param $ressourceRepository Pour étoffer une ressource en allant chercher des infos en base
- * @param $routes
- */
 module.exports = function (Ressource, $ressourceRepository, $routes, $settings) {
+  /**
+   * Service qui regroupe les fonctions de transformation de données sur des ressources
+   * (objets vers vue ou résultat de post vers controller)
+   * @service $ressourceConverter
+   * @requires $ressourceRepository
+   * @requires $routes
+   * @requires $settings
+   */
+  var $ressourceConverter = {}
+
   var _ = require('lodash')
   var flow = require('an-flow')
   //var moment = require('moment')
@@ -51,12 +55,14 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   /**
    * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
    * @see http://www.jstree.com/docs/json/ pour le format
+   * @private
    * @param {Ressource} ressource
    */
   function getJstNode (ressource) {
     /**
      * Retourne les datas qui nous intéressent à mettre sur le tag a
      * (pour a_attr : data-ref, data-typeTechnique, href et alt)
+     * @private
      * @param {Ressource} ressource
      * @return {Object}
      */
@@ -86,12 +92,6 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
     return node
   }
 
-  /**
-   * Service qui regroupe les fonctions de transformation de données pour les vues
-   * (objets vers vue ou résultat de post vers controller)
-   * @namespace $ressourceConverter
-   */
-  var $ressourceConverter = {}
   // les 2 méthodes jstree
   if (jstreeConverter) {
     jstreeConverter.setBaseUrl($settings.get('application.baseUrl', ''))
@@ -102,6 +102,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   /**
    * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
    * dont le 1er est un id de relation valide
+   * @private
    * @param ressource
    * @param relations
    * @returns {Array} Les erreurs éventuelles, ou false si y'a pas eu d'erreur mais que l'on a rien modifié (la relation y était déjà)
@@ -143,9 +144,9 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
 
   /**
    * Ajoute les propriétés urlXXX à chaque elt du tableau de ressource
+   * @private
    * @param {Array} ressources
    * @returns {Array} ressources
-   * @memberOf $ressourceConverter
    */
   $ressourceConverter.addUrlsToList = function (ressources) {
     if (ressources && ressources.length) ressources.forEach(function (ressource) {
@@ -168,12 +169,14 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
     /**
      * Parcours les enfants de parent pour les transformer et appeler nextStep
      * (sans argument, nextStep peut être le this de seq)
+     * @private
      * @param parent
      * @param nextStep
      */
     function populateEnfants(parent, nextStep) {
       /**
        * Met à jour un enfant chez son parent d'après une ressource récupérée en bdd
+       * @private
        * @param enfantIndex
        * @param ressourceBdd
        * @param next
@@ -253,7 +256,6 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   /**
    * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
    * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
-   * @memberOf $ressourceConverter
    */
   $ressourceConverter.toArbre = function (ressource) {
     var arbre
@@ -274,7 +276,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   /**
    * Renvoie une Ref à une ressource (avec tous les enfants)
    * @param ressource
-   * @return {Ref|exports|module.exports}
+   * @return {Ref}
    */
   $ressourceConverter.toRef = function (ressource) {
     return new Ref(ressource)

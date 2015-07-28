@@ -29,33 +29,33 @@
  * pour une explication en français)
  */
 
-'use strict'
+"use strict"
 
 /**
  * Configuration de l'application
  */
-var tools = require('../construct/tools')
-var localConfig = require('../_private/config')
-var ressourceConfig = require('../construct/ressource/config')
+var tools = require("../construct/tools")
+var localConfig = require("../_private/config")
+var ressourceConfig = require("../construct/ressource/config")
 
 /** La racine du projet */
-var root  = __dirname + '/..';
+var root  = __dirname + "/..";
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
  * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
  */
-var staging = (process.env.NODE_ENV === 'prod') ? 'prod' : 'dev'
+var staging = (process.env.NODE_ENV === "prod") ? "prod" : "dev"
 
 /** La config */
 var settings = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application : {
     name : "bibliotheque",
-    /* mis dans _private/config.js car dépendant de l'instance
-    baseUrl      : 'http://...',
-    mail : "user@example.com", */
-    staging: 'prod' // devrait être surchargé dans _private
+    // mis dans _private/config.js car dépendant de l'instance
+    baseUrl      : "http://...",
+    mail : "user@example.com",
+    staging: "prod" // devrait être surchargé dans _private
   },
   /* dans _private aussi
   $entities: {
@@ -71,17 +71,24 @@ var settings = {
     public        : true,
     //compression : {},
     cookie: {
-      key: 'asqlSTsrl78lAsg'
+      key: "asqlSTsrl78lAsg"
     },
-    bodyParser : {limit:'8mb'}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
+    bodyParser : {limit:"8mb"}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
     session: {
-      secret: 'asqlSTsrl78lAsg',
+      secret: "asqlSTsrl78lAsg",
       saveUninitialized: true,
       resave: true
     },
     authentication: {}
   },
   components: {
+    auth : {
+      paths : {
+        login         :"connexion",
+        logout        :"deconnexion",
+        externalLogout:"deconnexion/externe"
+      }
+    },
     cache : {
       defaultTTL: 15*60,
       purgeDelay: 5*60
@@ -92,12 +99,12 @@ var settings = {
         // les droits sont dans l'absolu, mais il peut y avoir des modifications liées au contexte
         // (on a toujours le droit de modifier un contenu dont on serait le seul auteur,
         // pas de droits read sur les ressources privées sauf les siennes, etc.)
-        admin      : {'create':true, 'read':true, 'update':true, 'delete':true, 'deleteVersion':true, 'index':true, 'publish':true, 'correction':true}, // jshint ignore:line
-        editeur    : {'create':true, 'read':true, 'update':true, 'delete':true, 'deleteVersion':true, 'index':true, 'publish':true, 'correction':true}, // jshint ignore:line
-        indexateur : {'index':true},
-        prof       : {'create':true, 'read':true},
-        acces_correction : {'correction':true},
-        eleve      : {'read':true}
+        admin      : {"create":true, "read":true, "update":true, "delete":true, "deleteVersion":true, "index":true, "publish":true, "correction":true}, // jshint ignore:line
+        editeur    : {"create":true, "read":true, "update":true, "delete":true, "deleteVersion":true, "index":true, "publish":true, "correction":true}, // jshint ignore:line
+        indexateur : {"index":true},
+        prof       : {"create":true, "read":true},
+        acces_correction : {"correction":true},
+        eleve      : {"read":true}
       },
       cacheTTL: 20*60
     },
@@ -109,12 +116,12 @@ var settings = {
 
   // les différents logs
   logs : {
-    dir       : process.env.LOGS || root + '/logs',
-    access    : 'access.log',
-    error     : 'error.log',
-    errorData : staging + 'errorData.log',
-    debug     : 'debug.log',
-    // ajouter les exclusions voulues parmi ['cache', 'resssourceRepository', 'personneRepository', 'accessControl']
+    dir       : process.env.LOGS || root + "/logs",
+    access    : "access.log",
+    error     : "error.log",
+    errorData : staging + "errorData.log",
+    debug     : "debug.log",
+    // ajouter les exclusions voulues parmi ["cache", "resssourceRepository", "personneRepository", "accessControl"]
     debugExclusions : []
   }
 }
@@ -124,7 +131,7 @@ var settings = {
 if (localConfig) tools.merge(settings, localConfig)
 
 // on enlève le debug mysql en prod
-if (settings.application.staging === 'prod' && settings.$entities.database.debug) {
+if (settings.application.staging === "prod" && settings.$entities.database.debug) {
   delete settings.$entities.database.debug
 }
 

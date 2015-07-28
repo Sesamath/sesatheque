@@ -84,14 +84,15 @@ var moment = require('moment')
 var staticTtl = 3600 * 24
 var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
 
+var tools = require('./tools')
+//var _ = require('lodash');
+
 // les déclarations de nos components
 require('./static')
-require('./ressource')
 require('./personne')
-var tools = require('./tools')
-
-//var _ = require('lodash');
-var dependancies = ['static', 'personne', 'ressource']
+require('./ressource')
+require('./auth')
+var dependancies = ['static', 'personne', 'ressource', 'auth']
 
 // On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
 var privateConfig = require('../_private/config')
@@ -298,6 +299,12 @@ function afterRailSession(rail) {
       next()
     })
   }
+}
+
+if (!isProd) {
+  sesatheque.controller(function() {
+    this.serve('doc', __dirname+'/../documentation');
+  });
 }
 
 // et on lance le boot

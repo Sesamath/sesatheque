@@ -41,6 +41,9 @@
  * @returns {$personneRepository}
  */
 module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
+
+  var _ = require('lodash')
+
   /**
    * Service d'accès aux personnes, utilisé par les différents contrôleurs
    * @namespace $personneRepository
@@ -49,26 +52,31 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
 
   /**
    * Récupère une personne (en cache ou en bdd)
-   * @param id Id de la personne (à priori dans son référentiel, donc ≠ oid)
-   * @param next
+   * @param {string}           origine   Nom du authClient qui a authentifié cette personne
+   * @param {string}           idOrigine Id de la personne dans son système d'authentification
+   * @param {personneCallback} next
    */
-  $personneRepository.load = function (id, next) {
-    log.debug('load ' + id)
-    $cachePersonne.get(id, function (error, personneCached) {
-      if (personneCached) next(null, personneCached)
-      else {
-        Personne.match('id').equals(id).grabOne(function (error, personne) {
-          //log.debug('personne load remonte ', personne)
-          if (error) next(error)
-          else if (personne) {
-            $cachePersonne.set(personne)
-            next(null, personne)
-          } else {
-            next(null, undefined)
-          }
-        })
-      }
-    })
+  $personneRepository.load = function (origine, idOrigine, next) {
+    log.debug('load personne ' + origine +'/' +idOrigine)
+    if (origine && idOrigine) {
+      $cachePersonne.get(idOrigine, function (error, personneCached) {
+        if (personneCached) next(null, personneCached)
+        else {
+          Personne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
+            //log.debug('personne load remonte ', personne)
+            if (error) next(error)
+            else if (personne) {
+              $cachePersonne.set(personne)
+              next(null, personne)
+            } else {
+              next(null, undefined)
+            }
+          })
+        }
+      })
+    } else {
+      next(new Error("origine ou idOrigine manquant, impossible de chercher en base de données."))
+    }
   }
 
   /**
@@ -107,6 +115,52 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
         next(error, groupe)
       })
     })
+  }
+
+  /**
+   * Enregistre une personne en bdd (et met à jour le cache)
+   * @param {Personne(Entity)}       personne
+   * @param {personneEntityCallback} next
+   */
+  $personneRepository.save = function (personne, next) {
+    if (!personne.store) personne = Personne.create(personne)
+    personne.store(function (error, personne) {
+      $cachePersonne.set(personne)
+      // on passe à next sans attendre le résultat de la mise en cache
+      next(error, personne)
+    })
+  }
+
+  /**
+   * Met à jour ou crée une personne
+   * @param {Personne(object)} personne
+   * @param {personneEntityCallback} next
+   */
+  $personneRepository.update = function (personne, next) {
+    function checkUpdate(personne, personneNew, next) {
+      var needUpdate = false
+      for (var prop in personneNew) {
+        if (personneNew.hasOwnProperty(prop) && !_.isEqual(personne[prop], personneNew[prop])) {
+          needUpdate = true
+          personne[prop] = personneNew[prop]
+        }
+      }
+      if (needUpdate) personne.store(next)
+      else next(null, personne)
+    }
+    if (personne.origine && personne.idOrigine) {
+      $personneRepository.load(personne.origine, personne.idOrigine, function (error, personneBdd) {
+        if (error) {
+          next(error)
+        } else if (personneBdd) {
+          checkUpdate(personneBdd, personne, next)
+        } else {
+          Personne.create(personne).store(next)
+        }
+      })
+    } else {
+      next(new Error("Il manque l'identifiant de l'origine pour mettre à jour les données de cet utilisateur"))
+    }
   }
 
   return $personneRepository

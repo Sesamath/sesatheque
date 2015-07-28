@@ -31,17 +31,22 @@
 
 'use strict'
 
-/**
- * Le controleur html du composant ressource
- * Le layout sera fixé par le listener beforeTransport, on s'en préoccupe pas ici sinon le déclarer en contexte
- * @param {Controller} controller
- * @param $ressourceRepository
- * @param $ressourceConverter
- * @param $accessControl
- * @param $views
- * @param $routes
- */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) {
+/**
+ * Le controleur html du composant ressource.
+ *
+ * Toutes ses routes exposées ici seront traitées par le controleur {@link /public/} si on est pas authentifié
+ *
+ * On ne fixe pas de layout dans les data renvoyées mais dans le contexte (page|iframe), le listener beforeTransport en déduira
+ * ce qu'il doit ajouter dans data
+ * @name controller
+ * @Controller /ressource/
+ * @requires $ressourceRepository
+ * @requires $ressourceConverter
+ * @requires $accessControl
+ * @requires $views
+ * @requires $routes
+ */
   var _ = require('lodash')
   var tools = require('../tools')
   //var seq = require('an-flow')
@@ -49,6 +54,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Crée un formToken et l'ajoute à la ressource et en session
+   * @private
    * @param context
    * @param ressource
    */
@@ -62,6 +68,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Vérifie que le token du post correspond à un en session (et le vire)
    * On gère plusieurs token de formulaires pour autoriser l'ouverture de plusieurs forms
+   * @private
    * @param context
    * @param next appelé si ok, sinon on affichera une erreur
    */
@@ -82,6 +89,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Affiche une 401 avec Authentification requise en html
+   * @private
    * @param context
    * @param {string} [message="Authentification requise"]
    * @returns {boolean} true si authentifié
@@ -93,6 +101,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Affiche le message existe pas ou droits insuffisant, avec un 404
+   * @private
    * @param context
    * @param {string} [id=] Identifiant de la ressource (ou son titre), pour le mettre dans le message
    */
@@ -103,6 +112,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Appelle next si on est authentifié ou redirige vers la même url en public
+   * @private
    * @param {Context}  context Le contexte
    * @param {function} next    Sera appelée sans arguments si on est authentifié
    */
@@ -113,6 +123,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Vérifie les droits avant d'appeler $views.prepareAndSend
+   * @private
    * @param context
    * @param error
    * @param ressource
@@ -126,7 +137,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $views.prepareAndSend(context, error, ressource, view, options)
   }
 
-  // describe
+  /**
+   * Page describe
+   * @route GET /ressource/decrire/:oid
+   */
   controller.get($routes.get('describe', ':oid'), function (context) {
     context.layout = 'page'
     redirectOrContinue(context, function () {
@@ -137,7 +151,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-// describeByOrigin
+  /**
+   * Page describe par id d'origine
+   * @route GET /ressource/decrire/:origine/:idOrigine
+   */
   controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
     context.tab = 'describe'
@@ -150,7 +167,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-// display : Voir la ressource pleine page (pour iframe)
+  /**
+   * Page display (voir en pleine page, à priori pour mettre en iframe)
+   * @route GET /ressource/voir/:oid
+   */
   controller.get($routes.get('display', ':oid'), function (context) {
     context.layout = 'iframe'
     redirectOrContinue(context, function () {
@@ -161,7 +181,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-// displayByOrigin : Voir la ressource pleine page (pour iframe)
+  /**
+   * Page display (voir en pleine page, à priori pour mettre en iframe)
+   * @route GET /ressource/voir/:origine/:idOrigine
+   */
   controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
     context.layout = 'iframe'
     redirectOrContinue(context, function () {
@@ -173,7 +196,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-// preview : Voir la ressource dans le site
+  /**
+   * Page preview
+   * @route GET /ressource/apercu/:oid
+   */
   controller.get($routes.get('preview', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'preview'
@@ -185,7 +211,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  // previewByOrigin
+  /**
+   * Page preview
+   * @route GET /ressource/apercu/:origine/:idOrigine
+   */
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
     context.tab = 'preview'
@@ -198,7 +227,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  // Ajouter, affichage du form de saisie
+  /**
+   * Page ajout de ressource (le formulaire de création)
+   * @route GET /ressource/ajouter
+   */
   controller.get($routes.get('add'), function (context) {
     context.layout = 'page'
     context.tab = 'add'
@@ -232,7 +264,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  // Ajouter, traitement du post
+  /**
+   * Traitement du formulaire d'ajout de ressource, réaffiche le form avec une erreur éventuelle ou
+   * redirige vers le form d'édition (pour ajouter ce qui dépend du typeTechnique choisi)
+   * @route POST /ressource/ajouter
+   */
   controller.post($routes.get('add'), function (context) {
     context.layout = 'page'
     context.tab = 'add'
@@ -279,7 +315,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
-  // Modifier, affichage du form
+  /**
+   * Affichage du formulaire d'édition
+   * @route GET /ressource/modifier
+   */
   controller.get($routes.get('edit', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'edit'
@@ -312,7 +351,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
-  // Modifier, traitement du form
+  /**
+   * Traitement du formulaire d'édition, réaffiche le formulaire en cas d'erreur ou sauvegarde et redirige vers la description
+   * @route GET /ressource/modifier
+   */
   controller.post($routes.get('edit', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'edit'
@@ -351,7 +393,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
-  // Delete, affichage d'une demande de confirmation
+  /**
+   * Affiche la demande de confirmation pour effacement
+   * (utilise la vue describe pour montrer le détail de ce que l'on va effacer)
+   * @route GET /ressource/supprimer/:oid
+   */
   controller.get($routes.get('delete', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'delete'
@@ -373,7 +419,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 $metas     : {title: 'Supprimer la ressource : ' + ressource.titre},
                 titre : ressource.titre,
                 contentBloc: {
-                  $view: 'delete',
+                  $view: __dirname +'/views/delete',
                   token : {
                     value:ressource.token,
                     name:'token',
@@ -394,7 +440,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
-  // Delete, traitement du post
+  /**
+   * Traite la demande d'effacement et affiche le résultat
+   * @route POST /ressource/supprimer
+   */
   controller.post($routes.get('delete', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'delete'
@@ -403,7 +452,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var data = {
         $views     : __dirname + '/views',
         $metas     : {title: 'Suppression de ressource'},
-        contentBloc: {$view: 'delete'}
+        contentBloc: {$view: __dirname +'/views/delete'}
       }
       checkToken(context, function () {
         // lassi demande de charger la ressource pour l'effacer, mais on vient de la mettre en cache
@@ -439,7 +488,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * La recherche (form et résultats)
+   * Affiche ou traite le form de recherche (donc affiche les résultats)
+   * @private
+   * @param {Context} context
    */
   function search(context) {
     context.layout = 'page'
@@ -529,5 +580,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   }
   search.timeout = 3000
+  /**
+   * Affiche le formulaire de recherche (s'il n'y a pas de critères) ou la liste de résultat
+   * @route GET /ressource/
+   */
   controller.get($routes.get('search'), search)
 }

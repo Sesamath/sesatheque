@@ -1,0 +1,96 @@
+/**
+ * This file is part of Sesatheque.
+ *   Copyright 2014-2015, Association Sésamath
+ *
+ * Sesatheque is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License version 3
+ * as published by the Free Software Foundation.
+ *
+ * Sesatheque is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Sesatheque (LICENCE.txt).
+ * @see http://www.gnu.org/licenses/agpl.txt
+ *
+ *
+ * Ce fichier fait partie de l'application Sésathèque, créée par l'association Sésamath.
+ *
+ * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
+ * les termes de la GNU Affero General Public License version 3 telle que publiée par la
+ * Free Software Foundation.
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
+ * Consultez la GNU Affero General Public License pour plus de détails.
+ * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
+ * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
+ * pour une explication en français)
+ */
+
+'use strict'
+
+/**
+ * @file Liste de typedef pour jsdoc
+ */
+
+/**
+ * Callback appellée avec une erreur ou sans argument
+ * @callback errorCallback
+ * @param {Error} Une erreur éventuelle
+ */
+
+/**
+ * @callback personneCallback
+ * @param {Error}                             [error=undefined] erreur
+ * @param {Personne(object)|Personne(entity)} personne          Entity ou Object
+ */
+
+/**
+ * @callback personneObjectCallback
+ * @param {Error}            [error=undefined] Erreur
+ * @param {Personne(object)} personne          Un Object Personne (pas Entity)
+ */
+/**
+ * @callback personneEntityCallback
+ * @param {Error}            [error=undefined] Erreur
+ * @param {Personne(entity)} personne          Une Entity Personne
+ */
+
+/**
+ * @callback ressourceCallback
+ * @param {Error}             [error=undefined]
+ * @param {Ressource(entity)} ressource         Une Entity Ressource
+ */
+
+/**
+ * Callback appellée sans argument
+ * @callback simpleCallback
+ */
+
+/**
+ * Une des relations d'une ressource
+ * @typedef relation
+ * @type {Integer[]}
+ * @property {Integer} 0 Id du type de liaison (cf construct/ressource/config:listes.relations)
+ * @property {Integer} 1 Id de la ressource liée
+ */
+
+/**
+ * Objet link à passer à la vue link.dust
+ * @typedef Link
+ * @type {object}
+ * @property {string} href    L'url du lien
+ * @property {string} value   Le texte à mettre dans le lien
+ * @property {string} [icon]  Le nom de l'icone
+ * @property {nameValue[]} [attributes] Attributs supplémentaires à mettre dans le tag a
+ */
+
+/**
+ * Paire name / value
+ * @typedef nameValue
+ * @type {object}
+ * @property {string} name
+ * @property {string} value
+ */

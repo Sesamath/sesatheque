@@ -69,11 +69,17 @@ personneComponent.service('$personneRepository', function(Personne, Groupe, $cac
   return require('./servicePersonneRepository')(Personne, Groupe, $cachePersonne, $cacheGroupe)
 })
 
-personneComponent.service('$accessControl', function (Groupe, $settings, $personneRepository) {
-  return require('./serviceAccessControl')(Groupe, $settings, $personneRepository)
+personneComponent.service('$accessControl', function (Personne, Groupe, $settings, $personneRepository) {
+  return require('./serviceAccessControl')(Personne, Groupe, $settings, $personneRepository)
 })
 
 // l'api json
 personneComponent.controller('api/personne', function (Personne, $personneRepository, $accessControl) {
   require('./controllerApi')(this, Personne, $personneRepository, $accessControl)
 })
+
+/**
+ * @callback personneCallback
+ * @param {Error}    [error=undefined]
+ * @param {Personne} personne
+ */

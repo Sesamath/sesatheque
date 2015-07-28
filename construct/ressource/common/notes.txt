@@ -1,0 +1,4 @@
+Ce dossier ne contient que des liens symboliques vers des fichiers de 
+construct/ressource/public/vendors/sesamath/ (qui sont ignorés par la construction
+de la doc du code serveur), uniquement pour que jsdoc puisse construire proprement
+la doc.

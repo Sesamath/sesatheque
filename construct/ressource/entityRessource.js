@@ -31,23 +31,16 @@
 
 "use strict"
 
-/**
- * Entity Ressource
- * @param {Entity} Ressource L'entity fraichement crée par lassi.entity, que l'on va étoffer ici
- * @param $settings
- */
 module.exports = function (Ressource) {
-
   var _ = require('lodash')
   var tools = require('../tools')
   var RessourceConstructor = require('./public/vendors/sesamath/Ressource')
   var configRessource = require('./config')
 
   /**
-   * L'entity Ressource
-   * @param {Object} initObj Un objet ayant des propriétés d'une ressource
-   * @constructor Ressource
-   * @extends EntityInstance
+   * @entity Ressource(entity)
+   * @param {Ressource(object)} initObj Un objet ayant des propriétés d'une ressource
+   * @extends lassi#EntityInstance
    */
   Ressource.construct(function (initObj) {
     var entity = this
@@ -74,7 +67,7 @@ module.exports = function (Ressource) {
     }
   })
 
-  // on laisse tomber beforeStore et afterStore ici car ils dépendent de nous, c'est le repository qui gère
+  // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
 
   Ressource
     .defineIndex('origine', 'string')

@@ -32,21 +32,11 @@
 'use strict'
 /*global lassi*/
 
-/** {Component} Composant de gestion des types de contenu "Ressource" */
+/**
+ * Composant de gestion des types de contenu "Ressource"
+ * @type {lassi#Component}
+ */
 var ressourceComponent = lassi.component('ressource')
-
-ressourceComponent.config(function($settings) {
-  // on vérifie que l'on a un cache avec des valeur acceptables
-  var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
-  if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")
-  else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
-  else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
-
-  // on désactive la compression dust en dev
-  if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression) {
-    lassi.transports.html.engine.disableWhiteSpaceCompression()
-  }
-})
 
 ressourceComponent.entity('Archive', function () {
   require('./entityArchive')(this)
@@ -101,19 +91,36 @@ ressourceComponent.controller('api', function ($ressourceRepository, $ressourceC
   require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl)
 })
 
-/**
- * En dev on ajoute des routes de debug
- */
+// En dev on ajoute des routes de debug
 if (!isProd) {
   ressourceComponent.controller('debug/ressource', function ($ressourceRepository) {
     require('./controllerDebug')(this, $ressourceRepository)
   })
 }
 
-// nos listener
+// settings
+ressourceComponent.config(function($settings) {
+  // on vérifie que l'on a un cache avec des valeur acceptables
+  var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
+  if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")
+  else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
+  else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
+
+  // on désactive la compression dust en dev
+  if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression) {
+    lassi.transports.html.engine.disableWhiteSpaceCompression()
+  }
+})
+// ajout de nos listener
 ressourceComponent.config(function($accessControl, $routes) {
   var listeners = require('./listeners')($accessControl, $routes)
   for (var eventName in listeners) {
-    lassi.on(eventName, listeners[eventName])
+    if (listeners.hasOwnProperty(eventName)) lassi.on(eventName, listeners[eventName])
   }
 })
+
+/**
+ * @callback ressourceCallback
+ * @param {Error}     [error=undefined]
+ * @param {Ressource} ressource
+ */

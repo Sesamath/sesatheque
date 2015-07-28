@@ -1,1 +1,1 @@
-<a {?href}href="{href}"{/href} {attrs}>{?icon}<i class="material-icons">{icon}</i> {/icon}{value}</a>
+<a {?href}href="{href}"{/href} {#attributes}{name}="{value}"{/attributes}>{?icon}<i class="material-icons">{icon}</i> {/icon}{value}</a>
