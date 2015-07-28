@@ -31,30 +31,33 @@
 
 "use strict"
 
-module.exports = function (Ressource) {
+module.exports = function (EntityRessource) {
   var _ = require('lodash')
   var tools = require('../tools')
-  var RessourceConstructor = require('./public/vendors/sesamath/Ressource')
+  var Ressource = require('./public/vendors/sesamath/Ressource')
   var configRessource = require('./config')
 
   /**
-   * @entity Ressource(entity)
-   * @param {Ressource(object)} initObj Un objet ayant des propriétés d'une ressource
-   * @extends lassi#EntityInstance
+   * @entity EntityRessource
+   * @param {object} initObj Un objet ayant des propriétés d'une ressource
+   * @extends EntityInstance
+   * @extends Ressource
    */
-  Ressource.construct(function (initObj) {
+  EntityRessource.construct(function (initObj) {
     var entity = this
-    // on cast d'abord les dates avec notre tools.toDate() qui gère mieux les fuseaux,
+    // on récupère un objet Ressource correctement typé et initialisé
+    var ressource = new Ressource(initObj)
+    // que l'on merge à notre objet Entity
+    tools.merge(entity, ressource)
+
+    // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
     // plus pratique ici que dans le constructeur qui ne peut faire de require
     if (initObj) {
       if (initObj.dateCreation && !initObj.dateCreation instanceof Date) initObj.dateCreation = tools.toDate(initObj.dateCreation)
       if (initObj.dateMiseAJour && !initObj.dateMiseAJour instanceof Date) initObj.dateMiseAJour = tools.toDate(initObj.dateMiseAJour)
     }
-    // on récupère un objet Ressource correctement typé et initialisé
-    var ressource = new RessourceConstructor(initObj)
-    // que l'on merge à notre objet Entity
-    tools.merge(entity, ressource)
-    // et on ajoute les éventuelles propriétés supplémentaire de notre objet initial
+
+    // ajoute les éventuelles propriétés supplémentaire de notre objet initial
     _.each(initObj, function (value, key) {
       if (!entity.hasOwnProperty(key) && typeof value !== 'function') entity[key] = value
     })
@@ -67,9 +70,12 @@ module.exports = function (Ressource) {
     }
   })
 
+  // on veut pas d'une table entity_ressource
+  EntityRessource.table = 'ressource'
+
   // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
 
-  Ressource
+  EntityRessource
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
     .defineIndex('typeTechnique', 'string')

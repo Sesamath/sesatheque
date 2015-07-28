@@ -31,12 +31,12 @@
 
 'use strict';
 
-module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessource, $cache) {
+module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache) {
   /**
    * Service d'accès aux ressources, utilisé par les différents contrôleurs
    * @service $ressourceRepository
-   * @requires Ressource
-   * @requires Archive
+   * @requires EntityRessource
+   * @requires EntityArchive
    * @requires $ressourceControl
    * @requires $cacheRessource
    * @requires $cache
@@ -117,7 +117,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
      * @param cb callback appelée avec cb(error, id)
      */
     function getFromDb(cb) {
-      Ressource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function (error, entity) {
+      EntityRessource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function (error, entity) {
         if (error) cb(error)
         else if (entity) cb(null, entity.idOrigine)
         else cb(null, 0) // aucune ressource d'origine local
@@ -193,7 +193,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
    * Affecte la propriété oid si la ressource existait mais qu'on ne l'avait pas chargée depuis le cache ou la bdd
    * Ajoute l'idOrigine si inexistant avec origine local
    * @private
-   * @param {Ressource} ressource
+   * @param {EntityRessource} ressource
    * @param {Function} next
    */
   function updateVersion(ressource, next) {
@@ -354,13 +354,13 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
   /**
    * Enregistre la ressource en archive et appelle next avec, mais ne modifie pas la ressource
-   * @param {Ressource} ressource
+   * @param {EntityRessource} ressource
    * @param next
    */
   $ressourceRepository.archive = function (ressource, next) {
     try {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n'existe pas encore")
-      Archive.create(ressource).store(next)
+      EntityArchive.create(ressource).store(next)
     } catch (error) {
       next(error)
     }
@@ -368,7 +368,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
   /**
    * Efface une ressource (et ses index)
-   * @param {Ressource} ressource
+   * @param {EntityRessource} ressource
    * @param {Function}  next      La callback qui sera appelée en lui passant error ou undefined
    * @returns {undefined}
    */
@@ -439,7 +439,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
       // le format est géré par le controleur
 
       // si on est toujours là on peut construire la requete
-      var query = Ressource
+      var query = EntityRessource
       optionsSafe.filters.forEach(function (filter) {
         log.debug("filter", filter)
         if (filter.values && filter.values.length) {
@@ -502,7 +502,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
         if (ressourceCached) next(null, ressourceCached)
-        else Ressource.match('oid').equals(oid).grabOne(function (error, ressource) {
+        else EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
           cacheAndNext(error, ressource, next)
         })
       })
@@ -524,7 +524,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
     $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
       if (ressourceCached) next(null, ressourceCached)
       else {
-        Ressource
+        EntityRessource
             .match('origine').equals(origine)
             .match('idOrigine').equals(idOrigine)
             .grabOne(function (error, ressource) {
@@ -545,7 +545,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
     $cacheRessource.get(oid, function (error, ressourceCached) {
       if (ressourceCached) next(null, ressourceCached)
       else {
-        Ressource
+        EntityRessource
             .match('oid').equals(oid)
             .match('restriction').equals(config.constantes.restriction.aucune)
             .grabOne(function (error, ressource) {
@@ -570,7 +570,7 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
     $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
       if (ressourceCached) next(null, ressourceCached)
       else {
-        Ressource
+        EntityRessource
           .match('origine').equals(origine)
           .match('idOrigine').equals(idOrigine)
           .match('restriction').equals(0)
@@ -583,13 +583,13 @@ module.exports = function (Ressource, Archive, $ressourceControl, $cacheRessourc
 
   /**
    * Ajoute ou modifie une ressource (contrôle la validité avant)
-   * @param {Ressource} ressource
+   * @param {EntityRessource} ressource
    * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
    */
   $ressourceRepository.write = function(ressource, next) {
     if (ressource.constructor.name !== 'Entity') {
-      log.debug("cast en Ressource dans write")
-      ressource = Ressource.create(ressource)
+      log.debug("cast en EntityRessource dans write")
+      ressource = EntityRessource.create(ressource)
     }
     flow().seq(function() {
       $ressourceControl.valide(ressource, this)

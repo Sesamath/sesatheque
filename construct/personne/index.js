@@ -57,29 +57,23 @@ personneComponent.service('$cacheGroupe', function($cache, $settings) {
   return require('./serviceCacheGroupe')($cache, $settings)
 })
 
-personneComponent.entity('Groupe', function ($cacheGroupe) {
-  require('./entityGroupe')(this, $cacheGroupe)
+personneComponent.entity('EntityGroupe', function ($cacheGroupe) {
+  require('./EntityGroupe')(this, $cacheGroupe)
 })
 
-personneComponent.entity('Personne', function (Groupe) {
-  require('./entityPersonne')(this, Groupe)
+personneComponent.entity('EntityPersonne', function () {
+  require('./EntityPersonne')(this)
 })
 
-personneComponent.service('$personneRepository', function(Personne, Groupe, $cachePersonne, $cacheGroupe) {
-  return require('./servicePersonneRepository')(Personne, Groupe, $cachePersonne, $cacheGroupe)
+personneComponent.service('$personneRepository', function(EntityPersonne, EntityGroupe, $cachePersonne, $cacheGroupe) {
+  return require('./servicePersonneRepository')(EntityPersonne, EntityGroupe, $cachePersonne, $cacheGroupe)
 })
 
-personneComponent.service('$accessControl', function (Personne, Groupe, $settings, $personneRepository) {
-  return require('./serviceAccessControl')(Personne, Groupe, $settings, $personneRepository)
+personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
+  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository)
 })
 
 // l'api json
-personneComponent.controller('api/personne', function (Personne, $personneRepository, $accessControl) {
-  require('./controllerApi')(this, Personne, $personneRepository, $accessControl)
+personneComponent.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl) {
+  require('./controllerApi')(this, EntityPersonne, $personneRepository, $accessControl)
 })
-
-/**
- * @callback personneCallback
- * @param {Error}    [error=undefined]
- * @param {Personne} personne
- */

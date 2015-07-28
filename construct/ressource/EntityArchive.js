@@ -32,36 +32,30 @@
 "use strict"
 
 var tools = require('../tools')
-var _ = require('lodash')
 
-module.exports = function (Archive) {
+module.exports = function (EntityArchive) {
   /**
-   * Idem Ressource avec warnings en moins, dateArchivage en plus et moins d'index
-   * @constructor
+   * Idem {@link EntityRessource}, avec dateArchivage en plus et moins d'index
+   * @entity EntityArchive
+   * @extends Ressource
+   * @extends Entity
    */
-  Archive.construct = function (ressource) {
+  EntityArchive.construct = function (ressource) {
     if (!ressource) {
       log.error("Création d'une entité archive sans ressource fourmie")
       return
     }
-    // on clone car on ne veut pas modifier l'original
-    ressource = tools.clone(ressource)
-    // on vire warnings
-    if (ressource.warnings) {
-      if (ressource.warnings.length) log.error("Archivage de la ressource " +ressource.oid +" (oid " +ressource.oid +
-        ") qui comportait des erreurs : " +ressource.warnings.join('\n'))
-      delete ressource.warnings
-    }
-    delete ressource.oid
-    // on garde tout le reste
-    _.each(ressource, function (value, key) {
-      this[key] = value
-    })
+    // on garde tout
+    tools.merge(this, ressource)
+    // sauf l'oid
+    delete this.oid
     // et on ajoute la date d'archivage
     this.dateArchivage = new Date()
   }
 
-  Archive
+  EntityArchive.table = "archive"
+
+  EntityArchive
     .defineIndex('id', 'integer')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')

@@ -56,7 +56,7 @@ module.exports = function ($accessControl, $views) {
 
   /**
    * Retourne le authClient pour ce contexte, ou une erreur si on l'a pas trouvé
-   * @param {lassi#Context} context
+   * @param {Context} context
    * @returns {AuthClient|Error}
    */
   function getClient(context) {
@@ -70,7 +70,7 @@ module.exports = function ($accessControl, $views) {
 
   /**
    * Retourne l'origine pour ce contexte, ou une erreur si on l'a pas trouvé
-   * @param {lassi#Context} context
+   * @param {Context} context
    * @returns {string|Error}
    */
   function getOrigine(context) {
@@ -105,15 +105,14 @@ module.exports = function ($accessControl, $views) {
   /**
    * Service d'authentification, proxy vers les différents authClient enregistrés
    * @service $auth
-   * @type {lassi#Service}
    */
   var $auth = {};
 
   /**
    * Inscrit un client d'authentification
    * Chaque service d'authentification devra appeler cette méthode pour s'inscrire en passant un objet AuthClient
-   * @memberOf $auth
    * @param {AuthClient} authClient
+   * @memberOf $auth
    */
   $auth.addClient = function (authClient) {
     try {
@@ -132,14 +131,28 @@ module.exports = function ($accessControl, $views) {
     }
   }
 
-  $auth.check = function (context) {
-    var user = $accessControl.getCurrentUser(context)
-    if (user) {
-      $views.printError(context, new  Error("Utilisateur déjà connecté"))
-    } else {
-      var client = getClient(context)
-      if (client instanceof Error) $views.printError(context, client)
-      else client.check(context, baseUrl +'/verification', baseUrl+'/deconnexion')
+  /**
+   * Redirige vers le serveur d'authentification pour savoir si on y est connecté (reviendra sur /validation?origine=…)
+   * @param {Context}       context
+   * @param {errorCallback} next
+   * @memberOf $auth
+   */
+  $auth.check = function (context, next) {
+    try {
+      var user = $accessControl.getCurrentUser(context)
+      if (user) {
+        throw new Error("Utilisateur déjà connecté")
+      } else if (context.session.user && context.session.user.lastCheck) {
+        var origine = getOrigine(context)
+        if (origine instanceof Error) {
+          throw origine
+        } else {
+          var client = getClient(context)
+          client.check(context, baseUrl +'/validation?origine=' +origine, baseUrl+'/deconnexion')
+        }
+      }
+    } catch (error) {
+      next(error)
     }
   }
 
@@ -173,10 +186,10 @@ module.exports = function ($accessControl, $views) {
   }
 
   /**
-   * Redirige vers la déconnexion du serveur d'authentification (elle est déjà faite dans sesatheque)
+   * Redirige vers la connexion du serveur d'authentification (elle est déjà faite dans sesatheque)
    * ou affiche une erreur
    * @memberOf $auth
-   * @param context
+   * @param {Context} context
    */
   $auth.login = function (context) {
     var user = $accessControl.getCurrentUser(context)
@@ -199,7 +212,7 @@ module.exports = function ($accessControl, $views) {
    * Redirige vers la déconnexion du serveur d'authentification (elle est déjà faite dans sesatheque)
    * ou affiche une erreur
    * @memberOf $auth
-   * @param context
+   * @param {Context} context
    */
   $auth.logout = function (context) {
     var user = $accessControl.getCurrentUser(context)
@@ -235,22 +248,14 @@ module.exports = function ($accessControl, $views) {
         throw new Error("Aucun utilisateur connecté")
       }
     } catch (error) {
-      // on sait pas sous quelle forme il veut sa réponse, on privilégie json
-      if (context.request.accepts("json")) {
-        context.json({success:false, error:error.toString()})
-      } else if (context.request.accepts("html")) {
-        context.layout = "iframe"
-        $views.printError(context, error)
-      } else {
-        context.text("Error : " +error.toString())
-      }
+      $views.outputError(context, error, "iframe")
     }
   }
 
   /**
    * Valide une authentification (au retour du serveur SSO) et rappelle next(error, personne)
    * @memberOf $auth
-   * @param {lassi#Context}    context
+   * @param {Context}    context
    * @param {personneCallback} next
    */
   $auth.validate = function (context, next) {
@@ -261,21 +266,15 @@ module.exports = function ($accessControl, $views) {
       client.validate(context, function (error, personne) {
         if (error) {
           next(error)
-        } else if (personne) {
-          personne.origine = getOrigine(context)
-          $accessControl.login(context, personne, next)
         } else {
-          next(new Error("Le serveur d'authentification n'a pas renvoyé d'information permettant de vous identifier"))
+          if (!personne) personne = {}
+          personne.origine = getOrigine(context)
+          personne.lastCheck = new Date()
+          $accessControl.login(context, personne, next)
         }
       })
     }
   }
-
-  /**
-   * @callback $auth~personneCallback
-   * @param {Error}    [error=undefined]
-   * @param {Personne(object)} personne
-   */
 
   return $auth
 }

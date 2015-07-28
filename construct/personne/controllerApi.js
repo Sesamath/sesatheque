@@ -30,24 +30,17 @@
  */
 
 /**
- * @file Controleur de la route api/*
- * POST /api/ressource
- * GET  /api/ressource/:oid Renvoie la ressource d'oid :oid
- * POST /api/ressourceMerge
+ * Controleur de la route /api/personne/
+ * @Controller controllerApiPersonne
  */
 'use strict'
 
-/**
- * Le controleur json du composant personne (sur /api/personne)
- * @param {Controller} controller
- * @param $personneRepository
- * @param $accessControl
- */
-module.exports = function (controller, Personne, $personneRepository, $accessControl) {
+module.exports = function (controller, EntityPersonne, $personneRepository, $accessControl) {
 
   /**
    * Équivalent de context.denied en json
-   * @param context
+   * @private
+   * @param {Context} context
    * @param msg
    */
   function denied(context, msg) {
@@ -58,7 +51,8 @@ module.exports = function (controller, Personne, $personneRepository, $accessCon
 
   /**
    * Callback générique de sortie
-   * @param context
+   * @private
+   * @param {Context} context
    * @param error
    * @param data
    */
@@ -74,8 +68,8 @@ module.exports = function (controller, Personne, $personneRepository, $accessCon
   }
 
   /**
-   * Create / update une personne
-   * @param context
+   * Create / update une personne (poster un objet ayant les propriétés de {@link Personne})
+   * @route POST /api/personne/add
    */
   controller.post('add', function (context) {
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
@@ -90,7 +84,7 @@ module.exports = function (controller, Personne, $personneRepository, $accessCon
       // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
       // pour garantir l'intégrité des données
       if (context.post.origine && context.post.idOrigine) {
-        var personne = Personne.create(context.post)
+        var personne = EntityPersonne.create(context.post)
         personne.store(function (error, personneBdd) {
           if (error) sendJson(context, error)
           else if (personneBdd && personneBdd.oid) sendJson(context, null, {oid: personneBdd.oid})

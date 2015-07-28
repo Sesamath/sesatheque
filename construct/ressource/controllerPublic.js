@@ -31,18 +31,18 @@
 
 'use strict';
 
+/**
+ * Le controleur html des routes /public/ (pages sans authentification)
+ * qui traite aussi les /ressource/ si on est pas authentifié
+ *
+ * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
+ * @controller controllerPublic
+ * @requires $ressourceRepository
+ * @requires $ressourceConverter
+ * @requires $views
+ * @requires $routes
+ */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $views, $routes) {
-  /**
-   * Le controleur html /public/ (pages sans authentification) du composant ressource
-   *
-   * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
-   * @name controller
-   * @controller /public/
-   * @requires $ressourceRepository
-   * @requires $ressourceConverter
-   * @requires $views
-   * @requires $routes
-   */
   var tools = require('../tools')
   var _ = require('lodash')
   var config = require('./config')
@@ -50,7 +50,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
    * @private
-   * @param context
+   * @param {Context} context
    * @param view
    * @param options
    */
@@ -64,7 +64,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Vérifie qu'une ressource est publique puis l'envoie à la vue
    * @private
-   * @param context
+   * @param {Context} context
    * @param error
    * @param ressource
    * @param view
@@ -202,8 +202,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           context.html(data)
         })
       } else {
-        context.error = "il faut choisir au moins un critère"
-        $views.printSearchForm(context)
+        $views.printSearchForm(context, ["il faut choisir au moins un critère"])
       }
     }
   }

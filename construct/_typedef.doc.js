@@ -42,26 +42,33 @@
  */
 
 /**
- * @callback personneCallback
- * @param {Error}                             [error=undefined] erreur
- * @param {Personne(object)|Personne(entity)} personne          Entity ou Object
+ * @callback groupeCallback
+ * @param {Error}  [error] erreur éventuelle
+ * @param {Groupe} groupe  Entity ou Object
  */
 
 /**
- * @callback personneObjectCallback
- * @param {Error}            [error=undefined] Erreur
- * @param {Personne(object)} personne          Un Object Personne (pas Entity)
+ * @callback personneCallback
+ * @param {Error}    [error]  erreur éventuelle
+ * @param {Personne} personne Entity ou Object
  */
+
 /**
- * @callback personneEntityCallback
- * @param {Error}            [error=undefined] Erreur
- * @param {Personne(entity)} personne          Une Entity Personne
+ * @callback entityPersonneCallback
+ * @param {Error}          [error]  Erreur éventuelle
+ * @param {EntityPersonne} personne Une Entity Personne
  */
 
 /**
  * @callback ressourceCallback
- * @param {Error}             [error=undefined]
- * @param {Ressource(entity)} ressource         Une Entity Ressource
+ * @param {Error}     [error]
+ * @param {Ressource} ressource
+ */
+
+/**
+ * @callback entityRessourceCallback
+ * @param {Error}           [error]
+ * @param {EntityRessource} ressource
  */
 
 /**

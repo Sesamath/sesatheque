@@ -33,36 +33,63 @@
 
 var tools = require('../tools')
 
-/**
- * Service helper de $personneRepository
- * Chaque groupe est mis en cache deux fois, par son nom et son id
- * (vu la taille d'un groupe pas rentable de passer par nom => id)
- */
 module.exports = function ($cache, $settings) {
   var ttl = $settings.get('components.personne.cacheTTL', 20*60)
 
-  return {
-    get: function (oid, next) {
-      $cache.get('groupe_' +oid, next)
-    },
-    getByNom: function (nom, next) {
-      var key = 'groupeNom_' +tools.sanitizeHashKey(nom)
-      $cache.get(key, next)
-    },
-    set: function (groupe, next) {
-      var nom = tools.sanitizeHashKey(groupe.nom)
-      $cache.set('groupeNom_' +nom, groupe, ttl)
-      $cache.set('groupe_' +groupe.oid, groupe, ttl, next)
-    },
-    delete : function (oid, next) {
-      // faut aller le chercher en cache pour trouver le nom
-      $cache.get('groupe_' +oid, function (error, groupe) {
-        if (groupe && groupe.nom) {
-          var key = 'groupeNom_' +tools.sanitizeHashKey(groupe.nom)
-          $cache.delete(key)
-        }
-      })
-      $cache.delete('groupe_', oid, next)
-    }
+  /**
+   * Service helper de $personneRepository
+   * Chaque groupe est mis en cache deux fois, par son nom et son oid
+   * (vu la taille d'un groupe pas rentable de passer par nom => id)
+   * @service $cacheGroupe
+   */
+  var $cacheGroupe
+
+  /**
+   * Récupère un groupe dans le cache, d'après son oid
+   * @param {Integer} oid
+   * @param {groupeCallback} next
+   * @memberOf $cacheGroupe
+   */
+  $cacheGroupe.get = function (oid, next) {
+    $cache.get('groupe_' +oid, next)
   }
+  /**
+   * Récupère un groupe dans le cache, d'après son nom
+   * @param {string} nom
+   * @param {groupeCallback} next
+   * @memberOf $cacheGroupe
+   */
+  $cacheGroupe.getByNom = function (nom, next) {
+    var key = 'groupeNom_' +tools.sanitizeHashKey(nom)
+    $cache.get(key, next)
+  }
+  /**
+   * Met un groupe en cache
+   * @param {Groupe} groupe
+   * @param {errorCallback} next
+   * @memberOf $cacheGroupe
+   */
+  $cacheGroupe.set = function (groupe, next) {
+    var nom = tools.sanitizeHashKey(groupe.nom)
+    $cache.set('groupeNom_' +nom, groupe, ttl)
+    $cache.set('groupe_' +groupe.oid, groupe, ttl, next)
+  }
+  /**
+   * Efface un groupe du cache
+   * @param {Integer} oid
+   * @param {errorCallback} next
+   * @memberOf $cacheGroupe
+   */
+  $cacheGroupe.delete = function (oid, next) {
+    // faut aller le chercher en cache pour trouver le nom
+    $cache.get('groupe_' +oid, function (error, groupe) {
+      if (groupe && groupe.nom) {
+        var key = 'groupeNom_' +tools.sanitizeHashKey(groupe.nom)
+        $cache.delete(key)
+      }
+    })
+    $cache.delete('groupe_', oid, next)
+  }
+
+  return $cacheGroupe
 }

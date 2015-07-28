@@ -31,7 +31,7 @@
 
 'use strict'
 
-module.exports = function ($cache, $settings, Ressource) {
+module.exports = function ($cache, $settings, EntityRessource) {
   var ttl = $settings.get('components.ressource.cacheTTL', 3600)
 
   function dummy() {}
@@ -60,7 +60,7 @@ module.exports = function ($cache, $settings, Ressource) {
     $cache.get(getKey(oid), function (error, ressourceCached) {
       var ressource
       if (!error) {
-        if (ressourceCached) ressource = Ressource.create(ressourceCached)
+        if (ressourceCached) ressource = EntityRessource.create(ressourceCached)
         log.debug('ressource ' + oid + ' récupérée en cache', ressourceCached, 'cache')
         log.debug('devenue ', ressource, 'cache')
       }
@@ -81,7 +81,7 @@ module.exports = function ($cache, $settings, Ressource) {
       else $cache.get(getKey(oid), function (error, ressourceCached) {
         var ressource
         if (!error) {
-          if (ressourceCached) ressource = Ressource.create(ressourceCached)
+          if (ressourceCached) ressource = EntityRessource.create(ressourceCached)
           log.debug('ressource ' +origine +'/' +idOrigine + ' récupérée en cache', ressourceCached, 'cache')
         }
         next(null, ressource)
@@ -91,7 +91,7 @@ module.exports = function ($cache, $settings, Ressource) {
 
   /**
    * Met en cache une ressource
-   * @param {Ressource}      ressource
+   * @param {EntityRessource}      ressource
    * @param {errorCallback} next
    * @memberOf $cacheRessource
    */
@@ -131,6 +131,7 @@ module.exports = function ($cache, $settings, Ressource) {
    * @param origine
    * @param idOrigine
    * @param next
+   * @memberOf $cacheRessource
    */
   $cacheRessource.deleteByOrigine = function (origine, idOrigine, next) {
     log.debug('delete cache ressource ' +origine +'/' +idOrigine, null, 'cache')

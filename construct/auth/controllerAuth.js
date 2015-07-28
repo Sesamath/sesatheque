@@ -37,10 +37,11 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
     /**
      * Controleur pour gérer l'authentification
      * @controller authController
-     * @name controller
-     * @requires {lassi#Service} $auth
-     * @requires {lassi#Service} $accessControl
-     * @requires {lassi#Service} $views
+     * @extends Controller
+     * @requires {object} $auth
+     * @requires {object} $accessControl
+     * @requires {object} $views
+     * @requires {object} $flashMessages
      */
 
     /**
@@ -77,7 +78,24 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
     controller.get('deconnexion/externe', $auth.logoutFromRemote)
 
     /**
-     * Valide un retour du serveur d'authentification
+     * redirige vers le serveur d'authentification pour savoir si on est connecté là-bas
+     * @route GET /testConnexion
+     */
+    controller.get('testConnexion', function (context) {
+      var urlRedirect = context.get.redirect || '/'
+      if ($accessControl.isAuthenticated(context)) {
+        log.error(new Error("appel de /testConnexion pour un utilisateur déjà connecté"))
+        context.redirect(urlRedirect)
+      } else {
+        $auth.check(context, function (error) {
+          if (!error) error = new Error("calback testConnexion appelée sans erreur, il aurait dû y avoir une redirection ou une erreur")
+          $views.outputError(context)
+        })
+      }
+    })
+
+    /**
+     * Valide un retour du serveur d'authentification (qui peut répondre que l'on est pas connecté)
      * @route GET /validation
      */
     controller.get('validation', function (context) {
@@ -89,7 +107,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
           if (error) {
             $views.printError(context, error)
           } else {
-            if (personne) $flashMessages.add(context, "Authentification réussie", "info")
+            if (personne && personne.idOrigine) $flashMessages.add(context, "Authentification réussie", "info")
             var uri = context.get.redirect || "/"
             context.redirect(uri)
           }

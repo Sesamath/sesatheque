@@ -33,7 +33,7 @@
 
 /**
  * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
- * @param Ressource
+ * @param EntityRessource
  * @param $ressourceRepository Pour aller chercher des infos complémentaires d'une ressource (les ressources liées) pour certaines vues
  * @param $personneRepository  Pour aller chercher des infos complémentaires d'une ressource (les auteurs) pour certaines vues
  * @param $ressourceConverter
@@ -41,7 +41,7 @@
  * @param $routes
  * @param $settings
  */
-module.exports = function (Ressource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
   var tools = require('../tools')
   var _ = require('lodash')
   var seq = require('an-flow')
@@ -282,7 +282,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
       // on en créé une vide, mais on regarde si on avait un token
       var token = ressource && ressource.token
       log.debug('dans sendFormData on lance un create')
-      ressource = Ressource.create()
+      ressource = EntityRessource.create()
       if (token) ressource.token = token
     }
     //log.debug('ressource traitée par sendFormData', ressource)
@@ -510,8 +510,28 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
   }
 
   /**
+   * Affiche une erreur en json ou html ou text, suivant accept, en laissant le status 200
+   * @param {Context} context
+   * @param {Error}   error
+   * @param {string}  [layout=page] Pour la sortie html, passer iframe si on veut pas des header/menu/footer
+   */
+  $views.outputError = function (context, error, layout) {
+    // on sait pas sous quelle forme l'utilisateur veut sa réponse, on privilégie json
+    if (context.request.accept("json")) {
+      log.error(error)
+      context.json({success:false, error:error.toString()})
+    } else if (context.request.accept("html")) {
+      context.layout = layout || "page"
+      $views.printError(context, error)
+    } else {
+      log.error(error)
+      context.text(error.toString())
+    }
+  }
+
+  /**
    * Prepare les data pour la vue dust et appelle html(data)
-   * @param context
+   * @param {Context} context
    * @param error
    * @param ressource
    * @param {string} view le nom de la vue dans ressource/views/
@@ -598,7 +618,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
 
   /**
    * Prepare les data pour le form dust et appelle html avec
-   * @param context
+   * @param {Context} context
    * @param error
    * @param ressource
    * @param options
@@ -622,12 +642,16 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
 
   /**
    * Prepare les data pour le form dust et appelle html avec
-   * @param context
+   * @param {Context}  context
+   * @param {string[]} [errorMessages]
    */
-  $views.printSearchForm = function (context) {
+  $views.printSearchForm = function (context, errorMessages) {
     var data = $views.getDefaultData('formSearch')
+    if (errorMessages && errorMessages.length) {
+      data.errors = errorMessages
+    }
     // les datas pour le form
-    var fakeRessource = Ressource.create(context.get)
+    var fakeRessource = EntityRessource.create(context.get)
     //log.debug("ressource d'après get", fakeRessource)
     tools.complete(data.contentBloc, getFormViewData(null, fakeRessource))
     // on vire ou modifie ce qui nous intéresse pour la recherche
@@ -665,10 +689,7 @@ module.exports = function (Ressource, $ressourceRepository, $personneRepository,
     }
     // titre de la page
     data.$metas.title = 'Recherche de ressources'
-    if (context.error) {
-      data.error = context.error
-      delete context.error
-    }
+
     context.html(data)
   }
 

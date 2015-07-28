@@ -33,42 +33,45 @@
 /*global lassi*/
 
 /**
- * Composant de gestion des types de contenu "Ressource"
- * @type {lassi#Component}
+ * Composant de gestion des ressources
  */
 var ressourceComponent = lassi.component('ressource')
 
-ressourceComponent.entity('Archive', function () {
-  require('./entityArchive')(this)
+ressourceComponent.entity('EntityArchive', function () {
+  require('./EntityArchive')(this)
 })
 
 
-ressourceComponent.entity('Ressource', function () {
-  require('./entityRessource')(this)
+ressourceComponent.entity('EntityRessource', function () {
+  require('./EntityRessource')(this)
 })
 
-ressourceComponent.service('$cacheRessource', function($cache, $settings, Ressource) {
-  return require('./serviceCacheRessource')($cache, $settings, Ressource)
+ressourceComponent.service('$cacheRessource', function($cache, $settings, EntityRessource) {
+  return require('./serviceCacheRessource')($cache, $settings, EntityRessource)
 })
 
 ressourceComponent.service('$routes', function($settings) {
   return require('./serviceRoutes')($settings)
 })
 
-ressourceComponent.service('$ressourceRepository', function(Ressource, Archive, $ressourceControl, $cacheRessource, $cache) {
-  return require('./serviceRessourceRepository')(Ressource, Archive, $ressourceControl, $cacheRessource, $cache)
+ressourceComponent.service('$flashMessages', function() {
+  return require('./serviceFlashMessages')()
 })
 
-ressourceComponent.service('$ressourceControl', function(Ressource) {
-  return require('./serviceRessourceControl')(Ressource)
+ressourceComponent.service('$ressourceRepository', function(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache) {
+  return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache)
 })
 
-ressourceComponent.service('$ressourceConverter', function (Ressource, $ressourceRepository, $routes, $settings) {
-  return require('./serviceRessourceConverter')(Ressource, $ressourceRepository, $routes, $settings)
+ressourceComponent.service('$ressourceControl', function(EntityRessource) {
+  return require('./serviceRessourceControl')(EntityRessource)
 })
 
-ressourceComponent.service('$views', function (Ressource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
-  return require('./serviceViews')(Ressource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings)
+ressourceComponent.service('$ressourceConverter', function (EntityRessource, $ressourceRepository, $routes, $settings) {
+  return require('./serviceRessourceConverter')(EntityRessource, $ressourceRepository, $routes, $settings)
+})
+
+ressourceComponent.service('$views', function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+  return require('./serviceViews')(EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings)
 })
 
 // nos ressources statiques
@@ -78,7 +81,7 @@ ressourceComponent.controller(function () {
 
 // les pages html de consultation / modification
 ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) { // jshint ignore:line
-  require('./controllerHtml')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes)
+  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes)
 })
 
 // un controleur html pour des pages publiques sans session
@@ -111,16 +114,11 @@ ressourceComponent.config(function($settings) {
     lassi.transports.html.engine.disableWhiteSpaceCompression()
   }
 })
+
 // ajout de nos listener
-ressourceComponent.config(function($accessControl, $routes) {
-  var listeners = require('./listeners')($accessControl, $routes)
+ressourceComponent.config(function($accessControl, $routes, $flashMessages) {
+  var listeners = require('./listeners')($accessControl, $routes, $flashMessages)
   for (var eventName in listeners) {
     if (listeners.hasOwnProperty(eventName)) lassi.on(eventName, listeners[eventName])
   }
 })
-
-/**
- * @callback ressourceCallback
- * @param {Error}     [error=undefined]
- * @param {Ressource} ressource
- */

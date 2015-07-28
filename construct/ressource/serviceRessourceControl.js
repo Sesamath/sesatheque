@@ -31,24 +31,25 @@
 
 'use strict';
 
-module.exports = function (Ressource) {
-  /**
-   * Service de validation / controle du contenu d'une ressource
-   * @namespace $ressourceControl
-   * @requires Ressource
-   */
-  var $ressourceControl = {}
+var _ = require('lodash')
+var tools = require('../tools')
 
-  var _ = require('lodash')
-  var tools = require('../tools')
+var config = require('./config')
 
-  var config = require('./config')
+/**
+ * Service de validation / controle du contenu d'une ressource
+ * @service $ressourceControl
+ * @requires EntityRessource
+ */
+var $ressourceControl = {}
 
+module.exports = function (EntityRessource) {
   /**
    * Ajoute les propriétés qui peuvent être déduites (deductions définies dans la configuration)
    * - categories si vide et que typeTechnique permet de le deviner
    * - typePedagogiques et typeDocumentaires si categories n'en contient qu'une et qu'elle permet de les déduire
-   * @param {Ressource} ressource une ressource (ou des datas qui y ressemblent)
+   * @private
+   * @param {EntityRessource} ressource une ressource (ou des datas qui y ressemblent)
    */
   function addDeductions(ressource) {
     // on normalise ces champs pour être sûr d'avoir des array
@@ -88,6 +89,7 @@ module.exports = function (Ressource) {
 
   /**
    * Ajoute des warnings éventuels (arbre sans enfants ou catégorie mise à "non défini")
+   * @private
    * @param ressource
    */
   function addWarnings(ressource) {
@@ -108,7 +110,8 @@ module.exports = function (Ressource) {
   /**
    * Vérifie que tous les champs qui doivent être des array le sont et met des tableaux vides sinon
    * ajoute warnings et errors, qui seront éventuellement virés s'ils sont vides avant envoi à la vue
-   * @param {Ressource} ressource
+   * @private
+   * @param {EntityRessource} ressource
    */
   function normalizeArrays(ressource) {
     _.each(config.typesVar, function (typeVar, key) {
@@ -120,6 +123,7 @@ module.exports = function (Ressource) {
 
   /**
    * Retourne la liste des erreurs rencontrées lors du parsing des enfants
+   * @memberOf $ressourceControl
    * @param enfants
    * @param titreParent Pour rendre les messages d'erreurs plus précis
    * @return {Array}
@@ -150,6 +154,7 @@ module.exports = function (Ressource) {
    * Renvoie un token aléatoire
    * pas aussi random que l'usage de crypto ou d'un module npm dédié mais suffisant pour notre besoin
    * @returns {string}
+   * @memberOf $ressourceControl
    */
   $ressourceControl.getToken = function () {
     return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
@@ -158,7 +163,8 @@ module.exports = function (Ressource) {
   /**
    * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
    * Fait du cast sans râler quand les propriétés de ressource sont "presque" du bon type
-   * @param {Ressource} ressource
+   * @memberOf $ressourceControl
+   * @param {EntityRessource} ressource
    * @param {boolean} [strict=true] Passer false pour ne faire que les conversion de type
    *                                sans renvoyer une erreur pour les champs manquants
    * @param {Function} next Callback appelé en synchrone qui recevra les arguments (error, ressource)
@@ -166,16 +172,23 @@ module.exports = function (Ressource) {
    *                        Sinon renvoie la ressource avec ses errors (+warnings éventuels, cast éventuels effectués)
    */
   $ressourceControl.valide = function(ressource, strict, next) {
-    /** erreur qui sera passée à next */
+    /**
+     * erreur qui sera passée à next
+     * @private
+     * @type {Error}
+     */
     var error = null
-    /** tableau de messages d'erreur qui sera concaténé dans error */
+    /**
+     * tableau de messages d'erreur qui sera concaténé dans error
+     * @private
+     * @type {Array}
+     */
     var errors = []
     if (!next) {
       next = strict
       strict = true
     }
     if (!next) throw new Error('pas de callback fournie')
-
 
     if (_.isEmpty(ressource)) {
       errors.push("Ressource vide");
@@ -312,12 +325,11 @@ module.exports = function (Ressource) {
   /**
    * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
    * Ajoute des choses dans ressource.warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
-   *
+   * @memberOf $ressourceControl
    * @param {object} data Le post
    * @param {boolean} [partial=false] Passer true pour ne pas générer d'erreur sur des champs requis manquants
    * @param {function} next Si appelé sans error, la ressource est valide,
    *                        sinon y'a une error et des warnings|errors ajouté à la ressource initiale qui est renvoyée modifiée
-   * @memberOf $ressourceControl
    */
   $ressourceControl.valideRessourceFromPost = function (data, partial, next) {
     try {
@@ -340,7 +352,7 @@ module.exports = function (Ressource) {
         else if (partial) next(null, ressource)
         // mais sinon on renvoie une vraie "Ressource"
         else {
-          var objRessource = Ressource.create(ressource)
+          var objRessource = EntityRessource.create(ressource)
           next(null, objRessource)
         }
       })

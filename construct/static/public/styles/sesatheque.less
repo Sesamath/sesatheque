@@ -27,40 +27,44 @@ body {min-width: 300px;}
 }
 
 /* Couleurs */
+.avert {
+  background-color: @base-background;
+  margin: 1rem;
+  padding: 1rem;
+  border: thin solid;
+}
 .error {
+  .avert();
+  color: @error-color;
+  border-color: @error-color;
   &::before {
     content: 'error';
     .material-icons();
     margin-right: 1rem;
   }
-  margin: 1em;
-  background-color: @base-background;
-  color: @error-color;
 }
 .warning {
+  .avert();
+  color: @warning-color;
+  border-color: @warning-color;
   &::before {
     content: 'warning';
     .material-icons();
     margin-right: 1rem;
   }
-  margin: 1em;
-  background-color: @base-background;
-  color: @warning-color;
 }
 .info {
+  .avert();
+  color: @info-color;
+  border-color: @info-color;
   &::before {
     content: 'info';
     .material-icons();
     margin-right: 1rem;
   }
-  margin: 1em;
-  background-color: @base-background;
 }
-.flash {
-  .info();
-  color: @flash-color;
-  border: solid thin @error-color;
-}
+// Les messages flash ont une de ces classes error|warning|info, mais aussi une classe flash, que l'on utilise pas pour le moment
+
 .cartouche { /* texte secondary sur fond foncé primary */
   background-color: @primary-color;
   color: @secondary-color-light;
@@ -203,17 +207,18 @@ body {min-width: 300px;}
 .ressource span.publie, .ressource span.restriction {
   display: block;
   float: right;
-  margin: 0.5em; }
-
+  margin: 0.5em;
+}
 .ressource p, .ressource ul {
-  margin: 1em; }
-
+  margin: 1em;
+}
 .remarque {
   font-size: 0.8em;
   font-weight: normal;
-  font-style: italic; }
-
+  font-style: italic;
+}
 .liste .links {
   margin: 0 0 0.2em 2em;
-  font-size: 0.8em; }
+  font-size: 0.8em;
+}
 

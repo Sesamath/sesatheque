@@ -31,27 +31,39 @@
 
 'use strict'
 
-/**
- * Service de gestion du cache des personnes, helper de $personneRepository
- * @requires $cache
- * @requires $settings
- */
 module.exports = function ($cache, $settings) {
   var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
 
   /**
-   * Service de mise en cache de personne
+   * Service de gestion du cache des personnes, helper de $personneRepository
    * @service $cachePersonne
-   * @type {lassi#Service}
    */
   var $cachePersonne = {}
 
+  /**
+   * Récupère une personne du cache
+   * @param {Integer}          oid
+   * @param {personneCallback} next
+   * @memberOf $cachePersonne
+   */
   $cachePersonne.get = function (oid, next) {
     $cache.get('personne_' + oid, next)
   }
+  /**
+   * Met un objet personne en cache
+   * @param {Personne}      personne
+   * @param {errorCallback} next
+   * @memberOf $cachePersonne
+   */
   $cachePersonne.set = function (personne, next) {
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }
+  /**
+   * Efface un objet personne du cache
+   * @param {Integer}       oid
+   * @param {errorCallback} next
+   * @memberOf $cachePersonne
+   */
   $cachePersonne.delete = function (oid, next) {
     $cache.delete('personne_', oid, next)
   }

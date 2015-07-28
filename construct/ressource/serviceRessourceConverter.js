@@ -31,27 +31,27 @@
 
 'use strict'
 
-module.exports = function (Ressource, $ressourceRepository, $routes, $settings) {
-  /**
-   * Service qui regroupe les fonctions de transformation de données sur des ressources
-   * (objets vers vue ou résultat de post vers controller)
-   * @service $ressourceConverter
-   * @requires $ressourceRepository
-   * @requires $routes
-   * @requires $settings
-   */
-  var $ressourceConverter = {}
+/**
+ * Service qui regroupe les fonctions de transformation de données sur des ressources
+ * (objets vers vue ou résultat de post vers controller)
+ * @service $ressourceConverter
+ * @requires $ressourceRepository
+ * @requires $routes
+ * @requires $settings
+ */
+var $ressourceConverter = {}
 
-  var _ = require('lodash')
-  var flow = require('an-flow')
-  //var moment = require('moment')
-  // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
-  // car on a l'autocomplétion sur les noms de propriété
-  var config = require('./config')
-  //var tools = require('../tools')
-  var Ref = require('./public/vendors/sesamath/Ref')
-  var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
+var _ = require('lodash')
+var flow = require('an-flow')
+//var moment = require('moment')
+// pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
+// car on a l'autocomplétion sur les noms de propriété
+var config = require('./config')
+//var tools = require('../tools')
+var Ref = require('./public/vendors/sesamath/Ref')
+var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
 
+module.exports = function (EntityRessource, $ressourceRepository, $routes, $settings) {
   /**
    * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
    * @see http://www.jstree.com/docs/json/ pour le format
@@ -102,7 +102,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   /**
    * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
    * dont le 1er est un id de relation valide
-   * @private
+   * @memberOf $ressourceConverter
    * @param ressource
    * @param relations
    * @returns {Array} Les erreurs éventuelles, ou false si y'a pas eu d'erreur mais que l'on a rien modifié (la relation y était déjà)
@@ -144,7 +144,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
 
   /**
    * Ajoute les propriétés urlXXX à chaque elt du tableau de ressource
-   * @private
+   * @memberOf $ressourceConverter
    * @param {Array} ressources
    * @returns {Array} ressources
    */
@@ -161,7 +161,8 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   //noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Peuple les enfants d'un arbre en allant les chercher en bdd
-   * @param context
+   * @memberOf $ressourceConverter
+   * @param {Context} context
    * @param ressource
    * @param next
    */
@@ -255,6 +256,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
 
   /**
    * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
+   * @memberOf $ressourceConverter
    * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
    */
   $ressourceConverter.toArbre = function (ressource) {
@@ -275,6 +277,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
 
   /**
    * Renvoie une Ref à une ressource (avec tous les enfants)
+   * @memberOf $ressourceConverter
    * @param ressource
    * @return {Ref}
    */
@@ -284,6 +287,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
 
   /**
    * Renvoie la ressource au format compact (oid, origine, idOrigine, titre, typeTechnique, categories, restriction, dataUri)
+   * @memberOf $ressourceConverter
    * @param ressource
    * @return {object}
    */
@@ -302,6 +306,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
 
   /**
    * Retourne un tableau children au format jstree
+   * @memberOf $ressourceConverter
    * @param ressource
    * @return {Array} Le tableau des enfants
    */
@@ -325,6 +330,7 @@ module.exports = function (Ressource, $ressourceRepository, $routes, $settings) 
   /**
    * Transforme un ressource de la bibli en node pour jstree
    * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
+   * @memberOf $ressourceConverter
    * @param {Ressource|Ref} ressource Une ressource ou une ref à une ressource
    * @returns {Object}
    */

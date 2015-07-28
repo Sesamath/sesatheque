@@ -38,7 +38,11 @@
  * Le controleur de la route /api/ (qui répond en json)
  * Toutes les routes contenant /public/ sont sans tenir compte de la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
- * @Controller /api/
+ * @Controller controlleurApi
+ * @requires $ressourceRepository
+ * @requires $ressourceConverter
+ * @requires $ressourceControl
+ * @requires $accessControl
  */
 
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl) {
@@ -52,7 +56,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Met à jour une ressource issue de la bdd et appelle checkWriteAndOut pour vérifier les droits, l'enregistrer et sortir
    * ou sort avant avec une erreur
    * @private
-   * @param context
+   * @param {Context} context
    * @param error
    * @param ressourceBdd
    * @param ressourceNew
@@ -71,7 +75,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Vérifie la validité de la ressource, les droits et enregistre la ressource
    * @private
-   * @param context
+   * @param {Context} context
    * @param ressource
    */
   function checkWriteAndOut(context, ressource) {
@@ -119,7 +123,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
-   * @param context
+   * @param {Context} context
    * @param id
    */
   function deleteAndSend(context, id) {
@@ -156,7 +160,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Équivalent de context.denied en json
    * @private
-   * @param context
+   * @param {Context} context
    * @param msg
    */
   function denied(context, msg) {
@@ -168,7 +172,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Renvoie l'id trouvé dans le post ou le get (en acceptant les propriétés id, oid ou origine&idOrigine, en GET ou POST)
    * @private
-   * @param context
+   * @param {Context} context
    * @returns {string} oid ou origine/idOrigine ou undefined
    */
   function extractId(context) {
@@ -183,7 +187,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
    * @private
-   * @param context
+   * @param {Context} context
    * @param visibility
    */
   function grabListe(context, visibility) {
@@ -227,7 +231,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Callback générique de sortie
    * @private
-   * @param context
+   * @param {Context} context
    * @param {string|Error} error
    * @param data
    */
@@ -252,7 +256,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Retourne un array pour jstree
    * @private
-   * @param context
+   * @param {Context} context
    * @param error
    * @param data
    */
@@ -273,7 +277,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
    * @private
-   * @param context
+   * @param {Context} context
    * @param error
    * @param ressources
    */
@@ -298,7 +302,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format
    * @private
-   * @param context
+   * @param {Context} context
    * @param error
    * @param ressource
    */
@@ -353,21 +357,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
     }
   } /* */
-
-  /**
-   * La réponse à une demande de ressource, la liste des autres propriétés dépend du format demandé,
-   * toutes les propriétés de la ressource par défaut. Cf {@link $ressourceConverter.toRef}
-   * @typedef reponseRessource
-   * @type {Object}
-   * @property {boolean}   success
-   * @property {string}    [error]        Message d'erreur éventuel
-   * @property {Integer}   oid
-   * @property {Integer}   [ref]          Si on a demandé le format ref
-   * @property {string}    titre
-   * @property {Integer[]} categories
-   * @property {string}    typeTechnique
-   * @property …
-   */
 
   /**
    * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
@@ -459,27 +448,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  /**
-   * @typedef reponseRessourceOid
-   * @type {Object}
-   * @property {boolean}  success
-   * @property {Integer}  oid
-   * @property {string}   [error]    Message d'erreur éventuel
-   * @property {string[]} [warnings] Avertissements éventuels sur la ressource (incohérences ne justifiant pas une erreur et le rejet de l'enregistrement)
-   */
-  /**
-   * @typedef reponseRessourceRef
-   * @type {Object}
-   * @property {boolean} success
-   * @property {Integer} oid
-   * @property {string} [error]
-   */
-
   //noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Traite la ressource postée
    * @private
-   * @param context
+   * @param {Context} context
    */
   function postRessource(context) {
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
@@ -545,7 +518,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Ajoute des relations
    * @private
-   * @param context
+   * @param {Context} context
    */
   function postRessourceAddRelations (context) {
     if (context.perf) {
@@ -625,37 +598,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.delete('public/:oid', function (context) {
     denied(context, "droits insuffisant pour effacer cette ressource")
   })
-
-  /**
-   * Format de la réponse à une demande de liste
-   * @typedef reponseListe
-   * @type {object}
-   * @property {boolean}                     success
-   * @property {Ref[]|Compact[]|Ressource[]} liste
-   * @property {string}                      [error] Message d'erreur éventuel
-   */
-
-  /**
-   * Arguments à donner à une requête qui renvoie une liste de ressources
-   * @typedef requeteListe
-   * @type {object}
-   * @property {string}   [json]    Tous les paramètres qui suivent dans une chaîne json (GET seulement, ignoré en POST)
-   * @property {filter[]} [filters] Les filtres à appliquer
-   * @property {string}   [orderBy] Un nom d'index
-   * @property {string}   [order]   Préciser 'desc' si on veut l'ordre descendant
-   * @property {Integer}  [start]   offset
-   * @property {Integer}  [nb]      Nombre de résultats voulus (Cf settings.ressource.limites.listeNbDefault, à priori 25),
-   *                                  sera ramené à settings.ressource.limites.maxSql si supérieur (à priori 500)
-   * @property {string}   [format]  compact|full par défaut on remonte les ressource au format ref
-   */
-
-  /**
-   * Format d'un filtre
-   * @typedef filter
-   * @type {object}
-   * @property {string} index  Le nom de l'index
-   * @property {Array}  [values] Une liste de valeurs à chercher (avec des ou), remontera toutes les ressource ayant index si omis
-   */
 
   /**
    * Cherche parmi les ressources publiques publiées
@@ -760,7 +702,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     // donc il récupèrera pas forcément nb résultats :-/
     // franchement pas terrible, donc on laisse tomber et on vérifie les droits all avant de lancer la requete
     if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
-    else denied("Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
+    else denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
   }
   getAllBy.timeout = 3000
   /**
@@ -779,3 +721,71 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post('liste/all', getAllBy)
   controller.options('liste/all', optionsOk)
 }
+
+
+/**
+ * Format de la réponse à une demande de liste
+ * @typedef reponseListe
+ * @type {object}
+ * @property {boolean}                     success
+ * @property {string}                      [error] Message d'erreur éventuel
+ * @property {Ref[]|Compact[]|Ressource[]} liste   Une liste de Ref si aucun format n'a été précisé
+ */
+
+/**
+ * La réponse à une demande de ressource
+ * @typedef reponseRessource
+ * @type {Object}
+ * @property {boolean}   success
+ * @property {string}    [error]        Message d'erreur éventuel
+ * @property {string[]}  [warnings]     Avertissements éventuels sur la ressource (incohérences ne justifiant pas une erreur et le rejet de l'enregistrement)
+ * @property {Integer}   oid
+ * @property {string}    titre
+ * @property {Integer[]} categories
+ * @property {string}    typeTechnique
+ * @property … Autre propriétés d'une ressource
+ */
+
+/**
+ * La réponse à un post pour enregistrer une ressource (ou une modif)
+ * @typedef reponseRessourceOid
+ * @type {Object}
+ * @property {boolean}  success
+ * @property {string}   [error]    Message d'erreur éventuel
+ * @property {string[]} [warnings] Avertissements éventuels sur la ressource (incohérences ne justifiant pas une erreur et le rejet de l'enregistrement)
+ * @property {Integer}  oid
+ */
+/**
+ * La réponse à une demande de ressource au format ref Cf {@link $ressourceConverter.toRef}
+ * @typedef reponseRessourceRef
+ * @type {Object}
+ * @property {boolean}   success
+ * @property {string}    [error]
+ * @property {Integer}   ref
+ * @property {string}    titre
+ * @property {Integer[]} categories
+ * @property {string}    typeTechnique
+ */
+
+
+/**
+ * Arguments à donner à une requête qui renvoie une liste de ressources
+ * @typedef requeteListe
+ * @type {object}
+ * @property {string}             [json]    Tous les paramètres qui suivent dans une chaîne json (GET seulement, ignoré en POST)
+ * @property {requeteArgFilter[]} [filters] Les filtres à appliquer
+ * @property {string}             [orderBy] Un nom d'index
+ * @property {string}             [order]   Préciser 'desc' si on veut l'ordre descendant
+ * @property {Integer}            [start]   offset
+ * @property {Integer}            [nb]      Nombre de résultats voulus (Cf settings.ressource.limites.listeNbDefault, à priori 25),
+ *                                          sera ramené à settings.ressource.limites.maxSql si supérieur (à priori 500)
+ * @property {string}             [format]  compact|full par défaut on remonte les ressource au format ref
+ */
+
+/**
+ * Format d'un filtre à passer à une requete de demande de liste
+ * @typedef requeteArgFilter
+ * @type {object}
+ * @property {string} index  Le nom de l'index
+ * @property {Array}  [values] Une liste de valeurs à chercher (avec des ou), remontera toutes les ressource ayant index si omis
+ */

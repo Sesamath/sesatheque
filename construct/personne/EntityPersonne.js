@@ -29,11 +29,17 @@
  * pour une explication en français)
  */
 
+/**
+ * @entity EntityPersonne
+ * @extends Entity
+ */
+
 "use strict"
 
-module.exports = function (Personne) {
+module.exports = function (EntityPersonne) {
   /**
    * Retourne la liste des propriétés vraies d'un objet
+   * @private
    * @param obj
    * @returns {Array}
    */
@@ -45,65 +51,19 @@ module.exports = function (Personne) {
     return list
   }
 
-  Personne.construct(
-    /**
-     * @entity Personne(entity)
-     * @constructor {Personne(entity)}
-     * @param {Personne(object)} initObj Un objet ayant des propriétés d'une personne
-     * @extends lassi#EntityInstance
-     */
-    function (initObj) {
-      if (!initObj) initObj = {}
-      /**
-       * Source de l'authentification (nom du authClient)
-       * @type {string}
-       */
-      this.origine = initObj.origine || null
-      /**
-       * Id de la source d'authentification
-       * @type {string}
-       */
-      this.idOrigine = initObj.idOrigine || null
-      /**
-       * Prénom
-       * @type {string}
-       */
-      this.prenom = initObj.prenom || ''
-      /**
-       * Nom
-       * @type {string}
-       */
-      this.nom = initObj.nom || ''
-      /**
-       * Adresse email
-       * @type {string}
-       */
-      this.email = initObj.email || ''
-      /**
-       * La liste des roles {role:boolean}
-       * @type {Object}
-       */
-      this.roles = initObj.roles || {}
-      /**
-       * La liste des groupes {groupe:boolean}
-       * @type {Object}
-       */
-      this.groupes = initObj.groupes || {}
-      /**
-       * D'autres champs stockés en json, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
-       * suivant le source d'authentification par ex.
-       * @type {string}
-       */
-      this.infos = initObj.infos || ''
+  var Personne = require('./Personne')
 
-      /**
-       * En session, on a une propriété "permissions" supplémentaire, ajouté au moment du login et de la mise en session,
-       * elle est déduite des roles avec $accessControl.getPermissions(personne)
-       */
-    }
-  )
+  EntityPersonne.construct(Personne)
 
-  Personne
+  EntityPersonne.table = "personne"
+
+  EntityPersonne.beforeStore = function (next) {
+    if (this.lastCheck) delete this.lastCheck
+    if (this.permissions) delete this.permissions
+    next()
+  }
+
+  EntityPersonne
       .defineIndex('origine', 'string')
       .defineIndex('idOrigine', 'string')
       .defineIndex('nom', 'string')

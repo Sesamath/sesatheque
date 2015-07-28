@@ -65,7 +65,6 @@ if (typeof define === 'function') {
 /**
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
  * @constructor
- * @variation object
  * @param {Object} initObj Un objet ayant des propriétés d'une ressource
  */
 function Ressource(initObj) {

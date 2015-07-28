@@ -23,7 +23,7 @@
     "gulp-jshint": "^1.7.0",
     "gulp-util": "^2.2.16",
     "js-beautify": "^1.5.1",
-    "jsdoc": "^3.3.0-beta1",
+    "jsdoc": "^3.3",
     "jshint-stylish": "^0.3.0",
     "knex": "^0.7.6",
     "less": "^2.5.1",

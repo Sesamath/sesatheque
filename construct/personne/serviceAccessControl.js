@@ -31,7 +31,7 @@
 
 'use strict'
 
-module.exports = function (Personne, Groupe, $settings, $personneRepository) {
+module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
 
   var _ = require('lodash')
   var tools = require('../tools')
@@ -39,12 +39,13 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
   /**
    * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
    * à la jonction entre personne et ressource.
-   * @namespace $accessControl
+   * @service $accessControl
    */
   var $accessControl = {}
 
   /**
    * Helper de checkAccess pour la permission add
+   * @private
    * @param {Context}   context
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
@@ -58,6 +59,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
 
   /**
    * Helper de checkAccess pour la permission del
+   * @private
    * @param {Context}   context
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
@@ -84,6 +86,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
 
   /**
    * Helper de checkAccess pour la permission read
+   * @private
    * @param {Context}   context
    * @param {Ressource} ressource
    * @returns {string|undefined} Le message d'interdiction éventuel (undefined sinon)
@@ -140,7 +143,25 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
   }
 
   /**
+   * Calcule et renvoie les permissions d'une personne en fonction de ses rôles
+   * @private
+   * @param {Personne} personne
+   * @returns {object} avec les permissions en propriété (valeur true|false|undefined)
+   */
+  function getPermissions(personne) {
+    var permissions = {}
+    var config = $settings.get('components.personne')
+    _.each(personne.roles, function(hasRole, role) {
+      // on ajoute les permissions définies pour ce role en config
+      if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
+    })
+
+    return permissions
+  }
+
+  /**
    * Helper de checkAccess pour la permission del
+   * @private
    * @param {Context}   context
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
@@ -159,6 +180,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
 
   /**
    * Retourne true si l'ip est locale
+   * @private
    * @param ip
    * @returns {boolean}
    */
@@ -170,18 +192,19 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
   }
 
   /**
-   * Ajoute un groupe d'après son id (vérifie qu'il existe)
+   * Ajoute un groupe d'après son id à une personne (s'il existe)
    * @param {Personne} personne
-   * @param {int} groupeId
-   * @param {EntityInstance~StoreCallback} next
+   * @param {string} groupeNom
+   * @param {personneCallback} next Avec la personne modifiée
+   * @memberOf $accessControl
    */
-  $accessControl.addGroupeById = function (personne, groupeId, next) {
-    if (!personne.groupes[groupeId]) {
-      $personneRepository.loadGroupe(groupeId, function (error, groupe) {
+  $accessControl.addGroupeById = function (personne, groupeNom, next) {
+    if (!personne.groupes[groupeNom]) {
+      $personneRepository.loadGroupe(groupeNom, function (error, groupe) {
         if (error) next(error)
         else {
-          if (groupe) personne.groupes[groupeId] = true
-          else log.error("Aucun groupe d'id " +groupeId)
+          if (groupe) personne.groupes[groupeNom] = true
+          else log.error("Aucun groupe d'id " +groupeNom)
           next(null, personne)
         }
       })
@@ -192,7 +215,8 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
    * Ajoute un groupe à la personne (en le créant s'il n'existait pas)
    * @param {Personne} personne
    * @param {string} groupeNom Le nom
-   * @param {EntityInstance~StoreCallback} next
+   * @param {groupeCallback} next
+   * @memberOf $accessControl
    */
   $accessControl.addGroupeByName = function (personne, groupeNom, next) {
     $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
@@ -203,7 +227,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
         next(null, personne)
       } else {
         // on le créé au passage
-        Groupe.create({nom:groupeNom}).store(function (error, groupe) {
+        EntityGroupe.create({nom:groupeNom}).store(function (error, groupe) {
           log.debug('après store ', groupe)
           if (groupe) personne.groupes[groupe.oid] = true
           next(error, personne)
@@ -215,9 +239,10 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
   /**
    * Vérifie la permission pour l'utilisateur courant et cette ressource
    * @param permission
-   * @param {Context} context
-   * @param {Ressource} ressource
-   * @param {Function} next callback qui sera appelée avec un message d'érreur éventuel (sans arguments sinon)
+   * @param {Context}       context
+   * @param {Ressource}     ressource
+   * @param {errorCallback} next
+   * @memberOf $accessControl
    */
   $accessControl.checkPermission = function (permission, context, ressource, next) {
     var msg
@@ -253,6 +278,8 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
   /**
    * Retourne l'oid du user courant ou undefined
    * @param {Context} context
+   * @returns {Integer} L'oid
+   * @memberOf $accessControl
    */
   $accessControl.getCurrentUserOid = function(context) {
     var oid
@@ -265,6 +292,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
    * Retourne le user courant ou undefined
    * @param {Context} context
    * @return {Personne|undefined} Le user
+   * @memberOf $accessControl
    */
   $accessControl.getCurrentUser = function(context) {
     var personne
@@ -278,6 +306,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
    * @param {Context} context
    * @param {Ressource[]} ressources Liste de ressources
    * @return {Ressource[]} Liste de ressources sur lesquelles on a les droits de lecture
+   * @memberOf $accessControl
    */
   $accessControl.getListeLisible = function (context, ressources) {
     var liste = []
@@ -291,25 +320,11 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
   }
 
   /**
-   * Calcule et renvoie les permissions d'une personne en fonction de ses rôles
-   * @param {Personne} personne
-   */
-  $accessControl.getPermissions = function(personne) {
-    var permissions = {}
-    var config = $settings.get('components.personne')
-    _.each(personne.roles, function(hasRole, role) {
-      // on ajoute les permissions définies pour ce role en config
-      if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
-    })
-
-    return permissions
-  }
-
-  /**
    * Renvoie true si c'est du json (api) appelé par une ip locale
    * @see http://expressjs.com/guide/behind-proxies.html
    * @see http://expressjs.com/api.html#req.ip
    * @param {Context} context
+   * @memberOf $accessControl
    */
   $accessControl.hasAllRights = function (context) {
     var token = context.request.header('X-ApiToken')
@@ -345,6 +360,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
    * @param {Context} context
    * @param {string} permission
    * @returns {boolean}
+   * @memberOf $accessControl
    */
   $accessControl.hasGenericPermission = function(permission, context) {
     return context &&
@@ -359,9 +375,10 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
    * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
    * (ou sur toutes les ressources si ressource n'est pas fournie)
    * @param {string} permission create|read|update|delete
-   * @param {Context} context
-   * @param {Ressource=} ressource
+   * @param {Context}   context
+   * @param {Ressource} [ressource]
    * @returns {boolean}
+   * @memberOf $accessControl
    */
   $accessControl.hasPermission = function (permission, context, ressource) {
     if (hasGenericPermission(permission, context)) return true
@@ -386,6 +403,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
    * @param {Context} context
    * @param {Ressource} ressource
    * @returns {boolean}
+   * @memberOf $accessControl
    */
   $accessControl.hasReadPermission = function (context, ressource) {
     if (!ressource.restriction) return true
@@ -399,6 +417,7 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
    * Retourne true si on a un user en session
    * @param {Context} context
    * @returns {boolean}
+   * @memberOf $accessControl
    */
   $accessControl.isAuthenticated = function (context) {
     return (context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale
@@ -406,29 +425,33 @@ module.exports = function (Personne, Groupe, $settings, $personneRepository) {
 
   /**
    * Connecte un user (regarde s'il existe et s'il faut le mettre à jour et le met en session)
-   * @param {lassi#Context}     context
-   * @param {Personne(object)}  personne
+   * @param {Context}     context
+   * @param {Personne}  personne
    * @param {personneCallback}  next
+   * @memberOf $accessControl
    */
   $accessControl.login = function (context, personne, next) {
     function setSession (error, personne) {
       if (personne) {
+        personne.permissions = getPermissions(personne)
         context.session.user = personne;
-        context.session.user.lastCheck = new Date()
       } else if (!error) {
         context.session.user = {
           oid:0,
-          lastSsoCheck : new Date()
+          lastCheck : new Date()
         }
       }
       next(error, personne)
     }
-    $personneRepository.update(personne, setSession)
+
+    if (personne.origine && personne.idOrigine) $personneRepository.update(personne, setSession)
+    else setSession(null, personne) // on enregistre que l'on sait ne pas être authentifié sur le serveur sso
   }
 
   /**
    * Déconnecte l'utilisateur courant
-   * @param context
+   * @param {Context} context
+   * @memberOf $accessControl
    */
   $accessControl.logout = function (context) {
     context.session.user = {}

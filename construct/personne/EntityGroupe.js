@@ -31,37 +31,57 @@
 
 "use strict";
 
-module.exports = function (Groupe, $cacheGroupe) {
-
+/**
+ * Un groupe d'utilisateurs
+ * @constructor
+ * @param {object} initObj Un objet ayant des propriétés d'un groupe
+ */
+function Groupe(initObj) {
+  if (!initObj) initObj = {}
   /**
-   * @constructor
+   * L'identifiant interne à la sésathèque
+   * @type {Integer}
+   * @default undefined
    */
-  Groupe.construct = function() {
-    /**
-     * Nom
-     * @type {string}
-     */
-    this.nom = '';
-    /**
-     * Visible dans la liste générale des groupes, tout le monde peut rentrer ou sortir à sa guise
-     * @type {boolean}
-     */
-    this.open = false
-  }
+  this.oid = initObj.oid || undefined
+  /**
+   * Nom
+   * @type {string}
+   * @default ""
+   */
+  this.nom = initObj.name || '';
+  /**
+   * Visible dans la liste générale des groupes, tout le monde peut rentrer ou sortir à sa guise
+   * @type {boolean}
+   * @default false
+   */
+  this.open = !!initObj.open
+}
 
-  Groupe.beforeStore(function(next) {
+module.exports = function (EntityGroupe, $cacheGroupe) {
+  var tools = require("../tools")
+  /**
+   * L'entité groupe
+   * @entity EntityGroupe
+   * @extends lassi#EntityInstance
+   */
+  EntityGroupe.construct(Groupe)
+
+  EntityGroupe.table = "groupe"
+
+  EntityGroupe.beforeStore(function(next) {
     log.debug('beforeStore groupe ' +this.nom)
     next()
   })
 
-  Groupe.afterStore(function(next) {
+  EntityGroupe.afterStore(function(next) {
     // on met en cache
     $cacheGroupe.set(this)
     // et on passe au suivant sans se préoccuper du retour de mise en cache
     next()
   })
 
-  Groupe
+  EntityGroupe
     .defineIndex('nom', 'string')
     .defineIndex('open', 'boolean')
 }

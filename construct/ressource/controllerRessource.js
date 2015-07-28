@@ -32,21 +32,18 @@
 'use strict'
 
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) {
-/**
- * Le controleur html du composant ressource.
- *
- * Toutes ses routes exposées ici seront traitées par le controleur {@link /public/} si on est pas authentifié
- *
- * On ne fixe pas de layout dans les data renvoyées mais dans le contexte (page|iframe), le listener beforeTransport en déduira
- * ce qu'il doit ajouter dans data
- * @name controller
- * @Controller /ressource/
- * @requires $ressourceRepository
- * @requires $ressourceConverter
- * @requires $accessControl
- * @requires $views
- * @requires $routes
- */
+  /**
+   * Controleur /ressource/ pour les utilisateurs authentifiés.
+   *
+   * Toutes ses routes exposées ici seront traitées par le controleur {@link controllerPublic} si on est pas authentifié (via une redirection interne)
+   *
+   * @controller controllerRessource
+   * @requires $ressourceRepository {@link $ressourceRepository]
+   * @requires $ressourceConverter
+   * @requires $accessControl
+   * @requires $views
+   * @requires $routes
+   */
   var _ = require('lodash')
   var tools = require('../tools')
   //var seq = require('an-flow')
@@ -55,7 +52,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Crée un formToken et l'ajoute à la ressource et en session
    * @private
-   * @param context
+   * @param {Context} context
    * @param ressource
    */
   function addToken(context, ressource) {
@@ -69,7 +66,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Vérifie que le token du post correspond à un en session (et le vire)
    * On gère plusieurs token de formulaires pour autoriser l'ouverture de plusieurs forms
    * @private
-   * @param context
+   * @param {Context} context
    * @param next appelé si ok, sinon on affichera une erreur
    */
   function checkToken(context, next) {
@@ -90,7 +87,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Affiche une 401 avec Authentification requise en html
    * @private
-   * @param context
+   * @param {Context} context
    * @param {string} [message="Authentification requise"]
    * @returns {boolean} true si authentifié
    */
@@ -102,7 +99,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Affiche le message existe pas ou droits insuffisant, avec un 404
    * @private
-   * @param context
+   * @param {Context} context
    * @param {string} [id=] Identifiant de la ressource (ou son titre), pour le mettre dans le message
    */
   function denied404(context, id) {
@@ -124,7 +121,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Vérifie les droits avant d'appeler $views.prepareAndSend
    * @private
-   * @param context
+   * @param {Context} context
    * @param error
    * @param ressource
    * @param view
@@ -573,8 +570,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             context.html(data)
           })
         } else {
-          context.error = "il faut choisir au moins un critère"
-          $views.printSearchForm(context)
+          $views.printSearchForm(context, ["il faut choisir au moins un critère"])
         }
       }
     })

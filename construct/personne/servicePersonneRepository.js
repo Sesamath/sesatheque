@@ -31,22 +31,13 @@
 
 'use strict'
 
-/**
- * Init de notre service $personneRepository avec ses dépendances en argument
- *
- * @param Personne
- * @param Groupe
- * @param $cachePersonne
- * @param $cacheGroupe
- * @returns {$personneRepository}
- */
-module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
+module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheGroupe) {
 
   var _ = require('lodash')
 
   /**
-   * Service d'accès aux personnes, utilisé par les différents contrôleurs
-   * @namespace $personneRepository
+   * Service d'accès aux personnes (et aux groupes), utilisé par les différents contrôleurs
+   * @service $personneRepository
    */
   var $personneRepository = {}
 
@@ -54,7 +45,8 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
    * Récupère une personne (en cache ou en bdd)
    * @param {string}           origine   Nom du authClient qui a authentifié cette personne
    * @param {string}           idOrigine Id de la personne dans son système d'authentification
-   * @param {personneCallback} next
+   * @param {personneCallback} next      On aura pas d'entity si ça vient du cache
+   * @memberOf $personneRepository
    */
   $personneRepository.load = function (origine, idOrigine, next) {
     log.debug('load personne ' + origine +'/' +idOrigine)
@@ -62,7 +54,7 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
       $cachePersonne.get(idOrigine, function (error, personneCached) {
         if (personneCached) next(null, personneCached)
         else {
-          Personne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
+          EntityPersonne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
             //log.debug('personne load remonte ', personne)
             if (error) next(error)
             else if (personne) {
@@ -82,12 +74,13 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
   /**
    * Récupère un groupe d'après son nom
    * @param {string} groupeNom
-   * @param {EntityInstance~StoreCallback} next
+   * @param {groupeCallback} next
+   * @memberOf $personneRepository
    */
   $personneRepository.loadGroupeByNom = function (groupeNom, next) {
     $cacheGroupe.getByNom(groupeNom, function (error, groupe) {
       if (groupe) return next(null, groupe)
-      Groupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
+      EntityGroupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
         if (error) return next(error)
         if (groupe) {
           $cacheGroupe.set(groupe)
@@ -101,13 +94,14 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
   /**
    * Récupère un groupe d'après son oid (si erreur on la log)
    * @param {int} oid
-   * @param {EntityInstance~StoreCallback} next
+   * @param {groupeCallback} next
+   * @memberOf $personneRepository
    */
   $personneRepository.loadGroupe = function (oid, next) {
-    if (parseInt(oid, 10) !== oid) return next(new Error("Type mismatch, groupe.oid doit être entier"))
+    if (parseInt(oid, 10) !== oid) return next(new Error("Incohérence, groupe.oid doit être entier"))
     $cacheGroupe.get(oid, function (error, groupe) {
       if (groupe) return next(null, groupe)
-      Groupe.match('oid').equals(oid).grabOne(function (error, groupe) {
+      EntityGroupe.match('oid').equals(oid).grabOne(function (error, groupe) {
         if (error) log.error(error)
         if (groupe) {
           $cacheGroupe.set(groupe)
@@ -119,11 +113,12 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
 
   /**
    * Enregistre une personne en bdd (et met à jour le cache)
-   * @param {Personne(Entity)}       personne
-   * @param {personneEntityCallback} next
+   * @param {EntityPersonne}       personne
+   * @param {entityPersonneCallback} next
+   * @memberOf $personneRepository
    */
   $personneRepository.save = function (personne, next) {
-    if (!personne.store) personne = Personne.create(personne)
+    if (!personne.store) personne = EntityPersonne.create(personne)
     personne.store(function (error, personne) {
       $cachePersonne.set(personne)
       // on passe à next sans attendre le résultat de la mise en cache
@@ -133,8 +128,9 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
 
   /**
    * Met à jour ou crée une personne
-   * @param {Personne(object)} personne
-   * @param {personneEntityCallback} next
+   * @param {Personne} personne
+   * @param {personneCallback} next Avec l'argument personne fourni si y'avait rien à mettre à jour (EntityPersonne sinon)
+   * @memberOf $personneRepository
    */
   $personneRepository.update = function (personne, next) {
     function checkUpdate(personne, personneNew, next) {
@@ -155,7 +151,7 @@ module.exports = function (Personne, Groupe, $cachePersonne, $cacheGroupe) {
         } else if (personneBdd) {
           checkUpdate(personneBdd, personne, next)
         } else {
-          Personne.create(personne).store(next)
+          EntityPersonne.create(personne).store(next)
         }
       })
     } else {

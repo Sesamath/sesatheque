@@ -31,70 +31,296 @@
 
 'use strict'
 
-module.exports =
+var _ = require('lodash')
+var tools = require('../tools')
+
 /**
- * Gère les menus contextuels à une ressource en écoutant beforeTransport
- * Ne fait rien si on a pas context.layout === page
- *
- * Cet ajout est fait dans le composant car on a besoin de services du composant qui ne seraient pas dispos
- * dans un controleur * du composant principal
- * @module listeners
- * @param $accessControl
- * @param $routes
- * @returns {{beforeTransport: Function}}
+ * @file listener beforeTransport.
  */
-function ($accessControl, $routes) {
+
+module.exports = function ($accessControl, $routes, $flashMessage) {
+  /**
+   * Ajoute les liens contextuels à une ressource dans data.actions
+   * @param context
+   * @param data
+   */
+  function addActions(context, data) {
+    if (context.ressource && context.ressource.oid) {
+      var links = []
+      var ressource = context.ressource
+      var oid = context.ressource.oid
+      if ($accessControl.hasPermission('read', context, oid)) {
+        links.push({
+          href: $routes.getAbs('describe', ressource),
+          value: 'Description',
+          icon: 'description',
+          selected: (context.tab === 'describe')
+        })
+        links.push({
+          href: $routes.getAbs('preview', ressource),
+          value: 'Aperçu',
+          icon: 'pageview',
+          selected: (context.tab === 'preview')
+        })
+        links.push({
+          href: $routes.getAbs('display', ressource),
+          value: 'Voir',
+          icon: 'open_in_new',
+          attrs: 'target="_blank"'
+        })
+      }
+      if ($accessControl.hasPermission('update', context, oid))
+        links.push({
+          href: $routes.getAbs('edit', oid),
+          value: 'Modifier',
+          icon: "mode_edit",
+          selected: (context.tab === 'edit')
+        })
+      if (oid && $accessControl.hasPermission('read', context, oid) && $accessControl.hasPermission('create', context))
+        links.push({
+          href: $routes.getAbs('add') + '?clone=' + oid,
+          value: 'Dupliquer', icon: 'call_split',
+          selected: (context.tab === 'add' && context.request.originalUrl.indexOf('clone=') > -1)
+        })
+      if ($accessControl.hasPermission('delete', context))
+        links.push({
+          href: $routes.getAbs('delete', oid),
+          value: 'Supprimer',
+          icon: 'delete',
+          selected: (context.tab === 'delete')
+        })
+
+      data.actions = {
+        $view: __dirname + '/views/actions',
+        links: links
+      }
+    }
+  } // addActions
+
+  /**
+   * Ajoute le menu dans data.navigation
+   * @param context
+   * @param data
+   */
+  function addNavigation(context, data) {
+    var links = []
+    // lien ajout
+    if ($accessControl.hasPermission('create', context)) {
+      links.push({href: $routes.getAbs('add'), value: 'Ajouter une ressource', icon: "note_add"})
+    }
+    // un lien vers la recherche
+    links.push({href: $routes.getAbs('search', null, context), value: 'Recherche', icon: 'search'})
+    data.navigation = {
+      $view: __dirname + '/views/navigation',
+      links: links
+    }
+  }
+
+  /**
+   * Ajoute des infos dans debug.log
+   * @private
+   * @param context
+   * @param data
+   */
+  function debug(context, data) {
+    var reqHttp = getReqHttp(context)
+    var isJson = getIsJson(context)
+    var isHtml = getIsHtml(context)
+    log.debug(
+        'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
+        data,
+        'beforeTransport',
+        {max:2000}
+    )
+    if (isHtml) log.debug("html vide ? " +_.isEmpty(data.contentBloc))
+    else if (isJson) log.debug("api vide ? " +_.isEmpty(data))
+    else log.debug("statique")
+    // vérif des $view
+    if (isHtml) {
+      for (var bloc in data) {
+        if (data.hasOwnProperty(bloc) && bloc.substr(0, 1) !== '$' && typeof data[bloc] !== 'string') {
+          if (!data[bloc].$view) log.error(new Error("Le bloc " +bloc +" n'a pas de $view"))
+          else if (data[bloc].$view.indexOf("/") === -1) log.error(new Error("Le bloc " +bloc +" a une $view en relatif"))
+        }
+      }
+    }
+  }
+
+  /**
+   * Gére les pages d'erreur, fixe le contentType (et $layout pour le html d'après context.layout)
+   * et ajoute les messages flash éventuels
+   * @param {Context} context
+   * @param data
+   */
+  function errorHandler(context, data) {
+    var reqHttp = getReqHttp(context)
+    var isJson = getIsJson(context)
+    var isHtml = getIsHtml(context)
+    // on fixe déjà le contentType s'il ne l'est pas
+    if (context.contentType) {
+      // on signale une incohérence sans changer le contentType
+      if (isJson && context.contentType !== 'application/json')
+        log.error(new Error("On a un appel " +reqHttp +" avec un contentType " +context.contentType))
+      if (isHtml && context.contentType !== 'text/html')
+        log.error(new Error("On a un layout html " + context.layout + " avec un contentType " + context.contentType))
+    } else if (isHtml) {
+      context.contentType = 'text/html'
+    } else if (isJson) {
+      context.contentType = 'application/json'
+    }
+    // ajout du layout
+    if (isHtml && !data.$layout) data.$layout = __dirname +'/../static/views/layout-' +(context.layout || "page")
+
+    /**
+     * Gestion des erreurs (lassi ne l'a pas encore fait)
+     */
+    if (context.error) {
+      // erreurs 500 détectée par lassi qui l'a récupéré mais pas notre code
+      // (qui manipule les data mais n'affecte pas context.error)
+      log.error('lassi a récupéré une erreur 500 sur ' +reqHttp, context.error)
+      context.status = 500
+      // on façonne notre erreur 500
+      var errorMsg = context.error.toString()
+      // on évite le un message incompréhensible pour l'utilisateur (le dev ira dans les logs)
+      if (errorMsg.indexOf("TypeError") === 0) errorMsg = "Erreur interne : problème de types incohérents"
+      else errorMsg = "Erreur interne : " +errorMsg
+      if (isJson) {
+        if (data.error) data.error += "\n" + errorMsg
+        else data.error = errorMsg
+      } else if (isHtml) {
+        prepareErrorHtmlData('Erreur interne', errorMsg)
+      } else {
+        data.content = errorMsg
+      }
+      delete context.error // on vient de le traiter, pas la peine que lassi le fasse aussi
+
+    } else {
+      // erreur 404 ?
+      var isVide = isHtml ? _.isEmpty(data.contentBloc) : isJson ? _.isEmpty(data) : false
+      log.debug("isVide " +isVide)
+      if (!context.status && isVide) {
+        context.status = 404
+        log.debug(reqHttp + ' : pas de status ni content => 404')
+      }
+      // et on gère ici les autres erreurs
+      if (context.status && context.status > 400) {
+        log.debug('erreur ' +context.status +(isJson ? ' api' : ' html'), data)
+        var msg
+        switch (context.status) {
+          case 404:
+            msg = "Cette page ou ce fichier n'existe pas"
+            break
+          case 401:
+          case 403:
+            // $accessControl pas dispo ici
+            if (context.session && context.session.user && context.session.user.oid) msg = 'Droits insuffisants'
+            else msg = "Authentification requise"
+            break
+          default:
+            msg = "Ooops, une erreur " +context.status +' est survenue'
+        }
+        if (isHtml) {
+          prepareErrorHtmlData('erreur ' +context.status, msg)
+        } else if (isJson) {
+          if (!data.error) data.error = msg // sinon on laisse celle qu'il y avait probablement plus explicite
+        } else {
+          data.content = msg
+        }
+      }
+    }
+
+    // messages flash, vérif des vues erreurs et warnings, ajout du titre en data
+    if (isHtml) {
+      // on ajoute d'éventuels messages flash si on est en html (erreur ou pas)
+      var flashData = $flashMessage.getAndPurge(context)
+      if (flashData) _.merge(data, flashData)
+      // et impose une vue en absolu à errors et warnings
+      if (data.errors) data.errors.$view = __dirname +'/views/errors'
+      if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
+      // s'il n'y en a pas, on met le titre en data pour que le layout l'affiche aussi
+      if (data.$metas && data.$metas.title && !data.titre) {
+        data.titre = data.$metas.title
+      }
+      if (!data.$metas.css) data.$metas.css = []
+      if (context.layout === 'iframe') data.$metas.css.push('/styles/iframe.css')
+      else data.$metas.css.push('/styles/page.css')
+    }
+  } // errorHandler
+
+  function getIsJson(context) {
+    return context.contentType === 'application/json' || context.request.originalUrl.substr(0, 5) === '/api/'
+  }
+
+  function getIsHtml(context) {
+    return !getIsJson(context) && !!context.layout
+  }
+
+  function getReqHttp(context) {
+    return context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+  }
+
+  /**
+   * Ajoute à data nos params par défaut s'il n'existent pas et met le contentType html
+   * @private
+   * @param data     Les données que l'on modifie
+   * @param title    Le titre à mettre s'il n'y en avait pas
+   * @param errorMsg Le message d'erreur à mettre s'il n'y en avait pas déjà un
+   */
+  function prepareErrorHtmlData(data, title, errorMsg) {
+    var defaultData = {
+      $metas     : {
+        title: title
+      },
+      $views     : __dirname + '/views',
+      errors: {
+        $view : __dirname + '/views/errors',
+        errors :[errorMsg]
+      }
+    }
+    tools.complete(data, defaultData)
+    log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max:2000})
+  } // prepareErrorHtmlData
+
+  /**
+   * jsdoc tient absolument à mettre listeners dans un namespace controllerRessource mettre un tag module, avec ou sans kind ne change rien
+   */
+
+  /**
+   * Listener de beforeTransport qui
+   * - gère les erreurs en les formattant
+   * - ajoute $layout d'après context.layout sur les pages html
+   * - ajoute menu de navigation et menu contextuel d'une ressource sur le layout page
+   * - ajoute des infos dans debug.log si on est pas en prod
+   *
+   * Tout ça aurait pu être dans un controleur * mais avec beforeTransport on est sûr de passer après tous les contrôleurs
+   *
+   * Le listener sur afterRailUse est dans construct/index.js et il ajoute CORS & logs sur le rail
+   *
+   * @class listeners
+   * @requires $accessControl
+   * @requires $routes
+   * @requires $flashMessage
+   * @returns {object}
+   */
+
   return {
     /**
      * @listens lassi#event:beforeTransport
-     * @param {lassi#Context} context
+     * @param {Context} context
      * @param {object} data
+     * @memberOf listeners
      */
     beforeTransport : function (context, data) {
-      // on ne s'occupe que des pages html avec layout pour ajouter nos menus
+      errorHandler(context, data)
+
+      // sur les pages html on ajoute les menus
       if (context.layout === 'page') {
-        // menu navigation, sur toutes les pages
-        var links = []
-        // lien ajout
-        if ($accessControl.hasPermission('create', context)) {
-          links.push({href:$routes.getAbs('add'), value :'Ajouter une ressource', icon : "note_add"})
-        }
-        // un lien vers la recherche
-        links.push({href: $routes.getAbs('search', null, context), value: 'Recherche', icon : 'search'})
-        data.navigation = {
-          // chemin absolu car on sait pas quel est le dossier $views courant
-          $view : __dirname +'/views/navigation',
-          links : links
-        }
-
-        // les liens contextuels à une ressource
-        if (context.ressource && context.ressource.oid) {
-          links = []
-          var ressource = context.ressource
-          var oid       = context.ressource.oid
-          if ($accessControl.hasPermission('read', context, oid)) {
-            links.push({href:$routes.getAbs('describe', ressource), value :'Description', icon:'description', selected:(context.tab === 'describe')})
-            links.push({href:$routes.getAbs('preview', ressource), value :'Aperçu', icon:'pageview', selected:(context.tab === 'preview')})
-            links.push({href:$routes.getAbs('display', ressource), value :'Voir', icon:'open_in_new', attrs:'target="_blank"'})
-          }
-          if ($accessControl.hasPermission('update', context, oid))
-            links.push({href:$routes.getAbs('edit', oid), value :'Modifier', icon:"mode_edit", selected:(context.tab === 'edit')})
-          if (oid && $accessControl.hasPermission('read', context, oid) && $accessControl.hasPermission('create', context))
-            links.push({
-              href:$routes.getAbs('add') +'?clone=' +oid,
-              value :'Dupliquer', icon:'call_split',
-              selected:(context.tab === 'add' && context.request.originalUrl.indexOf('clone=') > -1)
-            })
-          if ($accessControl.hasPermission('delete', context))
-            links.push({href:$routes.getAbs('delete', oid), value :'Supprimer', icon:'delete', selected:(context.tab === 'delete')})
-
-          data.actions = {
-            $view : __dirname +'/views/actions',
-            links : links
-          }
-        } // liens contextuels
-
+        addNavigation(context, data)
+        addActions(context, data)
       } // context.layout
+
+      // on envoie toutes les réponses dans le log de debug
+      if (!isProd) debug(context, data)
     }
   }
 }

@@ -32,8 +32,13 @@
 'use strict'
 
 /**
- * Modèle de service d'authentification qui peut s'inscrire avec $auth.addClient(authClient)
- * @class AuthClient
+ * @file Ce fichier ne sert pas directement dans sesatheque, il est là pour servir de modèle à l'implémentation d'un
+ * client d'authentification (et sert aussi pour jsdoc ou l'autocomplétion)
+ */
+
+/**
+ * Service d'authentification qui devra s'inscrire avec $auth.addClient(authClient)
+ * @constructor
  */
 function AuthClient() {
   /**
@@ -50,21 +55,22 @@ function AuthClient() {
 }
 
 /**
- * Redirige vers urlValidate que l'utilisateur soit connecté ou non sur le serveur d'authentification
+ * Redirige vers le serveur d'authentification qui redirigera vers urlValidate sans demander de login si l'utilisateur n'était pas connecté
  * (pour savoir si l'utilisateur serait connecté sur son serveur sans l'être encore ici)
- * @param context
- * @param urlValidate
- * @param urlLogout
+ * @param {Context} context
+ * @param {string}  urlValidate
+ * @param {string}  urlLogout
  */
 AuthClient.prototype.check = function (context, urlValidate, urlLogout) {
 
 }
 
 /**
- * Retourne l'url vers laquelle rediriger pour une déconnexion du serveur d'authentification (après déconnexion dans sesatheque)
- * @returns {string} L'url de déconnexion
+ * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée chez nous
+ * @param {string} userId
+ * @returns {Link[]} La liste de liens
  */
-AuthClient.prototype.getUrlLogout = function (user, redirect) {
+AuthClient.prototype.getSsoLinks = function (userId) {
 
 }
 
@@ -81,20 +87,25 @@ AuthClient.prototype.login = function (context, urlValidate, urlLogout) {
 }
 
 /**
- * Doit répondre à une demande de déconnexion du serveur d'authentification
+ * Redirige vers la déconnexion du serveur d'authentification (elle est déjà faite dans sesatheque)
  * @param {Context} context
- * @param {string}  errorMsg Un message d'erreur si la déconnexion n'a pas pu être faite localement
+ */
+AuthClient.prototype.logout = function (context) {
+
+}
+
+/**
+ * Répond à une demande de déconnexion du serveur d'authentification via context.json
+ * @param {Context} context
+ * @param {string}        errorMsg Un message d'erreur si la déconnexion n'a pas pu être faite localement
  */
 AuthClient.prototype.logoutFromRemote = function (context, errorMsg) {
 
 }
-
-
-
 /**
  * Valide une authentification (au retour du serveur SSO) et rappelle next(error, personne)
- * @param {lassi#Context}          context
- * @param {$auth~personneCallback} next
+ * @param {Context}          context
+ * @param {personneCallback} next
  */
 AuthClient.prototype.validate = function (context, next) {
 
