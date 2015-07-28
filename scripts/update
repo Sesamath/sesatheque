@@ -1,0 +1,32 @@
+#!/bin/bash
+
+dirInitial="$PWD"
+dirApp=$(dirname $0)/../
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  echo "Met à jour le dépôt local et les dépendances npm"
+  exit 0
+}
+
+function update() {
+  cd $dirApp
+  git pull && npm install && npm install git+ssh://git@src.sesamath.net:npm-sesasso-bibli
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+# check des options
+dest=''
+while getopts "h" OPTION
+do
+  case $OPTION in
+    h ) usage;;
+  esac
+done
+
+update
