@@ -33,16 +33,18 @@
 
 var _ = require('lodash')
 var moment = require('moment')
+var util = require('util')
 
 /**
  * Un assemblage de fonctions utilitaires
- * @module tools
- * @type {{}}
+ * @kind class
+ * @type {object}
  */
 var tools = {}
 
 /**
  * Clone un objet en conservant son prototype
+ * @memberOf tools
  * @param object
  * @returns {object}
  */
@@ -63,6 +65,7 @@ tools.clone = function(object) {
 
 /**
  * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
+ * @memberOf tools
  * @param int La valeur à contrôler
  * @param min Le minimum exigé
  * @param max Le maximum exigé
@@ -84,6 +87,7 @@ tools.encadre = function (int, min, max, label) {
 
 /**
  * Renvoie une copie de tab où toutes les chaînes représentant des entiers sont des entiers (récursivement)
+ * @memberOf tools
  * @param {Array} tab Le tableau à analyser
  * @returns {Array} Le tableau copié et éventuellement modifié
  */
@@ -107,6 +111,7 @@ tools.integerify = function (tab) {
 
 /**
  * Retourne true si l'url est sur l'api
+ * @memberOf tools
  * @param url
  * @returns {boolean}
  */
@@ -117,6 +122,7 @@ tools.isApi = function (url) {
 /**
  * Retourne true si l'url concerne un fichier statique
  * (statique i.e. les extensions susceptibles d'exister dans sesatheque, c'est pas exaustif)
+ * @memberOf tools
  * @param url
  * @returns {boolean}
  */
@@ -126,6 +132,7 @@ tools.isStatic = function (url) {
 
 /**
  * Retourne true si l'url concerne une url publique (avec /public/ dedans, html ou json)
+ * @memberOf tools
  * @param url
  * @returns {boolean}
  */
@@ -134,6 +141,7 @@ tools.isPublic = function (url) {
 }
 /**
  * Génère le code html d'un lien
+ * @memberOf tools
  * @param path Le path (absolu ou relatif)
  * @param texte Le texte à afficher
  * @param {string|array} [args] Des arguments à ajouter au path (séparateur slash)
@@ -150,6 +158,7 @@ tools.link = function (path, texte, args) {
 
 /**
  * Génère le code html d'un lien avec les args en queryString
+ * @memberOf tools
  * @param path Le path (absolu ou relatif)
  * @param texte Le texte à afficher
  * @param {object} [args] Des arguments à ajouter en queryString
@@ -171,6 +180,7 @@ tools.linkQs = function (path, texte, args) {
  * Fusionne les nouvelles valeurs avec les propriétés de l'objet (en profondeur)
  * (concatène si les deux propriétés sont des tableaux, en virant d'éventuels doublons,
  * fusionne si c'est deux objets et écrase les anciennes valeurs sinon)
+ * @memberOf tools
  * @param {Object} object L'objet source
  * @param {Object} newValues Les valeurs à fusionner
  * @param {boolean} [strict=false] passer true pour lancer une exception si les arguments ne sont pas 2 Object ou 2 Array
@@ -207,6 +217,7 @@ tools.merge = function(object, newValues, strict) {
 
 /**
  * Idem JSON.parse mais renvoie undefined en cas de plantage
+ * @memberOf tools
  * @param jsonString La string à parser
  * @return {object}
  */
@@ -225,6 +236,7 @@ tools.parse = function (jsonString) {
 /**
  * Vire les espaces et les caractères de contrôle d'une chaine
  * @see http://unicode-table.com/en/
+ * @memberOf tools
  * @param {string} source La chaîne à nettoyer
  * @returns {string} La chaîne nettoyée
  */
@@ -233,8 +245,31 @@ tools.sanitizeHashKey = function(source) {
 }
 
 /**
+ * Incorpore des arguments à un message, façon sprintf
+ * pas très intéressant si n arguments, util.format fait la même chose, mais tolère un tableau d'arguments en 2e param
+ * @param {string} message
+ * @param {string|Array} args Les arguments, en liste ou en tableau
+ * @returns {string}
+ */
+tools.strFormat = function (message, args) {
+  var retour
+  if (_.isArray(args)) {
+    // faut ajouter message en 1er argument et le passer à util.format
+    retour = util.format.apply(null, args.unshift(message));
+  } else {
+    // pas la peine de bosser pour rien
+    if (arguments.length < 2) retour = message
+    // on transmet tel quel
+    else retour = util.format.apply(null, arguments);
+  }
+
+  return retour
+}
+
+/**
  * Idem JSON.stringify mais sans planter, en cas de ref circulaire sur une propriété on renvoie quand même les autres
  * (avec le message d'erreur de JSON.stringify sur la propriété à pb)
+ * @memberOf tools
  * @param obj
  * @param {number} [indent] Le nb d'espaces d'indentation
  * @returns {string}
@@ -266,6 +301,7 @@ tools.stringify = function(obj, indent) {
 
 /**
  * Elimine les tags html d'une string
+ * @memberOf tools
  * @param {string} source
  * @returns {string}
  */
@@ -275,6 +311,7 @@ tools.stripTags = function (source) {
 
 /**
  * Converti un timestamp ou un chaine en objet Date
+ * @memberOf tools
  * @param {number|string} value Un timestamp (en ms ou s) ou une chaine ('DD/MM/YYYY' ou ISO_8601)
  * @returns {Date} L'objet Date ou undefined si la conversion a échoué (value invalide)
  */
@@ -297,6 +334,7 @@ tools.toDate = function (value) {
 
 /**
  * Formate un objet Date en DD/MM/YYYY
+ * @memberOf tools
  * @param {Date} date
  * @returns {string} Le jour au format DD/MM/YYYY
  */
@@ -306,6 +344,7 @@ tools.toJour = function (date) {
 
 /**
  * Update object en y ajoutant toutes les propriétés de addition
+ * @memberOf tools
  * @param object
  * @param addition
  */
@@ -321,6 +360,7 @@ tools.update = function(object, addition) {
 
 /**
  * Update object en y ajoutant toutes les propriétés de default qui n'existait pas dans object
+ * @memberOf tools
  * @param object
  * @param defaultValues
  */
@@ -334,5 +374,4 @@ tools.complete = function(object, defaultValues) {
   if (object instanceof Object && defaultValues instanceof Object) completeObj(object, defaultValues)
 }
 
-/** fonctions utilitaires */
 module.exports = tools

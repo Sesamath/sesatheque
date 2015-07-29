@@ -42,7 +42,7 @@ module.exports = function ($cache, $settings) {
    * (vu la taille d'un groupe pas rentable de passer par nom => id)
    * @service $cacheGroupe
    */
-  var $cacheGroupe
+  var $cacheGroupe = {}
 
   /**
    * Récupère un groupe dans le cache, d'après son oid

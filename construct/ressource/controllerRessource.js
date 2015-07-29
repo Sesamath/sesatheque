@@ -31,19 +31,19 @@
 
 'use strict'
 
+/**
+ * Controleur /ressource/ pour les utilisateurs authentifiés.
+ *
+ * Toutes ses routes exposées ici seront traitées par le controleur {@link controllerPublic} si on est pas authentifié (via une redirection interne)
+ *
+ * @controller controllerRessource
+ * @requires $ressourceRepository {@link $ressourceRepository]
+ * @requires $ressourceConverter
+ * @requires $accessControl
+ * @requires $views
+ * @requires $routes
+ */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) {
-  /**
-   * Controleur /ressource/ pour les utilisateurs authentifiés.
-   *
-   * Toutes ses routes exposées ici seront traitées par le controleur {@link controllerPublic} si on est pas authentifié (via une redirection interne)
-   *
-   * @controller controllerRessource
-   * @requires $ressourceRepository {@link $ressourceRepository]
-   * @requires $ressourceConverter
-   * @requires $accessControl
-   * @requires $views
-   * @requires $routes
-   */
   var _ = require('lodash')
   var tools = require('../tools')
   //var seq = require('an-flow')

@@ -56,6 +56,7 @@ module.exports = function ($accessControl, $views) {
 
   /**
    * Retourne le authClient pour ce contexte, ou une erreur si on l'a pas trouvé
+   * @private
    * @param {Context} context
    * @returns {AuthClient|Error}
    */
@@ -70,6 +71,7 @@ module.exports = function ($accessControl, $views) {
 
   /**
    * Retourne l'origine pour ce contexte, ou une erreur si on l'a pas trouvé
+   * @private
    * @param {Context} context
    * @returns {string|Error}
    */
@@ -92,6 +94,7 @@ module.exports = function ($accessControl, $views) {
 
   /**
    * Le client par défaut (l'origine qui sera utilisée si rien n'est précisé dans le contexte)
+   * @private
    * @type {string}
    */
   var defaultClient

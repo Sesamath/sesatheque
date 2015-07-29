@@ -29,14 +29,6 @@
  * pour une explication en français)
  */
 
-/**
- * @file Script autonome pour afficher un résultat de type am
- * On peut être chargé sur n'importe quelle appli, donc on a aucune dépendance à une lib externe
- * et on exporte 3 fonctions,
- * - soit pour requireJs (si define existe)
- * - soit en module amd (module.exports),
- * et sinon on ne fait rien...
- */
 /*global window*/
 (function () {
   "use strict";
@@ -44,13 +36,21 @@
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
   if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
 
-  /** Raccourci pour window.document */
+  // Raccourci pour window.document
   var wd = window.document;
-  /** Notre module exporté */
+  /**
+   * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
+   * Exporte 3 méthodes,
+   * - soit pour requireJs (si define existe)
+   * - soit en module amd (si on a module.exports)
+   * - soit dans window.sesatheque.emResult
+   * @service amResult
+   */
   var amResult = {};
 
   /**
    * Retourne le code html qui affiche le bilan (ici la durée d'affichage)
+   * @memberOf amResult
    * @param {Resultat} resultat L'objet Resultat dont on veut le bilan
    * @returns {string} Le code html
    */
@@ -72,6 +72,7 @@
 
   /**
    * Retourne le code html qui affiche le score (ici "affiché")
+   * @memberOf amResult
    * @param {Resultat} resultat
    * @returns {string} Le code html
    */
@@ -81,6 +82,7 @@
 
   /**
    * Affiche score et réponse dans un HTMLElement
+   * @memberOf amResult
    * @param resultat
    * @param element
    */

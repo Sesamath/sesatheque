@@ -33,7 +33,7 @@
 /*global lassi*/
 
 /**
- * Composant de gestion des ressources
+ * @file Composant de gestion des ressources
  */
 var ressourceComponent = lassi.component('ressource')
 
@@ -115,7 +115,7 @@ ressourceComponent.config(function($settings) {
   }
 })
 
-// ajout de nos listener
+// ajout de nos listeners
 ressourceComponent.config(function($accessControl, $routes, $flashMessages) {
   var listeners = require('./listeners')($accessControl, $routes, $flashMessages)
   for (var eventName in listeners) {

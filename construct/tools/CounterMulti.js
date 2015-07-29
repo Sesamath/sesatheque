@@ -32,7 +32,7 @@
 'use strict'
 
 /**
- * Un compteur de clés, chaque clé étant un compteur pouvant être incrémenté, décrémenté ou supprimé
+ * Une série de compteurs, chaque clé étant un compteur pouvant être incrémenté, décrémenté ou supprimé
  * @constructor
  */
 function CounterMulti() {

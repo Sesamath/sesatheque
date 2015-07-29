@@ -44,20 +44,14 @@ else if (typeof module === 'object') module.exports = Resultat;
 
 /**
  * Définition d'un résultat commune à toutes les ressources (exercices ou pas)
- *
- * @param initObj
  * @constructor
+ * @param {object|string} original Un objet ayant des propriétés d'un résultat, ou une chaine qui sera mise dans reponse
  */
-function Resultat(initObj) {
+function Resultat(original) {
   var values = {};
   // on accepte une simple chaine, que l'on mettra dans la propriété reponse du résultat construit
-  if (typeof initObj === 'string') values.reponse = initObj;
-  else if (typeof initObj === 'object') {
-    values = initObj
-    /*for (var p in initObj) {
-      if (initObj.hasOwnProperty(p)) values[p] = initObj[p];
-    }*/
-  }
+  if (typeof original === 'string') values.reponse = original;
+  else if (typeof original === 'object') values = original;
 
   /**
    * L'identifiant du résultat, pour celui qui va le stocker
@@ -134,10 +128,10 @@ function Resultat(initObj) {
   this.reponse = values.reponse || '';
 
   /**
-   * L'objet initial qu'on nous a passé (ou qu'on avait passé à celui qui nous appelle)
+   * L'objet initial passé au constructeur (si cet objet contient une propriété original c'est elle que l'on prend)
    * @type {Object}
    */
-  this.original = values.original || initObj;
+  this.original = values.original || original;
 }
 
 /**

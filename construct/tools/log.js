@@ -32,6 +32,7 @@
 'use strict';
 
 /**
+ * @file
  * Nos loggers maison
  * @todo utiliser https://www.npmjs.org/package/winston
  * @todo utiliser https://nodejs.org/api/util.html#util_util_debuglog_section
@@ -47,6 +48,7 @@ var _lassi = (typeof GLOBAL.lassi === 'undefined') ? console : GLOBAL.lassi
 
 /**
  * une pile pour les streams que l'on créé (pour les fermer au shutdown)
+ * @private
  * @type {stream.Writable[]}
  */
 var streamsQuiet = []
@@ -54,6 +56,7 @@ var streamsVerbose = []
 
 /**
  * Retourne une writeStream sur le fichier passé en arguments (qui sera ouvert dans le dossier de log défini dans la conf)
+ * @private
  * @param log Nom du log (sans dossier parent)
  * @returns {stream.Writable}
  */
@@ -96,18 +99,21 @@ var env = process.env.NODE_ENV || 'dev';
 
 /** 
  * Les messages à exclure
- * (une valeur à true excluera les debug de ce type dans le log de debug) 
+ * (une valeur à true excluera les debug de ce type dans le log de debug)
+ * @private
  */
 var exclusions = {}
 
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans la console)
+ * @private
  */
 var log // jshint ignore:line
 // (log étant défini en global dans la conf il râle si on le redéfini)
 
 /**
  * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans dev.log)
+ * @private
  */
 var logDebug
 
@@ -117,6 +123,7 @@ function getPrefix() {
 
 /**
  * Formate le message et l'envoie dans un log ou en console (si stream est null)
+ * @private
  * @param message
  * @param objectToDump
  * @param filter
@@ -148,6 +155,8 @@ if (env !== 'prod' && config.logs.debug) {
 
   /**
    * Écrit dans dev.log, pour raconter sa vie ou envoyer des objets
+   * @name debug
+   * @memberOf log
    * @param message
    * @param objectToDump
    * @param filter
@@ -157,7 +166,10 @@ if (env !== 'prod' && config.logs.debug) {
   }
 
   /**
-   * Écrit en console
+   * Écrit en console en dev (ne fait rien en prod)
+   * jsdoc ajoute new mais c'est bien une fct "normale"
+   * @kind class
+   * @type {function}
    * @param message
    * @param objectToDump
    * @param filter
@@ -189,6 +201,8 @@ if (config.logs.perf) {
   out('start log (démarrage appli)', null, null, perfOutputStream)
   /**
    * Ajoute une chaine avec un timer (depuis la réception de la requete) au message de perf courant
+   * S'active dans la conf (config.logs.perf), sinon ne fait rien
+   * @memberOf log
    * @param response
    * @param strToAdd
    * @param {boolean} [noTimer=false] passer true pour ne pas ajouter la mesure de temps
@@ -200,6 +214,10 @@ if (config.logs.perf) {
       if (timer) response.perf.msg += ' ' +log.getElapsed(response.perf.start)
     }
   }
+  /**
+   * Clos la mesure de perf pour cette requête et écrit dans le log
+   * @param {object} response L'objet response d'express, on traitera response.perf.msg si response.perf existe
+   */
   log.perf.out = function (response) {
     if (response.perf) {
       log.perf(response, 'end')
@@ -224,7 +242,8 @@ log.getElapsed = function (start) {
 }
 
 /**
- * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur, en dev comme en prod
+ * @memberOf log
  * @param message
  * @param objectToDump
  * @param filter
@@ -235,6 +254,7 @@ log.error = function (message, objectToDump, filter) {
 
 /**
  * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données
+ * @memberOf log
  * @param message
  * @param objectToDump
  * @param filter
@@ -245,6 +265,8 @@ log.errorData = function (message, objectToDump, filter) {
 
 /**
  * Active un filtre (le créé si besoin)
+ * @memberOf log
+ * @param {string} filter Le filtre à appliquer (pour exclure les messages qui le contiennent)
  */
 log.exclude = function (filter) {
   exclusions[filter] = true
@@ -252,14 +274,14 @@ log.exclude = function (filter) {
 
 /**
  * Désactive un filtre
+ * @memberOf log
+ * @param {string} filter Le filtre à enlever (les messages qui le contiennent redeviennent actifs)
  */
 log.include = function (filter) {
   exclusions[filter] = false
 }
 
-/**
- * Et on fermera nos streams au shutdown
- */
+// Et on fermera nos streams au shutdown
 if (_lassi.on) {
   _lassi.on('shutdown', function () {
     _lassi.log('app', 'shutdown event in log')

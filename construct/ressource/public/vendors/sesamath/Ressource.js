@@ -238,10 +238,10 @@ function Ressource(initObj) {
    */
   this.version = filters.int(values.version) || 1;
   /**
-   * Vrai si la ressource est indexable (peut sortir sur des résultats de recherche)
-   * Sert à distinguer des ressources "obsolètes" car remplacées par d'autres mais toujours publiées car utilisées.
-   * true par défaut
+   * Si la ressource est indexable elle peut sortir dans un résultat de recherche
+   * Passer à false pour des ressources "obsolètes" car remplacées par d'autres, mais toujours publiées car utilisées.
    * @type {boolean}
+   * @default true
    */
   this.indexable = values.hasOwnProperty('indexable') ? !!values.indexable : true;
   /**
@@ -253,7 +253,8 @@ function Ressource(initObj) {
    */
   this.warnings = filters.arrayString(values.warnings)
   /**
-   * idem pour des erreurs (qui empêchent le save)
+   * Une liste d'erreurs éventuelles (incohérences, données manquantes, etc.)
+   * Bloque l'enregistrement s'il n'est pas vide (sinon viré avant enregistrement)
    * @default undefined
    * @type {string[]}
    */

@@ -30,12 +30,7 @@
  */
 
 /**
- * Script autonome pour afficher un résultat de type em
- * On peut être chargé sur n'importe quelle appli, donc on a aucune dépendance à une lib externe
- * et on exporte 3 fonctions,
- * - soit pour requireJs (si define existe)
- * - soit en module amd (module.exports),
- * et sinon on ne fait rien...
+ * @file Script autonome pour afficher un résultat d'un exercice de type em
  */
 /*global window*/
 (function () {
@@ -49,11 +44,19 @@
 
   /** Raccourci pour window.document */
   var wd = window.document;
-  /** Notre module exporté */
+  /**
+   * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
+   * Exporte 3 méthodes,
+   * - soit pour requireJs (si define existe)
+   * - soit en module amd (si on a module.exports)
+   * - soit dans window.sesatheque.emResult
+   * @service emResult
+   */
   var emResult = {};
 
   /**
    * Retourne le code html qui affiche le bilan (ici les carrés colorés)
+   * @memberOf emResult
    * @param {Resultat} resultat L'objet Resultat dont on veut le bilan
    * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin
    * @returns {string} Le code html
@@ -75,6 +78,7 @@
 
   /**
    * Retourne le code html qui affiche le score (ici x/y)
+   * @memberOf emResult
    * @param {Resultat} resultat
    * @returns {string} Le code html
    */
@@ -99,6 +103,7 @@
 
   /**
    * Affiche score et réponse dans un HTMLElement
+   * @memberOf emResult
    * @param resultat
    * @param element
    * @param baseUrl
@@ -114,6 +119,8 @@
     define(emResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
     module.exports = emResult;
+  } else {
+    window.sesatheque.emResult = emResult;
   }
 
 })();

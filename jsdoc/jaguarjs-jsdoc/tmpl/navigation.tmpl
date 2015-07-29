@@ -1,6 +1,5 @@
-<?js
-var self = this;
-?>
+<?js var self = this; ?>
+
 <div class="navigation">
     <h3 class="applicationName"><a href="index.html"><?js= env.conf.templates.applicationName ?></a></h3>
 
@@ -8,9 +7,12 @@ var self = this;
         <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
     </div>
     <ul class="list">
-    <?js
-    this.nav.forEach(function (item) {
-    ?>
+      <?js this.nav.forEach(function (section) { ?>
+      <h2><?js= section.name ?></h2>
+      <?js section.items.forEach(function (item) { ?>
+      <?js
+      //console.log("=========================", item);
+      ?>
         <li class="item" data-name="<?js= item.longname ?>">
             <span class="title">
                 <?js= self.linkto(item.longname, item.longname) ?>
@@ -76,6 +78,7 @@ var self = this;
             ?>
             </ul>
         </li>
+    <?js }); ?>
     <?js }); ?>
     </ul>
 </div>

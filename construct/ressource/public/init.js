@@ -48,6 +48,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
     /**
      * Retourne true si l'argument est une string
+     * @private
      * @param arg
      * @returns {boolean}
      */
@@ -58,7 +59,11 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     /**
      * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
      * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
-     * @param ... Nombre variable d'arguments, tous seront passé à console.log (ou console.error si c'est une erreur)
+     *
+     * Déclaré par init (dès son chargement) avec une fonction vide
+     * puis remplacé par celle qui bosse si init() est appelé avec options.isDev
+     * @private
+     * @param {...*} args Nombre variable d'arguments, chacun sera passé à console.log ou console.error si c'est une erreur
      */
     function log() {
       var arg;
@@ -75,7 +80,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
     /**
      * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser log pour le dev seulement)
-     * @param … autant qu'on veut (console.error appelée une fois par argument)
+     * @private
+     * @param {...Error} autant qu'on veut (console.error appelée une fois par argument)
      */
     function logError() {
       if (console && console.error) {
@@ -86,7 +92,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     }
 
     /**
-     * Helper de init pour initialise les chemins de require
+     * Helper de init pour initialiser les chemins de require
+     * @private
      */
     function initRequire() {
       // et on configure requireJs avec une liste de librairies que l'on met à dispo des plugins
@@ -151,7 +158,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      */
 
     /**
-     * Ajoute une css dans le <head> courant
+     * Ajoute une css dans le <head> de la page
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      * @param {string}   file              le chemin du fichier css relatif au dossier du plugin
      * @param {boolean=} [isPluginDirRelative=false] passer true si le chemin ne doit pas être préfixé par le dossier du plugin
      */
@@ -165,6 +175,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
     /**
      * Ajoute un élément html de type tag à parent
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      * @param {HTMLElement} parent
      * @param {string} tag
      * @param {Object=} attrs Les attributs
@@ -180,12 +193,23 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       return elt;
     };
 
+    /**
+     * Ajoute du texte dans un élément
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
+     * @param elt
+     * @param text
+     */
     window.addText = function (elt, text) {
       elt.appendChild(wd.createTextNode(text));
     };
 
     /**
      * Vide un élément html de tous ses enfants
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      * @param {HTMLElement} element
      */
     window.empty = function (element) {
@@ -196,6 +220,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
     /**
      * Retourne un élément html de type tag (non inséré dans le dom)
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      * @param {string} tag
      * @param {Object=} attrs Les attributs
      * @param {string=} txtContent
@@ -219,6 +246,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
     /**
      * Retourne un id qui n'existe pas encore dans le dom (mais ne le créé pas)
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      */
     window.getNewId = (function () {
       // une closure pour conserver la valeur de cette variable privée entre 2 appels
@@ -238,6 +268,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
     /**
      * Cache le titre (en global pour que les plugins puissent le faire)
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      */
     window.hideTitle = function () {
       try {
@@ -248,13 +281,21 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     };
 
     /**
-     * Une fonction de log qui ne fait rien tant qu'on a pas appelé init avec isDev
-     * (dans ce cas c'est un console.log qui accepte un 2e argument facultatif, un objet à mettre en console aussi)
+     * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
+     * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
+     *
+     * Déclaré par init (dès son chargement) avec une fonction vide
+     * puis remplacé par celle qui bosse si init() est appelé avec options.isDev
+     * @global
+     * @param {...*} args Nombre variable d'arguments, chacun sera passé à console.log ou console.error si c'est une erreur
      */
     window.log = function () {};
 
     /**
      * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent) ET dans log.error
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      * @param {string|Error} error Le message à afficher
      * @param {number} [delay] Un éventuel délai d'affichage en secondes
      */
@@ -286,6 +327,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     /**
      * Affecte des styles à un élément html (on peut pas affecter elt.style directement car read only)
      * sans planter en cas de pb (on le signale juste en console)
+     *
+     * Déclaré par init (dès son chargement)
+     * @global
      * @param {HTMLElement} elt
      * @param {string|object} styles
      */
@@ -345,6 +389,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
        * Initialise les chemins des librairies pour les require des plugins, ainsi que les containers html
        * Complète options si besoin
        * @param options
+       * @service init
        */
       var init = function (options) {
         log('init avec les options', options);

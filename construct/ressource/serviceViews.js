@@ -31,29 +31,31 @@
 
 'use strict'
 
-/**
- * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
- * @param EntityRessource
- * @param $ressourceRepository Pour aller chercher des infos complémentaires d'une ressource (les ressources liées) pour certaines vues
- * @param $personneRepository  Pour aller chercher des infos complémentaires d'une ressource (les auteurs) pour certaines vues
- * @param $ressourceConverter
- * @param $accessControl       Pour savoir quels liens de menu afficher
- * @param $routes
- * @param $settings
- */
-module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
-  var tools = require('../tools')
-  var _ = require('lodash')
-  var seq = require('an-flow')
-  var moment = require('moment')
-  // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
-  // car on a l'autocomplétion sur les noms de propriété
-  var config = require('./config')
+var tools = require('../tools')
+var _ = require('lodash')
+var seq = require('an-flow')
+var moment = require('moment')
+// pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
+// car on a l'autocomplétion sur les noms de propriété
+var config = require('./config')
 
+module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+  /**
+   * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
+   * @service $views
+   * @requires EntityRessource
+   * @requires $ressourceRepository Pour aller chercher des infos complémentaires d'une ressource (les ressources liées) pour certaines vues
+   * @requires $personneRepository  Pour aller chercher des infos complémentaires d'une ressource (les auteurs) pour certaines vues
+   * @requires $ressourceConverter
+   * @requires $accessControl       Pour savoir quels liens de menu afficher
+   * @requires $routes
+   * @requires $settings
+   */
   var $views = {}
 
   /**
    * Ajoute les vars js pour l'affichage des ressources par les plugins
+   * @private
    * @param data
    * @param ressource
    */
@@ -70,6 +72,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Créé les infos pour une liste de choix dans dust
+   * @private
    * @param key le nom de la propriété de la ressource
    * @param {Array} selectedValues Les valeurs pour cette ressource
    * @param {boolean} isUnique Si c'est un select et pas des checkbox
@@ -119,6 +122,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Ajoute des infos à la ressource sur ses relations (titre & co)
+   * @private
    * @param ressource
    * @param next
    */
@@ -230,6 +234,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   /**
    * Retourne la série de labels (propriété => libellé) pour une ressource
    * (remplace parametres par enfants pour les arbres)
+   * @private
    * @param ressource
    */
   function getLabels(ressource) {
@@ -262,7 +267,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    *   label
    *   value
    * }]
-   *
+   * @private
    * @param error
    * @param {Ressource} ressource Une ressource qui peut contenir des erreurs (si elle vient d'un post)
    * @returns {object} Les data pour la vue dust, avec le token
@@ -398,6 +403,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Retourne un objet pour dust à partir d'une entité ressource
+   * @private
    * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
    * @param {Ressource} ressource La ressource qui sort d'un load
    * @param {string}    [view=''] Le nom de la vue (en absolu ou relatif)
@@ -474,6 +480,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Ajoute une erreur à la liste qui sera envoyée à la vue
+   * @memberOf $views
    * @param error
    * @param data
    */
@@ -489,6 +496,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Retourne les valeurs par défaut pour une vue ressource
+   * @memberOf $views
    * @param {string} viewName Le nom de la vue (dans ressource/views)
    * @returns {{$views: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
    */
@@ -511,6 +519,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Affiche une erreur en json ou html ou text, suivant accept, en laissant le status 200
+   * @memberOf $views
    * @param {Context} context
    * @param {Error}   error
    * @param {string}  [layout=page] Pour la sortie html, passer iframe si on veut pas des header/menu/footer
@@ -531,6 +540,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Prepare les data pour la vue dust et appelle html(data)
+   * @memberOf $views
    * @param {Context} context
    * @param error
    * @param ressource
@@ -540,6 +550,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   $views.prepareAndSend = function (context, error, ressource, view, options) {
     /**
      * envoie la ressource à la vue (en ajoutant menu si besoin
+     * @private
      * @param error
      */
     function termine(error) {
@@ -602,6 +613,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Affiche un message d'erreur
+   * @memberOf $views
    * @param {Context}      context
    * @param {string|Error} error
    * @param {number}       [status=200]
@@ -618,6 +630,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Prepare les data pour le form dust et appelle html avec
+   * @memberOf $views
    * @param {Context} context
    * @param error
    * @param ressource
@@ -642,6 +655,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Prepare les data pour le form dust et appelle html avec
+   * @memberOf $views
    * @param {Context}  context
    * @param {string[]} [errorMessages]
    */

@@ -1,4 +1,12 @@
 exports.defineTags = function(dictionary) {
+  dictionary.defineTag('controller', {
+    mustHaveValue: true,
+    onTagged : function(doclet, tag) {
+      doclet.addTag('kind', 'class');
+      doclet.addTag('name', tag.value);
+      doclet.exkind='controller';
+    }
+  });
   dictionary.defineTag('entity', {
     mustHaveValue: true,
     onTagged : function(doclet, tag) {
@@ -7,20 +15,20 @@ exports.defineTags = function(dictionary) {
       doclet.exkind='entity';
     }
   });
+  dictionary.defineTag('plugin', {
+    mustHaveValue: true,
+    onTagged : function(doclet, tag) {
+      doclet.addTag('kind', 'class');
+      doclet.addTag('name', tag.value);
+      doclet.exkind='plugin';
+    }
+  });
   dictionary.defineTag('service', {
     mustHaveValue: true,
     onTagged : function(doclet, tag) {
       doclet.addTag('kind', 'class');
       doclet.addTag('name', tag.value);
       doclet.exkind='service';
-    }
-  });
-  dictionary.defineTag('controller', {
-    mustHaveValue: true,
-    onTagged : function(doclet, tag) {
-      doclet.addTag('kind', 'class');
-      doclet.addTag('name', tag.value);
-      doclet.exkind='controller';
     }
   });
   dictionary.defineTag('route', {

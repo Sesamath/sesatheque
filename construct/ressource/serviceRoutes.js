@@ -31,10 +31,11 @@
 
 'use strict'
 
+var configRessource = require('./config')
+var routes = configRessource.constantes.routes
+var restriction = configRessource.constantes.restriction
+
 module.exports = function () {
-  var configRessource = require('./config')
-  var routes = configRessource.constantes.routes
-  var restriction = configRessource.constantes.restriction
   /**
    * Service pour récupérer les routes d'affichage des ressources
    * @service $routes
@@ -44,6 +45,7 @@ module.exports = function () {
   /**
    * Retourne la route (sans préfixe de controleur ni slash de début) d'une action
    * Les arguments supplémentaires sont concaténé avec /
+   * @memberOf $routes
    * @param {string} action
    * @returns {string} La route
    */
@@ -60,6 +62,7 @@ module.exports = function () {
   /**
    * Retourne la route absolue (commence par /) d'une action (avec public ou ressource au début suivant la ressource)
    * Les arguments supplémentaires sont concaténé avec /
+   * @memberOf $routes
    * @param {string}           action (display|describe|preview)
    * @param {Ressource|number} [ressource] ou oid de ressource
    * @param {Context}          [context]
@@ -92,6 +95,7 @@ module.exports = function () {
 
   /**
    * Retourne un tag html a avec une url locale absolue (qui commence avec /)
+   * @memberOf $routes
    * @param actionName
    * @param ressource
    * @param {string} [label=ressource.nom] Le texte du lien

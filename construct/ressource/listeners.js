@@ -31,16 +31,30 @@
 
 'use strict'
 
+/*
+ * jsdoc tient absolument à mettre listeners dans un namespace controllerRessource mettre un tag class ou module (avec ou sans kind) ne change rien
+ */
+
 var _ = require('lodash')
 var tools = require('../tools')
 
-/**
- * @file listener beforeTransport.
- */
-
 module.exports = function ($accessControl, $routes, $flashMessage) {
   /**
+   * Les listeners du composant ressource
+   *
+   * Tout ça aurait pu être dans un controleur * mais avec beforeTransport on est sûr de passer après tous les contrôleurs
+   *
+   * Le listener sur afterRailUse est dans construct/index.js et il ajoute CORS & logs sur le rail
+   * @service listeners
+   * @requires $accessControl
+   * @requires $routes
+   * @requires $flashMessage
+   */
+  var listeners = {}
+
+  /**
    * Ajoute les liens contextuels à une ressource dans data.actions
+   * @private
    * @param context
    * @param data
    */
@@ -99,6 +113,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
 
   /**
    * Ajoute le menu dans data.navigation
+   * @private
    * @param context
    * @param data
    */
@@ -149,6 +164,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   /**
    * Gére les pages d'erreur, fixe le contentType (et $layout pour le html d'après context.layout)
    * et ajoute les messages flash éventuels
+   * @private
    * @param {Context} context
    * @param data
    */
@@ -282,45 +298,28 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   } // prepareErrorHtmlData
 
   /**
-   * jsdoc tient absolument à mettre listeners dans un namespace controllerRessource mettre un tag module, avec ou sans kind ne change rien
-   */
-
-  /**
-   * Listener de beforeTransport qui
+   * Le listener de beforeTransport qui
    * - gère les erreurs en les formattant
    * - ajoute $layout d'après context.layout sur les pages html
    * - ajoute menu de navigation et menu contextuel d'une ressource sur le layout page
    * - ajoute des infos dans debug.log si on est pas en prod
-   *
-   * Tout ça aurait pu être dans un controleur * mais avec beforeTransport on est sûr de passer après tous les contrôleurs
-   *
-   * Le listener sur afterRailUse est dans construct/index.js et il ajoute CORS & logs sur le rail
-   *
-   * @class listeners
-   * @requires $accessControl
-   * @requires $routes
-   * @requires $flashMessage
-   * @returns {object}
+   * @memberOf listeners
+   * @listens lassi#event:beforeTransport
+   * @param {Context} context
+   * @param {object} data
    */
+  listeners.beforeTransport = function (context, data) {
+    errorHandler(context, data)
 
-  return {
-    /**
-     * @listens lassi#event:beforeTransport
-     * @param {Context} context
-     * @param {object} data
-     * @memberOf listeners
-     */
-    beforeTransport : function (context, data) {
-      errorHandler(context, data)
+    // sur les pages html on ajoute les menus
+    if (context.layout === 'page') {
+      addNavigation(context, data)
+      addActions(context, data)
+    } // context.layout
 
-      // sur les pages html on ajoute les menus
-      if (context.layout === 'page') {
-        addNavigation(context, data)
-        addActions(context, data)
-      } // context.layout
-
-      // on envoie toutes les réponses dans le log de debug
-      if (!isProd) debug(context, data)
-    }
+    // on envoie toutes les réponses dans le log de debug
+    if (!isProd) debug(context, data)
   }
+
+  return listeners
 }

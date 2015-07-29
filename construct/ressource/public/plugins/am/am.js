@@ -55,10 +55,13 @@
 
 define(['sesaswf'], function (sesaswf) {
   'use strict';
-  /** notre module exporté avec sa méthode display */
+  /** @plugin am */
   var am = {};
 
-  /** Le moment où ce module a été chargé dans le navigateur */
+  /**
+   * Le moment où ce module a été chargé dans le navigateur
+   * @private
+   */
   var startDate = new Date();
   
   var ressOid;
@@ -75,7 +78,7 @@ define(['sesaswf'], function (sesaswf) {
 
 
   /**
-   * Affiche la ressource dans l'élément d'id mepRess
+   * Affiche une ressource am
    * @param {Ressource} ressource  L'objet ressource (sans forcément son prototype)
    * @param {Object}    options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
    *                               et éventuellement resultCallback)

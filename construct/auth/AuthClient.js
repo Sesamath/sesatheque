@@ -37,7 +37,7 @@
  */
 
 /**
- * Service d'authentification qui devra s'inscrire avec $auth.addClient(authClient)
+ * Un modèle pour un client SSO qui devra s'inscrire dans la sésathèque via $auth.addClient(authClient)
  * @constructor
  */
 function AuthClient() {

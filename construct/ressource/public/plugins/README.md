@@ -3,6 +3,8 @@ Plugin ressource
 
 Pour la doc du code serveur, cf [sesatheque](../index.html)
 
+Cf [global](./global.html) pour la liste des méthodes globales accessibles depuis un plugin.
+
 Tous les plugins doivent exporter les méthodes display et showResult avec la syntaxe 
 
 ```javascript

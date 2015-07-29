@@ -34,6 +34,7 @@
 /**
  * Un groupe d'utilisateurs
  * @constructor
+ * @private
  * @param {object} initObj Un objet ayant des propriétés d'un groupe
  */
 function Groupe(initObj) {
@@ -59,11 +60,11 @@ function Groupe(initObj) {
 }
 
 module.exports = function (EntityGroupe, $cacheGroupe) {
-  var tools = require("../tools")
   /**
    * L'entité groupe
    * @entity EntityGroupe
-   * @extends lassi#EntityInstance
+   * @extends Entity
+   * @extends Groupe
    */
   EntityGroupe.construct(Groupe)
 

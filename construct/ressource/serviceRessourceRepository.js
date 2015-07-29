@@ -31,24 +31,26 @@
 
 'use strict';
 
+
+var _           = require('lodash')
+var flow        = require('an-flow')
+var elementtree = require('elementtree')
+//var util = require('util')
+
+var config = require('./config')
+
+/**
+ * Service d'accès aux ressources, utilisé par les différents contrôleurs
+ * @service $ressourceRepository
+ * @requires EntityRessource
+ * @requires EntityArchive
+ * @requires $ressourceControl
+ * @requires $cacheRessource
+ * @requires $cache
+ */
+var $ressourceRepository = {}
+
 module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache) {
-  /**
-   * Service d'accès aux ressources, utilisé par les différents contrôleurs
-   * @service $ressourceRepository
-   * @requires EntityRessource
-   * @requires EntityArchive
-   * @requires $ressourceControl
-   * @requires $cacheRessource
-   * @requires $cache
-   */
-  var $ressourceRepository = {}
-
-  var _ = require('lodash')
-  var flow          = require('an-flow')
-  var elementtree = require('elementtree')
-  //var util = require('util')
-
-  var config = require('./config')
   var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
   var listeNbDefault = config.limites.listeNbDefault || 10
 
@@ -354,6 +356,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Enregistre la ressource en archive et appelle next avec, mais ne modifie pas la ressource
+   * @memberOf $ressourceRepository
    * @param {EntityRessource} ressource
    * @param next
    */
@@ -368,6 +371,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Efface une ressource (et ses index)
+   * @memberOf $ressourceRepository
    * @param {EntityRessource} ressource
    * @param {Function}  next      La callback qui sera appelée en lui passant error ou undefined
    * @returns {undefined}
@@ -392,6 +396,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Récupère un liste de ressource d'après critères
+   * @memberOf $ressourceRepository
    * @param {string}   visibilite peut valoir public | correction | all | auteur/id | groupe/nom
    * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
    *                                filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
@@ -488,6 +493,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
+   * @memberOf $ressourceRepository
    * @param {number|String} oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
    * @param {Function}      next La callback qui sera appelée avec (error, ressource)
    *                             Attention, ressource peut avoir perdu son prototype s'il vient du cache
@@ -511,6 +517,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next
+   * @memberOf $ressourceRepository
    * @param {string}   origine
    * @param {string}   idOrigine
    * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
@@ -537,6 +544,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Récupère une ressource publique et la passe à next (seulement une erreur si elle n'existe pas)
+   * @memberOf $ressourceRepository
    * @param {number|String} oid  L'identifiant de la ressource
    * @param {Function}      next La callback qui sera appelée avec (error, ressource).
    * @returns {undefined}
@@ -557,6 +565,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next
+   * @memberOf $ressourceRepository
    * @param {string}   origine
    * @param {string}   idOrigine
    * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
@@ -583,6 +592,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Ajoute ou modifie une ressource (contrôle la validité avant)
+   * @memberOf $ressourceRepository
    * @param {EntityRessource} ressource
    * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
    */

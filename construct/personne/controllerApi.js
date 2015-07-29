@@ -29,13 +29,13 @@
  * pour une explication en français)
  */
 
-/**
- * Controleur de la route /api/personne/
- * @Controller controllerApiPersonne
- */
 'use strict'
 
 module.exports = function (controller, EntityPersonne, $personneRepository, $accessControl) {
+  /**
+   * Controleur de la route /api/personne/
+   * @Controller controllerApiPersonne
+   */
 
   /**
    * Équivalent de context.denied en json

@@ -78,7 +78,8 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
     controller.get('deconnexion/externe', $auth.logoutFromRemote)
 
     /**
-     * redirige vers le serveur d'authentification pour savoir si on est connecté là-bas
+     * Redirige vers le serveur d'authentification pour savoir si on est connecté là-bas mais reviendra sur /validation
+     * même si on est pas connecté là-bas
      * @route GET /testConnexion
      */
     controller.get('testConnexion', function (context) {
