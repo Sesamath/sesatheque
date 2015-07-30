@@ -16,8 +16,8 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
     /**
      * display sera appelée avec les arguments (ressource, options), options contient les propriétés 
      *   {string}      baseUrl         Le préfixe d'url qui pointe vers le dossier du plugin
-     *   {HTMLElement} container       Le div pour afficher la ressource
-     *   {HTMLElement} errorsContainer Le div pour afficher les erreurs
+     *   {Element} container       Le div pour afficher la ressource
+     *   {Element} errorsContainer Le div pour afficher les erreurs
      * et peut contenir
      *   {boolean}     isDev            true si on est en dev (active la fct log du dom global, 
                                           sinon elle existe mais ne fait rien)
@@ -46,8 +46,8 @@ define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
  *                                 et accepte un éventuel objet un 2e argument (que l'on enverra aussi à console.log())
  * {Function}    addCss(file)    : ajoute une css dans le head de la page courante
  *                                 (lui passer le fichier relativement au dossier du plugin)
- * {Function}    addElement(eltContainer, tag, attributes, innerText) : ajoute un HTMLElement dans eltContainer
- * {Function}    getElement(tag, attributes, innerText)               : renvoie un HTMLElement créé d'après les arguments
+ * {Function}    addElement(eltContainer, tag, attributes, innerText) : ajoute un Element dans eltContainer
+ * {Function}    getElement(tag, attributes, innerText)               : renvoie un Element créé d'après les arguments
  * {Function}    addError(errorMsg) : Ajoute une erreur dans errorsContainer
  */
  // une variable privée de ce module mais globale pour nos fonctions

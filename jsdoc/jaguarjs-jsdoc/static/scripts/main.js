@@ -32,14 +32,32 @@ $(function () {
     // Show an item related a current documentation automatically
     var filename = $('.page-title').data('filename').replace(/\.[a-z]+$/, '');
     var $currentItem = $('.navigation .item[data-name*="' + filename + '"]:eq(0)');
-
     if ($currentItem.length) {
+/* On modifie ce code original qui fait remonter la classe courante en 1er
         $currentItem
             .remove()
             .prependTo('.navigation .list')
             .show()
             .find('.itemMembers')
                 .show();
+ * par celui-ci qui ouvre la classe courante et scrolle dessus
+ */
+        $currentItem
+            .show()
+            .find('.itemMembers')
+            .show();
+            /**
+             * on veut se positionner sur l'élément
+             * ce code ça marche pas
+             $('.navigation .list').scrollTop($currentItem.offset().top)
+             * ça non plus
+             $currentItem.tabIndex = 0
+             $currentItem.focus();
+             * cette solution fonctionne http://stackoverflow.com/a/6677069
+             */
+        $('.navigation .list').animate({
+            scrollTop: $currentItem.offset().top - $('.navigation .list').offset().top
+        }, 1000);
     }
 
     // Auto resizing on navigation

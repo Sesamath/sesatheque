@@ -39,8 +39,11 @@
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
   if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
+  /**
+   * Espace de nom global pour sesatheque
+   * @namespace sesatheque
+   */
   if (typeof window.sesatheque === "undefined") window.sesatheque = {};
-  if (typeof window.sesatheque.em === "undefined") window.sesatheque.em = {};
 
   /** Raccourci pour window.document */
   var wd = window.document;
@@ -50,7 +53,8 @@
    * - soit pour requireJs (si define existe)
    * - soit en module amd (si on a module.exports)
    * - soit dans window.sesatheque.emResult
-   * @service emResult
+   * (ce code est réécrit pour sesalab dans une classe qooxdoo sesalab.resultats.Em, Cfsesalab-interface/class/sesalab/resultats)
+   * @namespace emResult
    */
   var emResult = {};
 
@@ -77,7 +81,7 @@
   };
 
   /**
-   * Retourne le code html qui affiche le score (ici x/y)
+   * Retourne le code html qui affiche le score (ici x/y en texte seul)
    * @memberOf emResult
    * @param {Resultat} resultat
    * @returns {string} Le code html
@@ -102,16 +106,15 @@
   };
 
   /**
-   * Affiche score et réponse dans un HTMLElement
+   * Affiche score et réponse dans un Element (en virant l'éventuel contenu existant)
    * @memberOf emResult
-   * @param resultat
-   * @param element
-   * @param baseUrl
+   * @param {Resultat} resultat
+   * @param {Element} element
+   * @param {string} baseUrl
    */
   emResult.showResult = function (resultat, element, baseUrl) {
-    var html = window.sesatheque.em.getHtmlScore(resultat) +' ' +
+    element.innerHTML = window.sesatheque.em.getHtmlScore(resultat) +' ' +
         window.sesatheque.em.getHtmlReponse(resultat, baseUrl);
-    element.addChild(wd.createTextNode(html));
   };
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global

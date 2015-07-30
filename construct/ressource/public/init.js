@@ -178,15 +178,15 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      *
      * Déclaré par init (dès son chargement)
      * @global
-     * @param {HTMLElement} parent
+     * @param {Element} parent
      * @param {string} tag
      * @param {Object=} attrs Les attributs
      * @param {string=} content
-     * @returns {HTMLElement}
-     * @throws {Error} Si le parent n'est pas un HTMLElement
+     * @returns {Element}
+     * @throws {Error} Si le parent n'est pas un Element
      */
     window.addElement = function (parent, tag, attrs, content) {
-      if (!parent || !parent.appendChild) throw new Error("parent n'est pas un HTMLElement");
+      if (!parent || !parent.appendChild) throw new Error("parent n'est pas un Element");
       var elt = w.getElement(tag, attrs, content);
       parent.appendChild(elt);
 
@@ -210,7 +210,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      *
      * Déclaré par init (dès son chargement)
      * @global
-     * @param {HTMLElement} element
+     * @param {Element} element
      */
     window.empty = function (element) {
       if (element && element.firstChild) {
@@ -330,7 +330,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      *
      * Déclaré par init (dès son chargement)
      * @global
-     * @param {HTMLElement} elt
+     * @param {Element} elt
      * @param {string|object} styles
      */
     window.setStyles = function(elt, styles) {
@@ -388,7 +388,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
        *
        * Initialise les chemins des librairies pour les require des plugins, ainsi que les containers html
        * Complète options si besoin
-       * @param options
+       * @param {initOptions} options
        * @service init
        */
       var init = function (options) {
@@ -401,7 +401,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         } else {
           options.sesathequeBase = rootPath;
         }
-        if (!options.pluginBaseUrl) options.pluginBaseUrl = pluginsDir +'/' +options.pluginName;
+        if (options.pluginName && !options.pluginBaseUrl) options.pluginBaseUrl = pluginsDir +'/' +options.pluginName;
         if (!options.vendorsBaseUrl) options.vendorsBaseUrl = vendorsDir;
         pluginBaseUrl = options.pluginBaseUrl; // pour addCss
 
@@ -434,3 +434,16 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
     }
   });
 }
+
+/**
+ * @typedef initOptions
+ * @type {object}
+ * @property {string}  [sesathequeBase=/]              Le préfixe de chemin vers la racine de la sésathèque.
+ *                                                     Il faut passer un chemin http:// complet si ce module est utilisé sur un autre domaine que la sésathèque)
+ * @property {string}  [pluginBaseUrl=plugins/$plugin] Le dossier du plugin concerné (pour qu'il puisse ajouter ses médias)
+ * @property {string}  [vendorsBaseUrl=vendors]        Le dossier de base vendors
+ * @property {string}  pluginName                      Le nom du plugin
+ * @property {Element} container                       L'élément html qui servira de conteneur au plugin pour afficher sa ressource
+ * @property {Element} errorsContainer                 L'élément html pour afficher des erreurs éventuelles
+ * @property {boolean} [isDev=false]                   Passer true pour ajouter des log en console
+ */

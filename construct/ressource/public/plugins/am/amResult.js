@@ -81,7 +81,7 @@
   };
 
   /**
-   * Affiche score et réponse dans un HTMLElement
+   * Affiche score et réponse dans un Element
    * @memberOf amResult
    * @param resultat
    * @param element

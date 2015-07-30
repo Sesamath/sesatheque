@@ -67,11 +67,11 @@ define(["jquery1", "mathquill"], function () {
   var w = window;
   var $ = w.jQuery;
   var wd = w.document;
-  /** {HTMLElement} Le conteneur global */
+  /** {Element} Le conteneur global */
   var container;
-  /** {HTMLElement} Le div des boutons */
+  /** {Element} Le div des boutons */
   var buttons;
-  /** {HTMLElement} Le textarea */
+  /** {Element} Le textarea */
   var textarea;
   // les même en objets jquery
   var $container, $buttons, $textarea;

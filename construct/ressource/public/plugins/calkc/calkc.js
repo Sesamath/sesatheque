@@ -41,8 +41,8 @@
  *                                 et accepte un éventuel objet un 2e argument pour ajouter son dump en console
  * {Function}    addCss          : ajoute une css dans le head de la page
  *                                 (lui passer le fichier relativement à ce dossier)
- * {HTMLElement} container       : le conteneur pour affichage
- * {HTMLElement} errorsContainer : un conteneur pour afficher d'éventuelles erreurs
+ * {Element} container       : le conteneur pour affichage
+ * {Element} errorsContainer : un conteneur pour afficher d'éventuelles erreurs
  * {String}      baseUrl         : le préfixe vers ce dossier à utiliser dans d'éventuels href
  *                                 (pour des médias ou autres fichiers à charger)
  * {Object}      window          : l'objet window

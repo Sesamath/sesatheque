@@ -81,7 +81,7 @@
   };
 
   /**
-   * Affiche score et réponse dans un HTMLElement
+   * Affiche score et réponse dans un Element
    * @param resultat
    * @param element
    * @param baseUrl

@@ -22,6 +22,7 @@
     "gulp": "^3.8.7",
     "gulp-jshint": "^1.7.0",
     "gulp-util": "^2.2.16",
+    "ink-docstrap": "^0.5.2",
     "js-beautify": "^1.5.1",
     "jsdoc": "^3.3",
     "jshint-stylish": "^0.3.0",

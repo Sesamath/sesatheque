@@ -57,7 +57,8 @@ var streamsVerbose = []
 /**
  * Retourne une writeStream sur le fichier passé en arguments (qui sera ouvert dans le dossier de log défini dans la conf)
  * @private
- * @param log Nom du log (sans dossier parent)
+ * @param {string}  log       Nom du log (sans dossier parent)
+ * @param {boolean} [verbose] Annonce l'ouverture et la fermeture du fichier dans le fichier
  * @returns {stream.Writable}
  */
 function getLogStream(log, verbose) {
@@ -105,18 +106,10 @@ var env = process.env.NODE_ENV || 'dev';
 var exclusions = {}
 
 /**
- * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans la console)
+ * Retourne le préfixe avec la date courante entre crochet
  * @private
+ * @returns {string}
  */
-var log // jshint ignore:line
-// (log étant défini en global dans la conf il râle si on le redéfini)
-
-/**
- * Fonction qui ne fait rien en prod, redéfinie plus loin pour le dev (pour ecrire dans dev.log)
- * @private
- */
-var logDebug
-
 function getPrefix() {
   return '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] '
 }
@@ -124,10 +117,13 @@ function getPrefix() {
 /**
  * Formate le message et l'envoie dans un log ou en console (si stream est null)
  * @private
- * @param message
- * @param objectToDump
- * @param filter
- * @param stream
+ * @param {string|object} message
+ * @param {object}        [objectToDump] Un objet éventuel (qui sera rendu en json avec indentation de n si options.indent=n)
+ * @param {string}        filter         Un nom de filtre pour exclusion éventuelle
+ * @param {writeStream}   stream         stream vers le fichier de log
+ * @param {object}        [options]      Passer une propriété
+ *                                          indent pour indenter objectToDump du nombre d'espaces demandés,
+ *                                          max pour modifier la limite de la sortie (200 par défaut)
  */
 function out(message, objectToDump, filter, stream, options) {
   if (!options) options = {}
@@ -148,36 +144,43 @@ function out(message, objectToDump, filter, stream, options) {
     else stream.write(message + "\n")
   }
 }
+// log
+if (env === 'prod') {
+  log = function () { } // jshint ignore:line
+  _lassi.log('app', "fonction log désactivée avec l'environnement : " + env)
+} else {
+  /**
+   * Méthode qui écrit en console si l'on est pas en prod (ne fait rien en prod)
+   * @service log
+   * @type {function}
+   * @param {string|object} message
+   * @param {object}        [objectToDump] Un objet éventuel qui sera rendu en json avec indentation
+   * @param {string}        filter         Un nom de filtre pour exclusion éventuelle
+   * @param {object}         [options]     Passer une propriété
+   *                                         indent pour indenter objectToDump du nombre d'espaces demandés,
+   *                                         max pour modifier la limite de la sortie (200 par défaut)
+   */
+  log = function (message, objectToDump, filter, options) { // jshint ignore:line
+    // (log étant défini en global dans la conf jshint il râle si on le redéfini)
+    out(message, objectToDump, filter, null, options)
+  }
+  _lassi.log('app', "fonction de log activée avec l'environnement : " + env)
+}
 
-if (env !== 'prod' && config.logs.debug) {
-  // notre stream vers dev.log
+// log.debug
+if (config.logs.debug) {
+  // notre stream vers debug.log
   debugOutputStream = getLogStream(config.logs.debug, true)
 
   /**
-   * Écrit dans dev.log, pour raconter sa vie ou envoyer des objets
-   * @name debug
+   * Écrit dans le fichier config.logs.debug s'il est précisé (ne fait rien sinon)
    * @memberOf log
    * @param message
    * @param objectToDump
    * @param filter
    */
-  logDebug = function(message, objectToDump, filter, options) {
+  log.debug = function(message, objectToDump, filter, options) {
     out(message, objectToDump, filter, debugOutputStream, options)
-  }
-
-  /**
-   * Écrit en console en dev (ne fait rien en prod)
-   * jsdoc ajoute new mais c'est bien une fct "normale"
-   * @kind class
-   * @type {function}
-   * @param message
-   * @param objectToDump
-   * @param filter
-   * @param options
-   */
-  log = function(message, objectToDump, filter, options) { // jshint ignore:line
-    // (log étant défini en global dans la conf jshint il râle si on le redéfini)
-    out(message, objectToDump, filter, null, options)
   }
 
   if (config.logs.debugExclusions) {
@@ -186,16 +189,14 @@ if (env !== 'prod' && config.logs.debug) {
     })
   }
 
-  _lassi.log('app', "fonction de log activée avec l'environnement : " +env)
+  _lassi.log('app', "fonction log.debug activée vers " +config.logs.debug +", avec l'environnement : " +env)
 
 } else {
-  logDebug = function() {};
-  log = function () {} // jshint ignore:line
-  _lassi.log('app', "fonction log désactivée avec l'environnement : " +env)
+  log.debug = function() {};
+  _lassi.log('app', "fonction log.debug désactivée avec l'environnement : " +env)
 }
 
-log.debug = logDebug
-
+// log.perf
 if (config.logs.perf) {
   perfOutputStream = getLogStream(config.logs.perf)
   out('start log (démarrage appli)', null, null, perfOutputStream)
@@ -228,7 +229,7 @@ if (config.logs.perf) {
   log.perf = function () {}
 }
 
-// on ajoute nos fct comme méthodes de la fct principale exportée
+// Et les autres méthodes toujours valides
 
 /**
  * Retourne le nb de ms écoulées depuis start
@@ -242,7 +243,7 @@ log.getElapsed = function (start) {
 }
 
 /**
- * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur, en dev comme en prod
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur (config.logs.error), en dev comme en prod
  * @memberOf log
  * @param message
  * @param objectToDump
@@ -253,7 +254,7 @@ log.error = function (message, objectToDump, filter) {
 }
 
 /**
- * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données (config.logs.errorData)
  * @memberOf log
  * @param message
  * @param objectToDump
