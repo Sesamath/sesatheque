@@ -32,8 +32,7 @@
 'use strict';
 
 /**
- * @file
- * Nos loggers maison
+ * module log avec ses nos loggers maison
  * @todo utiliser https://www.npmjs.org/package/winston
  * @todo utiliser https://nodejs.org/api/util.html#util_util_debuglog_section
  */
@@ -118,10 +117,10 @@ function getPrefix() {
  * Formate le message et l'envoie dans un log ou en console (si stream est null)
  * @private
  * @param {string|object} message
- * @param {object}        [objectToDump] Un objet éventuel (qui sera rendu en json avec indentation de n si options.indent=n)
+ * @param {Object}        [objectToDump] Un objet éventuel (qui sera rendu en json avec indentation de n si options.indent=n)
  * @param {string}        filter         Un nom de filtre pour exclusion éventuelle
  * @param {writeStream}   stream         stream vers le fichier de log
- * @param {object}        [options]      Passer une propriété
+ * @param {Object}        [options]      Passer une propriété
  *                                          indent pour indenter objectToDump du nombre d'espaces demandés,
  *                                          max pour modifier la limite de la sortie (200 par défaut)
  */
@@ -146,7 +145,7 @@ function out(message, objectToDump, filter, stream, options) {
 }
 // log
 if (env === 'prod') {
-  log = function () { } // jshint ignore:line
+  GLOBAL.log = function () { } // jshint ignore:line
   _lassi.log('app', "fonction log désactivée avec l'environnement : " + env)
 } else {
   /**
@@ -154,13 +153,13 @@ if (env === 'prod') {
    * @service log
    * @type {function}
    * @param {string|object} message
-   * @param {object}        [objectToDump] Un objet éventuel qui sera rendu en json avec indentation
+   * @param {Object}        [objectToDump] Un objet éventuel qui sera rendu en json avec indentation
    * @param {string}        filter         Un nom de filtre pour exclusion éventuelle
-   * @param {object}         [options]     Passer une propriété
+   * @param {Object}         [options]     Passer une propriété
    *                                         indent pour indenter objectToDump du nombre d'espaces demandés,
    *                                         max pour modifier la limite de la sortie (200 par défaut)
    */
-  log = function (message, objectToDump, filter, options) { // jshint ignore:line
+  GLOBAL.log = function (message, objectToDump, filter, options) { // jshint ignore:line
     // (log étant défini en global dans la conf jshint il râle si on le redéfini)
     out(message, objectToDump, filter, null, options)
   }
@@ -217,7 +216,7 @@ if (config.logs.perf) {
   }
   /**
    * Clos la mesure de perf pour cette requête et écrit dans le log
-   * @param {object} response L'objet response d'express, on traitera response.perf.msg si response.perf existe
+   * @param {Object} response L'objet response d'express, on traitera response.perf.msg si response.perf existe
    */
   log.perf.out = function (response) {
     if (response.perf) {

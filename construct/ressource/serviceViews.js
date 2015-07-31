@@ -38,8 +38,9 @@ var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
+var appConfig = require("../../config")
 
-module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
+module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes) {
   /**
    * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
    * @service $views
@@ -60,11 +61,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param ressource
    */
   function addJsVars(data, ressource) {
+    data.contentBloc.sesathequeBase = appConfig.application.baseUrl
+    data.contentBloc.isDev          = (appConfig.application.staging !== 'prod')
     if (ressource) {
-      data.contentBloc.pluginBaseUrl = '/plugins/' + ressource.typeTechnique
-      data.contentBloc.vendorsBaseUrl= '/vendors'
-      data.contentBloc.pluginName    = ressource.typeTechnique
-      data.contentBloc.isDev         = ($settings.get('lassi.application.staging') !== 'prod')
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource     = tools.stringify(ressource)
     }
@@ -270,7 +269,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @private
    * @param error
    * @param {Ressource} ressource Une ressource qui peut contenir des erreurs (si elle vient d'un post)
-   * @returns {object} Les data pour la vue dust, avec le token
+   * @returns {Object} Les data pour la vue dust, avec le token
    */
   function getFormViewData(error, ressource) {
     var formData = {
@@ -407,7 +406,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
    * @param {Ressource} ressource La ressource qui sort d'un load
    * @param {string}    [view=''] Le nom de la vue (en absolu ou relatif)
-   * @returns {object} L'objet à passser à la vue dust
+   * @returns {Object} L'objet à passser à la vue dust
    */
   function getViewData(error, ressource, view) {
     var viewData = {}
