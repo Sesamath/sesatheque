@@ -30,11 +30,6 @@
  */
 
 "use strict";
-
-/**
- * @file Définition d'une ressource
- */
-
 /* global define, module*/
 
 // on ne sait pas dans quel environnement on peut tourner, on prévoit ça en fallback
@@ -46,21 +41,21 @@ var filters = (function () {
     string : foo,
     date : foo,
     int : foo
-  }
+  };
 })();
 
 // suivant que l'on est coté serveur ou client
 if (typeof define === 'function') {
-  define(['sesamath/tools/filters'], function(realFilters) {
-    if (realFilters) filters = realFilters
-    else if (console && console.error) console.error(new Error("sesamath/tools/filters n'a pas été chargé, on s'en passera..."))
-    return Ressource
+  define(['tools/filters'], function(realFilters) {
+    filters = realFilters;
+    return Ressource;
   });
 } else if (typeof module === 'object') {
-  filters = require('./tools/filters')
+  filters = require('./tools/filters');
   module.exports = Ressource;
 }
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
+// pas trouvé comment documenté correctement un constructeur dans une fonction anonyme auto-exécutée…
 
 /**
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
@@ -68,17 +63,17 @@ if (typeof define === 'function') {
  * @param {Object} initObj Un objet ayant des propriétés d'une ressource
  */
 function Ressource(initObj) {
-  var values
+  var values;
   if (initObj) {
     // clonage du fainéant (on veut que les propriétés sans prototype)
     try {
       values = JSON.parse(JSON.stringify(initObj));
     } catch (e) {
-      if (console && typeof console.error === 'function') console.error(e)
-      values = {}
+      if (console && typeof console.error === 'function') console.error(e);
+      values = {};
     }
-  }else {
-    values = {}
+  } else {
+    values = {};
   }
   /**
    * L'identifiant interne à cette Sésathèque
@@ -269,17 +264,17 @@ function Ressource(initObj) {
    * Uri d'affichage
    * @type {string}
    */
-  this.displayUri = (this.restriction ? '/ressource' : '/public') +'/voir/' +(this.oid ? this.oid : this.origine +'/' +this.idOrigine)
+  this.displayUri = (this.restriction ? '/ressource' : '/public') + '/voir/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine)
   /**
    * Uri de la description
    * @type {string}
    */
-  this.describeUri = (this.restriction ? '/ressource' : '/public') +'/decrire/' +(this.oid ? this.oid : this.origine +'/' +this.idOrigine)
+  this.describeUri = (this.restriction ? '/ressource' : '/public') + '/decrire/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine)
   /**
    * Uri des datas (json)
    * @type {string}
    */
-  this.dataUri = '/api' +(this.restriction ? '/ressource/' : '/public/') +(this.oid ? this.oid : this.origine +'/' +this.idOrigine)
+  this.dataUri = '/api' + (this.restriction ? '/ressource/' : '/public/') + (this.oid ? this.oid : this.origine + '/' + this.idOrigine)
 }
 
 /**
@@ -288,4 +283,4 @@ function Ressource(initObj) {
  */
 Ressource.prototype.toString = function () {
   return this.titre;
-}
+};

@@ -31,11 +31,20 @@
 
 'use strict';
 
+/**
+ * Controleur de la route /debug/ (existe seulement si on est pas en prod)
+ * @Controller controlleurDebug
+ * @requires {@link $ressourceRepository}
+ */
 module.exports = function (controller, $ressourceRepository) {
-
-  // var tools = require('../tools/index')
-  //var _ = require('lodash')
-
+  /**
+   * Dump une ressource
+   * @route GET /dump?oid=…
+   * @param {Integer} oid              L'oid de la ressource dont on veut le dump
+   * @param {Integer} [depth=null]     La profondeur
+   * @param {boolean} [hidden=false]   Pour voir les propriétés cachées
+   * @param {boolean} [terminal=false] Pour l'afficher en console plutôt que sur la page
+   */
   controller.get('dump', function (context) {
     var oid = context.get.oid
     var depth = Number(context.get.depth) || null

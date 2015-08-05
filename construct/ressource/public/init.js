@@ -30,420 +30,150 @@
  */
 
 /**
- * Script d'init générique pour ajouter en global les méthodes addCss, addElement, getElement, addError, hideTitle
- * et log (qui ne fait rien sauf si on appelle init avec options.isDev à true), log.error affiche toujours
+ * Script d'init générique pour ajouter dans notre namespace global les méthodes générique (addCss, addElement, getElement, addError…)
+ * si cela n'a pas déjà été fait, activer log ou pas et étoffer options si besoin
+ * Appellera aussi initRequire si on nous passe une sesathequeBase (et qu'il n'a pas déjà été configuré avec cette base)
  */
-/* global window, define, require, alert */
-if (typeof define === 'undefined' || typeof require === 'undefined') {
-  alert("requireJs doit être chargé avant ce fichier");
-} else if (typeof window === 'undefined') {
+/* global window, define, require, alert, Sesamath */
+if (typeof window === 'undefined') {
   throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
+} else if (typeof define === 'undefined' || typeof require === 'undefined') {
+  alert("requireJs doit être chargé avant ce fichier");
 } else {
-  // on peut définir notre module
+  // on peut définir notre module sans dépendances (on a pas encore les path)
   define(function () {
     "use strict";
-    /********************
-     * Fonctions privées
-     */
+    // raccourcis
+    var w = window;
+    var wd = window.document;
+    if (typeof w.Sesamath === "undefined") w.Sesamath = {};
+    var S = window.Sesamath;
+    if (!S.Sesatheque) S.Sesatheque = {};
+    var ST = S.Sesatheque;
 
     /**
-     * Retourne true si l'argument est une string
-     * @private
-     * @param arg
-     * @returns {boolean}
+     * Notre module js que l'on exporte, une seule fonction.
+     * Complète les options si besoin avec sesathequeBase, container, errorsContainer qui seront créés si besoin,
+     * et ajoute aux options "urlResultatCallback", "userOrigine", "userId" si elles n'y sont pas et sont dans l'url
+     * @param {initOptions}   options
+     * @param {errorCallback} next
+     * @service init
      */
-    function isString(arg) {
-      return (typeof arg === 'string');
-    }
+    return function (options, next) {
 
-    /**
-     * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
-     * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
-     *
-     * Déclaré par init (dès son chargement) avec une fonction vide
-     * puis remplacé par celle qui bosse si init() est appelé avec options.isDev
-     * @private
-     * @param {...*} args Nombre variable d'arguments, chacun sera passé à console.log ou console.error si c'est une erreur
-     */
-    function log() {
-      var arg;
-      try {
-        for (var i = 0; i < arguments.length; i++) {
-          arg = arguments[i];
-          if (arg instanceof Error) console.error.call(console, arg);
-          else console.log.call(console, arg);
-        }
-      } catch (e) {
-        // rien, fallait un navigateur décent...
+      // on vérifie que initGlobal a bien été chargé, sinon on le fait
+      function checkGlobal() {
+        if (typeof Sesamath === "undefined" || !Sesamath.Sesatheque || !Sesamath.Sesatheque.addError) require(['initGlobal'], initDom);
+        else initDom();
       }
-    }
 
-    /**
-     * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser log pour le dev seulement)
-     * @private
-     * @param {...Error} autant qu'on veut (console.error appelée une fois par argument)
-     */
-    function logError() {
-      if (console && console.error) {
-        for (var i = 0; i < arguments.length; i++) {
-          console.error(arguments[i]);
-        }
-      }
-    }
+      // on peut passer à l'init du dom et des options
+      function initDom() {
+        S.log('init avec les options', options);
 
-    /**
-     * Helper de init pour initialiser les chemins de require
-     * @private
-     */
-    function initRequire() {
-      // et on configure requireJs avec une liste de librairies que l'on met à dispo des plugins
-      // et les plugins eux-même, mais sans affecter baseUrl pour pas perturber un appelant qui
-      // aurait déjà require avec son baseUrl
-      // faut donc lister tous nos modules ici...
-      var requireConfig = {
-        paths: {
-          // les modules de vendors
-          ckeditor : vendorsDir + '/ckeditor/ckeditor',
-          head     : vendorsDir + '/headjs/head.1.0',
-          head_load: vendorsDir + '/headjs/head.load.1.0',
-          jquery   : vendorsDir + '/jquery/dist/jquery.min',
-          jquery1  : vendorsDir + '/jquery/jquery-1.11.3.min',
-          jqueryUi : vendorsDir + '/jqueryUi/1.11.1/jquery-ui.min',
-          jqueryUiDialog : vendorsDir + '/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
-          jstree   : vendorsDir + '/jstree/dist/jstree.min',
-          lodash   : vendorsDir + '/lodash/lodash.min',
-          mathjax  : vendorsDir + '/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
-          mathquill: vendorsDir + '/mathquill-0.9.4/mathquill.min',
-          mqEditor : vendorsDir + '/sesamath/mqEditor/mqEditor',
-          swfobject: vendorsDir + '/swfobject/swfobject.2.2',
-          // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
-          sesaswf  : vendorsDir + '/sesamath/swf',
-          // autres modules génériques sesamath
-          sesalog  : vendorsDir + '/sesamath/log',
-          Resultat : vendorsDir + '/sesamath/Resultat',
-          Arbre    : vendorsDir + '/sesamath/Arbre',
-          jstreeConverter : vendorsDir + '/sesamath/tools/jstreeConverter'
-        },
-        shim :{
-          // pour jQueryUi faut charger les css, on pourrait créer un miniModule qui s'en charge pour chaque version
-          // mais c'est assez lourd, faut lui passer le chemin toussa, on laisse celui qui nous charge s'en occuper
-          jqueryUi    : {
-            init : function () {
-              w.addCss(vendorsDir +'/jqueryUi/1.11.1/jquery-ui.min.css');
-            }
-          },
-          mathjax : {
-            exports: "MathJax",
-            init: function () {
-              //MathJax.Hub.Config({ /* Your configuration here */ });
-              //MathJax.Hub.Startup.onload();
-              return MathJax;
-            }
-          }
-        }
-      };
-      // on ajoute nos plugins
-      ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "em", "j3p", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
-        requireConfig.paths[plugin] = pluginsDir +'/' +plugin +'/' +plugin;
-      });
-      w.log('la conf passée à require', requireConfig);
-      require.config(requireConfig);
-    }
+        // active la fct de log si on le demande
+        if (options.verbose) S.log.enable();
+        else S.log.disable();
 
-    /**************************************
-     * Méthodes globales
-     *
-     * On ajoute les fcts addCss, addElement, getElement en global
-     * la fct log est ajouté par init (dépend du contexte)
-     */
-
-    /**
-     * Ajoute une css dans le <head> de la page
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     * @param {string}   file              le chemin du fichier css relatif au dossier du plugin
-     * @param {boolean=} [isPluginDirRelative=false] passer true si le chemin ne doit pas être préfixé par le dossier du plugin
-     */
-    window.addCss = function (file, isPluginDirRelative) {
-      var elt = window.document.createElement("link");
-      elt.rel = "stylesheet";
-      elt.type = "text/css";
-      elt.href = (isPluginDirRelative ? pluginBaseUrl + '/' : '') + file;
-      wd.getElementsByTagName("head")[0].appendChild(elt);
-    };
-
-    /**
-     * Ajoute un élément html de type tag à parent
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     * @param {Element} parent
-     * @param {string} tag
-     * @param {Object=} attrs Les attributs
-     * @param {string=} content
-     * @returns {Element}
-     * @throws {Error} Si le parent n'est pas un Element
-     */
-    window.addElement = function (parent, tag, attrs, content) {
-      if (!parent || !parent.appendChild) throw new Error("parent n'est pas un Element");
-      var elt = w.getElement(tag, attrs, content);
-      parent.appendChild(elt);
-
-      return elt;
-    };
-
-    /**
-     * Ajoute du texte dans un élément
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     * @param elt
-     * @param text
-     */
-    window.addText = function (elt, text) {
-      elt.appendChild(wd.createTextNode(text));
-    };
-
-    /**
-     * Vide un élément html de tous ses enfants
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     * @param {Element} element
-     */
-    window.empty = function (element) {
-      if (element && element.firstChild) {
-        while(element.firstChild) element.removeChild(element.firstChild);
-      }
-    };
-
-    /**
-     * Retourne un élément html de type tag (non inséré dans le dom)
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     * @param {string} tag
-     * @param {Object=} attrs Les attributs
-     * @param {string=} txtContent
-     */
-    window.getElement = function (tag, attrs, txtContent) {
-      if (!isString(tag)) throw new Error("tag n'est pas une string " + tag);
-      var elt = wd.createElement(tag);
-      var attr;
-      if (attrs) for (attr in attrs) {
-        if (attrs.hasOwnProperty(attr)) {
-          if (attr === 'class') elt.className = attrs.class;
-          else if (attr === 'style') w.setStyles(elt, attrs.style);
-          else elt[attr] = attrs[attr];
-        }
-
-      }
-      if (txtContent) window.addText(elt, txtContent);
-
-      return elt;
-    };
-
-    /**
-     * Retourne un id qui n'existe pas encore dans le dom (mais ne le créé pas)
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     */
-    window.getNewId = (function () {
-      // une closure pour conserver la valeur de cette variable privée entre 2 appels
-      var lastId = 0;
-      return function () {
-        var id;
-        var found = false;
-        while (!found && lastId < 10000) { // au dela de 10000 id dans un dom y'a un pb !
-          found = !wd.getElementById('sesa' +lastId);
-          lastId++;
-        }
-        if (found) id = 'sesa' +lastId;
-
-        return id;
-      };
-    })();
-
-    /**
-     * Cache le titre (en global pour que les plugins puissent le faire)
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     */
-    window.hideTitle = function () {
-      try {
-        var titre = wd.getElementById('titre');
-        if (titre && titre.style) titre.style.display = "none";
-        w.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
-      } catch (e) { /* tant pis */ }
-    };
-
-    /**
-     * Un console.log qui plante pas sur les anciens IE (ou d'autres navigateurs qui n'auraient pas de console.log)
-     * Sera mis en global par init si on est en dev (sinon la fonction existera mais ne fera rien)
-     *
-     * Déclaré par init (dès son chargement) avec une fonction vide
-     * puis remplacé par celle qui bosse si init() est appelé avec options.isDev
-     * @global
-     * @param {...*} args Nombre variable d'arguments, chacun sera passé à console.log ou console.error si c'est une erreur
-     */
-    window.log = function () {};
-
-    /**
-     * Affiche un texte d'erreur dans errorsContainer (écrase l'éventuel message précédent) ET dans log.error
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     * @param {string|Error} error Le message à afficher
-     * @param {number} [delay] Un éventuel délai d'affichage en secondes
-     */
-    window.addError = function (error, delay) {
-      log.error(error);
-      var errorMsg = (error instanceof Error) ? error.toString() : error;
-      if (/^TypeError:/.test(errorMsg)) {
-        // on envoie qqchose de plus compréhensible
-        errorMsg = "Une erreur est survenue (voir la console pour les détails)";
-      }
-      if (!errorsContainer) {
-        errorsContainer = window.document.getElementById('errors') || window.document.getElementById('error') || window.document.getElementById('warnings');
-        log("errorContainer n'existait pas, on l'a recherché dans le dom", errorsContainer);
-      }
-      if (errorsContainer) {
-        // on ajoute un peu de margin à ce div s'il n'en a pas
-        if (!errorsContainer.style) errorsContainer.style = {margin : "0.2em"};
-        var errorBlock = w.addElement(errorsContainer, 'p', {class:"error"}, errorMsg);
-        if (delay) {
-          setTimeout(function () {
-            errorsContainer.remove(errorBlock);
-          }, delay *1000);
-        }
-      } else {
-        log.error(new Error("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg));
-      }
-    };
-
-    /**
-     * Affecte des styles à un élément html (on peut pas affecter elt.style directement car read only)
-     * sans planter en cas de pb (on le signale juste en console)
-     *
-     * Déclaré par init (dès son chargement)
-     * @global
-     * @param {Element} elt
-     * @param {string|object} styles
-     */
-    window.setStyles = function(elt, styles) {
-      try {
-        if (elt) {
-          if (!elt.style) elt.style = {};
-          if (typeof styles === 'string') {
-            styles = styles.split(';');
-            styles.forEach(function (paire) {
-              paire = /([\w]+):(.+)/.exec(paire);
-              if (paire && paire.length === 3) {
-                var key = paire[1];
-                elt.style[key] = paire[2];
-              }
-            });
-          } else if (typeof styles === 'object') {
-            for (var prop in styles) {
-              if (styles.hasOwnProperty(prop)) {
-                elt.style[prop] = styles[prop];
-              }
-            }
-          }
-        }
-      } catch (error) {
-        log.error(error);
-      }
-    };
-
-    // on ajoute également du forEach sur les Array si le navigateur connait pas
-    if (!Array.prototype.forEach) {
-      Array.prototype.forEach = function (fn) { // jshint ignore:line
-        for (var i = 0; i < this.length; i++) {
-          // on passe en argument (eltDuTableau, index, tableau)
-          fn(this[i], i, this);
-        }
-      };
-    }
-
-    try {
-      // deux raccourcis
-      var w = window;
-      var wd = window.document;
-      /** Le chemin racine de la sésathèque, avec slash de fin */
-      var rootPath = '/';
-      var pluginsDir = rootPath +'plugins';
-      var vendorsDir = rootPath +'vendors';
-      var pluginBaseUrl;
-      /** Le conteneur html pour afficher la ressource */
-      var container = window.document.getElementById('display');
-      /** Le conteneur html pour afficher d'éventuelles erreurs */
-      var errorsContainer = window.document.getElementById('errors');
-
-      /**
-       * Notre module js que l'on exportera, une seule fonction
-       *
-       * Initialise les chemins des librairies pour les require des plugins, ainsi que les containers html
-       * Complète options si besoin
-       * @param {initOptions} options
-       * @service init
-       */
-      var init = function (options) {
-        log('init avec les options', options);
-        if (options.sesathequeBase) {
-          rootPath = options.sesathequeBase;
-          if (rootPath.substr(-1) !== '/') rootPath += '/';
-          pluginsDir = rootPath +'plugins';
-          vendorsDir = rootPath +'vendors';
-        } else {
-          options.sesathequeBase = rootPath;
-        }
-        if (options.pluginName && !options.pluginBaseUrl) options.pluginBaseUrl = pluginsDir +'/' +options.pluginName;
-        if (!options.vendorsBaseUrl) options.vendorsBaseUrl = vendorsDir;
-        pluginBaseUrl = options.pluginBaseUrl; // pour addCss
-
-        // en dev on active la fct de log
-        if (options.isDev) {
-          w.log = log;
-          w.log.error = logError;
-        } else {
-          // en prod elle fait rien
-          w.log = function () {};
-          // mais log.error garde son comportement
-          w.log.error = logError;
-        }
         // on vérifie que l'on a nos containers et on les créé sinon
-        if (!errorsContainer) errorsContainer = w.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'errors'});
-        if (!container) container = w.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'display'});
+        /**
+         * Le conteneur html pour afficher la ressource, passé en options ou pris dans le dom si #display
+         * @type {Element}
+         */
+        var container = options.container || wd.getElementById('display');
+        /**
+         * Le conteneur html pour afficher d'éventuelles erreurs, passé en options ou pris dans le dom si #errors
+         * @type {Element}
+         */
+        var errorsContainer = options.errorsContainer || wd.getElementById('errors');
+        if (!errorsContainer) errorsContainer = S.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'errors'});
+        if (!container) container = S.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'display'});
         // et on ajoute ces deux éléments aux options
         options.container = container;
         options.errorsContainer = errorsContainer;
-        // reste la conf de require
-        initRequire();
-      };
 
-      return init;
+        // on regarde si d'autres options ont été passé en GET
+        var paramGet;
+        ["urlResultatCallback", "userOrigine", "userId"].forEach(function (param) {
+          paramGet = S.getURLParameter(param);
+          if (!options[param] && paramGet) options[param] = paramGet;
+        });
+        paramGet = S.getURLParameter("showTitle");
+        if (paramGet === "0" || paramGet === "false") options.showTitle = false;
 
-    } catch (error) {
-      if (errorsContainer) errorsContainer.innerHTML = error.toString();
-      else alert('Une erreur est survenue : ' + error.toString());
-      log(error);
-    }
+        // terminé
+        next();
+      }
+
+      try {
+        // on appelle la conf de require si ça n'a pas été fait, en cross domain si on est appelé avec sesathequeBase
+        // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
+        var base = options.sesathequeBase || "/";
+        if (base.substr(-1) !== "/") base += "/";
+        // tant que l'init a pas été fait require va chercher en relatif à la page courante, faut donc préciser en absolu
+        var initRequireName = base +"initRequire.js";
+        if (!ST.base || (options.sesathequeBase && options.sesathequeBase !== ST.base)) {
+          // jamais appelé ou on a changé de base depuis l'appel
+          require([initRequireName], function (initRequire) {
+            initRequire(base);
+            options.sesathequeBase = ST.base;
+            checkGlobal();
+          });
+        } else {
+          checkGlobal();
+        }
+      } catch (error) {
+        if (console && console.error) console.error(error);
+        // pb de chargement probable, on explicite
+        var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.sesathequeBase (" +error.toString() +")");
+        next(err);
+      }
+
+    };
   });
 }
 
 /**
+ * Options à passer à init() ou à display(), les autres propriétés seront laissées intactes
  * @typedef initOptions
- * @type {object}
- * @property {string}  [sesathequeBase=/]              Le préfixe de chemin vers la racine de la sésathèque.
- *                                                     Il faut passer un chemin http:// complet si ce module est utilisé sur un autre domaine que la sésathèque)
- * @property {string}  [pluginBaseUrl=plugins/$plugin] Le dossier du plugin concerné (pour qu'il puisse ajouter ses médias)
- * @property {string}  [vendorsBaseUrl=vendors]        Le dossier de base vendors
- * @property {string}  pluginName                      Le nom du plugin
- * @property {Element} container                       L'élément html qui servira de conteneur au plugin pour afficher sa ressource
- * @property {Element} errorsContainer                 L'élément html pour afficher des erreurs éventuelles
- * @property {boolean} [isDev=false]                   Passer true pour ajouter des log en console
+ * @type {Object}
+ * @property {string}  [sesathequeBase=/] Le préfixe de chemin vers la racine de la sésathèque.
+ *                                        Il faut passer un chemin http://… complet si ce module est utilisé sur un autre domaine que la sésathèque
+ *                                        Inutile si l'info a déjà été donnée à requireConfig avant
+ * @property {Element} [container]        L'élément html qui servira de conteneur au plugin pour afficher sa ressource, créé si non fourni
+ * @property {Element} [errorsContainer]  L'élément html pour afficher des erreurs éventuelles, créé si non fourni
+ * @property {boolean} [verbose=false]      Passer true pour ajouter des log en console
  */
+
+/**
+ * Options à passer à une méthode display d'un plugin
+ * @typedef displayOptions
+ * @type {Object}
+ * @property {string}           sesathequeBase        Le préfixe de chemin vers la racine de la sésathèque (chemin http absolu en cas d'appel d'un autre domaine)
+ * @property {string}           pluginBase            Le préfixe de chemin vers le dossier du plugin (mis par display)
+ * @property {Element}          container             L'élément html qui servira de conteneur au plugin pour afficher sa ressource
+ * @property {Element}          errorsContainer       L'élément html pour afficher des erreurs éventuelles
+ * @property {boolean}          [verbose=false]       Passer true pour ajouter des log en console
+ * @property {boolean}          [isDev=false]         Passer true pour initialiser le dom source en devsesamath (pour certains plugins)
+ * @property {string}           [urlResultatCallback] Une url vers laquelle poster le résultat (idem si la page de la ressource contient ?urlScoreCallback=http…)
+ * @property {resultatCallback} [resultatCallback]    Une fonction pour recevoir un objet Resultat (si y'a pas de urlScoreCallback)
+ * @property {string}           [sesatheque]          Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page),
+ *                                                      le nom de la sésathèque pour un client qui récupère des résultats de plusieurs sésatheques
+ * @property {boolean}          [showTitle=true]      Passer "0" ou "false" via l'url ou false via options pour cacher le titre
+ * @property {string}           [userOrigine]         Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
+ * @property {string}           [userId]              Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
+ * @property {object}           [flashvars]           Pour les plugins qui chargent du swf, sera passé en flashvars en plus
+ */
+
+/**
+ * @callback resultatCallback
+ * @param {Resultat} Un objet Resultat
+ */
+
+/**
+ * Un élément du Dom HTML
+ * @typedef Element
+ * @type {Object}
+ * @see https://developer.mozilla.org/fr/docs/Web/API/Element
+ */
+

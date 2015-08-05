@@ -29,102 +29,96 @@
  * pour une explication en français)
  */
 
-/**
- * Tous les plugins doivent exporter les méthodes display et showResult
- */
+try {
+  define(['tools/swf'], function (swf) {
+    'use strict';
 
-/**
- * Tout le reste est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
- *
- * this est ce module (donc on a this.display et this.showResult), avec dans notre scope les variables
- * {Function}    require         : pour charger d'autres modules ou d'autres scripts js
- * {Function}    log             : un console.log qui ne plantera pas sur les vieux IE
- *                                 et accepte un éventuel objet un 2e argument
- * {Function}    addCss          : ajoute une css dans le head de la page
- *                                 (lui passer le fichier relativement à ce dossier)
- * {Element} container       : le conteneur pour affichage
- * {Element} errorsContainer : un conteneur pour afficher d'éventuelles erreurs
- * {String}      baseUrl         : le préfixe vers ce dossier à utiliser dans d'éventuels href
- *                                 (pour des médias ou autres fichiers à charger)
- * {Object}      window          : l'objet window
- *
- * et aussi
- * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
- */
-/*global define, log */
+    /**
+     * Plugin am pour les aides mathenpoche (animations flash, sans réponse de l'élève)
+     * S'il est appelé directement sans passer par le module display, il faut appeler init avant
+     * @plugin am
+     */
+    var am = {};
 
-define(['sesaswf'], function (sesaswf) {
-  'use strict';
-  /** @plugin am */
-  var am = {};
+    /**
+     * Le moment où la ressource a été chargée
+     * @private
+     */
+    var startDate;
 
-  /**
-   * Le moment où ce module a été chargé dans le navigateur
-   * @private
-   */
-  var startDate = new Date();
-  
-  var ressOid;
-  
-  function getResultat() {
-    return {
-      ressType : 'am',
-      ressOid:ressOid,
-      date:startDate,
-      duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-      score : 1
-    };
-  }
+    var ressOid;
 
+    // raccourcis, si ça plante le catch gère
+    var S = window.Sesamath;
 
-  /**
-   * Affiche une ressource am
-   * @param {Ressource} ressource  L'objet ressource (sans forcément son prototype)
-   * @param {Object}    options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                               et éventuellement resultCallback)
-   * @param {Function}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
-   */
-  am.display = function (ressource, options, next) {
-    var baseSwf, swfUrl, swfOpt;
-    var container = options.container;
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+    /**
+     * Affiche une ressource am
+     * @memberOf am
+     * @param {Ressource}      ressource  L'objet ressource
+     * @param {displayOptions} options    Les options après init
+     * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
+     */
+    am.display = function (ressource, options, next) {
+      var baseSwf, swfUrl, swfOpt;
+      var container = options.container;
+      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
 
-    // on enverra le résultat à la fermeture
-    if (options.resultCallback && container.addEventListener) {
-      container.addEventListener('unload', function () {
-        var resultat = getResultat();
-        options.resultCallback(resultat);
+      // on enverra le résultat à la fermeture (si y'a eu un chargement, startDate sert de flag)
+      if (options.resultatCallback && container.addEventListener && startDate) {
+        container.addEventListener('unload', function () {
+          var resultat = {
+            ressType: 'am',
+            ressId: ressource.oid,
+            date: startDate,
+            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
+            score: 1
+          };
+          if (options.sesatheque) resultat.sesatheque = options.sesatheque;
+          options.resultatCallback(resultat);
+        });
+      }
+      var params = ressource.parametres;
+
+      S.log('start am display avec la ressource', ressource);
+      //les params minimaux
+      if (!ressource.oid || !ressource.titre || !params) {
+        throw new Error("Paramètres manquants");
+      }
+      // init de ressOid en global à ce module (pour les appels ultérieurs de getResultat)
+      ressOid = ressource.oid;
+
+      // On réinitialise le conteneur
+      S.empty(container);
+
+      // notre base (si ça vient pas de l'interface de développement des exo mathenpoche
+      // faudra le préciser via ressource.parametres.baseUrl)
+      if (ressource.origine !== 'am' && ressource.parametres.baseUrl) baseSwf = ressource.parametres.baseUrl;
+      else baseSwf = "http://mep-col.sesamath.net/dev/aides/" + (params.mep_langue_id ? params.mep_langue_id : 'fr');
+      // url du swf
+      swfUrl = baseSwf + '/aide' + ressource.idOrigine + ".swf";
+      // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
+      container.setAttribute("width", 735);
+      container.style.width = '735px';
+
+      swfOpt = {
+        base: baseSwf + "/",
+        largeur: 735,
+        hauteur: 450
+      };
+      swf.load(container, swfUrl, swfOpt, function (error) {
+        if (error) next(error);
+        else {
+          startDate = new Date();
+          next();
+        }
       });
-    }
-    var params = ressource.parametres;
-
-    log('start am display avec la ressource', ressource)
-    //les params minimaux
-    if (!ressource.oid || !ressource.titre || !params) {
-      throw new Error("Paramètres manquants");
-    }
-    // init de ressOid en global à ce module (pour les appels ultérieurs de getResultat)
-    ressOid = ressource.oid;
-
-    // On réinitialise le conteneur
-    container.innerHTML = '';
-
-    // notre base
-    if (ressource.origine !== 'am' && ressource.baseUrl) baseSwf =  ressource.baseUrl;
-    else baseSwf = "http://mep-col.sesamath.net/dev/aides/" +(params.mep_langue_id ? params.mep_langue_id : 'fr');
-    // url du swf
-    swfUrl = baseSwf +'/aide' +ressource.idOrigine +".swf";
-    // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    container.setAttribute("width", 735);
-    container.style.width = '735px';
-
-    swfOpt = {
-      base    : baseSwf + "/",
-      largeur : 735,
-      hauteur : 450
     };
-    sesaswf.load(container, swfUrl, swfOpt, next);
-  };
-  
-  return am;
-});
+
+    return am;
+  });
+} catch (error) {
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
+  }
+}

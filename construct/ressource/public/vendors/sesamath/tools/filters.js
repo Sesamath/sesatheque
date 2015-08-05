@@ -37,7 +37,7 @@
 
 /* global define, module*/
 
-var filters = {}
+var filters = {};
 
 /**
  * Retourne le tableau passé en argument ou un tableau vide si l'argument n'était pas un Array
@@ -46,7 +46,7 @@ var filters = {}
  */
 filters.array = function (arg) {
   return (arg instanceof Array) ? arg : [];
-}
+};
 
 /**
  * Retourne le tableau passé en argument ou un tableau vide si l'argument n'était pas un Array
@@ -55,15 +55,15 @@ filters.array = function (arg) {
  * @returns {Array}
  */
 filters.arrayInt = function (arg) {
-  arg = filters.array(arg)
+  arg = filters.array(arg);
   // IE < 9 connait pas filter
   if (arg.filter) {
     arg = arg.filter(function (elt) {
       return (parseInt(elt, 10) === elt && elt > -1);
-    })
+    });
   }
   return arg;
-}
+};
 
 /**
  * Retourne le tableau passé en argument ou un tableau vide si l'argument n'était pas un Array
@@ -72,12 +72,12 @@ filters.arrayInt = function (arg) {
  * @returns {Array}
  */
 filters.arrayString = function (arg) {
-  arg = filters.array(arg)
+  arg = filters.array(arg);
   // IE < 9 connait pas filter
   if (arg.filter) {
     arg = arg.filter(function (elt) {
       return (typeof elt === 'string');
-    })
+    });
   }
   return arg;
 }
@@ -91,10 +91,10 @@ filters.arrayString = function (arg) {
 filters.int = function (arg) {
   var int = 0;
   if (typeof arg === 'string') int = parseInt(arg, 10);
-  else if (typeof arg === 'number') int = Math.floor(arg)
+  else if (typeof arg === 'number') int = Math.floor(arg);
   if (int < 1 || int != arg) int = 0;
-  return int
-}
+  return int;
+};
 
 /**
  * Retourne un objet Date (on tente un cast si on nous fourni une string ou un entier) ou undefined
@@ -105,8 +105,8 @@ filters.date = function (arg) {
   var retour;
   if (arg instanceof Date) retour = arg;
   else if (arg && (typeof arg === 'string' || typeof arg === 'number')) retour = new Date(arg);
-  return retour
-}
+  return retour;
+};
 
 /**
  * Retourne la chaine passée en argument ou une chaine vide
@@ -119,10 +119,10 @@ filters.string = function (arg) {
   if (typeof arg === 'string') retour = arg;
   else if (arg) {
     retour = String(arg);
-    if (retour === 'undefined' || retour === '[object Object]') retour = ''
+    if (retour === 'undefined' || retour === '[object Object]') retour = '';
   }
   return retour;
-}
+};
 
 // suivant que l'on est coté serveur ou client
 if (typeof define === 'function') define(filters);

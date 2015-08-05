@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -u
+
+dirInitial="$PWD"
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  local exitCode=${1:-0}
+  echo "Compile les js clients avec l'optimiseur requirejs"
+  exit $exitCode
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+[ "${1:-}" == "-h" -o "${1:-}" == "--help" ] && usage
+
+cd $(dirname $0)/../
+dirApp=$PWD
+
+uglifyjs node_modules/requirejs/require.js construct/ressource/public/plugins/requireConfig.js --compress --mangle > construct/static/public/vendors/requirejs/require.min.js

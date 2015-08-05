@@ -36,11 +36,14 @@
 define(function () {
   "use strict";
   /* global define, window */
+  // raccourcis, si ça plante le catch gère
+  var S = window.Sesamath;
 
   /**
-   * Retourne une seule fonction qui affectera les comportements d'interface avec la gestion des étapes
+   * Retourne une seule fonction qui affectera les comportements de l'interface avec la gestion des étapes pour les ressources url
+   * @service urlUi
    * @param {Ressource} ressource
-   * @param {object}    options
+   * @param {Object}    options
    * @param {function}  next
    */
   return function (ressource, options, next) {
@@ -84,7 +87,7 @@ define(function () {
             if (hasTexConsigne) {
               // @see https://groups.google.com/forum/#!topic/mathjax-users/v6nVeANKihs
               // http://docs.mathjax.org/en/latest/queues.html
-              log("open consigne");
+              S.log("open consigne");
               MathJax.Hub.Queue(["Typeset", MathJax.Hub, "consigne"]);
             }
             $lienConsigne.css('font-weight', 'normal');
@@ -112,6 +115,7 @@ define(function () {
 
       /**
        * Charge les éventuelles dépendances avant d'appeler next
+       * @private
        * @param next
        */
       function loadDependencies(next) {
@@ -136,6 +140,7 @@ define(function () {
 
       /**
        * Construit la liste des étapes d'après les options
+       * @private
        */
       function setEtapes() {
         /**
@@ -158,7 +163,7 @@ define(function () {
         var answer_option = ressource.parametres.answer_option || "off";
 
         /** Le html du lien suivant */
-        var lienSuivant = w.getElement("img", {
+        var lienSuivant = S.getElement("img", {
           class: 'lienSuivant',
           src: prefixUrl + '/images/forward.png',
           align: 'absmiddle',
@@ -240,9 +245,10 @@ define(function () {
 
       /**
        * Réactualise l'affichage
+       * @private
        */
       function showEtape() {
-        log("showEtape");
+        S.log("showEtape");
         var i;
         // on ferme tout
         reponse.desactiver();
@@ -252,7 +258,7 @@ define(function () {
         // active les elts de l'etape en cours
         var etape = etapes.liste[etapes.currentIndex];
         for (i = 0; i < etape.length; i++) {
-          //log("active " +i +' ' +etapes.titres[i], etape[i]);
+          //S.log("active " +i +' ' +etapes.titres[i], etape[i]);
           etape[i].activer();
         }
 
@@ -264,10 +270,10 @@ define(function () {
           $filariane.append("Étape " + (i+1) + " : " + etapes.titres[i] + ' >> ');
         }
         // ajout titre courant
-        $filariane.append("Étape " + (c + 1) + " : ").append(w.getElement('span', {class: 'highlight'}, etapes.titres[c]));
+        $filariane.append("Étape " + (c + 1) + " : ").append(S.getElement('span', {class: 'highlight'}, etapes.titres[c]));
         // titre suivant éventuel
         if (etapes.hasNext()) {
-          var lienSuivant = w.getElement("img", {
+          var lienSuivant = S.getElement("img", {
             class: 'lienSuivant',
             src: prefixUrl + '/images/forward.png',
             align: 'absmiddle',
@@ -278,15 +284,14 @@ define(function () {
         }
       } // showEtape
 
-      var w = window;
-
       if (!ressource || !ressource.parametres || !ressource.parametres.adresse) throw new Error("ressource manquante ou incomplète");
-      log('urlUi avec ', ressource.parametres, options);
+      S.log('urlUi avec ', ressource.parametres, options);
       /**
        * Editeur à utiliser pour la réponse
        *   textarea : un textarea tout simple
        *   ckeditor : ckeditor en version standard
        *   ckeditorTex : ckeditor avec le plugin mathjax
+       * @private
        * @type {string}
        */
       var answer_editor = ressource.parametres.answer_editor || "textarea";
@@ -310,11 +315,11 @@ define(function () {
         }
       };
 
-      /**
+      /*
        * Nos 4 éléments qui peuvent entrer dans une étape
        */
 
-      /** La page en iframe, ou div si swf */
+      /* La page en iframe, ou div si swf */
       var page = {
         activer: function () {
           $page.show();
@@ -324,7 +329,7 @@ define(function () {
         }
       };
 
-      /** objet pour la fenêtre modale information */
+      /* objet pour la fenêtre modale information */
       var information = {
         activer: function () {
           $information.dialog('open');
@@ -342,7 +347,7 @@ define(function () {
         }
       };
 
-      /** objet pour la fenêtre modale consigne */
+      /* objet pour la fenêtre modale consigne */
       var consigne = {
         activer: function () {
           $consigne.dialog('open');
@@ -390,7 +395,7 @@ define(function () {
       loadDependencies(function () {
         init();
         setEtapes();
-        log("les etapes", etapes);
+        S.log("les etapes", etapes);
         showEtape();
         next();
       });

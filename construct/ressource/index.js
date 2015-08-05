@@ -33,7 +33,7 @@
 /*global lassi*/
 
 /**
- * @file Composant de gestion des ressources
+ * Composant de gestion des ressources
  */
 var ressourceComponent = lassi.component('ressource')
 

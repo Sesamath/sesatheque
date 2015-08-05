@@ -32,7 +32,7 @@
 'use strict'
 
 /**
- * @file service $auth, pour centraliser l'authentification (chaque module d'authentification devra y inscrire son client)
+ * service $auth, pour centraliser l'authentification (chaque module d'authentification devra y inscrire son client)
  */
 
 var _ = require('lodash')

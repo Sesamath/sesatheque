@@ -29,107 +29,92 @@
  * pour une explication en français)
  */
 
-/**
- * Tous les plugins doivent exporter les méthodes display et showResult
- */
+try {
+  define(function () {
+    'use strict';
+    /**
+     * module pour afficher les ressources coll_doc (atome de manuel ou cahier)
+     * @plugin coll_doc
+     */
+    var coll_doc = {};
 
-/**
- * Tout le reste est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
- *
- * this est ce module (donc on a this.display et this.showResult), avec dans notre scope les variables
- * {Function}    require         : pour charger d'autres modules ou d'autres scripts js
- * {Function}    log             : un console.log qui ne plantera pas sur les vieux IE
- *                                 et accepte un éventuel objet un 2e argument
- * {Function}    addCss          : ajoute une css dans le head de la page
- *                                 (lui passer le fichier relativement à ce dossier)
- * {Element} container       : le conteneur pour affichage
- * {Element} errorsContainer : un conteneur pour afficher d'éventuelles erreurs
- * {String}      baseUrl         : le préfixe vers ce dossier à utiliser dans d'éventuels href
- *                                 (pour des médias ou autres fichiers à charger)
- * {Object}      window          : l'objet window
- *
- * et aussi
- * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
- */
-/*global define, log */
+    // raccourcis, si ça plante le catch gère
+    var S = window.Sesamath;
 
-define(function () {
-  'use strict';
-  /** notre module exporté avec sa méthode display */
-  var coll_doc = {};
+    /* Le moment où ce module a été chargé dans le navigateur */
+    var startDate = new Date();
 
-  /** Le moment où ce module a été chargé dans le navigateur */
-  var startDate = new Date();
-  
-  var baseCollDoc = "http://ressources.sesamath.net";
-  
-  function getResultat() {
-    return {
-      ressType : 'coll_doc',
-      ressOid:ressOid,
-      date:startDate,
-      duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-      score : 1
+    var baseCollDoc = "http://ressources.sesamath.net";
+
+    /**
+     * Affiche la ressource dans l'élément d'id mepRess
+     * @memberOf coll_doc
+     * @param {Ressource}      ressource  L'objet ressource
+     * @param {displayOptions} options    Les options après init
+     * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé (sans argument ou avec une erreur)
+     */
+    coll_doc.display = function (ressource, options, next) {
+      var container = options.container;
+      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+
+      // on enverra le résultat à la fermeture
+      if (options.resultatCallback && container.addEventListener) {
+        container.addEventListener('unload', function () {
+          var resultat = {
+            ressType: 'coll_doc',
+            ressId: ressource.oid,
+            date: startDate,
+            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
+            score: 1
+          };
+          if (options.sesatheque) resultat.sesatheque = options.sesatheque;
+          options.resultatCallback(resultat);
+        });
+      }
+
+      S.log('start coll_doc display avec la ressource', ressource);
+      //les params minimaux
+      if (!ressource.oid || !ressource.titre || !ressource.parametres) {
+        throw new Error("Paramètres manquants");
+      }
+      var url;
+      try {
+        url = ressource.parametres.url || ressource.parametres.files[0].uri;
+      } catch (error) {
+        S.log.error(error);
+        throw new Error("Il manque l'adresse de cette ressource dans ses paramètres");
+      }
+      // On réinitialise le conteneur
+      S.empty(container);
+      if (ressource.parametres.url) {
+        // on affiche le lecteur d'origine
+        S.addElement(container, 'iframe', {src: url, style: "width:100%;height:100%", onload: next});
+      } else if (url) {
+        // on affiche les lien de téléchargement
+        var msg;
+        if (ressource.parametres.files.length > 1) msg = "Fichiers composant la ressource";
+        else msg = "Voici le lien pour télécharger la ressource";
+        var ul = S.addElement(container, 'ul', null, msg);
+        ressource.parametres.files.forEach(function (file) {
+          var li = S.addElement(ul, 'li');
+          if (file.uri) {
+            url = baseCollDoc + file.uri;
+            var pos = file.uri.lastIndexOf('/');
+            var name = file.uri.substr(pos + 1);
+            S.addElement(li, 'a', {href: url}, name);
+          } else {
+            S.addElement(li, 'span', {class: "error"}, "Url manquante");
+          }
+        });
+        next();
+      }
     };
+
+    return coll_doc;
+  });
+} catch (error) {
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
   }
-
-
-  /**
-   * Affiche la ressource dans l'élément d'id mepRess
-   * @param {Ressource} ressource  L'objet ressource (sans forcément son prototype)
-   * @param {Object}    options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                               et éventuellement resultCallback)
-   * @param {Function}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
-   */
-  coll_doc.display = function (ressource, options, next) {
-    var container = options.container;
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
-
-    // on enverra le résultat à la fermeture
-    if (options.resultCallback && container.addEventListener) {
-      container.addEventListener('unload', function () {
-        var resultat = getResultat();
-        options.resultCallback(resultat);
-      });
-    }
-
-    log('start coll_doc display avec la ressource', ressource);
-    //les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres) {
-      throw new Error("Paramètres manquants");
-    }
-    var url
-    try {
-      url = ressource.parametres.url ||  ressource.parametres.files[0].uri;
-    } catch (error) {
-      log.error(error);
-      throw new Error("Il manque l'adresse de cette ressource dans ses paramètres");
-    }
-    // On réinitialise le conteneur
-    window.empty(container);
-    if (ressource.parametres.url) {
-      // on affiche le lecteur d'origine
-      window.addElement(container, 'iframe', {src:url, style:"width:100%;height:100%", onload:next});
-    } else if (url) {
-      // on affiche les lien de téléchargement
-      var msg;
-      if (ressource.parametres.files.length > 1) msg = "Fichiers composant la ressource";
-      else msg = "Voici le lien pour télécharger la ressource";
-      var ul = window.addElement(container, 'ul', null, msg);
-      ressource.parametres.files.forEach(function (file) {
-        var li = window.addElement(ul, 'li');
-        if (file.uri) {
-          url = baseCollDoc +file.uri;
-          var pos = file.uri.lastIndexOf('/');
-          var name = file.uri.substr(pos +1);
-          window.addElement(li, 'a', {href:url}, name);
-        } else {
-          window.addElement(li, 'span', {class:"error"}, "Url manquante");
-        }
-      });
-      next();
-    }
-  };
-  
-  return coll_doc;
-});
+}

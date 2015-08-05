@@ -35,52 +35,63 @@
  * Cf ../README.md pour plus d'info sur l'écriture de plugins
  */
 
-/*global define, log, addCss, window */
+try {
+  define(['head'], function () {
+    'use strict';
 
-//define(['jquery171', 'jqueryUi18c'], function () {
-// faudra ajouter le css au début de display
-define(['head'], function () {
-  'use strict';
+    /**
+     * Module pour afficher les ressources j3p (js)
+     * @plugin j3p
+     */
+    var j3p = {};
 
-  /** notre module exporté avec sa méthode display */
-  var j3p = {};
+    // raccourcis, si ça plante le catch gère
+    var S = window.Sesamath;
+    var ST = S.Sesatheque;
 
-  var urlBaseJ3p = "http://j3p.sesamath.net";
+    var urlBaseJ3p = "http://j3p.sesamath.net";
 
-  /**
-   * Affiche la ressource dans l'élément d'id mepRess
-   * @param {Object}   ressource  L'objet ressource tel qu'il sort de la bdd
-   * @param {Object}   opt        Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                              et éventuellement resultCallback)
-   * @param {Function} next       La fct à appeler quand la ressource sera chargée (sans argument ou avec une erreur)
-   */
-  j3p.display = function (ressource, opt, next) {
-    log('j3p.display avec ressource et options', ressource, opt);
-    //les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
-      throw new Error("Ressource incomplète");
-    if (!opt.baseUrl || !opt.container || !opt.errorsContainer) throw new Error("Paramètres manquants");
+    /**
+     * Affiche la ressource dans l'élément d'id mepRess
+     * @memberOf j3p
+     * @param {Ressource}      ressource  L'objet ressource
+     * @param {displayOptions} options    Les options après init
+     * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
+     */
+    j3p.display = function (ressource, options, next) {
+      S.log('j3p.display avec ressource et options', ressource, options);
+      //les params minimaux
+      if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
+        throw new Error("Ressource incomplète");
+      if (!options.baseUrl || !options.container || !options.errorsContainer) throw new Error("Paramètres manquants");
 
-    // le domaine où prendre les js j3p
-    if (opt.isDev) {
-      urlBaseJ3p = 'http://j3p.devsesamath.net';
-    }
-
-    // et on délègue tout le reste
-    require([urlBaseJ3p + '/outils/loader.js'], function (loader) {
-      // on cache le titre
-      window.hideTitle();
-      // on lui donne nos params
-      loader.init({urlBaseJ3p:urlBaseJ3p, log:log});
-      var j3pOptions = {};
-      if (opt.saveResultat) {
-        // j3p veut un nom de fct qui existe en global dans son dom
-        window.saveResultat = opt.saveResultat;
-        j3pOptions.nomFctScore = 'saveResultat';
+      // le domaine où prendre les js j3p
+      if (options.isDev) {
+        urlBaseJ3p = 'http://j3p.devsesamath.net';
       }
-      loader.charge(opt.container, ressource.parametres.g, j3pOptions);
-    });
-  };
 
-  return j3p;
-});
+      // et on délègue tout le reste
+      require([urlBaseJ3p + '/outils/loader.js'], function (loader) {
+        // on cache toujours le titre
+        ST.hideTitle();
+        // on lui donne nos params
+        loader.init({urlBaseJ3p: urlBaseJ3p, log: S.log});
+        var j3pOptions = {};
+        if (options.resultatCallback) {
+          // j3p veut un nom de fct qui existe en global dans son dom
+          window.resultatCallback = options.resultatCallback;
+          j3pOptions.nomFctScore = 'resultatCallback';
+        }
+        loader.charge(options.container, ressource.parametres.g, j3pOptions);
+        next(); // le chargement sera pas terminé mais le loader propose pas de callback
+      });
+    };
+
+    return j3p;
+  });
+} catch (error) {
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
+  }
+}

@@ -39,14 +39,7 @@
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
   if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
-  /**
-   * Espace de nom global pour sesatheque
-   * @namespace sesatheque
-   */
-  if (typeof window.sesatheque === "undefined") window.sesatheque = {};
 
-  /** Raccourci pour window.document */
-  var wd = window.document;
   /**
    * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
    * Exporte 3 méthodes,
@@ -123,6 +116,7 @@
   } else if (typeof module === 'object' && module.exports) {
     module.exports = emResult;
   } else {
+    if (typeof window.sesatheque === "undefined") window.sesatheque = {};
     window.sesatheque.emResult = emResult;
   }
 

@@ -41,17 +41,17 @@
   /**
    * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
    * Exporte pour requireJs (si define existe) ou en module amd (si on a module.exports)
-   * @service urlResult
+   * @service atoResult
    */
-  var urlResult = {};
+  var atoResult = {};
 
   /**
    * Retourne le code html qui affiche le bilan (ici la durée d'affichage)
-   * @memberOf urlResult
+   * @memberOf atoResult
    * @param {Resultat} resultat L'objet Resultat dont on veut le bilan
    * @returns {string} Le code html
    */
-  urlResult.getHtmlReponse = function (resultat) {
+  atoResult.getHtmlReponse = function (resultat) {
     var output = "";
     // pour url on a pas de resultat.reponse, seule la durée peut servir
     if (resultat.duree > 0) {
@@ -68,30 +68,30 @@
   };
 
   /**
-   * Retourne le code html qui affiche le score
-   * @memberOf urlResult
-   * @returns {string} Le code html (ici la string "affiché")
+   * Retourne le code html qui affiche le score (ici "affiché")
+   * @memberOf atoResult
+   * @param {Resultat} resultat
+   * @returns {string} Le code html
    */
-  urlResult.getHtmlScore = function () {
+  atoResult.getHtmlScore = function () {
     return "affiché";
   };
 
   /**
    * Affiche score et réponse dans un Element
-   * @memberOf urlResult
+   * @memberOf atoResult
    * @param resultat
    * @param element
    */
-  urlResult.showResult = function (resultat, element) {
-    var html = urlResult.getHtmlReponse(resultat);
+  atoResult.showResult = function (resultat, element) {
+    var html = atoResult.getHtmlReponse(resultat);
     element.addChild(wd.createTextNode(html));
   };
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
   if (typeof define === 'function') {
-    define(urlResult); // jshint ignore:line
+    define(atoResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
-    module.exports = urlResult;
+    module.exports = atoResult;
   }
-
 })();

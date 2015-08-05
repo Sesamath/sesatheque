@@ -30,16 +30,13 @@
  */
 "use strict";
 
-/**
- * @file Format d'une Ref, référence à une ressource, pouvant être utilisé comme enfant d'un arbre
- */
-
-/* global define, module*/
-
 // suivant que l'on est coté serveur ou client
-if (typeof define === 'function') define(Ref);
+if (typeof define === 'function') define(function () {return Ref;});
 else if (typeof module === 'object') module.exports = Ref;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
+// pas trouvé comment documenté correctement un constructeur dans une fonction anonyme auto-exécutée…
+
+/* global define, module*/
 
 /**
  * Définition d'une référence à une ressource, que l'on peut rencontrer dans les feuilles d'un arbre
@@ -47,13 +44,13 @@ else if (typeof module === 'object') module.exports = Ref;
  * @constructor
  */
 function Ref(initObj) {
-  if (! initObj instanceof Object) initObj = {}
+  if (!initObj instanceof Object) initObj = {}
   /**
    * L'oid de la ressource que l'on référence
    * @type {number}
    */
   this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
-  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine +'/' +initObj.idOrigine
+  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine
   /**
    * Le nom
    * @type {string}

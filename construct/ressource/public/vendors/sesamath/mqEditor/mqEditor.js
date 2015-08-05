@@ -29,22 +29,17 @@
  * pour une explication en français)
  */
 
-'use strict'
-
 define(["jquery1", "mathquill"], function () {
+  'use strict';
   /**
    * Ajoute un bouton (et son comportement)
+   * @private
    * @param button
    */
   function addButton(button) {
-    var attrs = {
-      type: "button",
-      class: "mqButton" /*,
-      style: "background-image: url('" + basePath + "images/" + button + ".png');" */
-    }
-    var btn = w.addElement(buttons, 'button', {class: "mqButton", onclick:function () {return false;}});
-    w.addElement(btn, 'img', {src:basePath + "images/" + button + ".png", alt:mqLabel[button]});
-    log("Ajout bouton " +button, btn);
+    var btn = S.addElement(buttons, 'button', {class: "mqButton", onclick:function () {return false;}});
+    S.addElement(btn, 'img', {src:basePath + "images/" + button + ".png", alt:mqLabel[button]});
+    S.log("Ajout bouton " +button, btn);
     btn.addEventListener('click', function () {
       if (typeof mqExpr[button] === "string") {
         // une seule commande
@@ -59,116 +54,138 @@ define(["jquery1", "mathquill"], function () {
 
       } else {
         // inconnu
-        log.error(button +" n'est pas un bouton connu");
+        S.log.error(button +" n'est pas un bouton connu");
       }
     });
   }
-
-  var w = window;
-  var $ = w.jQuery;
-  var wd = w.document;
-  /** {Element} Le conteneur global */
-  var container;
-  /** {Element} Le div des boutons */
-  var buttons;
-  /** {Element} Le textarea */
-  var textarea;
-  // les même en objets jquery
-  var $container, $buttons, $textarea;
-  // le chemin vers ce dossier, avec slash de fin
-  var basePath;
-  /** expressions mathquill, une string (cmd) ou un tableau de tableaux (chacun passé à mathquill.apply) */
-  var mqExpr = {
-    equivaut: '\\iff',
-    exponentielle: [
-      ['write', 'e'],
-      ['cmd', '^']
-    ],
-    fraction: '\\frac',
-    infEgal: '\\leq',
-    infini: '\\infty',
-    inter: '\\cap',
-    pi: '\\pi',
-    puissance: '^',
-    racine: '\\sqrt',
-    supEgal: '\\geq',
-    union: '\\cup',
-    vide:'\\emptyset'
-  };
-  var mqLabel = {
-    equivaut: 'équivaut',
-    exponentielle: 'exponentielle',
-    fraction: 'fraction',
-    infEgal: 'inférieur ou égal',
-    infini: 'infini',
-    inter: 'intersection',
-    pi: 'Pi',
-    puissance: 'puissance',
-    racine: 'racine carrée',
-    supEgal: 'supérieur ou égal',
-    union: 'union',
-    vide:'ensemble vide'
-  };
-  var isInitDone = false;
-
-  if (typeof w.log === undefined) w.log = function () {};
-
+  
   try {
+    var w = window;
+    var $ = w.jQuery;
+    var wd = w.document;
+    // raccourcis, si ça plante le catch gère
+    var S = window.Sesamath;
+
+    /** expressions mathquill, une string (cmd) ou un tableau de tableaux (chacun passé à mathquill.apply) */
+    var mqExpr = {
+      equivaut: '\\iff',
+      exponentielle: [
+        ['write', 'e'],
+        ['cmd', '^']
+      ],
+      fraction: '\\frac',
+      infEgal: '\\leq',
+      infini: '\\infty',
+      inter: '\\cap',
+      pi: '\\pi',
+      puissance: '^',
+      racine: '\\sqrt',
+      supEgal: '\\geq',
+      union: '\\cup',
+      vide:'\\emptyset'
+    };
+    var mqLabel = {
+      equivaut: 'équivaut',
+      exponentielle: 'exponentielle',
+      fraction: 'fraction',
+      infEgal: 'inférieur ou égal',
+      infini: 'infini',
+      inter: 'intersection',
+      pi: 'Pi',
+      puissance: 'puissance',
+      racine: 'racine carrée',
+      supEgal: 'supérieur ou égal',
+      union: 'union',
+      vide:'ensemble vide'
+    };
+    var isInitDone = false;
 
     /**
-     * Fonction a qui on doit passer un container et une conf,
-     * avec options.vendorsBaseUrl si on est sur un autre domaine que celui de la sesatheque
+     * Service pour insérer du mathquill
+     * @service mqEditor
      */
-    return {
-      init: function (ctn, config, options, next) {
-        // nos éléments html de base
-        if (!ctn) ctn = wd.getElementById('mqEditor');
-        if (ctn) container = ctn;
-        else throw new Error("Il faut fournir un container ou avoir un élément mqEditor dans la page");
-        buttons = wd.getElementById("mqButtons");
-        if (!buttons) buttons = w.addElement(container, 'div', {id: "mqButtons"});
-        var txt = container.getElementsByTagName('textarea');
-        if (txt) textarea = txt[0];
-        else textarea = w.addElement(container, 'textarea');
-        // init de nos objets jquery
-        $container = $(container);
-        $buttons = $(buttons);
-        $textarea = $(textarea);
+    var mqEditor = {};
 
-        // la conf
-        var defaultConfig = {
-          fraction: true,
-          infEgal: true,
-          pi: true,
-          puissance: true,
-          racine: true,
-          supEgal: true
+    // objets jquery, initialisé par init, globaux à ce module
+    var $wqContainer, $buttons, $textarea;
+
+    /**
+     * Initialise MathQuill dans wqContainer (le crée dans options.container sinon)
+     * @memberOf mqEditor
+     * @param wqContainer
+     * @param {object}         [config] Éventuelle config pour mathquill, sinon ce sera la conf par défaut
+     * @param {displayOptions} options
+     * @param {errorCallback}  next
+     */
+    mqEditor.init = function (wqContainer, config, options, next) {
+      // nos éléments html de base
+      if (!wqContainer) wqContainer = wd.getElementById('mqEditor');
+      if (!wqContainer) wqContainer = S.addElement(options.container, 'div', {id:"mqEditor"});
+      var buttons = wd.getElementById("mqButtons"),
+          textarea;
+      if (!buttons) buttons = S.addElement(wqContainer, 'div', {id: "mqButtons"});
+      var txt = wqContainer.getElementsByTagName('textarea');
+      if (txt) textarea = txt[0];
+      else textarea = S.addElement(wqContainer, 'textarea');
+      // init de nos objets jquery
+      $wqContainer = $(wqContainer);
+      $buttons = $(buttons);
+      $textarea = $(textarea);
+
+      // la conf
+      var defaultConfig = {
+        fraction: true,
+        infEgal: true,
+        pi: true,
+        puissance: true,
+        racine: true,
+        supEgal: true
+      };
+      if (!config) config = defaultConfig;
+
+      S.addCss(options.pluginBase + "mqEditor.css");
+
+      // on ajoute les boutons demandés
+      for (var btn in config) {
+        if (config.hasOwnProperty(btn) && config[btn]) {
+          addButton(btn);
         }
-        if (!config) config = defaultConfig;
-
-        // options
-        if (!options) options = {};
-        basePath = options.vendorsBaseUrl || '/vendors';
-        basePath += "/sesamath/mqEditor/";
-        w.addCss(basePath + "mqEditor.css");
-
-        // on ajoute les boutons demandés
-        for (var btn in config) {
-          if (config.hasOwnProperty(btn) && config[btn]) {
-            addButton(btn);
-          }
-        }
-        isInitDone = true;
-        if (next) next();
-      },
-      hideButtons : function () {
-        if (isInitDone) $buttons.hide();
       }
+      isInitDone = true;
+      if (next) next();
     };
 
+    /**
+     * Cache les boutons mathquill
+     * @memberOf mqEditor
+     */
+    mqEditor.hideButtons = function () {
+      if (isInitDone) $buttons.hide();
+    };
+
+    /**
+     * Affiche les boutons mathquill
+     * @memberOf mqEditor
+     */
+    mqEditor.showButtons = function () {
+      if (isInitDone) $buttons.show();
+    };
+
+    /**
+     * Cache ou affiche les boutons mathquill
+     * @memberOf mqEditor
+     */
+    mqEditor.toggleButtons = function () {
+      if (isInitDone) $buttons.toggle();
+    };
+
+    return mqEditor;
+
   } catch (error) {
-    if (w.addError) w.addError(error);
-    else if (console && console.error) console.error(error);
+    if (typeof console !== 'undefined' && console.error) {
+      console.error("Il fallait probablement appeler init avant ce module");
+      console.error(error);
+    }
   }
 
 });

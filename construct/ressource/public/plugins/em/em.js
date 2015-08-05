@@ -29,171 +29,171 @@
  * pour une explication en français)
  */
 
-/**
- * Affiche une ressource de type url, avec post de la réponse ou simplement de la durée d'affichage
- * @module em
- * Cf ../README.md pour plus d'info sur l'écriture de plugins
- */
-/*global define, log, addCss, window */
+try {
+  define(['swfobject'], function () {
+    "use strict";
+    // le require de swfobject a ajouté la variable swfobject dans l'espace de nom global et ne nous la renvoie pas
+    /*global swfobject*/
 
-// pour le plugin mep, on a besoin de swfobject, que l'on indique ici comme dépendance
-define(['swfobject'], function () {
-  "use strict";
-  // le require de swfobject a ajouté la variable swfobject dans l'espace de nom global et ne nous la renvoie pas
-  /*global swfobject*/
-
-  /** Notre module exporté avec sa méthode display */
-  var em = {};
-
-  // nos vars globales
-  var ressId;
-  var ressType = 'em';
-  var startDate;
-
-  /**
-   * Affiche la ressource dans l'élément html passé dans les options
-   * @param {Object}   ressource  L'objet ressource tel qu'il sort de la bdd
-   * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                              et éventuellement resultCallback)
-   * @param {Function} next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
-   */
-  em.display = function (ressource, options, next) {
-    var container = options.container;
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
-    var errorsContainer = options.errorsContainer;
-    if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
-
-    /** class utilisée dans notre css */
-    var cssClass = 'mepRess';
-    var params = ressource.parametres;
-    var baseMepSwf, idSwf, swfUrl, largeur, hauteur, flashvars, swfParams, swfAttributes;
-    // raccourcis
-    var w = window;
-    var wd = window.document;
-    // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
-    var divId = 'mepRess' + (new Date()).getTime();
-    ressId = ressource.oid
-
-    log('start display em avec la ressource (+options)', ressource, options)
-    //les params minimaux
-    if (!ressource.oid || !ressource.titre || !params) {
-      throw new Error("Paramètres manquants");
-    }
-
-    // Ajout css
-    if (options.baseUrl) addCss(options.baseUrl +'mep.css'); // si on a pas tant pis pour le css
-    container.className = cssClass;
-
-    // le message en attendant le chargement
-    w.addElement(container, "div", {id: divId}, "Chargement de la ressource " + ressource.oid + " en cours.");
-
-    // notre base
-    if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf = ressource.baseUrl;
-    else if (options.isDev) baseMepSwf = "http://mep-col.devsesamath.net/dev/swf";
-    else baseMepSwf = "http://mep-col.sesamath.net/dev/swf";
-    // id du swf
-    idSwf = Number(params.swf_id ? params.swf_id : ressource.idOrigine);
-    // url du swf
-    swfUrl = baseMepSwf + '/exo' + idSwf + ".swf";
     /**
-     * Lance le chargement avec swfobject
+     * Module pour afficher les ressource em (exercices mathenpoche, en flash)
+     * @plugin em
      */
-    if (params.mep_modele === 'mep2lyc') {
-      largeur = 959;
-      hauteur = 618;
-    } else {
-      largeur = 735;
-      hauteur = 450;
-    }
-    // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    if (container.style) container.style.width = largeur + 'px';
-    else container.setAttribute("width", largeur + 'px'); // marche pas avec chrome ou ff
+    var em = {};
 
-    /** @see http://redmine.sesamath.net/projects/alibaba/wiki/ExosMep pour les flashvars à passer */
-    flashvars = options.flashvars || {};
+    // nos vars globales
+    var ressId;
+    var ressType = 'em';
+    var startDate;
+
+    /**
+     * Affiche la ressource dans l'élément html passé dans les options
+     * @memberOf em
+     * @param {Ressource}      ressource  L'objet ressource
+     * @param {displayOptions} options    Les options après init
+     * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
+     */
+    em.display = function (ressource, options, next) {
+      var container = options.container;
+      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+      var errorsContainer = options.errorsContainer;
+      if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
+
+      /** class utilisée dans notre css */
+      var cssClass = 'mepRess';
+      var params = ressource.parametres;
+      var baseMepSwf, idSwf, swfUrl, largeur, hauteur, flashvars, swfParams, swfAttributes;
+      // raccourcis, si ça plante le catch gère
+      var S = window.Sesamath;
+      var ST = S.Sesatheque;
+
+      // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
+      var divId = 'mepRess' + (new Date()).getTime();
+      ressId = ressource.oid;
+
+      S.log('start display em avec la ressource (+options)', ressource, options);
+      //les params minimaux
+      if (!ressource.oid || !ressource.titre || !params) {
+        throw new Error("Paramètres manquants");
+      }
+
+      // Ajout css
+      if (options.baseUrl) S.addCss(options.baseUrl + 'mep.css'); // si on a pas tant pis pour le css
+      container.className = cssClass;
+
+      // le message en attendant le chargement
+      S.addElement(container, "div", {id: divId}, "Chargement de la ressource " + ressource.oid + " en cours.");
+
+      // notre base
+      if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf = ressource.baseUrl;
+      else if (options.verbose) baseMepSwf = "http://mep-col.devsesamath.net/dev/swf";
+      else baseMepSwf = "http://mep-col.sesamath.net/dev/swf";
+      // id du swf
+      idSwf = Number(params.swf_id ? params.swf_id : ressource.idOrigine);
+      // url du swf
+      swfUrl = baseMepSwf + '/exo' + idSwf + ".swf";
+      /**
+       * Lance le chargement avec swfobject
+       */
+      if (params.mep_modele === 'mep2lyc') {
+        largeur = 959;
+        hauteur = 618;
+      } else {
+        largeur = 735;
+        hauteur = 450;
+      }
+      // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
+      if (container.style) container.style.width = largeur + 'px';
+      else container.setAttribute("width", largeur + 'px'); // marche pas avec chrome ou ff
+
+      /** @see http://redmine.sesamath.net/projects/alibaba/wiki/ExosMep pour les flashvars à passer */
+      flashvars = options.flashvars || {};
       // ces flashvars pour le swf sont obligatoires et on les impose ici
-    flashvars.idMep             = Number(ressource.idOrigine);
-    flashvars.modeleMep         = (params.mep_modele === "mep1") ? "1" : "2";
-    flashvars.abreviationLangue = params.mep_langue_id;
-    flashvars.idSwf             = idSwf;
+      flashvars.idMep = Number(ressource.idOrigine);
+      flashvars.modeleMep = (params.mep_modele === "mep1") ? "1" : "2";
+      flashvars.abreviationLangue = params.mep_langue_id;
+      flashvars.idSwf = idSwf;
       // si n on a pas de chiffrement de la réponse qui sera une string au format "vrrp..."
       // (sinon c'est un nombre qui correspond à cette réponse chiffrée)
       // et la propriété score est ajoutée (un entier donnant le nb de bonnes réponses)
-    flashvars.ch                = options.ch || 'n';
-    // ensuite le facultatif si présent
-    if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;
-    if (params.aide_id)         flashvars.idAide        = Number(params.aide_id);
-    if (params.aide_formateur)  flashvars.isBoutonAide  = params.aide_formateur;
-    // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
-    if (params.nb_wnk)          flashvars.mep_nb_wnk    = params.nb_wnk;
+      flashvars.ch = options.ch || 'n';
+      // ensuite le facultatif si présent
+      if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;
+      if (params.aide_id)         flashvars.idAide = Number(params.aide_id);
+      if (params.aide_formateur)  flashvars.isBoutonAide = params.aide_formateur;
+      // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
+      if (params.nb_wnk)          flashvars.mep_nb_wnk = params.nb_wnk;
 
-    // traitement du résultat éventuel (il faudra que l'appelant passe un idUtilisateur)
-    if (options.saveResultat) {
-      // faut une fonction qui va transformer le résultat au format attendu
-      // et la pour rendre accessible au swf dans son dom
-      window.saveResultat = function (result) {
-        log("saveResultat em reçoit", result);
-        var resultMod = {
-          reponse : result.reponse,
-          nbq     : result.nbq || params.nbq_defaut,
-          ressId  : ressId,
-          ressType: ressType,
-          date    : startDate,
-          duree   : Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
-          original: result
+      // traitement du résultat éventuel (il faudra que l'appelant passe un idUtilisateur)
+      if (options.resultatCallback) {
+        // faut une fonction qui va transformer le résultat au format attendu
+        // et la pour rendre accessible au swf dans son dom
+        window.resultatCallback = function (result) {
+          S.log("resultatCallback em reçoit", result);
+          var resultMod = {
+            reponse: result.reponse,
+            nbq: result.nbq || params.nbq_defaut,
+            ressId: ressId,
+            ressType: ressType,
+            date: startDate,
+            duree: Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
+            original: result
+          };
+          // le score sera calculé d'après la réponse juste avant enregistrement en bdd
+          // (après déchiffrement coté serveur), mais si c'est j3p qui charge il veut l'intercepter
+          if (resultMod.nbq) {
+            resultMod.score = result.score / resultMod.nbq;
+          } else {
+            resultMod.score = null;
+          }
+
+          options.resultatCallback(resultMod);
         };
-        // le score sera calculé d'après la réponse juste avant enregistrement en bdd
-        // (après déchiffrement coté serveur), mais si c'est j3p qui charge il veut l'intercepter
-        if (resultMod.nbq) {
-          resultMod.score = result.score / resultMod.nbq;
+        flashvars.nomFonctionCallback = 'resultatCallback';
+      }
+
+      // les params pour le player
+      swfParams = {
+        "base": baseMepSwf + "/",
+        "menu": "false",
+        "wmode": "window",
+        "allowScriptAccess": "always" // important pour que le swf puisse communiquer avec le js de cette page
+      };
+      // et les attributs pour le loader swfobject.embedSWF
+      swfAttributes = {
+        id: divId,
+        name: divId
+      };
+      // pour debug
+      S.log('flashvars', flashvars);
+      // swfobject.embedSWF (swfUrl, htmlId, largeur, hauteur, version_requise,
+      //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
+      swfobject.embedSWF(swfUrl, divId, largeur, hauteur, "8", null, flashvars, swfParams, swfAttributes, callbackFn);
+
+      /**
+       * Callback du chargement
+       * @param e objet avec id,success,ref
+       */
+      function callbackFn(e) {
+        var retour;
+        if (e.success) {
+          startDate = new Date();
+          S.log("Chargement de " + swfUrl + " ok");
         } else {
-          resultMod.score = null;
+          ST.addError("Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource.");
+          retour = new Error('Le chargement de ' + swfUrl + ' a échoué');
         }
-
-        options.saveResultat(resultMod);
+        if (next && typeof next === "function") {
+          next(retour);
+        }
       }
-      flashvars.nomFonctionCallback = 'saveResultat';
-    }
-
-    // les params pour le player
-    swfParams = {
-      "base"             : baseMepSwf + "/",
-      "menu"             : "false",
-      "wmode"            : "window",
-      "allowScriptAccess": "always" // important pour que le swf puisse communiquer avec le js de cette page
     };
-    // et les attributs pour le loader swfobject.embedSWF
-    swfAttributes = {
-      id  : divId,
-      name: divId
-    };
-    // pour debug
-    log('flashvars', flashvars);
-    // swfobject.embedSWF (swfUrl, htmlId, largeur, hauteur, version_requise,
-    //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
-    swfobject.embedSWF(swfUrl, divId, largeur, hauteur, "8", null, flashvars, swfParams, swfAttributes, callbackFn);
 
-    /**
-     * Callback du chargement
-     * @param e objet avec id,success,ref
-     */
-    function callbackFn(e) {
-      var retour, htmlElt;
-      if (e.success) {
-        startDate = new Date();
-        log("Chargement de " + swfUrl + " ok");
-      } else {
-        htmlElt = wd.createElement("p");
-        htmlElt.appendChild(wd.createTextNode("Javascript fonctionne" +
-                                              " mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource."));
-        errorsContainer.appendChild(htmlElt)
-        retour = new Error('Le chargement de ' + swfUrl + ' a échoué');
-      }
-      if (next && typeof next === "function") {
-        next(retour);
-      }
-    }
-  };
-
-  return em;
-});
+    return em;
+  });
+} catch (error) {
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
+  }
+}

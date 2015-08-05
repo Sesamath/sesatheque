@@ -30,133 +30,142 @@
  */
 
 /**
- * Module pour get/set des ressources sur l'api de la sesatheque courante
- * Attention, les urls sont en dur et supposent que la sesatheque est installée à la racine du domaine,
- * 
- * il faut utiliser setPrefix() avant les autres méthodes si ce n'est pas le cas
+ * Module "standalone" pour get/set des ressources sur l'api d'une sesatheque
+ * Il faut utiliser setBase() avant les autres méthodes pour préciser l'url absolue de la sésathèque
+ * @service apiClient
  */
-/*global define, XMLHttpRequest */
-'use strict';
+define(function () {
+  'use strict';
 
-/**
- * le prefixe d'installation de la bibliotheque, doit commencer et finir par un slash,
- * on appellera les urls de la forme
- * prefix + 'api/ressource/…'
- * @type {string}
- */
-var prefix = '/';
+  /**
+   * Gère les appels ajax vers l'api de la bibliothèque
+   * @private
+   * @param {Integer|string|Ressource} data Si data est un id on fera un get, si data est une ressource (un objet) un post
+   * @param {ressourceCallback} next
+   * @private
+   */
+  function callBibli(data, next) {
+    var xhr, method, url, isGet;
 
-/**
- * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
- * @type {number}
- */
-var ajaxTimeout = 10000;
+    try {
+      // post ou get ?
+      if (typeof data === "object") {
+        isGet = false;
+        method = 'POST';
+        url = sesathequeBase + 'api/ressource/';
+      } else {
+        isGet = true;
+        method = 'GET';
+        var id = data;
+        if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine");
+        url = sesathequeBase + 'api/ressource/' + id;
+        data = {};
+      }
 
-define({
+      if (typeof XMLHttpRequest === "undefined") {
+        throw new Error("appels ajax non supportés par le navigateur");
+      } else {
+        // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+        xhr = new XMLHttpRequest();
+      }
+
+      // on prépare la requete
+      xhr.timeout = ajaxTimeout;
+
+      // les différentes callback
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 400) {
+          var erreur, reponse;
+          try {
+            reponse = JSON.parse(xhr.responseText);
+          } catch (error) {
+            var errMsg = isGet ?
+                "La ressource renvoyée par la bibliotheque n'est pas du json valide" :
+                "La réponse du serveur au post n'est pas du json valide";
+            erreur = new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText);
+          }
+          next(erreur, reponse);
+        } else {
+          // On a une réponse mais c'est une erreur
+          // il faudra gérer les 301 & 302 éventuels, mais pour le moment l'api n'en renvoie pas
+          next(new Error('Error ' + xhr.status + ' : ' + xhr.responseText));
+        }
+      };
+
+      xhr.onerror = function () {
+        // Pb de connexion au serveur
+        var errMsg = "Le serveur a renvoyé une erreur";
+        if (xhr.status) errMsg += ' ' +xhr.status;
+        errMsg += ' : ' +xhr.responseText;
+        next(new Error(errMsg));
+      };
+
+      xhr.ontimeout = function () {
+        next(new Error("Le serveur n'a pas répondu après " +Math.floor(ajaxTimeout/1000) +"s d'attente."));
+      };
+
+      // et on envoie
+      xhr.open(method, url, true);
+      xhr.send(data);
+    } catch (error) {
+      if (ST.addError) ST.addError(error);
+      else if (typeof console !== 'undefined' && console.error) console.error(error);
+      next(new Error("votre navigateur n'a pas fait l'appel ajax : " +error.toString()));
+    }
+  } // callBibli
+
   /**
-   * Modifie le préfixe par défaut (/)
-   * @param bibliPrefix Le préfixe a mettre devant api/ressource. Il doit se terminer par un slash,
-   *                    et commencer par slash ou http
+   * la base de la sesatheque (on ajoutera le / de fin s'il manque mais en cross-domain fallait appeler init avant)
+   * on appellera les urls de la forme sesathequeBase + 'api/ressource/…'
+   * @type {string}
    */
-  setPrefix: function (bibliPrefix) {
-    prefix = bibliPrefix;
-    if (prefix.substr(-1) !== '/') prefix += '/';
-  },
+  var sesathequeBase;
+  if (typeof Sesamath === "undefined") window.Sesamath = {};
+  var S = Sesamath;
+  if (!S.Sesatheque) S.Sesatheque = {};
+  var ST = S.Sesatheque;
+  if (ST.base) sesathequeBase = ST.base;
+  else sesathequeBase = '/';
+
   /**
-   * Récupère une ressource sur la bibliothèque en ajax
-   * @param id peut être un oid de la sesatheque ou origine/idOrigine
-   * @param next sera appelé avec (error, ressource)
+   * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
+   * @private
+   * @type {Integer}
    */
-  getRessource: function (id, next) {
-    if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-    if (!id) return next(new Error("Il faut fournir un identifiant"));
-    callBibli({id:id}, next);
-  },
-  /**
-   * Enregistre une ressource sur la bibliotheque
-   * @param ressource
-   * @param next
-   */
-  setRessource: function (ressource, next) {
-    if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-    if (!ressource) return next(new Error("Il faut fournir une ressource"));
-    if (!ressource.titre || !ressource.categories) return next(new Error("Ressource invalide (titre et categories sont obligatoires)"));
-    callBibli(ressource, next);
-  }
+  var ajaxTimeout = 10000;
+
+  return {
+    /**
+     * Modifie le préfixe par défaut (/)
+     * @memberOf apiClient
+     * @param {string} sesathequeBase L'url de la sesathèque
+     */
+    setBase: function (sesathequeBase) {
+      sesathequeBase = sesathequeBase;
+      if (sesathequeBase.substr(-1) !== '/') sesathequeBase += '/';
+    },
+    /**
+     * Récupère une ressource sur la bibliothèque en ajax
+     * @memberOf apiClient
+     * @param {Integer|string}    id   peut être un oid de la sesatheque ou origine/idOrigine
+     * @param {ressourceCallback} next
+     */
+    getRessource: function (id, next) {
+      if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
+      if (!id) return next(new Error("Il faut fournir un identifiant"));
+      callBibli(id, next);
+    },
+    /**
+     * Enregistre une ressource sur la bibliotheque
+     * @memberOf apiClient
+     * @param {Ressource}         ressource
+     * @param {ressourceCallback} next
+     */
+    setRessource: function (ressource, next) {
+      if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
+      if (!ressource) return next(new Error("Il faut fournir une ressource"));
+      callBibli(ressource, next);
+    }
+  };
 });
 
-
-/**
- * Gère les appels ajax vers l'api de la bibliothèque
- * @param {number|Object} data Si data est un id on fera un get, si data est une ressource un post
- * @param {function} next
- * @private
- */
-function callBibli(data, next) {
-  var xhr, method, url, isGet;
-
-  try {
-    // post ou get ?
-    if (data.hasOwnProperty('titre')) {
-      isGet = false;
-      method = 'POST';
-      url = prefix + 'api/ressource/';
-    } else {
-      isGet = true;
-      method = 'GET';
-      var id = data.oid || data.id;
-      if (!id && data.origine && data.idOrigine) id = data.origine +'/' +data.idOrigine;
-      if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (propriétés oid ou id ou origine+idOrigine");
-      url = prefix + 'api/ressource/' + id;
-      data = {};
-    }
-
-    if (typeof XMLHttpRequest !== undefined) {
-      // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-      xhr = new XMLHttpRequest();
-    } else {
-      return next(new Error("votre navigateur ne supporte pas les appels ajax"));
-    }
-
-    // on prépare la requete
-    xhr.timeout = ajaxTimeout;
-
-    // les différentes callback
-    xhr.onload = function () {
-      if (xhr.status >= 200 && xhr.status < 400) {
-        var erreur, reponse;
-        try {
-          reponse = JSON.parse(xhr.responseText);
-        } catch (error) {
-          var errMsg = isGet ?
-              "La ressource renvoyée par la bibliotheque n'est pas du json valide" :
-              "La réponse du serveur au post n'est pas du json valide";
-          erreur = new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText);
-        }
-        next(erreur, reponse);
-      } else {
-        // On a une réponse mais c'est une erreur
-        // il faudra gérer les 301 & 302 éventuels, mais pour le moment l'api n'en renvoie pas
-        next(new Error('Error ' + xhr.status + ' : ' + xhr.responseText));
-      }
-    };
-
-    xhr.onerror = function () {
-      // Pb de connexion au serveur
-      var errMsg = "Le serveur a renvoyé une erreur";
-      if (xhr.status) errMsg += ' ' +xhr.status;
-      errMsg += ' : ' +xhr.responseText;
-      next(new Error(errMsg));
-    };
-
-    xhr.ontimeout = function () {
-      next(new Error("Le serveur n'a pas répondu après " +Math.floor(timeout/1000) +"s d'attente."));
-    };
-
-    // et on envoie
-    xhr.open(method, url, true);
-    xhr.send(data);
-  } catch (error) {
-    next(new Error("votre navigateur n'a pas fait l'appel ajax : " +error.toString()));
-  }
-}

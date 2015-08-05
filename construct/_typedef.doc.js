@@ -33,6 +33,7 @@
 
 /**
  * @file Liste de typedef pour jsdoc
+ * @private
  */
 
 /**
@@ -87,7 +88,7 @@
 /**
  * Objet link à passer à la vue link.dust
  * @typedef Link
- * @type {object}
+ * @type {Object}
  * @property {string} href    L'url du lien
  * @property {string} value   Le texte à mettre dans le lien
  * @property {string} [icon]  Le nom de l'icone
@@ -97,7 +98,7 @@
 /**
  * Paire name / value
  * @typedef nameValue
- * @type {object}
+ * @type {Object}
  * @property {string} name
  * @property {string} value
  */

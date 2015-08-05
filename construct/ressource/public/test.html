@@ -1,42 +1,16 @@
 <!DOCTYPE html>
-<!--
-faut un doctype html4 si on veut permettre la hauteur en % pour un div
-<!DOCTYPE html public "-//W3C//DTD HTML 4.01 Transitional//EN">
--->
-<html>
-<head lang="fr">
+<html lang="en">
+<head>
   <meta charset="UTF-8">
-  <title>Page statique de test</title>
-  <script type="text/javascript" src="/vendors/requirejs/require.2.1.18.min.js"></script>
-  <script type="text/javascript" src="/formEdit.js"></script>
+  <title>Test</title>
+  <script type="text/javascript" src="vendors/requirejs/require.min.js"></script>
 </head>
 <body>
-  <div id="parametres">
-    <textarea id="ckeditor"></textarea>
-  </div>
-  <script type="application/javascript">
-    // sesatheque.init doit exister, on vérifie
-    try {
-      if (typeof sesatheque === 'undefined' || !sesatheque.init) throw new Error("Impossible d'initialiser l'édition");
-      var options = {
-        pluginBaseUrl : '/plugins/url',
-        vendorsBaseUrl: '/vendors',
-        pluginName: 'url',
-        isDev :true
-    };
-    sesatheque.init(options, function () {
-      // maintenant que requireJs a été configuré on peut charger ce module qui l'utilise
-      require([options.pluginBaseUrl +'/edit.js'], function (editUrl) {
-        if (typeof editUrl === 'undefined') throw new Error('Le chargement a échoué, impossible de charger editUrl.js');
-        var ressource = {parametres:{}};
-      if (ressource) editUrl.init(ressource, options);
-      else throw new Error("Il manque la ressource à modifier");
-    });
-    });
-    } catch(error) {
-      if (window.addError) window.addError(error.toString());
-      if (console && console.error) console.error(error)
-    }
+  <script type="text/javascript">
+    require(['display'], function(display) {
+      console.log(display)
+    })
   </script>
+
 </body>
 </html>

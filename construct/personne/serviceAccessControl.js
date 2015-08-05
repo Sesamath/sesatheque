@@ -146,7 +146,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * Calcule et renvoie les permissions d'une personne en fonction de ses rôles
    * @private
    * @param {Personne} personne
-   * @returns {object} avec les permissions en propriété (valeur true|false|undefined)
+   * @returns {Object} avec les permissions en propriété (valeur true|false|undefined)
    */
   function getPermissions(personne) {
     var permissions = {}

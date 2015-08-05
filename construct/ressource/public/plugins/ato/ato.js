@@ -29,87 +29,66 @@
  * pour une explication en français)
  */
 
-/**
- * Tous les plugins doivent exporter les méthodes display et showResult
- */
+try {
+  define(function () {
+    'use strict';
+    /**
+     * module pour afficher les ressources ato (atome de manuel ou cahier)
+     * @plugin ato
+     */
+    var ato = {};
 
-/**
- * Tout le reste est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
- *
- * this est ce module (donc on a this.display et this.showResult), avec dans notre scope les variables
- * {Function}    require         : pour charger d'autres modules ou d'autres scripts js
- * {Function}    log             : un console.log qui ne plantera pas sur les vieux IE
- *                                 et accepte un éventuel objet un 2e argument
- * {Function}    addCss          : ajoute une css dans le head de la page
- *                                 (lui passer le fichier relativement à ce dossier)
- * {Element} container       : le conteneur pour affichage
- * {Element} errorsContainer : un conteneur pour afficher d'éventuelles erreurs
- * {String}      baseUrl         : le préfixe vers ce dossier à utiliser dans d'éventuels href
- *                                 (pour des médias ou autres fichiers à charger)
- * {Object}      window          : l'objet window
- *
- * et aussi
- * {Function} define  : utilisé ci-dessus pour définir les méthodes de ce module, ne doit pas être appelé une 2e fois
- */
-/*global define, log */
+    // raccourcis, si ça plante le catch gère
+    var S = window.Sesamath;
 
-define(function () {
-  'use strict';
-  /** notre module exporté avec sa méthode display */
-  var ato = {};
+    // Le moment où ce module a été chargé dans le navigateur
+    var startDate = new Date();
 
-  /** Le moment où ce module a été chargé dans le navigateur */
-  var startDate = new Date();
-  
-  var ressOid;
-  
-  function getResultat() {
-    return {
-      ressType : 'ato',
-      ressOid:ressOid,
-      date:startDate,
-      duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-      score : 1
-    };
-  }
+    /**
+     * Affiche une ressource ato
+     * @memberOf ato
+     * @param {Ressource}      ressource  L'objet ressource
+     * @param {displayOptions} options    Les options après init
+     * @param {errorCallback}  next       La fct à appeler quand l'atome sera chargé (sans argument ou avec une erreur)
+     */
+    ato.display = function (ressource, options, next) {
+      var container = options.container;
+      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
 
+      // on enverra un résultat seulement à la fermeture
+      if (options.resultatCallback && container.addEventListener) {
+        container.addEventListener('unload', function () {
+          options.resultatCallback({
+            ressType: 'ato',
+            ressOid: ressource.oid,
+            date: startDate,
+            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
+            score: 1
+          });
+        });
+      }
 
-  /**
-   * Affiche la ressource dans l'élément d'id mepRess
-   * @param {Ressource} ressource  L'objet ressource (sans forcément son prototype)
-   * @param {Object}    options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                               et éventuellement resultCallback)
-   * @param {Function}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
-   */
-  ato.display = function (ressource, options, next) {
-    var container = options.container;
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+      S.log('start ato display avec la ressource', ressource);
+      //les params minimaux
+      if (!ressource.oid || !ressource.titre) {
+        throw new Error("Paramètres manquants");
+      }
 
-    // on enverra le résultat à la fermeture
-    if (options.resultCallback && container.addEventListener) {
-      container.addEventListener('unload', function () {
-        var resultat = getResultat();
-        options.resultCallback(resultat);
+      // On réinitialise le conteneur
+      S.empty(container);
+
+      var url = "http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=" + ressource.idOrigine;
+      var iframe = S.addElement(container, 'iframe', {src: url, style: "width:100%;height:100%"});
+      iframe.addEventListener("load", function () {
+        next();
       });
-    }
+    };
 
-    log('start ato display avec la ressource', ressource)
-    //les params minimaux
-    if (!ressource.oid || !ressource.titre) {
-      throw new Error("Paramètres manquants");
-    }
-    // init de ressOid en global à ce module (pour les appels ultérieurs de getResultat)
-    ressOid = ressource.oid;
-
-    // On réinitialise le conteneur
-    window.empty(container);
-
-    var url = "http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=" +ressource.idOrigine;
-    var iframe = window.addElement(container, 'iframe', {src:url, style:"width:100%;height:100%"});
-    iframe.addEventListener("load", function () {
-      next();
-    });
-  };
-  
-  return ato;
-});
+    return ato;
+  });
+} catch (error) {
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
+  }
+}

@@ -32,7 +32,7 @@
 'use strict'
 
 /**
- * @file Ce fichier ne sert pas directement dans sesatheque, il est là pour servir de modèle à l'implémentation d'un
+ * Ce fichier ne sert pas directement dans sesatheque, il est là pour servir de modèle à l'implémentation d'un
  * client d'authentification (et sert aussi pour jsdoc ou l'autocomplétion)
  */
 

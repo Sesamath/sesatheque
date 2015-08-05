@@ -306,7 +306,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @memberOf listeners
    * @listens lassi#event:beforeTransport
    * @param {Context} context
-   * @param {object} data
+   * @param {Object} data
    */
   listeners.beforeTransport = function (context, data) {
     errorHandler(context, data)

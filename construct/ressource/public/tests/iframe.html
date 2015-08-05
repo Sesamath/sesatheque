@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test em en iframe</title>
+  <style type="text/css">
+    html, body, iframe {
+      height: 100%;
+      margin: 0;
+      overflow:hidden;
+    }
+    iframe {
+      display: block;       /* iframes are inline by default */
+      border: none;         /* Reset default border */
+      width: 100%;
+      height: 100%;
+    }
+    #links { list-style: none;}
+    #links li {display: inline; margin: 1em;}
+  </style>
+</head>
+<body id="body">
+<ul id="links"></ul>
+
+  <script type="text/javascript">
+    // pour récupérer les param
+    function getURLParameter(name) {
+      var regexp = new RegExp('[?|&]' + name + '=([^&#]+?)(&|#|$)');
+      var param = regexp.exec(window.location.search);
+
+      return param ? decodeURIComponent(param[1].replace(/\+/g, '%20')) : undefined;
+    };
+
+    // on ajoute nos liens
+    var links = document.getElementById('links');
+    var ids = [
+      ["am/42", "am"],
+      ["labomepBIBS/14", "ec2"],
+      ["em/42", "em"],
+      ["accomp/21415", "j3p"],
+      ["labomepBIBS/201656", "url"],
+    ];
+    var li, a, url;
+    ids.forEach(function (id) {
+      li = document.createElement("li");
+      a = document.createElement("a");
+      // on vire l'id
+      url = document.URL.replace(/[?|&]id=([^&#]+?)(&|#|$)/, "");
+      // pour remettre le notre
+      url += (url.indexOf('?') > -1) ? "&" : "?";
+      url += "id=" +id[0];
+      a.href = url;
+      a.appendChild(document.createTextNode(id[1]));
+      li.appendChild(a);
+      links.appendChild(li);
+    })
+
+    // on veut afficher la ressource indiquée ou une par défaut
+    var id = getURLParameter("id") || "em/42";
+    var base = getURLParameter("domain");
+    if (base) {
+      if (base.substr(0, 4) !== "http") base = "http://" + base; // pour du https faudra le passer dans domain
+      if (base.substr(-1) !== "/") base += "/";
+    } else {
+      base = "/";
+    }
+    var body = document.getElementById('body');
+    var iframe = document.createElement("iframe");
+    iframe.src = base +"public/voir/" +id;
+    body.appendChild(iframe);
+  </script>
+</body>
+</html>

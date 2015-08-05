@@ -90,25 +90,25 @@ function Personne(initObj) {
   this.email = initObj.email || ''
   /**
    * Liste des roles {role:boolean}
-   * @type {object}
+   * @type {Object}
    * @default {}
    */
   this.roles = initObj.roles || {}
   /**
    * Liste des permissions, calculée d'après les roles au login, non sauvegardée donc à priori seulement en session
-   * @type {object}
+   * @type {Object}
    * @default {}
    */
   this.permissions = initObj.permissions || undefined
   /**
    * La liste des groupes {groupe:boolean}
-   * @type {object}
+   * @type {Object}
    * @default {}
    */
   this.groupes = initObj.groupes || {}
   /**
    * D'autres propriétés regroupées dans cet objet, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
-   * @type {object}
+   * @type {Object}
    * @default undefined
    */
   this.infos = initObj.infos || undefined

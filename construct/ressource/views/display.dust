@@ -18,20 +18,17 @@ Chargement en cours</div>
     /** Le post reçu que l'on transmet tel quel */
     var post = {?post}{post|js}{:else}{~lb}{~rb}{/post};
 
-    {! pourquoi faut ajouter .js ici ??? mais si on le fait pas require ne l'ajoute pas... !}
-    require(['{vendorsBaseUrl}/../display.js'], function (display) {
+    require(['/display.js'], function (display) {
         try {
             if (typeof display === 'undefined') throw new Error('Le chargement a échoué, impossible de charger display.js');
-            display.load(
-                {ressource|s},
-                {
-                    saveResult : function (resultat, next) {log('saveResult', resultat); next();}, // DEBUG
-                    pluginBaseUrl : '{pluginBaseUrl}',
-                    vendorsBaseUrl: '{vendorsBaseUrl}',
-                    pluginName: '{pluginName}',
-                    isDev :{?isDev}{isDev}{:else}false{/isDev}
-                }
-            );
+            var options = {
+              saveResult: function (resultat, next) {
+                Sesamath.log('saveResult', resultat);
+                next();
+              }, // DEBUG
+              isDev :{?isDev}{isDev}{:else}false{/isDev}
+            }
+            display({ressource|s}, options);
         } catch(error) {
           document.getElementById('errors').innerHTML = error.toString();
           if (console && console.error) console.error(error)

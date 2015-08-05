@@ -37,8 +37,7 @@ var util = require('util')
 
 /**
  * Un assemblage de fonctions utilitaires
- * @kind class
- * @type {object}
+ * @service tools
  */
 var tools = {}
 
@@ -46,7 +45,7 @@ var tools = {}
  * Clone un objet en conservant son prototype
  * @memberOf tools
  * @param object
- * @returns {object}
+ * @returns {Object}
  */
 tools.clone = function(object) {
   var copy = object
@@ -161,7 +160,7 @@ tools.link = function (path, texte, args) {
  * @memberOf tools
  * @param path Le path (absolu ou relatif)
  * @param texte Le texte à afficher
- * @param {object} [args] Des arguments à ajouter en queryString
+ * @param {Object} [args] Des arguments à ajouter en queryString
  * @returns {string} Le code html du tag a
  */
 tools.linkQs = function (path, texte, args) {
@@ -219,7 +218,7 @@ tools.merge = function(object, newValues, strict) {
  * Idem JSON.parse mais renvoie undefined en cas de plantage
  * @memberOf tools
  * @param jsonString La string à parser
- * @return {object}
+ * @return {Object}
  */
 tools.parse = function (jsonString) {
   var obj

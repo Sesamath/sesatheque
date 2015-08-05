@@ -37,6 +37,7 @@
 (function () {
   "use strict";
   var delayedOptions;
+  var initTmp;
   var afterInit;
 
   if (typeof define === 'undefined' || typeof require === 'undefined') {
@@ -45,18 +46,16 @@
     throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
   } else {
     // ça doit exister tout de suite
-    window.sesatheque = {
-      init   : function (options, next) {
-        // si on est appelé c'est qu'on a pas encore été écrasé par le chargement d'init, on met ça de coté
-        delayedOptions = options;
-        afterInit = next;
-      }
+    initTmp = function (options, next) {
+      // si on est appelé c'est qu'on a pas encore été écrasé par le chargement d'init, on met ça de coté
+      delayedOptions = options;
+      afterInit = next;
     };
     try {
       // faut charger init seul avant de lancer un autre require...
-      require(['/init.js'], function (init) {
+      require(['init'], function (init) {
         // on le met en global pour qu'il puisse être lancé dans la vue avec les options
-        window.sesatheque.init = function (options, next) {
+        initTmp = function (options, next) {
           init(options);
           require(['jquery1'], function () {
             function onTypeChange() {
@@ -84,11 +83,10 @@
           });
         };
         // on regarde si init avait été appelé avant qu'on l'affecte et le lance si c'est le cas
-        if (delayedOptions) window.sesatheque.init(delayedOptions, afterInit);
+        if (delayedOptions) initTmp(delayedOptions, afterInit);
       });
     } catch (error) {
-      if (window.addError) window.addError(error);
-      else if (log.error) log.error(error);
+      if (typeof console !== 'undefined' && console.error) console.error(error);
     }
   }
 })();

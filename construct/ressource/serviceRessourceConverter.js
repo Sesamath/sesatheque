@@ -289,7 +289,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
    * Renvoie la ressource au format compact (oid, origine, idOrigine, titre, typeTechnique, categories, restriction, dataUri)
    * @memberOf $ressourceConverter
    * @param ressource
-   * @return {object}
+   * @return {Object}
    */
   $ressourceConverter.toCompactFormat = function (ressource) {
     return {

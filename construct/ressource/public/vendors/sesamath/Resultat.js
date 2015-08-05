@@ -29,18 +29,12 @@
  * pour une explication en français)
  */
 
-/**
- * Format d'un résultat d'une ressource Sésamath
- * sous forme d'un module js exporté pour requirejs ou node
- */
-
 /* global define, module*/
-
 // suivant que l'on est coté serveur ou client
-// Avec requirejsoOn retourne juste le constructeur comme module mais faut le mettre en retour de fct
-if (typeof define === 'function') define(function () {return Resultat});
+if (typeof define === 'function') define(function () {return Resultat;});
 else if (typeof module === 'object') module.exports = Resultat;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
+// pas trouvé comment documenté correctement un constructeur dans une fonction anonyme auto-exécutée…
 
 /**
  * Définition d'un résultat commune à toutes les ressources (exercices ou pas)
@@ -74,28 +68,28 @@ function Resultat(original) {
    * @type {number|string}
    */
   this.ressId = values.ressId;
-  
+
   /**
    * Le type de la ressource (typeTechnique de la ressource, nom de code du plugin qui la gère et saura afficher le résultat)
    * @default undefined
    * @type {string}
    */
   this.ressType = values.ressType;
-  
+
   /**
    * L'origine du l'utilisateur (à priori complété par celui qui récupère le résultat)
    * @default undefined
    * @type {number|string}
    */
-  this.userOrigine = values.userOrigine ;
-  
+  this.userOrigine = values.userOrigine;
+
   /**
    * L'id de l'utilisateur (l'auteur du résultat) dans son référentiel d'origine
    * (à priori complété par celui qui récupère le résultat)
    * @default undefined
    * @type {number|string}
    */
-  this.userId = values.userId ;
+  this.userId = values.userId;
 
   /**
    * La date du résultat
@@ -140,4 +134,4 @@ function Resultat(original) {
  */
 Resultat.prototype.toString = function () {
   return (typeof this.reponse === "string") ? this.reponse : this.reponse.toString();
-}
+};

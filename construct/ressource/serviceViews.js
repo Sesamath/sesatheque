@@ -61,7 +61,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param ressource
    */
   function addJsVars(data, ressource) {
-    data.contentBloc.sesathequeBase = appConfig.application.baseUrl
     data.contentBloc.isDev          = (appConfig.application.staging !== 'prod')
     if (ressource) {
       // une string pour que dust le mette dans le source
@@ -504,7 +503,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       $views : __dirname + '/views',
       $metas : {
         // css ajouté par le listener d'après context.layout
-        js : ['/vendors/requirejs/require.2.1.18.min.js']
+        js : ['/vendors/requirejs/require.min.js']
       }
     }
     // les erreurs sont pas dans le bloc contenu

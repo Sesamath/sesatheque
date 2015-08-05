@@ -29,31 +29,38 @@
  * pour une explication en français)
  */
 
-(function () {
-  'use strict'
+'use strict';
+
+// suivant que l'on est coté serveur ou client
+if (typeof define === 'function') define(function () {return Feedback;});
+else if (typeof module === 'object') module.exports = Feedback;
+// sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
+// pas trouvé comment documenté correctement un constructeur dans une fonction anonyme auto-exécutée…
+
+/**
+ * Un retour d'une api http qui enregistre des Resultat (surtout pour documenter le format utilisé dans sesatheque|sesalab)
+ * @param {Object} values
+ * @constructor
+ */
+function Feedback(values) {
+  if (typeof values !== 'object') values = {}
   /**
-   * Un retour de l'api http (surtout pour documenter le format utilisé dans sesatheque|sesalab)
-   * @param {object} values
-   * @constructor
+   * Statut du retour (success aussi accepté comme nom de propriété)
+   * @type {boolean}
    */
-  function Feedback(values) {
-    if (typeof values !== 'object') values = {}
+  this.ok = !!values.ok;
+  if (values.hasOwnProperty("success")) {
     /**
-     * Statut du retour
+     * Alternative à la propriété ok
      * @type {boolean}
      */
-    this.ok = !!values.ok;
-    /**
-     * Message éventuel (si ok = false c'est un message d'erreur et sinon une info)
-     * @type {*|string}
-     */
-    this.message = values.error || '';
+    this.success = !! values.success;
   }
-  // export
-  if (typeof define === 'function') {
-    define(Feedback); // jshint ignore:line
-  } else if (typeof module === 'object' && module.exports) {
-    module.exports = Feedback;
-  }
-})();
+  /**
+   * Message éventuel (si ok = false c'est un message d'erreur et sinon une info)
+   * @type {*|string}
+   */
+  this.message = values.error || '';
+}
+
 

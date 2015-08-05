@@ -69,22 +69,22 @@ try {
 
     function addOptions(blocParam, parametres, options) {
       function addLabel(id, label) {
-        w.addElement(blocParam, 'label', {for:id}, label);
+        S.addElement(blocParam, 'label', {for:id}, label);
       }
       function addOption(name, txt, value, onclick) {
-        var id = w.getNewId();
+        var id = S.getNewId();
         var args = {type:"radio", name:"parametres[" +name +"]", id:id, value:value};
         if (onclick) args.onclick = onclick;
         if (parametres[name] === value) args.checked = "checked";
-        w.addElement(blocParam, 'input', args);
+        S.addElement(blocParam, 'input', args);
         addLabel(id, txt);
       }
-      w.addText(blocParam, "Consigne : ");
-      var editorToggleButton = w.addElement(blocParam, 'button', null, "Éditeur de texte enrichi");
+      S.addText(blocParam, "Consigne : ");
+      var editorToggleButton = S.addElement(blocParam, 'button', null, "Éditeur de texte enrichi");
       var consigne = parametres.consigne || '';
-      var divConsigne = w.addElement(blocParam, 'div');
+      var divConsigne = S.addElement(blocParam, 'div');
       var $divConsigne = $(divConsigne);
-      var editor = w.addElement(divConsigne, 'textarea', {name:"parametres[consigne]", id:"editor"}, consigne);
+      var editor = S.addElement(divConsigne, 'textarea', {name:"parametres[consigne]", id:"editor"}, consigne);
       var $editor = $(editor);
       $editorToggleButton = $(editorToggleButton);
       $editorToggleButton.click(function () {
@@ -119,19 +119,19 @@ try {
       addOption("question_option", "avant", "before", $divConsigne.show);
       addOption("question_option", "pendant", "while", $divConsigne.show);
       addOption("question_option", "après", "after", $divConsigne.show);
-      w.addText(blocParam, " (l'affichage de la page)");
-      w.addElement(blocParam, 'br');
+      S.addText(blocParam, " (l'affichage de la page)");
+      S.addElement(blocParam, 'br');
       //initCKEditor();
       mqEditor.init(divConsigne, parametres.mqEditorConfig, options);
-      w.addElement(blocParam, 'br');
-      w.addText(blocParam, "Réponse :");
+      S.addElement(blocParam, 'br');
+      S.addText(blocParam, "Réponse :");
       addOption("answer_option", "aucune", "off");
       addOption("answer_option", "avant", "before");
       addOption("answer_option", "pendant", "while");
       addOption("answer_option", "après", "after");
-      w.addText(blocParam, " (l'affichage de la page)");
-      w.addElement(blocParam, 'br');
-      w.addText(blocParam, " Type d'éditeur pour la réponse : ");
+      S.addText(blocParam, " (l'affichage de la page)");
+      S.addElement(blocParam, 'br');
+      S.addText(blocParam, " Type d'éditeur pour la réponse : ");
       addOption("answer_editor", "zone de texte", "textarea");
       addOption("answer_editor", "texte enrichi", "ckeditor");
       addOption("answer_editor", "texte avec éditeur d'équation simplifié", "mqEditor");
@@ -142,7 +142,7 @@ try {
      * Initialise la conf de ckeditor (mais il faudra appeler CKEDITOR.replace ensuite)
      */
     function initCKEditor() {
-      if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/ckeditor/contents.css');
+      if (options.vendorsBaseUrl) S.addCss(options.vendorsBaseUrl + '/ckeditor/contents.css');
       if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) CKEDITOR.tools.enableHtml5Elements( document );
       // The trick to keep the editor in the sample quite small unless user specified own height.
       CKEDITOR.config.height = 150;
@@ -173,7 +173,7 @@ try {
       // @see http://ckeditor.com/comment/123266#comment-123266, sauf que ça marche pas, faut aller modifier config.js
       // ou TeX-AMS_HTML ou TeX-AMS-MML_SVG, cf http://docs.mathjax.org/en/latest/configuration.html#loading
       CKEDITOR.config.mathJaxLib = "/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-      //w.log('ckeditor', CKEDITOR);
+      //S.log('ckeditor', CKEDITOR);
     }
 
     /**
@@ -182,7 +182,7 @@ try {
      */
     function initDom(parametres, options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-      //if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/editUrl.css');
+      //if (options.vendorsBaseUrl) S.addCss(options.vendorsBaseUrl + '/editUrl.css');
       // nos éléments html
       var blocParam = window.document.getElementById('parametres');
       if (!blocParam) throw new Error("Élément #parametres manquant");
@@ -190,28 +190,28 @@ try {
       $blocParam.text("Adresse Internet de votre page externe (par exemple : http://www.sesamath.net)");
       var url = parametres.adresse || '';
       if (url === "undefined") url = '';
-      var adresseElt = w.addElement(blocParam, 'input', {name:"parametres[adresse]",size:100, value:url});
+      var adresseElt = S.addElement(blocParam, 'input', {name:"parametres[adresse]",size:100, value:url});
       $adresse = $(adresseElt);
       $adresse.change(adresseOnChange);
-      w.addElement(blocParam, 'br');
-      w.addText(blocParam, "Il est possible d'accompagner la page internet d'une consigne et même de demander à l'élève de saisir un texte dans une zone de réponse.");
-      w.addElement(blocParam, 'br');
-      w.addText(blocParam, "Choisissez le paramétrage que vous souhaitez parmi ceux proposés ci-dessous.");
-      w.addElement(blocParam, 'br');
-      //w.addText(blocParam, "Le symbole ");
-      //w.addElement(blocParam, 'img', {src: options.pluginBaseUrl +"/images/forward.png"});
-      //w.addText(blocParam, " indique que les affichages seront proposés successivements et non simultanément.");
+      S.addElement(blocParam, 'br');
+      S.addText(blocParam, "Il est possible d'accompagner la page internet d'une consigne et même de demander à l'élève de saisir un texte dans une zone de réponse.");
+      S.addElement(blocParam, 'br');
+      S.addText(blocParam, "Choisissez le paramétrage que vous souhaitez parmi ceux proposés ci-dessous.");
+      S.addElement(blocParam, 'br');
+      //S.addText(blocParam, "Le symbole ");
+      //S.addElement(blocParam, 'img', {src: options.pluginBaseUrl +"/images/forward.png"});
+      //S.addText(blocParam, " indique que les affichages seront proposés successivements et non simultanément.");
       addOptions(blocParam, parametres, options);
-      w.addText(blocParam, "Vous pouvez forcer une dimension d'affichage (déconseillé pour une page, mieux vaut laisser vide et laisser le navigateur s'adapter, mais cela peut être utile pour une image).");
-      w.addElement(blocParam, 'br');
-      w.addElement(blocParam, 'label', {for:"largeur"}, "largeur (en pixels)");
-      w.addElement(blocParam, 'input', {id:"largeur", name:"parametres[largeur]",size:4, value:parametres.largeur});
-      w.addElement(blocParam, 'label', {for:"hauteur"}, "hauteur (en pixels)");
-      w.addElement(blocParam, 'input', {id:"hauteur", name:"parametres[hauteur]",size:4, value:parametres.hauteur});
-      w.addElement(blocParam, 'br');
+      S.addText(blocParam, "Vous pouvez forcer une dimension d'affichage (déconseillé pour une page, mieux vaut laisser vide et laisser le navigateur s'adapter, mais cela peut être utile pour une image).");
+      S.addElement(blocParam, 'br');
+      S.addElement(blocParam, 'label', {for:"largeur"}, "largeur (en pixels)");
+      S.addElement(blocParam, 'input', {id:"largeur", name:"parametres[largeur]",size:4, value:parametres.largeur});
+      S.addElement(blocParam, 'label', {for:"hauteur"}, "hauteur (en pixels)");
+      S.addElement(blocParam, 'input', {id:"hauteur", name:"parametres[hauteur]",size:4, value:parametres.hauteur});
+      S.addElement(blocParam, 'br');
 
-      w.addElement(blocParam, 'button', {onClick:adresseOnChange}, "Prévisualiser la page");
-      iframeApercu = w.addElement(container, 'iframe',{id:"iframeApercu"});
+      S.addElement(blocParam, 'button', {onClick:adresseOnChange}, "Prévisualiser la page");
+      iframeApercu = S.addElement(container, 'iframe',{id:"iframeApercu"});
     }
 
 
@@ -238,7 +238,8 @@ try {
     };
   });
 } catch (error) {
-  if (typeof window.addError !== 'undefined') window.addError(error);
-  if (typeof console !== 'undefined' && console.error) console.error(error);
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
+  }
 }
-

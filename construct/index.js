@@ -32,7 +32,7 @@
 'use strict'
 
 /**
- * @fileOverview Définition de l'application
+ * Fichier principal de l'application (à passer en argument de node), avec
  * - chargement lassi
  * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
  * - ajout d'éventuels composants en prérequi|postrequis définis dans la conf

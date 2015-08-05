@@ -30,281 +30,277 @@
  */
 
 /**
- * Le chargeur générique pour l'affichage de toutes les ressources
+ * Afficheur générique pour l'affichage de toutes les ressources
  * appelé avant les plugins (c'est sa fct load qui chargera le bon)
  *
- * Son chargement ajoute en global les méthodes addCss, addElement, getElement, addError, hideTitle
- * et log (qui ne fait rien sauf si on appelle init avec options.isDev à true), log.error affiche toujours
- *
+ * Son chargement déclenche celui de init qui ajoute en global nos méthodes utilitaires, cf {@link namespace:Sesamath}
  */
+
 /* global window, define, require, alert */
+
 if (typeof define === 'undefined' || typeof require === 'undefined') {
   alert("requireJs doit être chargé avant ce fichier");
 } else if (typeof window === 'undefined') {
   throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
 } else {
-  // on peut définir notre module
-  define(['/init.js'], function (init) {
+
+  // faut d'abord un module sans dépendance pour pouvoir la charger avec le bon chemin si besoin
+  define(function () {
     "use strict";
-    /********************
-     * Fonctions privées
-     */
-
     /**
-     * Retourne true si l'argument est une string
-     * @param arg
-     * @returns {boolean}
+     * Module d'une seule fonction pour afficher une ressource quelconque.
+     * Il chargera le bon afficheur en lui passant les options attendues, en créant si besoin les contereurs dans le dom courant.
+     * @service display
+     * @param {Ressource}     ressource La ressource à afficher
+     * @param {initOptions}   [options] Les options éventuelles (passer sesathequeBase si ce js est chargé sur un autre domaine)
+     * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
      */
-    function isFunction(arg) {
-      return (typeof arg === 'function');
-    }
-
-    /**
-     * Retourne true si l'argument est une string
-     * @param arg
-     * @returns {boolean}
-     */
-    function isString(arg) {
-      return (typeof arg === 'string');
-    }
-
-    /**
-     * Récupère un paramètre de l'url courante
-     * Inspiré de http://stackoverflow.com/a/11582513
-     * Attention, les + sont transformés en espace (RFC 1738), les %20 aussi (RFC 3986),
-     * pour récupérer des + faut qu'ils soient correctement encodés en %2B
-     * @param name Le nom du paramètre
-     * @returns Sa valeur (ou null s'il n'existait pas)
-     */
-    function getURLParameter(name) {
-      var regexp = new RegExp('[?|&]' + name + '=([^&#]+?)(&|#|$)');
-      var param = regexp.exec(window.location.search);
-      if (param) {
-        param = decodeURIComponent(param[1].replace(/\+/g, '%20'));
-      }
-      return param;
-    }
-
-    /**
-     * Ajoute une méthode saveResultat aux options si besoin
-     * @param {object}          options      L'objet sur lequel on ajoutera la methode saveResultat
-     * @param {string|function} traiteResult L'url vers laquelle poster, ou une fct de callback
-     * @param {function}        Resultat     Le constructeur Resultat
-     */
-    function addSaveResultat(options, traiteResult, Resultat) {
-      /*global XMLHttpRequest*/
-      /** Le conteneur du picto enregistrement */
-      var divFeedback = window.document.getElementById('pictoFeedback');
-
-      /** Éteint le feedback */
-      function feedbackOff() {
-        if (divFeedback) divFeedback.className = 'feedbackOff';
-      }
-
-      /** Allume le feedback OK pour 4s */
-      function feedbackOk() {
-        if (divFeedback) {
-          divFeedback.className = 'feedbackOk';
-          setTimeout(feedbackOff, 4000);
-        }
-      }
-
-      /** Allume le feedback KO pour 4s */
-      function feedbackKo() {
-        if (divFeedback) {
-          divFeedback.className = 'feedbackKo';
-          setTimeout(feedbackOff, 4000);
-        }
-      }
-
-      // vérif minimale
-      if (traiteResult && !isFunction(traiteResult) && !isString(traiteResult)) {
-        throw new Error("option de traitement du score incorrecte.");
-      }
-      if (isString(traiteResult) && traiteResult.substr(0, 4) !== 'http') {
-        throw new Error("Il faut fournir une url absolue pour envoyer des résultats.");
-      }
-
+    var display = function (ressource, options, next) {
       /**
-       * Envoi un résultat en ajax (ou à la callback) pour sauvegarde
-       * @param result       {object}   Le résultat à envoyer
-       * @param [retourUser] {function} La fonction à rappeler avec le retour de l'appel ajax
+       * Fait le chargement proprement dit après l'init
+       * @param {Error} [error] Une erreur éventuelle à l'init
        */
-      options.saveResultat = function (result, retourUser) {
-        /**
-         * Gère l'affichage du feedback
-         * @param retour Le retour de l'envoi du score
-         */
-        function feedback(retour) {
-          log('feedback', retour);
-          if (retour && retour.ok && retour.ok === true) {
-            feedbackOk();
-          } else {
-            if (retour && retour.error) w.addError(retour.error);
-            feedbackKo();
-          }
-          // et on appelle retourUser si on nous l'a fourni
-          if (retourUser) retourUser(retour);
-        }
+      function load(error) {
+        if (error) next(error);
+        else {
+          /**
+           * Les options complétés par init
+           * @name options
+           * @type {displayOptions}
+           */
+          S.log('display avec la ressource', ressource);
+          S.log('et les options après init', options);
 
-        log("saveResultat display a reçu", result);
-        var resultat = new Resultat(result);
-        // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
-        ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
-          var paramValue = getURLParameter(paramName) || options[paramName];
-          if (paramValue) resultat[paramName] = paramValue;
-        });
-        // @todo ajouter des vérifs minimales
+          // ajoute de la css commune à toutes les ressources ici
+          S.addCss(options.sesathequeBase + 'styles/ressourceDisplay.css');
 
-        // si on nous a passé une fct on lui envoie le résultat
-        if (isFunction(traiteResult)) {
-          log('on envoie ce résultat à la fct qui nous a été passé en param', resultat);
-          traiteResult(resultat);
-        } else {
-          log("on va poster ce résultat vers " + traiteResult, resultat);
-          // c'est une url, on gère l'envoi
-          if (typeof XMLHttpRequest === "undefined") {
-            // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-            throw new Error("Le navigateur ne supporte pas les appels ajax, impossible d'envoyer des résultats");
-          }
-          // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-          var xhr = new XMLHttpRequest();
-          // pour que le navigateur envoie les cookies
-          xhr.withCredentials = true;
+          // tente de charger le plugin du type de ressource
+          var name = ressource.typeTechnique;
+          var modules = [name];
+          // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct
+          var traiteResultat = options.urlResultatCallback || options.resultatCallback;
+          if (!traiteResultat && options.resultatCallback) traiteResultat = options.resultatCallback;
+          if (traiteResultat) modules.push('Resultat');
 
-
-          xhr.timeout = ajaxTimeout;
-          // les différentes callback
-          xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 400) {
-              try {
-                var retour = JSON.parse(xhr.responseText);
-                feedback(retour);
-              } catch (error) {
-                feedback({error: "La réponse de l'enregistrement du résultat est invalide"});
+          require(modules, function (plugin, Resultat) {
+            try {
+              if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' + name + ' a échoué');
+              if (typeof plugin.display !== 'function') throw new Error('Le plugin ' + name + " n'a pas de méthode display");
+              S.log('plugin ' + name + ' chargé');
+              if (options.container) options.container.innerHTML = '';
+              else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource");
+              if (options.errorsContainer) options.errorsContainer.innerHTML = '';
+              else throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs");
+              // On vire le titre si on nous le demande via les options ou un param dans l'url
+              if (options.hasOwnProperty('showTitle') && !options.showTitle || /\?.*showTitle=0/.test(wd.URL)) {
+                ST.hideTitle();
               }
-            } else {
-              // On a une réponse mais c'est une erreur
-              feedback({
-                error: "La réponse de l'enregistrement du résultat est une erreur " +
-                       xhr.status + ' : ' + xhr.responseText
+              // on regarde s'il faut ajouter une fct de sauvegarde des résultats
+              if (Resultat) addResultatCallback(options, traiteResultat, Resultat);
+              // on lui ajoute toujours ça
+              options.pluginBase = options.sesathequeBase +"plugins/" +name +"/";
+              // on peut afficher
+              plugin.display(ressource, options, function (error) {
+                if (error) {
+                  S.log("le display a terminé mais renvoyé l'erreur", error);
+                  ST.addError(error);
+                } else {
+                  S.log("le display a terminé sans erreur");
+                }
+                if (next) next(error);
               });
-            }
-          };
-
-          xhr.onerror = function () {
-            // Pb de connexion au serveur
-            feedback({error: "Impossible d'envoyer le résultat (à " + traiteResult + ")"});
-          };
-
-          xhr.ontimeout = function () {
-            feedback({
-              error: "Pas de réponse de l'enregistrement du résultat après " +
-                     Math.floor(ajaxTimeout / 1000) + "s d'attente."
-            });
-          };
-
-          // et on envoie
-          xhr.open('POST', traiteResult, true);
-          xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-          try {
-            xhr.send(JSON.stringify(resultat));
-          } catch (error) {
-            feedback({error: "Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
-          }
-        } // fin else ajax
-      }; // fin définition options.saveResultat
-    } // addSaveResultat
-
-    try {
-      // deux raccourcis
-      var w = window;
-      var wd = window.document;
-      /** Le chemin racine de la sésathèque, avec slash de fin */
-      var rootPath = '/';
-      /** Un flag pour savoir si l'init a déjà été fait */
-      var isInitDone = false;
-      /**
-       * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
-       * @type {number}
-       */
-      var ajaxTimeout = 10000;
-      /**
-       * Et notre module js que l'on exportera
-       */
-      var displayModule = {};
-
-
-      /**
-       * Initialise les chemins des librairies pour les require des plugins, ainsi que les containers html
-       * @param options
-       */
-      displayModule.init = function (options) {
-        if (!isInitDone) {
-          init(options);
-          w.log('options après init', options);
-          isInitDone = true;
-        }
-      };
-
-      /**
-       * Charge une ressource et le plugin qui la gère, puis appelle la methode display du plugin
-       * @param ressource
-       * @param {object} [options]
-       * @param {function} [next] Fct appelée à la fin du chargement avec une erreur ou undefined
-       */
-      displayModule.load = function (ressource, options, next) {
-        w.log('display.load avec la ressource', ressource);
-        // init du dom, des options et des fcts globales
-        displayModule.init(options);
-        w.log('et les options après init', options);
-
-        // ajoute de la css commune à toutes les ressources ici
-        w.addCss(rootPath + 'styles/ressourceDisplay.css');
-
-        // tente de charger le plugin du type de ressource
-        var name = ressource.typeTechnique;
-        var modules = [name];
-        // pour envoyer les résultats, on regarde si on nous fourni une url
-        var traiteResultat = getURLParameter("urlScoreCallback") || options.urlScoreCallback;
-        // ou une fct de callback à qui l'envoyer
-        if (!traiteResultat && options.saveResultat) traiteResultat = options.saveResultat;
-        if (traiteResultat) modules.push('Resultat');
-
-        require(modules, function (plugin, Resultat) {
-          try {
-            if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' + name + ' a échoué');
-            if (typeof plugin.display !== 'function') throw new Error('Le plugin ' + name + " n'a pas de méthode display");
-            w.log('plugin ' + name + ' chargé');
-            if (options.container) options.container.innerHTML = '';
-            if (options.errorsContainer) options.errorsContainer.innerHTML = '';
-log("errorsContainer", options.errorsContainer)
-            // On vire le titre si on nous le demande via les options ou un param dans l'url
-            if (options.hasOwnProperty('showTitle') && !options.showTitle || /\?.*showTitle=0/.test(wd.URL)) {
-              w.hideTitle();
-            }
-            // on regarde s'il faut ajouter une fct de sauvegarde des résultats
-            if (Resultat) addSaveResultat(options, traiteResultat, Resultat);
-            // on peut afficher
-            plugin.display(ressource, options, function (error) {
-              if (error) {
-                log("le display a terminé mais renvoyé l'erreur", error);
-                w.addError(error);
-              } else {
-                w.log("le display a terminé sans erreur");
+            } catch (error) {
+              if (ST.addError) ST.addError(error.toString());
+              else if (console && console.error) {
+                console.error("Sesamath.Sesatheque.addError n'existe pas");
+                console.error(error);
               }
-              if (next) next(error);
-            });
-          } catch (error) {
-            w.addError(error.toString());
+            }
+          });
+        }
+      }
+
+      /**
+       * Ajoute une méthode resultatCallback aux options si besoin
+       * @private
+       * @param {Object}          options      L'objet sur lequel on ajoutera la methode resultatCallback
+       * @param {string|function} traiteResultat L'url vers laquelle poster, ou une fct de callback
+       * @param {function}        Resultat     Le constructeur Resultat
+       */
+      function addResultatCallback(options, traiteResultat, Resultat) {
+        /*global XMLHttpRequest*/
+        // Le conteneur du picto enregistrement
+        var divFeedback = wd.getElementById('pictoFeedback');
+
+        // Éteint le feedback */
+        function feedbackOff() {
+          if (divFeedback) divFeedback.className = 'feedbackOff';
+        }
+
+        // Allume le feedback OK pour 4s
+        function feedbackOk() {
+          if (divFeedback) {
+            divFeedback.className = 'feedbackOk';
+            setTimeout(feedbackOff, 4000);
           }
+        }
+
+        // Allume le feedback KO pour 4s
+        function feedbackKo() {
+          if (divFeedback) {
+            divFeedback.className = 'feedbackKo';
+            setTimeout(feedbackOff, 4000);
+          }
+        }
+
+        // vérif minimale
+        if (traiteResultat && !S.isFunction(traiteResultat) && !S.isString(traiteResultat)) {
+          throw new Error("option de traitement du score incorrecte.");
+        }
+        if (S.isString(traiteResultat) && traiteResultat.substr(0, 4) !== 'http') {
+          throw new Error("Il faut fournir une url absolue pour envoyer des résultats.");
+        }
+
+        /**
+         * Envoi un résultat en ajax ou à la callback pour sauvegarde et appelle saveCallback avec le retour
+         * @private
+         * @param {Object}   result         Le résultat à envoyer (passera par le constructeur Resultat)
+         * @param {function} [saveCallback] La fonction à rappeler avec le retour de l'appel ajax ou de la callback de sauvegarde
+         */
+        options.resultatCallback = function (result, saveCallback) {
+          /**
+           * Gère l'affichage du feedback puis appelle saveCallback avec le retour
+           * @private
+           * @param retour Le retour de l'envoi du score
+           */
+          function feedback(retour) {
+            S.log('feedback', retour);
+            if (retour && (retour.ok && retour.ok === true) || (retour.success && retour.success === true)) {
+              feedbackOk();
+            } else {
+              if (retour && retour.error) ST.addError(retour.error);
+              feedbackKo();
+            }
+            // et on appelle saveCallback si on nous l'a fourni
+            if (saveCallback) saveCallback(retour);
+          }
+
+          /**
+           * poste resultat en ajax vers traiteResultat puis appellera feedback avec le retour
+           * @private
+           * @param {Resultat} resultat
+           */
+          function sendAjax (resultat) {
+            // c'est une url, on gère l'envoi
+            if (typeof XMLHttpRequest === "undefined") {
+              // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+              throw new Error("Le navigateur ne supporte pas les appels ajax, impossible d'envoyer des résultats");
+            }
+            // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+            var xhr = new XMLHttpRequest();
+            // pour que le navigateur envoie les cookies
+            xhr.withCredentials = true;
+
+
+            xhr.timeout = ajaxTimeout;
+
+            // les différentes callback
+            xhr.onload = function () {
+              if (xhr.status >= 200 && xhr.status < 400) {
+                try {
+                  var retour = JSON.parse(xhr.responseText);
+                  feedback(retour);
+                } catch (error) {
+                  feedback({error: "La réponse de l'enregistrement du résultat est invalide"});
+                }
+              } else {
+                // On a une réponse mais c'est une erreur
+                feedback({
+                  error: "La réponse de l'enregistrement du résultat est une erreur " +
+                  xhr.status + ' : ' + xhr.responseText
+                });
+              }
+            };
+
+            xhr.onerror = function () {
+              // Pb de connexion au serveur
+              feedback({error: "Impossible d'envoyer le résultat (à " + traiteResultat + ")"});
+            };
+
+            xhr.ontimeout = function () {
+              feedback({
+                error: "Pas de réponse de l'enregistrement du résultat après " +
+                Math.floor(ajaxTimeout / 1000) + "s d'attente."
+              });
+            };
+
+            // et on envoie
+            xhr.open('POST', traiteResultat, true);
+            xhr.setRequestHeader('Content-type', 'text/plain'); // pour éviter le preflight
+            try {
+              xhr.send(JSON.stringify(resultat));
+            } catch (error) {
+              feedback({error: "Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
+            }
+          }
+
+          S.log("resultatCallback display a reçu", result);
+          var resultat = new Resultat(result);
+          // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
+          ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
+            var paramValue = S.getURLParameter(paramName) || options[paramName];
+            if (paramValue) resultat[paramName] = paramValue;
+          });
+          // @todo ajouter des vérifs minimales
+
+          // si on nous a passé une fct on lui envoie le résultat
+          if (S.isFunction(traiteResultat)) {
+            S.log('on envoie ce résultat à la fct qui nous a été passé en param', resultat);
+            traiteResultat(resultat);
+          } else { // isString ok plus haut
+            S.log("on va poster ce résultat vers " + traiteResultat, resultat);
+            sendAjax(resultat);
+          }
+        }; // fin définition options.resultatCallback
+      } // addResultatCallback
+
+      /**
+       * MAIN
+       */
+      try {
+        // raccourcis
+        var w = window;
+        var wd = window.document;
+        if (typeof w.Sesamath === "undefined") w.Sesamath = {};
+        var S = window.Sesamath;
+        if (!S.Sesatheque) S.Sesatheque = {};
+        var ST = S.Sesatheque;
+
+        /**
+         * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
+         * @private
+         * @type {number}
+         */
+        var ajaxTimeout = 10000;
+
+        // on appelle la conf de require, en cross domain si on est appelé avec sesathequeBase
+        // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
+        var base = options.sesathequeBase || "/";
+        if (base.substr(-1) !== "/") base += "/";
+        options.sesathequeBase = base;
+        // tant que l'init a pas été fait require va chercher en relatif à la page courante, faut donc préciser en absolu
+        var initFile = base + "init.js";
+        require([initFile], function (init) {
+          init(options, load);
         });
-      };
+      } catch (error) {
+        if (console && console.error) console.error(error);
+        // pb de chargement probable, on explicite
+        var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.sesathequeBase (" +error.toString() +")");
+        next(err);
+      }
+    };
 
-      return displayModule;
-
-    } catch (error) {
-      w.addError(error);
-    }
+    return display;
   });
 }

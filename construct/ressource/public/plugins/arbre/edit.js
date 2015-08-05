@@ -33,7 +33,7 @@
  * @file Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
  */
 try {
-  define(['jstreeConverter', '/apiClient.js', 'jquery1', 'jstree'], function (jstreeConverter, apiClient) {
+  define(['tools/jstreeConverter', 'apiClient', 'jquery1', 'jstree'], function (jstreeConverter, apiClient) {
     /* jshint jquery:true */
     "use strict";
 
@@ -55,8 +55,8 @@ try {
     }
 
     function addLoadSrc() {
-      w.addElement(container, 'span', null, "arbre source à charger ");
-      inputRef = w.addElement(container, 'input', {id:"loadRef", type:'text'});
+      S.addElement(container, 'span', null, "arbre source à charger ");
+      inputRef = S.addElement(container, 'input', {id:"loadRef", type:'text'});
       $inputRef = $(inputRef);
       // enter doit pas valider le form mais charger la ref
       $inputRef.keypress(function (event) {
@@ -66,20 +66,21 @@ try {
         }
       });
       // lien de chargement
-      loadLink = w.addElement(container, 'a', {href:'#'}, ' afficher');
+      loadLink = S.addElement(container, 'a', {href:'#'}, ' afficher');
       $(loadLink).click(loadSrc);
       // un div pour les erreurs
-      var loadError = w.addElement(container, 'p', {class:"error"});
+      var loadError = S.addElement(container, 'p', {class:"error"});
       $loadError = $(loadError);
     }
 
     /**
      * Crée un json de la liste des enfants de l'arbre destination et le met dans le textarea
+     * @private
      */
     function dstTreeToTextarea() {
       var jstree = $.jstree.reference($dstTree);
       var enfants;
-      log("saveDst avec", jstree);
+      S.log("saveDst avec", jstree);
       try {
         // on veut pas les enfants de # (un seul, l'arbre complet), mais ceux de notre arbre, 1er (et seul) enfant de root
         var nodeId = jstree._model.data['#'].children[0];
@@ -87,7 +88,7 @@ try {
       } catch (error) {
         log.error(error);
       }
-      log("On récupère les enfants", enfants);
+      S.log("On récupère les enfants", enfants);
       var enfantsStr = '';
       try {
         enfantsStr = JSON.stringify(enfants, null, 2);
@@ -98,58 +99,60 @@ try {
       if ($textarea) {
         $textarea.val(enfantsStr);
       } else {
-        w.addError("zone de texte enfants non trouvée");
+        ST.addError("zone de texte enfants non trouvée");
       }
     }
 
     /**
-     * Charge l'arbre source, initialise le dom et les comportements 
+     * Charge l'arbre source, initialise le dom et les comportements
+     * @private
      * @param options
      */
     function initDom(options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-      if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
+      if (options.vendorsBaseUrl) S.addCss(options.vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
       // nos éléments html
       var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
       container = window.document.getElementById('display');
       $container = $(container);
 
       // ancre
-      w.addElement(blocTexte, 'a', {name:"enfants"});
+      S.addElement(blocTexte, 'a', {name:"enfants"});
       // lien et comportement pour repasser en graphique
-      var linkShowGraphic = w.addElement(blocTexte, 'a', {href:'#enfants'}, 'passer en mode graphique');
+      var linkShowGraphic = S.addElement(blocTexte, 'a', {href:'#enfants'}, 'passer en mode graphique');
       $linkShowGraphic = $(linkShowGraphic);
       $linkShowGraphic.click(showGraphic);
 
       // lien et comportement pour passer en mode texte
-      var linkShowTxt = w.addElement(blocTexte, 'a', {href:'#enfants'}, "passer en mode texte");
+      var linkShowTxt = S.addElement(blocTexte, 'a', {href:'#enfants'}, "passer en mode texte");
       $linkShowTxt = $(linkShowTxt);
       $linkShowTxt.click(showTxt);
 
       addLoadSrc();
 
       // la recherche
-      var searchContainer = w.addElement(container, "div", {class: 'search'});
-      w.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ');
-      searchInput = w.addElement(searchContainer, 'input', {type: 'text'});
+      var searchContainer = S.addElement(container, "div", {class: 'search'});
+      S.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ');
+      searchInput = S.addElement(searchContainer, 'input', {type: 'text'});
 
-      srcGroup = w.addElement(container, 'div', {id:"srcGroup"});
-      w.addElement(srcGroup, 'span', null, "arbre source");
-      srcTree = w.addElement(srcGroup, 'div');
+      srcGroup = S.addElement(container, 'div', {id:"srcGroup"});
+      S.addElement(srcGroup, 'span', null, "arbre source");
+      srcTree = S.addElement(srcGroup, 'div');
 
-      var dstGroup = w.addElement(container, 'div', {id:"dstGroup"});
-      w.addElement(dstGroup, 'strong', null, "arbre à modifier");
-      w.addElement(dstGroup, 'em', {style:{"font-size":"0.8em"}}, " (clic droit pour enlever des éléments ou ajouter des dossiers)");
-      dstTree = w.addElement(dstGroup, 'div');
+      var dstGroup = S.addElement(container, 'div', {id:"dstGroup"});
+      S.addElement(dstGroup, 'strong', null, "arbre à modifier");
+      S.addElement(dstGroup, 'em', {style:{"font-size":"0.8em"}}, " (clic droit pour enlever des éléments ou ajouter des dossiers)");
+      dstTree = S.addElement(dstGroup, 'div');
 
-      w.addElement(container, 'p', {style:"clear:both;"}, "Aperçu d'un élément");
-      iframeApercu = w.addElement(container, 'iframe', {id:"apercu"});
+      S.addElement(container, 'p', {style:"clear:both;"}, "Aperçu d'un élément");
+      iframeApercu = S.addElement(container, 'iframe', {id:"apercu"});
 
       showGraphic();
     }
 
     /**
      * Charge l'arbre destination
+     * @private
      * @param arbre
      */
     function loadDst(arbre) {
@@ -168,6 +171,7 @@ try {
           /**
            * La liste de nos éléments de menu
            * @see http://www.jstree.com/api/#/?q=$.jstree.defaults&f=$.jstree.defaults.contextmenu.items
+           * @private
            * @param node Le node, avec les propriétés a_attr, icon, text
            * @param cb à rappeler avec les items du menu contextuel pour ce node
            */
@@ -221,7 +225,7 @@ try {
               };
             }
             addApercu(items, node);
-            log("clic droit sur", node);
+            S.log("clic droit sur", node);
             cb(items);
           }
         }
@@ -230,13 +234,13 @@ try {
 
       $dstTree.jstree(jstData);
       //var jstree = $.jstree.reference($dstTree);
-      //log('fct qui renvoie les items par défaut', jstree.settings.contextmenu.items.toString())
+      //S.log('fct qui renvoie les items par défaut', jstree.settings.contextmenu.items.toString())
 
       // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
       // on écoute donc l'événement select sur le jstree
       $dstTree.on('select_node.jstree', function (e, data) {
         var jstNode = data.node.original;
-        log("clic sur", jstNode);
+        S.log("clic sur", jstNode);
         if (jstNode && jstNode.a_attr && jstNode.a_attr['data-typeTechnique'] === 'arbre') {
           // on fait du toggle
           if ($dstTree.jstree('is_open', data.node)) $dstTree.jstree('close_node', data.node);
@@ -247,22 +251,23 @@ try {
 
     /**
      * Charge l'arbre source
+     * @private
      * @return {boolean}
      */
     function loadSrc() {
       var ref = $inputRef.val();
-      log("On va charger en source " +ref);
+      S.log("On va charger en source " +ref);
       if (ref) {
         apiClient.getRessource(ref, function (error, ressource) {
           if (error) {
-            w.addError("Erreur au chargement de " + ref + " : " + error.toString(), 5);
+            ST.addError("Erreur au chargement de " + ref + " : " + error.toString(), 5);
           } else if (ressource && ressource.typeTechnique === 'arbre') {
             arbreInitial = ressource;
             // on charge
             var rootElt = jstreeConverter.toJstree(ressource);
             rootElt.state = {opened: true};
             modifIco(rootElt);
-            log("On a récupéré un arbre, devenu", rootElt);
+            S.log("On a récupéré un arbre, devenu", rootElt);
             var jstData = {
               core : {
                 check_callback : false,
@@ -280,13 +285,13 @@ try {
                     items.replace = {
                       label : "Charger ici",
                       action : function () {
-                        log("Charger en source " +ref);
+                        S.log("Charger en source " +ref);
                         $inputRef.val(ref);
                         loadSrc();
                       }
                     };
                   }
-                  log("clic droit dans la source sur", node);
+                  S.log("clic droit dans la source sur", node);
                   cb(items);
                 }
               },
@@ -296,13 +301,13 @@ try {
             var srcTreeRef = $.jstree.reference($srcTree);
             if (srcTreeRef) srcTreeRef.destroy();
             $srcTree.jstree(jstData);
-            //log("après chargement de l'arbre source on a", $.jstree.reference($srcTree));
+            //S.log("après chargement de l'arbre source on a", $.jstree.reference($srcTree));
 
             // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
             // on écoute donc l'événement select sur le jstree
             $srcTree.on('select_node.jstree', function (e, data) {
               var jstNode = data.node.original;
-              log("clic sur", jstNode);
+              S.log("clic sur", jstNode);
               if (jstNode && jstNode.a_attr && jstNode.a_attr['data-typeTechnique'] === 'arbre') {
                 // on fait du toggle
                 if ($srcTree.jstree('is_open', data.node)) $srcTree.jstree('close_node', data.node);
@@ -329,21 +334,22 @@ try {
               },
               5000
             );
-            log("Ressource chargée qui n'est pas un arbre", ressource);
+            S.log("Ressource chargée qui n'est pas un arbre", ressource);
           }
         });
       } else {
-        log("appel de load sans ref");
+        S.log("appel de load sans ref");
       }
       return false; // sinon il submit le form !
     } // loadSrc
 
     /**
      * Remplace les icones classique des dossiers par une icone "ref" quand c'est une ref (qui ne montre pas ses enfants)
+     * @private
      * @param jstNode
      */
     function modifIco(jstNode) {
-      //log("modifIco", jstree);
+      //S.log("modifIco", jstree);
       if (jstNode.children && jstNode.children.forEach) {
         jstNode.children.forEach(function (child) {
           if (child.children && child.children.length) {
@@ -360,6 +366,7 @@ try {
 
     /**
      * Récupère l'arbre jstree et complète le champ enfants avec
+     * @private
      */
     function saveDst() {
       if (!isTextMode) {
@@ -371,6 +378,7 @@ try {
 
     /**
      * Passe en mode texte
+     * @private
      */
     function showTxt() {
       $linkShowTxt.hide();
@@ -383,6 +391,7 @@ try {
 
     /**
      * passe en mode graphique
+     * @private
      */
     function showGraphic() {
       $linkShowGraphic.hide();
@@ -396,14 +405,21 @@ try {
       isTextMode = false;
     }
 
-    /**
+    /*********
      * MAIN
      */
     if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
     if (typeof jstreeConverter === 'undefined') throw new Error('Problème de chargement des dépendances');
     if (typeof display === 'undefined') throw new Error('Problème de chargement des dépendances');
 
+    // raccourcis
     var w = window;
+    var wd = window.document;
+    if (typeof w.Sesamath === "undefined") w.Sesamath = {};
+    var S = window.Sesamath;
+    if (!S.Sesatheque) S.Sesatheque = {};
+    var ST = S.Sesatheque;
+
     // les containers (variables locales au module), qui seront affectés par initDom()
     var iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, srcTree, dstTree;
     // quasi les mêmes jquerifiée
@@ -420,7 +436,7 @@ try {
         initDom(options);
         // on ajoute simplement un lien pour passer à la version graphique
         jstreeConverter.setBaseUrl(options.sesathequeBase);
-        log("edit de l'arbre", arbre);
+        S.log("edit de l'arbre", arbre);
         // nos arbres jstree
         $srcTree = $(srcTree);
         $dstTree = $(dstTree);
@@ -437,7 +453,9 @@ try {
     };
   });
 } catch (error) {
-  if (typeof window.addError !== 'undefined') window.addError(error);
-  if (typeof console !== 'undefined' && console.error) console.error(error);
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
+  }
 }
 

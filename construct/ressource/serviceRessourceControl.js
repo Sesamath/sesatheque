@@ -326,7 +326,7 @@ module.exports = function (EntityRessource) {
    * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
    * Ajoute des choses dans ressource.warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
    * @memberOf $ressourceControl
-   * @param {object} data Le post
+   * @param {Object} data Le post
    * @param {boolean} [partial=false] Passer true pour ne pas générer d'erreur sur des champs requis manquants
    * @param {function} next Si appelé sans error, la ressource est valide,
    *                        sinon y'a une error et des warnings|errors ajouté à la ressource initiale qui est renvoyée modifiée

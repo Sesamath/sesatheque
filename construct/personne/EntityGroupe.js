@@ -35,7 +35,7 @@
  * Un groupe d'utilisateurs
  * @constructor
  * @private
- * @param {object} initObj Un objet ayant des propriétés d'un groupe
+ * @param {Object} initObj Un objet ayant des propriétés d'un groupe
  */
 function Groupe(initObj) {
   if (!initObj) initObj = {}

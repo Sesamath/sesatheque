@@ -29,69 +29,79 @@
  * pour une explication en français)
  */
 
-/**
- * Ressource calculatice en flash
- * ex 5894 et suivants
- */
-/*global define, log, container, window */
+try {
+  define(['tools/swf'], function (swf) {
+    /**
+     * Ressource calculatice en flash
+     * ex 5894 et suivants
+     */
+    'use strict';
+    /**
+     * Module pour afficher les ressources ec2 (exercices calculatice en flash)
+     * @plugin ec2
+     */
+    var ec2 = {};
+    // raccourcis, si ça plante le catch gère
+    var S = window.Sesamath;
 
-define(['sesaswf'], function (sesaswf) {
-  'use strict';
-  /** Le module exporté avec sa méthode display */
-  var ec2 = {};
-  var baseEc2 = "http://www.labomep.net/exercices_calculatice";
+    // charger_options et enregistrer_score exportées dans le dom global par display
 
-  // charger_options et enregistrer_score exportées dans le dom global par display
+    /**
+     * Affiche la ressource dans l'élément d'id mepRess
+     * @memberOf ec2
+     * @param {Ressource}      ressource  L'objet ressource
+     * @param {displayOptions} options    Possibilité de passer ec2Base pour modifier http://ressources.sesamath.net/replication_calculatice/flash
+     * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
+     */
+    ec2.display = function (ressource, options, next) {
+      var ec2Base = S.getURLParameter("ec2Base") || options.ec2Base || "http://ressources.sesamath.net/replication_calculatice/flash";
+      var swfUrl;
 
-  /**
-   * Affiche la ressource dans l'élément d'id mepRess
-   * @param {Object}   ressource  L'objet ressource tel qu'il sort de la bdd
-   * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-   *                              et éventuellement resultCallback)
-   * @param {Function} next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
-   */
-  ec2.display = function (ressource, options, next) {
-    var swfUrl;
+      S.log('start ec2 display avec la ressource', ressource);
+      //les params minimaux
+      if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
+        throw new Error("Paramètres manquants");
+      }
+      // le swf
+      swfUrl = ec2Base + '/' + ressource.parametres.swf;
+      // les fcts exportées pour le swf
+      var optionsChargement = ressource.parametres.json || "defaut";
+      window.charger_options = function () {
+        return optionsChargement;
+      };
 
-    log('start ec2 display avec la ressource', ressource)
-    //les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
-      throw new Error("Paramètres manquants");
-    }
-    // le swf
-    swfUrl = baseEc2 + '/' + ressource.parametres.swf;
-    // les fcts exportées pour le swf
-    var optionsChargement = ressource.parametres.json || "defaut";
-    window.charger_options = function () {
-      return optionsChargement;
+      window.enregistrer_score = function (datasCalculatice) {
+        if (options && options.resultatCallback) {
+          S.log("résultats reçus", datasCalculatice);
+          options.resultatCallback({reponse: datasCalculatice});
+        }
+      };
+
+      // On réinitialise le conteneur
+      S.empty(options.container);
+
+      // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
+      options.container.setAttribute("width", 735); // change rien avec ff
+      options.container.style.width = '735px';
+
+      var swfOptions = {
+        largeur: 735,
+        hauteur: 450,
+        base: ec2Base + '/',
+        flashvars: {
+          contexte: 'LaboMEP', // encore utile ça ?
+          statut: 'eleve'
+        }
+      };
+
+      swf.load(options.container, swfUrl, swfOptions, next);
     };
 
-    window.enregistrer_score = function (datasCalculatice) {
-      if (options && options.resultCallback) {
-        log("résultats reçus", datasCalculatice);
-        options.resultCallback({reponse: datasCalculatice});
-      }
-    };
-
-    // On réinitialise le conteneur
-    container.innerHTML = '';
-
-    // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    container.setAttribute("width", 735); // change rien avec ff
-    container.style.width = '735px';
-
-    options = {
-      largeur  : 735,
-      hauteur  : 450,
-      base     : baseEc2 + '/',
-      flashvars: {
-        contexte: 'LaboMEP', // encore utile ça ?
-        statut  : 'eleve'
-      }
-    }
-
-    sesaswf.load(container, swfUrl, options, next);
+    return ec2;
+  });
+} catch (error) {
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
   }
-
-  return ec2;
-});
+}

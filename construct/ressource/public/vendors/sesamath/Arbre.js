@@ -40,6 +40,7 @@
 if (typeof define === 'function') define(function () {return Arbre;});
 else if (typeof module === 'object') module.exports = Arbre;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
+// pas trouvé comment documenté correctement un constructeur dans une fonction anonyme auto-exécutée…
 
 /**
  * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
@@ -52,7 +53,6 @@ else if (typeof module === 'object') module.exports = Arbre;
  * @constructor
  */
 function Arbre(initObj) {
-  log('constructeur Arbre avec', initObj);
   if (! initObj instanceof Object) initObj = {};
   /**
    * L'identifiant de l'arbre (pour éventuellement le référencer comme enfant d'un autre arbre)

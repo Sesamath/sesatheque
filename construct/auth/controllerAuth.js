@@ -38,10 +38,10 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
      * Controleur pour gérer l'authentification
      * @controller authController
      * @extends Controller
-     * @requires {object} $auth
-     * @requires {object} $accessControl
-     * @requires {object} $views
-     * @requires {object} $flashMessages
+     * @requires {Object} $auth
+     * @requires {Object} $accessControl
+     * @requires {Object} $views
+     * @requires {Object} $flashMessages
      */
 
     /**

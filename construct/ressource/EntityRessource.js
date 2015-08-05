@@ -38,9 +38,10 @@ module.exports = function (EntityRessource) {
   var configRessource = require('./config')
 
   /**
+   * Notre entité ressource, cf [Entity](lassi/Entity.html)
    * @entity EntityRessource
-   * @param {object} initObj Un objet ayant des propriétés d'une ressource
-   * @extends EntityInstance
+   * @param {Object} initObj Un objet ayant des propriétés d'une ressource
+   * @extends Entity
    * @extends Ressource
    */
   EntityRessource.construct(function (initObj) {

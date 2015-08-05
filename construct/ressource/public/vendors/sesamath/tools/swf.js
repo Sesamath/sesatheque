@@ -33,7 +33,7 @@
  * @file Un module js pour charger un swf dans un container, utilisé par plusieurs plugins de ressources, contient swf object
  */
 
-/*global define, require, log, addCss, container, errorsContainer, baseUrl, window */
+/*global define, require, window */
 
 /*	SWFObject v2.2 <http://code.google.com/p/swfobject/>
  is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -47,7 +47,7 @@ var swfobject = function(){var D="undefined",r="object",S="Shockwave Flash",W="S
 
 /**
  * Module pour charger des swf avec swfobject (qu'il contient et déclare en global)
- * @service swf
+ * @service tools/swf
  */
 define({
   load   : load
@@ -55,7 +55,7 @@ define({
 
 /**
  * Charge un swf dans l'élément container
- * @memberOf swf
+ * @memberOf tools/swf
  * @param {Element}        container L'élément html dans lequel on ajoutera
  * @param {string}         swfHref   Le chemin vers le swf à charger
  * @param {swfloadOptions} [options] Des paramètres utilisés pour le chargement
@@ -70,12 +70,14 @@ function load(container, swfHref, options, next) {
   function callbackFn(e) {
     if (!next) next = function () {};
     var message
+    var S = (typeof Sesamath === "undefined") ? {} : Sesamath;
+    var ST = Sesamath.Sesatheque;
     if (e.success) {
-      if (typeof log !== "undefined") log("Lancement de " + swfHref +' réussi');
+      if (S.log) S.log("Lancement de " + swfHref +' réussi');
       next()
     } else {
       var errorMsg = "Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource.";
-      if (typeof window.addError !== "undefined") window.addError(errorMsg)
+      if (ST.addError) ST.addError(errorMsg)
       next(new Error(errorMsg))
     }
   }
@@ -116,9 +118,9 @@ function load(container, swfHref, options, next) {
 
 /**
  * @typedef swfloadOptions
- * @type {object}
+ * @type {Object}
  * @param {string} [id]        Id du div html que l'on va créer
- * @param {object} [flashvars] Les flashvars qui seront passées au swf
+ * @param {Object} [flashvars] Les flashvars qui seront passées au swf
  * @param {string} [base]      Une base à passer en paramètre au swf, tous les load lancés par le swf seront traité en relatif à cette base
  * @param {Integer} [hauteur=400] La hauteur d'affichage imposée au swf
  * @param {Integer} [largeur=400] La largeur d'affichage imposée au swf

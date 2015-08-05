@@ -29,9 +29,6 @@
  * pour une explication en français)
  */
 
-/**
- * @file Controleur de la route /api/
- */
 'use strict'
 
 /**
@@ -39,10 +36,10 @@
  * Toutes les routes contenant /public/ sont sans tenir compte de la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controlleurApi
- * @requires $ressourceRepository
- * @requires $ressourceConverter
- * @requires $ressourceControl
- * @requires $accessControl
+ * @requires {@link $ressourceRepository}
+ * @requires {@link $ressourceConverter}
+ * @requires {@link $ressourceControl}
+ * @requires {@link $accessControl}
  */
 
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl) {
@@ -726,7 +723,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 /**
  * Format de la réponse à une demande de liste
  * @typedef reponseListe
- * @type {object}
+ * @type {Object}
  * @property {boolean}                     success
  * @property {string}                      [error] Message d'erreur éventuel
  * @property {Ref[]|Compact[]|Ressource[]} liste   Une liste de Ref si aucun format n'a été précisé
@@ -771,7 +768,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 /**
  * Arguments à donner à une requête qui renvoie une liste de ressources
  * @typedef requeteListe
- * @type {object}
+ * @type {Object}
  * @property {string}             [json]    Tous les paramètres qui suivent dans une chaîne json (GET seulement, ignoré en POST)
  * @property {requeteArgFilter[]} [filters] Les filtres à appliquer
  * @property {string}             [orderBy] Un nom d'index
@@ -785,7 +782,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 /**
  * Format d'un filtre à passer à une requete de demande de liste
  * @typedef requeteArgFilter
- * @type {object}
+ * @type {Object}
  * @property {string} index  Le nom de l'index
  * @property {Array}  [values] Une liste de valeurs à chercher (avec des ou), remontera toutes les ressource ayant index si omis
  */

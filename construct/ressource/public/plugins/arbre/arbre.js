@@ -29,42 +29,46 @@
  * pour une explication en français)
  */
 
-/**
- * @file Affiche un arbre avec jstree
- */
 try {
-  define(['jstreeConverter', 'jquery1', 'jstree'], function (jstreeConverter) {
+  define(['tools/jstreeConverter', 'jquery1', 'jstree'], function (jstreeConverter) {
     "use strict";
     if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
     /* jshint jquery:true */
 
-    /** Notre module */
+    /**
+     * Module pour afficher un arbre
+     * @plugin arbre
+     */
     var arbre = {};
-    var w = window;
+
+    // raccourcis, si ça plante le catch gère
+    var S = window.Sesamath;
+    var ST = S.Sesatheque;
 
     /**
-     * Affiche l'arbre
-     * @param {Object}   ressource  L'arbre dans son format "ressource"
-     * @param {Object}   options    Les options (baseUrl, vendorsBaseUrl, container, errorsContainer,
-     *                              et éventuellement resultCallback)
-     * @param {Function} next       La fct à appeler quand la ressource sera chargée (sans argument ou avec une erreur)
+     * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles
+     * @memberOf arbre
+     * @param {Ressource}      ressource  L'objet ressource
+     * @param {displayOptions} options    Les options après init
+     * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
      */
     arbre.display = function (ressource, options, next) {
       var error;
       try {
-        log('arbre.display avec', ressource);
+        S.log('arbre.display avec', ressource);
         var container = options.container;
         if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
         var errorsContainer = options.errorsContainer;
         if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
-        // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-        if (options.vendorsBaseUrl) w.addCss(options.vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
+
+        S.addCss(options.sesathequeBase + 'vendors/jstree/dist/themes/default/style.min.css');
+        var baseUrl = options.sesathequeBase + 'plugins/arbre';
 
         // un div d'aperçu
-        //var apercuElt = w.getElement('iframe', {id: w.getNewId(), width:'50%',height:'400px', style : 'float:right;resize:both;overflow:scroll;'});
-        //var apercuElt = w.getElement('div', {id: w.getNewId(), style : 'float:right;width:50%;height:400px;resize:both;border:none;'});
-        //w.addElement(apercuElt, 'iframe', {style : 'width:100%;height:100%;border:none;'});
-        var apercuContainer = w.addElement(container, 'div', {style : {position:'absolute',"background-color":"#fff"}});
+        //var apercuElt = S.getElement('iframe', {id: S.getNewId(), width:'50%',height:'400px', style : 'float:right;resize:both;overflow:scroll;'});
+        //var apercuElt = S.getElement('div', {id: S.getNewId(), style : 'float:right;width:50%;height:400px;resize:both;border:none;'});
+        //S.addElement(apercuElt, 'iframe', {style : 'width:100%;height:100%;border:none;'});
+        var apercuContainer = S.addElement(container, 'div', {style : {position:'absolute',"background-color":"#fff"}});
         // en global car on s'en sert souvent, pas la peine de le recalculer dans chaque fct
         var $apercuContainer = $(apercuContainer);
         // un flag pour savoir si on est en mode aperçu (true, false ou null)
@@ -77,16 +81,17 @@ try {
 
         /**
          * Ajoute les boutons
+         * @private
          */
         var initApercu = function () {
-          log('init aperçu');
+          S.log('init aperçu');
           if (isApercu === null) {
-            apercuContainer.innerHTML = '';
+            S.empty(apercuContainer);
             // en relative
-            var boutons = w.addElement(apercuContainer, 'div', {style:{position:'absolute',"z-index":2,float:"right","right":0}});
-            var apercuFermer = w.addElement(boutons, 'img', {src:options.baseUrl +'/images/fermer.png', alt:"fermer l'aperçu", style:{float:'right'}});
-            var apercuAgrandir = w.addElement(boutons, 'img', {src:options.baseUrl +'/images/agrandir.png', alt:"agrandir l'aperçu", style:{float:'right'}});
-            var apercuReduire = w.addElement(boutons, 'img', {src:options.baseUrl +'/images/reduire.png', alt:"réduire l'aperçu", style:{float:'right'}});
+            var boutons = S.addElement(apercuContainer, 'div', {style:{position:'absolute',"z-index":2,float:"right","right":0}});
+            var apercuFermer = S.addElement(boutons, 'img', {src:baseUrl +'/images/fermer.png', alt:"fermer l'aperçu", style:{float:'right'}});
+            var apercuAgrandir = S.addElement(boutons, 'img', {src:baseUrl +'/images/agrandir.png', alt:"agrandir l'aperçu", style:{float:'right'}});
+            var apercuReduire = S.addElement(boutons, 'img', {src:baseUrl +'/images/reduire.png', alt:"réduire l'aperçu", style:{float:'right'}});
             $(apercuFermer).click(fermer);
             $(apercuAgrandir).click(agrandir);
             $(apercuReduire).click(reduire);
@@ -94,15 +99,15 @@ try {
             $apercuContainer.css('background-color', '#fff');
             $apercuContainer.show();
             // on ajoute l'iframe dedans
-            iframeApercu = w.addElement(apercuContainer, 'iframe', {style : {position:'absolute',"z-index":1,width:'100%',height:'100%'}});
+            iframeApercu = S.addElement(apercuContainer, 'iframe', {style : {position:'absolute',"z-index":1,width:'100%',height:'100%'}});
             isApercu = false;
           } else {
-            log.error('div apercu déjà initialisé');
+            S.log.error('div apercu déjà initialisé');
           }
         };
 
         var fermer = function fermer() {
-          log("on ferme");
+          S.log("on ferme");
           // on vide
           $apercuContainer.empty();
           iframeApercu = null;
@@ -112,7 +117,7 @@ try {
         };
 
         var agrandir = function () {
-          log("grand");
+          S.log("grand");
           if (isApercu === false) {
             $apercuContainer.css('top', '5%');
             $apercuContainer.css('left', '5%');
@@ -123,7 +128,7 @@ try {
         };
 
         var reduire = function() {
-          log("petit");
+          S.log("petit");
           if (isApercu) {
             $apercuContainer.height('30%');
             $apercuContainer.width('30%');
@@ -134,16 +139,16 @@ try {
         };
 
         // on crée un div pour le tree et ses compagnons
-        var caseTree = w.addElement(container, 'div');
+        var caseTree = S.addElement(container, 'div');
         // la recherche
-        var searchContainer = w.addElement(caseTree, "div", {class: 'search'});
-        w.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ');
-        var searchInput = w.addElement(searchContainer, 'input', {type:'text'});
+        var searchContainer = S.addElement(caseTree, "div", {class: 'search'});
+        S.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ');
+        var searchInput = S.addElement(searchContainer, 'input', {type:'text'});
 
 
         // l'arbre
-        var treeId = w.getNewId();
-        w.addElement(caseTree, "div", {id: treeId});
+        var treeId = S.getNewId();
+        S.addElement(caseTree, "div", {id: treeId});
         // l'élément root, pas encore un array
         var rootElt = jstreeConverter.toJstree(ressource);
         rootElt.state = {opened: true};
@@ -151,7 +156,7 @@ try {
         var jstData = {
           'core': {
             'data': function (node, next) {
-               //log('fct data', node);
+               //S.log('fct data', node);
                if(node.id == '#') {
                  next(rootElt);
                } else {
@@ -166,7 +171,7 @@ try {
                    }
                  }).success(next).error(function (jqXHR, textStatus, error) {
                    next(["Erreur lors de l'appel ajax pour récupérer les éléments"]);
-                   log(error);
+                   ST.addError(error);
                  });
                }
             }
@@ -177,8 +182,7 @@ try {
         var $tree = $('#' + treeId);
         $tree.jstree(jstData);
 
-        /**
-         * Pour récupérer un élément sous sa forme jstree, c'est (id est l'id jstree, sans #)
+        /* Pour récupérer un élément sous sa forme jstree, c'est (id est l'id jstree, sans #)
          * var jstNode = $.jstree.reference($tree).get_node(id);
          * et les data que l'on a mise sont dans
          * jstNode.original, par ex jstNode.original.a_attr['data-typeTechnique'];
@@ -201,7 +205,7 @@ try {
         // on écoute donc l'événement select sur le jstree
         $tree.on('select_node.jstree', function (e, data) {
           var jstNode = data.node.original;
-          log("on veut l'aperçu du node", jstNode);
+          S.log("on veut l'aperçu du node", jstNode);
           if (jstNode && jstNode.a_attr) {
             if (jstNode.a_attr['data-typeTechnique'] === 'arbre') {
               // on fait du toggle
@@ -212,7 +216,7 @@ try {
               // on resize avant chargement
               agrandir();
               // et on lui file une url à charger
-              log("on va charger " + jstNode.a_attr.href);
+              S.log("on va charger " + jstNode.a_attr.href);
               iframeApercu.src = jstNode.a_attr.href;
             }
           }
@@ -234,7 +238,8 @@ try {
     return arbre;
   });
 } catch (error) {
-  if (typeof window.addError !== 'undefined') window.addError(error);
-  if (typeof console !== 'undefined' && console.error) console.error(error);
+  if (typeof console !== 'undefined' && console.error) {
+    console.error("Il fallait probablement appeler init avant ce module");
+    console.error(error);
+  }
 }
-

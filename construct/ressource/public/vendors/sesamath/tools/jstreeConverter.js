@@ -32,6 +32,13 @@
   'use strict';
   var jstreeConverter = {};
   var baseUrl = (typeof baseUrl === 'undefined') ? '' : baseUrl;
+  var log;
+  // on prend celui-là si on le trouve
+  try {
+    log = window.Sesamath.log;
+  } catch (error) {
+    log = function () {};
+  }
   /**
    * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
    * @see http://www.jstree.com/docs/json/ pour le format
