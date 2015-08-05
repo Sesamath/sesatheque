@@ -61,6 +61,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
        * @param {Error} [error] Une erreur éventuelle à l'init
        */
       function load(error) {
+        S.log(window)
         if (error) next(error);
         else {
           /**
@@ -275,7 +276,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         var S = window.Sesamath;
         if (!S.Sesatheque) S.Sesatheque = {};
         var ST = S.Sesatheque;
-
         /**
          * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
          * @private

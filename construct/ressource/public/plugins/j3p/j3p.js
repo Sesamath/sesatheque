@@ -63,7 +63,7 @@ try {
       //les params minimaux
       if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
         throw new Error("Ressource incomplète");
-      if (!options.baseUrl || !options.container || !options.errorsContainer) throw new Error("Paramètres manquants");
+      if (!options.container || !options.errorsContainer) throw new Error("Paramètres manquants");
 
       // le domaine où prendre les js j3p
       if (options.isDev) {
