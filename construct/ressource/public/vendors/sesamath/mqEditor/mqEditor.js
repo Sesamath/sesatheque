@@ -64,7 +64,7 @@ define(["jquery1", "mathquill"], function () {
     var $ = w.jQuery;
     var wd = w.document;
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
+    var S = window.sesamath;
 
     /** expressions mathquill, une string (cmd) ou un tableau de tableaux (chacun passé à mathquill.apply) */
     var mqExpr = {

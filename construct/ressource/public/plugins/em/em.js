@@ -64,8 +64,8 @@ try {
       var params = ressource.parametres;
       var baseMepSwf, idSwf, swfUrl, largeur, hauteur, flashvars, swfParams, swfAttributes;
       // raccourcis, si ça plante le catch gère
-      var S = window.Sesamath;
-      var ST = S.Sesatheque;
+      var S = window.sesamath;
+      var ST = S.sesatheque;
 
       // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
       var divId = 'mepRess' + (new Date()).getTime();

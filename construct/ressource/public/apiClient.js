@@ -120,10 +120,10 @@ define(function () {
    * @type {string}
    */
   var sesathequeBase;
-  if (typeof Sesamath === "undefined") window.Sesamath = {};
-  var S = Sesamath;
-  if (!S.Sesatheque) S.Sesatheque = {};
-  var ST = S.Sesatheque;
+  if (typeof sesamath === "undefined") window.sesamath = {};
+  var S = sesamath;
+  if (!S.sesatheque) S.sesatheque = {};
+  var ST = S.sesatheque;
   if (ST.base) sesathequeBase = ST.base;
   else sesathequeBase = '/';
 

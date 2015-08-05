@@ -45,7 +45,7 @@ try {
     var histoReponses = [];
 
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
+    var S = window.sesamath;
 
     /**
      * Affiche une ressource calkc

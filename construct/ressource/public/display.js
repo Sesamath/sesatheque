@@ -33,7 +33,7 @@
  * Afficheur générique pour l'affichage de toutes les ressources
  * appelé avant les plugins (c'est sa fct load qui chargera le bon)
  *
- * Son chargement déclenche celui de init qui ajoute en global nos méthodes utilitaires, cf {@link namespace:Sesamath}
+ * Son chargement déclenche celui de init qui ajoute en global nos méthodes utilitaires, cf {@link namespace:sesamath}
  */
 
 /* global window, define, require, alert */
@@ -113,7 +113,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             } catch (error) {
               if (ST.addError) ST.addError(error.toString());
               else if (console && console.error) {
-                console.error("Sesamath.Sesatheque.addError n'existe pas");
+                console.error("sesamath.sesatheque.addError n'existe pas");
                 console.error(error);
               }
             }
@@ -272,10 +272,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         // raccourcis
         var w = window;
         var wd = window.document;
-        if (typeof w.Sesamath === "undefined") w.Sesamath = {};
-        var S = window.Sesamath;
-        if (!S.Sesatheque) S.Sesatheque = {};
-        var ST = S.Sesatheque;
+        if (typeof w.sesamath === "undefined") w.sesamath = {};
+        var S = window.sesamath;
+        if (!S.sesatheque) S.sesatheque = {};
+        var ST = S.sesatheque;
         /**
          * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
          * @private

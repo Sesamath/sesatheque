@@ -34,7 +34,7 @@
  * si cela n'a pas déjà été fait, activer log ou pas et étoffer options si besoin
  * Appellera aussi initRequire si on nous passe une sesathequeBase (et qu'il n'a pas déjà été configuré avec cette base)
  */
-/* global window, define, require, alert, Sesamath */
+/* global window, define, require, alert, sesamath */
 if (typeof window === 'undefined') {
   throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
 } else if (typeof define === 'undefined' || typeof require === 'undefined') {
@@ -46,10 +46,10 @@ if (typeof window === 'undefined') {
     // raccourcis
     var w = window;
     var wd = window.document;
-    if (typeof w.Sesamath === "undefined") w.Sesamath = {};
-    var S = window.Sesamath;
-    if (!S.Sesatheque) S.Sesatheque = {};
-    var ST = S.Sesatheque;
+    if (typeof w.sesamath === "undefined") w.sesamath = {};
+    var S = window.sesamath;
+    if (!S.sesatheque) S.sesatheque = {};
+    var ST = S.sesatheque;
 
     /**
      * Notre module js que l'on exporte, une seule fonction.
@@ -63,7 +63,7 @@ if (typeof window === 'undefined') {
 
       // on vérifie que initGlobal a bien été chargé, sinon on le fait
       function checkGlobal() {
-        if (typeof Sesamath === "undefined" || !Sesamath.Sesatheque || !Sesamath.Sesatheque.addError) require(['initGlobal'], initDom);
+        if (typeof sesamath === "undefined" || !sesamath.sesatheque || !sesamath.sesatheque.addError) require(['initGlobal'], initDom);
         else initDom();
       }
 

@@ -48,6 +48,18 @@
   // Ça permet aussi de les désigner par un nom court sans se préoccuper du chemin
 
   /**
+   * Idem sesamath.addCss, qui n'est pas encore déclaré
+   * @param file
+   */
+  function addCss(file) {
+    var elt = document.createElement("link");
+    elt.rel = "stylesheet";
+    elt.type = "text/css";
+    elt.href = file;
+    document.getElementsByTagName("head")[0].appendChild(elt);
+  }
+
+  /**
    * Retourne la conf à passer à require.config()
    * @private
    * @param {string} [base] Url de base de la sésathèque
@@ -87,11 +99,10 @@
         Arbre: base + 'vendors/sesamath/Arbre'
       },
       shim: {
-        // pour jQueryUi faut charger les css, on pourrait créer un miniModule qui s'en charge pour chaque version
-        // mais c'est assez lourd, faut lui passer le chemin toussa, on laisse celui qui nous charge s'en occuper
+        // pour jQueryUi faut charger les css
         jqueryUi: {
           init: function () {
-            if (typeof windoS.addCss !== "undefined") windoS.addCss(base + 'vendors/jqueryUi/1.11.1/jquery-ui.min.css');
+            addCss(base + 'vendors/jqueryUi/1.11.1/jquery-ui.min.css');
           }
         },
         mathjax: {
@@ -123,9 +134,9 @@
         if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/";
         // on l'ajoute aussi dans le dom global pour que les modules puissent le retrouver
         // sans avoir à le repréciser
-        if (typeof window.Sesamath === "undefined") window.Sesamath = {};
-        if (!window.Sesamath.Sesatheque) window.Sesamath.Sesatheque = {};
-        window.Sesamath.Sesatheque.base = sesathequeBase;
+        if (typeof window.sesamath === "undefined") window.sesamath = {};
+        if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
+        window.sesamath.sesatheque.base = sesathequeBase;
         require.config(getConfig(sesathequeBase));
       };
     });
