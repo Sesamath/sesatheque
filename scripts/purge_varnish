@@ -22,7 +22,7 @@ function purge_varnish() {
   local url
   local vhost=$(sed -nre "/baseUrl/ s/^.*:[^\"']*[\"']([^\"']+)[\"'].*\$/\1/p" $CONFIG)
   local findOpt=''
-  [ -f $LAST_FILE ] && findOpt="-newer '$LAST_FILE'"
+  [ -f $LAST_FILE ] && findOpt="-newer $LAST_FILE"
   if [ -z "$vhost" ]
   then
     echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
