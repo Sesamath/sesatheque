@@ -30,16 +30,20 @@ cd "$dirApp"
 # sans options on l'aide
 [ $# -lt 1 ] && usage
 
+# vérif de jsdoc
+jsdoc=node_modules/.bin/jsdoc
+[ ! -x $jsdoc ] && echo "$jsdoc n'est pas exécutable" >&2 && exit 1
+
 # check des options
 while getopts "ahlprs" OPTION
 do
   case $OPTION in
     a) for f in jsdoc/jsdoc*.json; do jsdoc -c $f ; done ;;
     h) usage;;
-    l) jsdoc -c jsdoc/jsdocLassi.json;;
-    p) jsdoc -c jsdoc/jsdocPlugins.json;;
-    r) jsdoc -c jsdoc/jsdocRestApi.json;;
-    s) jsdoc -c jsdoc/jsdocApp.json;;
+    l) $jsdoc -c jsdoc/jsdocLassi.json;;
+    p) $jsdoc -c jsdoc/jsdocPlugins.json;;
+    r) $jsdoc -c jsdoc/jsdocRestApi.json;;
+    s) $jsdoc -c jsdoc/jsdocApp.json;;
     *) usage 1;;
   esac
 done
