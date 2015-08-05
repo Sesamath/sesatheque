@@ -140,8 +140,8 @@ define(function () {
      * @memberOf apiClient
      * @param {string} sesathequeBase L'url de la sesathèque
      */
-    setBase: function (sesathequeBase) {
-      sesathequeBase = sesathequeBase;
+    setBase: function (newSesathequeBase) {
+      sesathequeBase = newSesathequeBase;
       if (sesathequeBase.substr(-1) !== '/') sesathequeBase += '/';
     },
     /**
