@@ -448,9 +448,17 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       optionsSafe.filters.forEach(function (filter) {
         log.debug("filter", filter)
         if (filter.values && filter.values.length) {
-          if (filter.values.length > 1) query = query.match(filter.index).in(filter.values)
-          else query = query.match(filter.index).equals(filter.values[0])
-        } else query = query.match(filter.index)
+          if (filter.values.length > 1) {
+            query = query.match(filter.index).in(filter.values)
+          } else {
+            // une seule valeur, on regarde si on veut du like
+            var value = filter.values[0]
+            var action = (typeof value === "string" && (value.indexOf("%") > -1 || value.indexOf("_") > -1)) ? "like":"equals"
+            query = query.match(filter.index)[action](filter.values[0])
+          }
+        } else {
+          query = query.match(filter.index)
+        }
       })
 
       // restriction d'après la visibilité

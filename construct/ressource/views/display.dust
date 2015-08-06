@@ -26,7 +26,8 @@ Chargement en cours</div>
                 Sesamath.log('saveResult', resultat);
                 next();
               }, // DEBUG
-              isDev :{?isDev}{isDev}{:else}false{/isDev}
+              isDev :{?isDev}{isDev}{:else}false{/isDev},
+              verbose :{?verbose}{verbose}{:else}false{/verbose}
             }
             display({ressource|s}, options);
         } catch(error) {

@@ -61,7 +61,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param ressource
    */
   function addJsVars(data, ressource) {
-    data.contentBloc.isDev          = (appConfig.application.staging !== 'prod')
+    data.contentBloc.verbose         = (appConfig.application.staging !== 'prod')
+    data.contentBloc.isDev           = (appConfig.application.staging !== 'prod')
     if (ressource) {
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource     = tools.stringify(ressource)
@@ -506,6 +507,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         js : ['/vendors/requirejs/require.min.js']
       }
     }
+    if (viewName.substr(0, 1) !== "/") viewName = __dirname +"/views/" +viewName
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view:viewName}
     else data.contentBloc = {$view:viewName}

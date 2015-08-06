@@ -80,6 +80,7 @@ module.exports = function (EntityRessource) {
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
     .defineIndex('typeTechnique', 'string')
+    .defineIndex('titre', 'string')
     .defineIndex('niveaux', 'integer')
     .defineIndex('categories', 'integer')
     .defineIndex('typePedagogiques', 'integer')
