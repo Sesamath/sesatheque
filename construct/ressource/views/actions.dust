@@ -10,7 +10,7 @@
         {:else}
           <a {?href}href="{href}"{/href} {attrs} {?icon}title="{value}"{/icon}>
             {?icon}
-              <i class="material-icons">{icon}</i> <span class="gt-medium-only">{value}</span>
+              <i class="fa fa-{icon}"></i> <span class="gt-medium-only">{value}</span>
             {:else}
               {value}
             {/icon}

@@ -1,1 +1,8 @@
-<a {?href}href="{href}"{/href} {#attributes}{name}="{value}"{/attributes}>{?icon}<i class="material-icons">{icon}</i> {/icon}{value}</a>
+<a {?href}href="{href}"{/href} {#attributes}{name}="{value}"{/attributes}>
+{?icon}<i class="fa fa-{icon}"></i> {/icon}
+{?iconStack}{! cf Stacked Icons sur http://fortawesome.github.io/Font-Awesome/examples/ !}
+  <span class="fa-stack fa-lg {parent}">
+    {#iconStack}<i class="fa fa-{.}"></i>{/iconStack}
+  </span>
+{/iconStack}
+{value}</a>

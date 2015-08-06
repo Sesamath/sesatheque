@@ -2,7 +2,8 @@
 <div id="auth">
 {?user}
   <a href="#">
-    <i class="material-icons">face</i>
+    <i class="fa fa-user"></i>
+    <i class="fa fa-ellipsis-v"></i>
   </a>
   <ul>
     <div>{user.prenom} {user.nom}</div>

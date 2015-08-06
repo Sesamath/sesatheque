@@ -140,7 +140,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
           data.authBloc.ssoLinks = $auth.getSsoLinks(context)
           data.authBloc.logoutLink = {
             href : "/deconnexion?redirect=" +encodeURIComponent(urlRedirect),
-            icon : "exit_to_app",
+            icon : "sign-out",
             value: "Déconnexion"
           }
         } else {
@@ -149,7 +149,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
           // faut envoyer au moins une propriété sinon la vue n'est pas rendue (ici on en a une mais sinon faut mettre un foo:bar qcq)
           data.authBloc.loginLink = {
             href : "/connexion?redirect=" +encodeURIComponent(urlRedirect),
-            icon : "person",
+            icon : "sign-in",
             value: "Connexion"
           }
         }

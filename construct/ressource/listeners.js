@@ -67,19 +67,19 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         links.push({
           href: $routes.getAbs('describe', ressource),
           value: 'Description',
-          icon: 'description',
+          icon: 'file-text-o', // material icons description
           selected: (context.tab === 'describe')
         })
         links.push({
           href: $routes.getAbs('preview', ressource),
           value: 'Aperçu',
-          icon: 'pageview',
+          icon: 'eye-slash', // ma pageview
           selected: (context.tab === 'preview')
         })
         links.push({
           href: $routes.getAbs('display', ressource),
           value: 'Voir',
-          icon: 'open_in_new',
+          icon: 'eye', // material icons open_in_new était pas terrible
           attrs: 'target="_blank"'
         })
       }
@@ -87,20 +87,21 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         links.push({
           href: $routes.getAbs('edit', oid),
           value: 'Modifier',
-          icon: "mode_edit",
+          icon: "edit", // mode_edit pour material icons
           selected: (context.tab === 'edit')
         })
       if (oid && $accessControl.hasPermission('read', context, oid) && $accessControl.hasPermission('create', context))
         links.push({
           href: $routes.getAbs('add') + '?clone=' + oid,
-          value: 'Dupliquer', icon: 'call_split',
+          value: 'Dupliquer',
+          icon: 'copy', // ma call_split
           selected: (context.tab === 'add' && context.request.originalUrl.indexOf('clone=') > -1)
         })
       if ($accessControl.hasPermission('delete', context))
         links.push({
           href: $routes.getAbs('delete', oid),
           value: 'Supprimer',
-          icon: 'delete',
+          icon: 'trash', // ma delete
           selected: (context.tab === 'delete')
         })
 
@@ -121,7 +122,14 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     var links = []
     // lien ajout
     if ($accessControl.hasPermission('create', context)) {
-      links.push({href: $routes.getAbs('add'), value: 'Ajouter une ressource', icon: "note_add"})
+      /* @todo : voir si on peut superposer, mais ce code marche pas, pb de float, faudrait revoir les autres css
+      links.push({
+        href: $routes.getAbs('add'),
+        value: 'Ajouter une ressource',
+        iconStack: ["file-o fa-stack-2x", "plus fa-stack-1x"] // ma note_add
+      })
+      /* */
+      links.push({href: $routes.getAbs('add', null, context), value: 'Ajouter une ressource', icon: 'plus-circle'})
     }
     // un lien vers la recherche
     links.push({href: $routes.getAbs('search', null, context), value: 'Recherche', icon: 'search'})
