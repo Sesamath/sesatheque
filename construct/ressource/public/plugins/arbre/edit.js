@@ -208,7 +208,7 @@ try {
                 shortcut_label: 'suppr'
               };
             }
-            // On peut créer dans la racine ou les éléments arbre qui n'en sont pas eux-même
+            // On peut créer dans la racine ou les éléments arbre qui ne sont pas une ref vers un autre arbre (sinon faut aller éditer l'original)
             if (isRacine || isArbreSansRef) {
               items.create = {
                 label : "Ajouter un dossier",
@@ -227,6 +227,30 @@ try {
                   //}
                 }
               };
+              // idem pour les ressources
+              items.add = {
+                label: "Ajouter une ressource",
+                action: function (data) {
+                  var id = w.prompt("Id de la ressource (oid ou origine/idOrigine");
+                  var inst = $.jstree.reference(data.reference);
+                  var node = inst.get_node(data.reference);
+                  apiClient.getRessource(id, function (error, ressource) {
+                    if (error) addError(error);
+                    else {
+                      S.log("ressource récupérée", ressource);
+                      console.dir(ressource);
+                      var tt = ressource.typeTechnique;
+                      inst.create_node(node, {
+                        text:ressource.titre,
+                        icon: tt + "JstNode",
+                        a_attr: {"data-typeTechnique": tt}
+                      }, "last", function (new_node) {
+                        S.log("node créé", new_node);
+                      });
+                    }
+                  })
+                }
+              }
             }
             // on peut renommer les arbres sans ref
             if (isArbreSansRef) {
@@ -240,8 +264,8 @@ try {
                 }
               };
             }
+            // un raccourci pour aller éditer une ref
             if (isArbreRef) {
-              // un raccourci pour aller éditer une ref
               items.editRef = {
                 label : "Éditer",
                 action : function (data) {
