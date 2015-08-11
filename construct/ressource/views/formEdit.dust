@@ -1,7 +1,7 @@
 <div class="block edit ressource">
     {?errors}
-    <div class="error">
-        {#errors}<div class="help-block">{.}</div>{/errors}
+    <div id="errors">
+        {#errors}<p class="error">{.}</p>{/errors}
     </div>
     {/errors}
 
@@ -10,7 +10,7 @@
         {?warnings}
         <div>
         Avertissement{@gt key=warnings.length value=1}s{/gt} :
-        {#warnings}<div class="warning">{.}</div>{/warnings}
+        {#warnings}<p class="warning">{.}</p>{/warnings}
         {>wrapper widget="checkboxes" o=force /}
         </div>
         {/warnings}

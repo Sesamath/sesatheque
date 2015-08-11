@@ -54,6 +54,16 @@ try {
       }
     }
 
+    function addError(errorMessage) {
+      $loadError.text(errorMessage);
+      if (!$loadError.hasClass("error")) $loadError.addClass("error");
+      setTimeout(function () {
+            $loadError.empty();
+          },
+          5000
+      );
+    }
+
     function addLoadSrc() {
       S.addElement(container, 'span', null, "arbre source à charger ");
       inputRef = S.addElement(container, 'input', {id:"loadRef", type:'text'});
@@ -69,7 +79,7 @@ try {
       loadLink = S.addElement(container, 'a', {href:'#'}, ' afficher');
       $(loadLink).click(loadSrc);
       // un div pour les erreurs
-      var loadError = S.addElement(container, 'p', {class:"error"});
+      var loadError = S.addElement(container, 'p');
       $loadError = $(loadError);
     }
 
@@ -110,7 +120,9 @@ try {
      */
     function initDom(options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-      if (options.vendorsBaseUrl) S.addCss(options.vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
+      var vendorsBaseUrl = options.vendorsBaseUrl || '/vendors'
+      S.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
+      S.addCss(options.sesathequeBase + 'styles/ressources.css');
       // nos éléments html
       var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
       container = window.document.getElementById('display');
@@ -180,6 +192,7 @@ try {
             var items = {};
             var isRacine = (node.parent === '#');
             var isArbreSansRef = node.a_attr["data-typeTechnique"] === "arbre" && !node.a_attr["data-ref"];
+            var isArbreRef = node.a_attr["data-typeTechnique"] === "arbre" && node.a_attr["data-ref"];
             // on peut supprimer n'importe quel item sauf la racine
             if (!isRacine) {
               items.remove = {
@@ -189,6 +202,7 @@ try {
                   var node = inst.get_node(data.reference);
                   if (inst.is_selected(node)) inst.delete_node(inst.get_selected());
                   else inst.delete_node(node);
+                  isDstModified = true;
                 },
                 shortcut      : 46, // suppr, cf http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
                 shortcut_label: 'suppr'
@@ -207,6 +221,7 @@ try {
                     // pourquoi faut le sortir de la pile ?
                     setTimeout(function () {
                       inst.edit(new_node);
+                      isDstModified = true;
                     }, 0);
                   });
                   //}
@@ -221,6 +236,17 @@ try {
                   var inst = $.jstree.reference(data.reference);
                   var node = inst.get_node(data.reference);
                   inst.edit(node);
+                  isDstModified = true;
+                }
+              };
+            }
+            if (isArbreRef) {
+              // un raccourci pour aller éditer une ref
+              items.editRef = {
+                label : "Éditer",
+                action : function (data) {
+                  if (isDstModified) ST.addError("Enfants de l'arbre modifiés mais non sauvegardé (recharger la page pour annuler les modifications avant d'éditer un arbre enfant)");
+                  else window.location = "/ressource/modifier/" +node.a_attr["data-ref"];
                 }
               };
             }
@@ -328,12 +354,7 @@ try {
               }, 250);
             });
           } else {
-            $loadError.text("La ressource " +ref +" n'existe pas ou n'est pas un arbre");
-            setTimeout(function () {
-                $loadError.empty();
-              },
-              5000
-            );
+            addError("La ressource " +ref +" n'existe pas ou n'est pas un arbre");
             S.log("Ressource chargée qui n'est pas un arbre", ressource);
           }
         });
@@ -427,6 +448,7 @@ try {
     var timeout;
     var isTextMode = true;
     var arbreInitial;
+    var isDstModified = false;
     // le textarea enfants
     $textarea = $('#enfants');
 

@@ -541,7 +541,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 log.error((nbInit - ressources.length) +" ressources de la liste ont été filtrées par les droits avec " +context.request.originalUrl)
               }
               // les actions (en float right, dust sait pas boucler en partant de la fin, faudrait écrire un helper, on empile de droite à gauche)
-              data.actions = {links:[]}
+              data.actions = {
+                $view : __dirname +"/views/actions",
+                links:[]
+              }
               // lien suivant (si on est au max)
               if (ressources.length == options.nb) {
                 crit.start = options.start + options.nb

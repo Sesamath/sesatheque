@@ -1,27 +1,27 @@
 {! Ce bloc partiel insère le code pour charger le js d'édition du typeTechnique et appelle son init !}
-<p>édition {ressource.typeTechnique}</p>
-
 <script type="application/javascript">
-  // sesatheque.init doit exister, on vérifie
-  try {
-    if (typeof sesatheque === 'undefined' || !sesatheque.init) throw new Error("Impossible d'initialiser l'édition");
-    var options = {
-      pluginBaseUrl : '{pluginBaseUrl}',
-      vendorsBaseUrl: '{vendorsBaseUrl}',
-      pluginName: '{pluginName}',
-      isDev :{?isDev}{isDev}{:else}false{/isDev}
-    };
-    sesatheque.init(options, function () {
-      // maintenant que requireJs a été configuré on peut charger ce module qui l'utilise
-      require(['{pluginBaseUrl}/edit.js'], function (editUrl) {
-        if (typeof editUrl === 'undefined') throw new Error('Le chargement a échoué, impossible de charger editUrl.js');
-        var ressource = {?ressource}{ressource|s}{:else}null{/ressource};
-        if (ressource) editUrl.init(ressource, options);
-        else throw new Error("Il manque la ressource à modifier");
+  require(['/init.js'], function (init) {
+  console.log('init chargé');
+    try {
+      var options = {
+        isDev :{?isDev}{isDev}{:else}false{/isDev},
+        verbose :{?verbose}{verbose}{:else}false{/verbose}
+      };
+      init(options, function (error) {
+        if (error) throw error;
+        console.log('init lancé');
+        // maintenant que requireJs a été configuré on peut charger ce module qui l'utilise
+        require(['/plugins/{typeTechnique.value}/edit.js'], function (edit) {
+          if (typeof edit === 'undefined') throw new Error('Le chargement a échoué, impossible de charger edit.js');
+          console.log('edit chargé');
+          var ressource = {?ressource}{ressource|s}{:else}null{/ressource};
+          if (ressource) edit.init(ressource, options);
+          else throw new Error("Il manque la ressource à modifier");
+        });
       });
-    });
-  } catch(error) {
-    if (window.setError) window.setError(error.toString());
-    if (console && console.error) console.error(error)
-  }
+    } catch(error) {
+      if (window.setError) window.setError(error.toString());
+      if (console && console.error) console.error(error)
+    }
+  });
 </script>

@@ -45,7 +45,7 @@ body {min-width: 300px;}
   color: @error-color;
   border-color: @error-color;
   &::before { /* merci http://stackoverflow.com/a/11919684 */
-    content: "warning";
+    content: "\f071";
   }
 }
 .warning {
@@ -53,7 +53,7 @@ body {min-width: 300px;}
   color: @warning-color;
   border-color: @warning-color;
   &::before {
-    content: 'exclamation';
+    content: '\f12a';
   }
 }
 .info {
@@ -61,7 +61,7 @@ body {min-width: 300px;}
   color: @info-color;
   border-color: @info-color;
   &::before {
-    content: 'info-circle';
+    content: '\f05a';
   }
 }
 // Les messages flash ont une de ces classes error|warning|info, mais aussi une classe flash, que l'on utilise pas pour le moment

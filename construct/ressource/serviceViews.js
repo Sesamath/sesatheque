@@ -63,6 +63,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   function addJsVars(data, ressource) {
     data.contentBloc.verbose         = (appConfig.application.staging !== 'prod')
     data.contentBloc.isDev           = (appConfig.application.staging !== 'prod')
+    data.contentBloc.sesathequeBase = appConfig.application.baseUrl
     if (ressource) {
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource     = tools.stringify(ressource)
