@@ -218,6 +218,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.json({error: msg})
   }
 
+  /**
+   * Répond sur certaines requetes OPTIONS
+   * @private
+   * @param {Context} context
+   */
   function optionsOk(context) {
     log.debug("appel options avec le context", context)
     context.setHeader('Access-Control-Allow-Methods', 'POST OPTIONS');
@@ -510,6 +515,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @returns {reponseRessourceOid|reponseRessourceRef}
    */
   controller.post('ressource', postRessource)
+  /**
+   * Pour le preflight, ajoute aux headers cors habituels le header
+   *   Access-Control-Allow-Methods:POST OPTIONS
+   * @route OPTIONS /api/ressource
+   */
   controller.options('ressource', optionsOk)
 
   /**
@@ -562,6 +572,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route POST /api/ressource/addRelations
    */
   controller.post('ressource/addRelations', postRessourceAddRelations)
+  /**
+   * Pour le preflight, ajoute aux headers cors habituels le header
+   *   Access-Control-Allow-Methods:POST OPTIONS
+   * @route OPTIONS /api/ressource/addRelations
+   */
   controller.options('ressource/addRelations', optionsOk)
 
   /**
@@ -615,6 +630,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post('liste/public', function (context) {
     grabListe(context, 'public')
   })
+  /**
+   * Pour le preflight, ajoute aux headers cors habituels le header
+   *   Access-Control-Allow-Methods: POST OPTIONS
+   * @route OPTIONS /api/liste/public
+   */
   controller.options('liste/public', optionsOk)
 
   function getListeAvecCorriges(context) {
@@ -641,6 +661,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @returns {reponseListe}
    */
   controller.post('liste/prof', getListeAvecCorriges)
+  /**
+   * Pour le preflight, ajoute aux headers cors habituels le header
+   *   Access-Control-Allow-Methods:POST OPTIONS
+   * @route OPTIONS /api/liste/prof
+   */
   controller.options('liste/prof', optionsOk)
 
   /**
@@ -692,6 +717,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       context.redirect(urlConnexion)
     }
   })
+  /**
+   * Pour le preflight, ajoute aux headers cors habituels le header
+   *   Access-Control-Allow-Methods:POST OPTIONS
+   * @route OPTIONS /api/liste/perso
+   */
   controller.options('liste/perso', optionsOk)
 
   function getAllBy(context) {
@@ -716,6 +746,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @returns {reponseListe}
    */
   controller.post('liste/all', getAllBy)
+  /**
+   * Ajoute aux headers cors habituels le header
+   * Access-Control-Allow-Methods', 'POST OPTIONS'
+   * @route OPTIONS /api/liste/all
+   */
   controller.options('liste/all', optionsOk)
 }
 
