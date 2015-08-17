@@ -36,7 +36,7 @@
  * @Controller controlleurDebug
  * @requires {@link $ressourceRepository}
  */
-module.exports = function (controller, $ressourceRepository) {
+module.exports = function (controller, $ressourceRepository, EntityRessource) {
   /**
    * Dump une ressource
    * @route GET /dump?oid=…
@@ -80,5 +80,18 @@ module.exports = function (controller, $ressourceRepository) {
         }
       }
     })
+  })
+
+  controller.get('like', function (context) {
+    var index = context.get.index
+    var value = context.get.value
+    var nb = context.nb || 10
+    var start = context.start || 0
+    if (index && value) {
+      EntityRessource.match(index).like(value).grab(nb, start, function(error, ressources) {
+        if (error) context.json({error:error.toString()})
+        else context.json({ressources:ressources})
+      })
+    }
   })
 }
