@@ -38,7 +38,7 @@ jsdoc=node_modules/.bin/jsdoc
 while getopts "ahlprs" OPTION
 do
   case $OPTION in
-    a) for f in jsdoc/jsdoc*.json; do jsdoc -c $f ; done ;;
+    a) for f in jsdoc/jsdoc*.json; do $jsdoc -c $f ; done ;;
     h) usage;;
     l) $jsdoc -c jsdoc/jsdocLassi.json;;
     p) $jsdoc -c jsdoc/jsdocPlugins.json;;
