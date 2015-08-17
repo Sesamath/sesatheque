@@ -96,8 +96,8 @@ ressourceComponent.controller('api', function ($ressourceRepository, $ressourceC
 
 // En dev on ajoute des routes de debug
 if (!isProd) {
-  ressourceComponent.controller('debug/ressource', function ($ressourceRepository) {
-    require('./controllerDebug')(this, $ressourceRepository)
+  ressourceComponent.controller('debug/ressource', function ($ressourceRepository, EntityRessource) {
+    require('./controllerDebug')(this, $ressourceRepository, EntityRessource)
   })
 }
 
