@@ -174,7 +174,11 @@ try {
       modifIco(rootElt);
       var jstData = {
         core : {
-          check_callback : true,
+          check_callback : function (action, node, parent) {
+            //S.log("check_callback avec", arguments);
+            // on accepte le drop seulement dans des arbres (dossiers)
+            return (parent.id !== "#" && parent.a_attr && parent.a_attr["data-typeTechnique"] === "arbre");
+          },
           data: rootElt
         },
         plugins: ["dnd", "contextmenu"],
@@ -291,6 +295,9 @@ try {
             S.log("clic droit sur", node);
             cb(items);
           }
+        }, // contextmenu
+        dnd : {
+          inside_pos:"last"
         }
       };
 
