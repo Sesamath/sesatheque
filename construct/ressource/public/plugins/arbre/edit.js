@@ -33,7 +33,8 @@
  * @file Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
  */
 try {
-  define(['tools/jstreeConverter', 'apiClient', 'jquery1', 'jstree'], function (jstreeConverter, apiClient) {
+  // jstree fait un require de "jquery", on prend le même nom (jquery1 est un alias)
+  define(['tools/jstreeConverter', 'apiClient', 'jquery', 'jstree'], function (jstreeConverter, apiClient) {
     /* jshint jquery:true */
     "use strict";
 
@@ -88,24 +89,23 @@ try {
      * @private
      */
     function dstTreeToTextarea() {
-      var jstree = $.jstree.reference($dstTree);
+      var jstree = $jstree.reference($dstTree);
       var enfants;
-      S.log("saveDst avec", jstree);
+      S.log("dstTreeToTextarea avec", jstree);
       try {
         // on veut pas les enfants de # (un seul, l'arbre complet), mais ceux de notre arbre, 1er (et seul) enfant de root
         var nodeId = jstree._model.data['#'].children[0];
         enfants = jstreeConverter.getEnfants(nodeId, jstree);
       } catch (error) {
-        log.error(error);
+        S.log.error(error);
       }
       S.log("On récupère les enfants", enfants);
       var enfantsStr = '';
       try {
         enfantsStr = JSON.stringify(enfants, null, 2);
       } catch (error) {
-        log.error("Le parsing json a planté", error, enfants);
+        S.log.error("Le parsing json a planté", error, enfants);
       }
-      $textarea = $('#enfants');
       if ($textarea) {
         $textarea.val(enfantsStr);
       } else {
@@ -120,7 +120,7 @@ try {
      */
     function initDom(options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-      var vendorsBaseUrl = options.vendorsBaseUrl || '/vendors'
+      var vendorsBaseUrl = options.vendorsBaseUrl || '/vendors';
       S.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
       S.addCss(options.sesathequeBase + 'styles/ressources.css');
       // nos éléments html
@@ -149,17 +149,17 @@ try {
 
       srcGroup = S.addElement(container, 'div', {id:"srcGroup"});
       S.addElement(srcGroup, 'span', null, "arbre source");
-      srcTree = S.addElement(srcGroup, 'div');
+      divSrcTree = S.addElement(srcGroup, 'div');
+      $srcTree = $(divSrcTree);
 
       var dstGroup = S.addElement(container, 'div', {id:"dstGroup"});
       S.addElement(dstGroup, 'strong', null, "arbre à modifier");
       S.addElement(dstGroup, 'em', {style:{"font-size":"0.8em"}}, " (clic droit pour enlever des éléments ou ajouter des dossiers)");
-      dstTree = S.addElement(dstGroup, 'div');
+      divDstTree = S.addElement(dstGroup, 'div');
+      $dstTree = $(divDstTree);
 
       S.addElement(container, 'p', {style:"clear:both;"}, "Aperçu d'un élément");
       iframeApercu = S.addElement(container, 'iframe', {id:"apercu"});
-
-      showGraphic();
     }
 
     /**
@@ -169,6 +169,7 @@ try {
      */
     function loadDst(arbre) {
       var rootElt = jstreeConverter.toJstree(arbre);
+      S.log("après conversion on va charger", rootElt);
       rootElt.state = {opened: true};
       modifIco(rootElt);
       var jstData = {
@@ -178,11 +179,12 @@ try {
         },
         plugins: ["dnd", "contextmenu"],
         contextmenu : {
-          // cf $.jstree.defaults.contextmenu sur
+          select_node:false,
+          // cf $jstree.defaults.contextmenu sur
           // https://github.com/vakata/jstree/blob/master/src/jstree.contextmenu.js#L58
           /**
            * La liste de nos éléments de menu
-           * @see http://www.jstree.com/api/#/?q=$.jstree.defaults&f=$.jstree.defaults.contextmenu.items
+           * @see http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
            * @private
            * @param node Le node, avec les propriétés a_attr, icon, text
            * @param cb à rappeler avec les items du menu contextuel pour ce node
@@ -198,7 +200,7 @@ try {
               items.remove = {
                 label         : "Supprimer",
                 action        : function (data) {
-                  var inst = $.jstree.reference(data.reference);
+                  var inst = $jstree.reference(data.reference);
                   var node = inst.get_node(data.reference);
                   if (inst.is_selected(node)) inst.delete_node(inst.get_selected());
                   else inst.delete_node(node);
@@ -215,14 +217,19 @@ try {
                 action: function (data) {
                   //var name = w.prompt("Nom du dossier");
                   //if (name) {
-                  var inst = $.jstree.reference(data.reference);
+                  var inst = $jstree.reference(data.reference);
+                      S.log("avant modif on a " +inst._cnt +" childs");
                   var node = inst.get_node(data.reference);
                   inst.create_node(node, {icon:"arbreJstNode", a_attr:{"data-typeTechnique":"arbre"}}, "last", function (new_node) {
-                    // pourquoi faut le sortir de la pile ?
+                    inst.edit(new_node, "titre", function (new_node, status) {
+                      if (status) isDstModified = true;
+                      S.log("après modif", inst);
+                    });
+                    /* pourquoi faut le sortir de la pile ?
                     setTimeout(function () {
                       inst.edit(new_node);
                       isDstModified = true;
-                    }, 0);
+                    }, 0); */
                   });
                   //}
                 }
@@ -232,7 +239,7 @@ try {
                 label: "Ajouter une ressource",
                 action: function (data) {
                   var id = w.prompt("Id de la ressource (oid ou origine/idOrigine");
-                  var inst = $.jstree.reference(data.reference);
+                  var inst = $jstree.reference(data.reference);
                   var node = inst.get_node(data.reference);
                   apiClient.getRessource(id, function (error, ressource) {
                     if (error) addError(error);
@@ -240,24 +247,30 @@ try {
                       S.log("ressource récupérée", ressource);
                       console.dir(ressource);
                       var tt = ressource.typeTechnique;
+                      var attr = {
+                        "data-typeTechnique": tt,
+                        "data-ref" : ressource.oid
+                      };
+                      if (ressource.dataUri) attr["data-dataUri"] = ressource.dataUri;
+                      if (ressource.displayUri) attr["data-displayUri"] = ressource.displayUri;
                       inst.create_node(node, {
                         text:ressource.titre,
                         icon: tt + "JstNode",
-                        a_attr: {"data-typeTechnique": tt}
+                        a_attr: attr
                       }, "last", function (new_node) {
                         S.log("node créé", new_node);
                       });
                     }
-                  })
+                  });
                 }
-              }
+              };
             }
             // on peut renommer les arbres sans ref
             if (isArbreSansRef) {
               items.rename = {
                 label : "Renommer",
                 action : function (data) {
-                  var inst = $.jstree.reference(data.reference);
+                  var inst = $jstree.reference(data.reference);
                   var node = inst.get_node(data.reference);
                   inst.edit(node);
                   isDstModified = true;
@@ -268,7 +281,7 @@ try {
             if (isArbreRef) {
               items.editRef = {
                 label : "Éditer",
-                action : function (data) {
+                action : function () {
                   if (isDstModified) ST.addError("Enfants de l'arbre modifiés mais non sauvegardé (recharger la page pour annuler les modifications avant d'éditer un arbre enfant)");
                   else window.location = "/ressource/modifier/" +node.a_attr["data-ref"];
                 }
@@ -282,8 +295,9 @@ try {
       };
 
 
+      $dstTree.jstree("destroy");
       $dstTree.jstree(jstData);
-      //var jstree = $.jstree.reference($dstTree);
+      //var jstree = $jstree.reference($dstTree);
       //S.log('fct qui renvoie les items par défaut', jstree.settings.contextmenu.items.toString())
 
       // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
@@ -297,7 +311,7 @@ try {
           else $dstTree.jstree('open_node', data.node);
         }
       });
-    }
+    } // loadDst
 
     /**
      * Charge l'arbre source
@@ -326,7 +340,7 @@ try {
               plugins: ["contextmenu", "dnd", "search"],
               contextmenu : {
                 items : function (node, cb) {
-                  // cf http://www.jstree.com/api/#/?q=$.jstree.defaults&f=$.jstree.defaults.contextmenu.items
+                  // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
                   var items = {};
                   addApercu(items, node);
                   // ajout du "charger ici"
@@ -348,10 +362,10 @@ try {
               dnd : {always_copy:true}
             };
             // si on ne détruit pas un éventuel jstree existant il refuse d'en charger un autre
-            var srcTreeRef = $.jstree.reference($srcTree);
+            var srcTreeRef = $jstree.reference($srcTree);
             if (srcTreeRef) srcTreeRef.destroy();
             $srcTree.jstree(jstData);
-            //S.log("après chargement de l'arbre source on a", $.jstree.reference($srcTree));
+            //S.log("après chargement de l'arbre source on a", $jstree.reference($srcTree));
 
             // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
             // on écoute donc l'événement select sur le jstree
@@ -439,12 +453,16 @@ try {
      * @private
      */
     function showGraphic() {
+      try {
+        dstTree.enfants = JSON.parse($textarea.val());
+      } catch (error) {
+        ST.addError("json enfants invalide");
+        S.log.error(error);
+      }
       $linkShowGraphic.hide();
       $textarea.hide();
-      if (arbreInitial) {
-        arbreInitial.enfants = $textarea.val();
-        loadDst(arbreInitial);
-      }
+      S.log("On va charger en dst", dstTree);
+      loadDst(dstTree);
       $container.show();
       $linkShowTxt.show();
       isTextMode = false;
@@ -459,14 +477,13 @@ try {
 
     // raccourcis
     var w = window;
-    var wd = window.document;
     if (typeof w.sesamath === "undefined") w.sesamath = {};
     var S = window.sesamath;
     if (!S.sesatheque) S.sesatheque = {};
     var ST = S.sesatheque;
 
     // les containers (variables locales au module), qui seront affectés par initDom()
-    var iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, srcTree, dstTree;
+    var iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree;
     // quasi les mêmes jquerifiée
     var $container, $inputRef, $loadError, $srcTree, $dstTree, $saveButton, $textarea, $linkShowTxt, $linkShowGraphic;
     var timeout;
@@ -475,26 +492,25 @@ try {
     var isDstModified = false;
     // le textarea enfants
     $textarea = $('#enfants');
+    var $jstree = $.jstree; // globale pour $.jstree que l'on perd dans les callbacks
 
     return {
       init: function (arbre, options) {
+        dstTree = arbre;
         timeout = options.timeout;
         initDom(options);
         // on ajoute simplement un lien pour passer à la version graphique
         jstreeConverter.setBaseUrl(options.sesathequeBase);
         S.log("edit de l'arbre", arbre);
-        // nos arbres jstree
-        $srcTree = $(srcTree);
-        $dstTree = $(dstTree);
+        S.log("$dstTree", $dstTree);
         $saveButton = $('#saveButton');
         if (!$saveButton) throw new Error("Bouton de sauvegarde non trouvé dans la page");
-        $textarea = $('#enfants');
         if (!$textarea) throw new Error("Champ de sauvegarde des enfants non trouvé dans le formulaire");
         $saveButton.click(saveDst);
 
         // on charge l'arbre à éditer
         loadDst(arbre);
-
+        showGraphic();
       }
     };
   });

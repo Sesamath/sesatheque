@@ -82,10 +82,10 @@
 
   /**
    * Retourne un tableau children au format jstree
-   * @param nodeId Le nodeId dont on veut les enfants, passer '#' ou null pour la racine
+   * @param {string} nodeId Le nodeId dont on veut les enfants, passer '#' ou null pour la racine
    *               (pour trouver l'objet jstree._model.data[nodeId])
-   * @param jstree L'objet jstree complet, retourné par $.jstree.reference('#leTree')
-   * @return {Array} Le tableau des enfants de node
+   * @param {object} jstree L'objet jstree complet, retourné par $.jstree.reference('#leTree')
+   * @return {Array} Le tableau des enfants de nodeId
    */
   jstreeConverter.getEnfants = function (nodeId, jstree) {
     //log('getEnfants de ' +nodeId, jstree);
@@ -96,8 +96,9 @@
       root[nodeId].children.forEach(function (rootChildId) {
         var child = root[rootChildId];
         var enfant = jstreeConverter.toRef(child, jstree);
+        //log("traitement child", child);
         if (enfant && (enfant.ref || enfant.typeTechnique === 'arbre')) enfants.push(enfant);
-        else log.error("Pb de conversion du child", child);
+        else log.error("Pb de conversion du child, ni ref ni arbre", child);
       });
     } catch(error) {
       log.error(error);
@@ -109,7 +110,7 @@
 
   /**
    * Retourne un tableau children au format jstree
-   * @param ressource
+   * @param {Ressource} ressource
    * @return {Array} Le tableau des enfants
    */
   jstreeConverter.getJstreeChildren = function (ressource) {
@@ -177,17 +178,25 @@
   jstreeConverter.toRef = function (node, jstree) {
     //log('toRef de', node);
     var item = {};
-    if (node.original) {
-      item.titre = node.original.text;
-      if (node.original.a_attr) {
-        item.typeTechnique = node.original.a_attr['data-typeTechnique'];
+    var nodeSrc;
+    if (node.text && node.a_attr) {
+      nodeSrc = node;
+    } else if (node.original) {
+      nodeSrc = node.original;
+    } else {
+      log.error("node impossible à convertir en ref", node);
+    }
+    if (nodeSrc) {
+      item.titre = nodeSrc.text;
+      if (nodeSrc.a_attr) {
+        item.typeTechnique = nodeSrc.a_attr['data-typeTechnique'];
         if (item.typeTechnique === 'arbre' && node.children && node.children.length && jstree) {
           item.enfants = jstreeConverter.getEnfants(node.id, jstree);
         }
-        if (node.original.a_attr['data-displayUri']) item.displayUri = node.original.a_attr['data-displayUri'];
-        if (node.original.a_attr['data-dataUri']) item.displayUri = node.original.a_attr['data-dataUri'];
-        if (node.original.a_attr['data-ref']) item.ref = node.original.a_attr['data-ref'];
-        if (node.original.a_attr.alt) item.resume = node.original.a_attr.alt;
+        if (nodeSrc.a_attr['data-displayUri']) item.displayUri = nodeSrc.a_attr['data-displayUri'];
+        if (nodeSrc.a_attr['data-dataUri']) item.displayUri = nodeSrc.a_attr['data-dataUri'];
+        if (nodeSrc.a_attr['data-ref']) item.ref = nodeSrc.a_attr['data-ref'];
+        if (nodeSrc.a_attr.alt) item.resume = nodeSrc.a_attr.alt;
       }
       //log('converti en', item);
     }
