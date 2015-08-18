@@ -222,7 +222,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       // erreur 404 ?
       var isVide = isHtml ? _.isEmpty(data.contentBloc) : isJson ? _.isEmpty(data) : false
       log.debug("isVide " +isVide)
-      if (!context.status && isVide) {
+      if (!context.status && isVide && context.method !== 'options') {
         context.status = 404
         log.debug(reqHttp + ' : pas de status ni content => 404')
       }

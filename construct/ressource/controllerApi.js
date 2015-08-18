@@ -224,10 +224,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Context} context
    */
   function optionsOk(context) {
-    log.debug("appel options avec le context", context)
     context.setHeader('Access-Control-Allow-Methods', 'POST OPTIONS');
+    context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept');
     // et on laisse le middleware CORS faire son boulot
-    context.next(null, '');
+    context.next(null, 'OK'); // ne pas renvoyer de chaîne vide sinon 404
   }
 
   /**
@@ -474,6 +474,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
 
     log.debug('post /api/ressource a reçu', context.post, 'api', {max:1000})
+    console.log(context.post);
 
     $ressourceControl.valideRessourceFromPost(context.post, partial, function (error, ressource) {
       try {
