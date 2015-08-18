@@ -363,7 +363,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   } /* */
 
   /**
-   * Loggue un user d'un sesalab localement
+   * Loggue un user d'un sesalab localement, répond {success:true} ou {success:false, error:"message d'erreur"}
    * @Route POST /api/connexion
    * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
    * @param {string} token   Le token de sesalab qui servira à récupérer le user
@@ -395,7 +395,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             // on peut connecter
             $accessControl.loginFromSesalab(context, body.user, domaine, function (error) {
               if (error) sendJson(context, error)
-              else sendJson(context, {ok: true})
+              else sendJson(context, {success: true})
             })
           } else {
             error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
