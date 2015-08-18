@@ -391,7 +391,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           } else if (body.ok && body.user) {
             // on peut connecter
             $accessControl.loginFromSesalab(context, body.user, origine, function (error, personne) {
-
+              if (error) sendJson(context, error)
+              else sendJson(context, {ok:true})
             })
           } else {
             error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
