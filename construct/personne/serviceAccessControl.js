@@ -449,6 +449,49 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Connecte un user sesalab (regarde s'il existe et s'il faut le mettre à jour et le met en session)
+   * @param {Context} context
+   * @param {object}  sesalabUser
+   * @param {string}  origine
+   * @param {personneCallback}  next
+   * @memberOf $accessControl
+   */
+  $accessControl.loginFromSesalab = function (context, sesalabUser, origine, next) {
+    function setSession (error, personne) {
+      if (personne) {
+        personne.permissions = getPermissions(personne)
+        context.session.user = personne;
+      } else if (!error) {
+        context.session.user = {
+          oid:0,
+          lastCheck : new Date()
+        }
+      }
+      next(error, personne)
+    }
+
+    if (origine && sesalabUser.oid) {
+      var data = {
+        nom : sesalabUser.nom,
+        prenom : sesalabUser.prenom,
+        email : sesalabUser.mail,
+      }
+      if (sesalabUser.externalId && sesalabUser.externalMech) {
+        data.origine = (sesalabUser.externalMech === 'sesamath_sso') ? "sesasso" : sesalabUser.externalMech
+        data.idOrigine = sesalabUser.externalId
+      } else {
+        data.origine = origine
+        data.idOrigine = sesalabUser.oid
+      }
+      // @todo ajouter les roles sesasso
+      var personne = new EntityPersonne(data)
+      $personneRepository.update(personne, setSession)
+    } else {
+      next(new Error("Impossible de connecter un utilisateur sesalab sans origine ou oid"))
+    }
+  }
+
+  /**
    * Déconnecte l'utilisateur courant
    * @param {Context} context
    * @memberOf $accessControl
