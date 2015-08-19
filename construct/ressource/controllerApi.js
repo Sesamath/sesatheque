@@ -44,8 +44,10 @@
 
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl) {
   var _ = require('lodash')
+  var request = require('request')
   //var flow = require('an-flow')
   var tools = require('../tools')
+  var config = require("../../config");
 
   var testConnexionDelay = 10*60*1000 // 10 min en ms
 
@@ -359,6 +361,55 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
     }
   } /* */
+
+  /**
+   * Loggue un user d'un sesalab localement, répond {success:true} ou {success:false, error:"message d'erreur"}
+   * @Route POST /api/connexion
+   * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
+   * @param {string} token   Le token de sesalab qui servira à récupérer le user
+   */
+  controller.post('connexion', function (context) {
+    var token = context.post.token;
+    var origine = context.post.origine;
+    var timeout = 5000
+    if (token && origine) {
+      if (origine.substr(-1) !== "/") origine += "/"
+      if (config.sesalabs.indexOf(origine) > -1) {
+        var postOptions = {
+          url: origine + "api/utilisateur/check-token",
+          json: true,
+          content_type: 'charset=UTF-8',
+          timeout: timeout,
+          form: {
+            token: token
+          }
+        }
+        // on ne garde que le nom de domaine en origine
+        var domaine = /https?:\/\/([a-z\.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
+        request.post(postOptions, function (error, response, body) {
+          if (error) {
+            sendJson(context, error)
+          } else if (body.error) {
+            sendJson(context, new Error(body.error))
+          } else if (body.ok && body.user) {
+            // on peut connecter
+            $accessControl.loginFromSesalab(context, body.user, domaine, function (error) {
+              if (error) sendJson(context, error)
+              else sendJson(context, {success: true})
+            })
+          } else {
+            error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
+            log.debug(error, body)
+            sendJson(context, error)
+          }
+        })
+      } else {
+        sendJson(context, "Origine " +origine +"non autorisée à se connecter ici")
+      }
+    } else {
+      sendJson(context, "token ou origine manquant")
+    }
+  })
 
   /**
    * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
@@ -703,19 +754,21 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (oid) {
       grabListe(context, 'auteur/' +oid)
     } else {
+      // la redirection marche mal, on laisse tomber, faut une connexion préalable
+      sendJson(context, "Il faut s'authentifier sur /api/connexion avant de récupérer des ressources perso")
       // on redirige vers l'authentification qui nous rappellera ensuite, mais on est en post
       // donc faut reconstruire l'url en GET d'après cette demande en post
-      var urlConnexion = context.request.originalUrl
-      urlConnexion += context.request.originalUrl.indexOf('?') ? '&' : '?'
-      var queryString = ''
-      for (var prop in context.post) {
-        if (context.post.hasOwnProperty(prop)) queryString += '&' +prop +'=' +encodeURIComponent(context.post[prop])
-      }
-      queryString += '&connexion'
-      if (context.request.originalUrl.indexOf('?')) urlConnexion += queryString
-      // faut virer notre premier & (on est sûr qu'il existe même si y'avait pas de post grace au &connexion)
-      else urlConnexion += '?' +queryString.substr(1)
-      context.redirect(urlConnexion)
+      //var urlConnexion = context.request.originalUrl
+      //urlConnexion += context.request.originalUrl.indexOf('?') ? '&' : '?'
+      //var queryString = ''
+      //for (var prop in context.post) {
+      //  if (context.post.hasOwnProperty(prop)) queryString += '&' +prop +'=' +encodeURIComponent(context.post[prop])
+      //}
+      //queryString += '&connexion'
+      //if (context.request.originalUrl.indexOf('?')) urlConnexion += queryString
+      //// faut virer notre premier & (on est sûr qu'il existe même si y'avait pas de post grace au &connexion)
+      //else urlConnexion += '?' +queryString.substr(1)
+      //context.redirect(urlConnexion)
     }
   })
   /**

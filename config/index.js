@@ -110,6 +110,10 @@ var settings = {
     },
     ressource : ressourceConfig
   },
+  // une liste de domaines "sesalab" pouvant servir de source d'authentification et stocker chez nous, cf /api/connexion
+  sesalabs : [
+    "https://www.labomep.net"
+  ],
 
   // le reste est spécifique à sesatheque et ignoré par lassi
   // Cf _private.example/config.js
