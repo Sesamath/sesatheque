@@ -175,7 +175,7 @@ try {
       var jstData = {
         core : {
           check_callback : function (action, node, parent) {
-            //S.log("check_callback avec", arguments);
+            S.log("check_callback avec", arguments);
             // on accepte le drop seulement dans des arbres (dossiers)
             return (parent.id !== "#" && parent.a_attr && parent.a_attr["data-typeTechnique"] === "arbre");
           },

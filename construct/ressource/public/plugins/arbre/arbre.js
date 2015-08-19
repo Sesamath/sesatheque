@@ -30,7 +30,7 @@
  */
 
 try {
-  define(['tools/jstreeConverter', 'jquery1', 'jstree'], function (jstreeConverter) {
+  define(['tools/jstreeConverter', 'jquery', 'jstree'], function (jstreeConverter) {
     "use strict";
     if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
     /* jshint jquery:true */
@@ -68,7 +68,12 @@ try {
         //var apercuElt = S.getElement('iframe', {id: S.getNewId(), width:'50%',height:'400px', style : 'float:right;resize:both;overflow:scroll;'});
         //var apercuElt = S.getElement('div', {id: S.getNewId(), style : 'float:right;width:50%;height:400px;resize:both;border:none;'});
         //S.addElement(apercuElt, 'iframe', {style : 'width:100%;height:100%;border:none;'});
-        var apercuContainer = S.addElement(container, 'div', {style : {position:'absolute',"background-color":"#fff"}});
+        var apercuContainer = S.addElement(container, 'div', {
+          style: {
+            position: 'absolute',
+            "background-color": "#fff"
+          }
+        });
         // en global car on s'en sert souvent, pas la peine de le recalculer dans chaque fct
         var $apercuContainer = $(apercuContainer);
         // un flag pour savoir si on est en mode aperçu (true, false ou null)
@@ -88,10 +93,29 @@ try {
           if (isApercu === null) {
             S.empty(apercuContainer);
             // en relative
-            var boutons = S.addElement(apercuContainer, 'div', {style:{position:'absolute',"z-index":2,float:"right","right":0}});
-            var apercuFermer = S.addElement(boutons, 'img', {src:baseUrl +'/images/fermer.png', alt:"fermer l'aperçu", style:{float:'right'}});
-            var apercuAgrandir = S.addElement(boutons, 'img', {src:baseUrl +'/images/agrandir.png', alt:"agrandir l'aperçu", style:{float:'right'}});
-            var apercuReduire = S.addElement(boutons, 'img', {src:baseUrl +'/images/reduire.png', alt:"réduire l'aperçu", style:{float:'right'}});
+            var boutons = S.addElement(apercuContainer, 'div', {
+              style: {
+                position: 'absolute',
+                "z-index": 2,
+                float: "right",
+                "right": 0
+              }
+            });
+            var apercuFermer = S.addElement(boutons, 'img', {
+              src: baseUrl + '/images/fermer.png',
+              alt: "fermer l'aperçu",
+              style: {float: 'right'}
+            });
+            var apercuAgrandir = S.addElement(boutons, 'img', {
+              src: baseUrl + '/images/agrandir.png',
+              alt: "agrandir l'aperçu",
+              style: {float: 'right'}
+            });
+            var apercuReduire = S.addElement(boutons, 'img', {
+              src: baseUrl + '/images/reduire.png',
+              alt: "réduire l'aperçu",
+              style: {float: 'right'}
+            });
             $(apercuFermer).click(fermer);
             $(apercuAgrandir).click(agrandir);
             $(apercuReduire).click(reduire);
@@ -99,7 +123,14 @@ try {
             $apercuContainer.css('background-color', '#fff');
             $apercuContainer.show();
             // on ajoute l'iframe dedans
-            iframeApercu = S.addElement(apercuContainer, 'iframe', {style : {position:'absolute',"z-index":1,width:'100%',height:'100%'}});
+            iframeApercu = S.addElement(apercuContainer, 'iframe', {
+              style: {
+                position: 'absolute',
+                "z-index": 1,
+                width: '100%',
+                height: '100%'
+              }
+            });
             isApercu = false;
           } else {
             S.log.error('div apercu déjà initialisé');
@@ -127,7 +158,7 @@ try {
           }
         };
 
-        var reduire = function() {
+        var reduire = function () {
           S.log("petit");
           if (isApercu) {
             $apercuContainer.height('30%');
@@ -143,7 +174,7 @@ try {
         // la recherche
         var searchContainer = S.addElement(caseTree, "div", {class: 'search'});
         S.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ');
-        var searchInput = S.addElement(searchContainer, 'input', {type:'text'});
+        var searchInput = S.addElement(searchContainer, 'input', {type: 'text'});
 
 
         // l'arbre
@@ -156,30 +187,31 @@ try {
         var jstData = {
           'core': {
             'data': function (node, next) {
-               //S.log('fct data', node);
-               if(node.id == '#') {
-                 next(rootElt);
-               } else {
-                 // faut faire l'appel ajax nous même car jstree peut pas mixer json initial + ajax ensuite
-                 // @see http://git.net/jstree/msg12107.html
-                 $.ajax({
-                   url : node.data.url,
-                   timeout : options.timeout || 10000,
-                   dataType : 'json',
-                   xhrFields: {
-                     withCredentials: true
-                   }
-                 }).success(next).error(function (jqXHR, textStatus, error) {
-                   next(["Erreur lors de l'appel ajax pour récupérer les éléments"]);
-                   ST.addError(error);
-                 });
-               }
+              //S.log('fct data', node);
+              if (node.id == '#') {
+                next(rootElt);
+              } else {
+                // faut faire l'appel ajax nous même car jstree peut pas mixer json initial + ajax ensuite
+                // @see http://git.net/jstree/msg12107.html
+                $.ajax({
+                  url: node.data.url,
+                  timeout: options.timeout || 10000,
+                  dataType: 'json',
+                  xhrFields: {
+                    withCredentials: true
+                  }
+                }).success(next).error(function (jqXHR, textStatus, error) {
+                  next(["Erreur lors de l'appel ajax pour récupérer les éléments"]);
+                  ST.addError(error);
+                });
+              }
             }
           },
-          plugins : ["search"]
+          plugins: ["search"]
         };
 
         var $tree = $('#' + treeId);
+        S.log('$tree', $tree);
         $tree.jstree(jstData);
 
         /* Pour récupérer un élément sous sa forme jstree, c'est (id est l'id jstree, sans #)
@@ -194,7 +226,9 @@ try {
         $searchInput.keyup(function () {
           // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
           // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
-          if (timer) { clearTimeout(timer); }
+          if (timer) {
+            clearTimeout(timer);
+          }
           timer = setTimeout(function () {
             var v = $searchInput.val();
             $tree.jstree(true).search(v);
@@ -221,14 +255,14 @@ try {
             }
           }
           /*
-          var href = data.rslt.obj.children("a").attr("href");
-          // this will load content into a div:
-          $("#contents").load(href);
-          // this will follow the link:
-          document.location.href = href; */
+           var href = data.rslt.obj.children("a").attr("href");
+           // this will load content into a div:
+           $("#contents").load(href);
+           // this will follow the link:
+           document.location.href = href; */
         });
 
-      } catch(e) {
+      } catch (e) {
         error = e;
       }
 
