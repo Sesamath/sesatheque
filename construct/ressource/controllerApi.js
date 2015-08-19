@@ -49,8 +49,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var tools = require('../tools')
   var config = require("../../config");
 
-  var testConnexionDelay = 10*60*1000 // 10 min en ms
-
   /**
    * Met à jour une ressource issue de la bdd et appelle checkWriteAndOut pour vérifier les droits, l'enregistrer et sortir
    * ou sort avant avec une erreur
@@ -184,6 +182,57 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Traite GET|POST /api/liste/all
+   * @private
+   * @param {Context} context
+   */
+  function getListeAll(context) {
+    // si on lance la requete faut filtrer d'après les droits avec $accessControl.getListeLisible,
+    // donc il récupèrera pas forcément nb résultats :-/
+    // franchement pas terrible, donc on laisse tomber et on vérifie les droits all avant de lancer la requete
+    if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
+    else denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
+  }
+  
+  /**
+   * Traite GET|POST /api/liste/prof
+   * @private
+   * @param {Context} context
+   */
+  function getListeProf(context) {
+    if ($accessControl.hasGenericPermission('correction', context)) {
+      grabListe(context, 'correction')
+    } else if ($accessControl.isAuthenticated(context)) {
+      denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
+    } else {
+      denied(context, "Il faut être authentifié pour accéder aux corrigés")
+    }
+  }
+
+  /**
+   * Traite GET|POST /api/liste/perso
+   * @private
+   * @param {Context} context
+   */
+  function getListePerso(context) {
+    var oid = $accessControl.getCurrentUserOid(context)
+    if (oid) {
+      grabListe(context, 'auteur/' +oid)
+    } else {
+      sendJson(context, "Il faut s'authentifier avant pour récupérer ses ressources personnelles")
+    }
+  }
+
+  /**
+   * Traite GET|POST /api/liste/public
+   * @private
+   * @param context
+   */
+  function getListePublic(context) {
+    grabListe(context, 'public')
+  }
+
+  /**
    * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
    * @private
    * @param {Context} context
@@ -230,6 +279,100 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept');
     // et on laisse le middleware CORS faire son boulot
     context.next(null, 'OK'); // ne pas renvoyer de chaîne vide sinon 404
+  }
+
+  //noinspection FunctionWithMoreThanThreeNegationsJS
+  /**
+   * Traite la ressource de POST /api/ressource
+   * @private
+   * @param {Context} context
+   */
+  function postRessource(context) {
+    /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+     log.error(new Error('une trace pour ' +reqHttp)) */
+    if (context.perf) {
+      var msg = 'start-'
+      if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
+      else msg += context.post.oid
+      log.perf(context.response, msg)
+    }
+    // 1s ne suffit pas toujours en local, à cause d'insert mysql très lents, on met 2s dans le listener
+
+    // partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
+    var partial = !!context.get.partial
+    if (!partial && !context.post.titre && !context.post.categories) {
+      partial = (context.post.oid > 0 || (context.post.origine && context.post.idOrigine))
+    }
+
+    log.debug('post /api/ressource a reçu', context.post, 'api', {max:1000})
+    console.log(context.post);
+
+    $ressourceControl.valideRessourceFromPost(context.post, partial, function (error, ressource) {
+      try {
+        if (error) {
+          sendJson(context, error)
+        } else {
+          // faut la charger, ne serait-ce que pour savoir si elle existe
+          if (ressource.oid) { // par oid
+            $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
+              checkUpdateAndOut(context, error, ressourceBdd, ressource)
+            })
+          } else if (ressource.origine && ressource.idOrigine) { // ou par origine/idOrigine
+            $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
+              checkUpdateAndOut(context, error, ressourceBdd, ressource)
+            })
+          } else if (ressource.origine === "local") {
+            // seul cas autorisé où l'idOrigine n'est pas obligatoire ($ressourceRepository.write le créera)
+            checkWriteAndOut(context, ressource)
+          } else {
+            throw new Error("Il faut fournir oid ou origine/idOrigine")
+          }
+        }
+
+      } catch (error) {
+        sendJson(context, error)
+      }
+    })
+  }
+
+  /**
+   * Ajoute des relations à une ressource
+   * @private
+   * @param {Context} context
+   */
+  function postRessourceAddRelations (context) {
+    if (context.perf) {
+      var msg = 'start-'
+      if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
+      else msg += context.post.oid
+      log.perf(context.response, msg)
+    }
+    log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
+    var relations = context.post.relations
+    if (relations && relations.length) {
+      var ref = extractId(context)
+
+      if (ref) {
+        $ressourceRepository.load(ref, function (error, ressource) {
+          if (error) sendJson(context, error)
+          else if (ressource) {
+            var errors = $ressourceConverter.addRelations(ressource, relations)
+            // rien changé
+            if (errors === false) sendJson(context, null, {success: true, oid:ressource.oid})
+            // y'a eu des erreurs
+            else if (errors.length) sendJson(context, errors)
+            // ni l'un ni l'autre, faut sauvegarder
+            else checkWriteAndOut(context, ressource)
+          } else {
+            notFound(context, "La ressource " + ref + " n'existe pas")
+          }
+        })
+      } else {
+        sendJson(context, "pas d'identifiant de ressource")
+      }
+    } else {
+      sendJson(context, 'relations manquantes')
+    }
   }
 
   /**
@@ -412,65 +555,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
-   * @Route GET /api/ressource/:oid
-   * @param {Integer} oid
-   * @return {reponseRessource}
-   */
-  controller.get('ressource/:oid', function (context) {
-    var oid = context.arguments.oid
-    $ressourceRepository.load(oid, function (error, ressource) {
-      sendRessource(context, error, ressource)
-    })
-  })
-  /**
-   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
-   * @route GET /api/ressource/:origine/:idOrigine
-   * @param {string} :origine
-   * @param {string} :idOrigine
-   * @return {reponseRessource}
-   */
-  controller.get('ressource/:origine/:idOrigine', function (context) {
-    var idOrigine = context.arguments.idOrigine
-    var origine = context.arguments.origine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      sendRessource(context, error, ressource)
-    })
-  })
-  /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(ref|compact)
-   * @route GET /api/public/:oid
-   * @param {Integer} oid
-   * @return {reponseRessource}
-   */
-  controller.get('public/:oid', function (context) {
-    var oid = context.arguments.oid
-    if (oid !== 'by') {
-      $ressourceRepository.loadPublic(oid, function (error, ressource) {
-        if (error) sendJson(context, error)
-        else if (ressource) sendJson(context, null, ressource)
-        else notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
-      })
-    }
-  })
-  /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(ref|compact)
-   * @route GET /api/public/:origine/:idOrigine
-   * @param {string} :origine
-   * @param {string} :idOrigine
-   * @return {reponseRessource}
-   */
-  controller.get('public/:origine/:idOrigine', function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      if (error) sendJson(context, error)
-      else if (ressource && ressource.restriction === 0) sendJson(context, null, ressource)
-      else notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
-    })
-  })
-
-  /**
    * Récupère un arbre au format jstree (children=1 pour récupérer les enfants seulement)
    * @route GET /api/jstree?ref=xx[&children=1]
    * @returns {Object} Un objet pour jstree (Cf le plugin arbre pour un exemple d'utilisation)
@@ -501,59 +585,150 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-  //noinspection FunctionWithMoreThanThreeNegationsJS
+
+  getListeAll.timeout = 3000
   /**
-   * Traite la ressource postée
-   * @private
-   * @param {Context} context
+   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
+   * @route GET /api/liste/all
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
-  function postRessource(context) {
-    /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-    log.error(new Error('une trace pour ' +reqHttp)) */
-    if (context.perf) {
-      var msg = 'start-'
-      if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
-      else msg += context.post.oid
-      log.perf(context.response, msg)
+  controller.get('liste/all', getListeAll)
+  /**
+   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
+   * @route POST /api/liste/all
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.post('liste/all', getListeAll)
+  /**
+   * Ajoute aux headers cors habituels le header
+   * Access-Control-Allow-Methods', 'POST OPTIONS'
+   * @route OPTIONS /api/liste/all
+   */
+  controller.options('liste/all', optionsOk)
+
+
+  getListePerso.timeout = 3000;
+  /**
+   * Cherche parmi les ressources du user courant (qui doit être connecté avant)
+   * @route GET /api/liste/perso
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.get('liste/perso', getListePerso)
+  /**
+   * Cherche parmi les ressources du user courant (qui doit être connecté avant)
+   * @route POST /api/liste/perso
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.post('liste/perso', getListePerso)
+  /**
+   * Pour le preflight
+   * @route OPTIONS /api/liste/perso
+   */
+  controller.options('liste/perso', optionsOk)
+
+
+  getListeProf.timeout = 3000
+  /**
+   * Cherche parmi les ressources publiques ou les corrections
+   * @route GET /api/liste/prof
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.get('liste/prof', getListeProf)
+  /**
+   * Cherche parmi les ressources publiques ou les corrections
+   * @route POST /api/liste/prof
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.post('liste/prof', getListeProf)
+  /**
+   * Pour le preflight, ajoute aux headers cors habituels le header
+   *   Access-Control-Allow-Methods:POST OPTIONS
+   * @route OPTIONS /api/liste/prof
+   */
+  controller.options('liste/prof', optionsOk)
+
+
+  /**
+   * Cherche parmi les ressources publiques publiées
+   * @route GET /api/liste/public
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.get('liste/public', getListePublic)
+  /**
+   * Cherche parmi les ressources publiques publiées
+   * @route POST /api/liste/public
+   * @param {requeteListe}
+   * @returns {reponseListe}
+   */
+  controller.post('liste/public', function (context) {
+    grabListe(context, 'public')
+  })
+  /**
+   * Pour le preflight, ajoute aux headers cors habituels le header
+   *   Access-Control-Allow-Methods: POST OPTIONS
+   * @route OPTIONS /api/liste/public
+   */
+  controller.options('liste/public', optionsOk)
+
+  /**
+   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(ref|compact)
+   * @route GET /api/public/:oid
+   * @param {Integer} oid
+   * @return {reponseRessource}
+   */
+  controller.get('public/:oid', function (context) {
+    var oid = context.arguments.oid
+    if (oid !== 'by') {
+      $ressourceRepository.loadPublic(oid, function (error, ressource) {
+        if (error) sendJson(context, error)
+        else if (ressource) sendJson(context, null, ressource)
+        else notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
+      })
     }
-    // 1s ne suffit pas toujours en local, à cause d'insert mysql très lents, on met 2s dans le listener
+  })
 
-    // partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
-    var partial = !!context.get.partial
-    if (!partial && !context.post.titre && !context.post.categories) {
-      partial = (context.post.oid > 0 || (context.post.origine && context.post.idOrigine))
-    }
-
-    log.debug('post /api/ressource a reçu', context.post, 'api', {max:1000})
-    console.log(context.post);
-
-    $ressourceControl.valideRessourceFromPost(context.post, partial, function (error, ressource) {
-      try {
-        if (error) {
-          sendJson(context, error)
-        } else {
-          // faut la charger, ne serait-ce que pour savoir si elle existe
-          if (ressource.oid) { // par oid
-            $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
-              checkUpdateAndOut(context, error, ressourceBdd, ressource)
-            })
-          } else if (ressource.origine && ressource.idOrigine) { // ou par origine/idOrigine
-            $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
-              checkUpdateAndOut(context, error, ressourceBdd, ressource)
-            })
-          } else if (ressource.origine === "local") {
-            // seul cas autorisé où l'idOrigine n'est pas obligatoire ($ressourceRepository.write le créera)
-            checkWriteAndOut(context, ressource)
-          } else {
-            throw new Error("Il faut fournir oid ou origine/idOrigine")
-          }
-        }
-
-      } catch (error) {
-        sendJson(context, error)
-      }
+  /**
+   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(ref|compact)
+   * @route GET /api/public/:origine/:idOrigine
+   * @param {string} :origine
+   * @param {string} :idOrigine
+   * @return {reponseRessource}
+   */
+  controller.get('public/:origine/:idOrigine', function (context) {
+    var origine = context.arguments.origine
+    var idOrigine = context.arguments.idOrigine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      if (error) sendJson(context, error)
+      else if (ressource && ressource.restriction === 0) sendJson(context, null, ressource)
+      else notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
     })
-  }
+  })
+
+  /**
+   * Denied (rerouting interne ressource => public si on a ni session ni token)
+   * @internal
+   * @route DEL /api/public/:origine/:idOrigine
+   */
+  controller.delete('public/:origine/:idOrigine', function (context) {
+    denied(context, "droits insuffisant pour effacer cette ressource")
+  })
+
+  /**
+   * Denied (rerouting interne ressource => public si on a ni session ni token)
+   * @internal
+   * @route DEL /api/public/:oid
+   */
+  controller.delete('public/:oid', function (context) {
+    denied(context, "droits insuffisant pour effacer cette ressource")
+  })
+
   postRessource.timeout = 5000
   /**
    * Create / update une ressource
@@ -573,46 +748,52 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route OPTIONS /api/ressource
    */
   controller.options('ressource', optionsOk)
+  
+  /**
+   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
+   * @Route GET /api/ressource/:oid
+   * @param {Integer} oid
+   * @return {reponseRessource}
+   */
+  controller.get('ressource/:oid', function (context) {
+    var oid = context.arguments.oid
+    $ressourceRepository.load(oid, function (error, ressource) {
+      sendRessource(context, error, ressource)
+    })
+  })
 
   /**
-   * Ajoute des relations
-   * @private
-   * @param {Context} context
+   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
+   * @route GET /api/ressource/:origine/:idOrigine
+   * @param {string} :origine
+   * @param {string} :idOrigine
+   * @return {reponseRessource}
    */
-  function postRessourceAddRelations (context) {
-    if (context.perf) {
-      var msg = 'start-'
-      if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
-      else msg += context.post.oid
-      log.perf(context.response, msg)
-    }
-    log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
-    var relations = context.post.relations
-    if (relations && relations.length) {
-      var ref = extractId(context)
+  controller.get('ressource/:origine/:idOrigine', function (context) {
+    var idOrigine = context.arguments.idOrigine
+    var origine = context.arguments.origine
+    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+      sendRessource(context, error, ressource)
+    })
+  })
 
-      if (ref) {
-        $ressourceRepository.load(ref, function (error, ressource) {
-          if (error) sendJson(context, error)
-          else if (ressource) {
-            var errors = $ressourceConverter.addRelations(ressource, relations)
-            // rien changé
-            if (errors === false) sendJson(context, null, {success: true, oid:ressource.oid})
-            // y'a eu des erreurs
-            else if (errors.length) sendJson(context, errors)
-            // ni l'un ni l'autre, faut sauvegarder
-            else checkWriteAndOut(context, ressource)
-          } else {
-            notFound(context, "La ressource " + ref + " n'existe pas")
-          }
-        })
-      } else {
-        sendJson(context, "pas d'identifiant de ressource")
-      }
-    } else {
-      sendJson(context, 'relations manquantes')
-    }
-  }
+  /**
+   * Delete par oid
+   * @route DEL /api/ressource/:oid
+   */
+  controller.delete('ressource/:oid', function (context) {
+    deleteAndSend(context, context.arguments.oid)
+  })
+
+  /**
+   * Delete par id d'origine
+   * @route DEL /api/ressource/:origine/:idOrigine
+   */
+  controller.delete('ressource/:origine/:idOrigine', function (context) {
+    var ref = context.arguments.origine +'/' +context.arguments.idOrigine
+    deleteAndSend(context, ref)
+  })
+
   postRessourceAddRelations.timeout = 5000
   /**
    * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
@@ -630,182 +811,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route OPTIONS /api/ressource/addRelations
    */
   controller.options('ressource/addRelations', optionsOk)
-
-  /**
-   * Delete par oid
-   * @route DEL /api/ressource/:oid
-   */
-  controller.delete('ressource/:oid', function (context) {
-    deleteAndSend(context, context.arguments.oid)
-  })
-  /**
-   * Delete par id d'origine
-   * @route DEL /api/ressource/:origine/:idOrigine
-   */
-  controller.delete('ressource/:origine/:idOrigine', function (context) {
-    var ref = context.arguments.origine +'/' +context.arguments.idOrigine
-    deleteAndSend(context, ref)
-  })
-  /**
-   * Denied (rerouting interne ressource => public si on a ni session ni token)
-   * @internal
-   * @route DEL /api/public/:origine/:idOrigine
-   */
-  controller.delete('public/:origine/:idOrigine', function (context) {
-    denied(context, "droits insuffisant pour effacer cette ressource")
-  })
-  /**
-   * Denied (rerouting interne ressource => public si on a ni session ni token)
-   * @internal
-   * @route DEL /api/public/:oid
-   */
-  controller.delete('public/:oid', function (context) {
-    denied(context, "droits insuffisant pour effacer cette ressource")
-  })
-
-  /**
-   * Cherche parmi les ressources publiques publiées
-   * @route GET /api/liste/public
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.get('liste/public', function (context) {
-    grabListe(context, 'public')
-  })
-
-  /**
-   * Cherche parmi les ressources publiques publiées
-   * @route POST /api/liste/public
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.post('liste/public', function (context) {
-    grabListe(context, 'public')
-  })
-  /**
-   * Pour le preflight, ajoute aux headers cors habituels le header
-   *   Access-Control-Allow-Methods: POST OPTIONS
-   * @route OPTIONS /api/liste/public
-   */
-  controller.options('liste/public', optionsOk)
-
-  function getListeAvecCorriges(context) {
-    if ($accessControl.hasGenericPermission('correction', context)) {
-      grabListe(context, 'correction')
-    } else if ($accessControl.isAuthenticated(context)) {
-      denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
-    } else {
-      denied(context, "Il faut être authentifié pour accéder aux corrigés")
-    }
-  }
-  getListeAvecCorriges.timeout = 3000
-  /**
-   * Cherche parmi les ressources publiques ou les corrections
-   * @route GET /api/liste/prof
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.get('liste/prof', getListeAvecCorriges)
-  /**
-   * Cherche parmi les ressources publiques ou les corrections
-   * @route POST /api/liste/prof
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.post('liste/prof', getListeAvecCorriges)
-  /**
-   * Pour le preflight, ajoute aux headers cors habituels le header
-   *   Access-Control-Allow-Methods:POST OPTIONS
-   * @route OPTIONS /api/liste/prof
-   */
-  controller.options('liste/prof', optionsOk)
-
-  /**
-   * Cherche parmi les ressources du user courant (fera un check sur le serveur d'authentification s'il n'est pas connecté ici)
-   * @route GET /api/liste/perso
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.get('liste/perso', function (context) {
-    log.debug("controleur GET /api/liste/perso", context.session)
-    // cette url est suceptible d'être appelée
-    var oid = $accessControl.getCurrentUserOid(context)
-    log.debug("oid : " +oid)
-    if (oid) {
-      grabListe(context, 'auteur/' +oid)
-    } else if (context.session.user && context.session.lastCheck && context.session.lastCheck > ((new Date()).getTime() - testConnexionDelay)) {
-      // on redirige vers l'authentification qui nous rappellera ensuite avec un ticket
-      var urlConnexion = context.request.originalUrl
-      urlConnexion += context.request.originalUrl.indexOf('?') > 0 ? '&' : '?'
-      urlConnexion += 'testConnexion'
-      log.debug("GET api/perso redirige vers " +urlConnexion)
-      context.redirect(urlConnexion)
-    }
-  })
-
-  /**
-   * Cherche parmi les ressources du user courant (fera un check sur le serveur d'authentification s'il n'est pas connecté ici)
-   * @route POST /api/liste/perso
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.post('liste/perso', function (context) {
-    var oid = $accessControl.getCurrentUserOid(context)
-    if (oid) {
-      grabListe(context, 'auteur/' +oid)
-    } else {
-      // la redirection marche mal, on laisse tomber, faut une connexion préalable
-      sendJson(context, "Il faut s'authentifier sur /api/connexion avant de récupérer des ressources perso")
-      // on redirige vers l'authentification qui nous rappellera ensuite, mais on est en post
-      // donc faut reconstruire l'url en GET d'après cette demande en post
-      //var urlConnexion = context.request.originalUrl
-      //urlConnexion += context.request.originalUrl.indexOf('?') ? '&' : '?'
-      //var queryString = ''
-      //for (var prop in context.post) {
-      //  if (context.post.hasOwnProperty(prop)) queryString += '&' +prop +'=' +encodeURIComponent(context.post[prop])
-      //}
-      //queryString += '&connexion'
-      //if (context.request.originalUrl.indexOf('?')) urlConnexion += queryString
-      //// faut virer notre premier & (on est sûr qu'il existe même si y'avait pas de post grace au &connexion)
-      //else urlConnexion += '?' +queryString.substr(1)
-      //context.redirect(urlConnexion)
-    }
-  })
-  /**
-   * Pour le preflight, ajoute aux headers cors habituels le header
-   *   Access-Control-Allow-Methods:POST OPTIONS
-   * @route OPTIONS /api/liste/perso
-   */
-  controller.options('liste/perso', optionsOk)
-
-  function getAllBy(context) {
-    // si on lance la requete faut filtrer d'après les droits avec $accessControl.getListeLisible,
-    // donc il récupèrera pas forcément nb résultats :-/
-    // franchement pas terrible, donc on laisse tomber et on vérifie les droits all avant de lancer la requete
-    if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
-    else denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
-  }
-  getAllBy.timeout = 3000
-  /**
-   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
-   * @route GET /api/liste/all
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.get('liste/all', getAllBy)
-  /**
-   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
-   * @route POST /api/liste/all
-   * @param {requeteListe}
-   * @returns {reponseListe}
-   */
-  controller.post('liste/all', getAllBy)
-  /**
-   * Ajoute aux headers cors habituels le header
-   * Access-Control-Allow-Methods', 'POST OPTIONS'
-   * @route OPTIONS /api/liste/all
-   */
-  controller.options('liste/all', optionsOk)
 }
 
 
