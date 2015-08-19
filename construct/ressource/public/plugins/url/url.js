@@ -30,7 +30,7 @@
  */
 
 try {
-  define(["jquery1"], function () {
+  define(["jquery"], function () {
     "use strict";
     /* jshint jquery:true */
 

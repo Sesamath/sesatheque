@@ -80,7 +80,6 @@
         head: base + 'vendors/headjs/head.1.0',
         head_load: base + 'vendors/headjs/head.load.1.0',
         jquery: base + 'vendors/jquery/dist/jquery.min',
-        jquery1: base + 'vendors/jquery/jquery-1.11.3.min',
         jqueryUi: base + 'vendors/jqueryUi/1.11.1/jquery-ui.min',
         jqueryUiDialog: base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
         jstree: base + 'vendors/jstree/dist/jstree.min',

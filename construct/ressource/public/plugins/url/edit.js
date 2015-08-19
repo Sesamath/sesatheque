@@ -39,7 +39,7 @@
  * answer_editor   Quel type d'éditeur pour la réponse (textarea, ckeditor, ckeditorTex), cette propriété n'existait pas dans labomep1
  */
 try {
-  define(['jquery1', 'mqEditor'], function (none, mqEditor) {
+  define(['jquery', 'mqEditor'], function (none, mqEditor) {
     /* jshint jquery:true */
     /* global alert,CKEDITOR */
     //"use strict";

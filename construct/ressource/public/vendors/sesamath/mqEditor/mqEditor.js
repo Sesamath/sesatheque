@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-define(["jquery1", "mathquill"], function () {
+define(["jquery", "mathquill"], function () {
   'use strict';
   /**
    * Ajoute un bouton (et son comportement)

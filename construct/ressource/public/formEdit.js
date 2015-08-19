@@ -57,7 +57,7 @@
         // on le met en global pour qu'il puisse être lancé dans la vue avec les options
         initTmp = function (options, next) {
           init(options);
-          require(['jquery1'], function () {
+          require(['jquery'], function () {
             function onTypeChange() {
               var $label = $groupParametres.filter('label');
               var $textarea = $groupParametres.filter('textarea');

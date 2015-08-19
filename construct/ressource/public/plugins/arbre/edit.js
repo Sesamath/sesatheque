@@ -33,7 +33,6 @@
  * @file Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
  */
 try {
-  // jstree fait un require de "jquery", on prend le même nom (jquery1 est un alias)
   define(['tools/jstreeConverter', 'apiClient', 'jquery', 'jstree'], function (jstreeConverter, apiClient) {
     /* jshint jquery:true */
     "use strict";
