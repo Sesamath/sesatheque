@@ -236,7 +236,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
             // et on envoie
             xhr.open('POST', traiteResultat, true);
-            xhr.setRequestHeader('Content-type', 'text/plain'); // pour éviter le preflight
+            xhr.setRequestHeader('Content-type', 'application/json'); // text/plain évite le preflight mais le body parser interprête pas
             try {
               xhr.send(JSON.stringify(resultat));
             } catch (error) {
