@@ -3,7 +3,7 @@
     "allowUnknownTags": true
   },
   "source": {
-    "include": [ "./construct/ressource/controllerApi.js"]
+    "include": [ "./construct/ressource/controllerApi.js", "API.md"]
   },
   "plugins": [
     "plugins_sup/ngdoc"

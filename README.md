@@ -21,13 +21,13 @@ Pour écrire ou utiliser un plugin (qui gère un type de ressource), voir la [do
 Routage
 -------
 
-Cf [/ressource/](controleurRessource.html) et [/public/](controleurPublic.html)
+[/ressource/](controllerRessource.html) et [/public/](controllerPublic.html)
 
 
-API http, via /api
-------------------
+API http
+--------
 
-Cf la [documentation dédiée](restApi/index.html)
+Doc [dédiée](restApi/) qui pour le moment est identique à [/api/](controllerApi.html)
 
 
 Scripts

@@ -35,7 +35,7 @@
  * Le controleur de la route /api/ (qui répond en json)
  * Toutes les routes contenant /public/ sont sans tenir compte de la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
- * @Controller controlleurApi
+ * @Controller controllerApi
  * @requires {@link $ressourceRepository}
  * @requires {@link $ressourceConverter}
  * @requires {@link $ressourceControl}
@@ -77,7 +77,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function checkWriteAndOut(context, ressource) {
     log.debug("dans cb api checkWriteAndOut on récupère", ressource, 'api', {max:500})
-    var permission = ressource.oid ? 'update' : 'create'
+    var permission = (ressource.oid || (ressource.origine && ressource.idOrigine)) ? 'update' : 'create'
     // hasPermission et pas checkPermission pour être synchrone et gérer nos messages
     if ($accessControl.hasPermission(permission, context, ressource)) {
       // on ajoute celui qui poste comme auteur, sauf si c'est un admin
@@ -555,8 +555,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Récupère un arbre au format jstree (children=1 pour récupérer les enfants seulement)
+   * Récupère un arbre au format jstree
    * @route GET /api/jstree?ref=xx[&children=1]
+   * @param {string} ref        Un oid ou origine/idOrigine
+   * @param {string} [children] Passer 1 pour ne récupérer que les enfants
    * @returns {Object} Un objet pour jstree (Cf le plugin arbre pour un exemple d'utilisation)
    */
   controller.get('jstree', function (context) {
@@ -627,6 +629,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Pour le preflight
    * @route OPTIONS /api/liste/perso
+   * @param {requeteListe}
+   * @returns {reponseListe}
    */
   controller.options('liste/perso', optionsOk)
 
@@ -739,6 +743,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    *
    * Retourne d'autres propriétés de la ressource enregistrée si on le réclame avec ?format=(ref|compact)
    * @route POST /api/ressource
+   * @param {object} Les propriétés de la ressource
    * @returns {reponseRessourceOid|reponseRessourceRef}
    */
   controller.post('ressource', postRessource)
@@ -780,6 +785,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Delete par oid
    * @route DEL /api/ressource/:oid
+   * @param {Integer} oid
    */
   controller.delete('ressource/:oid', function (context) {
     deleteAndSend(context, context.arguments.oid)
@@ -788,6 +794,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Delete par id d'origine
    * @route DEL /api/ressource/:origine/:idOrigine
+   * @param {string} :origine
+   * @param {string} :idOrigine
    */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     var ref = context.arguments.origine +'/' +context.arguments.idOrigine
@@ -801,7 +809,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} [origine]
    * @param {string} [idOrigine]
    * @param {string} [ref]
-   * @param {string} relations
+   * @param {Array} relations
    * @route POST /api/ressource/addRelations
    */
   controller.post('ressource/addRelations', postRessourceAddRelations)
