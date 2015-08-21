@@ -505,7 +505,7 @@ try {
         dstTree = arbre;
         timeout = options.timeout;
         initDom(options);
-        // on ajoute simplement un lien pour passer à la version graphique
+        // on ajoute un lien pour passer à la version graphique
         jstreeConverter.setBaseUrl(options.sesathequeBase);
         S.log("edit de l'arbre", arbre);
         S.log("$dstTree", $dstTree);

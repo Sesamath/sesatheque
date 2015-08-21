@@ -67,27 +67,37 @@ try {
       if (url) iframeApercu.href = url;
     }
 
+    /**
+     * Ajoute les boutons d'options sur la consigne et la réponse
+     * @param blocParam
+     * @param parametres
+     * @param options
+     */
     function addOptions(blocParam, parametres, options) {
-      function addLabel(id, label) {
-        S.addElement(blocParam, 'label', {for:id}, label);
-      }
-      function addOption(name, txt, value, onclick) {
+      /**
+       * Ajoute une option dans parent
+       * @internal
+       * @param parent
+       * @param name
+       * @param label
+       * @param value
+       * @param onClick
+       */
+      function addOption(parent, name, label, value, onClick) {
         var id = S.getNewId();
-        var args = {type:"radio", name:"parametres[" +name +"]", id:id, value:value};
-        if (onclick) args.onclick = onclick;
+        var args = {type:"radio", name:"parametres[" +name +"]", id:id, value:value, style:{"line-height":"1.3em","vertical-align":"middle"}};
         if (parametres[name] === value) args.checked = "checked";
-        S.addElement(blocParam, 'input', args);
-        addLabel(id, txt);
+        var radio = S.addElement(parent, 'input', args);
+        if (onClick) $(radio).click(onClick);
+
+        S.addElement(parent, 'label', {htmlFor:id,style:{"line-height":"1.3em","vertical-align":"middle", margin:"0 1em 0 0.2em"}}, label);
       }
-      S.addText(blocParam, "Consigne : ");
-      var editorToggleButton = S.addElement(blocParam, 'button', null, "Éditeur de texte enrichi");
-      var consigne = parametres.consigne || '';
-      var divConsigne = S.addElement(blocParam, 'div');
-      var $divConsigne = $(divConsigne);
-      var editor = S.addElement(divConsigne, 'textarea', {name:"parametres[consigne]", id:"editor"}, consigne);
-      var $editor = $(editor);
-      $editorToggleButton = $(editorToggleButton);
-      $editorToggleButton.click(function () {
+
+      /**
+       * Affiche / masque ckEditor (callback onClic du bouton afficher simple/enrichi)
+       * @returns {boolean} toujours false sinon ça valide le form !
+       */
+      function toggleEditor() {
         function toCk() {
           $divConsigne.hide();
           $editorToggleButton.text("Éditeur d'équation simplifié");
@@ -96,53 +106,69 @@ try {
           });
           $divConsigne.show();
         }
+        function toSimple() {
+          $divConsigne.hide();
+          $editorToggleButton.text("Éditeur enrichi");
+          // on vire le html
+          var contenu = $editor.text();
+          $editor.text(contenu);
+          $divConsigne.show();
+        }
         if (isMqEditor) {
           if (typeof CKEDITOR === "undefined") {
             require(["ckeditor"], function () {
               if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor');
               initCKEditor();
               toCk();
-            })
+            });
           } else {
             toCk();
           }
         } else {
-          $divConsigne.hide();
-          // on vire le html
-          var contenu = $editor.text()
-          $editor.text(contenu);
-          mqEditor.init(divConsigne, parametres.mqEditorConfig, options);
-          $divConsigne.show();
+          toSimple();
         }
-      });
-      addOption("question_option", "aucune", "off", $divConsigne.hide);
-      addOption("question_option", "avant", "before", $divConsigne.show);
-      addOption("question_option", "pendant", "while", $divConsigne.show);
-      addOption("question_option", "après", "after", $divConsigne.show);
-      S.addText(blocParam, " (l'affichage de la page)");
-      S.addElement(blocParam, 'br');
-      //initCKEditor();
+
+        return false; // sinon il valide le form !
+      }
+      S.addElement(blocParam, "span", {style:{"font-weight":"bold"}}, "Consigne :");
+      var consigne = parametres.consigne || '';
+      var divConsigneOptions = S.addElement(blocParam, 'div');
+      var divConsigne = S.addElement(blocParam, 'div');
+      var editorToggleButton = S.addElement(divConsigne, 'button', {style:{display:"block"}}, "Éditeur enrichi");
+      $editorToggleButton = $(editorToggleButton);
+      $editorToggleButton.click(toggleEditor);
+      var $divConsigne = $(divConsigne);
+      addOption(divConsigneOptions, "question_option", "aucune", "off", function () {$divConsigne.hide();});
+      addOption(divConsigneOptions, "question_option", "avant", "before", function () {$divConsigne.show();});
+      addOption(divConsigneOptions, "question_option", "pendant", "while", function () {$divConsigne.show();});
+      addOption(divConsigneOptions, "question_option", "après", "after", function () {$divConsigne.show();});
+      S.addText(divConsigneOptions, " (l'affichage de la page)");
+
+      var editor = S.addElement(divConsigne, 'textarea', {name:"parametres[consigne]", id:"editor",style:{"min-width":"50%"}}, consigne);
+      var $editor = $(editor);
       mqEditor.init(divConsigne, parametres.mqEditorConfig, options);
-      S.addElement(blocParam, 'br');
-      S.addText(blocParam, "Réponse :");
-      addOption("answer_option", "aucune", "off");
-      addOption("answer_option", "avant", "before");
-      addOption("answer_option", "pendant", "while");
-      addOption("answer_option", "après", "after");
-      S.addText(blocParam, " (l'affichage de la page)");
-      S.addElement(blocParam, 'br');
-      S.addText(blocParam, " Type d'éditeur pour la réponse : ");
-      addOption("answer_editor", "zone de texte", "textarea");
-      addOption("answer_editor", "texte enrichi", "ckeditor");
-      addOption("answer_editor", "texte avec éditeur d'équation simplifié", "mqEditor");
-      addOption("answer_editor", "texte enrichi avec LaTeX possible", "ckeditorTex");
+
+
+      S.addElement(blocParam, "span", {style:{"font-weight":"bold"}}, "Réponse :");
+      var divReponseOptions = S.addElement(blocParam, 'div');
+      addOption(divReponseOptions, "answer_option", "aucune", "off");
+      addOption(divReponseOptions, "answer_option", "avant", "before");
+      addOption(divReponseOptions, "answer_option", "pendant", "while");
+      addOption(divReponseOptions, "answer_option", "après", "after");
+      S.addText(divReponseOptions, " (l'affichage de la page)");
+      S.addElement(divReponseOptions, 'br');
+      S.addText(divReponseOptions, " Type d'éditeur pour la réponse : ");
+      addOption(divReponseOptions, "answer_editor", "zone de texte", "textarea");
+      addOption(divReponseOptions, "answer_editor", "texte enrichi", "ckeditor");
+      addOption(divReponseOptions, "answer_editor", "texte avec éditeur d'équation simplifié", "mqEditor");
+      addOption(divReponseOptions, "answer_editor", "texte enrichi avec LaTeX possible", "ckeditorTex");
     }
 
     /**
      * Initialise la conf de ckeditor (mais il faudra appeler CKEDITOR.replace ensuite)
      */
     function initCKEditor() {
-      if (options.vendorsBaseUrl) S.addCss(options.vendorsBaseUrl + '/ckeditor/contents.css');
+      S.addCss('/vendors/ckeditor/contents.css');
       if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) CKEDITOR.tools.enableHtml5Elements( document );
       // The trick to keep the editor in the sample quite small unless user specified own height.
       CKEDITOR.config.height = 150;
@@ -177,7 +203,7 @@ try {
     }
 
     /**
-     * Charge l'arbre source, initialise le dom et les comportements 
+     * Initialise le dom et les comportements
      * @param options
      */
     function initDom(parametres, options) {
@@ -186,32 +212,31 @@ try {
       // nos éléments html
       var blocParam = window.document.getElementById('parametres');
       if (!blocParam) throw new Error("Élément #parametres manquant");
-      $blocParam = $(blocParam);
-      $blocParam.text("Adresse Internet de votre page externe (par exemple : http://www.sesamath.net)");
+      var instructions = S.addElement(blocParam, 'div', "Adresse Internet de votre page externe (par exemple : http://www.sesamath.net)");
       var url = parametres.adresse || '';
       if (url === "undefined") url = '';
-      var adresseElt = S.addElement(blocParam, 'input', {name:"parametres[adresse]",size:100, value:url});
+      var adresseElt = S.addElement(instructions, 'input', {name:"parametres[adresse]",size:100, value:url});
       $adresse = $(adresseElt);
       $adresse.change(adresseOnChange);
-      S.addElement(blocParam, 'br');
-      S.addText(blocParam, "Il est possible d'accompagner la page internet d'une consigne et même de demander à l'élève de saisir un texte dans une zone de réponse.");
-      S.addElement(blocParam, 'br');
-      S.addText(blocParam, "Choisissez le paramétrage que vous souhaitez parmi ceux proposés ci-dessous.");
-      S.addElement(blocParam, 'br');
-      //S.addText(blocParam, "Le symbole ");
-      //S.addElement(blocParam, 'img', {src: options.pluginBaseUrl +"/images/forward.png"});
-      //S.addText(blocParam, " indique que les affichages seront proposés successivements et non simultanément.");
+      S.addElement(instructions, 'br');
+      S.addText(instructions, "Il est possible d'accompagner la page internet d'une consigne et même de demander à l'élève de saisir un texte dans une zone de réponse.");
+      S.addElement(instructions, 'br');
+      S.addText(instructions, "Choisissez le paramétrage que vous souhaitez parmi ceux proposés ci-dessous.");
+      //S.addText(instructions, "Le symbole ");
+      //S.addElement(instructions, 'img', {src: options.pluginBaseUrl +"/images/forward.png"});
+      //S.addText(instructions, " indique que les affichages seront proposés successivements et non simultanément.");
       addOptions(blocParam, parametres, options);
-      S.addText(blocParam, "Vous pouvez forcer une dimension d'affichage (déconseillé pour une page, mieux vaut laisser vide et laisser le navigateur s'adapter, mais cela peut être utile pour une image).");
-      S.addElement(blocParam, 'br');
-      S.addElement(blocParam, 'label', {for:"largeur"}, "largeur (en pixels)");
-      S.addElement(blocParam, 'input', {id:"largeur", name:"parametres[largeur]",size:4, value:parametres.largeur});
-      S.addElement(blocParam, 'label', {for:"hauteur"}, "hauteur (en pixels)");
-      S.addElement(blocParam, 'input', {id:"hauteur", name:"parametres[hauteur]",size:4, value:parametres.hauteur});
-      S.addElement(blocParam, 'br');
-
+      var divTaille = S.addElement(blocParam, 'div');
+      S.addText(divTaille, "Vous pouvez forcer une dimension d'affichage (déconseillé pour une page, mieux vaut laisser vide et laisser le navigateur s'adapter, mais cela peut être utile pour une image).");
+      S.addElement(divTaille, 'br');
+      S.addElement(divTaille, 'label', {htmlFor:"largeur", style:{margin:"0 0.2em 0 0"}}, "largeur (en pixels)");
+      S.addElement(divTaille, 'input', {id:"largeur", name:"parametres[largeur]",size:4, value: parseInt(parametres.largeur, 10) || ""});
+      S.addElement(divTaille, 'label', {htmlFor:"hauteur", style:{margin:"0 0.2em 0 1em"}}, "hauteur (en pixels)");
+      S.addElement(divTaille, 'input', {id:"hauteur", name:"parametres[hauteur]",size:4, value: parseInt(parametres.hauteur, 10) || ""});
+/*
       S.addElement(blocParam, 'button', {onClick:adresseOnChange}, "Prévisualiser la page");
-      iframeApercu = S.addElement(container, 'iframe',{id:"iframeApercu"});
+      iframeApercu = S.addElement(blocParam, 'iframe',{id:"iframeApercu"});
+*/
     }
 
 
@@ -220,12 +245,18 @@ try {
      */
     if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery');
 
+    // raccourcis
     var w = window;
+    if (typeof w.sesamath === "undefined") w.sesamath = {};
+    var S = window.sesamath;
+    if (!S.sesatheque) S.sesatheque = {};
+    var ST = S.sesatheque;
+
     var exclus = ["euler.ac-versailles.fr"];
     // les containers (variables locales au module), qui seront affectés par initDom()
-    var iframeApercu, container, editor;
+    var iframeApercu, container;
     // quasi les mêmes jquerifiée
-    var $adresse, $blocParam, $editorToggleButton;
+    var $adresse, $editorToggleButton;
     var isMqEditor = true;
 
     return {

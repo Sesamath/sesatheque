@@ -34,10 +34,11 @@ define(["jquery", "mathquill"], function () {
   /**
    * Ajoute un bouton (et son comportement)
    * @private
+   * @param parent
    * @param button
    */
-  function addButton(button) {
-    var btn = S.addElement(buttons, 'button', {class: "mqButton", onclick:function () {return false;}});
+  function addButton(parent, button) {
+    var btn = S.addElement(parent, 'button', {class: "mqButton", onclick:function () {return false;}});
     S.addElement(btn, 'img', {src:basePath + "images/" + button + ".png", alt:mqLabel[button]});
     S.log("Ajout bouton " +button, btn);
     btn.addEventListener('click', function () {
@@ -107,7 +108,7 @@ define(["jquery", "mathquill"], function () {
     var mqEditor = {};
 
     // objets jquery, initialisé par init, globaux à ce module
-    var $wqContainer, $buttons, $textarea;
+    var basePath, mqButtons, $wqContainer, $mqButtons, $textarea;
 
     /**
      * Initialise MathQuill dans wqContainer (le crée dans options.container sinon)
@@ -121,15 +122,17 @@ define(["jquery", "mathquill"], function () {
       // nos éléments html de base
       if (!wqContainer) wqContainer = wd.getElementById('mqEditor');
       if (!wqContainer) wqContainer = S.addElement(options.container, 'div', {id:"mqEditor"});
-      var buttons = wd.getElementById("mqButtons"),
-          textarea;
-      if (!buttons) buttons = S.addElement(wqContainer, 'div', {id: "mqButtons"});
+      basePath = options.sesathequeBase || "/";
+      basePath += "vendors/sesamath/mqEditor/";
+      var textarea;
+      mqButtons = wd.getElementById("mqButtons");
+      if (!mqButtons) mqButtons = S.addElement(wqContainer, 'div', {id: "mqButtons"});
       var txt = wqContainer.getElementsByTagName('textarea');
       if (txt) textarea = txt[0];
       else textarea = S.addElement(wqContainer, 'textarea');
       // init de nos objets jquery
       $wqContainer = $(wqContainer);
-      $buttons = $(buttons);
+      $mqButtons = $(mqButtons);
       $textarea = $(textarea);
 
       // la conf
@@ -143,14 +146,15 @@ define(["jquery", "mathquill"], function () {
       };
       if (!config) config = defaultConfig;
 
-      S.addCss(options.pluginBase + "mqEditor.css");
+      S.addCss(basePath + "mqEditor.css");
 
       // on ajoute les boutons demandés
       for (var btn in config) {
         if (config.hasOwnProperty(btn) && config[btn]) {
-          addButton(btn);
+          addButton(mqButtons, btn);
         }
       }
+      S.addElement(mqButtons, "hr", {style:{visibility:"hidden", clear:"left"}});
       isInitDone = true;
       if (next) next();
     };
@@ -160,7 +164,7 @@ define(["jquery", "mathquill"], function () {
      * @memberOf mqEditor
      */
     mqEditor.hideButtons = function () {
-      if (isInitDone) $buttons.hide();
+      if (isInitDone) $mqButtons.hide();
     };
 
     /**
@@ -168,7 +172,7 @@ define(["jquery", "mathquill"], function () {
      * @memberOf mqEditor
      */
     mqEditor.showButtons = function () {
-      if (isInitDone) $buttons.show();
+      if (isInitDone) $mqButtons.show();
     };
 
     /**
@@ -176,7 +180,7 @@ define(["jquery", "mathquill"], function () {
      * @memberOf mqEditor
      */
     mqEditor.toggleButtons = function () {
-      if (isInitDone) $buttons.toggle();
+      if (isInitDone) $mqButtons.toggle();
     };
 
     return mqEditor;

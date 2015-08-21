@@ -50,7 +50,7 @@ if (typeof define === 'function') {
     filters = realFilters;
     return Ressource;
   });
-} else if (typeof module === 'object') {
+} else if (typeof module === 'object' && typeof require !== "undefined") {
   filters = require('./tools/filters');
   module.exports = Ressource;
 }
@@ -199,7 +199,7 @@ function Ressource(initObj) {
    * Liste de noms de groupes partageant cette ressource
    * @type {string[]}
    */
-  this.groupes = filters.arrayInt(values.groupes);
+  this.groupes = filters.arrayString(values.groupes);
   /**
    * code langue ISO 639-2
    * @see {@link http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2}

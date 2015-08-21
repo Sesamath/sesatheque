@@ -80,7 +80,7 @@ filters.arrayString = function (arg) {
     });
   }
   return arg;
-}
+};
 
 
 /**
