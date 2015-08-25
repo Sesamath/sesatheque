@@ -193,7 +193,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
     else denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
   }
-  
+
   /**
    * Traite GET|POST /api/liste/prof
    * @private
@@ -534,9 +534,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             sendJson(context, error)
           } else if (body.error) {
             sendJson(context, new Error(body.error))
-          } else if (body.ok && body.user) {
+          } else if (body.ok && body.utilisateur) {
             // on peut connecter
-            $accessControl.loginFromSesalab(context, body.user, domaine, function (error) {
+            $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
               if (error) sendJson(context, error)
               else sendJson(context, {success: true})
             })
@@ -753,7 +753,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route OPTIONS /api/ressource
    */
   controller.options('ressource', optionsOk)
-  
+
   /**
    * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
    * @Route GET /api/ressource/:oid
