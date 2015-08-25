@@ -511,9 +511,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
    * @param {string} token   Le token de sesalab qui servira à récupérer le user
    */
-  controller.post('connexion', function (context) {
-    var token = context.post.token;
-    var origine = context.post.origine;
+  controller.get('connexion', function (context) {
+    var token = context.get.token;
+    var origine = context.get.origine;
     var timeout = 5000
     if (token && origine) {
       if (origine.substr(-1) !== "/") origine += "/"
