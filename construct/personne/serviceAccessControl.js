@@ -458,6 +458,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.loginFromSesalab = function (context, sesalabUser, origine, next) {
     function setSession (error, personne) {
+      log.debug("setSession", error)
+      log.debug("setSession", personne)
       if (personne) {
         personne.permissions = getPermissions(personne)
         context.session.user = personne;
@@ -470,21 +472,26 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       next(error, personne)
     }
 
+    log.debug("loginFromSesalab avec", sesalabUser, "sesasso", {max:10000})
     if (origine && sesalabUser.oid) {
       var data = {
         nom : sesalabUser.nom,
         prenom : sesalabUser.prenom,
         email : sesalabUser.mail,
+        groupes : {}
       }
       if (sesalabUser.externalId && sesalabUser.externalMech) {
-        data.origine = (sesalabUser.externalMech === 'sesamath_sso') ? "sesasso" : sesalabUser.externalMech
+        data.origine = sesalabUser.externalMech
         data.idOrigine = sesalabUser.externalId
       } else {
         data.origine = origine
         data.idOrigine = sesalabUser.oid
       }
+      sesalabUser.groupes.forEach(function (groupe) {
+        data.groupes[groupe] = true
+      })
       // @todo ajouter les roles sesasso
-      var personne = new EntityPersonne(data)
+      var personne = EntityPersonne.create(data)
       $personneRepository.update(personne, setSession)
     } else {
       next(new Error("Impossible de connecter un utilisateur sesalab sans origine ou oid"))

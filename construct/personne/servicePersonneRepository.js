@@ -133,6 +133,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
    * @memberOf $personneRepository
    */
   $personneRepository.update = function (personne, next) {
+
     function checkUpdate(personne, personneNew, next) {
       var needUpdate = false
       for (var prop in personneNew) {
@@ -144,6 +145,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
       if (needUpdate) personne.store(next)
       else next(null, personne)
     }
+
     if (personne.origine && personne.idOrigine) {
       $personneRepository.load(personne.origine, personne.idOrigine, function (error, personneBdd) {
         if (error) {
