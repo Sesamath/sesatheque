@@ -6,14 +6,19 @@
         extra des attributs supplémentaires pour le widget
 !}
 <div class="control-group  {?o.warnings}warning{/o.warnings}">
-    {#o.warnings}<div class="help-block">{.}</div>{/o.warnings}
-
+  {#o.warnings}
+    <div class="help-block">{.}</div>{/o.warnings}
+  {?o.hidden}
+  {:else}
     <label>{o.label}
-        {?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{/o.required}
-        {#rmq}&nbsp;<span class="remarque">({.})</span>{/rmq}
+      {?o.required}<span class="required" title="Ce champ est obligatoire">*</span>{/o.required}
+      {#rmq}&nbsp;<span class="remarque">({.})</span>{/rmq}
     </label>
+  {/o.hidden}
 
-    <div class="input-group {widget}"{?width} width="{width}"{/width}>
-        {>"{widget}" /}
-    </div>
+  <div class="input-group {widget}"{?width} width="{width}"{/width}>
+    {>"{widget}" /}
+  </div>
+
+  {?o.new}{>wrapper widget="text" o=o.new /}{/o.new}
 </div>

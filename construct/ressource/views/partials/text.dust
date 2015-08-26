@@ -21,7 +21,14 @@
        {! on prend o.id, et sinon id s'il existe !}
        {?o.id}id="input-{o.id}"{:else}{?id}id="input-{id}"{/id}{/o.id}
        class="{?class}{class}{:else}form-control{/class}"
-       {?o.label}placeholder="{o.label}"{/o.label}
+       {?o.hidden}
+       {:else}
+         {?o.placeholder}
+           placeholder="{o.placeholder}"
+         {:else}
+           {?o.label}placeholder="{o.label}"{/o.label}
+         {/o.placeholder}
+       {/o.hidden}
        {?o.value}value="{o.value}"{/o.value}
        {?o.readonly}readonly="readonly"{/o.readonly}
        {?maxlength}maxlength="{maxlength}"{/maxlength}

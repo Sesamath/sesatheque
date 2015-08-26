@@ -1,71 +1,89 @@
 <div class="block edit ressource">
-    {?errors}
+  {?errors}
     <div id="errors">
-        {#errors}<p class="error">{.}</p>{/errors}
+      {#errors}<p class="error">{.}</p>{/errors}
     </div>
-    {/errors}
+  {/errors}
 
-    <form name="editRessource" method="post" id="formRessource">
+  <form name="editRessource" method="post" id="formRessource">
 
-        {?warnings}
-        <div>
+    {?warnings}
+      <div>
         Avertissement{@gt key=warnings.length value=1}s{/gt} :
         {#warnings}<p class="warning">{.}</p>{/warnings}
         {>wrapper widget="checkboxes" o=force /}
-        </div>
-        {/warnings}
+      </div>
+    {/warnings}
 
-        <div class="form-group">
-            {! Attention à masquer l'élément id du form si l'objet passé n'a pas de propriété id
-               On peut le faire en donnant cette valeur id ou en masquant le contexte comme avec
-               #oid:oid, cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting
-            !}
-            {?token}{>wrapper widget="text" o=token /}{/token}
-            {>wrapper widget="text" o=titre /}
-            {>wrapper widget="text" o=typeTechnique /}
-            {>wrapper widget="checkboxes" o=publie /}
-            {>wrapper widget="select" o=restriction /}
-            {>wrapper widget="select" o=langue /}
-        </div>
+    <div class="form-group">
+      {! Attention à masquer l'élément id du form si l'objet passé n'a pas de propriété id
+         On peut le faire en donnant cette valeur id ou en masquant le contexte comme avec
+         #oid:oid, cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting
+      !}
+      {?token}{>wrapper widget="text" o=token /}{/token}
+      {>wrapper widget="text" o=titre /}
+      {>wrapper widget="text" o=typeTechnique /}
+      {>wrapper widget="checkboxes" o=publie /}
+      {>wrapper widget="select" o=restriction /}
+      {>wrapper widget="select" o=langue /}
+    </div>
 
-        <div class="form-group">
-            {>wrapper widget="text" o=oid /}
-            {>wrapper widget="text" o=origine /}
-            {>wrapper widget="text" o=idOrigine /}
-        </div>
+    <div class="form-group">
+      {>wrapper widget="text" o=oid /}
+      {>wrapper widget="text" o=origine /}
+      {>wrapper widget="text" o=idOrigine /}
+    </div>
 
-        <div class="form-group">
-            {>wrapper widget="checkboxes" o=categories /}
-            {>wrapper widget="checkboxes" o=niveaux /}
-            {! Les types, devraient disparaitrent car conditionnés par la catégorie !}
-            {>wrapper widget="checkboxes" o=typePedagogiques /}
-            {>wrapper widget="checkboxes" o=typeDocumentaires /}
-        </div>
+    <div class="form-group">
+      {>wrapper widget="checkboxes" o=categories /}
+      {>wrapper widget="checkboxes" o=niveaux /}
+      {! Les types, devraient disparaitrent car conditionnés par la catégorie !}
+      {>wrapper widget="checkboxes" o=typePedagogiques /}
+      {>wrapper widget="checkboxes" o=typeDocumentaires /}
+    </div>
 
-        <div class="form-group">
-            {>wrapper widget="textarea" o=resume cols=50 rows=5 /}
-            {>wrapper widget="textarea" o=description cols=50 rows=5 /}
-            {>wrapper widget="textarea" o=commentaires cols=50 rows=5 /}
-        </div>
+    <div class="form-group">
+      {>wrapper widget="textarea" o=resume cols=50 rows=5 /}
+      {>wrapper widget="textarea" o=description cols=50 rows=5 /}
+      {>wrapper widget="textarea" o=commentaires cols=50 rows=5 /}
+    </div>
 
-        {! todo widget relations !}
+    {! todo widget relations !}
 
-        {>"plugins/{typeTechnique.value}" /}
+    {! todo widget auteurs et contributeurs !}
+    <div class="form-group">
+      {?auteurs.hidden}
+        {>wrapper widget="text" o=auteurs /}
+      {:else}
+        {>wrapper widget="checkboxes" o=auteurs /}
+      {/auteurs.hidden}
+    </div>
 
-        {! todo widget auteurs et contributeurs !}
+    <div class="form-group">
+      {?contributeurs.hidden}
+        {>wrapper widget="text" o=contributeurs /}
+      {:else}
+        {>wrapper widget="checkboxes" o=contributeurs /}
+      {/contributeurs.hidden}
+    </div>
 
-         <div class="form-group">
-            {>wrapper widget="text" o=version /}
-            {?dateCreation}{>wrapper widget="text" o=dateCreation rmq="JJ/MM/YYYY" /}{/dateCreation}
-            {?dateMiseAJour}{>wrapper widget="text" o=dateMiseAJour /}{/dateMiseAJour}
-        </div>
+    <div class="form-group">
+      {>wrapper widget="checkboxes" o=groupes /}
+    </div>
 
+    <div class="form-group">
+      {>wrapper widget="text" o=version /}
+      {?dateCreation}{>wrapper widget="text" o=dateCreation rmq="JJ/MM/YYYY" /}{/dateCreation}
+      {?dateMiseAJour}{>wrapper widget="text" o=dateMiseAJour /}{/dateMiseAJour}
+    </div>
 
-        {! submit, attention #saveButton est utilisé par editArbre !}
-        <div class="form-group">
-            <input id="saveButton" type="submit" value="Enregistrer" />
-        </div>
-    </form>
+    {>"plugins/{typeTechnique.value}" /}
+
+    {! submit, attention #saveButton est utilisé par editArbre !}
+    <div class="form-group">
+      <input id="saveButton" type="submit" value="Enregistrer"/>
+    </div>
+  </form>
 </div>
 {! <pre>
 {@contextDump key="oid" to="output"/}

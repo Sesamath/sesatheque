@@ -55,6 +55,114 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   var $views = {}
 
   /**
+   * Ajoute les groupes au form
+   * @private
+   * @param {object}        formData
+   * @param {string[]}      values
+   * @param {errorCallback} next
+   */
+  function addGroupes(formData, values, next) {
+    var choices = []
+    var i = 0
+    seq(values).seqEach(function (value) {
+      var suivant = this
+      $personneRepository.loadGroupe(value, function (error, groupe) {
+        if (error) {
+          log.error(error)
+          formData.errors.push(error.toString())
+        } else if (groupe) {
+          choices.push({
+            value:value,
+            label:groupe.nom,
+            isOpen:groupe.open,
+            id : "groupes" +i,
+            name : "groupes[" +i +"]"
+          })
+          i++
+        } else {
+          formData.errors.push("Le groupe " +value +" n'existe pas")
+        }
+        suivant()
+      })
+    }).seq(function () {
+      formData.groupes.choices = choices
+      formData.groupes.new = {
+        name : "groupesAdd",
+        id: "groupeAdd",
+        label : "Nouveau(x) groupe(s) à ajouter (à séparer par des virgules s'il y en a plusieurs)",
+        placeholder : "nom du groupe"
+      }
+      next()
+      this()
+    }).catch(function (error) {
+      next(error)
+    })
+  }
+
+  /**
+   * Ajoute les checkbox ou input hidden pour auteurs & contributeurs
+   * @private
+   * @param {Context}       context
+   * @param {object}        formData Les datas pour le form dust
+   * @param {string}        key
+   * @param {errorCallback} next
+   * @param {Integer[]} values
+   */
+  function addPersonnes(context, formData, key, values, next) {
+    log.debug("addPersonnes avec " +key +" qui vaut " +values.join(",") +
+        " ; formData.errors est un Array ? " +(formData instanceof Array) +" " +(formData.errors && !!formData.errors.push))
+    // seuls les éditeurs peuvent modifier auteurs et contributeurs,
+    if ($accessControl.hasPermission("updateAuteurs", context)) {
+      formData[key].choices = []
+      //if (!formData.errors || !formData.errors instanceof Array) {
+      //  log("addPersonnes récupère un formData sans errors", formData)
+      //  formData.errors = []
+      //}
+      var i = 0
+      seq(values).seqEach(function (value) {
+        log.debug("entrée seq, appel personne.load " +value)
+        var suivant = this
+        $personneRepository.load(value, function (error, personne) {
+          log.debug("formData dans cb load personne " +value, formData, {max:5000})
+          log.debug("formData.errors dans cb load personne " +(formData.errors && formData.errors.push), formData.errors)
+          if (error) {
+            log.error(error)
+            formData.errors.push(error.toString())
+          } else if (personne) {
+            formData[key].choices.push({
+              value:value,
+              label:personne.prenom +" " +personne.nom,
+              id : key +i,
+              name : key +"[" +i +"]",
+              selected : true
+            })
+          } else {
+            formData.errors.push("Aucune personne d'identifiant " +value)
+          }
+          suivant()
+        })
+      }).seq(function () {
+        log.debug("addPersonnes fin seq " +key)
+        formData[key].new = {
+          name :  key +"Add",
+          id: key +"Add",
+          label : "Nouvelle personne à ajouter aux " +config.labels[key],
+          placeholder: "identifiant de la personne"
+        }
+        next()
+        this()
+      }).catch(function (error) {
+        next(error)
+      })
+    } else {
+      formData[key].name = key
+      formData[key].hidden = true
+      formData[key].value = values.join(",")
+      next()
+    }
+  }
+
+  /**
    * Ajoute les vars js pour l'affichage des ressources par les plugins
    * @private
    * @param data
@@ -71,7 +179,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   }
 
   /**
-   * Créé les infos pour une liste de choix dans dust
+   * Créé les infos pour une liste de choix (connu en config) dans dust
    * @private
    * @param key le nom de la propriété de la ressource
    * @param {Array} selectedValues Les valeurs pour cette ressource
@@ -80,19 +188,27 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @returns {Array}
    */
   function arrayToDust(key, selectedValues, isUnique) {
+    /**
+     * Ajoute un choix à la liste
+     * @internal
+     * @param label
+     * @param cbValue
+     */
     function addChoice(label, cbValue) {
       // cbValue est toujours une string (propriété de l'objet)
       var intValue = parseInt(cbValue, 10)
       if (intValue == cbValue) cbValue = intValue
       var choice = {
-        label: label,
         value: cbValue
       }
+      if (label) choice.label = label
       if (!isUnique) {
         // faut du name sur chaque checkbox
         choice.name = key + '[' + i + ']'
-        i++
       }
+      // un id
+      choice.id = key + i
+      i++
       // et on ajoute les selected s'il y en a
       if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
         choice.selected = true
@@ -109,12 +225,33 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       _.each(config.listesOrdonnees [key], function (cbValue) {
         addChoice(config.listes[key][cbValue], cbValue)
       })
-    } else {
+    } else if (config.listes[key]) {
       // dans l'ordre où ça vient
       _.each(config.listes[key], function (label, cbValue) {
         addChoice(label, cbValue)
       })
       //log.debug("renvoie ", choices)
+    } else {
+      // auteurs ou contributeurs ou groupes
+      _.each(selectedValues, function (value) {
+        if (key === "groupes") {
+          $personneRepository.loadGroupe(value, function (groupe) {
+            addChoice(groupe.nom, value)
+          })
+        } else {
+          $personneRepository.load(value, function (personne) {
+            addChoice(personne.prenom +" " +personne.nom, value)
+          })
+        }
+      }) // each
+      // et on ajoute une case à cocher pour ajouter une personne / groupe
+      choices.push({
+        value: "",
+        label: "Ajouter",
+        id: key + "New",
+        name: key + '[New]',
+        selected: false
+      })
     }
 
     return choices
@@ -268,11 +405,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    *   value
    * }]
    * @private
-   * @param error
+   * @param {Context}   context
+   * @param {Error}     error
    * @param {Ressource} ressource Une ressource qui peut contenir des erreurs (si elle vient d'un post)
-   * @returns {Object} Les data pour la vue dust, avec le token
+   * @param {function}  next appelée avec formData (data pour la vue dust du form, avec le token)
    */
-  function getFormViewData(error, ressource) {
+  function getFormViewData(context, error, ressource, next) {
     var formData = {
       errors: ressource && ressource.errors || []
     }
@@ -295,35 +433,52 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
     var labels = getLabels(ressource)
     log.debug("labels de " +ressource.oid, labels)
+    // faut un array pour seq
+    var labelsArray = []
     _.each(labels, function (label, key) {
+      labelsArray.push([key, label])
+    })
+    seq(labelsArray).seqEach(function (labelItem) {
+      var key = labelItem[0]
+      var label = labelItem[1]
       var value = ressource[key]
       var isUnique = config.uniques[key]
+      var labelSuivant = this
 
       // pour tout le monde
       formData[key] = {
-        id   : key, // le template ajoutera un préfixe de son choix
+        id   : key, // le template ajoutera un préfixe de son choix s'il veut
         label: label
       }
       // required ?
       if (config.required[key]) formData[key].required = true
       if (isUnique) formData[key].unique = true
 
-      // ajouter ici du if (key === 'xxx') le jour ou des Array ne sont plus tous des tableaux d'ids
       if (config.typesVar[key] === 'Array' || config.uniques[key]) {
         // c'est un tableau ou une valeur unique (donc select ou radios)
         // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
-        // et la liste des possibles dans config.prop
+        // et la liste des possibles dans config.liste[prop]
         if (isUnique) {
           value = [value] // arrayToDust veut un array
           // faut ça sur le select et pas ses choices
           formData[key].name = key
         }
-        formData[key].choices = arrayToDust(key, value, isUnique)
+        // les Array ne sont pas tous des tableaux d'ids connus, faut différencier
+        // et l'ajout d'auteurs, contributeurs et groupes est asynchrone, faut du seq
+        if (config.listes[key]) {
+          formData[key].choices = arrayToDust(key, value, isUnique)
+          labelSuivant()
+        } else if (key === "groupes") {
+          addGroupes(formData, value, labelSuivant)
+        } else {
+          addPersonnes(context, formData, key, value, labelSuivant)
+        }
 
       } else if (config.typesVar[key] === 'Boolean') {
         // checkbox tout seul (pas de label dans les choices, c'est le parent qui le porte)
         formData[key].choices = [{name : key, value: [true]}]
         if (value) formData[key].choices[0].selected = true
+        labelSuivant()
 
       } else {
         // objet ou scalaire => input ou textarea
@@ -342,63 +497,86 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           }
         }
         formData[key].value = value
+        labelSuivant()
       }
-    }) // fin each propriété
 
-    // on ajoute nos cas particulier
-    formData.version.readonly = true
+    }).seq(function () {
+      // on a passé tous les labels, faut ajouter nos cas particulier
+      formData.version.readonly = true
 
-    // si modif
-    if (ressource && ressource.oid) {
-      formData.oid = {
-        name  : 'oid',
-        value : ressource.oid,
-        label : labels.oid,
-        readonly: true
+      // si modif
+      if (ressource && ressource.oid) {
+        formData.oid = {
+          name  : 'oid',
+          value : ressource.oid,
+          label : labels.oid,
+          readonly: true
+        }
+        // c'est une modif, on ne peut plus changer le typeTechnique, on remplace le select par un text
+        formData.typeTechnique = {
+          name : "typeTechnique",
+          value : ressource.typeTechnique,
+          label : labels.typeTechnique,
+          readonly : true
+        }
+        // origine & idOrigine en lecture seule pour modif mais pas création
+        formData.origine.readonly = true;
+        formData.idOrigine.readonly = true;
+        // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
+        formData.$view = __dirname +'/views/formEdit'
+      } else {
+        formData.$view = __dirname +'/views/formCreate'
+        if (!$accessControl.hasPermission("createAll", context)) {
+          // faut restreindre typeTechnique
+          var ttChoices = []
+          formData.typeTechnique.choices.forEach(function (choice) {
+            if (config.listes.typePerso[choice.value]) ttChoices.push(choice)
+          })
+          formData.typeTechnique.choices = ttChoices
+          // et imposer origine local
+          formData.origine.value = "local"
+          formData.origine.hidden = true
+          formData.idOrigine.hidden = true
+          // publié par défaut
+          formData.publie.choices[0].selected = true
+        }
       }
-      // c'est une modif, on ne peut plus changer le typeTechnique, on remplace le select par un text
-      formData.typeTechnique = {
-        name : "typeTechnique",
-        value : ressource.typeTechnique,
-        label : labels.typeTechnique,
-        readonly : true
-      }
-      // origine & idOrigine en lecture seule pour modif mais pas création
-      formData.origine.readonly = true;
-      formData.idOrigine.readonly = true;
-      // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
-      formData.$view = __dirname +'/views/formEdit'
-    } else {
-      formData.$view = __dirname +'/views/formCreate'
-    }
-    // un token si y'en a un dans la ressource
-    if (ressource.token) {
-      formData.token = {
-        name  : 'token',
-        value : ressource.token,
-        hidden: true
-      }
-    }
 
-    // un checkbox pour forcer malgré les warnings si y'en a (mais qu'il n'y a pas d'erreurs)
-    if (ressource.warnings && ressource.warnings.length && !formData.errors.length) {
-      formData.warnings = ressource.warnings
-      formData.force = {
-        id    : 'force',
-        label : config.labels.force,
-        choices : [{
-          label: "Cocher cette case pour forcer l'enregistrement margré les avertissements",
-          name : "force",
-          value: ['forced']
-        }]
+      // un token si y'en a un dans la ressource
+      if (ressource.token) {
+        formData.token = {
+          name  : 'token',
+          value : ressource.token,
+          hidden: true
+        }
       }
-      //if (ressource.force) formData.force.choices[0].selected = true
-    }
-    // on vire le champ si y'a pas d'erreurs
-    if (!formData.errors.length) delete formData.errors
-    //log.debug('formData pour le form', formData.warnings, 'htmlform', {max:50000, indent:2})
 
-    return formData
+      // un checkbox pour forcer malgré les warnings si y'en a (mais qu'il n'y a pas d'erreurs)
+      if (ressource.warnings && ressource.warnings.length && !formData.errors.length) {
+        formData.warnings = ressource.warnings
+        formData.force = {
+          id    : 'force',
+          label : config.labels.force,
+          choices : [{
+            label: "Cocher cette case pour forcer l'enregistrement margré les avertissements",
+            name : "force",
+            value: ['forced']
+          }]
+        }
+        //if (ressource.force) formData.force.choices[0].selected = true
+      }
+      // on vire le champ si y'a pas d'erreurs
+      if (!formData.errors.length) delete formData.errors
+      //log.debug('formData pour le form', formData.warnings, 'htmlform', {max:50000, indent:2})
+      log.debug('auteurs pour le form', formData.auteurs, 'htmlform', {max:50000, indent:2})
+      log.debug('contributeurs pour le form', formData.contributeurs, 'htmlform', {max:50000, indent:2})
+      next(formData)
+
+    }).catch(function (error) {
+      log.error(error)
+      formData.errors.push(error.toString())
+      next(formData)
+    })
   }
 
   /**
@@ -635,23 +813,25 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Context} context
    * @param error
    * @param ressource
-   * @param options
+   * @param {object} [options] sera mergé dans data
    */
   $views.printForm = function (context, error, ressource, options) {
     var data = $views.getDefaultData('formEdit')
     if (context.layout === 'page' && ressource) context.ressource = ressource
     // les datas pour le form
-    tools.merge(data.contentBloc, getFormViewData(error, ressource))
-    // le titre
-    data.$metas.title = 'Modifier la ressource ' +ressource.titre
-    // et d'éventuels overrides
-    if (options) tools.merge(data, options)
-    // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source, donc on passe ici du json)
-    addJsVars(data, ressource)
-    // faut aussi ajouter ça pour les vues dust (data.contentBloc.typeTechnique existe déjà mais c'est un select)
-    data.contentBloc.editeur = ressource.typeTechnique
-    // avant d'envoyer
-    context.html(data)
+    getFormViewData(context, error, ressource, function (formData) {
+      tools.merge(data.contentBloc, formData)
+      // le titre
+      data.$metas.title = 'Modifier la ressource ' +ressource.titre
+      // et d'éventuels overrides
+      if (options) tools.merge(data, options)
+      // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source, donc on passe ici du json)
+      addJsVars(data, ressource)
+      // faut aussi ajouter ça pour les vues dust (data.contentBloc.typeTechnique existe déjà mais c'est un select)
+      data.contentBloc.editeur = ressource.typeTechnique
+      // avant d'envoyer
+      context.html(data)
+    })
   }
 
   /**
@@ -668,44 +848,46 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // les datas pour le form
     var fakeRessource = EntityRessource.create(context.get)
     //log.debug("ressource d'après get", fakeRessource)
-    tools.complete(data.contentBloc, getFormViewData(null, fakeRessource))
-    // on vire ou modifie ce qui nous intéresse pour la recherche
-    var fd = data.contentBloc // raccourci d'écriture (form data)
-    delete fd.version
-    // ces champs ne sont pas indexés, pas la peine de les chercher…
-    delete fd.parametres
-    delete fd.enfants
-    delete fd.resume
-    delete fd.description
-    delete fd.commentaires
-    // @todo ajouter ces critères, mais en gérant des fourchettes
-    delete fd.dateCreation
-    delete fd.dateMiseAJour
-    if (!$accessControl.isAuthenticated(context)) {
-      delete fd.restriction
-    }
-    // on ajoute un choix "pas de choix" pour typeTechnique et langue
-    fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
-    // pour la langue on vire le select actuel
-    fd.langue.choices.forEach(function (choice) {
-      if (choice.selected) choice.selected = false
-    })
-    fd.langue.choices.unshift({label:'peu importe', value:''})
-    // pour le booléen publié, on transforme en select
-    fd.publie = {
-      id:"publie",
-      label:"Publié",
-      name : "publie",
-      choices : [
-        {label:'peu importe', value:''},
-        {label:'oui', value:'true'},
-        {label:'non', value:'false'},
-      ]
-    }
-    // titre de la page
-    data.$metas.title = 'Recherche de ressources'
+    getFormViewData(context, null, fakeRessource, function (formData) {
+      tools.complete(data.contentBloc, formData)
+      // on vire ou modifie ce qui nous intéresse pour la recherche
+      var fd = data.contentBloc // raccourci d'écriture (form data)
+      delete fd.version
+      // ces champs ne sont pas indexés, pas la peine de les chercher…
+      delete fd.parametres
+      delete fd.enfants
+      delete fd.resume
+      delete fd.description
+      delete fd.commentaires
+      // @todo ajouter ces critères, mais en gérant des fourchettes
+      delete fd.dateCreation
+      delete fd.dateMiseAJour
+      if (!$accessControl.isAuthenticated(context)) {
+        delete fd.restriction
+      }
+      // on ajoute un choix "pas de choix" pour typeTechnique et langue
+      fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
+      // pour la langue on vire le select actuel
+      fd.langue.choices.forEach(function (choice) {
+        if (choice.selected) choice.selected = false
+      })
+      fd.langue.choices.unshift({label:'peu importe', value:''})
+      // pour le booléen publié, on transforme en select
+      fd.publie = {
+        id:"publie",
+        label:"Publié",
+        name : "publie",
+        choices : [
+          {label:'peu importe', value:''},
+          {label:'oui', value:'true'},
+          {label:'non', value:'false'},
+        ]
+      }
+      // titre de la page
+      data.$metas.title = 'Recherche de ressources'
 
-    context.html(data)
+      context.html(data)
+    })
   }
 
   return $views

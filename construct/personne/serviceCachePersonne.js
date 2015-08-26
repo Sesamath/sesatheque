@@ -41,7 +41,7 @@ module.exports = function ($cache, $settings) {
   var $cachePersonne = {}
 
   /**
-   * Récupère une personne du cache
+   * Récupère une personne du cache d'après son oid
    * @param {Integer}          oid
    * @param {personneCallback} next
    * @memberOf $cachePersonne
@@ -49,6 +49,26 @@ module.exports = function ($cache, $settings) {
   $cachePersonne.get = function (oid, next) {
     $cache.get('personne_' + oid, next)
   }
+
+  /**
+   * Récupère une personne du cache d'après son origine
+   * @param {string}           origine
+   * @param {string}           idOrigine
+   * @param {personneCallback} next
+   * @memberOf $cachePersonne
+   */
+  $cachePersonne.getByOrigine = function (origine, idOrigine, next) {
+    if (origine && idOrigine) {
+      $cache.get('personne_' + origine +"/" +idOrigine, function (error, oid) {
+        if (error) next(error)
+        else if (oid) $cachePersonne.get(oid, next)
+        else next(null, undefined)
+      })
+    } else {
+      next(new Error("origine ou idOrigine manquant"))
+    }
+  }
+
   /**
    * Met un objet personne en cache
    * @param {Personne}      personne
@@ -56,8 +76,10 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cachePersonne
    */
   $cachePersonne.set = function (personne, next) {
+    $cache.set('personne_' + personne.origine +"/" +personne.idOrigine, personne.oid, ttl)
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }
+
   /**
    * Efface un objet personne du cache
    * @param {Integer}       oid
@@ -65,6 +87,7 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cachePersonne
    */
   $cachePersonne.delete = function (oid, next) {
+    // on efface pas l'oid par origine, le get par origine renverra undefined quand même
     $cache.delete('personne_', oid, next)
   }
 

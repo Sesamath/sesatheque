@@ -57,8 +57,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function addToken(context, ressource) {
     var token = $ressourceControl.getToken()
-    if (!context.session.formTokens) context.session.formTokens = []
-    context.session.formTokens.push(token)
+    if (!context.session.tokens) context.session.tokens = {}
+    context.session.tokens[token] = ressource.oid
     ressource.token = token
   }
 
@@ -66,22 +66,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Vérifie que le token du post correspond à un en session (et le vire)
    * On gère plusieurs token de formulaires pour autoriser l'ouverture de plusieurs forms
    * @private
-   * @param {Context} context
-   * @param next appelé si ok, sinon on affichera une erreur
+   * @param {Context}        context
+   * @param {string|Integer} oid
+   * @param {simpleCallback} next appelé sans argument si ok, sinon on affichera une erreur
    */
-  function checkToken(context, next) {
-    var result = false
-    if (context.post.token) {
-      if (context.session.formTokens) {
-        var i = context.session.formTokens.indexOf(context.post.token)
-        if (i > -1) {
-          context.session.formTokens.splice(i, 1)
-          result = true
-        }
-      }
+  function checkToken(context, oid, next) {
+    var token = context.post.token
+    var result = (token && context.session.tokens && context.session.tokens[token] == oid)
+    if (result) {
+      delete context.session.tokens[token]
+      next()
+    } else {
+      $views.printError(context, "Jeton invalide, demande probablement déjà soumise et en cours de traitement")
     }
-    if (result) next()
-    else $views.printError(context, "Jeton invalide, demande probablement déjà soumise et en cours de traitement")
   }
 
   /**
@@ -195,7 +192,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Page preview
-   * @route GET /ressource/apercu/:oid
+   * @route GET /ressource/apercevoir/:oid
    */
   controller.get($routes.get('preview', ':oid'), function (context) {
     context.layout = 'page'
@@ -210,7 +207,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Page preview
-   * @route GET /ressource/apercu/:origine/:idOrigine
+   * @route GET /ressource/apercevoir/:origine/:idOrigine
    */
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
@@ -228,9 +225,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Page ajout de ressource (le formulaire de création)
    * @route GET /ressource/ajouter
    */
-  controller.get($routes.get('add'), function (context) {
+  controller.get($routes.get('create'), function (context) {
     context.layout = 'page'
-    context.tab = 'add'
+    context.tab = 'create'
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       // envoi des valeur au form
       function termine (ressource) {
@@ -253,7 +250,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             }
           })
         } else {
-          var fake = {new: true}
+          var fake = {new:true, oid:0}
           addToken(context, fake)
           termine(fake)
         }
@@ -266,9 +263,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * redirige vers le form d'édition (pour ajouter ce qui dépend du typeTechnique choisi)
    * @route POST /ressource/ajouter
    */
-  controller.post($routes.get('add'), function (context) {
+  controller.post($routes.get('create'), function (context) {
     context.layout = 'page'
-    context.tab = 'add'
+    context.tab = 'create'
     // réaffiche le form en cas d'erreur ou warnings
     function rePrintForm(error, ressource) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
@@ -279,7 +276,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (context.post.oid) {
       $views.printError(context, "Impossible d'ajouter une ressource existante")
     } else {
-      checkToken(context, function () {
+      checkToken(context, 0, function () {
         $accessControl.checkPermission('create', context, null, function (errorMsg) {
           if (errorMsg) {
             denied(context, errorMsg)
@@ -287,13 +284,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             // on fixe la date de màj avant validation
             if (!context.post.dateMiseAJour) context.post.dateMiseAJour = new Date();
             $ressourceControl.valideRessourceFromPost(context.post, false, function (error, ressource) {
-              // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+              // valider le contenu et l'enregistrer en DB (récupérer l'action create de l'api)
               // et rediriger vers le describe ou vers le form avec les erreurs
               if (error || !_.isEmpty(ressource.errors)) {
                 rePrintForm(error, ressource)
               } else if (!_.isEmpty(ressource.warnings) && !ressource.force) {
                 rePrintForm(error, ressource)
               } else {
+                // on ajoute l'auteur si y'en avait pas, sinon on le met en contributeur
+                var userOid = $accessControl.getCurrentUserOid(context)
+                if (_.isEmpty(ressource.auteurs)) ressource.auteurs = [userOid]
+                else ressource.contributeurs.push(userOid)
                 $ressourceRepository.write(ressource, function (error, ressource) {
                   if (error || !_.isEmpty(ressource.errors)) {
                     // là c'est un bug dans notre code
@@ -314,7 +315,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Affichage du formulaire d'édition
-   * @route GET /ressource/modifier
+   * @route GET /ressource/modifier/:oid
    */
   controller.get($routes.get('edit', ':oid'), function (context) {
     context.layout = 'page'
@@ -350,11 +351,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Traitement du formulaire d'édition, réaffiche le formulaire en cas d'erreur ou sauvegarde et redirige vers la description
-   * @route GET /ressource/modifier
+   * @route POST /ressource/modifier/:oid
    */
   controller.post($routes.get('edit', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'edit'
+
     function rePrintForm(error, ressource) {
       if (error) log.error('une erreur au post update', error)
       if (ressource.errors) log.debug('errors au post update', ressource.errors)
@@ -364,22 +366,32 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
 
     if ($accessControl.isAuthenticated(context)) {
-      checkToken(context, function () {
-        // valider le contenu et l'enregistrer en DB (récupérer l'action add de l'api)
+      checkToken(context, context.post.oid, function () {
+        // valider le contenu et l'enregistrer en DB (récupérer l'action create de l'api)
         // et rediriger vers le describe ou vers le form avec les erreurs
         $ressourceControl.valideRessourceFromPost(context.post, false, function (error, ressource) {
           if (error || (ressource.errors && ressource.errors.length) || (ressource.warnings && ressource.warnings.length && context.post.force !== "forced")) {
             rePrintForm(error, ressource)
           } else {
-            $ressourceRepository.write(ressource, function (error, ressourceOk) {
-              if (error) {
-                rePrintForm(error, ressource)
-              } else if (ressourceOk) {
-                var url = $routes.getAbs('describe', ressourceOk)
-                log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
-                context.redirect(url)
-              } else {
-                rePrintForm(new Error("L'écriture en base de donnée n'a pas répondu correctement"), ressource)
+            // on vérifie déjà les auteurs / contributeurs n'ont pas été modifiés si on a pas les droits, faut la ressource avant modif
+            $ressourceRepository.load(context.post.oid, function (error, ressourceOriginale) {
+              if (error) rePrintForm(error, ressource)
+              else {
+                if (!$accessControl.hasPermission("updateAuteurs")) {
+                  ressource.auteurs = ressourceOriginale.auteurs
+                  ressource.contributeurs = ressourceOriginale.contributeurs
+                }
+                $ressourceRepository.write(ressource, function (error, ressourceOk) {
+                  if (error) {
+                    rePrintForm(error, ressource)
+                  } else if (ressourceOk) {
+                    var url = "/ressource/" + $routes.get('describe', ressourceOk.oid) // pas getAbs pour ne pas aller vers /public/
+                    log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
+                    context.redirect(url)
+                  } else {
+                    rePrintForm(new Error("L'écriture en base de donnée n'a pas répondu correctement"), ressource)
+                  }
+                })
               }
             })
           }
@@ -451,7 +463,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $metas     : {title: 'Suppression de ressource'},
         contentBloc: {$view: __dirname +'/views/delete'}
       }
-      checkToken(context, function () {
+      checkToken(context, oid, function () {
         // lassi demande de charger la ressource pour l'effacer, mais on vient de la mettre en cache
         $ressourceRepository.load(oid, function (error, ressource) {
           if (error) {

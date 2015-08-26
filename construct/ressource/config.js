@@ -50,6 +50,10 @@ var ressourceConfig = {
       'mental': 'calcul mental',
       'url'   : 'page externe'
     },
+    // les typeTechnique qui peuvent être utilisés pour une ressource perso
+    typePerso : {
+      'url'   : true
+    },
     niveaux          : {
       11: 'CP',
       10: 'CE1',
@@ -358,12 +362,12 @@ var ressourceConfig = {
     routes : {
       api : '',
       display:'voir',
-      preview:'apercu',
-      add : 'ajouter',
+      preview:'apercevoir',
+      create : 'ajouter',
       edit: 'modifier',
       describe:'decrire',
       delete:'supprimer',
-      search:'recherche'
+      search:'rechercher'
     }
   }, // fin constantes
   /**

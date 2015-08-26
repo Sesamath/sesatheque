@@ -92,10 +92,10 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         })
       if (oid && $accessControl.hasPermission('read', context, oid) && $accessControl.hasPermission('create', context))
         links.push({
-          href: $routes.getAbs('add') + '?clone=' + oid,
+          href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
           icon: 'copy', // ma call_split
-          selected: (context.tab === 'add' && context.request.originalUrl.indexOf('clone=') > -1)
+          selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1)
         })
       if ($accessControl.hasPermission('delete', context))
         links.push({
@@ -124,12 +124,12 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     if ($accessControl.hasPermission('create', context)) {
       /* @todo : voir si on peut superposer, mais ce code marche pas, pb de float, faudrait revoir les autres css
       links.push({
-        href: $routes.getAbs('add'),
+        href: $routes.getAbs('create'),
         value: 'Ajouter une ressource',
         iconStack: ["file-o fa-stack-2x", "plus fa-stack-1x"] // ma note_add
       })
       /* */
-      links.push({href: $routes.getAbs('add', null, context), value: 'Ajouter une ressource', icon: 'plus-circle'})
+      links.push({href: $routes.getAbs('create', null, context), value: 'Ajouter une ressource', icon: 'plus-circle'})
     }
     // un lien vers la recherche
     links.push({href: $routes.getAbs('search', null, context), value: 'Recherche', icon: 'search'})
@@ -153,7 +153,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
         data,
         'beforeTransport',
-        {max:2000}
+        {max:1000}
     )
     if (isHtml) log.debug("html vide ? " +_.isEmpty(data.contentBloc))
     else if (isJson) log.debug("api vide ? " +_.isEmpty(data))
@@ -261,13 +261,14 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       // et impose une vue en absolu à errors et warnings
       if (data.errors) data.errors.$view = __dirname +'/views/errors'
       if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
-      // s'il n'y en a pas, on met le titre en data pour que le layout l'affiche aussi
-      if (data.$metas && data.$metas.title && !data.titre) {
-        data.titre = data.$metas.title
-      }
+      if (!data.$metas) data.$metas = {}
       if (!data.$metas.css) data.$metas.css = []
       if (context.layout === 'iframe') data.$metas.css.push('/styles/iframe.css')
       else data.$metas.css.push('/styles/page.css')
+      // s'il n'y est pas, on met le titre en data pour que le layout l'affiche aussi (l'appelant peut en mettre 2 ≠)
+      if (data.$metas.title && !data.titre) {
+        data.titre = data.$metas.title
+      }
     }
   } // errorHandler
 
@@ -296,10 +297,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         title: title
       },
       $views     : __dirname + '/views',
-      errors: {
-        $view : __dirname + '/views/errors',
-        errors :[errorMsg]
-      }
+      errors: [errorMsg]
     }
     tools.complete(data, defaultData)
     log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max:2000})

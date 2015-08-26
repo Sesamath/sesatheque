@@ -115,10 +115,12 @@ module.exports = function (EntityRessource) {
    */
   function normalizeArrays(ressource) {
     _.each(config.typesVar, function (typeVar, key) {
-      if (typeVar === 'Array') {
-        if (!_.isArray(ressource[key])) ressource[key] = []
-      }
+      if (typeVar === 'Array' && !_.isArray(ressource[key])) ressource[key] = []
     })
+  }
+
+  $ressourceControl.checkExtKeys = function (ressource, next) {
+
   }
 
   /**
@@ -236,7 +238,7 @@ module.exports = function (EntityRessource) {
               else errors.push("Le champ " + champ +' vaut ' +value +" qui n'est pas un booléen")
 
             } else if (typeVar === 'Array') {
-              // on tolère une string "[1,2]"
+              // on veut une string "[1,2]"
               if (_.isString(value) && value.substr(0,1) === '[' && value.substr(-1) === ']') {
                 try {
                   buffer = JSON.parse(value)
@@ -314,6 +316,7 @@ module.exports = function (EntityRessource) {
       if (ressource) ressource.errors = errors
       //error = new Error("Ressource invalide : \n" + errors.join("\n"))
     }
+
     // nettoyage
     if (ressource.errors && !ressource.errors.length) delete ressource.errors
     if (ressource.warnings && !ressource.warnings.length) delete ressource.warnings

@@ -44,21 +44,35 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   var $accessControl = {}
 
   /**
-   * Helper de checkAccess pour la permission add
+   * Helper de checkAccess pour la permission create
    * @private
    * @param {Context}   context
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getCreateDeniedMessage(context) {
     var msg
-    if (!context.session.user) msg = "Vous devez vous identifier avant de créer une ressource"
-    else if (!context.session.user.permissions || !context.session.user.permissions.add) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    if (!$accessControl.isAuthenticated(context)) msg = "Vous devez vous identifier avant de créer une ressource"
+    else if (!$accessControl.hasPermission("create")) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
 
     return msg
   }
 
   /**
-   * Helper de checkAccess pour la permission del
+   * Helper de checkAccess pour la permission createAll
+   * @private
+   * @param {Context}   context
+   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   */
+  function getCreateAllDeniedMessage(context) {
+    var msg
+    if (!$accessControl.isAuthenticated(context)) msg = "Vous devez vous identifier avant de créer une ressource"
+    else if (!$accessControl.hasPermission("createAll")) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de n'importe quel type"
+
+    return msg
+  }
+
+  /**
+   * Helper de checkAccess pour la permission delete
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
@@ -68,7 +82,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     var msg
     if (!context.session.user) {
       msg = "Vous devez vous identifier avant de supprimer une ressource"
-    } else if (_.contains(ressource.auteurs, context.session.user.oid)) {
+    } else if (_.contains(ressource.auteurs, $accessControl.getCurrentUserOid(context))) {
       // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
       // (sinon d'autres peuvent s'en servir)
       if (ressource.auteurs.length > 1)
@@ -78,7 +92,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       else if (ressource.restriction != 2) msg = "Vous êtes l'auteur de cette ressource" +
           " mais elle est partagée avec d'autres, vous ne pouvez plus la supprimer"
     } else {
-      msg = "Vous n'avez pas de droits suffisants pour effacer cette ressource"
+      msg = "Vous n'avez pas de droits suffisants pour supprimer cette ressource"
     }
 
     return msg
@@ -160,7 +174,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Helper de checkAccess pour la permission del
+   * Helper de checkAccess pour la permission del|update
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
@@ -168,11 +182,12 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   function getUpdateDeniedMessage(context, ressource) {
     var msg
+    var oid = $accessControl.getCurrentUserOid(context)
     if (!$accessControl.isAuthenticated(context)) msg = "Vous devez être authentifié pour modifier cette ressource"
     // on regarde si c'est l'auteur
-    else if (_.contains(ressource.auteurs, context.session.user.oid)) return
+    else if (_.contains(ressource.auteurs, oid)) return
     // un contributeur
-    else if (_.contains(ressource.contributeurs, context.session.user.oid)) return
+    else if (_.contains(ressource.contributeurs, oid)) return
     // pour le moment tout le reste est interdit
     else msg = "Vous n'avez pas de droits suffisants pour modifier cette ressource"
     return msg
@@ -390,6 +405,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
 
     if (!$accessControl.isAuthenticated(context)) return false
     else switch (permission) {
+      case 'createAll' : return (getCreateAllDeniedMessage(context) === '')
       case 'create' : return (getCreateDeniedMessage(context) === '')
       case 'delete' : return (getDeleteDeniedMessage(context, ressource) === '')
       case 'update' : return (getUpdateDeniedMessage(context, ressource) === '')

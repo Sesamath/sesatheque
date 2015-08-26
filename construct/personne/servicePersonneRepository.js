@@ -41,6 +41,42 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
    */
   var $personneRepository = {}
 
+
+  /**
+   * Récupère une personne (en cache ou en bdd)
+   * @param {string}           id   Oid ou origine/idOrigine
+   * @param {personneCallback} next      On aura pas d'entity si ça vient du cache
+   * @memberOf $personneRepository
+   */
+  $personneRepository.load = function (id, next) {
+    log.debug('load personne ' + id)
+    var pos = -1;
+    if (typeof id === "string") pos = id.indexOf("/")
+    if (pos > -1) {
+      var origine = id.substr(0, pos)
+      var idOrigine = id.substr(pos +1)
+      $personneRepository.loadByOrigin(origine, idOrigine, next)
+    } else if (id) {
+      $cachePersonne.get(id, function (error, personneCached) {
+        if (personneCached) next(null, personneCached)
+        else {
+          EntityPersonne.match('oid').equals(id).grabOne(function (error, personne) {
+            //log.debug('personne load remonte ', personne)
+            if (error) next(error)
+            else if (personne) {
+              $cachePersonne.set(personne)
+              next(null, personne)
+            } else {
+              next(null, undefined)
+            }
+          })
+        }
+      })
+    } else {
+      next(new Error("id manquant, impossible de charger une personne."))
+    }
+  }
+
   /**
    * Récupère une personne (en cache ou en bdd)
    * @param {string}           origine   Nom du authClient qui a authentifié cette personne
@@ -48,10 +84,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
    * @param {personneCallback} next      On aura pas d'entity si ça vient du cache
    * @memberOf $personneRepository
    */
-  $personneRepository.load = function (origine, idOrigine, next) {
+  $personneRepository.loadByOrigin = function (origine, idOrigine, next) {
     log.debug('load personne ' + origine +'/' +idOrigine)
     if (origine && idOrigine) {
-      $cachePersonne.get(idOrigine, function (error, personneCached) {
+      $cachePersonne.getByOrigine(origine, idOrigine, function (error, personneCached) {
         if (personneCached) next(null, personneCached)
         else {
           EntityPersonne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
@@ -133,6 +169,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
    * @memberOf $personneRepository
    */
   $personneRepository.update = function (personne, next) {
+
     function checkUpdate(personne, personneNew, next) {
       var needUpdate = false
       for (var prop in personneNew) {
@@ -144,19 +181,20 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
       if (needUpdate) personne.store(next)
       else next(null, personne)
     }
-    if (personne.origine && personne.idOrigine) {
-      $personneRepository.load(personne.origine, personne.idOrigine, function (error, personneBdd) {
-        if (error) {
-          next(error)
-        } else if (personneBdd) {
-          checkUpdate(personneBdd, personne, next)
-        } else {
-          EntityPersonne.create(personne).store(next)
-        }
-      })
-    } else {
-      next(new Error("Il manque l'identifiant de l'origine pour mettre à jour les données de cet utilisateur"))
+
+    function modify(error, personneBdd) {
+      if (error) {
+        next(error)
+      } else if (personneBdd) {
+        checkUpdate(personneBdd, personne, next)
+      } else {
+        EntityPersonne.create(personne).store(next)
+      }
     }
+
+    if (personne.oid) $personneRepository.load(personne.oid, modify)
+    else if (personne.origine && personne.idOrigine) $personneRepository.load(personne.origine +"/" +personne.idOrigine, modify)
+    else next(new Error("Il manque un identifiant pour mettre à jour les données de cet utilisateur"))
   }
 
   return $personneRepository

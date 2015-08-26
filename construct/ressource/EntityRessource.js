@@ -95,10 +95,16 @@ module.exports = function (EntityRessource) {
     })
     .defineIndex('auteurs', 'integer')
     .defineIndex('contributeurs', 'integer')
+    .defineIndex('groupes', 'string')
     .defineIndex('langue', 'string')
     .defineIndex('publie', 'boolean')
     .defineIndex('indexable', 'boolean')
     .defineIndex('restriction', 'integer')
     .defineIndex('dateCreation', 'date')
     .defineIndex('dateMiseAJour', 'date')
+
+  EntityRessource.beforeStore(function (next) {
+    if (this.token) delete this.token
+    next()
+  })
 }

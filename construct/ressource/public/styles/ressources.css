@@ -1,35 +1,45 @@
 /* pour le layout-iframe qui n'inclue pas main.css */
-.error {margin: 1em; background-color: #fff; color: #b00;}
+.error {
+  margin: 1em;
+  background-color: #fff;
+  color: #b00;
+}
 
 #formRessource .form-group {
   clear: left;
   margin: 1em;
-  position: relative; }
+  position: relative;
+}
 
 /* propriété flottante dans son groupe */
 #formRessource .control-group {
   float: left;
-  margin: 0.5em; }
+  margin: 0.5em;
+}
 
 /* titres centrés */
 #formRessource .control-group > label {
   font-weight: bold;
   width: 100%;
-  text-align: center; }
+  text-align: center;
+}
 
 /* checkboxes, alignés à droite dans son div */
 #formRessource .checkboxes {
-  position: relative; }
+  position: relative;
+}
 
 #formRessource .checkboxes input {
-  margin: 0.2em 0 0.1em 0.5em; }
+  margin: 0.2em 0 0.1em 0.5em;
+}
 
 /* */
 #formRessource .checkboxes label {
   float: right;
   clear: right;
   font-weight: normal;
-  margin: 0.1em 0; }
+  margin: 0.1em 0;
+}
 
 /*
 #formRessource .form-group div.input-group {}
@@ -41,25 +51,32 @@
 /* titres centrés * /
 #formRessource .input-group div, #formRessource .input-group label {font-weight: bold; width: 100%; text-align: center; float: none; }
 /* #form-oid, #form-typeTechnique {width: 5em;} fait passer le titre à droite.... */
-#formRessource #srcGroup, #formRessource #dstGroup {float:left; width: 47%;}
+#formRessource #srcGroup, #formRessource #dstGroup {
+  float: left;
+  width: 47%;
+}
 
-  /* description */
+/* description */
 .ressource span.publie, .ressource span.restriction {
   display: block;
   float: right;
-  margin: 0.5em; }
+  margin: 0.5em;
+}
 
 .ressource p, .ressource ul {
-  margin: 1em; }
+  margin: 1em;
+}
 
 .remarque {
   font-size: 0.8em;
   font-weight: normal;
-  font-style: italic; }
+  font-style: italic;
+}
 
 .liste .links {
   margin: 0 0 0.2em 2em;
-  font-size: 0.8em; }
+  font-size: 0.8em;
+}
 
 /*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiIiwic291cmNlcyI6WyJjb25zdHJ1Y3QvcmVzc291cmNlL3B1YmxpYy9zdHlsZXMvcmVzc291cmNlcy5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLGVBQWU7RUFBYyxPQUFPO0VBQU0sUUFBUTtFQUFLLFVBQVU7OztBQUVqRSxlQUFlO0VBQWdCLE9BQU87RUFBTSxRQUFROzs7QUFFcEQsZUFBZSxpQkFBaUI7RUFBTyxhQUFhO0VBQU0sT0FBTztFQUFNLFlBQVk7OztBQUVuRixlQUFlO0VBQWMsVUFBVTs7QUFDdkMsZUFBZSxZQUFZO0VBQVEsUUFBUTs7O0FBQzNDLGVBQWUsWUFBWTtFQUFPLE9BQU87RUFBTyxPQUFPO0VBQU8sYUFBYTtFQUFRLFFBQVE7Ozs7Ozs7Ozs7Ozs7QUFhM0YsV0FBVyxJQUFJLFNBQVMsV0FBVyxJQUFJO0VBQWUsU0FBUztFQUFPLE9BQU87RUFBTyxRQUFROztBQUM1RixXQUFXLEdBQUcsV0FBVztFQUFJLFFBQVE7O0FBRXJDO0VBQVcsV0FBVztFQUFPLGFBQWE7RUFBUSxZQUFZOztBQUU5RCxPQUFPO0VBQVEsUUFBUTtFQUFlLFdBQVciLCJzb3VyY2VzQ29udGVudCI6WyIjZm9ybVJlc3NvdXJjZSAuZm9ybS1ncm91cCB7IGNsZWFyOiBsZWZ0OyBtYXJnaW46IDFlbTsgcG9zaXRpb246IHJlbGF0aXZlO31cbi8qIHByb3ByacOpdMOpIGZsb3R0YW50ZSBkYW5zIHNvbiBncm91cGUgKi9cbiNmb3JtUmVzc291cmNlIC5jb250cm9sLWdyb3VwIHtmbG9hdDogbGVmdDsgbWFyZ2luOiAwLjVlbTt9XG4vKiB0aXRyZXMgY2VudHLDqXMgKi9cbiNmb3JtUmVzc291cmNlIC5jb250cm9sLWdyb3VwID4gbGFiZWwge2ZvbnQtd2VpZ2h0OiBib2xkOyB3aWR0aDogMTAwJTsgdGV4dC1hbGlnbjogY2VudGVyOyB9XG4vKiBjaGVja2JveGVzLCBhbGlnbsOpcyDDoCBkcm9pdGUgZGFucyBzb24gZGl2ICovXG4jZm9ybVJlc3NvdXJjZSAuY2hlY2tib3hlcyB7IHBvc2l0aW9uOiByZWxhdGl2ZTt9XG4jZm9ybVJlc3NvdXJjZSAuY2hlY2tib3hlcyBpbnB1dCB7IG1hcmdpbjogMC4yZW0gMCAwLjFlbSAwLjVlbTsgfSAvKiAqL1xuI2Zvcm1SZXNzb3VyY2UgLmNoZWNrYm94ZXMgbGFiZWwge2Zsb2F0OiByaWdodDsgY2xlYXI6IHJpZ2h0OyBmb250LXdlaWdodDogbm9ybWFsOyBtYXJnaW46IDAuMWVtIDA7fVxuLypcbiNmb3JtUmVzc291cmNlIC5mb3JtLWdyb3VwIGRpdi5pbnB1dC1ncm91cCB7fVxuXG4jZm9ybVJlc3NvdXJjZSAuY2hlY2tib3hlcyB7IG1hcmdpbjogMWVtOyB9XG4jZm9ybVJlc3NvdXJjZSAuY2hlY2tib3hlcyBici5jbGVhciB7IGNsZWFyOiBib3RoOyB9XG4jZm9ybVJlc3NvdXJjZSAuY2hlY2tib3hlcyBsYWJlbCB7IGZsb2F0OiByaWdodDsgfVxuXG4vKiB0aXRyZXMgY2VudHLDqXMgKiAvXG4jZm9ybVJlc3NvdXJjZSAuaW5wdXQtZ3JvdXAgZGl2LCAjZm9ybVJlc3NvdXJjZSAuaW5wdXQtZ3JvdXAgbGFiZWwge2ZvbnQtd2VpZ2h0OiBib2xkOyB3aWR0aDogMTAwJTsgdGV4dC1hbGlnbjogY2VudGVyOyBmbG9hdDogbm9uZTsgfVxuLyogI2Zvcm0tb2lkLCAjZm9ybS10eXBlVGVjaG5pcXVlIHt3aWR0aDogNWVtO30gZmFpdCBwYXNzZXIgbGUgdGl0cmUgw6AgZHJvaXRlLi4uLiAqL1xuXG4vKiBkZXNjcmlwdGlvbiAqL1xuLnJlc3NvdXJjZSBzcGFuLnB1YmxpZSwgLnJlc3NvdXJjZSBzcGFuLnJlc3RyaWN0aW9uICB7ZGlzcGxheTogYmxvY2s7IGZsb2F0OiByaWdodDsgbWFyZ2luOiAwLjVlbTt9XG4ucmVzc291cmNlIHAsIC5yZXNzb3VyY2UgdWwge21hcmdpbjogMWVtO31cblxuLnJlbWFycXVlIHtmb250LXNpemU6IDAuOGVtOyBmb250LXdlaWdodDogbm9ybWFsOyBmb250LXN0eWxlOiBpdGFsaWM7fVxuXG4ubGlzdGUgLmxpbmtzIHttYXJnaW46IDAgMCAwLjJlbSAyZW07IGZvbnQtc2l6ZTogMC44ZW07fSJdfQ==*/
 
@@ -72,21 +89,51 @@
   width: 16px;
   height: 24px !important;
 }
-.amJstNode {background-image: url("/plugins/am/am.gif") !important;}
-.arbreJstNode {background-image: url("/plugins/arbre/images/arbre.gif") !important;}
-.arbreJstNodeRef {background-image: url("/plugins/arbre/images/arbreRef.gif") !important;}
-.atoJstNode {background-image: url("/plugins/ato/ato.gif") !important;}
-.calkcJstNode { background-image: url("/plugins/calkc/calkc.gif") !important;}
-.ec2JstNode { background-image: url("/plugins/ec2/ec2.gif") !important;}
-.emJstNode { background-image: url("/plugins/em/em.gif") !important;}
-.j3pJstNode { background-image: url("/plugins/j3p/j3p.gif") !important;}
-.mentalJstNode { background-image: url("/plugins/mental/mental.gif") !important;}
-.urlJstNode { background-image: url("/plugins/url/url.gif") !important;}
+
+.amJstNode {
+  background-image: url("/plugins/am/am.gif") !important;
+}
+
+.arbreJstNode {
+  background-image: url("/plugins/arbre/images/arbre.gif") !important;
+}
+
+.arbreJstNodeRef {
+  background-image: url("/plugins/arbre/images/arbreRef.gif") !important;
+}
+
+.atoJstNode {
+  background-image: url("/plugins/ato/ato.gif") !important;
+}
+
+.calkcJstNode {
+  background-image: url("/plugins/calkc/calkc.gif") !important;
+}
+
+.ec2JstNode {
+  background-image: url("/plugins/ec2/ec2.gif") !important;
+}
+
+.emJstNode {
+  background-image: url("/plugins/em/em.gif") !important;
+}
+
+.j3pJstNode {
+  background-image: url("/plugins/j3p/j3p.gif") !important;
+}
+
+.mentalJstNode {
+  background-image: url("/plugins/mental/mental.gif") !important;
+}
+
+.urlJstNode {
+  background-image: url("/plugins/url/url.gif") !important;
+}
 
 #display #apercu {
   width: 100%;
   min-height: 500px;
   resize: both;
-  overflow:auto;
-  border:1px solid black
+  overflow: auto;
+  border: 1px solid black
 }

@@ -80,7 +80,7 @@ module.exports = function () {
       route = '/'
       if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
       // ce qui concerne l'édition est toujours sur /ressource
-      if (['add', 'delete', 'edit'].indexOf(action) > -1) route += 'ressource/'
+      if (['create', 'delete', 'edit'].indexOf(action) > -1) route += 'ressource/'
       else route += isPublic ? 'public/' : 'ressource/'
       // et on ajoute l'oid éventuel
       if (oid) route += $routes.get(action, oid)
