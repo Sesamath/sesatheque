@@ -106,6 +106,22 @@ function Resultat(original) {
   this.duree = values.duree || null;
 
   /**
+   * Vaut true quand c'est le dernier envoi de l'exercice (seulement pour certains types)
+   * @default undefined
+   * @type {boolean}
+   */
+  this.fin = values.fin;
+
+  /**
+   * Un contenu pour une réponse qui ne rentre pas dans la string réponse
+   * (sert à distinguer les résultats où le formateur peut aller consulter un objet réponse,
+   * ça peut être un paragraphe de texte, un objet xml ou base64 pour certains types, etc.)
+   * @default undefined
+   * @type {string|*}
+   */
+  this.contenu = values.contenu
+
+  /**
    * Le score numérique, entre 0 et 1
    * @default null
    * @type {number}

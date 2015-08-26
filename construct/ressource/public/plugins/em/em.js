@@ -45,6 +45,7 @@ try {
     var ressId;
     var ressType = 'em';
     var startDate;
+    var lastResult;
 
     /**
      * Affiche la ressource dans l'élément html passé dans les options
@@ -137,6 +138,7 @@ try {
             ressType: ressType,
             date: startDate,
             duree: Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
+            fin : (result.fin === "o"),
             original: result
           };
           // le score sera calculé d'après la réponse juste avant enregistrement en bdd
@@ -146,9 +148,27 @@ try {
           } else {
             resultMod.score = null;
           }
+          lastResult = resultMod;
 
           options.resultatCallback(resultMod);
         };
+
+        // on ajoute un envoi au unload si rien n'a été envoyé avant
+        window.document.addEventListener('unload', function () {
+          if (!lastResult) {
+            lastResult = {
+              reponse: "",
+              nbq: params.nbq_defaut,
+              ressId: ressId,
+              ressType: ressType,
+              date: startDate,
+              duree: Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
+              original: null
+            };
+            options.resultatCallback(lastResult);
+          }
+        });
+
         flashvars.nomFonctionCallback = 'resultatCallback';
       }
 

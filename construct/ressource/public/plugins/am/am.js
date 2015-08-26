@@ -65,7 +65,7 @@ try {
 
       // on enverra le résultat à la fermeture (si y'a eu un chargement, startDate sert de flag)
       if (options.resultatCallback && container.addEventListener && startDate) {
-        container.addEventListener('unload', function () {
+        window.document.addEventListener('unload', function () {
           var resultat = {
             ressType: 'am',
             ressId: ressource.oid,
