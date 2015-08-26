@@ -64,8 +64,9 @@ try {
       if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
 
       // on enverra le résultat à la fermeture (si y'a eu un chargement, startDate sert de flag)
-      if (options.resultatCallback && container.addEventListener && startDate) {
-        window.document.addEventListener('unload', function () {
+      if (options.resultatCallback && window.addEventListener) {
+        window.addEventListener('unload', function () {
+          S.log("unload am");
           var resultat = {
             ressType: 'am',
             ressId: ressource.oid,
@@ -74,7 +75,8 @@ try {
             score: 1
           };
           if (options.sesatheque) resultat.sesatheque = options.sesatheque;
-          options.resultatCallback(resultat);
+          if (startDate) options.resultatCallback(resultat);
+          // sinon le swf n'a pas été chargé, on envoie rien
         });
       }
       var params = ressource.parametres;

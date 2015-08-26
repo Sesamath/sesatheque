@@ -154,8 +154,9 @@ try {
         };
 
         // on ajoute un envoi au unload si rien n'a été envoyé avant
-        window.document.addEventListener('unload', function () {
-          if (!lastResult) {
+        window.addEventListener('unload', function () {
+          S.log("unload em");
+          if (startDate && !lastResult) {
             lastResult = {
               reponse: "",
               nbq: params.nbq_defaut,
@@ -167,6 +168,7 @@ try {
             };
             options.resultatCallback(lastResult);
           }
+          // sinon le swf n'a pas été chargé ou il a déjà envoyé une réponse et on envoie rien au unload
         });
 
         flashvars.nomFonctionCallback = 'resultatCallback';
