@@ -6,11 +6,43 @@
   <script type="text/javascript" src="vendors/requirejs/require.min.js"></script>
 </head>
 <body>
+<a href="#" id="exo42">exo 42</a>
+<a href="#" id="exo43">exo 43</a>
+
+<iframe id="iframe" width="100%" height="300">
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+  <p>Iframe de départ</p>
   <script type="text/javascript">
-    require(['display'], function(display) {
-      console.log(display)
+    require(['jquery'], function() {
+      window.addEventListener("unload", function () {
+        console.log("unload iframe de départ")
+      })
     })
   </script>
+  </body>
+  </html>
+</iframe>
+
+<script type="text/javascript">
+  require(['/init.js'], function(init) {
+    init();
+    require(['jquery'], function() {
+      var iframe = document.getElementById("iframe");
+
+      $("#exo42").click(function () {
+        iframe.src = "/public/voir/am/1"
+      })
+      $("#exo43").click(function () {
+        iframe.src = "/public/voir/am/2"
+      })
+    })
+  })
+</script>
 
 </body>
 </html>

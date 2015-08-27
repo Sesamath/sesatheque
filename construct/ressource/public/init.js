@@ -106,6 +106,8 @@ if (typeof window === 'undefined') {
       }
 
       try {
+        if (!options) options = {};
+        if (!next) next = function () {};
         // on appelle la conf de require si ça n'a pas été fait, en cross domain si on est appelé avec sesathequeBase
         // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
         var base = options.sesathequeBase || "/";
