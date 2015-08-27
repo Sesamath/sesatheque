@@ -3,43 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <title>Test</title>
-  <script type="text/javascript" src="vendors/requirejs/require.min.js"></script>
+  <script type="text/javascript" src="/vendors/requirejs/require.min.js"></script>
 </head>
 <body>
-<a href="#" id="exo42">exo 42</a>
-<a href="#" id="exo43">exo 43</a>
+<a href="#" id="exoEm">exo em</a>
+<a href="#" id="exoAm">exo am</a>
 
-<iframe id="iframe" width="100%" height="300">
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-  </head>
-  <body>
-  <p>Iframe de départ</p>
-  <script type="text/javascript">
-    require(['jquery'], function() {
-      window.addEventListener("unload", function () {
-        console.log("unload iframe de départ")
-      })
-    })
-  </script>
-  </body>
-  </html>
-</iframe>
+<iframe id="iframe" width="100%" height="500"></iframe>
 
 <script type="text/javascript">
-  require(['/init.js'], function(init) {
-    init();
+  require(['/initRequire.js'], function(init) {
     require(['jquery'], function() {
       var iframe = document.getElementById("iframe");
 
-      $("#exo42").click(function () {
-        iframe.src = "/public/voir/am/1"
+      $("#exoEm").click(function () {
+        iframe.src = "/public/voir/em/42?urlResultatCallback=http://bibliotheque.local:3001/foo"
       })
-      $("#exo43").click(function () {
-        iframe.src = "/public/voir/am/2"
+      $("#exoAm").click(function () {
+        iframe.src = "/public/voir/am/42?urlResultatCallback=http://bibliotheque.local:3001/bar"
       })
+    }, function (error) {
+      console.log("erreur de chargement")
+      console.dir(error)
     })
   })
 </script>

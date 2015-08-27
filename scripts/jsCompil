@@ -22,4 +22,4 @@ trap fin EXIT
 cd $(dirname $0)/../
 dirApp=$PWD
 
-uglifyjs node_modules/requirejs/require.js construct/ressource/public/plugins/requireConfig.js --compress --mangle > construct/static/public/vendors/requirejs/require.min.js
+uglifyjs node_modules/requirejs/require.js construct/ressource/public/initRequire.js --compress --mangle > construct/static/public/vendors/requirejs/require.min.js

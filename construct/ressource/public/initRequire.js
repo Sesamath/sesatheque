@@ -33,7 +33,7 @@
  * @file requireConfig.js
  * Configuration de requireJs avec la liste des librairies et plugin utilisés
  *
- * Script concaténé avec le require.js de sesatheque, mais qui doit être appelé seul avant tout autre module en cas de cross-domain
+ * Script concaténé avec le require.js de sesatheque (par scripts/jsCompil), mais qui doit être appelé seul avant tout autre module en cas de cross-domain
  *
  * Pour être utilisé en cross-domain, peut importe que le require.js vienne de la sésathèque ou du domaine concerné,
  * il faut charger ce module et l'appeler avec en argument l'url absolue de la sésathèque avant de charger
@@ -67,6 +67,7 @@
    */
   function getConfig (base) {
     if (typeof base !== "string") base = "/";
+    if (typeof sesamath !== "undefined" && sesamath.sesatheque && sesamath.sesatheque.base) base = sesamath.sesatheque.base;
     if (base.substring(-1) !== "/") base += "/";
 
     var requireConfig = {
@@ -118,6 +119,7 @@
     ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "em", "j3p", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
       requireConfig.paths[plugin] = base + 'plugins/' + plugin + '/' + plugin;
     });
+
     return requireConfig;
   }
 
@@ -127,16 +129,17 @@
     // on exporte une fonction de conf avec comme seul argument l'url de la sésathèque
     // pour que qqun d'autre puisse reconfigurer require.js avec une autre base absolue
     // pour les modules de la sésathèque (en cas de cross-domain c'est obligatoire,
-    // et ça permet de continuer à utiliser require sur son domaine pour ses modules)
+    // et ça permet de continuer à utiliser son propre require sur son domaine pour ses modules)
     define(function () {
       return function (sesathequeBase) {
-        if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/";
-        // on l'ajoute aussi dans le dom global pour que les modules puissent le retrouver
-        // sans avoir à le repréciser
-        if (typeof window.sesamath === "undefined") window.sesamath = {};
-        if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
-        window.sesamath.sesatheque.base = sesathequeBase;
-        require.config(getConfig(sesathequeBase));
+          if (!sesathequeBase) sesathequeBase = "/";
+          else if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/";
+          // on l'ajoute aussi dans le dom global pour que les modules puissent le retrouver
+          // sans avoir à le repréciser
+          if (typeof window.sesamath === "undefined") window.sesamath = {};
+          if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
+          window.sesamath.sesatheque.base = sesathequeBase;
+          require.config(getConfig(sesathequeBase));
       };
     });
   }
