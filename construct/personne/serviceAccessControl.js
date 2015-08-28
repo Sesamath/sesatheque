@@ -194,6 +194,31 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Helper de checkAccess pour la permission updateAuteurs
+   * @private
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   */
+  function getUpdateAuteursDeniedMessage(context, ressource) {
+    var msg
+    if (!$accessControl.isAuteur(context, ressource)) msg = "Vous ne pouvez pas modifier les auteurs ou contributeur si vous n'êtes pas auteur de la ressource"
+    return msg
+  }
+
+  /**
+   * Helper de checkAccess pour la permission updateGroupes
+   * @private
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   */
+  function getUpdateGroupesDeniedMessage(context, ressource) {
+    // pour le moment idem update
+    return $accessControl.getUpdateDeniedMessage(context, ressource)
+  }
+
+  /**
    * Retourne true si l'ip est locale
    * @private
    * @param ip
@@ -403,13 +428,18 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     // read n'a pas forcément besoin de session
     if (permission === 'read') return $accessControl.hasReadPermission(context, ressource)
 
-    if (!$accessControl.isAuthenticated(context)) return false
-    else switch (permission) {
-      case 'createAll' : return (getCreateAllDeniedMessage(context) === '')
-      case 'create' : return (getCreateDeniedMessage(context) === '')
-      case 'delete' : return (getDeleteDeniedMessage(context, ressource) === '')
-      case 'update' : return (getUpdateDeniedMessage(context, ressource) === '')
-      default: return false
+    if ($accessControl.isAuthenticated(context)) {
+      switch (permission) {
+        case 'createAll' : return (getCreateAllDeniedMessage(context) === '')
+        case 'create' : return (getCreateDeniedMessage(context) === '')
+        case 'delete' : return (getDeleteDeniedMessage(context, ressource) === '')
+        case 'update' : return (getUpdateDeniedMessage(context, ressource) === '')
+        case 'updateAuteurs' : return (getUpdateAuteursDeniedMessage(context, ressource) === '')
+        case 'updateGroupes' : return (getUpdateGroupesDeniedMessage(context, ressource) === '')
+        default: return false
+      }
+    } else {
+      return false
     }
   }
 
@@ -436,7 +466,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.isAuthenticated = function (context) {
-    return (context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale
+    return (context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale et un token
   }
 
   /**
@@ -448,6 +478,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.isAuteur = function (context, ressource) {
     var userOid = $accessControl.getCurrentUserOid(context)
     return (ressource && ressource.auteurs && ressource.auteurs.indexOf(userOid) > -1)
+  }
+
+  /**
+   * Retourne true si l'utilisateur est dans le groupe
+   * @param {Context} context
+   * @param {string}  groupeNom
+   * @returns {boolean}
+   */
+  $accessControl.isInGroupe = function (context, groupeNom) {
+    var user = $accessControl.getCurrentUser(context)
+    return (user.groupes.indexOf(groupeNom) > -1)
   }
 
   /**
@@ -479,14 +520,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * Connecte un user sesalab (regarde s'il existe et s'il faut le mettre à jour et le met en session)
    * @param {Context} context
    * @param {object}  sesalabUser
-   * @param {string}  origine
+   * @param {string}  domaine     Le domaine du sesalab concerné
    * @param {personneCallback}  next
    * @memberOf $accessControl
    */
-  $accessControl.loginFromSesalab = function (context, sesalabUser, origine, next) {
+  $accessControl.loginFromSesalab = function (context, sesalabUser, domaine, next) {
     function setSession (error, personne) {
-      log.debug("setSession", error)
-      log.debug("setSession", personne)
+      log.debug("setSession error", error)
+      log.debug("setSession personne", personne)
       if (personne) {
         personne.permissions = getPermissions(personne)
         context.session.user = personne;
@@ -499,8 +540,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       next(error, personne)
     }
 
-    log.debug("loginFromSesalab avec", sesalabUser, "sesasso", {max:10000})
-    if (origine && sesalabUser.oid) {
+    log.debug("loginFromSesalab avec le user", sesalabUser, "sesasso", {max:10000})
+    if (domaine && sesalabUser.oid) {
       var data = {
         nom : sesalabUser.nom,
         prenom : sesalabUser.prenom,
@@ -511,7 +552,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         data.origine = sesalabUser.externalMech
         data.idOrigine = sesalabUser.externalId
       } else {
-        data.origine = origine
+        data.origine = domaine
         data.idOrigine = sesalabUser.oid
       }
       sesalabUser.groupes.forEach(function (groupe) {
@@ -521,7 +562,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       var personne = EntityPersonne.create(data)
       $personneRepository.update(personne, setSession)
     } else {
-      next(new Error("Impossible de connecter un utilisateur sesalab sans origine ou oid"))
+      next(new Error("Impossible de connecter un utilisateur sesalab sans domaine et oid"))
     }
   }
 

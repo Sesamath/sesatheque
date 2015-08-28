@@ -180,20 +180,23 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     var reqHttp = getReqHttp(context)
     var isJson = getIsJson(context)
     var isHtml = getIsHtml(context)
-    // on fixe déjà le contentType s'il ne l'est pas
-    if (context.contentType) {
-      // on signale une incohérence sans changer le contentType
-      if (isJson && context.contentType !== 'application/json')
-        log.error(new Error("On a un appel " +reqHttp +" avec un contentType " +context.contentType))
-      if (isHtml && context.contentType !== 'text/html')
-        log.error(new Error("On a un layout html " + context.layout + " avec un contentType " + context.contentType))
-    } else if (isHtml) {
-      context.contentType = 'text/html'
-    } else if (isJson) {
-      context.contentType = 'application/json'
+
+    if (context.method === "get" || context.method === "post") {
+      // on fixe déjà le contentType s'il ne l'est pas
+      if (context.contentType) {
+        // on signale une incohérence sans changer le contentType
+        if (isJson && context.contentType !== 'application/json')
+          log.error(new Error("On a un appel " + reqHttp + " avec un contentType " + context.contentType))
+        if (isHtml && context.contentType !== 'text/html')
+          log.error(new Error("On a un layout html " + context.layout + " avec un contentType " + context.contentType))
+      } else if (isHtml) {
+        context.contentType = 'text/html'
+      } else if (isJson) {
+        context.contentType = 'application/json'
+      }
+      // ajout du layout
+      if (isHtml && !data.$layout) data.$layout = __dirname + '/../static/views/layout-' + (context.layout || "page")
     }
-    // ajout du layout
-    if (isHtml && !data.$layout) data.$layout = __dirname +'/../static/views/layout-' +(context.layout || "page")
 
     /**
      * Gestion des erreurs (lassi ne l'a pas encore fait)

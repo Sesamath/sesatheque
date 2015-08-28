@@ -190,7 +190,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
       } else {
         EntityPersonne.create(personne).store(next)
       }
-
     }
 
     if (personne.oid) $personneRepository.load(personne.oid, modify)

@@ -65,12 +65,16 @@ personneComponent.entity('EntityPersonne', function () {
   require('./EntityPersonne')(this)
 })
 
+personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
+  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository)
+})
+
 personneComponent.service('$personneRepository', function(EntityPersonne, EntityGroupe, $cachePersonne, $cacheGroupe) {
   return require('./servicePersonneRepository')(EntityPersonne, EntityGroupe, $cachePersonne, $cacheGroupe)
 })
 
-personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
-  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository)
+personneComponent.service('$personneControl', function(EntityPersonne, EntityGroupe, $personneRepository, $accessControl) {
+  return require('./servicePersonneControl')(EntityPersonne, EntityGroupe, $personneRepository, $accessControl)
 })
 
 // l'api json

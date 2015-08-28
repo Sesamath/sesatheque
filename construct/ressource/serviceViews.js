@@ -87,8 +87,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     }).seq(function () {
       formData.groupes.choices = choices
       formData.groupes.new = {
-        name : "groupesAdd",
-        id: "groupeAdd",
+        name : "groupesSup",
+        id: "groupesSup",
         label : "Nouveau(x) groupe(s) à ajouter (à séparer par des virgules s'il y en a plusieurs)",
         placeholder : "nom du groupe"
       }

@@ -244,6 +244,15 @@ tools.sanitizeHashKey = function(source) {
 }
 
 /**
+ * Vire tous les caractères autres que lettres (non accentuées), chiffres, _ et -
+ * @param source
+ * @returns {void|*|{value}|string|XML}
+ */
+tools.sanitizeStrict = function (source) {
+  return source.replace(/[^a-zA-Z0-9_\-]/, '');
+}
+
+/**
  * Incorpore des arguments à un message, façon sprintf
  * pas très intéressant si n arguments, util.format fait la même chose, mais tolère un tableau d'arguments en 2e param
  * @param {string} message

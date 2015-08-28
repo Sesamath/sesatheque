@@ -42,10 +42,10 @@
  * @requires {@link $accessControl}
  */
 
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl) {
   var _ = require('lodash')
   var request = require('request')
-  //var flow = require('an-flow')
+  var flow = require('an-flow')
   var tools = require('../tools')
   var config = require("../../config");
 
@@ -63,9 +63,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       sendJson(context, error)
     } else {
       log.perf(context.response, 'loaded')
-      if (ressourceBdd) _.merge(ressourceBdd, ressourceNew)
-      else ressourceBdd = ressourceNew
-      checkWriteAndOut(context, ressourceBdd)
+      flow().seq(function () {
+        if ($accessControl.hasPermission("updateAuteurs", context, ressourceBdd)) {
+          $personneControl.checkPersonnes(context, ressourceBdd, ressourceNew, this)
+        } else {
+          ressourceNew.auteurs = ressourceBdd ? ressourceBdd.auteurs : []
+          ressourceNew.contributeurs = ressourceBdd ? ressourceBdd.contributeurs : []
+          this()
+        }
+      }).seq(function () {
+        $personneControl.checkGroupes(context, ressourceBdd, ressourceNew, this)
+      }).seq(function () {
+        $personneControl.checkPersonnes(context, ressourceBdd, ressourceNew, this)
+      }).seq(function () {
+        log.debug("fin checkGroupes & checkPersonnes")
+        if (ressourceBdd) _.merge(ressourceBdd, ressourceNew)
+        else ressourceBdd = ressourceNew
+        checkWriteAndOut(context, ressourceBdd)
+      }).catch(function (error) {
+        sendJson(context, error)
+      })
     }
   }
 
@@ -307,32 +324,36 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     log.debug('post /api/ressource a reçu', context.post, 'api', {max:1000})
     console.log(context.post);
 
-    $ressourceControl.valideRessourceFromPost(context.post, partial, function (error, ressource) {
-      try {
-        if (error) {
-          sendJson(context, error)
-        } else {
-          // faut la charger, ne serait-ce que pour savoir si elle existe
-          if (ressource.oid) { // par oid
-            $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
-              checkUpdateAndOut(context, error, ressourceBdd, ressource)
-            })
-          } else if (ressource.origine && ressource.idOrigine) { // ou par origine/idOrigine
-            $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
-              checkUpdateAndOut(context, error, ressourceBdd, ressource)
-            })
-          } else if (ressource.origine === "local") {
-            // seul cas autorisé où l'idOrigine n'est pas obligatoire ($ressourceRepository.write le créera)
-            checkWriteAndOut(context, ressource)
+    if ($accessControl.isAuthenticated(context) || $accessControl.hasAllRights(context)) {
+      $ressourceControl.valideRessourceFromPost(context.post, partial, function (error, ressource) {
+        try {
+          if (error) {
+            sendJson(context, error)
           } else {
-            throw new Error("Il faut fournir oid ou origine/idOrigine")
+            // faut la charger, ne serait-ce que pour savoir si elle existe
+            if (ressource.oid) { // par oid
+              $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
+                checkUpdateAndOut(context, error, ressourceBdd, ressource)
+              })
+            } else if (ressource.origine && ressource.idOrigine) { // ou par origine/idOrigine
+              $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
+                checkUpdateAndOut(context, error, ressourceBdd, ressource)
+              })
+            } else if (ressource.origine === "local") {
+              // seul cas autorisé où l'idOrigine n'est pas obligatoire ($ressourceRepository.write le créera)
+              checkWriteAndOut(context, ressource)
+            } else {
+              throw new Error("Il faut fournir oid ou origine/idOrigine")
+            }
           }
-        }
 
-      } catch (error) {
-        sendJson(context, error)
-      }
-    })
+        } catch (error) {
+          sendJson(context, error)
+        }
+      })
+    } else {
+      sendJson(context, "Vous devez être authentifié pour ajouter une ressource")
+    }
   }
 
   /**
@@ -537,6 +558,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           } else if (body.ok && body.utilisateur) {
             // on peut connecter
             $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
+              log.debug("dans cb loginFromSesalab on a en session", context.session.user)
               if (error) sendJson(context, error)
               else sendJson(context, null, {success: true})
             })
