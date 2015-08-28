@@ -440,6 +440,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Retourne true si l'utilisateur courant est auteur de la ressource
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   * @returns {boolean|undefined}
+   */
+  $accessControl.isAuteur = function (context, ressource) {
+    var userOid = $accessControl.getCurrentUserOid(context)
+    return (ressource && ressource.auteurs && ressource.auteurs.indexOf(userOid) > -1)
+  }
+
+  /**
    * Connecte un user (regarde s'il existe et s'il faut le mettre à jour et le met en session)
    * @param {Context}     context
    * @param {Personne}  personne
