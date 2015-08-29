@@ -1,0 +1,23 @@
+<div id="test"> * Je suis une iFrame d'un domaine autre que ma fenêtre parente.</div>
+<script>
+  function listener(event){
+    var tokens = event.data.split('::');
+    if (tokens[0]==='close') {
+      document.getElementById("test").innerHTML +=
+        "<br> * J'ai reçu l'ordre de la fermer, mais je vais faire un truc avant !!!";
+      setTimeout(function() {
+        document.getElementById("test").innerHTML +=
+          "<br> * ok, j'ai fini, je vais prévenir !";
+        window.parent.postMessage('done::'+tokens[1], event.origin);
+      }, 2000)
+    }
+
+  }
+
+  if (window.addEventListener){
+    addEventListener('message', listener, false)
+  } else {
+    // Uniquement pour IE8 à iE10
+    attachEvent('onmessage', listener)
+  }
+</script>
