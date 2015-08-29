@@ -80,8 +80,8 @@ ressourceComponent.controller(function () {
 })
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) { // jshint ignore:line
-  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes)
+ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) { // jshint ignore:line
+  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes)
 })
 
 // un controleur html pour des pages publiques sans session

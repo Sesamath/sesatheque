@@ -117,7 +117,7 @@ try {
       $page.css("width", tailleDispo + 'px');
     }
 
-    function sendResultat(reponse) {
+    function sendResultat(reponse, needDefer) {
       var resultat = {
         score: 1,
         ressId: ressId,
@@ -125,6 +125,7 @@ try {
         date: startDate,
         duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000)
       };
+      if (needDefer) resultat.defer = true;
       if (reponse) resultat.reponse = reponse;
       resultatCallback(resultat);
     }

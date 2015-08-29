@@ -189,8 +189,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
            * poste resultat en ajax vers traiteResultat puis appellera feedback avec le retour
            * @private
            * @param {Resultat} resultat
+           * @param {boolean} deferNeeded
            */
-          function sendAjax (resultat) {
+          function sendAjax (resultat, deferNeeded) {
             // c'est une url, on gère l'envoi
             if (typeof XMLHttpRequest === "undefined") {
               // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
@@ -202,7 +203,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             xhr.withCredentials = true;
 
 
-            xhr.timeout = ajaxTimeout;
 
             // les différentes callback
             xhr.onload = function () {
@@ -227,24 +227,37 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               feedback({error: "Impossible d'envoyer le résultat (à " + traiteResultat + ")"});
             };
 
-            xhr.ontimeout = function () {
-              feedback({
-                error: "Pas de réponse de l'enregistrement du résultat après " +
-                Math.floor(ajaxTimeout / 1000) + "s d'attente."
-              });
-            };
 
-            // et on envoie
-            xhr.open('POST', traiteResultat, true);
+            // et on envoie, mais sur le proxy si defer
+            if (deferNeeded) {
+              //resultat.deferUrl = traiteResultat;
+              //traiteResultat = options.sesathequeBase +'api/deferPost';
+              //S.log("on passe par le proxy " +traiteResultat);
+              S.log("on passe en synchrone");
+            } else {
+              S.log("pas différé");
+              xhr.timeout = ajaxTimeout;
+              xhr.ontimeout = function () {
+                feedback({
+                  error: "Pas de réponse de l'enregistrement du résultat après " +
+                  Math.floor(ajaxTimeout / 1000) + "s d'attente."
+                });
+              };
+            }
+            xhr.open('POST', traiteResultat, !deferNeeded); // synchronous if defer
             xhr.setRequestHeader('Content-type', 'application/json'); // text/plain évite le preflight mais le body parser interprête pas
             try {
+              S.log("on va envoyer");
               xhr.send(JSON.stringify(resultat));
+              S.log("post fait");
             } catch (error) {
               feedback({error: "Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
             }
+            S.log("fin ajax");
           }
 
           S.log("resultatCallback display a reçu", result);
+          var deferNeeded = result.defer;
           var resultat = new Resultat(result);
           // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
           ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
@@ -259,7 +272,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             traiteResultat(resultat);
           } else { // isString ok plus haut
             S.log("on va poster ce résultat vers " + traiteResultat, resultat);
-            sendAjax(resultat);
+            if (deferNeeded) S.log("mais en différé");
+            sendAjax(resultat, deferNeeded);
           }
         }; // fin définition options.resultatCallback
       } // addResultatCallback

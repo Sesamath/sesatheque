@@ -164,7 +164,8 @@ try {
               ressType: ressType,
               date: startDate,
               duree: Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
-              original: null
+              original: null,
+              defer:true
             };
             options.resultatCallback(lastResult);
           }

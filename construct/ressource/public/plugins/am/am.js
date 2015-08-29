@@ -67,12 +67,14 @@ try {
       if (options.resultatCallback && window.addEventListener) {
         window.addEventListener('unload', function () {
           S.log("unload am");
+          var now = new Date();
           var resultat = {
             ressType: 'am',
             ressId: ressource.oid,
             date: startDate,
-            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-            score: 1
+            duree: Math.floor((now.getTime() - startDate.getTime()) / 1000),
+            score: 1,
+            defer: true
           };
           if (options.sesatheque) resultat.sesatheque = options.sesatheque;
           if (startDate) options.resultatCallback(resultat);

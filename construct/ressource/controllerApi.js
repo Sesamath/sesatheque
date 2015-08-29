@@ -576,6 +576,44 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
+  controller.post('deferPost', function (context) {
+    var resultat = context.post
+    log.debug("deferPost appelé avec", resultat)
+    if (typeof resultat.deferUrl === "string") {
+      var ok = false;
+      var url = resultat.deferUrl;
+      delete resultat.deferUrl;
+      config.sesalabs.forEach(function (sesalab) {
+        if (url.indexOf(sesalab) === 0) ok = true
+      })
+      if (ok) {
+        var postOptions = {
+          url: url,
+          json: true,
+          content_type: 'charset=UTF-8',
+          timeout: 3000,
+          headers: {
+            "Cookie": context.request.cookies
+          },
+          form: context.post
+        }
+        request.post(postOptions, function (error, response, body) {
+          // pas la peine de répondre personne n'écoute
+          log.debug("deferPost, après envoi vers " + postOptions.url + " de ", postOptions.form)
+          log.debug("on récupère l'erreur", error)
+          log.debug("on récupère la réponse", response)
+          log.debug("on récupère et le body", body)
+          // mais si on renvoie rien ça donne une erreur 500 en timeout, context.next() donne une 404 car pas de contenu
+          sendJson(context, null, {success:true})
+        })
+      } else {
+        sendJson(context, new Error("deferPost appelé pour faire suivre à " +resultat.defer +" qui n'est pas dans les sesalab autorisés"))
+      }
+    } else {
+      sendJson(context, new Error("Il faut poster une url via deferUrl"))
+    }
+  })
+
   /**
    * Récupère un arbre au format jstree
    * @route GET /api/jstree?ref=xx[&children=1]

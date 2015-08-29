@@ -40,13 +40,14 @@
  * @requires $ressourceRepository {@link $ressourceRepository]
  * @requires $ressourceConverter
  * @requires $accessControl
+ * @requires $personneControl
  * @requires $views
  * @requires $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $views, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) {
   var _ = require('lodash')
   var tools = require('../tools')
-  //var seq = require('an-flow')
+  var seq = require('seq')
   var config = require('./config')
 
   /**
@@ -375,22 +376,38 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           } else {
             // on vérifie déjà les auteurs / contributeurs n'ont pas été modifiés si on a pas les droits, faut la ressource avant modif
             $ressourceRepository.load(context.post.oid, function (error, ressourceOriginale) {
-              if (error) rePrintForm(error, ressource)
-              else {
-                if (!$accessControl.hasPermission("updateAuteurs")) {
-                  ressource.auteurs = ressourceOriginale.auteurs
-                  ressource.contributeurs = ressourceOriginale.contributeurs
-                }
-                $ressourceRepository.write(ressource, function (error, ressourceOk) {
-                  if (error) {
-                    rePrintForm(error, ressource)
-                  } else if (ressourceOk) {
-                    var url = "/ressource/" + $routes.get('describe', ressourceOk.oid) // pas getAbs pour ne pas aller vers /public/
-                    log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
-                    context.redirect(url)
+              if (error) {
+                rePrintForm(error, ressource)
+              } else {
+                seq().seq(function () {
+                  if ($accessControl.hasPermission("updateAuteurs", context, ressourceOriginale)) {
+                    $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
                   } else {
-                    rePrintForm(new Error("L'écriture en base de donnée n'a pas répondu correctement"), ressource)
+                    ressource.auteurs = ressourceOriginale ? ressourceOriginale.auteurs : []
+                    ressource.contributeurs = ressourceOriginale ? ressourceOriginale.contributeurs : []
+                    this()
                   }
+                }).seq(function () {
+                  $personneControl.checkGroupes(context, ressourceOriginale, ressource, this)
+                }).seq(function () {
+                  $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
+                }).seq(function () {
+                  log.debug("fin checkGroupes & checkPersonnes")
+                  if (ressourceOriginale) _.merge(ressourceOriginale, ressource)
+                  else ressourceOriginale = ressource
+                  $ressourceRepository.write(ressource, function (error, ressourceOk) {
+                    if (error) {
+                      rePrintForm(error, ressource)
+                    } else if (ressourceOk) {
+                      var url = "/ressource/" + $routes.get('describe', ressourceOk.oid) // pas getAbs pour ne pas aller vers /public/
+                      log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
+                      context.redirect(url)
+                    } else {
+                      rePrintForm(new Error("L'écriture en base de donnée n'a pas répondu correctement"), ressource)
+                    }
+                  })
+                }).catch(function (error) {
+                  rePrintForm(error, ressource)
                 })
               }
             })
