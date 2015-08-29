@@ -189,9 +189,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
            * poste resultat en ajax vers traiteResultat puis appellera feedback avec le retour
            * @private
            * @param {Resultat} resultat
-           * @param {boolean} deferNeeded
            */
-          function sendAjax (resultat, deferNeeded) {
+          function sendAjax (resultat, deferSync) {
             // c'est une url, on gère l'envoi
             if (typeof XMLHttpRequest === "undefined") {
               // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
@@ -228,14 +227,13 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             };
 
 
-            // et on envoie, mais sur le proxy si defer
-            if (deferNeeded) {
-              //resultat.deferUrl = traiteResultat;
-              //traiteResultat = options.sesathequeBase +'api/deferPost';
-              //S.log("on passe par le proxy " +traiteResultat);
-              S.log("on passe en synchrone");
+            // et on envoie, mais sur le proxy si sync (car on est sur un event unload et l'envoi de la requete options est annulée en cross domain)
+            if (deferSync) {
+              resultat.deferUrl = traiteResultat;
+              traiteResultat = options.sesathequeBase +'api/deferPost';
+              S.log("on passe en synchrone vers " +traiteResultat);
             } else {
-              S.log("pas différé");
+              // on peut pas mettre de timeout en synchrone
               xhr.timeout = ajaxTimeout;
               xhr.ontimeout = function () {
                 feedback({
@@ -244,20 +242,17 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
                 });
               };
             }
-            xhr.open('POST', traiteResultat, !deferNeeded); // synchronous if defer
+            xhr.open('POST', traiteResultat, !deferSync);
             xhr.setRequestHeader('Content-type', 'application/json'); // text/plain évite le preflight mais le body parser interprête pas
             try {
-              S.log("on va envoyer");
               xhr.send(JSON.stringify(resultat));
-              S.log("post fait");
             } catch (error) {
               feedback({error: "Impossible de convertir (donc d'envoyer) le résultat renvoyé par la ressource."});
             }
-            S.log("fin ajax");
           }
 
           S.log("resultatCallback display a reçu", result);
-          var deferNeeded = result.defer;
+          var deferSync = result.deferSync;
           var resultat = new Resultat(result);
           // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
           ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
@@ -272,8 +267,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             traiteResultat(resultat);
           } else { // isString ok plus haut
             S.log("on va poster ce résultat vers " + traiteResultat, resultat);
-            if (deferNeeded) S.log("mais en différé");
-            sendAjax(resultat, deferNeeded);
+
+            sendAjax(resultat, deferSync);
           }
         }; // fin définition options.resultatCallback
       } // addResultatCallback

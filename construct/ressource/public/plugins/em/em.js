@@ -165,7 +165,8 @@ try {
               date: startDate,
               duree: Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
               original: null,
-              defer:true
+              fin:true,
+              deferSync:true
             };
             options.resultatCallback(lastResult);
           }

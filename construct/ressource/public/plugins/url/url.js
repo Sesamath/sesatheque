@@ -117,7 +117,13 @@ try {
       $page.css("width", tailleDispo + 'px');
     }
 
-    function sendResultat(reponse, needDefer) {
+    /**
+     * Envoie le résultat à resultatCallback
+     * @param {string}   reponse
+     * @param {boolean}  deferSync
+     * @param {function} next
+     */
+    function sendResultat(reponse, deferSync, next) {
       var resultat = {
         score: 1,
         ressId: ressId,
@@ -125,9 +131,12 @@ try {
         date: startDate,
         duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000)
       };
-      if (needDefer) resultat.defer = true;
+      if (deferSync) {
+        resultat.fin = true;
+        resultat.deferSync = true;
+      }
       if (reponse) resultat.reponse = reponse;
-      resultatCallback(resultat);
+      resultatCallback(resultat, next);
     }
 
     /** notre module exporté avec sa méthode display */
@@ -174,7 +183,9 @@ try {
         addPage(params, next);
         if (resultatCallback) {
           // un listener pour envoyer "affiché" comme score (i.e. un score de 1 avec une durée)
-          $('body').on('unload', sendResultat);
+          $('body').on('unload', function () {
+            sendResultat(null, true);
+          });
         } // sinon rien à faire
       } else {
         /**
@@ -189,8 +200,8 @@ try {
           function sendReponse() {
             if (!isResultatSent) {
               var reponse = $(textarea).val();
-              sendResultat(reponse, function (retour) {
-                if (retour) isResultatSent = true;
+              sendResultat(reponse, false, function (retour) {
+                if (retour && (retour.ok || retour.success)) isResultatSent = true;
               });
             }
           }
@@ -247,7 +258,9 @@ try {
               var boutonReponse = S.addElement(form, 'button', {id: "envoi"}, "Enregistrer cette réponse");
               // on ajoute l'envoi de la réponse sur le bouton et à la fermeture
               $(boutonReponse).click(sendReponse);
-              $('body').on("unload", sendReponse);
+              $('body').on("unload", function () {
+                sendReponse(null, true);
+              });
               $(textarea).change(function () {
                 isResultatSent = false;
               });

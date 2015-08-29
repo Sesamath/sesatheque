@@ -74,7 +74,8 @@ try {
             date: startDate,
             duree: Math.floor((now.getTime() - startDate.getTime()) / 1000),
             score: 1,
-            defer: true
+            fin:true,
+            deferSync: true
           };
           if (options.sesatheque) resultat.sesatheque = options.sesatheque;
           if (startDate) options.resultatCallback(resultat);
