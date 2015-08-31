@@ -53,18 +53,27 @@ try {
       var url = $adresse.val();
       if (url && !/https?:\/\//.exec(url)) {
         url = "http://" +url;
-        document.editRessource.parametres.adresse.value = url;
+        $adresse.val(url);
       }
       // vérif exclus
       exclus.forEach(function (domain) {
         if (url.indexOf(domain) > -1) {
           alert(domain +" a explicitemenent refusé que ses pages puissent être intégrées");
-          document.editRessource.parametres.adresse.value = "";
+          $adresse.val("");
           url = "";
+          $(linkAdresseElt).hide();
           return false;
         }
       });
-      if (url) iframeApercu.href = url;
+      //if (url) iframeApercu.href = url;
+      S.log("linkAdresseElt", linkAdresseElt);
+      linkAdresseElt.href = url;
+      if (url) {
+        $(linkAdresseElt).show();
+        $adresseAlert.hide();
+      } else {
+        $(linkAdresseElt).hide();
+      }
     }
 
     /**
@@ -212,11 +221,17 @@ try {
       // nos éléments html
       var blocParam = window.document.getElementById('parametres');
       if (!blocParam) throw new Error("Élément #parametres manquant");
-      var instructions = S.addElement(blocParam, 'div', "Adresse Internet de votre page externe (par exemple : http://www.sesamath.net)");
+      var instructions = S.addElement(blocParam, 'div', {}, "Adresse Internet de votre page externe (par exemple : http://www.sesamath.net) ");
       var url = parametres.adresse || '';
       if (url === "undefined") url = '';
+      linkAdresseElt = S.addElement(instructions, 'a', {target:"_blank", href:url}, "Voir dans un nouvel onglet");
+      var adresseAlert = S.addElement(instructions, 'div', {class:"error"}, "Il faut entrer une adresse");
+      $adresseAlert = $(adresseAlert);
+      $adresseAlert.hide();
       var adresseElt = S.addElement(instructions, 'input', {name:"parametres[adresse]",size:100, value:url});
+      if (!url) $(linkAdresseElt).hide();
       $adresse = $(adresseElt);
+      S.log("$adresse affecté dans initDom");
       $adresse.change(adresseOnChange);
       S.addElement(instructions, 'br');
       S.addText(instructions, "Il est possible d'accompagner la page internet d'une consigne et même de demander à l'élève de saisir un texte dans une zone de réponse.");
@@ -237,6 +252,13 @@ try {
       S.addElement(blocParam, 'button', {onClick:adresseOnChange}, "Prévisualiser la page");
       iframeApercu = S.addElement(blocParam, 'iframe',{id:"iframeApercu"});
 */
+      $("#formRessource").submit(function () {
+        "use strict";
+        if (!$adresse.val()) {
+          $adresseAlert.show();
+          return false;
+        }
+      });
     }
 
 
@@ -256,7 +278,7 @@ try {
     // les containers (variables locales au module), qui seront affectés par initDom()
     var iframeApercu, container;
     // quasi les mêmes jquerifiée
-    var $adresse, $editorToggleButton;
+    var $adresse, $adresseAlert, linkAdresseElt, $editorToggleButton;
     var isMqEditor = true;
 
     return {

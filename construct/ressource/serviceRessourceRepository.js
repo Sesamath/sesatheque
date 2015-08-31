@@ -36,6 +36,7 @@ var _           = require('lodash')
 var flow        = require('an-flow')
 var elementtree = require('elementtree')
 //var util = require('util')
+var uuid = require('node-uuid')
 
 var config = require('./config')
 
@@ -104,7 +105,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
-   * Récupère un idOrigine dispo pour l'origine local
+   * Récupère le premier idOrigine numérique dispo (incrémente par rapport au dernier jusqu'à en trouver un bon)
    * @private
    * @param ressource
    * @param next
@@ -616,7 +617,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       updateVersion(ressource, this)
 
     }).seq(function (ressource) {
-      setLastLocalId(ressource, this)
+      if (ressource.origine === "local" && !ressource.idOrigine) {
+        ressource.idOrigine = uuid.v1();
+      }
+      this(null, ressource)
 
     }).seq(function (ressource) {
       beforeStore(ressource, this)

@@ -51,7 +51,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
     ressource.errors.push(errorMsg)
   }
 
-  var seq = require('seq')
+  var seq = require('an-flow')
   var _ = require('lodash')
   //var tools = require('../tools')
 

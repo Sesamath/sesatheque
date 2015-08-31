@@ -63,7 +63,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       var links = []
       var ressource = context.ressource
       var oid = context.ressource.oid
-      if ($accessControl.hasPermission('read', context, oid)) {
+      if ($accessControl.hasPermission('read', context, ressource)) {
         links.push({
           href: $routes.getAbs('describe', ressource),
           value: 'Description',
@@ -83,21 +83,21 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           attrs: 'target="_blank"'
         })
       }
-      if ($accessControl.hasPermission('update', context, oid))
+      if ($accessControl.hasPermission('update', context, ressource))
         links.push({
           href: $routes.getAbs('edit', oid),
           value: 'Modifier',
           icon: "edit", // mode_edit pour material icons
           selected: (context.tab === 'edit')
         })
-      if (oid && $accessControl.hasPermission('read', context, oid) && $accessControl.hasPermission('create', context))
+      if (oid && $accessControl.hasPermission('read', context, ressource) && $accessControl.hasPermission('create', context))
         links.push({
           href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
           icon: 'copy', // ma call_split
           selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1)
         })
-      if ($accessControl.hasPermission('delete', context))
+      if ($accessControl.hasPermission('delete', context, ressource))
         links.push({
           href: $routes.getAbs('delete', oid),
           value: 'Supprimer',
