@@ -87,6 +87,11 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       delete ressource.displayUri
       delete ressource.describeUri
       delete ressource.dataUri
+      // bizarre, parfois errors est un object, on cherche à savoir comment
+      if (ressource.errors && !ressource.errors.push) {
+        log.debug("ressource.errors est un object et pas un array", ressource.errors)
+        ressource.errors = []
+      }
       // on vérifie que l'on peut sauvegarder
       if (ressource.origine && ressource.idOrigine && (!ressource.errors || !ressource.errors.length)) {
         next(null, ressource)
@@ -95,7 +100,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         var error
         if (!ressource.origine) error = new Error("propriété origine obligatoire")
         else if (!ressource.idOrigine) error = new Error("propriété idOrigine obligatoire")
-        else error = new Error("Il reste des erreurs qui empêchent la sauvegarde : \n".ressource.errors.join("\n"))
+        else error = new Error("Il reste des erreurs qui empêchent la sauvegarde : \n" +ressource.errors.join("\n"))
         log.error("erreur au beforeStore", error)
         next(error)
       }
@@ -600,7 +605,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
-   * Ajoute ou modifie une ressource (contrôle la validité avant)
+   * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin)
    * @memberOf $ressourceRepository
    * @param {EntityRessource} ressource
    * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)

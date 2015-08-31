@@ -40,6 +40,7 @@
  * @requires {@link $ressourceConverter}
  * @requires {@link $ressourceControl}
  * @requires {@link $accessControl}
+ * @requires {@link $personneControl}
  */
 
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl) {
@@ -48,6 +49,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var flow = require('an-flow')
   var tools = require('../tools')
   var config = require("../../config");
+  var configRessource = require("./config");
 
   /**
    * Met à jour une ressource issue de la bdd et appelle checkWriteAndOut pour vérifier les droits, l'enregistrer et sortir
@@ -94,15 +96,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function checkWriteAndOut(context, ressource) {
     log.debug("dans cb api checkWriteAndOut on récupère", ressource, 'api', {max:500})
-    var permission = (ressource.oid || (ressource.origine && ressource.idOrigine)) ? 'update' : 'create'
+    var permission
+    if (ressource.new) permission = 'create'
+    else if (ressource.oid) permission = "update"
+    else if (ressource.origine && ressource.idOrigine) permission = "update"
+    else permission = "create"
     // hasPermission et pas checkPermission pour être synchrone et gérer nos messages
     if ($accessControl.hasPermission(permission, context, ressource)) {
-      // on ajoute celui qui poste comme auteur, sauf si c'est un admin
-      if (!$accessControl.hasAllRights(context)) {
-        var userOid = $accessControl.getCurrentUserOid(context)
-        if (!ressource.auteurs) ressource.auteurs = [userOid]
-        else if (ressource.auteurs.indexOf(userOid) === -1) ressource.auteurs.push(userOid)
-      }
+      if (ressource.new) delete ressource.new
       $ressourceRepository.write(ressource, function (error, ressource) {
         log.debug("et après $ressourceRepository.write", ressource, 'repository', {max:500})
         if (error) log.debug("avec l'erreur", error, 'repository')
@@ -130,6 +131,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var errorMsg = "Droits insuffisants"
       if (ressource.oid) errorMsg += " pour modifier la ressource " + ressource.oid
       else errorMsg += " pour ajouter une ressource"
+      log.debug("denied avec le msg " +errorMsg +" et la ressource", ressource)
+      log.debug("pour le user", $accessControl.getCurrentUser(context))
       denied(context, errorMsg)
     }
   }
@@ -337,7 +340,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               })
             } else if (ressource.origine && ressource.idOrigine) { // ou par origine/idOrigine
               $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
-                checkUpdateAndOut(context, error, ressourceBdd, ressource)
+                if (error || ressourceBdd) {
+                  checkUpdateAndOut(context, error, ressourceBdd, ressource)
+                } else {
+                  // on a origine / idOrigine mais c'est pas un update
+                  ressource.new = true
+                  // pour les séries on ajoute la catégorie ici
+                  if (!ressource.categories && ressource.typeTechnique) ressource.categories = configRessource.categoriesToTypes[ressource.typeTechnique]
+                  if ($accessControl.hasPermission("create", context, ressource)) checkWriteAndOut(context, ressource)
+                  else denied(context, "Vous n'avez pas les droits suffisant pour créer cette ressource (de type " +ressource.typeTechnique +")")
+                }
               })
             } else if (ressource.origine === "local") {
               // seul cas autorisé où l'idOrigine n'est pas obligatoire ($ressourceRepository.write le créera)

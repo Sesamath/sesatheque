@@ -169,7 +169,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
    * @memberOf $personneRepository
    */
   $personneRepository.update = function (personne, next) {
-
+log.debug("$personneRepository.update")
     function checkUpdate(personne, personneNew, next) {
       var needUpdate = false
       for (var prop in personneNew) {

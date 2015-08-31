@@ -36,6 +36,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   var _ = require('lodash')
   var tools = require('../tools')
 
+  var configRessource = require("../ressource/config")
+
   /**
    * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
    * à la jonction entre personne et ressource.
@@ -44,15 +46,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   var $accessControl = {}
 
   /**
-   * Helper de checkAccess pour la permission create
+   * Helper de checkAccess pour la permission create (à n'utiliser qu'avec un user en session)
    * @private
    * @param {Context}   context
+   * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getCreateDeniedMessage(context) {
+  function getCreateDeniedMessage(context, ressource) {
     var msg
-    if (!$accessControl.isAuthenticated(context)) msg = "Vous devez vous identifier avant de créer une ressource"
-    else if (!$accessControl.hasPermission("create")) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    var user = $accessControl.getCurrentUser(context)
+    if (!user.permissions.create) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    else if (!configRessource.listes.typePerso[ressource.typeTechnique]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.typeTechnique
 
     return msg
   }
@@ -65,8 +69,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   function getCreateAllDeniedMessage(context) {
     var msg
-    if (!$accessControl.isAuthenticated(context)) msg = "Vous devez vous identifier avant de créer une ressource"
-    else if (!$accessControl.hasPermission("createAll")) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de n'importe quel type"
+    var user = $accessControl.getCurrentUser(context)
+    if (!user.permissions.createAll) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
 
     return msg
   }
@@ -80,9 +84,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   function getDeleteDeniedMessage(context, ressource) {
     var msg
-    if (!context.session.user) {
-      msg = "Vous devez vous identifier avant de supprimer une ressource"
-    } else if (_.contains(ressource.auteurs, $accessControl.getCurrentUserOid(context))) {
+    var userOid = $accessControl.getCurrentUserOid(context)
+    if (_.contains(ressource.auteurs, userOid)) {
       // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
       // (sinon d'autres peuvent s'en servir)
       if (ressource.auteurs.length > 1)
@@ -115,6 +118,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       if (ressource.restriction === restriction.aucune) return
       else if (!$accessControl.isAuthenticated(context)) msg = "Vous devez être authentifié pour consulter cette ressource"
       else {
+        var user = $accessControl.getCurrentUser(context)
         switch (ressource.restriction) {
           // public
           case restriction.aucune:
@@ -128,17 +132,16 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
 
           // réservée au groupe
           case restriction.groupe:
-            if (_.contains(ressource.auteurs, context.session.user.oid)) return
-            if (_.contains(ressource.contributeurs, context.session.user.oid)) return
-            if (ressource.parametres.allow && ressource.parametres.allow.groupes && !_.empty(_.intersection(ressource.parametres.allow.groupes,
-                                                                                                            context.session.user.groupes))) return
+            if ($accessControl.isAuteur(context, ressource)) return
+            if ($accessControl.isContributeur(context, ressource)) return
+            if (ressource.groupes && !_.empty(_.intersection(ressource.groupes, user.groupes))) return
             msg = "Ressource restreinte"
             break
 
           // privée
           case restriction.prive:
-            if (_.contains(ressource.auteurs, context.session.user.id)) return
-            if (_.contains(ressource.contributeurs, context.session.user.id)) return
+            if ($accessControl.isAuteur(context, ressource)) return
+            if ($accessControl.isContributeur(context, ressource)) return
             msg = "Ressource privée"
             break
 
@@ -174,23 +177,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Helper de checkAccess pour la permission del|update
+   * Helper de checkAccess pour la permission del|update (faut un user authentifié)
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getUpdateDeniedMessage(context, ressource) {
-    var msg
-    var oid = $accessControl.getCurrentUserOid(context)
-    if (!$accessControl.isAuthenticated(context)) msg = "Vous devez être authentifié pour modifier cette ressource"
-    // on regarde si c'est l'auteur
-    else if (_.contains(ressource.auteurs, oid)) return
-    // un contributeur
-    else if (_.contains(ressource.contributeurs, oid)) return
+    if ($accessControl.isAuteur(context, ressource)) return
+    else if ($accessControl.isContributeur(context, ressource)) return
     // pour le moment tout le reste est interdit
-    else msg = "Vous n'avez pas de droits suffisants pour modifier cette ressource"
-    return msg
+    else return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
   }
 
   /**
@@ -215,7 +212,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   function getUpdateGroupesDeniedMessage(context, ressource) {
     // pour le moment idem update
-    return $accessControl.getUpdateDeniedMessage(context, ressource)
+    return getUpdateDeniedMessage(context, ressource)
   }
 
   /**
@@ -425,13 +422,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (hasAllRights(context)) return true
     if (!ressource) return false
 
-    // read n'a pas forcément besoin de session
+    // read n'a pas forcément besoin de session, ça dépend de la ressource
     if (permission === 'read') return $accessControl.hasReadPermission(context, ressource)
 
     if ($accessControl.isAuthenticated(context)) {
       switch (permission) {
         case 'createAll' : return (getCreateAllDeniedMessage(context) === '')
-        case 'create' : return (getCreateDeniedMessage(context) === '')
+        case 'create' : return (getCreateDeniedMessage(context, ressource) === '')
         case 'delete' : return (getDeleteDeniedMessage(context, ressource) === '')
         case 'update' : return (getUpdateDeniedMessage(context, ressource) === '')
         case 'updateAuteurs' : return (getUpdateAuteursDeniedMessage(context, ressource) === '')
@@ -478,6 +475,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.isAuteur = function (context, ressource) {
     var userOid = $accessControl.getCurrentUserOid(context)
     return (ressource && ressource.auteurs && ressource.auteurs.indexOf(userOid) > -1)
+  }
+
+  /**
+   * Retourne true si l'utilisateur courant est contributeur de la ressource
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   * @returns {boolean|undefined}
+   */
+  $accessControl.isContributeur = function (context, ressource) {
+    var userOid = $accessControl.getCurrentUserOid(context)
+    return (ressource && ressource.contributeurs && ressource.contributeurs.indexOf(userOid) > -1)
   }
 
   /**
@@ -546,6 +554,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         nom : sesalabUser.nom,
         prenom : sesalabUser.prenom,
         email : sesalabUser.mail,
+        roles : {},
+        permissions : {},
         groupes : {}
       }
       if (sesalabUser.externalId && sesalabUser.externalMech) {
@@ -555,11 +565,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         data.origine = domaine
         data.idOrigine = sesalabUser.oid
       }
-      sesalabUser.groupes.forEach(function (groupe) {
+      if (sesalabUser.type === 1) data.roles.prof = true
+      if (data.origine === "sesasso") data.roles.acces_correction = true
+      if (sesalabUser.groupes) sesalabUser.groupes.forEach(function (groupe) {
         data.groupes[groupe] = true
       })
-      // @todo ajouter les roles sesasso
       var personne = EntityPersonne.create(data)
+      personne.permissions = getPermissions(personne)
       $personneRepository.update(personne, setSession)
     } else {
       next(new Error("Impossible de connecter un utilisateur sesalab sans domaine et oid"))

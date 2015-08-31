@@ -164,7 +164,8 @@ var ressourceConfig = {
     'calkc' : [7],
     'ec2'   : [7],
     'em'    : [7],
-    'mental': [7]
+    'mental': [7],
+    'serie' : [8]
   },
 
   /**
