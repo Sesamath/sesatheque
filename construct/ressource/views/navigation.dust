@@ -1,16 +1,1 @@
-{#links}
-  <a href="{href}" {?selected}class="selected"{/selected} {?icon}title="{value}"{/icon} {attrs}>
-    {?icon}
-      <i class="fa fa-{icon}"></i> <span>{value}</span>
-    {:else}
-      {?iconStack}{! cf Stacked Icons sur http://fortawesome.github.io/Font-Awesome/examples/ !}
-        <span class="fa-stack fa-lg {parent}">
-          {#iconStack}<i class="fa fa-{.}"></i>{/iconStack}
-        </span>
-        <span>{value}</span>
-      {:else}
-        {value}
-      {/iconStack}
-    {/icon}
-  </a>
-{/links}
+{#links}{>link /}{/links}

@@ -80,7 +80,9 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           href: $routes.getAbs('display', ressource),
           value: 'Voir',
           icon: 'eye', // material icons open_in_new était pas terrible
-          attrs: 'target="_blank"'
+          attributes : [
+            {name:"target", value:"_blank"}
+          ]
         })
       }
       if ($accessControl.hasPermission('update', context, ressource))

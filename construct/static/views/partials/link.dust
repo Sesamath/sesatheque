@@ -1,8 +1,19 @@
-<a {?href}href="{href}"{/href} {#attributes}{name}="{value}"{/attributes}>
-{?icon}<i class="fa fa-{icon}"></i> {/icon}
-{?iconStack}{! cf Stacked Icons sur http://fortawesome.github.io/Font-Awesome/examples/ !}
-  <span class="fa-stack fa-lg {parent}">
-    {#iconStack}<i class="fa fa-{.}"></i>{/iconStack}
-  </span>
-{/iconStack}
-{value}</a>
+<a
+    {?href}href="{href}"{/href}
+    {?selected}class="selected"{/selected}
+    {?icon}title="{value}"{/icon}
+    {#attributes}{name}="{value}"{/attributes}
+>
+  {?icon}
+    <i class="fa fa-{icon}"></i> <span>{value}</span>
+  {:else}
+    {?iconStack}{! cf Stacked Icons sur http://fortawesome.github.io/Font-Awesome/examples/ !}
+      <span class="fa-stack fa-lg {parent}">
+        {#iconStack}<i class="fa fa-{.}"></i>{/iconStack}
+      </span>
+      <span>{value}</span>
+    {:else}
+      {value}
+    {/iconStack}
+  {/icon}
+</a>
