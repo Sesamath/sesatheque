@@ -1,8 +1,10 @@
 <form method="get" id="formRessource">
   <div class="form-group">
     {>wrapper widget="text" o=oid /}
-    {>wrapper widget="text" o=origine /}
-    {>wrapper widget="text" o=idOrigine /}
+    {?origine}
+      {>wrapper widget="text" o=origine /}
+      {>wrapper widget="text" o=idOrigine /}
+    {/origine}
     {>wrapper widget="text" o=titre /}
     {>wrapper widget="select" o=typeTechnique size=2 /}
     {>wrapper widget="select" o=publie /}

@@ -574,6 +574,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
     }).catch(function (error) {
       log.error(error)
+      if (!formData.errors) formData.errors = []
       formData.errors.push(error.toString())
       next(formData)
     })
@@ -865,6 +866,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (!$accessControl.isAuthenticated(context)) {
         delete fd.restriction
       }
+      // si on a pas les droits createAll, origine est hidden avec local imposé, on le vire dans ce cas
+      if (fd.origine.hidden) {
+        delete fd.origine
+        delete fd.idOrigine
+      }
       // on ajoute un choix "pas de choix" pour typeTechnique et langue
       fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
       // pour la langue on vire le select actuel
@@ -883,6 +889,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           {label:'non', value:'false'},
         ]
       }
+      // on vire tous les required et on ajoute des valeurs si besoin
+      for (var key in fd) {
+        if (fd.hasOwnProperty(key)) {
+          if (fd[key].required) delete fd[key].required
+          if (context.get.modify && context.get[key]) {
+            if (fd[key].hasOwnProperty("value")) {
+              fd[key].value = context.get[key]
+            } else if (fd[key].choices) {
+              fd[key].choices.forEach(function (choice) {
+                if (choice.value == context.get[key]) choice.selected = true
+              })
+            }
+          }
+        }
+      }
+      //log.debug("search form data", fd)
+
       // titre de la page
       data.$metas.title = 'Recherche de ressources'
 
