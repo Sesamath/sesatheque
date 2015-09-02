@@ -78,9 +78,10 @@
         initGlobal : base +'initGlobal',
         // les modules de vendors
         ckeditor: base + 'vendors/ckeditor/ckeditor',
+        ckeditorJquery : base +'vendors/ckeditor/adapters/jquery',
         head: base + 'vendors/headjs/head.1.0',
         head_load: base + 'vendors/headjs/head.load.1.0',
-        jquery: base + 'vendors/jquery/dist/jquery.min',
+        jquery: base + 'vendors/jquery/jquery-1.11.3.min',
         jqueryUi: base + 'vendors/jqueryUi/1.11.1/jquery-ui.min',
         jqueryUiDialog: base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
         jstree: base + 'vendors/jstree/dist/jstree.min',
@@ -99,10 +100,20 @@
         Arbre: base + 'vendors/sesamath/Arbre'
       },
       shim: {
+        jquery: {
+          export: "$"
+        },
         // pour jQueryUi faut charger les css
         jqueryUi: {
+          deps : ["jquery"],
           init: function () {
             addCss(base + 'vendors/jqueryUi/1.11.1/jquery-ui.min.css');
+          }
+        },
+        jqueryUiDialog: {
+          deps : ["jquery"],
+          init: function () {
+            addCss(base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css');
           }
         },
         mathjax: {
@@ -111,6 +122,12 @@
             //MathJax.Hub.Config({ /* Your configuration here */ });
             //MathJax.Hub.Startup.onload();
             return MathJax;
+          }
+        },
+        mathquill : {
+          deps : ["jquery"],
+          init: function () {
+            addCss(base + 'vendors/mathquill-0.9.4/mathquill.css');
           }
         }
       }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test</title>
+  <script type="text/javascript" src="/vendors/requirejs/require.min.js"></script>
+</head>
+<body>
+
+<div id="editor"></div>
+<div id="mqButtons">
+  <a href="#" id="x2">x2</a>
+  <a href="#" id="racine">racine</a>
+  <a href="#" id="revert">revert</a>
+</div>
+
+<script type="text/javascript">
+  require(['/init.js'], function(init) {
+    init({verbose:true}, function () {
+      var S = window.sesamath;
+      require(['jquery'], function($) {
+        require(['mathquill'], function() {
+          var $editor = $("#editor")
+          $editor.mathquill('editable');
+          $editor.mathquill('latex', "y^3");
+          document.getElementById("racine").addEventListener('click', function () {
+            S.log("clic sur racine");
+            $editor.mathquill('cmd', "\\sqrt").focus();
+          });
+          document.getElementById("x2").addEventListener('click', function () {
+            S.log("clic sur x2");
+            $editor.mathquill('latex', "x^2").focus();
+          });
+          document.getElementById("revert").addEventListener('click', function () {
+            var contenu = $editor.mathquill('latex');
+            S.log("contenu récupéré", contenu)
+            $editor.empty().removeClass().html(contenu);
+          });
+        }, function (error) {
+          console.log("erreur de chargement")
+          console.dir(error)
+        })
+      })
+    })
+  })
+</script>
+
+</body>
+</html>

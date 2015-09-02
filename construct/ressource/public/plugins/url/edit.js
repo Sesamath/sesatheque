@@ -39,7 +39,7 @@
  * answer_editor   Quel type d'éditeur pour la réponse (textarea, ckeditor, ckeditorTex), cette propriété n'existait pas dans labomep1
  */
 try {
-  define(['jquery', 'mqEditor'], function (none, mqEditor) {
+  define(["mqEditor"], function (mqEditor) {
     /* jshint jquery:true */
     /* global alert,CKEDITOR */
     //"use strict";
@@ -61,20 +61,21 @@ try {
           alert(domain +" a explicitemenent refusé que ses pages puissent être intégrées");
           $adresse.val("");
           url = "";
-          $(linkAdresseElt).hide();
           return false;
         }
       });
-      //if (url) iframeApercu.href = url;
-      S.log("linkAdresseElt", linkAdresseElt);
       linkAdresseElt.href = url;
+      iframeApercu.src = url;
+      S.log("On change d'adresse vers " +url);
       if (url) {
-        $(linkAdresseElt).show();
         $adresseAlert.hide();
+        $(linkAdresseElt).show();
+        $apercu.show();
       } else {
         $(linkAdresseElt).hide();
+        $apercu.hide();
       }
-    }
+    } // adresseOnChange
 
     /**
      * Ajoute les boutons d'options sur la consigne et la réponse
@@ -104,6 +105,7 @@ try {
 
       /**
        * Affiche / masque ckEditor (callback onClic du bouton afficher simple/enrichi)
+       * @internal
        * @returns {boolean} toujours false sinon ça valide le form !
        */
       function toggleEditor() {
@@ -114,36 +116,50 @@ try {
             customConfig : '' // on veut pas charger le config.js
           });
           $divConsigne.show();
+          // faut pas revenir au simple, marche plus, il valide le form même avec le return false
+          // et ensuite le retour à ck marche pas non plus car le replace ne doit être fait qu'une fois, ça soule
+          //$editorToggleButton.hide();
+          isCk = true;
         }
         function toSimple() {
           $divConsigne.hide();
           $editorToggleButton.text("Éditeur enrichi");
+          CKEDITOR.instances.editor.destroy();
           // on vire le html
-          var contenu = $editor.text();
-          $editor.text(contenu);
+          var contenu = $editor.val().replace(/<[^<>]+>/ig, "");
+          S.log("avant de simplifier l'éditeur on récupère le texte " +contenu);
+          $editor.empty();
+          $editor.val(contenu);
           $divConsigne.show();
+          S.log("et on fini avec " +$editor.text())
+          isCk = false;
         }
-        if (isMqEditor) {
+        //S.log("toggleEditor se lance");
+        if (isCk) {
+          toSimple();
+        } else {
           if (typeof CKEDITOR === "undefined") {
             require(["ckeditor"], function () {
-              if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor');
-              initCKEditor();
-              toCk();
+              require(["ckeditorJquery"], function () {
+                if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor');
+                initCKEditor();
+                toCk();
+              });
             });
           } else {
             toCk();
           }
-        } else {
-          toSimple();
         }
 
-        return false; // sinon il valide le form !
-      }
+        //S.log("toggleEditor return false");
+        return false; // sinon il valide le form, mais même comme ça il valide au 2e clic
+      } // toggleEditor
+
       S.addElement(blocParam, "span", {style:{"font-weight":"bold"}}, "Consigne :");
       var consigne = parametres.consigne || '';
       var divConsigneOptions = S.addElement(blocParam, 'div');
       var divConsigne = S.addElement(blocParam, 'div');
-      var editorToggleButton = S.addElement(divConsigne, 'button', {style:{display:"block"}}, "Éditeur enrichi");
+      var editorToggleButton = S.addElement(divConsigne, 'button', {style:{display:"block"}, type:"button"}, "Éditeur enrichi");
       $editorToggleButton = $(editorToggleButton);
       $editorToggleButton.click(toggleEditor);
       var $divConsigne = $(divConsigne);
@@ -152,11 +168,20 @@ try {
       addOption(divConsigneOptions, "question_option", "pendant", "while", function () {$divConsigne.show();});
       addOption(divConsigneOptions, "question_option", "après", "after", function () {$divConsigne.show();});
       S.addText(divConsigneOptions, " (l'affichage de la page)");
+      var divConsigneEditor = S.addElement(divConsigne, "div");
+      S.addText(divConsigneEditor, " Type d'éditeur : ");
+      addOption(divConsigneEditor, "consigne_editeur", "simple", "textarea", toSimple);
+      S.addText(divConsigneEditor, " - ");
+      addOption(divConsigneEditor, "consigne_editeur", "équation", "mathquill", toMq);
+      S.addText(divConsigneEditor, " - ");
+      addOption(divConsigneEditor, "consigne_editeur", "texte riche", "ckEditor", toCk);
 
       var editor = S.addElement(divConsigne, 'textarea', {name:"parametres[consigne]", id:"editor",style:{"min-width":"50%"}}, consigne);
       var $editor = $(editor);
-      mqEditor.init(divConsigne, parametres.mqEditorConfig, options);
+      mqEditor.init(editor, parametres.mqEditorConfig, options);
 
+      // on passe en mode ck d'office si on trouve du <p> dans la consigne
+      if (consigne.indexOf("<p>") > -1) toggleEditor();
 
       S.addElement(blocParam, "span", {style:{"font-weight":"bold"}}, "Réponse :");
       var divReponseOptions = S.addElement(blocParam, 'div');
@@ -171,13 +196,12 @@ try {
       addOption(divReponseOptions, "answer_editor", "texte enrichi", "ckeditor");
       addOption(divReponseOptions, "answer_editor", "texte avec éditeur d'équation simplifié", "mqEditor");
       addOption(divReponseOptions, "answer_editor", "texte enrichi avec LaTeX possible", "ckeditorTex");
-    }
+    } // addOptions
 
     /**
      * Initialise la conf de ckeditor (mais il faudra appeler CKEDITOR.replace ensuite)
      */
     function initCKEditor() {
-      S.addCss('/vendors/ckeditor/contents.css');
       if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) CKEDITOR.tools.enableHtml5Elements( document );
       // The trick to keep the editor in the sample quite small unless user specified own height.
       CKEDITOR.config.height = 150;
@@ -209,7 +233,7 @@ try {
       // ou TeX-AMS_HTML ou TeX-AMS-MML_SVG, cf http://docs.mathjax.org/en/latest/configuration.html#loading
       CKEDITOR.config.mathJaxLib = "/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
       //S.log('ckeditor', CKEDITOR);
-    }
+    } // initCKEditor
 
     /**
      * Initialise le dom et les comportements
@@ -233,6 +257,18 @@ try {
       $adresse = $(adresseElt);
       S.log("$adresse affecté dans initDom");
       $adresse.change(adresseOnChange);
+      var apercu = S.addElement(instructions, 'div',{width:"300", height:"200"});
+      S.addElement(apercu, 'p',{style:{float:"right", margin:"3em 1em"}}, "Cet aperçu miniature permet de vérifier que le site autorise l'affichage incrusté (dans une iframe).");
+      var divTaille = S.addElement(apercu, 'div');
+      S.addText(divTaille, "Vous pouvez forcer une dimension d'affichage (déconseillé pour une page, mieux vaut laisser vide et laisser le navigateur s'adapter, mais cela peut être utile pour une image).");
+      S.addElement(divTaille, 'br');
+      S.addElement(divTaille, 'label', {htmlFor:"largeur", style:{margin:"0 0.2em 0 0"}}, "largeur (en pixels)");
+      S.addElement(divTaille, 'input', {id:"largeur", name:"parametres[largeur]",size:4, value: parseInt(parametres.largeur, 10) || ""});
+      S.addElement(divTaille, 'label', {htmlFor:"hauteur", style:{margin:"0 0.2em 0 1em"}}, "hauteur (en pixels)");
+      S.addElement(divTaille, 'input', {id:"hauteur", name:"parametres[hauteur]",size:4, value: parseInt(parametres.hauteur, 10) || ""});
+
+      iframeApercu = S.addElement(apercu, 'iframe',{id:"iframeApercu", width:"300", height:"200"});
+      $apercu = $(apercu);
       S.addElement(instructions, 'br');
       S.addText(instructions, "Il est possible d'accompagner la page internet d'une consigne et même de demander à l'élève de saisir un texte dans une zone de réponse.");
       S.addElement(instructions, 'br');
@@ -241,17 +277,8 @@ try {
       //S.addElement(instructions, 'img', {src: options.pluginBaseUrl +"/images/forward.png"});
       //S.addText(instructions, " indique que les affichages seront proposés successivements et non simultanément.");
       addOptions(blocParam, parametres, options);
-      var divTaille = S.addElement(blocParam, 'div');
-      S.addText(divTaille, "Vous pouvez forcer une dimension d'affichage (déconseillé pour une page, mieux vaut laisser vide et laisser le navigateur s'adapter, mais cela peut être utile pour une image).");
-      S.addElement(divTaille, 'br');
-      S.addElement(divTaille, 'label', {htmlFor:"largeur", style:{margin:"0 0.2em 0 0"}}, "largeur (en pixels)");
-      S.addElement(divTaille, 'input', {id:"largeur", name:"parametres[largeur]",size:4, value: parseInt(parametres.largeur, 10) || ""});
-      S.addElement(divTaille, 'label', {htmlFor:"hauteur", style:{margin:"0 0.2em 0 1em"}}, "hauteur (en pixels)");
-      S.addElement(divTaille, 'input', {id:"hauteur", name:"parametres[hauteur]",size:4, value: parseInt(parametres.hauteur, 10) || ""});
-/*
-      S.addElement(blocParam, 'button', {onClick:adresseOnChange}, "Prévisualiser la page");
-      iframeApercu = S.addElement(blocParam, 'iframe',{id:"iframeApercu"});
-*/
+
+      // on empêche la soumission sans url de page
       $("#formRessource").submit(function () {
         "use strict";
         if (!$adresse.val()) {
@@ -259,7 +286,7 @@ try {
           return false;
         }
       });
-    }
+    } // initDom
 
 
     /**
@@ -272,14 +299,12 @@ try {
     if (typeof w.sesamath === "undefined") w.sesamath = {};
     var S = window.sesamath;
     if (!S.sesatheque) S.sesatheque = {};
-    var ST = S.sesatheque;
+    //var ST = S.sesatheque;
 
     var exclus = ["euler.ac-versailles.fr"];
     // les containers (variables locales au module), qui seront affectés par initDom()
-    var iframeApercu, container;
-    // quasi les mêmes jquerifiée
-    var $adresse, $adresseAlert, linkAdresseElt, $editorToggleButton;
-    var isMqEditor = true;
+    var container, iframeApercu, linkAdresseElt, $adresse, $adresseAlert, $apercu, $editorToggleButton;
+    var isCk = false;
 
     return {
       init: function (ressource, options) {

@@ -172,18 +172,22 @@ define(function () {
 
         if (question_option == "off") {
           etapes.liste = [[information, page]];
+          // pas de question, pour la réponse :
           if (answer_option == "while") {
             etapes.titres = ["Visualisation du document et réponse"];
             information.setContent("Observe ce document et envoie ta réponse.");
+            // ajout de la réponse à la 1re étape
             etapes.liste[0].push(reponse);
 
           } else if (answer_option == "after") {
             etapes.titres = ["Visualisation du document", "Réponse"];
             information.setContent("Observe ce document puis clique sur ", lienSuivant, " pour répondre.");
+            // ajout de la réponse en 2e étape
             etapes.liste.push([reponse]);
           }
 
         } else if (question_option == "before") {
+          // consigne puis page
           etapes.liste = [[consigne, information], [page]];
           if (answer_option == "off") {
             etapes.titres = ["Lecture de la consigne", "Visualisation du document"];
@@ -244,7 +248,7 @@ define(function () {
       } // setEtapes
 
       /**
-       * Réactualise l'affichage
+       * Réactualise l'affichage avec l'étape etapes.currentIndex
        * @private
        */
       function showEtape() {
@@ -283,6 +287,10 @@ define(function () {
           $(lienSuivant).click(etapes.next);
         }
       } // showEtape
+
+      /**
+       * MAIN
+       */
 
       if (!ressource || !ressource.parametres || !ressource.parametres.adresse) throw new Error("ressource manquante ou incomplète");
       S.log('urlUi avec ', ressource.parametres, options);

@@ -94,11 +94,25 @@
      * @param {string}  file Chemin du fichier css (mis dans href tel quel)
      */
     S.addCss = function (file) {
-      var elt = wd.createElement("link");
-      elt.rel = "stylesheet";
-      elt.type = "text/css";
-      elt.href = file;
-      wd.getElementsByTagName("head")[0].appendChild(elt);
+      var head = wd.getElementsByTagName("head")[0];
+      var links = head.getElementsByTagName("link");
+      var dejala = false;
+      for (var i = 0; i < links.length; i++) {
+        if (links[i].href === file) {
+          dejala = true;
+          break;
+        }
+      }
+
+      if (dejala) {
+        S.log(file +" était déjà présent, on ne l'ajoute pas");
+      } else {
+        var elt = wd.createElement("link");
+        elt.rel = "stylesheet";
+        elt.type = "text/css";
+        elt.href = file;
+        head.appendChild(elt);
+      }
     };
 
     /**
