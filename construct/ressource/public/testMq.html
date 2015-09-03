@@ -7,40 +7,69 @@
 </head>
 <body>
 
+<!-- Code basique OK --)
 <div id="editor"></div>
 <div id="mqButtons">
   <a href="#" id="x2">x2</a>
   <a href="#" id="racine">racine</a>
   <a href="#" id="revert">revert</a>
 </div>
+-->
+<textarea id="txt"></textarea>
+
 
 <script type="text/javascript">
   require(['/init.js'], function(init) {
     init({verbose:true}, function () {
       var S = window.sesamath;
-      require(['jquery'], function($) {
-        require(['mathquill'], function() {
-          var $editor = $("#editor")
-          $editor.mathquill('editable');
-          $editor.mathquill('latex', "y^3");
-          document.getElementById("racine").addEventListener('click', function () {
-            S.log("clic sur racine");
-            $editor.mathquill('cmd', "\\sqrt").focus();
-          });
-          document.getElementById("x2").addEventListener('click', function () {
-            S.log("clic sur x2");
-            $editor.mathquill('latex', "x^2").focus();
-          });
-          document.getElementById("revert").addEventListener('click', function () {
-            var contenu = $editor.mathquill('latex');
-            S.log("contenu récupéré", contenu)
-            $editor.empty().removeClass().html(contenu);
-          });
-        }, function (error) {
-          console.log("erreur de chargement")
-          console.dir(error)
-        })
+      /**
+       * Ce code basique fonctionne (sauf le focus qui marche plus à partir de jQuery 1.9 :-/)
+       *
+       * Cf http://jenseng.github.io/mathquill/demo.html, qui montre des trucs qui marchent pas avec la 0.9.4 de github
+       * /
+      require(['mathquill'], function() {
+        var $editor = $("#editor")
+        S.log("$editor", $editor);
+        S.log("editor", document.getElementById("editor"));
+        $editor.mathquill('editable');
+//        $editor.mathquill('latex', "y^3");
+        document.getElementById("racine").addEventListener('click', function () {
+          S.log("clic sur racine");
+          $editor.mathquill('cmd', "\\sqrt").focus();
+//          S.log("empty elt ?", $editor.filter(".empty"));
+//          S.log("empty elt ?", $(".empty"));
+//          S.log("tentative de focus sur", $("#editor .empty").first());
+//          $("#editor .empty").first().mathquill().focus();
+//          $("#editor").first().mathquill().focus();
+//          $editor.mathquill().focus();
+        });
+        document.getElementById("x2").addEventListener('click', function () {
+          S.log("clic sur x2");
+          $editor.mathquill('latex', "x^2").focus();
+        });
+        document.getElementById("revert").addEventListener('click', function () {
+          var contenu = $editor.mathquill('latex');
+          S.log("contenu récupéré", contenu)
+          $editor.empty().removeClass().html(contenu);
+        });
+      }, function (error) {
+        console.log("erreur de chargement")
+        console.dir(error)
       })
+      /* */
+
+      /* On teste mqEditor * /
+      require(['mqEditor'], function(mqEditor) {
+        var textarea = document.getElementById("editor");
+        mqEditor.init(textarea);
+      }); /* */
+
+      /* On teste multiEditor */
+      require(['multiEditor'], function(multiEditor) {
+        var textarea = document.getElementById("txt");
+        multiEditor.init(textarea, {editor:"simple"});
+      }); /* */
+
     })
   })
 </script>

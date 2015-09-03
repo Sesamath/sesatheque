@@ -82,6 +82,7 @@
         head: base + 'vendors/headjs/head.1.0',
         head_load: base + 'vendors/headjs/head.load.1.0',
         jquery: base + 'vendors/jquery/jquery-1.11.3.min',
+        jquery18: base + 'vendors/jquery/jquery-1.8.3.min',
         jqueryUi: base + 'vendors/jqueryUi/1.11.1/jquery-ui.min',
         jqueryUiDialog: base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
         jstree: base + 'vendors/jstree/dist/jstree.min',
@@ -89,6 +90,7 @@
         mathjax: base + 'vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
         mathquill: base + 'vendors/mathquill-0.9.4/mathquill.min',
         mqEditor: base + 'vendors/sesamath/mqEditor/mqEditor',
+        multiEditor: base + 'vendors/sesamath/multiEditor/multiEditor',
         swfobject: base + 'vendors/swfobject/swfobject.2.2',
         // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
         "tools/swf": base + 'vendors/sesamath/tools/swf',
@@ -125,7 +127,8 @@
           }
         },
         mathquill : {
-          deps : ["jquery"],
+          // attention, mathquill marche bcp moins bien en jQuery 1.9 (impossible de donner le focus par ex)
+          deps : ["jquery18"],
           init: function () {
             addCss(base + 'vendors/mathquill-0.9.4/mathquill.css');
           }
