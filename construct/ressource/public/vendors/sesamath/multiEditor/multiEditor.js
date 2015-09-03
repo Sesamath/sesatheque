@@ -36,18 +36,45 @@ define(["jquery"], function () {
    * Ajoute les liens pour changer d'éditeur
    * @private
    */
-  function addLinks() {
+  function addLinks(config) {
+    /**
+     * Ajoute un lien ou un bouton radio suivant config.optionsName
+     * @internal
+     * @param value
+     * @returns {Element}
+     */
+    function addLink(value) {
+      var elt;
+      var args = {onclick:editors[value].go};
+      if (config.optionsName) {
+        var id = value +"Option";
+        args.id = id;
+        args.name = config.optionsName;
+        args.type = "radio";
+        args.value = value;
+        args.style = {"line-height":"1.3em","vertical-align":"middle"};
+        if (config.editor === value) args.checked = "checked";
+        elt = S.addElement(divChoices, 'input', args);
+        S.addElement(divChoices, 'label', {htmlFor:id, style:{"line-height":"1.3em","vertical-align":"middle", margin:"0 1em 0 0.2em"}}, editors[value].label);
+      } else {
+        args.style = {padding:"0.3em"};
+        elt = S.addElement(divChoices, 'a', args, editors[value].label);
+      }
+
+      return elt;
+    }
+
     var divChoices = S.getElement('div');
     S.addText(divChoices, "Utiliser l'éditeur : ");
-    var toSimpleLink = S.addElement(divChoices, 'a', {id:"toSimpleLink", style:{padding:"0.3em"}, onclick:multiEditor.toSimple}, "simple");
-    S.addText(divChoices, " - ");
-    var toMathquillLink = S.addElement(divChoices, 'a', {id:"toMathquillLink", style:{padding:"0.3em"}, onclick:multiEditor.toMathquill}, "équation");
-    S.addText(divChoices, " - ");
-    var toCkEditorLink = S.addElement(divChoices, 'a', {id:"toCkEditorLink", style:{padding:"0.3em"}, onclick:multiEditor.toCkEditor}, "texte riche");
+    var link = addLink("simple");
+    if (config.optionsName) $toCkEditorLink = $(link);
+    else S.addText(divChoices, " - ");
+    link = addLink("mathquill");
+    if (config.optionsName) $toMathquillLink = $(link);
+    else S.addText(divChoices, " - ");
+    link = addLink("ckeditor");
+    if (config.optionsName) $toCkEditorLink = $(link);
     $textarea.before(divChoices);
-    $toCkEditorLink = $(toCkEditorLink);
-    $toMathquillLink = $(toMathquillLink);
-    $toSimpleLink = $(toSimpleLink);
   }
 
   /**
@@ -61,6 +88,7 @@ define(["jquery"], function () {
 
   /**
    * Charge et initialise la conf de ckeditor si cela n'avait pas été fait (rien sinon)
+   * @private
    * @param {errorCallback} next
    */
   function initCKEditor(next) {
@@ -113,6 +141,11 @@ define(["jquery"], function () {
     }
   } // initCKEditor
 
+  /**
+   * Affecte la variable current, modifie le highligth des liens et appelle la callback éventuelle de modif de l'éditeur
+   * @private
+   * @param editor
+   */
   function setCurrent(editor) {
     if (initConfig.changeCallback) initConfig.changeCallback(editor);
     if ($toSimpleLink) {
@@ -140,6 +173,7 @@ define(["jquery"], function () {
       }
     } // sinon on a pas initialisé les liens donc rien à faire
     current = editor;
+    S.log("On est passé en " +current);
   }
 
   try {
@@ -159,51 +193,6 @@ define(["jquery"], function () {
     // objets initialisé par init, globaux à ce module
     var current, initConfig, mqEditor, $textarea, $toCkEditorLink, $toMathquillLink, $toSimpleLink;
 
-    /**
-     * Initialise le choix de l'éditeur sur un textarea en créant un div dans container (qui sera créé dans options.container sinon)
-     * @memberOf mqEditor
-     * @param {Element}        [textarea]  Un textarea avec le contenu à éditer
-     * @param {object}         [config]    config qui peut contenir les propriétés
-     *                                       - editor : préciser simple|mathquill|ckeditor (simple par défaut)
-     *                                       - choices : pour restreindre à certains éditeurs (['simple', 'mathquill', 'ckeditor'] par défaut),
-     *                                         passer un array vide pour empêcher de changer d'éditeur
-     *                                       - ckeditor : objet avec des propriétés qui seront passées à CKEDITOR.config
-     *                                       - mathquill (liste de noms de boutons, cf mqEditor)
-     *                                       - changeCallback : une fonction qui sera appelée avec le nom de l'éditeur à chaque changement
-     * @param {errorCallback}  [next]
-     */
-    multiEditor.init = function (textarea, config, next) {
-      $(function () {
-        if (typeof next !== "function") next = errorCallbackDefault;
-        if (!config) config = {};
-        if (!config.editor) config.editor = "simple";
-        if (!config.choices) config.choices = ['simple', 'mathquill', 'ckeditor'];
-        if (!config.ckeditor) config.ckeditor = {};
-        if (!config.mathquill) config.mathquill = null;
-        if (!config.changeCallback) config.changeCallback = function () {};
-        $textarea = $(textarea);
-        if (config.choices.length > 1) {
-          addLinks();
-        }
-        initConfig = config;
-        initConfig.textarea = textarea;
-        current = "simple";
-        switch (config.editor) {
-          case "simple":
-            setCurrent("simple"); // pour le highlight du lien
-            next();
-            break;
-          case "mathquill":
-            multiEditor.toMathquill(next);
-            break;
-          case "ckeditor":
-            multiEditor.toCkEditor(next);
-            break;
-          default :
-            throw new Error("Éditeur " +config.editor +" non géré");
-        }
-      });
-    };
 
     /**
      * Cache les boutons mathquill
@@ -259,16 +248,22 @@ define(["jquery"], function () {
       if (typeof next !== "function") next = errorCallbackDefault;
       try {
         if (!initConfig) throw new Error("Il faut initialiser multiEditor avant d'appeler ses autres méthodes");
-        if (mqEditor) {
-          init();
-        } else {
-          require(["mqEditor"], function (module) {
-            mqEditor = module;
-            init();
-          }, function () {
-            next(new Error("Le chargement de mathquill a échoué"));
-          });
-        }
+        multiEditor.toSimple(function (error) {
+          if (error) {
+            next(error);
+          } else {
+            if (mqEditor) {
+              init();
+            } else {
+              require(["mqEditor"], function (module) {
+                mqEditor = module;
+                init();
+              }, function () {
+                next(new Error("Le chargement de mathquill a échoué"));
+              });
+            }
+          }
+        });
       } catch (error) {
         next(error);
       }
@@ -301,6 +296,69 @@ define(["jquery"], function () {
       } catch (error) {
         next(error);
       }
+    };
+
+    var editors = {
+      simple : {
+        go:multiEditor.toSimple,
+        label : "simple"
+      },
+      ckeditor : {
+        go:multiEditor.toCkEditor,
+        label : "texte riche"
+      },
+      mathquill : {
+        go:multiEditor.toMathquill,
+        label:"équation"
+      }
+    };
+
+    /**
+     * Initialise le choix de l'éditeur sur un textarea en créant un div dans container (qui sera créé dans options.container sinon)
+     * @memberOf mqEditor
+     * @param {Element}        [textarea]  Un textarea avec le contenu à éditer
+     * @param {object}         [config]    config qui peut contenir les propriétés
+     *                                       - editor : préciser simple|mathquill|ckeditor (simple par défaut)
+     *                                       - optionsName : un nom pour mettre les options d'éditeur sous forme de bouton radio plutôt que de liens
+     *                                       - choices : pour restreindre à certains éditeurs (['simple', 'mathquill', 'ckeditor'] par défaut),
+     *                                         passer un array vide pour empêcher de changer d'éditeur
+     *                                       - ckeditor : objet avec des propriétés qui seront passées à CKEDITOR.config
+     *                                       - mathquill (liste de noms de boutons, cf mqEditor)
+     *                                       - changeCallback : une fonction qui sera appelée avec le nom de l'éditeur à chaque changement
+     * @param {errorCallback}  [next]
+     */
+    multiEditor.init = function (textarea, config, next) {
+      $(function () {
+        S.log("multiEditor.init avec la config", config);
+        if (typeof next !== "function") next = errorCallbackDefault;
+        if (!config) config = {};
+        if (!config.editor) config.editor = "simple";
+        if (!config.choices) config.choices = ['simple', 'mathquill', 'ckeditor'];
+        if (!config.ckeditor) config.ckeditor = {};
+        if (!config.mathquill) config.mathquill = "full";
+        if (!config.changeCallback) config.changeCallback = function () {};
+        $textarea = $(textarea);
+        if (config.choices.length > 1) {
+          addLinks(config);
+        }
+        initConfig = config;
+        initConfig.textarea = textarea;
+        current = "simple";
+        switch (config.editor) {
+          case "simple":
+            setCurrent("simple"); // pour le highlight du lien
+            next();
+            break;
+          case "mathquill":
+            multiEditor.toMathquill(next);
+            break;
+          case "ckeditor":
+            multiEditor.toCkEditor(next);
+            break;
+          default :
+            throw new Error("Éditeur " +config.editor +" non géré");
+        }
+      });
     };
 
     return multiEditor;

@@ -6,6 +6,5 @@
   float: left;
   text-align: center;
   margin: 1px;
-  height: 40px;
-  width: 40px;
+  padding: 0;
 }

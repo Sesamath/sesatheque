@@ -46,9 +46,7 @@ define(["mathquill"], function () {
       // une seule commande
       btn.addEventListener('click', function () {
         S.log("clic sur " +button);
-        $mqDiv.mathquill('cmd', value); //.focus();
-        //$mqDiv.mathquill().focus();
-        $mqDiv.focus();
+        $mqDiv.mathquill('cmd', value).focus();
       });
     } else if (value && value.forEach) {
       // un array de commandes
@@ -182,7 +180,23 @@ define(["mathquill"], function () {
             racine: true,
             supEgal: true
           };
+          var fullConfig = {
+            equivaut: true,
+            exponentielle: true,
+            fraction: true,
+            infEgal: true,
+            infini: true,
+            inter: true,
+            pi: true,
+            puissance: true,
+            racine: true,
+            supEgal: true,
+            union: true,
+            vide: true
+          };
           if (!config) config = defaultConfig;
+          else if (config === "default") config = defaultConfig;
+          else if (config === "full") config = fullConfig;
           // on ajoute ces boutons
           for (var btn in config) {
             if (config.hasOwnProperty(btn) && config[btn]) {

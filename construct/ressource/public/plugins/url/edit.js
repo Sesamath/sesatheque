@@ -39,7 +39,7 @@
  * answer_editor   Quel type d'éditeur pour la réponse (textarea, ckeditor, ckeditorTex), cette propriété n'existait pas dans labomep1
  */
 try {
-  define(["mqEditor"], function (mqEditor) {
+  define(["multiEditor"], function (multiEditor) {
     /* jshint jquery:true */
     /* global alert,CKEDITOR */
     //"use strict";
@@ -83,7 +83,7 @@ try {
      * @param parametres
      * @param options
      */
-    function addOptions(blocParam, parametres, options) {
+    function addOptions(blocParam, parametres) {
       /**
        * Ajoute une option dans parent
        * @internal
@@ -103,88 +103,30 @@ try {
         S.addElement(parent, 'label', {htmlFor:id,style:{"line-height":"1.3em","vertical-align":"middle", margin:"0 1em 0 0.2em"}}, label);
       }
 
-      /**
-       * Affiche / masque ckEditor (callback onClic du bouton afficher simple/enrichi)
-       * @internal
-       * @returns {boolean} toujours false sinon ça valide le form !
-       */
-      function toggleEditor() {
-        function toCk() {
-          $divConsigne.hide();
-          $editorToggleButton.text("Éditeur d'équation simplifié");
-          CKEDITOR.replace('editor', {
-            customConfig : '' // on veut pas charger le config.js
-          });
-          $divConsigne.show();
-          // faut pas revenir au simple, marche plus, il valide le form même avec le return false
-          // et ensuite le retour à ck marche pas non plus car le replace ne doit être fait qu'une fois, ça soule
-          //$editorToggleButton.hide();
-          isCk = true;
-        }
-        function toSimple() {
-          $divConsigne.hide();
-          $editorToggleButton.text("Éditeur enrichi");
-          CKEDITOR.instances.editor.destroy();
-          // on vire le html
-          var contenu = $editor.val().replace(/<[^<>]+>/ig, "");
-          S.log("avant de simplifier l'éditeur on récupère le texte " +contenu);
-          $editor.empty();
-          $editor.val(contenu);
-          $divConsigne.show();
-          S.log("et on fini avec " +$editor.text())
-          isCk = false;
-        }
-        //S.log("toggleEditor se lance");
-        if (isCk) {
-          toSimple();
-        } else {
-          if (typeof CKEDITOR === "undefined") {
-            require(["ckeditor"], function () {
-              require(["ckeditorJquery"], function () {
-                if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor');
-                initCKEditor();
-                toCk();
-              });
-            });
-          } else {
-            toCk();
-          }
-        }
-
-        //S.log("toggleEditor return false");
-        return false; // sinon il valide le form, mais même comme ça il valide au 2e clic
-      } // toggleEditor
-
-      S.addElement(blocParam, "span", {style:{"font-weight":"bold"}}, "Consigne :");
+      var containerConsigne = S.addElement(blocParam, "div", {style:{"border":"#000 thin solid", padding:"1em"}});
+      S.addElement(containerConsigne, "span", {style:{"font-weight":"bold"}}, "Consigne :");
       var consigne = parametres.consigne || '';
-      var divConsigneOptions = S.addElement(blocParam, 'div');
-      var divConsigne = S.addElement(blocParam, 'div');
-      var editorToggleButton = S.addElement(divConsigne, 'button', {style:{display:"block"}, type:"button"}, "Éditeur enrichi");
-      $editorToggleButton = $(editorToggleButton);
-      $editorToggleButton.click(toggleEditor);
-      var $divConsigne = $(divConsigne);
+      var divConsigneOptions = S.addElement(containerConsigne, 'div');
+      var divConsigne = S.addElement(containerConsigne, 'div');
+      var $divConsigne = $(divConsigne); // un div autour du textarea pour afficher / masquer
       addOption(divConsigneOptions, "question_option", "aucune", "off", function () {$divConsigne.hide();});
       addOption(divConsigneOptions, "question_option", "avant", "before", function () {$divConsigne.show();});
       addOption(divConsigneOptions, "question_option", "pendant", "while", function () {$divConsigne.show();});
       addOption(divConsigneOptions, "question_option", "après", "after", function () {$divConsigne.show();});
       S.addText(divConsigneOptions, " (l'affichage de la page)");
-      var divConsigneEditor = S.addElement(divConsigne, "div");
-      S.addText(divConsigneEditor, " Type d'éditeur : ");
-      addOption(divConsigneEditor, "consigne_editeur", "simple", "textarea", toSimple);
-      S.addText(divConsigneEditor, " - ");
-      addOption(divConsigneEditor, "consigne_editeur", "équation", "mathquill", toMq);
-      S.addText(divConsigneEditor, " - ");
-      addOption(divConsigneEditor, "consigne_editeur", "texte riche", "ckEditor", toCk);
 
       var editor = S.addElement(divConsigne, 'textarea', {name:"parametres[consigne]", id:"editor",style:{"min-width":"50%"}}, consigne);
-      var $editor = $(editor);
-      mqEditor.init(editor, parametres.mqEditorConfig, options);
+      var editorConfig = {
+        editor: parametres.question_editor,
+        mathquill: "full",
+        //optionsName: "parametres[question_editor]"
+      };
 
-      // on passe en mode ck d'office si on trouve du <p> dans la consigne
-      if (consigne.indexOf("<p>") > -1) toggleEditor();
+      multiEditor.init(editor, editorConfig);
 
-      S.addElement(blocParam, "span", {style:{"font-weight":"bold"}}, "Réponse :");
-      var divReponseOptions = S.addElement(blocParam, 'div');
+      var containerReponse = S.addElement(blocParam, "div", {style:{"border":"#000 thin solid", padding:"1em", "margin-top":"1em"}});
+      S.addElement(containerReponse, "span", {style:{"font-weight":"bold"}}, "Réponse :");
+      var divReponseOptions = S.addElement(containerReponse, 'div');
       addOption(divReponseOptions, "answer_option", "aucune", "off");
       addOption(divReponseOptions, "answer_option", "avant", "before");
       addOption(divReponseOptions, "answer_option", "pendant", "while");
@@ -192,48 +134,10 @@ try {
       S.addText(divReponseOptions, " (l'affichage de la page)");
       S.addElement(divReponseOptions, 'br');
       S.addText(divReponseOptions, " Type d'éditeur pour la réponse : ");
-      addOption(divReponseOptions, "answer_editor", "zone de texte", "textarea");
+      addOption(divReponseOptions, "answer_editor", "zone de texte", "simple");
       addOption(divReponseOptions, "answer_editor", "texte enrichi", "ckeditor");
-      addOption(divReponseOptions, "answer_editor", "texte avec éditeur d'équation simplifié", "mqEditor");
-      addOption(divReponseOptions, "answer_editor", "texte enrichi avec LaTeX possible", "ckeditorTex");
+      addOption(divReponseOptions, "answer_editor", "éditeur d'équation simplifié", "mathquill");
     } // addOptions
-
-    /**
-     * Initialise la conf de ckeditor (mais il faudra appeler CKEDITOR.replace ensuite)
-     */
-    function initCKEditor() {
-      if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) CKEDITOR.tools.enableHtml5Elements( document );
-      // The trick to keep the editor in the sample quite small unless user specified own height.
-      CKEDITOR.config.height = 150;
-      CKEDITOR.config.width = 'auto';
-      // on reprend le config.js de base ici pour éviter de le charger
-      CKEDITOR.config.toolbarGroups = [
-        { name: 'clipboard',   groups: [ 'clipboard', 'undo' ] },
-        { name: 'editing',     groups: [ 'find', 'selection', 'spellchecker' ] },
-        { name: 'links' },
-        { name: 'insert' },
-        { name: 'forms' },
-        { name: 'tools' },
-        { name: 'document',	   groups: [ 'mode', 'document', 'doctools' ] },
-        { name: 'others' },
-        '/',
-        { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
-        { name: 'paragraph',   groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
-        { name: 'styles' },
-        { name: 'colors' },
-        { name: 'about' }
-      ];
-      CKEDITOR.config.removeButtons = 'Underline,Subscript,Superscript,Styles';
-      CKEDITOR.config.format_tags = 'p;h1;h2;h3;pre';
-      CKEDITOR.config.removeDialogTabs = 'image:advanced;link:advanced';
-      // mathedit et eqneditor utilisent des appels à CodeCogs pour faire des images, on laisse tomber
-      // @todo s'inspirer de mathedit pour faire un plugin mathquill only
-      CKEDITOR.config.extraPlugins = 'mathjax';
-      // @see http://ckeditor.com/comment/123266#comment-123266, sauf que ça marche pas, faut aller modifier config.js
-      // ou TeX-AMS_HTML ou TeX-AMS-MML_SVG, cf http://docs.mathjax.org/en/latest/configuration.html#loading
-      CKEDITOR.config.mathJaxLib = "/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-      //S.log('ckeditor', CKEDITOR);
-    } // initCKEditor
 
     /**
      * Initialise le dom et les comportements
@@ -245,7 +149,7 @@ try {
       // nos éléments html
       var blocParam = window.document.getElementById('parametres');
       if (!blocParam) throw new Error("Élément #parametres manquant");
-      var instructions = S.addElement(blocParam, 'div', {}, "Adresse Internet de votre page externe (par exemple : http://www.sesamath.net) ");
+      var instructions = S.addElement(blocParam, 'div', {}, "Adresse Internet de votre page externe");
       var url = parametres.adresse || '';
       if (url === "undefined") url = '';
       linkAdresseElt = S.addElement(instructions, 'a', {target:"_blank", href:url}, "Voir dans un nouvel onglet");
@@ -288,6 +192,18 @@ try {
       });
     } // initDom
 
+    /**
+     * Initialise les parametres avec des valeurs par défaut
+     * @param parametres
+     */
+    function initParam(parametres) {
+      "use strict";
+      if (!parametres.question_option) parametres.question_option = "before";
+      if (!parametres.question_editor) parametres.question_editor = "simple";
+      if (!parametres.answer_option) parametres.answer_option = "off";
+      if (!parametres.answer_editor) parametres.answer_editor = "simple";
+    }
+
 
     /**
      * MAIN
@@ -303,14 +219,14 @@ try {
 
     var exclus = ["euler.ac-versailles.fr"];
     // les containers (variables locales au module), qui seront affectés par initDom()
-    var container, iframeApercu, linkAdresseElt, $adresse, $adresseAlert, $apercu, $editorToggleButton;
-    var isCk = false;
+    var container, iframeApercu, linkAdresseElt, $adresse, $adresseAlert, $apercu;
 
     return {
       init: function (ressource, options) {
         container = options.container || w.document.getElementById('formRessource');
         if (!container) throw new Error("Il faut passer le container dans les options");
         if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer");
+        initParam(ressource.parametres);
         initDom(ressource.parametres, options);
       }
     };
