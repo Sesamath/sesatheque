@@ -252,15 +252,24 @@ define(["jquery"], function () {
           if (error) {
             next(error);
           } else {
-            if (mqEditor) {
-              init();
-            } else {
-              require(["mqEditor"], function (module) {
-                mqEditor = module;
+            // on regarde si y'a des espaces hors de balises \text{}
+            var contenuSsTxt = $textarea.val().replace(/\\text{[^}]*}/g, "");
+            //if (contenu.length && contenu.indexOf("$") === -1) {
+            //  // on ajoute un $$ à la fin
+            //  $textarea.val(contenu +" $$");
+            //}
+            if (contenuSsTxt.indexOf(" ") === -1 || confirm("Attention, l'éditeur d'équation supprime les espaces (hors commande \text{})," +
+                    " annuler pour revenir à l'éditeur simple")) {
+              if (mqEditor) {
                 init();
-              }, function () {
-                next(new Error("Le chargement de mathquill a échoué"));
-              });
+              } else {
+                require(["mqEditor"], function (module) {
+                  mqEditor = module;
+                  init();
+                }, function () {
+                  next(new Error("Le chargement de mathquill a échoué"));
+                });
+              }
             }
           }
         });

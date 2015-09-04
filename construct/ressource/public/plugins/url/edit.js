@@ -119,7 +119,7 @@ try {
       var editorConfig = {
         editor: parametres.question_editor,
         mathquill: "full",
-        //optionsName: "parametres[question_editor]"
+        optionsName: "parametres[question_editor]"
       };
 
       multiEditor.init(editor, editorConfig);
@@ -198,10 +198,12 @@ try {
      */
     function initParam(parametres) {
       "use strict";
+      S.log("on a au départ les params", parametres);
       if (!parametres.question_option) parametres.question_option = "before";
       if (!parametres.question_editor) parametres.question_editor = "simple";
       if (!parametres.answer_option) parametres.answer_option = "off";
       if (!parametres.answer_editor) parametres.answer_editor = "simple";
+      S.log("après init", parametres);
     }
 
 

@@ -38,7 +38,9 @@ define(["mathquill"], function () {
    * @param button
    */
   function addButton(parent, button) {
-    var btn = S.addElement(parent, 'button', {class: "mqButton", type:"button"});
+    var argBtn = {class: "mqButton", type:"button"};
+    if (mqTitle[button]) argBtn.title = mqTitle[button];
+    var btn = S.addElement(parent, 'button', argBtn);
     S.addElement(btn, 'img', {src:basePath + "images/" + button + ".png", alt:mqLabel[button]});
     S.log("Ajout bouton " +button, btn);
     var value = mqExpr[button];
@@ -86,6 +88,7 @@ define(["mathquill"], function () {
       puissance: '^',
       racine: '\\sqrt',
       supEgal: '\\geq',
+      text: '\\text',
       union: '\\cup',
       vide:'\\emptyset'
     };
@@ -100,6 +103,22 @@ define(["mathquill"], function () {
       puissance: 'puissance',
       racine: 'racine carrée',
       supEgal: 'supérieur ou égal',
+      text: 'texte',
+      union: 'union',
+      vide:'ensemble vide'
+    };
+    var mqTitle = {
+      equivaut: 'équivaut',
+      exponentielle: 'exponentielle',
+      fraction: 'fraction',
+      infEgal: 'inférieur ou égal',
+      infini: 'infini',
+      inter: 'intersection',
+      pi: 'Pi',
+      puissance: 'puissance',
+      racine: 'racine carrée',
+      supEgal: 'supérieur ou égal',
+      text : "ajoute un texte (avec espaces possibles)",
       union: 'union',
       vide:'ensemble vide'
     };
@@ -163,6 +182,8 @@ define(["mathquill"], function () {
             S.log("init mathquill avec un contenu dans un tag " + textarea.nodeName);
             $mqDiv = $(textarea);
           }
+          // on regarde si on trouve des éléments 
+          $mqDiv.attr("contenteditable", true);
           $mqDiv.mathquill('editable').focus();
 
           // les boutons mathquill
@@ -191,6 +212,7 @@ define(["mathquill"], function () {
             puissance: true,
             racine: true,
             supEgal: true,
+            text: true,
             union: true,
             vide: true
           };
