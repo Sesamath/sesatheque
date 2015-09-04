@@ -30,7 +30,7 @@
  */
 
 try {
-  define(["jquery"], function () {
+  define(["jquery"], function ($) {
     "use strict";
     /* jshint jquery:true */
 
@@ -41,7 +41,7 @@ try {
     function addPage(params, next) {
       S.log("addPage avec les params", params);
       var page = S.addElement(container, 'div', {id: "page"});
-      var args = {src: params.adresse};
+      var args = {src: params.adresse, id:"pageContent"};
       // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
       // ff aime pas et sort une erreur js Error: Permission denied to access property 'toString'
       // chrome râle aussi parce que c'est pas un document
@@ -60,7 +60,7 @@ try {
           if (options.largeur < 100) options.largeur = 100;
           S.log("On charge " + url + " dans #page avec", options);
           swf.load(swfContainer, url, options, function () {
-            if (!options.hauteur && !options.largeur) autosize(params);
+            if (!options.hauteur && !options.largeur) autosize();
             // on est appelé quand swfobject a mis l'object dans le dom, mais le swf est pas forcément chargé
             // on regarde la hauteur pour savoir si c'est fait
             var $swfId = $('#' + swfId);
@@ -81,12 +81,15 @@ try {
         S.addElement(page, 'iframe', args, "Si vous lisez ce texte," +
             " votre navigateur ne supporte probablement pas les iframes");
         // url source (non cliquable) en footer
-        autosize(params);
+        autosize();
         next();
       }
       S.addElement(page, 'p', {id: 'urlSrc'}, "source : " + params.adresse);
     }
 
+    /**
+     * Appelle resizePage et le colle comme comportement au resize de la fenêtre
+     */
     function autosize() {
       // on redimensionne dès que jQuery est prêt
       $(resizePage);
@@ -99,6 +102,7 @@ try {
      */
     function resizePage() {
       var $page = $("#page");
+      var $pageContent = $("#pageContent");
       var occupe = 0;
       ["#errors", "#warnings", "#titre", "#entete", "#urlSrc"].forEach(function (selector) {
         occupe += $(selector).outerHeight(true);
@@ -110,11 +114,13 @@ try {
       // pour l'iframe de l'url, faut retirer ce que l'on utilise pour consigne & co
       if (!isBasic) tailleDispo -= $('#entete').innerHeight();
       $page.css("height", tailleDispo + 'px');
+      $pageContent.css("height", tailleDispo + 'px');
       // et la largeur de l'iframe
       tailleDispo = $(container).innerWidth() - 4; // 2px de marge dans le css
       if (tailleDispo < 300) tailleDispo = 300;
       S.log('resize largeur à ' + tailleDispo);
       $page.css("width", tailleDispo + 'px');
+      $pageContent.css("width", tailleDispo + 'px');
     }
 
     /**
@@ -267,7 +273,7 @@ try {
             } else if (options.preview) {
               S.addElement(form, 'p', null, "Réponse attendue mais pas d'envoi possible en prévisualisation");
             } else {
-              S.addElement(form, 'p', {class: "error"}, "Une réponse est attendue mais aucune destination n'a été fournie pour l'envoyer");
+              S.addElement(form, 'p', {class: "info", style:{margin:"1em;"}}, "Aucun enregistrement ne sera effectué (car aucune destination n'a été fournie pour l'envoyer, normal en visualisation seule)");
             }
             addPage(params, function () {
               urlUi(ressource, options, function () {

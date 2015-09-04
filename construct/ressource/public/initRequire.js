@@ -108,15 +108,18 @@
         // pour jQueryUi faut charger les css
         jqueryUi: {
           deps : ["jquery"],
-          init: function () {
-            addCss(base + 'vendors/jqueryUi/1.11.1/jquery-ui.min.css');
-          }
+          //init: function () {
+          //  console.log("On ajoute la css de jQueryUi dans shim");
+          //  addCss(base + 'vendors/jqueryUi/1.11.1/jquery-ui.min.css');
+          //}
         },
         jqueryUiDialog: {
-          deps : ["jquery"],
-          init: function () {
-            addCss(base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css');
-          }
+          deps : ["jquery"], // marche pas en ajoutant "css!" ou "text!" +base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css'
+          // cette fct init n'est jamais appelée
+          //init: function () {
+          //  console.log("On ajoute la css de jQueryUiDialog dans shim");
+          //  addCss(base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css');
+          //}
         },
         mathjax: {
           exports: "MathJax",
