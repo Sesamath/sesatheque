@@ -227,7 +227,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/ajouter
    */
   controller.get($routes.get('create'), function (context) {
-    context.layout = 'page'
+    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'create'
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       // envoi des valeur au form
