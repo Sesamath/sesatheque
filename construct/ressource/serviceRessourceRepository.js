@@ -282,7 +282,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @private
    * @param error
    * @param ressources ressource ou tableau de ressources (ou rien, sera passé à next tel quel)
-   * @param next
+   * @param next appelé avec (error, ressources)
    * @throws {Error} Si ressources est défini mais n'est pas une ressource ou un tableau de ressources
    */
   function cacheAndNext(error, ressources, next) {
@@ -379,7 +379,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * Efface une ressource (et ses index)
    * @memberOf $ressourceRepository
    * @param {EntityRessource} ressource
-   * @param {Function}  next      La callback qui sera appelée en lui passant error ou undefined
+   * @param {errorCallback}   next
    * @returns {undefined}
    */
   $ressourceRepository.delete = function(ressource, next) {
@@ -508,9 +508,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   /**
    * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
    * @memberOf $ressourceRepository
-   * @param {number|String} oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
-   * @param {Function}      next La callback qui sera appelée avec (error, ressource)
-   *                             Attention, ressource peut avoir perdu son prototype s'il vient du cache
+   * @param {number|String}     oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
+   * @param {ressourceCallback} next appelée avec une EntityRessource
    * @returns {undefined}
    */
   $ressourceRepository.load = function(oid, next) {
@@ -521,7 +520,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       else next(new Error("identifiant invalide : " +oid))
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
-        if (ressourceCached) next(null, ressourceCached)
+        if (ressourceCached) next(null, EntityRessource.create(ressourceCached))
         else EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
           cacheAndNext(error, ressource, next)
         })
@@ -532,9 +531,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next
    * @memberOf $ressourceRepository
-   * @param {string}   origine
-   * @param {string}   idOrigine
-   * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
+   * @param {string}            origine
+   * @param {string}            idOrigine
+   * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
   $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
     if (!origine || !idOrigine) {
@@ -543,8 +542,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }
 
     $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
-      if (ressourceCached) next(null, ressourceCached)
-      else {
+      if (ressourceCached) {
+        next(null, EntityRessource.create(ressourceCached))
+      } else {
         EntityRessource
             .match('origine').equals(origine)
             .match('idOrigine').equals(idOrigine)
@@ -559,13 +559,13 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   /**
    * Récupère une ressource publique et la passe à next (seulement une erreur si elle n'existe pas)
    * @memberOf $ressourceRepository
-   * @param {number|String} oid  L'identifiant de la ressource
-   * @param {Function}      next La callback qui sera appelée avec (error, ressource).
+   * @param {number|String}      oid  L'identifiant de la ressource
+   * @param {ressourceCallback}  next avec une EntityRessource
    * @returns {undefined}
    */
   $ressourceRepository.loadPublic = function(oid, next) {
     $cacheRessource.get(oid, function (error, ressourceCached) {
-      if (ressourceCached) next(null, ressourceCached)
+      if (ressourceCached) next(null, EntityRessource.create(ressourceCached))
       else {
         EntityRessource
             .match('oid').equals(oid)
@@ -580,9 +580,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next
    * @memberOf $ressourceRepository
-   * @param {string}   origine
-   * @param {string}   idOrigine
-   * @param {Function} next     La callback qui sera appelée en lui passant le nb de ligne effacées en argument
+   * @param {string}            origine
+   * @param {string}            idOrigine
+   * @param {ressourceCallback} next      Appelée avec une EntityRessource
    */
   $ressourceRepository.loadPublicByOrigin = function(origine, idOrigine, next) {
     if (!origine || !idOrigine) {
@@ -591,8 +591,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }
 
     $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
-      if (ressourceCached) next(null, ressourceCached)
-      else {
+      if (ressourceCached) {
+        next(null, EntityRessource.create(ressourceCached))
+      } else {
         EntityRessource
           .match('origine').equals(origine)
           .match('idOrigine').equals(idOrigine)
@@ -607,8 +608,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   /**
    * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin)
    * @memberOf $ressourceRepository
-   * @param {EntityRessource} ressource
-   * @param {Function} next Callback qui sera passé au store() et recevra les arguments (error, ressource)
+   * @param {EntityRessource}   ressource
+   * @param {ressourceCallback} [next]    appelée avec une EntityRessource
    */
   $ressourceRepository.write = function(ressource, next) {
     if (ressource.constructor.name !== 'Entity') {

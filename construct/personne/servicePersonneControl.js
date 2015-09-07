@@ -51,7 +51,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
     ressource.errors.push(errorMsg)
   }
 
-  var seq = require('an-flow')
+  var flow = require('an-flow')
   var _ = require('lodash')
   //var tools = require('../tools')
 
@@ -66,65 +66,72 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
    * Normalise la propriété groupes d'une ressource (en vérifiant les droits et que les groupes existent)
    * Un prof peut enlever/ajouter des groupes s'il est auteur (rien sinon)
    * @param {Context}       context
-   * @param {Ressource}     ressourceOriginale
+   * @param {Ressource}     [ressourceOriginale]
    * @param {Ressource}     ressourceNew
-   * @param {errorCallback} next
+   * @param {ressourceCallback} next
    * @memberOf $personneControl
    */
   $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, next) {
     log.debug("checkGroupes")
+    if (!ressourceNew.groupes) ressourceNew.groupes = []
+    // les 2 cas où y'a rien à faire
     if (ressourceOriginale && _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes)) {
-      next()
+      // update sans modif de groupe
+      next(null, ressourceNew)
+    } else if (!ressourceOriginale && !ressourceNew.groupes.length) {
+      // création sans groupes
+      next(null, ressourceNew)
     } else {
-      var groupes = [],
-          tmpGroupes
-      if (!ressourceOriginale) ressourceOriginale = {groupes:[], auteurs:[$accessControl.getCurrentUserOid(context)]}
-      if (_.isArray(ressourceNew.groupes)) {
-        groupes = ressourceNew.groupes
-      } else if (typeof ressourceNew.groupes === "string") {
-      // on normalise si on récupère une string
-        tmpGroupes = ressourceNew.groupes.split(",")
+      // faut examiner les différences, on regarde d'abord si c'est le format attendu
+      if (!_.isArray(ressourceNew.groupes)) {
+        // on vide et on signale l'erreur sans aller plus loin
+        log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
+        if (!ressourceNew.errors) ressourceNew.errors = []
+        ressourceNew.errors.push("Groupes invalides")
         ressourceNew.groupes = []
-        tmpGroupes.forEach(function (groupe) {
-          groupes.push(groupe.trim())
-        })
-      }
-      ressourceNew.groupes = []
-
-
-      if ($accessControl.hasPermission("updateGroupes", context, ressourceOriginale)) {
-        // on ajoute new si besoin
-        if (ressourceNew.groupesSup) {
-          tmpGroupes = ressourceNew.groupesSup.split(",")
-          tmpGroupes.forEach(function (groupe) {
-            groupes.push(groupe.trim())
-          })
-        }
-        // groupes contient tous ceux que l'on veut mettre, on vérifie qu'ils existent et que l'utilisateur peut ajouter
-        seq(groupes).seqEach(function (groupeNom) {
-          var nextGroupe = this
-          // si l'utilisateur n'a pas le droit générique sur les groupes, on regarde l'appartenance avant de charger le groupe
-          if (!$accessControl.hasPermission("updateGroupes", context) && !$accessControl.isInGroupe(context, groupeNom)) {
-            ressourceNew.warnings.push("Vous devez faire partie du groupe " +groupeNom +" pour y partager cette ressource")
-          } else {
-            $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
-              if (error) {
-                addError(ressourceNew, error.toString())
-              } else if (groupe) {
-                ressourceNew.groupes.push(groupe.nom)
-              } else {
-                addWarning(ressourceNew, "Le groupe " +groupe.nom +" n'existe pas")
-              }
-              nextGroupe()
+        next(null, ressourceNew)
+      } else {
+        var groupesVoulus = ressourceNew.groupes
+        var tmpGroupes
+        ressourceNew.groupes = []
+        // les droits, seulement si la ressource existait (sinon on suppose que si on est appelé c'est qu'il a les droits de création)
+        if (ressourceOriginale && !$accessControl.hasPermission("updateGroupes", context, ressourceOriginale)) {
+          ressourceNew.groupes = ressourceOriginale.groupes
+          addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
+          next(null, ressourceNew)
+        } else {
+          // on a les droits, on ajoute les groupes sup si besoin
+          if (ressourceNew.groupesSup) {
+            tmpGroupes = ressourceNew.groupesSup.split(",")
+            tmpGroupes.forEach(function (groupe) {
+              groupesVoulus.push(groupe.trim())
             })
           }
-        }).seq(function () {
-          next()
-        })
-      } else {
-        ressourceNew.groupes = ressourceOriginale.groupes
-        addWarning(ressourceNew, "Vous ne pouvez pas modifier les groupes d'une ressources dont vous n'êtes pas l'auteur")
-        next()
+          // groupes contient tous ceux que l'on veut mettre, on vérifie qu'ils existent et que l'utilisateur peut ajouter
+          flow(groupesVoulus).seqEach(function (groupeNom) {
+            var nextGroupe = this
+            // si l'utilisateur n'a pas le droit générique sur les groupes, on regarde l'appartenance avant de charger le groupe
+            if (!$accessControl.hasPermission("updateGroupes", context) && !$accessControl.isInGroupe(context, groupeNom)) {
+              ressourceNew.warnings.push("Vous devez faire partie du groupe " + groupeNom + " pour y partager cette ressource")
+              nextGroupe()
+            } else {
+              $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
+                if (error) {
+                  addError(ressourceNew, error.toString())
+                } else if (groupe) {
+                  ressourceNew.groupes.push(groupe.nom)
+                } else {
+                  addWarning(ressourceNew, "Le groupe " + groupe.nom + " n'existe pas")
+                }
+                nextGroupe()
+              })
+            }
+          }).seq(function () {
+            next(null, ressourceNew)
+          }).catch(function (error) {
+            next(error)
+          })
+        }
       }
     }
   }
@@ -134,42 +141,52 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
    * @param {Context}       context
    * @param {Ressource}     ressourceOriginale
    * @param {Ressource}     ressourceNew
-   * @param {errorCallback} next
+   * @param {ressourceCallback} next
    */
   $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
     log.debug("checkPersonnes")
-    if (ressourceOriginale && _.isEqual(ressourceNew.auteurs, ressourceOriginale.auteurs) && _.isEqual(ressourceNew.contributeurs, ressourceOriginale.contributeurs) ) {
-      next()
+    // les cas où on a rien à faire
+    if (
+        ressourceOriginale &&
+        _.isEqual(ressourceNew.auteurs, ressourceOriginale.auteurs) &&
+        _.isEqual(ressourceNew.contributeurs, ressourceOriginale.contributeurs
+    ) ) {
+      // y'avait une ressource et on a rien changé
+      next(null, ressourceNew)
+
     } else {
-      // qqchose a changé
+      // qqchose a changé, ou c'est une création, on mémorise ce que l'on veut mettre
       var auteurs = ressourceNew.auteurs,
           contributeurs = ressourceNew.contributeurs,
           tmp
-      // si pas d'originale, on met le user en auteur
-      if (!ressourceOriginale) ressourceOriginale = {auteurs:[$accessControl.getCurrentUserOid(context)], contributeurs:[]}
+      // puis reset des personnes sur la nouvelle ressource
       ressourceNew.auteurs = []
       ressourceNew.contributeurs = []
 
-      if ($accessControl.hasPermission("updateAuteurs", context, ressourceOriginale)) {
-        // on ajoute new si besoin
-        if (ressourceNew.auteursSup) {
-          tmp = ressourceNew.auteursSup.split(",")
-          tmp.forEach(function (oid) {
-            auteurs.push(oid.trim())
-          })
+      flow().seq(function () {
+        // les droits
+        if (ressourceOriginale && !$accessControl.hasPermission("updateAuteurs", context, ressourceOriginale)) {
+          // modif interdite
+          this(new Error("Vous n'avez pas les droits suffisants pour modifier les auteurs ou contributeurs de cette ressource"))
+        } else {
+          this()
         }
-        if (ressourceNew.contributeursSup) {
-          tmp = ressourceNew.contributeursSup.split(",")
-          tmp.forEach(function (oid) {
-            contributeurs.push(oid.trim())
-          })
-        }
-        // et on vérifie qu'ils existent
-        seq().seq(function () {
-          var nextStep = this
 
-          // seq auteurs
-          seq(auteurs).seqEach(function (oid) {
+      }).seq(function () {
+        var nextStep = this
+        // si création sans tous les droits sur les personnes on le met seul auteur
+        if (!ressourceOriginale && !$accessControl.hasPermission("updateAuteurs", context)) {
+          ressourceNew.auteurs = [$accessControl.getCurrentUserOid(context)]
+          nextStep()
+        } else {
+          // on passe en revue les auteurs demandés, en ajoutant à la wishlist les auteurs sup s'il y en a
+          if (ressourceNew.auteursSup) {
+            tmp = ressourceNew.auteursSup.split(",")
+            tmp.forEach(function (oid) {
+              auteurs.push(oid.trim())
+            })
+          }
+          flow(auteurs).seqEach(function (oid) {
             var nextAuteur = this
             $personneRepository.load(oid, function (error, personne) {
               if (error) {
@@ -186,41 +203,41 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
           }).catch(function (error) {
             nextStep(error)
           })
+        }
 
-        }).seq(function () {
-          var nextStep = this
-
-          // seq contributeurs
-          seq(contributeurs).seqEach(function (oid) {
-            var nextContributeur = this
-            $personneRepository.load(oid, function (error, personne) {
-              if (error) {
-                addError(ressourceNew, error.toString())
-              } else if (personne) {
-                ressourceNew.contributeurs.push(personne.oid)
-              } else {
-                addWarning(ressourceNew, "Le contributeur d'identifiant " + oid + " n'existe pas")
-              }
-              nextContributeur()
-            })
-          }).seq(function () {
-            nextStep()
-          }).catch(function (error) {
-            nextStep(error)
+      }).seq(function () {
+        var nextStep = this
+        // aj contributeurs sup
+        if (ressourceNew.contributeursSup) {
+          tmp = ressourceNew.contributeursSup.split(",")
+          tmp.forEach(function (oid) {
+            contributeurs.push(oid.trim())
+          })
+        }
+        // flow contributeurs demandés
+        flow(contributeurs).seqEach(function (oid) {
+          var nextContributeur = this
+          $personneRepository.load(oid, function (error, personne) {
+            if (error) {
+              addError(ressourceNew, error.toString())
+            } else if (personne) {
+              ressourceNew.contributeurs.push(personne.oid)
+            } else {
+              addWarning(ressourceNew, "Le contributeur d'identifiant " + oid + " n'existe pas")
+            }
+            nextContributeur()
           })
         }).seq(function () {
-          // terminé
-          next()
+          nextStep()
         }).catch(function (error) {
-          addError(ressourceNew, error.toString())
-          next()
+          nextStep(error)
         })
-      } else {
-        ressourceNew.auteurs = ressourceOriginale.auteurs
-        ressourceNew.contributeurs = ressourceOriginale.contributeurs
-        addWarning(ressourceNew, "Vous ne pouvez pas modifier les auteurs ou contributeurs d'une ressources dont vous n'êtes pas l'auteur")
-        next()
-      }
+
+      }).seq(function () {
+        // terminé
+        next(null, ressourceNew)
+
+      }).catch(next)
     }
   }
 

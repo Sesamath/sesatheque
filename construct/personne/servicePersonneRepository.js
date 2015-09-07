@@ -45,7 +45,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
   /**
    * Récupère une personne (en cache ou en bdd)
    * @param {string}           id   Oid ou origine/idOrigine
-   * @param {personneCallback} next      On aura pas d'entity si ça vient du cache
+   * @param {personneCallback} next Renvoie toujours une EntityPersonne
    * @memberOf $personneRepository
    */
   $personneRepository.load = function (id, next) {
@@ -58,7 +58,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
       $personneRepository.loadByOrigin(origine, idOrigine, next)
     } else if (id) {
       $cachePersonne.get(id, function (error, personneCached) {
-        if (personneCached) next(null, personneCached)
+        if (personneCached) next(null, EntityPersonne.create(personneCached))
         else {
           EntityPersonne.match('oid').equals(id).grabOne(function (error, personne) {
             //log.debug('personne load remonte ', personne)
@@ -81,15 +81,16 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
    * Récupère une personne (en cache ou en bdd)
    * @param {string}           origine   Nom du authClient qui a authentifié cette personne
    * @param {string}           idOrigine Id de la personne dans son système d'authentification
-   * @param {personneCallback} next      On aura pas d'entity si ça vient du cache
+   * @param {personneCallback} next      Renvoie toujours une EntityPersonne
    * @memberOf $personneRepository
    */
   $personneRepository.loadByOrigin = function (origine, idOrigine, next) {
-    log.debug('load personne ' + origine +'/' +idOrigine)
+    log.debug('loadByOrigin personne ' + origine +'/' +idOrigine)
     if (origine && idOrigine) {
       $cachePersonne.getByOrigine(origine, idOrigine, function (error, personneCached) {
-        if (personneCached) next(null, personneCached)
-        else {
+        if (personneCached) {
+          next(null, EntityPersonne.create(personneCached))
+        } else {
           EntityPersonne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
             //log.debug('personne load remonte ', personne)
             if (error) next(error)
@@ -163,13 +164,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
   }
 
   /**
-   * Met à jour ou crée une personne
+   * Met à jour ou enregistre une nouvelle personne
    * @param {Personne} personne
-   * @param {personneCallback} next Avec l'argument personne fourni si y'avait rien à mettre à jour (EntityPersonne sinon)
+   * @param {personneCallback} next Avec l'EntityPersonne
    * @memberOf $personneRepository
    */
   $personneRepository.update = function (personne, next) {
-log.debug("$personneRepository.update")
+    //log.debug("$personneRepository.update", personne, {max:2000})
     function checkUpdate(personne, personneNew, next) {
       var needUpdate = false
       for (var prop in personneNew) {
@@ -193,7 +194,7 @@ log.debug("$personneRepository.update")
     }
 
     if (personne.oid) $personneRepository.load(personne.oid, modify)
-    else if (personne.origine && personne.idOrigine) $personneRepository.load(personne.origine +"/" +personne.idOrigine, modify)
+    else if (personne.origine && personne.idOrigine) $personneRepository.loadByOrigin(personne.origine, personne.idOrigine, modify)
     else next(new Error("Il manque un identifiant pour mettre à jour les données de cet utilisateur"))
   }
 

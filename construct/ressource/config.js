@@ -381,7 +381,10 @@ var ressourceConfig = {
     maxSql : 500,
     listeNbDefault : 25
   },
-  cacheTTL : 3600
+  cacheTTL : 3600,
+  imports : {
+    ecBase : "http://ressources.devsesamath.net/replication_calculatice"
+  }
 };
 
 module.exports = ressourceConfig

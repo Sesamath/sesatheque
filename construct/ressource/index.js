@@ -74,6 +74,10 @@ ressourceComponent.service('$views', function (EntityRessource, $ressourceReposi
   return require('./serviceViews')(EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings)
 })
 
+ressourceComponent.service('$json', function () {
+  return require('./serviceJson')()
+})
+
 // nos ressources statiques
 ressourceComponent.controller(function () {
   this.serve(__dirname + '/public')
@@ -90,8 +94,13 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl)
+ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
+  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json)
+})
+
+// import calculatice
+ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) { // jshint ignore:line
+  require('./controllerImportEc')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes)
 })
 
 // En dev on ajoute des routes de debug

@@ -32,7 +32,7 @@
 'use strict'
 
 module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
-
+  var dns = require('dns')
   var _ = require('lodash')
   var tools = require('../tools')
 
@@ -99,6 +99,22 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     }
 
     return msg
+  }
+
+  /**
+   * Retourne l'ip du client (la 1re dans la chaine de proxy,
+   * ou celle des headers x-real-ip ou x-forwarded-for ou celle de la requete)
+   * @param context
+   * @returns {*}
+   */
+  function getClientIp(context) {
+    // on regarde si par hasard ce serait pas l'ip du proxy
+    var ipClient = context.request.ip
+    if (context.ips && context.ips.length) ipClient = context.ips[0]
+    else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
+    else if (context.request.headers['x-forwarded-for']) ipClient = context.request.header('x-forwarded-for').split(',')[0]
+
+    return ipClient
   }
 
   /**
@@ -372,17 +388,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         // token ok on vérifie l'ip
         var ip = context.request.ip
         log("token ok dans hasAllRights avec l'ip " + ip)
-        if (isOnLan(ip)) {
-          // on regarde si par hasard ce serait pas l'ip du proxy
-          var ipClient = ip
-          if (context.ips && context.ips.length) ipClient = context.ips[0]
-          else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
-          else if (context.request.headers['x-forwarded-for'])
-            ipClient = context.request.header('x-forwarded-for').split(',')[0]
-          if (ipClient && ipClient !== ip) log.debug("L'appli est derrière un proxy mais trust proxy n'a pas été déclaré")
-
-          return isOnLan(ipClient)
-        }
+        return $accessControl.isLanClient(context)
       }
 
     }
@@ -500,6 +506,50 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Retourne true si le client a une ip locale ou privée
+   * @param context
+   * @returns {boolean}
+   */
+  $accessControl.isLanClient = function (context) {
+    var isLanClient = false
+    var ip = context.request.ip
+    if (isOnLan(ip)) {
+      // on regarde si c'est pas simplement l'ip d'un frontal
+      var ipClient = getClientIp(context)
+      isLanClient = isOnLan(ipClient)
+    }
+
+    return isLanClient
+  }
+
+  /**
+   * Appelle next avec (error, isLocalOrSesamath), où isLocalOrSesamath vaut true si c'est un client
+   * avec une ip locale ou dont le reverse est en (dev)sesamath.net
+   * @param {Context} context
+   * @param {function} next
+   */
+  $accessControl.isSesamathClient = function (context, next) {
+    var isSesamathClient = $accessControl.isLanClient(context)
+    if (!isSesamathClient) {
+      var ipClient = getClientIp(context)
+      dns.reverse(ipClient, function (error, hostnames) {
+        if (error) {
+          log.error(error)
+          next(new Error("La recherche du reverse de " +ipClient +" a échoué"))
+        } else {
+          var isSesamath = false
+          hostnames.forEach(function (hostname) {
+            if (/^([^\.]+\.)?(dev)?sesamath.net$/.exec(hostname)) isSesamath = true
+          })
+          next(null, isSesamath);
+        }
+      })
+    } else {
+      next(null, true);
+    }
+  }
+
+  /**
    * Connecte un user (regarde s'il existe et s'il faut le mettre à jour et le met en session)
    * @param {Context}     context
    * @param {Personne}  personne
@@ -527,7 +577,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   /**
    * Connecte un user sesalab (regarde s'il existe et s'il faut le mettre à jour et le met en session)
    * @param {Context} context
-   * @param {object}  sesalabUser
+   * @param {object}  sesalabUser Le user sesalab à son format
    * @param {string}  domaine     Le domaine du sesalab concerné
    * @param {personneCallback}  next
    * @memberOf $accessControl
@@ -570,9 +620,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       if (sesalabUser.groupes) sesalabUser.groupes.forEach(function (groupe) {
         data.groupes[groupe] = true
       })
-      var personne = EntityPersonne.create(data)
-      personne.permissions = getPermissions(personne)
-      $personneRepository.update(personne, setSession)
+      //$personneRepository.loadByOrigin(data.origine, data.idOrigine, function (error, personne) {
+      //  if (error) {
+      //    next(error)
+      //  } else if (personne)
+      //})
+      data.permissions = getPermissions(data)
+      $personneRepository.update(data, setSession)
     } else {
       next(new Error("Impossible de connecter un utilisateur sesalab sans domaine et oid"))
     }
