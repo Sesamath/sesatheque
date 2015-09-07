@@ -184,7 +184,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Context} context
    */
   function optionsOk(context) {
-    context.setHeader('Access-Control-Allow-Methods', 'POST OPTIONS');
+    context.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept');
     // et on laisse le middleware CORS faire son boulot
     context.next(null, 'OK'); // ne pas renvoyer de chaîne vide sinon 404
@@ -592,7 +592,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post('liste/all', getListeAll)
   /**
    * Ajoute aux headers cors habituels le header
-   * Access-Control-Allow-Methods', 'POST OPTIONS'
+   * Access-Control-Allow-Methods', 'POST, OPTIONS'
    * @route OPTIONS /api/liste/all
    */
   controller.options('liste/all', optionsOk)

@@ -626,7 +626,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       //  } else if (personne)
       //})
       data.permissions = getPermissions(data)
-      $personneRepository.update(personne, setSession)
+      $personneRepository.update(data, setSession)
     } else {
       next(new Error("Impossible de connecter un utilisateur sesalab sans domaine et oid"))
     }
