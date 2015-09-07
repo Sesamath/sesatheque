@@ -249,7 +249,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $ressourceControl.valideRessourceFromPost(ressourcePostee, partial, this)
 
       }).seq(function (ressourceNew) {
-        // la ressource est cohérente
+        // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
         $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)

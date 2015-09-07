@@ -47,7 +47,7 @@
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) {
   var _ = require('lodash')
   var tools = require('../tools')
-  var seq = require('an-flow')
+  var flow = require('an-flow')
   var config = require('./config')
 
   /**
@@ -69,7 +69,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @private
    * @param {Context}        context
    * @param {string|Integer} oid
-   * @param {simpleCallback} next appelé sans argument si ok, sinon on affichera une erreur
+   * @param {errorCallback} next appelé sans argument si ok, sinon on affichera une erreur
    */
   function checkToken(context, oid, next) {
     var token = context.post.token
@@ -78,7 +78,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       delete context.session.tokens[token]
       next()
     } else {
-      $views.printError(context, "Jeton invalide, demande probablement déjà soumise et en cours de traitement")
+      log.debug("checkToken KO, reçu " +token +" pour l'oid " +oid +" avec en session", context.session.tokens)
+      next(new  Error("Jeton invalide, demande probablement déjà soumise et en cours de traitement"))
     }
   }
 
@@ -103,6 +104,24 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function denied404(context, id) {
     var message = "La ressource " +id +" n'existe pas ou droits insuffisants"
     $views.printError(context, message, 404)
+  }
+
+  /**
+   * Affiche un form en ajoutant un token à la ressource
+   * @private
+   * @param {Context}   context
+   * @param {Error}     error
+   * @param {Ressource} ressource
+   * @param {string}    [titre] Le titre de la page
+   */
+  function printForm(context, error, ressource, titre) {
+    if (error) log.error('une erreur au post update', error)
+    if (ressource.errors) log.debug('errors au post update', ressource.errors)
+    if (ressource.warnings) log.debug('warnings au post update avec force=' +context.post.force, ressource.warnings)
+    addToken(context, ressource)
+    var options
+    if (titre) options = {$metas : {title: 'Ajouter une ressource'}}
+    $views.printForm(context, error, ressource, options)
   }
 
   /**
@@ -232,28 +251,31 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       // envoi des valeur au form
       function termine (ressource) {
+        addToken(context, ressource)
+        if (context.get.layout === 'iframe') ressource.layout = "iframe"
         $views.printForm(context, null, ressource, options)
       }
 
       var options = {$metas: {title: 'Ajouter une ressource'}}
-      if (errorMsg) denied(context, errorMsg)
-      else {
+      if (errorMsg) {
+        denied(context, errorMsg)
+      } else {
         if (context.get.clone) {
           $ressourceRepository.load(context.get.clone, function (error, ressource) {
             if (error) {
               $views.printError(context, error)
             } else if (ressource) {
+              $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
               delete ressource.oid
               delete ressource.idOrigine
+              ressource.origine = "local"
               termine(ressource)
             } else {
               $views.printError(context, "Ressource à dupliquer inexistante ou droits insuffisants pour la lire", 404)
             }
           })
         } else {
-          var fake = {new:true, oid:0}
-          addToken(context, fake)
-          termine(fake)
+          termine({new:true, oid:0})
         }
       }
     })
@@ -265,52 +287,59 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route POST /ressource/ajouter
    */
   controller.post($routes.get('create'), function (context) {
-    context.layout = 'page'
+    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'create'
-    // réaffiche le form en cas d'erreur ou warnings
-    function rePrintForm(error, ressource) {
-      var options = {$metas: {title: 'Ajouter une ressource'}}
-      addToken(context, ressource)
-      $views.printForm(context, error, ressource, options)
-    }
+    var ressourcePosted = context.post
+    var titrePage = 'Ajouter une ressource'
 
     if (context.post.oid) {
       $views.printError(context, "Impossible d'ajouter une ressource existante")
     } else {
-      checkToken(context, 0, function () {
-        $accessControl.checkPermission('create', context, null, function (errorMsg) {
-          if (errorMsg) {
-            denied(context, errorMsg)
+      flow().seq(function () {
+        checkToken(context, 0, this)
+
+      }).seq(function () {
+        var next = this
+        $accessControl.checkPermission('create', context, ressourcePosted, function (errorMsg) {
+          if (errorMsg) denied(context, errorMsg)
+          else next()
+        })
+
+      }).seq(function () {
+        // on fixe la date de màj avant validation
+        if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date();
+        $ressourceControl.valideRessourceFromPost(context.post, false, this)
+
+      }).seq(function (ressource) {
+        ressourcePosted = ressource
+        if (!_.isEmpty(ressource.errors)) printForm(context, null, ressource, titrePage)
+        else if (!_.isEmpty(ressource.warnings) && !ressource.force) printForm(context, null, ressource, titrePage)
+        else this(null, ressource)
+
+      }).seq(function (ressource) {
+        $personneControl.checkGroupes(context, null, ressource, this)
+
+      }).seq(function (ressource) {
+        $personneControl.checkPersonnes(context, null, ressource, this)
+
+      }).seq(function (ressource) {
+        $ressourceRepository.write(ressource, function (error, ressource) {
+          // on veut gérér les erreurs ici car y'a un bug dans notre code
+          if (error || !_.isEmpty(ressource.errors)) {
+            log.error(new Error("on a une erreur au write mais pas au valide précédent"))
+            printForm(context, error, ressource, 'Ajouter une ressource')
           } else {
-            // on fixe la date de màj avant validation
-            if (!context.post.dateMiseAJour) context.post.dateMiseAJour = new Date();
-            $ressourceControl.valideRessourceFromPost(context.post, false, function (error, ressource) {
-              // valider le contenu et l'enregistrer en DB (récupérer l'action create de l'api)
-              // et rediriger vers le describe ou vers le form avec les erreurs
-              if (error || !_.isEmpty(ressource.errors)) {
-                rePrintForm(error, ressource)
-              } else if (!_.isEmpty(ressource.warnings) && !ressource.force) {
-                rePrintForm(error, ressource)
-              } else {
-                // on ajoute l'auteur si y'en avait pas, sinon on le met en contributeur
-                var userOid = $accessControl.getCurrentUserOid(context)
-                if (_.isEmpty(ressource.auteurs)) ressource.auteurs = [userOid]
-                else ressource.contributeurs.push(userOid)
-                $ressourceRepository.write(ressource, function (error, ressource) {
-                  if (error || !_.isEmpty(ressource.errors)) {
-                    // là c'est un bug dans notre code
-                    log.error(new Error("on a une erreur au write mais pas au valide précédent"))
-                    rePrintForm(error, ressource)
-                  } else {
-                    log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
-                    context.redirect($routes.getAbs('edit', ressource.oid))
-                  }
-                }) // write
-              }
-            }) // valideRessourceFromPost
+            log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
+            var url = $routes.getAbs('edit', ressource.oid)
+            if (context.layout === "iframe") url += "?layout=iframe"
+            context.redirect(url)
           }
-        }) // checkPermission
-      }) // checkToken
+        }) // write
+
+      }).catch(function (error) {
+        printForm(context, error, ressourcePosted, titrePage)
+      })
+
     }
   })
 
@@ -319,7 +348,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/modifier/:oid
    */
   controller.get($routes.get('edit', ':oid'), function (context) {
-    context.layout = 'page'
+    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
     // pas la peine de la charger si on est pas authentifié
     if ($accessControl.isAuthenticated(context)) {
@@ -329,19 +358,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           log.error(error)
           $views.printError(context, "Probleme d'accès à la base de données")
         } else if (ressource) {
-          $accessControl.checkPermission('update', context, ressource, function (errorMsg) {
-            if (errorMsg) {
-              denied(context, errorMsg)
-            } else {
-              var options = {
-                $metas: {title: 'Modifier la ressource : ' + ressource.titre}
-              }
-              options.titre = ressource.titre
-              addToken(context, ressource)
-              $views.printForm(context, error, ressource, options)
+          if ($accessControl.hasPermission('update', context, ressource)) {
+            var options = {
+              $metas: {title: 'Modifier la ressource : ' + ressource.titre}
             }
-          })
+            options.titre = ressource.titre
+            addToken(context, ressource)
+            $views.printForm(context, error, ressource, options)
+          } else {
+            // la ressource existe mais on donne pas l'info
+            denied404(context, oid)
+          }
         } else {
+          // la ressource n'existe pas mais on donne pas l'info
           denied404(context, oid)
         }
       })
@@ -355,64 +384,56 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route POST /ressource/modifier/:oid
    */
   controller.post($routes.get('edit', ':oid'), function (context) {
-    context.layout = 'page'
+    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
-
-    function rePrintForm(error, ressource) {
-      if (error) log.error('une erreur au post update', error)
-      if (ressource.errors) log.debug('errors au post update', ressource.errors)
-      if (ressource.warnings) log.debug('warnings au post update avec force=' +context.post.force, ressource.warnings)
-      addToken(context, ressource)
-      $views.printForm(context, error, ressource)
-    }
+    var titrePage = "Modifier une ressource"
+    var ressourceNew = context.post
+    var ressourceOriginale
 
     if ($accessControl.isAuthenticated(context)) {
-      checkToken(context, context.post.oid, function () {
-        // valider le contenu et l'enregistrer en DB (récupérer l'action create de l'api)
-        // et rediriger vers le describe ou vers le form avec les erreurs
-        $ressourceControl.valideRessourceFromPost(context.post, false, function (error, ressource) {
-          if (error || (ressource.errors && ressource.errors.length) || (ressource.warnings && ressource.warnings.length && context.post.force !== "forced")) {
-            rePrintForm(error, ressource)
-          } else {
-            // on vérifie déjà les auteurs / contributeurs n'ont pas été modifiés si on a pas les droits, faut la ressource avant modif
-            $ressourceRepository.load(context.post.oid, function (error, ressourceOriginale) {
-              if (error) {
-                rePrintForm(error, ressource)
-              } else {
-                seq().seq(function () {
-                  if ($accessControl.hasPermission("updateAuteurs", context, ressourceOriginale)) {
-                    $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
-                  } else {
-                    ressource.auteurs = ressourceOriginale ? ressourceOriginale.auteurs : []
-                    ressource.contributeurs = ressourceOriginale ? ressourceOriginale.contributeurs : []
-                    this()
-                  }
-                }).seq(function () {
-                  $personneControl.checkGroupes(context, ressourceOriginale, ressource, this)
-                }).seq(function () {
-                  $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
-                }).seq(function () {
-                  log.debug("fin checkGroupes & checkPersonnes")
-                  if (ressourceOriginale) _.merge(ressourceOriginale, ressource)
-                  else ressourceOriginale = ressource
-                  $ressourceRepository.write(ressource, function (error, ressourceOk) {
-                    if (error) {
-                      rePrintForm(error, ressource)
-                    } else if (ressourceOk) {
-                      var url = "/ressource/" + $routes.get('describe', ressourceOk.oid) // pas getAbs pour ne pas aller vers /public/
-                      log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
-                      context.redirect(url)
-                    } else {
-                      rePrintForm(new Error("L'écriture en base de donnée n'a pas répondu correctement"), ressource)
-                    }
-                  })
-                }).catch(function (error) {
-                  rePrintForm(error, ressource)
-                })
-              }
-            })
-          }
-        })
+      flow().seq(function () {
+        checkToken(context, ressourceNew.oid, this)
+
+      }).seq(function () {
+        $ressourceControl.valideRessourceFromPost(ressourceNew, false, this)
+
+      }).seq(function (ressourceNormee) {
+        if (!_.isEmpty(ressourceNew.errors)) {
+          printForm(context, null, ressourceNew, titrePage)
+        } else if (!_.isEmpty(ressourceNew.warnings) && ressourceNew.force !== "forced") {
+          printForm(context, null, ressourceNew, titrePage)
+        } else {
+          ressourceNew = ressourceNormee
+          // faut charger pour vérifier groupes et personnes
+          $ressourceRepository.load(ressourceNew.oid, this)
+        }
+
+      }).seq(function (ressourceBdd) {
+        if (!ressourceBdd) {
+          var error = new Error("La ressource " +ressourceNew.oid +" n'existe plus")
+          log.error(error)
+          this(error)
+        } else {
+          ressourceOriginale = ressourceBdd
+          $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, this)
+        }
+
+      }).seq(function (ressource) {
+        ressourceNew = ressource
+        $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
+
+      }).seq(function (ressource) {
+        ressourceNew = ressource
+        _.merge(ressourceOriginale, ressource)
+        $ressourceRepository.write(ressourceOriginale, this)
+
+      }).seq(function (ressource) {
+        var url = "/ressource/" + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
+        log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
+        context.redirect(url)
+
+      }).catch(function (error) {
+        printForm(context, error, ressourceNew, titrePage)
       })
     } else {
       denied(context)

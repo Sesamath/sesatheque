@@ -433,12 +433,12 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
 
     if ($accessControl.isAuthenticated(context)) {
       switch (permission) {
-        case 'createAll' : return (getCreateAllDeniedMessage(context) === '')
-        case 'create' : return (getCreateDeniedMessage(context, ressource) === '')
-        case 'delete' : return (getDeleteDeniedMessage(context, ressource) === '')
-        case 'update' : return (getUpdateDeniedMessage(context, ressource) === '')
-        case 'updateAuteurs' : return (getUpdateAuteursDeniedMessage(context, ressource) === '')
-        case 'updateGroupes' : return (getUpdateGroupesDeniedMessage(context, ressource) === '')
+        case 'createAll' : return !getCreateAllDeniedMessage(context)
+        case 'create' : return !getCreateDeniedMessage(context, ressource)
+        case 'delete' : return !getDeleteDeniedMessage(context, ressource)
+        case 'update' : return !getUpdateDeniedMessage(context, ressource)
+        case 'updateAuteurs' : return !getUpdateAuteursDeniedMessage(context, ressource)
+        case 'updateGroupes' : return !getUpdateGroupesDeniedMessage(context, ressource)
         default: return false
       }
     } else {
@@ -626,7 +626,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       //  } else if (personne)
       //})
       data.permissions = getPermissions(data)
-      $personneRepository.update(data, setSession)
+      $personneRepository.update(personne, setSession)
     } else {
       next(new Error("Impossible de connecter un utilisateur sesalab sans domaine et oid"))
     }
