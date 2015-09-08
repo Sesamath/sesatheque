@@ -76,6 +76,17 @@
         apiClient : base +'apiClient',
         display : base + 'display',
         initGlobal : base +'initGlobal',
+        // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
+        "tools/swf": base + 'vendors/sesamath/tools/swf',
+        // autres modules génériques sesamath
+        "tools/jstreeConverter" : base + 'vendors/sesamath/tools/jstreeConverter',
+        "tools/filters" : base + 'vendors/sesamath/tools/filters',
+        Arbre: base + 'vendors/sesamath/Arbre',
+        Resultat: base + 'vendors/sesamath/Resultat',
+        Ressource: base + 'vendors/sesamath/Ressource',
+        mqEditor: base + 'vendors/sesamath/mqEditor/mqEditor',
+        jsonMulti: base + 'vendors/sesamath/jsonMulti/jsonMulti',
+        multiEditor: base + 'vendors/sesamath/multiEditor/multiEditor',
         // les modules de vendors
         ckeditor: base + 'vendors/ckeditor/ckeditor',
         ckeditorJquery : base +'vendors/ckeditor/adapters/jquery',
@@ -85,21 +96,12 @@
         jquery18: base + 'vendors/jquery/jquery-1.8.3.min',
         jqueryUi: base + 'vendors/jqueryUi/1.11.1/jquery-ui.min',
         jqueryUiDialog: base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
+        jsoneditor : base + 'vendors/jsoneditor/dist/jsoneditor.min',
         jstree: base + 'vendors/jstree/dist/jstree.min',
         lodash: base + 'vendors/lodash/lodash.min',
         mathjax: base + 'vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
         mathquill: base + 'vendors/mathquill-0.9.4/mathquill.min',
-        mqEditor: base + 'vendors/sesamath/mqEditor/mqEditor',
-        multiEditor: base + 'vendors/sesamath/multiEditor/multiEditor',
-        swfobject: base + 'vendors/swfobject/swfobject.2.2',
-        // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
-        "tools/swf": base + 'vendors/sesamath/tools/swf',
-        // autres modules génériques sesamath
-        "tools/jstreeConverter" : base + 'vendors/sesamath/tools/jstreeConverter',
-        "tools/filters" : base + 'vendors/sesamath/tools/filters',
-        Resultat: base + 'vendors/sesamath/Resultat',
-        Ressource: base + 'vendors/sesamath/Ressource',
-        Arbre: base + 'vendors/sesamath/Arbre'
+        swfobject: base + 'vendors/swfobject/swfobject.2.2'
       },
       shim: {
         jquery: {
@@ -146,24 +148,39 @@
     return requireConfig;
   }
 
+  function setBase(sesathequeBase) {
+    if (!sesathequeBase) sesathequeBase = "/";
+    else if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/";
+    // on l'ajoute aussi dans le dom global pour que les modules puissent le retrouver
+    // sans avoir à le repréciser
+    if (typeof window.sesamath === "undefined") window.sesamath = {};
+    if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
+    window.sesamath.sesatheque.base = sesathequeBase;
+    require.config(getConfig(sesathequeBase));
+    // ça c'est pour savoir si on a déjà chargé initRequire ou s'il faut le faire (parce que l'on veut donner une base différente en cross domain)
+    window.sesamath.sesatheque.requireBase = sesathequeBase;
+  }
+
+  // NE PAS EFFACER ni modifier ces lignes avec CUT, ça sert à concaténer ce qui précède avec notre require.min.js)
+  // Cf scripts/jsCompil
+  // BEGIN CUT
   if (typeof require !== "undefined" && typeof define !== "undefined") {
     // conf par défaut dès l'exécution
-    require.config(getConfig());
+    var base;
+    try {
+      base = window.sesamath.sesatheque.base;
+    } catch (error) {
+      base = "/";
+    }
+    setBase(base);
     // on exporte une fonction de conf avec comme seul argument l'url de la sésathèque
     // pour que qqun d'autre puisse reconfigurer require.js avec une autre base absolue
     // pour les modules de la sésathèque (en cas de cross-domain c'est obligatoire,
     // et ça permet de continuer à utiliser son propre require sur son domaine pour ses modules)
     define(function () {
-      return function (sesathequeBase) {
-          if (!sesathequeBase) sesathequeBase = "/";
-          else if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/";
-          // on l'ajoute aussi dans le dom global pour que les modules puissent le retrouver
-          // sans avoir à le repréciser
-          if (typeof window.sesamath === "undefined") window.sesamath = {};
-          if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
-          window.sesamath.sesatheque.base = sesathequeBase;
-          require.config(getConfig(sesathequeBase));
-      };
+      return setBase;
     });
   }
+  // END CUT
+  // IF CUT setBase("/");
 })();

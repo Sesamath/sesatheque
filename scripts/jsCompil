@@ -10,7 +10,7 @@ function fin() {
 
 function usage() {
   local exitCode=${1:-0}
-  echo "Compile les js clients avec l'optimiseur requirejs"
+  echo "Compile require.js avec notre config"
   exit $exitCode
 }
 
@@ -22,4 +22,11 @@ trap fin EXIT
 cd $(dirname $0)/../
 dirApp=$PWD
 
-uglifyjs node_modules/requirejs/require.js construct/ressource/public/initRequire.js --compress --mangle > construct/static/public/vendors/requirejs/require.min.js
+tmp=/tmp/$(basename $0)
+src=node_modules/requirejs/require.js
+dst=construct/static/public/vendors/requirejs/require.min.js
+echo -n "$dst "
+# on récupère la conf sans le define de fin qui n'aime pas être concaténé tel quel
+sed -e '/BEGIN CUT/, /END CUT/ d; s@// IF CUT@@g;' construct/ressource/public/initRequire.js > $tmp
+node_modules/.bin/uglifyjs $src $tmp --compress --mangle > $dst && echo ok || echo KO
+rm -f $tmp

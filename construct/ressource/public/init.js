@@ -110,12 +110,11 @@ if (typeof window === 'undefined') {
         if (!next) next = function () {};
         // on appelle la conf de require si ça n'a pas été fait, en cross domain si on est appelé avec sesathequeBase
         // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
-        var base = options.sesathequeBase || "/";
+        var base = options.sesathequeBase || ST.base || "/";
         if (base.substr(-1) !== "/") base += "/";
-        // tant que l'init a pas été fait require va chercher en relatif à la page courante, faut donc préciser en absolu
-        var initRequireName = base +"initRequire.js";
-        if (!ST.base || (options.sesathequeBase && options.sesathequeBase !== ST.base)) {
-          // jamais appelé ou on a changé de base depuis l'appel
+        if (!ST.requireBase || ST.requireBase !== base) {
+          // l'init a pas été fait ou on veut le changer, require va chercher en relatif à la page courante si pas initialisé,
+          var initRequireName = base +"initRequire.js";
           require([initRequireName], function (initRequire) {
             initRequire(base);
             options.sesathequeBase = ST.base;
