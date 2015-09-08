@@ -1,4 +1,4 @@
 <div class="form-group" id="groupParametres">
-  Une interface graphique pour éditer le graphe arrive bientôt ;-)
   {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
+  {>edit /}
 </div>

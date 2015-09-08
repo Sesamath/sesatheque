@@ -1,9 +1,7 @@
 <div class="block edit ressource">
-  {?errors}
-    <div id="errors">
-      {#errors}<p class="error">{.}</p>{/errors}
-    </div>
-  {/errors}
+  <div id="errors">
+    {#errors}<p class="error">{.}</p>{/errors}
+  </div>
 
   <form name="editRessource" method="post" id="formRessource">
 

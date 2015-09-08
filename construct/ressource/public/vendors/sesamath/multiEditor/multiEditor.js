@@ -195,7 +195,7 @@ define(["jquery"], function () {
 
 
     /**
-     * Cache les boutons mathquill
+     * Bascule vers CkEditor
      * @memberOf mqEditor
      */
     multiEditor.toCkEditor = function (next) {
@@ -230,7 +230,7 @@ define(["jquery"], function () {
     };
 
     /**
-     * Affiche les boutons mathquill
+     * Bascule vers mathquill
      * @memberOf mqEditor
      */
     multiEditor.toMathquill = function (next) {
@@ -279,7 +279,7 @@ define(["jquery"], function () {
     };
 
     /**
-     * Cache ou affiche les boutons mathquill
+     * Bascule vers textarea
      * @memberOf mqEditor
      */
     multiEditor.toSimple = function (next) {
