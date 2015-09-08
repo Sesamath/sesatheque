@@ -120,8 +120,8 @@ try {
         }
         var urlEditGraphe = "http://j3p.";
         if (options.isDev) urlEditGraphe += "dev";
-        urlEditGraphe += "sesamath.net/editgraphes/lanceur_graphique.html?callback=j3pEditgrapheCallback";
-        urlEditGraphe = "http://j3p.local/editgraphes/lanceur_graphique.html";
+        urlEditGraphe += "sesamath.net/editgraphes/lanceur_graphique.html";
+        //urlEditGraphe = "http://j3p.local/editgraphes/lanceur_graphique.html";
         $textarea.hide();
         var egWindow = addEditGraphe(urlEditGraphe, container);
         // Un écouteur sur le message editGrapheReady que nous enverra editGraphe avec une action de callback pour charger le graphe
