@@ -140,10 +140,13 @@ try {
         $form = $("#formRessource");
 
         $form.submit(function () {
-          //return true;
-          // on envoie un message saveAndSubmit, qui renverra un message saveAndSubmit avec les paramètres
           S.log("submit demandé, on transfère à saveAndSubmit et on attend");
           egWindow.postMessage({action:"saveAndSubmit"}, "*");
+          if (!isSaveAndSubmitDone) setTimeout(function () {
+            // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
+            isSaveAndSubmitDone = true;
+            $form.submit();
+          }, 3000);
           return isSaveAndSubmitDone; // on fera le submit au retour du message
         });
         // Un écouteur sur les messages envoyés par editGraphe
