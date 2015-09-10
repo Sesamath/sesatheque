@@ -428,9 +428,28 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $ressourceRepository.write(ressourceOriginale, this)
 
       }).seq(function (ressource) {
-        var url = "/ressource/" + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
-        log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
-        context.redirect(url)
+        // si on a du closer=YYY dans l'url, on affiche une page avec de l'autoclose
+        if (context.get.closer) {
+          context.html({
+            $metas : {
+              title: "Enregistrement réussi, fermeture automatique"
+            },
+            $views : __dirname +"/views",
+            contentBloc : {
+              $view : __dirname +"/../static/views/home",
+              content : "Ressource " +ressource.oid +" enregistrée"
+            },
+            jsBloc : {
+              $view : __dirname +"/views/js",
+              jsCode : 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +context.get.closer +'"}, "*")'
+            }
+          })
+        } else {
+          // redirection normale
+          var url = "/ressource/" + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
+          log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
+          context.redirect(url)
+        }
 
       }).catch(function (error) {
         printForm(context, error, ressourceNew, titrePage)
