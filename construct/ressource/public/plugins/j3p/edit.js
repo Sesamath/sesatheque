@@ -84,14 +84,22 @@ try {
      * Met dans le textarea la string json de l'objet passé en param
      * @param {object} parametres
      */
-    function saveParametres(parametres) {
-      try {
-        var paramString = JSON.stringify(parametres, null, 2);
-        $textarea.val(paramString);
-      } catch (error) {
-        S.log.error("stringify plante avec l'objet", parametres);
-        ST.addError("Impossible de modifier les paramètres, objet malformé (" +error.toString() +")", 5);
-      }
+    function saveParametres(parametres, next) {
+      S.log("saveParametres", parametres);
+      // sans le setTimeout, le $textarea.val(paramString) ne change rien dans le html, aucune idée du pourquoi...
+      setTimeout(function () {
+        try {
+          var paramString = JSON.stringify(parametres, null, 2);
+          S.log("on met dans le textarea", paramString);
+          $textarea.val(paramString);
+          S.log("après modif le textarea contient", $textarea.val());
+          S.log("après modif le textarea", $textarea);
+        } catch (error) {
+          S.log.error("stringify plante avec l'objet", parametres);
+          ST.addError("Impossible de modifier les paramètres, objet malformé (" +error.toString() +")", 5);
+        }
+        if (next) next();
+      }, 0);
     }
 
     /**
@@ -105,7 +113,10 @@ try {
     var S = window.sesamath;
     var ST = S.sesatheque;
 
-    var $editgraphe, $textarea;
+    var $editgraphe,
+        $form,
+        isSaveAndSubmitDone = false,
+        $textarea;
 
     return {
       init: function (ressource, options) {
@@ -116,7 +127,7 @@ try {
         // le container pour l'iframe
         var container = wd.getElementById('groupParametres');
         if (!container) {
-          S.log("pas trouvé de #formRessource, on prend le parent du textarea");
+          S.log("pas trouvé de #groupParametres, on prend le parent du textarea en container");
           container = textarea.parentNode();
         }
         var urlEditGraphe = "http://j3p.";
@@ -125,16 +136,48 @@ try {
         //urlEditGraphe = "http://j3p.local/editgraphes/lanceur_graphique.html";
         $textarea.hide();
         var egWindow = addEditGraphe(urlEditGraphe, container);
-        // Un écouteur sur le message editGrapheReady que nous enverra editGraphe avec une action de callback pour charger le graphe
+        // au submit on veut récupérer le contenu d'éditgraphe
+        $form = $("#formRessource");
+
+        $form.submit(function () {
+          //return true;
+          // on envoie un message saveAndSubmit, qui renverra un message saveAndSubmit avec les paramètres
+          S.log("submit demandé, on transfère à saveAndSubmit et on attend");
+          egWindow.postMessage({action:"saveAndSubmit"}, "*");
+          return isSaveAndSubmitDone; // on fera le submit au retour du message
+        });
+        // Un écouteur sur les messages envoyés par editGraphe
         window.addEventListener("message", function (event) {
-          // on teste pas event.origin, on accepte d'être embarqué par tout le monde
-          S.log("Message reçu dans l'édition de la ressource", event);
-          if (event.data && event.data.action === "editGrapheReady") {
-            egWindow.postMessage({action:"load", ressource:ressource}, "*");
-          }
-          if (event.data && event.data.action === "saveParams") {
-            if (event.data.parametres) saveParametres(event.data.parametres);
-            else ST.addError("editgraphe envoi un message avec l'action saveParams sans fournir parametres");
+          // on teste pas event.origin, on accepte les messages de tous ceux que l'on embarque
+          if (event.data) {
+            S.log("Message reçu dans l'édition de la ressource", event);
+            if (event.data.action === "editGrapheReady") {
+              egWindow.postMessage({action: "load", ressource: ressource}, "*");
+            } else if (event.data && event.data.action === "saveParametres") {
+              if (event.data.parametres) saveParametres(event.data.parametres);
+              else ST.addError("editgraphe envoi un message avec l'action saveParametres sans fournir parametres");
+            } else if (event.data && event.data.action === "saveAndSubmit") {
+              if (event.data.parametres) {
+                //S.log("on save puis submit 2s plus tard");
+                //saveParametres(event.data.parametres, function () {
+                //  setTimeout(function () {$form.submit();}, 2000);
+                //});
+                S.log("Dans saveAndSubmit on récupère les parametres", event.data.parametres);
+                S.log("mais ils sont souvent vides, on modifie rien et on submit dans 2s");
+                w.setTimeout(function () {
+                  isSaveAndSubmitDone = true;
+                  S.log("submit en différé");
+                  $form.submit();
+                }, 2000);
+              } else {
+                ST.addError("editgraphe envoi un message avec l'action saveAndSubmit sans fournir parametres, on sauvegarde en l'état dans 2s");
+                setTimeout(function () {
+                  $form.submit();
+                }, 2000);
+              }
+            }
+          } else {
+            S.log("message reçu sans data ???", event);
           }
         });
       }
