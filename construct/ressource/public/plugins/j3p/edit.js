@@ -86,10 +86,11 @@ try {
      */
     function saveParametres(parametres) {
       try {
-        var paramString = JSON.stringify(parametres);
+        var paramString = JSON.stringify(parametres, null, 2);
         $textarea.val(paramString);
       } catch (error) {
-        ST.addError("editgraphe a renvoyé un objet malformé", 5);
+        S.log.error("stringify plante avec l'objet", parametres);
+        ST.addError("Impossible de modifier les paramètres, objet malformé (" +error.toString() +")", 5);
       }
     }
 
@@ -126,16 +127,16 @@ try {
         var egWindow = addEditGraphe(urlEditGraphe, container);
         // Un écouteur sur le message editGrapheReady que nous enverra editGraphe avec une action de callback pour charger le graphe
         window.addEventListener("message", function (event) {
-          S.log("Message reçu dans l'édition de la ressource", event);
           // on teste pas event.origin, on accepte d'être embarqué par tout le monde
+          S.log("Message reçu dans l'édition de la ressource", event);
           if (event.data && event.data.action === "editGrapheReady") {
-            if (!event.data.loadCallback) ST.addError("editgraphe n'a pas fourni de fonction pour charger le graphe");
-            else egWindow.postMessage({action:"load", ressource:ressource}, "*");
+            egWindow.postMessage({action:"load", ressource:ressource}, "*");
+          }
+          if (event.data && event.data.action === "saveParams") {
+            if (event.data.parametres) saveParametres(event.data.parametres);
+            else ST.addError("editgraphe envoi un message avec l'action saveParams sans fournir parametres");
           }
         });
-        window.j3pEditgrapheCallback = function (initEditgraphe) {
-          initEditgraphe(ressource, saveParametres);
-        };
       }
     };
   });
