@@ -92,33 +92,35 @@ body {min-width: 300px;}
   .cartouche();
   .line();
   .pas();
-  nav a {
-    .btn();
-    padding: 0.5rem 1rem;
-    margin: 0 1rem;
-    background-color: @primary-color-ligth;
-    text-align: center;
-    text-decoration: none;
-  };
-  nav a.selected, nav a:hover {
-    background-color: @primary-color-ligther;
-    color: @secondary-color-link;
+  nav {
+    z-index: 15;
+    a {
+      .btn();
+      padding: 0.5rem 1rem;
+      margin: 0 1rem;
+      background-color: @primary-color-ligth;
+      text-align: center;
+      text-decoration: none;
+    };
+    a.selected, a:hover {
+      background-color: @primary-color-ligther;
+      color: @secondary-color-link;
+    }
+    a:hover {
+      color: @secondary-color-link-hover;
+    }
+    a .fa {margin-right: 1rem;}
+    // avec une exception
+    a .fa-user {margin-right:0; margin-left: 1rem;}
   }
-  nav a:hover {
-    color: @secondary-color-link-hover;
-  }
-  nav a .fa {margin-right: 1rem;}
-  // avec une exception
-  nav a .fa-user {margin-right:0; margin-left: 1rem;}
 }
 #auth {
   ul {
     display: none;
     position: absolute; // pour qu'il n'agrandisse pas le header quand il s'ouvre
-    z-index: 10;
-    top: 0;
+    top: 3rem; // pour démarrer à ras des boutons
     right: 0;
-    padding-top: 5rem;
+    padding-top: 2rem;
     list-style: none;
     div {
       padding: 0.2rem;

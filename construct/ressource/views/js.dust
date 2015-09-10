@@ -3,6 +3,6 @@
 {/jsFiles}
 {?jsCode}
 <script type="application/javascript" >
-{jsCode}
+{jsCode|s}
 </script>
 {/jsCode}
