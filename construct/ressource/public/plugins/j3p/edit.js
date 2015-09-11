@@ -116,6 +116,7 @@ try {
     var $editgraphe,
         $form,
         isSaveAndSubmitDone = false,
+        isSubmitForced = false,
         $textarea;
 
     return {
@@ -141,13 +142,16 @@ try {
 
         $form.submit(function () {
           S.log("submit demandé, on transfère à saveAndSubmit et on attend");
-          egWindow.postMessage({action:"saveAndSubmit"}, "*");
-          if (!isSaveAndSubmitDone) setTimeout(function () {
-            // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
+          if (!isSaveAndSubmitDone) {
+            egWindow.postMessage({action:"saveAndSubmit"}, "*");
             isSaveAndSubmitDone = true;
-            $form.submit();
-          }, 3000);
-          return isSaveAndSubmitDone; // on fera le submit au retour du message
+            setTimeout(function () {
+              // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
+              isSubmitForced = true;
+              $form.submit();
+            }, 3000);
+          }
+          return isSubmitForced || isSaveAndSubmitDone; // on fera le submit au retour du message
         });
         // Un écouteur sur les messages envoyés par editGraphe
         window.addEventListener("message", function (event) {
@@ -161,21 +165,24 @@ try {
               else ST.addError("editgraphe envoi un message avec l'action saveParametres sans fournir parametres");
             } else if (event.data && event.data.action === "saveAndSubmit") {
               if (event.data.parametres) {
-                //S.log("on save puis submit 2s plus tard");
-                //saveParametres(event.data.parametres, function () {
-                //  setTimeout(function () {$form.submit();}, 2000);
-                //});
                 S.log("Dans saveAndSubmit on récupère les parametres", event.data.parametres);
-                S.log("mais ils sont souvent vides, on modifie rien et on submit dans 2s");
-                w.setTimeout(function () {
-                  isSaveAndSubmitDone = true;
-                  S.log("submit en différé");
-                  $form.submit();
-                }, 2000);
+                saveParametres(event.data.parametres, function () {
+                  if (!isSubmitForced) {
+                    isSubmitForced = true;
+                    $form.submit();
+                  } else {
+                    S.log("submit déjà fait en timeout");
+                  }
+                });
               } else {
                 ST.addError("editgraphe envoi un message avec l'action saveAndSubmit sans fournir parametres, on sauvegarde en l'état dans 2s");
                 setTimeout(function () {
-                  $form.submit();
+                  if (!isSubmitForced) {
+                    isSubmitForced = true;
+                    $form.submit();
+                  } else {
+                    S.log("submit déjà fait en timeout");
+                  }
                 }, 2000);
               }
             }

@@ -61,6 +61,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (!context.session.tokens) context.session.tokens = {}
     context.session.tokens[token] = ressource.oid
     ressource.token = token
+    log.debug("on ajoute le token " +token +" en session", context.session.tokens);
   }
 
   /**
@@ -452,6 +453,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         }
 
       }).catch(function (error) {
+        log.debug("erreur au post", error)
+        log.debug("avec la ressource", ressourceNew)
         printForm(context, error, ressourceNew, titrePage)
       })
     } else {

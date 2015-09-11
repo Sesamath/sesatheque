@@ -818,6 +818,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   $views.printForm = function (context, error, ressource, options) {
     var data = $views.getDefaultData('formEdit')
+    if (ressource.token && context.session.tokens && !context.session.tokens[ressource.token])
+      log.error("dans printForm on a le token " +ressource.token +" avec en session", context.session.tokens)
     if (context.layout === 'page' && ressource) context.ressource = ressource
     // les datas pour le form
     getFormViewData(context, error, ressource, function (formData) {

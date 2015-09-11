@@ -29,13 +29,14 @@
  * pour une explication en français)
  */
 // jsoneditor a une dépendance à jquery
-define(["jQuery"], function ($) {
+define(["jquery"], function ($) {
   'use strict';
   /*global alert*/
 
   /**
    * Ajoute les liens pour changer d'éditeur
    * @private
+   * @param {object} config avec les propriétés facultatives optionsName (pour mettre des boutons radio au lieu de liens) et editor (pour cocher l'actuel)
    */
   function addLinks(config) {
     /**
@@ -47,7 +48,7 @@ define(["jQuery"], function ($) {
      */
     function addLink(container, editorName) {
       var elt;
-      var args = {onclick:function () {setCurrent(editorName);}};
+      var args = {onclick:function () {setEditor(editorName);}};
       if (config.optionsName) {
         var id = editorName +"Option";
         args.id = id;
@@ -73,21 +74,12 @@ define(["jQuery"], function ($) {
     var first = true;
     for (var editorName in editors) {
       if (editors.hasOwnProperty(editorName)) {
-        addLink(divChoices, editorName);
         if (first) first = false;
         else S.addText(divChoices, " - ");
+        addLink(divChoices, editorName);
       }
     }
     $textarea.before(divChoices);
-  }
-
-  /**
-   * Callback d'erreur par défaut (pour l'afficher sur la page si aucune callback n'a été fournie)
-   * @private
-   * @param error
-   */
-  function errorCallbackDefault(error) {
-    if (error) ST.addError(error);
   }
 
   /**
@@ -101,14 +93,15 @@ define(["jQuery"], function ($) {
         isJseLoaded = false; // en cours
         require(["jsoneditor"], function (JSONEditor) {
           if (!JSONEditor) throw new Error('Problème de chargement de jsoneditor');
-          jsonEditor = new JSONEditor(jsonEditorId);
+          S.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css');
+          jsonEditor = new JSONEditor(jsonEditorDiv);
           isJseLoaded = true;
           next();
         }, function () {
           throw new Error('Problème de chargement de jsoneditor');
         });
       } else if (isJseLoaded === false) {
-        alert("Le chargement de jsoneditor est en cours")
+        alert("Le chargement de jsoneditor est déjà en cours");
       } else {
         // init déjà fait
         next();
@@ -119,53 +112,11 @@ define(["jQuery"], function ($) {
   } // initJsonEditor
 
   /**
-   * Change l'éditeur courant (affecte la variable current, modifie le highligth des liens
-   * et appelle la callback éventuelle de modif de l'éditeur)
+   * Renvoie true si la chaine est du json valide
    * @private
-   * @param editorName
+   * @param {string} json
+   * @returns {boolean}
    */
-  function setCurrent(editorName) {
-    // réalise la bascule visuelle
-    function toggle() {
-      if (editors[editorName].jqLink) {
-        // css sur les liens
-        editors[current].jqLink.css("background-color", "");
-        editors[editorName].jqLink.css("background-color", "");
-      } // sinon on a pas initialisé les liens donc rien à faire
-      editors[current].jq.hide();
-      editors[editorName].jq.show();
-      if (changeCallback) changeCallback(editorName);
-      current = editorName;
-      S.log("On est passé à l'éditeur " + current);
-    }
-
-    try {
-      if (editorName !== current) {
-        if (current === "simple") {
-          var json = $textarea.val();
-          if (isJsonValide(json)) {
-            editors[editorName].setJson(json);
-            toggle();
-          } else {
-            throw new Error("Le json est invalide");
-          }
-        } else {
-          setSimple(function (error, json) {
-            if (error) throw error;
-            else {
-              editors[editorName].setJson(json);
-              toggle();
-            }
-          });
-        }
-      } else if (console && console.error) {
-        console.error(new Error("On était déjà sur l'éditeur " +editorName));
-      }
-    } catch (error) {
-      ST.addError(error.toString(), 5);
-    }
-  }
-  
   function isJsonValide(json) {
     var retour = false;
     try {
@@ -174,44 +125,80 @@ define(["jQuery"], function ($) {
     } catch (error) {
       S.log("json invalide", json);
     }
-    
+
     return retour;
   }
 
   /**
-   * Récupère le json de l'éditeur courant, s'il est valide l'affecte dans le textarea et appelle next avec l'objet,
-   * sinon affiche une erreur
+   * Change l'éditeur courant (affecte la variable current, modifie le highligth des liens
+   * et appelle la callback éventuelle de modif de l'éditeur)
    * @private
-   * @param next
+   * @param editorName
+   */
+  function setEditor(editorName) {
+    // réalise la bascule visuelle
+    function toggle() {
+      if (editors[editorName].jqLink) {
+        // css sur les liens
+        editors[current].jqLink.css("background-color", "");
+        editors[editorName].jqLink.css("background-color", "#fe7");
+      } // sinon on a pas initialisé les liens donc rien à faire
+      editors[current].jq.hide();
+      editors[editorName].jq.show();
+    }
+    // affecte le nouveau avec du json valide
+    function setNew(obj) {
+      editors[editorName].set(obj);
+      toggle();
+      current = editorName;
+      if (changeCallback) changeCallback(editorName);
+      S.log("On est passé à l'éditeur " +editorName);
+    }
+
+    try {
+      if (!editors[editorName]) throw new Error("éditeur " +editorName +" non géré");
+      if (editorName !== current) {
+        if (current === "simple") {
+          var json = $textarea.val();
+          if (isJsonValide(json)) setNew(json);
+          else throw new Error("Le json est invalide");
+        } else {
+          setSimple(setNew);
+        }
+      } else {
+        S.log.error(new Error("On était déjà sur l'éditeur " +editorName));
+      }
+    } catch (error) {
+      ST.addError(error.toString(), 5);
+    }
+  } // setEditor
+
+  /**
+   * Récupère le json de l'éditeur courant, s'il est valide l'affecte dans le textarea indenté
+   * et appelle next avec l'objet, sinon affiche une erreur
+   * @private
+   * @param {function} next sera appelé avec l'objet correspondant au json mis dans le textarea s'il était valide
    */
   function setSimple(next) {
-    if (current !== "simple") {
-      editors[current].getJson(function (jsonString) {
-        // on teste que c'est du json valide en récupérant l'objet au passage
-        try {
-          var obj = JSON.parse(jsonString);
-          // et on l'affecte indenté
-          $textarea.val(JSON.stringify(obj, null, 2));
-          next(obj);
-        } catch (error) {
-          ST.addError("Le json est invalide", 3000);
-        }
-      });
-    }
+    editors[current].getJson(function (jsonString) {
+      // on teste que c'est du json valide en récupérant l'objet au passage
+      try {
+        var obj = JSON.parse(jsonString);
+        // et on l'affecte indenté
+        $textarea.val(JSON.stringify(obj, null, 2));
+        next(obj);
+      } catch (error) {
+        ST.addError("Le json est invalide " +jsonString, 3000);
+        S.log.error(error);
+      }
+    });
   }
 
   /**
    * Charge jsonEditor si ça n'a jamais été fait et l'initialise avec l'objet de l'éditeur courant
    * (ou affiche une erreur)
    */
-  function setJsonEditor() {
-    setSimple(function (obj) {
-      initJsonEditor(function (error) {
-        if (error) ST.addError(error.toString(), 5);
-        else jsonEditor.set(obj);
-      });
-    });
-  }
+
 
   try {
     var w = window;
@@ -221,8 +208,7 @@ define(["jQuery"], function ($) {
     var ST = S.sesatheque;
     
     var isInitDone = false;
-    var isJseLoaded = false;
-    var jsonEditorId = "jsonEditor";
+    var isJseLoaded;
 
     /**
      * Service pour insérer jsoneditor et basculer avec un textarea classique
@@ -231,37 +217,50 @@ define(["jQuery"], function ($) {
     var jsonMulti = {};
 
     // objets globaux à ce module
-    var basePath, changeCallback, current, jsonEditor, $textarea;
+    var basePath, changeCallback, current, jsonEditor, jsonEditorDiv, $textarea;
 
     var editors = {
       simple : {
         label : "simple",
-        getJson:function (next) { next($textarea.val()); },
-        go: function () {setCurrent("simple");}
+        getJson:function (next) {
+          next($textarea.val());
+        }
+        // set inutile, initialisé au chargement puis affecté par setSimple
       },
       jsoneditor : {
         label : "avancé",
         getJson:function (next) {
           if (jsonEditor) {
-            next(jsonEditor.get());
+            var obj = jsonEditor.get();
+            S.log("On récupère l'objet", obj);
+            var json = JSON.stringify(obj);
+            next(json);
           } else {
             ST.addError("jsonEditor n'est pas encore initialisé", 5);
           }
         },
-        setJson: setJsonEditor
+        set: function (obj) {
+          initJsonEditor(function (error) {
+            if (error) ST.addError(error.toString(), 5);
+            else if (jsonEditor) jsonEditor.set(obj);
+            else ST.addError("jsonEditor n'a pas été correctement initialisé mais l'initialisation n'a pas renvoyé d'erreur");
+          });
+        }
       }
     };
 
     /**
-     * Initialise MathQuill en créant un div juste avant textarea qu'il cache
+     * Initialise jsonMulti (ajoute les liens / radio pour changer d'éditeur et les comportements)
      * @memberOf jsonMulti
      * @param {Element}        textarea  Un textarea vers lequel mettre le code LaTeX à la fermeture (on le cachera)
      * @param {object}         config    Objet avec les propriétés (facultatives entre crochets
      *                                   - changeCallback : sera appelé avec le nom du nouvel éditeur à chaque changement
+     *                                   - editorIni : le nom de l'éditeur à afficher au load
      *                                   - editorsSup : un tableau d'objets {
      *                                       container : le div qui sera masqué / affiché lors des changements
      *                                       get:fonction appelée avec une callback à laquelle il faudra fournir le contenu à mettre dans le textarea
      *                                       label:texte affiché pour le lien de bascule,
+     *                                       name : le nom de l'éditeur (sera la valeur du bouton radio)
      *                                       set:callback pour lancer l'éditeur, appelée avec la string json (valide)
      *                                     }
      *                                   - optionsName : un nom pour mettre des boutons radio à la place des liens simples (pour insérer le choix dans le form)
@@ -269,6 +268,7 @@ define(["jQuery"], function ($) {
      * @param {errorCallback}  [next]
      */
     jsonMulti.init = function (textarea, config, options, next) {
+      S.log("jsonMulti.init avec config et options", config, options);
       try {
         $(function () {
           if (!textarea) throw new Error("Il faut fournir un textarea pour jsonMulti");
@@ -277,22 +277,35 @@ define(["jQuery"], function ($) {
           if (textarea.nodeName !== "TEXTAREA") throw new Error("Il faut fournir un textarea pour jsonMulti");
           $textarea = $(textarea);
           editors.simple.jq = $textarea;
+          if (!config) config = {};
           // on ajoute les boutons
           addLinks(config);
+          current = "simple";
+          if (editors.simple.jqLink) editors.simple.jqLink.css("background-color", "#fe7");
           // on affecte ça si ça existe
           if (config.changeCallback) changeCallback = options.changeCallback;
-          // on crée un div pour jsonEditor
-          var jsonDiv = S.getElement("div", {id:jsonEditorId});
-          $textarea.before(jsonDiv);
-          if (options && options.optionsName === "jsoneditor") {
-            initJsonEditor(function () {
-              setCurrent('jsoneditor');
-              isInitDone = true;
-            });
-          } else {
-            isInitDone = true;
+          if (config.editorsSup) {
+            try {
+              config.editorsSup.forEach(function (editor) {
+                if (!editor.name) throw new Error("editeur sup sans name");
+                var editorName = editor.name;
+                delete editor.name;
+                if (!editor.container) throw new Error("editeur sup sans container");
+                editor.jq = $(editor.container);
+                delete editor.container;
+                editors[editorName] = editor;
+              });
+              S.log("on a ajouté les éditeurs sup pour arriver à", editors);
+            } catch (error) {
+              S.log.error("La config passée a une propriété editorsSup invalide", error);
+            }
           }
-
+          // on crée un div pour jsonEditor
+          jsonEditorDiv = S.getElement("div", {id:"jsonEditor"});
+          $textarea.before(jsonEditorDiv);
+          editors.jsoneditor.jq = $(jsonEditorDiv);
+          if (options && options.editorIni) setEditor(options.editorIni);
+          isInitDone = true;
           if (next) next();
         });
       } catch (error) {
