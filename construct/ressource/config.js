@@ -52,6 +52,7 @@ var ressourceConfig = {
     },
     // les typeTechnique qui peuvent être utilisés pour une ressource perso
     typePerso : {
+      'j3p'   : true,
       'url'   : true
     },
     niveaux          : {
