@@ -199,16 +199,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function postRessource(context) {
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
+    var ressourcePostee = context.post
+    var ressourceOriginale
+
     if (context.perf) {
       var msg = 'start-'
       if (ressourcePostee.origine && ressourcePostee.idOrigine) msg += ressourcePostee.origine +'/' +ressourcePostee.idOrigine
       else msg += ressourcePostee.oid
       log.perf(context.response, msg)
     }
-    log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max:1000})
 
-    var ressourcePostee = context.post
-    var ressourceOriginale
+    log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max:1000})
 
     if ($accessControl.isAuthenticated(context) || $accessControl.hasAllRights(context)) {
       flow().seq(function () {

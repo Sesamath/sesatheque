@@ -166,7 +166,9 @@ var ressourceConfig = {
     'ec2'   : [7],
     'em'    : [7],
     'mental': [7],
-    'serie' : [8]
+    'serie' : [8],
+    'series' : [8],
+    'sequence' : [8]
   },
 
   /**
