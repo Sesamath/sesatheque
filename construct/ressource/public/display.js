@@ -79,7 +79,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           var modules = [name];
           // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct
           var traiteResultat = options.urlResultatCallback || options.resultatCallback;
-          if (!traiteResultat && options.resultatCallback) traiteResultat = options.resultatCallback;
+          // un cas particulier, le prof qui teste, on fourni une callback qui fait rien,
+          // pour éviter des avertissements sur les ressources qui attendent une callback
+          if (traiteResultat === "none") traiteResultat = function () {};
           if (traiteResultat) modules.push('Resultat');
 
           require(modules, function (plugin, Resultat) {
