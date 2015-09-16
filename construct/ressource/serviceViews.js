@@ -524,21 +524,28 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         formData.idOrigine.readonly = true;
         // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
         formData.$view = __dirname +'/views/formEdit'
+
       } else {
-        formData.$view = __dirname +'/views/formCreate'
-        if (!$accessControl.hasPermission("createAll", context)) {
-          // faut restreindre typeTechnique
-          var ttChoices = []
-          formData.typeTechnique.choices.forEach(function (choice) {
-            if (config.listes.typePerso[choice.value]) ttChoices.push(choice)
-          })
-          formData.typeTechnique.choices = ttChoices
-          // et imposer origine local
-          formData.origine.value = "local"
-          formData.origine.hidden = true
-          formData.idOrigine.hidden = true
-          // publié par défaut
-          formData.publie.choices[0].selected = true
+        if (ressource.search) {
+          // inutile, getDefaultData l'a initialisé
+          //formData.$view = __dirname +'/views/formSearch'
+          delete ressource.search
+        } else {
+          formData.$view = __dirname +'/views/formCreate'
+          if (!$accessControl.hasPermission("createAll", context)) {
+            // faut restreindre typeTechnique
+            var ttChoices = []
+            formData.typeTechnique.choices.forEach(function (choice) {
+              if (config.listes.typePerso[choice.value]) ttChoices.push(choice)
+            })
+            formData.typeTechnique.choices = ttChoices
+            // et imposer origine local
+            formData.origine.value = "local"
+            formData.origine.hidden = true
+            formData.idOrigine.hidden = true
+            // publié par défaut
+            formData.publie.choices[0].selected = true
+          }
         }
       }
 
@@ -851,6 +858,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     }
     // les datas pour le form
     var fakeRessource = EntityRessource.create(context.get)
+    // on ajoute un flag pour getFormViewData (oui c'est crade)
+    fakeRessource.search = true
     //log.debug("ressource d'après get", fakeRessource)
     getFormViewData(context, null, fakeRessource, function (formData) {
       tools.complete(data.contentBloc, formData)
