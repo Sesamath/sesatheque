@@ -49,6 +49,7 @@ var config = require('../config')
 
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname +'/..')
+// sesalab-admin après mise en global de l'appli
 
 /* attention, ici GLOBAL.lassi existe mais pas toujours lassi !!!
 if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
@@ -118,6 +119,8 @@ if (privateConfig.extraDependenciesLast) {
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
 var sesatheque = lassi.component('sesatheque', dependancies)
+GLOBAL.app = sesatheque // pour sesalab-admin
+require('./sesalab-admin');
 
 sesatheque.config(function($cache, $settings) {
   // on ajoute memcache si précisé dans les settings

@@ -1,0 +1,30 @@
+.an-progress {
+  $height: 20px;
+  position: relative;
+  height: 20px;
+  width: 300px;
+  border-radius: 4px;
+  background:#E0E0E0;
+  box-shadow:inset 0px 2px 3px black(0.05);
+    border: 1px solid black(0.2);
+  .progress-message {
+    @include fill-all;
+    line-height: $height;
+    text-align: center;
+    z-index: 1;
+    color: #474747;
+    text-shadow: 1px 1px white(0.3);
+  }
+  .progress-progress {
+    @include fill-all;
+    left: 1px; right: 1px; top: 1px; bottom: 1px;
+    background-color:#ac0;
+    border-radius: 4px;
+    background-image:
+      linear-gradient(45deg,
+      white(.2) 25%, transparent 25%, transparent 50%,
+      white(.2) 50%, white(.2) 75%, transparent 75%, transparent);
+    box-shadow:inset 0px 2px 8px white(.5);
+    border: 1px solid black(0.1);
+  }
+}

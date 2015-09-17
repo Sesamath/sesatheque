@@ -1,0 +1,108 @@
+.an-popover {
+  $border-color: black(0.3);
+  pointer-events: auto;
+  position: absolute;
+  width: 300px;
+  top:100px;
+  z-index:100;
+  box-shadow: 0 0 10px black(0.4);
+  border: 1px solid $border-color;
+  border-radius: 2px;
+  background-color: white;
+  transition: opacity 0.2s ease;
+  padding: 5px;
+  display: none;
+  &.visible {
+    display: block;
+  }
+  .content {
+    .menu {
+      .menu-item {
+        padding: 10px 0;
+      }
+    }
+  }
+  .buttons {
+    position: absolute;
+    left: 0;
+    right:0;
+    bottom: 0;
+    margin: 10px 0 0 0;
+    padding: 8px;
+    min-height: 52px;
+    height: 52px;
+    display: flex;
+    justify-content: flex-end;
+    .button {
+      $height: 36px;
+      border-radius: 0;
+      box-shadow: none;
+      display: inline-block;
+      flex: initial;
+      &:after { display: none; }
+      height: $height;
+      min-height: $height;
+      line-height: $height;
+      margin: 0 0 0 8px;
+      padding: 0 8px;
+      border: none;
+      &:last-child { border: none; }
+      background: none;
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: #4083F3;
+      span {
+        display: block;
+        transition: all 0.5s ease;
+      }
+      &.activated {
+        color: #852C85;
+        span {
+          transform: scale(1.25);
+        }
+        box-shadow: none;
+      }
+    }
+  }
+
+  .triangle {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top:-18px;
+    left: 20px;
+    z-index:-5;
+    clip: rect(0, 30px, 18px, 0px);
+    &:after {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      top:10px;
+      left: 8px;
+      background-color: white;
+      box-shadow: 0 0 10px black(0.4);
+      border: 1px solid black(0.4);
+      transform: rotate(45deg);
+      content: '';
+      display: block;
+    }
+  }
+
+  .menu-items {
+    li {
+      a {
+        font-size: 15px;
+        display: block;
+        padding: 6px 15px;
+        margin: 0 -6px;
+        border-bottom: 1px solid black(0.1);
+        position: relative;
+      }
+      &.last a {
+        border: none;
+      }
+    }
+  }
+
+}

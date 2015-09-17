@@ -1,0 +1,21 @@
+<div id="menu-container">
+  <div id="menu-content">
+    <ui-view name="content" id="{{stateId}}"></ui-view>
+  </div>
+  <div id="sidebar">
+    <div id="logo">
+      <a href="/" class="logo"><span>Sésalab</span></a>
+    </div>
+    <ul id="menu">
+      <li ng-class="{open: isOpenMenu(item)}"  ng-repeat="item in menu.items">
+        <a ng-click="openMenu(item)">{{item.label}}</a>
+        <ul ng-if="isOpenMenu(item)">
+          <li ng-repeat="subItem in item.items" ng-class="{active: isItemActive(subItem.state)}">
+            <a ng-if="!subItem.href" ui-sref="{{subItem.state}}">{{subItem.label}}</a>
+            <a ng-if="subItem.href" href="{{subItem.href}}">{{subItem.label}}</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </ul>
+</div>

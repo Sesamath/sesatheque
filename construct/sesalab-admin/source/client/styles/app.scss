@@ -1,0 +1,67 @@
+@import '_reset';
+@import '_mixins';
+@import '_gm';
+@import '_styles';
+* {
+  font-family: 'Roboto';
+}
+html {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+}
+body {
+
+  table {
+    border-collapse:collapse;
+    th {
+      padding: 5px 10px;
+      font-weight: bold;
+      border-bottom: 1px solid #9E9E9E;
+    }
+    td {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-bottom: 1px solid #CFCFCF;
+      a {
+        @include gmLinkButton();
+        font-size: 14px;
+        height: 20px; line-height: 20px; max-height: 20px;min-height: 20px;
+      }
+    }
+  }
+
+  &.translations {
+    form {
+      table {
+        width: 100%;
+        td { padding: 0}
+        td.label {
+          width: 100px;
+          padding: 5px;
+        }
+        textarea {
+          padding: 5px;
+          width: 100%;
+          border: 0;
+          resize: none;
+        }
+      }
+      footer {
+        background-color: rgba(black,0.9);
+        box-shadow: 0 0 10px rgba(black,0.8);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        text-align: center;
+          display: block;
+          padding: 10px;
+        input {
+          display: inline-block;
+        }
+      }
+    }
+  }
+
+}

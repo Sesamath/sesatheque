@@ -1,0 +1,22 @@
+<div class="entity-field">
+  <label>Entité</label>
+  <select ng-model="query.entity" ng-options="entity.name for entity in entities">
+  </select>
+</div>
+<div class="query">
+  <div class="query-part" ng-repeat="field in query.fields">
+    <select ng-change="doSelectFieldIndex(field)" ng-model="field.index" ng-options="index.name for index in query.entity.indexes">
+    </select>
+    <select ng-model="field.operator" ng-options="operator.name for operator in
+      operators | filter:filterOperators(field)">
+    </select>
+    <input type="text" ng-if="field.index.type!=='date'" ng-model="field.value">
+    <an-date-picker ng-if="field.index.type==='date'" ng-model="field.date"></an-date-picker>
+  </div>
+</div>
+<a ng-click="doAddField()" class="button button-small button-energized">Ajouter un champ</a>
+<a ng-click="doExecute()" class="button button-small button-energized">Lancer</a>
+
+<div class="nb-resultats">{{nbResults}} résultats</div>
+<div id="query-result">
+</div>

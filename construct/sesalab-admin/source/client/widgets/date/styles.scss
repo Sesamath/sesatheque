@@ -1,0 +1,84 @@
+$active-color : #DDB2D4;
+$selected-color : #9F027F;
+.an-picker {
+  display: inline-block;
+  .value {
+    font-size: 16px;
+    color: #2D2D2D;
+    cursor: pointer;
+    &.activated {
+      color: $active-color;
+    }
+  }
+}
+
+.an-popover {
+  table {
+    width: 100%;
+    td {
+      font-size: 16px;
+      line-height: 30px;
+      text-align: center;
+      padding: 0;
+      cursor: pointer;
+      &.active,&.activated {
+        background-color: $active-color;
+        color: #1E1E1E;
+        border-radius: 1px;
+      }
+    }
+
+    &.an-date-picker {
+      caption {
+        padding: 5px 0;
+        span {
+          font-size: 18px;
+          line-height: 30px;
+          position: relative;
+          top: -5px;
+        }
+        i {
+          color: #929292;
+          &.activated {
+            color: #B3007D;
+          }
+          display: inline-block;
+          width: 30px;
+          height: 30px;
+          &:before {
+            font-size: 25px;
+          }
+        }
+      }
+      td {
+        &.disabled {
+          color: #6F6F6F;
+        }
+        &.now {
+          color: $active-color;
+        }
+        &.weekend {
+          background-color: #F4F4F4;
+        }
+        &.active {
+          background-color: $active-color;
+          color: white;
+        }
+      }
+      th {
+        font-weight: bold;
+        border-bottom: 1px solid #BDBDBD;
+      }
+    }
+  }
+  .an-time-picker {
+    .hours {
+    }
+    .minutes {
+      border-top: 1px solid #CDCDCD;
+      padding: 5px 0 0 0;
+      margin: 5px 0 0 0;
+    }
+  }
+}
+

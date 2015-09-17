@@ -1,0 +1,250 @@
+$light     : #fff !default;
+$stable    : #f8f8f8 !default;
+$positive  : #82ACF3 !default;
+$calm      : #85DCD8 !default;
+$balanced  : #A7CC68 !default;
+$energized : #FFB400 !default;
+$assertive : #CB5B5E !default;
+$royal     : #B5A2F1 !default;
+$dark      : #444 !default;
+$gm-input-placeholder-color : #969696;
+$gm-input-border-color : #C8C8C8;
+$gm-input-color : #353535;
+$gm-input-focus : #228ADE;
+
+@mixin gmLinkButton() {
+  cursor: pointer;
+  $height: 36px;
+  border-radius: 0;
+  box-shadow: none;
+  display: inline-block;
+  flex: initial;
+  &:after { display: none; }
+  height: $height;
+  min-height: $height;
+  line-height: $height;
+  margin: 0 0 0 8px;
+  padding: 0 8px;
+  border: none;
+  &:last-child { border: none; }
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #4083F3;
+  span {
+    display: block;
+    transition: all 0.5s ease;
+  }
+  &.activated,&:hover {
+    color: #852C85;
+    span {
+      transform: scale(1.25);
+    }
+    box-shadow: none;
+  }
+}
+
+@mixin gmIconButton() {
+  font-size: 30px;
+  color: #4083F3;
+  cursor: pointer;
+  &.activated,&:hover {
+    color: #852C85;
+    span {
+      transform: scale(1.25);
+    }
+    box-shadow: none;
+  }
+}
+
+@mixin gmButton($bg: red, $fg: blue) {
+  text-transform: uppercase;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0 32px;
+  line-height: 40px;
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: 0 2px 5px 0 black(0.36);
+  margin: 0 8px 8px 8px;
+  border-radius: 3px;
+  letter-spacing: .01em;
+  transition: box-shadow .4s ease;
+  text-decoration: none;
+
+    border: 1px solid black(0.15);
+    border-top: 1px solid black(0.06);
+    background-color: $bg;
+    color: $fg;
+  &.button-stable     { background-color: $stable    ; color: white; }
+  &.button-positive   { background-color: $positive  ; color: white; }
+  &.button-calm       { background-color: $calm      ; color: #3D3D3D; }
+  &.button-balanced   { background-color: $balanced  ; color: #3D3D3D; }
+  &.button-energized  {
+    background-color: $energized;
+    color: #313131;
+  }
+  &.button-assertive  { background-color: $assertive ; color: white; }
+  &.button-royal      { background-color: $royal     ; color: white; }
+  &.button-dark       { background-color: $dark      ; color: white; }
+
+  &.button-small {
+    line-height: 25px;
+    height: 25px;
+    max-height: 25px;
+    font-size: 12px;
+  }
+
+  &:hover {
+    text-decoration: none;
+  }
+  &:active {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+  }
+}
+
+@mixin gmSelect {
+  background:transparent;
+  box-shadow: none;
+  font-size: 14px;
+  line-height: 16px;
+  padding: 0 0 8px 0;
+  border: none;
+  border-bottom : 1px solid $gm-input-border-color;
+  /*transition: border-color 1s ease;*/
+  color: #353535;
+  &:focus {
+    border-bottom: 2px solid $gm-input-focus;
+    padding-bottom: 7px;
+    transition: border-color 1s ease;
+  }
+}
+
+@mixin gmInput {
+  background    : transparent;
+  border-radius: 0;
+  box-shadow    : none;
+  font-size     : 16px;
+  line-height   : 16px;
+  height: 24px;
+  padding       : 0 0 3px 0;
+  border        : none;
+  border-bottom : 1px solid $gm-input-border-color;
+  /*transition    : border-color 1s ease;*/
+  color         : $gm-input-color;
+
+  &::placeholder {
+    color: $gm-input-placeholder-color;
+    font-size: 14px;
+  }
+  &:focus {
+    border-bottom: 2px solid $gm-input-focus;
+    padding-bottom: 2px;
+    /*transition: border-color 1s ease;*/
+  }
+}
+
+@mixin gmTextArea {
+  background    : #F9F9F9;
+  box-shadow    : none;
+  font-size     : 14px;
+  line-height   : 20px;
+  padding       : 4px 4px;
+  border        : none;
+  border-bottom : 1px solid $gm-input-border-color;
+  border-radius : 0;
+  /*transition    : border-color 1s ease;*/
+  color         : $gm-input-color;
+
+  &::placeholder {
+    color: $gm-input-placeholder-color;
+    font-size: 14px;
+  }
+  &:focus {
+    border-bottom: 2px solid $gm-input-focus;
+    padding-bottom: 3px;
+    transition: border-color 1s ease;
+  }
+}
+
+
+@mixin gmFormItem {
+  margin: 16px 0;
+  padding: 16px 0 0 8px;
+  label {
+    font-size   : 12px;
+    color       : #565656;
+    display     : block;
+    margin      : 0 0 8px 0;
+    font-weight : 400;
+  }
+
+  input { @include gmInput };
+  select { @include gmSelect };
+  textarea { @include gmTextArea };
+
+
+  &.focus {
+    label {
+      color: $gm-input-focus;
+    }
+  }
+
+  &.error {
+    $error-color : #DE3226;
+    select, input, textarea {
+      border-bottom: 2px solid $error-color;
+      padding-bottom: 7px;
+      /*transition: border-color 1s ease;*/
+    }
+    .error-message {
+      padding: 4px 0;
+      display: block;
+      color: $error-color;
+    }
+  }
+}
+
+@mixin gmTable {
+  width: 100%;
+  thead {
+    tr {
+      th {
+        line-height: 56px;
+        font-weight: 500;
+        color: #454545;
+        text-align: left;
+        white-space: nowrap;
+        padding: 0 8px;
+        &:first-child {
+          padding-left: 20px;
+          border-left: none;
+        }
+      }
+      border-bottom: 1px solid #C1C1C1;
+    }
+  }
+  tbody {
+    tr {
+      td {
+        line-height: 48px;
+        font-weight: 500;
+        color: #2B2B2B;
+        padding: 0 8px;
+        white-space: nowrap;
+        text-align: left;
+        &:first-child {
+          padding-left: 20px;
+          border-left: none;
+        }
+      }
+      border-bottom: 1px solid #D7D7D7;
+    }
+  }
+
+}
+
+

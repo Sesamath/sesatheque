@@ -114,6 +114,10 @@ var settings = {
   sesalabs : [
     "https://www.labomep.net/"
   ],
+  // une liste de login / pass admin
+  admin : {
+    // foo:"passDeFoo"
+  },
 
   // le reste est spécifique à sesatheque et ignoré par lassi
   // Cf _private.example/config.js

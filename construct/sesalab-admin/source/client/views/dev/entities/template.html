@@ -1,0 +1,18 @@
+<table>
+  <tr><th>Entité</th><th>Volume</th><th>Actions</th></tr>
+  <tr
+    ng-repeat="entity in entities"
+    >
+    <td>{{entity.name}}</td>
+    <td>{{entity.count}}</td>
+    <td>
+      <an-progress
+        ng-if="entity.job"
+        total="{{entity.job.total}}"
+        progress="{{entity.job.progress}}"></an-progress>
+      <a
+        ng-if="!entity.job"
+        ng-click="doReindex(entity)">Reindexer</a>
+    </td>
+  </tr>
+</table>

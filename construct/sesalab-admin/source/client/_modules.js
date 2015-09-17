@@ -1,0 +1,6 @@
+require("./widgets/an-progress/index.js")
+require("./widgets/date/index.js")
+require("./views/menu/index.js")
+require("./views/dev/query/index.js")
+require("./views/dev/entities/index.js")
+require("./services/popover/index.js")
