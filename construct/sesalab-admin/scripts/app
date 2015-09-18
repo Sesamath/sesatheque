@@ -21,7 +21,7 @@ function clean() {
 }
 
 function clean_release2() {
-  rm -rf *.disabled source/client npm-debug.log
+  # on efface rien d'autre que les packages de dev
   node -e "for(var pkg in require('./package.json').devDependencies) console.log('node_modules/'+pkg);" | xargs rm -r
 }
 
@@ -36,7 +36,7 @@ function build() {
 }
 
 function reset() {
-  clean && prepare && build && clean_release
+  clean && prepare && build && clean_release2
 }
  
 # initialisation de nos constantes et fct communes, si ce n'a pas déjà été fait
