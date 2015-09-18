@@ -72,4 +72,4 @@ cd $(dirname $0)/..
 init_command $@
 $COMMAND
 
-cd dir0
+cd $dir0
