@@ -1,3 +1,8 @@
 node_modules
 public/vendors
 npm-debug.log
+public/app.css
+public/app.js
+source/client/_modules.js
+source/client/styles/_styles.scss
+source/server/_modules.js

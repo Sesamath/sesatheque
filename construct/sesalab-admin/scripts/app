@@ -20,8 +20,8 @@ function clean() {
   rm -rf {documentation,node_modules,public/app.*}
 }
 
-function clean_release() {
-  rm -rf scripts *.disabled README.md bower.json source/client npm-debug.log
+function clean_release2() {
+  rm -rf *.disabled source/client npm-debug.log
   node -e "for(var pkg in require('./package.json').devDependencies) console.log('node_modules/'+pkg);" | xargs rm -r
 }
 
@@ -35,9 +35,36 @@ function build() {
   build_js
 }
 
+function reset() {
+  clean && prepare && build && clean_release
+}
+ 
 # initialisation de nos constantes et fct communes, si ce n'a pas déjà été fait
-[ -z "${STAGE-}" ] && . $(dirname $0)/../../scripts/app_init_vars
-
+#[ -z "${STAGE-}" ] && . $(dirname $0)/../../scripts/app_init_vars
+function init_command() {
+  while [[ $# > 0 ]] ; do
+    case $1 in
+      --*)
+        # la clé sera ce qui suit le -- jusqu'à une espace ou =
+        # et la valeur sera true ou ce qui suit le =
+        V='true'
+        eval $(echo $1 | sed -re "s/=[\"']?([^\"']*)[\"']?$/; V=\"\1\"/; s/--/K=/;")
+        # on passe la clé en màj pour être insensible à la casse
+        K=$(echo $K | tr 'a-z' 'A-Z')
+        eval "$K='$V'"
+        ;;
+      *)  
+        # on concatène avec _ tout ce qui n'est pas une option pour former la commande
+        [ -n "$COMMAND" ] && COMMAND="${COMMAND}_$1" || COMMAND="$1"
+        ;;
+    esac  
+    shift 
+  done    
+}
+ 
+function step() {
+  echo -e "$BLEU$(basename $PWD)$NORM:$BLEU$BUILD_MODE$NORM@$VERT$STAGE$NORM> $1"
+}
+ 
 init_command $@
 $COMMAND
-
