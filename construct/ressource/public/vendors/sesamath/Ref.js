@@ -52,10 +52,20 @@ function Ref(initObj) {
   this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
   if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine
   /**
-   * Le nom
+   * Titre
    * @type {string}
    */
-  this.titre = (initObj.titre && typeof initObj.titre === 'string') ? initObj.titre : '';
+  this.titre = (initObj.titre && typeof initObj.titre === 'string') ? initObj.titre : 'Sans titre';
+  /**
+   * Résumé (pour l'élève)
+   * @type {string}
+   */
+  this.resume = (initObj.resume && typeof initObj.resume === 'string') ? initObj.resume : '';
+  /**
+   * Commentaires (pour le formateur)
+   * @type {string}
+   */
+  this.commentaires = (initObj.commentaires && typeof initObj.commentaires === 'string') ? initObj.commentaires : '';
   /**
    * Le typeTechnique qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {string}
