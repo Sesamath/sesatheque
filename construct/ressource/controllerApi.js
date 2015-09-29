@@ -451,6 +451,43 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   } /* */
 
   /**
+   * Clone une ressource en mettant l'utilisateur courant contributeur, avec publié et privé
+   * @route GET /api/clone/:oid
+   * @param {object} Les propriétés de la ressource
+   * @returns {reponseRessourceOid|reponseRessourceRef}
+   */
+  controller.get('clone', function (context) {
+    var oid = context.arguments.oid
+    var userOid = $accessControl.getCurrentUserOid(context)
+    if (!userOid) {
+      $json.denied(context, "Vous devez être authentifié pour créer une ressource")
+    } else {
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (error) {
+          $json.send(context, error)
+        } else if (ressource) {
+          if ($accessControl.hasReadPermission(context, ressource)) {
+            // on clone
+            delete ressource.oid
+            if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
+            ressource.publie = true
+            ressource.restriction = configRessource.constantes.restriction.prive
+            $ressourceRepository.write(ressource, function (error, ressource) {
+              if (error) $json.send(context, error)
+              else if (ressource && ressource.oid) $json.send(context, null, {success:true, oid:ressource.oid})
+              else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
+            })
+          } else {
+            $json.denied(context, "Vous n'avez pas les droits suffisant pour lire la ressource " + oid)
+          }
+        } else {
+          $json.notFound(context, "La ressource " + oid + " n'existe pas")
+        }
+      })
+    }
+  })
+
+  /**
    * Loggue un user d'un sesalab localement, répond {success:true} ou {success:false, error:"message d'erreur"}
    * @Route POST /api/connexion
    * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
