@@ -472,6 +472,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
             ressource.publie = true
             ressource.restriction = configRessource.constantes.restriction.prive
+            if (!ressource.relations) ressource.relations = []
+            ressource.relations.push([configRessource.constantes.relations.estVersionDe, oid])
             $ressourceRepository.write(ressource, function (error, ressource) {
               if (error) $json.send(context, error)
               else if (ressource && ressource.oid) $json.send(context, null, {success:true, oid:ressource.oid})
