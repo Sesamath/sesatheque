@@ -451,12 +451,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   } /* */
 
   /**
-   * Clone une ressource en mettant l'utilisateur courant contributeur, avec publié et privé
+   * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
    * @route GET /api/clone/:oid
    * @param {object} Les propriétés de la ressource
-   * @returns {reponseRessourceOid|reponseRessourceRef}
+   * @returns {reponseRessourceOid}
    */
-  controller.get('clone', function (context) {
+  controller.get('clone/:oid', function (context) {
     var oid = context.arguments.oid
     var userOid = $accessControl.getCurrentUserOid(context)
     if (!userOid) {
@@ -469,6 +469,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if ($accessControl.hasReadPermission(context, ressource)) {
             // on clone
             delete ressource.oid
+            delete ressource.idOrigine
+            ressource.origine = "local"
             if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
             ressource.publie = true
             ressource.restriction = configRessource.constantes.restriction.prive
@@ -484,6 +486,57 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
         } else {
           $json.notFound(context, "La ressource " + oid + " n'existe pas")
+        }
+      })
+    }
+  })
+
+  /**
+   * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant contributeur, avec publié et privé
+   * @route GET /api/externalClone/:oid?sesathequeBase=url
+   * @param {object} Les propriétés de la ressource
+   * @returns {reponseRessourceOid}
+   */
+  controller.get('externalClone/:oid', function (context) {
+    var oid = context.arguments.oid
+    var sesathequeBase = context.get.sesathequeBase
+    var userOid = $accessControl.getCurrentUserOid(context)
+    if (!userOid) {
+      $json.denied(context, "Vous devez être authentifié pour créer une ressource")
+    } else if (!oid || ! sesathequeBase) {
+      $json.send(context, new Error("Paramètre manquant"))
+    } else {
+      if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/"
+      var options = {
+        uri : sesathequeBase +"api/public/" +oid,
+        gzip : true,
+        json : true,
+        timeout : 3000
+      }
+      request(options, function (error, response, ressource) {
+        if (error) {
+          $json.send(context, error)
+        } else if (response.statusCode === 200 && ressource) {
+          // on vire ce que l'on ne veut plus
+          ["oid", "idOrigine", "version", "archiveOid", "displayUri", "describeUri", "dataUri"].forEach(function (prop) {
+            if (ressource.hasOwnProperty(prop)) delete ressource[prop]
+          })
+          // on impose qq propriétés
+          ressource.origine = "local"
+          ressource.dateCreation = new Date()
+          ressource.publie = true
+          if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
+          ressource.restriction = configRessource.constantes.restriction.prive
+          if (!ressource.relations) ressource.relations = []
+          var originalUrl = sesathequeBase +"public/" +configRessource.constantes.routes.describe +"/" +oid
+          ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
+          $ressourceRepository.write(ressource, function (error, ressource) {
+            if (error) $json.send(context, error)
+            else if (ressource && ressource.oid) $json.send(context, null, {success:true, oid:ressource.oid})
+            else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
+          })
+        } else {
+          $json.notFound(context, "La ressource " + oid + " n'existe pas sur la sesatheque " +sesathequeBase)
         }
       })
     }

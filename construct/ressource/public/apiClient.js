@@ -40,7 +40,7 @@ define(function () {
   /**
    * Gère les appels ajax vers l'api de la bibliothèque
    * @private
-   * @param {Integer|string|Ressource} data Si data est un id on fera un get, si data est une ressource (un objet) un post
+   * @param {Integer|string|object} data Si data est un id on fera un get, si data est une ressource (un objet) un post
    * @param {ressourceCallback} next
    * @private
    */
@@ -121,7 +121,7 @@ define(function () {
    */
   var sesathequeBase;
   if (typeof sesamath === "undefined") window.sesamath = {};
-  var S = sesamath;
+  var S = window.sesamath;
   if (!S.sesatheque) S.sesatheque = {};
   var ST = S.sesatheque;
   if (ST.base) sesathequeBase = ST.base;
@@ -138,7 +138,7 @@ define(function () {
     /**
      * Modifie le préfixe par défaut (/)
      * @memberOf apiClient
-     * @param {string} sesathequeBase L'url de la sesathèque
+     * @param {string} newSesathequeBase L'url de la sesathèque
      */
     setBase: function (newSesathequeBase) {
       sesathequeBase = newSesathequeBase;
@@ -152,8 +152,8 @@ define(function () {
      */
     getRessource: function (id, next) {
       if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-      if (!id) return next(new Error("Il faut fournir un identifiant"));
-      callBibli(id, next);
+      if (id) callBibli(id, next);
+      else next(new Error("Il faut fournir un identifiant"));
     },
     /**
      * Enregistre une ressource sur la bibliotheque
@@ -163,8 +163,8 @@ define(function () {
      */
     setRessource: function (ressource, next) {
       if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-      if (!ressource) return next(new Error("Il faut fournir une ressource"));
-      callBibli(ressource, next);
+      if (ressource) callBibli(ressource, next);
+      else next(new Error("Il faut fournir une ressource"));
     }
   };
 });

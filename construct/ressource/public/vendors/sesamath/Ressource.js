@@ -216,7 +216,7 @@ function Ressource(initObj) {
    * Restriction sur la ressource, cf lassi.settings.ressource.constantes.restriction
    * @type {Integer}
    */
-  this.restriction = filters.int(values.restriction)
+  this.restriction = filters.int(values.restriction);
   /**
    * Date de création
    * @type {Date}
@@ -264,17 +264,17 @@ function Ressource(initObj) {
    * Uri d'affichage
    * @type {string}
    */
-  this.displayUri = (this.restriction ? '/ressource' : '/public') + '/voir/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine)
+  this.displayUri = (this.restriction ? '/ressource' : '/public') + '/voir/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine);
   /**
    * Uri de la description
    * @type {string}
    */
-  this.describeUri = (this.restriction ? '/ressource' : '/public') + '/decrire/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine)
+  this.describeUri = (this.restriction ? '/ressource' : '/public') + '/decrire/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine);
   /**
    * Uri des datas (json)
    * @type {string}
    */
-  this.dataUri = '/api' + (this.restriction ? '/ressource/' : '/public/') + (this.oid ? this.oid : this.origine + '/' + this.idOrigine)
+  this.dataUri = '/api' + (this.restriction ? '/ressource/' : '/public/') + (this.oid ? this.oid : this.origine + '/' + this.idOrigine);
 }
 
 /**
