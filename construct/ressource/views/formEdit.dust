@@ -75,8 +75,11 @@
       {?dateMiseAJour}{>wrapper widget="text" o=dateMiseAJour /}{/dateMiseAJour}
     </div>
 
-    {>"plugins/{typeTechnique.value}" /}
-
+    {?typeTechnique.value}
+      {>"plugins/{typeTechnique.value}" /}
+    {:else}
+      <p class="error">Pas de type technique</p>
+    {/typeTechnique.value}
     {! submit, attention #saveButton est utilisé par editArbre !}
     <div class="form-group">
       <input id="saveButton" type="submit" value="Enregistrer"/>

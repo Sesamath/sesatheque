@@ -59,9 +59,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function addToken(context, ressource) {
     var token = $ressourceControl.getToken()
     if (!context.session.tokens) context.session.tokens = {}
+    log.debug("avant ajout du token on a en session", context.session.tokens);
     context.session.tokens[token] = ressource.oid
     ressource.token = token
-    log.debug("on ajoute le token " +token +" en session", context.session.tokens);
+    log.debug("on a ajouté le token " +token +" en session avec l'oid " +ressource.oid, context.session.tokens);
   }
 
   /**
@@ -250,19 +251,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'create'
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
-      // envoi des valeur au form
-      function termine (ressource) {
-        addToken(context, ressource)
-        if (context.get.layout === 'iframe') ressource.layout = "iframe"
-        $views.printForm(context, null, ressource, options)
-      }
-
       var options = {$metas: {title: 'Ajouter une ressource'}}
       if (errorMsg) {
         denied(context, errorMsg)
       } else {
-        if (context.get.clone) {
-          $ressourceRepository.load(context.get.clone, function (error, ressource) {
+        var clonedOid = context.get.clone
+        if (clonedOid) {
+          // cas particulier du clonage
+          $ressourceRepository.load(clonedOid, function (error, ressource) {
             if (error) {
               $views.printError(context, error)
             } else if (ressource) {
@@ -270,13 +266,31 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               delete ressource.oid
               delete ressource.idOrigine
               ressource.origine = "local"
-              termine(ressource)
+              var userOid = $accessControl.getCurrentUserOid(context)
+              if (!ressource.contributeurs) ressource.contributeurs = []
+              if (userOid && ressource.contributeurs.indexOf(userOid) === -1) ressource.contributeurs.push(userOid)
+              $ressourceRepository.write(ressource, function (error, ressource) {
+                if (error) {
+                  $views.printError(context, error)
+                } else if (ressource && ressource.oid) {
+                  var url = $routes.getAbs('edit', ressource.oid)
+                  if (context.layout === "iframe") url += "?layout=iframe"
+                  context.redirect(url)
+                } else {
+                  $views.printError(context, new Error("L'enregistrement d'une copie de la ressource " +clonedOid +" a échoué"))
+                }
+              })
             } else {
               $views.printError(context, "Ressource à dupliquer inexistante ou droits insuffisants pour la lire", 404)
             }
           })
         } else {
-          termine({new:true, oid:0})
+          // creation simple
+          var fake = {new:true, oid:0}
+          addToken(context, fake)
+          // à quoi ça servait ????
+          //if (context.get.layout === 'iframe') fake.layout = "iframe"
+          $views.printForm(context, null, fake, options)
         }
       }
     })

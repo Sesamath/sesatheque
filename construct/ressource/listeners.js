@@ -196,7 +196,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       } else if (isJson) {
         context.contentType = 'application/json'
       }
-      // ajout du layout
+      // ajout du layout, page si non précisé
       if (isHtml && !data.$layout) data.$layout = __dirname + '/../static/views/layout-' + (context.layout || "page")
     }
 
@@ -277,14 +277,32 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     }
   } // errorHandler
 
+  /**
+   * Retourne true si c'est du json (d'après contentType ou url qui démarre par /api/)
+   * @private
+   * @param context
+   * @returns {boolean}
+   */
   function getIsJson(context) {
     return context.contentType === 'application/json' || context.request.originalUrl.substr(0, 5) === '/api/'
   }
 
+  /**
+   * Retourne true si c'est une page html (pas de layout fixé et pas json)
+   * @private
+   * @param context
+   * @returns {boolean}
+   */
   function getIsHtml(context) {
     return !getIsJson(context) && !!context.layout
   }
 
+  /**
+   * Retourne la requete http (du type GET /path/to/something?args)
+   * @private
+   * @param context
+   * @returns {string}
+   */
   function getReqHttp(context) {
     return context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
   }

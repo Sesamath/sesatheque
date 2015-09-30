@@ -105,10 +105,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Context}       context
    * @param {object}        formData Les datas pour le form dust
    * @param {string}        key
+   * @param {Integer[]}     values
    * @param {errorCallback} next
-   * @param {Integer[]} values
    */
   function addPersonnes(context, formData, key, values, next) {
+    if (!values) values = []
     log.debug("addPersonnes avec " +key +" qui vaut " +values.join(",") +
         " ; formData.errors est un Array ? " +(formData instanceof Array) +" " +(formData.errors && !!formData.errors.push))
     // seuls les éditeurs peuvent modifier auteurs et contributeurs,
@@ -210,7 +211,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       choice.id = key + i
       i++
       // et on ajoute les selected s'il y en a
-      if (selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
+      if (selectedValues && selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
         choice.selected = true
       }
       choices.push(choice)
@@ -470,8 +471,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           labelSuivant()
         } else if (key === "groupes") {
           addGroupes(formData, value, labelSuivant)
-        } else {
+        } else if (key === "auteurs" || key === "contributeurs") {
           addPersonnes(context, formData, key, value, labelSuivant)
+        } else {
+          log.error(new Error("On tombe sur la clé innatendue " +key))
         }
 
       } else if (config.typesVar[key] === 'Boolean') {
@@ -827,6 +830,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var data = $views.getDefaultData('formEdit')
     if (ressource.token && context.session.tokens && !context.session.tokens[ressource.token])
       log.error("dans printForm on a le token " +ressource.token +" avec en session", context.session.tokens)
+    // on met la ressource en contexte
     if (context.layout === 'page' && ressource) context.ressource = ressource
     // les datas pour le form
     getFormViewData(context, error, ressource, function (formData) {
@@ -840,7 +844,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // faut aussi ajouter ça pour les vues dust (data.contentBloc.typeTechnique existe déjà mais c'est un select)
       data.contentBloc.editeur = ressource.typeTechnique
       // avant d'envoyer
-      log.debug("on va envoyer au form ", data, 'form', {max:2000})
+      log.debug("on va envoyer au form ", data, 'form', {max:2000, indent:2})
       context.html(data)
     })
   }
