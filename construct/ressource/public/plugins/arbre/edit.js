@@ -120,8 +120,9 @@ try {
     function initDom(options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
       var vendorsBaseUrl = options.vendorsBaseUrl || '/vendors';
+      var base = options.sesathequeBase || '/';
       S.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
-      S.addCss(options.sesathequeBase + 'styles/ressources.css');
+      S.addCss(base + 'styles/ressources.css');
       // nos éléments html
       var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
       container = window.document.getElementById('display');
