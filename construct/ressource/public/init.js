@@ -157,6 +157,7 @@ if (typeof window === 'undefined') {
  * @property {boolean}          [verbose=false]       Passer true pour ajouter des log en console
  * @property {boolean}          [isDev=false]         Passer true pour initialiser le dom source en devsesamath (pour certains plugins)
  * @property {string}           [urlResultatCallback] Une url vers laquelle poster le résultat (idem si la page de la ressource contient ?urlScoreCallback=http…)
+ * @property {string}           [resultatMessageAction] Un nom d'action pour passer le résultat en postMessage
  * @property {resultatCallback} [resultatCallback]    Une fonction pour recevoir un objet Resultat (si y'a pas de urlScoreCallback)
  * @property {string}           [sesatheque]          Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page),
  *                                                      le nom de la sésathèque pour un client qui récupère des résultats de plusieurs sésatheques
