@@ -35,7 +35,7 @@ var configRessource = require('./config')
 var routes = configRessource.constantes.routes
 var restriction = configRessource.constantes.restriction
 
-module.exports = function () {
+module.exports = function ($accessControl) {
   /**
    * Service pour récupérer les routes d'affichage des ressources
    * @service $routes
@@ -72,7 +72,7 @@ module.exports = function () {
     var route, oid, isPublic = true
     if (ressource) {
       oid = ressource.oid || parseInt(ressource, 10)
-      if (ressource.restriction !== restriction.aucune) isPublic = false
+      if (ressource.restriction !== restriction.aucune || $accessControl.isAuthenticated(context)) isPublic = false
     } else if (context && context.session && context.session.user && context.session.user.oid) {
       isPublic = false
     }

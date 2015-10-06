@@ -67,7 +67,7 @@ module.exports = function () {
   /**
    * Callback générique de sortie json
    * @param {Context} context
-   * @param {string|Error} error
+   * @param {string|string[]|Error} error
    * @param data
    */
   $json.send = function (context, error, data) {
@@ -79,8 +79,7 @@ module.exports = function () {
       } else if (_.isArray(error)) {
         error = error.join(", ")
       }
-      log.debug("$json.send va renvoyer l'erreur " +error, 'api')
-      context.json({success:false, error: error})
+      $json.sendErrorMessage(context, error)
     } else {
       log.debug('$json.send va renvoyer', data, 'api')
       // pas la peine de faire le stringify pour rien, on teste avant
@@ -88,6 +87,16 @@ module.exports = function () {
       // commenté car Content-Length dispo dans le onFinish, sauf 204 et 304 (logique)
       context.json(data)
     }
+  }
+
+  /**
+   * Envoie un message d'erreur {success:false, error: errorMessage}
+   * @param context
+   * @param errorMessage
+   */
+  $json.sendErrorMessage = function (context, errorMessage) {
+    log.debug("$json va renvoyer l'erreur " +errorMessage, 'api')
+    context.json({success:false, error: errorMessage})
   }
 
   /**

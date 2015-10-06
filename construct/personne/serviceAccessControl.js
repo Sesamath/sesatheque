@@ -469,7 +469,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.isAuthenticated = function (context) {
-    return (context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale et un token
+    return (context && context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale et un token
   }
 
   /**

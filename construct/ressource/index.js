@@ -50,8 +50,8 @@ ressourceComponent.service('$cacheRessource', function($cache, $settings, Entity
   return require('./serviceCacheRessource')($cache, $settings, EntityRessource)
 })
 
-ressourceComponent.service('$routes', function($settings) {
-  return require('./serviceRoutes')($settings)
+ressourceComponent.service('$routes', function($accessControl) {
+  return require('./serviceRoutes')($accessControl)
 })
 
 ressourceComponent.service('$flashMessages', function() {
@@ -99,8 +99,8 @@ ressourceComponent.controller('api', function ($ressourceRepository, $ressourceC
 })
 
 // import calculatice
-ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) { // jshint ignore:line
-  require('./controllerImportEc')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes)
+ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes) { // jshint ignore:line
+  require('./controllerImportEc')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes)
 })
 
 // En dev on ajoute des routes de debug

@@ -65,19 +65,19 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       var oid = context.ressource.oid
       if ($accessControl.hasPermission('read', context, ressource)) {
         links.push({
-          href: $routes.getAbs('describe', ressource),
+          href: $routes.getAbs('describe', ressource, context),
           value: 'Description',
           icon: 'file-text-o', // material icons description
           selected: (context.tab === 'describe')
         })
         links.push({
-          href: $routes.getAbs('preview', ressource),
+          href: $routes.getAbs('preview', ressource, context),
           value: 'Aperçu',
           icon: 'eye-slash', // ma pageview
           selected: (context.tab === 'preview')
         })
         links.push({
-          href: $routes.getAbs('display', ressource),
+          href: $routes.getAbs('display', ressource, context),
           value: 'Voir',
           icon: 'eye', // material icons open_in_new était pas terrible
           attributes : [
@@ -87,7 +87,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       }
       if ($accessControl.hasPermission('update', context, ressource))
         links.push({
-          href: $routes.getAbs('edit', oid),
+          href: $routes.getAbs('edit', oid, context),
           value: 'Modifier',
           icon: "edit", // mode_edit pour material icons
           selected: (context.tab === 'edit')
@@ -101,7 +101,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         })
       if ($accessControl.hasPermission('delete', context, ressource))
         links.push({
-          href: $routes.getAbs('delete', oid),
+          href: $routes.getAbs('delete', oid, context),
           value: 'Supprimer',
           icon: 'trash', // ma delete
           selected: (context.tab === 'delete')

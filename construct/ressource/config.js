@@ -386,7 +386,8 @@ var ressourceConfig = {
   },
   cacheTTL : 3600,
   imports : {
-    ecBase : "http://ressources.devsesamath.net/replication_calculatice"
+    //ecBase : "http://ressources.devsesamath.net/replication_calculatice"
+    ecBase : "http://bibliotheque.local:3001/xml_calculatice"
   }
 };
 

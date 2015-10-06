@@ -273,7 +273,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 if (error) {
                   $views.printError(context, error)
                 } else if (ressource && ressource.oid) {
-                  var url = $routes.getAbs('edit', ressource.oid)
+                  var url = $routes.getAbs('edit', ressource.oid, context)
                   if (context.layout === "iframe") url += "?layout=iframe"
                   context.redirect(url)
                 } else {
@@ -345,7 +345,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             printForm(context, error, ressource, 'Ajouter une ressource')
           } else {
             log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
-            var url = $routes.getAbs('edit', ressource.oid)
+            var url = $routes.getAbs('edit', ressource.oid, context)
             if (context.layout === "iframe") url += "?layout=iframe"
             context.redirect(url)
           }

@@ -41,49 +41,13 @@
  * @requires $views
  * @requires $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes) {
   var request = require('request')
   var _ = require('lodash')
   var tools = require('../tools')
   var seq = require('an-flow')
+  var elementtree = require('elementtree')
   var config = require('./config')
-
-  /**
-   * Équivalent de context.denied en json
-   * @private
-   * @param {Context} context
-   * @param msg
-   */
-  function denied(context, msg) {
-    if (!msg) msg = "Accès refusé"
-    context.status = 403;
-    context.json({error: msg})
-  }
-
-  /**
-   * Callback générique de sortie
-   * @private
-   * @param {Context} context
-   * @param {string|Error} error
-   * @param data
-   */
-  function sendJson(context, error, data) {
-    if (error) {
-      log.debug("sendJson va renvoyer l'erreur", error, 'api')
-      // on logge l'erreur si s'en est vraiment une (pas les strings simples)
-      if (error.stack) {
-        log.error(error)
-        error = error.toString()
-      }
-      context.json({success:false, error: error})
-    } else {
-      log.debug('sendJson va renvoyer', data, 'api')
-      // pas la peine de faire le stringify pour rien, on teste avant
-      // if (log.perf.out) log.perf(context.response, 'jsonSentLength ' +tools.stringify(data).length, true)
-      // commenté car Content-Length dispo dans le onFinish, sauf 204 et 304 (logique)
-      context.json(data)
-    }
-  }
 
   /**
    * Met à jour un arbre calculatice
@@ -94,8 +58,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     seq().seq(function () {
       $accessControl.isSesamathClient(context, this)
     }).seq(function (isSesamathClient) {
-      if (!isSesamathClient) denied(context, "Vous n'avez pas les droits suffisant pour accéder à cette commande")
-      else this()
+      if (isSesamathClient) this()
+      else $json.denied(context, "Vous n'avez pas les droits suffisant pour accéder à cette commande")
     }).seq(function () {
       // on peut importer
       var next = this
@@ -106,14 +70,22 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           next(new Error("impossible de récupérer " +url))
         } else if (body) {
           log.debug("on récupère le xml", body, {max:2000})
-          sendJson(context, null, {success:true})
+          next(null, body)
         } else {
           log.error("Sur l'url " +url +" on récupère", response)
         }
       })
+    }).seq(function (xmlString) {
+      //log('analyse de ' +xmlString)
+      var arbreXml = elementtree.parse(xmlString)
+      if (!arbreXml._root) this(new Error("arbreXml sans racine"))
+      if (!arbreXml._root._children || !arbreXml._root._children.length) this(new Error("arbreXml vide"))
+      else this(arbreXml._root)
+    }).seq(function (xmlObj) {
+      log.debug("obj xml", xmlObj, 'xml', {max:3000, indent:2})
     }).catch(function (error) {
       log.error(error)
-      sendJson(context, null, {success:false, error:error.toString()})
+      $json.sendErrorMessage(context, error.toString())
     })
   }
   getXml.timeout = 10000
