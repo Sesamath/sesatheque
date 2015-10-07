@@ -141,18 +141,23 @@ try {
         $form = $("#formRessource");
 
         $form.submit(function () {
-          S.log("submit demandé, on transfère à saveAndSubmit et on attend");
+          S.log("submit demandé");
+          // on le fait qu'une fois, au cas où le user s'excite sur le bouton enregistrer
           if (!isSaveAndSubmitDone) {
+            S.log("on transfère à saveAndSubmit et on attend");
             egWindow.postMessage({action:"saveAndSubmit"}, "*");
             isSaveAndSubmitDone = true;
             setTimeout(function () {
+              S.log("timeout sans réponse, on force le submit tel quel");
               // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
               isSubmitForced = true;
               $form.submit();
             }, 3000);
           }
-          return isSubmitForced || isSaveAndSubmitDone; // on fera le submit au retour du message
+
+          return isSubmitForced; // on fera le submit au retour du message
         });
+        
         // Un écouteur sur les messages envoyés par editGraphe
         window.addEventListener("message", function (event) {
           // on teste pas event.origin, on accepte les messages de tous ceux que l'on embarque
