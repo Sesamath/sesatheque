@@ -94,7 +94,7 @@ if (typeof window === 'undefined') {
 
         // on regarde si d'autres options ont été passé en GET
         var paramGet;
-        ["urlResultatCallback", "userOrigine", "userId"].forEach(function (param) {
+        ["resultatMessageAction", "urlResultatCallback", "userOrigine", "userId"].forEach(function (param) {
           paramGet = S.getURLParameter(param);
           if (!options[param] && paramGet) options[param] = paramGet;
         });
