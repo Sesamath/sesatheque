@@ -400,7 +400,11 @@
         var titre = wd.getElementById('titre');
         if (titre && titre.style) titre.style.display = "none";
         S.log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé");
-      } catch (e) { /* tant pis */
+        var picto = wd.getElementById('pictoFeedback');
+        if (picto && picto.style) picto.style.display = "none";
+        S.log(picto ? "picto feedback masqué" : "demande de masquage mais picto feedback non trouvé");
+      } catch (e) {
+        /* tant pis */
       }
     };
 

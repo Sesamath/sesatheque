@@ -161,10 +161,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         }
 
         if (traiteResultat) {
-
-          // sera affecté si on utilise postMessage
-          var messageListener;
-
           /**
            * Envoi un résultat en ajax ou à la callback pour sauvegarde et appelle saveCallback avec le retour
            * @private
@@ -257,20 +253,11 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             }
 
             function sendMessage(resultat) {
-              if (!messageListener) {
-                window.addEventListener("message", function (event) {
-                  if (event.data && event.data.action === "ressource::saveResultatResult") {
-                    feedback(event.data.saveResultatResult);
-                  }
-                });
-                messageListener = true;
-              }
               var chunks = options.resultatMessageAction.split('::');
               var action = options.resultatMessageAction;
               var resultatProp = chunks[1] || "resultat";
               var message = {
                 action: action,
-                callbackMessageAction: "ressource::saveResultatResult"
               };
               message[resultatProp] = resultat;
               // on envoie
@@ -296,9 +283,13 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             } else if (traiteResultat === "ajax") {
               S.log("on va poster ce résultat vers " + traiteResultat, resultat);
               sendAjax(resultat, deferSync);
-            } else if (traiteResultat === "message" && options.resultatMessageAction !== "none") {
-              S.log("postMessage de ce résultat vers " + traiteResultat, resultat);
-              sendMessage(resultat);
+            } else if (traiteResultat === "message") {
+              if (options.resultatMessageAction === "none") {
+                S.log("On a reçu ce résultat (que l'on ne fait pas suivre on est en test)", resultat);
+              } else {
+                S.log("postMessage de ce résultat vers " + traiteResultat, resultat);
+                sendMessage(resultat);
+              }
             }
           }; // fin définition options.resultatCallback
         }
