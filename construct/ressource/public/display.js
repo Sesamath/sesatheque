@@ -266,7 +266,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
                 messageListener = true;
               }
               var chunks = options.resultatMessageAction.split('::');
-              var action = chunks[0];
+              var action = options.resultatMessageAction;
               var resultatProp = chunks[1] || "resultat";
               var message = {
                 action: action,
