@@ -462,6 +462,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         } else {
           // redirection normale
           var url = "/ressource/" + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
+          if (context.layout === "iframe") url += "?layout=iframe"
           log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
           context.redirect(url)
         }
