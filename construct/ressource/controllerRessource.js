@@ -60,7 +60,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var token = $ressourceControl.getToken()
     if (!context.session.tokens) context.session.tokens = {}
     log.debug("avant ajout du token on a en session", context.session.tokens);
-    context.session.tokens[token] = ressource.oid
+    context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n'existe pas
     ressource.token = token
     log.debug("on a ajouté le token " +token +" en session avec l'oid " +ressource.oid, context.session.tokens);
   }
