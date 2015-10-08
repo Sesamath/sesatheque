@@ -3,7 +3,8 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "start": "./scripts/run"
+    "start": "./scripts/run",
+    "wpwatch" : "webpack --watch"
   },
   "dependencies": {
     "an-flow": "^1.0.0",
@@ -37,6 +38,7 @@
     "requirejs": "^2.1.20",
     "through2": "^0.4.2",
     "uglify-js": "^2.4.24",
+    "webpack": "^1.12.2",
     "xml2js": "^0.4.4",
     "zombie": "^2.5.1"
   }

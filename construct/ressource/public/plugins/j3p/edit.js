@@ -44,6 +44,7 @@ try {
      * Ajoute l'iframe d'editgraphe
      * @private
      * @param {string} urlEditGraphe
+     * @param {Element} container
      */
     function addEditGraphe(urlEditGraphe, container) {
       S.log("addEditGraphe avec " +urlEditGraphe);
@@ -52,6 +53,74 @@ try {
       $editgraphe = $(editgraphe);
       autosize();
       return editgraphe.contentWindow;
+    }
+
+    /**
+     * Helper de loadGraphic qui ajoute un écouteur sur les messages envoyés par editGraphe
+     * @param ressource
+     * @param $form
+     */
+    function addMessageListener(ressource, $form) {
+      window.addEventListener("message", function (event) {
+        // on teste pas event.origin, on accepte les messages de tous ceux que l'on embarque
+        if (event.data) {
+          S.log("Message reçu dans l'édition de la ressource", event);
+          if (event.data.action === "editGrapheReady") {
+            egWindow.postMessage({action: "load", ressource: ressource}, "*");
+          } else if (event.data && event.data.action === "saveParametres") {
+            if (event.data.parametres) saveParametres(event.data.parametres);
+            else ST.addError("editgraphe envoi un message avec l'action saveParametres sans fournir parametres");
+          } else if (event.data && event.data.action === "saveAndSubmit") {
+            if (event.data.parametres) {
+              S.log("Dans saveAndSubmit on récupère les parametres", event.data.parametres);
+              saveParametres(event.data.parametres, function () {
+                if (!isSubmitForced) {
+                  isSubmitForced = true;
+                  $form.submit();
+                } else {
+                  S.log("submit déjà fait en timeout");
+                }
+              });
+            } else {
+              ST.addError("editgraphe envoi un message avec l'action saveAndSubmit sans fournir parametres, on sauvegarde en l'état dans 2s");
+              setTimeout(function () {
+                if (!isSubmitForced) {
+                  isSubmitForced = true;
+                  $form.submit();
+                } else {
+                  S.log("submit déjà fait en timeout");
+                }
+              }, 2000);
+            }
+          }
+        } else {
+          S.log("message reçu sans data ???", event);
+        }
+      });
+    }
+
+    /**
+     * Helper de loadGraphic qui ajoute l'écouteur sur submit
+     * @param $form
+     */
+    function addSubmitCallback($form) {
+      $form.submit(function () {
+        S.log("submit demandé");
+        // on le fait qu'une fois, au cas où le user s'excite sur le bouton enregistrer
+        if (!isSaveAndSubmitDone) {
+          S.log("on transfère à saveAndSubmit et on attend");
+          egWindow.postMessage({action: "saveAndSubmit"}, "*");
+          isSaveAndSubmitDone = true;
+          setTimeout(function () {
+            S.log("timeout sans réponse, on force le submit tel quel");
+            // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
+            isSubmitForced = true;
+            $form.submit();
+          }, 3000);
+        }
+
+        return isSubmitForced; // on fera le submit au retour du message
+      });
     }
 
     /**
@@ -64,6 +133,27 @@ try {
       // et à chaque changement de la taille de la fenêtre
       $(window).resize(resizeIframe);
     }
+
+    /**
+     * Ajoute l'iframe, la gestion de messages et la sauvegarde auto du graphe
+     * @param {object}    options
+     * @param {Element}   container
+     * @param {Ressource} ressource
+     */
+    function loadGraphic(options, container, ressource) {
+      var urlEditGraphe = "http://j3p.";
+      if (options.isDev) urlEditGraphe += "dev";
+      urlEditGraphe += "sesamath.net/editgraphes/lanceur_graphique.html";
+      //urlEditGraphe = "http://j3p.local/editgraphes/lanceur_graphique.html";
+      $textarea.hide();
+      $textarea.before(S.getElement("a", {href:"?editor=text"}, "mode texte (sauvegarder les modifications avant)"));
+      $textarea.before(S.getElement("br"));
+      egWindow = addEditGraphe(urlEditGraphe, container);
+      // au submit on veut récupérer le contenu d'éditgraphe
+      var $form = $("#formRessource");
+      addMessageListener(ressource, $form);
+      addSubmitCallback($form);
+    } // loadGraphic
 
     /**
      * Modifie la taille de l'iframe pour le maximiser sur l'espace visible
@@ -113,10 +203,10 @@ try {
     var S = window.sesamath;
     var ST = S.sesatheque;
 
-    var $editgraphe,
-        $form,
-        isSaveAndSubmitDone = false,
-        isSubmitForced = false,
+    var $editgraphe,                 // iframe
+        egWindow,
+        isSaveAndSubmitDone = false, // on a envoyé le postMessage
+        isSubmitForced = false,      // pour forcer le submit, postMessage fait ou pas
         $textarea;
 
     return {
@@ -131,70 +221,14 @@ try {
           S.log("pas trouvé de #groupParametres, on prend le parent du textarea en container");
           container = textarea.parentNode();
         }
-        var urlEditGraphe = "http://j3p.";
-        if (options.isDev) urlEditGraphe += "dev";
-        urlEditGraphe += "sesamath.net/editgraphes/lanceur_graphique.html";
-        //urlEditGraphe = "http://j3p.local/editgraphes/lanceur_graphique.html";
-        $textarea.hide();
-        var egWindow = addEditGraphe(urlEditGraphe, container);
-        // au submit on veut récupérer le contenu d'éditgraphe
-        $form = $("#formRessource");
-
-        $form.submit(function () {
-          S.log("submit demandé");
-          // on le fait qu'une fois, au cas où le user s'excite sur le bouton enregistrer
-          if (!isSaveAndSubmitDone) {
-            S.log("on transfère à saveAndSubmit et on attend");
-            egWindow.postMessage({action:"saveAndSubmit"}, "*");
-            isSaveAndSubmitDone = true;
-            setTimeout(function () {
-              S.log("timeout sans réponse, on force le submit tel quel");
-              // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
-              isSubmitForced = true;
-              $form.submit();
-            }, 3000);
-          }
-
-          return isSubmitForced; // on fera le submit au retour du message
-        });
-        
-        // Un écouteur sur les messages envoyés par editGraphe
-        window.addEventListener("message", function (event) {
-          // on teste pas event.origin, on accepte les messages de tous ceux que l'on embarque
-          if (event.data) {
-            S.log("Message reçu dans l'édition de la ressource", event);
-            if (event.data.action === "editGrapheReady") {
-              egWindow.postMessage({action: "load", ressource: ressource}, "*");
-            } else if (event.data && event.data.action === "saveParametres") {
-              if (event.data.parametres) saveParametres(event.data.parametres);
-              else ST.addError("editgraphe envoi un message avec l'action saveParametres sans fournir parametres");
-            } else if (event.data && event.data.action === "saveAndSubmit") {
-              if (event.data.parametres) {
-                S.log("Dans saveAndSubmit on récupère les parametres", event.data.parametres);
-                saveParametres(event.data.parametres, function () {
-                  if (!isSubmitForced) {
-                    isSubmitForced = true;
-                    $form.submit();
-                  } else {
-                    S.log("submit déjà fait en timeout");
-                  }
-                });
-              } else {
-                ST.addError("editgraphe envoi un message avec l'action saveAndSubmit sans fournir parametres, on sauvegarde en l'état dans 2s");
-                setTimeout(function () {
-                  if (!isSubmitForced) {
-                    isSubmitForced = true;
-                    $form.submit();
-                  } else {
-                    S.log("submit déjà fait en timeout");
-                  }
-                }, 2000);
-              }
-            }
-          } else {
-            S.log("message reçu sans data ???", event);
-          }
-        });
+        var editor = S.getURLParameter('editor') || "graphic";
+        if (editor === "graphic") {
+          loadGraphic(options, container, ressource);
+        } else {
+          if (editor !== "text") ST.addError("Éditeur " +editor +" inconnu, on prend text");
+          $textarea.before(S.getElement("a", {href:"?editor=graphic"}, "mode graphique (sauvegarder les modifications avant)"));
+          $textarea.before(S.getElement("br"));
+        }
       }
     };
   });
