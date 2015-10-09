@@ -256,7 +256,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
         log.debug("fin checkGroupes & checkPersonnes")
-        if (ressourceOriginale) _.merge(ressourceOriginale, ressourceNew)
+        if (ressourceOriginale) tools.update(ressourceOriginale, ressourceNew)
         else ressourceOriginale = ressourceNew
         writeAndOut(context, ressourceOriginale)
 
@@ -820,8 +820,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Create / update une ressource
    * Prend un objet ressource, éventuellement incomplète mais oid ou origine/idOrigine sont obligatoires
    * Si le titre et la catégorie sont manquants, ou que l'on passe ?merge=1 à l'url, ça merge avec la ressource
-   * existante que l'on update,sinon on écrase (ou on créé si elle n'existait pas)
-   * C'est un merge au sens lodash du terme (chaque propriété présente écrase celle qui existait)
+   * existante que l'on update, sinon on écrase (ou on créé si elle n'existait pas)
    *
    * Retourne d'autres propriétés de la ressource enregistrée si on le réclame avec ?format=(ref|compact)
    * @route POST /api/ressource

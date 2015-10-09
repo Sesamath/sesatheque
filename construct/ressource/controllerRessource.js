@@ -439,7 +439,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
       }).seq(function (ressource) {
         ressourceNew = ressource
-        _.merge(ressourceOriginale, ressource)
+        // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
+        tools.update(ressourceOriginale, ressource)
         $ressourceRepository.write(ressourceOriginale, this)
 
       }).seq(function (ressource) {
