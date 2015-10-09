@@ -1,0 +1,2967 @@
+<?xml version="1.0"?>
+<niveau id="6eme">
+  <competence>
+    <nom>M&#xE9;moriser la table d'addition</nom>
+    <activite>
+      <nom>Quadricalc</nom>
+      <exercice uid="1412">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"plageA":"2-9","temps_question":0,"plageB":"2-9","choixVitesse":400,"totalTentative":"10","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[1]}</options>
+      </exercice>
+      <exercice uid="1413">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"plageA":"2-9","temps_question":0,"plageB":"2-9","choixVitesse":600,"totalTentative":"10","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[1]}</options>
+      </exercice>
+      <exercice uid="1414">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"plageA":"2-9","temps_question":0,"plageB":"2-9","choixVitesse":1000,"totalTentative":"10","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[1]}</options>
+      </exercice>
+      <exercice uid="1415">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"plageA":"2-9","temps_question":0,"plageB":"2-9","choixVitesse":1000,"totalTentative":"10","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[1]}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Addiclic</nom>
+      <exercice uid="1416">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-as3.swf</fichier>
+        <fichierjs>addiclic</fichierjs>
+        <options>{"nom":"addiclic-as3","typeAddition":4,"totalEssai":1,"temps_exo":"0","tempsExpoCorrection":"30","temps_question":0,"totalQuestion":10}</options>
+      </exercice>
+      <exercice uid="1417">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-as3.swf</fichier>
+        <fichierjs>addiclic</fichierjs>
+        <options>{"nom":"addiclic-as3","typeAddition":6,"totalEssai":1,"temps_exo":"0","tempsExpoCorrection":"30","temps_question":0,"totalQuestion":10}</options>
+      </exercice>
+      <exercice uid="1418">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-as3.swf</fichier>
+        <fichierjs>addiclic</fichierjs>
+        <options>{"nom":"addiclic-as3","typeAddition":3,"totalEssai":1,"temps_exo":"0","tempsExpoCorrection":"30","temps_question":0,"totalQuestion":10}</options>
+      </exercice>
+      <exercice uid="1419">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-as3.swf</fichier>
+        <fichierjs>addiclic</fichierjs>
+        <options>{"nom":"addiclic-as3","typeAddition":5,"totalEssai":1,"temps_exo":"0","tempsExpoCorrection":"30","temps_question":0,"totalQuestion":10}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Table attaque</nom>
+      <exercice uid="1420">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-9","totalQuestion":1,"defilement":8,"tentative":"10","operateur":[1],"totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1421">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-9","totalQuestion":1,"defilement":6,"tentative":"20","operateur":[1],"totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1422">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"totalEssai":1,"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-9","totalQuestion":1,"defilement":4,"tentative":"20","operateur":[1]}</options>
+      </exercice>
+      <exercice uid="1423">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-9","totalQuestion":1,"defilement":3,"tentative":"20","operateur":[1],"totalEssai":1}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Op&#xE9;rations &#xE0; trous</nom>
+      <exercice uid="1424">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"temps_question":"5","operateur":[1],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"2-9","nombre_a_trouver":"2-9","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+      </exercice>
+      <exercice uid="1425">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-9","nombre_donne":"2-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[1],"temps_question":"10"}</options>
+      </exercice>
+      <exercice uid="1426">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-9","nombre_donne":"2-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[1],"temps_question":"20"}</options>
+      </exercice>
+      <exercice uid="1427">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-9","nombre_donne":"2-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[1],"temps_question":"30"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Les brickators</nom>
+      <exercice uid="1428">
+        <nom>Niveau 1</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1429">
+        <nom>Niveau 2</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"defilement":1.3,"operateur":[1],"totalTentative":"20","plageB":"3-9","plageA":"2-9","totalEssai":1,"nom":"brickators-as3","totalQuestion":1,"temps_question":0}</options>
+      </exercice>
+      <exercice uid="1430">
+        <nom>Niveau 3</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"defilement":1.6,"operateur":[1],"totalTentative":"20","plageB":"3-9","plageA":"2-9","totalEssai":1,"nom":"brickators-as3","totalQuestion":1,"temps_question":0}</options>
+      </exercice>
+      <exercice uid="1431">
+        <nom>Niveau 4</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"defilement":1.9,"operateur":[1],"totalTentative":"20","plageB":"3-9","plageA":"2-9","totalEssai":1,"nom":"brickators-as3","totalQuestion":1,"temps_question":0}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>L'oiseau</nom>
+      <exercice uid="1432">
+        <nom>niveau 1</nom>
+        <fichier/>
+        <fichierjs>oiseauaddition</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"typeAddition":0}</options>
+      </exercice>
+      <exercice uid="1433">
+        <nom>niveau 2</nom>
+        <fichier/>
+        <fichierjs>oiseauaddition</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"typeAddition":0}</options>
+      </exercice>
+      <exercice uid="1434">
+        <nom>niveau 3</nom>
+        <fichier/>
+        <fichierjs>oiseauaddition</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"typeAddition":0}</options>
+      </exercice>
+      <exercice uid="1435">
+        <nom>niveau 4</nom>
+        <fichier/>
+        <fichierjs>oiseauaddition</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"typeAddition":0}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>M&#xE9;moriser les tables de multiplication</nom>
+    <competence>
+      <nom>Table x 2</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1436">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2","choixVitesse":400,"totalTentative":"10","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1437">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1438">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2","choixVitesse":800,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1439">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"choixOperateur":[10],"totalQuestion":1,"plageA":"2-10","temps_question":0,"plageB":"2","totalEssai":1,"choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1440">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1441">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1442">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1443">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"20","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"2","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Double moiti&#xE9;</nom>
+        <exercice uid="1444">
+          <nom>Double moiti&#xE9;</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nMax":0,"nMin":1,"relation":"double","temps_max":"60","max_essais":1,"nbre_questions":10}</options>
+        </exercice>
+        <exercice uid="1445">
+          <nom>Double moiti&#xE9;</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nbre_questions":10,"max_essais":2,"temps_max":"180","relation":"double","nMin":1,"nMax":0}</options>
+        </exercice>
+        <exercice uid="1446">
+          <nom>Double moiti&#xE9;</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nMax":0,"nMin":1,"relation":"double","temps_max":"300","max_essais":1,"nbre_questions":10}</options>
+        </exercice>
+        <exercice uid="1447">
+          <nom>Double moiti&#xE9;</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nMax":0,"nMin":1,"relation":"double","temps_max":"0","max_essais":1,"nbre_questions":10}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1448">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":2,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1449">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":2,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1450">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":2,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1451">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":2,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x 3</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1452">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"3","choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1453">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"choixOperateur":[10],"totalQuestion":1,"plageA":"2-9","temps_question":0,"plageB":"3","totalEssai":1,"choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3"}</options>
+        </exercice>
+        <exercice uid="1454">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"3","choixVitesse":800,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1455">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"3","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1456">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-9","nombre_donne":"3","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1457">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"3","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1458">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"3","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1459">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"3","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1460">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":3,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1461">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":3,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1462">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":3,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1463">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":3,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x 4</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1464">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"choixOperateur":[10],"totalQuestion":1,"plageA":"2-9","temps_question":0,"plageB":"4","totalEssai":1,"choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3"}</options>
+        </exercice>
+        <exercice uid="1465">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"4","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1466">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"4","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1467">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"4","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1468">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"4","nombre_donne":"2-10","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1469">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-9","nombre_donne":"4","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1470">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"4","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1471">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"4","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1472">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":4,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1473">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":4,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1474">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":4,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1475">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":4,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x 5</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1476">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"5","choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1477">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"5","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1478">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"5","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1479">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"5","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1480">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"5","nombre_donne":"2-10","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1481">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"5","nombre_donne":"2-10","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1482">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"5","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1483">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"5","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1484">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":5,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1485">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":5,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1486">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":5,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1487">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":5,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x2 x3 x4 x5</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1488">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"2-5","choixVitesse":400,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1489">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2-5","choixVitesse":600,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1490">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"2-5","choixVitesse":800,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1491">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"2-5","choixVitesse":1000,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1492">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"20","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2-5","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1493">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"20","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2-5","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1494">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"20","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2-5","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1495">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"20","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"2-5","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Table attaque</nom>
+        <exercice uid="1496">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"totalEssai":1,"nom":"table-attaque-as3","plageA":"2-10","temps_question":0,"plageB":"2-5","totalQuestion":1,"defilement":8,"tentative":"30","operateur":[10]}</options>
+        </exercice>
+        <exercice uid="1497">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"operateur":[10],"totalEssai":1,"nom":"table-attaque-as3","plageA":"2-10","temps_question":0,"plageB":"2-5","totalQuestion":1,"defilement":6,"tentative":"30"}</options>
+        </exercice>
+        <exercice uid="1498">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"2-10","temps_question":0,"plageB":"2-5","totalQuestion":1,"defilement":4,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1499">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-5","totalQuestion":1,"defilement":3,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Double, moiti&#xE9;, quadruple, quart</nom>
+        <exercice uid="1500">
+          <nom>Doubl, moiti&#xE9;,quadruple,quart</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nbre_questions":10,"max_essais":2,"temps_max":"80","relation":"double-quadruple","nMin":1,"nMax":1}</options>
+        </exercice>
+        <exercice uid="1501">
+          <nom>Doubl, moiti&#xE9;,quadruple,quart</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nbre_questions":10,"max_essais":1,"temps_max":"180","relation":"double-quadruple","nMin":1,"nMax":1}</options>
+        </exercice>
+        <exercice uid="1502">
+          <nom>Doubl, moiti&#xE9;,quadruple,quart</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nbre_questions":10,"max_essais":1,"temps_max":"300","relation":"double-quadruple","nMin":1,"nMax":1}</options>
+        </exercice>
+        <exercice uid="1503">
+          <nom>Doubl, moiti&#xE9;,quadruple,quart</nom>
+          <fichier>double.swf</fichier>
+          <fichierjs/>
+          <options>{"nbre_questions":10,"max_essais":1,"temps_max":"0","relation":"quadruple","nMin":1,"nMax":1}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Multiclic</nom>
+        <exercice uid="1504">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"5","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"2-5","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1505">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"7","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"2-5","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1506">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"10","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"2-5","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1507">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"totalQuestion":"30","totalEssai":1,"nom":"multiclic-table-as3","temps_exo":0,"temps_question":"0","plageA":"2-5","plageB":"2-10"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1508">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":"2-5","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1509">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":"2-5","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1510">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":"2-5","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1511">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":"2-5","plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x6</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1512">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"6","choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1513">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"6","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1514">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"6","choixVitesse":800,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1515">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-9","temps_question":0,"plageB":"6","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1516">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"5","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"6","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+        </exercice>
+        <exercice uid="1517">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"10","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"6","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+        </exercice>
+        <exercice uid="1518">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"15","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"6","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+        </exercice>
+        <exercice uid="1519">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"20","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"6","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1520">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":6,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1521">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":6,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1522">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":6,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1523">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":6,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x7</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1524">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"7","choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1525">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"choixOperateur":[10],"plageA":"2-10","temps_question":0,"plageB":"7","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1526">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"7","choixVitesse":800,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1527">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"7","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1528">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"7","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1529">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"7","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1530">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"15","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"7","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+        </exercice>
+        <exercice uid="1531">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"temps_question":"20","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"7","nombre_a_trouver":"2-10","temps_max":0,"max_essais":1,"nbre_questions":"15"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1532">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":7,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1533">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":7,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1534">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":7,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1535">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":7,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x8</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1536">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"8","choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1537">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"8","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1538">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"8","choixVitesse":800,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1539">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"8","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1540">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"8","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1541">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"8","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1542">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"8","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1543">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"8","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1544">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":8,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1545">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":8,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1546">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":8,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1547">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":8,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x9</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1548">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"9","choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1549">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"9","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1550">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"9","choixVitesse":800,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1551">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"9","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1552">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1553">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1554">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1555">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1556">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":9,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1557">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":9,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1558">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":9,"plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1559">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":9,"plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Table x6 x7 x8 x9</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1560">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"6-9","temps_question":0,"plageB":"2-10","choixVitesse":400,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1561">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"6-9","temps_question":0,"plageB":"2-10","choixVitesse":600,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1562">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"6-9","temps_question":0,"plageB":"2-10","choixVitesse":800,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1563">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"6-9","temps_question":0,"plageB":"2-10","choixVitesse":1000,"totalTentative":"20","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1564">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"6-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1565">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"6-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1566">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"6-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1567">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"6-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Table attaque</nom>
+        <exercice uid="1568">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"6-9","temps_question":0,"plageB":"2-10","totalQuestion":1,"defilement":8,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1569">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"6-9","temps_question":0,"plageB":"2-10","totalQuestion":1,"defilement":6,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1570">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"6-9","temps_question":0,"plageB":"2-10","totalQuestion":1,"defilement":6,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1571">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"6-9","temps_question":0,"plageB":"2-10","totalQuestion":1,"defilement":4,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Rectangle</nom>
+        <exercice uid="1572">
+          <nom>Rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"nbre_questions":"10","max_essais":1,"temps_max":"120","largeur":"6-9","longueur":"3-10"}</options>
+        </exercice>
+        <exercice uid="1573">
+          <nom>Rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"longueur":"3-10","largeur":"6-9","temps_max":"180","max_essais":1,"nbre_questions":"10"}</options>
+        </exercice>
+        <exercice uid="1574">
+          <nom>Rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"longueur":"3-10","largeur":"6-9","temps_max":"240","max_essais":1,"nbre_questions":"10"}</options>
+        </exercice>
+        <exercice uid="1575">
+          <nom>Rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"nbre_questions":"10","max_essais":1,"temps_max":"0","largeur":"6-9","longueur":"3-10"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Multiclic</nom>
+        <exercice uid="1576">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"5","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"6-9","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1577">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_exo":0,"temps_question":"10","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"6-9","plageB":"2-10"}</options>
+        </exercice>
+        <exercice uid="1578">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"15","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"6-9","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1579">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"0","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"6-9","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1580">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":"6-9","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1581">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":"6-9","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1582">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":"6-9","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1583">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":"6-9","plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+    <competence>
+      <nom>Toutes les tables</nom>
+      <activite>
+        <nom>Quadricalc</nom>
+        <exercice uid="1584">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2-10","choixVitesse":400,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1585">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2-10","choixVitesse":600,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1586">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2-10","choixVitesse":800,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+        <exercice uid="1587">
+          <nom>Quadricalc</nom>
+          <fichier>quadricalc-as3.swf</fichier>
+          <fichierjs>quadricalc</fichierjs>
+          <options>{"plageA":"2-10","temps_question":0,"plageB":"2-10","choixVitesse":1000,"totalTentative":"30","nom":"quadricalc-as3","totalQuestion":1,"totalEssai":1,"choixOperateur":[10]}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Multiclic</nom>
+        <exercice uid="1588">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"5","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"2-9","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1589">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"10","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"2-9","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1590">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"15","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"2-9","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+        <exercice uid="1591">
+          <nom>Multiclic</nom>
+          <fichier>multiclic-table-as3.swf</fichier>
+          <fichierjs>multiclic</fichierjs>
+          <options>{"temps_question":"0","totalEssai":1,"nom":"multiclic-table-as3","totalQuestion":"30","plageA":"2-9","plageB":"2-10","temps_exo":0}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <exercice uid="1592">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"5"}</options>
+        </exercice>
+        <exercice uid="1593">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-9","nombre_donne":"2-10","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+        </exercice>
+        <exercice uid="1594">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2-10","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+        </exercice>
+        <exercice uid="1595">
+          <nom>Op&#xE9;rations &#xE0; trous</nom>
+          <fichier>operations-a-trou3.swf</fichier>
+          <fichierjs>operationsatrous</fichierjs>
+          <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2-10","nombre_donne":"2-10","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Table attaque</nom>
+        <exercice uid="1596">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-10","totalQuestion":1,"defilement":8,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1597">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-9","totalQuestion":1,"defilement":6,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1598">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"totalEssai":1,"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-9","totalQuestion":1,"defilement":4,"tentative":"30","operateur":[10]}</options>
+        </exercice>
+        <exercice uid="1599">
+          <nom>Table attaque</nom>
+          <fichier>table-attaque-as3.swf</fichier>
+          <fichierjs>tableattaque</fichierjs>
+          <options>{"nom":"table-attaque-as3","plageA":"2-9","temps_question":0,"plageB":"2-9","totalQuestion":1,"defilement":3,"tentative":"30","operateur":[10],"totalEssai":1}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Le rectangle</nom>
+        <exercice uid="1600">
+          <nom>Le rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"nbre_questions":"10","max_essais":1,"temps_max":"120","largeur":"3-10","longueur":"3-10"}</options>
+        </exercice>
+        <exercice uid="1601">
+          <nom>Le rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"longueur":"3-10","largeur":"3-10","temps_max":"180","max_essais":1,"nbre_questions":"10"}</options>
+        </exercice>
+        <exercice uid="1602">
+          <nom>Le rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"longueur":"3-10","largeur":"3-10","temps_max":"240","max_essais":1,"nbre_questions":"10"}</options>
+        </exercice>
+        <exercice uid="1603">
+          <nom>Le rectangle</nom>
+          <fichier>rectangle2.swf</fichier>
+          <fichierjs>rectangle</fichierjs>
+          <options>{"longueur":"3-10","largeur":"3-10","temps_max":"0","max_essais":1,"nbre_questions":"10"}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>Tri s&#xE9;lectif</nom>
+        <exercice uid="1604">
+          <nom>Tri s&#xE9;lectif</nom>
+          <fichier>triselectif-as3.swf</fichier>
+          <fichierjs/>
+          <options>{"temps_question":0,"frequence":4,"tables":2,"nom":"triselectif-as3","totalTentative":"20","totalQuestion":1,"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1605">
+          <nom>Tri s&#xE9;lectif</nom>
+          <fichier>triselectif-as3.swf</fichier>
+          <fichierjs/>
+          <options>{"temps_question":0,"frequence":3,"tables":2,"nom":"triselectif-as3","totalTentative":"20","totalQuestion":1,"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1606">
+          <nom>Tri s&#xE9;lectif</nom>
+          <fichier>triselectif-as3.swf</fichier>
+          <fichierjs/>
+          <options>{"temps_question":0,"frequence":2,"tables":2,"nom":"triselectif-as3","totalTentative":"20","totalQuestion":1,"totalEssai":1}</options>
+        </exercice>
+        <exercice uid="1607">
+          <nom>Tri s&#xE9;lectif</nom>
+          <fichier>triselectif-as3.swf</fichier>
+          <fichierjs/>
+          <options>{"temps_question":0,"frequence":2,"tables":1,"nom":"triselectif-as3","totalTentative":"20","totalQuestion":1,"totalEssai":1}</options>
+        </exercice>
+      </activite>
+      <activite>
+        <nom>L'oiseau</nom>
+        <exercice uid="1608">
+          <nom>Niveau 1</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":2,"plageA":"2-9","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1609">
+          <nom>Niveau 2</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":3,"plageA":"2-9","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1610">
+          <nom>Niveau 3</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":4,"plageA":"2-9","plageB":"0-10"}</options>
+        </exercice>
+        <exercice uid="1611">
+          <nom>Niveau 4</nom>
+          <fichier/>
+          <fichierjs>oiseaumultiplication</fichierjs>
+          <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":5,"plageA":"2-9","plageB":"0-10"}</options>
+        </exercice>
+      </activite>
+    </competence>
+  </competence>
+  <competence>
+    <nom>Compl&#xE9;ment d'un entier &#xE0; 10, 20, ... , 20, 200</nom>
+    <activite>
+      <nom>Le compl&#xE9;ment</nom>
+      <exercice uid="1616">
+        <nom>Niveau 1</nom>
+        <fichier>complement-as3.swf</fichier>
+        <fichierjs>complement</fichierjs>
+        <options>{"temps_exo":0,"nom":"complement-as3","temps_question":"5","typeEnonce":[1,2,4],"nombreDonne":"20-90","totalQuestion":"10","totalEssai":1,"typeComplement":0}</options>
+      </exercice>
+      <exercice uid="1617">
+        <nom>Niveau 2</nom>
+        <fichier>complement-as3.swf</fichier>
+        <fichierjs>complement</fichierjs>
+        <options>{"temps_exo":0,"temps_question":"5","typeEnonce":[1,2,4],"nom":"complement-as3","nombreDonne":"20-60","totalQuestion":"10","totalEssai":1,"typeComplement":2}</options>
+      </exercice>
+      <exercice uid="1618">
+        <nom>Niveau 3</nom>
+        <fichier>complement-as3.swf</fichier>
+        <fichierjs>complement</fichierjs>
+        <options>{"temps_exo":0,"temps_question":"15","typeEnonce":[1,2,4],"nom":"complement-as3","nombreDonne":"20-60","totalQuestion":"10","totalEssai":1,"typeComplement":3}</options>
+      </exercice>
+      <exercice uid="1619">
+        <nom>Niveau 4</nom>
+        <fichier>complement-as3.swf</fichier>
+        <fichierjs>complement</fichierjs>
+        <options>{"temps_exo":0,"temps_question":"10","typeEnonce":[1,2,4],"nom":"complement-as3","nombreDonne":"20-90","totalQuestion":"10","totalEssai":1,"typeComplement":3}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>La caisse</nom>
+      <exercice uid="1620">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":5,"temps_question":"12","rendu_opt":1}</options>
+      </exercice>
+      <exercice uid="1621">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":5,"temps_question":"15","rendu_opt":1}</options>
+      </exercice>
+      <exercice uid="1622">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":3,"temps_question":"20","rendu_opt":1}</options>
+      </exercice>
+      <exercice uid="1623">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"temps_question":"0","rendu_opt":1,"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":3}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Math brique</nom>
+      <exercice uid="1624">
+        <nom>Math brique</nom>
+        <fichier>math-brique-as3.swf</fichier>
+        <fichierjs>mbrique</fichierjs>
+        <options>{"nom":"math-brique-as3","temps_exo":"180","totalQuestion":"10","temps_question":"0","totalEssai":1,"typeCalcul":4}</options>
+      </exercice>
+      <exercice uid="1625">
+        <nom>Math brique</nom>
+        <fichier>math-brique-as3.swf</fichier>
+        <fichierjs>mbrique</fichierjs>
+        <options>{"nom":"math-brique-as3","temps_exo":"180","totalQuestion":"10","temps_question":"0","totalEssai":1,"typeCalcul":3}</options>
+      </exercice>
+      <exercice uid="1626">
+        <nom>Math brique</nom>
+        <fichier>math-brique-as3.swf</fichier>
+        <fichierjs>mbrique</fichierjs>
+        <options>{"nom":"math-brique-as3","temps_exo":"180","totalQuestion":"10","temps_question":"0","totalEssai":1,"typeCalcul":2}</options>
+      </exercice>
+      <exercice uid="1627">
+        <nom>Math brique</nom>
+        <fichier>math-brique-as3.swf</fichier>
+        <fichierjs>mbrique</fichierjs>
+        <options>{"nom":"math-brique-as3","temps_exo":"180","totalQuestion":"10","temps_question":"0","totalEssai":1,"typeCalcul":1}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Somme de plusieurs nombres</nom>
+    <activite>
+      <nom>Les nombres sympathiques</nom>
+      <exercice uid="1636">
+        <nom>Les nombres sympathiques</nom>
+        <fichier>nbres-sympas-as3.swf</fichier>
+        <fichierjs>nombresympathique</fichierjs>
+        <options>{"temps_question":0,"nom":"nbres-sympas-as3","effacement":true,"totalEssai":1,"nbreTerme":5,"totalQuestion":10,"sommeSympa":50,"deplacement":false,"temps_expo":"60"}</options>
+      </exercice>
+      <exercice uid="1637">
+        <nom>Les nombres sympathiques</nom>
+        <fichier>nbres-sympas-as3.swf</fichier>
+        <fichierjs>nombresympathique</fichierjs>
+        <options>{"totalEssai":1,"nbreTerme":5,"temps_question":0,"totalQuestion":10,"sommeSympa":20,"deplacement":false,"nom":"nbres-sympas-as3","effacement":true,"temps_expo":"100"}</options>
+      </exercice>
+      <exercice uid="1638">
+        <nom>Les nombres sympathiques</nom>
+        <fichier>nbres-sympas-as3.swf</fichier>
+        <fichierjs>nombresympathique</fichierjs>
+        <options>{"totalEssai":1,"nbreTerme":5,"temps_question":0,"totalQuestion":10,"sommeSympa":50,"deplacement":false,"nom":"nbres-sympas-as3","effacement":false,"temps_expo":"60"}</options>
+      </exercice>
+      <exercice uid="1639">
+        <nom>Les nombres sympathiques</nom>
+        <fichier>nbres-sympas-as3.swf</fichier>
+        <fichierjs>nombresympathique</fichierjs>
+        <options>{"temps_expo":"60","temps_question":0,"nom":"nbres-sympas-as3","effacement":false,"totalEssai":1,"nbreTerme":5,"totalQuestion":10,"sommeSympa":40,"deplacement":true}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Chute de nombres</nom>
+      <exercice uid="1640">
+        <nom>Chute de nombres</nom>
+        <fichier>chutenb1.swf</fichier>
+        <fichierjs/>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1641">
+        <nom>Chute de nombres</nom>
+        <fichier>chutenb1.swf</fichier>
+        <fichierjs/>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1642">
+        <nom>Chute de nombres</nom>
+        <fichier>chutenb1.swf</fichier>
+        <fichierjs/>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1643">
+        <nom>Chute de nombres</nom>
+        <fichier>chutenb1.swf</fichier>
+        <fichierjs/>
+        <options>default</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Addiclic</nom>
+      <exercice uid="1644">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"typeAddition":2,"nom":"addiclic-as3","totalEssai":1,"temps_exo":"60","totalQuestion":10,"tempsExpoCorrection":"30"}</options>
+      </exercice>
+      <exercice uid="1645">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"typeAddition":2,"nom":"addiclic-as3","totalEssai":1,"temps_exo":"120","totalQuestion":10,"tempsExpoCorrection":"30"}</options>
+      </exercice>
+      <exercice uid="1646">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"typeAddition":2,"nom":"addiclic-as3","totalEssai":1,"temps_exo":"180","totalQuestion":10,"tempsExpoCorrection":"30"}</options>
+      </exercice>
+      <exercice uid="1647">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"typeAddition":1,"totalQuestion":10,"tempsExpoCorrection":"30","temps_question":0,"temps_exo":"0","nom":"addiclic-as3","totalEssai":1}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le poisson</nom>
+      <exercice uid="1648">
+        <nom>Niveau 1</nom>
+        <fichier>bocal-as3.swf</fichier>
+        <fichierjs>bocal</fichierjs>
+        <options>{"totalQuestion":"10","nBulleMax":"4","plagePremierNombre":"50-60","totalEssai":1,"plageAutreNombre":"2-9","nom":"bocal-as3","temps_question":0,"choixVitesse":2}</options>
+      </exercice>
+      <exercice uid="1649">
+        <nom>Niveau 2</nom>
+        <fichier>bocal-as3.swf</fichier>
+        <fichierjs>bocal</fichierjs>
+        <options>{"totalQuestion":"10","plagePremierNombre":"80-90","choixVitesse":2,"totalEssai":1,"plageAutreNombre":"2-9","nom":"bocal-as3","nBulleMax":"4","temps_question":0}</options>
+      </exercice>
+      <exercice uid="1650">
+        <nom>Niveau 3</nom>
+        <fichier>bocal-as3.swf</fichier>
+        <fichierjs>bocal</fichierjs>
+        <options>{"totalQuestion":"10","plagePremierNombre":"80-90","choixVitesse":3,"totalEssai":1,"plageAutreNombre":"2-9","nom":"bocal-as3","temps_question":0,"nBulleMax":"4"}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Ajouter retirer des dizaines, des centaines ...</nom>
+    <activite>
+      <nom>Les cibles</nom>
+      <exercice uid="1651">
+        <nom>Les cibles</nom>
+        <fichier>cible-cycle3-3fleches-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"temps_exo":0,"temps_question":"15","totalQuestion":10,"nom":"cible-as3","typeDonnee":2,"totalFleche":3}</options>
+      </exercice>
+      <exercice uid="1652">
+        <nom>Les cibles</nom>
+        <fichier>cible-cycle3-3fleches-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"temps_exo":0,"temps_question":"17","totalQuestion":10,"nom":"cible-as3","typeDonnee":2,"totalFleche":3}</options>
+      </exercice>
+      <exercice uid="1653">
+        <nom>Les cibles</nom>
+        <fichier>cible-cycle3-3fleches-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"temps_exo":0,"temps_question":"20","totalQuestion":10,"typeDonnee":1,"nom":"cible-as3","totalFleche":3}</options>
+      </exercice>
+      <exercice uid="1654">
+        <nom>Les cibles</nom>
+        <fichier>cible-cycle3-3fleches-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"totalQuestion":10,"totalEssai":1,"temps_exo":0,"totalFleche":3,"temps_question":"0","typeDonnee":1,"nom":"cible-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Addiclic</nom>
+      <exercice uid="1655">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"temps_exo":"60","nom":"addiclic-as3","totalEssai":1,"typeAddition":3,"totalQuestion":10,"tempsExpoCorrection":"30"}</options>
+      </exercice>
+      <exercice uid="1656">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"temps_exo":"120","nom":"addiclic-as3","totalEssai":1,"typeAddition":3,"totalQuestion":10,"tempsExpoCorrection":"30"}</options>
+      </exercice>
+      <exercice uid="1657">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"temps_exo":"180","nom":"addiclic-as3","totalEssai":1,"typeAddition":3,"totalQuestion":10,"tempsExpoCorrection":"30"}</options>
+      </exercice>
+      <exercice uid="1658">
+        <nom>Addiclic</nom>
+        <fichier>addiclic-3nombres-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"temps_exo":"0","nom":"addiclic-as3","totalEssai":1,"typeAddition":3,"totalQuestion":10,"tempsExpoCorrection":"30"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Op&#xE9;rations &#xE0; trous</nom>
+      <exercice uid="1659">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":0,"nombre_a_trouver":"10;200;30;400;50;600;70;800;90","nombre_donne":"10;200;30;400;50;600;70;800;90","nDecimalesA":0,"nDecimalesB":0,"operateur":[1,10],"temps_question":"10"}</options>
+      </exercice>
+      <exercice uid="1660">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":0,"nombre_a_trouver":"10;200;30;400;50;600;70;800;90","nombre_donne":"10;200;30;400;50;600;70;800;90","nDecimalesA":0,"nDecimalesB":0,"operateur":[1,10],"temps_question":"15"}</options>
+      </exercice>
+      <exercice uid="1661">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"temps_question":"20","operateur":[1,10],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"10;200;30;400;50;600;70;800;90","nombre_a_trouver":"10;200;30;400;50;600;70;800;90","temps_max":0,"max_essais":1,"nbre_questions":"10"}</options>
+      </exercice>
+      <exercice uid="1662">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":0,"nombre_a_trouver":"100;20;300;40;500;60;700;80;900","nombre_donne":"10;200;30;400;50;600;70;800;90","nDecimalesA":0,"nDecimalesB":0,"operateur":[1,10],"temps_question":"0"}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Ajouter retirer 9, 99, 11, 101 &#xE0; un entier</nom>
+    <activite>
+      <nom>La grenouille</nom>
+      <exercice uid="1663">
+        <nom>La grenouille</nom>
+        <fichier>grenouille-as3.swf</fichier>
+        <fichierjs>grenouille</fichierjs>
+        <options>{"totalQuestion":"2","temps_exo":0,"n_depart":"113;812","totalEssai":1,"temps_question":"25","dX":"101;-101","nom":"grenouille-as3"}</options>
+      </exercice>
+      <exercice uid="1664">
+        <nom>La grenouille</nom>
+        <fichier>grenouille-as3.swf</fichier>
+        <fichierjs>grenouille</fichierjs>
+        <options>{"totalQuestion":"2","temps_exo":0,"n_depart":"27;438","totalEssai":1,"temps_question":"30","dX":"11;-11","nom":"grenouille-as3"}</options>
+      </exercice>
+      <exercice uid="1665">
+        <nom>La grenouille</nom>
+        <fichier>grenouille-as3.swf</fichier>
+        <fichierjs>grenouille</fichierjs>
+        <options>{"totalQuestion":"2","temps_exo":0,"n_depart":"106;732","totalEssai":1,"temps_question":"60","dX":"99;-99","nom":"grenouille-as3"}</options>
+      </exercice>
+      <exercice uid="1666">
+        <nom>La grenouille</nom>
+        <fichier>grenouille-as3.swf</fichier>
+        <fichierjs>grenouille</fichierjs>
+        <options>{"totalQuestion":"2","temps_exo":0,"n_depart":"15;104","totalEssai":1,"temps_question":"120","dX":"9;-9","nom":"grenouille-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Dans les bois</nom>
+      <exercice uid="1667">
+        <nom>Dans les bois</nom>
+        <fichier>lost-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"depart":"346","totalQuestion":"20","nom":"lost-as3","plageA":"9;99;11;101","operateur":3}</options>
+      </exercice>
+      <exercice uid="1668">
+        <nom>Dans les bois</nom>
+        <fichier>lost-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"depart":"682","totalQuestion":"20","nom":"lost-as3","plageA":"9;99;11","operateur":3}</options>
+      </exercice>
+      <exercice uid="1669">
+        <nom>Dans les bois</nom>
+        <fichier>lost-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"depart":"535","totalQuestion":"30","nom":"lost-as3","plageA":"99;101","operateur":3}</options>
+      </exercice>
+      <exercice uid="1670">
+        <nom>Dans les bois</nom>
+        <fichier>lost-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"depart":"45","totalQuestion":"30","nom":"lost-as3","plageA":"9;11","operateur":3}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Addition soustraction de d&#xE9;cimaux simples</nom>
+    <activite>
+      <nom>Quadricalc</nom>
+      <exercice uid="1671">
+        <nom>Niveau 1</nom>
+        <fichier>quadricalc-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"plageB":"0,1;0,9","choixOperateur":[1],"precisionB":10,"precisionA":1,"choixVitesse":1400,"temps_question":0,"totalQuestion":1,"plageA":"50-90","totalEssai":1,"totalTentative":"20","nom":"quadricalc-as3"}</options>
+      </exercice>
+      <exercice uid="1672">
+        <nom>Niveau 2</nom>
+        <fichier>quadricalc-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"plageB":"25-30","choixOperateur":[1],"precisionB":10,"precisionA":10,"choixVitesse":1400,"temps_question":0,"totalQuestion":1,"plageA":"2-9","totalEssai":1,"totalTentative":"20","nom":"quadricalc-as3"}</options>
+      </exercice>
+      <exercice uid="1673">
+        <nom>Niveau 3</nom>
+        <fichier>quadricalc-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"plageB":"0,1-0,9","choixOperateur":[100],"precisionB":10,"precisionA":1,"choixVitesse":1400,"temps_question":0,"totalQuestion":1,"plageA":"50-100","totalEssai":1,"totalTentative":"20","nom":"quadricalc-as3"}</options>
+      </exercice>
+      <exercice uid="1674">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"plageB":"2-3","choixOperateur":[100],"precisionB":10,"precisionA":10,"choixVitesse":1400,"temps_question":0,"totalQuestion":1,"plageA":"65-70","totalEssai":1,"totalTentative":"20","nom":"quadricalc-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Op&#xE9;rations &#xE0; trous</nom>
+      <exercice uid="1675">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"15","max_essais":1,"temps_max":0,"nombre_a_trouver":"2;2.2;3;3.1;4.2;4;5.3;5;6.2;6;7.3;7;8.5;8;9.5;9","nombre_donne":"1.2;2.3;3.4;5.5;1.8;2.9;3.7;4.6","nDecimalesA":0,"nDecimalesB":0,"operateur":[10],"temps_question":"15"}</options>
+      </exercice>
+      <exercice uid="1676">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"temps_question":"15","operateur":[1,10],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"2-9","nombre_a_trouver":"0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;0.9","temps_max":0,"max_essais":1,"nbre_questions":"10"}</options>
+      </exercice>
+      <exercice uid="1677">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"temps_question":"10","operateur":[1],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"2.1;3.5;4.3;5.5;6.9;7.8;8.7","nombre_a_trouver":"0.1;0.2;0.3;0.4;1.2;2.3;3.3;3.4","temps_max":0,"max_essais":1,"nbre_questions":"10"}</options>
+      </exercice>
+      <exercice uid="1678">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":0,"nombre_a_trouver":"0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;0.9","nombre_donne":"2-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[1],"temps_question":"20"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Table attaque</nom>
+      <exercice uid="1679">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;0.9","operateur":[1,100],"tentative":"20","temps_question":0,"defilement":4,"totalEssai":1,"totalQuestion":1,"plageA":"2-9","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1680">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;0.9","operateur":[100],"tentative":"20","totalEssai":1,"temps_question":0,"defilement":4,"totalQuestion":1,"plageA":"2-9","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1681">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"10.1;12.5;13.3;23.4;8.5;3.4;5.2","operateur":[1],"tentative":"20","temps_question":0,"defilement":4,"totalEssai":1,"totalQuestion":1,"plageA":"0.5;1.5;2;3.2;4.5;5.3;6.2;7.1;8.3;9.4","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1682">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"10.1;12.5;13.3;23.4;8.5;3.4;5.2","operateur":[1],"tentative":"20","temps_question":0,"defilement":3,"totalEssai":1,"totalQuestion":1,"plageA":"0.5;1.5;2;3.2;4.5;5.3;6.2;7.1;8.3;9.4","nom":"table-attaque-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Number Crush</nom>
+      <exercice uid="1683">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>numbercrushdecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":5,"cote":3}</options>
+      </exercice>
+      <exercice uid="1684">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>numbercrushdecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":2,"cote":3}</options>
+      </exercice>
+      <exercice uid="1685">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>numbercrushdecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":5,"cote":4}</options>
+      </exercice>
+      <exercice uid="1686">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>numbercrushdecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":1,"totalTentative":10,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":6,"cote":4}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Compl&#xE9;ment d'un d&#xE9;cimal &#xE0; un entier</nom>
+    <activite>
+      <nom>Boule et Boule</nom>
+      <exercice uid="1687">
+        <nom>Niveau 1</nom>
+        <fichier>bouboule-decimaux-as3.swf</fichier>
+        <fichierjs>bouleetbouledecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":6,"totalTentative":5,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[10,20,30,40,50],"typeComplement":0,"delai":0,"totalPaires":5,"nom":"bouboule-as3","temps_exo":0,"temps_question":0}</options>
+      </exercice>
+      <exercice uid="1688">
+        <nom>Niveau 2</nom>
+        <fichier>bouboule-decimaux-as3.swf</fichier>
+        <fichierjs>bouleetbouledecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":5,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[20,30,40,50,60],"typeComplement":1,"delai":10,"totalPaires":5,"nom":"bouboule-as3","temps_exo":0,"temps_question":0}</options>
+      </exercice>
+      <exercice uid="1689">
+        <nom>Niveau 3</nom>
+        <fichier>bouboule-decimaux-as3.swf</fichier>
+        <fichierjs>bouleetbouledecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":6,"totalTentative":5,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[30,40,50,60,70],"typeComplement":1,"delai":10,"totalPaires":5,"nom":"bouboule-as3","temps_question":0,"temps_exo":0}</options>
+      </exercice>
+      <exercice uid="1690">
+        <nom>Niveau 4</nom>
+        <fichier>bouboule-decimaux-as3.swf</fichier>
+        <fichierjs>bouleetbouledecimaux</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":5,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[50,60,70,80,90],"typeComplement":1,"delai":5,"totalPaires":5,"nom":"bouboule-as3","temps_exo":0,"temps_question":0}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le compl&#xE9;ment</nom>
+      <exercice uid="1691">
+        <nom>Niveau 1</nom>
+        <fichier>complement-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_exo":0,"typeComplement":0,"totalEssai":1,"temps_question":"0","nom":"complement-decimaux-as3","totalQuestion":"10","typeDecimal":0,"typeEnonce":[1,2],"nombreDonne":"0-1"}</options>
+      </exercice>
+      <exercice uid="1692">
+        <nom>Niveau 2</nom>
+        <fichier>complement-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_exo":0,"typeComplement":0,"totalEssai":1,"temps_question":"0","nom":"complement-decimaux-as3","totalQuestion":"10","typeDecimal":0,"typeEnonce":[1,2],"nombreDonne":"0-1"}</options>
+      </exercice>
+      <exercice uid="1693">
+        <nom>Niveau 3</nom>
+        <fichier>complement-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_exo":0,"typeComplement":0,"typeEnonce":[1,2],"temps_question":"0","totalQuestion":"10","nom":"complement-decimaux-as3","typeDecimal":1,"totalEssai":1,"nombreDonne":"0-1"}</options>
+      </exercice>
+      <exercice uid="1694">
+        <nom>Niveau 4</nom>
+        <fichier>complement-decimaux-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_exo":0,"typeComplement":1,"totalEssai":1,"temps_question":"0","totalQuestion":"10","nom":"complement-decimaux-as3","typeDecimal":1,"typeEnonce":[1,2],"nombreDonne":"0-1"}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Multiplier un entier par 10, 20, ... , 100, 200</nom>
+    <activite>
+      <nom>Quadricalc</nom>
+      <exercice uid="1695">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"totalQuestion":1,"plageA":"20;300;40;50;6;70;700;80;800;90","plageB":"2;30;4;50;6;70;8;90","choixOperateur":[10],"choixVitesse":600,"totalTentative":"30","totalEssai":1,"temps_question":0,"nom":"quadricalc-as3"}</options>
+      </exercice>
+      <exercice uid="1696">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"temps_question":0,"plageB":"200;30;400;50;600;70;800;90","choixOperateur":[10],"choixVitesse":800,"totalTentative":"20","totalEssai":1,"nom":"quadricalc-as3","totalQuestion":1,"plageA":"2;3;4;5;60;70;80;90"}</options>
+      </exercice>
+      <exercice uid="1697">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"temps_question":0,"choixOperateur":[10],"choixVitesse":1400,"totalTentative":"20","totalEssai":1,"nom":"quadricalc-as3","totalQuestion":1,"plageA":"20;30;40;50;60;70;80;90","plageB":"20;30;40;5;6;700;800;900"}</options>
+      </exercice>
+      <exercice uid="1698">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"totalEssai":1,"temps_question":0,"plageB":"10;20;30;40;50;600;700;800;900","totalQuestion":1,"totalTentative":"20","nom":"quadricalc-as3","choixOperateur":[10],"choixVitesse":1400,"plageA":"2-9"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Op&#xE9;rations &#xE0; trous</nom>
+      <exercice uid="1699">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"20","max_essais":1,"temps_max":0,"nombre_a_trouver":"200;3;40;500;60;7;800;90;9","nombre_donne":"20;3;4;50;60;70;8;9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"10"}</options>
+      </exercice>
+      <exercice uid="1700">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":0,"nombre_a_trouver":"20;300;40;500;600;70;800;90","nombre_donne":"2;30;4;50;6;70;8;90","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"15"}</options>
+      </exercice>
+      <exercice uid="1701">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":0,"nombre_a_trouver":"20;300;40;500;60;700;80;900","nombre_donne":"2-9","nDecimalesA":0,"nDecimalesB":0,"operateur":[100],"temps_question":"20"}</options>
+      </exercice>
+      <exercice uid="1702">
+        <nom>Op&#xE9;rations &#xE0; trous</nom>
+        <fichier>operations-a-trou3.swf</fichier>
+        <fichierjs>operationsatrous</fichierjs>
+        <options>{"temps_question":"0","operateur":[100],"nDecimalesB":0,"nDecimalesA":0,"nombre_donne":"2-9","nombre_a_trouver":"20;30;40;50;60;70;80;90","temps_max":0,"max_essais":1,"nbre_questions":"10"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Table attaque</nom>
+      <exercice uid="1703">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"20;300;40;500;60;600;70;80;900","operateur":[10],"tentative":"20","totalEssai":1,"temps_question":0,"defilement":6,"totalQuestion":1,"plageA":"20;3;40;5;60;6;70;8;90","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1704">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"20;300;40;500;60;600;70;80;900","operateur":[10],"tentative":"20","totalEssai":1,"temps_question":0,"defilement":6,"totalQuestion":1,"plageA":"20;3;40;5;60;6;70;8;90","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1705">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageA":"2-9","nom":"table-attaque-as3","plageB":"20;300;30;400;50;600;70;800;90","operateur":[10],"tentative":"20","temps_question":0,"defilement":3,"totalEssai":1,"totalQuestion":1}</options>
+      </exercice>
+      <exercice uid="1706">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageA":"2-9","nom":"table-attaque-as3","plageB":"20;30;40;50;60;70;80;90","operateur":[10],"tentative":"20","totalEssai":1,"temps_question":0,"defilement":3,"totalQuestion":1}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Basketmath</nom>
+      <exercice uid="1707">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>basketmath3p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[1,2,3],"niveau":0}</options>
+      </exercice>
+      <exercice uid="1708">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>basketmath3p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[1,2,3],"niveau":1}</options>
+      </exercice>
+      <exercice uid="1709">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>basketmath3p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[1,2,3],"niveau":2}</options>
+      </exercice>
+      <exercice uid="1710">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>basketmath3p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":120,"tempsQuestion":0,"estRejouable":true,"cible":[1,2,3],"niveau":2}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Calculer le quotient exact d'une division</nom>
+    <activite>
+      <nom>Quadricalc</nom>
+      <exercice uid="1711">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"totalQuestion":1,"nom":"quadricalc-as3","choixOperateur":[1000],"totalEssai":1,"plageA":"2-9","plageB":"2-9","choixVitesse":400,"totalTentative":"30","temps_question":0}</options>
+      </exercice>
+      <exercice uid="1712">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"choixOperateur":[1000],"totalEssai":1,"plageA":"2-9","plageB":"2-9","choixVitesse":800,"totalTentative":"20","temps_question":0,"totalQuestion":1,"nom":"quadricalc-as3"}</options>
+      </exercice>
+      <exercice uid="1713">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"choixOperateur":[10],"totalEssai":1,"plageA":"2-9","plageB":"2-9","choixVitesse":1000,"totalTentative":"20","temps_question":0,"totalQuestion":1,"nom":"quadricalc-as3"}</options>
+      </exercice>
+      <exercice uid="1714">
+        <nom>Quadricalc</nom>
+        <fichier>quadricalc-as3.swf</fichier>
+        <fichierjs>quadricalc</fichierjs>
+        <options>{"plageB":"2-9","choixOperateur":[1000],"choixVitesse":1400,"totalTentative":"20","totalEssai":1,"nom":"quadricalc-as3","totalQuestion":1,"plageA":"2-9","temps_question":0}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Table attaque</nom>
+      <exercice uid="1715">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"2-9","operateur":[1000],"tentative":"20","temps_question":0,"defilement":6,"totalEssai":1,"totalQuestion":1,"plageA":"2-12","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1716">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"2-9","operateur":[1000],"tentative":"20","temps_question":0,"defilement":4,"totalEssai":1,"totalQuestion":1,"plageA":"2-9","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1717">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"2-9","operateur":[1000],"tentative":"20","temps_question":0,"defilement":4,"totalEssai":1,"totalQuestion":1,"plageA":"2-9","nom":"table-attaque-as3"}</options>
+      </exercice>
+      <exercice uid="1718">
+        <nom>Table attaque</nom>
+        <fichier>table-attaque-as3.swf</fichier>
+        <fichierjs>tableattaque</fichierjs>
+        <options>{"plageB":"2-9","operateur":[1000],"tentative":"20","totalEssai":1,"temps_question":0,"defilement":3,"totalQuestion":1,"plageA":"2-9","nom":"table-attaque-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Les brickators</nom>
+      <exercice uid="1719">
+        <nom>Niveau 1</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"defilement":1,"operateur":[1000],"totalTentative":"20","plageB":"2-9","plageA":"2-9","totalEssai":1,"nom":"brickators-as3","totalQuestion":1,"temps_question":0}</options>
+      </exercice>
+      <exercice uid="1720">
+        <nom>Niveau 2</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"defilement":1.3,"operateur":[1000],"totalTentative":"20","plageB":"2-9","plageA":"2-9","totalEssai":1,"nom":"brickators-as3","totalQuestion":1,"temps_question":0}</options>
+      </exercice>
+      <exercice uid="1721">
+        <nom>Niveau 3</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"defilement":1.6,"operateur":[1000],"totalTentative":"20","plageB":"2-9","plageA":"2-9","totalEssai":1,"nom":"brickators-as3","totalQuestion":1,"temps_question":0}</options>
+      </exercice>
+      <exercice uid="1722">
+        <nom>Niveau 4</nom>
+        <fichier>brickators-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"defilement":1.9,"operateur":[1000],"totalTentative":"20","plageB":"2-9","plageA":"2-9","totalEssai":1,"nom":"brickators-as3","totalQuestion":1,"temps_question":0}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Calculer le quotient et le reste d'une division</nom>
+    <activite>
+      <nom>Diviclic</nom>
+      <exercice uid="1723">
+        <nom>Diviclic</nom>
+        <fichier>diviclic-as3.swf</fichier>
+        <fichierjs>diviclic</fichierjs>
+        <options>{"temps_exo":"180","totalQuestion":10,"nom":"diviclic-as3","temps_question":0,"totalEssai":1,"afficherAide":true,"typeDivision":6}</options>
+      </exercice>
+      <exercice uid="1724">
+        <nom>Diviclic</nom>
+        <fichier>diviclic-as3.swf</fichier>
+        <fichierjs>diviclic</fichierjs>
+        <options>{"temps_exo":"180","totalQuestion":10,"nom":"diviclic-as3","temps_question":0,"totalEssai":1,"afficherAide":true,"typeDivision":5}</options>
+      </exercice>
+      <exercice uid="1725">
+        <nom>Diviclic</nom>
+        <fichier>diviclic-as3.swf</fichier>
+        <fichierjs>diviclic</fichierjs>
+        <options>{"temps_exo":"240","totalQuestion":10,"nom":"diviclic-as3","temps_question":0,"totalEssai":1,"afficherAide":true,"typeDivision":3}</options>
+      </exercice>
+      <exercice uid="1726">
+        <nom>Diviclic</nom>
+        <fichier>diviclic-as3.swf</fichier>
+        <fichierjs>diviclic</fichierjs>
+        <options>{"temps_exo":"0","totalQuestion":10,"nom":"diviclic-as3","temps_question":0,"totalEssai":1,"afficherAide":true,"typeDivision":1}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Tri s&#xE9;lectif</nom>
+      <exercice uid="1727">
+        <nom>Tri s&#xE9;lectif</nom>
+        <fichier>triselectif-as3-reste.swf</fichier>
+        <fichierjs/>
+        <options>{"nom":"triselectif-as3","totalQuestion":1,"temps_exo":"0","diviseur":9,"totalTentative":"20","totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1728">
+        <nom>Tri s&#xE9;lectif</nom>
+        <fichier>triselectif-as3-reste.swf</fichier>
+        <fichierjs/>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1729">
+        <nom>Tri s&#xE9;lectif</nom>
+        <fichier>triselectif-as3-reste.swf</fichier>
+        <fichierjs/>
+        <options>{"nom":"triselectif-as3","totalQuestion":1,"temps_exo":"0","diviseur":7,"totalTentative":"20","totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1730">
+        <nom>Tri s&#xE9;lectif</nom>
+        <fichier>triselectif-as3-reste.swf</fichier>
+        <fichierjs/>
+        <options>{"nom":"triselectif-as3","totalTentative":"20","temps_exo":"0","diviseur":6,"totalQuestion":1,"totalEssai":1}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Estimer un ordre de grandeur d'une somme</nom>
+    <activite>
+      <nom>Le plus proche</nom>
+      <exercice uid="1631">
+        <nom>Niveau 1</nom>
+        <fichier>approximation-as3-somme.swf</fichier>
+        <fichierjs>approximationsomme</fichierjs>
+        <options>{"totalEssai":1,"nom":"approximation-as3","temps_exo":"0","niveau":1,"temps_question":0,"totalQuestion":"10"}</options>
+      </exercice>
+      <exercice uid="1630">
+        <nom>Niveau 2</nom>
+        <fichier>approximation-as3-somme.swf</fichier>
+        <fichierjs>approximationsomme</fichierjs>
+        <options>{"totalEssai":1,"nom":"approximation-as3","temps_exo":"120","niveau":2,"temps_question":0,"totalQuestion":"10"}</options>
+      </exercice>
+      <exercice uid="1629">
+        <nom>Niveau 3</nom>
+        <fichier>approximation-as3-somme.swf</fichier>
+        <fichierjs>approximationsomme</fichierjs>
+        <options>{"totalEssai":1,"nom":"approximation-as3","temps_exo":"120","niveau":4,"temps_question":0,"totalQuestion":"10"}</options>
+      </exercice>
+      <exercice uid="1628">
+        <nom>Niveau 4</nom>
+        <fichier>approximation-as3-somme.swf</fichier>
+        <fichierjs>approximationsomme</fichierjs>
+        <options>{"totalEssai":1,"nom":"approximation-as3","temps_exo":"120","niveau":5,"temps_question":0,"totalQuestion":"10"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Les plan&#xE8;tes</nom>
+      <exercice uid="1632">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>planeteaddition</fichierjs>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1633">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>planeteaddition</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":120,"tempsQuestion":0,"estRejouable":true,"typeOperation":"addition","niveau":1}</options>
+      </exercice>
+      <exercice uid="1634">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>planeteaddition</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"typeOperation":"addition","niveau":2}</options>
+      </exercice>
+      <exercice uid="1635">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>planeteaddition</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":180,"tempsQuestion":0,"estRejouable":true,"typeOperation":"addition","niveau":2}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Estimer un ordre de grandeur d'un produit</nom>
+    <activite>
+      <nom>Plan&#xE8;tes</nom>
+      <exercice uid="1731">
+        <nom>Plan&#xE8;tes</nom>
+        <fichier>planete-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>{"typeOperation":"multiplication","temps_exo":"120","totalQuestion":"10","nom":"planete-as3","temps_question":0,"totalEssai":1,"niveau":1}</options>
+      </exercice>
+      <exercice uid="1732">
+        <nom>Plan&#xE8;tes</nom>
+        <fichier>planete-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_exo":"120","totalQuestion":"10","nom":"planete-as3","temps_question":0,"totalEssai":1,"typeOperation":"multiplication","niveau":2}</options>
+      </exercice>
+      <exercice uid="1733">
+        <nom>Plan&#xE8;tes</nom>
+        <fichier>planete-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"temps_exo":"0","totalQuestion":"10","nom":"planete-as3","temps_question":0,"typeOperation":"multiplication","niveau":3}</options>
+      </exercice>
+      <exercice uid="1734">
+        <nom>Plan&#xE8;tes</nom>
+        <fichier>planete-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>{"typeOperation":"multiplication","temps_exo":"0","totalQuestion":"10","nom":"planete-as3","temps_question":0,"totalEssai":1,"niveau":4}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le plus proche</nom>
+      <exercice uid="1735">
+        <nom>Le plus proche</nom>
+        <fichier>approximation-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"nom":"approximation-as3","temps_exo":"120","niveau":4,"temps_question":0,"totalQuestion":"10"}</options>
+      </exercice>
+      <exercice uid="1736">
+        <nom>Le plus proche</nom>
+        <fichier>approximation-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"nom":"approximation-as3","temps_exo":"120","niveau":3,"temps_question":0,"totalQuestion":"10"}</options>
+      </exercice>
+      <exercice uid="1737">
+        <nom>Le plus proche</nom>
+        <fichier>approximation-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"nom":"approximation-as3","temps_exo":"120","niveau":2,"temps_question":0,"totalQuestion":"10"}</options>
+      </exercice>
+      <exercice uid="1738">
+        <nom>Le plus proche</nom>
+        <fichier>approximation-as3-multiplication.swf</fichier>
+        <fichierjs/>
+        <options>default</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>Double, moiti&#xE9;, quadruple, quart, triple, tiers</nom>
+    <activite>
+      <nom>Double,moiti&#xE9;</nom>
+      <exercice uid="1739">
+        <nom>Double,moiti&#xE9;</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nMax":2,"nMin":1,"relation":"double","temps_max":"80","max_essais":1,"nbre_questions":10}</options>
+      </exercice>
+      <exercice uid="1740">
+        <nom>Double,moiti&#xE9;</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"120","relation":"double","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1741">
+        <nom>Double,moiti&#xE9;</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"180","relation":"double","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1742">
+        <nom>Double,moiti&#xE9;</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"0","relation":"double","nMin":1,"nMax":2}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Triple , tiers</nom>
+      <exercice uid="1743">
+        <nom>Triple , tiers</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nMax":2,"nMin":1,"relation":"triple","temps_max":"80","max_essais":2,"nbre_questions":10}</options>
+      </exercice>
+      <exercice uid="1744">
+        <nom>Triple , tiers</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"120","relation":"triple","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1745">
+        <nom>Triple , tiers</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"180","relation":"triple","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1746">
+        <nom>Triple , tiers</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"0","relation":"triple","nMin":1,"nMax":2}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Quadruple, quart</nom>
+      <exercice uid="1747">
+        <nom>Quadruple, quart</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nMax":2,"nMin":1,"relation":"quadruple","temps_max":"80","max_essais":1,"nbre_questions":10}</options>
+      </exercice>
+      <exercice uid="1748">
+        <nom>Quadruple, quart</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"120","relation":"quadruple","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1749">
+        <nom>Quadruple, quart</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"180","relation":"quadruple","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1750">
+        <nom>Quadruple, quart</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"0","relation":"quadruple","nMin":1,"nMax":2}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Double,triple,quadruple, ...</nom>
+      <exercice uid="1751">
+        <nom>Double,triple,quadruple, ...</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"80","relation":"double-triple-quadruple","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1752">
+        <nom>Double,triple,quadruple, ...</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"120","relation":"double-triple-quadruple","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1753">
+        <nom>Double,triple,quadruple, ...</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"180","relation":"double-triple-quadruple","nMin":1,"nMax":2}</options>
+      </exercice>
+      <exercice uid="1754">
+        <nom>Double,triple,quadruple, ...</nom>
+        <fichier>double.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":10,"max_essais":1,"temps_max":"0","relation":"double-triple-quadruple","nMin":1,"nMax":2}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Lancers Francs</nom>
+      <exercice uid="1428936019710">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>basketmath2p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[1,2],"typeMultiple":1}</options>
+      </exercice>
+      <exercice uid="1428936037909">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>basketmath2p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":8,"estRejouable":true,"cible":[1,2],"typeMultiple":1}</options>
+      </exercice>
+      <exercice uid="1428936050480">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>basketmath2p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"cible":[1,2],"typeMultiple":2}</options>
+      </exercice>
+      <exercice uid="1428936062835">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>basketmath2p</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":8,"estRejouable":true,"cible":[1,2],"typeMultiple":2}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>R&#xE9;soudre des probl&#xE8;mes avec l'addition et la soustraction</nom>
+    <activite>
+      <nom>La caisse</nom>
+      <exercice uid="1755">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":2,"temps_question":"60","rendu_opt":0}</options>
+      </exercice>
+      <exercice uid="1756">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":1,"temps_question":"60","rendu_opt":0}</options>
+      </exercice>
+      <exercice uid="1757">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":2,"temps_question":"60","rendu_opt":1}</options>
+      </exercice>
+      <exercice uid="1758">
+        <nom>La caisse</nom>
+        <fichier>lacaisse-as3.swf</fichier>
+        <fichierjs>lacaisse</fichierjs>
+        <options>{"temps_question":"0","rendu_opt":1,"totalEssai":1,"totalQuestion":"5","nom":"lacaisse-as3","rendu_precision":1}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le bus</nom>
+      <exercice uid="1759">
+        <nom>Le bus</nom>
+        <fichier>bus-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"maxPassagers":"9","totalEssai":1,"temps_exo":"0","temps_question":0,"totalQuestion":"10","nom":"bus-as3","maxES":"10","vitesse":"rapide"}</options>
+      </exercice>
+      <exercice uid="1760">
+        <nom>Le bus</nom>
+        <fichier>bus-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"maxPassagers":"9","totalEssai":1,"temps_exo":"0","temps_question":0,"totalQuestion":"8","nom":"bus-as3","maxES":"8","vitesse":"rapide"}</options>
+      </exercice>
+      <exercice uid="1761">
+        <nom>Le bus</nom>
+        <fichier>bus-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"maxPassagers":"9","totalEssai":1,"maxES":"6","temps_exo":"0","temps_question":0,"totalQuestion":"6","nom":"bus-as3","vitesse":"moyenne"}</options>
+      </exercice>
+      <exercice uid="1762">
+        <nom>Le bus</nom>
+        <fichier>bus-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"maxPassagers":"9","totalQuestion":"10","maxES":"4","temps_exo":"0","temps_question":0,"totalEssai":1,"nom":"bus-as3","vitesse":"moyenne"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le croupier</nom>
+      <exercice uid="1763">
+        <nom>Le croupier</nom>
+        <fichier>croupier.swf</fichier>
+        <fichierjs>croupier</fichierjs>
+        <options>{"nbre_questions":"9","max_essais":1,"maxCartes":"9","temps_max":"180"}</options>
+      </exercice>
+      <exercice uid="1764">
+        <nom>Le croupier</nom>
+        <fichier>croupier.swf</fichier>
+        <fichierjs>croupier</fichierjs>
+        <options>{"nbre_questions":"7","max_essais":1,"maxCartes":"8","temps_max":"180"}</options>
+      </exercice>
+      <exercice uid="1765">
+        <nom>Le croupier</nom>
+        <fichier>croupier.swf</fichier>
+        <fichierjs>croupier</fichierjs>
+        <options>{"nbre_questions":"5","max_essais":1,"maxCartes":"8","temps_max":"120"}</options>
+      </exercice>
+      <exercice uid="1766">
+        <nom>Le croupier</nom>
+        <fichier>croupier.swf</fichier>
+        <fichierjs>croupier</fichierjs>
+        <options>{"nbre_questions":"5","max_essais":1,"maxCartes":"5","temps_max":"180"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le tapis de cartes</nom>
+      <exercice uid="1767">
+        <nom>Le tapis de cartes</nom>
+        <fichier>tapis-cartes.swf</fichier>
+        <fichierjs>tapisdecarte</fichierjs>
+        <options>{"temps_max":"180","max_essais":1,"nbre_questions":"5"}</options>
+      </exercice>
+      <exercice uid="1768">
+        <nom>Le tapis de cartes</nom>
+        <fichier>tapis-cartes.swf</fichier>
+        <fichierjs>tapisdecarte</fichierjs>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"200"}</options>
+      </exercice>
+      <exercice uid="1769">
+        <nom>Le tapis de cartes</nom>
+        <fichier>tapis-cartes.swf</fichier>
+        <fichierjs>tapisdecarte</fichierjs>
+        <options>{"temps_max":"220","max_essais":1,"nbre_questions":"5"}</options>
+      </exercice>
+      <exercice uid="1770">
+        <nom>Le tapis de cartes</nom>
+        <fichier>tapis-cartes.swf</fichier>
+        <fichierjs>tapisdecarte</fichierjs>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"0"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Les &#xE9;tag&#xE8;res</nom>
+      <exercice uid="1771">
+        <nom>Les &#xE9;tag&#xE8;res</nom>
+        <fichier>etageres2.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"240","type_nombre":5}</options>
+      </exercice>
+      <exercice uid="1772">
+        <nom>Les &#xE9;tag&#xE8;res</nom>
+        <fichier>etageres2.swf</fichier>
+        <fichierjs/>
+        <options>{"type_nombre":5,"temps_max":"300","max_essais":1,"nbre_questions":"5"}</options>
+      </exercice>
+      <exercice uid="1773">
+        <nom>Les &#xE9;tag&#xE8;res</nom>
+        <fichier>etageres2.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"300","type_nombre":4}</options>
+      </exercice>
+      <exercice uid="1774">
+        <nom>Les &#xE9;tag&#xE8;res</nom>
+        <fichier>etageres2.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"0","type_nombre":2}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le supermarch&#xE9;</nom>
+      <exercice uid="1775">
+        <nom>Niveau 1</nom>
+        <fichier>supermarche-as3-euros-centimes.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"niveau":2,"totalQuestion":"10","nom":"supermarche-as3-euros-cents","totalEssai":1,"vitesse":3,"temps_exo":0}</options>
+      </exercice>
+      <exercice uid="1776">
+        <nom>Niveau 2</nom>
+        <fichier>supermarche-as3-euros-centimes.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"niveau":3,"totalQuestion":"10","nom":"supermarche-as3-euros-cents","totalEssai":1,"vitesse":3,"temps_exo":0}</options>
+      </exercice>
+      <exercice uid="1777">
+        <nom>Niveau 3</nom>
+        <fichier>supermarche-as3-euros-centimes.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"niveau":4,"totalQuestion":"10","nom":"supermarche-as3-euros-cents","totalEssai":1,"vitesse":3,"temps_exo":0}</options>
+      </exercice>
+      <exercice uid="1778">
+        <nom>Niveau 4</nom>
+        <fichier>supermarche-as3-euros-centimes.swf</fichier>
+        <fichierjs/>
+        <options>{"temps_question":0,"niveau":5,"totalQuestion":"10","nom":"supermarche-as3-euros-cents","totalEssai":1,"vitesse":3,"temps_exo":0}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le viaduc</nom>
+      <exercice uid="1779">
+        <nom>niveau 1</nom>
+        <fichier>viaduc-as3.swf</fichier>
+        <fichierjs>viaduc</fichierjs>
+        <options>{"nom":"viaduc-as3","typeDifficulte":3,"totalQuestion":5,"temps_question":"60","totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1780">
+        <nom>niveau 2</nom>
+        <fichier>viaduc-as3.swf</fichier>
+        <fichierjs>viaduc</fichierjs>
+        <options>{"totalEssai":1,"typeDifficulte":4,"totalQuestion":5,"nom":"viaduc-as3","temps_question":"60"}</options>
+      </exercice>
+      <exercice uid="1781">
+        <nom>niveau 3</nom>
+        <fichier>viaduc-as3.swf</fichier>
+        <fichierjs>viaduc</fichierjs>
+        <options>{"temps_question":"60","typeDifficulte":5,"totalQuestion":5,"nom":"viaduc-as3","totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1782">
+        <nom>niveau 4</nom>
+        <fichier>viaduc-as3.swf</fichier>
+        <fichierjs>viaduc</fichierjs>
+        <options>{"totalEssai":1,"typeDifficulte":5,"totalQuestion":5,"temps_question":"35","nom":"viaduc-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>La recette</nom>
+      <exercice uid="1783">
+        <nom>Niveau 1</nom>
+        <fichier>recette-as3.swf</fichier>
+        <fichierjs>recette</fichierjs>
+        <options>{"nom":"recette-as3","totalQuestion":10,"totalEssai":1,"niveau":0,"temps_exo":0,"temps_question":"0"}</options>
+      </exercice>
+      <exercice uid="1784">
+        <nom>Niveau 2</nom>
+        <fichier>recette-as3.swf</fichier>
+        <fichierjs>recette</fichierjs>
+        <options>{"nom":"recette-as3","totalQuestion":10,"totalEssai":1,"niveau":1,"temps_exo":0,"temps_question":"0"}</options>
+      </exercice>
+      <exercice uid="1785">
+        <nom>Niveau 3</nom>
+        <fichier>recette-as3.swf</fichier>
+        <fichierjs>recette</fichierjs>
+        <options>{"nom":"recette-as3","totalQuestion":10,"totalEssai":1,"niveau":3,"temps_exo":0,"temps_question":"0"}</options>
+      </exercice>
+      <exercice uid="1786">
+        <nom>Niveau 4</nom>
+        <fichier>recette-as3.swf</fichier>
+        <fichierjs>recette</fichierjs>
+        <options>{"nom":"recette-as3","totalQuestion":10,"totalEssai":1,"niveau":2,"temps_exo":0,"temps_question":"0"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le catalogue</nom>
+      <exercice uid="1787">
+        <nom>Niveau 1</nom>
+        <fichier>catalogue-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"nom":"catalogue-as3","typeCoeff":1,"temps_exo":0,"totalQuestion":10,"temps_question":0,"totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1788">
+        <nom>Niveau 2</nom>
+        <fichier>catalogue-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"typeCoeff":2,"temps_exo":0,"totalQuestion":10,"temps_question":0,"nom":"catalogue-as3"}</options>
+      </exercice>
+      <exercice uid="1789">
+        <nom>Niveau 3</nom>
+        <fichier>catalogue-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"nom":"catalogue-as3","typeCoeff":3,"temps_exo":0,"totalQuestion":10,"temps_question":0,"totalEssai":1}</options>
+      </exercice>
+      <exercice uid="1790">
+        <nom>Niveau 4</nom>
+        <fichier>catalogue-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"totalEssai":1,"typeCoeff":4,"temps_exo":0,"totalQuestion":10,"temps_question":0,"nom":"catalogue-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>La balance ++</nom>
+      <exercice uid="1791">
+        <nom>niveau 1</nom>
+        <fichier>balance-plus-as3.swf</fichier>
+        <fichierjs>balanceadd</fichierjs>
+        <options>{"totalEssai":2,"temps_exo":0,"temps_question":"0","typeCalcul":0,"totalQuestion":"5","nom":"balance-plus-as3"}</options>
+      </exercice>
+      <exercice uid="1792">
+        <nom>niveau 2</nom>
+        <fichier>balance-plus-as3.swf</fichier>
+        <fichierjs>balanceadd</fichierjs>
+        <options>{"totalEssai":2,"temps_exo":0,"temps_question":"20","typeCalcul":1,"totalQuestion":"5","nom":"balance-plus-as3"}</options>
+      </exercice>
+      <exercice uid="1793">
+        <nom>niveau 3</nom>
+        <fichier>balance-plus-as3.swf</fichier>
+        <fichierjs>balanceadd</fichierjs>
+        <options>{"totalEssai":2,"temps_exo":0,"temps_question":"20","typeCalcul":2,"totalQuestion":"5","nom":"balance-plus-as3"}</options>
+      </exercice>
+      <exercice uid="1794">
+        <nom>niveau 4</nom>
+        <fichier>balance-plus-as3.swf</fichier>
+        <fichierjs>balanceadd</fichierjs>
+        <options>{"totalEssai":2,"temps_exo":0,"temps_question":"18","typeCalcul":2,"totalQuestion":"5","nom":"balance-plus-as3"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Les &#xE9;l&#xE9;phants</nom>
+      <exercice uid="1795">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>elephants</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"chargeMax":5000,"totalElephant":8}</options>
+      </exercice>
+      <exercice uid="1796">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>elephants</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":300,"tempsQuestion":0,"estRejouable":true,"chargeMax":5000,"totalElephant":8}</options>
+      </exercice>
+      <exercice uid="1797">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>elephants</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":240,"tempsQuestion":0,"estRejouable":true,"chargeMax":5000,"totalElephant":8}</options>
+      </exercice>
+      <exercice uid="1798">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>elephants</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":180,"tempsQuestion":0,"estRejouable":true,"chargeMax":5000,"totalElephant":8}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>D&#xE9;collage imm&#xE9;diat</nom>
+      <exercice uid="1412342124048">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>decollage</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"typeQ":1}</options>
+      </exercice>
+      <exercice uid="1412342138878">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>decollage</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"typeQ":2}</options>
+      </exercice>
+      <exercice uid="1412342152432">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>decollage</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"typeQ":3}</options>
+      </exercice>
+      <exercice uid="1412342173932">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>decollage</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":180,"tempsQuestion":0,"estRejouable":true,"typeQ":1}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>La frise</nom>
+      <exercice uid="1412512448285">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>frise</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":30,"estRejouable":true,"niveau":1}</options>
+      </exercice>
+      <exercice uid="1412512479971">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>frise</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":40,"estRejouable":true,"niveau":2}</options>
+      </exercice>
+      <exercice uid="1412512501595">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>frise</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":50,"estRejouable":true,"niveau":3}</options>
+      </exercice>
+      <exercice uid="1412512515970">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>frise</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":10,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":60,"estRejouable":true,"niveau":4}</options>
+      </exercice>
+    </activite>
+  </competence>
+  <competence>
+    <nom>R&#xE9;soudre des probl&#xE8;mes avec la multiplication et la division</nom>
+    <activite>
+      <nom>Le d&#xE9;fil&#xE9;</nom>
+      <exercice uid="1799">
+        <nom>Le d&#xE9;fil&#xE9;</nom>
+        <fichier>defilev1.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"60"}</options>
+      </exercice>
+      <exercice uid="1800">
+        <nom>Le d&#xE9;fil&#xE9;</nom>
+        <fichier>defilev1.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"80"}</options>
+      </exercice>
+      <exercice uid="1801">
+        <nom>Le d&#xE9;fil&#xE9;</nom>
+        <fichier>defilev1.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":2,"temps_max":"120"}</options>
+      </exercice>
+      <exercice uid="1802">
+        <nom>Le d&#xE9;fil&#xE9;</nom>
+        <fichier>defilev1.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"180"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le rectangle</nom>
+      <exercice uid="1803">
+        <nom>Le rectangle</nom>
+        <fichier>rectangle2.swf</fichier>
+        <fichierjs>rectangle</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":"90","largeur":"3-11","longueur":"3-11"}</options>
+      </exercice>
+      <exercice uid="1804">
+        <nom>Le rectangle</nom>
+        <fichier>rectangle2.swf</fichier>
+        <fichierjs>rectangle</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":"120","largeur":"3-11","longueur":"3-11"}</options>
+      </exercice>
+      <exercice uid="1805">
+        <nom>Le rectangle</nom>
+        <fichier>rectangle2.swf</fichier>
+        <fichierjs>rectangle</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":2,"temps_max":"80","largeur":"3-9","longueur":"3-9"}</options>
+      </exercice>
+      <exercice uid="1806">
+        <nom>Le rectangle</nom>
+        <fichier>rectangle2.swf</fichier>
+        <fichierjs>rectangle</fichierjs>
+        <options>{"nbre_questions":"10","max_essais":1,"temps_max":"0","largeur":"3-9","longueur":"3-9"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le chocolat</nom>
+      <exercice uid="1807">
+        <nom>Le chocolat</nom>
+        <fichier>chocolat1.swf</fichier>
+        <fichierjs>chocolat1</fichierjs>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1808">
+        <nom>Le chocolat</nom>
+        <fichier>chocolat1.swf</fichier>
+        <fichierjs>chocolat1</fichierjs>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1809">
+        <nom>Le chocolat</nom>
+        <fichier>chocolat1.swf</fichier>
+        <fichierjs>chocolat1</fichierjs>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1810">
+        <nom>Le chocolat</nom>
+        <fichier>chocolat1.swf</fichier>
+        <fichierjs>chocolat1</fichierjs>
+        <options>default</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Les bornes</nom>
+      <exercice uid="1811">
+        <nom>Les bornes</nom>
+        <fichier>lesbornespara.swf</fichier>
+        <fichierjs>lesbornes</fichierjs>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1812">
+        <nom>Les bornes</nom>
+        <fichier>lesbornespara.swf</fichier>
+        <fichierjs>lesbornes</fichierjs>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1813">
+        <nom>Les bornes</nom>
+        <fichier>lesbornespara.swf</fichier>
+        <fichierjs>lesbornes</fichierjs>
+        <options>default</options>
+      </exercice>
+      <exercice uid="1814">
+        <nom>Les bornes</nom>
+        <fichier>lesbornespara.swf</fichier>
+        <fichierjs>lesbornes</fichierjs>
+        <options>default</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Les allumettes</nom>
+      <exercice uid="1815">
+        <nom>Les allumettes</nom>
+        <fichier>allumette-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"div_choix":"9","totalQuestion":"5","temps_question":0,"totalEssai":1,"temps_exo":"120","nom":"allumette-as3"}</options>
+      </exercice>
+      <exercice uid="1816">
+        <nom>Les allumettes</nom>
+        <fichier>allumette-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"div_choix":"7","totalQuestion":"5","temps_question":0,"totalEssai":1,"temps_exo":"0","nom":"allumette-as3"}</options>
+      </exercice>
+      <exercice uid="1817">
+        <nom>Les allumettes</nom>
+        <fichier>allumette-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"div_choix":"3","totalQuestion":"5","temps_question":0,"totalEssai":1,"temps_exo":"0","nom":"allumette-as3"}</options>
+      </exercice>
+      <exercice uid="1818">
+        <nom>Les allumettes</nom>
+        <fichier>allumette-as3.swf</fichier>
+        <fichierjs/>
+        <options>{"div_choix":"3","nom":"allumette-as3","totalEssai":1,"temps_exo":"0","totalQuestion":"5","temps_question":0}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Le tr&#xE9;sor</nom>
+      <exercice uid="1819">
+        <nom>Le tr&#xE9;sor</nom>
+        <fichier>tresorparam.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"5","max_essais":1,"temps_max":"360","max_couleurs":4}</options>
+      </exercice>
+      <exercice uid="1820">
+        <nom>Le tr&#xE9;sor</nom>
+        <fichier>tresorparam.swf</fichier>
+        <fichierjs/>
+        <options>{"nbre_questions":"4","max_essais":1,"temps_max":"360","max_couleurs":4}</options>
+      </exercice>
+      <exercice uid="1821">
+        <nom>Le tr&#xE9;sor</nom>
+        <fichier>tresorparam.swf</fichier>
+        <fichierjs/>
+        <options>{"max_couleurs":3,"temps_max":"300","max_essais":1,"nbre_questions":"5"}</options>
+      </exercice>
+      <exercice uid="1822">
+        <nom>Le tr&#xE9;sor</nom>
+        <fichier>tresorparam.swf</fichier>
+        <fichierjs/>
+        <options>{"max_couleurs":3,"temps_max":"0","max_essais":1,"nbre_questions":"5"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>Mistral gagnant</nom>
+      <exercice uid="1412770733532">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>mistral</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":75,"totalBoite":2,"intervalePrix":"2-9"}</options>
+      </exercice>
+      <exercice uid="1412770751007">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>mistral</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":20,"estRejouable":true,"vitesse":75,"totalBoite":2,"intervalePrix":"2-9"}</options>
+      </exercice>
+      <exercice uid="1412770788231">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>mistral</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"vitesse":75,"totalBoite":3,"intervalePrix":"2-9"}</options>
+      </exercice>
+      <exercice uid="1412770804983">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>mistral</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":25,"estRejouable":true,"vitesse":75,"totalBoite":3,"intervalePrix":"2-9"}</options>
+      </exercice>
+    </activite>
+    <activite>
+      <nom>La surface bleue</nom>
+      <exercice uid="1413986953821">
+        <nom>Niveau 1</nom>
+        <fichier/>
+        <fichierjs>surfacebleue</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"typeCalcul":1}</options>
+      </exercice>
+      <exercice uid="1413986978831">
+        <nom>Niveau 2</nom>
+        <fichier/>
+        <fichierjs>surfacebleue</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":120,"tempsQuestion":0,"estRejouable":true,"typeCalcul":1}</options>
+      </exercice>
+      <exercice uid="1413986992457">
+        <nom>Niveau 3</nom>
+        <fichier/>
+        <fichierjs>surfacebleue</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"typeCalcul":2}</options>
+      </exercice>
+      <exercice uid="1413987007260">
+        <nom>Niveau 4</nom>
+        <fichier/>
+        <fichierjs>surfacebleue</fichierjs>
+        <options>{"parametrable":true,"totalQuestion":5,"totalTentative":1,"totalEssai":1,"tempsExo":0,"tempsQuestion":0,"estRejouable":true,"typeCalcul":3}</options>
+      </exercice>
+    </activite>
+  </competence>
+</niveau>
