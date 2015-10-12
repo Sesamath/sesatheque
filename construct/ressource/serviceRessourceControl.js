@@ -115,7 +115,20 @@ module.exports = function (EntityRessource) {
    */
   function normalizeArrays(ressource) {
     _.each(config.typesVar, function (typeVar, key) {
-      if (typeVar === 'Array' && !_.isArray(ressource[key])) ressource[key] = []
+      var tmp
+      if (typeVar === 'Array' && !_.isArray(ressource[key])) {
+        if (_.isString(ressource[key])) {
+          tmp = ressource[key].split(',')
+          ressource[key] = []
+          tmp.forEach(function (val) {
+            var value = val.trim()
+            if (value) ressource[key].push(value)
+          })
+        } else {
+          log.debug("la propriété " +key +" n'était pas un array ni une string, init avec array vide")
+          ressource[key] = []
+        }
+      }
     })
   }
 

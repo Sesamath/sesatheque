@@ -844,7 +844,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // faut aussi ajouter ça pour les vues dust (data.contentBloc.typeTechnique existe déjà mais c'est un select)
       data.contentBloc.editeur = ressource.typeTechnique
       // avant d'envoyer
-      log.debug("on va envoyer au form ", data, 'form', {max:2000, indent:2})
+      //log.debug("on va envoyer au form ", data, 'form', {max:2000, indent:2})
       context.html(data)
     })
   }

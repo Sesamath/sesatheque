@@ -91,12 +91,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       if (ressource.auteurs.length > 1)
           msg = "Vous êtes auteur de cette ressource mais n'êtes pas le seul, vous ne pouvez pas la supprimer"
       else if (ressource.contributeurs.length) msg = "Vous êtes l'auteur de cette ressource" +
-          " mais il y a d'autres contributeurs, vous ne pouvez pas la supprimer"
-      else if (ressource.restriction != 2) msg = "Vous êtes l'auteur de cette ressource" +
-          " mais elle est partagée avec d'autres, vous ne pouvez plus la supprimer"
+          " mais il y a d'autres contributeurs, vous ne pouvez plus la supprimer"
+      // @todo que fait-on pour les ressources publiques ? Difficile de savoir si qqun l'utilise...
+      //else if (ressource.restriction != 2) msg = "Vous êtes l'auteur de cette ressource" +
+      //    " mais elle est partagée avec d'autres, vous ne pouvez plus la supprimer"
     } else {
       msg = "Vous n'avez pas de droits suffisants pour supprimer cette ressource"
     }
+    if (msg) log.debug("on a le message d'erreur " +msg +" avec " +ressource.auteurs.length, ressource.auteurs)
 
     return msg
   }
@@ -294,37 +296,41 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param permission
    * @param {Context}       context
    * @param {Ressource}     ressource
-   * @param {errorCallback} next
+   * @param {errorCallback} next (appelé avec un message d'erreur et pas une erreur)
    * @memberOf $accessControl
    */
   $accessControl.checkPermission = function (permission, context, ressource, next) {
-    var msg
-    // pas la peine de continuer si c'est pour voir une ressource publique
-    if (permission === 'read' && ressource.restriction === 0 ||
+    if (
+        // pas la peine de continuer si c'est pour voir une ressource publique
+        permission === 'read' && ressource.restriction === 0 ||
         // ni si c'est l'api appelée par un de nos serveurs ou qqun ayant tous les droits
         hasAllRights(context) ||
         // ni si l'utilisateur a les droits génériques
         hasGenericPermission(permission, context)
     ) {
+      // rien à faire
       next(null, ressource)
-    } else if (!$accessControl.isAuthenticated(context)) {
-      next("Authentification requise")
     } else {
-      // on regarde donc ce user pour cette ressource
-      switch (permission) {
-        // sinon on délègue suivant la permission
-        case 'create':
-          msg = getCreateDeniedMessage(context); break
-        case 'delete':
-          msg = getDeleteDeniedMessage(context, ressource, next); break
-        case 'read':
-          msg = getReadDeniedMessage(context, ressource, next); break
-        case 'update':
-          msg = getUpdateDeniedMessage(context, ressource, next); break
-        default:
-          msg = "Permission " + permission + " inconnue, refusée par défaut"
+      var msg
+      if (!$accessControl.isAuthenticated(context)) {
+        msg = "Authentification requise"
+      } else {
+        // on regarde donc ce user pour cette ressource
+        switch (permission) {
+          // sinon on délègue suivant la permission
+          case 'create':
+            msg = getCreateDeniedMessage(context); break
+          case 'delete':
+            msg = getDeleteDeniedMessage(context, ressource, next); break
+          case 'read':
+            msg = getReadDeniedMessage(context, ressource, next); break
+          case 'update':
+            msg = getUpdateDeniedMessage(context, ressource, next); break
+          default:
+            msg = "Permission " + permission + " inconnue, refusée par défaut"
+        }
       }
-      next(msg)
+      next(msg, ressource)
     }
   }
 

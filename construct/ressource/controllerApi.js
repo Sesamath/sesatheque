@@ -59,26 +59,24 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function deleteAndSend(context, id) {
     log.debug("dans cb api deleteRessource " +id)
-    // on donne pas d'info sur l'existence de la ressource
-    var deniedMsg = "droits insuffisant pour effacer cette ressource"
-    // avant d'aller plus loin on vérifie qu'on a une chance d'avoir les droits
-    if (!$accessControl.isAuthenticated(context) && !$accessControl.hasAllRights(context)) {
-      $json.denied(context, deniedMsg)
+    if (!$accessControl.isAuthenticated(context)) {
+      $json.denied(context, "Vous devez être authentifié pour effacer une ressource")
     } else {
       // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
       $ressourceRepository.load(id, function (error, ressource) {
         if (error) {
           $json.send(context, error)
         } else if (ressource) {
-          if ($accessControl.hasPermission('delete', context, ressource)) {
-            $ressourceRepository.delete(ressource, function (error) {
-              if (error) $json.send(context, error)
-              else $json.send(context, null, {deleted: id})
-            })
-          } else {
-            log.debug(deniedMsg + ' (' + id + ')')
-            $json.denied(context, deniedMsg)
-          }
+          $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
+            if (errorMessage) {
+              $json.denied(context, errorMessage)
+            } else {
+              $ressourceRepository.delete(ressource, function (error) {
+                if (error) $json.send(context, error)
+                else $json.send(context, null, {deleted: id})
+              })
+            }
+          })
         } else {
           log.debug("La ressource " + id + " n'existait pas, on a rien effacé")
           // pas de ressource, on vérifie qu'il avait certains droits
@@ -185,6 +183,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function optionsOk(context) {
     context.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+    context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept');
+    // et on laisse le middleware CORS faire son boulot
+    context.next(null, 'OK'); // ne pas renvoyer de chaîne vide sinon 404
+  }
+
+  /**
+   * Répond ok pour les options delete
+   */
+  function optionsDeleteOk(context, method) {
+    method = method || 'POST'
+    context.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS');
     context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept');
     // et on laisse le middleware CORS faire son boulot
     context.next(null, 'OK'); // ne pas renvoyer de chaîne vide sinon 404
@@ -871,6 +880,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.delete('ressource/:oid', function (context) {
     deleteAndSend(context, context.arguments.oid)
   })
+  controller.options('ressource/:oid', optionsDeleteOk)
 
   /**
    * Delete par id d'origine
@@ -882,6 +892,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var ref = context.arguments.origine +'/' +context.arguments.idOrigine
     deleteAndSend(context, ref)
   })
+  controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
 
   postRessourceAddRelations.timeout = 5000
   /**

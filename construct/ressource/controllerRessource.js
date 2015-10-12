@@ -132,7 +132,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Context}  context Le contexte
    * @param {function} next    Sera appelée sans arguments si on est authentifié
    */
-  function redirectOrContinue(context, next) {
+  function redirectPublicOrContinue(context, next) {
     if ($accessControl.isAuthenticated(context)) next()
     else context.redirect(context.request.originalUrl.replace('ressource/', 'public/'), 302)
   }
@@ -158,8 +158,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/decrire/:oid
    */
   controller.get($routes.get('describe', ':oid'), function (context) {
-    context.layout = 'page'
-    redirectOrContinue(context, function () {
+    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
+    redirectPublicOrContinue(context, function () {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
         send(context, error, ressource, 'describe')
@@ -174,7 +174,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
     context.tab = 'describe'
-    redirectOrContinue(context, function () {
+    redirectPublicOrContinue(context, function () {
       var origine = context.arguments.origine
       var idOrigine = context.arguments.idOrigine
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -189,7 +189,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.get($routes.get('display', ':oid'), function (context) {
     context.layout = 'iframe'
-    redirectOrContinue(context, function () {
+    redirectPublicOrContinue(context, function () {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
         send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
@@ -203,7 +203,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
     context.layout = 'iframe'
-    redirectOrContinue(context, function () {
+    redirectPublicOrContinue(context, function () {
       var origine = context.arguments.origine
       var idOrigine = context.arguments.idOrigine
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -219,7 +219,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('preview', ':oid'), function (context) {
     context.layout = 'page'
     context.tab = 'preview'
-    redirectOrContinue(context, function () {
+    redirectPublicOrContinue(context, function () {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
         send(context, error, ressource, 'display')
@@ -234,7 +234,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'
     context.tab = 'preview'
-    redirectOrContinue(context, function () {
+    redirectPublicOrContinue(context, function () {
       var origine = context.arguments.origine
       var idOrigine = context.arguments.idOrigine
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
@@ -288,8 +288,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           // creation simple
           var fake = {new:true, oid:0}
           addToken(context, fake)
-          // à quoi ça servait ????
-          //if (context.get.layout === 'iframe') fake.layout = "iframe"
           $views.printForm(context, null, fake, options)
         }
       }
@@ -338,6 +336,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $personneControl.checkPersonnes(context, null, ressource, this)
 
       }).seq(function (ressource) {
+        log.debug("auteurs après checkPersonnes", ressource.auteurs)
         $ressourceRepository.write(ressource, function (error, ressource) {
           // on veut gérér les erreurs ici car y'a un bug dans notre code
           if (error || !_.isEmpty(ressource.errors)) {
@@ -346,7 +345,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           } else {
             log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
             var url = $routes.getAbs('edit', ressource.oid, context)
-            if (context.layout === "iframe") url += "?layout=iframe"
+            if (context.layout === "iframe") {
+              url += "?layout=iframe"
+              if (context.get.closerId) url += "&closerId=" +context.get.closerId
+            }
             context.redirect(url)
           }
         }) // write
@@ -438,6 +440,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
 
       }).seq(function (ressource) {
+        log.debug("auteurs après checkPersonnes", ressource.auteurs)
         ressourceNew = ressource
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         tools.update(ressourceOriginale, ressource)
@@ -445,7 +448,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
       }).seq(function (ressource) {
         // si on a du closer=YYY dans l'url, on affiche une page avec de l'autoclose
-        if (context.get.closer) {
+        if (context.get.closerId) {
           context.html({
             $metas : {
               title: "Enregistrement réussi, fermeture automatique"
@@ -457,7 +460,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             },
             jsBloc : {
               $view : __dirname +"/views/js",
-              jsCode : 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +context.get.closer +'"}, "*")'
+              jsCode : 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
+                context.get.closerId +'", ressource:' +JSON.stringify($ressourceConverter.toRef(ressource)) +'}, "*")'
             }
           })
         } else {
@@ -579,7 +583,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function search(context) {
     context.layout = 'page'
-    redirectOrContinue(context, function () {
+    redirectPublicOrContinue(context, function () {
       if (_.isEmpty(context.get) || context.get.modify) {
         // form de recherche
         $views.printSearchForm(context)

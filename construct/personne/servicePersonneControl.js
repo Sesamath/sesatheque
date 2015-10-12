@@ -144,18 +144,21 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
    * @param {ressourceCallback} next
    */
   $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
-    log.debug("checkPersonnes")
+    log.debug("checkPersonnes avec les auteurs initiaux", ressourceOriginale && ressourceOriginale.auteurs)
+    log.debug("et les nouveaux auteurs", ressourceNew.auteurs)
     // les cas où on a rien à faire
     if (
         ressourceOriginale &&
         _.isEqual(ressourceNew.auteurs, ressourceOriginale.auteurs) &&
-        _.isEqual(ressourceNew.contributeurs, ressourceOriginale.contributeurs
-    ) ) {
+        _.isEqual(ressourceNew.contributeurs, ressourceOriginale.contributeurs) &&
+        !ressourceNew.auteursAdd &&
+        !ressourceNew.contributeursAdd
+    ) {
       // y'avait une ressource et on a rien changé
       next(null, ressourceNew)
 
-    } else {
-      // qqchose a changé, ou c'est une création, on mémorise ce que l'on veut mettre
+    } else if ($accessControl.hasPermission("updateAuteurs", context, ressourceOriginale)) {
+      // on a tous les droits sur les auteurs et qqchose a changé, on mémorise ce que l'on veut mettre
       var auteurs = ressourceNew.auteurs,
           contributeurs = ressourceNew.contributeurs,
           tmp
@@ -164,54 +167,44 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
       ressourceNew.contributeurs = []
 
       flow().seq(function () {
-        // les droits
-        if (ressourceOriginale && !$accessControl.hasPermission("updateAuteurs", context, ressourceOriginale)) {
-          // modif interdite
-          this(new Error("Vous n'avez pas les droits suffisants pour modifier les auteurs ou contributeurs de cette ressource"))
-        } else {
-          this()
-        }
-
-      }).seq(function () {
         var nextStep = this
-        // si création sans tous les droits sur les personnes on le met seul auteur
-        if (!ressourceOriginale && !$accessControl.hasPermission("updateAuteurs", context)) {
-          ressourceNew.auteurs = [$accessControl.getCurrentUserOid(context)]
-          nextStep()
-        } else {
-          // on passe en revue les auteurs demandés, en ajoutant à la wishlist les auteurs sup s'il y en a
-          if (ressourceNew.auteursSup) {
-            tmp = ressourceNew.auteursSup.split(",")
-            tmp.forEach(function (oid) {
-              auteurs.push(oid.trim())
-            })
-          }
-          flow(auteurs).seqEach(function (oid) {
-            var nextAuteur = this
-            $personneRepository.load(oid, function (error, personne) {
-              if (error) {
-                addError(ressourceNew, error.toString())
-              } else if (personne) {
-                ressourceNew.auteurs.push(personne.oid)
-              } else {
-                addWarning(ressourceNew, "L'auteur d'identifiant " + oid + " n'existe pas")
-              }
-              nextAuteur()
-            })
-          }).seq(function () {
-            nextStep()
-          }).catch(function (error) {
-            nextStep(error)
+        // on passe en revue les auteurs demandés, en ajoutant à la wishlist les auteurs sup s'il y en a
+        if (ressourceNew.auteursAdd) {
+          tmp = ressourceNew.auteursAdd.split(",")
+          delete ressourceNew.auteursAdd
+          tmp.forEach(function (oid) {
+            log.debug("push auteur " +id)
+            var id = oid.trim()
+            if (id) auteurs.push(id)
           })
         }
+        flow(auteurs).seqEach(function (oid) {
+          var nextAuteur = this
+          $personneRepository.load(oid, function (error, personne) {
+            if (error) {
+              addError(ressourceNew, error.toString())
+            } else if (personne) {
+              ressourceNew.auteurs.push(personne.oid)
+            } else {
+              addWarning(ressourceNew, "L'auteur d'identifiant " + oid + " n'existe pas")
+            }
+            nextAuteur()
+          })
+        }).seq(function () {
+          nextStep()
+        }).catch(function (error) {
+          nextStep(error)
+        })
 
       }).seq(function () {
         var nextStep = this
         // aj contributeurs sup
-        if (ressourceNew.contributeursSup) {
-          tmp = ressourceNew.contributeursSup.split(",")
+        if (ressourceNew.contributeursAdd) {
+          tmp = ressourceNew.contributeursAdd.split(",")
+          delete ressourceNew.contributeursAdd
           tmp.forEach(function (oid) {
-            contributeurs.push(oid.trim())
+            var id = oid.trim()
+            if (id) contributeurs.push(id)
           })
         }
         // flow contributeurs demandés
@@ -238,6 +231,25 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
         next(null, ressourceNew)
 
       }).catch(next)
+
+    } else {
+      // pas tous les droits sur les auteurs, on ajoute le user courant en auteur (nouvelle ressource) ou contributeur (modif existante) sans toucher au reste
+      var currentUserOid = $accessControl.getCurrentUserOid(context)
+      if (ressourceOriginale) {
+        ressourceNew.auteurs = ressourceOriginale.auteurs || []
+        ressourceNew.contributeurs = ressourceOriginale.contributeurs || []
+      }
+      if (ressourceNew.auteurs.indexOf(currentUserOid) < 0) {
+        // il est pas auteur
+        if (ressourceOriginale) {
+          // y'avait une ressource, on l'ajoute en contributeurs s'il n'y était pas
+          if (ressourceNew.contributeurs.indexOf(currentUserOid) < 0) ressourceNew.contributeurs.push(currentUserOid);
+        } else {
+          // creation, mise d'office en auteur
+          ressourceNew.auteurs = [currentUserOid]
+        }
+      }
+      next(null, ressourceNew)
     }
   }
 
