@@ -297,6 +297,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       // (car c'est pas du xml mais du json)
       if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
         convertXmlEc2(ressource)
+      } else if (ressource.typeTechnique === 'j3p' && ressource.parametres && ressource.parametres.xml) {
+        convertXmlJ3p(ressource)
       }
       if (ressource.typeTechnique === 'arbre') delete ressource.parametres
       else delete ressource.enfants
@@ -315,6 +317,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }
   }
 
+  /**
+   * Converti un xml qui trainerait en parametres en json pour les ec2
+   * @param ressource
+   */
   function convertXmlEc2(ressource) {
     var config = elementtree.parse(ressource.parametres.xml)
     var params = {}
@@ -354,6 +360,26 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       $ressourceRepository.write(ressource)
     }
     log("convertXmlEc2", params)
+  }
+
+  /**
+   * Modifie les parametres de ressource pour remplacer un éventuel xml par un graphe
+   * @param {Ressource} ressource
+   */
+  function convertXmlJ3p(ressource) {
+    if (ressource.parametres && ressource.parametres.xml) {
+      var string = require('../../tasks/modules/j3pGraphe2json')(ressource.parametres.xml)
+      try {
+        var graphe = JSON.parse(string)
+        ressource.parametres = {
+          g : graphe
+        }
+      } catch (error) {
+        log.error("plantage dans la conversion du xml de la ressource j3p")
+        if (!ressource.errors) ressource.errors = []
+        ressource.errors.push("la propriété xml des parametres ne contient pas de graphe valide")
+      }
+    }
   }
 
   /**
