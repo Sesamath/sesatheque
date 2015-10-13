@@ -421,6 +421,20 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   var hasGenericPermission = $accessControl.hasGenericPermission
 
   /**
+   *
+   * @param role
+   * @param context
+   * @returns {*|data.roles|{}|settings.components.personne.roles|{admin, editeur, indexateur, prof, acces_correction, eleve}|Object}
+   */
+  $accessControl.hasRole = function(role, context) {
+    return context &&
+           context.session &&
+           context.session.user &&
+           context.session.user.roles &&
+           context.session.user.roles[role]
+  }
+
+  /**
    * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
    * (ou sur toutes les ressources si ressource n'est pas fournie)
    * @param {string} permission create|read|update|delete

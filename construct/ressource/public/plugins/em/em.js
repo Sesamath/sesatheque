@@ -119,14 +119,21 @@ try {
       // et la propriété score est ajoutée (un entier donnant le nb de bonnes réponses)
       flashvars.ch = options.ch || 'n';
       // ensuite le facultatif si présent
-      if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;
       if (params.aide_id)         flashvars.idAide = Number(params.aide_id);
-      if (params.aide_formateur)  flashvars.isBoutonAide = params.aide_formateur;
+      // pour les profs (passer les questions et voir l'aide)
+      if (options.isFormateur) {
+        S.log("affichage par un formateur, on désactive le score et regarde si on peut activer le bouton suite et l'aide (suivant ressource)");
+        // à l'import on ne met pas ces valeurs si c'est o (valeur par défaut)
+        if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur;
+        else flashvars.isBoutonSuite = "o";
+        if (params.aide_formateur)  flashvars.isBoutonAide = params.aide_formateur;
+        else flashvars.isBoutonAide = "o";
+      }
       // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
       if (params.nb_wnk)          flashvars.mep_nb_wnk = params.nb_wnk;
 
-      // traitement du résultat éventuel (il faudra que l'appelant passe un idUtilisateur)
-      if (options.resultatCallback) {
+      // traitement du résultat éventuel
+      if (options.resultatCallback && !options.isFormateur) {
         // faut une fonction qui va transformer le résultat au format attendu
         // et la pour rendre accessible au swf dans son dom
         window.resultatCallback = function (result) {
