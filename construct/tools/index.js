@@ -63,6 +63,15 @@ tools.clone = function(object) {
 }
 
 /**
+ * Renvoie les propriétés d'un objet en virant le prototype et les méthodes (avec stringify & parse)
+ * @param {object} object
+ * @returns {object}
+ */
+tools.cloneData = function(object) {
+  return tools.parse(tools.stringify(object))
+}
+
+/**
  * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
  * @memberOf tools
  * @param int La valeur à contrôler
@@ -82,6 +91,16 @@ tools.encadre = function (int, min, max, label) {
     value = max
   }
   return value
+}
+
+/**
+ * Compare les data des objets (via stringify)
+ * @param obj1
+ * @param obj2
+ * @returns {boolean}
+ */
+tools.isEqual = function (obj1, obj2) {
+  return tools.stringify(obj1) === tools.stringify(obj2)
 }
 
 /**
@@ -368,6 +387,7 @@ tools.update = function(object, addition) {
 
 /**
  * Update object en y ajoutant toutes les propriétés de default qui n'existait pas dans object
+ * (Attention, c'est récursif sur toutes les propriétés qui sont des objets)
  * @memberOf tools
  * @param object
  * @param defaultValues
