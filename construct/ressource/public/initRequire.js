@@ -141,7 +141,7 @@
       }
     };
     // on ajoute nos plugins
-    ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "em", "j3p", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
+    ["am", "arbre", "ato", "calkc", "coll_doc", "ecjs", "em", "j3p", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
       requireConfig.paths[plugin] = base + 'plugins/' + plugin + '/' + plugin;
     });
 
