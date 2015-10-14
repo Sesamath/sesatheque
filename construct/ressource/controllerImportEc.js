@@ -43,7 +43,7 @@
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes) {
   var request = require('request')
-  //var _ = require('lodash')
+  var _ = require('lodash')
   var tools = require('../tools')
   var seq = require('an-flow')
   var elementtree = require('elementtree')
@@ -111,14 +111,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @returns {{titre: string, typeTechnique: string, origine: string, idOrigine: *, categories: *[], publie: boolean, restriction: number, enfants: Array}}
    */
   function getArbreDefaultValues(xmlSuffix) {
-    var titre = "Ressources Calcul@tice " +xmlSuffix
+    var classe = (xmlSuffix === "6eme") ? xmlSuffix : xmlSuffix.toUpperCase()
+    var titre = "Ressources Calcul@tice " +classe
+    var niveaux
     if (xmlSuffix === "all") titre = "Toutes les ressources Calcul@tice"
+    else if (xmlSuffix === "6eme") niveaux = [config.constantes.niveaux["6e"]]
+    else niveaux = [config.constantes.niveaux[xmlSuffix]]
     return {
       titre        : titre,
       typeTechnique: 'arbre',
       origine      : "calculatice",
       idOrigine    : xmlSuffix,
       categories   : [arbreCateg],
+      niveaux      : niveaux,
       publie       : true,
       restriction  : 0,
       enfants      : []
@@ -142,7 +147,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
       var swf, js, options
       child._children.forEach(function (elt) {
-        if (elt.tag === "nom") ressource.titre = child.text
+        if (elt.tag === "nom") ressource.titre = elt.text
         else if (elt.tag === "fichier") swf = elt.text
         else if (elt.tag === "fichierjs") js = elt.text
         else if (elt.tag === "options") options = elt.text
@@ -182,8 +187,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     seq(children).seqEach(function (child) {
       var nextChild = this
       if (child.tag === "exercice") {
-        enfants.push(getEcRessource(child))
-        nextChild()
+        save(getEcRessource(child), function (error, ressource) {
+          if (error) log.error(error)
+          else enfants.push($ressourceConverter.toRef(ressource))
+          nextChild()
+        })
       } else if (child._children.length) {
         var enfant = {}
         enfant.typeTechnique = "arbre"
@@ -229,27 +237,32 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Enregistre un arbre
-   * @param {Ressource} arbre
+   * Enregistre une ressource
+   * @param {Ressource} ressource
    * @param next Appelé avec (error, entiteRessource)
    */
-  function save(arbre, next) {
-    if (arbre.idOrigine) {
-      $ressourceRepository.loadByOrigin(arbre.origine, arbre.idOrigine, function (error, ressource) {
+  function save(ressource, next) {
+    if (ressource.idOrigine) {
+      $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceLoaded) {
         if (error) {
-          log.error("pb au chargement : " + error.toString(), arbre)
-          next(new Error("Impossible de sauvegarder l'arbre récupéré (probablement mal interprété)"))
+          log.error("pb au chargement : " + error.toString(), ressource)
+          next(new Error("Impossible de sauvegarder la ressource récupérée (probablement mal interprétée)"))
         } else {
-          if (ressource) tools.update(ressource, arbre)
-          else ressource = arbre
-          log.debug("save ", ressource)
-          $ressourceRepository.write(ressource, next)
+          var ressourceInitiale = tools.clone(ressourceLoaded) || {}
+          var ressourceNew = tools.clone(ressourceLoaded) || {}
+          tools.update(ressourceNew, ressource)
+          if (_.isEqual(ressourceInitiale, ressourceNew)) {
+            next(null, ressourceNew)
+          } else {
+            log.debug("ressource calculatice/" +ressource.idOrigine +" modifiée")
+            $ressourceRepository.write(ressourceNew, next)
+          }
         }
       })
     } else {
-      log.debug("arbre incomplet", arbre)
-      log.error(new Error("arbre sans idOrigine"))
-      next(new Error("arbre incomplet"))
+      log.debug("ressource incomplète", ressource)
+      log.error(new Error("ressource sans idOrigine"))
+      next(new Error("ressource incomplète"))
     }
   }
 

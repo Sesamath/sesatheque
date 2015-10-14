@@ -311,6 +311,20 @@ var ressourceConfig = {
       liste             : 8,
       aucune            : 9 // déclenchera un warning dans $ressourceControl.valide
     },
+    niveaux : {
+      cp:11,
+      ce1:10,
+      ce2:9,
+      cm1:8,
+      cm2:7,
+      "6e":6,
+      "5e":5,
+      "4e":4,
+      "3e":3,
+      "2de":2,
+      "1re":1,
+      "Tle":12
+    },
     typePedagogiques : {
       cours            : 3,
       exercice         : 9,
