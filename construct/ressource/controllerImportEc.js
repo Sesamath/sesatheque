@@ -84,7 +84,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       })
 
     }).seq(function (xmlString) {
-      log.debug('analyse de', xmlString)
+      //log.debug('analyse de', xmlString)
       var arbreXml = elementtree.parse(xmlString)
       if (!arbreXml._root) this(new Error("xml " +xmlSuffix +" sans racine"))
       else if (!arbreXml._root._children || !arbreXml._root._children.length) this(new Error("xml " +xmlSuffix +" vide"))
@@ -93,7 +93,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       else this(null, arbreXml._root._children)
 
     }).seq(function (children) {
-      log.debug("obj xml", children, 'xml', {max:1000, indent:2})
+      //log.debug("obj xml", children, 'xml', {max:1000, indent:2})
       parseEnfants(children, this)
 
     }).seq(function (enfants) {
@@ -114,9 +114,21 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var classe = (xmlSuffix === "6eme") ? xmlSuffix : xmlSuffix.toUpperCase()
     var titre = "Ressources Calcul@tice " +classe
     var niveaux
-    if (xmlSuffix === "all") titre = "Toutes les ressources Calcul@tice"
-    else if (xmlSuffix === "6eme") niveaux = [config.constantes.niveaux["6e"]]
-    else niveaux = [config.constantes.niveaux[xmlSuffix]]
+    if (xmlSuffix === "all") {
+      titre = "Toutes les ressources Calcul@tice"
+      niveaux = [
+          config.constantes.niveaux.cp,
+          config.constantes.niveaux.ce1,
+          config.constantes.niveaux.ce2,
+          config.constantes.niveaux.cm1,
+          config.constantes.niveaux.cm2,
+          config.constantes.niveaux["6e"]
+      ]
+    } else if (xmlSuffix === "6eme") {
+      niveaux = [config.constantes.niveaux["6e"]]
+    } else {
+      niveaux = [config.constantes.niveaux[xmlSuffix]]
+    }
     return {
       titre        : titre,
       typeTechnique: 'arbre',
@@ -248,10 +260,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           log.error("pb au chargement : " + error.toString(), ressource)
           next(new Error("Impossible de sauvegarder la ressource récupérée (probablement mal interprétée)"))
         } else {
-          var ressourceInitiale = tools.clone(ressourceLoaded) || {}
-          var ressourceNew = tools.clone(ressourceLoaded) || {}
+          var ressourceNew = ressourceLoaded || {}
           tools.update(ressourceNew, ressource)
-          if (_.isEqual(ressourceInitiale, ressourceNew)) {
+          if (tools.isEqual(ressourceLoaded, ressourceNew)) {
             next(null, ressourceNew)
           } else {
             log.debug("ressource calculatice/" +ressource.idOrigine +" modifiée")
@@ -330,7 +341,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
     })
   }
-  xmlController.timeout = 20000;
+  xmlController.timeout = 60000;
 
   controller.get(':xml', xmlController)
 }
