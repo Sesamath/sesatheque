@@ -43,51 +43,281 @@
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes) {
   var request = require('request')
-  var _ = require('lodash')
+  //var _ = require('lodash')
   var tools = require('../tools')
   var seq = require('an-flow')
   var elementtree = require('elementtree')
   var config = require('./config')
+  var arbreCateg = config.constantes.categories.liste
+
+  var xmls = ["cp", "ce1", "ce2", "cm1", "cm2", "6eme"]
 
   /**
    * Met à jour un arbre calculatice
    * @route GET /importEc/:xml
-   * @param {string} xml Le nom du xml (nom du fichier sans extension, ressources-cm2 par ex)
+   * @param {string} xmlSuffix Le suffixe du xml (cm2 pour ressources-cm2.xml)
    */
-  function getXml(context) {
+  function getAndParseXml(context, xmlSuffix, next) {
+    var arbre = getArbreDefaultValues(xmlSuffix)
+
     seq().seq(function () {
       $accessControl.isSesamathClient(context, this)
+
     }).seq(function (isSesamathClient) {
       if (isSesamathClient) this()
       else $json.denied(context, "Vous n'avez pas les droits suffisant pour accéder à cette commande")
+
     }).seq(function () {
       // on peut importer
-      var next = this
-      var url = config.imports.ecBase +"/xml/" +context.arguments.xml +".xml"
+      var nextStep = this
+      var url = config.imports.ecBase +"/xml/ressources-" +xmlSuffix +".xml"
       request.get(url, function (error, response, body) {
         if (error) {
           log.error(error)
-          next(new Error("impossible de récupérer " +url))
+          nextStep(new Error("impossible de récupérer " +url))
         } else if (body) {
-          log.debug("on récupère le xml", body, {max:2000})
-          next(null, body)
+          nextStep(null, body)
         } else {
           log.error("Sur l'url " +url +" on récupère", response)
+          nextStep(new Error(url +" renvoie une réponse vide"))
         }
       })
+
     }).seq(function (xmlString) {
-      //log('analyse de ' +xmlString)
+      log.debug('analyse de', xmlString)
       var arbreXml = elementtree.parse(xmlString)
-      if (!arbreXml._root) this(new Error("arbreXml sans racine"))
-      if (!arbreXml._root._children || !arbreXml._root._children.length) this(new Error("arbreXml vide"))
-      else this(arbreXml._root)
-    }).seq(function (xmlObj) {
-      log.debug("obj xml", xmlObj, 'xml', {max:3000, indent:2})
+      if (!arbreXml._root) this(new Error("xml " +xmlSuffix +" sans racine"))
+      else if (!arbreXml._root._children || !arbreXml._root._children.length) this(new Error("xml " +xmlSuffix +" vide"))
+      else if (arbreXml._root.tag !== "niveau") this(new Error("xml " +xmlSuffix +" ne contient pas de tag niveau à la racine"))
+      else if (arbreXml._root.attrib.id !== xmlSuffix) this(new Error("xml " +xmlSuffix +" ne contient pas le bon niveau (trouvé " +arbreXml._root.attrib.id +")"))
+      else this(null, arbreXml._root._children)
+
+    }).seq(function (children) {
+      log.debug("obj xml", children, 'xml', {max:1000, indent:2})
+      parseEnfants(children, this)
+
+    }).seq(function (enfants) {
+      arbre.enfants = enfants
+      next(null, arbre)
+
+    }).catch(function (error) {
+      next(error)
+    })
+  } // getAndParseXml
+
+  /**
+   * Retourne les valeurs par défaut d'un arbre de ressources calculatice
+   * @param xmlSuffix
+   * @returns {{titre: string, typeTechnique: string, origine: string, idOrigine: *, categories: *[], publie: boolean, restriction: number, enfants: Array}}
+   */
+  function getArbreDefaultValues(xmlSuffix) {
+    var titre = "Ressources Calcul@tice " +xmlSuffix
+    if (xmlSuffix === "all") titre = "Toutes les ressources Calcul@tice"
+    return {
+      titre        : titre,
+      typeTechnique: 'arbre',
+      origine      : "calculatice",
+      idOrigine    : xmlSuffix,
+      categories   : [arbreCateg],
+      publie       : true,
+      restriction  : 0,
+      enfants      : []
+    }
+  }
+
+  /**
+   * Retourne une ressource à partir d'un child exercice
+   * @param child
+   * @returns {Ressource}
+   */
+  function getEcRessource(child) {
+    var ressource
+    if (child.attrib.uid) {
+      ressource = {
+        titre : "???",
+        origine : "calculatice",
+        idOrigine : child.attrib.uid,
+        categories : [config.constantes.categories.exerciceInteractif],
+        parametres: {}
+      }
+      var swf, js, options
+      child._children.forEach(function (elt) {
+        if (elt.tag === "nom") ressource.titre = child.text
+        else if (elt.tag === "fichier") swf = elt.text
+        else if (elt.tag === "fichierjs") js = elt.text
+        else if (elt.tag === "options") options = elt.text
+        else log.debug("tag d'enfant d'exo ec inconnu", elt)
+      })
+      if (options && options !== "default") {
+        try {
+          ressource.parametres.options = JSON.parse(options)
+        } catch (error) {
+          log.debug("parsing d'options HS", options)
+          log.error(new Error("erreur sur le parsing des options de l'exercice calculatice " +ressource.idOrigine +
+                  " : " +error.toString() +"\navec\n" +options))
+        }
+      } else if (!options) {
+        log.error(new Error("exercice calculatice " +ressource.idOrigine +" sans options"))
+      }
+      if (js) {
+        ressource.typeTechnique = "ecjs"
+        ressource.parametres.fichier = js
+      } else if (swf) {
+        ressource.typeTechnique = "ec2"
+        ressource.parametres.fichier = swf
+      }
+    }
+
+    return ressource
+  } // getEcRessource
+
+  /**
+   * Passe à next les enfants d'un élément du xml
+   * @param children
+   * @param next callback(error, enfants)
+   */
+  function parseEnfants(children, next) {
+    var enfants = []
+
+    seq(children).seqEach(function (child) {
+      var nextChild = this
+      if (child.tag === "exercice") {
+        enfants.push(getEcRessource(child))
+        nextChild()
+      } else if (child._children.length) {
+        var enfant = {}
+        enfant.typeTechnique = "arbre"
+        enfant.titre = getNom(child._children)
+        parseEnfants(child._children, function (error, ptifils) {
+          if (error) {
+            nextChild(error)
+          } else {
+            enfant.enfants = ptifils
+            enfants.push(enfant)
+            nextChild()
+          }
+        })
+      } else {
+        if (child.tag !== "nom") log.debug("child ignoré", child)
+        nextChild()
+      }
+
+    }).seq(function () {
+      next(null, enfants)
+
     }).catch(function (error) {
       log.error(error)
-      $json.sendErrorMessage(context, error.toString())
+      next(error)
+    })
+  } // parseEnfants
+  
+  /**
+   * Renvoie le text du premier tag nom trouvé dans les enfants passés en argument
+   * @param {object[]} children
+   */
+  function getNom(children) {
+    var i = 0
+    var nom
+    while (!nom && i < children.length) {
+      if (children[i].tag === "nom") {
+        nom = children[i].text
+      }
+      i++
+    }
+
+    return nom || "???"
+  }
+
+  /**
+   * Enregistre un arbre
+   * @param {Ressource} arbre
+   * @param next Appelé avec (error, entiteRessource)
+   */
+  function save(arbre, next) {
+    if (arbre.idOrigine) {
+      $ressourceRepository.loadByOrigin(arbre.origine, arbre.idOrigine, function (error, ressource) {
+        if (error) {
+          log.error("pb au chargement : " + error.toString(), arbre)
+          next(new Error("Impossible de sauvegarder l'arbre récupéré (probablement mal interprété)"))
+        } else {
+          if (ressource) tools.update(ressource, arbre)
+          else ressource = arbre
+          log.debug("save ", ressource)
+          $ressourceRepository.write(ressource, next)
+        }
+      })
+    } else {
+      log.debug("arbre incomplet", arbre)
+      log.error(new Error("arbre sans idOrigine"))
+      next(new Error("arbre incomplet"))
+    }
+  }
+
+  /**
+   * Enregistre la ressource et affiche la réponse
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   */
+  function saveAndSendReponse(context, ressource) {
+    save(ressource, function (error, ressource) {
+      $json.send(context, error, $ressourceConverter.toRef(ressource))
     })
   }
-  getXml.timeout = 10000
-  controller.get(':xml', getXml)
+
+  /**
+   * Le controleur
+   * @param context
+   */
+  function xmlController(context) {
+    $accessControl.isSesamathClient(context, function (error, isSesamathClient) {
+      if (error) {
+        log.error(error)
+        $json.denied(context, error.toString())
+      } else if (isSesamathClient) {
+        var xmlSuffix = context.arguments.xml
+        if (!xmlSuffix) throw new Error("Il manque un argument") // devrait jamais arriver
+
+        if (xmlSuffix === "all") {
+          var arbreAll = getArbreDefaultValues(xmlSuffix)
+
+          seq(xmls).seqEach(function (suffix) {
+            var nextXml = this
+            log.debug("pour all on lance " +suffix)
+            getAndParseXml(context, suffix, function (error, arbre) {
+              if (error) {
+                nextXml(error)
+              } else {
+                save(arbre, function (error, arbre) {
+                  if (error) {
+                    nextXml(error)
+                  } else {
+                    arbreAll.enfants.push($ressourceConverter.toRef(arbre))
+                    nextXml()
+                  }
+                })
+              }
+            })
+
+          }).seq(function () {
+            saveAndSendReponse(context, arbreAll)
+
+          }).catch(function (error) {
+            $json.send(context, error)
+          })
+
+        } else {
+          getAndParseXml(context, xmlSuffix, function (error, arbre) {
+            if (error) $json.send(context, error)
+            else saveAndSendReponse(context, arbre)
+          })
+        }
+
+      } else {
+        $json.denied(context, "Vous n'avez pas les droits suffisant pour accéder à cette commande")
+      }
+    })
+  }
+  xmlController.timeout = 20000;
+
+  controller.get(':xml', xmlController)
 }

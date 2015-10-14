@@ -241,9 +241,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   function isOnLan(ip) {
     // avec pm2 on a du bind ipv6
-    if (/^(::ffff:)?(127\.0|192\.168)/.exec(ip)) return true
-    if (/^::1/.exec(ip)) return true
-    return false
+    return (/^(::ffff:)?(127\.0|192\.168)/.test(ip) || /^::1/.test(ip))
   }
 
   /**
@@ -531,15 +529,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {boolean}
    */
   $accessControl.isLanClient = function (context) {
-    var isLanClient = false
-    var ip = context.request.ip
-    if (isOnLan(ip)) {
-      // on regarde si c'est pas simplement l'ip d'un frontal
-      var ipClient = getClientIp(context)
-      isLanClient = isOnLan(ipClient)
-    }
-
-    return isLanClient
+    var ipClient = getClientIp(context)
+    log.debug("isLanClient analyse l'ip " +ipClient)
+    return isOnLan(ipClient)
   }
 
   /**
@@ -559,7 +551,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         } else {
           var isSesamath = false
           hostnames.forEach(function (hostname) {
-            if (/^([^\.]+\.)?(dev)?sesamath.net$/.exec(hostname)) isSesamath = true
+            if (/^([^\.]+\.)?(dev)?sesamath.net$/.test(hostname)) isSesamath = true
           })
           next(null, isSesamath);
         }

@@ -50,7 +50,7 @@ module.exports = function () {
   $json.denied = function (context, msg) {
     if (!msg) msg = "Accès refusé"
     context.status = 403;
-    context.json({error: msg})
+    $json.sendErrorMessage(context, msg)
   }
 
   /**
@@ -61,7 +61,7 @@ module.exports = function () {
   $json.notFound = function (context, msg) {
     if (!msg) msg = "Contenu inexistant"
     context.status = 404;
-    context.json({error: msg})
+    $json.sendErrorMessage(context, msg)
   }
 
   /**
@@ -81,6 +81,7 @@ module.exports = function () {
       }
       $json.sendErrorMessage(context, error)
     } else {
+      if (!data) data = {success:true}
       log.debug('$json.send va renvoyer', data, 'api')
       // pas la peine de faire le stringify pour rien, on teste avant
       // if (log.perf.out) log.perf(context.response, 'jsonSentLength ' +tools.stringify(data).length, true)
@@ -108,7 +109,7 @@ module.exports = function () {
   $json.sendOk = function (context, data) {
     var reponse = {success:true}
     if (data) tools.merge(reponse, data)
-    $json.send(context, null, reponse)
+    context.json(reponse)
   }
 
   return $json
