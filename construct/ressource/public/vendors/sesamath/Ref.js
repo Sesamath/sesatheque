@@ -77,11 +77,6 @@ function Ref(initObj) {
    */
   this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : [];
   /**
-   * Les enfants éventuels, un tableaux d'objets qui peuvent être un mix de Ref et Ressource
-   * @type {Ref[]|Ressource[]}
-   */
-  if (initObj.enfants && initObj.enfants instanceof Array) this.enfants = initObj.enfants;
-  /**
    * Uri d'affichage (facultatif), commence par /public/ ou /ressource/
    * @type {string}
    */
