@@ -51,6 +51,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var arbreCateg = config.constantes.categories.liste
 
   var xmls = ["cp", "ce1", "ce2", "cm1", "cm2", "6eme"]
+  var niveaux // affecté dans getArbreDefaultValues et utilisé au save
 
   /**
    * Met à jour un arbre calculatice
@@ -94,6 +95,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     }).seq(function (children) {
       //log.debug("obj xml", children, 'xml', {max:1000, indent:2})
+      log.debug("parsing des enfants de " +xmlSuffix)
       parseEnfants(children, this)
 
     }).seq(function (enfants) {
@@ -113,7 +115,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function getArbreDefaultValues(xmlSuffix) {
     var classe = (xmlSuffix === "6eme") ? xmlSuffix : xmlSuffix.toUpperCase()
     var titre = "Ressources Calcul@tice " +classe
-    var niveaux
     if (xmlSuffix === "all") {
       titre = "Toutes les ressources Calcul@tice"
       niveaux = [
@@ -155,6 +156,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         origine : "calculatice",
         idOrigine : child.attrib.uid,
         categories : [config.constantes.categories.exerciceInteractif],
+        niveaux      : niveaux,
         parametres: {}
       }
       var swf, js, options
@@ -178,7 +180,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
       if (js) {
         ressource.typeTechnique = "ecjs"
-        ressource.parametres.fichier = js
+        ressource.parametres.fichierjs = js
       } else if (swf) {
         ressource.typeTechnique = "ec2"
         ressource.parametres.fichier = swf
@@ -260,8 +262,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           log.error("pb au chargement : " + error.toString(), ressource)
           next(new Error("Impossible de sauvegarder la ressource récupérée (probablement mal interprétée)"))
         } else {
-          var ressourceNew = ressourceLoaded || {}
+          var ressourceNew = tools.clone(ressourceLoaded) || {}
           tools.update(ressourceNew, ressource)
+          if (ressource.idOrigine == 1) {
+            log.debug("ressource 1 en bdd", ressourceLoaded.parametres)
+            log.debug("ressource 1 passée", ressourceNew.parametres)
+          }
           if (tools.isEqual(ressourceLoaded, ressourceNew)) {
             next(null, ressourceNew)
           } else {
