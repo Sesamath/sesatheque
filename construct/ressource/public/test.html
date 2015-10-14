@@ -1,33 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Test</title>
-  <script type="text/javascript" src="/vendors/requirejs/require.min.js"></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
+  <meta charset="utf-8" />
+  <meta name="robots" content="noodp"/>
+  <title>Quadricalc</title>
+  <meta property="og:title" content="Quadricalc"/>
+  <meta property="twitter:title" content="Quadricalc"/>
+  <link type="text/css" media="all" rel="stylesheet" href="/styles/iframe.css"/>
+  <script type="text/javascript" src="/vendors/headjs/head.load.1.0.js"></script>
 </head>
 <body>
-<a href="#" id="exoEm">exo em</a>
-<a href="#" id="exoAm">exo am</a>
 
-<iframe id="iframe" width="100%" height="500"></iframe>
 
-<script type="text/javascript">
-  require(['/initRequire.js'], function(init) {
-    require(['jquery'], function() {
-      var iframe = document.getElementById("iframe");
+<div id="errors"></div>
+<div id="pictoFeedback" class="feedbackOff"></div>
+<h1 id="titre">Quadricalc</h1>
+<div id="display">Vous devez avoir un navigateur avec javascript activé pour voir ce contenu.<br />
+  Chargement en cours</div>
 
-      $("#exoEm").click(function () {
-        iframe.src = "/public/voir/em/42?urlResultatCallback=http://bibliotheque.local:3001/foo"
-      })
-      $("#exoAm").click(function () {
-        iframe.src = "/public/voir/am/42?urlResultatCallback=http://bibliotheque.local:3001/bar"
-      })
-    }, function (error) {
-      console.log("erreur de chargement")
-      console.dir(error)
-    })
-  })
+<script type="application/javascript">
+  try {
+    window.enregistrer_score = function (datasCalculatice) {
+      console.log("résultats reçus", datasCalculatice);
+    };
+
+    var ecjsBase = "http://ressources.sesamath.net/replication_calculatice/javascript";
+    var ressource = {"oid":50491,"origine":"calculatice","idOrigine":"1","typeTechnique":"ecjs","titre":"Quadricalc","resume":"","description":"","commentaires":"","parametres":{"options":{"choixOperateur":[1],"totalTentative":"15","temps_question":0,"choixVitesse":1000,"totalQuestion":1,"plageA":"2-9","nom":"quadricalc-as3","plageB":"2-6","totalEssai":1},"fichierjs":"quadricalc"},"niveaux":[11],"categories":[7],"typePedagogiques":[9],"typeDocumentaires":[9],"relations":[],"auteurs":[],"contributeurs":[],"groupes":[],"langue":"fra","publie":false,"restriction":0,"dateCreation":"2015-10-14T10:24:54.062Z","dateMiseAJour":"2015-10-14T10:24:54.065Z","version":2,"indexable":true,"warnings":[],"errors":[],"archiveOid":50491,"displayUri":"/public/voir/50491","describeUri":"/public/decrire/50491","dataUri":"/api/public/50491"};
+
+    // d'après {ecjsBase}/api/clc-api.main.js
+    head.load(
+        //"http://calculatice.ac-lille.fr/calculatice/squelettes/css/clear.css",
+        ecjsBase + "/lib-externes/jquery/css/start/jquery-ui-1.10.4.custom.min.css",
+        ecjsBase + "/clc/css/clc.css",
+        ecjsBase + "/lib-externes/swfobject.js",
+        ecjsBase + "/lib-externes/modernizr.custom.59181.js",
+        ecjsBase + "/lib-externes/jquery.all.min.js",
+        ecjsBase + "/lib-externes/svgjs.all.min.js",
+        ecjsBase + "/lib-externes/raphael.all.min.js",
+        ecjsBase + "/lib-externes/big.all.min.js",
+        ecjsBase + "/clc/js/clc.dev.1.js"
+    );
+    // fin clc-api.main.js
+    head.ready(function () {
+      /*global CLC, $*/
+      var $container = $("#display");
+      // les options et le nom de l'exo
+      var optionsClc = ressource.parametres.options || "default";
+      var nomExo = ressource.parametres.fichierjs;
+      var cheminExo = ecjsBase + "/exercices/";
+
+      // cree un exo de maniere asynchrone
+      var reqExo  = CLC.loadExo(cheminExo+nomExo,optionsClc);
+
+      // quand l'exo est pret on le met dans la div et on l'affiche avec une dialog jquery
+      // Attention l'id de la div est ici "cntExo", changer si besoin.
+      reqExo.done(function(exercice){
+        console.log("exo clc", exercice);
+        $container.dialog({
+          close: function () {
+            // on arrete les animations qui tournent encore au cas où l'utilisateur referme
+            // la dialog avant d'avoir fini l'exo
+            exercice.unload();
+          },
+          title: nomExo,
+          width: 775
+        });
+        $container.dialog("open");
+        $container.html(exercice);
+      });
+    });
+
+  } catch(error) {
+    document.getElementById('errors').innerHTML = error.toString();
+    if (console && console.error) console.error(error)
+  }
 </script>
+
 
 </body>
 </html>
