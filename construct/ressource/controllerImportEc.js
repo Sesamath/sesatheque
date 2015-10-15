@@ -116,7 +116,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var classe = (xmlSuffix === "6eme") ? xmlSuffix : xmlSuffix.toUpperCase()
     var titre = "Ressources Calcul@tice " +classe
     if (xmlSuffix === "all") {
-      titre = "Toutes les ressources Calcul@tice"
+      titre = "Exercices de calcul mental Calcul@TICE"
       niveaux = [
           config.constantes.niveaux.cp,
           config.constantes.niveaux.ce1,

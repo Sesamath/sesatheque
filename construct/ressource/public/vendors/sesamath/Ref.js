@@ -44,13 +44,13 @@ else if (typeof module === 'object') module.exports = Ref;
  * @constructor
  */
 function Ref(initObj) {
-  if (!initObj instanceof Object) initObj = {}
+  if (!initObj instanceof Object) initObj = {};
   /**
    * L'oid de la ressource que l'on référence
    * @type {number}
    */
   this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
-  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine
+  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
   /**
    * Titre
    * @type {string}
@@ -76,11 +76,13 @@ function Ref(initObj) {
    * @type {Array}
    */
   this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : [];
+
+  var prefix = (initObj.restriction === 0) ? "public" : "ressource";
   /**
    * Uri d'affichage (facultatif), commence par /public/ ou /ressource/
    * @type {string}
    */
-  this.displayUri = initObj.displayUri;
+  this.displayUri = initObj.displayUri || "/" +prefix +"/voir/" +this.ref;
   /**
    * Url absolue d'affichage (facultatif)
    * @type {string}
@@ -90,7 +92,7 @@ function Ref(initObj) {
    * Uri des data en json (facultatif), commence par /public/ ou /ressource/
    * @type {string}
    */
-  this.dataUri = initObj.dataUri;
+  this.dataUri = initObj.dataUri || "/api/" +prefix +"/" +this.ref;
   /**
    * Url absolue des data en json (facultatif)
    * @type {string}
