@@ -99,7 +99,7 @@ module.exports = function (controller) {
 
   // déclenche une erreur 500
   controller.get('erreur500', function (context) {
-    context.layout = 'page'
+    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     throw new Error("Une erreur 500 provoquée")
   })
 }

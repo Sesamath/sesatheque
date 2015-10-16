@@ -217,7 +217,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         if (data.error) data.error += "\n" + errorMsg
         else data.error = errorMsg
       } else if (isHtml) {
-        prepareErrorHtmlData('Erreur interne', errorMsg)
+        prepareErrorHtmlData(data, 'Erreur interne', errorMsg)
       } else {
         data.content = errorMsg
       }
@@ -249,7 +249,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
             msg = "Ooops, une erreur " +context.status +' est survenue'
         }
         if (isHtml) {
-          prepareErrorHtmlData('erreur ' +context.status, msg)
+          prepareErrorHtmlData(data, 'erreur ' +context.status, msg)
         } else if (isJson) {
           if (!data.error) data.error = msg // sinon on laisse celle qu'il y avait probablement plus explicite
         } else {
@@ -308,21 +308,22 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   }
 
   /**
-   * Ajoute à data nos params par défaut s'il n'existent pas et met le contentType html
+   * Ajoute à data nos params par défaut s'il n'existent pas
+   * @todo régler le doublon avec $views.addError
    * @private
    * @param data     Les données que l'on modifie
    * @param title    Le titre à mettre s'il n'y en avait pas
    * @param errorMsg Le message d'erreur à mettre s'il n'y en avait pas déjà un
    */
   function prepareErrorHtmlData(data, title, errorMsg) {
-    var defaultData = {
-      $metas     : {
-        title: title
-      },
-      $views     : __dirname + '/views',
-      errors: [errorMsg]
+    if (!data.hasOwnProperty('$metas')) data.$metas = {}
+    data.$metas.title = title
+    if (!data.$views) data.$views = __dirname + '/views' // sinon lassi/classes/transport/html/Renderer.js plante avec " Wrong views path"
+    if (!data.errors) data.errors = data.errors = {
+      $view : __dirname +'/views/errors',
+      errorMessages : []
     }
-    tools.complete(data, defaultData)
+    data.errors.errorMessages.push(errorMsg.replace(/Error[\s]*:[\s]*/, ''))
     log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max:2000})
   } // prepareErrorHtmlData
 
