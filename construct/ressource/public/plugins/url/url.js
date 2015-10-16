@@ -176,9 +176,10 @@ try {
       // raccourcis
       var params = ressource.parametres;
       url = params.adresse;
+      if (!url) throw new Error("Url manquante");
+      if (!/^https?:\/\//.test(url)) throw new Error("Url invalide : " +url);
 
       // init
-      S.addElement(container, 'p', {id: "loading"}, "Chargement en cours...");
       S.addCss(options.pluginBase + '/url.css');
 
       var hasConsigne = (params.question_option && params.question_option !== 'off');

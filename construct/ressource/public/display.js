@@ -94,12 +94,17 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' + name + ' a échoué');
               if (typeof plugin.display !== 'function') throw new Error('Le plugin ' + name + " n'a pas de méthode display");
               S.log('plugin ' + name + ' chargé');
-              if (options.container) options.container.innerHTML = '';
+              if (options.container) S.empty(options.container);
               else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource");
               if (options.errorsContainer) options.errorsContainer.innerHTML = '';
               else throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs");
               // On vire le titre si on nous le demande via les options ou un param dans l'url
-              if (options.hasOwnProperty('showTitle') && !options.showTitle || /\?.*showTitle=0/.test(wd.URL)) {
+              if (
+                  (options.hasOwnProperty('showTitle') && !options.showTitle) ||
+                  /\?.*showTitle=0/.test(wd.URL) ||
+                  /\/apercevoir\//.test(wd.URL) ||
+                  /\?(.+&)?layout=iframe/.test(wd.URL)
+              ) {
                 ST.hideTitle();
               }
               // on regarde s'il faut ajouter une fct de sauvegarde des résultats
