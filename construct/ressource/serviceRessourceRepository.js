@@ -390,7 +390,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * Enregistre la ressource en archive et appelle next avec, mais ne modifie pas la ressource
    * @memberOf $ressourceRepository
    * @param {EntityRessource} ressource
-   * @param next
+   * @param next appelé avec (error, archive)
    */
   $ressourceRepository.archive = function (ressource, next) {
     try {

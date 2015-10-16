@@ -73,6 +73,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             } else {
               $ressourceRepository.delete(ressource, function (error) {
                 if (error) $json.send(context, error)
+                //else $json.send(context, null, {error:"message d'erreur bidon"})
                 else $json.send(context, null, {deleted: id})
               })
             }
