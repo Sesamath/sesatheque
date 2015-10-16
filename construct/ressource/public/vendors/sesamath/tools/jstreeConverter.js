@@ -90,13 +90,18 @@
   jstreeConverter.getEnfants = function (nodeId, jstree) {
     //log('getEnfants de ' +nodeId, jstree);
     var enfants = [];
+    var i = 0;
     try {
       if (!nodeId) nodeId = '#';
       var root = jstree._model.data;
       root[nodeId].children.forEach(function (rootChildId) {
         var child = root[rootChildId];
         var enfant = jstreeConverter.toRef(child, jstree);
-        //log("traitement child", child);
+        if (i<5) {
+          log("traitement child", child);
+          log("devenu", enfant);
+          i++;
+        }
         if (enfant && (enfant.ref || enfant.typeTechnique === 'arbre')) enfants.push(enfant);
         else log.error("Pb de conversion du child, ni ref ni arbre", child);
       });
