@@ -136,9 +136,10 @@ try {
       $linkShowGraphic.click(showGraphic);
 
       // lien et comportement pour passer en mode texte
-      var linkShowTxt = S.addElement(blocTexte, 'a', {href:'#enfants'}, "passer en mode texte");
-      $linkShowTxt = $(linkShowTxt);
-      $linkShowTxt.click(showTxt);
+      S.addElement(blocTexte, 'a', {href:'?editor=texte'}, "passer en mode texte sans sauvegarder");
+      //var linkShowTxt = S.addElement(blocTexte, 'a', {href:'#enfants'}, "passer en mode texte");
+      //$linkShowTxt = $(linkShowTxt);
+      //$linkShowTxt.click(showTxt);
 
       addLoadSrc();
 
@@ -503,21 +504,28 @@ try {
 
     return {
       init: function (arbre, options) {
-        dstTree = arbre;
-        timeout = options.timeout;
-        initDom(options);
-        // on ajoute un lien pour passer à la version graphique
-        jstreeConverter.setBaseUrl(options.sesathequeBase);
-        S.log("edit de l'arbre", arbre);
-        S.log("$dstTree", $dstTree);
-        $saveButton = $('#saveButton');
-        if (!$saveButton) throw new Error("Bouton de sauvegarde non trouvé dans la page");
-        if (!$textarea) throw new Error("Champ de sauvegarde des enfants non trouvé dans le formulaire");
-        $saveButton.click(saveDst);
+        var editor = S.getURLParameter('editor') || "graphic";
+        if (editor === "graphic") {
+          dstTree = arbre;
+          timeout = options.timeout;
+          initDom(options);
+          // on ajoute un lien pour passer à la version graphique
+          jstreeConverter.setBaseUrl(options.sesathequeBase);
+          S.log("edit de l'arbre", arbre);
+          S.log("$dstTree", $dstTree);
+          $saveButton = $('#saveButton');
+          if (!$saveButton) throw new Error("Bouton de sauvegarde non trouvé dans la page");
+          if (!$textarea) throw new Error("Champ de sauvegarde des enfants non trouvé dans le formulaire");
+          $saveButton.click(saveDst);
 
-        // on charge l'arbre à éditer
-        loadDst(arbre);
-        showGraphic();
+          // on charge l'arbre à éditer
+          loadDst(arbre);
+          showGraphic();
+        } else {
+          // on ne met que le lien
+          var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
+          S.addElement(blocTexte, 'a', {href:'?editor=graphic'}, 'passer en mode graphique');
+        }
       }
     };
   });
