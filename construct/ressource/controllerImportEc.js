@@ -110,7 +110,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Retourne les valeurs par défaut d'un arbre de ressources calculatice
    * @param xmlSuffix
-   * @returns {{titre: string, typeTechnique: string, origine: string, idOrigine: *, categories: *[], publie: boolean, restriction: number, enfants: Array}}
+   * @returns {object} {titre: string, typeTechnique: string, origine: string, idOrigine: *, categories: *[], publie: boolean, restriction: number, enfants: Array}
    */
   function getArbreDefaultValues(xmlSuffix) {
     var classe = (xmlSuffix === "6eme") ? xmlSuffix : xmlSuffix.toUpperCase()
