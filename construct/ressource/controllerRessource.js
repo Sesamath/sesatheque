@@ -645,7 +645,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // "titre" avec le nb de ressources
               var html = ressources.length +' ressource'
               if (ressources.length) {
-                html += 's (' + (options.start + 1) + ' à ' + (options.start + options.nb) + ')'
+                var last = Math.min(options.start + options.nb, options.start + ressources.length)
+                html += 's (' + (options.start + 1) + ' à ' +last + ')'
               }
               data.actions.links.push({html :html, selected:true})
               // liens précédents
