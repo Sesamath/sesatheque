@@ -48,7 +48,7 @@ try {
      */
     function addEditGraphe(urlEditGraphe, container) {
       S.log("addEditGraphe avec " +urlEditGraphe);
-      var args = {src: urlEditGraphe, id:"editgraphe"};
+      var args = {src: urlEditGraphe, id:"editgraphe", allowfullscreen:true};
       var editgraphe = S.addElement(container, 'iframe', args, "Si vous lisez ce texte, votre navigateur ne supporte pas les iframes");
       $editgraphe = $(editgraphe);
       autosize();
