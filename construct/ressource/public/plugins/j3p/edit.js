@@ -48,8 +48,9 @@ try {
      */
     function addEditGraphe(urlEditGraphe, container) {
       S.log("addEditGraphe avec " +urlEditGraphe);
-      var args = {src: urlEditGraphe, id:"editgraphe", allowfullscreen:true};
+      var args = {src: urlEditGraphe, id:"editgraphe"}; // mettre ici allowfullscreen:"true" sert à rien, faut un setAttribute plus loin
       var editgraphe = S.addElement(container, 'iframe', args, "Si vous lisez ce texte, votre navigateur ne supporte pas les iframes");
+      editgraphe.setAttribute("allowfullscreen", true);
       $editgraphe = $(editgraphe);
       autosize();
       return editgraphe.contentWindow;
