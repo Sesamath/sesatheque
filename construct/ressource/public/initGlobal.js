@@ -125,11 +125,26 @@
      * @param {string} tag
      * @param {Object=} attrs Les attributs
      * @param {string=} content
-     * @returns {Element}
+     * @returns {Element} L'élément ajouté
      */
     S.addElement = function (parent, tag, attrs, content) {
       var elt = S.getElement(tag, attrs, content);
       parent.appendChild(elt);
+
+      return elt;
+    };
+
+    /**
+     * Ajoute un élément html comme premier enfant de parent
+     * @param {Element} parent
+     * @param {string} tag
+     * @param {Object=} attrs Les attributs
+     * @param {string=} content
+     * @returns {Element} L'élément ajouté
+     */
+    S.addElementFirst = function (parent, tag, attrs, content) {
+      var elt = S.getElement(tag, attrs, content);
+      parent.insertBefore(elt, parent.firstChild);
 
       return elt;
     };
@@ -140,8 +155,8 @@
      * Déclaré par init (dès son chargement)
      * @name addText
      * @memberOf sesamath
-     * @param elt
-     * @param text
+     * @param {Element} elt
+     * @param {string} text
      */
     S.addText = function (elt, text) {
       elt.appendChild(wd.createTextNode(text));

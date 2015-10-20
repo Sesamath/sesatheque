@@ -113,7 +113,7 @@ try {
     }
 
     /**
-     * Charge l'arbre source, initialise le dom et les comportements
+     * Charge initialise le dom et les liens pour changer de mode
      * @private
      * @param options
      */
@@ -124,25 +124,30 @@ try {
       S.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
       S.addCss(base + 'styles/ressources.css');
       // nos éléments html
-      var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
       container = window.document.getElementById('display');
       $container = $(container);
-
+      var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
+      // faut ajouter nos eléments en first child
       // ancre
-      S.addElement(blocTexte, 'a', {name:"enfants"});
+      S.addElementFirst(blocTexte, 'a', {name: "enfants"});
       // lien et comportement pour repasser en graphique
-      var linkShowGraphic = S.addElement(blocTexte, 'a', {href:'#enfants'}, 'passer en mode graphique');
+      var linkShowGraphic = S.addElementFirst(blocTexte, 'a', {href: '#enfants', style:{float:"left"}}, 'passer en mode graphique');
       $linkShowGraphic = $(linkShowGraphic);
       $linkShowGraphic.click(showGraphic);
 
       // lien et comportement pour passer en mode texte
-      S.addElement(blocTexte, 'a', {href:'?editor=texte'}, "passer en mode texte sans sauvegarder");
-      //var linkShowTxt = S.addElement(blocTexte, 'a', {href:'#enfants'}, "passer en mode texte");
-      //$linkShowTxt = $(linkShowTxt);
-      //$linkShowTxt.click(showTxt);
+      var linkShowTxt = S.addElementFirst(blocTexte, 'a', {href: '#enfants', style:{float:"left"}}, "passer en mode texte");
+      $linkShowTxt = $(linkShowTxt);
+      $linkShowTxt.click(showTxt);
+      //S.addElement(blocTexte, 'br');
+      //S.addElement(blocTexte, 'a', {href:'?editor=texte'}, "passer en mode texte sans sauvegarder");
+    }
 
+    /**
+     * Initialise les éléments de dom pour le mode graphique
+     */
+    function initDomGraphic () {
       addLoadSrc();
-
       // la recherche
       var searchContainer = S.addElement(container, "div", {class: 'search'});
       S.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ');
@@ -461,6 +466,7 @@ try {
      * @private
      */
     function showGraphic() {
+      if (!$dstTree) initDomGraphic();
       try {
         dstTree.enfants = JSON.parse($textarea.val());
       } catch (error) {
@@ -500,32 +506,33 @@ try {
     var isDstModified = false;
     // le textarea enfants
     $textarea = $('#enfants');
+    if (!$textarea) throw new Error("Champ de sauvegarde des enfants non trouvé dans le formulaire");
     var $jstree = $.jstree; // globale pour $.jstree que l'on perd dans les callbacks
+    $saveButton = $('#saveButton');
+    if (!$saveButton) throw new Error("Bouton de sauvegarde non trouvé dans la page");
 
     return {
       init: function (arbre, options) {
         var editor = S.getURLParameter('editor') || "graphic";
+        initDom(options);
+        dstTree = arbre;
+        timeout = options.timeout;
         if (editor === "graphic") {
-          dstTree = arbre;
-          timeout = options.timeout;
-          initDom(options);
+          initDomGraphic();
           // on ajoute un lien pour passer à la version graphique
           jstreeConverter.setBaseUrl(options.sesathequeBase);
           S.log("edit de l'arbre", arbre);
           S.log("$dstTree", $dstTree);
-          $saveButton = $('#saveButton');
-          if (!$saveButton) throw new Error("Bouton de sauvegarde non trouvé dans la page");
-          if (!$textarea) throw new Error("Champ de sauvegarde des enfants non trouvé dans le formulaire");
-          $saveButton.click(saveDst);
 
           // on charge l'arbre à éditer
           loadDst(arbre);
           showGraphic();
         } else {
-          // on ne met que le lien
-          var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
-          S.addElement(blocTexte, 'a', {href:'?editor=graphic'}, 'passer en mode graphique');
+          $linkShowTxt.hide();
+          $textarea.val(JSON.stringify(arbre.enfants, null, 2));
         }
+        // comportement au save
+        $saveButton.click(saveDst);
       }
     };
   });

@@ -199,7 +199,7 @@
           item.enfants = jstreeConverter.getEnfants(node.id, jstree);
         }
         if (nodeSrc.a_attr['data-displayUri']) item.displayUri = nodeSrc.a_attr['data-displayUri'];
-        if (nodeSrc.a_attr['data-dataUri']) item.displayUri = nodeSrc.a_attr['data-dataUri'];
+        if (nodeSrc.a_attr['data-dataUri']) item.dataUri = nodeSrc.a_attr['data-dataUri'];
         if (nodeSrc.a_attr['data-ref']) item.ref = nodeSrc.a_attr['data-ref'];
         if (nodeSrc.a_attr.alt) item.resume = nodeSrc.a_attr.alt;
       }

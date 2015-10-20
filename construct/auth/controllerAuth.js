@@ -122,7 +122,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
      * @route GET /*
      */
     controller.get('*', function (context) {
-      log.debug("controlleur auth avec " +context.layout)
+      //log.debug("controlleur auth avec " +context.layout)
       if (context.layout === 'page') {
         var data = {
           authBloc: {

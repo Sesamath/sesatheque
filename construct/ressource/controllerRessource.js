@@ -192,7 +192,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     redirectPublicOrContinue(context, function () {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
-        send(context, error, ressource, 'display', {$layout: '../../static/views/layout-iframe'})
+        send(context, error, ressource, 'display')
       })
     })
   })
