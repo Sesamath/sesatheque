@@ -46,7 +46,7 @@ var assert = require("assert")
  */
 var Zombie = require('zombie')
 
-var config = require('../../config')
+var config = require('../../app/config')
 var urlBibli = 'http://'
 if (process.argv.indexOf('--prod') > -1) {
   urlBibli += 'bibliotheque.sesamath.net'

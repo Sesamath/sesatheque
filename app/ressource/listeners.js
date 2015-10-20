@@ -44,7 +44,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    *
    * Tout ça aurait pu être dans un controleur * mais avec beforeTransport on est sûr de passer après tous les contrôleurs
    *
-   * Le listener sur afterRailUse est dans construct/index.js et il ajoute CORS & logs sur le rail
+   * Le listener sur afterRailUse est dans app/index.js et il ajoute CORS & logs sur le rail
    * @service listeners
    * @requires $accessControl
    * @requires $routes

@@ -15,7 +15,7 @@ var knex = require('knex')
 //var moment = require('moment')
 var flow = require('an-flow')
 
-var tools = require('../construct/tools')
+var tools = require('../app/tools')
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
@@ -28,7 +28,7 @@ urlBibli += confSesatheque.$server && confSesatheque.$server.port || '3000'
 urlBibli += '/api/ressource'
 
 // constantes
-var confRessource = require('../construct/ressource/config')
+var confRessource = require('../app/ressource/config')
 var tdCode = confRessource.constantes.typeDocumentaires
 var tpCode = confRessource.constantes.typePedagogiques
 var catCode = confRessource.constantes.categories

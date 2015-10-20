@@ -42,7 +42,7 @@ function del() {
 }
 
 function runNode() {
-  NODE_ENV=$nodeEnv node construct/index.js
+  NODE_ENV=$nodeEnv node app/index.js
 }
 
 function runPm2() {
@@ -63,8 +63,8 @@ function runPm2Watch() {
   local error="$(getConf error_file $name.error.log)"
   local pid="$(getConf pid_file $name.pid)"
   # le scale 2 sert à rien, toujours du fork
-  # * pas géré dans le --ignore-watch, on met du construct/ressource/public à la place d'un construct/*/public générique
-  local cmd="pm2 start construct/index.js scale $name 2 --env dev $pm2opts -o '$out' -e '$error' -p '$pid' --watch construct --ignore-watch 'node_modules construct/qxApps construct/ressource/public'"
+  # * pas géré dans le --ignore-watch, on met du app/ressource/public à la place d'un app/*/public générique
+  local cmd="pm2 start app/index.js scale $name 2 --env dev $pm2opts -o '$out' -e '$error' -p '$pid' --watch app --ignore-watch 'node_modules app/qxApps app/ressource/public'"
   echo $cmd
   eval $cmd
   exit $?
@@ -90,7 +90,7 @@ do
     p) nodeEnv='prod'; runPm2;;
     x) del;;
     w) runPm2Watch;;
-    #w) pm2opts="--watch '[\"construct\", \"config\"]' --ignore-watch '[\"construct/qxApps\", \"construct/*/public\"]'"; runPm2;;
+    #w) pm2opts="--watch '[\"app\", \"config\"]' --ignore-watch '[\"app/qxApps\", \"app/*/public\"]'"; runPm2;;
     *) usage 1;;
   esac
 done

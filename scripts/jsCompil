@@ -19,14 +19,14 @@ trap fin EXIT
 
 [ "${1:-}" == "-h" -o "${1:-}" == "--help" ] && usage
 
-cd $(dirname $0)/../
-dirApp=$PWD
+dirRoot="$(dirname $0)/.."
+cd $dirRoot
 
 tmp=/tmp/$(basename $0)
 src=node_modules/requirejs/require.js
-dst=construct/static/public/vendors/requirejs/require.min.js
+dst=app/static/public/vendors/requirejs/require.min.js
 echo -n "$dst "
 # on récupère la conf sans le define de fin qui n'aime pas être concaténé tel quel
-sed -e '/BEGIN CUT/, /END CUT/ d; s@// IF CUT@@g;' construct/ressource/public/initRequire.js > $tmp
+sed -e '/BEGIN CUT/, /END CUT/ d; s@// IF CUT@@g;' app/ressource/public/initRequire.js > $tmp
 node_modules/.bin/uglifyjs $src $tmp --compress --mangle > $dst && echo ok || echo KO
 rm -f $tmp

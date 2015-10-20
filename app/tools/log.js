@@ -40,7 +40,7 @@
 var fs = require('fs')
 var moment = require('moment')
 var _ = require('lodash')
-var config = require('../../config/index') // jshint ignore:line
+var config = require('../config') // jshint ignore:line
 var tools = require('./index') // jshint ignore:line
 
 var _lassi = (typeof GLOBAL.lassi === 'undefined') ? console : GLOBAL.lassi

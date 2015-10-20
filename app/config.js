@@ -34,12 +34,12 @@
 /**
  * Configuration de l'application
  */
-var tools = require("../construct/tools")
-var localConfig = require("../_private/config")
-var ressourceConfig = require("../construct/ressource/config")
+var tools = require("./tools")
+var localConfig = require("./_private/config")
+var ressourceConfig = require("./ressource/config")
 
 /** La racine du projet */
-var root  = __dirname + "/..";
+var root  = __dirname +'/..';
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
@@ -131,7 +131,8 @@ var settings = {
     debug     : "debug.log",
     // ajouter les exclusions voulues parmi ["cache", "resssourceRepository", "personneRepository", "accessControl"]
     debugExclusions : []
-  }
+  },
+  varnish : false // mettre true s'il y a un varnish en fromtal pour purger les urls mises en cache
 }
 
 // on ajoute nos params locaux (accès à la base et port,

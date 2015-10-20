@@ -69,7 +69,7 @@ urlApiBibli += ':'
 urlApiBibli += serverConf.$server && serverConf.$server.port || '3000'
 urlApiBibli += '/api'
 
-var ressConf = require('../construct/ressource/config')
+var ressConf = require('../app/ressource/config')
 var arbreCateg = ressConf.constantes.categories.liste
 
 /**

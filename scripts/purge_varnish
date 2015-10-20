@@ -5,7 +5,7 @@ LAST_FILE=_private/purge_varnish.last
 CONFIG=_private/config.js
 
 dirInitial="$PWD"
-dirApp=$(dirname $0)/../
+dirApp=$(dirname $0)/../app
 
 function fin() {
   cd "$dirInitial"
@@ -28,7 +28,7 @@ function purge_varnish() {
     echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
   else
 
-    find construct/*/public -type f $findOpt | while read file
+    find */public -type f $findOpt | while read file
     do
       url=$vhost${file#*public} # on démarre au / qui suit build
       echo -n "$url : "

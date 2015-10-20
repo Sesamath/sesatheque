@@ -11,18 +11,18 @@ Knacss
 Récupération des sources et duplication des less chez nous sans leur namespace
 
 ```bash
-# installe les sources dans construct/static/public/vendors/knacss
+# installe les sources dans app/static/public/vendors/knacss
 bower install knacss
 
 # on veut récupérer les sources less sans namespace pour pouvoir les utiliser en mixin 
 # (sinon impossible de faire du .foo {.@{kna-namespace}bar()})
-cd construct/static/public
+cd app/static/public
 [ -d ] styles/knacssSrc || mkdir styles/knacssSrc
 for f in vendors/knacss/less/*.less; do sed -e 's/@{kna-namespace}//g' $f > styles/knacssSrc/$(basename $f); done
 ```
 
-On précisera ce que l'on inclue dans notre construct/static/public/styles/page.less (dérivé de construct/static/public/vendors/knacss/less/knacss.less)
-avec nos définitions de styles propres à sesatheque dans construct/static/public/styles/sesatheque.less
+On précisera ce que l'on inclue dans notre app/static/public/styles/page.less (dérivé de app/static/public/vendors/knacss/less/knacss.less)
+avec nos définitions de styles propres à sesatheque dans app/static/public/styles/sesatheque.less
 
 Utilisation locale des polices google
 -------------------------------------
@@ -30,7 +30,7 @@ Utilisation locale des polices google
 Pour récupérer localement les icones material design et la police roboto 
 
 ```bash
-cd construct/static/public/styles/fonts
+cd app/static/public/styles/fonts
 
 # On récupère les polices MaterialIcons
 for e in eot ttf woff woff2; do wget -O MaterialIcons-Regular.$e https://github.com/google/material-design-icons/blob/master/iconfont/MaterialIcons-Regular.$e?raw=true; done

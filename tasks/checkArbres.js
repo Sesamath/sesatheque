@@ -6,7 +6,7 @@
 var fs = require('fs')
 var moment = require('moment')
 var flow = require('an-flow')
-var tools = require('../construct/tools')
+var tools = require('../app/tools')
 
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line

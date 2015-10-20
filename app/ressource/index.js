@@ -58,8 +58,8 @@ ressourceComponent.service('$flashMessages', function() {
   return require('./serviceFlashMessages')()
 })
 
-ressourceComponent.service('$ressourceRepository', function(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache) {
-  return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache)
+ressourceComponent.service('$ressourceRepository', function(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
+  return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes)
 })
 
 ressourceComponent.service('$ressourceControl', function(EntityRessource) {

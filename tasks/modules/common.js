@@ -9,8 +9,8 @@ var request = require('request')
 var moment = require('moment')
 var flow = require('an-flow')
 
-var tools = require('../../construct/tools')
-var CounterMulti = require('../../construct/tools/CounterMulti')
+var tools = require('../../app/tools')
+var CounterMulti = require('../../app/tools/CounterMulti')
 
 // conf de l'appli
 var confSesatheque = require('../../_private/config')
@@ -24,7 +24,7 @@ var apiToken = confSesatheque.apiTokens[0]
 
 // conf ressource
 // conf des ressources
-var confRessource = require('../../construct/ressource/config')
+var confRessource = require('../../app/ressource/config')
 // constantes
 var tdCode = confRessource.constantes.typeDocumentaires
 var tpCode = confRessource.constantes.typePedagogiques

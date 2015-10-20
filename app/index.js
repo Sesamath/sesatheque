@@ -45,10 +45,10 @@ var _ = require('lodash')
 var morgan = require('morgan')
 var moment = require('moment')
 var tools = require('./tools')
-var config = require('../config')
+var config = require('./config')
 
 // appel du module lassi qui met en global une variable lassi
-require('lassi')(__dirname +'/..')
+require('lassi')(__dirname)
 // sesalab-admin après mise en global de l'appli
 
 /* attention, ici GLOBAL.lassi existe mais pas toujours lassi !!!
@@ -63,9 +63,9 @@ for (var i = 10; i < 1000; i +=100) {
 GLOBAL.isProd = ((lassi.settings.application.staging === 'prod'))
 lassi.log('app', "Démarrage de l'application avec l'environnement", (lassi.settings.application.staging).red)
 
+console.log("ici")
 // nos loggers
 GLOBAL.log = require('./tools/log.js')
-
 
 /**
  * Gestion des traces
@@ -81,7 +81,6 @@ GLOBAL.log = require('./tools/log.js')
  */
 /* if (!isProd) /* * / require('long-stack-traces') /* */
 
-var moment = require('moment')
 var staticTtl = 3600 * 24
 var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
 
@@ -96,7 +95,9 @@ require('./auth')
 var dependancies = ['static', 'personne', 'ressource', 'auth']
 
 // On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
-var privateConfig = require('../_private/config')
+console.log('avant conf private')
+var privateConfig = require('./_private/config')
+console.log('après conf private')
 // des modules sup à charger
 if (privateConfig.extraModules) {
   privateConfig.extraModules.forEach(function (module) {
@@ -118,9 +119,11 @@ if (privateConfig.extraDependenciesLast) {
 }
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
+console.log("av component")
 var sesatheque = lassi.component('sesatheque', dependancies)
 GLOBAL.app = sesatheque // pour sesalab-admin
 require('./sesalab-admin');
+console.log("av config")
 
 sesatheque.config(function($cache, $settings) {
   // on ajoute memcache si précisé dans les settings
@@ -310,5 +313,6 @@ if (!isProd) {
   });
 }
 
+lassi.log("avant bootstrap")
 // et on lance le boot
 sesatheque.bootstrap()

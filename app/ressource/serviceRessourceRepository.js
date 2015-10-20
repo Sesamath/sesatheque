@@ -35,10 +35,12 @@
 var _           = require('lodash')
 var flow        = require('an-flow')
 var elementtree = require('elementtree')
+var request     = require('request')
 //var util = require('util')
 var uuid = require('node-uuid')
 
 var config = require('./config')
+var appConfig = require('../config')
 
 /**
  * Service d'accès aux ressources, utilisé par les différents contrôleurs
@@ -51,7 +53,7 @@ var config = require('./config')
  */
 var $ressourceRepository = {}
 
-module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache) {
+module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
   var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
   var listeNbDefault = config.limites.listeNbDefault || 10
 
@@ -192,6 +194,31 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       }
     } catch(error) {
       next(error, ressource)
+    }
+  } // setLastLocalId
+
+  /**
+   * Purge les urls publiques de la ressource sur varnish
+   * (asynchrone, rend la main avant de le faire effectivement)
+   * @param {Ressource} ressource
+   * @returns {{}}
+   */
+  function purgeVarnish(ressource) {
+    // on ne purge que les ressources publiques (les autres ne sont pas en cache)
+    if (appConfig.varnish && ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
+      [
+        $routes.getAbs('api', ressource),
+        $routes.getAbs('display', ressource),
+        $routes.getAbs('describe', ressource),
+        $routes.getAbs('preview', ressource)
+      ].forEach(function (url) {
+        request({
+          method : "PURGE",
+          url : url
+        }, function (response) {
+          if (response.status !== 200) log.error("purge KO pour " +url)
+        })
+      })
     }
   }
 
@@ -666,6 +693,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       if (!ressource.oid) this(new Error("Après un write la ressource n'a toujours pas d'oid"))
       else {
         $cacheRessource.set(ressource)
+        purgeVarnish(ressource)
         log.debug('write ' + ressource.oid + ' ok')
         if (next) next(null, ressource)
       }

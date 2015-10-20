@@ -36,7 +36,7 @@
  */
 
 var _ = require('lodash')
-var baseUrl = require('../../config').application.baseUrl
+var baseUrl = require('../config').application.baseUrl
 
 module.exports = function ($accessControl, $views) {
   /**

@@ -35,11 +35,11 @@
 
 var assert = require("assert")
 var _ = require('lodash')
-var tools = require('../../construct/tools')
+var tools = require('../../app/tools')
 // tools fait du log.error
-GLOBAL.log = require('../../construct/tools/log')
+GLOBAL.log = require('../../app/tools/log')
 
-var CounterMulti = require('../../construct/tools/CounterMulti')
+var CounterMulti = require('../../app/tools/CounterMulti')
 //var flow = require('an-flow');
 //var request = require('request')
 

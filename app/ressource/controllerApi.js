@@ -48,7 +48,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var request = require('request')
   var flow = require('an-flow')
   var tools = require('../tools')
-  var config = require("../../config");
+  var config = require("../config");
   var configRessource = require("./config");
 
   /**

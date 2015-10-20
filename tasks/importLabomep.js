@@ -15,7 +15,7 @@ var flow = require('an-flow')
 var xml2js = require('xml2js')
 // pour ec2, fct piquée dans le repository
 var elementtree = require('elementtree')
-var tools = require('../construct/tools')
+var tools = require('../app/tools')
 
 // nos méthodes mutualisées
 var common = require('./modules/common')
@@ -31,7 +31,7 @@ var logRelations = false
 var logProcess = true
 
 // conf de l'appli
-var config = require('../construct/ressource/config.js')
+var config = require('../app/ressource/config.js')
 // conf de l'appli
 var serverConf = require('../_private/config')
 var urlBibli = 'http://'

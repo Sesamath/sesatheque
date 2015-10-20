@@ -38,7 +38,7 @@ var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
-var appConfig = require("../../config")
+var appConfig = require("../config")
 
 module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes) {
   /**

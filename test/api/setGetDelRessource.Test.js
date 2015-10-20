@@ -73,11 +73,11 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
 } else {
   var assert = require("assert")
   var _ = require('lodash')
-  var tools = require('../../construct/tools')
+  var tools = require('../../app/tools')
   var request = require('request')
 
   // conf de l'appli
-  var config = require('../../config')
+  var config = require('../../app/config')
   // token
   var apiToken = config.apiTokens[0]
   if (process.argv.indexOf('--token') > -1) {

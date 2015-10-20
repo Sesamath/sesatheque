@@ -1,4 +1,4 @@
-var config = require('../../../../config')
+var config = require('../../../config')
 app.controller(function() {
   var basicAuth = require('basic-auth-connect');
   var auth = basicAuth(function(user, pass) {
