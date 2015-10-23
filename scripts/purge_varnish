@@ -1,8 +1,9 @@
 #!/bin/bash
 set -u
 
-LAST_FILE=app/_private/purge_varnish.last
-CONFIG=app/_private/config.js
+# relatif à dirApp
+LAST_FILE=_private/purge_varnish.last
+CONFIG=_private/config.js
 
 dirInitial="$PWD"
 dirApp=$(dirname $0)/../app
