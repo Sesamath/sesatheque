@@ -749,7 +749,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // pour display faut ajouter les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
       if (view === 'display') {
         addJsVars(data, ressource)
-        data.contentBloc.isFormateur = $accessControl.hasRole("prof", context)
+        data.contentBloc.isFormateur = $accessControl.hasRole("acces_correction", context)
       } else if (view === 'describe' && ressource && ressource.typeTechnique === 'arbre') {
         // on ajoute la liste des urls des enfants si on les a
         if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
