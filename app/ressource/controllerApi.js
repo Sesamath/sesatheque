@@ -784,7 +784,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (oid !== 'by') {
       $ressourceRepository.loadPublic(oid, function (error, ressource) {
         if (error) $json.send(context, error)
-        else if (ressource) $json.send(context, null, ressource)
+        else if (ressource) sendRessource(context, null, ressource)
         else $json.notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
       })
     }
@@ -802,7 +802,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var idOrigine = context.arguments.idOrigine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       if (error) $json.send(context, error)
-      else if (ressource && ressource.restriction === 0) $json.send(context, null, ressource)
+      else if (ressource && ressource.restriction === 0) sendRessource(context, null, ressource)
       else $json.notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
     })
   })
