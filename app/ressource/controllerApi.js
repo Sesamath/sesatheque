@@ -605,6 +605,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
+   * Déconnecte l'utilisateur courant
+   */
+  controller.get('deconnexion', function (context) {
+    $accessControl.logout(context)
+    $json.sendOk(context)
+  })
+
+  /**
    * Forward un post (au unload on ne peut pas poster en crossdomain, on le fait en synchrone ici qui fera suivre)
    * @Route POST /api/deferPost
    */
