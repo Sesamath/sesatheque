@@ -608,8 +608,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Déconnecte l'utilisateur courant
    */
   controller.get('deconnexion', function (context) {
-    $accessControl.logout(context)
-    $json.sendOk(context)
+    if ($accessControl.isAuthenticated(context)) {
+      $accessControl.logout(context)
+      $json.sendOk(context)
+    } else {
+      $json.send(context, "Utilisateur non connecté")
+    }
   })
 
   /**
