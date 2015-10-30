@@ -227,7 +227,7 @@ function afterRailSession(rail) {
     else if (tools.isPublic(req.url)) ttl = publicTtl
     if (ttl) {
       // faut mettre ça au format de la RFC 1123
-      res.header('Expires', moment().utc().add(ttl, 's').format('ddd, DD MMM YYYY hh:mm:ss') +' GMT')
+      res.header('Expires', moment().utc().add(ttl, 's').format('ddd, DD MMM YYYY HH:mm:ss') +' GMT')
       res.header('Cache-Control', 'public, max-age=' +ttl)
       // @todo regarder If-Modified-Since et répondre 304 Not Modified si c'est le cas
       // mais c'est vraiment pas très urgent si on a un varnish devant nous il le gère
