@@ -7,7 +7,7 @@
     "wpwatch" : "webpack --watch"
   },
   "dependencies": {
-    "an-flow": "^1.0.0",
+    "an-flow": "^1.1.0",
     "lassi": "git://src.sesamath.net/lassi#master",
     "lodash": "^3.6.0",
     "memcached": "^2.1.0",

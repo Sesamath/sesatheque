@@ -203,37 +203,32 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
       }
 
       if (parent.enfants && parent.enfants.length) {
-        flow(parent.enfants)
-          // seqEach passe au suivant de la boucle quand la cb appelle this
-          // et au seq suivant quand la dernière cb appele this
-            .seqEach(function (enfant, enfantIndex) {
-                       var finEach = this
-                       // pour permettre de récupérer des objets d'après leur ref d'origine, on accepte aussi id et idOrigine (à la place de ref)
-                       if (enfant.origine && enfant.idOrigine) {
-                         // on le cherche en db
-                         //var logSuffix = enfant.idOrigine + ' - ' + enfant.id
-                         //log('load ' + logSuffix)
-                         $ressourceRepository.loadByOrigin(enfant.origine, enfant.idOrigine, function (error, ressource) {
-                           log("on traite l'enfant " +enfant.titre +" et on a récupéré ", ressource)
-                           updateEnfant(enfantIndex, ressource, finEach)
-                         })
-                       } else if (enfant.ref) {
-                         $ressourceRepository.load(enfant.ref, function (error, ressource) {
-                           updateEnfant(enfantIndex, ressource, finEach)
-                         })
-                       } else {
-                         // pas de ref ni idOrigine
-                         populateEnfants(enfant, finEach)
-                       }
-                     }) // seqEach
-            .seq(function () {
-                   nextStep()
-                 })
-            .catch(function(error) {
-                     log.error(new Error("L'analyse de l'arbre a planté (cf aussi erreur suivante)"), parent)
-                     log.error(error)
-                     nextStep()
-                   })
+        flow(parent.enfants).seqEach(function (enfant, enfantIndex) {
+          var finEach = this
+          // pour permettre de récupérer des objets d'après leur ref d'origine, on accepte aussi id et idOrigine (à la place de ref)
+          if (enfant.origine && enfant.idOrigine) {
+            // on le cherche en db
+            //var logSuffix = enfant.idOrigine + ' - ' + enfant.id
+            //log('load ' + logSuffix)
+            $ressourceRepository.loadByOrigin(enfant.origine, enfant.idOrigine, function (error, ressource) {
+              log("on traite l'enfant " +enfant.titre +" et on a récupéré ", ressource)
+              updateEnfant(enfantIndex, ressource, finEach)
+            })
+          } else if (enfant.ref) {
+            $ressourceRepository.load(enfant.ref, function (error, ressource) {
+              updateEnfant(enfantIndex, ressource, finEach)
+            })
+          } else {
+            // pas de ref ni idOrigine
+            populateEnfants(enfant, finEach)
+          }
+         }).seq(function () {
+           nextStep()
+         }).catch(function(error) {
+           log.error(new Error("L'analyse de l'arbre a planté (cf aussi erreur suivante)"), parent)
+           log.error(error)
+           nextStep()
+         })
       } else {
         nextStep()
       }

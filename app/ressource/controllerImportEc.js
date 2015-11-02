@@ -43,9 +43,9 @@
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes) {
   var request = require('request')
-  var _ = require('lodash')
+  //var _ = require('lodash')
   var tools = require('../tools')
-  var seq = require('an-flow')
+  var flow = require('an-flow')
   var elementtree = require('elementtree')
   var config = require('./config')
   var arbreCateg = config.constantes.categories.liste
@@ -61,7 +61,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function getAndParseXml(context, xmlSuffix, next) {
     var arbre = getArbreDefaultValues(xmlSuffix)
 
-    seq().seq(function () {
+    flow().seq(function () {
       $accessControl.isSesamathClient(context, this)
 
     }).seq(function (isSesamathClient) {
@@ -198,7 +198,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function parseEnfants(children, next) {
     var enfants = []
 
-    seq(children).seqEach(function (child) {
+    flow(children).seqEach(function (child) {
       var nextChild = this
       if (child.tag === "exercice") {
         save(getEcRessource(child), function (error, ressource) {
@@ -310,7 +310,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (xmlSuffix === "all") {
           var arbreAll = getArbreDefaultValues(xmlSuffix)
 
-          seq(xmls).seqEach(function (suffix) {
+          flow(xmls).seqEach(function (suffix) {
             var nextXml = this
             log.debug("pour all on lance " +suffix)
             getAndParseXml(context, suffix, function (error, arbre) {

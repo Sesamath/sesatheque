@@ -33,7 +33,7 @@
 
 var tools = require('../tools')
 var _ = require('lodash')
-var seq = require('an-flow')
+var flow = require('an-flow')
 var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
@@ -64,7 +64,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   function addGroupes(formData, values, next) {
     var choices = []
     var i = 0
-    seq(values).seqEach(function (value) {
+    flow(values).seqEach(function (value) {
       var suivant = this
       $personneRepository.loadGroupe(value, function (error, groupe) {
         if (error) {
@@ -120,7 +120,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       //  formData.errors = []
       //}
       var i = 0
-      seq(values).seqEach(function (value) {
+      flow(values).seqEach(function (value) {
         log.debug("entrée seq, appel personne.load " +value)
         var suivant = this
         $personneRepository.load(value, function (error, personne) {
@@ -268,7 +268,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
     // faut aller chercher en asynchrone les infos complémentaires pour la vue describe
     // (éventuels titres de ressources liées, auteurs ou groupes)
-    var fluxComplements = seq()
+    var fluxComplements = flow()
 
     // étape relations
     fluxComplements.seq(function () {
@@ -277,7 +277,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         nextComplement()
       } else {
         log.debug('faut ajouter des titres de relations', ressource.relations)
-        var fluxRelations = seq(ressource.relations)
+        var fluxRelations = flow(ressource.relations)
         fluxRelations.parEach(2, function (relation, index) {
           var nextSeq = this
           $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
@@ -314,7 +314,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (_.isEmpty(ressource.auteurs)) {
         nextComplement()
       } else {
-        var fluxAuteurs = seq(ressource.auteurs)
+        var fluxAuteurs = flow(ressource.auteurs)
         fluxAuteurs.seqEach(function (auteurId) {
           var nextSeq = this
           $personneRepository.load(auteurId, function (error, personne) {
@@ -341,7 +341,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (_.isEmpty(ressource.contributeurs)) {
         nextComplement()
       } else {
-        var fluxContributeurs = seq(ressource.contributeurs)
+        var fluxContributeurs = flow(ressource.contributeurs)
         fluxContributeurs.parSeq(2, function (contributeurId, index) {
           var nextSeq = this
           $personneRepository.load(contributeurId, function (error, personne) {
@@ -439,7 +439,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     _.each(labels, function (label, key) {
       labelsArray.push([key, label])
     })
-    seq(labelsArray).seqEach(function (labelItem) {
+    flow(labelsArray).seqEach(function (labelItem) {
       var key = labelItem[0]
       var label = labelItem[1]
       var value = ressource[key]
