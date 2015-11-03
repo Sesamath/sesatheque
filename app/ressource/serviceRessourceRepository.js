@@ -42,6 +42,8 @@ var uuid = require('node-uuid')
 var config = require('./config')
 var appConfig = require('../config')
 
+var j3pGraphe2json = require('../../tasks/modules/j3pGraphe2json')
+
 /**
  * Service d'accès aux ressources, utilisé par les différents contrôleurs
  * @service $ressourceRepository
@@ -395,7 +397,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   function convertXmlJ3p(ressource) {
     if (ressource.parametres && ressource.parametres.xml) {
-      var string = require('../../tasks/modules/j3pGraphe2json')(ressource.parametres.xml)
+      var string = j3pGraphe2json(ressource.parametres.xml)
       try {
         var graphe = JSON.parse(string)
         ressource.parametres = {
@@ -674,6 +676,15 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
     }).seq(function (ressource) {
       updateVersion(ressource, this)
+
+    }).seq(function (ressource) {
+      // on sauvegarde pour la prochaine fois (mais on laisse continuer pendant ce temps)
+      if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
+        convertXmlEc2(ressource)
+      } else if (ressource.typeTechnique === 'j3p' && ressource.parametres && ressource.parametres.xml) {
+        convertXmlJ3p(ressource)
+      }
+      this()
 
     }).seq(function (ressource) {
       if (ressource.origine === "local" && !ressource.idOrigine) {
