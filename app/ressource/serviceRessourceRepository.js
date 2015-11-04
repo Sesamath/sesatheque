@@ -678,15 +678,16 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       updateVersion(ressource, this)
 
     }).seq(function (ressource) {
-      // on sauvegarde pour la prochaine fois (mais on laisse continuer pendant ce temps)
       if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
         convertXmlEc2(ressource)
       } else if (ressource.typeTechnique === 'j3p' && ressource.parametres && ressource.parametres.xml) {
         convertXmlJ3p(ressource)
+        log.debug('ressource j3p après conversion avant write', ressource)
       }
-      this()
+      this(null, ressource)
 
     }).seq(function (ressource) {
+      // on génère idOrigine pour local s'il manque
       if (ressource.origine === "local" && !ressource.idOrigine) {
         ressource.idOrigine = uuid.v1();
       }
