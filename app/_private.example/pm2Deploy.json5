@@ -1,0 +1,33 @@
+{
+  /**
+   * Configuration du déploiement, à priori uniquement en local
+   * (ou éventuellement dev si on lance des déploiement dev -> prod depuis le dev)
+   * @see https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#deployment-pm2--090
+   */
+  deploy : {
+    prod : {
+      user : "userSSH",
+      host : "hostSSH", // cf ~/.ssh/config
+      ref  : "origin/master",
+      repo : "git@src.sesamath.net:sesatheque",
+      path : "/var/www/sesatheque", // deploy setup va créer un sous-dossier source
+      "post-deploy" : "npm install && app/sesalab-admin/scripts/app reset && pm2 startOrGracefulReload app/_private/pm2App.json5 --env prod && ./scripts/purge_varnish"
+    },
+    dev : {
+      user : "userSSH",
+      host : "hostSSH",
+      ref  : "origin/master",
+      repo : "git@src.sesamath.net:sesatheque",
+      path : "/var/www/sesatheque",
+      "post-deploy" : "npm install && app/sesalab-admin/scripts/app reset && pm2 startOrGracefulReload app/_private/pm2App.json5 --env dev && ./scripts/purge_varnish && ./scripts/doc -a"
+    },
+    otherStage : {
+      user : "userSSH",
+      host : "hostSSH",
+      ref  : "origin/master",
+      repo : "git@src.sesamath.net:sesatheque",
+      path : "/var/www/sesatheque",
+      "post-deploy" : "npm install && app/sesalab-admin/scripts/app reset && pm2 startOrGracefulReload app/_private/pm2App.json5 --env prod && ./scripts/purge_varnish"
+    },
+  }
+}

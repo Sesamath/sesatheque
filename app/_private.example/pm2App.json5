@@ -1,0 +1,31 @@
+{
+  /**
+   * Fichier de conf de l'appli pour démarrage avec pm2
+   * dans _private car spécifique à l'instance de l'appli qui tourne ici
+   */
+  "apps" : [
+    {
+      "name"             : "sesatheque",
+      "script"           : "app/index.js",
+      "log_date_format"  : "YYYY-MM-DD HH:mm:ss",
+      "exec_mode"        : "cluster",
+      "exec_interpreter" : "node",
+      "node_args"        : [],
+      "instances"        : "2",
+      "watch"            : false,
+      "pid_file"         : "sesatheque.pid",
+      "error_file"       : "logs/sesatheque-err.log",
+      "out_file"         : "logs/sesatheque-out.log",
+
+      "env": {
+        "PORT"  : 3001
+      },
+      "env_dev" : {
+        "NODE_ENV": "dev"
+      },
+      "env_prod" : {
+        "NODE_ENV": "prod"
+      }
+    }
+  ]
+}
