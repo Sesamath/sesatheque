@@ -172,21 +172,21 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
         if (ressourceNew.auteursAdd) {
           tmp = ressourceNew.auteursAdd.split(",")
           delete ressourceNew.auteursAdd
-          tmp.forEach(function (oid) {
+          tmp.forEach(function (id) {
             log.debug("push auteur " +id)
-            var id = oid.trim()
-            if (id) auteurs.push(id)
+            var idClean = id.trim()
+            if (idClean) auteurs.push(idClean)
           })
         }
-        flow(auteurs).seqEach(function (oid) {
+        flow(auteurs).seqEach(function (id) {
           var nextAuteur = this
-          $personneRepository.load(oid, function (error, personne) {
+          $personneRepository.load(id, function (error, personne) {
             if (error) {
               addError(ressourceNew, error.toString())
             } else if (personne) {
               ressourceNew.auteurs.push(personne.oid)
             } else {
-              addWarning(ressourceNew, "L'auteur d'identifiant " + oid + " n'existe pas")
+              addWarning(ressourceNew, "L'auteur d'identifiant " + id + " n'existe pas")
             }
             nextAuteur()
           })

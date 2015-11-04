@@ -238,7 +238,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
       }).seq(function (ressourceBdd) {
         if (log.perf) log.perf(context.response, 'loaded')
-        if (ressourceBdd) {
+        if (ressourceBdd && ressourceBdd.oid) {
           if ($accessControl.hasPermission("update", context, ressourceBdd)) this(null, ressourceBdd)
           else $json.denied(context, "Vous n'avez pas les droits suffisants pour modifier cette ressource")
         } else {
