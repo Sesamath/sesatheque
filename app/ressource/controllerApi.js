@@ -377,6 +377,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function sendRessource(context, error, ressource) {
+    log.debug("sendRessource api avec", ressource, 'avirer', {max:5000})
     if (error) {
       $json.send(context, error)
     } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
@@ -385,6 +386,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       else if (format === 'compact') $json.send(context, null, $ressourceConverter.toCompactFormat(ressource))
       else $json.send(context, null, ressource)
     } else {
+      log.debug("lecture ko", ressource, 'avirer', {max:5000})
       $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
     }
   }

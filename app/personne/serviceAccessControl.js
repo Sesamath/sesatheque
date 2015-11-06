@@ -55,8 +55,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   function getCreateDeniedMessage(context, ressource) {
     var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user.permissions.create) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.listes.typePerso[ressource.typeTechnique]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.typeTechnique
+    if (!user.permissions.create)
+      msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    else if (!configRessource.listes.typePerso[ressource.typeTechnique])
+      msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.typeTechnique
 
     return msg
   }
@@ -384,20 +386,21 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.hasAllRights = function (context) {
+    var retour = false;
     var token = context.request.header('X-ApiToken')
-    log("token " +token)
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
       if ($settings.get('apiTokens', []).indexOf(token) > -1) {
-        // token ok on vérifie l'ip
-        var ip = context.request.ip
-        log("token ok dans hasAllRights avec l'ip " + ip)
-        return $accessControl.isLanClient(context)
+        log.debug("token api ok")
+        // token ok donc retour ok si client local
+        retour = $accessControl.isLanClient(context)
       }
-
+    } else {
+      // false sauf si admin
+      retour = $accessControl.hasRole('admin', context)
     }
 
-    return false
+    return retour
   }
   // alias
   var hasAllRights = $accessControl.hasAllRights

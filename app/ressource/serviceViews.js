@@ -798,7 +798,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         termine()
       }
     } else {
-      $views.printError(context, "Cette ressource n'existe pas ou vous n'avez pas les droits suffisants pour y accéder)", 404)
+      $views.printError(context, "Cette ressource n'existe pas ou vous n'avez pas les droits suffisants pour y accéder", 404)
     }
   }
 

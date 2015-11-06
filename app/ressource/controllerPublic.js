@@ -121,7 +121,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
   /**
    * Page preview (avec le layout du site)
-   * @route GET /public/apercu/:oid
+   * @route GET /public/apercevoir/:oid
    */
   controller.get($routes.get('preview', ':oid'), function (context) {
     context.layout = 'page'
@@ -130,7 +130,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
   /**
    * Page preview (avec le layout du site)
-   * @route GET /public/apercu/:origine/:idOrigine
+   * @route GET /public/apercevoir/:origine/:idOrigine
    */
   controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
     context.layout = 'page'

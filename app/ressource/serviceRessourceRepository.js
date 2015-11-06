@@ -620,8 +620,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   $ressourceRepository.loadPublic = function(oid, next) {
     $cacheRessource.get(oid, function (error, ressourceCached) {
-      if (ressourceCached) next(null, EntityRessource.create(ressourceCached))
-      else {
+      if (ressourceCached) {
+        if (ressourceCached.restriction === config.constantes.restriction.aucune) next(null, EntityRessource.create(ressourceCached))
+        else next(null, null)
+      } else {
         EntityRessource
             .match('oid').equals(oid)
             .match('restriction').equals(config.constantes.restriction.aucune)
@@ -647,12 +649,13 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
     $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
       if (ressourceCached) {
-        next(null, EntityRessource.create(ressourceCached))
+        if (ressourceCached.restriction === config.constantes.restriction.aucune) next(null, EntityRessource.create(ressourceCached))
+        else next(null, null)
       } else {
         EntityRessource
           .match('origine').equals(origine)
           .match('idOrigine').equals(idOrigine)
-          .match('restriction').equals(0)
+          .match('restriction').equals(config.constantes.restriction.aucune)
           .grabOne(function (error, ressource) {
             cacheAndNext(error, ressource, next)
           })
