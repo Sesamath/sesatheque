@@ -125,12 +125,12 @@ function getTitre(arbreXml, xmlName) {
  * Renvoie les valeurs par défaut pour un arbre
  * @param {string} idOrigine
  * @param {string} titre
- * @returns {{typeTechnique: string, origine: string, categories: *[], publie: boolean, restriction: number, enfants: Array}}
+ * @returns {{type: string, origine: string, categories: *[], publie: boolean, restriction: number, enfants: Array}}
  */
 function getArbreDefaultValues(idOrigine, titre) {
   return {
     titre        : titre,
-    typeTechnique: 'arbre',
+    type: 'arbre',
     origine      : origineArbre,
     idOrigine    : idOrigine,
     categories   : [arbreCateg],
@@ -361,7 +361,7 @@ function getEnfants(arbreXml, xmlName, next) {
           common.addError(xmlName, "dossier sans titre, n° d'ordre " +child._id)
           enfant.titre = 'sans titre'
         }
-        enfant.typeTechnique = 'arbre'
+        enfant.type = 'arbre'
         enfant.attributes = child.attrib
         getEnfants(child, null, function (ptizenfants) {
           enfant.enfants = ptizenfants
@@ -395,7 +395,7 @@ function getEnfants(arbreXml, xmlName, next) {
               enfant = ref
             } else {
               enfant = {
-                typeTechnique: child.tag,
+                type: child.tag,
                 origine      : origine,
                 idOrigine    : idOrigine,
                 titre        : "Erreur, n'existait pas dans la bibliothèque au moment de l'import" + ' (' + (enfant.titre || '') + ')'
@@ -524,14 +524,14 @@ flow().seq(function () {
 })
 
 /* après l'import, pour passer en origine sesamath, et virer le suffixe .xml de idOrigine
- * un peu bourrin le xml de idOrigine qui précede typeTechnique mais ça passe
+ * un peu bourrin le xml de idOrigine qui précede type mais ça passe
  UPDATE ressource r
  inner join ressource_index io using(oid)
  inner join ressource_index ii using(oid)
  SET
     io._string = 'sesamath',
     ii._string = replace(ii._string, '.xml', ''),
-    r.data = replace(replace(r.data, 'origine":"sesamath"', 'origine":"sesamath"'), '.xml","typeTechnique":', '","typeTechnique":')
+    r.data = replace(replace(r.data, 'origine":"sesamath"', 'origine":"sesamath"'), '.xml","type":', '","type":')
  WHERE io.name = 'origine'
    and io._string = 'labomepXml'
    and ii.name = 'idOrigine'

@@ -95,77 +95,77 @@ function parseRessource(row) {
 
   //noinspection IfStatementWithTooManyBranchesJS
   if (row.type_id === 1) {
-    ressource.typeTechnique = 'qts'
+    ressource.type = 'qts'
     if (!ressource.titre) ressource.titre = "Message ou question"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 2) {
-    ressource.typeTechnique = 'tep'
+    ressource.type = 'tep'
     if (!ressource.titre) ressource.titre = "Figure TracenPoche"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 4) {
-    ressource.typeTechnique = 'testd'
+    ressource.type = 'testd'
     if (!ressource.titre) ressource.titre = "Test diagnostique"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 6) {
-    ressource.typeTechnique = 'poseur'
+    ressource.type = 'poseur'
     if (!ressource.titre) ressource.titre = "Opération posée"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 7) {
-    ressource.typeTechnique = 'calkc'
+    ressource.type = 'calkc'
     if (!ressource.titre) ressource.titre = "Exercice avec la calculatrice cassée"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 9) {
-    ressource.typeTechnique = 'ggb'
+    ressource.type = 'ggb'
     if (!ressource.titre) ressource.titre = "Figure GeoGebra"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 10) {
-    ressource.typeTechnique = 'url'
+    ressource.type = 'url'
     if (!ressource.titre) ressource.titre = "Page externe"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 11) {
-    ressource.typeTechnique = 'mental'
+    ressource.type = 'mental'
     if (!ressource.titre) ressource.titre = "Exercice de calcul mental"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 13) {
-    ressource.typeTechnique = 'ebeps'
+    ressource.type = 'ebeps'
     if (!ressource.titre) ressource.titre = "Animation interactive"
     ressource.categories  = catCode.activiteAnimee
     ressource.typePedagogiques = config.categoriesToTypes[catCode.activiteAnimee].typePedagogiques
     ressource.typeDocumentaires = config.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires
   } else if (row.type_id === 14) {
-    ressource.typeTechnique = 'msqcm'
+    ressource.type = 'msqcm'
     if (!ressource.titre) ressource.titre = "QCM interactif"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 15) {
-    ressource.typeTechnique = 'msatdj'
+    ressource.type = 'msatdj'
     if (!ressource.titre) ressource.titre = "Exercice corrigé"
     ressource.categories = catCode.exerciceInteractif
     ressource.typePedagogiques = config.categoriesToTypes[catCode.exerciceInteractif].typePedagogiques
     ressource.typeDocumentaires = config.categoriesToTypes[catCode.exerciceInteractif].typeDocumentaires
   } else if (row.type_id === 16) {
-    ressource.typeTechnique = 'qcmlz'
+    ressource.type = 'qcmlz'
     if (!ressource.titre) ressource.titre = "QCM"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 17) {
-    ressource.typeTechnique = 'iep'
+    ressource.type = 'iep'
     if (!ressource.titre) ressource.titre = "Animation instrumenpoche"
     ressource.categories = catCode.activiteAnimee
     ressource.typePedagogiques = config.categoriesToTypes[catCode.activiteAnimee].typePedagogiques
     ressource.typeDocumentaires = config.categoriesToTypes[catCode.activiteAnimee].typeDocumentaires
   } else if (row.type_id === 18) {
-    ressource.typeTechnique = 'gen'
+    ressource.type = 'gen'
     if (!ressource.titre) ressource.titre = "Titre manquant"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 19) {
-    ressource.typeTechnique = 'j3p'
+    ressource.type = 'j3p'
     if (!ressource.titre) ressource.titre = "Titre manquant"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 20) {
-    ressource.typeTechnique = 'lingotpd'
+    ressource.type = 'lingotpd'
     if (!ressource.titre) ressource.titre = "Test diagnostique d'algèbre"
     addCatExoInteractif(ressource)
   } else if (row.type_id === 21) {
-    ressource.typeTechnique = 'ec2'
+    ressource.type = 'ec2'
     if (!ressource.titre) ressource.titre = "Exercice Calcul@TICE"
     addCatExoInteractif(ressource)
   } else {
@@ -188,7 +188,7 @@ function flushRessources(next) {
         if (logProcess) log('processing ' + ressource.idOrigine)
         addAuteurs(ressource, function () {
           // on transforme le xml en objet js pour certains
-          switch (ressource.typeTechnique) {
+          switch (ressource.type) {
             case 'url':
               modifyUrl(ressource, common.deferRessource)
               break
@@ -397,7 +397,7 @@ function modifyUrl(ressource, next) {
               ressource.parametres.cloneDe = {
                 origine      : 'zoneur',
                 idOrigine    : test[1],
-                typeTechnique: 'ato'
+                type: 'ato'
               }
               // ne sachant pas trop on met cours et exercice
               addCoursExoFixe(ressource)

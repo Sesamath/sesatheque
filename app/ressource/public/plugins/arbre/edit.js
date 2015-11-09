@@ -120,7 +120,7 @@ try {
     function initDom(options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
       var vendorsBaseUrl = options.vendorsBaseUrl || '/vendors';
-      var base = options.sesathequeBase || '/';
+      var base = options.base || '/';
       S.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css');
       S.addCss(base + 'styles/ressources.css');
       // nos éléments html
@@ -183,7 +183,7 @@ try {
           check_callback : function (action, node, parent) {
             S.log("check_callback avec", arguments);
             // on accepte le drop seulement dans des arbres (dossiers)
-            return (parent.id !== "#" && parent.a_attr && parent.a_attr["data-typeTechnique"] === "arbre");
+            return (parent.id !== "#" && parent.a_attr && parent.a_attr["data-type"] === "arbre");
           },
           data: rootElt
         },
@@ -203,8 +203,8 @@ try {
             // on met une fct car le résultat dépend de l'item sur lequel on fait un clic droit
             var items = {};
             var isRacine = (node.parent === '#');
-            var isArbreSansRef = node.a_attr["data-typeTechnique"] === "arbre" && !node.a_attr["data-ref"];
-            var isArbreRef = node.a_attr["data-typeTechnique"] === "arbre" && node.a_attr["data-ref"];
+            var isArbreSansRef = node.a_attr["data-type"] === "arbre" && !node.a_attr["data-ref"];
+            var isArbreRef = node.a_attr["data-type"] === "arbre" && node.a_attr["data-ref"];
             // on peut supprimer n'importe quel item sauf la racine
             if (!isRacine) {
               items.remove = {
@@ -230,7 +230,7 @@ try {
                   var inst = $jstree.reference(data.reference);
                       S.log("avant modif on a " +inst._cnt +" childs");
                   var node = inst.get_node(data.reference);
-                  inst.create_node(node, {icon:"arbreJstNode", a_attr:{"data-typeTechnique":"arbre"}}, "last", function (new_node) {
+                  inst.create_node(node, {icon:"arbreJstNode", a_attr:{"data-type":"arbre"}}, "last", function (new_node) {
                     inst.edit(new_node, "titre", function (new_node, status) {
                       if (status) isDstModified = true;
                       S.log("après modif", inst);
@@ -256,9 +256,9 @@ try {
                     else {
                       S.log("ressource récupérée", ressource);
                       console.dir(ressource);
-                      var tt = ressource.typeTechnique;
+                      var tt = ressource.type;
                       var attr = {
-                        "data-typeTechnique": tt,
+                        "data-type": tt,
                         "data-ref" : ressource.oid
                       };
                       if (ressource.dataUri) attr["data-dataUri"] = ressource.dataUri;
@@ -318,7 +318,7 @@ try {
       $dstTree.on('select_node.jstree', function (e, data) {
         var jstNode = data.node.original;
         S.log("clic sur", jstNode);
-        if (jstNode && jstNode.a_attr && jstNode.a_attr['data-typeTechnique'] === 'arbre') {
+        if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
           // on fait du toggle
           if ($dstTree.jstree('is_open', data.node)) $dstTree.jstree('close_node', data.node);
           else $dstTree.jstree('open_node', data.node);
@@ -338,7 +338,7 @@ try {
         apiClient.getRessource(ref, function (error, ressource) {
           if (error) {
             ST.addError("Erreur au chargement de " + ref + " : " + error.toString(), 5);
-          } else if (ressource && ressource.typeTechnique === 'arbre') {
+          } else if (ressource && ressource.type === 'arbre') {
             arbreInitial = ressource;
             // on charge
             var rootElt = jstreeConverter.toJstree(ressource);
@@ -358,7 +358,7 @@ try {
                   addApercu(items, node);
                   // ajout du "charger ici"
                   var ref = node.a_attr && node.a_attr["data-ref"];
-                  if (ref && node.a_attr["data-typeTechnique"] === "arbre") {
+                  if (ref && node.a_attr["data-type"] === "arbre") {
                     items.replace = {
                       label : "Charger ici",
                       action : function () {
@@ -385,7 +385,7 @@ try {
             $srcTree.on('select_node.jstree', function (e, data) {
               var jstNode = data.node.original;
               S.log("clic sur", jstNode);
-              if (jstNode && jstNode.a_attr && jstNode.a_attr['data-typeTechnique'] === 'arbre') {
+              if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
                 // on fait du toggle
                 if ($srcTree.jstree('is_open', data.node)) $srcTree.jstree('close_node', data.node);
                 else $srcTree.jstree('open_node', data.node);
@@ -426,7 +426,7 @@ try {
         jstNode.children.forEach(function (child) {
           if (child.children && child.children.length) {
             child.children.forEach(modifIco);
-          } else if (child.a_attr && child.a_attr['data-typeTechnique'] === 'arbre' && child.a_attr['data-ref']) {
+          } else if (child.a_attr && child.a_attr['data-type'] === 'arbre' && child.a_attr['data-ref']) {
             // on change l'icone
             child.icon = 'arbreJstNodeRef';
             // on vire ça pour pas avoir le triangle qui laisse supposer que ça se déplie
@@ -520,7 +520,7 @@ try {
         if (editor === "graphic") {
           initDomGraphic();
           // on ajoute un lien pour passer à la version graphique
-          jstreeConverter.setBaseUrl(options.sesathequeBase);
+          jstreeConverter.setBaseUrl(options.base);
           S.log("edit de l'arbre", arbre);
           S.log("$dstTree", $dstTree);
 

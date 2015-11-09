@@ -125,7 +125,7 @@ function initRessourceMep(row) {
   return {
     origine          : 'em',
     idOrigine        : id.toString(),
-    typeTechnique    : 'em',
+    type    : 'em',
     titre            : row.mep_titre || 'Exercice mathenpoche',
     resume           : row.mep_descriptif || '',
     description      : '',
@@ -155,7 +155,7 @@ function initRessourceAm(row) {
   return {
     origine          : 'am',
     idOrigine        : row.aide_id,
-    typeTechnique    : 'am',
+    type    : 'am',
     titre            : row.aide_titre,
     categories       : [catCode.activiteAnimee],
     typePedagogiques : [confRessource.constantes.typePedagogiques.tutoriel],

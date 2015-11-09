@@ -26,7 +26,7 @@ Chargement en cours</div>
                 Sesamath.log('saveResult', resultat);
                 next();
               }, // DEBUG
-              {?sesathequeBase}sesathequeBase : "{sesathequeBase}",{/sesathequeBase}
+              {?base}base : "{base}",{/base}
               {?isFormateur}isFormateur : {isFormateur},{/isFormateur}
               isDev :{?isDev}{isDev}{:else}false{/isDev},
               verbose :{?verbose}{verbose}{:else}false{/verbose},

@@ -37,10 +37,13 @@
  */
 var ressourceComponent = lassi.component('ressource')
 
+ressourceComponent.entity('EntityAlias', function () {
+  require('./EntityAlias')(this)
+})
+
 ressourceComponent.entity('EntityArchive', function () {
   require('./EntityArchive')(this)
 })
-
 
 ressourceComponent.entity('EntityRessource', function () {
   require('./EntityRessource')(this)
@@ -84,8 +87,8 @@ ressourceComponent.controller(function () {
 })
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) { // jshint ignore:line
-  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes)
+ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes, EntityRessource) { // jshint ignore:line
+  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes, EntityRessource)
 })
 
 // un controleur html pour des pages publiques sans session
@@ -94,8 +97,8 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json)
+ressourceComponent.controller('api', function (EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
+  require('./controllerApi')(this, EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json)
 })
 
 // import calculatice

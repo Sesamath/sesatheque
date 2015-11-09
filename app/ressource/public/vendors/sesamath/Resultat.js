@@ -70,7 +70,7 @@ function Resultat(original) {
   this.ressId = values.ressId;
 
   /**
-   * Le type de la ressource (typeTechnique de la ressource, nom de code du plugin qui la gère et saura afficher le résultat)
+   * Le type de la ressource (type de la ressource, nom de code du plugin qui la gère et saura afficher le résultat)
    * @default undefined
    * @type {string}
    */

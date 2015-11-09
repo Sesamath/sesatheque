@@ -61,8 +61,8 @@ try {
         var errorsContainer = options.errorsContainer;
         if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
 
-        S.addCss(options.sesathequeBase + 'vendors/jstree/dist/themes/default/style.min.css');
-        var baseUrl = options.sesathequeBase + 'plugins/arbre';
+        S.addCss(options.base + 'vendors/jstree/dist/themes/default/style.min.css');
+        var baseUrl = options.base + 'plugins/arbre';
 
         // un div d'aperçu
         //var apercuElt = S.getElement('iframe', {id: S.getNewId(), width:'50%',height:'400px', style : 'float:right;resize:both;overflow:scroll;'});
@@ -217,7 +217,7 @@ try {
         /* Pour récupérer un élément sous sa forme jstree, c'est (id est l'id jstree, sans #)
          * var jstNode = $.jstree.reference($tree).get_node(id);
          * et les data que l'on a mise sont dans
-         * jstNode.original, par ex jstNode.original.a_attr['data-typeTechnique'];
+         * jstNode.original, par ex jstNode.original.a_attr['data-type'];
          */
 
         // pour la recherche, on écoute la modif de l'input
@@ -241,7 +241,7 @@ try {
           var jstNode = data.node.original;
           S.log("on veut l'aperçu du node", jstNode);
           if (jstNode && jstNode.a_attr) {
-            if (jstNode.a_attr['data-typeTechnique'] === 'arbre') {
+            if (jstNode.a_attr['data-type'] === 'arbre') {
               // on fait du toggle
               if ($tree.jstree('is_open', data.node)) $tree.jstree('close_node', data.node);
               else $tree.jstree('open_node', data.node);

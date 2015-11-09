@@ -148,17 +148,17 @@
     return requireConfig;
   }
 
-  function setBase(sesathequeBase) {
-    if (!sesathequeBase) sesathequeBase = "/";
-    else if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/";
+  function setBase(base) {
+    if (!base) base = "/";
+    else if (base.substr(-1) !== "/") base += "/";
     // on l'ajoute aussi dans le dom global pour que les modules puissent le retrouver
     // sans avoir à le repréciser
     if (typeof window.sesamath === "undefined") window.sesamath = {};
     if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
-    window.sesamath.sesatheque.base = sesathequeBase;
-    require.config(getConfig(sesathequeBase));
+    window.sesamath.sesatheque.base = base;
+    require.config(getConfig(base));
     // ça c'est pour savoir si on a déjà chargé initRequire ou s'il faut le faire (parce que l'on veut donner une base différente en cross domain)
-    window.sesamath.sesatheque.requireBase = sesathequeBase;
+    window.sesamath.sesatheque.requireBase = base;
   }
 
   // NE PAS EFFACER ni modifier ces lignes avec CUT, ça sert à concaténer ce qui précède avec notre require.min.js)

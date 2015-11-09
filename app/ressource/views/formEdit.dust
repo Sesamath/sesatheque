@@ -20,7 +20,7 @@
       !}
       {?token}{>wrapper widget="text" o=token /}{/token}
       {>wrapper widget="text" o=titre /}
-      {>wrapper widget="text" o=typeTechnique /}
+      {>wrapper widget="text" o=type /}
       {>wrapper widget="checkboxes" o=publie /}
       {>wrapper widget="select" o=restriction /}
       {>wrapper widget="select" o=langue /}
@@ -75,11 +75,11 @@
       {?dateMiseAJour}{>wrapper widget="text" o=dateMiseAJour /}{/dateMiseAJour}
     </div>
 
-    {?typeTechnique.value}
-      {>"plugins/{typeTechnique.value}" /}
+    {?type.value}
+      {>"plugins/{type.value}" /}
     {:else}
       <p class="error">Pas de type technique</p>
-    {/typeTechnique.value}
+    {/type.value}
     {! submit, attention #saveButton est utilisé par editArbre !}
     <div class="form-group">
       <input id="saveButton" type="submit" value="Enregistrer"/>

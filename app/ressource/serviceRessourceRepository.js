@@ -324,12 +324,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       if (!ressource || !ressource.oid) throw new Error("Paramètre invalide (ressource attendue)")
       // pour ec2 on regarde si on a un xml et rien d'autre pour le mettre directement en parametres
       // (car c'est pas du xml mais du json)
-      if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
+      if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {
         convertXmlEc2(ressource)
-      } else if (ressource.typeTechnique === 'j3p' && ressource.parametres && ressource.parametres.xml) {
+      } else if (ressource.type === 'j3p' && ressource.parametres && ressource.parametres.xml) {
         convertXmlJ3p(ressource)
       }
-      if (ressource.typeTechnique === 'arbre') delete ressource.parametres
+      if (ressource.type === 'arbre') delete ressource.parametres
       else delete ressource.enfants
       $cacheRessource.set(ressource)
     }
@@ -681,9 +681,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       updateVersion(ressource, this)
 
     }).seq(function (ressource) {
-      if (ressource.typeTechnique === 'ec2' && ressource.parametres && ressource.parametres.xml) {
+      if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {
         convertXmlEc2(ressource)
-      } else if (ressource.typeTechnique === 'j3p' && ressource.parametres && ressource.parametres.xml) {
+      } else if (ressource.type === 'j3p' && ressource.parametres && ressource.parametres.xml) {
         convertXmlJ3p(ressource)
         log.debug('ressource j3p après conversion avant write', ressource)
       }

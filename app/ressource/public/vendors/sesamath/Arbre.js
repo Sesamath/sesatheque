@@ -46,7 +46,7 @@ else if (typeof module === 'object') module.exports = Arbre;
  * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
  * C'est aussi la définition d'une branche ou d'une feuille
  *
- * La présence d'un attribut oid, laisse supposer titre et typeTechnique sont renseignés,
+ * La présence d'un attribut oid, laisse supposer titre et type sont renseignés,
  * sinon ref doit être renseigné pour aller les chercher
  *
  * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel Arbre
@@ -77,11 +77,11 @@ function Arbre(initObj) {
    */
   this.titre = (initObj.titre && typeof initObj.titre === 'string') ? initObj.titre : '';
   /**
-   * Le typeTechnique de la racine (qui peut être une feuille, dans ce cas c'est pas arbre),
+   * Le type de la racine (qui peut être une feuille, dans ce cas c'est pas arbre),
    * qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {(Number|string|undefined)}
    */
-  this.typeTechnique = initObj.typeTechnique || 'arbre';
+  this.type = initObj.type || 'arbre';
   /**
    * Des attributs du node (ou la racine de l'arbre), ça peut être ico pour une icone particulière
    * @type {Object}

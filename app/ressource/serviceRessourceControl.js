@@ -46,7 +46,7 @@ var $ressourceControl = {}
 module.exports = function (EntityRessource) {
   /**
    * Ajoute les propriétés qui peuvent être déduites (deductions définies dans la configuration)
-   * - categories si vide et que typeTechnique permet de le deviner
+   * - categories si vide et que type permet de le deviner
    * - typePedagogiques et typeDocumentaires si categories n'en contient qu'une et qu'elle permet de les déduire
    * @private
    * @param {EntityRessource} ressource une ressource (ou des datas qui y ressemblent)
@@ -56,9 +56,9 @@ module.exports = function (EntityRessource) {
     if (!_.isArray(ressource.categories))        ressource.categories = []
     if (!_.isArray(ressource.typePedagogiques))  ressource.typePedagogiques = []
     if (!_.isArray(ressource.typeDocumentaires)) ressource.typeDocumentaires = []
-    // si categories absent on essaie de le déduire de typeTechnique
-    if (ressource && ressource.typeTechnique && _.isEmpty(ressource.categories) && config.typeTechniqueToCategories[ressource.typeTechnique]) {
-      ressource.categories = config.typeTechniqueToCategories[ressource.typeTechnique]
+    // si categories absent on essaie de le déduire de type
+    if (ressource && ressource.type && _.isEmpty(ressource.categories) && config.typeToCategories[ressource.type]) {
+      ressource.categories = config.typeToCategories[ressource.type]
     }
     // puis typePedagogiques et typeDocumentaires d'après catégories
     if (ressource && ressource.categories && ressource.categories.length) {
@@ -98,7 +98,7 @@ module.exports = function (EntityRessource) {
       ressource.warnings.push(warning)
     }
     // on ajoute un warning pour les enfants
-    if (ressource.typeTechnique === 'arbre' && (!ressource.enfants || !ressource.enfants.length)) {
+    if (ressource.type === 'arbre' && (!ressource.enfants || !ressource.enfants.length)) {
       addWarning('arbre sans enfants')
     }
     // la catégorie non définie
@@ -149,8 +149,8 @@ module.exports = function (EntityRessource) {
     if (_.isArray(enfants)) {
       enfants.forEach(function (enfant, i) {
         if (!enfant.titre) errors.push("L'enfant d'index " + i + " de « " +titreParent +" » n'a pas de titre")
-        if (!enfant.typeTechnique) errors.push("L'enfant d'index " + i + " n'a pas de typeTechnique")
-        if (enfant.typeTechnique !== 'arbre' && !enfant.ref) errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
+        if (!enfant.type) errors.push("L'enfant d'index " + i + " n'a pas de type")
+        if (enfant.type !== 'arbre' && !enfant.ref) errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
         else if (enfant.ref < 1 && (typeof enfant.ref !== 'string' || !/^[\w]+\/[\w]+$/.exec(enfant.ref)))
           errors.push("L'enfant d'index " + i + " de " +titreParent +" n'a pas de ref valide")
         if (enfant.enfants && enfant.enfants.length) {
@@ -308,21 +308,21 @@ module.exports = function (EntityRessource) {
       }) // fin each
 
       // pour les arbres, on switch parametres / enfants si besoin
-      if (ressource.typeTechnique === 'arbre') {
+      if (ressource.type === 'arbre') {
         if (!_.isEmpty(ressource.parametres) && _.isEmpty(ressource.enfants)) {
           ressource.enfants = ressource.parametres;
           delete ressource.parametres;
         }
       } else {
         if (_.isEmpty(ressource.parametres) && !_.isEmpty(ressource.enfants)) {
-          log("Bizarre, arbre transformé en " +ressource.typeTechnique);
+          log("Bizarre, arbre transformé en " +ressource.type);
           ressource.parametres = ressource.enfants;
           delete ressource.enfants;
         }
       }
       addWarnings(ressource)
       //log.debug('après addWarnings', ressource.warnings)
-      //log.debug('après addWarnings, enfants de ' +ressource.typeTechnique, ressource.enfants)
+      //log.debug('après addWarnings, enfants de ' +ressource.type, ressource.enfants)
     } // else non vide
 
     if (errors.length) {

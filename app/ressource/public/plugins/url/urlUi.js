@@ -305,8 +305,8 @@ try {
 
         var prefixUrl = options && options.pluginBaseUrl || '/plugins/url';
 
-        var sesathequeBase = options && options.sesathequeBase || "/";
-        S.addCss(sesathequeBase +"vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css");
+        var base = options && options.base || "/";
+        S.addCss(base +"vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css");
 
         var etapes = {
           currentIndex: 0,

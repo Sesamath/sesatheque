@@ -40,7 +40,7 @@ var ressourceConfig = {
    * Les listes de choix pour nos propriétés dont on enregistre des ids
    */
   listes : {
-    typeTechnique : {
+    type : {
       'am'    : 'aide mathenpoche',
       'arbre' : 'arbre (liste hiérarchisée)',
       'calkc' : 'calculatrice cassée',
@@ -50,7 +50,7 @@ var ressourceConfig = {
       'mental': 'calcul mental',
       'url'   : 'page externe'
     },
-    // les typeTechnique qui peuvent être utilisés pour une ressource perso
+    // les type qui peuvent être utilisés pour une ressource perso
     typePerso : {
       'j3p'   : true,
       'url'   : true
@@ -155,11 +155,19 @@ var ressourceConfig = {
     typeDocumentaires: [9,5,6,12,11,1,2],
     typePedagogiques : [3,9,91,92,191,7,2,81,82,13,141,151,21,22]
   }, // fin des listes
+  // modifs à répercuter dans npm-sesatheque-client
+  editable : {
+    'arbre' : true,
+    'calkc' : true,
+    'j3p'   : true,
+    'mental': true,
+    'url'   : true
+  },
 
   /**
-   * Donne la catégorie induite par le typeTechnique, mais ça peut être surchargé par l'utilisateur qui renseigne categories
+   * Donne la catégorie induite par le type, mais ça peut être surchargé par l'utilisateur qui renseigne categories
    */
-  typeTechniqueToCategories : {
+  typeToCategories : {
     'am'    : [2],
     'arbre' : [8],
     'calkc' : [7],
@@ -211,7 +219,7 @@ var ressourceConfig = {
 
   // les propriétés qui ne prennent qu'une seule valeur
   uniques          : {
-    'typeTechnique': true,
+    'type': true,
     'langue'       : true,
     'restriction'  : true
   },
@@ -219,7 +227,7 @@ var ressourceConfig = {
   // les propriétés obligatoires
   required         : {
     titre         : true,
-    typeTechnique : true,
+    type : true,
     categories    : true
     //'auteurs'
   },
@@ -229,7 +237,7 @@ var ressourceConfig = {
     oid              : "Identifiant",
     origine          : 'Origine',
     idOrigine        : "Identifiant d'origine",
-    typeTechnique    : "Type technique",
+    type    : "Type technique",
     titre            : "Titre",
     resume           : "Résumé",
     description      : "Description",
@@ -266,7 +274,7 @@ var ressourceConfig = {
     oid              : 'Number',
     origine          : 'String',
     idOrigine        : 'String',
-    typeTechnique    : 'String',
+    type    : 'String',
     titre            : 'String',
     resume           : 'String',
     description      : 'String',

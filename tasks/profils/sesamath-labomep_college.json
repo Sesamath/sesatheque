@@ -1,6 +1,6 @@
 {
   "titre"        : "Ressources collège",
-  "typeTechnique": "arbre",
+  "type": "arbre",
   "origine"      : "sesamath",
   "idOrigine"    : "labomep_college",
   "publie"       : true,
@@ -8,19 +8,19 @@
   "enfants"      : [
     {
       "titre"        : "Animations interactives",
-      "typeTechnique": "arbre",
+      "type": "arbre",
       "origine"      : "sesaxml",
       "idOrigine"    : "animations_interactives"
     },
     {
       "titre"        : "exercices interactifs",
-      "typeTechnique": "arbre",
+      "type": "arbre",
       "origine"      : "sesaxml",
       "idOrigine"    : "exercices_interactifs"
     },
     {
       "titre"        : "tests diagnostiques",
-      "typeTechnique": "arbre",
+      "type": "arbre",
       "origine"      : "sesaxml",
       "idOrigine"    : "tests_algebre"
     },
@@ -28,85 +28,85 @@
       "titre": "Manuel 6e 2009",
       "origine": "ouvrage",
       "idOrigine": "ms6_2009",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 6e 2013",
       "origine": "ouvrage",
       "idOrigine": "ms6_2013",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Cahier 6e 2009",
       "origine": "ouvrage",
       "idOrigine": "cm6_2009",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 5e 2006",
       "origine": "ouvrage",
       "idOrigine": "ms5_2006",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 5e 2010",
       "origine": "ouvrage",
       "idOrigine": "ms5_2010",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Cahier 5e 2010",
       "origine": "ouvrage",
       "idOrigine": "cm5_2010",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 4e 2007",
       "origine": "ouvrage",
       "idOrigine": "ms4_2007",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 4e 2011",
       "origine": "ouvrage",
       "idOrigine": "ms4_2011",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Cahier 4e 2007",
       "origine": "ouvrage",
       "idOrigine": "cm4_2007",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Cahier 4e 2011",
       "origine": "ouvrage",
       "idOrigine": "cm4_2011",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 3e 2008",
       "origine": "ouvrage",
       "idOrigine": "ms3_2008",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 3e 2012",
       "origine": "ouvrage",
       "idOrigine": "ms3_2012",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Cahier 3e 2008",
       "origine": "ouvrage",
       "idOrigine": "cm3_2008",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Cahier 3e 2012",
       "origine": "ouvrage",
       "idOrigine": "cm3_2012",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     }
   ]
 }

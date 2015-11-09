@@ -46,6 +46,24 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   var $accessControl = {}
 
   /**
+   * Helper de checkAccess pour la permission correction
+   * @private
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   */
+  function getCorrectionDeniedMessage(context, ressource) {
+    var msg
+    var user = $accessControl.getCurrentUser(context)
+    if (!user.permissions.create)
+      msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    else if (!configRessource.listes.typePerso[ressource.type])
+      msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.type
+
+    return msg
+  }
+
+  /**
    * Helper de checkAccess pour la permission create (à n'utiliser qu'avec un user en session)
    * @private
    * @param {Context}   context
@@ -57,8 +75,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     var user = $accessControl.getCurrentUser(context)
     if (!user.permissions.create)
       msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.listes.typePerso[ressource.typeTechnique])
-      msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.typeTechnique
+    else if (!configRessource.listes.typePerso[ressource.type])
+      msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.type
 
     return msg
   }
@@ -454,10 +472,15 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
 
     if ($accessControl.isAuthenticated(context)) {
       switch (permission) {
-        case 'createAll' : return !getCreateAllDeniedMessage(context)
-        case 'create' : return !getCreateDeniedMessage(context, ressource)
-        case 'delete' : return !getDeleteDeniedMessage(context, ressource)
-        case 'update' : return !getUpdateDeniedMessage(context, ressource)
+        case 'correction'    : return !getCorrectionDeniedMessage(context)
+        case 'create'        : return !getCreateDeniedMessage(context, ressource)
+        case 'createAll'     : return !getCreateAllDeniedMessage(context)
+        case 'delete'        : return !getDeleteDeniedMessage(context, ressource)
+        case 'deleteVersion' : return !getDeleteVersionDeniedMessage(context, ressource)
+        case 'index'         : return !getIndexDeniedMessage(context)
+        case 'publish'       : return !getPublishDeniedMessage(context)
+        case 'read'          : return !getReadDeniedMessage(context)
+        case 'update'        : return !getUpdateDeniedMessage(context, ressource)
         case 'updateAuteurs' : return !getUpdateAuteursDeniedMessage(context, ressource)
         case 'updateGroupes' : return !getUpdateGroupesDeniedMessage(context, ressource)
         default: return false

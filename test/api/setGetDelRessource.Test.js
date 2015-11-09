@@ -104,7 +104,7 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
     origine      : 'em',
     idOrigine    : '5000', // celle là est pas près d'exister
     titre        : "Ressource pour tester l'api",
-    typeTechnique: 'em',
+    type: 'em',
     resume       : 'Un résumé bidon sur\ndeux lignes',
     description  : 'Une description bidon sur\ndeux lignes',
     commentaires : 'Un commentaire bidon sur\ndeux lignes',

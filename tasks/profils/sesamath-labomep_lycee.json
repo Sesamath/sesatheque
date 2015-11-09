@@ -1,6 +1,6 @@
 {
   "titre"        : "Ressources lycée",
-  "typeTechnique": "arbre",
+  "type": "arbre",
   "origine"      : "sesamath",
   "idOrigine"    : "labomep_lycee",
   "publie"       : true,
@@ -10,25 +10,25 @@
       "titre"        : "Animations interactives",
       "origine"      : "sesaxml",
       "idOrigine"    : "animations_interactives",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre"        : "Exercices interactifs",
       "origine"      : "sesaxml",
       "idOrigine"    : "exercices_interactifs",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre"        : "Tests diagnostiques",
       "origine"      : "sesaxml",
       "idOrigine"    : "tests_algebre",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Manuel 2de 2014",
       "origine": "ouvrage",
       "idOrigine": "ms2_2014",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     }
   ]
 }

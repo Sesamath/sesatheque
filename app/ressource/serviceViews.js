@@ -170,9 +170,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param ressource
    */
   function addJsVars(data, ressource) {
-    data.contentBloc.verbose         = (appConfig.application.staging !== 'prod')
-    data.contentBloc.isDev           = (appConfig.application.staging !== 'prod')
-    data.contentBloc.sesathequeBase = appConfig.application.baseUrl
+    data.contentBloc.verbose = (appConfig.application.staging !== 'prod')
+    data.contentBloc.isDev   = (appConfig.application.staging !== 'prod')
+    data.contentBloc.base    = appConfig.application.baseUrl
     if (ressource) {
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource     = tools.stringify(ressource)
@@ -287,7 +287,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             } else if (ressourceLiee) {
               // on ajoute le tag a et le type technique
               ressource.relations[index].push($routes.getTagA('describe', ressourceLiee))
-              ressource.relations[index].push(ressourceLiee.typeTechnique)
+              ressource.relations[index].push(ressourceLiee.type)
             } else {
               log.errorData(error)
               ressource.warnings.push("la ressource liée " + relation[1] + " n'existe pas")
@@ -378,7 +378,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   function getLabels(ressource) {
     var labels = tools.clone(config.labels)
     // avec pour les arbres la propriété parametres remplacée par enfants
-    if (ressource && ressource.typeTechnique === 'arbre') {
+    if (ressource && ressource.type === 'arbre') {
       delete labels.parametres
     } else {
       delete labels.enfants
@@ -515,11 +515,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           label : labels.oid,
           readonly: true
         }
-        // c'est une modif, on ne peut plus changer le typeTechnique, on remplace le select par un text
-        formData.typeTechnique = {
-          name : "typeTechnique",
-          value : ressource.typeTechnique,
-          label : labels.typeTechnique,
+        // c'est une modif, on ne peut plus changer le type, on remplace le select par un text
+        formData.type = {
+          name : "type",
+          value : ressource.type,
+          label : labels.type,
           readonly : true
         }
         // origine & idOrigine en lecture seule pour modif mais pas création
@@ -536,12 +536,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         } else {
           formData.$view = __dirname +'/views/formCreate'
           if (!$accessControl.hasPermission("createAll", context)) {
-            // faut restreindre typeTechnique
+            // faut restreindre type
             var ttChoices = []
-            formData.typeTechnique.choices.forEach(function (choice) {
+            formData.type.choices.forEach(function (choice) {
               if (config.listes.typePerso[choice.value]) ttChoices.push(choice)
             })
-            formData.typeTechnique.choices = ttChoices
+            formData.type.choices = ttChoices
             // et imposer origine local
             formData.origine.value = "local"
             formData.origine.hidden = true
@@ -623,7 +623,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
                   predicat     : config.listes.relations[relation[0]],
                   oid          : relation[1],
                   lien         : relation[2],
-                  typeTechnique: relation[3]
+                  type: relation[3]
                 })
               })
             } // sinon on l'ajoute pas, seul describe s'en sert
@@ -750,7 +750,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (view === 'display') {
         addJsVars(data, ressource)
         data.contentBloc.isFormateur = $accessControl.hasRole("acces_correction", context)
-      } else if (view === 'describe' && ressource && ressource.typeTechnique === 'arbre') {
+      } else if (view === 'describe' && ressource && ressource.type === 'arbre') {
         // on ajoute la liste des urls des enfants si on les a
         if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
           var enfantsDescribe = []
@@ -842,8 +842,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (options) tools.merge(data, options)
       // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source, donc on passe ici du json)
       addJsVars(data, ressource)
-      // faut aussi ajouter ça pour les vues dust (data.contentBloc.typeTechnique existe déjà mais c'est un select)
-      data.contentBloc.editeur = ressource.typeTechnique
+      // faut aussi ajouter ça pour les vues dust (data.contentBloc.type existe déjà mais c'est un select)
+      data.contentBloc.editeur = ressource.type
       // avant d'envoyer
       //log.debug("on va envoyer au form ", data, 'form', {max:2000, indent:2})
       context.html(data)
@@ -888,8 +888,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         delete fd.origine
         delete fd.idOrigine
       }
-      // on ajoute un choix "pas de choix" pour typeTechnique et langue
-      fd.typeTechnique.choices.unshift({label:'peu importe', value:''})
+      // on ajoute un choix "pas de choix" pour type et langue
+      fd.type.choices.unshift({label:'peu importe', value:''})
       // pour la langue on vire le select actuel
       fd.langue.choices.forEach(function (choice) {
         if (choice.selected) choice.selected = false

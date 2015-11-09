@@ -54,7 +54,7 @@ try {
   /**
    * Retourne une Ref
    * @param {jQueryElement} node
-   * @returns {Ref} La ref (presque, ref, titre, typeTechnique, avec displayUrl & resume en plus,
+   * @returns {Ref} La ref (presque, ref, titre, type, avec displayUrl & resume en plus,
    *                mais pas categories ni enfants)
    */
   function nodeToRef(node) {
@@ -66,7 +66,7 @@ try {
       if (node.original.a_attr) {
         item.displayUrl = node.original.a_attr.href
         item.ref = node.original.a_attr['data-ref'];
-        item.typeTechnique = node.original.a_attr['data-typeTechnique'];
+        item.type = node.original.a_attr['data-type'];
         item.resume = node.original.a_attr.alt;
       }
     }
@@ -157,7 +157,7 @@ try {
           item.titre = node.original.text
           if (node.original.a_attr) {
             item.id = node.original.a_attr['data-id'];
-            item.typeTechnique = node.original.a_attr['data-typeTechnique'];
+            item.type = node.original.a_attr['data-type'];
             if (node.original.a_attr.alt) item.resume = node.original.a_attr.alt;
           }
         }

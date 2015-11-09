@@ -44,7 +44,7 @@
  * @requires $views
  * @requires $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes, EntityRessource) {
   var _ = require('lodash')
   var tools = require('../tools')
   var flow = require('an-flow')
@@ -296,7 +296,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Traitement du formulaire d'ajout de ressource, réaffiche le form avec une erreur éventuelle ou
-   * redirige vers le form d'édition (pour ajouter ce qui dépend du typeTechnique choisi)
+   * redirige vers le form d'édition (pour ajouter ce qui dépend du type choisi)
    * @route POST /ressource/ajouter
    */
   controller.post($routes.get('create'), function (context) {
@@ -677,4 +677,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/
    */
   controller.get($routes.get('search'), search)
+
+  controller.get('rename', function (context) {
+    var start = context.get.start || 0
+    var limit = 500
+    EntityRessource.match('oid').grab(limit, start, function (error, ressources) {
+      if (error) $views.printError(context, error)
+      else if (ressources.length === limit) context.redirect('/ressource/rename?start=' +start+limit)
+      else $views.printError(context, 'terminé à ' +start +ressources.length)
+    })
+  })
 }

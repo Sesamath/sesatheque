@@ -160,14 +160,14 @@ define(["mathquill"], function () {
      *                                     parmi equivaut, exponentielle, fraction, infEgal, infini, inter, pi, puissance,
      *                                     racine, supEgal, union, vide), sinon ce sera la conf par défaut
      *                                     (fraction, infEgal, pi, puissance, racine, supEgal)
-     * @param {displayOptions} [options] Options (on ne regarde que sesathequeBase s'il existe pour charger les images des boutons)
+     * @param {displayOptions} [options] Options (on ne regarde que base s'il existe pour charger les images des boutons)
      * @param {errorCallback}  [next]
      */
     mqEditor.init = function (textarea, config, options, next) {
       try {
         $(function () {
           if (!textarea) throw new Error("Il faut fournir un div ou un textarea pour mathquill");
-          basePath = (options && options.sesathequeBase) || "/";
+          basePath = (options && options.base) || "/";
           basePath += "vendors/sesamath/mqEditor/";
           if (textarea.nodeName === "TEXTAREA") {
             $textarea = $(textarea);

@@ -456,7 +456,7 @@ common.getListe = function (qsOptions, next) {
  * Récupère une ref via l'api
  * @param origine
  * @param idOrigine
- * @param next appelé avec {ref, titre, typeTechnique}
+ * @param next appelé avec {ref, titre, type}
  */
 common.getRef = function (origine, idOrigine, next) {
   var idComb = origine +'/' +idOrigine

@@ -75,7 +75,7 @@ fluxFile.seqEach(function (file) {
   var labomep_all = {
     "titre": "Ressources Sésamath",
     "resume": "Liste des arbres affichables dans le panneau « Ressources Sésamath » de Labomep",
-    "typeTechnique": "arbre",
+    "type": "arbre",
     "categorie": 8,
     "publie": true,
     "restriction": 0,

@@ -50,7 +50,7 @@ module.exports = function () {
   $json.denied = function (context, msg) {
     if (!msg) msg = "Accès refusé"
     context.status = 403;
-    $json.sendErrorMessage(context, msg)
+    $json.sendError(context, msg)
   }
 
   /**
@@ -61,7 +61,7 @@ module.exports = function () {
   $json.notFound = function (context, msg) {
     if (!msg) msg = "Contenu inexistant"
     context.status = 404;
-    $json.sendErrorMessage(context, msg)
+    $json.sendError(context, msg)
   }
 
   /**
@@ -79,7 +79,7 @@ module.exports = function () {
       } else if (_.isArray(error)) {
         error = error.join(", ")
       }
-      $json.sendErrorMessage(context, error)
+      $json.sendError(context, error)
     } else {
       if (!data) data = {success:true}
       log.debug('$json.send va renvoyer', data, 'api')
@@ -92,12 +92,16 @@ module.exports = function () {
 
   /**
    * Envoie un message d'erreur {success:false, error: errorMessage}
-   * @param context
-   * @param errorMessage
+   * @param {Context}      context
+   * @param {Error|string} error
    */
-  $json.sendErrorMessage = function (context, errorMessage) {
-    log.debug("$json va renvoyer l'erreur " +errorMessage, 'api')
-    context.json({success:false, error: errorMessage})
+  $json.sendError = function (context, error) {
+    if (error && error instanceof Error) {
+      log.error(error)
+      error = error.toString()
+    }
+    log.debug("$json va renvoyer l'erreur " +error, 'api')
+    context.json({success:false, error: error})
   }
 
   /**

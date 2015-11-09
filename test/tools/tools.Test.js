@@ -74,6 +74,54 @@ describe('tools', function () {
     })
   })
 
+  describe('complete', function () {
+    var src = {
+      foo: 'bar',
+      bar : {
+        titi : {
+          toto : 'foo',
+          tata : 'bar',
+          tutu : 42
+        }
+      },
+      nullprop:null
+    }
+    var addons = {
+      foo:"modif",
+      bar : {
+        titi : {
+          tata : 'bartabac',
+          tyty : 2
+        },
+        truc : 42,
+      },
+      baz: 43,
+      nullprop : 42
+    }
+    var expected = {
+      foo: 'bar',
+      bar : {
+        titi : {
+          toto : 'foo',
+          tata : 'bar',
+          tutu : 42
+        }
+      },
+      baz: 43,
+      nullprop:null
+    }
+    it("ajoute les propriétés manquantes de la racine", function () {
+      tools.complete(src, addons, false)
+      assert.ok(_.isEqual(src, expected))
+    })
+    it("ajoute les propriétés manquantes récursivement", function () {
+      expected.bar.titi.tyty = addons.bar.titi.tyty
+      expected.bar.truc = addons.bar.truc
+      tools.complete(src, addons)
+      assert.ok(_.isEqual(src, expected))
+    })
+  })
+
   describe('encadre', function () {
     it("retourne la valeur fournie si dans l'intervalle", function () {
       assert.strictEqual(42, tools.encadre(42, -2, 48))

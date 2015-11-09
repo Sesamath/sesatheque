@@ -110,7 +110,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Retourne les valeurs par défaut d'un arbre de ressources calculatice
    * @param xmlSuffix
-   * @returns {object} {titre: string, typeTechnique: string, origine: string, idOrigine: *, categories: *[], publie: boolean, restriction: number, enfants: Array}
+   * @returns {object} {titre: string, type: string, origine: string, idOrigine: *, categories: *[], publie: boolean, restriction: number, enfants: Array}
    */
   function getArbreDefaultValues(xmlSuffix) {
     var classe = (xmlSuffix === "6eme") ? xmlSuffix : xmlSuffix.toUpperCase()
@@ -132,7 +132,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
     return {
       titre        : titre,
-      typeTechnique: 'arbre',
+      type: 'arbre',
       origine      : "calculatice",
       idOrigine    : xmlSuffix,
       categories   : [arbreCateg],
@@ -179,10 +179,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.error(new Error("exercice calculatice " +ressource.idOrigine +" sans options"))
       }
       if (js) {
-        ressource.typeTechnique = "ecjs"
+        ressource.type = "ecjs"
         ressource.parametres.fichierjs = js
       } else if (swf) {
-        ressource.typeTechnique = "ec2"
+        ressource.type = "ec2"
         ressource.parametres.fichier = swf
       }
     }
@@ -208,7 +208,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         })
       } else if (child._children.length) {
         var enfant = {}
-        enfant.typeTechnique = "arbre"
+        enfant.type = "arbre"
         enfant.titre = getNom(child._children)
         parseEnfants(child._children, function (error, ptifils) {
           if (error) {

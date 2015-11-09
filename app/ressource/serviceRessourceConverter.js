@@ -48,6 +48,7 @@ var flow = require('an-flow')
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
 //var tools = require('../tools')
+var Alias = require('./public/vendors/sesamath/Alias')
 var Ref = require('./public/vendors/sesamath/Ref')
 var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
 
@@ -61,7 +62,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
   function getJstNode (ressource) {
     /**
      * Retourne les datas qui nous intéressent à mettre sur le tag a
-     * (pour a_attr : data-ref, data-typeTechnique, href et alt)
+     * (pour a_attr : data-ref, data-type, href et alt)
      * @private
      * @param {Ressource} ressource
      * @return {Object}
@@ -74,7 +75,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
       else if (ressource.origine && ressource.idOrigine) attr['data-ref'] = ressource.origine +'/' +ressource.idOrigine
       // url complète
       if (ressource.displayUri) attr.href = $settings.get('application.baseUrl', '') +ressource.displayUri
-      if (ressource.typeTechnique) attr['data-typeTechnique'] = ressource.typeTechnique
+      if (ressource.type) attr['data-type'] = ressource.type
       if (ressource.resume) attr.alt = ressource.resume
 
       return attr
@@ -85,7 +86,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
       node = {
         text  : ressource.titre,
         a_attr: getAttr(),
-        icon  : ressource.typeTechnique + 'JstNode'
+        icon  : ressource.type + 'JstNode'
       }
     } else log.error(new Error("getJstNode appelé sans ressource"))
 
@@ -188,7 +189,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
           var newEnfant = {
             oid          : ressourceBdd.oid,
             titre        : ressourceBdd.titre,
-            typeTechnique: ressourceBdd.typeTechnique
+            type: ressourceBdd.type
           }
           if (enfant.contenu) newEnfant.contenu = enfant.contenu
           if (enfant.enfants && enfant.enfants.length) newEnfant.enfants = enfant.enfants
@@ -235,7 +236,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
     } // populateEnfants
 
     // checks
-    if (ressource.typeTechnique !== 'arbre') {
+    if (ressource.type !== 'arbre') {
       next(new Error("Impossible de peupler une ressource autre qu'un arbre"))
     } else if (!ressource.enfants ||
                !ressource.enfants instanceof Array ||
@@ -252,22 +253,32 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
   /**
    * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
    * @memberOf $ressourceConverter
-   * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de typeTechnique arbre)
+   * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de type arbre)
    */
   $ressourceConverter.toArbre = function (ressource) {
     var arbre
-    if (ressource.typeTechnique === 'arbre') {
+    if (ressource.type === 'arbre') {
       var clone = _.clone(ressource)
       arbre = {
         oid          : clone.oid,
         titre        : clone.titre,
-        typeTechnique: 'arbre',
+        type: 'arbre',
         attributes   : clone.parametres.attributes || {},
         enfants      : clone.enfants || []
       }
     }
 
     return arbre
+  }
+
+  /**
+   * Renvoie un Alias à une ressource (le controleur devra ajouter le proprio)
+   * @memberOf $ressourceConverter
+   * @param ressource
+   * @return {Alias}
+   */
+  $ressourceConverter.toAlias = function (ressource) {
+    return new Alias(ressource)
   }
 
   /**
@@ -281,7 +292,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
   }
 
   /**
-   * Renvoie la ressource au format compact (oid, origine, idOrigine, titre, typeTechnique, categories, restriction, dataUri)
+   * Renvoie la ressource au format compact (oid, origine, idOrigine, titre, type, categories, restriction, dataUri)
    * @memberOf $ressourceConverter
    * @param ressource
    * @return {Object}
@@ -292,7 +303,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
       origine      : ressource.origine,
       idOrigine    : ressource.idOrigine,
       titre        : ressource.titre,
-      typeTechnique: ressource.typeTechnique,
+      type: ressource.type,
       categories   : ressource.categories,
       restriction  : ressource.restriction,
       dataUri      : ressource.dataUri || $routes.getAbs('api', ressource)
@@ -307,10 +318,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
    */
   $ressourceConverter.getJstreeChildren = function (ressource) {
     var children = []
-    if (ressource.typeTechnique === 'arbre' && ressource.enfants) {
+    if (ressource.type === 'arbre' && ressource.enfants) {
       ressource.enfants.forEach(function (enfant) {
         var child
-        if (enfant.typeTechnique === 'arbre') {
+        if (enfant.type === 'arbre') {
           child = $ressourceConverter.toJstree(enfant)
         } else {
           child = getJstNode(enfant)
@@ -331,7 +342,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
    */
   $ressourceConverter.toJstree = function (ressource) {
     var node = getJstNode(ressource)
-    if (ressource.typeTechnique === 'arbre') {
+    if (ressource.type === 'arbre') {
       if (ressource.enfants && ressource.enfants.length) {
         node.children = $ressourceConverter.getJstreeChildren(ressource)
       } else {

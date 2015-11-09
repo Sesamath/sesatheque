@@ -1,6 +1,6 @@
 {
   "titre": "Ressources Sésamath",
-  "typeTechnique": "arbre",
+  "type": "arbre",
   "publie": true,
   "restriction": 0,
   "indexable": true,
@@ -11,31 +11,31 @@
       "titre": "Animations interactives",
       "origine": "sesaxml",
       "idOrigine": "animations_interactives",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Exercices interactifs",
       "origine": "sesaxml",
       "idOrigine": "exercices_interactifs",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Tests diagnostiques",
       "origine": "sesaxml",
       "idOrigine": "tests_algebre",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Tous les manuels et cahiers",
       "origine": "ouvrage",
       "idOrigine": "tous_les_manuels_cahiers",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     },
     {
       "titre": "Sélection de ressources pour le curriculum Suisse",
       "origine": "sesaxml",
       "idOrigine": "labomep_profil_suisse",
-      "typeTechnique": "arbre"
+      "type": "arbre"
     }
   ]
 }

@@ -14,7 +14,7 @@
         {:else}Public{/restriction.value}</span>
     <p>
     oid : {oid} ({origine.value}/{idOrigine.value},
-    {typeTechnique.title} {typeTechnique.value},{~s}
+    {type.title} {type.value},{~s}
     {version.title} {version.value})<br />
     {dateCreation.title} : {dateCreation.value}<br />
     {dateMiseAJour.title} : {dateMiseAJour.value}<br />

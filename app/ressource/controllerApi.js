@@ -36,20 +36,23 @@
  * Toutes les routes contenant /public/ sont sans tenir compte de la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
+ * @requires {@link EntityAlias}
  * @requires {@link $ressourceRepository}
  * @requires {@link $ressourceConverter}
  * @requires {@link $ressourceControl}
  * @requires {@link $accessControl}
  * @requires {@link $personneControl}
+ * @requires {@link $json}
  */
 
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
+module.exports = function (controller, EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
   var _ = require('lodash')
   var request = require('request')
   var flow = require('an-flow')
   var tools = require('../tools')
-  var config = require("../config");
-  var configRessource = require("./config");
+  var config = require("../config")
+  var configRessource = require("./config")
+  var Alias = require("./public/vendors/sesamath/Alias")
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
@@ -157,9 +160,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
    * @private
    * @param {Context} context
-   * @param visibility
+   * @param {string} visibility
+   * @param {boolean} alsoAlias Passer true pour ajouter les alias du user courant à la liste
    */
-  function grabListe(context, visibility) {
+  function grabListe(context, visibility, alsoAlias) {
     var args
     if (context.get.json) {
       args = tools.parse(context.get.json)
@@ -173,6 +177,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     tools.merge(args, context.post)
     log.debug("grabListe " +visibility, args)
     $ressourceRepository.getListe(visibility, args, function (error, ressources) {
+      if (alsoAlias && !error) {
+        var uid = $accessControl.getCurrentUserOid(context)
+        if (uid) {
+          EntityAlias.match('proprio').equals(uid).grab(function (aliasError, aliases) {
+            if (aliasError) error = aliasError
+            else aliases.forEach(function (alias) {
+              ressources.push(alias)
+            })
+          })
+        }
+      }
       sendListe(context, error, ressources)
     })
   }
@@ -248,7 +263,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
       }).seq(function (ressourceBdd) {
         // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
-        var tt = ressourcePostee.typeTechnique
+        var tt = ressourcePostee.type
         if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
         // on valide le contenu
         // partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
@@ -477,20 +492,38 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $json.send(context, error)
         } else if (ressource) {
           if ($accessControl.hasReadPermission(context, ressource)) {
-            // on clone
-            delete ressource.oid
-            delete ressource.idOrigine
-            ressource.origine = "local"
-            if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
-            ressource.publie = true
-            ressource.restriction = configRessource.constantes.restriction.prive
-            if (!ressource.relations) ressource.relations = []
-            ressource.relations.push([configRessource.constantes.relations.estVersionDe, oid])
-            $ressourceRepository.write(ressource, function (error, ressource) {
-              if (error) $json.send(context, error)
-              else if (ressource && ressource.oid) $json.send(context, null, {success: true, oid: ressource.oid})
-              else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
-            })
+            if (configRessource.editable[ressource.type]) {
+              // on clone
+              delete ressource.oid
+              delete ressource.idOrigine
+              ressource.origine = "local"
+              if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
+              ressource.publie = true
+              ressource.restriction = configRessource.constantes.restriction.prive
+              if (!ressource.relations) ressource.relations = []
+              ressource.relations.push([configRessource.constantes.relations.estVersionDe, oid])
+              $ressourceRepository.write(ressource, function (error, ressource) {
+                if (error) $json.send(context, error)
+                else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
+                else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
+              })
+            } else {
+              // on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource
+              EntityAlias.match('alias').equals(ressource.oid).match('base').equals(config.application.baseUrl).grabOne(function (error, alias) {
+                if (error) {
+                  $json.sendError(context, error.toString())
+                } else if (alias) {
+                  $json.sendOk(context, {oid:alias.oid})
+                } else {
+                  alias = EntityAlias.create(new Alias(ressource))
+                  alias.proprio = userOid
+                  alias.store(function (error, alias) {
+                    if (error) $json.sendError(context, error)
+                    else $json.sendOk(context, {oid:alias.oid})
+                  })
+                }
+              })
+            }
           } else {
             $json.denied(context, "Vous n'avez pas les droits suffisant pour lire la ressource " + oid)
           }
@@ -499,60 +532,87 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         }
       })
     } else {
-      $json.denied(context, "Vous devez être authentifié pour créer une ressource")
+      $json.denied(context, "Vous devez être authentifié pour cloner une ressource")
     }
   })
 
   /**
    * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant contributeur, avec publié et privé
-   * @route GET /api/externalClone/:oid?sesathequeBase=url
+   * @route GET /api/externalClone/:oid?base=url
    * @param {object} Les propriétés de la ressource
    * @returns {reponseRessourceOid}
    */
   controller.get('externalClone/:oid', function (context) {
     var oid = context.arguments.oid
-    var sesathequeBase = context.get.sesathequeBase
-    var userOid = $accessControl.getCurrentUserOid(context)
-    if (userOid) {
-      if (oid && sesathequeBase) {
-        if (sesathequeBase.substr(-1) !== "/") sesathequeBase += "/"
-        var options = {
-          uri: sesathequeBase + "api/public/" + oid,
-          gzip: true,
-          json: true,
-          timeout: 3000
-        }
-        request(options, function (error, response, ressource) {
-          if (error) {
-            $json.send(context, error)
-          } else if (response.statusCode === 200 && ressource) {
-            // on vire ce que l'on ne veut plus
-            ["oid", "idOrigine", "version", "archiveOid", "displayUri", "describeUri", "dataUri"].forEach(function (prop) {
-              if (ressource.hasOwnProperty(prop)) delete ressource[prop]
-            })
-            // on impose qq propriétés
-            ressource.origine = "local"
-            ressource.dateCreation = new Date()
-            ressource.publie = true
-            if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
-            ressource.restriction = configRessource.constantes.restriction.prive
-            if (!ressource.relations) ressource.relations = []
-            var originalUrl = sesathequeBase + "public/" + configRessource.constantes.routes.describe + "/" + oid
-            ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
-            $ressourceRepository.write(ressource, function (error, ressource) {
-              if (error) $json.send(context, error)
-              else if (ressource && ressource.oid) $json.send(context, null, {success: true, oid: ressource.oid})
-              else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
-            })
-          } else {
-            $json.notFound(context, "La ressource " + oid + " n'existe pas sur la sesatheque " + sesathequeBase)
+    var base = context.get.base
+    if (base) {
+      // on normalise sans slash de fin
+      if (base && base.substr(-1) === "/") base = base.substr(0, base.length - 1)
+      var userOid = $accessControl.getCurrentUserOid(context)
+      if (userOid) {
+        if (oid) {
+          var url = base +"/api/public/" + oid
+          var options = {
+            uri: url,
+            gzip: true,
+            json: true,
+            timeout: 3000
           }
-        })
+          request(options, function (error, response, ressource) {
+            if (error) {
+              $json.send(context, error)
+            } else if (response.statusCode === 200 && ressource) {
+              if (configRessource.editable[ressource.type]) {
+                // on vire ce que l'on ne veut plus
+                ["oid", "idOrigine", "version", "archiveOid", "displayUri", "describeUri", "dataUri"].forEach(function (prop) {
+                  if (ressource.hasOwnProperty(prop)) delete ressource[prop]
+                })
+                // on impose qq propriétés
+                ressource.origine = "local"
+                ressource.dateCreation = new Date()
+                ressource.publie = true
+                if (ressource.contributeurs.indexOf(userOid) < 0) ressource.contributeurs.push(userOid)
+                ressource.restriction = configRessource.constantes.restriction.prive
+                if (!ressource.relations) ressource.relations = []
+                var originalUrl = base + "public/" + configRessource.constantes.routes.describe + "/" + oid
+                ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
+                $ressourceRepository.write(ressource, function (error, ressource) {
+                  if (error) $json.send(context, error)
+                  else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
+                  else $json.sendError(context, new Error("L'enregistrement de la ressource a échoué"))
+                })
+              } else {
+                // un alias, on regarde si on l'avait pas déjà
+                EntityAlias.match('alias').equals(ressource.oid).match('base').equals(base).grabOne(function (error, alias) {
+                  if (error) {
+                    $json.send(context, error)
+                  } else if (alias) {
+                    $json.sendOk(context, {oid: alias.oid})
+                  } else {
+                    alias = EntityAlias.create(new Alias(ressource))
+                    log.debug("au retour du create on a l'alias", alias, 'avirer', {max: 5000})
+                    alias.proprio = userOid
+                    alias.base = base
+                    log.debug("on va sauver", alias, 'avirer', {max: 5000})
+                    alias.store(function (error, alias) {
+                      if (error) $json.sendError(context, error)
+                      else $json.sendOk(context, {oid: alias.oid})
+                    })
+                  }
+                })
+              }
+            } else {
+              $json.notFound(context, "La ressource " + oid + " n'existe pas sur la sesatheque " + base)
+            }
+          })
+        } else {
+          $json.send(context, new Error("Paramètre manquant"))
+        }
       } else {
-        $json.send(context, new Error("Paramètre manquant"))
+        $json.denied(context, "Vous devez être authentifié pour créer une ressource")
       }
     } else {
-      $json.denied(context, "Vous devez être authentifié pour créer une ressource")
+      $json.sendError(context, "Il faut préciser une base pour la ressource à cloner")
     }
   })
 
@@ -677,7 +737,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
         var jstData
         if (onlyChildren) {
-          if (ressource.typeTechnique === 'arbre') {
+          if (ressource.type === 'arbre') {
             jstData = $ressourceConverter.getJstreeChildren(ressource)
             sendJsonJstreeArray(context, null, jstData)
           } else {
@@ -948,7 +1008,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
  * @property {Integer}   oid
  * @property {string}    titre
  * @property {Integer[]} categories
- * @property {string}    typeTechnique
+ * @property {string}    type
  * @property … Autre propriétés d'une ressource
  */
 
@@ -970,7 +1030,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
  * @property {Integer}   ref
  * @property {string}    titre
  * @property {Integer[]} categories
- * @property {string}    typeTechnique
+ * @property {string}    type
  */
 
 

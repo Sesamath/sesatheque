@@ -40,17 +40,22 @@ else if (typeof module === 'object') module.exports = Ref;
 
 /**
  * Définition d'une référence à une ressource, que l'on peut rencontrer dans les feuilles d'un arbre
- * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Ref
+ * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte un Alias
  * @constructor
  */
 function Ref(initObj) {
   if (!initObj instanceof Object) initObj = {};
   /**
    * L'oid de la ressource que l'on référence
-   * @type {number}
+   * @property ref
+   * @type {Integer|string}
    */
-  this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
-  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
+  if (initObj.alias) {
+    this.ref = initObj.alias;
+  } else {
+    this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
+    if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
+  }
   /**
    * Titre
    * @type {string}
@@ -67,10 +72,10 @@ function Ref(initObj) {
    */
   this.commentaires = (initObj.commentaires && typeof initObj.commentaires === 'string') ? initObj.commentaires : '';
   /**
-   * Le typeTechnique qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
+   * Le type qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {string}
    */
-  this.typeTechnique = (initObj.typeTechnique && typeof initObj.typeTechnique === 'string') ? initObj.typeTechnique : 'arbre';
+  this.type = (initObj.type && typeof initObj.type === 'string') ? initObj.type : 'arbre';
   /**
    * Un ou des id de catégorie(s) éventuel (pour un picto)
    * @type {Array}

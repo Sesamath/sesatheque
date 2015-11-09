@@ -98,7 +98,7 @@ function Ressource(initObj) {
    * @default ""
    * @type {string}
    */
-  this.typeTechnique = filters.string(values.typeTechnique);
+  this.type = filters.string(values.type);
   /**
    * Titre
    * @default ""
@@ -123,9 +123,9 @@ function Ressource(initObj) {
    * @type {string}
    */
   this.commentaires = filters.string(values.commentaires);
-  if (this.typeTechnique === 'arbre') {
+  if (this.type === 'arbre') {
     /**
-     * Les enfants de l'arbre (à la place de la propriété parametres si typeTechnique vaut "arbre")
+     * Les enfants de l'arbre (à la place de la propriété parametres si type vaut "arbre")
      * @type {Object}
      */
     this.enfants = (values.enfants instanceof Object) ? values.enfants : {};
@@ -140,7 +140,7 @@ function Ressource(initObj) {
     }
   } else {
     /**
-     * Contenu qui dépend du type technique (toutes les infos spécifique à ce typeTechnique)
+     * Contenu qui dépend du type technique (toutes les infos spécifique à ce type)
      * @type {Object}
      */
     this.parametres = (values.parametres instanceof Object) ? values.parametres : {};

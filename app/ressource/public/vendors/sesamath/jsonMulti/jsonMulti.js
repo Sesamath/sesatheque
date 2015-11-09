@@ -272,7 +272,7 @@ define(["jquery"], function ($) {
       try {
         $(function () {
           if (!textarea) throw new Error("Il faut fournir un textarea pour jsonMulti");
-          basePath = (options && options.sesathequeBase) || "/";
+          basePath = (options && options.base) || "/";
           basePath += "vendors/sesamath/jsonMulti/";
           if (textarea.nodeName !== "TEXTAREA") throw new Error("Il faut fournir un textarea pour jsonMulti");
           $textarea = $(textarea);

@@ -1,4 +1,4 @@
-{! Ce bloc partiel insère le code pour charger le js d'édition du typeTechnique et appelle son init !}
+{! Ce bloc partiel insère le code pour charger le js d'édition du type et appelle son init !}
 <script type="application/javascript">
   require(['/init.js'], function (init) {
   console.log('init chargé');
@@ -10,7 +10,7 @@
       init(options, function (error) {
         if (error) throw error;
         console.log('init lancé');
-        require(['/plugins/{typeTechnique.value}/edit.js'], function (edit) {
+        require(['/plugins/{type.value}/edit.js'], function (edit) {
           if (typeof edit === 'undefined') throw new Error('Le chargement a échoué, impossible de charger edit.js');
           console.log('edit chargé');
           var ressource = {?ressource}{ressource|s}{:else}null{/ressource};

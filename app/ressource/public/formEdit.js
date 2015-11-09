@@ -61,21 +61,21 @@
             function onTypeChange() {
               var $label = $groupParametres.filter('label');
               var $textarea = $groupParametres.filter('textarea');
-              var typeTechnique = $typeTechnique.val();
-              console.log("type change : " + typeTechnique + ' ' + $label.text());
+              var type = $type.val();
+              console.log("type change : " + type + ' ' + $label.text());
               console.log($label);
-              if (typeTechnique === 'arbre') {
+              if (type === 'arbre') {
                 $label.text('Enfants');
                 $textarea.attr('placeholder', 'Enfants');
               }
               else $label.text('Paramètres');
             }
 
-            // comportement sur le titre de parametres suivant le choix de typeTechnique
-            var $typeTechnique = $('#typeTechnique');
+            // comportement sur le titre de parametres suivant le choix de type
+            var $type = $('#type');
             var $groupParametres = $('#groupParametres');
-            if ($typeTechnique && $groupParametres) {
-              $typeTechnique.change(onTypeChange);
+            if ($type && $groupParametres) {
+              $type.change(onTypeChange);
               onTypeChange();
             }
 

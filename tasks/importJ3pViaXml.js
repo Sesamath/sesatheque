@@ -163,7 +163,7 @@ function parseRessource(row) {
     titre            : row.titre,
     origine          : 'labomepBIBS',
     idOrigine        : String(row.id),
-    typeTechnique    : 'j3p',
+    type    : 'j3p',
     resume           : row.resume || '',
     description      : row.description || '',
     commentaires     : row.commentaire || '',
@@ -194,7 +194,7 @@ function purgeJ3pAndExit() {
 
   var query = "DELETE ressource, ri2 FROM ressource_index ri INNER JOIN ressource USING(oid)" +
       " INNER JOIN ressource_index ri2 USING(oid)" +
-      " WHERE ri.name = 'typeTechnique' AND ri._string = 'j3p'"
+      " WHERE ri.name = 'type' AND ri._string = 'j3p'"
   var dbConfigBibli = require(__dirname + '/../_private/config')
   var confKnex = {
     client: "mysql",

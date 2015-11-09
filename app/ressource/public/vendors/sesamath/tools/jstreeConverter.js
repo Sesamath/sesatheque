@@ -47,7 +47,7 @@
   function getJstNode(ressource) {
     /**
      * Retourne les datas qui nous intéressent à mettre sur le tag a
-     * (pour a_attr : data-ref, data-typeTechnique, href et alt)
+     * (pour a_attr : data-ref, data-type, href et alt)
      * @return {Object}
      */
     function getAttr() {
@@ -62,7 +62,7 @@
         attr['data-displayUri'] = ressource.displayUri;
       }
       if (ressource.dataUri) attr['data-dataUri'] = ressource.dataUri;
-      if (ressource.typeTechnique) attr['data-typeTechnique'] = ressource.typeTechnique;
+      if (ressource.type) attr['data-type'] = ressource.type;
       if (ressource.resume) attr.alt = ressource.resume;
 
       return attr;
@@ -73,7 +73,7 @@
       node = {
         text  : ressource.titre,
         a_attr: getAttr(),
-        icon  : ressource.typeTechnique + 'JstNode'
+        icon  : ressource.type + 'JstNode'
       };
     } else throw new Error("getJstNode appelé sans ressource");
 
@@ -102,7 +102,7 @@
           log("devenu", enfant);
           i++;
         }
-        if (enfant && (enfant.ref || enfant.typeTechnique === 'arbre')) enfants.push(enfant);
+        if (enfant && (enfant.ref || enfant.type === 'arbre')) enfants.push(enfant);
         else log.error("Pb de conversion du child, ni ref ni arbre", child);
       });
     } catch(error) {
@@ -120,10 +120,10 @@
    */
   jstreeConverter.getJstreeChildren = function (ressource) {
     var children = [];
-    if (ressource.typeTechnique === 'arbre' && ressource.enfants && ressource.enfants.forEach) {
+    if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.forEach) {
       ressource.enfants.forEach(function (enfant) {
         var child;
-        if (enfant.typeTechnique === 'arbre') {
+        if (enfant.type === 'arbre') {
           child = jstreeConverter.toJstree(enfant);
         } else {
           child = getJstNode(enfant);
@@ -155,7 +155,7 @@
    */
   jstreeConverter.toJstree = function (ressource) {
     var node = getJstNode(ressource);
-    if (ressource.typeTechnique === 'arbre') {
+    if (ressource.type === 'arbre') {
       if (ressource.enfants && ressource.enfants.length) {
         node.children = jstreeConverter.getJstreeChildren(ressource);
       } else {
@@ -177,7 +177,7 @@
   /**
    * Retourne une Ref à partir d'un node jstree
    * @param {jQueryElement} node Un element de l'objet reference jstree _model.data[childId]
-   * @returns {Ref} La ref (presque, ref, titre, typeTechnique, avec displayUrl & resume en plus,
+   * @returns {Ref} La ref (presque, ref, titre, type, avec displayUrl & resume en plus,
    *                mais pas categories, et enfants seulement si on passe le jstree complet)
    */
   jstreeConverter.toRef = function (node, jstree) {
@@ -194,8 +194,8 @@
     if (nodeSrc) {
       item.titre = nodeSrc.text;
       if (nodeSrc.a_attr) {
-        item.typeTechnique = nodeSrc.a_attr['data-typeTechnique'];
-        if (item.typeTechnique === 'arbre' && node.children && node.children.length && jstree) {
+        item.type = nodeSrc.a_attr['data-type'];
+        if (item.type === 'arbre' && node.children && node.children.length && jstree) {
           item.enfants = jstreeConverter.getEnfants(node.id, jstree);
         }
         if (nodeSrc.a_attr['data-displayUri']) item.displayUri = nodeSrc.a_attr['data-displayUri'];

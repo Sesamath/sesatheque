@@ -77,7 +77,7 @@ function checkArbre(arbre, next) {
 function getPaquet(start, next) {
   var qsOptions = {
     filters: [
-      {index: 'typeTechnique', values: ['arbre']}
+      {index: 'type', values: ['arbre']}
     ],
     orderBy: 'oid',
     start  : start,

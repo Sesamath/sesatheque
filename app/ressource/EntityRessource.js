@@ -79,7 +79,7 @@ module.exports = function (EntityRessource) {
   EntityRessource
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
-    .defineIndex('typeTechnique', 'string')
+    .defineIndex('type', 'string')
     .defineIndex('titre', 'string')
     .defineIndex('niveaux', 'integer')
     .defineIndex('categories', 'integer')

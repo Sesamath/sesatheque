@@ -197,7 +197,7 @@ tools.linkQs = function (path, texte, args) {
 /**
  * Fusionne les nouvelles valeurs avec les propriétés de l'objet (en profondeur)
  * (concatène si les deux propriétés sont des tableaux, en virant d'éventuels doublons,
- * fusionne si c'est deux objets et écrase les anciennes valeurs sinon)
+ * fusionne si c'est deux objets en écrasant les propriétés de object par celles de newValues)
  * @memberOf tools
  * @param {Object} object L'objet source
  * @param {Object} newValues Les valeurs à fusionner
@@ -386,17 +386,19 @@ tools.update = function(object, addition) {
 }
 
 /**
- * Update object en y ajoutant toutes les propriétés de default qui n'existait pas dans object
- * (Attention, c'est récursif sur toutes les propriétés qui sont des objets)
+ * Update object en y ajoutant toutes les propriétés de default qui n'existait pas dans object sans modifier les autres
  * @memberOf tools
- * @param object
- * @param defaultValues
+ * @param {object}  object
+ * @param {object}  defaultValues
+ * @param {boolean} [recursion=true] Passer false pour ne compléter que les propriétés "racine" de l'objet sans récursion
  */
-tools.complete = function(object, defaultValues) {
+tools.complete = function(object, defaultValues, recursion) {
+  // recursion=true par défaut
+  if (recursion !== false) recursion = true
   function completeObj(obj, values) {
     _.each(values, function(value, key) {
-      if (!obj[key]) obj[key] = value
-      else if (_.isObject(obj[key]) && _.isObject(value)) completeObj(obj[key], value)
+      if (!obj.hasOwnProperty(key)) obj[key] = value
+      else if (recursion && _.isObject(obj[key]) && _.isObject(value)) completeObj(obj[key], value)
     })
   }
   if (object instanceof Object && defaultValues instanceof Object) completeObj(object, defaultValues)

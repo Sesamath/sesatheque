@@ -48,7 +48,7 @@ Si on veut que la sésatheque ajoute des infos au résultat, par ex le nom qu'on
 ```
 
 On peut aussi utiliser les modules js de la sésathèque en cross-domain, pour mettre les ressources dans son dom et interagir dessus.
-Il faut alors passer `options.sesathequeBase = "http://sesathequeDomain/"`, en général à display() mais ça peut être à init() 
+Il faut alors passer `options.base = "http://sesathequeDomain/"`, en général à display() mais ça peut être à init() 
 (si on veut appeler des méthodes de plugins sans passer par display), que le require.js soit celui du domaine appelant ou celui de la sésathèque.
 
 Cette
@@ -77,7 +77,7 @@ Par exemple, si on a déjà la ressource complète
   // on veut afficher cette ressource
   var ressource = {
     titre = "…",
-    typeTechnique = "…",
+    type = "…",
     etc.
   }
   
@@ -87,7 +87,7 @@ Par exemple, si on a déjà la ressource complète
   require(['http://sesatheque.domain/display.js'], function(display) {
     // les options à passer
     var options = {
-      sesathequeBase = "http://sesathequeDomain/",
+      base = "http://sesathequeDomain/",
       container : document.getElementById("laRessource"),
       resultatCallback : saveResultat
     };
@@ -129,7 +129,7 @@ Autre exemple où on appelle d'abord la sesathèque pour charger une ressource (
     // ces containers, appeler seulement initRequire (seul bémol, jQueryUi a besoin de requireGlobal pour charger ses css, 
     // faut appeler avant requireGlobal dans ce cas) 
     var options = {
-      sesathequeBase = "http://sesathequeDomain/",
+      base = "http://sesathequeDomain/",
       container : document.getElementById("laRessource"),
       errorsContainer : document.getElementById("errors")
     };

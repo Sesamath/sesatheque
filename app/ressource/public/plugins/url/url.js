@@ -162,7 +162,7 @@ try {
       S.log('url.display avec les options', options);
       //les params minimaux
       if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.adresse) throw new Error("Ressource incomplète");
-      ["sesathequeBase", "pluginBase", "container", "errorsContainer"].forEach(function (param) {
+      ["base", "pluginBase", "container", "errorsContainer"].forEach(function (param) {
         if (!options[param]) throw new Error("Paramètre " + param + " manquant");
       });
 

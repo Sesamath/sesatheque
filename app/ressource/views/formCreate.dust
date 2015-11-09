@@ -20,7 +20,7 @@
         !}
         {?token}{>wrapper widget="text" o=token /}{/token}
         {>wrapper widget="text" o=titre /}
-        {>wrapper widget="select" o=typeTechnique size=2 /}
+        {>wrapper widget="select" o=type size=2 /}
         {>wrapper widget="checkboxes" o=publie /}
         {>wrapper widget="select" o=restriction /}
         {>wrapper widget="select" o=langue /}

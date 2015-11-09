@@ -52,13 +52,13 @@ define(function () {
       if (typeof data === "object") {
         isGet = false;
         method = 'POST';
-        url = sesathequeBase + 'api/ressource/';
+        url = base + 'api/ressource/';
       } else {
         isGet = true;
         method = 'GET';
         var id = data;
         if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine");
-        url = sesathequeBase + 'api/ressource/' + id;
+        url = base + 'api/ressource/' + id;
         data = {};
       }
 
@@ -116,16 +116,16 @@ define(function () {
 
   /**
    * la base de la sesatheque (on ajoutera le / de fin s'il manque mais en cross-domain fallait appeler init avant)
-   * on appellera les urls de la forme sesathequeBase + 'api/ressource/…'
+   * on appellera les urls de la forme base + 'api/ressource/…'
    * @type {string}
    */
-  var sesathequeBase;
+  var base;
   if (typeof sesamath === "undefined") window.sesamath = {};
   var S = window.sesamath;
   if (!S.sesatheque) S.sesatheque = {};
   var ST = S.sesatheque;
-  if (ST.base) sesathequeBase = ST.base;
-  else sesathequeBase = '/';
+  if (ST.base) base = ST.base;
+  else base = '/';
 
   /**
    * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
@@ -141,8 +141,8 @@ define(function () {
      * @param {string} newSesathequeBase L'url de la sesathèque
      */
     setBase: function (newSesathequeBase) {
-      sesathequeBase = newSesathequeBase;
-      if (sesathequeBase.substr(-1) !== '/') sesathequeBase += '/';
+      base = newSesathequeBase;
+      if (base.substr(-1) !== '/') base += '/';
     },
     /**
      * Récupère une ressource sur la bibliothèque en ajax

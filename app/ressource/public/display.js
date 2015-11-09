@@ -52,7 +52,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
      * Il chargera le bon afficheur en lui passant les options attendues, en créant si besoin les contereurs dans le dom courant.
      * @service display
      * @param {Ressource}     ressource La ressource à afficher
-     * @param {initOptions}   [options] Les options éventuelles (passer sesathequeBase si ce js est chargé sur un autre domaine)
+     * @param {initOptions}   [options] Les options éventuelles (passer base si ce js est chargé sur un autre domaine)
      * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
      */
     var display = function (ressource, options, next) {
@@ -72,10 +72,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           S.log('et les options après init', options);
 
           // ajoute de la css commune à toutes les ressources ici
-          S.addCss(options.sesathequeBase + 'styles/ressourceDisplay.css');
+          S.addCss(options.base + 'styles/ressourceDisplay.css');
 
           // tente de charger le plugin du type de ressource
-          var name = ressource.typeTechnique;
+          var name = ressource.type;
           var modules = [name];
           // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
           var traiteResultat;
@@ -110,7 +110,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               // on regarde s'il faut ajouter une fct de sauvegarde des résultats
               if (Resultat) addResultatCallback(options, traiteResultat, Resultat);
               // on lui ajoute toujours ça
-              options.pluginBase = options.sesathequeBase +"plugins/" +name +"/";
+              options.pluginBase = options.base +"plugins/" +name +"/";
               // on peut afficher
               plugin.display(ressource, options, function (error) {
                 if (error) {
@@ -235,7 +235,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               var url;
               if (deferSync) {
                 resultat.deferUrl = options.urlResultatCallback;
-                url = options.sesathequeBase + 'api/deferPost';
+                url = options.base + 'api/deferPost';
                 S.log("on passe en synchrone vers " + url);
               } else {
                 // on pouvait pas mettre de timeout en synchrone
@@ -318,11 +318,11 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
          */
         var ajaxTimeout = 10000;
 
-        // on appelle la conf de require, en cross domain si on est appelé avec sesathequeBase
+        // on appelle la conf de require, en cross domain si on est appelé avec base
         // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
-        var base = options.sesathequeBase || "/";
+        var base = options.base || "/";
         if (base.substr(-1) !== "/") base += "/";
-        options.sesathequeBase = base;
+        options.base = base;
         // tant que l'init a pas été fait require va chercher en relatif à la page courante, faut donc préciser en absolu
         var initFile = base + "init.js";
         require([initFile], function (init) {
@@ -331,7 +331,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       } catch (error) {
         if (console && console.error) console.error(error);
         // pb de chargement probable, on explicite
-        var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.sesathequeBase (" +error.toString() +")");
+        var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.base (" +error.toString() +")");
         next(err);
       }
     };

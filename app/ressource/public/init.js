@@ -32,7 +32,7 @@
 /**
  * Script d'init générique pour ajouter dans notre namespace global les méthodes générique (addCss, addElement, getElement, addError…)
  * si cela n'a pas déjà été fait, activer log ou pas et étoffer options si besoin
- * Appellera aussi initRequire si on nous passe une sesathequeBase (et qu'il n'a pas déjà été configuré avec cette base)
+ * Appellera aussi initRequire si on nous passe une base (et qu'il n'a pas déjà été configuré avec cette base)
  */
 /* global window, define, require, alert, sesamath */
 if (typeof window === 'undefined') {
@@ -53,7 +53,7 @@ if (typeof window === 'undefined') {
 
     /**
      * Notre module js que l'on exporte, une seule fonction.
-     * Complète les options si besoin avec sesathequeBase, container, errorsContainer qui seront créés si besoin,
+     * Complète les options si besoin avec base, container, errorsContainer qui seront créés si besoin,
      * et ajoute aux options "urlResultatCallback", "userOrigine", "userId" si elles n'y sont pas et sont dans l'url
      * @param {initOptions}   options
      * @param {errorCallback} next
@@ -108,16 +108,16 @@ if (typeof window === 'undefined') {
       try {
         if (!options) options = {};
         if (!next) next = function () {};
-        // on appelle la conf de require si ça n'a pas été fait, en cross domain si on est appelé avec sesathequeBase
+        // on appelle la conf de require si ça n'a pas été fait, en cross domain si on est appelé avec base
         // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
-        var base = options.sesathequeBase || ST.base || "/";
+        var base = options.base || ST.base || "/";
         if (base.substr(-1) !== "/") base += "/";
         if (!ST.requireBase || ST.requireBase !== base) {
           // l'init a pas été fait ou on veut le changer, require va chercher en relatif à la page courante si pas initialisé,
           var initRequireName = base +"initRequire.js";
           require([initRequireName], function (initRequire) {
             initRequire(base);
-            options.sesathequeBase = ST.base;
+            options.base = ST.base;
             checkGlobal();
           });
         } else {
@@ -126,7 +126,7 @@ if (typeof window === 'undefined') {
       } catch (error) {
         if (console && console.error) console.error(error);
         // pb de chargement probable, on explicite
-        var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.sesathequeBase (" +error.toString() +")");
+        var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.base (" +error.toString() +")");
         next(err);
       }
 
@@ -138,7 +138,7 @@ if (typeof window === 'undefined') {
  * Options à passer à init() ou à display(), les autres propriétés seront laissées intactes
  * @typedef initOptions
  * @type {Object}
- * @property {string}  [sesathequeBase=/] Le préfixe de chemin vers la racine de la sésathèque.
+ * @property {string}  [base=/] Le préfixe de chemin vers la racine de la sésathèque.
  *                                        Il faut passer un chemin http://… complet si ce module est utilisé sur un autre domaine que la sésathèque
  *                                        Inutile si l'info a déjà été donnée à requireConfig avant
  * @property {Element} [container]        L'élément html qui servira de conteneur au plugin pour afficher sa ressource, créé si non fourni
@@ -150,7 +150,7 @@ if (typeof window === 'undefined') {
  * Options à passer à une méthode display d'un plugin
  * @typedef displayOptions
  * @type {Object}
- * @property {string}           sesathequeBase        Le préfixe de chemin vers la racine de la sésathèque (chemin http absolu en cas d'appel d'un autre domaine)
+ * @property {string}           base        Le préfixe de chemin vers la racine de la sésathèque (chemin http absolu en cas d'appel d'un autre domaine)
  * @property {string}           pluginBase            Le préfixe de chemin vers le dossier du plugin (mis par display)
  * @property {Element}          container             L'élément html qui servira de conteneur au plugin pour afficher sa ressource
  * @property {Element}          errorsContainer       L'élément html pour afficher des erreurs éventuelles
