@@ -94,4 +94,11 @@ module.exports = function (controller, $ressourceRepository, EntityRessource) {
       })
     }
   })
+
+  controller.get('headers', function (context) {
+    context.json({success:true, headers:context.request.headers})
+  })
+  controller.post('headers', function (context) {
+    context.json({success:true, headers:context.request.headers})
+  })
 }

@@ -636,7 +636,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       next(error, personne)
     }
 
-    log.debug("loginFromSesalab avec le user", sesalabUser, "sesasso", {max:10000})
+    log.debug("loginFromSesalab avec le domaine " +domaine +" et le user", sesalabUser, "sesasso", {max:10000})
     if (domaine && sesalabUser.oid) {
       var data = {
         nom : sesalabUser.nom,
@@ -666,7 +666,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       data.permissions = getPermissions(data)
       $personneRepository.update(data, setSession)
     } else {
-      next(new Error("Impossible de connecter un utilisateur sesalab sans domaine et oid"))
+      next(new Error("Impossible de connecter un utilisateur sesalab sans son domaine et oid (manquant dans la réponse de sesalab)"))
     }
   }
 

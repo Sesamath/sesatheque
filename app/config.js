@@ -75,8 +75,12 @@ var settings = {
     },
     bodyParser : {limit:"8mb"}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
     session: {
+      name: "mySessName",
       secret: "asqlSTsrl78lAsg",
       saveUninitialized: true,
+      /* cookie : {
+        httpOnly : false
+      }, /* */
       resave: true
     },
     authentication: {}
