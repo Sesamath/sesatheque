@@ -672,7 +672,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       $accessControl.logout(context)
       $json.sendOk(context)
     } else {
-      $json.send(context, "Utilisateur non connecté")
+      $json.sendOk(context, {warning: "Utilisateur non connecté"})
     }
   })
 

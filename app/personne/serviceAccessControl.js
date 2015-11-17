@@ -676,6 +676,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.logout = function (context) {
+    log.debug("déconnexion")
     context.session.user = {}
   }
 
