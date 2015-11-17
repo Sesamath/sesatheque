@@ -79,12 +79,12 @@ try {
           loader.init({urlBaseJ3p: urlBaseJ3p, log: S.log});
           var j3pOptions = {};
           if (options.resultatCallback) {
-            // j3p veut un nom de fct qui existe en global dans son dom
-            window.resultatCallback = options.resultatCallback;
-            j3pOptions.nomFctScore = 'resultatCallback';
+            j3pOptions.resultatCallback = options.resultatCallback;
+          }
+          if (options.lastResultat) {
+            j3pOptions.lastResultat = options.lastResultat;
           }
           S.log("loader j3p avec le graphe", ressource.parametres.g);
-          S.log("graphe Array ?", ressource.parametres.g instanceof Array, typeof ressource.parametres.g);
           if (ressource.parametres.g instanceof Array) {
             loader.charge(options.container, ressource.parametres.g, j3pOptions);
             next(); // le chargement sera pas terminé mais le loader propose pas de callback
