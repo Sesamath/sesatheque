@@ -616,6 +616,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Loggue un user d'un sesalab localement, répond {success:true} ou {success:false, error:"message d'erreur"}
+   * Dupliqué dans app/personne/controllerPersonne.js en html
    * @Route POST /api/connexion
    * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
    * @param {string} token   Le token de sesalab qui servira à récupérer le user

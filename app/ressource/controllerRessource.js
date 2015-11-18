@@ -49,6 +49,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var tools = require('../tools')
   var flow = require('an-flow')
   var config = require('./config')
+  var request = require('request')
 
   /**
    * Crée un formToken et l'ajoute à la ressource et en session
@@ -152,6 +153,77 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
     $views.prepareAndSend(context, error, ressource, view, options)
   }
+
+  /**
+   * Iframe de connexion pour loguer un user d'un sesalab localement, appelle sendMessage avec {action:"connexion",success:{boolean}[,error:msgErreur]}
+   * Dupliqué dans app/connexion, qu'il remplace vu que pas mal de navigateurs déconnent pour affecter le cookie en xhr
+   * @Route GET /ressource/connexion
+   * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
+   * @param {string} token   Le token de sesalab qui servira à récupérer le user
+   */
+  controller.get('connexion', function (context) {
+    function end(error) {
+      var retour = {
+        action : "connexion",
+        success : !error
+      }
+      if (error) retour.error = error.toString()
+      var data = {
+        $views : __dirname + '/views',
+        jsBloc : {
+          $view : __dirname +"/views/js",
+          jsCode : 'if (parent.postMessage) parent.postMessage(' +JSON.stringify(retour) +', "*")'
+        }
+      }
+      context.html(data)
+    }
+
+    var token = context.get.token;
+    var origine = context.get.origine;
+    var timeout = 5000
+
+    context.layout = 'iframe'
+    context.status = 200 // sinon le listener va traduire l'absence de contenu par une 404
+
+    if (token && origine) {
+      if (origine.substr(-1) !== "/") origine += "/"
+      if (config.sesalabs.indexOf(origine) > -1) {
+        var postOptions = {
+          url: origine + "api/utilisateur/check-token",
+          json: true,
+          content_type: 'charset=UTF-8',
+          timeout: timeout,
+          form: {
+            token: token
+          }
+        }
+        // on ne garde que le nom de domaine en origine
+        var domaine = /https?:\/\/([a-z\.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
+        request.post(postOptions, function (error, response, body) {
+          if (error) {
+            end(error)
+          } else if (body.error) {
+            end(new Error(body.error))
+          } else if (body.ok && body.utilisateur) {
+            // on peut connecter
+            $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
+              log.debug("dans cb loginFromSesalab on a en session", context.session.user)
+              if (error) end(error)
+              else end()
+            })
+          } else {
+            error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
+            log.debug(error, body)
+            end(error)
+          }
+        })
+      } else {
+        end(new Error("Origine " +origine +"non autorisée à se connecter ici"))
+      }
+    } else {
+      end(new Error("token ou origine manquant"))
+    }
+  })
 
   /**
    * Page describe
