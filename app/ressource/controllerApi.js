@@ -648,7 +648,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
               log.debug("dans cb loginFromSesalab on a en session", context.session.user)
               if (error) $json.send(context, error)
-              else $json.sendOk(context)
+              else $json.sendOk(context, {random: +new Date()})
             })
           } else {
             error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)

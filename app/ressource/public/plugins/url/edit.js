@@ -178,7 +178,7 @@ try {
       S.addElement(instructions, 'br');
       S.addText(instructions, "Choisissez le paramétrage que vous souhaitez parmi ceux proposés ci-dessous.");
       //S.addText(instructions, "Le symbole ");
-      //S.addElement(instructions, 'img', {src: options.pluginBaseUrl +"/images/forward.png"});
+      //S.addElement(instructions, 'img', {src: options.pluginBaseUrl +"images/forward.png"});
       //S.addText(instructions, " indique que les affichages seront proposés successivements et non simultanément.");
       addOptions(blocParam, parametres, options);
 

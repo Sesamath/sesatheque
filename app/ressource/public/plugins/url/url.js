@@ -180,7 +180,7 @@ try {
       if (!/^https?:\/\//.test(url)) throw new Error("Url invalide : " +url);
 
       // init
-      S.addCss(options.pluginBase + '/url.css');
+      S.addCss(options.pluginBase + 'url.css');
 
       var hasConsigne = (params.question_option && params.question_option !== 'off');
       var hasReponse = (params.answer_option && params.answer_option !== 'off');
@@ -198,7 +198,7 @@ try {
         /**
          * Ajout des comportements pour la gestion des panneaux Consigne et Réponse avec jQueryUi
          */
-        var dependances = [options.pluginBase + '/urlUi.js', "jqueryUiDialog"];
+        var dependances = [options.pluginBase + 'urlUi.js', "jqueryUiDialog"];
         var hasCkeditor = (params.answer_editor && params.answer_editor.indexOf('ckeditor') === 0);
         var hasMqEditor = (params.answer_editor === 'mqEditor');
         if (hasCkeditor) dependances.push('ckeditor');

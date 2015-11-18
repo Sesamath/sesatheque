@@ -62,7 +62,7 @@ try {
         if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs");
 
         S.addCss(options.base + 'vendors/jstree/dist/themes/default/style.min.css');
-        var baseUrl = options.base + 'plugins/arbre';
+        var baseUrl = options.pluginBase;
 
         // un div d'aperçu
         //var apercuElt = S.getElement('iframe', {id: S.getNewId(), width:'50%',height:'400px', style : 'float:right;resize:both;overflow:scroll;'});
@@ -102,17 +102,17 @@ try {
               }
             });
             var apercuFermer = S.addElement(boutons, 'img', {
-              src: baseUrl + '/images/fermer.png',
+              src: baseUrl + 'images/fermer.png',
               alt: "fermer l'aperçu",
               style: {float: 'right'}
             });
             var apercuAgrandir = S.addElement(boutons, 'img', {
-              src: baseUrl + '/images/agrandir.png',
+              src: baseUrl + 'images/agrandir.png',
               alt: "agrandir l'aperçu",
               style: {float: 'right'}
             });
             var apercuReduire = S.addElement(boutons, 'img', {
-              src: baseUrl + '/images/reduire.png',
+              src: baseUrl + 'images/reduire.png',
               alt: "réduire l'aperçu",
               style: {float: 'right'}
             });

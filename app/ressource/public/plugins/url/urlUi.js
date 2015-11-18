@@ -303,10 +303,7 @@ try {
          */
         var answer_editor = ressource.parametres.answer_editor || "textarea";
 
-        var prefixUrl = options && options.pluginBaseUrl || '/plugins/url';
-
-        var base = options && options.base || "/";
-        S.addCss(base +"vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css");
+        S.addCss(options.base +"vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css");
 
         var etapes = {
           currentIndex: 0,
@@ -328,7 +325,7 @@ try {
         /** Le html du lien suivant */
         var lienSuivant = S.getElement("img", {
           class: 'lienSuivant',
-          src: prefixUrl + '/images/forward.png',
+          src: options.pluginBaseUrl + 'images/forward.png',
           align: 'absmiddle',
           alt: 'suivant',
           onclick:etapes.next

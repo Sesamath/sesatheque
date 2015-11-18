@@ -109,6 +109,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               }
               // on regarde s'il faut ajouter une fct de sauvegarde des résultats
               if (Resultat) addResultatCallback(options, traiteResultat, Resultat);
+              if (!options.base) options.base = "/";
+              else if (options.base.substring(-1) !== "/") options.base += "/";
               // on lui ajoute toujours ça
               options.pluginBase = options.base +"plugins/" +name +"/";
               // on peut afficher
