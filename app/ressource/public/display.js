@@ -75,8 +75,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           S.addCss(options.base + 'styles/ressourceDisplay.css');
 
           // tente de charger le plugin du type de ressource
-          var name = ressource.type;
-          var modules = [name];
+          var pluginName = ressource.type;
+          var modules = [pluginName];
           // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
           var traiteResultat;
           if (options) {
@@ -91,9 +91,9 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
           require(modules, function (plugin, Resultat) {
             try {
-              if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' + name + ' a échoué');
-              if (typeof plugin.display !== 'function') throw new Error('Le plugin ' + name + " n'a pas de méthode display");
-              S.log('plugin ' + name + ' chargé');
+              if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' + pluginName + ' a échoué');
+              if (typeof plugin.display !== 'function') throw new Error('Le plugin ' + pluginName + " n'a pas de méthode display");
+              S.log('plugin ' + pluginName + ' chargé');
               if (options.container) S.empty(options.container);
               else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource");
               if (options.errorsContainer) options.errorsContainer.innerHTML = '';
@@ -109,10 +109,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               }
               // on regarde s'il faut ajouter une fct de sauvegarde des résultats
               if (Resultat) addResultatCallback(options, traiteResultat, Resultat);
+              // on lui ajoute toujours ça
               if (!options.base) options.base = "/";
               else if (options.base.substring(-1) !== "/") options.base += "/";
-              // on lui ajoute toujours ça
-              options.pluginBase = options.base +"plugins/" +name +"/";
+              options.pluginBase = options.base +"/plugins/" +pluginName +"/";
               // on peut afficher
               plugin.display(ressource, options, function (error) {
                 if (error) {

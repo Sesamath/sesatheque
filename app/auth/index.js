@@ -29,7 +29,6 @@
  * pour une explication en français)
  */
 'use strict'
-console.log("start comp auth")
 var authComponent = lassi.component('auth')
 
 authComponent.service('$auth', function($accessControl, $views) {

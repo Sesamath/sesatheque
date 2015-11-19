@@ -63,7 +63,6 @@ for (var i = 10; i < 1000; i +=100) {
 GLOBAL.isProd = ((lassi.settings.application.staging === 'prod'))
 lassi.log('app', "Démarrage de l'application avec l'environnement", (lassi.settings.application.staging).red)
 
-console.log("ici")
 // nos loggers
 GLOBAL.log = require('./tools/log.js')
 
@@ -95,9 +94,7 @@ require('./auth')
 var dependancies = ['static', 'personne', 'ressource', 'auth']
 
 // On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
-console.log('avant conf private')
 var privateConfig = require('./_private/config')
-console.log('après conf private')
 // des modules sup à charger
 if (privateConfig.extraModules) {
   privateConfig.extraModules.forEach(function (module) {
@@ -119,11 +116,9 @@ if (privateConfig.extraDependenciesLast) {
 }
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
-console.log("av component")
 var sesatheque = lassi.component('sesatheque', dependancies)
 GLOBAL.app = sesatheque // pour sesalab-admin
 require('./sesalab-admin');
-console.log("av config")
 
 sesatheque.config(function($cache, $settings) {
   // on ajoute memcache si précisé dans les settings

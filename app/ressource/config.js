@@ -41,19 +41,21 @@ var ressourceConfig = {
    */
   listes : {
     type : {
-      'am'    : 'aide mathenpoche',
-      'arbre' : 'arbre (liste hiérarchisée)',
-      'calkc' : 'calculatrice cassée',
-      'ec2'   : 'exercice calculatice',
-      'em'    : 'exercice mathenpoche',
-      'j3p'   : 'activité j3p',
-      'mental': 'calcul mental',
-      'url'   : 'page externe'
+      am    : 'aide mathenpoche',
+      arbre : 'arbre (liste hiérarchisée)',
+      calkc : 'calculatrice cassée',
+      ec2   : 'exercice calculatice (flash)',
+      ecjs  : 'exercice calculatice (javascript)',
+      em    : 'exercice mathenpoche',
+      j3p   : 'activité j3p',
+      mental: 'calcul mental',
+      url   : 'page externe'
     },
     // les type qui peuvent être utilisés pour une ressource perso
     typePerso : {
-      'j3p'   : true,
-      'url'   : true
+      ecjs : true,
+      j3p  : true,
+      url  : true
     },
     niveaux          : {
       11: 'CP',
@@ -131,16 +133,16 @@ var ressourceConfig = {
       52: "est la correction de"
     },
     langue           : {
-      'deu': 'allemand',
-      'eng': 'anglais',
-      'ara': 'arabe',
-      'eus': 'basque',
-      'bre': 'breton',
-      'cat': 'catalan',
-      'spa': 'espagnol',
-      'fra': 'français',
-      'ita': 'italien',
-      'por': 'portugais'
+      deu: 'allemand',
+      eng: 'anglais',
+      ara: 'arabe',
+      eus: 'basque',
+      bre: 'breton',
+      cat: 'catalan',
+      spa: 'espagnol',
+      fra: 'français',
+      ita: 'italien',
+      por: 'portugais'
     },
     restriction      : {
       0: 'aucune',
@@ -157,26 +159,26 @@ var ressourceConfig = {
   }, // fin des listes
   // modifs à répercuter dans npm-sesatheque-client
   editable : {
-    'arbre' : true,
-    'calkc' : true,
-    'j3p'   : true,
-    'mental': true,
-    'url'   : true
+    arbre : true,
+    calkc : true,
+    j3p   : true,
+    mental: true,
+    url   : true
   },
 
   /**
    * Donne la catégorie induite par le type, mais ça peut être surchargé par l'utilisateur qui renseigne categories
    */
   typeToCategories : {
-    'am'    : [2],
-    'arbre' : [8],
-    'calkc' : [7],
-    'ec2'   : [7],
-    'em'    : [7],
-    'mental': [7],
-    'serie' : [8],
-    'series' : [8],
-    'sequence' : [8]
+    am    : [2],
+    arbre : [8],
+    calkc : [7],
+    ec2   : [7],
+    em    : [7],
+    mental: [7],
+    serie : [8],
+    series : [8],
+    sequence : [8]
   },
 
   /**
@@ -219,9 +221,9 @@ var ressourceConfig = {
 
   // les propriétés qui ne prennent qu'une seule valeur
   uniques          : {
-    'type': true,
-    'langue'       : true,
-    'restriction'  : true
+    type: true,
+    langue       : true,
+    restriction  : true
   },
 
   // les propriétés obligatoires

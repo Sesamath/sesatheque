@@ -108,7 +108,7 @@ try {
             var $exoClc = $(exoClc);
             // les options et le nom de l'exo
             var optionsClc = ressource.parametres.options || {};
-            optionsClc.parametrable = !!options.isFormateur;
+            optionsClc.parametrable = !!options.isFormateur || options.optionsClcCallback;
             var nomExo = ressource.parametres.fichierjs;
             var cheminExo = ecjsBase + "/exercices/";
             var exoLoaded = false;
@@ -140,8 +140,7 @@ try {
             // cree un exo de maniere asynchrone
             var reqExo  = CLC.loadExo(cheminExo + nomExo, optionsClc);
 
-            // quand l'exo est pret on le met dans la div et on l'affiche avec une dialog jquery
-            // Attention l'id de la div est ici "cntExo", changer si besoin.
+            // quand l'exo est pret on le met dans son div
             reqExo.done(function(exercice){
               S.log("exo clc", exercice);
               $exoClc.html(exercice);
@@ -155,6 +154,58 @@ try {
               if (next && typeof next === "function") {
                 exoLoaded = true;
                 next();
+              }
+              // si l'utilisateur veut récupérer les paramètres, on les lui affiche directement
+              if (typeof options.optionsClcCallback === "function") {
+                exercice.on('validationOption', null, function (event, optionsClc) {
+                  options.optionsClcCallback(optionsClc);
+                });
+                $exoClc.ready(function () {
+                  // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
+                  var i=0;
+                  function delayOptions() {
+                    if (i++ < 300) {
+                      setTimeout(function () {
+                        var $button = $('button.parametrer');
+                        if ($button.length > 0) {
+                          if ($button.length > 1) {
+                            S.log.error("On a plusieurs boutons qui répondent au sélecteur 'button .bouton.parametrer'");
+                            $button = $button.first();
+                          }
+                          S.log("on a trouvé le bouton après " +i*10 +"ms d'attente");
+                          $button.click();
+                          i = 0;
+                          delayOptionsValidate();
+                        } else {
+                          delayOptions();
+                        }
+                      }, 10);
+                    } else {
+                      S.log.error("Pas trouvé le bouton paramétrer après 5s", $exoClc.html());
+                    }
+                  }
+                  function delayOptionsValidate() {
+                    if (i++ < 300) {
+                      setTimeout(function () {
+                        var $button = $('button.tester-parametre');
+                        if ($button.length > 0) {
+                          if ($button.length > 1) {
+                            S.log.error("On a plusieurs boutons qui répondent au sélecteur 'button.tester-parametre'");
+                            $button = $button.first();
+                          }
+                          S.log("on a trouvé le bouton valider après " +i*10 +"ms d'attente");
+                          $button.hide();
+                        } else {
+                          delayOptionsValidate();
+                        }
+                      }, 10);
+                    } else {
+                      S.log.error("Pas trouvé le bouton paramétrer après 5s", $exoClc.html());
+                    }
+                    $('button.tester-parametre').hide();
+                  }
+                  delayOptions();
+                });
               }
             });
           });

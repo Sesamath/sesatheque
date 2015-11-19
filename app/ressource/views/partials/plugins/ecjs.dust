@@ -1,4 +1,5 @@
 <div class="form-group" id="groupParametres">
+  <div id="display"></div>
   {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
   {>editParametres /}
 </div>
