@@ -49,6 +49,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var tools = require('../tools')
   var flow = require('an-flow')
   var config = require('./config')
+  var appConfig = require('../config')
   var request = require('request')
 
   /**
@@ -187,7 +188,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     if (token && origine) {
       if (origine.substr(-1) !== "/") origine += "/"
-      if (config.sesalabs.indexOf(origine) > -1) {
+      if (appConfig.sesalabs && appConfig.sesalabs.indexOf(origine) > -1) {
         var postOptions = {
           url: origine + "api/utilisateur/check-token",
           json: true,
