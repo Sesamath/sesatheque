@@ -78,7 +78,7 @@
     {?type.value}
       {>"plugins/{type.value}" /}
     {:else}
-      <p class="error">Pas de type technique</p>
+      <p class="error">Pas de type</p>
     {/type.value}
     {! submit, attention #saveButton est utilisé par editArbre !}
     <div class="form-group">

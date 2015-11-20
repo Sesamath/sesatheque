@@ -60,7 +60,7 @@ module.exports = function (EntityAlias) {
     if (!this.proprio) {
       next(new Error("Impossible d'enregistrer un alias sans propriétaire"))
     } else if (!this.type) {
-      next(new Error("Impossible d'enregistrer un alias sans type technique"))
+      next(new Error("Impossible d'enregistrer un alias sans type"))
     } else if (this.alias === this.oid && (!this.base || this.base === config.application.baseUrl)) {
       log.debug("pb circulaire", this, 'avirer', {max:5000})
       next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))

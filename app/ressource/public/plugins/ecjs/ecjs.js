@@ -202,7 +202,7 @@ try {
                     } else {
                       S.log.error("Pas trouvé le bouton paramétrer après 5s", $exoClc.html());
                     }
-                    $('button.tester-parametre').hide();
+                    //$('button.tester-parametre').hide();
                   }
                   delayOptions();
                 });

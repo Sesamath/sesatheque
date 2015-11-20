@@ -285,7 +285,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               log.error(error)
               ressource.warnings.push(error)
             } else if (ressourceLiee) {
-              // on ajoute le tag a et le type technique
+              // on ajoute le tag a et le type
               ressource.relations[index].push($routes.getTagA('describe', ressourceLiee))
               ressource.relations[index].push(ressourceLiee.type)
             } else {

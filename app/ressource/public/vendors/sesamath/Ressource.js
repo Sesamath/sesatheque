@@ -140,7 +140,7 @@ function Ressource(initObj) {
     }
   } else {
     /**
-     * Contenu qui dépend du type technique (toutes les infos spécifique à ce type)
+     * Contenu qui dépend du type (toutes les infos spécifique à ce type)
      * @type {Object}
      */
     this.parametres = (values.parametres instanceof Object) ? values.parametres : {};
