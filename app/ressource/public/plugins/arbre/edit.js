@@ -129,14 +129,14 @@ try {
       var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
       // faut ajouter nos eléments en first child
       // ancre
-      S.addElementFirst(blocTexte, 'a', {name: "enfants"});
+      S.addElementFirstChild(blocTexte, 'a', {name: "enfants"});
       // lien et comportement pour repasser en graphique
-      var linkShowGraphic = S.addElementFirst(blocTexte, 'a', {href: '#enfants', style:{float:"left"}}, 'passer en mode graphique');
+      var linkShowGraphic = S.addElementFirstChild(blocTexte, 'a', {href: '#enfants', style:{float:"left"}}, 'passer en mode graphique');
       $linkShowGraphic = $(linkShowGraphic);
       $linkShowGraphic.click(showGraphic);
 
       // lien et comportement pour passer en mode texte
-      var linkShowTxt = S.addElementFirst(blocTexte, 'a', {href: '#enfants', style:{float:"left"}}, "passer en mode texte");
+      var linkShowTxt = S.addElementFirstChild(blocTexte, 'a', {href: '#enfants', style:{float:"left"}}, "passer en mode texte");
       $linkShowTxt = $(linkShowTxt);
       $linkShowTxt.click(showTxt);
       //S.addElement(blocTexte, 'br');

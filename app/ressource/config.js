@@ -48,12 +48,14 @@ var ressourceConfig = {
       ecjs  : 'exercice calculatice (javascript)',
       em    : 'exercice mathenpoche',
       j3p   : 'activité j3p',
+      iep   : 'animation instrumenpoche',
       mental: 'calcul mental',
       url   : 'page externe'
     },
     // les type qui peuvent être utilisés pour une ressource perso
     typePerso : {
       ecjs : true,
+      iep  : true,
       j3p  : true,
       url  : true
     },
@@ -161,6 +163,7 @@ var ressourceConfig = {
   editable : {
     arbre : true,
     calkc : true,
+    iep   : true,
     j3p   : true,
     mental: true,
     url   : true
@@ -176,6 +179,7 @@ var ressourceConfig = {
     ec2   : [7],
     ecjs  : [7],
     em    : [7],
+    iep   : [2],
     mental: [7],
     serie : [8],
     series : [8],

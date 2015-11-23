@@ -81,6 +81,8 @@
         // autres modules génériques sesamath
         "tools/jstreeConverter" : base + 'vendors/sesamath/tools/jstreeConverter',
         "tools/filters" : base + 'vendors/sesamath/tools/filters',
+        "tools/formEditor" : base + 'vendors/sesamath/tools/formEditor',
+        "tools/xhr" : base + 'vendors/sesamath/tools/xhr',
         Arbre: base + 'vendors/sesamath/Arbre',
         Resultat: base + 'vendors/sesamath/Resultat',
         Ressource: base + 'vendors/sesamath/Ressource',
@@ -141,7 +143,7 @@
       }
     };
     // on ajoute nos plugins
-    ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "ecjs", "em", "j3p", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
+    ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "ecjs", "em", "j3p", "iep", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
       requireConfig.paths[plugin] = base + 'plugins/' + plugin + '/' + plugin;
     });
     //console.log("la conf de requireJs", requireConfig);

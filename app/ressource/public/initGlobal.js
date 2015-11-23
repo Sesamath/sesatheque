@@ -50,8 +50,8 @@
     try {
       for (var i = 0; i < arguments.length; i++) {
         arg = arguments[i];
-        if (arg instanceof Error) console.error.call(console, arg);
-        else console.log.call(console, arg);
+        if (arg instanceof Error) console.error(arg);
+        else console.log(arg);
       }
     } catch (e) {
       // rien, fallait un navigateur décent...
@@ -135,6 +135,41 @@
     };
 
     /**
+     * Ajoute un élément html juste après element
+     * @param {Element} element
+     * @param {string} tag
+     * @param {Object=} attrs Les attributs
+     * @param {string=} content
+     * @returns {Element} L'élément ajouté
+     */
+    S.addElementAfter = function (element, tag, attrs, content) {
+      var newElt = S.getElement(tag, attrs, content);
+      var parent = element.parentNode;
+      // pas de insertAfter, si nextSibling est null ça le mettra à la fin, cf https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore
+      if (parent) parent.insertBefore(newElt, element.nextSibling);
+      else S.log.error(new Error("Navigateur incompatible (pas de parentNode), impossible d'ajouter l'élément"));
+
+      return newElt;
+    };
+
+    /**
+     * Ajoute un élément html juste avant element
+     * @param {Element} element
+     * @param {string} tag
+     * @param {Object=} attrs Les attributs
+     * @param {string=} content
+     * @returns {Element} L'élément ajouté
+     */
+    S.addElementBefore = function (element, tag, attrs, content) {
+      var newElt = S.getElement(tag, attrs, content);
+      var parent = element.parentNode;
+      if (parent) parent.insertBefore(newElt, element);
+      else S.log.error(new Error("Navigateur incompatible (pas de parentNode), impossible d'insérer l'élément"));
+
+      return newElt;
+    };
+
+    /**
      * Ajoute un élément html comme premier enfant de parent
      * @param {Element} parent
      * @param {string} tag
@@ -142,11 +177,26 @@
      * @param {string=} content
      * @returns {Element} L'élément ajouté
      */
-    S.addElementFirst = function (parent, tag, attrs, content) {
-      var elt = S.getElement(tag, attrs, content);
-      parent.insertBefore(elt, parent.firstChild);
+    S.addElementFirstChild = function (parent, tag, attrs, content) {
+      var newElt = S.getElement(tag, attrs, content);
+      parent.insertBefore(newElt, parent.firstChild);
 
-      return elt;
+      return newElt;
+    };
+
+    /**
+     * Ajoute un élément html comme frère aîné de elementRef
+     * @param {Element} elementRef
+     * @param {string} tag
+     * @param {Object=} attrs Les attributs
+     * @param {string=} content
+     * @returns {Element} L'élément ajouté
+     */
+    S.addElementFirstSibling = function (elementRef, tag, attrs, content) {
+      var newElt = S.getElement(tag, attrs, content);
+      elementRef.parentNode.insertBefore(newElt, elementRef.parentNode.firstChild);
+
+      return newElt;
     };
 
     /**
@@ -244,14 +294,18 @@
     S.getElement = function (tag, attrs, txtContent) {
       var elt = wd.createElement(tag);
       var attr;
-      if (attrs) for (attr in attrs) {
-        if (attrs.hasOwnProperty(attr)) {
-          if (attr === 'class') elt.className = attrs.class;
-          else if (attr === 'style') S.setStyles(elt, attrs.style);
-          else elt[attr] = attrs[attr];
+      try {
+        if (attrs) for (attr in attrs) {
+          if (attrs.hasOwnProperty(attr)) {
+            if (attr === 'class') elt.className = attrs.class;
+            else if (attr === 'style') S.setStyles(elt, attrs.style);
+            else elt.setAttribute(attr, attrs[attr]);
+          }
         }
-
+      } catch (error) {
+        S.log("plantage dans getElement " +tag +" avec les attributs ", attrs, error);
       }
+
       if (txtContent) S.addText(elt, txtContent);
 
       return elt;

@@ -40,6 +40,7 @@ try {
 
     // raccourcis, si ça plante le catch gère
     var S = window.sesamath;
+    var ST = S.sesatheque;
 
     // Le moment où ce module a été chargé dans le navigateur
     var startDate = new Date();
@@ -47,12 +48,45 @@ try {
     /**
      * Affiche une ressource iep
      * @memberOf iep
-     * @param {Ressource}      ressource  L'objet ressource
+     * @param {Ressource}      ressource  L'objet ressource (une ressource iep a en parametres soit une propriété url
+     *                                      avec l'url du xml soit une propriété xml avec la string xml)
      * @param {displayOptions} options    Les options après init
      * @param {errorCallback}  next       La fct à appeler quand l'iep sera chargé (sans argument ou avec une erreur)
      */
     iep.display = function (ressource, options, next) {
       var container = options.container;
+      function affiche(xml) {
+        //S.log("on va afficher le xml : " +xml);
+        // On réinitialise le conteneur
+        S.empty(container);
+        var error;
+        if (typeof iep === "undefined") {
+          error = new Error("il faut charger iep.js avant de lancer l'affichage");
+          ST.addError(error);
+        } else {
+          var width = ressource.parametres.width || container.offsetWidth || 800;
+          var height = ressource.parametres.height || width * 0.75 || 600;
+          // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
+          //var svg = S.addElement(container, 'svg', {id:'svg', width:"800px", height:"500px", xmlns:"http://www.w3.org/2000/svg"});
+          var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttributeNS (null, "width", width);
+          svg.setAttributeNS (null, "height", height);
+          svg.style.display = "block";
+          container.appendChild(svg);
+          if (window.iep.iepApp) {
+            var app = new window.iep.iepApp();
+            app.addDoc(svg, xml);
+            window.addEventListener("unload", function () {
+              app.closeAllXMLWindows();
+            });
+          } else {
+            error = new Error("Problème de chargement du moteur instrumenpoche (constructeur iepApp absent)");
+          }
+        }
+        if (next) next(error);
+        else ST.addError(error);
+      }
+
       if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
 
       // on enverra un résultat seulement à la fermeture
@@ -73,11 +107,14 @@ try {
       if (!ressource.oid || !ressource.titre || !ressource.parametres) {
         throw new Error("Paramètres manquants");
       }
-
-      // On réinitialise le conteneur
-      S.empty(container);
-      S.addElement(container, 'svg', {id:'svg', width:"100%", height:"500px"})
-      require(['http://iep.sesamath.net/iepmin.js', 'Mathjax'], function () {
+      if (!ressource.parametres.url && !ressource.parametres.xml) {
+        throw new Error("Pas de script iep en paramètre");
+      }
+      var dependencies = [];
+      if (ressource.parametres.url) dependencies.push('tools/xhr');
+      dependencies.push('http://iep.sesamath.net/iepjsmin.js');
+      dependencies.push('mathjax');
+      require(dependencies, function (xhr) {
         /*global MathJax*/
         MathJax.Hub.Config({
           tex2jax: {
@@ -88,7 +125,20 @@ try {
           messageStyle:'none'
         });
         MathJax.Hub.Queue(function() {
-
+          if (ressource.parametres.url) {
+            var options = {};
+            if (ressource.parametres.url.indexOf(".php?") > 0) options.withCredentials = true;
+            xhr.get(ressource.parametres.url, options, function (error, xml) {
+              if (error) {
+                S.log.error(error);
+                ST.addError("L'appel de " +ressource.parametres.url +" a échoué");
+              } else {
+                affiche(xml);
+              }
+            });
+          } else {
+            affiche(ressource.parametres.xml);
+          }
         });
       });
     };
