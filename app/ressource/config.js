@@ -52,7 +52,9 @@ var ressourceConfig = {
       mental: 'calcul mental',
       url   : 'page externe'
     },
-    // les type qui peuvent être utilisés pour une ressource perso
+    /**
+     * types qui peuvent être utilisés pour une ressource perso (form de ressource/ajouter)
+     */
     typePerso : {
       ecjs : true,
       iep  : true,
@@ -160,9 +162,14 @@ var ressourceConfig = {
     typePedagogiques : [3,9,91,92,191,7,2,81,82,13,141,151,21,22]
   }, // fin des listes
   // modifs à répercuter dans npm-sesatheque-client
+  /**
+   * La liste des types que l'on peut éditer dans une sésatheque (ils sont cloné en ressources, les autres seront des alias)
+   * Utilisé par clone et externalClone pour savoir s'il faut cloner une ressource ou juste créer un alias
+   */
   editable : {
     arbre : true,
     calkc : true,
+    ecjs  : true,
     iep   : true,
     j3p   : true,
     mental: true,

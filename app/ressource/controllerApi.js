@@ -560,6 +560,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             if (error) {
               $json.send(context, error)
             } else if (response.statusCode === 200 && ressource) {
+              log.debug("externalClone a récupéré la ressource", ressource, 'clone', {max:5000, indent:2})
               if (configRessource.editable[ressource.type]) {
                 // on vire ce que l'on ne veut plus
                 ["oid", "idOrigine", "version", "archiveOid", "displayUri", "describeUri", "dataUri"].forEach(function (prop) {
@@ -587,7 +588,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                   } else if (alias) {
                     $json.sendOk(context, {oid: alias.oid})
                   } else {
-                    alias = EntityAlias.create(new Alias(ressource))
+                    alias = EntityAlias.create()
+                    tools.update(alias, new Alias(ressource))
                     log.debug("au retour du create on a l'alias", alias, 'avirer', {max: 5000})
                     alias.proprio = userOid
                     alias.base = base
