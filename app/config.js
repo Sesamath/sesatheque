@@ -133,6 +133,8 @@ var settings = {
     error     : "error.log",
     errorData : staging + "errorData.log",
     debug     : "debug.log",
+    //perf      : "perf.log", log les perfs si présent
+    //sql       : "sql.log", log les requetes sql si présent
     // ajouter les exclusions voulues parmi ["cache", "resssourceRepository", "personneRepository", "accessControl"]
     debugExclusions : []
   },

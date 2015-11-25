@@ -228,6 +228,19 @@ if (config.logs.perf) {
   log.perf = function () {}
 }
 
+if (config.logs.sql) {
+  // pour que ça sorte qqchose, ajouter à node_modules/lassi/classes/entities/EntityQuery.js la ligne
+  // if (typeof log !== "undefined" && log.sql) log.sql(query.toString(), query.args);
+  // juste avant l'appel de database.query
+  var sqlOutputStream = getLogStream(config.logs.sql)
+  log.sql = function (queryString, args) {
+    for (var i = 0; i < args.length; i++) {
+      queryString = queryString.replace("?", "'" +args[i] +"'")
+    }
+    out(queryString, null, null, sqlOutputStream)
+  }
+}
+
 // Et les autres méthodes toujours valides
 
 /**

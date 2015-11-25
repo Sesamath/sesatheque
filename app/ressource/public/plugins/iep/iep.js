@@ -54,7 +54,11 @@ try {
      * @param {errorCallback}  next       La fct à appeler quand l'iep sera chargé (sans argument ou avec une erreur)
      */
     iep.display = function (ressource, options, next) {
-      var container = options.container;
+      /**
+       * Affiche le xml dans le conteneur passé en options
+       * @private
+       * @param xml
+       */
       function affiche(xml) {
         //S.log("on va afficher le xml : " +xml);
         // On réinitialise le conteneur
@@ -76,9 +80,6 @@ try {
           if (window.iep.iepApp) {
             var app = new window.iep.iepApp();
             app.addDoc(svg, xml);
-            window.addEventListener("unload", function () {
-              app.closeAllXMLWindows();
-            });
           } else {
             error = new Error("Problème de chargement du moteur instrumenpoche (constructeur iepApp absent)");
           }
@@ -87,6 +88,7 @@ try {
         else ST.addError(error);
       }
 
+      var container = options.container;
       if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
 
       // on enverra un résultat seulement à la fermeture

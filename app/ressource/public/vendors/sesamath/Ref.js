@@ -103,6 +103,11 @@ function Ref(initObj) {
    * @type {string}
    */
   this.dataUrl = initObj.dataUrl;
+  /**
+   * La base de la sesathèque concernée
+   * @type {string}
+   */
+  this.base = initObj.base;
 }
 
 /**

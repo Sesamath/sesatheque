@@ -62,6 +62,7 @@
       // on nous passe un alias
       this.alias = initObj.alias;
       this.oid = initObj.oid;
+      this.proprio = initObj.proprio;
     } else {
       // on nous passe un truc qu'on traite comme une ressource ou une ref
       /**

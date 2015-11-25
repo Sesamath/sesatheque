@@ -53,6 +53,21 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   var config = require("../config")
   var configRessource = require("./config")
   var Alias = require("./public/vendors/sesamath/Alias")
+  var Ref   = require("./public/vendors/sesamath/Ref")
+
+  /**
+   * Ajoute des refs à une liste en vérifiant qu'elles sont valides
+   * @private
+   * @param {Ref[]}                     liste      La liste de refs à laquelle ajouter ressources
+   * @param {Ressource[]|Ref[]|Alias[]} ressources La liste des ressources|refs|aliases à ajouter après vérif
+   */
+  function addRefs(liste, ressources) {
+    ressources.forEach(function (ressource) {
+      var ref = new Ref(ressource)
+      if (ref.ref && ref.titre && ref.type) liste.push(ref)
+      else (log.errorData("pas de ref pour la ressource", ressource))
+    })
+  }
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
@@ -140,8 +155,23 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   function getListePerso(context) {
     var oid = $accessControl.getCurrentUserOid(context)
+    var refs = []
     if (oid) {
-      grabListe(context, 'auteur/' +oid)
+      flow().seq(function () {
+        $ressourceRepository.getListe("all", {filters:[{index:"auteurs", values:[oid]}]}, this)
+      }).seq(function (ressources) {
+        if (ressources.length) addRefs(refs, ressources)
+        $ressourceRepository.getListe("all", {filters:[{index:"contributeurs", values:[oid]}]}, this)
+      }).seq(function (ressources) {
+        if (ressources.length) addRefs(refs, ressources)
+        EntityAlias.match('proprio').equals(oid).grab(this)
+      }).seq(function (aliases) {
+        log.debug("on récupère les alias de " +oid, aliases)
+        if (aliases.length) addRefs(refs, aliases)
+        sendListe(context, null, refs)
+      }).catch(function (error) {
+        sendListe(context, error)
+      })
     } else {
       $json.denied(context, "Il faut s'authentifier avant pour récupérer ses ressources personnelles")
     }
@@ -161,9 +191,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @private
    * @param {Context} context
    * @param {string} visibility
-   * @param {boolean} alsoAlias Passer true pour ajouter les alias du user courant à la liste
    */
-  function grabListe(context, visibility, alsoAlias) {
+  function grabListe(context, visibility) {
     var args
     if (context.get.json) {
       args = tools.parse(context.get.json)
@@ -177,17 +206,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     tools.merge(args, context.post)
     log.debug("grabListe " +visibility, args)
     $ressourceRepository.getListe(visibility, args, function (error, ressources) {
-      if (alsoAlias && !error) {
-        var uid = $accessControl.getCurrentUserOid(context)
-        if (uid) {
-          EntityAlias.match('proprio').equals(uid).grab(function (aliasError, aliases) {
-            if (aliasError) error = aliasError
-            else aliases.forEach(function (alias) {
-              ressources.push(alias)
-            })
-          })
-        }
-      }
       sendListe(context, error, ressources)
     })
   }
@@ -206,7 +224,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   /**
    * Répond ok pour les options delete
    */
-  function optionsDeleteOk(context, method) {
+  function optionsDeleteOk(context) {
     context.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS')
     //context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept')
     // et on laisse le middleware CORS faire son boulot
@@ -586,17 +604,16 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                   if (error) {
                     $json.send(context, error)
                   } else if (alias) {
-                    $json.sendOk(context, {oid: alias.oid})
+                    $json.sendOk(context, new Ref(alias))
                   } else {
-                    alias = EntityAlias.create()
-                    tools.update(alias, new Alias(ressource))
+                    alias = EntityAlias.create(ressource)
                     log.debug("au retour du create on a l'alias", alias, 'avirer', {max: 5000})
                     alias.proprio = userOid
                     alias.base = base
                     log.debug("on va sauver", alias, 'avirer', {max: 5000})
                     alias.store(function (error, alias) {
                       if (error) $json.sendError(context, error)
-                      else $json.sendOk(context, {oid: alias.oid})
+                      else $json.sendOk(context, new Ref(alias))
                     })
                   }
                 })

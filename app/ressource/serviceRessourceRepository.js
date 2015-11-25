@@ -527,7 +527,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         query = query.match('restriction').equals(config.constantes.restriction.aucune)
       } else if (visibilite == 'correction') {
         query = query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
-      } else if (visibilite.indexOf('/')) {
+      } else if (visibilite.indexOf('/') > 0) {
         var fragments = visibilite.split('/', 2)
         if (fragments[0] === 'auteur') {
           query = query.match('auteurs').equals(fragments[1])

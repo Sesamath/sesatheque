@@ -33,6 +33,8 @@
 
 module.exports = function (EntityAlias) {
   var config = require('../config')
+  var Alias = require('./public/vendors/sesamath/Alias')
+  var tools = require('../tools')
 
   /**
    * Notre entité Alias cf [Entity](lassi/Entity.html)
@@ -42,11 +44,10 @@ module.exports = function (EntityAlias) {
    * @param {Object} initObj Un alias construit avant (Entity mergera après ce construct toutes les propriétés de initObj)
    * @extends Entity
    */
-  EntityAlias.construct(function () {
-    // est-ce bien utile ?
-    this.alias = undefined
-    this.proprio = undefined
-    this.base = undefined
+  EntityAlias.construct(function (init) {
+    if (init) {
+      tools.merge(this, new Alias(init))
+    }
   })
 
   EntityAlias.table = 'alias'
