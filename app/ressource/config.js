@@ -49,6 +49,7 @@ var ressourceConfig = {
       em    : 'exercice mathenpoche',
       j3p   : 'activité j3p',
       iep   : 'animation instrumenpoche',
+      mathgraph : 'figure Mathgraph',
       mental: 'calcul mental',
       url   : 'page externe'
     },
@@ -59,6 +60,7 @@ var ressourceConfig = {
       ecjs : true,
       iep  : true,
       j3p  : true,
+      mathgraph : true,
       url  : true
     },
     niveaux          : {
@@ -172,6 +174,7 @@ var ressourceConfig = {
     ecjs  : true,
     iep   : true,
     j3p   : true,
+    mathgraph : true,
     mental: true,
     url   : true
   },

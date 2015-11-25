@@ -50,63 +50,59 @@ try {
 
     return {
       init: function (ressource) {
-        function importXml() {
-          var url = $parametresUrl.val();
-          if (url && url.substr(0, 4) === "http") {
-            $.ajax({
-              url:url,
-              dataType:"text", // sinon jQuery le converti en objet, idiot puisqu'on veut la string
-              success:function (data) {
-                $xmlElt.val(data);
-              }
-            }).fail(function () {
-              ST.addError("La récupération du script iep sur " +url +" a échoué");
-            });
-          } else {
-            ST.addError("Il faut préciser une url absolue (http…)");
-          }
-        }
-
         if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer");
         var parametres = ressource.parametres;
         var groupParametres = wd.getElementById('groupParametres');
         if (!groupParametres) throw new Error("Pas de conteneur #groupParametres trouvé dans cette page");
+        var width = parametres.width || 500;
+        var height = parametres.height || 500;
         formEditor.addInputText(
           groupParametres,
-          {name:"parametres[width]", size:5, value:parametres.width || "", placeholder:"largeur"},
+          {name:"parametres[width]", size:5, value:width, placeholder:"largeur"},
           {label:"largeur", remarque:"(en pixels)"}
         );
         formEditor.addInputText(
             groupParametres,
-            {name:"parametres[height]", size:5, value:parametres.height || "", placeholder:"hauteur", class:"center"},
+            {name:"parametres[height]", size:5, value:height, placeholder:"hauteur", class:"center"},
             {label:"hauteur", remarque:"(en pixels)"}
         );
-        var $parametresUrl = $(formEditor.addInputText(
-            groupParametres,
-            {name:"parametres[url]", id:"parametresUrl", size:80, value:parametres.url||"", placeholder:"Entrer une url absolue (http…)"},
-            {label:"url", remarque:"(ira lire le script de cette url à chaque affichage si le champ xml est vide)"}
-        ));
-        var xmlWrapper = formEditor.addFormGroup(groupParametres, "after");
-        var link = S.addElement(xmlWrapper, 'p');
-        S.addElement(link, 'a', {href:"#parametres[xml]"}, "importer le script").addEventListener('click', importXml);
-        S.addElement(link, 'span', {class:"remarque"}, "(une fois pour toute, si la source change ou disparait cette ressource restera identique)");
-        var xmlElt = formEditor.addTextarea(
-            xmlWrapper,
-            {name:"parametres[xml]", cols:80, rows:20, style:{resize:"both"}},
-            {label:"Script instrumenpoche"}
+        // ajout applet
+        var figureWrapper = formEditor.addFormGroup(groupParametres, "after");
+        var figure = S.addElement(figureWrapper, 'input', {name:"parametres[figure]", type:"hidden", value:ressource.parametres.figure});
+        var appletName = "mtgApplet";
+        var appletWidth = Math.max(figureWrapper.offsetWidth || 0, 800);
+        var applet = formEditor.addElement(
+            figureWrapper,
+            'applet',
+            {
+              name: appletName,
+              code: "mathgraph32.MtgFrame.class",
+              archive: "MathGraph32Applet.jar",
+              codebase: "http://www.mathgraph32.org/webstart/4.9.9/",
+              width: appletWidth,
+              height: Math.round(appletWidth*0.75)
+            },
+            {label:"Figure mathgraph"}
         );
-        var $xmlElt = $(xmlElt);
+        S.addElement(applet, 'param', {name:"initialFigure", value:"orthonormalFrame"});
+        S.addElement(applet, 'param', {name:"allowLeftToolbar", value:"true"});
+        S.addElement(applet, 'param', {name:"allowTopToolbar", value:"true"});
+        S.addElement(applet, 'param', {name:"allowRightToolbar", value:"true"});
+        S.addElement(applet, 'param', {name:"allowToolsChoice", value:"true"});
+        S.addElement(applet, 'param', {name:"allowMenuBar", value:"true"});
+        S.addElement(applet, 'param', {name:"allowFileMenu", value:"true"});
+        S.addElement(applet, 'param', {name:"allowOptionsMenu", value:"true"});
+        S.addElement(applet, 'param', {name:"language", value:"true"});
+        S.addElement(applet, 'param', {name:"level", value:"3"});
+        S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur");
+        S.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com");
+        S.addText(applet, " pour installer java.");
         $("form#formRessource").submit(function () {
-          var url = $parametresUrl.val();
-          var xml = $xmlElt.val();
-          var retour = false;
-          if (url && /https?:\/\/[a-z][a-z0-9\-_\.]+\.[a-z]+\/.+/.test(url)) retour = true;
-          else if (url) ST.addError("Url invalide");
-          else if (xml) retour = true;
-          else ST.addError("Il faut au moins une url ou un script");
-          if (!retour) $(document).scrollTop(0);
+          var newFigure = document.mtgApplet.getScript();
+          S.log("on récupère " +newFigure);
+          if (newFigure) figure.value = newFigure;
 
-          return retour;
+          return true;
         });
       }
     };

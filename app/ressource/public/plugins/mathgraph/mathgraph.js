@@ -33,10 +33,10 @@ try {
   define(function () {
     'use strict';
     /**
-     * module pour afficher les ressources iep (iepme de manuel ou cahier)
-     * @plugin iep
+     * module pour afficher les ressources mathgraph32 (avec le lecteur js)
+     * @plugin mathgraph
      */
-    var iep = {};
+    var mathgraph = {};
 
     // raccourcis, si ça plante le catch gère
     var S = window.sesamath;
@@ -46,104 +46,83 @@ try {
     var startDate = new Date();
 
     /**
-     * Affiche une ressource iep
-     * @memberOf iep
-     * @param {Ressource}      ressource  L'objet ressource (une ressource iep a en parametres soit une propriété url
+     * Affiche une ressource mathgraph
+     * @memberOf mathgraph
+     * @param {Ressource}      ressource  L'objet ressource (une ressource mathgraph a en parametres soit une propriété url
      *                                      avec l'url du xml soit une propriété xml avec la string xml)
      * @param {displayOptions} options    Les options après init
-     * @param {errorCallback}  next       La fct à appeler quand l'iep sera chargé (sans argument ou avec une erreur)
+     * @param {errorCallback}  next       La fct à appeler quand l'mathgraph sera chargé (sans argument ou avec une erreur)
      */
-    iep.display = function (ressource, options, next) {
-      var container = options.container;
-      function affiche(xml) {
-        //S.log("on va afficher le xml : " +xml);
-        // On réinitialise le conteneur
-        S.empty(container);
-        var error;
-        if (typeof iep === "undefined") {
-          error = new Error("il faut charger iep.js avant de lancer l'affichage");
-          ST.addError(error);
-        } else {
+    mathgraph.display = function (ressource, options, next) {
+      try {
+        var container = options.container;
+        if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
+
+        // on enverra un résultat seulement à la fermeture
+        if (options.resultatCallback && container.addEventListener) {
+          container.addEventListener('unload', function () {
+            options.resultatCallback({
+              ressType: 'mathgraph',
+              ressOid: ressource.oid,
+              date: startDate,
+              duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
+              score: 1
+            });
+          });
+        }
+
+        S.log('start mathgraph display avec la ressource', ressource);
+        //les params minimaux
+        if (!ressource.oid || !ressource.titre || !ressource.parametres) {
+          throw new Error("Paramètres manquants");
+        }
+        if (!ressource.parametres.figure) {
+          throw new Error("Pas de figure mathgraph en paramètre");
+        }
+        var dependencies = [
+          "http://www.mathgraph32.org/js/4.9.9/mtg32jsmin.js",
+          "http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js"
+        ];
+        require(dependencies, function () {
+          /*global MathJax, mtg32*/
+          if (typeof MathJax === "undefined") throw new Error("Mathjax n'est pas chargé");
+          if (typeof mtg32 === "undefined") throw new Error("Mathgraph32 n'est pas chargé");
           var width = ressource.parametres.width || container.offsetWidth || 800;
           var height = ressource.parametres.height || width * 0.75 || 600;
+          var svgId = "mtg32svg";
+          // la consigne éventuelle
+          if (ressource.parametres.consigne) S.addElement(container, 'p', null, ressource.parametres.consigne);
           // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
           //var svg = S.addElement(container, 'svg', {id:'svg', width:"800px", height:"500px", xmlns:"http://www.w3.org/2000/svg"});
           var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          svg.setAttributeNS (null, "width", width);
-          svg.setAttributeNS (null, "height", height);
+          svg.setAttributeNS(null, "id", svgId);
+          svg.setAttributeNS(null, "width", width);
+          svg.setAttributeNS(null, "height", height);
           svg.style.display = "block";
           container.appendChild(svg);
-          if (window.iep.iepApp) {
-            var app = new window.iep.iepApp();
-            app.addDoc(svg, xml);
-            window.addEventListener("unload", function () {
-              app.closeAllXMLWindows();
-            });
-          } else {
-            error = new Error("Problème de chargement du moteur instrumenpoche (constructeur iepApp absent)");
-          }
-        }
+          MathJax.Hub.Config({
+            tex2jax: {
+              inlineMath: [["$", "$"], ["\\(", "\\)"]]
+            },
+            jax: ["input/TeX", "output/SVG"],
+            TeX: {extensions: ["color.js"]},
+            messageStyle: 'none'
+          });
+          MathJax.Hub.Queue(function () {
+            var mtg32App = new mtg32.mtg32App();
+            mtg32App.addDoc(svgId, ressource.parametres.figure, true);
+            mtg32App.calculateAndDisplayAll();
+            if (next) next();
+          });
+        });
+      } catch (error) {
         if (next) next(error);
         else ST.addError(error);
       }
 
-      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
-
-      // on enverra un résultat seulement à la fermeture
-      if (options.resultatCallback && container.addEventListener) {
-        container.addEventListener('unload', function () {
-          options.resultatCallback({
-            ressType: 'iep',
-            ressOid: ressource.oid,
-            date: startDate,
-            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-            score: 1
-          });
-        });
-      }
-
-      S.log('start iep display avec la ressource', ressource);
-      //les params minimaux
-      if (!ressource.oid || !ressource.titre || !ressource.parametres) {
-        throw new Error("Paramètres manquants");
-      }
-      if (!ressource.parametres.url && !ressource.parametres.xml) {
-        throw new Error("Pas de script iep en paramètre");
-      }
-      var dependencies = [];
-      if (ressource.parametres.url) dependencies.push('tools/xhr');
-      dependencies.push('http://iep.sesamath.net/iepjsmin.js');
-      dependencies.push('mathjax');
-      require(dependencies, function (xhr) {
-        /*global MathJax*/
-        MathJax.Hub.Config({
-          tex2jax: {
-            inlineMath: [["$","$"],["\\(","\\)"]]
-          },
-          jax: ["input/TeX","output/SVG"],
-          TeX: {extensions: ["color.js"]},
-          messageStyle:'none'
-        });
-        MathJax.Hub.Queue(function() {
-          if (ressource.parametres.url) {
-            var options = {};
-            if (ressource.parametres.url.indexOf(".php?") > 0) options.withCredentials = true;
-            xhr.get(ressource.parametres.url, options, function (error, xml) {
-              if (error) {
-                S.log.error(error);
-                ST.addError("L'appel de " +ressource.parametres.url +" a échoué");
-              } else {
-                affiche(xml);
-              }
-            });
-          } else {
-            affiche(ressource.parametres.xml);
-          }
-        });
-      });
     };
 
-    return iep;
+    return mathgraph;
   });
 } catch (error) {
   if (typeof console !== 'undefined' && console.error) {

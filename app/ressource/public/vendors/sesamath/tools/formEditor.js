@@ -54,6 +54,21 @@ define('tools/formEditor', [], function () {
   // Méthodes exportées
 
   /**
+   * Ajoute un element quelconque avec l'emballage qui va bien pour le form ressource
+   * @memberOf tools/formEditor
+   * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
+   * @param {string}  tag       Le tag de l'élément html à ajouter
+   * @param {object}  attrs     Les attributs de l'élément tag
+   * @param {object}  [options] On utilise éventuellement label et required
+   * @returns {Element} L'élément ajouté
+   */
+  function addElement(parent, tag, attrs, options) {
+    var container = S.addElement(getWrapper(parent, options), 'div', {class:"input-group " +tag});
+
+    return S.addElement(container, tag, attrs);
+  }
+
+  /**
    * Ajoute un div.form-group à l'élément (ou avant / après élément) ou au form
    * @memberOf tools/formEditor
    * @param {Element} [element]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
@@ -82,8 +97,8 @@ define('tools/formEditor', [], function () {
    * Ajoute un input avec l'emballage qui va bien pour le form ressource
    * @memberOf tools/formEditor
    * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
-   * @param {object}      [attrs]   Les attributs éventuels de l'input
-   * @param {object}      [options] On utilise éventuellement label et required
+   * @param {object}  [attrs]   Les attributs éventuels de l'input
+   * @param {object}  [options] On utilise éventuellement label et required
    * @returns {Element} L'input text
    */
   function addInputText(parent, attrs, options) {
@@ -111,6 +126,7 @@ define('tools/formEditor', [], function () {
   var S = window.sesamath;
 
   return {
+    addElement   : addElement,
     addFormGroup : addFormGroup,
     addInputText : addInputText,
     addTextarea  : addTextarea
