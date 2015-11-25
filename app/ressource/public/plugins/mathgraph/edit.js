@@ -46,7 +46,7 @@ try {
     var w = window;
     var wd = w.document;
     var S = window.sesamath;
-    var ST = S.sesatheque;
+    //var ST = S.sesatheque;
 
     return {
       init: function (ressource) {
@@ -68,7 +68,7 @@ try {
         );
         // ajout applet
         var figureWrapper = formEditor.addFormGroup(groupParametres, "after");
-        var figure = S.addElement(figureWrapper, 'input', {name:"parametres[figure]", type:"hidden", value:ressource.parametres.figure});
+        var figure = S.addElement(figureWrapper, 'input', {name:"parametres[figure]", type:"hidden", value:ressource.parametres.figure || ""});
         var appletName = "mtgApplet";
         var appletWidth = Math.max(figureWrapper.offsetWidth || 0, 800);
         var applet = formEditor.addElement(
@@ -84,6 +84,24 @@ try {
             },
             {label:"Figure mathgraph"}
         );
+        /*
+        var applet = formEditor.addElement(
+            figureWrapper,
+            'object',
+            {
+              name: appletName,
+              type: "application/x-java-applet",
+              width: appletWidth,
+              height: Math.round(appletWidth*0.75)
+            },
+            {label:"Figure mathgraph"}
+        );
+        // aj pour object
+        S.addElement(applet, 'param', {name:"codebase", value:"http://www.mathgraph32.org/webstart/4.9.9/"});
+        S.addElement(applet, 'param', {name:"archive", value:"MathGraph32Applet.jar"});
+        S.addElement(applet, 'param', {name:"code", value:"mathgraph32.MtgFrame"});
+        S.addElement(applet, 'param', {name:"name", value:appletName});
+        */
         S.addElement(applet, 'param', {name:"initialFigure", value:"orthonormalFrame"});
         S.addElement(applet, 'param', {name:"allowLeftToolbar", value:"true"});
         S.addElement(applet, 'param', {name:"allowTopToolbar", value:"true"});
@@ -94,7 +112,8 @@ try {
         S.addElement(applet, 'param', {name:"allowOptionsMenu", value:"true"});
         S.addElement(applet, 'param', {name:"language", value:"true"});
         S.addElement(applet, 'param', {name:"level", value:"3"});
-        S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur");
+
+        S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ");
         S.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com");
         S.addText(applet, " pour installer java.");
         $("form#formRessource").submit(function () {
