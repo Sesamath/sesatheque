@@ -46,8 +46,9 @@
    * - soit pour requireJs (si define existe)
    * - soit en module amd (si on a module.exports)
    * - soit dans window.sesatheque.j3pResult
-   * (ce code est réécrit pour sesalab dans une classe qooxdoo sesalab.resultats.Em, Cfsesalab-interface/class/sesalab/resultats)
-   * @namespace j3pResult
+   * (ce code est dupliqué dans sesalab pour des questions de commodité, tous les trucResult sont dans
+   * sesalab-front/source/services/formatter/index.js)
+   * @module j3pResult
    */
   var j3pResult = {};
 
