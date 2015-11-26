@@ -8,6 +8,11 @@ Pour générer la doc, lancer depuis la racine
 (./script/doc pour afficher les options possibles)
 -->
 
+Installation
+------------
+
+Cf INSTALL.md à la racine du projet
+
 Framework Lassi
 ---------------
 
