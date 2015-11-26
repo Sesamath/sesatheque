@@ -1,7 +1,0 @@
-Ce dossier ne contient que des liens symboliques vers des fichiers de 
-app/ressource/public/vendors/sesamath/ (qui sont ignorés par la construction
-de la doc du code serveur), uniquement pour que jsdoc puisse construire proprement
-la doc.
-
-Pour construire la doc sous windows, remplacer ces liens symboliques cassés lors du git clone
-par des liens windows, cf http://stackoverflow.com/questions/5917249/git-symlinks-in-windows
