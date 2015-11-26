@@ -55,19 +55,18 @@
    * Retourne le code html qui affiche le bilan (ici les carrés colorés)
    * @memberOf j3pResult
    * @param {Resultat} resultat L'objet Resultat dont on veut le bilan
-   * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin
+   * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin (si on veut charger des css ou des images dedans)
    * @returns {string} Le code html
    */
   j3pResult.getHtmlReponse = function (resultat, baseUrl) {
-    var output = "";
+    var output;
     // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
     if (typeof resultat.reponse === "string") {
-      for (var i = 0; i < resultat.reponse.length; i++) {
-        output += '<img src="' +baseUrl +'/images/reponse_' +resultat.reponse[i] +
-        '.gif" width="10" height="15" alt="">';
-      }
+      output = resultat.reponse;
+    } else if (resultat.reponse) {
+      output = "réponse à un mauvais format";
     } else {
-      output = "pas de réponse ou réponse à un mauvais format";
+      output = "pas de réponse";
     }
 
     return output;
@@ -80,34 +79,15 @@
    * @returns {string} Le code html
    */
   j3pResult.getHtmlScore = function (resultat) {
-    var output = "";
-    var nbok = 0;
-    var nbq, lettre;
-    // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
-    if (typeof resultat.reponse === "string") {
-      nbq = resultat.reponse.length;
-      lettre = resultat.reponse[i];
-      for (var i = 0; i < nbq; i++) {
-        if (lettre === 'v' || lettre === 'p') nbok++;
-      }
-      output = nbok +' / ' +nbq;
+    var output;
+    // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine
+    if (resultat.score || resultat.score === 0) {
+      output = resultat.score;
     } else {
-      output = "pas de réponse ou réponse à un mauvais format";
+      output = "N/A";
     }
 
     return output;
-  };
-
-  /**
-   * Affiche score et réponse dans un Element (en virant l'éventuel contenu existant)
-   * @memberOf j3pResult
-   * @param {Resultat} resultat
-   * @param {Element} element
-   * @param {string} baseUrl
-   */
-  j3pResult.showResult = function (resultat, element, baseUrl) {
-    element.innerHTML = window.sesatheque.j3p.getHtmlScore(resultat) +' ' +
-        window.sesatheque.j3p.getHtmlReponse(resultat, baseUrl);
   };
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global

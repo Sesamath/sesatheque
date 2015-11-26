@@ -34,7 +34,7 @@
  * si cela n'a pas déjà été fait, activer log ou pas et étoffer options si besoin
  * Appellera aussi initRequire si on nous passe une base (et qu'il n'a pas déjà été configuré avec cette base)
  */
-/* global window, define, require, alert, sesamath */
+/* global window, define, require, alert */
 if (typeof window === 'undefined') {
   throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
 } else if (typeof define === 'undefined' || typeof require === 'undefined') {
@@ -63,7 +63,7 @@ if (typeof window === 'undefined') {
 
       // on vérifie que initGlobal a bien été chargé, sinon on le fait
       function checkGlobal() {
-        if (typeof sesamath === "undefined" || !sesamath.sesatheque || !sesamath.sesatheque.addError) require(['initGlobal'], initDom);
+        if (!ST.addError) require(['initGlobal'], initDom);
         else initDom();
       }
 

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>test Bilan J3P</title>
+  <script type="application/javascript">
+    // on indique ça avant de charger require.min.js, au cas où on voudrait faire des
+    // require(["nomModuleDeLaBiBli"], function (nomModuleDeLaBiBli) { /* du code qui l'utilise */ }
+    var sesamath = {
+      sesatheque : {base:"http://bibliotheque.devsesamath.net/"}
+    };
+  </script>
+  <script type="text/javascript" src="http://bibliotheque.devsesamath.net/vendors/requirejs/require.min.js"></script>
+</head>
+<body>
+<div id="errors"></div>
+<div id="display">
+  Score d'un graphe j3p : <span id="score"></span>
+  Bilan d'un graphe j3p :
+  <div id="reponse"></div>
+</div>
+<script type="application/javascript">
+  var resultat = {}; // l'objet qui a été renvoyé par j3p via la méthode j3pOptions.resultatCallback qu'on lui a passé au chargement
+  var score = document.getElementById("score");
+  var reponse = document.getElementById("reponse");
+  // pour utiliser notre sesamath.sesatheque.addError ou d'autre fct sesamath.* de la bibli faudrait charger
+  // require(["initGlobal"], function () { /* sesamath.sesatheque.addError est dispo */ };
+  // ou ajouter "initGlobal" à la liste des truc à charger dans le require ci-dessous
+
+  // on veut tester la version locale de j3pResult
+  require(['./plugins/j3p/j3pResult'], function (j3pResult) {
+    score.innerHTML = j3pResult.getHtmlScore(resultat);
+    reponse.innerHTML = j3pResult.getHtmlReponse(resultat);
+  });
+</script>
+</body>
+</html>

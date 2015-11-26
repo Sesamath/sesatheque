@@ -33,7 +33,9 @@
  * @file requireConfig.js
  * Configuration de requireJs avec la liste des librairies et plugin utilisés
  *
- * Script concaténé avec le require.js de sesatheque (par scripts/jsCompil), mais qui doit être appelé seul avant tout autre module en cas de cross-domain
+ * Script concaténé avec le require.js de sesatheque (par scripts/jsCompil) pour lister tous nos modules,
+ * avec une base mise par défaut à /, qui doit donc être appelé seul avant tout autre module en cas de cross-domain
+ * pour indiquer la base.
  *
  * Pour être utilisé en cross-domain, peut importe que le require.js vienne de la sésathèque ou du domaine concerné,
  * il faut charger ce module et l'appeler avec en argument l'url absolue de la sésathèque avant de charger
