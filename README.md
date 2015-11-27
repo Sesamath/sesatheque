@@ -34,6 +34,10 @@ API http
 
 Doc [dédiée](restApi/) qui pour le moment est identique à [/api/](controllerApi.html)
 
+Module pour normaliser les réponses de la sésathèque [sesatheque-client](modules/sesatheque-client/)
+
+Module (AMD client) pour récupérer ou enregistrer des ressources sur la sésathèque [apiClient](modules/apiClient/)
+
 
 Scripts
 -------

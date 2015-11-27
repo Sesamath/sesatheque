@@ -40,6 +40,7 @@ else if (typeof module === 'object') module.exports = Ref;
 
 /**
  * Définition d'une référence à une ressource, que l'on peut rencontrer dans les feuilles d'un arbre
+ * Cela devient un alias sans oid (pas une entité)
  * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte un Alias
  * @constructor
  */
@@ -81,6 +82,11 @@ function Ref(initObj) {
    * @type {Array}
    */
   this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : [];
+  /**
+   * True si public (sinon il faut être authentifié pour lire la ressource)
+   * @type {boolean}
+   */
+  this.public = (initObj.public || initObj.restriction === 0);
 
   var prefix = (initObj.restriction === 0) ? "public" : "ressource";
   /**

@@ -58,19 +58,26 @@
    */
   function Alias(initObj) {
     if (!initObj instanceof Object) initObj = {};
-    if (initObj.alias) {
-      // on nous passe un alias
-      this.alias = initObj.alias;
-      this.oid = initObj.oid;
-      this.proprio = initObj.proprio;
-    } else {
-      // on nous passe un truc qu'on traite comme une ressource ou une ref
-      /**
-       * L'oid de la ressource que l'on référence
-       * @type {number}
-       */
-      this.alias = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
-      if (!this.alias && initObj.origine && initObj.idOrigine) this.alias = initObj.origine + '/' + initObj.idOrigine;
+    if (initObj.oid) {
+      // on nous passe un alias ou une ressource, on accepte d'affecter l'oid que si l'on a ref et base
+      if (initObj.ref && initObj.base) {
+        // c'est un alias
+        /**
+         * oid de l'alias
+         * @type {number}
+         */
+        this.oid = initObj.oid;
+        /**
+         * oid ou origine/idOrigine de la ressource que l'on référence
+         * @type {number|string}
+         */
+        this.ref = initObj.ref;
+        // this base plus loin car peut exister sur une Ref sans oid
+      } else {
+        // on nous passe un truc qu'on traite comme une ref ou une ressource
+        this.ref = initObj.ref || initObj.oid;
+        if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
+      }
     }
     /**
      * Titre
@@ -97,22 +104,13 @@
      * @type {Array}
      */
     this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : undefined;
-
-    if (this.alias) {
-      var prefix = (initObj.restriction === 0) ? "public" : "ressource";
-      /**
-       * Uri d'affichage (facultatif), commence par /public/ ou /ressource/
-       * @type {string}
-       */
-      this.displayUri = initObj.displayUri || "/" + prefix + "/voir/" + this.alias;
-      /**
-       * Uri des data en json (facultatif), commence par /public/ ou /ressource/
-       * @type {string}
-       */
-      this.dataUri = initObj.dataUri || "/api/" + prefix + "/" + this.alias;
-    }
     /**
-     * Base de la sesatheque qui gère ces uri
+     * True si public (sinon il faut être authentifié pour lire la ressource)
+     * @type {boolean}
+     */
+    this.public = (initObj.public || initObj.restriction === 0);
+    /**
+     * Base de la sesatheque qui gère la cible
      * @type {string}
      */
     this.base = initObj.base;
@@ -132,14 +130,15 @@
    */
   Alias.prototype.toRef = function () {
     // pour éviter une dépendance à tools.clone on le fait manuellement
-    return new Ref({
+    return {
+      ref : this.ref,
       titre : this.titre,
-      ref : this.alias,
       resume : this.resume,
       commentaires : this.commentaires,
-      dataUri : this.dataUri,
-      displayUri : this.displayUri,
+      type : this.type,
+      categories : this.categories,
+      public : this.public,
       base : this.base
-    });
+    };
   };
 })();
