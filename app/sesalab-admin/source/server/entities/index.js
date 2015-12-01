@@ -3,7 +3,6 @@ var flow = require('an-flow');
 app.controller(function($entities, $job) {
 
   this.get('admin/api/entities', function(context) {
-    console.log('here', $entities.definitions());
     var entities = [];
     _.each($entities.definitions(), function(definition, name) {
       var entity = {name: name, indexes:[]};
@@ -24,7 +23,7 @@ app.controller(function($entities, $job) {
         entity.count = count;
         this();
       })
-      .empty().seq(this).catch(this);
+      .done(this);
     })
     .seq(function() {
       context.json({entities: entities});
@@ -34,7 +33,7 @@ app.controller(function($entities, $job) {
 
   this.post('admin/api/query', function(context) {
     function callback(error, rows) {
-      console.log('result:', rows.length);
+      console.log(error, rows);
       context.json({rows: rows});
     }
     var query = context.post;
@@ -60,8 +59,12 @@ app.controller(function($entities, $job) {
         code += ')';
       })
     }
-    code += '.grab(callback);';
-    console.log(query, code);
+    //code+= '.sort("oid", "asc")';
+    if (query.limit) {
+      code += '.grab('+query.limit+', callback);';
+    } else {
+      code += '.grab(callback);';
+    }
     var Entity = lassi.service(query.entity.name);
     eval(code);
   });
@@ -73,40 +76,32 @@ app.controller(function($entities, $job) {
     flow()
     .seq(function() { Entity.match().count(this); })
     .seq(function(count) {
-      job.init(count);
-      var ranges = [];
-      var offset = 0
-      while (count > limit) {
-        ranges.push([offset, limit]);
-        count -= limit;
-        offset+= 1000;
-      }
-      if (count > 0) ranges.push([offset, count]);
+      var ranges = job.init(count, limit);
+      console.log(count, ranges);
       flow(ranges).seqEach(function(range) {
+        console.log('=>', range);
         flow()
         .seq(function() {
-          Entity.match().grab(range[1], range[0], this);
+          Entity.match().sort('oid', 'asc').grab(range[1], range[0], this);
         })
         .seq(function(entities) {
           flow(entities).seqEach(function(row) {
+            console.log(row.oid);
             job.tick();
             row.reindex(this);
-          }).empty().seq(this).catch(this);
-        }).empty().seq(this).catch(this);
-      }).empty().seq(this).catch(this);
+          }).done(this);
+        }).done(this);
+      }).done(this);
     })
-    .empty().seq(job.done).catch(job.done);
+    .done(job.done);
   }
 
   this.get('admin/api/reindex/:name', function(context) {
-    console.log('reindex');
     $job.create(
       function(job) {
-        console.log('startCallback');
         reindex(context.arguments.name, job);
       },
       function(job) {
-        console.log('initCallback');
         context.json({job: job});
       });
   })

@@ -14,8 +14,14 @@
     <an-date-picker ng-if="field.index.type==='date'" ng-model="field.date"></an-date-picker>
   </div>
 </div>
-<a ng-click="doAddField()" class="button button-small button-energized">Ajouter un champ</a>
-<a ng-click="doExecute()" class="button button-small button-energized">Lancer</a>
+<div class="tools">
+  <a ng-click="doAddField()" class="button button-small button-energized">Ajouter un champ</a>
+  <div>
+    <label>Limite</table>
+    <input ng-model="query.limit">
+  </div>
+  <a ng-click="doExecute()" class="button button-small button-energized">Lancer</a>
+</div>
 
 <div class="nb-resultats">{{nbResults}} résultats</div>
 <div id="query-result">

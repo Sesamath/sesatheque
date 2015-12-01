@@ -1,5 +1,4 @@
 app.directive('anDatePicker', function($rootScope, $timeout, $popover) {
-  console.log('here');
   // TODO à factoriser !!!
   var months = [
     'Janvier', 'Février', 'Mars',

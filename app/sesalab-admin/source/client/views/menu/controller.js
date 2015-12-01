@@ -1,13 +1,20 @@
+var _ = require('lodash');
 module.exports = function($scope, $state, $rootScope) {
 
   function  updateState(state) {
     $scope.stateId="state-"+state.name.replace('.', '-');
+    _.each($scope.menu.items, function(item) {
+      _.each(item.items, function(subItem) {
+        if (subItem.state===state.name) {
+          $scope.menu.open = item;
+        }
+      })
+    })
   }
   function initialize() {
     $rootScope.$on('$stateChangeSuccess', function(event, toState){
       updateState(toState);
     })
-    updateState($state.current);
     $scope.menu = {
       open: undefined,
       items: [
@@ -16,10 +23,12 @@ module.exports = function($scope, $state, $rootScope) {
           items: [
             { label: 'Entitées', state: 'menu.entities' },
             { label: 'Requêtes', state: 'menu.query' },
+            { label: 'Mises à jour', state: 'menu.updates' },
           ]
         }
       ]
     }
+    updateState($state.current);
   }
 
 

@@ -7,7 +7,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "an-flow": "^1.0.0",
+    "an-flow": "^1.1.5",
     "an-uuid": "^1.0.0",
     "basic-auth-connect": "^1.0.0"
   },
@@ -48,17 +48,18 @@
     }
   },
   "devDependencies": {
-    "an-browserify-angular-annotate": "^1.0.4",
-    "an-browserify-template": "^1.0.4",
-    "angular": "^1.4.5",
-    "angular-animate": "^1.4.5",
-    "angular-sanitize": "^1.4.5",
+    "an-browserify-angular-annotate": "^1.0.6",
+    "an-browserify-template": "^1.0.6",
+    "angular": "^1.4.7",
+    "angular-animate": "^1.4.7",
+    "angular-sanitize": "^1.4.7",
     "angular-ui-router": "^0.2.15",
-    "autoprefixer": "^5.1.0",
-    "browserify": "^10.2.4",
-    "clean-css": "^3.2.10",
+    "autoprefixer": "^6.0.3",
+    "browserify": "^11.2.0",
+    "clean-css": "^3.4.6",
     "jquery": "^2.1.4",
     "lodash": "^3.10.1",
-    "node-sass": "^3.1.1"
+    "node-sass": "^3.4.0-beta1",
+    "postcss-cli": "^2.2.0"
   }
 }

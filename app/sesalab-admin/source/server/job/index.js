@@ -9,19 +9,32 @@ app.service('$job', function() {
       progress: 0,
       state: 0,
       total: undefined,
-      init: function(total) {
+      init: function(total, limit) {
         job.total = total;
         initCallback(job);
+        if (limit) {
+          var ranges = [];
+          var offset = 0
+          while (total > limit) {
+            ranges.push([offset, limit]);
+            total -= limit;
+            offset+= limit;
+          }
+          if (total > 0) ranges.push([offset, total]);
+          return ranges;
+        }
       },
 
       done: function(error) {
+        console.log('done', error);
         job.state =  3;
-        console.log(error);
-        job.error = error?error.toString():false;
+        job.error = error?''+job.error:false;
       },
-      tick: function() {
+
+      tick: function(count) {
+        count = count || 1;
         job.state = 2;
-        job.progress++;
+        job.progress+=count;
       }
     }
     jobs[job.id] = job;

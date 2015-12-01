@@ -2,10 +2,8 @@
   <div id="menu-content">
     <ui-view name="content" id="{{stateId}}"></ui-view>
   </div>
-  <div id="sidebar">
-    <div id="logo">
-      <a href="/" class="logo"><span>Sésalab</span></a>
-    </div>
+  <div id="header">
+    <a href="/" id="logo"></a>
     <ul id="menu">
       <li ng-class="{open: isOpenMenu(item)}"  ng-repeat="item in menu.items">
         <a ng-click="openMenu(item)">{{item.label}}</a>
@@ -17,5 +15,5 @@
         </ul>
       </li>
     </ul>
-  </ul>
+  </div>
 </div>

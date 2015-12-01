@@ -10,55 +10,20 @@ $dark      : #444 !default;
 $gm-input-placeholder-color : #969696;
 $gm-input-border-color : #C8C8C8;
 $gm-input-color : #353535;
-$gm-input-focus : #228ADE;
+$gm-input-focus : #009688; // #228ADE
+$gm-input-disabled-color : #D5D5D5;
+$gm-color-error : #A91A10;
+$gm-icon-size: 20px;
+$gm-icon-spacing: 0.3;
+$gm-icon-zoom: 1.2;
 
-@mixin gmLinkButton() {
-  cursor: pointer;
-  $height: 36px;
-  border-radius: 0;
-  box-shadow: none;
-  display: inline-block;
-  flex: initial;
-  &:after { display: none; }
-  height: $height;
-  min-height: $height;
-  line-height: $height;
-  margin: 0 0 0 8px;
-  padding: 0 8px;
-  border: none;
-  &:last-child { border: none; }
-  background: none;
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  color: #4083F3;
-  span {
-    display: block;
-    transition: all 0.5s ease;
-  }
-  &.activated,&:hover {
-    color: #852C85;
-    span {
-      transform: scale(1.25);
-    }
-    box-shadow: none;
-  }
-}
+$gm-z-index-menu: 0;
+$gm-z-index-content: 1;
+$gm-z-index-popup: 98;
+$gm-z-index-popover: 99;
+$gm-z-index-toaster: 100;
 
-@mixin gmIconButton() {
-  font-size: 30px;
-  color: #4083F3;
-  cursor: pointer;
-  &.activated,&:hover {
-    color: #852C85;
-    span {
-      transform: scale(1.25);
-    }
-    box-shadow: none;
-  }
-}
-
-@mixin gmButton($bg: red, $fg: blue) {
+@mixin gmButton() {
   text-transform: uppercase;
   border: none;
   font-size: 14px;
@@ -75,10 +40,12 @@ $gm-input-focus : #228ADE;
   transition: box-shadow .4s ease;
   text-decoration: none;
 
+  &.button-light      {
     border: 1px solid black(0.15);
     border-top: 1px solid black(0.06);
-    background-color: $bg;
-    color: $fg;
+    background-color: #F9F9F9;
+    color: $gm-input-color;
+  }
   &.button-stable     { background-color: $stable    ; color: white; }
   &.button-positive   { background-color: $positive  ; color: white; }
   &.button-calm       { background-color: $calm      ; color: #3D3D3D; }
@@ -91,18 +58,162 @@ $gm-input-focus : #228ADE;
   &.button-royal      { background-color: $royal     ; color: white; }
   &.button-dark       { background-color: $dark      ; color: white; }
 
-  &.button-small {
-    line-height: 25px;
-    height: 25px;
-    max-height: 25px;
-    font-size: 12px;
-  }
-
   &:hover {
     text-decoration: none;
   }
   &:active {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+  }
+}
+
+@mixin gmLinkButton() {
+  line-height: 32px;
+  text-decoration: none;
+  color: #106CC8;
+  padding: 0 8px;
+  font-weight: 500;
+  font-size: 14px;
+  text-transform:uppercase;
+  display: inline-block;
+  white-space: nowrap;
+  &.activated {
+    background-color: #E4E4E4;
+    border-radius: 3px;
+  }
+  &.button-assertive {
+    color: #F44336;
+  }
+  &.button-small {
+    font-size: 12px;
+    padding: 0 8px;
+  }
+}
+
+@mixin gmLinkButtonBar() {
+  position: absolute;
+  left: 0;
+  right:0;
+  bottom: 0;
+  margin: 10px 0 0 0;
+  padding: 8px;
+  min-height: 52px;
+  height: 52px;
+  display: flex;
+  justify-content: flex-end;
+  .button {
+    @include gmLinkButton();
+  }
+}
+
+@mixin gmDatePicker {
+  background:transparent;
+  box-shadow: none;
+  font-size: 14px;
+  line-height: 16px;
+  padding: 8px 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  label {
+    i:before {
+      font-size: $gm-icon-size*$gm-icon-zoom;
+      padding-right: $gm-icon-size*$gm-icon-spacing;
+
+      color: $gm-input-focus;
+    }
+  }
+  .value {
+    color: $gm-input-color;
+    display: flex;
+    align-items: center;
+    .date {
+      font-size: 36px;
+      margin-right: 4px;
+      color: #484848;
+      line-height: 33px;
+      letter-spacing: -3px;
+    }
+    .day {
+      font-size: 11px;
+      color: gray;
+      display: block;
+    }
+    .month {
+      position: relative;
+      top: -3px;
+      font-size: 13px;
+    }
+    .year {
+      position: relative;
+      top: -3px;
+      font-size: 13px;
+    }
+  }
+  &:focus,&.activated {
+    .value {
+    }
+  }
+  &.disabled {
+    pointer-events: none;
+    .value {
+      color: $gm-input-disabled-color;
+    }
+  }
+}
+
+@mixin gmTimePicker {
+  background:transparent;
+  box-shadow: none;
+  font-size: 14px;
+  line-height: 16px;
+  padding: 8px 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  label {
+    i:before {
+      font-size: $gm-icon-size*$gm-icon-zoom;
+      padding-right: 4px;
+      color: $gm-input-focus;
+    }
+  }
+  .value {
+    color: $gm-input-color;
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    .date {
+      font-size: 36px;
+      margin-right: 4px;
+      color: #484848;
+      line-height: 33px;
+      letter-spacing: -3px;
+    }
+    .day {
+      font-size: 13px;
+      display: block;
+    }
+    .month {
+      font-size: 13px;
+    }
+    .year {
+      font-size: 13px;
+    }
+  }
+  &:focus,&.activated {
+    .value {
+    }
+  }
+  &.disabled {
+    pointer-events: none;
+    label {
+      i:before {
+        color: $gm-input-disabled-color;
+      }
+    }
+    .value {
+      color: $gm-input-disabled-color;
+    }
   }
 }
 
@@ -114,12 +225,16 @@ $gm-input-focus : #228ADE;
   padding: 0 0 8px 0;
   border: none;
   border-bottom : 1px solid $gm-input-border-color;
-  /*transition: border-color 1s ease;*/
-  color: #353535;
-  &:focus {
+  transition: border-color 1s ease;
+  color: $gm-input-color;
+  &:focus,&.activated {
     border-bottom: 2px solid $gm-input-focus;
     padding-bottom: 7px;
     transition: border-color 1s ease;
+  }
+  &[disabled] {
+    color: $gm-input-disabled-color;
+    border-color: lighten($gm-input-border-color, 10%);
   }
 }
 
@@ -133,8 +248,9 @@ $gm-input-focus : #228ADE;
   padding       : 0 0 3px 0;
   border        : none;
   border-bottom : 1px solid $gm-input-border-color;
-  /*transition    : border-color 1s ease;*/
+  transition    : border-color 1s ease;
   color         : $gm-input-color;
+  box-shadow    : none;
 
   &::placeholder {
     color: $gm-input-placeholder-color;
@@ -143,21 +259,29 @@ $gm-input-focus : #228ADE;
   &:focus {
     border-bottom: 2px solid $gm-input-focus;
     padding-bottom: 2px;
-    /*transition: border-color 1s ease;*/
+    transition: border-color 1s ease;
+  }
+  &:required,&:invalid {
+  }
+  .error & {
+    border-color: $gm-color-error;
   }
 }
 
 @mixin gmTextArea {
-  background    : #F9F9F9;
+  background    : transparent;
+  border-radius: 0;
   box-shadow    : none;
-  font-size     : 14px;
-  line-height   : 20px;
-  padding       : 4px 4px;
+  font-size     : 16px;
+  line-height   : 16px+8px;
+  padding       : 0 0 8px 0;
   border        : none;
   border-bottom : 1px solid $gm-input-border-color;
-  border-radius : 0;
-  /*transition    : border-color 1s ease;*/
+  transition    : border-color 1s ease;
   color         : $gm-input-color;
+  resize        : none;
+  overflow      : hidden;
+  width         : 100%;
 
   &::placeholder {
     color: $gm-input-placeholder-color;
@@ -165,47 +289,67 @@ $gm-input-focus : #228ADE;
   }
   &:focus {
     border-bottom: 2px solid $gm-input-focus;
-    padding-bottom: 3px;
+    padding-bottom: 7px;
     transition: border-color 1s ease;
+  }
+  &.error {
+    border-color: $gm-color-error;
   }
 }
 
 
 @mixin gmFormItem {
-  margin: 16px 0;
-  padding: 16px 0 0 8px;
-  label {
-    font-size   : 12px;
+  margin: 8px 0;
+  padding: 0;
+  &:first-child { margin-top: 0; }
+  &:last-child { margin-bottom: 0; }
+  >label {
+    font-size   : 16px;
     color       : #565656;
     display     : block;
-    margin      : 0 0 8px 0;
+    margin      : 8px 0 8px 0;
     font-weight : 400;
   }
 
-  input { @include gmInput };
-  select { @include gmSelect };
-  textarea { @include gmTextArea };
-
-
   &.focus {
-    label {
+    >label {
       color: $gm-input-focus;
     }
   }
 
   &.error {
-    $error-color : #DE3226;
-    select, input, textarea {
-      border-bottom: 2px solid $error-color;
-      padding-bottom: 7px;
-      /*transition: border-color 1s ease;*/
-    }
-    .error-message {
-      padding: 4px 0;
+    textarea, input, select { border-color: $gm-color-error; }
+    >.form-error {
+      padding: 4px 0 10px 0;
       display: block;
-      color: $error-color;
+      color: $gm-color-error;
+      font-size: 12px;
+      p {
+        margin: 10px 0;
+      }
     }
   }
+
+  .form-description {
+    font-size: 11px;
+    line-height: 110%;
+    margin-top: 4px;
+    font-style: italic;
+    color: #686868;
+  }
+
+  >*[name] {
+    padding-right: 16px;
+    position: relative;
+    &:after {
+      content: 'X';
+      position: absolute;
+      display: block;
+      right: 0; top: 0; bottom: 0; width: 16px;
+      background-color: red;
+    }
+  }
+
 }
 
 @mixin gmTable {
@@ -244,7 +388,289 @@ $gm-input-focus : #228ADE;
       border-bottom: 1px solid #D7D7D7;
     }
   }
+}
+
+@mixin gmCheckbox() {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  .label {
+    display: block;
+    padding: 0 0 0 $gm-icon-size*$gm-icon-spacing;
+    font-size: 14px;
+    line-height: $gm-icon-size;
+  }
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: $gm-icon-size;
+    height: $gm-icon-size;
+    @include touchZone($gm-icon-size);
+    &:before {
+      transition: color 1s ease;
+      font-size: $gm-icon-size*$gm-icon-zoom;
+      content: "\f372";
+      font-family: ionicons;
+      color: $gm-input-border-color;
+    }
+  }
+  &.checked {
+    .toggle {
+      &:before {
+        content: "\f374";
+        color: $gm-input-focus;
+      }
+    }
+  }
+  &.disabled {
+    pointer-events: none;
+    .toggle:before {
+      color: lighten($gm-input-disabled-color, 10%);
+    }
+    .label {
+      color: $gm-input-disabled-color;
+    }
+  }
+}
+
+@mixin gmRadioGroup() {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8px;
+  .item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    margin: 0 8px;
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: $gm-icon-size;
+      height: $gm-icon-size;
+      @include touchZone($gm-icon-size);
+      &:before {
+        transition: color 0.3s ease-in-out;
+        content: "\f3a6";
+        font-family: ionicons;
+        font-size: $gm-icon-size*$gm-icon-zoom;
+        color: $gm-input-border-color;
+      }
+    }
+    .label {
+      line-height: $gm-icon-size;
+      min-height: $gm-icon-size;
+      padding: 0 0 0 $gm-icon-size*$gm-icon-spacing;
+      display: inline-block;
+    }
+    &.activated {
+      .toggle {
+        border-color: $gm-input-focus;
+      }
+    }
+    &.checked {
+      .toggle {
+        &:before {
+          color: $gm-input-focus;
+          content: "\f3a7";
+        }
+      }
+    }
+  }
+  &.disabled {
+    pointer-events: none;
+    .item {
+      .toggle {
+        &:before {
+          color: lighten($gm-input-disabled-color, 10%);
+        }
+      }
+      .label {
+        color: $gm-input-disabled-color;
+      }
+    }
+  }
+}
+
+@mixin gmPopup {
+  $size-title-height: 40px;
+  border-radius: 2px;
+  box-shadow: 0 0 10px black(0.8);
+  background-color: white;
+  overflow: hidden;
+  >.title {
+    padding: 8px 24px;
+    text-align:left;
+    border: none;
+    line-height: 28px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #494148;
+  }
+  >.content {
+    padding: 8px 24px;
+    >.scroll-content {
+      margin: 8px 24px;
+    }
+    /*@include on(phone) { margin: 8px; }*/
+
+    overflow: hidden;
+    >.list {
+      margin: 0 -10px;
+    }
+    >.padding {
+      margin: 10px -10px 0 -10px;
+    }
+    input {
+      background-color: transparent;
+    }
+    .item {
+      background-color: transparent;
+      &.item-divider  {
+        background-color: #F3E4AD;
+        border: none;
+      }
+    }
+    .item-input-wrapper {
+      background-color: transparent;
+    }
+  }
+  >.buttons {
+    @include gmLinkButtonBar();
+  }
+}
+
+@mixin gmPopover {
+  $border-color: black(0.3);
+  pointer-events: auto;
+  position: absolute;
+  width: 300px;
+  top:100px;
+  z-index: $gm-z-index-popover;
+  box-shadow: 0 0 10px black(0.4);
+  border: 1px solid $border-color;
+  border-radius: 2px;
+  background-color: white;
+  transition: opacity 0.2s ease;
+  padding: 5px;
+  .content {
+    .menu {
+      .menu-item {
+        padding: 10px 0;
+      }
+    }
+  }
+  .buttons {
+    position: absolute;
+    left: 0;
+    right:0;
+    bottom: 0;
+    margin: 10px 0 0 0;
+    padding: 8px;
+    min-height: 52px;
+    height: 52px;
+    display: flex;
+    justify-content: flex-end;
+    .button {
+      $height: 36px;
+      border-radius: 0;
+      box-shadow: none;
+      display: inline-block;
+      flex: initial;
+      &:after { display: none; }
+      height: $height;
+      min-height: $height;
+      line-height: $height;
+      margin: 0 0 0 8px;
+      padding: 0 8px;
+      border: none;
+      &:last-child { border: none; }
+      background: none;
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: #4083F3;
+      span {
+        display: block;
+        transition: all 0.5s ease;
+      }
+      &.activated {
+        color: #852C85;
+        span {
+          transform: scale(1.25);
+        }
+        box-shadow: none;
+      }
+    }
+  }
+
+  .triangle {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top:-17px;
+    left: 20px;
+    z-index:-5;
+    clip: rect(0, 30px, 17px, 0px);
+    &:after {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      top:10px;
+      left: 8px;
+      background-color: white;
+      box-shadow: 0 0 10px black(0.4);
+      border: 1px solid black(0.4);
+      transform: rotate(45deg);
+      content: '';
+      display: block;
+    }
+  }
+
+  .menu-items {
+    li {
+      a {
+        font-size: 15px;
+        display: block;
+        padding: 6px 15px;
+        margin: 0 -6px;
+        border-bottom: 1px solid black(0.1);
+        position: relative;
+        .counter {
+          @include badge;
+          position: absolute;
+          right: 10px;
+          top: 10px;
+        }
+      }
+      &.last a {
+        border: none;
+      }
+    }
+  }
 
 }
 
+@mixin gmCard {
+  margin: 10px;
+  border-radius: 2px;
+  background-color: white;
+  box-shadow: 0 2px 5px 0 black(0.16), 0 2px 10px 0 black(0.12);
+
+  >.title {
+    text-decoration:none;
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    line-height: 46px;
+    font-weight: 400;
+    color: white;
+    height: 46px;
+    &.activated {
+      background-image: none;
+    }
+  }
+  .body {
+    padding: 16px 16px 24px 16px;
+  }
+}
 

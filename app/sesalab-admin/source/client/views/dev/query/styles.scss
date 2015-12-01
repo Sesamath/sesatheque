@@ -26,6 +26,13 @@
       margin: 10px 0;
     }
   }
+  .tools {
+    display: flex;
+    input {
+      @include gmInput();
+      width: 30px;
+    }
+  }
 
   .object {
     font-size: 10px;

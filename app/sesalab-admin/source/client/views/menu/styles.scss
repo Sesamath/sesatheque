@@ -1,115 +1,86 @@
+$menuSize: 60px;
+html {
+  @include fill-all;
+}
 #menu-container {
   @include fill-all;
 }
 
-
-#sidebar {
-  border-right: 1px solid black(0.2);
-  background-color:white;
-  position: absolute;
+#header {
   left: 0;
+  right: 0;
   top: 0;
-  width: 200px;
-  bottom: 0;
+  height: $menuSize;
   box-shadow: 0 0 10px black(0.2);
   padding: 10px 0;
   z-index:100;
   overflow: hidden;
+  display: flex;
+  background-color: black;
+  background-image: linear-gradient(to bottom, white(0.2), white(0.3));
+  align-items: flex-end;
 
-  #logo a {
+  #logo {
     display: block;
-    width: 190px;
-    height: 80px;
-    background: url(/images/logo.png) no-repeat;
+    height: 40px;
+    width: 40px;
+    background: url("/favicon-96x96.png") no-repeat;
     background-size: contain;
-    margin: 10px 5px;
-    span {
-      display: none;
-    }
+    margin: 0 10px;
   }
   #menu {
-
-    >li {
+    li, ul {
+      display: inline-block;
       a {
-        font-family: Raleway;
-        display: block;
-        color: #D1D1D1;
-        cursor: pointer;
-
-      }
-      >a {
-        font-size: 15px;
-        padding: 0 10px;
-        line-height: 25px;
-        color: #5C5C5C;
-        font-weight: 500;
-      }
-      &.open> a {
-        background-color: #ECECEC;
-        background-image: linear-gradient(to top, black(0.1), black(0));
-        box-shadow: 0 0 10px black(0.3) inset;
-        padding: 0 20px;
-        margin: 0 -10px;
-        color: black;
-      }
-      ul {
-        padding: 5px 0;
-        li {
-          a {
-            font-size: 14px;
-            padding: 0 10px 0 20px;
-            margin: 0 0 3px 0;
-            color: gray;
-          }
-          &.active a {
-            color: black;
-            font-weight: bold;
-          }
-        }
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.7s ease;
       }
     }
+    > li {
+      padding: 0 10px 0 0;
+      > a {
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 16px;
+        font-weight: 400;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
 
-    li {
-      .ng-enter {
-        animation: enter 600ms cubic-bezier(0.445, 0.050, 0.550, 0.950);
-        display: block;
-        position: relative;
-      }
-      @keyframes enter {
-        from {
-          opacity: 0;
-          height: 0px;
-          left: -70px;
-        }
-        75% {
-          left: 15px;
-        }
-        to {
-          opacity: 1;
-          height: 30px;
-          left: 0px;
+        &:hover {
+          cursor: pointer;
+          background-color:#545454;
         }
       }
-
-      .ng-leave {
-        animation: leave 600ms cubic-bezier(0.445, 0.050, 0.550, 0.950);
-        display: block;
-        position: relative;
+      &.open {
+        >a {
+          background-color:#696464;
+          &:after {
+            content: "\f3d3";
+            font-family: ionicons;
+            font-size: 20px;
+            padding: 0 0 0 10px;
+            position: relative;
+            top: 2px;
+            color: #D4FF65;
+          }
+        }
       }
-
-      @keyframes leave {
-        to {
-          opacity: 0;
-          height: 0px;
-          left: -70px;
+      li {
+        font-size: 15px;
+        padding: 0 10px 0 0;
+        a {
+          color: #D1D1D1;
+          border-bottom: 1px solid transparent;
+          &:hover {
+            color: white;
+            border-color: #989898;
+          }
         }
-        25% {
-          left: 15px;
-        }
-        from {
-          opacity: 1;
-          height: 30px;
-          left: 0px;
+        &.active {
+          a {
+            color: white;
+            border-color: #4E89E5;
+          }
         }
       }
     }
@@ -121,8 +92,8 @@
   overflow: auto;
 
   position: absolute;
-  left: 200px;
-  top: 0;
+  left: 0;
+  top: $menuSize;
   right: 0;
   bottom: 0;
 }
