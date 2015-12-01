@@ -53,18 +53,17 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   var config = require("../config")
   var configRessource = require("./config")
   var Alias = require("./public/vendors/sesamath/Alias")
-  var Ref   = require("./public/vendors/sesamath/Ref")
 
   /**
    * Ajoute des refs à une liste en vérifiant qu'elles sont valides
    * @private
-   * @param {Ref[]}                     liste      La liste de refs à laquelle ajouter ressources
-   * @param {Ressource[]|Ref[]|Alias[]} ressources La liste des ressources|refs|aliases à ajouter après vérif
+   * @param {Alias[]}             liste      La liste d'alias à laquelle ajouter les ressources fournies
+   * @param {Ressource[]|Alias[]} ressources La liste des ressources|aliases à ajouter après vérif de leur intégrité
    */
   function addRefs(liste, ressources) {
     ressources.forEach(function (ressource) {
-      var ref = new Ref(ressource)
-      if (ref.ref && ref.titre && ref.type) liste.push(ref)
+      var alias = new Alias(ressource)
+      if (alias.ref && alias.titre && alias.type) liste.push(alias)
       else (log.errorData("pas de ref pour la ressource", ressource))
     })
   }
@@ -401,7 +400,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   }
 
   /**
-   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format
+   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (alias ou compact ou normalized)
    * @private
    * @param {Context} context
    * @param error
@@ -413,8 +412,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       $json.send(context, error)
     } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
       var format = context.get.format
-      if (format === 'ref') $json.send(context, null, $ressourceConverter.toRef(ressource))
+      // on garde ref pour compatibilité ascendante
+      if (format === "alias" || format === "ref") $json.send(context, null, $ressourceConverter.toRef(ressource))
       else if (format === 'compact') $json.send(context, null, $ressourceConverter.toCompactFormat(ressource))
+      else if (format === 'normalized') $json.send(context, null, $ressourceConverter.toNormalizedFormat(ressource))
       else $json.send(context, null, ressource)
     } else {
       log.debug("lecture ko", ressource, 'avirer', {max:5000})
@@ -423,7 +424,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   }
 
   /**
-   * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels ou le format demandé
+   * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels
+   * ou le ?format= demandé (alias ou compact ou normalized, le reste donnant la ressource complète)
    * @private
    * @param {Context} context
    * @param ressource
@@ -437,7 +439,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         } else {
           log.perf(context.response, 'written')
           if (context.get.format) {
-            // on veut une ref (ou un autre format) en réponse, sendRessource le gère
+            // on veut la ressource formatée, sendRessource le gère
             sendRessource(context, null, ressource)
           } else {
             // on ne renvoie que l'oid et des warnings éventuels
@@ -604,7 +606,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                   if (error) {
                     $json.send(context, error)
                   } else if (alias) {
-                    $json.sendOk(context, new Ref(alias))
+                    $json.sendOk(context, new Alias(alias))
                   } else {
                     alias = EntityAlias.create(ressource)
                     log.debug("au retour du create on a l'alias", alias, 'avirer', {max: 5000})
@@ -613,7 +615,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                     log.debug("on va sauver", alias, 'avirer', {max: 5000})
                     alias.store(function (error, alias) {
                       if (error) $json.sendError(context, error)
-                      else $json.sendOk(context, new Ref(alias))
+                      else $json.sendOk(context, new Alias(alias))
                     })
                   }
                 })
@@ -866,7 +868,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('liste/public', optionsOk)
 
   /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(ref|compact)
+   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|compact|normalized)
    * @route GET /api/public/:oid
    * @param {Integer} oid
    * @return {reponseRessource}
@@ -883,7 +885,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
 
   /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(ref|compact)
+   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|compact|normalized)
    * @route GET /api/public/:origine/:idOrigine
    * @param {string} :origine
    * @param {string} :idOrigine
@@ -924,10 +926,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * Si le titre et la catégorie sont manquants, ou que l'on passe ?merge=1 à l'url, ça merge avec la ressource
    * existante que l'on update, sinon on écrase (ou on créé si elle n'existait pas)
    *
-   * Retourne d'autres propriétés de la ressource enregistrée si on le réclame avec ?format=(ref|compact)
+   * Retourne d'autres propriétés de la ressource enregistrée si on le réclame avec ?format=(alias|compact|normalized)
    * @route POST /api/ressource
    * @param {object} Les propriétés de la ressource
-   * @returns {reponseRessourceOid|reponseRessourceRef}
+   * @returns {reponseRessourceOid|reponseRessourceAlias}
    */
   controller.post('ressource', postRessource)
   /**
@@ -938,7 +940,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('ressource', optionsOk)
 
   /**
-   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
+   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|compact|normalized)
    * @Route GET /api/ressource/:oid
    * @param {Integer} oid
    * @return {reponseRessource}
@@ -951,7 +953,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
 
   /**
-   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(ref|compact)
+   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|compact|normalized)
    * @route GET /api/ressource/:origine/:idOrigine
    * @param {string} :origine
    * @param {string} :idOrigine
@@ -1013,7 +1015,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
  * @type {Object}
  * @property {boolean}                     success
  * @property {string}                      [error] Message d'erreur éventuel
- * @property {Ref[]|Compact[]|Ressource[]} liste   Une liste de Ref si aucun format n'a été précisé
+ * @property {Alias[]|Compact[]|Ressource[]} liste   Une liste d'Alias si aucun format n'a été précisé
  */
 
 /**
@@ -1040,8 +1042,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
  * @property {Integer}  oid
  */
 /**
- * La réponse à une demande de ressource au format ref Cf {@link $ressourceConverter.toRef}
- * @typedef reponseRessourceRef
+ * La réponse à une demande de ressource au format alias Cf {@link $ressourceConverter.toRef}
+ * @typedef reponseRessourceAlias
  * @type {Object}
  * @property {boolean}   success
  * @property {string}    [error]
@@ -1049,6 +1051,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
  * @property {string}    titre
  * @property {Integer[]} categories
  * @property {string}    type
+ * @property {boolean}   public
+ * @property {string}    base
  */
 
 

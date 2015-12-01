@@ -128,12 +128,13 @@ function Ressource(initObj) {
      * Les enfants de l'arbre (à la place de la propriété parametres si type vaut "arbre")
      * @type {Object}
      */
-    this.enfants = (values.enfants instanceof Object) ? values.enfants : {};
+    this.enfants = (values.enfants instanceof Array) ? values.enfants : [];
     // on accepte une chaîne json
     if (values.enfants && typeof values.enfants === 'string') {
       try {
         var enfants = JSON.parse(values.enfants);
-        this.enfants = enfants;
+        if (enfants instanceof Array) this.enfants = enfants;
+        else throw new Error("enfants invalides");
       } catch (error) {
         if (console && console.error) console.error(error);
       }
@@ -239,42 +240,31 @@ function Ressource(initObj) {
    * @default true
    */
   this.indexable = values.hasOwnProperty('indexable') ? !!values.indexable : true;
-  /**
-   * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
-   * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
-   * Viré au save s'il est vide
-   * @default undefined
-   * @type {string[]}
-   */
-  this.warnings = filters.arrayString(values.warnings)
-  /**
-   * Une liste d'erreurs éventuelles (incohérences, données manquantes, etc.)
-   * Bloque l'enregistrement s'il n'est pas vide (sinon viré avant enregistrement)
-   * @default undefined
-   * @type {string[]}
-   */
-  this.errors = filters.arrayString(values.errors)
+  if (values.warnings) {
+    /**
+     * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
+     * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
+     * Viré au save s'il est vide
+     * @default undefined
+     * @type {string[]}
+     */
+    this.warnings = filters.arrayString(values.warnings);
+  }
+  if (values.errors) {
+    /**
+     * Une liste d'erreurs éventuelles (incohérences, données manquantes, etc.)
+     * Bloque l'enregistrement s'il n'est pas vide (sinon viré avant enregistrement)
+     * @default undefined
+     * @type {string[]}
+     */
+    this.errors = filters.arrayString(values.errors);
+  }
   /**
    * L'oid de l'archive correspondant à la version précédente
    * @default undefined
    * @type {Integer}
    */
-  this.archiveOid = filters.int(values.archiveOid)
-  /**
-   * Uri d'affichage
-   * @type {string}
-   */
-  this.displayUri = (this.restriction ? '/ressource' : '/public') + '/voir/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine);
-  /**
-   * Uri de la description
-   * @type {string}
-   */
-  this.describeUri = (this.restriction ? '/ressource' : '/public') + '/decrire/' + (this.oid ? this.oid : this.origine + '/' + this.idOrigine);
-  /**
-   * Uri des datas (json)
-   * @type {string}
-   */
-  this.dataUri = '/api' + (this.restriction ? '/ressource/' : '/public/') + (this.oid ? this.oid : this.origine + '/' + this.idOrigine);
+  this.archiveOid = filters.int(values.archiveOid);
 }
 
 /**

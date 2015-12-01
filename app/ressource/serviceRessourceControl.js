@@ -159,7 +159,7 @@ module.exports = function (EntityRessource) {
         }
       })
     } else {
-      errors.push("Enfants doit être un tableau d'objets Ref")
+      errors.push("Enfants doit être un tableau d'Alias")
     }
 
     return errors

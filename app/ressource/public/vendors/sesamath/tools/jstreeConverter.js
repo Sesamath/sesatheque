@@ -28,22 +28,26 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-(function () {
+(function (global) {
   'use strict';
   var jstreeConverter = {};
-  var baseUrl = (typeof baseUrl === 'undefined') ? '' : baseUrl;
+  // global est window dans un navigateur
+  var baseUrl = (typeof global.baseUrl === 'undefined') ? '' : global.baseUrl;
   var log;
   // on prend celui-là si on le trouve
   try {
     log = window.sesamath.log;
   } catch (error) {
     log = function () {};
+    log.error = function () {};
   }
+
   /**
    * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
    * @see http://www.jstree.com/docs/json/ pour le format
    * @param {Ressource} ressource
    */
+  jstreeConverter.getJstNode = getJstNode;
   function getJstNode(ressource) {
     /**
      * Retourne les datas qui nous intéressent à mettre sur le tag a
@@ -51,17 +55,32 @@
      * @return {Object}
      */
     function getAttr() {
+      var prefix;
       var attr = {};
+      var base = ressource.base || baseUrl;
       // ref
-      if (ressource.oid) attr['data-ref'] = ressource.oid;
-      else if (ressource.ref) attr['data-ref'] = ressource.ref;
-      else if (ressource.origine && ressource.idOrigine) attr['data-ref'] = ressource.origine + '/' + ressource.idOrigine;
+      var ref = ressource.id || ressource.ref || ressource.oid;
+      if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine;
+      if (ref) attr['data-ref'] = ref;
       // url complète
-      if (ressource.displayUri) {
-        attr.href = baseUrl + ressource.displayUri;
-        attr['data-displayUri'] = ressource.displayUri;
+      if (ressource.displayUrl) {
+        attr.href = (ressource.base || baseUrl) + ressource.displayUrl;
+      } else if (ressource.displayUri) {
+        // @todo à virer dès que displayUri aura définitivement disparu
+        log.error("On a encore une ressource avec displayUri", ressource);
+        attr.href = base + ressource.displayUri;
+      } else {
+        prefix = (ressource.public || ressource.restriction === 0) ? 'public' : 'ressource';
+        attr.href = base + prefix +'/voir/' +ref;
       }
-      if (ressource.dataUri) attr['data-dataUri'] = ressource.dataUri;
+      if (attr.href) attr['data-displayUrl'] = attr.href;
+      if (ressource.dataUrl) attr['data-dataUrl'] = ressource.dataUrl;
+      else if (ressource.dataUri) attr['data-dataUrl'] = base +ressource.dataUri;
+      else if (ref) {
+        log.error("ressource sans dataUrl", ressource);
+        prefix = (ressource.public || ressource.restriction === 0) ? 'public' : 'ressource';
+        attr['data-dataUrl'] = base +'api/' +prefix +'/' +ref;
+      }
       if (ressource.type) attr['data-type'] = ressource.type;
       if (ressource.resume) attr.alt = ressource.resume;
 
@@ -150,7 +169,7 @@
   /**
    * Transforme un ressource de la bibli en node pour jstree
    * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
-   * @param {Ressource|Ref} ressource Une ressource ou une ref à une ressource
+   * @param {Ressource|Alias} ressource Une ressource ou une référence à une ressource
    * @returns {Object}
    */
   jstreeConverter.toJstree = function (ressource) {
@@ -159,14 +178,14 @@
       if (ressource.enfants && ressource.enfants.length) {
         node.children = jstreeConverter.getJstreeChildren(ressource);
       } else {
-        // uri pour récupérer les enfants
+        // url pour récupérer les enfants
         var url;
         if (ressource.oid) url = '/api/jstree?ref=' + ressource.oid;
         else if (ressource.ref) url = '/api/jstree?ref=' + ressource.ref;
         else if (ressource.origine && ressource.idOrigine) url = '/api/jstree?ref=' + ressource.origine + '/' + ressource.idOrigine;
         if (url) {
           node.children = true;
-          node.data = {url: baseUrl + url + '&children=1'};
+          node.data = {url: (ressource.base || baseUrl) + url + '&children=1'};
         }
       }
     }
@@ -198,8 +217,8 @@
         if (item.type === 'arbre' && node.children && node.children.length && jstree) {
           item.enfants = jstreeConverter.getEnfants(node.id, jstree);
         }
-        if (nodeSrc.a_attr['data-displayUri']) item.displayUri = nodeSrc.a_attr['data-displayUri'];
-        if (nodeSrc.a_attr['data-dataUri']) item.dataUri = nodeSrc.a_attr['data-dataUri'];
+        if (nodeSrc.a_attr['data-displayUrl']) item.displayUrl = nodeSrc.a_attr['data-displayUrl'];
+        if (nodeSrc.a_attr['data-dataUrl']) item.dataUrl = nodeSrc.a_attr['data-dataUrl'];
         if (nodeSrc.a_attr['data-ref']) item.ref = nodeSrc.a_attr['data-ref'];
         if (nodeSrc.a_attr.alt) item.resume = nodeSrc.a_attr.alt;
       }
@@ -213,4 +232,4 @@
   if (typeof define === 'function') define(function () { return jstreeConverter; }); // requireJs
   else if (typeof module === 'object') module.exports = jstreeConverter; // node
   // sinon il se passe rien
-})();
+})(this);

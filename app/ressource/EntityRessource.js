@@ -60,7 +60,7 @@ module.exports = function (EntityRessource) {
 
     // ajoute les éventuelles propriétés supplémentaire de notre objet initial
     _.each(initObj, function (value, key) {
-      if (!entity.hasOwnProperty(key) && typeof value !== 'function') entity[key] = value
+      if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug("la propriété " +key +" a été ignorée dans le constructeur de Ressource")
     })
     // la langue par défaut
     if (this.langue) {
@@ -87,11 +87,29 @@ module.exports = function (EntityRessource) {
     .defineIndex('typeDocumentaires', 'integer')
     // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir une callback qui la remplace
     // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
-    .defineIndex('relations', 'integer', function() {
-      return this.relations
-          .map(function(relation) {
-            return relation[1]
-          })
+    // c'est une string car ça peut être "alias/xxx" où xxx est l'oid de l'alias et pas l'oid d'une ressource
+    // (pour gérer les relations avec des oid externes)
+    .defineIndex('relations', 'string', function() {
+      return this.relations.map(function(relation) {
+        // on retourne pour chaque relation l'item lié
+        return relation[1]
+      })
+    })
+    // pour les arbres on veut avoir tous les enfants qu'ils contiennent (toutes générations comprises)
+    .defineIndex('enfants', 'string', function() {
+      var refsEnfants, enfant, i
+      function addRefsEnfants (enfants) {
+        for (i = 0; i < enfants.length; i++) {
+          enfant = enfants[i]
+          if (enfant.ref) refsEnfants.push(enfant.ref)
+          else if (enfant.oid) refsEnfants.push(enfant.oid)
+        }
+      }
+      if (this.enfants && this.enfants.length) {
+        refsEnfants = []
+        addRefsEnfants(this.enfants)
+      }
+      return refsEnfants
     })
     .defineIndex('auteurs', 'integer')
     .defineIndex('contributeurs', 'integer')

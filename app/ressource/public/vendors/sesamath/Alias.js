@@ -30,16 +30,12 @@
  */
 "use strict";
 (function () {
-  var Ref;
   // suivant que l'on est coté serveur ou client
   if (typeof define === 'function') {
-    define(['Ref'], function (module) {
-      Ref = module;
-
+    define('Alias', [], function () {
       return Alias;
     });
   } else if (typeof module === 'object') {
-    Ref = require('./Ref');
     module.exports = Alias;
   }
   // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
@@ -49,7 +45,7 @@
 
   /**
    * Définition d'un alias d'une ressource, souvent d'une autre sesatheque
-   * On prend en argument du constructeur une Ressource ou une Ref ou un Alias
+   * On prend en argument du constructeur une Ressource ou un Alias
    * Si on passe au constructeur un Alias avec oid mais sans ref il sera considéré comme une ref et va se référencer lui-même,
    * mais probablement sur une autre sesathèque, ce qui donnerait du grand n'importe quoi
    * et le store de l'entity va planter
@@ -58,9 +54,8 @@
    */
   function Alias(initObj) {
     if (!initObj instanceof Object) initObj = {};
-    if (initObj.oid) {
-      // on nous passe un alias ou une ressource, on accepte d'affecter l'oid que si l'on a ref et base
-      if (initObj.ref && initObj.base) {
+    if (initObj.oid && initObj.ref && initObj.base) {
+      // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et base)
         // c'est un alias
         /**
          * oid de l'alias
@@ -72,28 +67,31 @@
          * @type {number|string}
          */
         this.ref = initObj.ref;
-        // this base plus loin car peut exister sur une Ref sans oid
-      } else {
-        // on nous passe un truc qu'on traite comme une ref ou une ressource
-        this.ref = initObj.ref || initObj.oid;
-        if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
-      }
+        // this base plus loin car peut exister sur un Alias sans oid (ex Ref)
+    } else {
+      // on nous passe un truc qu'on traite comme une ref ou une ressource
+      this.ref = initObj.ref || initObj.oid;
+      if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
     }
     /**
      * Titre
      * @type {string}
      */
     this.titre = (initObj.titre && typeof initObj.titre === 'string') ? initObj.titre : 'Sans titre';
-    /**
-     * Résumé (pour l'élève)
-     * @type {string}
-     */
-    this.resume = (initObj.resume && typeof initObj.resume === 'string') ? initObj.resume : undefined;
-    /**
-     * Commentaires (pour le formateur)
-     * @type {string}
-     */
-    this.commentaires = (initObj.commentaires && typeof initObj.commentaires === 'string') ? initObj.commentaires : undefined;
+    if (initObj.resume && typeof initObj.resume === 'string') {
+      /**
+       * Résumé (pour l'élève)
+       * @type {string}
+       */
+      this.resume = initObj.resume;
+    }
+    if (initObj.commentaires && typeof initObj.commentaires === 'string') {
+      /**
+       * Commentaires (pour le formateur)
+       * @type {string}
+       */
+      this.commentaires = initObj.commentaires;
+    }
     /**
      * Le type qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
      * @type {string}
@@ -103,7 +101,7 @@
      * Un ou des id de catégorie(s) éventuel (pour un picto)
      * @type {Array}
      */
-    this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : undefined;
+    this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : [];
     /**
      * True si public (sinon il faut être authentifié pour lire la ressource)
      * @type {boolean}
@@ -114,6 +112,13 @@
      * @type {string}
      */
     this.base = initObj.base;
+    if (initObj.proprio) {
+      /**
+       * Utilisé quand c'est un user qui copie une ressource non éditable dans les siennes
+       * @type {Integer} L'oid du user qui créé l'alias
+       */
+      this.proprio = initObj.proprio;
+    }
   }
 
   /**
@@ -122,23 +127,5 @@
    */
   Alias.prototype.toString = function () {
     return this.titre;
-  };
-
-  /**
-   * Cast en ref
-   * @returns {Ref}
-   */
-  Alias.prototype.toRef = function () {
-    // pour éviter une dépendance à tools.clone on le fait manuellement
-    return {
-      ref : this.ref,
-      titre : this.titre,
-      resume : this.resume,
-      commentaires : this.commentaires,
-      type : this.type,
-      categories : this.categories,
-      public : this.public,
-      base : this.base
-    };
   };
 })();

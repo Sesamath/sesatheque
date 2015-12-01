@@ -89,9 +89,11 @@
         Arbre: base + 'vendors/sesamath/Arbre',
         Resultat: base + 'vendors/sesamath/Resultat',
         Ressource: base + 'vendors/sesamath/Ressource',
-        mqEditor: base + 'vendors/sesamath/mqEditor/mqEditor',
         jsonMulti: base + 'vendors/sesamath/jsonMulti/jsonMulti',
+        mqEditor: base + 'vendors/sesamath/mqEditor/mqEditor',
         multiEditor: base + 'vendors/sesamath/multiEditor/multiEditor',
+        // module npm recopié là par jsCompil
+        sesathequeClient : base +'../vendors/sesamath/sesathequeClient',
         // les modules de vendors
         ckeditor: base + 'vendors/ckeditor/ckeditor',
         ckeditorJquery : base +'vendors/ckeditor/adapters/jquery',

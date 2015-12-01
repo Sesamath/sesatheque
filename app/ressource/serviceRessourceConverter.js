@@ -49,7 +49,6 @@ var flow = require('an-flow')
 var config = require('./config')
 //var tools = require('../tools')
 var Alias = require('./public/vendors/sesamath/Alias')
-var Ref = require('./public/vendors/sesamath/Ref')
 var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $settings) {
@@ -282,13 +281,20 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
   }
 
   /**
-   * Renvoie une Ref à une ressource (avec tous les enfants)
+   * Renvoie une Ref à une ressource, c'est un Alias sans oid ni proprio, avec enfants éventuels
    * @memberOf $ressourceConverter
    * @param ressource
-   * @return {Ref}
+   * @return {Object} un Alias sans oid ni proprio, mais avec enfants éventuels
    */
   $ressourceConverter.toRef = function (ressource) {
-    return new Ref(ressource)
+    var alias = new Alias(ressource)
+    // au cas où ressource serait déjà un alias on nettoie
+    if (alias.oid) delete alias.oid
+    if (alias.proprio) delete alias.proprio
+    // et on ajoute d'éventuels enfants
+    if (alias.type === "arbre" && ressource.enfants) alias.enfants = ressource.enfants
+
+    return alias
   }
 
   /**
@@ -337,7 +343,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
    * Transforme un ressource de la bibli en node pour jstree
    * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
    * @memberOf $ressourceConverter
-   * @param {Ressource|Ref} ressource Une ressource ou une ref à une ressource
+   * @param {Ressource|Alias} ressource Une ressource ou une référence à une ressource
    * @returns {Object}
    */
   $ressourceConverter.toJstree = function (ressource) {

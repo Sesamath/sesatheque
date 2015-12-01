@@ -34,25 +34,44 @@
  * Il faut utiliser setBase() avant les autres méthodes pour préciser l'url absolue de la sésathèque
  * @service apiClient
  */
-define(function () {
+(function () {
   'use strict';
+
+  /**
+   * Ajoute les urls et public
+   * @private
+   * @param {Ressource} ressource
+   */
+  function addUrls(ressource) {
+    var id = ressource.id || ressource.ref || ressource.oid;
+    if (!id && ressource.origine && ressource.idOrigine) id = ressource.origine +'/' +ressource.idOrigine;
+    var prefix = (ressource.restriction === 0 || ressource.public) ? 'public' : 'ressource';
+    if (id) {
+      ressource.dataUrl = base +'api/' +prefix +'/' +id;
+      ressource.deleteUrl = base +'api/ressource/' +id;
+      ressource.displayUrl = base +prefix +'/' +id;
+      ressource.editUrl = base +'ressource/modifier/' +id;
+      ressource.public = (ressource.public || ressource.restriction === 0);
+    }
+  }
 
   /**
    * Gère les appels ajax vers l'api de la bibliothèque
    * @private
-   * @param {Integer|string|object} data Si data est un id on fera un get, si data est une ressource (un objet) un post
-   * @param {ressourceCallback} next
+   * @param {Integer|string|object} data    Si data est un id on fera un get, si data est une ressource (un objet) un post
+   * @param {object}                options Passer {format:"alias|compact"} pour formater la réponse
+   *                                          (ou {merge:1} pour mettre à jour une ressource en envoyant seulement certaines propriétés)
+   * @param {ressourceCallback}     next
    * @private
    */
-  function callBibli(data, next) {
+  function callBibli(data, options, next) {
     var xhr, method, url, isGet;
-
     try {
       // post ou get ?
       if (typeof data === "object") {
         isGet = false;
         method = 'POST';
-        url = base + 'api/ressource/';
+        url = base + 'api/ressource';
       } else {
         isGet = true;
         method = 'GET';
@@ -60,6 +79,12 @@ define(function () {
         if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine");
         url = base + 'api/ressource/' + id;
         data = {};
+      }
+      if (options && options.format) {
+        url += "?format=" +options.format;
+        if (options.merge) url += "&merge=1";
+      } else if (options && options.merge) {
+        url += "?merge=1";
       }
 
       if (typeof XMLHttpRequest === "undefined") {
@@ -84,6 +109,7 @@ define(function () {
                 "La réponse du serveur au post n'est pas du json valide";
             erreur = new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText);
           }
+          if (reponse) addUrls(reponse);
           next(erreur, reponse);
         } else {
           // On a une réponse mais c'est une erreur
@@ -134,7 +160,7 @@ define(function () {
    */
   var ajaxTimeout = 10000;
 
-  return {
+  var apiClient = {
     /**
      * Modifie le préfixe par défaut (/)
      * @memberOf apiClient
@@ -145,14 +171,32 @@ define(function () {
       if (base.substr(-1) !== '/') base += '/';
     },
     /**
-     * Récupère une ressource sur la bibliothèque en ajax
+     * Récupère une ressource sur la bibliothèque en ajax sous forme d'alias
      * @memberOf apiClient
      * @param {Integer|string}    id   peut être un oid de la sesatheque ou origine/idOrigine
      * @param {ressourceCallback} next
      */
-    getRessource: function (id, next) {
-      if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-      if (id) callBibli(id, next);
+    getAlias: function (id, next) {
+      if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
+      else if (id) callBibli(id, {format:"alias"}, next);
+      else next(new Error("Il faut fournir un identifiant"));
+    },
+    /**
+     * Récupère une ressource sur la bibliothèque en ajax
+     * @memberOf apiClient
+     * @param {Integer|string}    id       peut être un oid de la sesatheque ou origine/idOrigine
+     * @param {string}            [format] alias|compact
+     * @param {ressourceCallback} next
+     */
+    getRessource: function (id, format, next) {
+      var options;
+      if (typeof format === "function") {
+        next = format;
+      } else {
+        options = {format:format};
+      }
+      if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
+      else if (id) callBibli(id, options, next);
       else next(new Error("Il faut fournir un identifiant"));
     },
     /**
@@ -161,11 +205,21 @@ define(function () {
      * @param {Ressource}         ressource
      * @param {ressourceCallback} next
      */
-    setRessource: function (ressource, next) {
-      if (!next || typeof next !== 'function') throw new Error('Il faut fournir une fonction de rappel');
-      if (ressource) callBibli(ressource, next);
+    setRessource: function (ressource, isPartial, next) {
+      var options;
+      if (typeof isPartial === "function") {
+        next = isPartial;
+      } else if (isPartial) {
+        options = {merge:1};
+      }
+      if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
+      else if (ressource) callBibli(ressource, options, next);
       else next(new Error("Il faut fournir une ressource"));
     }
   };
-});
 
+  // AMD
+  if (typeof define === 'function') define(function () { return apiClient; });
+  // CommonJs
+  else if (typeof module === 'object') module.exports = apiClient;
+})();

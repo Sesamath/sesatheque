@@ -51,12 +51,8 @@ function Ref(initObj) {
    * @property ref
    * @type {Integer|string}
    */
-  if (initObj.alias) {
-    this.ref = initObj.alias;
-  } else {
-    this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
-    if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
-  }
+  this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined;
+  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
   /**
    * Titre
    * @type {string}

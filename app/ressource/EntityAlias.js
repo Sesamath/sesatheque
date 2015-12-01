@@ -43,17 +43,16 @@ module.exports = function (EntityAlias) {
    * @entity EntityAlias
    * @param {Object} initObj Un alias construit avant (Entity mergera après ce construct toutes les propriétés de initObj)
    * @extends Entity
+   * @extends Alias
    */
   EntityAlias.construct(function (init) {
-    if (init) {
-      tools.merge(this, new Alias(init))
-    }
+    tools.merge(this, new Alias(init))
   })
 
   EntityAlias.table = 'alias'
 
   EntityAlias
-    .defineIndex('alias', 'string')
+    .defineIndex('ref', 'string')
     .defineIndex('base', 'string')
     .defineIndex('proprio', 'integer')
 
@@ -62,11 +61,10 @@ module.exports = function (EntityAlias) {
       next(new Error("Impossible d'enregistrer un alias sans propriétaire"))
     } else if (!this.type) {
       next(new Error("Impossible d'enregistrer un alias sans type"))
-    } else if (this.alias === this.oid && (!this.base || this.base === config.application.baseUrl)) {
-      log.debug("pb circulaire", this, 'avirer', {max:5000})
+    } else if (this.ref === this.oid && (!this.base || this.base === config.application.baseUrl)) {
       next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))
     } else {
-      // on sauvegarde toujours sans le slash de fin
+      // on sauvegarde toujours la base sans le slash de fin
       if (this.base && this.base.substr(-1) === '/') this.base = this.base.substr(0, this.base.length - 1)
       next()
     }

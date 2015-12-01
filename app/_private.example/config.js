@@ -65,8 +65,8 @@ module.exports = {
     "http://labomep.example.com/"
   ],
   admin : {
-    user1:"password1",
-    user2:"password2"
+    //user1:"password1",
+    //user2:"password2"
   }
 }
 
