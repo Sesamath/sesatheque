@@ -85,6 +85,7 @@
         "tools/filters" : base + 'vendors/sesamath/tools/filters',
         "tools/formEditor" : base + 'vendors/sesamath/tools/formEditor',
         "tools/xhr" : base + 'vendors/sesamath/tools/xhr',
+        Alias: base + 'vendors/sesamath/Alias',
         Arbre: base + 'vendors/sesamath/Arbre',
         Resultat: base + 'vendors/sesamath/Resultat',
         Ressource: base + 'vendors/sesamath/Ressource',
@@ -105,6 +106,7 @@
         lodash: base + 'vendors/lodash/lodash.min',
         mathjax: base + 'vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
         mathquill: base + 'vendors/mathquill-0.9.4/mathquill.min',
+        pluginDetect : base +'vendors/pluginDetect/javaFlashDetect.min.js',
         swfobject: base + 'vendors/swfobject/swfobject.2.2'
       },
       shim: {
