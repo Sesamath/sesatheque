@@ -30,3 +30,8 @@ echo -n "$dst "
 sed -e '/BEGIN CUT/, /END CUT/ d; s@// IF CUT@@g;' app/ressource/public/initRequire.js > $tmp
 node_modules/.bin/uglifyjs $src $tmp --compress --mangle > $dst && echo ok || echo KO
 rm -f $tmp
+# d'autres js à minifier
+src=node_modules/sesatheque-client/index.js
+dst=app/ressource/public/vendors/sesamath/sesathequeClient/index.min.js
+echo -n "module npm sesatheque-client => $dst "
+node_modules/.bin/uglifyjs $src --compress --mangle > $dst && echo ok || echo KO
