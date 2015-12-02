@@ -35,11 +35,21 @@
  * Configuration de l'application
  */
 var tools = require("./tools")
-var localConfig = require("./_private/config")
+// la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
+var privateConfModule = "./_private/"
+if (process.env.SESATHEQUE_CONF && /^[^\/]+$/.test(process.env.SESATHEQUE_CONF)) {
+  // on peut préciser un autre fichier de conf via l'environnement (utile pour faire tourner plusieurs instances de l'appli)
+  privateConfModule += process.env.SESATHEQUE_CONF
+} else {
+  privateConfModule += "config"
+}
+var localConfig = require(privateConfModule)
+
+// la conf du composant ressource à part
 var ressourceConfig = require("./ressource/config")
 
 /** La racine du projet */
-var root  = __dirname +'/..';
+var root  = __dirname +'/..'
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
@@ -55,7 +65,7 @@ var settings = {
     // mis dans _private/config.js car dépendant de l'instance
     baseUrl      : "http://...",
     mail : "user@example.com",
-    staging: "prod" // devrait être surchargé dans _private
+    staging: staging
   },
   /* dans _private aussi
   $entities: {
