@@ -22,6 +22,11 @@ function usage() {
   exit $exitCode
 }
 
+function go() {
+  local cas=$1
+  echo -n "$cas "
+  $jsdoc -c jsdoc/jsdoc$cas.json && echo "ok" || echo "KO"
+}
 # on veut exécuter fin avant de sortir
 trap fin EXIT
 
@@ -38,14 +43,23 @@ jsdoc=node_modules/.bin/jsdoc
 while getopts "ahlprs" OPTION
 do
   case $OPTION in
-    a) for f in jsdoc/jsdoc*.json; do $jsdoc -c $f ; done ;;
+    a) for f in jsdoc/jsdoc*.json; do cas=$(basename ${f/jsdoc\/jsdoc/} .json); go $cas; done;;
     h) usage;;
-    l) $jsdoc -c jsdoc/jsdocLassi.json;;
-    p) $jsdoc -c jsdoc/jsdocPlugins.json;;
-    r) $jsdoc -c jsdoc/jsdocRestApi.json;;
-    s) $jsdoc -c jsdoc/jsdocApp.json;;
+    l) go Lassi;;
+    p) go Plugins;;
+    r) go RestApi;;
+    s) go App;;
     *) usage 1;;
   esac
 done
+
+# et si on passe directement un nom en arg
+if [ $# -gt 0 ]; then
+  for arg in $@
+  do
+    # on prend tous les arguments sauf les options
+    [ ${arg:0:1} != "-" ] && go $arg
+  done
+fi
 
 fin
