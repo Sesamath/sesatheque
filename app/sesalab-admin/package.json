@@ -11,12 +11,6 @@
     "an-uuid": "^1.0.0",
     "basic-auth-connect": "^1.0.0"
   },
-  "browserify": {
-    "transform": [
-      "an-browserify-angular-annotate",
-      "an-browserify-template"
-    ]
-  },
   "jshintConfig": {
     "asi": true,
     "boss": true,
@@ -48,18 +42,12 @@
     }
   },
   "devDependencies": {
-    "an-browserify-angular-annotate": "^1.0.6",
-    "an-browserify-template": "^1.0.6",
+    "an-dev": "^2.0.18",
     "angular": "^1.4.7",
     "angular-animate": "^1.4.7",
     "angular-sanitize": "^1.4.7",
     "angular-ui-router": "^0.2.15",
-    "autoprefixer": "^6.0.3",
-    "browserify": "^11.2.0",
-    "clean-css": "^3.4.6",
     "jquery": "^2.1.4",
-    "lodash": "^3.10.1",
-    "node-sass": "^3.4.0-beta1",
-    "postcss-cli": "^2.2.0"
+    "lodash": "^3.10.1"
   }
 }
