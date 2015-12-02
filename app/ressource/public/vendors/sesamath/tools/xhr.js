@@ -46,29 +46,38 @@ define('tools/xhr', [], function () {
    *                              si options.response.type === "json" la réponse sera un objet,
    *                              sinon l'objet response du XMLHttpRequest
    */
-  function xhr(verb, url, data, options, callback) {
-    var request;
-    if (typeof verb !== "string") verb = 'GET';
-    if (typeof options !== "object") options = {};
-    else verb = verb.toUpperCase();
+  function xhrCall(verb, url, data, options, callback) {
+    var xhr, isNextCalled = false;
+    // pour s'assurer qu'on ne l'appelle qu'une fois, entre timeout, error et done
+    function next(error, data) {
+      if (!isNextCalled) {
+        isNextCalled = true;
+        callback(error, data);
+      }
+    }
 
-    if (['GET', 'POST', 'PUT', 'DELETE'].indexOf(verb) < 0) return callback(new Error("Verbe http " +verb +" non géré"));
+    if (typeof verb !== "string") verb = 'GET';
+    else verb = verb.toUpperCase();
+    if (typeof options !== "object") options = {};
+
+    // on est une méthode privée, tous les appels sont listés plus bas
+    //if (['GET', 'POST', 'PUT', 'DELETE'].indexOf(verb) < 0) return next(new Error("Verbe http " +verb +" non géré"));
 
     if (typeof window.XMLHttpRequest !== 'undefined') {
-      request = new XMLHttpRequest();
+      xhr = new XMLHttpRequest();
     } else if (typeof ActiveXObject !== "undefined") {
-      var versions = ["MSXML2.XmlHttp.5.0", "MSXML2.XmlHttp.4.0", "MSXML2.XmlHttp.3.0", "MSXML2.XmlHttp.2.0", "Microsoft.XmlHttp"]
-      for(var i = 0, ii = versions.length; i < ii; i++) {
+      var versions = ["MSXML2.XmlHttp.5.0", "MSXML2.XmlHttp.4.0", "MSXML2.XmlHttp.3.0", "MSXML2.XmlHttp.2.0", "Microsoft.XmlHttp"];
+      for(var i = 0; i < versions.length; i++) {
         try {
           /*global ActiveXObject*/
-          request = new ActiveXObject(versions[i]);
+          xhr = new ActiveXObject(versions[i]);
           break;
         } catch(e) { /* on laisse tomber et on tente le suivant */}
       }
     }
 
-    if (typeof request === 'undefined') {
-      callback(new Error('XHR indisponible avec ce navigateur'));
+    if (typeof xhr === 'undefined') {
+      next(new Error('Appel ajax indisponible avec ce navigateur'));
     } else {
       if (options.urlParams) {
         for (var p in options.urlParams) {
@@ -79,21 +88,33 @@ define('tools/xhr', [], function () {
           }
         }
       }
-      request.open(verb, url, true);
-      if (options.withCredentials) {
-        request.withCredentials = true;
-      }
-      if (options.responseType) {
-        request.responseType = options.responseType;
-      }
-      if (verb != 'GET') request.setRequestHeader('Content-Type', 'application/json');
+      xhr.open(verb, url, true);
+      if (options.withCredentials)          xhr.withCredentials = true;
+      if (options.timeout)                  xhr.timeout = options.timeout;
+      if (options.responseType)             xhr.responseType = options.responseType;
+      if (options.responseType === "json")  xhr.setRequestHeader('Content-Type', 'application/json');
 
-      request.onreadystatechange = function () {
+      xhr.onerror = function () {
+        // Pb de connexion au serveur
+        var errMsg = "Le serveur a renvoyé une erreur";
+        if (xhr.status) errMsg += ' ' +xhr.status;
+        errMsg += ' : ' +xhr.responseText;
+        next(new Error(errMsg));
+      };
+
+      xhr.ontimeout = function () {
+        var msg = "Le serveur n'a pas répondu";
+        if (options.timeout) msg += " après " +Math.floor(options.timeout / 1000) +"s d'attente.";
+        next(new Error(msg));
+      };
+
+      xhr.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
           var error, retour;
 
           if (this.status === 200) {
-            if (this.response.length && this.response.substr(0, 1) === "{") {
+            // OK
+            if (options.responseType === "json") {
               try {
                 retour = JSON.parse(this.response);
               } catch (e) {
@@ -105,7 +126,9 @@ define('tools/xhr', [], function () {
             } else {
               retour = this.response;
             }
+
           } else {
+            // KO (les redirections sont normalement gérées par le navigateur)
             var message;
             switch (this.status) {
               case 0:
@@ -120,22 +143,26 @@ define('tools/xhr', [], function () {
             message += " sur " + verb + " " + url;
             error = new Error(message);
             error.status = this.status;
-            error.content = retour;
+            error.content = this.response;
           }
 
-          callback(error, retour);
+          next(error, retour);
         }
       };
+
       if (data) try {
         data = JSON.stringify(data);
       } catch (error) {
         data = undefined;
       }
-      request.send(data);
+      xhr.send(data);
     }
-  } // xhr
+  } // xhrCall
 
   return {
+    delete : function del(url, options, callback) {
+      xhrCall("DELETE", url, null, options, callback);
+    },
     /**
      * Appel ajax en GET
      * @param {string}   url
@@ -146,7 +173,7 @@ define('tools/xhr', [], function () {
      *                              sinon l'objet response du XMLHttpRequest
      */
     get : function get(url, options, callback) {
-      xhr("GET", url, null, options, callback);
+      xhrCall("GET", url, null, options, callback);
     },
     /**
      * Appel ajax en POST
@@ -162,7 +189,7 @@ define('tools/xhr', [], function () {
      * @param callback
      */
     post : function post(url, data, options, callback) {
-      xhr('POST', url, data, options, callback);
+      xhrCall('POST', url, data, options, callback);
     }
   };
 })

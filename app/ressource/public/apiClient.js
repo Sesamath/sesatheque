@@ -38,11 +38,11 @@
   'use strict';
 
   /**
-   * Ajoute les urls et public
+   * Ajoute les propriétés xxxUrl et public
    * @private
    * @param {Ressource} ressource
    */
-  function addUrls(ressource) {
+  function addUrls(ressource, next) {
     var id = ressource.id || ressource.ref || ressource.oid;
     if (!id && ressource.origine && ressource.idOrigine) id = ressource.origine +'/' +ressource.idOrigine;
     var prefix = (ressource.restriction === 0 || ressource.public) ? 'public' : 'ressource';
@@ -53,6 +53,7 @@
       ressource.editUrl = base +'ressource/modifier/' +id;
       ressource.public = (ressource.public || ressource.restriction === 0);
     }
+    next(null, ressource);
   }
 
   /**
@@ -65,78 +66,29 @@
    * @private
    */
   function callBibli(data, options, next) {
-    var xhr, method, url, isGet;
-    try {
-      // post ou get ?
-      if (typeof data === "object") {
-        isGet = false;
-        method = 'POST';
-        url = base + 'api/ressource';
-      } else {
-        isGet = true;
-        method = 'GET';
-        var id = data;
-        if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine");
-        url = base + 'api/ressource/' + id;
-        data = {};
-      }
-      if (options && options.format) {
-        url += "?format=" +options.format;
-        if (options.merge) url += "&merge=1";
-      } else if (options && options.merge) {
-        url += "?merge=1";
-      }
-
-      if (typeof XMLHttpRequest === "undefined") {
-        throw new Error("appels ajax non supportés par le navigateur");
-      } else {
-        // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-        xhr = new XMLHttpRequest();
-      }
-
-      // on prépare la requete
-      xhr.timeout = ajaxTimeout;
-
-      // les différentes callback
-      xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status < 400) {
-          var erreur, reponse;
-          try {
-            reponse = JSON.parse(xhr.responseText);
-          } catch (error) {
-            var errMsg = isGet ?
-                "La ressource renvoyée par la bibliotheque n'est pas du json valide" :
-                "La réponse du serveur au post n'est pas du json valide";
-            erreur = new Error(errMsg +' : ' +error.toString() +' la réponse brute était ' +xhr.responseText);
-          }
-          if (reponse) addUrls(reponse);
-          next(erreur, reponse);
-        } else {
-          // On a une réponse mais c'est une erreur
-          // il faudra gérer les 301 & 302 éventuels, mais pour le moment l'api n'en renvoie pas
-          next(new Error('Error ' + xhr.status + ' : ' + xhr.responseText));
-        }
-      };
-
-      xhr.onerror = function () {
-        // Pb de connexion au serveur
-        var errMsg = "Le serveur a renvoyé une erreur";
-        if (xhr.status) errMsg += ' ' +xhr.status;
-        errMsg += ' : ' +xhr.responseText;
-        next(new Error(errMsg));
-      };
-
-      xhr.ontimeout = function () {
-        next(new Error("Le serveur n'a pas répondu après " +Math.floor(ajaxTimeout/1000) +"s d'attente."));
-      };
-
-      // et on envoie
-      xhr.open(method, url, true);
-      xhr.send(data);
-    } catch (error) {
-      if (ST.addError) ST.addError(error);
-      else if (typeof console !== 'undefined' && console.error) console.error(error);
-      next(new Error("votre navigateur n'a pas fait l'appel ajax : " +error.toString()));
+    function end(error, ressource) {
+      if (error) next(error);
+      else addUrls(ressource, next);
+    }
+    var url, xhrOptions = {};
+    if (options && options.format) {
+      xhrOptions.urlParams = {};
+      xhrOptions.urlParams.format = options.format;
+    }
+    if (options && options.merge) {
+      if (!xhrOptions.urlParams) xhrOptions.urlParams = {};
+      xhrOptions.urlParams.merge = "1";
+    }
+    options.timeout = ajaxTimeout;
+    // post ou get ?
+    if (typeof data === "object") {
+      url = base + 'api/ressource';
+      xhr.post(url, data, xhrOptions, end);
+    } else {
+      var id = data;
+      if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine");
+      url = base + 'api/ressource/' + id;
+      xhr.get(url, xhrOptions, end);
     }
   } // callBibli
 
@@ -145,7 +97,7 @@
    * on appellera les urls de la forme base + 'api/ressource/…'
    * @type {string}
    */
-  var base;
+  var base, xhr;
   if (typeof sesamath === "undefined") window.sesamath = {};
   var S = window.sesamath;
   if (!S.sesatheque) S.sesatheque = {};
@@ -219,7 +171,15 @@
   };
 
   // AMD
-  if (typeof define === 'function') define(function () { return apiClient; });
+  if (typeof define === 'function') define(['tools/xhr'], function (xhrTool) {
+    xhr = xhrTool;
+
+    return apiClient;
+  });
   // CommonJs
-  else if (typeof module === 'object') module.exports = apiClient;
+  else if (typeof module === 'object') {
+    xhr = require('./tools/xhr');
+
+    module.exports = apiClient;
+  }
 })();
