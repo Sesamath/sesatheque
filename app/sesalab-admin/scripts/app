@@ -35,8 +35,12 @@ function build() {
   build_js
 }
 
+function reset() {
+  clean && prepare && build
+}
+
 # initialisation de nos constantes et fct communes, si ce n'a pas déjà été fait
-[ -z "${STAGE-}" ] && . $(dirname $0)/../../scripts/app_init_vars
+[ -z "${STAGE-}" ] && . $(dirname $0)/app_init_vars
 
 init_command $@
 $COMMAND

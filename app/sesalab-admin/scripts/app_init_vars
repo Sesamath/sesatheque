@@ -1,0 +1,94 @@
+#!/bin/bash
+# Initialise les constantes utilisées par les différents scripts/app,
+# d'après le fichier de conf et l'option --debug éventuelle
+
+# doit être sourcé par le script appelant
+
+# pour être prévenu si on utilise un variable non initialisée
+set -u
+
+function end() {
+  cd "$DIR_INIT"
+}
+
+function step() {
+  echo -e "$BLEU$(basename $PWD)$NORM:$BLEU$BUILD_MODE$NORM@$VERT$STAGE$NORM> $1"
+}
+
+function annonce() {
+  echo -e "$ROUGE->$NORM Entrée dans $JAUNE$1$NORM : $BLEU$BUILD_MODE$NORM@$STAGE"
+}
+
+# recalcule les variables d'après les paramètre du script courant
+# (COMMAND et DEBUG mais pas STAGE et BUILD_MODE définis d'après la conf à l'init)
+function init_command() {
+  while [[ $# > 0 ]] ; do
+    case $1 in
+      --*)
+        # la clé sera ce qui suit le -- jusqu'à une espace ou =
+        # et la valeur sera true ou ce qui suit le =
+        V='true'
+        eval $(echo $1 | sed -re "s/=[\"']?([^\"']*)[\"']?$/; V=\"\1\"/; s/--/K=/;")
+        # on passe la clé en màj pour être insensible à la casse
+        K=$(echo $K | tr 'a-z' 'A-Z')
+        eval "$K='$V'"
+        ;;
+      *)
+        # on concatène avec _ tout ce qui n'est pas une option pour former la commande
+        [ -n "$COMMAND" ] && COMMAND="${COMMAND}_$1" || COMMAND="$1"
+        ;;
+    esac
+    shift
+  done
+}
+
+APPDIR="$(dirname $0)/.."
+export PATH=$PATH:$(readlink -e $APPDIR/node_modules/.bin):./node_modules/.bin:./scripts
+
+# passer --conf_file=fichier pour l'écraser
+CONF_FILE="$APPDIR/_private/config.js"
+# si on est appelé par un app de sesalab-* faut remonter d'un cran
+[ ! -f $CONF_FILE ] && APPDIR="$APPDIR/.." && CONF_FILE="$APPDIR/_private/config.js"
+# si on veut régler tous les cas de figure, symlinks compris, cf http://stackoverflow.com/a/246128
+
+# dir au lancement
+DIR_INIT="$PWD"
+# on y reviendra en sortant (même en cas de sortie violente pour plantage)
+trap end EXIT
+
+# Couleurs
+if [ -z "${TERM-}" ]
+then
+  VERT=''
+  ROUGE=''
+  JAUNE=''
+  BLEU=''
+  NORM=''
+else
+  VERT='\e[38;05;2m'
+  ROUGE='\e[38;05;1m'
+  JAUNE='\e[38;05;3m'
+  BLEU='\e[38;05;4m'
+  NORM='\e[0;00m'
+fi
+
+COMMAND=''
+DEBUG=''
+
+# on lit le staging dans la conf
+CONF_ENV=$(sed -nre 's/^\s*staging\s*:\s*['"'"'"]([a-z]+)['"'"'"].*/\1/p' $CONF_FILE)
+case $CONF_ENV in
+  dev) STAGE='dev'; BUILD_MODE='debug'; DEBUG=1;;
+  prod) STAGE='prod'; BUILD_MODE='release';;
+  *) echo "Staging ($CONF_ENV) non trouvé dans $CONF_FILE ou ≠ de dev|prod">&2; exit 1;;
+esac
+
+# même si on est sourcé, faut exporté pour que ça se propage aux suivants
+export APPDIR CONF_FILE DEBUG STAGE BUILD_MODE VERT ROUGE JAUNE BLEU NORM
+export -f end step annonce init_command
+
+# normalement on est pas exécutable, au cas où on prévient quand même
+[ "$0" = "app_init_vars" ] && echo -e "${ROUGE}Ce script $0 ne fait rien, il doit être sourcé$NORM" >&2
+
+# on se place dans le parent du app appelé
+cd "$(dirname $0)/.."
