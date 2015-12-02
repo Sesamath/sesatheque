@@ -114,8 +114,8 @@
     this.base = initObj.base;
     if (initObj.proprio) {
       /**
-       * Utilisé quand c'est un user qui copie une ressource non éditable dans les siennes
-       * @type {Integer} L'oid du user qui créé l'alias
+       * L'oid du user qui créé l'alias (quand c'est un user qui copie une ressource non éditable dans les siennes)
+       * @type {Integer}
        */
       this.proprio = initObj.proprio;
     }

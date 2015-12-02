@@ -53,53 +53,6 @@ var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $settings) {
   /**
-   * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
-   * @see http://www.jstree.com/docs/json/ pour le format
-   * @private
-   * @param {Ressource} ressource
-   */
-  function getJstNode (ressource) {
-    /**
-     * Retourne les datas qui nous intéressent à mettre sur le tag a
-     * (pour a_attr : data-ref, data-type, href et alt)
-     * @private
-     * @param {Ressource} ressource
-     * @return {Object}
-     */
-    function getAttr() {
-      var attr = {}
-      // id
-      if (ressource.oid) attr['data-ref'] = ressource.oid
-      else if (ressource.ref) attr['data-ref'] = ressource.ref
-      else if (ressource.origine && ressource.idOrigine) attr['data-ref'] = ressource.origine +'/' +ressource.idOrigine
-      // url complète
-      if (ressource.displayUri) attr.href = $settings.get('application.baseUrl', '') +ressource.displayUri
-      if (ressource.type) attr['data-type'] = ressource.type
-      if (ressource.resume) attr.alt = ressource.resume
-
-      return attr
-    }
-
-    var node
-    if (ressource) {
-      node = {
-        text  : ressource.titre,
-        a_attr: getAttr(),
-        icon  : ressource.type + 'JstNode'
-      }
-    } else log.error(new Error("getJstNode appelé sans ressource"))
-
-    return node
-  }
-
-  // les 2 méthodes jstree
-  if (jstreeConverter) {
-    jstreeConverter.setBaseUrl($settings.get('application.baseUrl', ''))
-    $ressourceConverter.getJstreeChildren = jstreeConverter.getJstreeChildren
-    $ressourceConverter.toJstree = jstreeConverter.toJstree
-  }
-
-  /**
    * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
    * dont le 1er est un id de relation valide
    * @memberOf $ressourceConverter
@@ -330,7 +283,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
         if (enfant.type === 'arbre') {
           child = $ressourceConverter.toJstree(enfant)
         } else {
-          child = getJstNode(enfant)
+          child = jstreeConverter.getJstNode(enfant)
         }
         children.push(child);
       });
@@ -347,7 +300,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
    * @returns {Object}
    */
   $ressourceConverter.toJstree = function (ressource) {
-    var node = getJstNode(ressource)
+    var node = jstreeConverter.getJstNode(ressource)
     if (ressource.type === 'arbre') {
       if (ressource.enfants && ressource.enfants.length) {
         node.children = $ressourceConverter.getJstreeChildren(ressource)

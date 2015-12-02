@@ -759,6 +759,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         if (onlyChildren) {
           if (ressource.type === 'arbre') {
             jstData = $ressourceConverter.getJstreeChildren(ressource)
+            log.debug("à partir de", ressource, 'avirer', {max:5000,indent:2})
+            log.debug("on récupère les enfants", jstData, 'avirer', {max:5000,indent:2})
             sendJsonJstreeArray(context, null, jstData)
           } else {
             sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
