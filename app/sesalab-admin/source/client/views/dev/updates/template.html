@@ -1,0 +1,18 @@
+<table>
+  <tr><th>ID</th><th>Description</th><th>Actions</th></tr>
+  <tr
+    ng-repeat="update in updates"
+    >
+    <td>{{update.id}}</td>
+    <td>{{update.description}}</td>
+    <td>
+      <an-progress
+        ng-if="update.job"
+        total="{{update.job.total}}"
+        progress="{{update.job.progress}}"></an-progress>
+      <a
+        ng-if="!update.job"
+        ng-click="doUpdate(update)">Démarrer</a>
+    </td>
+  </tr>
+</table>

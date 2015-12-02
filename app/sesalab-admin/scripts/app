@@ -1,30 +1,21 @@
 #! /bin/bash
 
-function build_js() {
+function build_scripts() {
   step "Construction des scripts"
-  (cd source/server; find . -name "index.js" | sed -E 's/^(.+)/require("\1")/' > _modules.js)
-  (cd source/client; find . -name "index.js" | sed -E 's/^(.+)/require("\1")/' > _modules.js)
-  node_modules/.bin/browserify source/client/app.js > public/app.js
+  indexify 'require("./$$");' source/client/_modules.js '**/index.js'
+  indexify 'require("./$$");' source/server/_modules.js '**/index.js'
+  script-builder --debug=$DEBUG source/client/app.js public/app.js
 }
 
 function build_styles() {
   step "Construction des styles"
-  (cd source/client; find . -name "styles.scss" -o -name "index.scss" | sed -E 's/^(.+)/@import ".\1";/' > styles/_styles.scss)
-  node_modules/.bin/node-sass source/client/styles/app.scss --stdout | \
-  node_modules/.bin/postcss --use autoprefixer | \
-  node_modules/.bin/cleancss > \
-  public/app.css
+  indexify '@import "$$";' source/styles/_styles.scss '../server/**/styles.scss' '../client/**/styles.scss' './*/**/*.scss'
+  style-builder --debug=$DEBUG source/styles/app.scss public/app.css
 }
 
 function clean() {
   rm -rf {documentation,node_modules,public/app.*}
 }
-
-function clean_release() {
-  rm -rf scripts *.disabled README.md bower.json source/client npm-debug.log
-  node -e "for(var pkg in require('./package.json').devDependencies) console.log('node_modules/'+pkg);" | xargs rm -r
-}
-
 
 function prepare() {
   npm install > /dev/null
@@ -32,7 +23,7 @@ function prepare() {
 
 function build() {
   build_styles
-  build_js
+  build_scripts
 }
 
 function reset() {
