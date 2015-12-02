@@ -416,7 +416,11 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       if (format === "alias" || format === "ref") $json.send(context, null, $ressourceConverter.toRef(ressource))
       else if (format === 'compact') $json.send(context, null, $ressourceConverter.toCompactFormat(ressource))
       else if (format === 'normalized') $json.send(context, null, $ressourceConverter.toNormalizedFormat(ressource))
-      else $json.send(context, null, ressource)
+      else {
+        // full, et on ajoute la base dans les réponses de l'api
+        if (!ressource.base) ressource.base = config.application.baseUrl
+        $json.send(context, null, ressource)
+      }
     } else {
       log.debug("lecture ko", ressource, 'avirer', {max:5000})
       $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
@@ -750,29 +754,32 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.get('jstree', function (context) {
     var ref = context.get.ref || context.get.id
     var onlyChildren = !!context.get.children
-    if (!ref) sendJsonJstreeArray(context, "il faut fournir une ref de ressource")
-    $ressourceRepository.load(ref, function (error, ressource) {
-      if (error) {
-        sendJsonJstreeArray(context, error)
-      } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
-        var jstData
-        if (onlyChildren) {
-          if (ressource.type === 'arbre') {
-            jstData = $ressourceConverter.getJstreeChildren(ressource)
-            log.debug("à partir de", ressource, 'avirer', {max:5000,indent:2})
-            log.debug("on récupère les enfants", jstData, 'avirer', {max:5000,indent:2})
-            sendJsonJstreeArray(context, null, jstData)
+    if (ref) {
+      $ressourceRepository.load(ref, function (error, ressource) {
+        if (error) {
+          sendJsonJstreeArray(context, error)
+        } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
+          var jstData
+          if (onlyChildren) {
+            if (ressource.type === 'arbre') {
+              jstData = $ressourceConverter.getJstreeChildren(ressource)
+              log.debug("à partir de", ressource, 'avirer', {max: 5000, indent: 2})
+              log.debug("on récupère les enfants", jstData, 'avirer', {max: 5000, indent: 2})
+              sendJsonJstreeArray(context, null, jstData)
+            } else {
+              sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
+            }
           } else {
-            sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
+            jstData = $ressourceConverter.toJstree(ressource)
+            sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
           }
         } else {
-          jstData = $ressourceConverter.toJstree(ressource)
-          sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
+          sendJsonJstreeArray(context, "la ressource " + ref + " n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
         }
-      } else {
-        sendJsonJstreeArray(context, "la ressource " +ref +" n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
-      }
-    })
+      })
+    } else {
+      sendJsonJstreeArray(context, "il faut fournir un id de ressource")
+    }
   })
 
 

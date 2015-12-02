@@ -47,9 +47,11 @@ var flow = require('an-flow')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
+var appConfig = require('../config')
 //var tools = require('../tools')
 var Alias = require('./public/vendors/sesamath/Alias')
 var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
+var defaultBase = appConfig.application.baseUrl
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $settings) {
   /**
@@ -283,7 +285,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
         if (enfant.type === 'arbre') {
           child = $ressourceConverter.toJstree(enfant)
         } else {
-          child = jstreeConverter.getJstNode(enfant)
+          child = jstreeConverter.getJstNode(enfant, defaultBase)
         }
         children.push(child);
       });
@@ -300,7 +302,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
    * @returns {Object}
    */
   $ressourceConverter.toJstree = function (ressource) {
-    var node = jstreeConverter.getJstNode(ressource)
+    var node = jstreeConverter.getJstNode(ressource, defaultBase)
     if (ressource.type === 'arbre') {
       if (ressource.enfants && ressource.enfants.length) {
         node.children = $ressourceConverter.getJstreeChildren(ressource)

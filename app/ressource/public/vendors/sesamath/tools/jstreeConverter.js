@@ -46,9 +46,10 @@
    * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
    * @see http://www.jstree.com/docs/json/ pour le format
    * @param {Ressource} ressource
+   * @param {string}    [defaultBase]
    */
   jstreeConverter.getJstNode = getJstNode;
-  function getJstNode(ressource) {
+  function getJstNode(ressource, defaultBase) {
     /**
      * Retourne les datas qui nous intéressent à mettre sur le tag a
      * (pour a_attr : data-ref, data-type, href et alt)
@@ -57,14 +58,14 @@
     function getAttr() {
       var prefix;
       var attr = {};
-      var base = ressource.base || baseUrl;
+      var base = ressource.base || defaultBase || baseUrl;
       // ref
       var ref = ressource.id || ressource.ref || ressource.oid;
       if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine;
       if (ref) attr['data-ref'] = ref;
       // url complète
       if (ressource.displayUrl) {
-        attr.href = (ressource.base || baseUrl) + ressource.displayUrl;
+        attr.href = ressource.displayUrl;
       } else if (ressource.displayUri) {
         // @todo à virer dès que displayUri aura définitivement disparu
         log.error("On a encore une ressource avec displayUri", ressource);
@@ -135,17 +136,19 @@
   /**
    * Retourne un tableau children au format jstree
    * @param {Ressource} ressource
+   * @param {string}    [defaultBase]
    * @return {Array} Le tableau des enfants
    */
-  jstreeConverter.getJstreeChildren = function (ressource) {
+  jstreeConverter.getJstreeChildren = function (ressource, defaultBase) {
+    var base = ressource.base || defaultBase || baseUrl;
     var children = [];
     if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.forEach) {
       ressource.enfants.forEach(function (enfant) {
         var child;
         if (enfant.type === 'arbre') {
-          child = jstreeConverter.toJstree(enfant);
+          child = jstreeConverter.toJstree(enfant, base);
         } else {
-          child = getJstNode(enfant);
+          child = getJstNode(enfant, base);
         }
         children.push(child);
       });
@@ -170,13 +173,15 @@
    * Transforme un ressource de la bibli en node pour jstree
    * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
    * @param {Ressource|Alias} ressource Une ressource ou une référence à une ressource
+   * @param {string}          [defaultBase]
    * @returns {Object}
    */
-  jstreeConverter.toJstree = function (ressource) {
-    var node = getJstNode(ressource);
+  jstreeConverter.toJstree = function (ressource, defaultBase) {
+    var base = ressource.base || defaultBase || baseUrl;
+    var node = getJstNode(ressource, base);
     if (ressource.type === 'arbre') {
       if (ressource.enfants && ressource.enfants.length) {
-        node.children = jstreeConverter.getJstreeChildren(ressource);
+        node.children = jstreeConverter.getJstreeChildren(ressource, base);
       } else {
         // url pour récupérer les enfants
         var url;
@@ -185,7 +190,7 @@
         else if (ressource.origine && ressource.idOrigine) url = '/api/jstree?ref=' + ressource.origine + '/' + ressource.idOrigine;
         if (url) {
           node.children = true;
-          node.data = {url: (ressource.base || baseUrl) + url + '&children=1'};
+          node.data = {url: base + url + '&children=1'};
         }
       }
     }
