@@ -46,7 +46,7 @@ try {
     var w = window;
     var wd = w.document;
     var S = window.sesamath;
-    //var ST = S.sesatheque;
+    var ST = S.sesatheque;
 
     return {
       init: function (ressource) {
@@ -67,12 +67,19 @@ try {
             {label:"hauteur", remarque:"(en pixels)"}
         );
         // ajout applet
-        var figureWrapper = formEditor.addFormGroup(groupParametres, "after");
-        var figure = S.addElement(figureWrapper, 'input', {name:"parametres[figure]", type:"hidden", value:ressource.parametres.figure || ""});
+        var dataContainer = formEditor.addFormGroup(groupParametres.parentNode);
+        var figureBase64Ini = ressource.parametres.figure || "";
+        var figureData = formEditor.addTextarea(
+            dataContainer,
+            {id:"figure", name:"parametres[figure]"},
+            {label: "Figure (encodée en base64)", content: figureBase64Ini}
+        );
+        $(dataContainer).hide();
+        var appletContainer = formEditor.addFormGroup(groupParametres.parentNode);
         var appletName = "mtgApplet";
-        var appletWidth = Math.max(figureWrapper.offsetWidth || 0, 800);
+        var appletWidth = Math.max(appletContainer.offsetWidth || 0, 800);
         var applet = formEditor.addElement(
-            figureWrapper,
+            appletContainer,
             'applet',
             {
               name: appletName,
@@ -112,16 +119,39 @@ try {
         S.addElement(applet, 'param', {name:"allowOptionsMenu", value:"true"});
         S.addElement(applet, 'param', {name:"language", value:"true"});
         S.addElement(applet, 'param', {name:"level", value:"3"});
+        S.addElement(applet, 'param', {name:"figureData", value: figureBase64Ini});
 
         S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ");
         S.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com");
         S.addText(applet, " pour installer java.");
-        $("form#formRessource").submit(function () {
-          var newFigure = document.mtgApplet.getScript();
-          S.log("on récupère " +newFigure);
-          if (newFigure) figure.value = newFigure;
 
-          return true;
+        var isSubmitChecked = false;
+        var $form = $("form#formRessource");
+        $form.submit(function () {
+          var retour = false;
+          if (isSubmitChecked) {
+            retour = true;
+          } else {
+            try {
+              var newFigure = document.mtgApplet.getScript();
+              S.log("on récupère " + newFigure);
+              // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
+              if (newFigure) {
+                setTimeout(function () {
+                  $(figureData).val(newFigure);
+                  isSubmitChecked = true;
+                  $form.submit();
+                }, 0);
+              } else {
+                retour = true;
+              }
+            } catch (error) {
+              ST.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste");
+              isSubmitChecked = true;
+            }
+          }
+
+          return retour;
         });
       }
     };
