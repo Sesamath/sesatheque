@@ -36,7 +36,7 @@
  */
 var tools = require("./tools")
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
-var privateConfModule = "./_private/"
+var privateConfModule = __dirname + "/_private/"
 if (process.env.SESATHEQUE_CONF && /^[^\/]+$/.test(process.env.SESATHEQUE_CONF)) {
   // on peut préciser un autre fichier de conf via l'environnement (utile pour faire tourner plusieurs instances de l'appli)
   privateConfModule += process.env.SESATHEQUE_CONF
