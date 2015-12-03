@@ -110,17 +110,17 @@ define('tools/formEditor', [], function () {
   }
 
   /**
-   * Ajoute un input avec l'emballage qui va bien pour le form ressource
+   * Ajoute un textarea avec l'emballage qui va bien pour le form ressource
    * @memberOf tools/formEditor
    * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
    * @param {object}      [attrs]   Les attributs éventuels de l'input
-   * @param {object}      [options] On utilise éventuellement label et required
-   * @returns {Element} L'input text
+   * @param {object}      [options] On utilise label, required et content
+   * @returns {Element} Le textarea
    */
   function addTextarea(parent, attrs, options) {
     var container = S.addElement(getWrapper(parent, options), 'div', {class:"input-group textarea"});
 
-    return S.addElement(container, 'textarea', attrs);
+    return S.addElement(container, 'textarea', attrs, options.content || "");
   }
 
   var S = window.sesamath;
