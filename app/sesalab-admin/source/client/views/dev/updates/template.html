@@ -1,18 +1,25 @@
 <table>
-  <tr><th>ID</th><th>Description</th><th>Actions</th></tr>
-  <tr
-    ng-repeat="update in updates"
-    >
-    <td>{{update.id}}</td>
-    <td>{{update.description}}</td>
-    <td>
-      <an-progress
-        ng-if="update.job"
-        total="{{update.job.total}}"
-        progress="{{update.job.progress}}"></an-progress>
-      <a
-        ng-if="!update.job"
-        ng-click="doUpdate(update)">Démarrer</a>
-    </td>
-  </tr>
+  <thead>
+    <tr><th>ID</th><th>Date</th><th>Description</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    <tr
+      ng-repeat="update in updates"
+      >
+      <td>{{update.id}}</td>
+      <td>{{update.$date}}</td>
+      <td>{{update.description}}</td>
+      <td>
+        <an-progress
+          ng-if="update.job"
+          total="{{update.job.total}}"
+          progress="{{update.job.progress}}"></an-progress>
+        <a
+          class="button-link"
+          ng-if="!update.job && !update.done"
+          ng-click="doUpdate(update)">Démarrer</a>
+        <span ng-if="update.done">Appliqué le {{update.$done}}</span>
+      </td>
+    </tr>
+  </tbody>
 </table>

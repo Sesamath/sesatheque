@@ -7,6 +7,7 @@ $energized : #FFB400 !default;
 $assertive : #CB5B5E !default;
 $royal     : #B5A2F1 !default;
 $dark      : #444 !default;
+
 $gm-input-placeholder-color : #969696;
 $gm-input-border-color : #C8C8C8;
 $gm-input-color : #353535;
@@ -19,11 +20,25 @@ $gm-icon-zoom: 1.2;
 
 $gm-z-index-menu: 0;
 $gm-z-index-content: 1;
-$gm-z-index-popup: 98;
-$gm-z-index-popover: 99;
-$gm-z-index-toaster: 100;
+$gm-z-index-header: 2;
+$gm-z-index-header-buttons: 3;
+$gm-z-index-popup: 4;
+$gm-z-index-popover: 5;
+$gm-z-index-toaster: 6;
 
-@mixin gmButton() {
+@mixin gmBadge {
+  background-color: rgba(#A21212, 0.7);
+  color: white;
+  border-radius: 8px;
+  font-size: 11px;
+  display: inline-block;
+  height: 16px;
+  line-height: 16px;
+  padding: 0 4px;
+}
+
+
+@mixin gmButton($bg: red, $fg: white) {
   text-transform: uppercase;
   border: none;
   font-size: 14px;
@@ -39,24 +54,28 @@ $gm-z-index-toaster: 100;
   letter-spacing: .01em;
   transition: box-shadow .4s ease;
   text-decoration: none;
+  user-select: none;
+  background-color: $bg;
+  color: $fg;
 
-  &.button-light      {
-    border: 1px solid black(0.15);
-    border-top: 1px solid black(0.06);
-    background-color: #F9F9F9;
-    color: $gm-input-color;
-  }
+  &.button-light      { border: 1px solid black(0.15); border-top: 1px solid black(0.06); background-color: #F9F9F9; color: $gm-input-color; }
   &.button-stable     { background-color: $stable    ; color: white; }
   &.button-positive   { background-color: $positive  ; color: white; }
   &.button-calm       { background-color: $calm      ; color: #3D3D3D; }
   &.button-balanced   { background-color: $balanced  ; color: #3D3D3D; }
-  &.button-energized  {
-    background-color: $energized;
-    color: #313131;
-  }
+  &.button-energized  { background-color: $energized; color: #313131; }
   &.button-assertive  { background-color: $assertive ; color: white; }
   &.button-royal      { background-color: $royal     ; color: white; }
   &.button-dark       { background-color: $dark      ; color: white; }
+
+  .button-small {
+    padding: 0 10px;
+    min-width: 28px;
+    min-height: 25px;
+    height: 25px;
+    font-size: 12px;
+    line-height: 25px;
+  }
 
   &:hover {
     text-decoration: none;
@@ -64,44 +83,169 @@ $gm-z-index-toaster: 100;
   &:active {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
   }
-}
 
-@mixin gmLinkButton() {
-  line-height: 32px;
-  text-decoration: none;
-  color: #106CC8;
-  padding: 0 8px;
-  font-weight: 500;
-  font-size: 14px;
-  text-transform:uppercase;
-  display: inline-block;
-  white-space: nowrap;
-  &.activated {
-    background-color: #E4E4E4;
-    border-radius: 3px;
-  }
-  &.button-assertive {
-    color: #F44336;
-  }
   &.button-small {
-    font-size: 12px;
-    padding: 0 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  line-height: 25px;
   }
 }
 
-@mixin gmLinkButtonBar() {
-  position: absolute;
-  left: 0;
-  right:0;
-  bottom: 0;
-  margin: 10px 0 0 0;
-  padding: 8px;
-  min-height: 52px;
-  height: 52px;
+@mixin gmButtonBar {
+  padding: 5px 10px;
   display: flex;
   justify-content: flex-end;
-  .button {
-    @include gmLinkButton();
+  >.center  {
+    justify-content: center;
+  }
+  >.left  {
+    justify-content: flex-start;
+  }
+  >.button {
+    @include gmButton;
+    &:first-child { margin-left: 0 }
+    &:last-child { margin-right: 0 }
+  }
+}
+
+
+
+@mixin gmButtonLink {
+  border-radius: 0;
+  box-shadow: none;
+  display: inline-block;
+  flex: initial;
+  margin: 0 0 0 8px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 40px;
+  text-transform: uppercase;
+  color: #4083F3;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:after { display: none; }
+  &:last-child { border: none; }
+  span {
+    display: block;
+    transition: all 0.5s ease;
+  }
+
+  .button-small {
+    padding: 0 10px;
+    min-width: 28px;
+    min-height: 25px;
+    height: 25px;
+    font-size: 12px;
+    line-height: 25px;
+  }
+
+
+  /*
+  &.activated {
+    color: #852C85;
+    span {
+      transform: scale(1.25);
+    }
+    box-shadow: none;
+  }
+  */
+
+  &.button-positive   { color: $positive  ; }
+  &.button-calm       { color: $calm      ; }
+  &.button-balanced   { color: $balanced  ; }
+  &.button-energized  { color: $energized; }
+  &.button-assertive  { color: $assertive ; }
+  &.button-royal      { color: $royal     ; }
+  &.button-dark       { color: $dark      ; }
+
+}
+
+@mixin gmButtonLinks {
+  padding: 8px;
+  display: flex;
+  justify-content: flex-end;
+  >a {
+    @include gmButtonLink;
+    margin: 0;
+    &:first-child { padding-left: 0;}
+    &:last-child { padding-right: 0;}
+  }
+}
+
+@mixin gmButtonIcon {
+  display: inline-block;
+  position: relative;
+  height: 40px;
+  width: 40px;
+  max-height: 40px;
+  max-width: 40px;
+  line-height: 40px;
+  padding: 0;
+  margin: 0;
+  text-align:center;
+  @include icon;
+  &:before {
+    transition: text-shadow 400ms ease, color 400ms ease;
+    line-height: 40px;
+    font-size: 30px;
+    color: black;
+  }
+  &.button.active,
+  /*
+  &.button.activated,
+  &:active {
+    box-shadow: none !important;
+    &:before {
+      color: $gm-input-focus;
+    }
+  }
+  */
+  .item-reorder &.button.activated, .item-reorder &.button.active {
+    background-color: transparent;
+    box-shadow: none;
+    &:before {
+      color: black;
+    }
+  }
+  &.pushed {
+    background-color:black(0.1);
+    &:before {
+      color: orange;
+    }
+  }
+  .badge {
+    position: absolute;
+    right: 0px;
+    top: 5px;
+    @include gmBadge();
+  }
+
+
+  &.fab {
+    background-color: #2196F3;
+    border-radius: 50%;
+    $size : 40px;
+    width: $size;
+    height: $size;
+    max-width: $size;
+    max-height: $size;
+    min-height: $size;
+    line-height: $size;
+    display: inline-block;
+    &:before {
+      font-size: $size / 1.5;
+      height: $size;
+      line-height: $size;
+      color: white;
+      margin: 0 !important;
+    }
+    &.activated {
+      box-shadow: none;
+    }
   }
 }
 
@@ -147,10 +291,6 @@ $gm-z-index-toaster: 100;
       position: relative;
       top: -3px;
       font-size: 13px;
-    }
-  }
-  &:focus,&.activated {
-    .value {
     }
   }
   &.disabled {
@@ -200,10 +340,6 @@ $gm-z-index-toaster: 100;
       font-size: 13px;
     }
   }
-  &:focus,&.activated {
-    .value {
-    }
-  }
   &.disabled {
     pointer-events: none;
     label {
@@ -222,14 +358,14 @@ $gm-z-index-toaster: 100;
   box-shadow: none;
   font-size: 14px;
   line-height: 16px;
-  padding: 0 0 8px 0;
+  padding: 0 0 5px 0;
   border: none;
   border-bottom : 1px solid $gm-input-border-color;
   transition: border-color 1s ease;
   color: $gm-input-color;
   &:focus,&.activated {
     border-bottom: 2px solid $gm-input-focus;
-    padding-bottom: 7px;
+    padding-bottom: 4px;
     transition: border-color 1s ease;
   }
   &[disabled] {
@@ -240,29 +376,28 @@ $gm-z-index-toaster: 100;
 
 @mixin gmInput {
   background    : transparent;
-  border-radius: 0;
+  border-radius : 0;
   box-shadow    : none;
   font-size     : 16px;
   line-height   : 16px;
-  height: 24px;
+  height        : 24px;
   padding       : 0 0 3px 0;
   border        : none;
   border-bottom : 1px solid $gm-input-border-color;
   transition    : border-color 1s ease;
   color         : $gm-input-color;
-  box-shadow    : none;
 
   &::placeholder {
     color: $gm-input-placeholder-color;
     font-size: 14px;
   }
+
   &:focus {
     border-bottom: 2px solid $gm-input-focus;
     padding-bottom: 2px;
     transition: border-color 1s ease;
   }
-  &:required,&:invalid {
-  }
+
   .error & {
     border-color: $gm-color-error;
   }
@@ -281,7 +416,6 @@ $gm-z-index-toaster: 100;
   color         : $gm-input-color;
   resize        : none;
   overflow      : hidden;
-  width         : 100%;
 
   &::placeholder {
     color: $gm-input-placeholder-color;
@@ -299,15 +433,15 @@ $gm-z-index-toaster: 100;
 
 
 @mixin gmFormItem {
-  margin: 8px 0;
+  margin: 8px 0 16px 0;
   padding: 0;
   &:first-child { margin-top: 0; }
   &:last-child { margin-bottom: 0; }
   >label {
-    font-size   : 16px;
-    color       : #565656;
+    font-size   : 14px;
+    color       : #A4A4A4;
     display     : block;
-    margin      : 8px 0 8px 0;
+    margin      : 8px 0 2px 0;
     font-weight : 400;
   }
 
@@ -330,7 +464,7 @@ $gm-z-index-toaster: 100;
     }
   }
 
-  .form-description {
+  .form-description,.description {
     font-size: 11px;
     line-height: 110%;
     margin-top: 4px;
@@ -338,7 +472,7 @@ $gm-z-index-toaster: 100;
     color: #686868;
   }
 
-  >*[name] {
+  >*[name][type=text] {
     padding-right: 16px;
     position: relative;
     &:after {
@@ -359,7 +493,7 @@ $gm-z-index-toaster: 100;
       th {
         line-height: 56px;
         font-weight: 500;
-        color: #454545;
+        color: #686868;
         text-align: left;
         white-space: nowrap;
         padding: 0 8px;
@@ -406,18 +540,15 @@ $gm-z-index-toaster: 100;
     width: $gm-icon-size;
     height: $gm-icon-size;
     @include touchZone($gm-icon-size);
-    &:before {
+    @include icon-check-uncheck {
       transition: color 1s ease;
       font-size: $gm-icon-size*$gm-icon-zoom;
-      content: "\f372";
-      font-family: ionicons;
       color: $gm-input-border-color;
     }
   }
   &.checked {
     .toggle {
-      &:before {
-        content: "\f374";
+      @include icon-check-check {
         color: $gm-input-focus;
       }
     }
@@ -448,10 +579,8 @@ $gm-z-index-toaster: 100;
       width: $gm-icon-size;
       height: $gm-icon-size;
       @include touchZone($gm-icon-size);
-      &:before {
+      @include icon-radio-off {
         transition: color 0.3s ease-in-out;
-        content: "\f3a6";
-        font-family: ionicons;
         font-size: $gm-icon-size*$gm-icon-zoom;
         color: $gm-input-border-color;
       }
@@ -469,9 +598,8 @@ $gm-z-index-toaster: 100;
     }
     &.checked {
       .toggle {
-        &:before {
+        @include icon-radio-on {
           color: $gm-input-focus;
-          content: "\f3a7";
         }
       }
     }
@@ -535,7 +663,15 @@ $gm-z-index-toaster: 100;
     }
   }
   >.buttons {
-    @include gmLinkButtonBar();
+    position: absolute;
+    left: 0;
+    right:0;
+    bottom: 0;
+    min-height: 52px;
+    height: 52px;
+    background-color: white;
+    @include gmButtonLinks;
+    padding: 8px 24px;
   }
 }
 
@@ -546,7 +682,7 @@ $gm-z-index-toaster: 100;
   width: 300px;
   top:100px;
   z-index: $gm-z-index-popover;
-  box-shadow: 0 0 10px black(0.4);
+  box-shadow: 0 0 5px black(0.26);
   border: 1px solid $border-color;
   border-radius: 2px;
   background-color: white;
@@ -565,42 +701,10 @@ $gm-z-index-toaster: 100;
     right:0;
     bottom: 0;
     margin: 10px 0 0 0;
-    padding: 8px;
     min-height: 52px;
     height: 52px;
-    display: flex;
-    justify-content: flex-end;
-    .button {
-      $height: 36px;
-      border-radius: 0;
-      box-shadow: none;
-      display: inline-block;
-      flex: initial;
-      &:after { display: none; }
-      height: $height;
-      min-height: $height;
-      line-height: $height;
-      margin: 0 0 0 8px;
-      padding: 0 8px;
-      border: none;
-      &:last-child { border: none; }
-      background: none;
-      font-size: 14px;
-      font-weight: 500;
-      text-transform: uppercase;
-      color: #4083F3;
-      span {
-        display: block;
-        transition: all 0.5s ease;
-      }
-      &.activated {
-        color: #852C85;
-        span {
-          transform: scale(1.25);
-        }
-        box-shadow: none;
-      }
-    }
+    @include gmButtonLinks;
+    padding: 8px 24px;
   }
 
   .triangle {
@@ -618,7 +722,7 @@ $gm-z-index-toaster: 100;
       top:10px;
       left: 8px;
       background-color: white;
-      box-shadow: 0 0 10px black(0.4);
+      box-shadow: 0 0 5px black(0.26);
       border: 1px solid black(0.4);
       transform: rotate(45deg);
       content: '';
@@ -636,7 +740,7 @@ $gm-z-index-toaster: 100;
         border-bottom: 1px solid black(0.1);
         position: relative;
         .counter {
-          @include badge;
+          @include gmBadge;
           position: absolute;
           right: 10px;
           top: 10px;
@@ -655,22 +759,113 @@ $gm-z-index-toaster: 100;
   border-radius: 2px;
   background-color: white;
   box-shadow: 0 2px 5px 0 black(0.16), 0 2px 10px 0 black(0.12);
+  border: 1px solid black(0.2);
+  position: relative;
 
   >.title {
     text-decoration:none;
     display: block;
-    text-align: center;
     font-size: 20px;
     line-height: 46px;
     font-weight: 400;
-    color: white;
+    color: black;
     height: 46px;
+    padding: 0 0 0 16px;
     &.activated {
       background-image: none;
     }
   }
-  .body {
-    padding: 16px 16px 24px 16px;
+  >.content {
+    padding: 0px 16px 24px 16px;
+  }
+  >.buttons {
+    margin-top: -24px;
+    min-height: 52px;
+    height: 52px;
+    @include gmButtonLinks;
+    padding: 8px 24px;
+  }
+}
+
+@mixin gmTabSelector() {
+
+  display: flex;
+  border-bottom: 1px solid #E8E8E8;
+  .tab {
+    padding: 8px 16px;
+    font-size: 16px;
+    position: relative;
+    top: 1px;
+    color: #333333;
+    user-select: none;
+    cursor: pointer;
+    white-space: nowrap;
+    .badge {
+      margin-left: 3px;
+      @include gmBadge();
+    }
+    &.active,&:hover {
+      color: $gm-input-focus;
+    }
+    &.active {
+      border-bottom: 3px solid $gm-input-focus;
+    }
+    &:hover {
+      border-bottom: 3px solid rgba($gm-input-focus, 0.5);
+    }
+  }
+
+}
+
+@mixin gmProgressBar($height: 20px) {
+  position: relative;
+  height: 20px;
+  border-radius: 4px;
+  background:#E0E0E0;
+  box-shadow:inset 0px 2px 3px black(0.05);
+  border: 1px solid black(0.2);
+  .message {
+    @include fill-all;
+    line-height: $height;
+    text-align: center;
+    z-index: 1;
+    color: #474747;
+    text-shadow: 1px 1px white(0.3);
+  }
+  .bar {
+    @include fill-all;
+    left: 1px; right: 1px; top: 1px; bottom: 1px;
+    background-color:#ac0;
+    border-radius: 4px;
+    background-image:
+    linear-gradient(45deg,
+    white(.2) 25%, transparent 25%, transparent 50%,
+    white(.2) 50%, white(.2) 75%, transparent 75%, transparent);
+    box-shadow:inset 0px 2px 8px white(.5);
+    border: 1px solid black(0.1);
+  }
+}
+
+@mixin gmMessage() {
+  margin: 10px;
+  border-radius: 2px;
+  background-color: white;
+  box-shadow: 0 2px 5px 0 black(0.16), 0 2px 10px 0 black(0.12);
+  border: 1px solid black(0.2);
+  position: relative;
+  padding: 8px;
+  font-size: 14px;
+  &.message-info {
+    @include clear;
+    @include icon;
+    @include icon-info {
+      font-size: 30px;
+      color: #559AE4;
+      float: left;
+      margin: 0 10px 0 0;
+    }
+    &:before {
+    }
   }
 }
 

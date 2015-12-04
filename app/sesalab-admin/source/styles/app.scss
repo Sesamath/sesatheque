@@ -11,3 +11,6 @@ table {
   @include gmTable();
 }
 
+.button-link {
+  @include gmButtonLink();
+}

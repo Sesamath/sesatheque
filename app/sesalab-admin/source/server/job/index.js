@@ -3,7 +3,7 @@ var uuid = require('an-uuid');
 app.service('$job', function() {
   var jobs = {};
 
-  function create(startCallback, initCallback) {
+  function create(startCallback, initCallback, doneCallback) {
     var job = {
       id: uuid(),
       progress: 0,
@@ -26,9 +26,9 @@ app.service('$job', function() {
       },
 
       done: function(error) {
-        console.log('done', error);
         job.state =  3;
         job.error = error?''+job.error:false;
+        if (doneCallback) doneCallback();
       },
 
       tick: function(count) {

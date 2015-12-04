@@ -37,73 +37,70 @@ var flow = require('an-flow')
 var Alias = require('../../../../ressource/public/vendors/sesamath/Alias')
 var configRessource = require('../../../../ressource/config')
 
-module.exports = {
-  description: 'Normalisation et nettoyage des arbres',
-  job: function(job) {
-    /**
-     * Formate les enfants d'un arbre au nouveau format (avec public et base)
-     * @param {Arbre} arbre
-     */
-    function checkArbre(arbre) {
-      if (arbre.enfants && arbre.enfants.length) {
-        for (var i = 0; i < arbre.enfants.length; i++) {
-          var enfant = arbre.enfants[i]
-          var newEnfant = new Alias(enfant)
-          newEnfant.public = enfant.public || (enfant.dataUri && enfant.dataUri.indexOf("public") > -1)
-          if (!newEnfant.ref) {
-            if (newEnfant.type === "arbre") {
-              // on vire les null
-              if (newEnfant.hasOwnProperty("ref")) delete newEnfant.ref
-              delete newEnfant.public
-            } else {
-              log.errorData("Error : pas de ref dans l'arbre " + (arbre.oid || arbre.ref || arbre.titre) + " pour l'enfant ", enfant)
-            }
+module.exports = function(job) {
+  /**
+   * Formate les enfants d'un arbre au nouveau format (avec public et base)
+   * @param {Arbre} arbre
+   */
+  function checkArbre(arbre) {
+    if (arbre.enfants && arbre.enfants.length) {
+      for (var i = 0; i < arbre.enfants.length; i++) {
+        var enfant = arbre.enfants[i]
+        var newEnfant = new Alias(enfant)
+        newEnfant.public = enfant.public || (enfant.dataUri && enfant.dataUri.indexOf("public") > -1)
+        if (!newEnfant.ref) {
+          if (newEnfant.type === "arbre") {
+            // on vire les null
+            if (newEnfant.hasOwnProperty("ref")) delete newEnfant.ref
+            delete newEnfant.public
+          } else {
+            log.errorData("Error : pas de ref dans l'arbre " + (arbre.oid || arbre.ref || arbre.titre) + " pour l'enfant ", enfant)
           }
-          if (enfant.type === "arbre" && enfant.enfants && enfant.enfants.length) {
-            checkArbre(enfant)
-            newEnfant.enfants = enfant.enfants
-          }
-          arbre.enfants[i] = newEnfant
         }
+        if (enfant.type === "arbre" && enfant.enfants && enfant.enfants.length) {
+          checkArbre(enfant)
+          newEnfant.enfants = enfant.enfants
+        }
+        arbre.enfants[i] = newEnfant
       }
-      arbre.type = "arbre"
-      arbre.categories = [configRessource.constantes.categories.liste]
     }
-
-    var EntityRessource = lassi.service("EntityRessource")
-    flow().seq(function () {
-      EntityRessource.match('type').equals('arbre').sort("oid").count(this)
-    }).seq(function (nbArbres) {
-      log(nbArbres +" arbres trouvés dans " +__filename)
-      var tours = job.init(nbArbres, 50)
-      flow(tours).seqEach(function (tour) {
-        var nextTour = this
-        log("On démarre à " +tour[0])
-        flow().seq(function () {
-          EntityRessource.match('type').equals('arbre').sort("oid").grab(tour[1], tour[0], this)
-        }).seq(function (arbres) {
-          flow(arbres).seqEach(function (arbre) {
-            var nextArbre = this
-            //log("parsing arbre " +arbre.oid)
-            checkArbre(arbre)
-            arbre.store(function (error, arbreSaved) {
-              if (error) {
-                log.errorData("arbre invalide " +arbre.oid, error)
-                log("arbre " +arbreSaved.oid +" KO")
-              //} else {
-                //log("arbre " +arbreSaved.oid +" ok")
-              }
-              job.tick()
-              nextArbre()
-            })
-          }).seq(function () {
-            nextTour()
-          }).catch(job.done)
-        }).catch(job.done)
-      }).seq(function () {
-        // log("dernier tour terminé")
-        job.done("")
-      }).catch(job.done)
-    }).catch(job.done)
+    arbre.type = "arbre"
+    arbre.categories = [configRessource.constantes.categories.liste]
   }
+
+  var EntityRessource = lassi.service("EntityRessource")
+  flow().seq(function () {
+    EntityRessource.match('type').equals('arbre').sort("oid").count(this)
+  }).seq(function (nbArbres) {
+    log(nbArbres + " arbres trouvés dans " + __filename)
+    var tours = job.init(nbArbres, 50)
+    flow(tours).seqEach(function (tour) {
+      var nextTour = this
+      log("On démarre à " + tour[0])
+      flow().seq(function () {
+        EntityRessource.match('type').equals('arbre').sort("oid").grab(tour[1], tour[0], this)
+      }).seq(function (arbres) {
+        flow(arbres).seqEach(function (arbre) {
+          var nextArbre = this
+          //log("parsing arbre " +arbre.oid)
+          checkArbre(arbre)
+          arbre.store(function (error, arbreSaved) {
+            if (error) {
+              log.errorData("arbre invalide " + arbre.oid, error)
+              log("arbre " + arbreSaved.oid + " KO")
+              //} else {
+              //log("arbre " +arbreSaved.oid +" ok")
+            }
+            job.tick()
+            nextArbre()
+          })
+        }).seq(function () {
+          nextTour()
+        }).catch(job.done)
+      }).catch(job.done)
+    }).seq(function () {
+      // log("dernier tour terminé")
+      job.done("")
+    }).catch(job.done)
+  }).catch(job.done)
 }

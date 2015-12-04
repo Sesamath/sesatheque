@@ -1,7 +1,12 @@
+var formatDate = require('an-format-date');
 module.exports = function($scope, $http) {
   function initialize() {
     $http.get('/admin/api/updates').success(function(response) {
       $scope.updates = response.list;
+      response.list.forEach(function(update) {
+        update.$date = formatDate(new Date(update.date), '%d/%M/%Y %H:%M');
+        update.$done = update.done?formatDate(new Date(update.done), '%d/%M/%Y %H:%M'):'';
+      })
     })
   }
 
@@ -15,6 +20,9 @@ module.exports = function($scope, $http) {
             setTimeout(doUpdate, 1000);
           } else {
             delete update.job;
+            update.done = new Date();
+            update.$done = formatDate(update.done, '%d/%M/%Y %H:%M');
+
           }
         })
       }
