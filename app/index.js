@@ -117,7 +117,10 @@ if (privateConfig.extraDependenciesLast) {
 
 // Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
 var sesatheque = lassi.component('sesatheque', dependancies)
-GLOBAL.app = sesatheque // pour sesalab-admin
+// pour sesalab-admin
+// utile aussi pour d'autres modules npm qui voudrait ajouter du app.service('$newService', function () {…})
+// ou app.controller('path', function () {this.get('path', function (context) {…} })
+GLOBAL.app = sesatheque
 require('./sesalab-admin');
 
 sesatheque.config(function($cache, $settings) {

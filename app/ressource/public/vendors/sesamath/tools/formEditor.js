@@ -36,12 +36,15 @@ define('tools/formEditor', [], function () {
    * @private
    * @memberOf tools/formEditor
    * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
-   * @param {object}  [options] On utilise label, required et remarque
+   * @param {object}  [options] On utilise label, required, remarque, wrapperAttributes
    * @returns {Element} Le div.control-group pour y mettre un input
    */
-  function getWrapper(parent, options) {
+  function addWrapper(parent, options) {
     if (!parent) parent = addFormGroup();
-    var wrapper = S.addElement(parent, 'div', {class:"control-group"});
+    var divAttrs = options.wrapperAttributes || {};
+    if (!divAttrs.class) divAttrs.class += " control-group";
+    else divAttrs.class = "control-group";
+    var wrapper = S.addElement(parent, 'div', divAttrs);
     if (options.label) {
       var label = S.addElement(wrapper, 'label', {}, options.label);
       if (options.required) S.addElement(label, 'span', {class:"required", title:"Ce champ est obligatoire"}, "*");
@@ -59,11 +62,11 @@ define('tools/formEditor', [], function () {
    * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
    * @param {string}  tag       Le tag de l'élément html à ajouter
    * @param {object}  attrs     Les attributs de l'élément tag
-   * @param {object}  [options] On utilise éventuellement label et required
+   * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
    * @returns {Element} L'élément ajouté
    */
   function addElement(parent, tag, attrs, options) {
-    var container = S.addElement(getWrapper(parent, options), 'div', {class:"input-group " +tag});
+    var container = S.addElement(addWrapper(parent, options), 'div', {class:"input-group " +tag});
 
     return S.addElement(container, tag, attrs);
   }
@@ -94,15 +97,42 @@ define('tools/formEditor', [], function () {
   }
 
   /**
+   * Ajoute un groupe de Checkboxes avec l'emballage qui va bien pour le form ressource
+   * @memberOf tools/formEditor
+   * @param {Element} [parent]   Le parent (si non fourni on ajoutera un div.form-group à la fin du form
+   * @param {string}  name       Le nom du groupe de checkboxes (qui auront chacun un name="{nom}[{i}]", sauf s'il n'y en qu'un, pas de [i] dans ce cas)
+   * @param {object}  [options]  On regarde label, required, remarque, wrapperAttributes
+   * @param {Array}   checkboxes Une liste d'item avec {label, value, [id], [checked]}, checked sera imposé à "checked" si true après cast booléen
+   * @returns {Element} Le div avec tous les inputs
+   */
+  function addCheckboxes(parent, name, options, checkboxes) {
+    var container = S.addElement(addWrapper(parent, options), 'div', {class:"input-group checkboxes"});
+    if (checkboxes instanceof Array) {
+      checkboxes.forEach(function (checkbox, i) {
+        var id = checkbox.id || S.getNewId();
+        var label = S.addElement(container, 'label', {for:id}, checkbox.label);
+        var attrs = {type:"checkbox", id:id, value:checkbox.value};
+        // on ne renvoie un tableau qui si y'en a plusieurs
+        if (checkboxes.length > 1) attrs.name = name +"[" +i +"]";
+        else attrs.name = name;
+        if (checkbox.checked) attrs.checked = "checked";
+        S.addElement(label, 'input', attrs);
+      });
+    }
+
+    return container;
+  }
+
+  /**
    * Ajoute un input avec l'emballage qui va bien pour le form ressource
    * @memberOf tools/formEditor
    * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
    * @param {object}  [attrs]   Les attributs éventuels de l'input
-   * @param {object}  [options] On utilise éventuellement label et required
+   * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
    * @returns {Element} L'input text
    */
   function addInputText(parent, attrs, options) {
-    var container = S.addElement(getWrapper(parent, options), 'div', {class:"input-group text"});
+    var container = S.addElement(addWrapper(parent, options), 'div', {class:"input-group text"});
     if (!attrs) attrs = {};
     attrs.type = "text";
 
@@ -110,15 +140,46 @@ define('tools/formEditor', [], function () {
   }
 
   /**
+   * Ajoute un select avec l'emballage qui va bien pour le form ressource
+   * @memberOf tools/formEditor
+   * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
+   * @param {object}  [attrs]   Les attributs éventuels du select
+   * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
+   * @param {Array}   choix   Les attributs des tag option à mettre, content sera pris pour le contenu text et viré des attributs,
+   *                            selected sera imposé à "selected" si le cast booléen vaut true
+   * @returns {Element} Le select
+   */
+  function addSelect(parent, attrs, options, choix) {
+    var container = S.addElement(addWrapper(parent, options), 'div', {class:"input-group select"});
+    if (!attrs) attrs = {};
+    var select = S.getElement('select', attrs);
+    if (choix instanceof Array) {
+      choix.forEach(function (optionAttrs) {
+        var content;
+        if (optionAttrs.content) {
+          content = optionAttrs.content;
+          delete optionAttrs.content;
+        }
+        if (optionAttrs.selected) optionAttrs.selected = "selected";
+        else delete optionAttrs.selected;
+        S.addElement(select, 'option', optionAttrs, content);
+      });
+    }
+    container.appendChild(select);
+
+    return select;
+  }
+
+  /**
    * Ajoute un textarea avec l'emballage qui va bien pour le form ressource
    * @memberOf tools/formEditor
    * @param {Element} [parent]  Le parent (si non fourni on ajoutera un div.form-group à la fin du form
-   * @param {object}      [attrs]   Les attributs éventuels de l'input
-   * @param {object}      [options] On utilise label, required et content
+   * @param {object}  [attrs]   Les attributs éventuels de l'input
+   * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
    * @returns {Element} Le textarea
    */
   function addTextarea(parent, attrs, options) {
-    var container = S.addElement(getWrapper(parent, options), 'div', {class:"input-group textarea"});
+    var container = S.addElement(addWrapper(parent, options), 'div', {class:"input-group textarea"});
 
     return S.addElement(container, 'textarea', attrs, options.content || "");
   }
@@ -126,9 +187,11 @@ define('tools/formEditor', [], function () {
   var S = window.sesamath;
 
   return {
+    addCheckboxes: addCheckboxes,
     addElement   : addElement,
     addFormGroup : addFormGroup,
     addInputText : addInputText,
+    addSelect    : addSelect,
     addTextarea  : addTextarea
   };
 });

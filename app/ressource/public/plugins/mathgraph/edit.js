@@ -37,6 +37,104 @@ try {
     /* jshint jquery:true */
     "use strict";
 
+    function addApplet(isFullSize) {
+      if (isFullSize) {
+        width = Math.max(appletContainer.offsetWidth || 0, width);
+        height = Math.max(height, Math.round(width * 0.75));
+      }
+      var appletName = "mtgApplet";
+      // faut d'abord créer un élément html complet avant de le mettre dans le dom,
+      // sinon il peut lancer le jar avant d'avoir tous les params
+      var applet = S.getElement(
+          'applet',
+          {
+            id:appletName,
+            //name: appletName +"name",
+            code: "mathgraph32.MtgFrame.class",
+            archive: "/plugins/mathgraph/MathGraph32Applet.jar",
+            width: width,
+            height: height,
+            style:"border:#000 solid 1px;"
+          },
+          {label:"Figure mathgraph"}
+      );
+      for (var allow in allowDef) {
+        if (allowDef.hasOwnProperty(allow)) {
+          S.addElement(applet, 'param', {name:"allow" +allow, value:(allowProf.indexOf(allow) > -1)?"true":"false"});
+        }
+      }
+      S.addElement(applet, 'param', {name:"initialFigure", value:"orthonormalFrame"});
+      S.addElement(applet, 'param', {name:"language", value:"true"});
+      var level = (levelProf === 0) ? levelEleve : levelProf;
+      S.addElement(applet, 'param', {name:"level", value:level});
+      S.addElement(applet, 'param', {name:"figureData", value: $figureData.val()});
+
+      S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ");
+      S.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com");
+      S.addText(applet, " pour installer java.");
+      // on peut la mettre dans le dom
+      S.empty(appletContainer);
+      appletContainer.appendChild(applet);
+      isAppletAdded = true;
+    }
+
+    function hideApplet() {
+      try {
+        var newFigure = document.mtgApplet.getScript();
+        S.log("on récupère " + newFigure);
+        // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
+        setTimeout(function () {
+          $figureData.val(newFigure);
+          $appletContainer.hide();
+          $dataContainer.show();
+          submitHandler = onSubmitTrue;
+        }, 0);
+      } catch (error) {
+        S.log.error(error);
+        ST.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste");
+      }
+    }
+
+    function showApplet() {
+      // on rafraîchi nos valeurs d'après le form
+      width = parseInt($width.val(), 10) || 600;
+      height = parseInt($height.val(), 10) || Math.round(width * 0.75);
+      var isFullSize = !!$isFullSize.val();
+      addApplet(isFullSize);
+      $dataContainer.hide();
+      $appletContainer.show();
+      // et on récupèrera sa figure à la validation
+      S.log("submitHandler = onSubmitGetMgData");
+      submitHandler = onSubmitGetMgData;
+    }
+
+    function onSubmitGetMgData() {
+      S.log("submit avec figure à récupérer dans l'applet");
+      var retour = false;
+      try {
+        var newFigure = document.mtgApplet.getScript();
+        S.log("on récupère " + newFigure);
+        // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
+        $figureData.val(newFigure);
+        setTimeout(function () {
+          submitHandler = onSubmitTrue;
+          S.log("On va soumettre avec le textarea", $figureData.val());
+          $form.submit();
+        }, 0);
+      } catch (error) {
+        S.log.error(error);
+        ST.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste");
+        submitHandler = onSubmitTrue;
+      }
+
+      return retour;
+    }
+
+    function onSubmitTrue() {
+      S.log("submit sans récupération");
+      return true;
+    }
+
     /**
      * MAIN
      */
@@ -48,111 +146,189 @@ try {
     var S = window.sesamath;
     var ST = S.sesatheque;
 
+    // var globales à notre module (initialisées par init et utilisées par nos fcts)
+    var allowProf, isAppletAdded, levelEleve, levelProf, figureBase64Ini,
+        width, height, $width, $height,
+        appletContainer,
+        $appletContainer, $figureData,
+        $isFullSize, $dataContainer, $form;
+    // les fonctionnalités dispo
+    var allowDef = {
+      "MenuBar" : "Barre de menu",
+      "LeftToolbar" : "Barre d'outils de gauche",
+      "topToolbar" : "Barre d'outils du haut",
+      "RightToolbar" : "Barre d'outils de droite",
+      "IndicationArea" : "Zone d'information du bas",
+      "ToolsChoice" : "Choix des outils",
+      FileMenu : "Menu Fichier",
+      OptionsMenu : "Menu Options"
+    };
+    // le submitHandler, à true par défaut
+    // on ne peut appeler $form.submit() qu'une fois puisqu'on lui passe un écouteur,
+    // c'est cet écouteur que l'on va modifier si besoin
+    var submitHandler = onSubmitTrue;
+
     return {
       init: function (ressource) {
         if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer");
         var parametres = ressource.parametres;
-        var groupParametres = wd.getElementById('groupParametres');
-        if (!groupParametres) throw new Error("Pas de conteneur #groupParametres trouvé dans cette page");
-        var width = parametres.width || 500;
-        var height = parametres.height || 500;
-        formEditor.addInputText(
-          groupParametres,
+        var divParametres = wd.getElementById('parametres');
+        if (!divParametres) throw new Error("Pas de conteneur #parametres trouvé dans cette page");
+
+        // param de taille
+        width = parametres.width || Math.max(divParametres.offsetWidth || 0, 600);
+        height = parametres.height || Math.round(width*0.75);
+        var sizeGroup = formEditor.addFormGroup(divParametres);
+        var widthInput = formEditor.addInputText(
+          sizeGroup,
           {name:"parametres[width]", size:5, value:width, placeholder:"largeur"},
           {label:"largeur", remarque:"(en pixels)"}
         );
-        formEditor.addInputText(
-            groupParametres,
-            {name:"parametres[height]", size:5, value:height, placeholder:"hauteur", class:"center"},
-            {label:"hauteur", remarque:"(en pixels)"}
+        $width = $(widthInput);
+        var heightInput = formEditor.addInputText(
+          sizeGroup,
+          {name:"parametres[height]", size:5, value:height, placeholder:"hauteur", class:"center"},
+          {label:"hauteur", remarque:"(en pixels)"}
         );
-        // ajout applet
-        var dataContainer = formEditor.addFormGroup(groupParametres.parentNode);
-        var figureBase64Ini = ressource.parametres.figure || "";
+        $height = $(heightInput);
+        formEditor.addCheckboxes(
+            sizeGroup,
+            "parametres[profFullSize]",
+            {label:"exception formateur"},
+            [{
+              id : "isFullSize",
+              label: "maximiser l'éditeur ci-dessous",
+              value: true,
+              checked: !!parametres.profFullSize
+            }]
+        );
+        $isFullSize = $("#isFullSize");
+
+        var allowFullList = [];
+        var allow;
+        for (allow in allowDef) {
+          if (allowDef.hasOwnProperty(allow)) allowFullList.push(allow);
+        }
+
+        // config élève
+        var eleveGroup = formEditor.addFormGroup(divParametres);
+        levelEleve = parseInt(parametres.levelEleve, 10) || 0;
+        var levelEleveSelect = formEditor.addSelect(
+          eleveGroup,
+          {id:"selectTypeInterface", name:"parametres[levelEleve]"},
+          {
+            label:"type d'interface élève",
+            wrapperAttributes : {style:"max-width:300px;"}
+          },
+          [
+            {value:"0", content:"lecteur seulement*", selected:(levelEleve === 0)},
+            {value:"1", content:"éditeur élémentaire", selected:(levelEleve === 1)},
+            {value:"2", content:"éditeur collège", selected:(levelEleve === 2)},
+            {value:"3", content:"éditeur avancé sans nombres complexes", selected:(levelEleve === 3)},
+            {value:"4", content:"éditeur avancé avec nombres complexes", selected:(levelEleve === 4)},
+          ]
+        );
+        S.addElementAfter(levelEleveSelect, 'div', {class:"remarque"},
+            "* L'éditeur nécessite java, le lecteur simple est conseillé si vous n'avez pas besoin de récupérer la figure de l'élève");
+        var $levelEleveSelect = $(levelEleveSelect);
+
+        var allowEleve = parametres.allowEleve || allowFullList;
+        // on remplit ses checkboxes
+        var checkboxes = [];
+        for (allow in allowDef) {
+          if (allowDef.hasOwnProperty(allow)) {
+            checkboxes.push({
+              label:allowDef[allow],
+              value:allow,
+              checked:(allowEleve.indexOf(allow) > -1)
+            });
+          }
+        }
+        var allowEleveCb = formEditor.addCheckboxes(
+            eleveGroup,
+            "parametres[allowEleve]",
+            {label:"fonctionnalités accessibles aux élèves", remarque:"(ne concerne que l'éditeur)"},
+            checkboxes
+        );
+        var $allowEleveCb = $(allowEleveCb.parentNode);
+        if (levelEleve === 0) $allowEleveCb.hide();
+
+        $levelEleveSelect.change(function () {
+          levelEleve = parseInt($(this).val()) || 0;
+          if (levelEleve === 0) $allowEleveCb.hide();
+          else $allowEleveCb.show();
+        });
+
+        // param de l'applet d'édition
+        var profGroup = formEditor.addFormGroup(divParametres);
+        levelProf = parseInt(parametres.levelProf, 10) || 0;
+        var isApplet = (levelProf !== -1);
+        var levelProfSelect = formEditor.addSelect(
+            profGroup,
+            {name:"parametres[levelProf]"},
+            {label:"type d'interface formateur", remarque:"(utilisée ci-dessous)"},
+            [
+              {value:"-1", content:"aucune (zone pour coller une figure exportée)", selected:(levelProf === -1)},
+              {value:"0", content:"identique aux élèves", selected:(levelProf === 0)},
+              {value:"1", content:"éditeur élémentaire", selected:(levelProf === 1)},
+              {value:"2", content:"éditeur collège", selected:(levelProf === 2)},
+              {value:"3", content:"éditeur avancé sans nombres complexes", selected:(levelProf === 3)},
+              {value:"4", content:"éditeur avancé avec nombres complexes", selected:(levelProf === 4)},
+            ]
+        );
+        // fonctions de l'applet d'édition
+        allowProf = parametres.allowProf || allowFullList;
+        checkboxes = [];
+        for (allow in allowDef) {
+          if (allowDef.hasOwnProperty(allow)) {
+            checkboxes.push({
+              label:allowDef[allow],
+              value:allow,
+              checked:(allowProf.indexOf(allow) > -1)
+            });
+          }
+        }
+        var allowProfCb = formEditor.addCheckboxes(
+            profGroup,
+            "parametres[allowProf]",
+            {label:"fonctionnalités formateur", remarque:"(ci-dessous)"},
+            checkboxes
+        );
+        var $allowProfCb = $(allowProfCb.parentNode);
+
+        // ajout figure
+        var dataContainer = formEditor.addFormGroup(divParametres);
+        $dataContainer = $(dataContainer);
+        figureBase64Ini = ressource.parametres.figure || "";
         var figureData = formEditor.addTextarea(
             dataContainer,
-            {id:"figure", name:"parametres[figure]"},
+            {id:"figure", name:"parametres[figure]", cols:80, rows:5},
             {label: "Figure (encodée en base64)", content: figureBase64Ini}
         );
-        $(dataContainer).hide();
-        var appletContainer = formEditor.addFormGroup(groupParametres.parentNode);
-        var appletName = "mtgApplet";
-        var appletWidth = Math.max(appletContainer.offsetWidth || 0, 800);
-        var applet = formEditor.addElement(
-            appletContainer,
-            'applet',
-            {
-              name: appletName,
-              code: "mathgraph32.MtgFrame.class",
-              archive: "MathGraph32Applet.jar",
-              codebase: "http://www.mathgraph32.org/webstart/4.9.9/",
-              width: appletWidth,
-              height: Math.round(appletWidth*0.75)
-            },
-            {label:"Figure mathgraph"}
-        );
-        /*
-        var applet = formEditor.addElement(
-            figureWrapper,
-            'object',
-            {
-              name: appletName,
-              type: "application/x-java-applet",
-              width: appletWidth,
-              height: Math.round(appletWidth*0.75)
-            },
-            {label:"Figure mathgraph"}
-        );
-        // aj pour object
-        S.addElement(applet, 'param', {name:"codebase", value:"http://www.mathgraph32.org/webstart/4.9.9/"});
-        S.addElement(applet, 'param', {name:"archive", value:"MathGraph32Applet.jar"});
-        S.addElement(applet, 'param', {name:"code", value:"mathgraph32.MtgFrame"});
-        S.addElement(applet, 'param', {name:"name", value:appletName});
-        */
-        S.addElement(applet, 'param', {name:"initialFigure", value:"orthonormalFrame"});
-        S.addElement(applet, 'param', {name:"allowLeftToolbar", value:"true"});
-        S.addElement(applet, 'param', {name:"allowTopToolbar", value:"true"});
-        S.addElement(applet, 'param', {name:"allowRightToolbar", value:"true"});
-        S.addElement(applet, 'param', {name:"allowToolsChoice", value:"true"});
-        S.addElement(applet, 'param', {name:"allowMenuBar", value:"true"});
-        S.addElement(applet, 'param', {name:"allowFileMenu", value:"true"});
-        S.addElement(applet, 'param', {name:"allowOptionsMenu", value:"true"});
-        S.addElement(applet, 'param', {name:"language", value:"true"});
-        S.addElement(applet, 'param', {name:"level", value:"3"});
-        S.addElement(applet, 'param', {name:"figureData", value: figureBase64Ini});
+        $figureData = $(figureData);
 
-        S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ");
-        S.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com");
-        S.addText(applet, " pour installer java.");
+        appletContainer = formEditor.addFormGroup(divParametres);
+        $appletContainer = $(appletContainer);
 
-        var isSubmitChecked = false;
-        var $form = $("form#formRessource");
+        $form = $("form#formRessource");
         $form.submit(function () {
-          var retour = false;
-          if (isSubmitChecked) {
-            retour = true;
-          } else {
-            try {
-              var newFigure = document.mtgApplet.getScript();
-              S.log("on récupère " + newFigure);
-              // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
-              if (newFigure) {
-                setTimeout(function () {
-                  $(figureData).val(newFigure);
-                  isSubmitChecked = true;
-                  $form.submit();
-                }, 0);
-              } else {
-                retour = true;
-              }
-            } catch (error) {
-              ST.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste");
-              isSubmitChecked = true;
-            }
-          }
-
-          return retour;
+          submitHandler(); // on peut pas passer sa valeur actuelle en argument, faut l'exécuter à chaque fois
         });
+
+        // le hide/show au changement de select
+        $(levelProfSelect).change(function () {
+          levelProf = parseInt($(this).val(), 10);
+          if (levelProf === -1) {
+            $allowProfCb.hide();
+            hideApplet();
+          } else {
+            $allowProfCb.show();
+            showApplet();
+          }
+        });
+
+        if (isApplet) showApplet();
+        else $allowProfCb.hide(); // pas de hideApplet tant qu'on l'a pas mise
       }
     };
   });
