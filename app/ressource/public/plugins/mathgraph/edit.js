@@ -75,7 +75,6 @@ try {
       // on peut la mettre dans le dom
       S.empty(appletContainer);
       appletContainer.appendChild(applet);
-      isAppletAdded = true;
     }
 
     function hideApplet() {
@@ -147,7 +146,7 @@ try {
     var ST = S.sesatheque;
 
     // var globales à notre module (initialisées par init et utilisées par nos fcts)
-    var allowProf, isAppletAdded, levelEleve, levelProf, figureBase64Ini,
+    var allowProf, levelEleve, levelProf, figureBase64Ini,
         width, height, $width, $height,
         appletContainer,
         $appletContainer, $figureData,
@@ -156,7 +155,7 @@ try {
     var allowDef = {
       "MenuBar" : "Barre de menu",
       "LeftToolbar" : "Barre d'outils de gauche",
-      "topToolbar" : "Barre d'outils du haut",
+      "TopToolbar" : "Barre d'outils du haut",
       "RightToolbar" : "Barre d'outils de droite",
       "IndicationArea" : "Zone d'information du bas",
       "ToolsChoice" : "Choix des outils",

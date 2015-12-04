@@ -32,6 +32,99 @@
 try {
   define(function () {
     'use strict';
+
+    function displayJava(ressource, options, next) {
+      var params = ressource.parametres;
+      var container = options.container;
+      var width = Math.max(container.offsetWidth || 0, 640);
+      var height = Math.round(width * 0.75);
+      if (params.height && params.height > 400) height = params.height;
+      var appletName = "mtgApplet";
+      // faut d'abord créer un élément html complet avant de le mettre dans le dom,
+      // sinon il peut lancer le jar avant d'avoir tous les params
+      var applet = S.getElement(
+          'applet',
+          {
+            id:appletName,
+            //name: appletName +"name",
+            code: "mathgraph32.MtgFrame.class",
+            archive: options.pluginBase +"MathGraph32Applet.jar",
+            width: width,
+            height: height,
+            style:"border:#000 solid 1px;"
+          }
+      );
+      var allowFull = ["MenuBar", "LeftToolbar", "TopToolbar", "RightToolbar", "IndicationArea", "ToolsChoice", "FileMenu","OptionsMenu"];
+      var allowEleve = params.allowEleve || allowFull;
+      allowFull.forEach(function (allow) {
+        S.addElement(applet, 'param', {name:"allow" +allow, value:(allowEleve.indexOf(allow) > -1)?"true":"false"});
+      });
+      S.addElement(applet, 'param', {name:"language", value:"true"});
+      S.addElement(applet, 'param', {name:"level", value:params.level});
+      if (params.figure) S.addElement(applet, 'param', {name:"figureData", value: params.figure});
+      else S.addElement(applet, 'param', {name:"initialFigure", value:"orthonormalFrame"});
+      S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ");
+      S.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com");
+      S.addText(applet, " pour installer java.");
+      // on peut la mettre dans le dom
+      S.empty(container);
+      container.appendChild(applet);
+    }
+    
+    function displayJs(ressource, options, next) {
+      var container = options.container;
+      // on enverra un résultat seulement à la fermeture
+      if (options.resultatCallback && container.addEventListener) {
+        container.addEventListener('unload', function () {
+          options.resultatCallback({
+            ressType: 'mathgraph',
+            ressOid: ressource.oid,
+            date: startDate,
+            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
+            score: 1
+          });
+        });
+      }
+
+      var dependencies = [
+        "http://www.mathgraph32.org/js/4.9.9/mtg32jsmin.js",
+        "http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js"
+      ];
+      require(dependencies, function () {
+        /*global MathJax, mtg32*/
+        if (typeof MathJax === "undefined") throw new Error("Mathjax n'est pas chargé");
+        if (typeof mtg32 === "undefined") throw new Error("Mathgraph32 n'est pas chargé");
+        var width = ressource.parametres.width || container.offsetWidth || 800;
+        var height = ressource.parametres.height || width * 0.75 || 600;
+        var svgId = "mtg32svg";
+        // la consigne éventuelle
+        if (ressource.parametres.consigne) S.addElement(container, 'p', null, ressource.parametres.consigne);
+        // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
+        //var svg = S.addElement(container, 'svg', {id:'svg', width:"800px", height:"500px", xmlns:"http://www.w3.org/2000/svg"});
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttributeNS(null, "id", svgId);
+        svg.setAttributeNS(null, "width", width);
+        svg.setAttributeNS(null, "height", height);
+        svg.style.display = "block";
+        container.appendChild(svg);
+        MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [["$", "$"], ["\\(", "\\)"]]
+          },
+          jax: ["input/TeX", "output/SVG"],
+          TeX: {extensions: ["color.js"]},
+          messageStyle: 'none'
+        });
+        MathJax.Hub.Queue(function () {
+          var mtg32App = new mtg32.mtg32App();
+          mtg32App.addDoc(svgId, ressource.parametres.figure, true);
+          mtg32App.calculateAndDisplayAll();
+          if (next) next();
+        });
+      });
+    }
+
+
     /**
      * module pour afficher les ressources mathgraph32 (avec le lecteur js)
      * @plugin mathgraph
@@ -58,19 +151,6 @@ try {
         var container = options.container;
         if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
 
-        // on enverra un résultat seulement à la fermeture
-        if (options.resultatCallback && container.addEventListener) {
-          container.addEventListener('unload', function () {
-            options.resultatCallback({
-              ressType: 'mathgraph',
-              ressOid: ressource.oid,
-              date: startDate,
-              duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-              score: 1
-            });
-          });
-        }
-
         S.log('start mathgraph display avec la ressource', ressource);
         //les params minimaux
         if (!ressource.oid || !ressource.titre || !ressource.parametres) {
@@ -79,42 +159,8 @@ try {
         if (!ressource.parametres.figure) {
           throw new Error("Pas de figure mathgraph en paramètre");
         }
-        var dependencies = [
-          "http://www.mathgraph32.org/js/4.9.9/mtg32jsmin.js",
-          "http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js"
-        ];
-        require(dependencies, function () {
-          /*global MathJax, mtg32*/
-          if (typeof MathJax === "undefined") throw new Error("Mathjax n'est pas chargé");
-          if (typeof mtg32 === "undefined") throw new Error("Mathgraph32 n'est pas chargé");
-          var width = ressource.parametres.width || container.offsetWidth || 800;
-          var height = ressource.parametres.height || width * 0.75 || 600;
-          var svgId = "mtg32svg";
-          // la consigne éventuelle
-          if (ressource.parametres.consigne) S.addElement(container, 'p', null, ressource.parametres.consigne);
-          // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
-          //var svg = S.addElement(container, 'svg', {id:'svg', width:"800px", height:"500px", xmlns:"http://www.w3.org/2000/svg"});
-          var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          svg.setAttributeNS(null, "id", svgId);
-          svg.setAttributeNS(null, "width", width);
-          svg.setAttributeNS(null, "height", height);
-          svg.style.display = "block";
-          container.appendChild(svg);
-          MathJax.Hub.Config({
-            tex2jax: {
-              inlineMath: [["$", "$"], ["\\(", "\\)"]]
-            },
-            jax: ["input/TeX", "output/SVG"],
-            TeX: {extensions: ["color.js"]},
-            messageStyle: 'none'
-          });
-          MathJax.Hub.Queue(function () {
-            var mtg32App = new mtg32.mtg32App();
-            mtg32App.addDoc(svgId, ressource.parametres.figure, true);
-            mtg32App.calculateAndDisplayAll();
-            if (next) next();
-          });
-        });
+        if (ressource.parametres.levelEleve > 0) displayJava(ressource, options, next);
+        else displayJs(ressource, options, next);
       } catch (error) {
         if (next) next(error);
         else ST.addError(error);

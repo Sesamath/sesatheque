@@ -149,7 +149,7 @@
       }
     };
     // on ajoute nos plugins
-    ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "ecjs", "em", "j3p", "iep", "lingot", "mental", "tep", "testd", "url"].forEach(function (plugin) {
+    ["am", "arbre", "ato", "calkc", "coll_doc", "ec2", "ecjs", "em", "j3p", "iep", "lingot", "mathgraph", "mental", "tep", "testd", "url"].forEach(function (plugin) {
       requireConfig.paths[plugin] = base + 'plugins/' + plugin + '/' + plugin;
     });
     //console.log("la conf de requireJs", requireConfig);
