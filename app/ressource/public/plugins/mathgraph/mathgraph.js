@@ -66,13 +66,43 @@ try {
       S.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ");
       S.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com");
       S.addText(applet, " pour installer java.");
+      var p = S.addElement(applet, 'p', {}, "Sinon, visualiser cette page avec le ");
+      S.addElement(p, 'a', {href:"?js=1"}, "lecteur javascript");
+      S.addText(p, " (mais l'enregistrement de la figure ne sera pas possible).");
       // on peut la mettre dans le dom
       S.empty(container);
       container.appendChild(applet);
+
+      if (options.resultatCallback && container.addEventListener) {
+        // et on ajoute un bouton pour envoyer
+        p = S.addElement(container, "p");
+        var button = S.addElement(p, "button", {}, "Envoyer la figure");
+        button.addEventListener("click", function () {
+          S.log("envoi de la figure");
+          try {
+            var newFigure = document[appletName].getScript();
+            options.resultatCallback({
+              ressType: 'mathgraph',
+              ressOid: ressource.oid,
+              date: startDate,
+              duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
+              score: 1,
+              reponse : newFigure
+            });
+          } catch (error) {
+            S.log.error(error);
+            ST.addError("Impossible de récupérer la figure de l'applet java");
+          }
+        });
+      }
+
+      // cb si présente
+      if (next) next();
     }
-    
+
     function displayJs(ressource, options, next) {
       var container = options.container;
+
       // on enverra un résultat seulement à la fermeture
       if (options.resultatCallback && container.addEventListener) {
         container.addEventListener('unload', function () {
@@ -84,6 +114,11 @@ try {
             score: 1
           });
         });
+      }
+
+      // on affiche un avertissement si on force
+      if (ressource.parametres.levelEleve > 0 && S.getURLParameter("js")) {
+        S.addElement(container, "p", {class:"warning"}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible");
       }
 
       var dependencies = [
@@ -159,7 +194,7 @@ try {
         if (!ressource.parametres.figure) {
           throw new Error("Pas de figure mathgraph en paramètre");
         }
-        if (ressource.parametres.levelEleve > 0) displayJava(ressource, options, next);
+        if (ressource.parametres.levelEleve > 0 && !S.getURLParameter("js")) displayJava(ressource, options, next);
         else displayJs(ressource, options, next);
       } catch (error) {
         if (next) next(error);
