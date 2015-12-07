@@ -19,6 +19,10 @@
           ng-if="!update.job && !update.done"
           ng-click="doUpdate(update)">Démarrer</a>
         <span ng-if="update.done">Appliqué le {{update.$done}}</span>
+        <a
+          class="button-link button-assertive"
+          ng-if="!update.job && update.done"
+          ng-click="doUpdate(update)">Rejouer</a>
       </td>
     </tr>
   </tbody>

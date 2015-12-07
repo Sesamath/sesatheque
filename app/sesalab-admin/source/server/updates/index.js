@@ -5,7 +5,7 @@ var fs = require('fs');
 
 app.entity('AppliedUpdate', function() {
   this.defineIndex('id', 'string');
-  this.defineIndex('date', 'date');
+  this.defineIndex('done', 'date');
 });
 
 app.service('$update', function(AppliedUpdate) {
@@ -22,10 +22,12 @@ app.service('$update', function(AppliedUpdate) {
     })
 
     flow()
-    .seq(function() { AppliedUpdate.match().grab(this) })
+    .seq(function() { AppliedUpdate.match().sort('oid','desc').grab(this) })
     .seq(function(updates) {
       updates.forEach(function(update) {
+        if (!_updates[update.id].done) {
         _updates[update.id] = _.extend(_updates[update.id], update);
+        }
       })
       cb(null, _updates);
     })
@@ -44,7 +46,6 @@ app.controller(function($entities, $job, $update, AppliedUpdate) {
     flow()
     .seq(function() { $update.list(this) })
     .seq(function(updates) {
-      console.log(updates);
       context.json({list: _.values(updates)});
     })
     .catch(context.next);
@@ -53,20 +54,16 @@ app.controller(function($entities, $job, $update, AppliedUpdate) {
   this.get('admin/api/update/:id', function(context) {
     var id = context.arguments.id;
     flow()
-    .seq(function() { $update.list(this) })
-    .seq(function(updates) {
-      console.log(updates);
-      var fn = require(updates[id].file);
+    .seq(function() {
+      var fn = require(__dirname+'/update'+id+'.js');
       $job.create(
 
       function(job) {
-        console.log('startCallback');
         var id = parseInt(id);
         fn(job);
       },
 
       function(job) {
-        console.log('initCallback');
         context.json({job: job});
       },
 
@@ -75,7 +72,6 @@ app.controller(function($entities, $job, $update, AppliedUpdate) {
           id: id,
           done: new Date()
           }).store(function() {
-          console.log('Update logged');
         })
       });
     })

@@ -4,7 +4,7 @@ function build_scripts() {
   step "Construction des scripts"
   indexify 'require("./$$");' source/client/_modules.js '**/index.js'
   indexify 'require("./$$");' source/server/_modules.js '**/index.js'
-  script-builder --debug=$DEBUG source/client/app.js public/app.js
+  script-builder --debug=$DEBUG --source=source/client/app.js public/app.js
 }
 
 function build_styles() {
