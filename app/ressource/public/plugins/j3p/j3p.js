@@ -36,7 +36,7 @@
  */
 
 try {
-  define(['head'], function () {
+  define(['tools/xhr', 'head'], function (xhr) {
     'use strict';
 
     /**
@@ -59,6 +59,36 @@ try {
      * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
      */
     j3p.display = function (ressource, options, next) {
+      /**
+       * Chargera la ressource quand on aura éventuellement récupéré lastResultat
+       */
+      function load() {
+        require([urlBaseJ3p + '/outils/loader.js'], function (loader) {
+          try {
+            // on cache toujours le titre
+            ST.hideTitle();
+            // on lui donne nos params
+            loader.init({urlBaseJ3p: urlBaseJ3p, log: S.log});
+            var j3pOptions = {};
+            if (options.resultatCallback) {
+              j3pOptions.resultatCallback = options.resultatCallback;
+            }
+            if (options.lastResultat) {
+              j3pOptions.lastResultat = options.lastResultat;
+            }
+            S.log("loader j3p avec le graphe", ressource.parametres.g);
+            if (ressource.parametres.g instanceof Array) {
+              loader.charge(options.container, ressource.parametres.g, j3pOptions);
+              next(); // le chargement sera pas terminé mais le loader propose pas de callback
+            } else {
+              next(new Error("Le graphe n'est pas un tableau"));
+            }
+          } catch (error) {
+            ST.addError(error);
+          }
+        });
+      }
+
       S.log('j3p.display avec ressource et options', ressource, options);
       //les params minimaux
       if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
@@ -70,31 +100,21 @@ try {
         urlBaseJ3p = 'http://j3p.devsesamath.net';
       }
 
-      // et on délègue tout le reste
-      require([urlBaseJ3p + '/outils/loader.js'], function (loader) {
-        try {
-          // on cache toujours le titre
-          ST.hideTitle();
-          // on lui donne nos params
-          loader.init({urlBaseJ3p: urlBaseJ3p, log: S.log});
-          var j3pOptions = {};
-          if (options.resultatCallback) {
-            j3pOptions.resultatCallback = options.resultatCallback;
+      var lastResultUrl = S.getURLParameter("lastResultUrl");
+      if (lastResultUrl) {
+        xhr.get(lastResultUrl, {responseType:"json"}, function (error, lastResultat) {
+          if (error) {
+            ST.addError("Impossible de récupérer le dernier résultat");
+            S.log.error(error);
+          } else if (lastResultat && lastResultat.ressId) {
+            S.log("on a récupéré lastResultat", lastResultat);
+            options.lastResultat = lastResultat;
           }
-          if (options.lastResultat) {
-            j3pOptions.lastResultat = options.lastResultat;
-          }
-          S.log("loader j3p avec le graphe", ressource.parametres.g);
-          if (ressource.parametres.g instanceof Array) {
-            loader.charge(options.container, ressource.parametres.g, j3pOptions);
-            next(); // le chargement sera pas terminé mais le loader propose pas de callback
-          } else {
-            next(new Error("Le graphe n'est pas un tableau"));
-          }
-        } catch (error) {
-          ST.addError(error);
-        }
-      });
+          load();
+        });
+      } else {
+        load();
+      }
     };
 
     return j3p;
