@@ -166,6 +166,18 @@ lassi.on('afterRailUse', function (rail, name) {
   if (name === 'session') afterRailSession(rail)
 })
 
+if (!isProd) {
+  sesatheque.controller(function() {
+    this.serve('doc', __dirname+'/../documentation');
+  });
+}
+
+lassi.log("avant bootstrap")
+// et on lance le boot
+sesatheque.bootstrap()
+
+// le reste est la fct afterRailSession qui ajoute nos middlewares
+
 /**
  * Ajoute sur le rail les requetes en console (en dev), CORS, expires, access.log et perf.log
  * @param {Object} rail le rail express
@@ -325,13 +337,3 @@ function afterRailSession(rail) {
     })
   }
 }
-
-if (!isProd) {
-  sesatheque.controller(function() {
-    this.serve('doc', __dirname+'/../documentation');
-  });
-}
-
-lassi.log("avant bootstrap")
-// et on lance le boot
-sesatheque.bootstrap()
