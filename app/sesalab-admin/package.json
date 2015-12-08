@@ -8,6 +8,7 @@
   "license": "ISC",
   "dependencies": {
     "an-flow": "^1.1.5",
+    "an-format-date": "^1.0.0",
     "an-serializer": "^1.0.0",
     "an-uuid": "^1.0.0",
     "basic-auth-connect": "^1.0.0"
