@@ -59,11 +59,17 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @private
    * @param {Alias[]}             liste      La liste d'alias à laquelle ajouter les ressources fournies
    * @param {Ressource[]|Alias[]} ressources La liste des ressources|aliases à ajouter après vérif de leur intégrité
+   * @param {boolean}             [parOrigine=false] Passer true pour récupérer les refs sous la forme origine/idOrigine
    */
-  function addRefs(liste, ressources) {
+  function addRefs(liste, ressources, parOrigine) {
     ressources.forEach(function (ressource) {
       var alias = new Alias(ressource)
-      if (alias.ref && alias.titre && alias.type) liste.push(alias)
+      if (alias.ref && alias.titre && alias.type) {
+        if (parOrigine && ressource.origine && ressource.idOrigine) {
+          alias.ref = ressource.origine +"/" +ressource.idOrigine
+        }
+        liste.push(alias)
+      }
       else (log.errorData("pas de ref pour la ressource", ressource))
     })
   }
@@ -159,14 +165,14 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       flow().seq(function () {
         $ressourceRepository.getListe("all", {filters:[{index:"auteurs", values:[oid]}]}, this)
       }).seq(function (ressources) {
-        if (ressources.length) addRefs(refs, ressources)
+        if (ressources.length) addRefs(refs, ressources, true)
         $ressourceRepository.getListe("all", {filters:[{index:"contributeurs", values:[oid]}]}, this)
       }).seq(function (ressources) {
-        if (ressources.length) addRefs(refs, ressources)
+        if (ressources.length) addRefs(refs, ressources, true)
         EntityAlias.match('proprio').equals(oid).grab(this)
       }).seq(function (aliases) {
         log.debug("on récupère les alias de " +oid, aliases)
-        if (aliases.length) addRefs(refs, aliases)
+        if (aliases.length) addRefs(refs, aliases, true)
         sendListe(context, null, refs)
       }).catch(function (error) {
         sendListe(context, error)

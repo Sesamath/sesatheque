@@ -456,7 +456,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             addToken(context, ressource)
             $views.printForm(context, error, ressource, options)
           } else {
-            // la ressource existe mais on donne pas l'info
+            // la ressource existe mais on donne pas l'info si on a pas les droits
             denied404(context, oid)
           }
         } else {
@@ -534,7 +534,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             jsBloc : {
               $view : __dirname +"/views/js",
               jsCode : 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-                context.get.closerId +'", ressource:' +JSON.stringify($ressourceConverter.toRef(ressource)) +'}, "*")'
+                context.get.closerId +'", ressource:' +JSON.stringify($ressourceConverter.toRef(ressource, (ressource.origine === "local"))) +'}, "*")'
             }
           })
         } else {

@@ -238,16 +238,20 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
   /**
    * Renvoie une Ref à une ressource, c'est un Alias sans oid ni proprio, avec enfants éventuels
    * @memberOf $ressourceConverter
-   * @param ressource
+   * @param {Ressource} ressource
+   * @param {boolean}   refParOrigineSiLocal passer true pour récupérer une ref en local/uuid
    * @return {Object} un Alias sans oid ni proprio, mais avec enfants éventuels
    */
-  $ressourceConverter.toRef = function (ressource) {
+  $ressourceConverter.toRef = function (ressource, refParOrigineSiLocal) {
     var alias = new Alias(ressource)
     // au cas où ressource serait déjà un alias on nettoie
     if (alias.oid) delete alias.oid
     if (alias.proprio) delete alias.proprio
     // et on ajoute d'éventuels enfants
     if (alias.type === "arbre" && ressource.enfants) alias.enfants = ressource.enfants
+    // et on donne origine/idOrigine en ref si l'origine est locale
+    if (refParOrigineSiLocal && ressource.publie && ressource.origine === "local" && ressource.idOrigine)
+      alias.ref = ressource.origine +'/' +ressource.idOrigine
 
     return alias
   }
