@@ -2,5 +2,13 @@
   {
     "date": "2015-11-04T08:30:36.450Z",
     "description": "Normalisation et nettoyage des arbres"
+  },
+  {
+    "date": "2015-12-09T17:42:00.000Z",
+    "description": "Move idOrigine => cle pour les ressources d'origine local"
+  },
+  {
+    "date": "2015-12-09T17:55:00.000Z",
+    "description": "Ajout de cle pour les corrections"
   }
 ]

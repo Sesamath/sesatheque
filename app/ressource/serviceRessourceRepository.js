@@ -37,7 +37,7 @@ var flow        = require('an-flow')
 var elementtree = require('elementtree')
 var request     = require('request')
 //var util = require('util')
-var uuid = require('node-uuid')
+var uuid = require('an-uuid')
 
 var config = require('./config')
 var appConfig = require('../config')
@@ -571,8 +571,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     log.debug('load ressource_' +oid, null, 'repository')
     if (_.isString(oid) && oid.indexOf('/') > 0) {
       var p = oid.split('/')
-      if (p.length === 2) $ressourceRepository.loadByOrigin(p[0], p[1], next)
-      else next(new Error("identifiant invalide : " +oid))
+      if (p.length === 2) {
+        if (p[0] === "cle") $ressourceRepository.loadByCle(p[1], next)
+        else $ressourceRepository.loadByOrigin(p[0], p[1], next)
+      } else {
+        next(new Error("identifiant invalide : " +oid))
+      }
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
         if (ressourceCached) next(null, EntityRessource.create(ressourceCached))
@@ -584,6 +588,32 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
+   * Récupère une ressource d'après sa cle et la passe à next
+   * @memberOf $ressourceRepository
+   * @param {string}            cle
+   * @param {ressourceCallback} next      appelée avec une EntityRessource
+   */
+  $ressourceRepository.loadByCle = function(cle, next) {
+    if (cle) {
+      $cacheRessource.getByOrigine("cle", cle, function(error, ressourceCached) {
+        if (ressourceCached) {
+          next(null, EntityRessource.create(ressourceCached))
+        } else {
+          EntityRessource
+              .match('cle').equals(cle)
+              .grabOne(function (error, ressource) {
+                cacheAndNext(error, ressource, next)
+              })
+        }
+
+      })
+    } else {
+      return next(new Error("Clé manquante, impossible de charger la ressource"))
+    }
+
+  } // loadByOrigin
+
+  /**
    * Récupère une ressource d'après son idOrigine et la passe à next
    * @memberOf $ressourceRepository
    * @param {string}            origine
@@ -591,24 +621,28 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
   $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
-    if (!origine || !idOrigine) {
-      log.error('origine ou idOrigine manquant dans loadByOrigin')
-      return next()
+    if (origine && idOrigine) {
+      if (origine === "cle") {
+        $ressourceRepository.loadByCle(idOrigine, next)
+      } else {
+        $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
+          if (ressourceCached) {
+            next(null, EntityRessource.create(ressourceCached))
+          } else {
+            EntityRessource
+                .match('origine').equals(origine)
+                .match('idOrigine').equals(idOrigine)
+                .grabOne(function (error, ressource) {
+                  cacheAndNext(error, ressource, next)
+                })
+          }
+
+        })
+      }
+    } else {
+      return next(new Error("Origine ou idOrigine manquant, impossible de charger la ressource"))
     }
 
-    $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
-      if (ressourceCached) {
-        next(null, EntityRessource.create(ressourceCached))
-      } else {
-        EntityRessource
-            .match('origine').equals(origine)
-            .match('idOrigine').equals(idOrigine)
-            .grabOne(function (error, ressource) {
-              cacheAndNext(error, ressource, next)
-            })
-      }
-
-    })
   } // loadByOrigin
 
   /**
@@ -690,9 +724,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       this(null, ressource)
 
     }).seq(function (ressource) {
-      // on génère idOrigine pour local s'il manque
-      if (ressource.origine === "local" && !ressource.idOrigine) {
-        ressource.idOrigine = uuid.v1();
+      // on génère la clé pour local si elle manque
+      if (ressource.origine === "local" && !ressource.cle) {
+        ressource.cle = uuid();
       }
       this(null, ressource)
 

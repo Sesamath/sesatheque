@@ -115,12 +115,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.layout = 'iframe'
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      // on regarde si c'est un anonyme qui veut lire une ressource privée locale
-      // et on lui donne un passe droit dans ce cas (élève qui regarde une ressource du prof)
-      if (ressource.restriction === config.constantes.restriction.prive && ressource.publie && ressource.origine === "local") ressource.restriction = 0
-      checkAndAffiche(context, error, ressource, 'display')
-    })
+    if (origine === "cle") {
+      $ressourceRepository.loadByCle(idOrigine, function (error, ressource) {
+        // on fait sauter la restriction si c'est une ressource publiée dont on connait la clé
+        if (!error && ressource && ressource.publie) ressource.restriction = 0
+        checkAndAffiche(context, error, ressource, 'display')
+      })
+    } else {
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        checkAndAffiche(context, error, ressource, 'display')
+      })
+    }
   })
   /**
    * Page preview (avec le layout du site)

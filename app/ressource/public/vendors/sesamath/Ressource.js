@@ -82,6 +82,12 @@ function Ressource(initObj) {
    */
   this.oid = filters.int(values.oid) || undefined; // on préfère l'absence de propriété à 0
   /**
+   * Une clé permettant de lire la ressource (si elle est publiée) en outrepassant les droits
+   * @default undefined
+   * @type {string}
+   */
+  this.cle = filters.string(values.cle);
+  /**
    * identifiant du dépôt d'origine (où est stockée et géré la ressource), "local" si créé sur cette sesatheque
    * @default ""
    * @type {string}

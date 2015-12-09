@@ -1,19 +1,19 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "start": "./scripts/run",
-    "wpwatch" : "webpack --watch"
+    "wpwatch": "webpack --watch"
   },
   "dependencies": {
     "an-flow": "^1.1.0",
+    "an-uuid": "^1.0.0",
     "lassi": "git://src.sesamath.net/lassi#1.8.41",
     "lodash": "^3.6.0",
     "memcached": "^2.1.0",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
-    "node-uuid": "^1.4.3",
     "request": "^2.39.0"
   },
   "devDependencies": {

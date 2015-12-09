@@ -74,6 +74,11 @@
       if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
     }
     /**
+     * Clé de lecture
+     * @type {string}
+     */
+    if (initObj.cle) this.cle = initObj.cle;
+    /**
      * Titre
      * @type {string}
      */
@@ -112,12 +117,12 @@
      * @type {string}
      */
     this.base = initObj.base;
-    if (initObj.proprio) {
+    if (initObj.userOid) {
       /**
        * L'oid du user qui créé l'alias (quand c'est un user qui copie une ressource non éditable dans les siennes)
        * @type {Integer}
        */
-      this.proprio = initObj.proprio;
+      this.userOid = initObj.userOid;
     }
   }
 

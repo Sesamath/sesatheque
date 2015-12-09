@@ -59,9 +59,10 @@ module.exports = function (EntityRessource) {
     }
 
     // ajoute les éventuelles propriétés supplémentaire de notre objet initial
-    _.each(initObj, function (value, key) {
-      if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug("la propriété " +key +" a été ignorée dans le constructeur de Ressource")
-    })
+    //_.each(initObj, function (value, key) {
+    //  if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug("la propriété " +key +" a été ignorée dans le constructeur de Ressource")
+    //})
+
     // la langue par défaut
     if (this.langue) {
       // on rectifie fre en fra
@@ -77,6 +78,7 @@ module.exports = function (EntityRessource) {
   // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
 
   EntityRessource
+    .defineIndex('cle', 'string')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
     .defineIndex('type', 'string')

@@ -29,44 +29,38 @@
  * pour une explication en français)
  */
 
+/*global log*/
 "use strict"
+var flow = require('an-flow')
 
-module.exports = function (EntityAlias) {
-  var config = require('../config')
-  var Alias = require('./public/vendors/sesamath/Alias')
-  var tools = require('../tools')
-
-  /**
-   * Notre entité Alias cf [Entity](lassi/Entity.html)
-   * Utilisé uniquement par l'api externalClone, qui en crée pour les ressources non modifiables
-   * et l'api liste/perso qui les récupère pour les filer à sesalab
-   * @entity EntityAlias
-   * @param {Object} initObj Un alias construit avant (Entity mergera après ce construct toutes les propriétés de initObj)
-   * @extends Entity
-   * @extends Alias
-   */
-  EntityAlias.construct(function (init) {
-    tools.merge(this, new Alias(init))
-  })
-
-  EntityAlias.table = 'alias'
-
-  EntityAlias
-    .defineIndex('ref', 'string')
-    .defineIndex('base', 'string')
-    .defineIndex('userOid', 'integer')
-
-  EntityAlias.beforeStore(function (next) {
-    if (!this.userOid) {
-      next(new Error("Impossible d'enregistrer un alias sans propriétaire"))
-    } else if (!this.type) {
-      next(new Error("Impossible d'enregistrer un alias sans type"))
-    } else if (this.ref === this.oid && (!this.base || this.base === config.application.baseUrl)) {
-      next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))
-    } else {
-      // on sauvegarde toujours la base sans le slash de fin
-      if (this.base && this.base.substr(-1) === '/') this.base = this.base.substr(0, this.base.length - 1)
-      next()
-    }
-  })
+module.exports = function(job) {
+  var EntityRessource = lassi.service("EntityRessource")
+  flow().seq(function () {
+    EntityRessource.match('origine').equals('local').count(this)
+  }).seq(function (nbRess) {
+    var tours = job.init(nbRess, 50)
+    flow(tours).seqEach(function (tour) {
+      var nextTour = this
+      log("On démarre à " + tour[0])
+      flow().seq(function () {
+        EntityRessource.match('origine').equals('local').grab(tour[1], tour[0], this)
+      }).seq(function (ressources) {
+        flow(ressources).seqEach(function (ressource) {
+          job.tick()
+          if (!ressource.cle && ressource.idOrigine) {
+            ressource.cle = ressource.idOrigine
+            delete ressource.idOrigine
+            ressource.store(this)
+          } else {
+            this()
+          }
+        }).seq(function () {
+          nextTour()
+        }).catch(job.done)
+      }).catch(job.done)
+    }).seq(function () {
+      // log("dernier tour terminé")
+      job.done("")
+    }).catch(job.done)
+  }).catch(job.done)
 }
