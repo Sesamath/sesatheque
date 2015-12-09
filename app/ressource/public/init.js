@@ -71,8 +71,10 @@ if (typeof window === 'undefined') {
       function initDom() {
         S.log('init avec les options', options);
 
-        // active la fct de log si on le demande
-        if (options.verbose) S.log.enable();
+        // (des)active la fct de log si on le demande, l'url est prioritaire sur options
+        var verbose = S.getURLParameter("verbose") || options.verbose;
+        if (verbose === "0" || verbose === "false") verbose = false;
+        if (verbose) S.log.enable();
         else S.log.disable();
 
         // on vérifie que l'on a nos containers et on les créé sinon
