@@ -414,6 +414,38 @@
       }
     };
 
+    /**
+     * Retourne l'url avec slash de fin
+     * @param {string} url
+     * @returns {string}
+     */
+    S.urlAddSlashAdd = function (url) {
+      if (typeof url === "string") {
+        if (url.length === 0 || url.substr(-1) !== "/") url += "/";
+      } else {
+        S.log.error("slashAdd veut une string, reçu " +typeof url);
+        url = "/";
+      }
+
+      return url;
+    };
+
+    /**
+     * Retourne l'url sans slash de fin
+     * @param {string} url
+     * @returns {string}
+     */
+    S.urlTrimSlash = function (url) {
+      if (typeof url === "string") {
+        if (url.length > 0 && url.substr(-1) === "/") url = url.substr(0, url.length -1);
+      } else {
+        S.log.error("slashRemove veut une string, reçu " +typeof url);
+        url = "";
+      }
+
+      return url;
+    };
+
     /****************
      * Namespace sesatheque
      */

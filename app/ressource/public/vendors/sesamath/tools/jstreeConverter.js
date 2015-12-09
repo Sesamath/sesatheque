@@ -33,6 +33,7 @@
   var jstreeConverter = {};
   // global est window dans un navigateur
   var baseUrl = (typeof global.baseUrl === 'undefined') ? '' : global.baseUrl;
+  if (baseUrl.length > 0 && baseUrl.substr(-1) === "/") baseUrl = baseUrl.substr(0, baseUrl.length -1);
   var log;
   // on prend celui-là si on le trouve
   try {
@@ -78,7 +79,6 @@
       if (ressource.dataUrl) attr['data-dataUrl'] = ressource.dataUrl;
       else if (ressource.dataUri) attr['data-dataUrl'] = base +ressource.dataUri;
       else if (ref) {
-        log.error("ressource sans dataUrl", ressource);
         prefix = (ressource.public || ressource.restriction === 0) ? 'public' : 'ressource';
         attr['data-dataUrl'] = base +'api/' +prefix +'/' +ref;
       }
