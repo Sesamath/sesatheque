@@ -520,7 +520,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $ressourceRepository.write(ressourceOriginale, this)
 
       }).seq(function (ressource) {
-        // si on a du closer=YYY dans l'url, on affiche une page avec de l'autoclose
+        // si on a du closerId=YYY dans l'url, on affiche une page qui envoie un message (Cf sesatheque-client.modifyItem)
         if (context.get.closerId) {
           context.html({
             $metas : {

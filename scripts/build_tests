@@ -1,0 +1,62 @@
+#!/bin/bash
+
+set -u
+
+dirInitial="$PWD"
+dirApp=$(dirname $0)/../
+
+ALL="sesatheque-client"
+
+function fin() {
+  cd "$dirInitial"
+}
+
+function usage() {
+  local exitCode=${1:-0}
+  echo "compile les js pour des tests manuels via /tests/*.html"
+  echo "Une option obligatoire parmi"
+  echo "  -a : tous les tests"
+  echo "  -h : afficher cette aide"
+  echo "  -c : nom du dossier dans tests"
+  exit $exitCode
+}
+
+function build() {
+  local baseSrc=node_modules/$1/tests
+  local baseDst=app/ressources/public/tests
+  [ ! -d "$baseSrc" ] && echo "Le dossier $baseSrc n'existe pas" >&2 && exit 1
+  [ ! -d "$baseSrc/build" ] && echo "Le dossier $baseSrc/build n'existe pas" >&2 && exit 1
+  for f in $baseSrc/tests/*.test.js
+  do
+    dst=$base/build/$(basename $f .test.js).bundle.js
+    echo -n "$dst "
+    node_modules/.bin/browserify -o $dst -e $f && echo "ok" || echo "KO"
+  done
+}
+
+function buildAll() {
+  local m
+  for m in $ALL
+  do
+    build $m
+  done
+}
+
+# on veut exécuter fin avant de sortir
+trap fin EXIT
+
+cd "$dirApp"
+
+# sans options on affiche l'aide
+[ $# -lt 1 ] && usage
+
+# check des options
+while getopts "ac:h" OPTION
+do
+  case $OPTION in
+    a) buildAll;;
+    c) build "$OPTARG";;
+    h) usage;;
+    *) usage 1;;
+  esac
+done

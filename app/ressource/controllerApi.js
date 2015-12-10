@@ -576,7 +576,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       var userOid = $accessControl.getCurrentUserOid(context)
       if (userOid) {
         if (oid) {
-          var url = base +"/api/public/" + oid
+          var url = base +"/api/ressource/" + oid
           var options = {
             uri: url,
             gzip: true,
@@ -604,7 +604,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                 ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
                 $ressourceRepository.write(ressource, function (error, ressource) {
                   if (error) $json.send(context, error)
-                  else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
+                  else if (ressource && ressource.oid) $json.send(context, ressource)
                   else $json.sendError(context, new Error("L'enregistrement de la ressource a échoué"))
                 })
               } else {
@@ -622,7 +622,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                     log.debug("on va sauver", alias, 'avirer', {max: 5000})
                     alias.store(function (error, alias) {
                       if (error) $json.sendError(context, error)
-                      else $json.sendOk(context, new Alias(alias))
+                      else $json.send(context, null, new Alias(alias))
                     })
                   }
                 })
