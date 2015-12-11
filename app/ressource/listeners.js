@@ -135,6 +135,12 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     }
     // un lien vers la recherche
     links.push({href: $routes.getAbs('search', null, context), value: 'Recherche', icon: 'search'})
+    // un lien mes ressources
+    var myOid = $accessControl.getCurrentUserOid(context)
+    if (myOid) {
+      links.push({href: $routes.getAbs('search', null, context) +"?auteurs=" +myOid, value: 'Mes ressources', icon: 'bookmark-o'})
+    }
+    // on peut tout ajouter
     data.navigation = {
       $view: __dirname + '/views/navigation',
       links: links
