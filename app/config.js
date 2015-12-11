@@ -63,7 +63,7 @@ var settings = {
   application : {
     name : "bibliotheque",
     // mis dans _private/config.js car dépendant de l'instance
-    baseUrl      : "http://...",
+    baseUrl      : "http://.../",
     mail : "user@example.com",
     staging: staging
   },
@@ -159,6 +159,8 @@ if (localConfig) tools.merge(settings, localConfig)
 if (settings.application.staging === "prod" && settings.$entities.database.debug) {
   delete settings.$entities.database.debug
 }
+// on ajoute toujours un slash de fin à baseUrl
+if (settings.application.baseUrl.substr(-1) !== "/") settings.application.baseUrl += "/"
 
 // Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,
 // cf _private.example/config.js

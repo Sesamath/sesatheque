@@ -534,7 +534,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             jsBloc : {
               $view : __dirname +"/views/js",
               jsCode : 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-                context.get.closerId +'", ressource:' +JSON.stringify($ressourceConverter.toRef(ressource, (ressource.origine === "local"))) +'}, "*")'
+                context.get.closerId +'", ressource:' +JSON.stringify($ressourceConverter.toRef(ressource)) +'}, "*")'
             }
           })
         } else {

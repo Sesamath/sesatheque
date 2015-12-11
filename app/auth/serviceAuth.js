@@ -151,7 +151,7 @@ module.exports = function ($accessControl, $views) {
           throw origine
         } else {
           var client = getClient(context)
-          client.check(context, baseUrl +'/validation?origine=' +origine, baseUrl+'/deconnexion')
+          client.check(context, baseUrl +'validation?origine=' +origine, baseUrl+'deconnexion')
         }
       }
     } catch (error) {
@@ -203,9 +203,9 @@ module.exports = function ($accessControl, $views) {
       if (client instanceof Error) {
         $views.printError(context, client)
       } else {
-        var urlValidate = baseUrl +'/validation'
+        var urlValidate = baseUrl +'validation'
         if (context.get.redirect) urlValidate += '?redirect=' +encodeURIComponent(context.get.redirect)
-        var urlLogout = baseUrl+'/deconnexion'
+        var urlLogout = baseUrl+'deconnexion'
         client.login(context, urlValidate, urlLogout)
       }
     }

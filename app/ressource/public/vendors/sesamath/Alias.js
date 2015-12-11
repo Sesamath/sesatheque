@@ -74,11 +74,6 @@
       if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
     }
     /**
-     * Clé de lecture
-     * @type {string}
-     */
-    if (initObj.cle) this.cle = initObj.cle;
-    /**
      * Titre
      * @type {string}
      */
@@ -112,6 +107,11 @@
      * @type {boolean}
      */
     this.public = (initObj.public || initObj.restriction === 0);
+    /**
+     * Clé de lecture
+     * @type {string}
+     */
+    if (!this.public && initObj.cle) this.cle = initObj.cle;
     /**
      * Base de la sesatheque qui gère la cible
      * @type {string}

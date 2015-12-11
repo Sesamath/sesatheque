@@ -33,10 +33,10 @@
   var jstreeConverter = {};
   // global est window dans un navigateur
   var baseUrl = (typeof global.baseUrl === 'undefined') ? '' : global.baseUrl;
-  if (baseUrl.length > 0 && baseUrl.substr(-1) === "/") baseUrl = baseUrl.substr(0, baseUrl.length -1);
+  if (baseUrl && baseUrl.substr(-1) !== "/") baseUrl += "/";
   var log;
-  // on prend celui-là si on le trouve
   try {
+    // on prend celui-là si on le trouve
     log = window.Sesamath.log;
   } catch (error) {
     log = function () {};
@@ -60,28 +60,36 @@
       var prefix;
       var attr = {};
       var base = ressource.base || defaultBase || baseUrl;
+      if (base && base.substr(-1) !== "/") base += "/";
       // ref
       var ref = ressource.id || ressource.ref || ressource.oid;
       if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine;
-      if (ref) attr['data-ref'] = ref;
-      // url complète
-      if (ressource.displayUrl) {
-        attr.href = ressource.displayUrl;
-      } else if (ressource.displayUri) {
-        // @todo à virer dès que displayUri aura définitivement disparu
-        log.error("On a encore une ressource avec displayUri", ressource);
-        attr.href = base + ressource.displayUri;
-      } else {
-        prefix = (ressource.public || ressource.restriction === 0) ? 'public' : 'ressource';
-        attr.href = base + prefix +'/voir/' +ref;
+      var isPublic = (ressource.public || ressource.restriction === 0)
+      var displayUrl = ressource.displayUrl;
+      var dataUrl = ressource.dataUrl;
+      if (ref || ressource.cle) {
+        if (ref) {
+          attr['data-ref'] = ref;
+          if (!displayUrl) {
+            if (isPublic) displayUrl = base + 'public/voir/' + ref;
+            else if (ressource.cle) displayUrl = base + 'public/voir/cle/' + ressource.cle;
+            else displayUrl = base + 'ressource/voir/' + ref;
+          }
+          if (!dataUrl) {
+            if (isPublic) dataUrl = base + 'api/public/' + ref;
+            else if (ressource.cle) dataUrl = base + 'api/public/cle/' + ressource.cle;
+            else dataUrl = base + 'api/ressource/' + ref;
+          }
+        } else {
+          if (!displayUrl) displayUrl = base + 'public/voir/cle/' + ressource.cle;
+          if (!dataUrl) dataUrl = base + 'api/public/cle/' + ressource.cle;
+        }
       }
-      if (attr.href) attr['data-displayUrl'] = attr.href;
-      if (ressource.dataUrl) attr['data-dataUrl'] = ressource.dataUrl;
-      else if (ressource.dataUri) attr['data-dataUrl'] = base +ressource.dataUri;
-      else if (ref) {
-        prefix = (ressource.public || ressource.restriction === 0) ? 'public' : 'ressource';
-        attr['data-dataUrl'] = base +'api/' +prefix +'/' +ref;
+      if (displayUrl) {
+        attr.href = displayUrl;
+        attr['data-displayUrl'] = displayUrl;
       }
+      if (dataUrl) attr['data-dataUrl'] = dataUrl;
       if (ressource.type) attr['data-type'] = ressource.type;
       if (ressource.resume) attr.alt = ressource.resume;
 

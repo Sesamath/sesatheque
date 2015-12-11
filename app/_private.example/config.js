@@ -6,7 +6,7 @@
 
 module.exports = {
   application : {
-    baseUrl : 'http://example.com',
+    baseUrl : 'http://example.com/',
     mail : "me@example.com",
     staging: 'dev' // prod ou dev
   },

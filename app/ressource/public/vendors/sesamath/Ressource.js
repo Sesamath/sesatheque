@@ -198,6 +198,10 @@ function Ressource(initObj) {
    */
   this.auteurs = filters.arrayInt(values.auteurs);
   /**
+   * Liste d'url pour les auteurs précédents
+   */
+  if (values.auteursParents) this.auteursParents = values.auteursParents;
+  /**
    * Liste d'id de contributeurs
    * @type {Integer[]}
    */

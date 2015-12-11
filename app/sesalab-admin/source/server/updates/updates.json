@@ -10,5 +10,13 @@
   {
     "date": "2015-12-09T17:55:00.000Z",
     "description": "Ajout de cle pour les corrections"
+  },
+  {
+    "date": "2015-12-11T19:25:00.000Z",
+    "description": "Ajout du slash de fin sur toutes les bases d'alias"
+  },
+  {
+    "date": "2015-12-11T19:30:00.000Z",
+    "description": "Contributeurs mis en auteurs sur commun (sinon ils peuvent pas effacer leurs clones)"
   }
 ]

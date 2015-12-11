@@ -29,46 +29,42 @@
  * pour une explication en français)
  */
 
+/*global log*/
 "use strict"
+var flow = require('an-flow')
 
-module.exports = function (EntityAlias) {
-  var config = require('../config')
-  var Alias = require('./public/vendors/sesamath/Alias')
-  var tools = require('../tools')
-
-  /**
-   * Notre entité Alias cf [Entity](lassi/Entity.html)
-   * Utilisé uniquement par l'api externalClone, qui en crée pour les ressources non modifiables
-   * et l'api liste/perso qui les récupère pour les filer à sesalab
-   * @entity EntityAlias
-   * @param {Object} initObj Un alias construit avant (Entity mergera après ce construct toutes les propriétés de initObj)
-   * @extends Entity
-   * @extends Alias
-   */
-  EntityAlias.construct(function (init) {
-    tools.merge(this, new Alias(init))
-  })
-
-  EntityAlias.table = 'alias'
-
-  EntityAlias
-    .defineIndex('ref', 'string')
-    .defineIndex('base', 'string')
-    .defineIndex('userOid', 'integer')
-
-  EntityAlias.beforeStore(function (next) {
-    if (!this.userOid) {
-      next(new Error("Impossible d'enregistrer un alias sans propriétaire"))
-    } else if (!this.type) {
-      next(new Error("Impossible d'enregistrer un alias sans type"))
-    } else if (this.ref === this.oid && (!this.base || this.base === config.application.baseUrl)) {
-      next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))
-    } else if (!this.base) {
-      next(new Error("Impossible de sauvegarder un alias sans base"))
-    } else {
-      // on sauvegarde toujours la base avec le slash de fin
-      if (this.base.substr(-1) !== '/') this.base += "/"
-      next()
-    }
-  })
+module.exports = function(job) {
+  var EntityAlias = lassi.service("EntityAlias")
+  flow().seq(function () {
+    EntityAlias.match('oid').count(this)
+  }).seq(function (nbRess) {
+    var tours = job.init(nbRess, 50)
+    flow(tours).seqEach(function (tour) {
+      var nextTour = this
+      log("On démarre à " + tour[0])
+      flow().seq(function () {
+        EntityAlias.match('oid').grab(tour[1], tour[0], this)
+      }).seq(function (aliases) {
+        flow(aliases).seqEach(function (alias) {
+          job.tick()
+          if (alias.base) {
+            if (alias.base.substr(-1) !== "/") {
+              alias.base += "/"
+              alias.store(this)
+            } else {
+              this()
+            }
+          } else {
+            // pas de base, on signale
+            log.errorData("l'alias " +alias.oid +" n'a pas de base", alias)
+            this()
+          }
+        }).seq(function () {
+          nextTour()
+        }).catch(job.done)
+      }).catch(job.done)
+    }).seq(function () {
+      job.done("")
+    }).catch(job.done)
+  }).catch(job.done)
 }
