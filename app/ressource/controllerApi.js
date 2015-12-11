@@ -980,7 +980,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
 
   /**
-   * Delete par oid
+   * Delete ressource par oid
    * @route DEL /api/ressource/:oid
    * @param {Integer} oid
    */
@@ -988,6 +988,35 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     deleteAndSend(context, context.arguments.oid)
   })
   controller.options('ressource/:oid', optionsDeleteOk)
+
+  /**
+   * Delete alias par oid
+   * @route DEL /api/ressource/:oid
+   * @param {Integer} oid
+   */
+  controller.delete('alias/:oid', function (context) {
+    if ($accessControl.isAuthenticated(context)) {
+      EntityAlias.match('oid').equals(context.get.oid).grabOne(function (error, alias) {
+        if (error) {
+          $json.sendError(context, error)
+        } else if (alias) {
+          if (alias.userOid && alias.userOid === $accessControl.getCurrentUserOid(context)) {
+            alias.delete(function (error) {
+              if (error) $json.sendError(context, error)
+              else $json.sendOk(context)
+            })
+          } else {
+            $json.sendError(context, "Vous n'êtes pas propriétaire de cet alias, impossible de le supprimer")
+          }
+        } else {
+          $json.sendError(context, "Cet alias n'existe pas ici")
+        }
+      })
+    } else {
+      $json.denied(context, "droits insuffisant pour effacer cette ressource")
+    }
+  })
+  controller.options('alias/:oid', optionsDeleteOk)
 
   /**
    * Delete par id d'origine
