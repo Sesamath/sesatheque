@@ -734,7 +734,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // le lien pour modifier les critères
               data.actions.links.push({href: context.request.originalUrl +'&modify=1', value:"Modifier cette recherche"})
               // et on ajoute des liens sur chaque ressource
-              data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
+              data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources, context)
             }
             context.html(data)
           })

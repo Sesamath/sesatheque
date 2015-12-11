@@ -506,6 +506,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     return (!getReadDeniedMessage(context, ressource))
   }
 
+
   /**
    * Retourne true si on a un user en session
    * @param {Context} context

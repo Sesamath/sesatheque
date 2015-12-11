@@ -53,7 +53,7 @@ var Alias = require('./public/vendors/sesamath/Alias')
 var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
 
-module.exports = function (EntityRessource, $ressourceRepository, $routes, $settings) {
+module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl) {
   /**
    * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
    * dont le 1er est un id de relation valide
@@ -100,14 +100,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $sett
   /**
    * Ajoute les propriétés urlXXX à chaque elt du tableau de ressource
    * @memberOf $ressourceConverter
-   * @param {Array} ressources
+   * @param {Ressource[]}   ressources
+   * @param {Context} context
    * @returns {Array} ressources
    */
-  $ressourceConverter.addUrlsToList = function (ressources) {
+  $ressourceConverter.addUrlsToList = function (ressources, context) {
     if (ressources && ressources.length) ressources.forEach(function (ressource) {
       ressource.urlDescribe = $routes.getAbs('describe', ressource)
       ressource.urlPreview = $routes.getAbs('preview', ressource)
       ressource.urlDisplay = $routes.getAbs('display', ressource)
+      if (context && $accessControl.hasPermission('update', context, ressource)) ressource.urlEdit = $routes.getAbs('edit', ressource)
     })
 
     return ressources

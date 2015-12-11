@@ -4,9 +4,13 @@
   <ul class="liste">
     {#ressources}
     <li>{oid} : {titre}
-      <span class="links">(<a href="{urlDescribe}">description</a>,
-          <a href="{urlPreview}">aperçu</a>,
-          <a href="{urlDisplay}">voir en pleine page</a>)
+      <span class="links">
+        (
+        <a href="{urlDescribe}">description</a>,
+        <a href="{urlPreview}">aperçu</a>,
+        <a href="{urlDisplay}">voir en pleine page</a>
+        {?urlEdit}, <a href="{urlEdit}">modifier</a>{/urlEdit}
+        )
       </span></li>
     {:else}
       <p>Aucune ressource</p>
