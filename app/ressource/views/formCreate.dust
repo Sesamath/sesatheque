@@ -1,9 +1,7 @@
 <form method="post" id="formRessource">
-  {?errors}
-  <div>
+  <div id="errors">
     {#errors}<p class="error">{.}</p>{/errors}
   </div>
-  {/errors}
 
   {?warnings}
   <p class="warning">

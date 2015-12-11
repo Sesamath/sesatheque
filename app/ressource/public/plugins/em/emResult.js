@@ -39,6 +39,8 @@
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
   if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
+  if (typeof window.Sesamath === "undefined") throw new Error("Il faut charger initGlobal.js avant ce script");
+  var S = window.Sesamath;
 
   /**
    * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
@@ -58,7 +60,7 @@
    * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin
    * @returns {string} Le code html
    */
-  emResult.getHtmlReponse = function (resultat, baseUrl) {
+  emResult.getHtmlReponse = function getHtmlReponse(resultat, baseUrl) {
     var output = "";
     // pour em on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
     if (typeof resultat.reponse === "string") {
@@ -79,7 +81,7 @@
    * @param {Resultat} resultat
    * @returns {string} Le code html
    */
-  emResult.getHtmlScore = function (resultat) {
+  emResult.getHtmlScore = function getHtmlScore(resultat) {
     var output = "";
     var nbok = 0;
     var nbq, lettre;
@@ -105,9 +107,9 @@
    * @param {Element} element
    * @param {string} baseUrl
    */
-  emResult.showResult = function (resultat, element, baseUrl) {
-    element.innerHTML = window.Sesamath.Sesatheque.em.getHtmlScore(resultat) +' ' +
-        window.Sesamath.Sesatheque.em.getHtmlReponse(resultat, baseUrl);
+  emResult.showResult = function showResult(resultat, element, baseUrl) {
+    S.empty(element);
+    S.addText(element, getHtmlScore(resultat) +' ' +getHtmlReponse(resultat, baseUrl));
   };
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
@@ -116,9 +118,8 @@
   } else if (typeof module === 'object' && module.exports) {
     module.exports = emResult;
   } else {
-    if (typeof window.Sesamath === "undefined") window.Sesamath = {};
-    if (!window.Sesamath.Sesatheque) window.Sesamath.Sesatheque = {};
-    window.Sesamath.Sesatheque.emResult = emResult;
+    if (!S.Sesatheque) window.Sesamath.Sesatheque = {};
+    S.Sesatheque.emResult = emResult;
   }
 
 })();

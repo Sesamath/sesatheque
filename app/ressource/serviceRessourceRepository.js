@@ -97,7 +97,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         ressource.errors = []
       }
       // on vérifie que l'on peut sauvegarder
-      if (ressource.origine && ressource.idOrigine && (!ressource.errors || !ressource.errors.length)) {
+      if (ressource.origine && (!ressource.errors || !ressource.errors.length)) {
         next(null, ressource)
       } else {
         // on bloque le save en renvoyant une erreur à next
@@ -739,8 +739,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
     }).seq(function (ressource) {
       // mise en cache et passage au suivant
-      if (!ressource.oid) this(new Error("Après un write la ressource n'a toujours pas d'oid"))
-      else {
+      if (!ressource.oid) {
+        this(new Error("Après un write la ressource n'a toujours pas d'oid"))
+      } else {
         $cacheRessource.set(ressource)
         purgeVarnish(ressource)
         log.debug('write ' + ressource.oid + ' ok')

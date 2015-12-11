@@ -13,7 +13,7 @@
         {/eq}
         {:else}Public{/restriction.value}</span>
     <p>
-    oid : {oid} ({origine.value}/{idOrigine.value},
+    oid : {oid} ({origine.value}{?idOrigine}/{idOrigine.value}{/idOrigine},
     {type.title} {type.value},{~s}
     {version.title} {version.value})<br />
     {dateCreation.title} : {dateCreation.value}<br />

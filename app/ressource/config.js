@@ -254,6 +254,7 @@ var ressourceConfig = {
     oid              : "Identifiant",
     origine          : 'Origine',
     idOrigine        : "Identifiant d'origine",
+    cle              : "Clé de lecture",
     type             : "Type technique",
     titre            : "Titre",
     resume           : "Résumé",

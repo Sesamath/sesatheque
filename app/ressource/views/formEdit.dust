@@ -19,6 +19,7 @@
          #oid:oid, cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting
       !}
       {?token}{>wrapper widget="text" o=token /}{/token}
+      {?cle}{>wrapper widget="text" o=cle /}{/cle}
       {>wrapper widget="text" o=titre /}
       {>wrapper widget="text" o=type /}
       {>wrapper widget="checkboxes" o=publie /}
@@ -29,7 +30,7 @@
     <div class="form-group">
       {>wrapper widget="text" o=oid /}
       {>wrapper widget="text" o=origine /}
-      {>wrapper widget="text" o=idOrigine /}
+      {?idOrigine}{>wrapper widget="text" o=idOrigine /}{/idOrigine}
     </div>
 
     <div class="form-group">

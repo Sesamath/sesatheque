@@ -96,8 +96,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               S.log('plugin ' + pluginName + ' chargé');
               if (options.container) S.empty(options.container);
               else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource");
-              if (options.errorsContainer) options.errorsContainer.innerHTML = '';
-              else throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs");
+              if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs");
               // On vire le titre si on nous le demande via les options ou un param dans l'url
               if (
                   (options.hasOwnProperty('showTitle') && !options.showTitle) ||

@@ -77,7 +77,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               $ressourceRepository.delete(ressource, function (error) {
                 if (error) $json.send(context, error)
                 //else $json.send(context, null, {error:"message d'erreur bidon"})
-                else $json.send(context, null, {deleted: id})
+                else $json.sendOk(context, {deleted: id})
               })
             }
           })
@@ -604,12 +604,12 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                 ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
                 $ressourceRepository.write(ressource, function (error, ressource) {
                   if (error) $json.send(context, error)
-                  else if (ressource && ressource.oid) $json.send(context, ressource)
+                  else if (ressource && ressource.oid) $json.send(context, null, ressource)
                   else $json.sendError(context, new Error("L'enregistrement de la ressource a échoué"))
                 })
               } else {
                 // un alias, on regarde si on l'avait pas déjà
-                EntityAlias.match('alias').equals(ressource.oid).match('base').equals(base).grabOne(function (error, alias) {
+                EntityAlias.match('ref').equals(ressource.oid).match('base').equals(base).grabOne(function (error, alias) {
                   if (error) {
                     $json.send(context, error)
                   } else if (alias) {

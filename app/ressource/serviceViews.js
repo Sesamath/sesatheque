@@ -373,7 +373,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * Retourne la série de labels (propriété => libellé) pour une ressource
    * (remplace parametres par enfants pour les arbres)
    * @private
-   * @param ressource
+   * @param {Ressource} ressource
    */
   function getLabels(ressource) {
     var labels = tools.clone(config.labels)
@@ -383,6 +383,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else {
       delete labels.enfants
     }
+    // idOrigine n'existe pas forcément
+    if (ressource.origine && !ressource.idOrigine) delete labels.idOrigine
 
     return labels
   }
@@ -470,11 +472,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           formData[key].choices = arrayToDust(key, value, isUnique)
           labelSuivant()
         } else if (key === "groupes") {
-          addGroupes(formData, value, labelSuivant)
+          if (value) addGroupes(formData, value, labelSuivant)
         } else if (key === "auteurs" || key === "contributeurs") {
-          addPersonnes(context, formData, key, value, labelSuivant)
+          if (value) addPersonnes(context, formData, key, value, labelSuivant)
         } else {
-          log.error(new Error("On tombe sur la clé innatendue " +key))
+          log.error(new Error("On tombe sur la clé inatendue " +key))
         }
 
       } else if (config.typesVar[key] === 'Boolean') {
@@ -524,7 +526,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         }
         // origine & idOrigine en lecture seule pour modif mais pas création
         formData.origine.readonly = true;
-        formData.idOrigine.readonly = true;
+        if (formData.idOrigine) formData.idOrigine.readonly = true;
         // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
         formData.$view = __dirname +'/views/formEdit'
 
@@ -557,6 +559,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         formData.token = {
           name  : 'token',
           value : ressource.token,
+          hidden: true
+        }
+      }
+      // idem pour la clé
+      if (ressource.cle) {
+        formData.cle = {
+          name  : 'cle',
+          value : ressource.cle,
           hidden: true
         }
       }
