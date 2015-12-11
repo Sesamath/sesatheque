@@ -45,7 +45,7 @@
    * Exporte 3 méthodes,
    * - soit pour requireJs (si define existe)
    * - soit en module amd (si on a module.exports)
-   * - soit dans window.sesatheque.j3pResult
+   * - soit dans window.Sesamath.Sesatheque.j3pResult
    * (ce code est dupliqué dans sesalab pour des questions de commodité, tous les trucResult sont dans
    * sesalab-front/source/services/formatter/index.js)
    * @module j3pResult
@@ -97,8 +97,9 @@
   } else if (typeof module === 'object' && module.exports) {
     module.exports = j3pResult;
   } else {
-    if (typeof window.sesatheque === "undefined") window.sesatheque = {};
-    window.sesatheque.j3pResult = j3pResult;
+    if (typeof window.Sesamath === "undefined") window.Sesamath = {};
+    if (!window.Sesamath.Sesatheque) window.Sesamath.Sesatheque = {};
+    window.Sesamath.Sesatheque.j3pResult = j3pResult;
   }
 
 })();

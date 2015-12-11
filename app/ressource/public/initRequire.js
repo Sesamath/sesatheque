@@ -50,7 +50,7 @@
   // Ça permet aussi de les désigner par un nom court sans se préoccuper du chemin
 
   /**
-   * Idem sesamath.addCss, qui n'est pas encore déclaré
+   * Idem Sesamath.addCss, qui n'est pas encore déclaré
    * @param file
    */
   function addCss(file) {
@@ -69,7 +69,7 @@
    */
   function getConfig (base) {
     if (typeof base !== "string") base = "/";
-    if (typeof sesamath !== "undefined" && sesamath.sesatheque && sesamath.sesatheque.base) base = sesamath.sesatheque.base;
+    if (typeof Sesamath !== "undefined" && Sesamath.Sesatheque && Sesamath.Sesatheque.base) base = Sesamath.Sesatheque.base;
     if (base.substring(-1) !== "/") base += "/";
 
     var requireConfig = {
@@ -162,12 +162,12 @@
     else if (base.substr(-1) !== "/") base += "/";
     // on l'ajoute aussi dans le dom global pour que les modules puissent le retrouver
     // sans avoir à le repréciser
-    if (typeof window.sesamath === "undefined") window.sesamath = {};
-    if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
-    window.sesamath.sesatheque.base = base;
+    if (typeof window.Sesamath === "undefined") window.Sesamath = {};
+    if (!window.Sesamath.Sesatheque) window.Sesamath.Sesatheque = {};
+    window.Sesamath.Sesatheque.base = base;
     require.config(getConfig(base));
     // ça c'est pour savoir si on a déjà chargé initRequire ou s'il faut le faire (parce que l'on veut donner une base différente en cross domain)
-    window.sesamath.sesatheque.requireBase = base;
+    window.Sesamath.Sesatheque.requireBase = base;
   }
 
   // NE PAS EFFACER ni modifier ces lignes avec CUT, ça sert à concaténer ce qui précède avec notre require.min.js)
@@ -177,7 +177,7 @@
     // conf par défaut dès l'exécution
     var base;
     try {
-      base = window.sesamath.sesatheque.base;
+      base = window.Sesamath.Sesatheque.base;
     } catch (error) {
       base = "/";
     }

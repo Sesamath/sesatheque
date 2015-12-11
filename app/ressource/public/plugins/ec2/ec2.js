@@ -42,7 +42,7 @@ try {
      */
     var ec2 = {};
     // raccourcis, si ça plante le catch gère
-    var S = window.sesamath;
+    var S = window.Sesamath;
 
     // charger_options et enregistrer_score exportées dans le dom global par display
 

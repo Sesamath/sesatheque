@@ -43,7 +43,7 @@
    * Exporte 3 méthodes,
    * - soit pour requireJs (si define existe)
    * - soit en module amd (si on a module.exports)
-   * - soit dans window.sesatheque.emResult
+   * - soit dans window.Sesamath.Sesatheque.emResult
    * @service amResult
    */
   var amResult = {};

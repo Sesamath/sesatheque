@@ -46,8 +46,8 @@ try {
     var j3p = {};
 
     // raccourcis, si ça plante le catch gère
-    var S = window.sesamath;
-    var ST = S.sesatheque;
+    var S = window.Sesamath;
+    var ST = S.Sesatheque;
 
     var urlBaseJ3p = "http://j3p.sesamath.net";
 

@@ -149,7 +149,7 @@ try {
     var url = {};
 
     // raccourcis, si ça plante le catch gère
-    var S = window.sesamath;
+    var S = window.Sesamath;
     var container, errorsContainer, isBasic, ressId, resultatCallback, startDate;
 
     /**

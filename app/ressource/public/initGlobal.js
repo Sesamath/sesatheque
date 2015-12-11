@@ -64,15 +64,15 @@
   } else {
     var w = window;
     var wd = w.document;
-    if (typeof w.sesamath === "undefined") w.sesamath = {};
+    if (typeof w.Sesamath === "undefined") w.Sesamath = {};
     /**
-     * Namespace window.sesamath, pour y mettre toutes nos fonctions globales génériques
-     * @namespace sesamath
+     * Namespace window.Sesamath, pour y mettre toutes nos fonctions globales génériques
+     * @namespace Sesamath
      */
-    var S = w.sesamath;
+    var S = w.Sesamath;
 
     /**
-     * Flag pour savoir si log() est bavard ou muet
+     * Flag pour savoir si S.log() est bavard ou muet
      * @private
      * @type {boolean}
      */
@@ -82,7 +82,6 @@
      * Méthodes globales
      *
      * On ajoute les fcts addCss, addElement, getElement en global
-     * la fct log est ajouté par init (dépend du contexte)
      */
 
     /**
@@ -90,7 +89,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addCss
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {string}  file Chemin du fichier css (mis dans href tel quel)
      */
     S.addCss = function (file) {
@@ -120,7 +119,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addElement
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {Element} parent
      * @param {string} tag
      * @param {Object=} attrs Les attributs
@@ -204,7 +203,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addText
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {Element} elt
      * @param {string} text
      */
@@ -217,7 +216,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name empty
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {Element} element
      */
     S.empty = function (element) {
@@ -232,7 +231,7 @@
      * Attention, les + sont transformés en espace (RFC 1738), les %20 aussi (RFC 3986),
      * pour récupérer des + faut qu'ils soient correctement encodés en %2B
      * @name getURLParameter
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {string}  name              Le nom du paramètre
      * @param {boolean} [noPlusTransform] Passer true pour conserver les "+" dans le retour,
      *                                      sinon ils seront transformés en espace (un + devrait être encodé %2B)
@@ -251,7 +250,7 @@
     /**
      * Retourne true si l'argument est un Array
      * @name isArray
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param arg
      * @returns {boolean}
      */
@@ -262,7 +261,7 @@
     /**
      * Retourne true si l'argument est une fonction
      * @name isFunction
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param arg
      * @returns {boolean}
      */
@@ -273,7 +272,7 @@
     /**
      * Retourne true si l'argument est une string
      * @name isString
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param arg
      * @returns {boolean}
      */
@@ -286,7 +285,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name getElement
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {string} tag
      * @param {Object=} attrs Les attributs
      * @param {string=} txtContent
@@ -316,7 +315,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name getNewId
-     * @memberOf sesamath
+     * @memberOf Sesamath
      */
     S.getNewId = (function () {
       // une closure pour conserver la valeur de cette variable privée entre 2 appels
@@ -340,7 +339,7 @@
      * Déclaré par initGlobal dès son chargement avec une fonction vide, puis remplacé éventuellement par une sortie
      * en console si un init() est appelé avec options.verbose
      * @name log
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {...*} arguments Nombre variable d'arguments, chacun sera passé à console.log ou console.error si c'est une erreur
      */
     S.log = function () {
@@ -348,30 +347,31 @@
     };
 
     /**
-     * Rend log() muet
+     * Rend S.log() muet
      * @name log.disable
-     * @memberOf sesamath
+     * @memberOf Sesamath
      */
     S.log.disable = function () {
       isLogEnable = false;
     };
 
     /**
-     * Rend log() bavard
+     * Rend S.log() bavard
      * @name log.disable
-     * @memberOf sesamath
+     * @memberOf Sesamath
      */
     S.log.enable = function () {
       isLogEnable = true;
     };
 
     /**
-     * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser log pour le dev seulement)
-     * @private
+     * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser S.log(error) pour afficher en dev seulement)
+     * @name log.error
+     * @memberOf Sesamath
      * @param {...Error} arguments autant qu'on veut (console.error appelée une fois par argument)
      */
     S.log.error = function () {
-      if (console && console.error) {
+      if (typeof console !== "undefined" && console.error) {
         for (var i = 0; i < arguments.length; i++) {
           console.error(arguments[i]);
         }
@@ -384,7 +384,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name setStyles
-     * @memberOf sesamath
+     * @memberOf Sesamath
      * @param {Element} elt
      * @param {string|object} styles
      */
@@ -410,7 +410,7 @@
           }
         }
       } catch (error) {
-        log.error(error);
+        S.log.error(error);
       }
     };
 
@@ -447,15 +447,15 @@
     };
 
     /****************
-     * Namespace sesatheque
+     * Namespace Sesamath.Sesatheque
      */
-    if (!S.sesatheque) S.sesatheque = {};
+    if (!S.Sesatheque) S.Sesatheque = {};
     /**
-     * Namespace window.sesamath.sesatheque, pour y mettre toutes des fonctions globales
+     * Namespace window.Sesamath.Sesatheque, pour y mettre toutes des fonctions globales
      * et les modules s'ils sont chargés sans require ni exports
-     * @namespace sesamath.sesatheque
+     * @namespace Sesamath.Sesatheque
      */
-    var ST = S.sesatheque;
+    var ST = S.Sesatheque;
 
     /**
      * Ajoute un texte d'erreur dans errorsContainer (#errors ou #error ou #warnings) ET dans console.error (si ça existe)
@@ -463,11 +463,12 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addError
-     * @memberOf sesamath.sesatheque
+     * @memberOf Sesamath.Sesatheque
      * @param {string|Error} error Le message à afficher
      * @param {number} [delay] Un éventuel délai d'affichage en secondes
      */
     ST.addError = function (error, delay) {
+      // on log toujours en console
       S.log.error(error);
       var errorsContainer = wd.getElementById('errors') || wd.getElementById('error') || wd.getElementById('warnings');
       var errorMsg = (error instanceof Error) ? error.toString() : error;
@@ -485,7 +486,7 @@
           }, delay * 1000);
         }
       } else {
-        log.error(new Error("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg));
+        S.log.error(new Error("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg));
       }
     };
 
@@ -494,7 +495,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name hideTitle
-     * @memberOf sesamath.sesatheque
+     * @memberOf Sesamath.Sesatheque
      */
     ST.hideTitle = function () {
       try {

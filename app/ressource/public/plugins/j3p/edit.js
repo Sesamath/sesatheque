@@ -201,8 +201,8 @@ try {
     // raccourcis
     var w = window;
     var wd = w.document;
-    var S = window.sesamath;
-    var ST = S.sesatheque;
+    var S = window.Sesamath;
+    var ST = S.Sesatheque;
 
     var $editgraphe,                 // iframe
         egWindow,

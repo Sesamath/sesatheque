@@ -38,7 +38,7 @@ try {
     "use strict";
     /* global define, window */
     // raccourcis, si ça plante le catch gère
-    var S = window.sesamath;
+    var S = window.Sesamath;
 
     /**
      * Retourne une seule fonction qui affectera les comportements de l'interface avec la gestion des étapes pour les ressources url

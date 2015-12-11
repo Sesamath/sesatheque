@@ -39,7 +39,7 @@ try {
     var coll_doc = {};
 
     // raccourcis, si ça plante le catch gère
-    var S = window.sesamath;
+    var S = window.Sesamath;
 
     /* Le moment où ce module a été chargé dans le navigateur */
     var startDate = new Date();

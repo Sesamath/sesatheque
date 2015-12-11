@@ -98,10 +98,10 @@
    * @type {string}
    */
   var base, xhr;
-  if (typeof sesamath === "undefined") window.sesamath = {};
-  var S = window.sesamath;
-  if (!S.sesatheque) S.sesatheque = {};
-  var ST = S.sesatheque;
+  if (typeof Sesamath === "undefined") window.Sesamath = {};
+  var S = window.Sesamath;
+  if (!S.Sesatheque) S.Sesatheque = {};
+  var ST = S.Sesatheque;
   if (ST.base) base = ST.base;
   else base = '/';
 

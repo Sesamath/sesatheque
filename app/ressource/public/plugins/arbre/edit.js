@@ -491,10 +491,10 @@ try {
 
     // raccourcis
     var w = window;
-    if (typeof w.sesamath === "undefined") w.sesamath = {};
-    var S = window.sesamath;
-    if (!S.sesatheque) S.sesatheque = {};
-    var ST = S.sesatheque;
+    if (typeof w.Sesamath === "undefined") w.Sesamath = {};
+    var S = window.Sesamath;
+    if (!S.Sesatheque) S.Sesatheque = {};
+    var ST = S.Sesatheque;
 
     // les containers (variables locales au module), qui seront affectés par initDom()
     var iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree;

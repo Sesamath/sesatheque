@@ -39,7 +39,7 @@ try {
      */
     var ecjs = {};
     // raccourcis, si ça plante le catch gère
-    var S = window.sesamath;
+    var S = window.Sesamath;
 
     /**
      * inspiré de http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/
@@ -61,6 +61,8 @@ try {
       //"http://calculatice.ac-lille.fr/calculatice/squelettes/css/clear.css",
       S.addCss(ecjsBase + "/lib-externes/jquery/css/start/jquery-ui-1.10.4.custom.min.css");
       S.addCss(ecjsBase + "/clc/css/clc.css");
+      // si on prend pas le css original qui reset html et body, ça casse tout (le rectangle clc s'affiche pas),
+      // mais en le laissant ça casse nos styles, faudrait le mettre toujours en iframe :-/
       require(["head_load"], function () {
         head.ready(function () {
           // on attend que tout soit fini pour virer require que Raphael et Big ne supportent pas

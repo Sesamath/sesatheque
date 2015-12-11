@@ -46,10 +46,10 @@ if (typeof window === 'undefined') {
     // raccourcis
     var w = window;
     var wd = window.document;
-    if (typeof w.sesamath === "undefined") w.sesamath = {};
-    var S = window.sesamath;
-    if (!S.sesatheque) S.sesatheque = {};
-    var ST = S.sesatheque;
+    if (typeof w.Sesamath === "undefined") w.Sesamath = {};
+    var S = window.Sesamath;
+    if (!S.Sesatheque) S.Sesatheque = {};
+    var ST = S.Sesatheque;
 
     /**
      * Notre module js que l'on exporte, une seule fonction.

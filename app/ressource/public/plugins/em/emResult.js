@@ -45,7 +45,7 @@
    * Exporte 3 méthodes,
    * - soit pour requireJs (si define existe)
    * - soit en module amd (si on a module.exports)
-   * - soit dans window.sesatheque.emResult
+   * - soit dans window.Sesamath.Sesatheque.emResult
    * (ce code est réécrit pour sesalab dans une classe qooxdoo sesalab.resultats.Em, Cfsesalab-interface/class/sesalab/resultats)
    * @namespace emResult
    */
@@ -106,8 +106,8 @@
    * @param {string} baseUrl
    */
   emResult.showResult = function (resultat, element, baseUrl) {
-    element.innerHTML = window.sesatheque.em.getHtmlScore(resultat) +' ' +
-        window.sesatheque.em.getHtmlReponse(resultat, baseUrl);
+    element.innerHTML = window.Sesamath.Sesatheque.em.getHtmlScore(resultat) +' ' +
+        window.Sesamath.Sesatheque.em.getHtmlReponse(resultat, baseUrl);
   };
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
@@ -116,8 +116,9 @@
   } else if (typeof module === 'object' && module.exports) {
     module.exports = emResult;
   } else {
-    if (typeof window.sesatheque === "undefined") window.sesatheque = {};
-    window.sesatheque.emResult = emResult;
+    if (typeof window.Sesamath === "undefined") window.Sesamath = {};
+    if (!window.Sesamath.Sesatheque) window.Sesamath.Sesatheque = {};
+    window.Sesamath.Sesatheque.emResult = emResult;
   }
 
 })();

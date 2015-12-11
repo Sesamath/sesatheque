@@ -184,7 +184,7 @@ define('tools/formEditor', [], function () {
     return S.addElement(container, 'textarea', attrs, options.content || "");
   }
 
-  var S = window.sesamath;
+  var S = window.Sesamath;
 
   return {
     addCheckboxes: addCheckboxes,
