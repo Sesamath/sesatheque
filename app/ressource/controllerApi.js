@@ -996,7 +996,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.delete('alias/:oid', function (context) {
     if ($accessControl.isAuthenticated(context)) {
-      EntityAlias.match('oid').equals(context.get.oid).grabOne(function (error, alias) {
+      EntityAlias.match('oid').equals(context.arguments.oid).grabOne(function (error, alias) {
         if (error) {
           $json.sendError(context, error)
         } else if (alias) {
