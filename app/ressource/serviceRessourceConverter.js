@@ -238,15 +238,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
   }
 
   /**
-   * Renvoie une Ref à une ressource, c'est un Alias sans oid ni userOid, avec enfants éventuels
+   * Renvoie une Ref à une ressource, c'est un Alias sans userOid, avec enfants éventuels
+   * (si ce qui sort contient oid ET ref, c'était un alias)
    * @memberOf $ressourceConverter
    * @param {Ressource} ressource
    * @return {Object} un Alias sans oid ni userOid, mais avec enfants éventuels
    */
   $ressourceConverter.toRef = function (ressource) {
     var alias = new Alias(ressource)
-    // au cas où ressource serait déjà un alias on nettoie
-    if (alias.oid) delete alias.oid
+    // on vire le proprio
     if (alias.userOid) delete alias.userOid
     // et on ajoute d'éventuels enfants
     if (alias.type === "arbre" && ressource.enfants) alias.enfants = ressource.enfants

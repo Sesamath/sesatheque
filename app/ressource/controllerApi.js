@@ -415,15 +415,19 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       $json.send(context, error)
     } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
       var format = context.get.format
-      // on garde ref pour compatibilité ascendante
-      if (format === "alias" || format === "ref") $json.send(context, null, $ressourceConverter.toRef(ressource))
-      else if (format === 'compact') $json.send(context, null, $ressourceConverter.toCompactFormat(ressource))
-      else if (format === 'normalized') $json.send(context, null, $ressourceConverter.toNormalizedFormat(ressource))
-      else {
-        // full, et on ajoute la base dans les réponses de l'api
+      if (format === "alias" || format === "ref") {
+        ressource = $ressourceConverter.toRef(ressource)
+        // au format ref on ajoute les droits
+        ressource.$droits = "R"
+        if ($accessControl.hasPermission("update")) ressource.$droits += "W"
+        if ($accessControl.hasPermission("delete")) ressource.$droits += "D"
+      } else if (format === 'compact') {
+        ressource = $ressourceConverter.toCompactFormat(ressource)
+      } else {
+        // full, on ajoute la base
         if (!ressource.base) ressource.base = config.application.baseUrl
-        $json.send(context, null, ressource)
       }
+      $json.send(context, null, ressource)
     } else {
       log.debug("lecture ko", ressource, 'avirer', {max:5000})
       $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
@@ -758,6 +762,17 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     } else {
       $json.send(context, new Error("Il faut poster une url via deferUrl"))
     }
+  })
+
+  /**
+   * Une url pour envoyer des notifications d'erreur, à priori par un client qui trouve des incohérences dans ce qu'on lui a envoyé
+   * @Route POST /api/notifyError
+   */
+  controller.post('notifyError', function (context) {
+    log("notifyError", context.post)
+    if (context.post.ref) log.errorData("notifyError", context.post)
+    else log.error("notifyError", context.post)
+    $json.sendOk(context)
   })
 
   /**

@@ -44,11 +44,12 @@
   /* global define, module*/
 
   /**
-   * Définition d'un alias d'une ressource, souvent d'une autre sesatheque
+   * Définition d'un alias d'une ressource, à priori d'une autre sesatheque
    * On prend en argument du constructeur une Ressource ou un Alias
    * Si on passe au constructeur un Alias avec oid mais sans ref il sera considéré comme une ref et va se référencer lui-même,
-   * mais probablement sur une autre sesathèque, ce qui donnerait du grand n'importe quoi
-   * et le store de l'entity va planter
+   * mais probablement sur une autre sesathèque, ce qui donnerait du grand n'importe quoi => le store de l'entity va planter
+   * Ce constructeur est utilisé pour passer les ressources au format ref pour sesatheque-client,
+   * un item sera traité comme un alias s'il a à la fois oid et ref (et base, mais oid & ref suffisent, la base pouvant être ajoutée aux ressources)
    * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Alias
    * @constructor
    */
@@ -73,6 +74,8 @@
       this.ref = initObj.ref || initObj.oid;
       if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine;
     }
+    // cast en string
+    if (this.ref && typeof this.ref !== "string") this.ref += "";
     /**
      * Titre
      * @type {string}
