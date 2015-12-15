@@ -64,12 +64,12 @@
   } else {
     var w = window;
     var wd = w.document;
-    if (typeof w.Sesamath === "undefined") w.Sesamath = {};
+    if (typeof w.sesamath === "undefined") w.sesamath = {};
     /**
-     * Namespace window.Sesamath, pour y mettre toutes nos fonctions globales génériques
-     * @namespace Sesamath
+     * Namespace window.sesamath, pour y mettre toutes nos fonctions globales génériques
+     * @namespace sesamath
      */
-    var S = w.Sesamath;
+    var S = w.sesamath;
 
     /**
      * Flag pour savoir si S.log() est bavard ou muet
@@ -89,7 +89,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addCss
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {string}  file Chemin du fichier css (mis dans href tel quel)
      */
     S.addCss = function (file) {
@@ -119,7 +119,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addElement
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {Element} parent
      * @param {string} tag
      * @param {Object=} attrs Les attributs
@@ -203,7 +203,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addText
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {Element} elt
      * @param {string} text
      */
@@ -216,7 +216,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name empty
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {Element} element
      */
     S.empty = function (element) {
@@ -231,7 +231,7 @@
      * Attention, les + sont transformés en espace (RFC 1738), les %20 aussi (RFC 3986),
      * pour récupérer des + faut qu'ils soient correctement encodés en %2B
      * @name getURLParameter
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {string}  name              Le nom du paramètre
      * @param {boolean} [noPlusTransform] Passer true pour conserver les "+" dans le retour,
      *                                      sinon ils seront transformés en espace (un + devrait être encodé %2B)
@@ -250,7 +250,7 @@
     /**
      * Retourne true si l'argument est un Array
      * @name isArray
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param arg
      * @returns {boolean}
      */
@@ -261,7 +261,7 @@
     /**
      * Retourne true si l'argument est une fonction
      * @name isFunction
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param arg
      * @returns {boolean}
      */
@@ -272,7 +272,7 @@
     /**
      * Retourne true si l'argument est une string
      * @name isString
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param arg
      * @returns {boolean}
      */
@@ -285,7 +285,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name getElement
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {string} tag
      * @param {Object=} attrs Les attributs
      * @param {string=} txtContent
@@ -315,7 +315,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name getNewId
-     * @memberOf Sesamath
+     * @memberOf sesamath
      */
     S.getNewId = (function () {
       // une closure pour conserver la valeur de cette variable privée entre 2 appels
@@ -339,7 +339,7 @@
      * Déclaré par initGlobal dès son chargement avec une fonction vide, puis remplacé éventuellement par une sortie
      * en console si un init() est appelé avec options.verbose
      * @name log
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {...*} arguments Nombre variable d'arguments, chacun sera passé à console.log ou console.error si c'est une erreur
      */
     S.log = function () {
@@ -349,7 +349,7 @@
     /**
      * Rend S.log() muet
      * @name log.disable
-     * @memberOf Sesamath
+     * @memberOf sesamath
      */
     S.log.disable = function () {
       isLogEnable = false;
@@ -358,7 +358,7 @@
     /**
      * Rend S.log() bavard
      * @name log.disable
-     * @memberOf Sesamath
+     * @memberOf sesamath
      */
     S.log.enable = function () {
       isLogEnable = true;
@@ -367,7 +367,7 @@
     /**
      * log une erreur avec console.error si ça existe, en prod comme en dev (utiliser S.log(error) pour afficher en dev seulement)
      * @name log.error
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {...Error} arguments autant qu'on veut (console.error appelée une fois par argument)
      */
     S.log.error = function () {
@@ -384,7 +384,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name setStyles
-     * @memberOf Sesamath
+     * @memberOf sesamath
      * @param {Element} elt
      * @param {string|object} styles
      */
@@ -447,15 +447,15 @@
     };
 
     /****************
-     * Namespace Sesamath.Sesatheque
+     * Namespace sesamath.sesatheque
      */
-    if (!S.Sesatheque) S.Sesatheque = {};
+    if (!S.sesatheque) S.sesatheque = {};
     /**
-     * Namespace window.Sesamath.Sesatheque, pour y mettre toutes des fonctions globales
+     * Namespace window.sesamath.sesatheque, pour y mettre toutes des fonctions globales
      * et les modules s'ils sont chargés sans require ni exports
-     * @namespace Sesamath.Sesatheque
+     * @namespace sesamath.sesatheque
      */
-    var ST = S.Sesatheque;
+    var ST = S.sesatheque;
 
     /**
      * Ajoute un texte d'erreur dans errorsContainer (#errors ou #error ou #warnings) ET dans console.error (si ça existe)
@@ -463,7 +463,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name addError
-     * @memberOf Sesamath.Sesatheque
+     * @memberOf sesamath.sesatheque
      * @param {string|Error} error Le message à afficher
      * @param {number} [delay] Un éventuel délai d'affichage en secondes
      */
@@ -495,7 +495,7 @@
      *
      * Déclaré par init (dès son chargement)
      * @name hideTitle
-     * @memberOf Sesamath.Sesatheque
+     * @memberOf sesamath.sesatheque
      */
     ST.hideTitle = function () {
       try {

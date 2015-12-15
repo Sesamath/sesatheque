@@ -142,8 +142,8 @@ try {
     // raccourcis
     var w = window;
     var wd = w.document;
-    var S = window.Sesamath;
-    var ST = S.Sesatheque;
+    var S = window.sesamath;
+    var ST = S.sesatheque;
 
     // var globales à notre module (initialisées par init et utilisées par nos fcts)
     var allowProf, levelEleve, levelProf, figureBase64Ini,

@@ -167,8 +167,8 @@ try {
     var mathgraph = {};
 
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
-    var ST = S.Sesatheque;
+    var S = window.sesamath;
+    var ST = S.sesatheque;
 
     // Le moment où ce module a été chargé dans le navigateur
     var startDate = new Date();

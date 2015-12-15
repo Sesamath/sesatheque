@@ -23,7 +23,7 @@ Chargement en cours</div>
             if (typeof display === 'undefined') throw new Error('Le chargement a échoué, impossible de charger display.js');
             var options = {
               saveResult: function (resultat, next) {
-                Sesamath.log('saveResult', resultat);
+                sesamath.log('saveResult', resultat);
                 next();
               }, // DEBUG
               {?base}base : "{base}",{/base}

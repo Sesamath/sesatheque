@@ -47,8 +47,8 @@ try {
     var mental = {};
 
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
-    var ST = S.Sesatheque;
+    var S = window.sesamath;
+    var ST = S.sesatheque;
 
     var baseMental;
     /**

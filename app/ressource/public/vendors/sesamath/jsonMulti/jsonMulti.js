@@ -204,8 +204,8 @@ define(["jquery"], function ($) {
     var w = window;
     //var wd = w.document;
     // raccourcis, si ça plante le catch gère
-    var S = w.Sesamath;
-    var ST = S.Sesatheque;
+    var S = w.sesamath;
+    var ST = S.sesatheque;
     
     var isInitDone = false;
     var isJseLoaded;

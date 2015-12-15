@@ -42,8 +42,8 @@ try {
     var arbre = {};
 
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
-    var ST = S.Sesatheque;
+    var S = window.sesamath;
+    var ST = S.sesatheque;
 
     /**
      * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles

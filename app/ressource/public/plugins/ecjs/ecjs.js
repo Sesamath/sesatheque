@@ -39,7 +39,7 @@ try {
      */
     var ecjs = {};
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
+    var S = window.sesamath;
 
     /**
      * inspiré de http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/

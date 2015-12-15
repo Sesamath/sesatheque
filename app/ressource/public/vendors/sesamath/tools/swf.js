@@ -70,8 +70,8 @@ function load(container, swfHref, options, next) {
   function callbackFn(e) {
     if (!next) next = function () {};
     var message
-    var S = (typeof window.Sesamath === "undefined") ? {} : window.Sesamath;
-    var ST = S.Sesatheque;
+    var S = (typeof window.sesamath === "undefined") ? {} : window.sesamath;
+    var ST = S.sesatheque;
     if (e.success) {
       if (S.log) S.log("Lancement de " + swfHref +' réussi');
       next()

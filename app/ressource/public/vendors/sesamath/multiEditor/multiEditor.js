@@ -181,8 +181,8 @@ define(["jquery"], function () {
     var $ = w.jQuery;
     //var wd = w.document;
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
-    var ST = S.Sesatheque;
+    var S = window.sesamath;
+    var ST = S.sesatheque;
 
     /**
      * Service pour insérer du mathquill

@@ -37,7 +37,7 @@
   var log;
   try {
     // on prend celui-là si on le trouve
-    log = window.Sesamath.log;
+    log = window.sesamath.log;
   } catch (error) {
     log = function () {};
     log.error = function () {};

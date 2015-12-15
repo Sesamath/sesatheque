@@ -45,8 +45,8 @@ try {
     // raccourcis
     var w = window;
     var wd = w.document;
-    var S = window.Sesamath;
-    //var ST = S.Sesatheque;
+    var S = window.sesamath;
+    //var ST = S.sesatheque;
 
     var $textarea;
 

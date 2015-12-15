@@ -46,8 +46,8 @@ try {
     var j3p = {};
 
     // raccourcis, si ça plante le catch gère
-    var S = window.Sesamath;
-    var ST = S.Sesatheque;
+    var S = window.sesamath;
+    var ST = S.sesatheque;
 
     var urlBaseJ3p = "http://j3p.sesamath.net";
 
@@ -106,9 +106,12 @@ try {
           if (error) {
             ST.addError("Impossible de récupérer le dernier résultat");
             S.log.error(error);
-          } else if (lastResultat && lastResultat.ressId) {
-            S.log("on a récupéré lastResultat", lastResultat);
-            options.lastResultat = lastResultat;
+          } else if (lastResultat) {
+            if (lastResultat.success) {
+              if (lastResultat.resultat) options.lastResultat = lastResultat.resultat;
+            } else {
+              S.log.error("l'appel de lastResultat a échoué", lastResultat);
+            }
           }
           load();
         });

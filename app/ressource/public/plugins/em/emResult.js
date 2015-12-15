@@ -39,15 +39,15 @@
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
   if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
-  if (typeof window.Sesamath === "undefined") throw new Error("Il faut charger initGlobal.js avant ce script");
-  var S = window.Sesamath;
+  if (typeof window.sesamath === "undefined") throw new Error("Il faut charger initGlobal.js avant ce script");
+  var S = window.sesamath;
 
   /**
    * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
    * Exporte 3 méthodes,
    * - soit pour requireJs (si define existe)
    * - soit en module amd (si on a module.exports)
-   * - soit dans window.Sesamath.Sesatheque.emResult
+   * - soit dans window.sesamath.sesatheque.emResult
    * (ce code est réécrit pour sesalab dans une classe qooxdoo sesalab.resultats.Em, Cfsesalab-interface/class/sesalab/resultats)
    * @namespace emResult
    */
@@ -118,8 +118,8 @@
   } else if (typeof module === 'object' && module.exports) {
     module.exports = emResult;
   } else {
-    if (!S.Sesatheque) window.Sesamath.Sesatheque = {};
-    S.Sesatheque.emResult = emResult;
+    if (!S.sesatheque) window.sesamath.sesatheque = {};
+    S.sesatheque.emResult = emResult;
   }
 
 })();
