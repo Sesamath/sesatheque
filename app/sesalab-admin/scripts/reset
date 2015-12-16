@@ -32,6 +32,6 @@ function reset() {
   clean && build
 }
 
-cd (dirname $0)/..
+cd $(dirname $0)/..
 reset
 cd -
