@@ -49,7 +49,7 @@ module.exports = {
     debugExclusions : ['cache'],
     perf : 'perf.log'
   }, /* */
-  memcache : '127.0.0.1:11211',
+  memcache : {host: '127.0.0.1', port:11211},
   //noCache:true,
   // les modules à précharger avant bootstrap
   extraModules : ['myExtraModule'],

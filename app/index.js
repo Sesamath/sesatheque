@@ -127,7 +127,7 @@ sesatheque.config(function($cache, $settings) {
   // on ajoute memcache si précisé dans les settings
   var memcache = $settings.get('memcache')
   if (memcache) {
-    if (typeof memcache !== 'string') {
+    if (typeof memcache !== 'object') {
       throw new Error("L'application sesatheque ne peut pas tourner avec un cluster memcache" +
                       " car elle utilise memcache comme stockage commun aux différents workers nodejs (pour lastIdOrigine)")
     }

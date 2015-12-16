@@ -43,13 +43,23 @@
       "VError": false
     }
   },
+  "browserify": {
+    "transform": [
+      "an-browserify-template"
+    ]
+  },
   "devDependencies": {
-    "an-dev": "^2.0.18",
+    "an-browserify-template": "^1.0.6",
     "angular": "^1.4.7",
     "angular-animate": "^1.4.7",
     "angular-sanitize": "^1.4.7",
     "angular-ui-router": "^0.2.15",
+    "autoprefixer": "^6.1.2",
+    "browserify": "^12.0.1",
     "jquery": "^2.1.4",
-    "lodash": "^3.10.1"
+    "lodash": "^3.10.1",
+    "node-sass": "^3.4.2",
+    "postcss": "^5.0.12",
+    "postcss-cli": "^2.3.2"
   }
 }

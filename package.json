@@ -9,7 +9,7 @@
   "dependencies": {
     "an-flow": "^1.1.0",
     "an-uuid": "^1.0.0",
-    "lassi": "git://src.sesamath.net/lassi#1.8.41",
+    "lassi": "git://src.sesamath.net/lassi#1.8.53",
     "lodash": "^3.6.0",
     "memcached": "^2.1.0",
     "moment": "^2.6.0",
