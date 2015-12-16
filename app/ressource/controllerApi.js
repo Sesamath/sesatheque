@@ -774,6 +774,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     else log.error("notifyError", context.post)
     $json.sendOk(context)
   })
+  controller.options('notifyError', optionsOk)
 
   /**
    * Récupère un arbre au format jstree
