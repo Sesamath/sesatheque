@@ -35,7 +35,8 @@ app.service('$update', function(AppliedUpdate) {
   }
 
   return {
-    list  : list
+    list  : list,
+    reset : function() { _updates = undefined; }
   }
 })
 
@@ -72,6 +73,8 @@ app.controller(function($entities, $job, $update, AppliedUpdate) {
           id: id,
           done: new Date()
           }).store(function() {
+            $update.reset();
+
         })
       });
     })
