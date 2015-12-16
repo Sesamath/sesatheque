@@ -419,8 +419,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         ressource = $ressourceConverter.toRef(ressource)
         // au format ref on ajoute les droits
         ressource.$droits = "R"
-        if ($accessControl.hasPermission("update")) ressource.$droits += "W"
-        if ($accessControl.hasPermission("delete")) ressource.$droits += "D"
+        if ($accessControl.hasPermission("update", context, ressource)) ressource.$droits += "W"
+        if ($accessControl.hasPermission("delete", context, ressource)) ressource.$droits += "D"
       } else if (format === 'compact') {
         ressource = $ressourceConverter.toCompactFormat(ressource)
       } else {
