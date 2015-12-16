@@ -118,7 +118,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     } else {
       msg = "Vous n'avez pas de droits suffisants pour supprimer cette ressource"
     }
-    if (msg) log.debug("dans getDeleteDeniedMessage on a le message d'erreur " +msg +" avec " +ressource.auteurs.length +" auteurs :", ressource.auteurs)
+    if (msg) log.debug("dans getDeleteDeniedMessage on a le message d'erreur " +msg +" avec " +(ressource.auteurs && ressource.auteurs.length) +" auteurs :", ressource.auteurs)
 
     return msg
   }
