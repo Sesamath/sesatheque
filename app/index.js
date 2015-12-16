@@ -127,9 +127,10 @@ sesatheque.config(function($cache, $settings) {
   // on ajoute memcache si précisé dans les settings
   var memcache = $settings.get('memcache')
   if (memcache) {
-    if (typeof memcache !== 'object') {
-      throw new Error("L'application sesatheque ne peut pas tourner avec un cluster memcache" +
-                      " car elle utilise memcache comme stockage commun aux différents workers nodejs (pour lastIdOrigine)")
+    if (typeof memcache !== 'object' || !memcache.host || !memcache.port) {
+console.log(memcache)
+      throw new Error("Il faut indiquer pour memcache un objet {host:xxx,port:nn}. L'application sesatheque ne peut pas tourner avec un cluster memcache" +
+                      " car elle utilise memcache comme stockage commun aux différents workers nodejs")
     }
     $cache.addEngine('', 'memcache', memcache);
     lassi.log('app', 'Memcache ajouté sur ' +memcache)
