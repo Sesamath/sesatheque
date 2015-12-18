@@ -50,24 +50,26 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
    */
   $personneRepository.load = function (id, next) {
     log.debug('load personne ' + id)
-    var pos = -1;
-    if (typeof id === "string") pos = id.indexOf("/")
-    if (pos > -1) {
-      var origine = id.substr(0, pos)
-      var idOrigine = id.substr(pos +1)
-      $personneRepository.loadByOrigin(origine, idOrigine, next)
+    // cast en string
+    id += ""
+    // on découpe sur le premier slash avec deux morceaux non vides
+    var match = id.match(/^([^\/]+)\/(.+)$/)
+    if (match && match.length === 3) {
+      $personneRepository.loadByOrigin(match[1], match[2], next)
     } else if (id) {
       $cachePersonne.get(id, function (error, personneCached) {
-        if (personneCached) next(null, EntityPersonne.create(personneCached))
-        else {
+        if (personneCached) {
+          next(null, EntityPersonne.create(personneCached))
+        } else {
           EntityPersonne.match('oid').equals(id).grabOne(function (error, personne) {
             //log.debug('personne load remonte ', personne)
-            if (error) next(error)
-            else if (personne) {
+            if (error) {
+              next(error)
+            } else if (personne) {
               $cachePersonne.set(personne)
               next(null, personne)
             } else {
-              next(null, undefined)
+              next()
             }
           })
         }

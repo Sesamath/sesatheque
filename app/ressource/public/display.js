@@ -275,6 +275,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             S.log("resultatCallback display a reçu", result);
             var deferSync = result.deferSync;
             var resultat = new Resultat(result);
+            // on impose juste ça
+            resultat.date = new Date();
             // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
             ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
               var paramValue = S.getURLParameter(paramName) || options[paramName];

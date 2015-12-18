@@ -16,7 +16,7 @@ function usage() {
   local exitCode=${1:-0}
   echo "Lance ou recharge l'application (en mode dev par défaut)"
   echo "option facultative"
-  echo "  -c : pour indiquer un autre fichier de déploiement que $PM2 (à mettre avant les actions)"
+  echo "  -c : pour indiquer un autre fichier de conf pm2 que $PM2 (à mettre avant les actions)"
   echo "  -d : lancement avec $PM2 en mode dev (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
   echo "  -h : afficher cette aide"
   echo "  -n : lancement avec node directement en mode dev"

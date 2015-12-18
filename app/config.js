@@ -55,7 +55,7 @@ var root  = __dirname +'/..'
  * L'environnement d'execution est récupéré par NODE_ENV
  * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
  */
-var staging = (process.env.NODE_ENV === "prod") ? "prod" : "dev"
+var staging = (process.env.NODE_ENV === "production") ? "prod" : "dev"
 
 /** La config */
 var settings = {
