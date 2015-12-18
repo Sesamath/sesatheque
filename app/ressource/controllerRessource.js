@@ -689,8 +689,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           options.nb = parseInt(crit.nb, 10) || 25
           options.orderBy = crit.orderBy || 'oid'
           var visibilite = 'public'
+          var userOid = $accessControl.getCurrentUserOid(context)
           // avec une exception pour l'admin qui peut passer ?all=1
           if (context.get.all && $accessControl.hasAllRights(context)) visibilite = "all"
+          // qqun qui veut voir ses ressources
+          else if (context.get.auteurs && context.get.auteurs == userOid) visibilite = "auteur/" +userOid
           $ressourceRepository.getListe(visibilite, options, function (error, ressources) {
             var data = $views.getDefaultData('liste')
             data.$metas.title = 'Résultats de la recherche'
