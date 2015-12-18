@@ -15,7 +15,7 @@ function build_styles() {
 }
 
 function clean() {
-  rm -rf {documentation,node_modules,public/app.*}
+  rm -rf public/app.*
 }
 
 function prepare() {
