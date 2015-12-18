@@ -196,7 +196,8 @@ function Ressource(initObj) {
    * Liste d'id d'auteurs
    * @type {Integer[]}
    */
-  this.auteurs = filters.arrayInt(values.auteurs);
+  // pas arrayInt car on peut recevoir du origin/idOrigin que l'on transforme ensuite, voire peut-être des urls un jour
+  this.auteurs = filters.array(values.auteurs);
   /**
    * Liste d'url pour les auteurs précédents
    */

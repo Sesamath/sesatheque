@@ -252,7 +252,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       log.perf(context.response, msg)
     }
 
-    log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max:1000})
+    log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max:10000})
 
     if ($accessControl.isAuthenticated(context) || $accessControl.hasAllRights(context)) {
       flow().seq(function () {
@@ -298,7 +298,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       }).seq(function (ressourceNew) {
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
-        log.debug("fin checkGroupes & checkPersonnes")
         if (ressourceOriginale) tools.update(ressourceOriginale, ressourceNew)
         else ressourceOriginale = ressourceNew
         writeAndOut(context, ressourceOriginale)

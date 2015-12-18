@@ -116,7 +116,7 @@ module.exports = function (EntityRessource) {
   function normalizeArrays(ressource) {
     _.each(config.typesVar, function (typeVar, key) {
       var tmp
-      if (typeVar === 'Array' && !_.isArray(ressource[key])) {
+      if (ressource.hasOwnProperty(key) && typeVar === 'Array' && !_.isArray(ressource[key])) {
         if (_.isString(ressource[key])) {
           tmp = ressource[key].split(',')
           ressource[key] = []

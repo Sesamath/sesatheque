@@ -32,7 +32,7 @@
 "use strict"
 
 module.exports = function (EntityRessource) {
-  var _ = require('lodash')
+  //var _ = require('lodash')
   var tools = require('../tools')
   var Ressource = require('./public/vendors/sesamath/Ressource')
   var configRessource = require('./config')
@@ -113,7 +113,7 @@ module.exports = function (EntityRessource) {
       }
       return refsEnfants
     })
-    .defineIndex('auteurs', 'integer')
+    .defineIndex('auteurs', 'string')
     .defineIndex('contributeurs', 'integer')
     .defineIndex('groupes', 'string')
     .defineIndex('langue', 'string')
