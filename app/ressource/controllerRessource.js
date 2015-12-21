@@ -470,6 +470,23 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
+   * Redirect vers le form d'édition par oid (pour jstree qui nous appelle ici si les enfants sont en origine/idOrigine)
+   * @route GET /ressource/modifier/:origine/:idOrigine
+   */
+  controller.get($routes.get('edit', ':origine', ':idOrigine'), function (context) {
+    $ressourceRepository.loadByOrigin(context.arguments.origine, context.arguments.idOrigine, function (error, ressource) {
+      if (error) {
+        log.error(error)
+        $views.printError(context, "Probleme d'accès à la base de données")
+      } else if (ressource) {
+        context.redirect($routes.getAbs('edit', ressource.oid))
+      } else {
+        denied404(context, context.arguments.origine +"/" +context.arguments.idOrigine)
+      }
+    })
+  })
+
+  /**
    * Traitement du formulaire d'édition, réaffiche le formulaire en cas d'erreur ou sauvegarde et redirige vers la description
    * @route POST /ressource/modifier/:oid
    */

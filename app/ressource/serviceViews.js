@@ -383,8 +383,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else {
       delete labels.enfants
     }
-    // idOrigine n'existe pas forcément
-    if (ressource.origine && !ressource.idOrigine) delete labels.idOrigine
 
     return labels
   }
@@ -527,6 +525,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         // origine & idOrigine en lecture seule pour modif mais pas création
         formData.origine.readonly = true;
         if (formData.idOrigine) formData.idOrigine.readonly = true;
+        else delete formData.idOrigine // idOrigine pas obligatoire, si on l'a pas mis à l'insert on peut plus l'ajouter
         // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
         formData.$view = __dirname +'/views/formEdit'
 
@@ -878,6 +877,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     //log.debug("ressource d'après get", fakeRessource)
     getFormViewData(context, null, fakeRessource, function (formData) {
       tools.complete(data.contentBloc, formData)
+      log.debug("search", data.contentBloc)
       // on vire ou modifie ce qui nous intéresse pour la recherche
       var fd = data.contentBloc // raccourci d'écriture (form data)
       delete fd.version
@@ -892,11 +892,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       delete fd.dateMiseAJour
       if (!$accessControl.isAuthenticated(context)) {
         delete fd.restriction
-      }
-      // si on a pas les droits createAll, origine est hidden avec local imposé, on le vire dans ce cas
-      if (fd.origine.hidden) {
-        delete fd.origine
-        delete fd.idOrigine
       }
       // on ajoute un choix "pas de choix" pour type et langue
       fd.type.choices.unshift({label:'peu importe', value:''})
@@ -924,9 +919,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             if (fd[key].hasOwnProperty("value")) {
               fd[key].value = context.get[key]
             } else if (fd[key].choices) {
-              fd[key].choices.forEach(function (choice) {
+              for (var i = 0; i < fd[key].choices.length; i++) {
+                var choice = fd[key].choices[i];
                 if (choice.value == context.get[key]) choice.selected = true
-              })
+              }
             }
           }
         }
