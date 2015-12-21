@@ -119,14 +119,12 @@
      * Base de la sesatheque qui gère la cible
      * @type {string}
      */
-    this.base = initObj.base;
-    if (initObj.userOid) {
+    if (initObj.base) this.base = initObj.base;
       /**
        * L'oid du user qui créé l'alias (quand c'est un user qui copie une ressource non éditable dans les siennes)
        * @type {Integer}
        */
-      this.userOid = initObj.userOid;
-    }
+    if (initObj.userOid) this.userOid = initObj.userOid;
   }
 
   /**

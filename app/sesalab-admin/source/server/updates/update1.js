@@ -54,6 +54,7 @@ module.exports = function(job) {
             if (newEnfant.hasOwnProperty("ref")) delete newEnfant.ref
             delete newEnfant.public
           } else {
+            // un enfant sans ref qui n'est pas un arbre
             log.errorData("Error : pas de ref dans l'arbre " + (arbre.oid || arbre.ref || arbre.titre) + " pour l'enfant ", enfant)
           }
         }

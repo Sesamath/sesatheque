@@ -51,9 +51,8 @@ module.exports = function ($accessControl) {
    */
   $routes.get = function(action) {
     var route = routes[action]
-    if (arguments.length > 1) {
-      if (route) route += '/'
-      route += Array.prototype.slice.call(arguments, 1).join('/')
+    for (var i = 1; i < arguments.length; i++) {
+      if (arguments[i]) if (route) route += '/' +arguments[i]
     }
 
     return route
