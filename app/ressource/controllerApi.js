@@ -165,10 +165,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         if (ressources.length) addRefs(ressources, 'WD')
         $ressourceRepository.getListe("all", {filters:[{index:"contributeurs", values:[oid]}]}, this)
       }).seq(function (ressources) {
+        log("listePerso récupère " +ressources.length)
         if (ressources.length) addRefs(ressources, 'W')
         EntityAlias.match('userOid').equals(oid).grab(this)
       }).seq(function (aliases) {
-        log.debug("on récupère les alias de " +oid, aliases)
         if (aliases.length) addRefs(aliases, 'D')
         $json.sendOk(context, {liste: refs})
       }).catch(function (error) {

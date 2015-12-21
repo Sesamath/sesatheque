@@ -84,16 +84,16 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         log.error("Ressource " + ressource.oid + " restreinte à des groupes sans préciser lesquels, on la passe privée")
         ressource.restriction = config.constantes.restriction.prive
       }
+      // on génère la clé si elle manque
+      if (ressource.restriction && !ressource.cle) {
+        ressource.cle = uuid();
+      }
       // si le tableau d'erreur est vide (devrait toujours être le cas),
       // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
       if (_.isEmpty(ressource.warnings)) delete ressource.warnings
-      // on vire aussi les uri, déduite du reste par le constructeur
-      delete ressource.displayUri
-      delete ressource.describeUri
-      delete ressource.dataUri
       // bizarre, parfois errors est un object, on cherche à savoir comment
       if (ressource.errors && !ressource.errors.push) {
-        log.debug("ressource.errors est un object et pas un array", ressource.errors)
+        log.error("ressource.errors n'est pas un array " +typeof ressource.errors, ressource.errors)
         ressource.errors = []
       }
       // on vérifie que l'on peut sauvegarder
@@ -256,7 +256,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
                     '\navant : ' +(ressourceBdd[prop] === undefined) ? undefined : JSON.parse(ressourceBdd[prop]) +
                     '\naprès : ' +(ressourceBdd[prop] === undefined) ? undefined : JSON.parse(ressource[prop]))
               } catch (e) {
-                log.debug(
+                log.error(
                     'le parsing de ressource[' +prop +'] a planté pour ' +ressource.oid +' ' +ressource.origine +'/' +ressource.idOrigine,
                     [ressourceBdd[prop], ressource[prop]]
                 )
@@ -555,7 +555,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       })
 
     } catch (error) {
-      log.debug(error)
+      log.error(error)
       next(error)
     }
   } // getListe
@@ -568,7 +568,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @returns {undefined}
    */
   $ressourceRepository.load = function(oid, next) {
-    log.debug('load ressource_' +oid, null, 'repository')
     if (_.isString(oid) && oid.indexOf('/') > 0) {
       var p = oid.split('/')
       if (p.length === 2) {
@@ -705,7 +704,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   $ressourceRepository.write = function(ressource, next) {
     if (ressource.constructor.name !== 'Entity') {
-      log.debug("cast en EntityRessource dans write")
       ressource = EntityRessource.create(ressource)
     }
     flow().seq(function() {
@@ -721,16 +719,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         convertXmlJ3p(ressource)
         log.debug('ressource j3p après conversion avant write', ressource)
       }
-      this(null, ressource)
-
-    }).seq(function (ressource) {
-      // on génère la clé pour local si elle manque
-      if (ressource.origine === "local" && !ressource.cle) {
-        ressource.cle = uuid();
-      }
-      this(null, ressource)
-
-    }).seq(function (ressource) {
       beforeStore(ressource, this)
 
     }).seq(function (ressource) {
