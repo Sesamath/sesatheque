@@ -188,7 +188,7 @@ try {
         var jstData = {
           'core': {
             'data': function (node, next) {
-              S.log('fct data', node);
+              //S.log('fct data', node);
               if (node.id == '#') {
                 next(rootElt);
               } else {
@@ -212,7 +212,7 @@ try {
         };
 
         var $tree = $('#' + treeId);
-        S.log('$tree', $tree);
+        //S.log('$tree', $tree);
         $tree.jstree(jstData);
 
         /* Pour récupérer un élément sous sa forme jstree, c'est (id est l'id jstree, sans #)
