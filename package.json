@@ -15,7 +15,8 @@
     "memcached": "^2.1.0",
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
-    "request": "^2.39.0"
+    "request": "^2.39.0",
+    "sesatheque-client": "git://src.sesamath.net/npm-sesatheque-client#master"
   },
   "devDependencies": {
     "bower": "^1.4.1",
@@ -37,7 +38,6 @@
     "mysql": "^2.6.0",
     "phantomjs": "^1.9.17",
     "requirejs": "^2.1.20",
-    "sesatheque-client": "git://src.sesamath.net/npm-sesatheque-client#master",
     "through2": "^0.4.2",
     "uglify-js": "^2.4.24",
     "webpack": "^1.12.2",

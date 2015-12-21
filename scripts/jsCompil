@@ -32,6 +32,6 @@ node_modules/.bin/uglifyjs $src $tmp --compress --mangle > $dst && echo ok || ec
 rm -f $tmp
 # d'autres js à minifier
 src=node_modules/sesatheque-client/index.js
-dst=app/ressource/public/vendors/sesamath/sesathequeClient/index.min.js
+dst=app/ressource/public/vendors/sesamath/sesatheque-client/index.min.js
 echo -n "module npm sesatheque-client => $dst "
 node_modules/.bin/uglifyjs $src --compress --mangle > $dst && echo ok || echo KO
