@@ -30,7 +30,7 @@
  */
 (function (global) {
   'use strict';
-  var jstreeConverter = {};
+
   // global est window dans un navigateur
   var baseUrl = (typeof global.baseUrl === 'undefined') ? '' : global.baseUrl;
   if (baseUrl && baseUrl.substr(-1) !== "/") baseUrl += "/";
@@ -44,63 +44,60 @@
   }
 
   /**
+   * Retourne les datas qui nous intéressent à mettre sur le tag a
+   * (pour a_attr : data-ref, data-type, href et alt)
+   * @private
+   * @return {Object}
+   */
+  function getAttr(ressource, defaultBase) {
+    var attr = {};
+    var base = ressource.base || defaultBase || baseUrl;
+    if (base && base.substr(-1) !== "/") base += "/";
+    // ref
+    var ref = ressource.id || ressource.ref || ressource.oid;
+    if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine;
+    var isPublic = (ressource.public || !ressource.restriction);
+    var displayUrl = ressource.displayUrl;
+    var dataUrl = ressource.dataUrl;
+    if (ref) {
+      attr['data-ref'] = ref;
+      if (!displayUrl) {
+        if (isPublic) displayUrl = base + 'public/voir/' + ref;
+        else if (ressource.cle) displayUrl = base + 'public/voir/cle/' + ressource.cle;
+        else displayUrl = base + 'ressource/voir/' + ref;
+      }
+      if (!dataUrl) {
+        if (isPublic) dataUrl = base + 'api/public/' + ref;
+        else if (ressource.cle) dataUrl = base + 'api/public/cle/' + ressource.cle;
+        else dataUrl = base + 'api/ressource/' + ref;
+      }
+    } else if (ressource.cle) {
+      if (!displayUrl) displayUrl = base + 'public/voir/cle/' + ressource.cle;
+      if (!dataUrl) dataUrl = base + 'api/public/cle/' + ressource.cle;
+    }
+    if (displayUrl) {
+      attr.href = displayUrl;
+      attr['data-displayurl'] = displayUrl;
+    }
+    if (dataUrl) attr['data-dataurl'] = dataUrl;
+    if (ressource.type) attr['data-type'] = ressource.type;
+    if (ressource.resume) attr.alt = ressource.resume;
+
+    return attr;
+  }
+
+  /**
    * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
    * @see http://www.jstree.com/docs/json/ pour le format
    * @param {Ressource} ressource
    * @param {string}    [defaultBase]
    */
-  jstreeConverter.getJstNode = getJstNode;
   function getJstNode(ressource, defaultBase) {
-    /**
-     * Retourne les datas qui nous intéressent à mettre sur le tag a
-     * (pour a_attr : data-ref, data-type, href et alt)
-     * @return {Object}
-     */
-    function getAttr() {
-      var prefix;
-      var attr = {};
-      var base = ressource.base || defaultBase || baseUrl;
-      if (base && base.substr(-1) !== "/") base += "/";
-      // ref
-      var ref = ressource.id || ressource.ref || ressource.oid;
-      if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine;
-      var isPublic = (ressource.public || ressource.restriction === 0)
-      var displayUrl = ressource.displayUrl;
-      var dataUrl = ressource.dataUrl;
-      if (ref || ressource.cle) {
-        if (ref) {
-          attr['data-ref'] = ref;
-          if (!displayUrl) {
-            if (isPublic) displayUrl = base + 'public/voir/' + ref;
-            else if (ressource.cle) displayUrl = base + 'public/voir/cle/' + ressource.cle;
-            else displayUrl = base + 'ressource/voir/' + ref;
-          }
-          if (!dataUrl) {
-            if (isPublic) dataUrl = base + 'api/public/' + ref;
-            else if (ressource.cle) dataUrl = base + 'api/public/cle/' + ressource.cle;
-            else dataUrl = base + 'api/ressource/' + ref;
-          }
-        } else {
-          if (!displayUrl) displayUrl = base + 'public/voir/cle/' + ressource.cle;
-          if (!dataUrl) dataUrl = base + 'api/public/cle/' + ressource.cle;
-        }
-      }
-      if (displayUrl) {
-        attr.href = displayUrl;
-        attr['data-displayUrl'] = displayUrl;
-      }
-      if (dataUrl) attr['data-dataUrl'] = dataUrl;
-      if (ressource.type) attr['data-type'] = ressource.type;
-      if (ressource.resume) attr.alt = ressource.resume;
-
-      return attr;
-    }
-
     var node;
     if (ressource) {
       node = {
         text  : ressource.titre,
-        a_attr: getAttr(),
+        a_attr: getAttr(ressource, defaultBase),
         icon  : ressource.type + 'JstNode'
       };
     } else throw new Error("getJstNode appelé sans ressource");
@@ -115,7 +112,7 @@
    * @param {object} jstree L'objet jstree complet, retourné par $.jstree.reference('#leTree')
    * @return {Array} Le tableau des enfants de nodeId
    */
-  jstreeConverter.getEnfants = function (nodeId, jstree) {
+  function getEnfants(nodeId, jstree) {
     //log('getEnfants de ' +nodeId, jstree);
     var enfants = [];
     var i = 0;
@@ -124,7 +121,7 @@
       var root = jstree._model.data;
       root[nodeId].children.forEach(function (rootChildId) {
         var child = root[rootChildId];
-        var enfant = jstreeConverter.toRef(child, jstree);
+        var enfant = toRef(child, jstree);
         if (i<5) {
           log("traitement child", child);
           log("devenu", enfant);
@@ -139,7 +136,7 @@
     //log("pour " +nodeId +" on va retourner", enfants);
 
     return enfants;
-  };
+  }
 
   /**
    * Retourne un tableau children au format jstree
@@ -147,14 +144,15 @@
    * @param {string}    [defaultBase]
    * @return {Array} Le tableau des enfants
    */
-  jstreeConverter.getJstreeChildren = function (ressource, defaultBase) {
+  function getJstreeChildren(ressource, defaultBase) {
     var base = ressource.base || defaultBase || baseUrl;
+    if (base.substr(-1) !== "/") base += "/";
     var children = [];
     if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.forEach) {
       ressource.enfants.forEach(function (enfant) {
         var child;
         if (enfant.type === 'arbre') {
-          child = jstreeConverter.toJstree(enfant, base);
+          child = toJstree(enfant, base);
         } else {
           child = getJstNode(enfant, base);
         }
@@ -163,19 +161,19 @@
     }
 
     return children;
-  };
+  }
 
   /**
    * Affecte la base de la sésathèque pour les urls mis dans les éléments de l'arbre
    * (sinon ces urls seront absolues sur le domaine courant)
    * @param {string} url L'url de base http://domaine.tld:port de la sesatheque
    */
-  jstreeConverter.setBaseUrl = function (url) {
+  function setBaseUrl(url) {
     if (typeof url === 'string') {
       if (url.substr(-1) === '/') url = url.substr(0, url.length - 1);
       baseUrl = url;
     }
-  };
+  }
 
   /**
    * Transforme un ressource de la bibli en node pour jstree
@@ -184,27 +182,28 @@
    * @param {string}          [defaultBase]
    * @returns {Object}
    */
-  jstreeConverter.toJstree = function (ressource, defaultBase) {
+  function toJstree(ressource, defaultBase) {
     var base = ressource.base || defaultBase || baseUrl;
+    if (base.substr(-1) !== "/") base += "/";
     var node = getJstNode(ressource, base);
     if (ressource.type === 'arbre') {
       if (ressource.enfants && ressource.enfants.length) {
-        node.children = jstreeConverter.getJstreeChildren(ressource, base);
+        node.children = getJstreeChildren(ressource, base);
       } else {
         // url pour récupérer les enfants
-        var url;
-        if (ressource.oid) url = '/api/jstree?ref=' + ressource.oid;
-        else if (ressource.ref) url = '/api/jstree?ref=' + ressource.ref;
-        else if (ressource.origine && ressource.idOrigine) url = '/api/jstree?ref=' + ressource.origine + '/' + ressource.idOrigine;
-        if (url) {
+        var path;
+        if (ressource.oid) path = 'api/jstree?ref=' + ressource.oid;
+        else if (ressource.ref) path = 'api/jstree?ref=' + ressource.ref;
+        else if (ressource.origine && ressource.idOrigine) path = 'api/jstree?ref=' + ressource.origine + '/' + ressource.idOrigine;
+        if (path) {
           node.children = true;
-          node.data = {url: base + url + '&children=1'};
+          node.data = {url: base + path + '&children=1'};
         }
       }
     }
 
     return node;
-  };
+  }
 
   /**
    * Retourne une Ref à partir d'un node jstree
@@ -212,7 +211,7 @@
    * @returns {Ref} La ref (presque, ref, titre, type, avec displayUrl & resume en plus,
    *                mais pas categories, et enfants seulement si on passe le jstree complet)
    */
-  jstreeConverter.toRef = function (node, jstree) {
+  function toRef(node, jstree) {
     //log('toRef de', node);
     var item = {};
     var nodeSrc;
@@ -228,10 +227,10 @@
       if (nodeSrc.a_attr) {
         item.type = nodeSrc.a_attr['data-type'];
         if (item.type === 'arbre' && node.children && node.children.length && jstree) {
-          item.enfants = jstreeConverter.getEnfants(node.id, jstree);
+          item.enfants = getEnfants(node.id, jstree);
         }
-        if (nodeSrc.a_attr['data-displayUrl']) item.displayUrl = nodeSrc.a_attr['data-displayUrl'];
-        if (nodeSrc.a_attr['data-dataUrl']) item.dataUrl = nodeSrc.a_attr['data-dataUrl'];
+        if (nodeSrc.a_attr['data-displayurl']) item.displayUrl = nodeSrc.a_attr['data-displayurl'];
+        if (nodeSrc.a_attr['data-dataurl']) item.dataUrl = nodeSrc.a_attr['data-dataurl'];
         if (nodeSrc.a_attr['data-ref']) item.ref = nodeSrc.a_attr['data-ref'];
         if (nodeSrc.a_attr.alt) item.resume = nodeSrc.a_attr.alt;
       }
@@ -239,10 +238,19 @@
     }
 
     return item;
+  }
+
+  var jstreeConverter = {
+    getJstNode: getJstNode,
+    getEnfants: getEnfants,
+    getJstreeChildren: getJstreeChildren,
+    setBaseUrl: setBaseUrl,
+    toJstree: toJstree,
+    toRef: toRef
   };
 
   // suivant que l'on est coté serveur ou client
-  if (typeof define === 'function') define(function () { return jstreeConverter; }); // requireJs
+  if (typeof define === 'function') define('tools/jstreeConverter', [], function () { return jstreeConverter; }); // requireJs
   else if (typeof module === 'object') module.exports = jstreeConverter; // node
   // sinon il se passe rien
 })(this);

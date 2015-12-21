@@ -69,11 +69,12 @@ module.exports = function ($accessControl) {
    * @returns {string} La route absolue
    */
   $routes.getAbs = function(action, ressource, context) {
-    var route, oid, isPublic = true
+    var route, id, isPublic = true
     if (ressource) {
-      oid = ressource.oid || parseInt(ressource, 10)
-      if (ressource.restriction !== restriction.aucune || $accessControl.isAuthenticated(context)) isPublic = false
-    } else if (context && context.session && context.session.user && context.session.user.oid) {
+      if (typeof ressource === "object") id = ressource.oid || ressource.ref || ressource.idOrigine
+      else id = ressource
+      if (ressource.restriction || $accessControl.isAuthenticated(context)) isPublic = false
+    } else if ($accessControl.isAuthenticated(context)) {
       isPublic = false
     }
     if (routes.hasOwnProperty(action)) {
@@ -83,8 +84,7 @@ module.exports = function ($accessControl) {
       if (['create', 'delete', 'edit'].indexOf(action) > -1) route += 'ressource/'
       else route += isPublic ? 'public/' : 'ressource/'
       // et on ajoute l'oid éventuel
-      if (oid) route += $routes.get(action, oid)
-      else route += $routes.get(action)
+      route += $routes.get(action, id)
     } else {
       log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
     }

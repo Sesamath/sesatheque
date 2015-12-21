@@ -188,7 +188,7 @@ try {
         var jstData = {
           'core': {
             'data': function (node, next) {
-              //S.log('fct data', node);
+              S.log('fct data', node);
               if (node.id == '#') {
                 next(rootElt);
               } else {
