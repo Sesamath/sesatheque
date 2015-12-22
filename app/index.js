@@ -46,6 +46,7 @@ var morgan = require('morgan')
 var moment = require('moment')
 var tools = require('./tools')
 var config = require('./config')
+require('an-log').config(config.lassiLogger)
 
 // appel du module lassi qui met en global une variable lassi
 require('lassi')(__dirname)
@@ -61,10 +62,10 @@ for (var i = 10; i < 1000; i +=100) {
 }
 /* */
 GLOBAL.isProd = ((lassi.settings.application.staging === 'prod'))
-lassi.log('app', "Démarrage de l'application avec l'environnement", (lassi.settings.application.staging).red)
 
 // nos loggers
 GLOBAL.log = require('./tools/log.js')
+log("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
 
 /**
  * Gestion des traces

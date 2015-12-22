@@ -148,6 +148,13 @@ var settings = {
     // ajouter les exclusions voulues parmi ["cache", "resssourceRepository", "personneRepository", "accessControl"]
     debugExclusions : []
   },
+  // pour an-log, si on veut récupérer les logs sql
+  lassiLogger : {
+    '$entities': {
+      logLevel: 'debug',
+      renderer: {name: 'fileRenderer', target:'./logs/entities.log'}
+    }
+  },
   varnish : false // mettre true s'il y a un varnish en fromtal pour purger les urls mises en cache
 }
 
