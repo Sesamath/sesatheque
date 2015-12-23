@@ -99,19 +99,19 @@ var privateConfig = require('./_private/config')
 // des modules sup à charger
 if (privateConfig.extraModules) {
   privateConfig.extraModules.forEach(function (module) {
-    lassi.log('app', "ajout du module supplémentaire " + module)
+    log("ajout du module supplémentaire " + module)
     require(module)
   })
 }
 if (privateConfig.extraDependenciesFirst) {
   privateConfig.extraDependenciesFirst.forEach(function(dependency) {
-    lassi.log('app', "ajout en premier de la dépendance supplémentaire " + dependency)
+    log("ajout en premier de la dépendance supplémentaire " + dependency)
     dependancies.unshift(dependency)
   })
 }
 if (privateConfig.extraDependenciesLast) {
   privateConfig.extraDependenciesLast.forEach(function(dependency) {
-    lassi.log('app', "ajout en dernier de la dépendance supplémentaire " + dependency)
+    log("ajout en dernier de la dépendance supplémentaire " + dependency)
     dependancies.push(dependency)
   })
 }
@@ -134,7 +134,7 @@ console.log(memcache)
                       " car elle utilise memcache comme stockage commun aux différents workers nodejs")
     }
     $cache.addEngine('', 'memcache', memcache);
-    lassi.log('app', 'Memcache ajouté sur ' +memcache)
+    log('Memcache ajouté sur ' +memcache)
   } else if (process.env.NODE_UNIQUE_ID) {
     // @see https://nodejs.org/api/cluster.html#cluster_cluster_ismaster
     throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
@@ -155,7 +155,7 @@ console.log(memcache)
   }
 
   // log("sesatheque en fin de config", sesatheque)
-  lassi.log('app', "FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
+  log("FIN config de l'application " +$settings.get('application.name') +" en mode " +$settings.get('application.staging'))
 })
 
 /**
@@ -174,7 +174,6 @@ if (!isProd) {
   });
 }
 
-lassi.log("avant bootstrap")
 // et on lance le boot
 sesatheque.bootstrap()
 
@@ -189,7 +188,7 @@ function afterRailSession(rail) {
    * En dev, ajout des requetes http en console et dans le log de debug
    */
   if (!isProd) {
-    lassi.log('$rail', "app is adding", "request log".blue.underline, "middleware (dev only)")
+    log("app is adding request log middleware (dev only)")
     rail.use('/', function(req, res, next) {
       // les requetes non statiques en console et debug
       if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
@@ -203,7 +202,7 @@ function afterRailSession(rail) {
   /**
    * Ajout du CORS
    */
-  lassi.log('$rail', "app is adding", "cors".blue.underline, "middleware")
+  log("app is adding cors middleware")
   rail.use('/', function(req, res, next) {
     var origin = req.header('Origin')
     if (origin) {
@@ -253,7 +252,7 @@ function afterRailSession(rail) {
    * headers expires sur le statique ou le json public
    * @todo le mettre aussi sur le html public (quand le source sera indépendant de la session)
    */
-  lassi.log('$rail', "app is adding", "expires".blue.underline, "middleware")
+  log("app is adding expires middleware")
   rail.use('/', function(req, res, next) {
     var ttl
     if (tools.isStatic(req.url)) ttl = staticTtl
@@ -302,10 +301,10 @@ function afterRailSession(rail) {
         })
         format += ' :post'
       }
-      lassi.log('$rail', "app is adding", "access.log".blue.underline, "middleware with " + accessLog)
+      log("app is adding access.log middleware with " + accessLog)
       rail.use('/', morgan(format, options))
     } else {
-      lassi.log('$rail', "Impossible d'ouvrir le log " +accessLog)
+      log.error("Impossible d'ouvrir le log " +accessLog)
     }
   } catch(error) {
     console.log(error.stack)
@@ -317,7 +316,7 @@ function afterRailSession(rail) {
    */
   if (log.perf.out) {
     // on veut logger les perfs, on ajoute response.perf, msg sera écrit dans le log après les contrôleurs
-    lassi.log('$rail', "app is adding", "perf.log".blue.underline, "middleware")
+    log("app is adding perf.log middleware")
     rail.use('/', function(request, response, next) {
       response.perf = {
         // message stocké en context qui sera écrit dans le listener beforeTransport

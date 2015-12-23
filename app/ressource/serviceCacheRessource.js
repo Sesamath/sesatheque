@@ -147,9 +147,10 @@ module.exports = function ($cache, $settings, EntityRessource) {
 
   // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne fassent rien
   if ($settings.get('noCache', false)) {
-    lassi.log('app', '$cacheRessource désactivé')
+    log('$cacheRessource désactivé')
     $cacheRessource.get = function (oid, next) { next() }
     $cacheRessource.getByOrigine = function (origine, idOrigine, next) { next() }
   }
+
   return $cacheRessource
 }

@@ -119,7 +119,7 @@ module.exports = function ($accessControl, $views) {
    */
   $auth.addClient = function (authClient) {
     try {
-      lassi.log('$auth', "adding", authClient.name.blue.underline, "authClient")
+      log("$auth is adding authClient")
 
       checkValidClient(authClient)
       if (_.isEmpty(clients)) {
@@ -128,7 +128,7 @@ module.exports = function ($accessControl, $views) {
         if (deferredInitController) deferredInitController()
       }
       clients[authClient.name] = authClient
-      lassi.log('$auth', authClient.name.blue.underline, "authClient registered")
+      log("$auth authClient" +authClient.name +" registered")
     } catch (error) {
       log.error(error)
     }
@@ -165,7 +165,7 @@ module.exports = function ($accessControl, $views) {
    * @param {function} initController
    */
   $auth.deferController = function (initController) {
-    lassi.log('$auth', "controller given")
+    log("$auth controller given")
     if (_.isEmpty(clients)) deferredInitController = initController
     else initController()
   }
