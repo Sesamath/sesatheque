@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": true,
   "scripts": {
     "start": "./scripts/run",
@@ -16,7 +16,7 @@
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "request": "^2.39.0",
-    "sesatheque-client": "git://src.sesamath.net/npm-sesatheque-client#master"
+    "sesatheque-client": "git://src.sesamath.net/sesatheque-client#master"
   },
   "devDependencies": {
     "bower": "^1.4.1",
