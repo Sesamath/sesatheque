@@ -37,6 +37,7 @@
 
 var _ = require('lodash')
 var baseUrl = require('../config').application.baseUrl
+var modLog = require('an-log')('$auth')
 
 module.exports = function ($accessControl, $views) {
   /**
@@ -119,8 +120,6 @@ module.exports = function ($accessControl, $views) {
    */
   $auth.addClient = function (authClient) {
     try {
-      log("$auth is adding authClient")
-
       checkValidClient(authClient)
       if (_.isEmpty(clients)) {
         defaultClient = authClient.name
@@ -128,7 +127,7 @@ module.exports = function ($accessControl, $views) {
         if (deferredInitController) deferredInitController()
       }
       clients[authClient.name] = authClient
-      log("$auth authClient" +authClient.name +" registered")
+      modLog("has registered", "authClient" +authClient.name)
     } catch (error) {
       log.error(error)
     }
@@ -165,7 +164,7 @@ module.exports = function ($accessControl, $views) {
    * @param {function} initController
    */
   $auth.deferController = function (initController) {
-    log("$auth controller given")
+    modLog("adding", "controller")
     if (_.isEmpty(clients)) deferredInitController = initController
     else initController()
   }

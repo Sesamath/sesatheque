@@ -42,6 +42,7 @@ var moment = require('moment')
 var _ = require('lodash')
 var config = require('../config') // jshint ignore:line
 var tools = require('./index') // jshint ignore:line
+var applog = require('an-log')(config.application.name)
 
 var _lassi = (typeof GLOBAL.lassi === 'undefined') ? console : GLOBAL.lassi
 
@@ -73,12 +74,12 @@ function getLogStream(log, verbose) {
       } else {
         streamsQuiet.push(stream)
       }
-      _lassi.log('app', 'ouverture du log ' +file)
+      applog('app', 'ouverture du log ' +file)
     } else {
-      _lassi.log('app', 'ouverture du log ' +file +' KO')
+      applog('app', 'ouverture du log ' +file +' KO')
     }
   } catch(error) {
-    _lassi.log('app', "ERROR : impossible d'ouvrir " +file)
+    applog('app', "ERROR : impossible d'ouvrir " +file)
   }
 
   return stream
@@ -97,7 +98,7 @@ var perfOutputStream
 var env = process.env.NODE_ENV || 'dev';
 
 
-/** 
+/**
  * Les messages à exclure
  * (une valeur à true excluera les debug de ce type dans le log de debug)
  * @private
@@ -146,7 +147,7 @@ function out(message, objectToDump, filter, stream, options) {
 // log
 if (env === 'prod') {
   GLOBAL.log = function () { } // jshint ignore:line
-  _lassi.log('app', "fonction log désactivée avec l'environnement : " + env)
+  applog('app', "fonction log désactivée avec l'environnement : " + env)
 } else {
   /**
    * Méthode qui écrit en console si l'on est pas en prod (ne fait rien en prod)
@@ -163,7 +164,7 @@ if (env === 'prod') {
     // (log étant défini en global dans la conf jshint il râle si on le redéfini)
     out(message, objectToDump, filter, null, options)
   }
-  _lassi.log('app', "fonction de log activée avec l'environnement : " + env)
+  applog('app', "fonction de log activée avec l'environnement : " + env)
 }
 
 // log.debug
@@ -188,11 +189,11 @@ if (config.logs.debug) {
     })
   }
 
-  _lassi.log('app', "fonction log.debug activée vers " +config.logs.debug +", avec l'environnement : " +env)
+  applog('app', "fonction log.debug activée vers " +config.logs.debug +", avec l'environnement : " +env)
 
 } else {
   log.debug = function() {};
-  _lassi.log('app', "fonction log.debug désactivée avec l'environnement : " +env)
+  applog('app', "fonction log.debug désactivée avec l'environnement : " +env)
 }
 
 // log.perf
@@ -228,6 +229,7 @@ if (config.logs.perf) {
   log.perf = function () {}
 }
 
+/*
 if (config.logs.sql) {
   // pour que ça sorte qqchose, ajouter à node_modules/lassi/classes/entities/EntityQuery.js la ligne
   // if (typeof log !== "undefined" && log.sql) log.sql(query.toString(), query.args);
@@ -240,6 +242,7 @@ if (config.logs.sql) {
     out(queryString, null, null, sqlOutputStream)
   }
 }
+*/
 
 // Et les autres méthodes toujours valides
 
@@ -297,7 +300,7 @@ log.include = function (filter) {
 // Et on fermera nos streams au shutdown
 if (_lassi.on) {
   _lassi.on('shutdown', function () {
-    _lassi.log('app', 'shutdown event in log')
+    applog('app', 'shutdown event in log')
 
     if (streamsQuiet.length) {
       _.each(streamsQuiet, function (stream) {

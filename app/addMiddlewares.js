@@ -38,6 +38,7 @@ var moment = require('moment')
 
 var tools = require('./tools')
 var config = require('./config')
+var applog = require('an-log')(config.application.name)
 
 var staticTtl = 3600 * 24
 var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
@@ -51,11 +52,11 @@ module.exports = function afterRailSession(rail) {
    * En dev, ajout des requetes http en console et dans le log de debug
    */
   if (!isProd) {
-    log("app is adding request log middleware (dev only)")
+    applog("adding middleware", "access log en console (car on est pas en prod)")
     rail.use('/', function(req, res, next) {
       // les requetes non statiques en console et debug
       if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
-        log(req.method +' ' +req.originalUrl)
+        applog(req.method, req.originalUrl)
         log.debug(req.method +' ' +req.originalUrl)
       }
       next()
@@ -65,7 +66,7 @@ module.exports = function afterRailSession(rail) {
   /**
    * Ajout du CORS
    */
-  log("app is adding cors middleware")
+  applog("adding middleware", "CORS")
   rail.use('/', function(req, res, next) {
     var origin = req.header('Origin')
     if (origin) {
@@ -104,7 +105,7 @@ module.exports = function afterRailSession(rail) {
           res.header('Access-Control-Allow-Credentials', 'true')
           res.header("Vary", "Origin,Cookie")
         } else {
-          log.error('cors avec ' + origin +' refusé')
+          log.debug('cors avec ' + origin +' refusé')
         }
       }
     }
@@ -115,7 +116,7 @@ module.exports = function afterRailSession(rail) {
    * headers expires sur le statique ou le json public
    * @todo le mettre aussi sur le html public (quand le source sera indépendant de la session)
    */
-  log("app is adding expires middleware")
+  applog("adding middleware", "expires")
   rail.use('/', function(req, res, next) {
     var ttl
     if (tools.isStatic(req.url)) ttl = staticTtl
@@ -164,7 +165,7 @@ module.exports = function afterRailSession(rail) {
         })
         format += ' :post'
       }
-      log("app is adding access.log middleware with " + accessLog)
+      applog("adding middleware", "access.log with " + accessLog)
       rail.use('/', morgan(format, options))
     } else {
       log.error("Impossible d'ouvrir le log " +accessLog)
@@ -179,7 +180,7 @@ module.exports = function afterRailSession(rail) {
    */
   if (log.perf.out) {
     // on veut logger les perfs, on ajoute response.perf, msg sera écrit dans le log après les contrôleurs
-    log("app is adding perf.log middleware")
+    applog("adding middleware", "perf.log")
     rail.use('/', function(request, response, next) {
       response.perf = {
         // message stocké en context qui sera écrit dans le listener beforeTransport

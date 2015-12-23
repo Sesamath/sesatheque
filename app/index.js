@@ -44,6 +44,7 @@ try {
   var tools = require('./tools')
   var config = require('./config')
   require('an-log').config(config.lassiLogger)
+  var appLog = require('an-log')(config.application.name)
 
 // appel du module lassi qui met en global une variable lassi
   require('lassi')(__dirname)
@@ -62,7 +63,7 @@ try {
 
 // nos loggers
   GLOBAL.log = require('./tools/log.js')
-  log("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
+  appLog("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
 
   /**
    * Gestion des traces
@@ -93,19 +94,19 @@ try {
 // des modules sup à charger
   if (privateConfig.extraModules) {
     privateConfig.extraModules.forEach(function (module) {
-      log("ajout du module supplémentaire " + module)
+      appLog("ajout du module supplémentaire " + module)
       require(module)
     })
   }
   if (privateConfig.extraDependenciesFirst) {
     privateConfig.extraDependenciesFirst.forEach(function (dependency) {
-      log("ajout en premier de la dépendance supplémentaire " + dependency)
+      appLog("ajout en premier de la dépendance supplémentaire " + dependency)
       dependancies.unshift(dependency)
     })
   }
   if (privateConfig.extraDependenciesLast) {
     privateConfig.extraDependenciesLast.forEach(function (dependency) {
-      log("ajout en dernier de la dépendance supplémentaire " + dependency)
+      appLog("ajout en dernier de la dépendance supplémentaire " + dependency)
       dependancies.push(dependency)
     })
   }
@@ -123,12 +124,11 @@ try {
     var memcache = $settings.get('memcache')
     if (memcache) {
       if (typeof memcache !== 'object' || !memcache.host || !memcache.port) {
-        console.log(memcache)
         throw new Error("Il faut indiquer pour memcache un objet {host:xxx,port:nn}. L'application sesatheque ne peut pas tourner avec un cluster memcache" +
             " car elle utilise memcache comme stockage commun aux différents workers nodejs")
       }
       $cache.addEngine('', 'memcache', memcache);
-      log('Memcache ajouté sur ' + memcache)
+      appLog('Memcache ajouté avec ' + memcache.host +":" +memcache.port)
     } else if (process.env.NODE_UNIQUE_ID) {
       // @see https://nodejs.org/api/cluster.html#cluster_cluster_ismaster
       throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
@@ -149,7 +149,7 @@ try {
     }
 
     // log("sesatheque en fin de config", sesatheque)
-    log("FIN config de l'application " + $settings.get('application.name') + " en mode " + $settings.get('application.staging'))
+    appLog("FIN config de l'application " + $settings.get('application.name') + " en mode " + $settings.get('application.staging'))
   })
 
   /**

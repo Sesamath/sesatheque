@@ -491,6 +491,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route POST /ressource/modifier/:oid
    */
   controller.post($routes.get('edit', ':oid'), function (context) {
+    context.timeout = 10000
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
     var titrePage = "Modifier une ressource"
