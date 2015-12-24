@@ -46,9 +46,9 @@ try {
   require('an-log').config(config.lassiLogger)
   var appLog = require('an-log')(config.application.name)
 
-// appel du module lassi qui met en global une variable lassi
+  // appel du module lassi qui met en global une variable lassi
   require('lassi')(__dirname)
-// sesalab-admin après mise en global de l'appli
+  // sesalab-admin sera appelé après mise en global de l'appli
 
   /* attention, ici GLOBAL.lassi existe mais pas toujours lassi !!!
    if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
@@ -61,7 +61,7 @@ try {
    /* */
   GLOBAL.isProd = ((lassi.settings.application.staging === 'prod'))
 
-// nos loggers
+  // nos loggers
   GLOBAL.log = require('./tools/log.js')
   appLog("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
 
@@ -80,18 +80,18 @@ try {
   /* if (!isProd) /* * / require('long-stack-traces') /* */
 
   var tools = require('./tools')
-//var _ = require('lodash');
+  //var _ = require('lodash');
 
-// les déclarations de nos components
+  // les déclarations de nos components
   require('./static')
   require('./personne')
   require('./ressource')
   require('./auth')
   var dependancies = ['static', 'personne', 'ressource', 'auth']
 
-// On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
+  // On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
   var privateConfig = require('./_private/config')
-// des modules sup à charger
+  // des modules sup à charger
   if (privateConfig.extraModules) {
     privateConfig.extraModules.forEach(function (module) {
       appLog("ajout du module supplémentaire " + module)
@@ -111,13 +111,8 @@ try {
     })
   }
 
-// Notre appli en global (pour que chacun puisse y ajouter ses controleurs ou services)
+  // Notre appli qui sera mise en global (pour que chacun puisse y ajouter ses controleurs ou services)
   var sesatheque = lassi.component('sesatheque', dependancies)
-// pour sesalab-admin
-// utile aussi pour d'autres modules npm qui voudrait ajouter du app.service('$newService', function () {…})
-// ou app.controller('path', function () {this.get('path', function (context) {…} })
-  GLOBAL.app = sesatheque
-  require('./sesalab-admin');
 
   sesatheque.config(function ($cache, $settings) {
     // on ajoute memcache si précisé dans les settings
@@ -168,7 +163,13 @@ try {
     });
   }
 
-// et on lance le boot
+  // pour sesalab-admin
+  // utile aussi pour d'autres modules npm qui voudrait ajouter du app.service('$newService', function () {…})
+  // ou app.controller('path', function () {this.get('path', function (context) {…} })
+  GLOBAL.app = sesatheque
+  require('./sesalab-admin');
+
+  // et on lance le boot
   sesatheque.bootstrap()
 } catch (error) {
   console.error(error)

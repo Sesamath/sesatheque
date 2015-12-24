@@ -38,9 +38,9 @@ module.exports = function (controller) {
 
   function getDefaultData() {
     return {
-      $views : __dirname + '/views',
+      $views : __dirname + '/../views',
       contentBloc : {
-        $view : __dirname +'/views/debug'
+        $view : 'debug'
       }
     }
   }

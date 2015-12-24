@@ -170,6 +170,42 @@ module.exports = function ($accessControl, $views) {
   }
 
   /**
+   * Retourne les infos pour le bloc d'authentification
+   * @memberOf $auth
+   * @param {Context} context
+   * @returns {object}
+   */
+  $auth.getAuthBloc = function(context) {
+    var authBloc = {}
+    var urlRedirect
+    if ($accessControl.isAuthenticated(context)) {
+      // on veut pas rediriger sur la connexion après déconnexion
+      urlRedirect = context.request.originalUrl.replace("connexion", "")
+      authBloc.user = {
+        nom: context.session.user.nom,
+        prenom: context.session.user.prenom,
+      }
+      authBloc.ssoLinks = $auth.getSsoLinks(context)
+      authBloc.logoutLink = {
+        href : "/deconnexion?redirect=" +encodeURIComponent(urlRedirect),
+        icon : "sign-out",
+        value: "Déconnexion"
+      }
+    } else {
+      // on veut pas rediriger sur deconnexion après connexion
+      urlRedirect = context.request.originalUrl.replace("deconnexion", "")
+      // faut envoyer au moins une propriété sinon la vue n'est pas rendue (ici on en a une mais sinon faut mettre un foo:bar qcq)
+      authBloc.loginLink = {
+        href : "/connexion?redirect=" +encodeURIComponent(urlRedirect),
+        icon : "sign-in",
+        value: "Connexion"
+      }
+    }
+
+    return authBloc
+  }
+
+  /**
    * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée
    * @memberOf $auth
    * @param {Context} context

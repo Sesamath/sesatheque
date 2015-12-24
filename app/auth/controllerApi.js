@@ -28,20 +28,38 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+
 'use strict'
-var authComponent = lassi.component('auth')
 
-authComponent.service('$auth', function($accessControl, $views) {
-  return require('./serviceAuth')($accessControl, $views)
-})
-
-authComponent.controller(function ($auth, $accessControl, $views, $flashMessages) {
-  require('./controllerAuth')(this, $auth, $accessControl, $views, $flashMessages)
-})
-
-authComponent.controller(function ($auth, $accessControl, $ressourceRepository) {
-  require('./controllerApi')(this, $auth, $accessControl, $ressourceRepository)
-})
-
-// rien à faire en config
-authComponent.config(function() {})
+module.exports = function (controller, $auth, $accessControl, $ressourceRepository) {
+  /**
+   * Renvoie en json les infos pour le bloc d'authentification et les droits sur une ressource éventuelle
+   * (pour ajouter les boutons modifier / supprimer sur les pages publiques)
+   * @route GET /api/auth[?ressourceId=xxx]
+   */
+  controller.get('api/auth', function (context) {
+    var isLogged = $accessControl.isAuthenticated(context)
+    var auth = {
+      isLogged:isLogged,
+      permissions:""
+    }
+    log("auth", auth)
+    if (isLogged) {
+      auth.authBloc = $auth.getAuthBloc(context)
+    }
+    if (isLogged && context.get.ressourceId) {
+      $ressourceRepository.load(context.get.ressourceId, function (error, ressource) {
+        if (error) log.error(error)
+        else if (ressource) {
+          if ($accessControl.hasReadPermission(context, ressource)) auth.permissions += "R"
+          if ($accessControl.hasPermission("create", context, ressource)) auth.permissions += "C"
+          if ($accessControl.hasPermission("delete", context, ressource)) auth.permissions += "D"
+          if ($accessControl.hasPermission("update", context, ressource)) auth.permissions += "W"
+        }
+        context.json(auth)
+      })
+    } else {
+      context.json(auth)
+    }
+  })
+}

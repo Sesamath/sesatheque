@@ -60,6 +60,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    */
   function addActions(context, data) {
     if (context.ressource && context.ressource.oid) {
+      var link
       var links = []
       var ressource = context.ressource
       var oid = context.ressource.oid
@@ -84,31 +85,44 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
             {name:"target", value:"_blank"}
           ]
         })
-      }
-      if ($accessControl.hasPermission('update', context, ressource))
-        links.push({
+        // pour tous les suivants, on met les liens mais on les cache si on a pas les droits,
+        // c'est le js qui les affichera si on est dans /public/ donc sans session
+
+        // modifier
+        link =  {
           href: $routes.getAbs('edit', oid, context),
           value: 'Modifier',
           icon: "edit", // mode_edit pour material icons
           selected: (context.tab === 'edit')
-        })
-      if (oid && $accessControl.hasPermission('read', context, ressource) && $accessControl.hasPermission('create', context))
-        links.push({
+        }
+        if (!$accessControl.hasPermission('update', context, ressource)) link.attributes = {style:"display:none;", id:"buttonEdit"}
+        links.push(links)
+
+        // dupliquer
+        link = {
           href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
           icon: 'copy', // ma call_split
           selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1)
-        })
-      if ($accessControl.hasPermission('delete', context, ressource))
-        links.push({
+        }
+        if (!$accessControl.hasPermission('create', context)) link.attributes = {style:"display:none;", id:"buttonDuplicate"}
+        links.push(link)
+
+        // supprimer
+        link = {
           href: $routes.getAbs('delete', oid, context),
           value: 'Supprimer',
           icon: 'trash', // ma delete
           selected: (context.tab === 'delete')
-        })
+        }
+        if (!$accessControl.hasPermission('delete', context, ressource)) link.attributes = {style:"display:none;", id:"buttonDelete"}
+        links.push(link)
+
+      } else {
+        log.error(new Error("On a une ressource dans listeners::addActions sans les droits pour la lire"))
+      }
 
       data.actions = {
-        $view: __dirname + '/views/actions',
         links: links
       }
     }
@@ -142,7 +156,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     }
     // on peut tout ajouter
     data.navigation = {
-      $view: __dirname + '/views/navigation',
       links: links
     }
   }
@@ -166,15 +179,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     if (isHtml) log.debug("html vide ? " +_.isEmpty(data.contentBloc))
     else if (isJson) log.debug("api vide ? " +_.isEmpty(data))
     else log.debug("statique")
-    // vérif des $view
-    if (isHtml) {
-      for (var bloc in data) {
-        if (data.hasOwnProperty(bloc) && bloc.substr(0, 1) !== '$' && typeof data[bloc] !== 'string') {
-          if (!data[bloc].$view) log.error(new Error("Le bloc " +bloc +" n'a pas de $view"))
-          else if (data[bloc].$view.indexOf("/") === -1) log.error(new Error("Le bloc " +bloc +" a une $view en relatif"))
-        }
-      }
-    }
   }
 
   /**
@@ -203,7 +207,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         context.contentType = 'application/json'
       }
       // ajout du layout, page si non précisé
-      if (isHtml && !data.$layout) data.$layout = __dirname + '/../static/views/layout-' + (context.layout || "page")
+      if (isHtml && !data.$layout) data.$layout = __dirname + '/../views/layout-' + (context.layout || "page")
     }
 
     /**
@@ -270,8 +274,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       var flashData = $flashMessage.getAndPurge(context)
       if (flashData) _.merge(data, flashData)
       // et impose une vue en absolu à errors et warnings
-      if (data.errors) data.errors.$view = __dirname +'/views/errors'
-      if (data.warnings) data.warnings.$view = __dirname +'/views/warnings'
       if (!data.$metas) data.$metas = {}
       if (!data.$metas.css) data.$metas.css = []
       if (context.layout === 'iframe') data.$metas.css.push('/styles/iframe.css')
@@ -324,9 +326,9 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   function prepareErrorHtmlData(data, title, errorMsg) {
     if (!data.hasOwnProperty('$metas')) data.$metas = {}
     data.$metas.title = title
-    if (!data.$views) data.$views = __dirname + '/views' // sinon lassi/classes/transport/html/Renderer.js plante avec " Wrong views path"
+    if (!data.$views) data.$views = __dirname + '/../views' // sinon lassi/classes/transport/html/Renderer.js plante avec " Wrong views path"
     if (!data.errors) data.errors = {
-      $view : __dirname +'/views/errors',
+      $view : 'errors',
     }
     if (!data.errors.errorMessages) data.errors.errorMessages = [errorMsg.replace(/Error[\s]*:[\s]*/, '')]
     log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max:2000})

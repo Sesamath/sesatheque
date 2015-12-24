@@ -1,4 +1,4 @@
-{!authBloc!}
+{!authBloc Attention à répercuter toute modif dans ressource/public/auth.js!}
 <div id="auth">
 {?user}
   <a href="#">
@@ -8,10 +8,10 @@
   <ul>
     <div>{user.prenom} {user.nom}</div>
     {!il cherche les dust inclus dans partial, faut donc l'indiquer relativement à <layoutDir>/partial !}
-    {#ssoLinks}<li>{>"../../../static/views/partials/link" /}</li>{/ssoLinks}
-    {#logoutLink}<li>{>"../../../static/views/partials/link" /}</li>{/logoutLink}
+    {#ssoLinks}<li>{>"link" /}</li>{/ssoLinks}
+    {#logoutLink}<li>{>"link" /}</li>{/logoutLink}
   </ul>
 {:else}
-  {#loginLink}{>"../../../static/views/partials/link" /}{/loginLink}
+  {#loginLink}{>"link" /}{/loginLink}
 {/user}
 </div>

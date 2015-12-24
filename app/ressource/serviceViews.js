@@ -527,15 +527,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         if (formData.idOrigine) formData.idOrigine.readonly = true;
         else delete formData.idOrigine // idOrigine pas obligatoire, si on l'a pas mis à l'insert on peut plus l'ajouter
         // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
-        formData.$view = __dirname +'/views/formEdit'
+        formData.$view = 'formEdit'
 
       } else {
         if (ressource.search) {
           // inutile, getDefaultData l'a initialisé
-          //formData.$view = __dirname +'/views/formSearch'
+          //formData.$view = 'formSearch'
           delete ressource.search
         } else {
-          formData.$view = __dirname +'/views/formCreate'
+          formData.$view = 'formCreate'
           if (!$accessControl.hasPermission("createAll", context)) {
             // faut restreindre type
             var ttChoices = []
@@ -671,7 +671,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // pas d'erreur mais pas de ressource non plus
       $views.addError("Aucune ressource transmise pour affichage", viewData)
     }
-    if (view) viewData.$view = __dirname +"/views/" +view
+    if (view) viewData.$view = view
 
     return viewData
   }
@@ -684,7 +684,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   $views.addError = function (error, data) {
     if (!data.errors || !data.errors.errorMessages) data.errors = {
-      $view : __dirname +'/../static/views/errors',
       errorMessages : []
     }
     var errorMsg = (typeof error === "string") ? error : error.toString()
@@ -695,18 +694,18 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   /**
    * Retourne les valeurs par défaut pour une vue ressource
    * @memberOf $views
-   * @param {string} viewName Le nom de la vue (dans ressource/views)
+   * @param {string} viewName Le nom de la vue (fichier dust dans views)
    * @returns {{$views: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
    */
   $views.getDefaultData = function (viewName) {
     var data = {
-      $views : __dirname + '/views',
+      $views : __dirname + '/../views',
       $metas : {
         // css ajouté par le listener d'après context.layout
         js : ['/vendors/requirejs/require.min.js']
       }
     }
-    if (viewName.substr(0, 1) !== "/") viewName = __dirname +"/views/" +viewName
+    //if (viewName.substr(0, 1) !== "/") viewName = __dirname +"/../views/" +viewName
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view:viewName}
     else data.contentBloc = {$view:viewName}
@@ -743,7 +742,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Context} context
    * @param error
    * @param ressource
-   * @param {string} view le nom de la vue dans ressource/views/
+   * @param {string} view le nom de la vue
    * @param options Objet de données qui sera mergé avec data avant envoi au rendu
    */
   $views.prepareAndSend = function (context, error, ressource, view, options) {

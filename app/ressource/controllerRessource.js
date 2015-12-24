@@ -170,9 +170,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
       if (error) retour.error = error.toString()
       var data = {
-        $views : __dirname + '/views',
+        $views : __dirname + '/../views',
         jsBloc : {
-          $view : __dirname +"/views/js",
+          $view : "js",
           jsCode : 'if (parent.postMessage) parent.postMessage(' +JSON.stringify(retour) +', "*")'
         }
       }
@@ -544,13 +544,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             $metas : {
               title: "Enregistrement réussi, fermeture automatique"
             },
-            $views : __dirname +"/views",
+            $views : __dirname +"/../views",
             contentBloc : {
-              $view : __dirname +"/../static/views/home",
+              $view : "home",
               content : "Ressource " +ressource.oid +" enregistrée"
             },
             jsBloc : {
-              $view : __dirname +"/views/js",
+              $view : "js",
               jsCode : 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
                 context.get.closerId +'", ressource:' +JSON.stringify($ressourceConverter.toRef(ressource)) +'}, "*")'
             }
@@ -599,7 +599,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 $metas     : {title: 'Supprimer la ressource : ' + ressource.titre},
                 titre : ressource.titre,
                 contentBloc: {
-                  $view: __dirname +'/views/delete',
+                  $view: 'delete',
                   token : {
                     value:ressource.token,
                     name:'token',
@@ -630,9 +630,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if ($accessControl.isAuthenticated(context)) {
       var oid = context.arguments.oid
       var data = {
-        $views     : __dirname + '/views',
+        $views     : __dirname + '/../views',
         $metas     : {title: 'Suppression de ressource'},
-        contentBloc: {$view: __dirname +'/views/delete'}
+        contentBloc: {$view: 'delete'}
       }
       checkToken(context, oid, function () {
         // lassi demande de charger la ressource pour l'effacer, mais on vient de la mettre en cache
@@ -728,7 +728,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               }
               // les actions (en float right, dust sait pas boucler en partant de la fin, faudrait écrire un helper, on empile de droite à gauche)
               data.actions = {
-                $view : __dirname +"/views/actions",
                 links:[]
               }
               // lien suivant (si on est au max)

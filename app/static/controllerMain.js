@@ -33,7 +33,7 @@
 module.exports = function (controller) {
   var baseData = {
     $metas : {},
-    $views : __dirname +'/views'
+    $views : __dirname +'/../views'
   }
 
   // nos ressources statiques génériques
@@ -47,7 +47,7 @@ module.exports = function (controller) {
     data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
     // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
     data.contentBloc = {
-      $view : __dirname +'/views/home',
+      $view : 'home',
       // ce content est la variable passée au template dust
       content : "Ce site est encore un prototype expérimental."
     }

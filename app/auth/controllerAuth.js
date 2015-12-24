@@ -125,34 +125,9 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
       //log.debug("controlleur auth avec " +context.layout)
       if (context.layout === 'page') {
         var data = {
-          authBloc: {
-            $view: __dirname +"/views/auth"
-          }
+          authBloc: $auth.getAuthBloc(context)
         }
-        var urlRedirect
-        if ($accessControl.isAuthenticated(context)) {
-          // on veut pas rediriger sur la connexion après déconnexion
-          urlRedirect = context.request.originalUrl.replace("connexion", "")
-          data.authBloc.user = {
-            nom: context.session.user.nom,
-            prenom: context.session.user.prenom,
-          },
-          data.authBloc.ssoLinks = $auth.getSsoLinks(context)
-          data.authBloc.logoutLink = {
-            href : "/deconnexion?redirect=" +encodeURIComponent(urlRedirect),
-            icon : "sign-out",
-            value: "Déconnexion"
-          }
-        } else {
-          // on veut pas rediriger sur deconnexion après connexion
-          urlRedirect = context.request.originalUrl.replace("deconnexion", "")
-          // faut envoyer au moins une propriété sinon la vue n'est pas rendue (ici on en a une mais sinon faut mettre un foo:bar qcq)
-          data.authBloc.loginLink = {
-            href : "/connexion?redirect=" +encodeURIComponent(urlRedirect),
-            icon : "sign-in",
-            value: "Connexion"
-          }
-        }
+        data.authBloc.$view = "auth"
         context.next(null, data)
       } else {
         // Pas concerné

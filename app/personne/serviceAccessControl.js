@@ -104,8 +104,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   function getDeleteDeniedMessage(context, ressource) {
     var msg
-    var userOid = $accessControl.getCurrentUserOid(context)
-    if (_.contains(ressource.auteurs, userOid)) {
+    if ($accessControl.isAuteur(context, ressource)) {
       // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
       // (sinon d'autres peuvent s'en servir)
       if (ressource.auteurs.length > 1)
@@ -263,6 +262,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     // avec pm2 on a du bind ipv6
     return (/^(::ffff:)?(127\.0|192\.168)/.test(ip) || /^::1/.test(ip))
   }
+
+  //######################
+  // Méthodes publiques
+  //######################
 
   /**
    * Ajoute un groupe d'après son id à une personne (s'il existe)
@@ -514,7 +517,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.isAuthenticated = function (context) {
-    return (context && context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale et un token
+    return !!(context && context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale et un token
   }
 
   /**

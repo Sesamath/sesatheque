@@ -64,7 +64,7 @@ module.exports = function () {
     if (context.session.flashMessages) {
       data = {
         flashBloc : {
-          $view : __dirname +'/views/flash',
+          $view : 'flash',
           messages : context.session.flashMessages
         }
       }
