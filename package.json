@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "an-flow": "^1.1.0",
+    "an-log": "1.0.25",
     "an-uuid": "^1.0.0",
     "elementtree": "^0.1.6",
     "lassi": "git://src.sesamath.net/lassi#master",
