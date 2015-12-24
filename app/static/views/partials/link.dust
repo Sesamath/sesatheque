@@ -1,8 +1,7 @@
-<a
-    {?href}href="{href}"{/href}
+<a  {?href}href="{href}"{/href}
     {?selected}class="selected"{/selected}
     {?icon}title="{value}"{/icon}
-    {#attributes}{name}="{value}"{/attributes}
+    {#attributes} {name}="{value}"{/attributes}
 >
   {?icon}
     <i class="fa fa-{icon}"></i> <span>{value}</span>
