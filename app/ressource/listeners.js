@@ -36,7 +36,7 @@
  */
 
 var _ = require('lodash')
-var tools = require('../tools')
+//var tools = require('../tools')
 
 module.exports = function ($accessControl, $routes, $flashMessage) {
   /**
@@ -53,14 +53,13 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   var listeners = {}
 
   /**
-   * Ajoute les liens contextuels à une ressource dans data.actions
+   * Ajoute les liens contextuels à une ressource dans data.actions, et refreshAuth.js si on est sur du /public/
    * @private
    * @param context
    * @param data
    */
   function addActions(context, data) {
     if (context.ressource && context.ressource.oid) {
-      var link
       var links = []
       var ressource = context.ressource
       var oid = context.ressource.oid
@@ -87,36 +86,30 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         })
         // pour tous les suivants, on met les liens mais on les cache si on a pas les droits,
         // c'est le js qui les affichera si on est dans /public/ donc sans session
-
-        // modifier
-        link =  {
+        links.push({
+          id : "buttonEdit",
           href: $routes.getAbs('edit', oid, context),
           value: 'Modifier',
           icon: "edit", // mode_edit pour material icons
-          selected: (context.tab === 'edit')
-        }
-        if (!$accessControl.hasPermission('update', context, ressource)) link.attributes = {style:"display:none;", id:"buttonEdit"}
-        links.push(links)
-
-        // dupliquer
-        link = {
+          selected: (context.tab === 'edit'),
+          hidden: !$accessControl.hasPermission('update', context, ressource)
+        })
+        links.push({
+          id:"buttonDuplicate",
           href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
           icon: 'copy', // ma call_split
-          selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1)
-        }
-        if (!$accessControl.hasPermission('create', context)) link.attributes = {style:"display:none;", id:"buttonDuplicate"}
-        links.push(link)
-
-        // supprimer
-        link = {
+          selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1),
+          hidden : !$accessControl.hasPermission('create', context)
+        })
+        links.push({
+          id:"buttonDelete",
           href: $routes.getAbs('delete', oid, context),
           value: 'Supprimer',
           icon: 'trash', // ma delete
-          selected: (context.tab === 'delete')
-        }
-        if (!$accessControl.hasPermission('delete', context, ressource)) link.attributes = {style:"display:none;", id:"buttonDelete"}
-        links.push(link)
+          selected: (context.tab === 'delete'),
+          hidden : !$accessControl.hasPermission('delete', context, ressource)
+        })
 
       } else {
         log.error(new Error("On a une ressource dans listeners::addActions sans les droits pour la lire"))
@@ -125,6 +118,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       data.actions = {
         links: links
       }
+      // le js est ajouté par addNavigation
     }
   } // addActions
 
@@ -145,18 +139,34 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         iconStack: ["file-o fa-stack-2x", "plus fa-stack-1x"] // ma note_add
       })
       /* */
-      links.push({href: $routes.getAbs('create', null, context), value: 'Ajouter une ressource', icon: 'plus-circle'})
     }
+    links.push({
+      id: "buttonAdd",
+      href: $routes.getAbs('create', null, context),
+      value: 'Ajouter une ressource',
+      icon: 'plus-circle',
+      hidden: !$accessControl.hasPermission('create', context)
+    })
     // un lien vers la recherche
-    links.push({href: $routes.getAbs('search', null, context), value: 'Recherche', icon: 'search'})
+    links.push({id:"buttonSearch", href: $routes.getAbs('search', null, context), value: 'Recherche', icon: 'search'})
     // un lien mes ressources
-    var myOid = $accessControl.getCurrentUserOid(context)
-    if (myOid) {
-      links.push({href: $routes.getAbs('search', null, context) +"?auteurs=" +myOid, value: 'Mes ressources', icon: 'bookmark-o'})
-    }
+    var myOid = $accessControl.getCurrentUserOid(context) || ""
+    links.push({
+      id:"buttonMyRessources",
+      href: $routes.getAbs('search', null, context) + "?auteurs=" + myOid,
+      value: 'Mes ressources',
+      icon: 'bookmark-o',
+      hidden:!myOid
+    })
     // on peut tout ajouter
     data.navigation = {
       links: links
+    }
+    // et on ajoute notre js qui les gère si on est sur du /public/
+    if (context.request.originalUrl.indexOf("/public/") > -1) {
+      if (!data.jsBloc) data.jsBloc = {$view:'js'}
+      if (!data.jsBloc.jsFiles) data.jsBloc.jsFiles = []
+      data.jsBloc.jsFiles.push("/refreshAuth.js")
     }
   }
 

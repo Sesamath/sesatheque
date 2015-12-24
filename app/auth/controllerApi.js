@@ -45,14 +45,14 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
     }
     log("auth", auth)
     if (isLogged) {
+      auth.oid = $accessControl.getCurrentUserOid(context)
       auth.authBloc = $auth.getAuthBloc(context)
+      if ($accessControl.hasPermission("create", context)) auth.permissions += "C"
     }
     if (isLogged && context.get.ressourceId) {
       $ressourceRepository.load(context.get.ressourceId, function (error, ressource) {
         if (error) log.error(error)
         else if (ressource) {
-          if ($accessControl.hasReadPermission(context, ressource)) auth.permissions += "R"
-          if ($accessControl.hasPermission("create", context, ressource)) auth.permissions += "C"
           if ($accessControl.hasPermission("delete", context, ressource)) auth.permissions += "D"
           if ($accessControl.hasPermission("update", context, ressource)) auth.permissions += "W"
         }

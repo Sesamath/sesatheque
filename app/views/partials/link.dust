@@ -1,6 +1,9 @@
-<a  {?href}href="{href}"{/href}
-    {?selected}class="selected"{/selected}
-    {?icon}title="{value}"{/icon}
+<a
+    {?id} id="{id}"{/id}
+    {?href} href="{href}"{/href}
+    {?selected} class="selected"{/selected}
+    {?icon} title="{value}"{/icon}
+    {?hidden} style="display: none;"{/hidden}
     {#attributes} {name}="{value}"{/attributes}
 >
   {?icon}

@@ -31,18 +31,17 @@
 
 /**
  * Met à jour l'affichage sur les pages publiques (vérifie si on est authentifié pour ajouter les infos et les boutons qui vont bien)
+ * Auto-exécuté au chargement
  */
 
 /* global window, define, require, alert */
-
 if (typeof define === 'undefined' || typeof require === 'undefined') {
   alert("requireJs doit être chargé avant ce fichier");
 } else if (typeof window === 'undefined') {
   throw new Error("Ce module est un module requireJs prévu pour fonctionner dans un navigateur");
 } else {
-
   // faut d'abord un module sans dépendance pour pouvoir la charger avec le bon chemin si besoin
-  define('refreshAuth', ['tools/xhr'], function (xhr) {
+  define('refreshAuth', ['tools/xhr', 'initGlobal'], function (xhr) {
     "use strict";
 
     function addLink(parent, link) {
@@ -54,14 +53,14 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
       var a = S.getElement('a', aOptions);
       if (link.icon) {
         S.addElement(a, 'i', {class: "fa fa-" + link.icon});
-        S.addElement(a, 'span', link.value);
+        S.addElement(a, 'span', {}, link.value);
       } else if (link.iconStack) {
         var spanStack = S.getElement('span', {class: "fa-stack fa-lg"});
         link.iconStack.forEach(function (icon) {
           S.addElement(spanStack, 'i', {class:"fa fa-" +icon});
         });
         a.appendChild(spanStack);
-        S.addElement(a, 'span', link.value);
+        S.addElement(a, 'span', {}, link.value);
       } else {
         S.addText(a, link.value);
       }
@@ -73,7 +72,13 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 
     return function () {
       if (window.location.pathname.indexOf("/public/") > -1) {
-        xhr.get("/api/personne/auth", {}, function (error, response) {
+        var url = "/api/auth";
+        // on regarde si on est sur une ressource
+        var match = window.location.pathname.match(/\/public\/[a-z]+\/(.+)$/);
+        if (match) url += "?ressourceId=" +match[1];
+        xhr.get(url, {withCredentials:true, responseType:"json"}, function (error, response) {
+          S.log.enable()
+          S.log("on récupère auth", response);
           if (error) {
             S.log.error(error);
           } else if (response && response.isLogged) {
@@ -85,6 +90,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
                 S.empty(authBloc);
                 var a = S.addElement(authBloc, 'a', {href:"#"});
                 S.addElement(a, 'i', {class:"fa fa-user"});
+                S.addText(a, " ");
                 S.addElement(a, 'i', {class:"fa fa-ellipsis-v"});
                 var ul = S.addElement(authBloc, 'ul');
                 S.addElement(ul, 'div', {}, data.user.prenom +" " +data.user.nom)
@@ -96,15 +102,26 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             } else {
               S.log.error("pas de authBloc dans la réponse de l'api");
             }
-            // on passe aux boutons si on est sur une ressource
+            // on passe aux boutons d'action si on est sur une ressource
             if (response.permissions && document.getElementById("actions")) {
               if (response.permissions.indexOf("C") > -1) S.setStyles(document.getElementById("buttonDuplicate"), {display:"block"});
               if (response.permissions.indexOf("D") > -1) S.setStyles(document.getElementById("buttonDelete"), {display:"block"});
               if (response.permissions.indexOf("W") > -1) S.setStyles(document.getElementById("buttonEdit"), {display:"block"});
             }
+            // la navigation
+            if (response.permissions.indexOf("C") > -1) S.setStyles(document.getElementById("buttonAdd"), {display:"inline-block"});
+            var buttonMyRessources = document.getElementById("buttonMyRessources");
+            if (buttonMyRessources && response.oid) {
+              buttonMyRessources.href += response.oid;
+              S.setStyles(buttonMyRessources, {display: "inline-block"});
+            }
+            var buttonSearch = document.getElementById("buttonSearch");
+            if (buttonSearch) buttonSearch.href = buttonSearch.href.replace("public", "ressource");
           }
         });
       }
     };
-  });
+  }); // define
+  // et on s'auto exécute
+  require(['refreshAuth'], function (refreshAuth) { refreshAuth(); });
 }

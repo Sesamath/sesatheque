@@ -1,8 +1,9 @@
+{!assure le rendu de jsBloc!}
 {#jsFiles}
-<script src="{.}" />
+  <script type="application/javascript" src="{.}" /></script>
 {/jsFiles}
 {?jsCode}
-<script type="application/javascript" >
-{jsCode|s}
-</script>
+  <script type="application/javascript">
+  {jsCode|s}
+  </script>
 {/jsCode}
