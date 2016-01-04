@@ -79,7 +79,8 @@
       if (!xhrOptions.urlParams) xhrOptions.urlParams = {};
       xhrOptions.urlParams.merge = "1";
     }
-    options.timeout = ajaxTimeout;
+    xhrOptions.responseType = "json";
+    xhrOptions.timeout = ajaxTimeout;
     // post ou get ?
     if (typeof data === "object") {
       url = base + 'api/ressource';

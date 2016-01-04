@@ -110,7 +110,7 @@ define('tools/xhr', [], function () {
             xhr.setRequestHeader(header, options.headers[header])
           }
         }
-      } else if (data && typeof data === "object")  {
+      } else if (!!data && typeof data === "object")  {
         xhr.setRequestHeader('Content-Type', 'application/json')
       }
       xhr.timeout = options.timeout || defaultTimeout
