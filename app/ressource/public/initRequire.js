@@ -109,7 +109,7 @@
         mathjax: base + 'vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
         mathquill: base + 'vendors/mathquill-0.9.4/mathquill.min',
         pluginDetect : base +'vendors/pluginDetect/javaFlashDetect.min.js',
-        swfobject: base + 'vendors/swfobject/swfobject.2.2'
+        swfobject: base + 'vendors/swfobject/swfobject.2.3'
       },
       shim: {
         jquery: {
