@@ -4,7 +4,7 @@
     "allowUnknownTags": true
   },
   "source"   : {
-    "include": [ "./node_modules/lassi/classes", "./node_modules/lassi/example", "./node_modules/lassi/README.md"],
+    "include": [ "./node_modules/lassi/source", "./node_modules/lassi/example", "./node_modules/lassi/README.md"],
     "includePattern": ".+\\.(js|md)$",
     "excludePattern": "node_modules/lassi/node_modules"
   },
