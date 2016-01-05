@@ -121,10 +121,9 @@ ressourceComponent.config(function($settings) {
   else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
   else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
 
-  // on désactive la compression dust en dev
-  if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression) {
-    lassi.transports.html.engine.disableWhiteSpaceCompression()
-  }
+  // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
+  //if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
+  lassi.transports.html.engine.disableWhiteSpaceCompression()
 })
 
 // ajout de nos listeners
