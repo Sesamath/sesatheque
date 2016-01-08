@@ -44,7 +44,7 @@ try {
      * Le moment où la ressource a été chargée
      * @private
      */
-    var startDate;
+    var isLoaded;
 
     var ressOid;
 
@@ -63,22 +63,19 @@ try {
       var container = options.container;
       if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource");
 
-      // on enverra le résultat à la fermeture (si y'a eu un chargement, startDate sert de flag)
+      // on enverra le résultat à la fermeture (si y'a eu un chargement, isLoaded sert de flag)
       if (options.resultatCallback && window.addEventListener) {
         window.addEventListener('unload', function () {
           S.log("unload am");
-          var now = new Date();
           var resultat = {
             ressType: 'am',
             ressId: ressource.oid,
-            date: startDate,
-            duree: Math.floor((now.getTime() - startDate.getTime()) / 1000),
             score: 1,
             fin:true,
             deferSync: true
           };
           if (options.sesatheque) resultat.sesatheque = options.sesatheque;
-          if (startDate) options.resultatCallback(resultat);
+          if (isLoaded) options.resultatCallback(resultat);
           // sinon le swf n'a pas été chargé, on envoie rien
         });
       }
@@ -113,7 +110,7 @@ try {
       swf.load(container, swfUrl, swfOpt, function (error) {
         if (error) next(error);
         else {
-          startDate = new Date();
+          isLoaded = true;
           next();
         }
       });

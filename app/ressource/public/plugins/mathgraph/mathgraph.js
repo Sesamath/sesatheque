@@ -84,8 +84,6 @@ try {
             options.resultatCallback({
               ressType: 'mathgraph',
               ressOid: ressource.oid,
-              date: startDate,
-              duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
               score: 1,
               reponse : newFigure
             });
@@ -106,13 +104,13 @@ try {
       // on enverra un résultat seulement à la fermeture
       if (options.resultatCallback && container.addEventListener) {
         container.addEventListener('unload', function () {
-          options.resultatCallback({
-            ressType: 'mathgraph',
-            ressOid: ressource.oid,
-            date: startDate,
-            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-            score: 1
-          });
+          if (isLoaded) {
+            options.resultatCallback({
+              ressType: 'mathgraph',
+              ressOid: ressource.oid,
+              score: 1
+            });
+          }
         });
       }
 
@@ -154,6 +152,7 @@ try {
           var mtg32App = new mtg32.mtg32App();
           mtg32App.addDoc(svgId, ressource.parametres.figure, true);
           mtg32App.calculateAndDisplayAll();
+          isLoaded = true;
           if (next) next();
         });
       });
@@ -169,9 +168,7 @@ try {
     // raccourcis, si ça plante le catch gère
     var S = window.sesamath;
     var ST = S.sesatheque;
-
-    // Le moment où ce module a été chargé dans le navigateur
-    var startDate = new Date();
+    var isLoaded;
 
     /**
      * Affiche une ressource mathgraph

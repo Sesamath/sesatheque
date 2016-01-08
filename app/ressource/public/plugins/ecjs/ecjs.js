@@ -85,9 +85,7 @@ try {
               S.log("résultats reçus du js calculatice", data);
               resultatSent = true; // même si ça plante, pas la peine de recommencer au unload
               var dataToSend = {
-                fin : true,
-                date: startDate,
-                duree : data.duree
+                fin : true
               };
               if (data.total > 0) {
                 var score = parseInt(data.score, 10) || 0;
@@ -114,7 +112,7 @@ try {
             var nomExo = ressource.parametres.fichierjs;
             var cheminExo = ecjsBase + "/exercices/";
             var exoLoaded = false;
-            var startDate;
+            var isLoaded;
             var resultatSent = false;
 
             // si ça intéresse l'appelant et que le chargement est KO on finira par le dire après 10s
@@ -128,10 +126,8 @@ try {
               // on ajoute un envoi au unload si rien n'a été envoyé avant
               window.addEventListener('unload', function () {
                 S.log("unload ecjs");
-                if (startDate && !resultatSent) {
+                if (isLoaded && !resultatSent) {
                   envoyerScoreExoJs(null, {
-                    date : startDate,
-                    duree : Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
                     score : 0,
                     reponse : "Aucune réponse",
                     fin : true
@@ -146,7 +142,7 @@ try {
             reqExo.done(function(exercice){
               S.log("exo clc", exercice);
               $exoClc.html(exercice);
-              startDate = new Date();
+              isLoaded = true;
               // le 2e arg se retrouve dans event.data (event 1er arg passé à la callback)
               // pour la liste des événements, chercher "publier" dans les sources calculatice
               // on a validationQuestion, validationOption, finExercice

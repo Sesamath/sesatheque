@@ -42,8 +42,7 @@ try {
     var S = window.sesamath;
     var ST = S.sesatheque;
 
-    // Le moment où ce module a été chargé dans le navigateur
-    var startDate = new Date();
+    var isLoaded;
 
     /**
      * Affiche une ressource iep
@@ -94,13 +93,13 @@ try {
       // on enverra un résultat seulement à la fermeture
       if (options.resultatCallback && container.addEventListener) {
         container.addEventListener('unload', function () {
-          options.resultatCallback({
-            ressType: 'iep',
-            ressOid: ressource.oid,
-            date: startDate,
-            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-            score: 1
-          });
+          if (isLoaded) {
+            options.resultatCallback({
+              ressType: 'iep',
+              ressOid: ressource.oid,
+              score: 1
+            });
+          }
         });
       }
 
