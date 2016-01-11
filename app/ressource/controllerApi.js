@@ -147,17 +147,21 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
      */
     function addRefs(ressources, droits) {
       ressources.forEach(function (ressource) {
-        var alias = new Alias(ressource)
-        if (alias.ref && alias.titre && alias.type && (alias.public || alias.cle)) {
-          if (droits) alias.$droits = droits
-          refs.push(alias)
-        } else {
-          log.errorData("ressource pas utilisable pour sesalab", ressource)
+        if (ressource.type === "sequenceModele") sequenceModeles.push(ressource)
+        else {
+          var alias = new Alias(ressource)
+          if (alias.ref && alias.titre && alias.type && (alias.public || alias.cle)) {
+            if (droits) alias.$droits = droits
+            refs.push(alias)
+          } else {
+            log.errorData("ressource pas utilisable pour sesalab", ressource)
+          }
         }
       })
     }
     var oid = $accessControl.getCurrentUserOid(context)
     var refs = []
+    var sequenceModeles = []
     if (oid) {
       flow().seq(function () {
         $ressourceRepository.getListe("all", {filters:[{index:"auteurs", values:[oid]}]}, this)
@@ -165,12 +169,11 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         if (ressources.length) addRefs(ressources, 'WD')
         $ressourceRepository.getListe("all", {filters:[{index:"contributeurs", values:[oid]}]}, this)
       }).seq(function (ressources) {
-        log("listePerso récupère " +ressources.length)
         if (ressources.length) addRefs(ressources, 'W')
         EntityAlias.match('userOid').equals(oid).grab(this)
       }).seq(function (aliases) {
         if (aliases.length) addRefs(aliases, 'D')
-        $json.sendOk(context, {liste: refs})
+        $json.sendOk(context, {liste: refs, sequenceModeles:sequenceModeles})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
