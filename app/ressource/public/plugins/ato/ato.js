@@ -42,7 +42,7 @@ try {
     var S = window.sesamath;
 
     // Le moment où ce module a été chargé dans le navigateur
-    var startDate = new Date();
+    var isLoaded;
 
     /**
      * Affiche une ressource ato
@@ -58,13 +58,13 @@ try {
       // on enverra un résultat seulement à la fermeture
       if (options.resultatCallback && container.addEventListener) {
         container.addEventListener('unload', function () {
-          options.resultatCallback({
-            ressType: 'ato',
-            ressOid: ressource.oid,
-            date: startDate,
-            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
-            score: 1
-          });
+          if (isLoaded) {
+            options.resultatCallback({
+              ressType: 'ato',
+              ressOid: ressource.oid,
+              score: 1
+            });
+          }
         });
       }
 
@@ -79,9 +79,15 @@ try {
 
       var url = "http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=" + ressource.idOrigine;
       var iframe = S.addElement(container, 'iframe', {src: url, style: "width:100%;height:100%"});
-      iframe.addEventListener("load", function () {
+      if (iframe.addEventListener) {
+        iframe.addEventListener("load", function () {
+          isLoaded = true;
+          next();
+        });
+      } else {
+        isLoaded = true;
         next();
-      });
+      }
     };
 
     return ato;

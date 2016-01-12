@@ -44,8 +44,7 @@ try {
     // nos vars globales
     var ressId;
     var ressType = 'em';
-    var startDate;
-    var lastResult;
+    var isLoaded, lastResult;
 
     /**
      * Affiche la ressource dans l'élément html passé dans les options
@@ -143,8 +142,6 @@ try {
             nbq: result.nbq || params.nbq_defaut,
             ressId: ressId,
             ressType: ressType,
-            date: startDate,
-            duree: Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
             fin : (result.fin === "o"),
             original: result
           };
@@ -163,14 +160,12 @@ try {
         // on ajoute un envoi au unload si rien n'a été envoyé avant
         window.addEventListener('unload', function () {
           S.log("unload em");
-          if (startDate && !lastResult) {
+          if (isLoaded && !lastResult) {
             lastResult = {
               reponse: "",
               nbq: params.nbq_defaut,
               ressId: ressId,
               ressType: ressType,
-              date: startDate,
-              duree: Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000),
               original: null,
               fin:true,
               deferSync:true
@@ -208,7 +203,7 @@ try {
       function callbackFn(e) {
         var retour;
         if (e.success) {
-          startDate = new Date();
+          isLoaded = true;
           S.log("Chargement de " + swfUrl + " ok");
         } else {
           ST.addError("Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource.");

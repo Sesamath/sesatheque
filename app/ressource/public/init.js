@@ -41,7 +41,7 @@ if (typeof window === 'undefined') {
   alert("requireJs doit être chargé avant ce fichier");
 } else {
   // on peut définir notre module sans dépendances (on a pas encore les path)
-  define(function () {
+  define('init', [], function () {
     "use strict";
     // raccourcis
     var w = window;

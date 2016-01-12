@@ -93,7 +93,7 @@
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
   if (typeof define === 'function') {
-    define(amResult); // jshint ignore:line
+    define("amResult", [], amResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
     module.exports = amResult;
   }

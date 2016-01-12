@@ -41,8 +41,7 @@ try {
     // raccourcis, si ça plante le catch gère
     var S = window.sesamath;
 
-    /* Le moment où ce module a été chargé dans le navigateur */
-    var startDate = new Date();
+    var isLoaded;
 
     var baseCollDoc = "http://ressources.sesamath.net";
 
@@ -63,8 +62,6 @@ try {
           var resultat = {
             ressType: 'coll_doc',
             ressId: ressource.oid,
-            date: startDate,
-            duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000),
             score: 1
           };
           if (options.sesatheque) resultat.sesatheque = options.sesatheque;

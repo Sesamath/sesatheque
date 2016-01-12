@@ -46,7 +46,7 @@ var filters = (function () {
 
 // suivant que l'on est coté serveur ou client
 if (typeof define === 'function') {
-  define(['tools/filters'], function(realFilters) {
+  define('Ressource', ['tools/filters'], function(realFilters) {
     filters = realFilters;
     return Ressource;
   });

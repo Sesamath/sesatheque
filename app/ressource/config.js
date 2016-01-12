@@ -51,6 +51,7 @@ var ressourceConfig = {
       iep   : 'animation instrumenpoche',
       mathgraph : 'figure Mathgraph',
       mental: 'calcul mental',
+      sequenceModele : 'modèle de séquence',
       url   : 'page externe'
     },
     /**
@@ -193,7 +194,7 @@ var ressourceConfig = {
     mental: [7],
     serie : [8],
     series : [8],
-    sequence : [8]
+    sequenceModele : [8]
   },
 
   /**

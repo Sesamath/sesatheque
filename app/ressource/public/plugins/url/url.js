@@ -66,6 +66,7 @@ try {
             var $swfId = $('#' + swfId);
             if ($swfId.innerHeight() > 10) next();
             else $swfId.on('load', function () {
+              isLoaded = true;
               next();
             }); // ne pas passer directement next en cb sinon il sera appelé avec un argument, qui sera interprété comme une erreur
           });
@@ -76,13 +77,22 @@ try {
         if (params.largeur > 100) args.width = params.largeur;
         S.log("c'est une image, pas d'iframe mais un tag img", args, params);
         S.addElement(page, 'img', args);
+        isLoaded = true;
         next();
       } else {
-        S.addElement(page, 'iframe', args, "Si vous lisez ce texte," +
+        var iframe = S.addElement(page, 'iframe', args, "Si vous lisez ce texte," +
             " votre navigateur ne supporte probablement pas les iframes");
         // url source (non cliquable) en footer
         autosize();
-        next();
+        if (iframe.addEventListener) {
+          iframe.addEventListener("load", function () {
+            isLoaded = true;
+            next();
+          });
+        } else {
+          isLoaded = true;
+          next();
+        }
       }
       S.addElement(page, 'p', {id: 'urlSrc'}, "source : " + params.adresse);
     }
@@ -133,9 +143,7 @@ try {
       var resultat = {
         score: 1,
         ressId: ressId,
-        ressType: 'url',
-        date: startDate,
-        duree: Math.floor((startDate.getTime() - (new Date()).getTime()) / 1000)
+        ressType: 'url'
       };
       if (deferSync) {
         resultat.fin = true;
@@ -150,7 +158,7 @@ try {
 
     // raccourcis, si ça plante le catch gère
     var S = window.sesamath;
-    var container, errorsContainer, isBasic, ressId, resultatCallback, startDate;
+    var container, errorsContainer, isBasic, ressId, resultatCallback, isLoaded;
 
     /**
      * Affiche la ressource url, en créant une iframe dans le container (ou un div si l'url est un swf)
@@ -171,7 +179,6 @@ try {
       errorsContainer = options.errorsContainer;
       if (typeof options.resultatCallback === 'function') resultatCallback = options.resultatCallback;
       ressId = ressource.oid;
-      startDate = new Date();
 
       // raccourcis
       var params = ressource.parametres;
@@ -191,7 +198,7 @@ try {
         if (resultatCallback) {
           // un listener pour envoyer "affiché" comme score (i.e. un score de 1 avec une durée)
           $('body').on('unload', function () {
-            sendResultat(null, true);
+            if (isLoaded) sendResultat(null, true);
           });
         } // sinon rien à faire
       } else {

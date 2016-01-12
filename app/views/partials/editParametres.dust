@@ -1,7 +1,7 @@
 {! Ce bloc partiel insère le code pour charger le js d'édition du type et appelle son init !}
 <script type="application/javascript">
-  require(['/init.js'], function (init) {
-  console.log('init chargé');
+  require(['init'], function (init) {
+  console.log('init chargé', typeof init);
     try {
       var options = {
         isDev :{?isDev}{isDev}{:else}false{/isDev},

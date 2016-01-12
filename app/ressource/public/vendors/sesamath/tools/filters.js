@@ -125,6 +125,6 @@ filters.string = function (arg) {
 };
 
 // suivant que l'on est coté serveur ou client
-if (typeof define === 'function') define(filters);
+if (typeof define === 'function') define('filters', [], filters);
 else if (typeof module === 'object') module.exports = filters;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global

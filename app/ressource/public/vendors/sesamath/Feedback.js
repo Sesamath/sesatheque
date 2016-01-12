@@ -32,7 +32,7 @@
 'use strict';
 
 // suivant que l'on est coté serveur ou client
-if (typeof define === 'function') define(function () {return Feedback;});
+if (typeof define === 'function') define('Feedback', [], function () {return Feedback;});
 else if (typeof module === 'object') module.exports = Feedback;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
 // pas trouvé comment documenté correctement un constructeur dans une fonction anonyme auto-exécutée…

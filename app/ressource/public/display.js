@@ -45,7 +45,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 } else {
 
   // faut d'abord un module sans dépendance pour pouvoir la charger avec le bon chemin si besoin
-  define(function () {
+  define('display', [], function () {
     "use strict";
     /**
      * Module d'une seule fonction pour afficher une ressource quelconque.
@@ -79,6 +79,8 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           var modules = [pluginName];
           // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
           var traiteResultat;
+          var startDate;
+
           if (options) {
             if (options.resultatCallback && S.isFunction(options.resultatCallback)) traiteResultat = "function";
             else if (options.urlResultatCallback && S.isString(options.urlResultatCallback) && options.urlResultatCallback.substr(0, 4) === 'http') traiteResultat = "ajax";
@@ -114,6 +116,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
               options.pluginBase = options.base +"/plugins/" +pluginName +"/";
               // on peut afficher
               plugin.display(ressource, options, function (error) {
+                startDate = new Date();
                 if (error) {
                   S.log("le display a terminé mais renvoyé l'erreur", error);
                   ST.addError(error);
@@ -167,6 +170,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         }
 
         if (traiteResultat) {
+          var startDate;
           /**
            * Envoi un résultat en ajax ou à la callback pour sauvegarde et appelle saveCallback avec le retour
            * @private
@@ -275,8 +279,10 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             S.log("resultatCallback display a reçu", result);
             var deferSync = result.deferSync;
             var resultat = new Resultat(result);
-            // on impose juste ça
+            // on impose juste date et durée
             resultat.date = new Date();
+            // le plugin peut imposer sa mesure
+            if (!resultat.duree) resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000);
             // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
             ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
               var paramValue = S.getURLParameter(paramName) || options[paramName];
@@ -327,6 +333,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         if (base.substr(-1) !== "/") base += "/";
         options.base = base;
         // tant que l'init a pas été fait require va chercher en relatif à la page courante, faut donc préciser en absolu
+        console.log("base " +base);
         var initFile = base + "init.js";
         require([initFile], function (init) {
           init(options, load);
