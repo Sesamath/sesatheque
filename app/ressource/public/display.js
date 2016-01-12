@@ -332,10 +332,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         var base = options.base || "/";
         if (base.substr(-1) !== "/") base += "/";
         options.base = base;
-        // tant que l'init a pas été fait require va chercher en relatif à la page courante, faut donc préciser en absolu
-        console.log("base " +base);
-        var initFile = base + "init.js";
-        require([initFile], function (init) {
+        require(['init'], function (init) {
           init(options, load);
         });
       } catch (error) {

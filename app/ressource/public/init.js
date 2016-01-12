@@ -50,6 +50,7 @@ if (typeof window === 'undefined') {
     var S = window.sesamath;
     if (!S.sesatheque) S.sesatheque = {};
     var ST = S.sesatheque;
+    console.log('ns', S)
 
     /**
      * Notre module js que l'on exporte, une seule fonction.
@@ -114,7 +115,8 @@ if (typeof window === 'undefined') {
         // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
         var base = options.base || ST.base || "/";
         if (base.substr(-1) !== "/") base += "/";
-        if (!ST.requireBase || ST.requireBase !== base) {
+        if (!ST.requireBase /* || ST.requireBase !== base */ ) { // le chargement de /fichier.js marche plus sans que l'on sache pourquoi…
+          //console.log("requireBase " +ST.requireBase +" et base " +base)
           // l'init a pas été fait ou on veut le changer, require va chercher en relatif à la page courante si pas initialisé,
           var initRequireName = base +"initRequire.js";
           require([initRequireName], function (initRequire) {
