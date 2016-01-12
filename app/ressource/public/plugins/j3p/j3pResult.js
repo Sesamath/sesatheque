@@ -60,15 +60,21 @@
    * @returns {string} Le code html
    */
   j3pResult.getHtmlReponse = function (resultat, baseUrl) {
-    var output;
+    var output,nbnoeuds,score;
+    console.log("resultat=",resultat)
     // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
-    if (typeof resultat.reponse === "string") {
-      output = resultat.reponse;
-    } else if (resultat.reponse) {
-      output = "réponse à un mauvais format";
+   if ( resultat.contenu && resultat.contenu.score &&  typeof resultat.contenu.score=== "array") {
+        output = "";
+        nbnoeuds = resultat.contenu.score.length;
+        for (var i = 0; i < nbnoeuds; i++) {
+            score=resultat.contenu.score[i];
+            output+="Nœud n°"+resultat.contenu.noeuds[i]+" : "+Math.round(100*score)+"<br>";
+          }
+          if(nbnoeuds>1)
+          output+="Vue graphique du parcours de l'élève (à venir)";
     } else {
       output = "pas de réponse";
-    }
+    }   
 
     return output;
     
@@ -81,14 +87,20 @@
    * @returns {string} Le code html
    */
   j3pResult.getHtmlScore = function (resultat) {
-    var output;
-    // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine
-    if (resultat.score || resultat.score === 0) {
-      output = resultat.score;
+    var output,nbnoeuds,score;
+    console.log("resultat=",resultat)
+    // pour j3p on s'attend à avoir 
+   if ( resultat.contenu && resultat.contenu.score &&  typeof resultat.contenu.score=== "array") {
+      score=0;
+      nbnoeuds = resultat.contenu.score.length;
+      for (var i = 0; i < nbnoeuds; i++) {
+        score+=resultat.contenu.score[i];
+      }
+      score=Math.round(100*score);
+      output = score +' % ';
     } else {
-      output = "N/A";
+      output = "pas de réponse ou réponse à un mauvais format";
     }
-
     return output;
   };
 
