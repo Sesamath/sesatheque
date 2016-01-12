@@ -63,7 +63,7 @@
     var output,nbnoeuds,score;
     console.log("resultat=",resultat)
     // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
-   if ( resultat.contenu && resultat.contenu.score &&  typeof resultat.contenu.score=== "array") {
+   if ( resultat.contenu && resultat.contenu.score &&  resultat.contenu.score.length) {
         output = "";
         nbnoeuds = resultat.contenu.score.length;
         for (var i = 0; i < nbnoeuds; i++) {
@@ -90,7 +90,7 @@
     var output,nbnoeuds,score;
     console.log("resultat=",resultat)
     // pour j3p on s'attend à avoir 
-   if ( resultat.contenu && resultat.contenu.score &&  typeof resultat.contenu.score=== "array") {
+   if ( resultat.contenu && resultat.contenu.score &&  resultat.contenu.score.length) {
       score=0;
       nbnoeuds = resultat.contenu.score.length;
       for (var i = 0; i < nbnoeuds; i++) {
