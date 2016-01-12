@@ -45,7 +45,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
 } else {
 
   // faut d'abord un module sans dépendance pour pouvoir la charger avec le bon chemin si besoin
-  define(function () {
+  define('display', [], function () {
     "use strict";
     /**
      * Module d'une seule fonction pour afficher une ressource quelconque.
@@ -333,6 +333,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         if (base.substr(-1) !== "/") base += "/";
         options.base = base;
         // tant que l'init a pas été fait require va chercher en relatif à la page courante, faut donc préciser en absolu
+        console.log("base " +base);
         var initFile = base + "init.js";
         require([initFile], function (init) {
           init(options, load);

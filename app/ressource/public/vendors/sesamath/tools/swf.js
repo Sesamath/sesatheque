@@ -49,9 +49,7 @@ var swfobject = function(){var D="undefined",r="object",S="Shockwave Flash",W="S
  * Module pour charger des swf avec swfobject (qu'il contient et déclare en global)
  * @service tools/swf
  */
-define({
-  load   : load
-});
+define('tools/swf', [], {load:load});
 
 /**
  * Charge un swf dans l'élément container

@@ -31,7 +31,7 @@
 "use strict";
 
 // suivant que l'on est coté serveur ou client
-if (typeof define === 'function') define(function () {return Ref;});
+if (typeof define === 'function') define('Ref', [], function () {return Ref;});
 else if (typeof module === 'object') module.exports = Ref;
 // sinon on est chargé tel quel et ce que l'on défini ici se retrouve dans l'espace de nom global
 // pas trouvé comment documenté correctement un constructeur dans une fonction anonyme auto-exécutée…

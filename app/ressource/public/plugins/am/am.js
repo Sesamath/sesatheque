@@ -30,7 +30,7 @@
  */
 
 try {
-  define(['tools/swf'], function (swf) {
+  define(['tools/swf'], [], function (swf) {
     'use strict';
 
     /**

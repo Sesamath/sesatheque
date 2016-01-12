@@ -77,6 +77,7 @@
         // nos modules "globaux"
         apiClient : base +'apiClient',
         display : base + 'display',
+        init : base +'init',
         initGlobal : base +'initGlobal',
         // un module pour charger un swf, qui contient swfobject, avec une méthode load(container, url, options, next)
         "tools/swf": base + 'vendors/sesamath/tools/swf',
@@ -186,7 +187,7 @@
     // pour que qqun d'autre puisse reconfigurer require.js avec une autre base absolue
     // pour les modules de la sésathèque (en cas de cross-domain c'est obligatoire,
     // et ça permet de continuer à utiliser son propre require sur son domaine pour ses modules)
-    define(function () {
+    define('initRequire', [], function () {
       return setBase;
     });
   }

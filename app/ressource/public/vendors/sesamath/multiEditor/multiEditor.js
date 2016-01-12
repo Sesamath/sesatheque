@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 // mathquill a une dépendance à jquery
-define(["jquery"], function () {
+define('multiEditor', ["jquery"], function () {
   'use strict';
 
   /**

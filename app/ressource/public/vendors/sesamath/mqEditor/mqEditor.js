@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 // mathquill a une dépendance à jquery
-define(["mathquill"], function () {
+define('mqEditor', ["mathquill"], function () {
   'use strict';
   /**
    * Ajoute un bouton (et son comportement)

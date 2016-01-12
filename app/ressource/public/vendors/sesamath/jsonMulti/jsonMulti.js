@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 // jsoneditor a une dépendance à jquery
-define(["jquery"], function ($) {
+define('jsonMulti', ["jquery"], function ($) {
   'use strict';
   /*global alert*/
 
