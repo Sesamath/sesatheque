@@ -22,6 +22,11 @@ trap fin EXIT
 dirRoot="$(dirname $0)/.."
 cd $dirRoot
 
+node_modules/.bin/browserify app/ressource/public/plugins/*/display.js > app/ressource/public/displayAll.js
+node_modules/.bin/uglifyjs app/ressource/public/displayAll.js --compress --mangle > app/ressource/public/displayAll.min.js
+
+exit 0
+
 tmp=/tmp/$(basename $0)
 src=node_modules/requirejs/require.js
 dst=app/static/public/vendors/requirejs/require.min.js

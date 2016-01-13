@@ -1,7 +1,7 @@
 {
   "extends": "../../../.jshintrc",
   "browser": true,
-  "asi": false,
+  "asi": true,
   "bitwise": true,
   "forin": true,
   "freeze": true,
