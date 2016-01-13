@@ -94,19 +94,19 @@ function initJsonEditor(next) {
   try {
     if (typeof isJseLoaded === "undefined") {
       isJseLoaded = false; // en cours
-      require(["jsoneditor"], function (JSONEditor) {
+      System.import('/vendor/jsoneditor').then(JSONEditor => {
         if (!JSONEditor) throw new Error('Problème de chargement de jsoneditor')
         dom.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css')
         jsonEditor = new JSONEditor(jsonEditorDiv)
         isJseLoaded = true
         next()
-      }, function () {
+      }).catch(error => {
         throw new Error('Problème de chargement de jsoneditor')
       })
     } else if (isJseLoaded === false) {
       alert("Le chargement de jsoneditor est déjà en cours")
     } else {
-      // init déjà fait
+      // load déjà fait
       next()
     }
   } catch (error) {

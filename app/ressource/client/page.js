@@ -30,11 +30,14 @@
  */
 
 "use strict"
-var dom = require('sesamath')
+var dom = require('./tools/dom')
 var log = require('./tools/log')
 var wd = window.document
 
-// en attendant la gestion du load async avec es6, on utilise le bon vieux head.js, mais on garde ici un mapping vers les modules tiers
+/**
+ * En attendant la gestion du load async avec es6, on utilise le bon vieux head.js,
+ * on garde ici un mapping vers les modules tiers que l'on utilise
+ */
 var externalModules = {
   ckeditor: '/vendors/ckeditor/ckeditor',
   ckeditorJquery : '/vendors/ckeditor/adapters/jquery',
@@ -51,11 +54,7 @@ var externalModules = {
   swfobject: '/vendors/swfobject/swfobject.2.3'
 }
 
-/**
- * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
- * @module sesamath/sesatheque
- */
-var page = {}
+var base = '/'
 
 /**
  * Ajoute un texte d'erreur dans errorsContainer (#errors ou #error ou #warnings) ET dans console.error (si ça existe)
@@ -63,7 +62,7 @@ var page = {}
  * @param {string|Error} error Le message à afficher
  * @param {number} [delay] Un éventuel délai d'affichage en secondes
  */
-page.addError = function (error, delay) {
+function addError(error, delay) {
   // on log toujours en console
   log.error(error)
   var errorsContainer = wd.getElementById('errors') || wd.getElementById('error') || wd.getElementById('warnings')
@@ -75,7 +74,7 @@ page.addError = function (error, delay) {
   if (errorsContainer) {
     // on ajoute un peu de margin à ce div s'il n'en a pas
     if (errorsContainer.style && !errorsContainer.style.margin) errorsContainer.style.margin = "0.2em"
-    var errorBlock = dom.addElement(errorsContainer, 'p', {class: "error"}, errorMsg)
+    var errorBlock = dom.addElement(errorsContainer, 'p', {"class": "error"}, errorMsg)
     if (delay) {
       setTimeout(function () {
         errorsContainer.remove(errorBlock)
@@ -89,7 +88,7 @@ page.addError = function (error, delay) {
 /**
  * Cache le #titre (en global pour que les plugins puissent le faire)
  */
-page.hideTitle = function () {
+function hideTitle() {
   try {
     var titre = wd.getElementById('titre')
     if (titre && titre.style) titre.style.display = "none"
@@ -108,90 +107,72 @@ page.hideTitle = function () {
  * @param {initOptions}   options
  * @param {errorCallback} next
  */
-page.init = function (options, next) {
+function init(options, next) {
+  if (!options) options = {}
+  log('page.init avec les options', options)
+  if (!options.base) options.base = base
+  // (des)active la fct de log si on le demande, l'url est prioritaire sur options
+  var verbose = dom.getURLParameter("verbose") || options.verbose
+  if (verbose === "0" || verbose === "false") verbose = false
+  if (verbose) log.enable()
+  else log.disable()
 
-  // on vérifie que initGlobal a bien été chargé, sinon on le fait
-  function checkGlobal() {
-    if (!page.addError) require(['initGlobal'], initDom)
-    else initDom()
-  }
+  // on vérifie que l'on a nos containers et on les créé sinon
+  /**
+   * Le conteneur html pour afficher la ressource, passé en options ou pris dans le dom si #display
+   * @type {Element}
+   */
+  var container = options.container || wd.getElementById('display')
+  /**
+   * Le conteneur html pour afficher d'éventuelles erreurs, passé en options ou pris dans le dom si #errors
+   * @type {Element}
+   */
+  var errorsContainer = options.errorsContainer || wd.getElementById('errors')
+  if (!errorsContainer) errorsContainer = dom.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'errors'})
+  if (!container) container = dom.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'display'})
+  // et on ajoute ces deux éléments aux options
+  options.container = container
+  options.errorsContainer = errorsContainer
 
-  // on peut passer à l'init du dom et des options
-  function initDom() {
-    log('init avec les options', options)
+  // on regarde si d'autres options ont été passé en GET
+  var paramGet
+  ["resultatMessageAction", "urlResultatCallback", "userOrigine", "userId"].forEach(function (param) {
+    paramGet = dom.getURLParameter(param)
+    if (!options[param] && paramGet) options[param] = paramGet
+  })
+  paramGet = dom.getURLParameter("showTitle")
+  if (paramGet === "0" || paramGet === "false") options.showTitle = false
 
-    // (des)active la fct de log si on le demande, l'url est prioritaire sur options
-    var verbose = dom.getURLParameter("verbose") || options.verbose
-    if (verbose === "0" || verbose === "false") verbose = false
-    if (verbose) log.enable()
-    else log.disable()
-
-    // on vérifie que l'on a nos containers et on les créé sinon
-    /**
-     * Le conteneur html pour afficher la ressource, passé en options ou pris dans le dom si #display
-     * @type {Element}
-     */
-    var container = options.container || wd.getElementById('display')
-    /**
-     * Le conteneur html pour afficher d'éventuelles erreurs, passé en options ou pris dans le dom si #errors
-     * @type {Element}
-     */
-    var errorsContainer = options.errorsContainer || wd.getElementById('errors')
-    if (!errorsContainer) errorsContainer = dom.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'errors'})
-    if (!container) container = dom.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'display'})
-    // et on ajoute ces deux éléments aux options
-    options.container = container
-    options.errorsContainer = errorsContainer
-
-    // on regarde si d'autres options ont été passé en GET
-    var paramGet
-    ["resultatMessageAction", "urlResultatCallback", "userOrigine", "userId"].forEach(function (param) {
-      paramGet = dom.getURLParameter(param)
-      if (!options[param] && paramGet) options[param] = paramGet
-    })
-    paramGet = dom.getURLParameter("showTitle")
-    if (paramGet === "0" || paramGet === "false") options.showTitle = false
-
-    // terminé
-    next()
-  }
-
-  try {
-    if (!options) options = {}
-    if (!next) next = function () {}
-    // on appelle la conf de require si ça n'a pas été fait, en cross domain si on est appelé avec base
-    // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
-    var base = options.base || page.base || "/"
-    if (base.substr(-1) !== "/") base += "/"
-    if (!page.requireBase /* || page.requireBase !== base */ ) { // le chargement de /fichier.js marche plus sans que l'on sache pourquoi…
-      //console.log("requireBase " +page.requireBase +" et base " +base)
-      // l'init a pas été fait ou on veut le changer, require va chercher en relatif à la page courante si pas initialisé,
-      var initRequireName = base +"initRequire.js"
-      require([initRequireName], function (initRequire) {
-        initRequire(base)
-        options.base = page.base
-        checkGlobal()
-      })
-    } else {
-      checkGlobal()
-    }
-  } catch (error) {
-    if (console && console.error) console.error(error)
-    // pb de chargement probable, on explicite
-    var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.base (" +error.toString() +")")
-    next(err)
-  }
-
+  // terminé
+  if (next) next()
 }
 
-page.loadAsync = function (module, callback) {
+/**
+ * Pour charger des modules référencé ici en async
+ * @param {Array} moduleNames
+ * @param callback
+ */
+function loadAsync(moduleNames, callback) {
   /*global head*/
-  var path = externalModules[module]
-  if (path) head.load(path, callback)
-  else page.addError("Le module " +module +" est inconnu, impossible de le charger")
+  var paths = [], errors = [], path
+  moduleNames.forEach(function (moduleName) {
+    path = externalModules[moduleName]
+    if (path) paths.push(path)
+    else errors.push(moduleName)
+  })
+  if (errors.length) addError("Impossible de le ou les modules inconnus suivants " +errors.join(", "))
+  else if (paths.length) head.load(paths, callback)
+  else log.error("appel de loadAsync sans modules")
 }
 
-module.exports = page
+function setBase(newBase) {
+  base = newBase
+}
+
+/**
+ * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
+ */
+module.exports = {addError, hideTitle, init, loadAsync, setBase}
 
 
 /**
@@ -216,7 +197,8 @@ module.exports = page
  * @property {Element}          errorsContainer       L'élément html pour afficher des erreurs éventuelles
  * @property {boolean}          [verbose=false]       Passer true pour ajouter des log en console
  * @property {boolean}          [isDev=false]         Passer true pour initialiser le dom source en devsesamath (pour certains plugins)
- * @property {string}           [urlResultatCallback] Une url vers laquelle poster le résultat (idem si la page de la ressource contient ?urlScoreCallback=http…)
+ * @property {string}           [urlResultatCallback] Une url vers laquelle poster le résultat
+ *                                                    (idem si la page de la ressource contient ?urlScoreCallback=http…)
  * @property {string}           [resultatMessageAction] Un nom d'action pour passer le résultat en postMessage
  * @property {resultatCallback} [resultatCallback]    Une fonction pour recevoir un objet Resultat (si y'a pas de urlScoreCallback)
  * @property {string}           [sesatheque]          Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page),

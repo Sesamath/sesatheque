@@ -36,7 +36,20 @@
  * Son chargement déclenche celui de init qui ajoute en global nos méthodes utilitaires, cf {@link namespace:sesamath}
  */
 "use strict"
-//var log = require('../tools/log')
+var log = require('./tools/log')
+var dom = require('./tools/dom')
+var page = require('./page')
+var wd = window.document
+/**
+ * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
+ * @private
+ * @type {number}
+ */
+var ajaxTimeout = 10000
+/**
+ * La date de début d'affichage
+ */
+var startDate
 
 /**
  * Module d'une seule fonction pour afficher une ressource quelconque.
@@ -46,7 +59,7 @@
  * @param {initOptions}   [options] Les options éventuelles (passer base si ce js est chargé sur un autre domaine)
  * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
  */
-module.exports = function display(ressource, options, next) {
+function display(ressource, options, next) {
   /**
    * Fait le chargement proprement dit après l'init
    * @param {Error} [error] Une erreur éventuelle à l'init
@@ -59,11 +72,11 @@ module.exports = function display(ressource, options, next) {
        * @name options
        * @type {displayOptions}
        */
-      S.log('display avec la ressource', ressource)
-      S.log('et les options après init', options)
+      log('display avec la ressource', ressource)
+      log('et les options après page.init', options)
 
       // ajoute de la css commune à toutes les ressources ici
-      S.addCss(options.base + 'styles/ressourceDisplay.css')
+      dom.addCss(options.base + 'styles/ressourceDisplay.css')
 
       // le display du plugin
       var pluginName = ressource.type
@@ -72,9 +85,9 @@ module.exports = function display(ressource, options, next) {
       var Resultat, traiteResultat
 
       if (options) {
-        if (options.resultatCallback && S.isFunction(options.resultatCallback)) traiteResultat = "function"
-        else if (options.urlResultatCallback && S.isString(options.urlResultatCallback) && options.urlResultatCallback.substr(0, 4) === 'http') traiteResultat = "ajax"
-        else if (options && options.resultatMessageAction && S.isString(options.resultatMessageAction)) traiteResultat = "message"
+        if (options.resultatCallback && dom.isFunction(options.resultatCallback)) traiteResultat = "function"
+        else if (options.urlResultatCallback && dom.isString(options.urlResultatCallback) && options.urlResultatCallback.substr(0, 4) === 'http') traiteResultat = "ajax" // jshint ignore:line
+        else if (options && options.resultatMessageAction && dom.isString(options.resultatMessageAction)) traiteResultat = "message"
       }
       // un cas particulier, le prof qui teste, on fourni une callback qui fait rien,
       // pour éviter des avertissements sur les ressources qui attendent une callback
@@ -84,8 +97,8 @@ module.exports = function display(ressource, options, next) {
       try {
         if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' + pluginName + ' a échoué')
         if (typeof plugin.display !== 'function') throw new Error('Le plugin ' + pluginName + " n'a pas de méthode display")
-        S.log('plugin ' + pluginName + ' chargé')
-        if (options.container) S.empty(options.container)
+        log('plugin ' + pluginName + ' chargé')
+        if (options.container) dom.empty(options.container)
         else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
         if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
         // On vire le titre si on nous le demande via les options ou un param dans l'url
@@ -95,7 +108,7 @@ module.exports = function display(ressource, options, next) {
             /\/apercevoir\//.test(wd.URL) ||
             /\?(.+&)?layout=iframe/.test(wd.URL)
         ) {
-          ST.hideTitle()
+          page.hideTitle()
         }
         // on regarde s'il faut ajouter une fct de sauvegarde des résultats
         if (Resultat) addResultatCallback(options, traiteResultat, Resultat)
@@ -107,19 +120,15 @@ module.exports = function display(ressource, options, next) {
         plugin.display(ressource, options, function (error) {
           startDate = new Date()
           if (error) {
-            S.log("le display a terminé mais renvoyé l'erreur", error)
-            ST.addError(error)
+            log("le display a terminé mais renvoyé l'erreur", error)
+            page.addError(error)
           } else {
-            S.log("le display a terminé sans erreur")
+            log("le display a terminé sans erreur")
           }
           if (next) next(error)
         })
-      } catch (error) {
-        if (ST.addError) ST.addError(error.toString())
-        else if (console && console.error) {
-          console.error("sesamath.sesatheque.addError n'existe pas")
-          console.error(error)
-        }
+      } catch (err) {
+        page.addError(err.toString())
       }
     }
   } // load
@@ -171,11 +180,11 @@ module.exports = function display(ressource, options, next) {
          * @param retour Le retour de l'envoi du score
          */
         function feedback(retour) {
-          S.log('feedback', retour)
+          log('feedback', retour)
           if (retour && (retour.ok && retour.ok === true) || (retour.success && retour.success === true)) {
             feedbackOk()
           } else {
-            if (retour && retour.error) ST.addError(retour.error)
+            if (retour && retour.error) page.addError(retour.error)
             feedbackKo()
           }
           // et on appelle saveCallback si on nous l'a fourni
@@ -228,7 +237,7 @@ module.exports = function display(ressource, options, next) {
           if (deferSync) {
             resultat.deferUrl = options.urlResultatCallback
             url = options.base + 'api/deferPost'
-            S.log("on passe en synchrone vers " + url)
+            log("on passe en synchrone vers " + url)
           } else {
             // on pouvait pas mettre de timeout en synchrone
             url = options.urlResultatCallback
@@ -263,7 +272,7 @@ module.exports = function display(ressource, options, next) {
 
 
         // MAIN addResultatCallback
-        S.log("resultatCallback display a reçu", result)
+        log("resultatCallback display a reçu", result)
         var deferSync = result.deferSync
         var resultat = new Resultat(result)
         // on impose juste date et durée
@@ -274,23 +283,23 @@ module.exports = function display(ressource, options, next) {
         }
         // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
         ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
-          var paramValue = S.getURLParameter(paramName) || options[paramName]
+          var paramValue = dom.getURLParameter(paramName) || options[paramName]
           if (paramValue) resultat[paramName] = paramValue
         })
         // @todo ajouter des vérifs minimales
 
         // si on nous a passé une fct on lui envoie le résultat
         if (traiteResultat === "function") {
-          S.log('on envoie ce résultat à la fct qui nous a été passé en param', resultat)
+          log('on envoie ce résultat à la fct qui nous a été passé en param', resultat)
           options.resultatCallback(resultat)
         } else if (traiteResultat === "ajax") {
-          S.log("on va poster ce résultat vers " + traiteResultat, resultat)
+          log("on va poster ce résultat vers " + traiteResultat, resultat)
           sendAjax(resultat, deferSync)
         } else if (traiteResultat === "message") {
           if (options.resultatMessageAction === "none") {
-            S.log("On a reçu ce résultat (que l'on ne fait pas suivre on est en test)", resultat)
+            log("On a reçu ce résultat (que l'on ne fait pas suivre on est en test)", resultat)
           } else {
-            S.log("postMessage de ce résultat vers " + traiteResultat, resultat)
+            log("postMessage de ce résultat vers " + traiteResultat, resultat)
             sendMessage(resultat)
           }
         }
@@ -298,33 +307,7 @@ module.exports = function display(ressource, options, next) {
     }
   } // addResultatCallback
 
-  /**
-   * MAIN
-   */
-  try {
-    // raccourcis
-    var wd = window.document
-    var S = require('sesamath')
-    var ST = require('sesamath/sesatheque')
-    var init = require('init')
-    var startDate
-    /**
-     * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
-     * @private
-     * @type {number}
-     */
-    var ajaxTimeout = 10000
-
-    // on appelle la conf de require, en cross domain si on est appelé avec base
-    // ça devrait marcher (sinon ça risque pas), car on complète avec le chemin absolu du fichier js
-    var base = options.base || "/"
-    if (base.substr(-1) !== "/") base += "/"
-    options.base = base
-    init(options, load)
-  } catch (error) {
-    if (console && console.error) console.error(error)
-    // pb de chargement probable, on explicite
-    var err = new Error("Problème de chargement probable, en cross-domain il faut passer options.base (" +error.toString() +")")
-    next(err)
-  }
+  page.init(options, load)
 }
+
+module.exports = display
