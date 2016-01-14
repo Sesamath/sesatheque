@@ -21,7 +21,7 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
@@ -47,6 +47,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
   // faut d'abord un module sans dépendance pour pouvoir la charger avec le bon chemin si besoin
   define('display', [], function () {
     "use strict";
+    var startDate;
     /**
      * Module d'une seule fonction pour afficher une ressource quelconque.
      * Il chargera le bon afficheur en lui passant les options attendues, en créant si besoin les contereurs dans le dom courant.
@@ -79,7 +80,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           var modules = [pluginName];
           // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
           var traiteResultat;
-          var startDate;
 
           if (options) {
             if (options.resultatCallback && S.isFunction(options.resultatCallback)) traiteResultat = "function";
@@ -170,7 +170,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         }
 
         if (traiteResultat) {
-          var startDate;
           /**
            * Envoi un résultat en ajax ou à la callback pour sauvegarde et appelle saveCallback avec le retour
            * @private
@@ -282,7 +281,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
             // on impose juste date et durée
             resultat.date = new Date();
             // le plugin peut imposer sa mesure
-            if (!resultat.duree) resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000);
+            if (!resultat.duree && startDate) resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000);
             // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
             ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
               var paramValue = S.getURLParameter(paramName) || options[paramName];
