@@ -1,0 +1,13 @@
+﻿p1_1=Le temps imparti pour cet exercice est terminé !\rClique sur "Suite" pour lire ton appréciation !
+p1_2=Clique ici pour commencer l'exercice !
+p1_3=Consigne :
+p1_4=Tu vas devoir répondre à $var1$ questions.
+p1_5=s
+p1_6=min
+p1_7=Tu vas devoir répondre à $var1$ questions en moins de $var2$ $var3$.
+p1_8=Attention, certaines d'entre elles sont chronométrées !
+p1_9=Trop tard !
+p2_1=Chronomètre :
+p2_2= Vrai ou faux ?
+p2_3= Complète l'opération suivante avec la bonne proposition.
+p2_4= Complète l'opération suivante.

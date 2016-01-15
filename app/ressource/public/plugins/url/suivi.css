@@ -1,0 +1,10 @@
+body {
+  background-color: #ffffff;
+  font-family:verdana,tahoma,helvetica;
+  font-size:12px;
+}
+h3 {
+  font-size:14px;
+  text-decoration:underline;
+  text-weight:bold;
+}
