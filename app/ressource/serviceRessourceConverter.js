@@ -49,8 +49,8 @@ var flow = require('an-flow')
 var config = require('./config')
 var appConfig = require('../config')
 //var tools = require('../tools')
-var Alias = require('./public/vendors/sesamath/Alias')
-var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
+var Alias = require('./constructors/Alias')
+var jstreeConverter = require('./srcClient/display/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl) {

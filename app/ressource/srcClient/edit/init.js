@@ -29,46 +29,38 @@
  * pour une explication en français)
  */
 
+/**
+ * Script pour le form d'édition de ressource
+ * (page.init et ajouter des comportements de modif dynamique du form)
+ */
 "use strict"
+var page = require('page')
+var $ = window.jQuery
 
-module.exports = function (EntityAlias) {
-  var config = require('../config')
-  var Alias = require('./constructors/Alias')
-  var tools = require('../tools')
-
+module.exports = function (options, next) {
+  page.init(options)
   /**
-   * Notre entité Alias cf [Entity](lassi/Entity.html)
-   * Utilisé uniquement par l'api externalClone, qui en crée pour les ressources non modifiables
-   * et l'api liste/perso qui les récupère pour les filer à sesalab
-   * @entity EntityAlias
-   * @param {Object} initObj Un alias construit avant (Entity mergera après ce construct toutes les propriétés de initObj)
-   * @extends Entity
-   * @extends Alias
+   * Modifie le nom paramètres|enfants suivant le type (arbre ou pas)
    */
-  EntityAlias.construct(function (init) {
-    tools.merge(this, new Alias(init))
-  })
-
-  EntityAlias.table = 'alias'
-
-  EntityAlias
-    .defineIndex('ref', 'string')
-    .defineIndex('base', 'string')
-    .defineIndex('userOid', 'integer')
-
-  EntityAlias.beforeStore(function (next) {
-    if (!this.userOid) {
-      next(new Error("Impossible d'enregistrer un alias sans propriétaire"))
-    } else if (!this.type) {
-      next(new Error("Impossible d'enregistrer un alias sans type"))
-    } else if (this.ref === this.oid && (!this.base || this.base === config.application.baseUrl)) {
-      next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))
-    } else if (!this.base) {
-      next(new Error("Impossible de sauvegarder un alias sans base"))
+  function onTypeChange() {
+    var $label = $groupParametres.filter('label')
+    var $textarea = $groupParametres.filter('textarea')
+    var type = $type.val()
+    if (type === 'arbre') {
+      $label.text('Enfants')
+      $textarea.attr('placeholder', 'Enfants')
     } else {
-      // on sauvegarde toujours la base avec le slash de fin
-      if (this.base.substr(-1) !== '/') this.base += "/"
-      next()
+      $label.text('Paramètres')
     }
-  })
+  }
+
+  // comportement sur le titre de parametres suivant le choix de type
+  var $type = $('#type')
+  var $groupParametres = $('#groupParametres')
+  if ($type && $groupParametres) {
+    $type.change(onTypeChange)
+    onTypeChange()
+  }
+
+  next()
 }

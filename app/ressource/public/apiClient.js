@@ -1,119 +1,3 @@
-(function() {
-  'use strict';
-
-  var globals = typeof window === 'undefined' ? global : window;
-  if (typeof globals.require === 'function') return;
-
-  var modules = {};
-  var cache = {};
-  var aliases = {};
-  var has = ({}).hasOwnProperty;
-
-  var endsWith = function(str, suffix) {
-    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-  };
-
-  var _cmp = 'components/';
-  var unalias = function(alias, loaderPath) {
-    var start = 0;
-    if (loaderPath) {
-      if (loaderPath.indexOf(_cmp) === 0) {
-        start = _cmp.length;
-      }
-      if (loaderPath.indexOf('/', start) > 0) {
-        loaderPath = loaderPath.substring(start, loaderPath.indexOf('/', start));
-      }
-    }
-    var result = aliases[alias + '/index.js'] || aliases[loaderPath + '/deps/' + alias + '/index.js'];
-    if (result) {
-      return _cmp + result.substring(0, result.length - '.js'.length);
-    }
-    return alias;
-  };
-
-  var _reg = /^\.\.?(\/|$)/;
-  var expand = function(root, name) {
-    var results = [], part;
-    var parts = (_reg.test(name) ? root + '/' + name : name).split('/');
-    for (var i = 0, length = parts.length; i < length; i++) {
-      part = parts[i];
-      if (part === '..') {
-        results.pop();
-      } else if (part !== '.' && part !== '') {
-        results.push(part);
-      }
-    }
-    return results.join('/');
-  };
-
-  var dirname = function(path) {
-    return path.split('/').slice(0, -1).join('/');
-  };
-
-  var localRequire = function(path) {
-    return function expanded(name) {
-      var absolute = expand(dirname(path), name);
-      return globals.require(absolute, path);
-    };
-  };
-
-  var initModule = function(name, definition) {
-    var module = {id: name, exports: {}};
-    cache[name] = module;
-    definition(module.exports, localRequire(name), module);
-    return module.exports;
-  };
-
-  var require = function(name, loaderPath) {
-    var path = expand(name, '.');
-    if (loaderPath == null) loaderPath = '/';
-    path = unalias(name, loaderPath);
-
-    if (has.call(cache, path)) return cache[path].exports;
-    if (has.call(modules, path)) return initModule(path, modules[path]);
-
-    var dirIndex = expand(path, './index');
-    if (has.call(cache, dirIndex)) return cache[dirIndex].exports;
-    if (has.call(modules, dirIndex)) return initModule(dirIndex, modules[dirIndex]);
-
-    throw new Error('Cannot find module "' + name + '" from '+ '"' + loaderPath + '"');
-  };
-
-  require.alias = function(from, to) {
-    aliases[to] = from;
-  };
-
-  require.register = require.define = function(bundle, fn) {
-    if (typeof bundle === 'object') {
-      for (var key in bundle) {
-        if (has.call(bundle, key)) {
-          modules[key] = bundle[key];
-        }
-      }
-    } else {
-      modules[bundle] = fn;
-    }
-  };
-
-  require.list = function() {
-    var result = [];
-    for (var item in modules) {
-      if (has.call(modules, item)) {
-        result.push(item);
-      }
-    }
-    return result;
-  };
-
-  require.brunch = true;
-  require._cache = cache;
-  globals.require = require;
-})();
-require.register("ressource/client/api/index", function(exports, require, module) {
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 /**
  * This file is part of Sesatheque.
  *   Copyright 2014-2015, Association Sésamath
@@ -145,21 +29,158 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  * pour une explication en français)
  */
 
-// on est compilé par brunch donc on peut utiliser le commonjs habituel
-// mais on doit pouvoir être chargé par n'importe qui de manière isolée, on s'adapte
-(function factory() {
+/**
+ * Module "standalone" pour get/set des ressources sur l'api d'une sesatheque
+ * Il faut utiliser setBase() avant les autres méthodes pour préciser l'url absolue de la sésathèque
+ * @service apiClient
+ */
+(function () {
   'use strict';
-  /*global define,exports*/
 
-  var sc = require('sesatheque-client');
-  if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object' && (typeof module === 'undefined' ? 'undefined' : _typeof(module)) === 'object') module.exports = sc;else if (typeof define === 'function' && define.amd) define(sc);else if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') exports["sesatheque-client"] = sc;else if (typeof window !== "undefined") {
-    // on ajoute ça en global dans notre ns
-    if (typeof window.sesamath === "undefined") window.sesamath = {};
-    if (typeof window.sesamath.sesatheque === "undefined") window.sesamath.sesatheque = {};
-    window.sesamath.sesatheque.client = sc;
+  /**
+   * Ajoute les propriétés xxxUrl et public
+   * @private
+   * @param {Ressource} ressource
+   */
+  function addUrls(ressource, next) {
+    var id = ressource.id || ressource.ref || ressource.oid;
+    if (!id && ressource.origine && ressource.idOrigine) id = ressource.origine +'/' +ressource.idOrigine;
+    var prefix = (ressource.restriction === 0 || ressource.public) ? 'public' : 'ressource';
+    if (id) {
+      ressource.dataUrl = base +'api/' +prefix +'/' +id;
+      ressource.deleteUrl = base +'api/ressource/' +id;
+      ressource.displayUrl = base +prefix +'/' +id;
+      ressource.editUrl = base +'ressource/modifier/' +id;
+      ressource.public = (ressource.public || ressource.restriction === 0);
+    }
+    next(null, ressource);
+  }
+
+  /**
+   * Gère les appels ajax vers l'api de la bibliothèque
+   * @private
+   * @param {Integer|string|object} data    Si data est un id on fera un get, si data est une ressource (un objet) un post
+   * @param {object}                options Passer {format:"alias|compact"} pour formater la réponse
+   *                                          (ou {merge:1} pour mettre à jour une ressource en envoyant seulement certaines propriétés)
+   * @param {ressourceCallback}     next
+   * @private
+   */
+  function callBibli(data, options, next) {
+    function end(error, ressource) {
+      if (error) next(error);
+      else addUrls(ressource, next);
+    }
+    var url, xhrOptions = {};
+    if (options && options.format) {
+      xhrOptions.urlParams = {};
+      xhrOptions.urlParams.format = options.format;
+    }
+    if (options && options.merge) {
+      if (!xhrOptions.urlParams) xhrOptions.urlParams = {};
+      xhrOptions.urlParams.merge = "1";
+    }
+    xhrOptions.responseType = "json";
+    xhrOptions.timeout = ajaxTimeout;
+    // post ou get ?
+    if (typeof data === "object") {
+      url = base + 'api/ressource';
+      xhr.post(url, data, xhrOptions, end);
+    } else {
+      var id = data;
+      if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine");
+      url = base + 'api/ressource/' + id;
+      xhr.get(url, xhrOptions, end);
+    }
+  } // callBibli
+
+  /**
+   * la base de la sesatheque (on ajoutera le / de fin s'il manque mais en cross-domain fallait appeler init avant)
+   * on appellera les urls de la forme base + 'api/ressource/…'
+   * @type {string}
+   */
+  var base, xhr;
+  if (typeof sesamath === "undefined") window.sesamath = {};
+  var S = window.sesamath;
+  if (!S.sesatheque) S.sesatheque = {};
+  var ST = S.sesatheque;
+  if (ST.base) base = ST.base;
+  else base = '/';
+
+  /**
+   * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
+   * @private
+   * @type {Integer}
+   */
+  var ajaxTimeout = 10000;
+
+  var apiClient = {
+    /**
+     * Modifie le préfixe par défaut (/)
+     * @memberOf apiClient
+     * @param {string} newSesathequeBase L'url de la sesathèque
+     */
+    setBase: function (newSesathequeBase) {
+      base = newSesathequeBase;
+      if (base.substr(-1) !== '/') base += '/';
+    },
+    /**
+     * Récupère une ressource sur la bibliothèque en ajax sous forme d'alias
+     * @memberOf apiClient
+     * @param {Integer|string}    id   peut être un oid de la sesatheque ou origine/idOrigine
+     * @param {ressourceCallback} next
+     */
+    getAlias: function (id, next) {
+      if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
+      else if (id) callBibli(id, {format:"alias"}, next);
+      else next(new Error("Il faut fournir un identifiant"));
+    },
+    /**
+     * Récupère une ressource sur la bibliothèque en ajax
+     * @memberOf apiClient
+     * @param {Integer|string}    id       peut être un oid de la sesatheque ou origine/idOrigine
+     * @param {string}            [format] alias|compact
+     * @param {ressourceCallback} next
+     */
+    getRessource: function (id, format, next) {
+      var options;
+      if (typeof format === "function") {
+        next = format;
+      } else {
+        options = {format:format};
+      }
+      if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
+      else if (id) callBibli(id, options, next);
+      else next(new Error("Il faut fournir un identifiant"));
+    },
+    /**
+     * Enregistre une ressource sur la bibliotheque
+     * @memberOf apiClient
+     * @param {Ressource}         ressource
+     * @param {ressourceCallback} next
+     */
+    setRessource: function (ressource, isPartial, next) {
+      var options;
+      if (typeof isPartial === "function") {
+        next = isPartial;
+      } else if (isPartial) {
+        options = {merge:1};
+      }
+      if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
+      else if (ressource) callBibli(ressource, options, next);
+      else next(new Error("Il faut fournir une ressource"));
+    }
+  };
+
+  // AMD
+  if (typeof define === 'function') define(['tools/xhr'], function (xhrTool) {
+    xhr = xhrTool;
+
+    return apiClient;
+  });
+  // CommonJs
+  else if (typeof module === 'object') {
+    xhr = require('./tools/xhr');
+
+    module.exports = apiClient;
   }
 })();
-});
-
-;
-//# sourceMappingURL=apiClient.js.map

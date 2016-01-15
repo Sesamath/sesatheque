@@ -29,46 +29,32 @@
  * pour une explication en français)
  */
 
-"use strict"
+'use strict'
 
-module.exports = function (EntityAlias) {
-  var config = require('../config')
-  var Alias = require('./constructors/Alias')
-  var tools = require('../tools')
-
+/**
+ * Un retour d'une api http qui enregistre des Resultat (surtout pour documenter le format utilisé dans sesatheque|sesalab)
+ * @param {Object} values
+ * @constructor
+ */
+function Feedback(values) {
+  if (typeof values !== 'object') values = {}
   /**
-   * Notre entité Alias cf [Entity](lassi/Entity.html)
-   * Utilisé uniquement par l'api externalClone, qui en crée pour les ressources non modifiables
-   * et l'api liste/perso qui les récupère pour les filer à sesalab
-   * @entity EntityAlias
-   * @param {Object} initObj Un alias construit avant (Entity mergera après ce construct toutes les propriétés de initObj)
-   * @extends Entity
-   * @extends Alias
+   * Statut du retour (success aussi accepté comme nom de propriété)
+   * @type {boolean}
    */
-  EntityAlias.construct(function (init) {
-    tools.merge(this, new Alias(init))
-  })
-
-  EntityAlias.table = 'alias'
-
-  EntityAlias
-    .defineIndex('ref', 'string')
-    .defineIndex('base', 'string')
-    .defineIndex('userOid', 'integer')
-
-  EntityAlias.beforeStore(function (next) {
-    if (!this.userOid) {
-      next(new Error("Impossible d'enregistrer un alias sans propriétaire"))
-    } else if (!this.type) {
-      next(new Error("Impossible d'enregistrer un alias sans type"))
-    } else if (this.ref === this.oid && (!this.base || this.base === config.application.baseUrl)) {
-      next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))
-    } else if (!this.base) {
-      next(new Error("Impossible de sauvegarder un alias sans base"))
-    } else {
-      // on sauvegarde toujours la base avec le slash de fin
-      if (this.base.substr(-1) !== '/') this.base += "/"
-      next()
-    }
-  })
+  this.ok = !!values.ok
+  if (values.hasOwnProperty("success")) {
+    /**
+     * Alternative à la propriété ok
+     * @type {boolean}
+     */
+    this.success = !! values.success
+  }
+  /**
+   * Message éventuel (si ok = false c'est un message d'erreur et sinon une info)
+   * @type {*|string}
+   */
+  this.message = values.error || ''
 }
+
+module.exports = Feedback

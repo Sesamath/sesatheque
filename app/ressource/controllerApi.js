@@ -52,7 +52,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   var tools = require('../tools')
   var config = require("../config")
   var configRessource = require("./config")
-  var Alias = require("./public/vendors/sesamath/Alias")
+  var Alias = require("./constructors/Alias")
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id

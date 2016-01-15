@@ -22,8 +22,9 @@ trap fin EXIT
 dirRoot="$(dirname $0)/.."
 cd $dirRoot
 
-node_modules/.bin/browserify app/ressource/public/plugins/*/display.js > app/ressource/public/displayAll.js
-node_modules/.bin/uglifyjs app/ressource/public/displayAll.js --compress --mangle > app/ressource/public/displayAll.min.js
+// cette écriture permet de mettre dans du js inline require('sesatheque-client')
+node_modules/.bin/browserify -r sesatheque-client > app/ressource/public/sesatheque-client.js
+node_modules/.bin/uglifyjs app/ressource/public/apiClient.js --compress --mangle > app/ressource/public/sesatheque-client.min.js
 
 exit 0
 

@@ -1,6 +1,8 @@
 {
-  "browser" : false,
-  "node": true,
+  "browser": true,
+  "node" : false,
+  "esversion" : 6,
+  "esnext" : true,
   "asi": true,
   "bitwise": true,
   "forin": true,
@@ -11,6 +13,5 @@
   "undef": true,
   "unused": true,
   "indent": 2,
-  "predef": ["GLOBAL", "lassi", "log", "isProd"],
-  "globals": ["GLOBAL", "lassi", "log","isProd"]
+  "globals": ["require", "module"]
 }

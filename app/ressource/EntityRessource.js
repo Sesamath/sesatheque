@@ -34,7 +34,7 @@
 module.exports = function (EntityRessource) {
   //var _ = require('lodash')
   var tools = require('../tools')
-  var Ressource = require('./public/vendors/sesamath/Ressource')
+  var Ressource = require('./constructors/Ressource')
   var configRessource = require('./config')
 
   /**
