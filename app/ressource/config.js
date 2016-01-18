@@ -54,16 +54,6 @@ var ressourceConfig = {
       sequenceModele : 'modèle de séquence',
       url   : 'page externe'
     },
-    /**
-     * types qui peuvent être utilisés pour une ressource perso (form de ressource/ajouter)
-     */
-    typePerso : {
-      ecjs : true,
-      iep  : true,
-      j3p  : true,
-      mathgraph : true,
-      url  : true
-    },
     niveaux          : {
       11: 'CP',
       10: 'CE1',
@@ -178,6 +168,23 @@ var ressourceConfig = {
     mathgraph : true,
     mental: true,
     url   : true
+  },
+  /**
+   * types qui peuvent être utilisés pour une ressource perso (form de ressource/ajouter)
+   */
+  typePerso : {
+    ecjs : true,
+    iep  : true,
+    j3p  : true,
+    mathgraph : true,
+    url  : true
+  },
+
+  /**
+   * Les type qu'il faut toujours mettre en iframe (qui cassent les css s'ils sont embarqués dans un div d'une page)
+   */
+  typeIframe : {
+    j3p : true
   },
 
   /**

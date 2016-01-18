@@ -31,6 +31,7 @@
 'use strict'
 
 var page = require('../../page')
+var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var swf = require('../../display/swf')
@@ -52,7 +53,7 @@ try {
    * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
    */
   ec2.display = function (ressource, options, next) {
-    var ec2Base = dom.getURLParameter("ec2Base") || options.ec2Base || "http://ressources.sesamath.net/replication_calculatice/flash"
+    var ec2Base = tools.getURLParameter("ec2Base") || options.ec2Base || "http://ressources.sesamath.net/replication_calculatice/flash"
     var swfUrl
 
     log('start ec2 display avec la ressource', ressource)

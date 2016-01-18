@@ -34,9 +34,9 @@
  * Auto-exécuté au chargement
  */
 "use strict"
-var dom = require('tools/dom')
-var log = require('tools/log')
-var xhr = require('tools/xhr')
+var dom = require('../tools/dom')
+var log = require('../tools/log')
+var xhr = require('../tools/xhr')
 
 function addLink(parent, link) {
   var li = dom.getElement('li')

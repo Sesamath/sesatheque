@@ -36,6 +36,7 @@
  */
 
 var page = require('../../page')
+var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var display = require('../../display')
@@ -526,7 +527,7 @@ module.exports = function arbreEdit(arbre, options) {
       $saveButton = $('#saveButton')
       if (!$saveButton) throw new Error("Bouton de sauvegarde non trouvé dans la page")
 
-      var editor = dom.getURLParameter('editor') || "graphic"
+      var editor = tools.getURLParameter('editor') || "graphic"
       initDom(options)
       dstTree = arbre
       if (editor === "graphic") {

@@ -165,8 +165,8 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     // et on ajoute notre js qui les gère si on est sur du /public/
     if (context.request.originalUrl.indexOf("/public/") > -1) {
       if (!data.jsBloc) data.jsBloc = {$view:'js'}
-      if (!data.jsBloc.jsFiles) data.jsBloc.jsFiles = []
-      data.jsBloc.jsFiles.push("/refreshAuth.js")
+      if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ""
+      data.jsBloc.jsCode += 'require("page/refreshAuth")();'
     }
   }
 

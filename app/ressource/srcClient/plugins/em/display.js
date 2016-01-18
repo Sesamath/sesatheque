@@ -80,7 +80,7 @@ try {
 
     // le message en attendant le chargement
     dom.empty(container)
-    dom.addText(container, "Chargement de la ressource " + ressource.oid + " en cours.")
+    var loadingElt = dom.addElement(container, 'p', {}, "Chargement de la ressource " + ressource.oid + " en cours.")
 
     // notre base
     if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf = ressource.baseUrl
@@ -185,26 +185,12 @@ try {
     }
     // pour debug
     log('flashvars', flashvars)
-    swf.load(container, swfUrl, swfOptions, callbackFn)
+    swf.load(container, swfUrl, swfOptions, function (error) {
+      if (!error) log('chargement du swf ok')
+      container.removeChild(loadingElt)
+      if (next) next()
+    })
     //swfobject.embedSWF(swfUrl, divId, largeur, hauteur, "8", null, flashvars, swfParams, swfAttributes, callbackFn)
-
-    /**
-     * Callback du chargement
-     * @param e objet avec id,success,ref
-     */
-    function callbackFn(e) {
-      var retour
-      if (e.success) {
-        isLoaded = true
-        log("Chargement de " + swfUrl + " ok")
-      } else {
-        page.addError("Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource.")
-        retour = new Error('Le chargement de ' + swfUrl + ' a échoué')
-      }
-      if (next && typeof next === "function") {
-        next(retour)
-      }
-    }
   }
 
 } catch (error) {

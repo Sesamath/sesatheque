@@ -286,7 +286,7 @@ function display(ressource, options, next) {
         }
         // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
         ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
-          var paramValue = dom.getURLParameter(paramName) || options[paramName]
+          var paramValue = tools.getURLParameter(paramName) || options[paramName]
           if (paramValue) resultat[paramName] = paramValue
         })
         // @todo ajouter des vérifs minimales

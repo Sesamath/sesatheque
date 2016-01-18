@@ -57,7 +57,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     var user = $accessControl.getCurrentUser(context)
     if (!user.permissions.create)
       msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.listes.typePerso[ressource.type])
+    else if (!configRessource.typePerso[ressource.type])
       msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.type
 
     return msg
@@ -75,7 +75,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     var user = $accessControl.getCurrentUser(context)
     if (!user.permissions.create)
       msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.listes.typePerso[ressource.type])
+    else if (!configRessource.typePerso[ressource.type])
       msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.type
 
     return msg

@@ -32,7 +32,8 @@
 'use strict'
 /*global head*/
 var page = require('../../page')
-var dom = require('../../tools/dom')
+var tools = require('../../tools')
+//var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var xhr = require('../../tools/xhr')
 
@@ -63,8 +64,9 @@ try {
      * Chargera la ressource quand on aura éventuellement récupéré lastResultat
      */
     function load() {
-      head([urlBaseJ3p + '/outils/loader.js'], function () {
-        var loader = require('loader')
+      log("lancement du chargement j3p sur " +urlBaseJ3p)
+      head.load([urlBaseJ3p + '/outils/loader.js'], function () {
+        var loader = require('j3p/loader')
         try {
           // on cache toujours le titre
           page.hideTitle()
@@ -101,8 +103,9 @@ try {
       urlBaseJ3p = 'http://j3p.devsesamath.net'
     }
 
-    var lastResultUrl = dom.getURLParameter("lastResultUrl")
+    var lastResultUrl = tools.getURLParameter("lastResultUrl")
     if (lastResultUrl) {
+      log("on va chercher un lastResultat sur " +lastResultUrl)
       xhr.get(lastResultUrl, {responseType:"json"}, function (error, lastResultat) {
         if (error) {
           page.addError("Impossible de récupérer le dernier résultat")

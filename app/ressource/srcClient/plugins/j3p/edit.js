@@ -37,9 +37,9 @@
  */
 
 var page = require('../../page')
+var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
-var tools = require('../../tools')
 var $ = window.jQuery
 /* jshint jquery:true */
 

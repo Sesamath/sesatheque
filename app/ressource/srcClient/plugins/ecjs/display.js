@@ -31,6 +31,7 @@
 'use strict'
 
 var page = require('../../page')
+var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
@@ -56,7 +57,7 @@ try {
     if (!ressource.parametres.fichierjs) throw new Error("Paramétrage manquant (nom de l'exercice à lancer)")
 
     // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
-    var ecjsBase = dom.getURLParameter("ecjsBase") || options.ecjsBase || "http://ressources.sesamath.net/replication_calculatice/javascript"
+    var ecjsBase = tools.getURLParameter("ecjsBase") || options.ecjsBase || "http://ressources.sesamath.net/replication_calculatice/javascript"
 
     // d'après {ecjsBase}/api/clc-api.main.js
     // celui-là détruit notre style et semble ne rien apporter dans les exos

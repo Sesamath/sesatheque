@@ -31,6 +31,7 @@
 
 "use strict"
 // l'écriture suivante fonctionne aussi, mais sans avoir l'autocomplétion dans l'IDE :-/
+var tools = require('../tools')
 var dom = require('../tools/dom')
 var log = require('../tools/log')
 var wd = window.document
@@ -113,7 +114,7 @@ function init(options, next) {
   log('page.init avec les options', options)
   if (!options.base) options.base = base
   // (des)active la fct de log si on le demande, l'url est prioritaire sur options
-  var verbose = dom.getURLParameter("verbose") || options.verbose
+  var verbose = tools.getURLParameter("verbose") || options.verbose
   if (verbose === "0" || verbose === "false") verbose = false
   if (verbose) log.enable()
   else log.disable()
@@ -138,10 +139,10 @@ function init(options, next) {
   // on regarde si d'autres options ont été passé en GET
   var paramGet
   ["resultatMessageAction", "urlResultatCallback", "userOrigine", "userId"].forEach(function (param) {
-    paramGet = dom.getURLParameter(param)
+    paramGet = tools.getURLParameter(param)
     if (!options[param] && paramGet) options[param] = paramGet
   })
-  paramGet = dom.getURLParameter("showTitle")
+  paramGet = tools.getURLParameter("showTitle")
   if (paramGet === "0" || paramGet === "false") options.showTitle = false
 
   // terminé

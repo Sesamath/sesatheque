@@ -72,8 +72,6 @@ dom.addCss = function (file) {
 
 /**
  * Ajoute un élément html de type tag à parent
- *
- * Déclaré par init (dès son chargement)
  * @param {Element} parent
  * @param {string} tag
  * @param {Object=} attrs Les attributs

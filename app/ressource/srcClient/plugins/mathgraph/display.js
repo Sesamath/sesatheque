@@ -31,6 +31,7 @@
 'use strict'
 
 var page = require('../../page')
+var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
@@ -122,7 +123,7 @@ function displayJs(ressource, options, next) {
   }
 
   // on affiche un avertissement si on force
-  if (ressource.parametres.levelEleve > 0 && dom.getURLParameter("js")) {
+  if (ressource.parametres.levelEleve > 0 && tools.getURLParameter("js")) {
     dom.addElement(container, "p", {"class":"warning"}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
   }
 
@@ -188,7 +189,7 @@ mathgraph.display = function (ressource, options, next) {
     if (!ressource.parametres.figure) {
       throw new Error("Pas de figure mathgraph en paramètre")
     }
-    if (ressource.parametres.levelEleve > 0 && !dom.getURLParameter("js")) displayJava(ressource, options, next)
+    if (ressource.parametres.levelEleve > 0 && !tools.getURLParameter("js")) displayJava(ressource, options, next)
     else displayJs(ressource, options, next)
   } catch (error) {
     if (next) next(error)

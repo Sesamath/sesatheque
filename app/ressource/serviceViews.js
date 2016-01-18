@@ -540,7 +540,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             // faut restreindre type
             var ttChoices = []
             formData.type.choices.forEach(function (choice) {
-              if (config.listes.typePerso[choice.value]) ttChoices.push(choice)
+              if (config.typePerso[choice.value]) ttChoices.push(choice)
             })
             formData.type.choices = ttChoices
             // et imposer origine local
@@ -610,8 +610,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   function getViewData(error, ressource, view) {
     var viewData = {}
     var buffer
-    if (error) $views.addError(error, viewData)
-    else if (ressource) {
+    if (error) {
+      $views.addError(error, viewData)
+    } else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
       var labels = getLabels(ressource)
       log.debug("labels de " +ressource.oid, labels)
@@ -701,9 +702,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var data = {
       $views : __dirname + '/../views',
       $metas : {
-        // css ajouté par le listener d'après context.layout
-        js : ['/vendors/requirejs/require.min.js']
+        // css ajouté par le listener à la fin, suivant la valeur de context.layout
+        js : ['/page.bundle.js']
       }
+    }
+    // les js en plus suivant la vue
+    if (viewName === "edit") {
+      data.$metas.js.push('/display.bundle.js')
+      data.$metas.js.push('/edit.bundle.js')
+    } else if (viewName === "display" || viewName === "preview") {
+      data.$metas.js.push('/display.bundle.js')
     }
     //if (viewName.substr(0, 1) !== "/") viewName = __dirname +"/../views/" +viewName
     // les erreurs sont pas dans le bloc contenu
@@ -752,42 +760,53 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
      * @param error
      */
     function termine(error) {
-      // et la ressource (ou erreur)
-      data.contentBloc = getViewData(error, ressource, view)
-      // pour display faut ajouter les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
-      if (view === 'display') {
-        addJsVars(data, ressource)
-        data.contentBloc.isFormateur = $accessControl.hasRole("acces_correction", context)
-      } else if (view === 'describe' && ressource && ressource.type === 'arbre') {
-        // on ajoute la liste des urls des enfants si on les a
-        if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
-          var enfantsDescribe = []
-          ressource.enfants.forEach(function (enfant) {
-            if (enfant.ref) {
-              enfantsDescribe.push({
-                oid  : enfant.ref,
-                titre: enfant.titre,
-                url  : $routes.getAbs('describe', enfant.ref)
-              })
-            }
-          })
-          data.contentBloc.enfantsDescribe = enfantsDescribe
+      if (view === "display" && context.layout === "page" && !error && ressource && config.typeIframe[ressource.type]) {
+        // simplement une iframe
+        data.contentBloc = {
+          $view : "iframe",
+          url : $routes.getAbs('display', ressource, context)
         }
-      }
-      // pour le menu qui en aura besoin
-      if (context.layout === 'page' && ressource) context.ressource = ressource
-      // le titre s'il n'est pas fourni en options
-      if (!options || !options.$metas || !options.$metas.title) {
-        if (ressource) {
-          if (ressource.titre) data.$metas.title = ressource.titre
-          else data.$metas.title = "Ressource sans titre"
-        } else {
-          data.$metas.title = "Pas de ressource à afficher"
+        if (!data.jsBloc) data.jsBloc = { $view:'js'}
+        if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ""
+        data.jsBloc.jsCode += 'require("display/autosize")("main", ["header", "footer"], null, {minHeight:500, minWidth:600});'
+      } else {
+        // et la ressource (ou erreur)
+        data.contentBloc = getViewData(error, ressource, view)
+        // pour display faut ajouter les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
+        if (view === 'display') {
+          addJsVars(data, ressource)
+          data.contentBloc.isFormateur = $accessControl.hasRole("acces_correction", context)
+        } else if (view === 'describe' && ressource && ressource.type === 'arbre') {
+          // on ajoute la liste des urls des enfants si on les a
+          if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
+            var enfantsDescribe = []
+            ressource.enfants.forEach(function (enfant) {
+              if (enfant.ref) {
+                enfantsDescribe.push({
+                  oid: enfant.ref,
+                  titre: enfant.titre,
+                  url: $routes.getAbs('describe', enfant.ref)
+                })
+              }
+            })
+            data.contentBloc.enfantsDescribe = enfantsDescribe
+          }
         }
+        // pour le menu qui en aura besoin
+        if (context.layout === 'page' && ressource) context.ressource = ressource
+        // le titre s'il n'est pas fourni en options
+        if (!options || !options.$metas || !options.$metas.title) {
+          if (ressource) {
+            if (ressource.titre) data.$metas.title = ressource.titre
+            else data.$metas.title = "Ressource sans titre"
+          } else {
+            data.$metas.title = "Pas de ressource à afficher"
+          }
+        }
+        // éventuels overrides
+        if (options) tools.merge(data, options)
+        //log.debug('envoi à ' + view, data, 'dust', {max: 10000, indent:2})
       }
-      // éventuels overrides
-      if (options) tools.merge(data, options)
-      //log.debug('envoi à ' + view, data, 'dust', {max: 10000, indent:2})
       context.html(data)
     } // termine
 
@@ -796,7 +815,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // on est appelé avec ce qui sort d'un load
       $views.printError(context, "Problème d'accès à la base de données", 500)
     } else if (ressource) {
-      log.debug('prepareAndSend pour la vue ' + view +' avec la ressource', ressource, 'dust', {max: 1000})
+      log.debug('prepareAndSend pour la vue ' + view + ' avec la ressource', ressource, 'dust', {max: 1000})
       var data = $views.getDefaultData(view)
 
       if (view === 'describe') {

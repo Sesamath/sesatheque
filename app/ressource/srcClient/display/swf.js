@@ -55,13 +55,17 @@ function load(container, swfHref, options, next) {
    */
   function callbackFn(e) {
     if (!next) next = function () {}
-    if (e.success) {
-      log("Lancement de " + swfHref +' réussi')
-      next()
+    if (e) {
+      if (e.success) {
+        log("Lancement de " + swfHref + ' réussi')
+        next()
+      } else {
+        var errorMsg = "Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource."
+        page.addError(errorMsg)
+        next(new Error(errorMsg))
+      }
     } else {
-      var errorMsg = "Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource."
-      page.addError(errorMsg)
-      next(new Error(errorMsg))
+      log('callback de chargement appelée sans argument')
     }
   }
 
