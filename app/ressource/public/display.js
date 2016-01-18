@@ -47,6 +47,7 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
   // faut d'abord un module sans dépendance pour pouvoir la charger avec le bon chemin si besoin
   define('display', [], function () {
     "use strict";
+    var startDate;
     /**
      * Module d'une seule fonction pour afficher une ressource quelconque.
      * Il chargera le bon afficheur en lui passant les options attendues, en créant si besoin les contereurs dans le dom courant.
@@ -79,7 +80,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
           var modules = [pluginName];
           // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
           var traiteResultat;
-          var startDate;
 
           if (options) {
             if (options.resultatCallback && S.isFunction(options.resultatCallback)) traiteResultat = "function";
@@ -170,7 +170,6 @@ if (typeof define === 'undefined' || typeof require === 'undefined') {
         }
 
         if (traiteResultat) {
-          var startDate;
           /**
            * Envoi un résultat en ajax ou à la callback pour sauvegarde et appelle saveCallback avec le retour
            * @private
