@@ -147,8 +147,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
      */
     function addRefs(ressources, droits) {
       ressources.forEach(function (ressource) {
-        if (ressource.type === "sequenceModele") sequenceModeles.push(ressource)
-        else {
+        if (ressource.type === "sequenceModele") {
+          if (ressource.parametres) sequenceModeles.push(ressource.parametres)
+          else log.errorData("sequenceModele sans parametres", ressource)
+        } else {
           var alias = new Alias(ressource)
           if (alias.ref && alias.titre && alias.type && (alias.public || alias.cle)) {
             if (droits) alias.$droits = droits
