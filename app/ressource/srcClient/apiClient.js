@@ -58,7 +58,8 @@ function addUrls(ressource, next) {
  */
 function init(newSesathequeBase) {
   if (!newSesathequeBase) throw new Error("Il faut fournir une base absolue de la sesatheque")
-  if (! /^https?:\/\/[a-z\-\._]+(:[0-9]+)?(\/.*)?$/.test(newSesathequeBase)) throw new Error("La base " +newSesathequeBase +" n'est pas une racine d'url absolue valide")
+  if (! /^https?:\/\/[a-z\-\._]+(:[0-9]+)?(\/.*)?$/.test(newSesathequeBase))
+    throw new Error("La base " +newSesathequeBase +" n'est pas une racine d'url absolue valide")
   if (typeof name !== "string") throw new Error("Le nom doit être une string")
   if (newSesathequeBase.substr(-1) !== "/") newSesathequeBase += "/"
   base = newSesathequeBase;

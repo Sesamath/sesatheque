@@ -65,7 +65,7 @@ try {
      */
     function load() {
       log("lancement du chargement j3p sur " +urlBaseJ3p)
-      head.load([urlBaseJ3p + '/outils/loader.js'], function () {
+      page.loadAsync([urlBaseJ3p + '/outils/loader.js'], function () {
         var loader = require('j3p/loader')
         try {
           // on cache toujours le titre

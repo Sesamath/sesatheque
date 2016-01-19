@@ -157,13 +157,14 @@ function init(options, next) {
 function loadAsync(moduleNames, callback) {
   /*global head*/
   var paths = [], errors = [], path
+  var loader = head.load || head.js // les anciennes versions de head utilisaient head.js avec la même signature
   moduleNames.forEach(function (moduleName) {
     path = externalModules[moduleName]
     if (path) paths.push(path)
     else errors.push(moduleName)
   })
   if (errors.length) addError("Impossible de le ou les modules inconnus suivants " +errors.join(", "))
-  else if (paths.length) head.load(paths, callback)
+  else if (paths.length) loader(paths, callback)
   else log.error("appel de loadAsync sans modules")
 }
 

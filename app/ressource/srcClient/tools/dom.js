@@ -35,7 +35,9 @@
  */
 "use strict"
 
+var log = require('./log')
 var wd = window.document
+
 /**
  * Notre module pour toutes nos fonctions génériques
  * @module sesamath
@@ -60,7 +62,7 @@ dom.addCss = function (file) {
   }
 
   if (dejala) {
-    dom.log(file +" était déjà présent, on ne l'ajoute pas")
+    log(file +" était déjà présent, on ne l'ajoute pas")
   } else {
     var elt = wd.createElement("link")
     elt.rel = "stylesheet"
@@ -98,7 +100,7 @@ dom.addElementAfter = function (element, tag, attrs, content) {
   var parent = element.parentNode
   // pas de insertAfter, si nextSibling est null ça le mettra à la fin, cf https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore
   if (parent) parent.insertBefore(newElt, element.nextSibling)
-  else dom.log.error(new Error("Navigateur incompatible (pas de parentNode), impossible d'ajouter l'élément"))
+  else log.error(new Error("Navigateur incompatible (pas de parentNode), impossible d'ajouter l'élément"))
 
   return newElt
 }
@@ -115,7 +117,7 @@ dom.addElementBefore = function (element, tag, attrs, content) {
   var newElt = dom.getElement(tag, attrs, content)
   var parent = element.parentNode
   if (parent) parent.insertBefore(newElt, element)
-  else dom.log.error(new Error("Navigateur incompatible (pas de parentNode), impossible d'insérer l'élément"))
+  else log.error(new Error("Navigateur incompatible (pas de parentNode), impossible d'insérer l'élément"))
 
   return newElt
 }
@@ -193,7 +195,7 @@ dom.getElement = function (tag, attrs, txtContent) {
       }
     }
   } catch (error) {
-    dom.log("plantage dans getElement " +tag +" avec les attributs ", attrs, error)
+    log("plantage dans getElement " +tag +" avec les attributs ", attrs, error)
   }
 
   if (txtContent) dom.addText(elt, txtContent)
@@ -250,7 +252,7 @@ dom.setStyles = function (elt, styles) {
       }
     }
   } catch (error) {
-    dom.log.error(error)
+    log.error(error)
   }
 }
 
