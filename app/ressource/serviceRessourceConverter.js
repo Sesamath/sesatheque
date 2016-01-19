@@ -21,7 +21,7 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
@@ -49,8 +49,8 @@ var flow = require('an-flow')
 var config = require('./config')
 var appConfig = require('../config')
 //var tools = require('../tools')
-var Alias = require('./public/vendors/sesamath/Alias')
-var jstreeConverter = require('./public/vendors/sesamath/tools/jstreeConverter')
+var Alias = require('./constructors/Alias')
+var jstreeConverter = require('./srcClient/display/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl) {

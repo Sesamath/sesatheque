@@ -21,7 +21,7 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
@@ -31,13 +31,13 @@
 
 /*global window*/
 (function () {
-  "use strict";
+  "use strict"
   // vérif minimale du contexte
-  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
-  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
+  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
+  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
 
   // Raccourci pour window.document
-  var wd = window.document;
+  var wd = window.document
   /**
    * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
    * Exporte 3 méthodes,
@@ -46,7 +46,7 @@
    * - soit dans window.sesamath.sesatheque.emResult
    * @service amResult
    */
-  var amResult = {};
+  var amResult = {}
 
   /**
    * Retourne le code html qui affiche le bilan (ici la durée d'affichage)
@@ -55,20 +55,20 @@
    * @returns {string} Le code html
    */
   amResult.getHtmlReponse = function (resultat) {
-    var output = "";
+    var output = ""
     // pour url on a pas de resultat.reponse, seule la durée peut servir
     if (resultat.duree > 0) {
-      output = "affiché pendant ";
+      output = "affiché pendant "
       if (resultat.duree > 59) {
-        output += Math.floor(resultat.duree / 60) + ' minutes ';
+        output += Math.floor(resultat.duree / 60) + ' minutes '
       }
-      output += resultat.duree % 60 +' s';
+      output += resultat.duree % 60 +' s'
     } else {
-      output = "pas de durée d'affichage connue";
+      output = "pas de durée d'affichage connue"
     }
 
-    return output;
-  };
+    return output
+  }
 
   /**
    * Retourne le code html qui affiche le score (ici "affiché")
@@ -77,8 +77,8 @@
    * @returns {string} Le code html
    */
   amResult.getHtmlScore = function () {
-    return "affiché";
-  };
+    return "affiché"
+  }
 
   /**
    * Affiche score et réponse dans un Element
@@ -87,14 +87,14 @@
    * @param element
    */
   amResult.showResult = function (resultat, element) {
-    var html = amResult.getHtmlReponse(resultat);
-    element.addChild(wd.createTextNode(html));
-  };
+    var html = amResult.getHtmlReponse(resultat)
+    element.addChild(wd.createTextNode(html))
+  }
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
   if (typeof define === 'function') {
     define("amResult", [], amResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
-    module.exports = amResult;
+    module.exports = amResult
   }
-})();
+})()

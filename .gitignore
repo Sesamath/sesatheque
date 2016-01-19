@@ -5,3 +5,5 @@ app/_private
 logs/*
 documentation/*
 *.pid
+*.map
+*.bundle.js

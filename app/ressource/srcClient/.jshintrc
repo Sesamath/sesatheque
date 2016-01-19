@@ -1,0 +1,17 @@
+{
+  "browser": true,
+  "node" : false,
+  "esversion" : 6,
+  "esnext" : true,
+  "asi": true,
+  "bitwise": true,
+  "forin": true,
+  "freeze": true,
+  "immed": true,
+  "maxlen": 160,
+  "newcap": true,
+  "undef": true,
+  "unused": true,
+  "indent": 2,
+  "globals": ["require", "module"]
+}

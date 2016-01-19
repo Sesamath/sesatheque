@@ -21,7 +21,7 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
@@ -34,13 +34,13 @@
  */
 /*global window*/
 (function () {
-  "use strict";
+  "use strict"
 
   // vérif minimale du contexte
-  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
-  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
-  if (typeof window.sesamath === "undefined") throw new Error("Il faut charger initGlobal.js avant ce script");
-  var S = window.sesamath;
+  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
+  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
+  if (typeof window.sesamath === "undefined") throw new Error("Il faut charger initGlobal.js avant ce script")
+  var S = window.sesamath
 
   /**
    * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
@@ -51,7 +51,7 @@
    * (ce code est réécrit pour sesalab dans une classe qooxdoo sesalab.resultats.Em, Cfsesalab-interface/class/sesalab/resultats)
    * @namespace emResult
    */
-  var emResult = {};
+  var emResult = {}
 
   /**
    * Retourne le code html qui affiche le bilan (ici les carrés colorés)
@@ -61,19 +61,19 @@
    * @returns {string} Le code html
    */
   emResult.getHtmlReponse = function getHtmlReponse(resultat, baseUrl) {
-    var output = "";
+    var output = ""
     // pour em on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
     if (typeof resultat.reponse === "string") {
       for (var i = 0; i < resultat.reponse.length; i++) {
         output += '<img src="' +baseUrl +'/images/reponse_' +resultat.reponse[i] +
-        '.gif" width="10" height="15" alt="">';
+        '.gif" width="10" height="15" alt="">'
       }
     } else {
-      output = "pas de réponse ou réponse à un mauvais format";
+      output = "pas de réponse ou réponse à un mauvais format"
     }
 
-    return output;
-  };
+    return output
+  }
 
   /**
    * Retourne le code html qui affiche le score (ici x/y en texte seul)
@@ -82,23 +82,23 @@
    * @returns {string} Le code html
    */
   emResult.getHtmlScore = function getHtmlScore(resultat) {
-    var output = "";
-    var nbok = 0;
-    var nbq, lettre;
+    var output = ""
+    var nbok = 0
+    var nbq, lettre
     // pour em on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
     if (typeof resultat.reponse === "string") {
-      nbq = resultat.reponse.length;
-      lettre = resultat.reponse[i];
+      nbq = resultat.reponse.length
+      lettre = resultat.reponse[i]
       for (var i = 0; i < nbq; i++) {
-        if (lettre === 'v' || lettre === 'p') nbok++;
+        if (lettre === 'v' || lettre === 'p') nbok++
       }
-      output = nbok +' / ' +nbq;
+      output = nbok +' / ' +nbq
     } else {
-      output = "pas de réponse ou réponse à un mauvais format";
+      output = "pas de réponse ou réponse à un mauvais format"
     }
 
-    return output;
-  };
+    return output
+  }
 
   /**
    * Affiche score et réponse dans un Element (en virant l'éventuel contenu existant)
@@ -108,18 +108,18 @@
    * @param {string} baseUrl
    */
   emResult.showResult = function showResult(resultat, element, baseUrl) {
-    S.empty(element);
-    S.addText(element, getHtmlScore(resultat) +' ' +getHtmlReponse(resultat, baseUrl));
-  };
+    S.empty(element)
+    S.addText(element, getHtmlScore(resultat) +' ' +getHtmlReponse(resultat, baseUrl))
+  }
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
   if (typeof define === 'function') {
     define(emResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
-    module.exports = emResult;
+    module.exports = emResult
   } else {
-    if (!S.sesatheque) window.sesamath.sesatheque = {};
-    S.sesatheque.emResult = emResult;
+    if (!S.sesatheque) window.sesamath.sesatheque = {}
+    S.sesatheque.emResult = emResult
   }
 
-})();
+})()

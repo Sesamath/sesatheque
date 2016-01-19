@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test Mathgraph</title>
+</head>
+<body>
+Applet java :<br />
+<applet name="mtgApplet" height="450" width="600" code="mathgraph32.MtgFrame.class" archive="MathGraph32Applet.jar" codebase="http://www.mathgraph32.org/webstart/4.9.9/" >
+  <param value="orthonormalFrame" name="initialFigure">
+  <param value="true" name="allowLeftToolbar">
+  <param value="true" name="allowTopToolbar">
+  <param value="true" name="allowRightToolbar">
+  <param value="true" name="allowToolsChoice">
+  <param value="true" name="allowMenuBar">
+  <param value="true" name="allowFileMenu">
+  <param value="true" name="allowOptionsMenu">
+  <param value="true" name="language">
+  <param value="3" name="level">
+  Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur
+  <a href="http://www.java.com">java.com</a> pour installer java.
+</applet>
+<div>
+  <button id="mtgButton">Récupérer la figure</button>
+</div>
+<script type="application/javascript">
+  var mtgApplet = document.mtgApplet;
+  var mtgButton = document.getElementById("mtgButton");
+  window.addEventListener('click', function () {
+    alert("on récupère la figure" +mtgApplet.getScript());
+  })
+</script>
+</body>
+</html>

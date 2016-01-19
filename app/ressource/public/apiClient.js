@@ -172,7 +172,7 @@
   };
 
   // AMD
-  if (typeof define === 'function') define('apiClient', ['tools/xhr'], function (xhrTool) {
+  if (typeof define === 'function') define(['tools/xhr'], function (xhrTool) {
     xhr = xhrTool;
 
     return apiClient;

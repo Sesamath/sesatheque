@@ -21,7 +21,7 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
@@ -165,8 +165,8 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     // et on ajoute notre js qui les gère si on est sur du /public/
     if (context.request.originalUrl.indexOf("/public/") > -1) {
       if (!data.jsBloc) data.jsBloc = {$view:'js'}
-      if (!data.jsBloc.jsFiles) data.jsBloc.jsFiles = []
-      data.jsBloc.jsFiles.push("/refreshAuth.js")
+      if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ""
+      data.jsBloc.jsCode += 'require("page/refreshAuth")();'
     }
   }
 

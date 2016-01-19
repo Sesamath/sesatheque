@@ -21,7 +21,7 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
@@ -34,11 +34,11 @@
  */
 /*global window*/
 (function () {
-  "use strict";
+  "use strict"
 
   // vérif minimale du contexte
-  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
-  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html");
+  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
+  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
 
   /**
    * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
@@ -50,7 +50,7 @@
    * sesalab-front/source/services/formatter/index.js)
    * @module j3pResult
    */
-  var j3pResult = {};
+  var j3pResult = {}
 
   /**
    * Retourne le code html qui affiche le bilan (ici les carrés colorés)
@@ -60,25 +60,25 @@
    * @returns {string} Le code html
    */
   j3pResult.getHtmlReponse = function (resultat, baseUrl) {
-    var output,nbnoeuds,score;
+    var output,nbnoeuds,score
     console.log("resultat=",resultat)
     // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
    if ( resultat.contenu && resultat.contenu.score &&  resultat.contenu.score.length) {
-        output = "";
-        nbnoeuds = resultat.contenu.score.length;
+        output = ""
+        nbnoeuds = resultat.contenu.score.length
         for (var i = 0; i < nbnoeuds; i++) {
-            score=resultat.contenu.score[i];
-            output+="Nœud n°"+resultat.contenu.noeuds[i]+" : "+Math.round(100*score)+"<br>";
+            score=resultat.contenu.score[i]
+            output+="Nœud n°"+resultat.contenu.noeuds[i]+" : "+Math.round(100*score)+"<br>"
           }
           if(nbnoeuds>1)
-          output+="Vue graphique du parcours de l'élève (à venir)";
+          output+="Vue graphique du parcours de l'élève (à venir)"
     } else {
-      output = "pas de réponse";
+      output = "pas de réponse"
     }   
 
-    return output;
+    return output
     
-  };
+  }
 
   /**
    * Retourne le code html qui affiche le score (ici x/y en texte seul)
@@ -87,32 +87,32 @@
    * @returns {string} Le code html
    */
   j3pResult.getHtmlScore = function (resultat) {
-    var output,nbnoeuds,score;
+    var output,nbnoeuds,score
     console.log("resultat=",resultat)
     // pour j3p on s'attend à avoir 
    if ( resultat.contenu && resultat.contenu.score &&  resultat.contenu.score.length) {
-      score=0;
-      nbnoeuds = resultat.contenu.score.length;
+      score=0
+      nbnoeuds = resultat.contenu.score.length
       for (var i = 0; i < nbnoeuds; i++) {
-        score+=resultat.contenu.score[i];
+        score+=resultat.contenu.score[i]
       }
-      score=Math.round(100*score);
-      output = score +' % ';
+      score=Math.round(100*score)
+      output = score +' % '
     } else {
-      output = "pas de réponse ou réponse à un mauvais format";
+      output = "pas de réponse ou réponse à un mauvais format"
     }
-    return output;
-  };
+    return output
+  }
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
   if (typeof define === 'function') {
     define(j3pResult); // jshint ignore:line
   } else if (typeof module === 'object' && module.exports) {
-    module.exports = j3pResult;
+    module.exports = j3pResult
   } else {
-    if (typeof window.sesamath === "undefined") window.sesamath = {};
-    if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {};
-    window.sesamath.sesatheque.j3pResult = j3pResult;
+    if (typeof window.sesamath === "undefined") window.sesamath = {}
+    if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {}
+    window.sesamath.sesatheque.j3pResult = j3pResult
   }
 
-})();
+})()

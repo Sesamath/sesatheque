@@ -21,7 +21,7 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
@@ -53,16 +53,6 @@ var ressourceConfig = {
       mental: 'calcul mental',
       sequenceModele : 'modèle de séquence',
       url   : 'page externe'
-    },
-    /**
-     * types qui peuvent être utilisés pour une ressource perso (form de ressource/ajouter)
-     */
-    typePerso : {
-      ecjs : true,
-      iep  : true,
-      j3p  : true,
-      mathgraph : true,
-      url  : true
     },
     niveaux          : {
       11: 'CP',
@@ -178,6 +168,23 @@ var ressourceConfig = {
     mathgraph : true,
     mental: true,
     url   : true
+  },
+  /**
+   * types qui peuvent être utilisés pour une ressource perso (form de ressource/ajouter)
+   */
+  typePerso : {
+    ecjs : true,
+    iep  : true,
+    j3p  : true,
+    mathgraph : true,
+    url  : true
+  },
+
+  /**
+   * Les type qu'il faut toujours mettre en iframe (qui cassent les css s'ils sont embarqués dans un div d'une page)
+   */
+  typeIframe : {
+    j3p : true
   },
 
   /**

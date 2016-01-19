@@ -34,7 +34,7 @@
 var flow = require('an-flow')
 //var _ = require('lodash')
 
-var Alias = require('../../../../ressource/public/vendors/sesamath/Alias')
+var Alias = require('../../../../ressource/constructors/Alias')
 var configRessource = require('../../../../ressource/config')
 
 module.exports = function(job) {
