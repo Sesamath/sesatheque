@@ -41,7 +41,7 @@ var swfobject = window.swfobject
 
 /**
  * Charge un swf dans l'élément container
- * @memberOf tools/swf
+ * @memberOf display/swf
  * @param {Element}        container L'élément html dans lequel on ajoutera
  * @param {string}         swfHref   Le chemin vers le swf à charger
  * @param {swfloadOptions} [options] Des paramètres utilisés pour le chargement

@@ -701,24 +701,21 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   $views.getDefaultData = function (viewName) {
     var data = {
       $views : __dirname + '/../views',
-      $metas : {
-        // css ajouté par le listener à la fin, suivant la valeur de context.layout
-        js : ['/page.bundle.js']
-      }
+      // css ajouté par le listener à la fin, suivant la valeur de context.layout, js ci-dessous
+      $metas : {}
     }
-    // les js en plus suivant la vue
+    // les js différents suivant la vue
     if (viewName === "edit") {
-      data.$metas.js.push('/display.bundle.js')
-      data.$metas.js.push('/edit.bundle.js')
+      data.$metas.js = ['/edit.bundle.js']
     } else if (viewName === "display" || viewName === "preview") {
-      data.$metas.js.push('/display.bundle.js')
+      data.$metas.js = ['/display.bundle.js']
+    } else {
+      data.$metas.js = ['/page.bundle.js']
     }
     //if (viewName.substr(0, 1) !== "/") viewName = __dirname +"/../views/" +viewName
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view:viewName}
     else data.contentBloc = {$view:viewName}
-    // charge init et crée sesatheque.init en global
-    if (viewName === 'formEdit') data.$metas.js.push('/formEdit.js')
 
     return data
   }

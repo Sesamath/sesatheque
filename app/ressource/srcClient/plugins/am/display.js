@@ -34,7 +34,7 @@
 var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
-var swf = require('../../tools/swf')
+var swf = require('../../display/swf')
 
 /**
  * Plugin am pour les aides mathenpoche (animations flash, sans réponse de l'élève)
