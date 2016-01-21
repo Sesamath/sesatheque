@@ -157,12 +157,6 @@ try {
     if (name === 'session') require('./addMiddlewares')(rail)
   })
 
-  if (!isProd) {
-    sesatheque.controller(function () {
-      this.serve('doc', __dirname + '/../documentation');
-    });
-  }
-
   // pour sesalab-admin
   // utile aussi pour d'autres modules npm qui voudrait ajouter du app.service('$newService', function () {…})
   // ou app.controller('path', function () {this.get('path', function (context) {…} })

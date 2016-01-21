@@ -61,6 +61,9 @@ staticComponent.controller(function () {
  * En dev on ajoute des routes de debug
  */
 if (!isProd) {
+  staticComponent.controller(function () {
+    this.serve('doc', __dirname +'/../../documentation')
+  })
   staticComponent.controller('debug', function () {
     require('./controllerDebug')(this)
   })
