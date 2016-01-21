@@ -6,7 +6,7 @@
   "source"   : {
     "include":["./app", "./node_modules/sesatheque-client/index.js" ,"./README.md"],
     "includePattern": ".+\\.(js|md)$",
-    "excludePattern": "(node_modules|public|qxApps|.+\\.bak\\.js)"
+    "excludePattern": "(node_modules|public|srcClient|.+\\.bak\\.js|.+\\.bundle\\.js)"
   },
   "plugins"  : [
     "plugins/markdown",

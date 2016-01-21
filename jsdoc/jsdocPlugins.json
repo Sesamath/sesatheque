@@ -4,7 +4,10 @@
     "allowUnknownTags": true
   },
   "source"   : {
-    "include": ["./app/_typedef.doc.js", "./app/ressource/public", "./app/ressource/public/plugins/README.md"]
+    "includeIgnored": ["./app/_typedef.doc.js", "./app/ressource/srcClient", "./app/ressource/srcClient/plugins/README.md"],
+    "include": ["./app/ressource/srcClient"],
+    "includePattern": ".+\\.(js|md)$",
+    "excludePattern": "(.+\\.bak\\.js|.+\\.bundle\\.js)"
   },
   "plugins"  : [
     "plugins/markdown",
