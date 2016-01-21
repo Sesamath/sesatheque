@@ -27,7 +27,8 @@ var config = {
         'edit.bundle.js': [srcs+'tools/*', srcs+'page/*', srcs+'display/*', srcs+'plugins/*/display*', srcs+'edit/*', srcs+'plugins/*/edit*', srcs+'editors/**'],
         // un module à utiliser à distance pour l'api
         'apiClient.bundle.js' : [srcs+'tools/xhr.js', srcs+'tools/log.js', srcs+"apiClient.js"],
-        // et son copain qui fait tout (api + display)
+        // et son copain qui fait tout (api + display), avec head et swfobject mais sans jQuery qui devra donc être chargé séparément
+        // (faudrait dedans revoir le code pour l'avoir en module)
         'remote.bundle.js' : [srcs+'tools/*', srcs+'page/*', srcs+"apiClient.js", srcs+'display/*', srcs+'plugins/*/display*']
       }
     }
@@ -46,7 +47,7 @@ var config = {
         "echo '" +headPreserveCode +"' >> app/ressource/public/page.bundle.js",
         "cat " +head +" " +jQuery +" " +swfobject +">> app/ressource/public/display.bundle.js",
         "cat " +head +" " +jQuery +" " +swfobject +">> app/ressource/public/edit.bundle.js",
-        "cat " +head +" " +jQuery +" " +swfobject +">> app/ressource/public/remote.bundle.js",
+        "cat " +head +" " +swfobject +">> app/ressource/public/remote.bundle.js",
         "echo '" +headPreserveCode +"' >> app/ressource/public/remote.bundle.js"
         /* */
     ],
