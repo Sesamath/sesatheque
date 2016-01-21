@@ -41,7 +41,7 @@ var ressOid
 
 /**
  * Affiche une ressource am (aides mathenpoche : animations flash, sans réponse de l'élève)
- * @module plugins/am/display
+ * @service plugins/am/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)

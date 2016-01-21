@@ -38,6 +38,7 @@ var isLoaded
 
 /**
  * Affiche une ressource iep (animation instrumenpoche)
+ * @service plugins/iep/display
  * @param {Ressource}      ressource  L'objet ressource (une ressource iep a en parametres soit une propriété url
  *                                      avec l'url du xml soit une propriété xml avec la string xml)
  * @param {displayOptions} options    Les options après init

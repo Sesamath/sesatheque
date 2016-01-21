@@ -34,9 +34,18 @@
  * (page.init et ajouter des comportements de modif dynamique du form)
  */
 "use strict"
-var page = require('../page')
-var $ = window.jQuery
 
+var page = require('../page')
+
+var $ = window.jQuery /* jshint jquery:true */
+
+/**
+ * Ajoute des comportement aux éléments du formulaire d'édition de ressource
+ * (change parametres|enfants en fonction du type)
+ * @service edit/init
+ * @param options
+ * @param next
+ */
 module.exports = function (options, next) {
   page.init(options)
   /**

@@ -38,7 +38,7 @@ var jstreeConverter = require('../../display/jstreeConverter')
 
 /**
  * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles
- * @module plugins/arbre/display
+ * @service plugins/arbre/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)

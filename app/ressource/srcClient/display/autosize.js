@@ -31,13 +31,9 @@
 
 "use strict"
 
-/**
- */
-
-var dom = require('../../tools/dom')
+//var dom = require('../../tools/dom')
 var log = require('../../tools/log')
-var $ = window.jQuery
-/* jshint jquery:true */
+var $ = window.jQuery /* jshint jquery:true */
 
 var $blocsH, $blocsW, $target
 var offsetHeight = 0,
@@ -46,13 +42,34 @@ var offsetHeight = 0,
     minWidth = 400
 
 /**
- * Initialise nos variables, appelle resize et le colle comme comportement au resize de la fenêtre
- * @module display/autosize
- * @param {string}   targetId
- * @param {string[]} hBlocIds
- * @param {string[]} wBlocIds
+ * Modifie la taille de l'iframe pour lui donner tout l'espace restant de container
  */
-function autosize(targetId, hBlocIds, wBlocIds, options) {
+function resize() {
+  var occupe = offsetHeight, tailleDispo
+  // hauteur
+  if ($blocsH) $blocsH.forEach(function ($bloc) { occupe += $bloc.outerHeight(true) })
+  tailleDispo = Math.floor(window.innerHeight - occupe)
+  if (tailleDispo < minHeight) tailleDispo = minHeight
+  log('resize height à ' + tailleDispo)
+  $target.css("height", tailleDispo + 'px')
+
+  // largeur
+  occupe = offsetWidth
+  if ($blocsW) $blocsW.forEach(function ($bloc) { occupe += $bloc.outerWidth(true) })
+  tailleDispo = Math.floor(window.innerWidth - occupe)
+  if (tailleDispo < minWidth) tailleDispo = minWidth
+  log('resize width à ' + tailleDispo)
+  $target.css("width", tailleDispo + 'px')
+}
+
+/**
+ * Affecte un comportement de redimensionnement automatique à un élément
+ * @service display/autosize
+ * @param {string}   targetId L'id html du bloc que l'on veut maximiser automatiquement
+ * @param {string[]} hBlocIds Liste des ids de bloc dont il faut déduire la hauteur
+ * @param {string[]} wBlocIds Liste des ids de bloc dont il faut déduire la largeur
+ */
+module.exports = function autosize(targetId, hBlocIds, wBlocIds, options) {
   // on initialise dès que jQuery est prêt
   $(function () {
     $target = $("#" +targetId)
@@ -79,26 +96,3 @@ function autosize(targetId, hBlocIds, wBlocIds, options) {
     $(window).resize(resize)
   })
 }
-
-/**
- * Modifie la taille de l'iframe pour lui donner tout l'espace restant de container
- */
-function resize() {
-  var occupe = offsetHeight, tailleDispo
-  // hauteur
-  if ($blocsH) $blocsH.forEach(function ($bloc) { occupe += $bloc.outerHeight(true) })
-  tailleDispo = Math.floor(window.innerHeight - occupe)
-  if (tailleDispo < minHeight) tailleDispo = minHeight
-  log('resize height à ' + tailleDispo)
-  $target.css("height", tailleDispo + 'px')
-
-  // largeur
-  occupe = offsetWidth
-  if ($blocsW) $blocsW.forEach(function ($bloc) { occupe += $bloc.outerWidth(true) })
-  tailleDispo = Math.floor(window.innerWidth - occupe)
-  if (tailleDispo < minWidth) tailleDispo = minWidth
-  log('resize width à ' + tailleDispo)
-  $target.css("width", tailleDispo + 'px')
-}
-
-module.exports = autosize

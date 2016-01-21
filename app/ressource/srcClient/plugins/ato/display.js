@@ -39,7 +39,7 @@ var isLoaded
 
 /**
  * Affiche une ressource ato
- * @module plugins/ato/display
+ * @service plugins/ato/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'atome sera chargé (sans argument ou avec une erreur)

@@ -35,7 +35,7 @@ var jsonMulti = require('../../editors/jsonMulti')
 
 /**
  * Édite les paramètres d'une ressource ec2
- * @module plugins/ec2/edit
+ * @service plugins/ec2/edit
  * @param ressource
  * @param options
  */

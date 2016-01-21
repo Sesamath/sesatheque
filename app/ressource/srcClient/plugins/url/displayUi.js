@@ -42,7 +42,7 @@ var $ = window.jQuery /*jshint jquery:true*/
 
 /**
  * Retourne une seule fonction qui affectera les comportements de l'interface avec la gestion des étapes pour les ressources url
- * @service urlUi
+ * @service plugins/url/displayUi
  * @param {Ressource}      ressource
  * @param {displayOptions} options
  * @param {errorCallback}  next

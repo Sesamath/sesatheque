@@ -40,6 +40,7 @@ var $ = window.jQuery
 
 /**
  * Édite les paramètres d'une ressource iep
+ * @service plugins/iep/edit
  */
 module.exports = function edit(ressource) {
   function importXml() {

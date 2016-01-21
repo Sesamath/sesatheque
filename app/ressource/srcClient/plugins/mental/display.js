@@ -562,6 +562,7 @@ var histoReponses = []
  * avec param en json, mais dans parametres.xml (sic)
  * qui permettent de générer un xml ici avec l'aléatoire paramétré
  * ex 36162 36248 36404 40141 (pris au hasard dans les ressources persos de profs)
+ * @service plugins/mental/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé

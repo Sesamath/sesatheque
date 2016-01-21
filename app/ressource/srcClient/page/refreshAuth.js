@@ -28,12 +28,8 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
-/**
- * Met à jour l'affichage sur les pages publiques (vérifie si on est authentifié pour ajouter les infos et les boutons qui vont bien)
- * Auto-exécuté au chargement
- */
 "use strict"
+
 var dom = require('../tools/dom')
 var log = require('../tools/log')
 var xhr = require('../tools/xhr')
@@ -62,7 +58,11 @@ function addLink(parent, link) {
   parent.appendChild(li)
 }
 
-
+/**
+ * Met à jour l'affichage des infos du user sur les pages publiques (dont le source est en cache, en version non authentifié)
+ * (vérifie si on est authentifié avec un appel ajax, pour ajouter les infos et les boutons qui vont bien)
+ * @service page/refreshAuth
+ */
 module.exports = function () {
   if (window.location.pathname.indexOf("/public/") > -1) {
     var url = "/api/auth"

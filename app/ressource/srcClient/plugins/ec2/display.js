@@ -38,7 +38,7 @@ var swf = require('../../display/swf')
 
 /**
  * Affiche la ressource ec2 (exercices calculatice en flash)
- * @module plugins/ec2/display
+ * @service plugins/ec2/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Possibilité de passer ec2Base pour modifier http://ressources.sesamath.net/replication_calculatice/flash
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé

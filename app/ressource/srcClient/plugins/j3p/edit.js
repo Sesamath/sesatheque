@@ -30,19 +30,12 @@
  */
 "use strict"
 
-/**
- * @file Édite une ressource j3p, en filant la ressource à j3p:/editgraphes/lanceur_graphique.html?callback=initEditJ3p en iframe
- * qui rappellera initEditJ3p(initCallback) quand il sera chargé pour qu'on lui renvoie les params avec
- * initCallback(ressource, resultatCallback)
- */
-
 var page = require('../../page')
 var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
-var $ = window.jQuery
-/* jshint jquery:true */
+var $ = window.jQuery /* jshint jquery:true */
 
 /**
  * Ajoute l'iframe d'editgraphe
@@ -205,6 +198,16 @@ var $editgraphe,                 // iframe
     $textarea
 var wd = window.document
 
+/**
+ * Édite une ressource j3p
+ * Donne la ressource à j3p:/editgraphes/lanceur_graphique.html?callback=initEditJ3p en iframe
+ * (en passant par du postMessage pour communiquer avec l'iframe)
+ * qui rappellera initEditJ3p(initCallback) quand il sera chargé pour qu'on lui renvoie les params avec
+ * initCallback(ressource, resultatCallback)
+ * @service plugins/j3p/edit
+ * @param ressource
+ * @param options
+ */
 module.exports = function edit(ressource, options) {
   try {
     if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")

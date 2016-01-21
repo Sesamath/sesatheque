@@ -33,15 +33,10 @@ var page = require('../page')
 //var dom = require('../tools/dom')
 var log = require('../tools/log')
 
-/**
- * @file Un module js pour charger un swf dans un container, utilisé par plusieurs plugins de ressources, 
- * utilise swfobject mis en global
- */
 var swfobject = window.swfobject
 
 /**
  * Charge un swf dans l'élément container
- * @memberOf display/swf
  * @param {Element}        container L'élément html dans lequel on ajoutera
  * @param {string}         swfHref   Le chemin vers le swf à charger
  * @param {swfloadOptions} [options] Des paramètres utilisés pour le chargement
@@ -103,7 +98,10 @@ function load(container, swfHref, options, next) {
   swfobject.embedSWF(swfHref, divId, largeur, hauteur, flashversion, null, flashvars, swfParams, swfAttributes, callbackFn)
 }
 
-module.exports = {load}
+/**
+ * @file Un module js pour charger un swf dans un container, utilisé par plusieurs plugins de ressources (utilise swfobject)
+ */
+module.exports = {load:load}
 
 /**
  * @typedef swfloadOptions

@@ -186,6 +186,11 @@ function addTextarea(parent, attrs, options) {
   return dom.addElement(container, 'textarea', attrs, options.content || "")
 }
 
+/**
+ * Propose des méthodes pour ajouter des widgets dans une page d'édition de ressource
+ * @service edit/formEditor
+ * @type {{addCheckboxes: edit.addCheckboxes, addElement: edit.addElement, addFormGroup: edit.addFormGroup, addInputText: edit.addInputText, addSelect: edit.addSelect, addTextarea: edit.addTextarea}}
+ */
 module.exports = {
   addCheckboxes: addCheckboxes,
   addElement   : addElement,

@@ -42,7 +42,7 @@ var histoReponses = []
 
 /**
  * Affiche une ressource calkc
- * @module plugins/calkc/display
+ * @service plugins/calkc/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé

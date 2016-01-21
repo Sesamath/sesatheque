@@ -41,6 +41,7 @@ var isLoaded, lastResult
 
 /**
  * afficher les ressource em (exercices mathenpoche, en flash)
+ * @service plugins/em/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé

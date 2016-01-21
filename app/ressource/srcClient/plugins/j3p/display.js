@@ -40,7 +40,7 @@ var urlBaseJ3p = "http://j3p.sesamath.net"
 
 /**
  * Affiche la ressource dans l'élément d'id mepRess
- * @module plugins/j3p/display
+ * @service plugins/j3p/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé

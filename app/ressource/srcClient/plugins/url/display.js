@@ -161,6 +161,7 @@ var container, errorsContainer, isBasic, ressId, resultatCallback, isLoaded
 
 /**
  * Affiche les ressources de type url (page externe) en créant une iframe dans le container (ou un div si l'url est un swf)
+ * @service plugins/url/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé

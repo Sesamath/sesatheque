@@ -47,7 +47,7 @@ var externalModules = {
   jquery18: '/vendor/jquery/jquery-1.8.3.min',
   jqueryUi: '/vendor/jqueryUi/1.11.1/jquery-ui.min',
   jqueryUiDialog: '/vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
-  jsoneditor : '/vendor/jsoneditor/dist/jsoneditor.min',
+  jsoneditor : '/vendor/jsoneditor/dist/jsoneditor.min.js',
   jstree: '/vendor/jstree/dist/jstree.min.js',
   lodash: '/vendor/lodash/lodash.min',
   mathjax: '/vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
@@ -179,7 +179,7 @@ function setBase(newBase) {
 
 /**
  * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
- * @module page
+ * @service page
  */
 module.exports = {addError, hideTitle, init, loadAsync, setBase}
 

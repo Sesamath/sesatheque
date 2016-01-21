@@ -165,6 +165,7 @@ var isLoaded
 /**
  * Affiche une ressource mathgraph, avec l'applet java ou le lecteur js (suivant paramétrage de la ressource)
  * On peut forcer le js en précisant ?js=1 dans l'url
+ * @service plugins/mathgraph/display
  * @param {Ressource}      ressource  L'objet ressource (une ressource mathgraph a en parametres soit une propriété url
  *                                      avec l'url du xml soit une propriété xml avec la string xml)
  * @param {displayOptions} options    Les options après init

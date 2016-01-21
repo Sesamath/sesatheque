@@ -1,5 +1,6 @@
 var src = 'app/ressource/srcClient'
 var srcs = src +'/'
+var constructors = 'app/ressource/constructors/'
 //var checkCode = 'if (typeof require === "undefined") throw new Error("Il faut charger page.bundle.js avant ce fichier");'
 // ces fichiers sont pas ajoutés car dans le dossier vendor de bower, on les ajoutera en after-brunch, ou on vire conventions.ignored
 var head = 'app/static/public/vendor/headjs/dist/1.0.0/head.load.min.js'
@@ -22,7 +23,7 @@ var config = {
         // la base avec headjs (doit être chargé par tous)
         'page.bundle.js': [srcs+'tools/*', srcs+'page/*'],
         // les modules d'affichage, avec jQuery mais pas jQueryUi (qui sera chargé en async pour l'édition d'arbre)
-        'display.bundle.js': [srcs+'tools/*', srcs+'page/*', srcs+'display/*', srcs+'plugins/*/display*'],
+        'display.bundle.js': [srcs+'tools/*', srcs+'page/*', srcs+'display/*', srcs+'plugins/*/display*', constructors+'Resultat'],
         // les modules d'édition
         'edit.bundle.js': [srcs+'tools/*', srcs+'page/*', srcs+'display/*', srcs+'plugins/*/display*', srcs+'edit/*', srcs+'plugins/*/edit*', srcs+'editors/**'],
         // un module à utiliser à distance pour l'api

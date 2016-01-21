@@ -163,6 +163,7 @@ var typesEc = ["addiclic",
 
 /**
  * Édite une ressource ecjs
+ * @service plugins/ecjs/edit
  * @param ressource
  * @param options
  */

@@ -58,7 +58,7 @@ var startDate
  * Module d'une seule fonction pour afficher une ressource quelconque.
  * Il chargera le bon afficheur en lui passant les options attendues,
  * en créant si besoin les contereurs dans le dom courant, avec un appel de page.init(options).
- * @module display
+ * @service display
  * @param {Ressource}     ressource La ressource à afficher
  * @param {initOptions}   [options] Les options éventuelles (passer base si ce js est chargé sur un autre domaine)
  * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
@@ -66,6 +66,7 @@ var startDate
 function display(ressource, options, next) {
   /**
    * Fait le chargement proprement dit après l'init
+   * @private
    * @param {Error} [error] Une erreur éventuelle à l'init
    */
   function load(error) {

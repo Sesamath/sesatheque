@@ -158,6 +158,11 @@ var allowDef = {
 // c'est cet écouteur que l'on va modifier si besoin
 var submitHandler = onSubmitTrue
 
+/**
+ * Edite une ressource mathgraph
+ * @service plugins/mathgraph/edit
+ * @param {Ressource} ressource
+ */
 module.exports = function mathgraphEdit(ressource) {
   try {
     if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")

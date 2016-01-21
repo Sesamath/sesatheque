@@ -38,7 +38,7 @@ var baseCollDoc = "http://ressources.sesamath.net"
 
 /**
  * Affiche la ressource coll_doc (atome de manuel ou cahier)
- * @module plugins/coll_doc/display
+ * @service plugins/coll_doc/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  [next]     La fct à appeler quand le contenu sera chargé (sans argument ou avec une erreur)

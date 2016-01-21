@@ -31,11 +31,11 @@
 /*global alert*/
 'use strict'
 
-// jsoneditor a une dépendance à jquery
-var $ = window.jQuery
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var page = require('../../page')
+
+var $ = window.jQuery /* jshint jquery:true */
 
 /**
  * Ajoute les liens pour changer d'éditeur
@@ -95,15 +95,17 @@ function initJsonEditor(next) {
   try {
     if (typeof isJseLoaded === "undefined") {
       isJseLoaded = false; // en cours
-      System.import('/vendor/jsoneditor').then(JSONEditor => {
-        if (!JSONEditor) throw new Error('Problème de chargement de jsoneditor')
-        dom.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css')
-        jsonEditor = new JSONEditor(jsonEditorDiv)
-        isJseLoaded = true
-        next()
-      }).catch(error => {
-        log.error(error)
-        throw new Error('Problème de chargement de jsoneditor')
+      page.loadAsync('jsoneditor', function () {
+        try {
+          var JSONEditor = require('JSONEditor')
+          jsonEditor = new JSONEditor(jsonEditorDiv)
+          dom.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css')
+          isJseLoaded = true
+          next()
+        } catch (error) {
+          log.error(error)
+          throw new Error('Problème de chargement de jsoneditor')
+        }
       })
     } else if (isJseLoaded === false) {
       alert("Le chargement de jsoneditor est déjà en cours")

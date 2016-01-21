@@ -40,7 +40,6 @@ var wd = window.document
 
 /**
  * Notre module pour toutes nos fonctions génériques
- * @module sesamath
  */
 var dom = {}
 

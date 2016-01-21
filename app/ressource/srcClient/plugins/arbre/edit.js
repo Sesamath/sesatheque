@@ -40,7 +40,7 @@ var jstreeConverter = require('../../display/jstreeConverter')
 
 /**
  * Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
- * @module plugins/arbre/edit
+ * @service plugins/arbre/edit
  * @param arbre
  * @param options
  */

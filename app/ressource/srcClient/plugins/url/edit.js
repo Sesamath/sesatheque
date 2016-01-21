@@ -44,6 +44,9 @@ var $ = window.jQuery /* jshint jquery:true */
  * consigne        La consigne
  * answer_option   Les options de la réponse after|off|question|while
  * answer_editor   Quel type d'éditeur pour la réponse (textarea, ckeditor, ckeditorTex), cette propriété n'existait pas dans labomep1
+ * @service plugins/url/edit
+ * @param ressource
+ * @param options
  */
 module.exports = function edit(ressource, options) {
   /**

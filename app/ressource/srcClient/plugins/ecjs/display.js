@@ -38,7 +38,7 @@ var log = require('../../tools/log')
 /**
  * Affiche les ressources ecjs (exercices calculatice en javascript)
  * inspiré de http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/
- * @module plugins/ecjs/display
+ * @service plugins/ecjs/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Possibilité de passer ecjsBase pour modifier http://ressources.sesamath.net/replication_calculatice/javascript
  * @param {errorCallback}  [next]     La fct à appeler quand le swf sera chargé

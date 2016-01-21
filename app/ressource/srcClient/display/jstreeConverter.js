@@ -30,10 +30,9 @@
  */
 'use strict'
 
+var log = require('../tools/log')
+
 var baseUrl
-if (typeof log === "undefined") {
-  var log = require('../tools/log')
-}
 
 /**
  * Retourne les datas qui nous intéressent à mettre sur le tag a
@@ -233,6 +232,10 @@ function toRef(node, jstree) {
   return item
 }
 
+/**
+ * Exporte des méthodes pour convertir ou manipuler des jstree
+ * @service display/jstreeConverter
+ */
 var jstreeConverter = {
   getJstNode: getJstNode,
   getEnfants: getEnfants,
