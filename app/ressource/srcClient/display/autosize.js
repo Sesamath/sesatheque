@@ -31,6 +31,9 @@
 
 "use strict"
 
+/**
+ */
+
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var $ = window.jQuery
@@ -44,7 +47,7 @@ var offsetHeight = 0,
 
 /**
  * Initialise nos variables, appelle resize et le colle comme comportement au resize de la fenêtre
- *
+ * @module display/autosize
  * @param {string}   targetId
  * @param {string[]} hBlocIds
  * @param {string[]} wBlocIds

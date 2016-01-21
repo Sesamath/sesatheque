@@ -36,32 +36,18 @@ var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var swf = require('../../display/swf')
 
+var isLoaded
+var ressOid
+
 /**
- * Plugin am pour les aides mathenpoche (animations flash, sans réponse de l'élève)
- * dom'il est appelé directement sans passer par le module display, il faut appeler init avant
- * @plugin am
+ * Affiche une ressource am (aides mathenpoche : animations flash, sans réponse de l'élève)
+ * @module plugins/am/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
  */
-var am = {}
-
-try {
-
-
-  /**
-   * Le moment où la ressource a été chargée
-   * @private
-   */
-  var isLoaded
-
-  var ressOid
-
-  /**
-   * Affiche une ressource am
-   * @memberOf am
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
-   */
-  am.display = function (ressource, options, next) {
+module.exports = function display(ressource, options, next) {
+  try {
     var baseSwf, swfUrl, swfOpt
     var container = options.container
     if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
@@ -111,16 +97,15 @@ try {
       hauteur: 450
     }
     swf.load(container, swfUrl, swfOpt, function (error) {
-      if (error) next(error)
-      else {
+      if (error) {
+        next(error)
+      } else {
         isLoaded = true
         next()
       }
     })
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = am

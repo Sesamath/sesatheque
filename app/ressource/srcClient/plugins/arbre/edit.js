@@ -31,10 +31,6 @@
 
 "use strict"
 
-/**
- * @file Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
- */
-
 var page = require('../../page')
 var tools = require('../../tools')
 var dom = require('../../tools/dom')
@@ -42,7 +38,13 @@ var log = require('../../tools/log')
 var display = require('../../display')
 var jstreeConverter = require('../../display/jstreeConverter')
 
-module.exports = function arbreEdit(arbre, options) {
+/**
+ * Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
+ * @module plugins/arbre/edit
+ * @param arbre
+ * @param options
+ */
+module.exports = function edit(arbre, options) {
   try {
     page.loadAsync(['apiClient'], function () {
       var apiClient = require('apiClient')

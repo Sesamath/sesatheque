@@ -37,22 +37,14 @@ var log = require('../../tools/log')
 var swf = require('../../display/swf')
 
 /**
- * Module pour afficher les ressources ec2 (exercices calculatice en flash)
- * @plugin ec2
+ * Affiche la ressource ec2 (exercices calculatice en flash)
+ * @module plugins/ec2/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Possibilité de passer ec2Base pour modifier http://ressources.sesamath.net/replication_calculatice/flash
+ * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-var ec2 = {}
-
-try {
-  // charger_options et enregistrer_score exportées dans le dom global par display
-
-  /**
-   * Affiche la ressource dans l'élément d'id mepRess
-   * @memberOf ec2
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Possibilité de passer ec2Base pour modifier http://ressources.sesamath.net/replication_calculatice/flash
-   * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
-   */
-  ec2.display = function (ressource, options, next) {
+module.exports = function display(ressource, options, next) {
+  try {
     var ec2Base = tools.getURLParameter("ec2Base") || options.ec2Base || "http://ressources.sesamath.net/replication_calculatice/flash"
     var swfUrl
 
@@ -94,10 +86,9 @@ try {
     }
 
     swf.load(options.container, swfUrl, swfOptions, next)
+
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = ec2

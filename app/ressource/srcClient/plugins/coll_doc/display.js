@@ -29,6 +29,7 @@
  * pour une explication en français)
  */
 'use strict'
+
 var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
@@ -36,20 +37,14 @@ var log = require('../../tools/log')
 var baseCollDoc = "http://ressources.sesamath.net"
 
 /**
- * module pour afficher les ressources coll_doc (atome de manuel ou cahier)
- * @plugin coll_doc
+ * Affiche la ressource coll_doc (atome de manuel ou cahier)
+ * @module plugins/coll_doc/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  [next]     La fct à appeler quand le contenu sera chargé (sans argument ou avec une erreur)
  */
-var coll_doc = {}
-
-try {
-  /**
-   * Affiche la ressource dans l'élément d'id mepRess
-   * @memberOf coll_doc
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé (sans argument ou avec une erreur)
-   */
-  coll_doc.display = function (ressource, options, next) {
+module.exports = function display(ressource, options, next) {
+  try {
     var container = options.container
     if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
 
@@ -102,10 +97,8 @@ try {
       })
       next()
     }
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = coll_doc

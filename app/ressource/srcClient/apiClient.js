@@ -33,6 +33,11 @@
 var xhr = require('./tools/xhr')
 
 /**
+ * Une fonction qui prend une base de sésathèque et renvoie un client dessus
+ * @module apiClient
+ */
+
+/**
  * Ajoute les propriétés xxxUrl et public
  * @private
  * @param {Ressource} ressource
@@ -124,7 +129,7 @@ var base
 var stClient = {
   /**
    * Récupère une ressource sur la bibliothèque en ajax sous forme d'alias
-   * @memberOf apiClient
+   * @memberOf stClient
    * @param {Integer|string}    id   peut être un oid de la sesatheque ou origine/idOrigine
    * @param {ressourceCallback} next
    */
@@ -135,7 +140,7 @@ var stClient = {
   },
   /**
    * Récupère une ressource sur la bibliothèque en ajax
-   * @memberOf apiClient
+   * @memberOf stClient
    * @param {Integer|string}    id       peut être un oid de la sesatheque ou origine/idOrigine
    * @param {string}            [format] alias|compact
    * @param {ressourceCallback} next
@@ -153,7 +158,7 @@ var stClient = {
   },
   /**
    * Enregistre une ressource sur la bibliotheque
-   * @memberOf apiClient
+   * @memberOf stClient
    * @param {Ressource}         ressource
    * @param {ressourceCallback} next
    */

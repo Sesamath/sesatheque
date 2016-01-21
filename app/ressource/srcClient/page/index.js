@@ -41,19 +41,19 @@ var wd = window.document
  * on garde ici un mapping vers les modules tiers que l'on utilise
  */
 var externalModules = {
-  ckeditor: '/vendors/ckeditor/ckeditor',
-  ckeditorJquery : '/vendors/ckeditor/adapters/jquery',
-  jquery: '/vendors/jquery/jquery-1.11.3.min',
-  jquery18: '/vendors/jquery/jquery-1.8.3.min',
-  jqueryUi: '/vendors/jqueryUi/1.11.1/jquery-ui.min',
-  jqueryUiDialog: '/vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
-  jsoneditor : '/vendors/jsoneditor/dist/jsoneditor.min',
-  jstree: '/vendors/jstree/dist/jstree.min',
-  lodash: '/vendors/lodash/lodash.min',
-  mathjax: '/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
-  mathquill: '/vendors/mathquill-0.9.4/mathquill.min',
-  pluginDetect : '/vendors/pluginDetect/javaFlashDetect.min.js',
-  swfobject: '/vendors/swfobject/swfobject.2.3'
+  ckeditor: '/vendor/ckeditor/ckeditor',
+  ckeditorJquery : '/vendor/ckeditor/adapters/jquery',
+  jquery: '/vendor/jquery/jquery-1.11.3.min',
+  jquery18: '/vendor/jquery/jquery-1.8.3.min',
+  jqueryUi: '/vendor/jqueryUi/1.11.1/jquery-ui.min',
+  jqueryUiDialog: '/vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
+  jsoneditor : '/vendor/jsoneditor/dist/jsoneditor.min',
+  jstree: '/vendor/jstree/dist/jstree.min.js',
+  lodash: '/vendor/lodash/lodash.min',
+  mathjax: '/vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
+  mathquill: '/vendor/mathquill-0.9.4/mathquill.min',
+  pluginDetect : '/vendor/pluginDetect/javaFlashDetect.min.js',
+  swfobject: '/vendor/swfobject/swfobject.2.3'
 }
 
 var base = '/'

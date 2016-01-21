@@ -30,25 +30,22 @@
  */
 "use strict"
 
+var page = require('../../page')
+var dom = require('../../tools/dom')
+var log = require('../../tools/log')
+var multiEditor = require('../../editors/multiEditor')
+
+var $ = window.jQuery /* jshint jquery:true */
+
 /**
- * @file Édite une ressource url
- * Ses parametres ont les propriétés
+ * Édite une ressource url, ses parametres ont les propriétés
  * adresse : l'url à afficher
  * question_option Les options de la consigne after|before|off|while
  * consigne        La consigne
  * answer_option   Les options de la réponse after|off|question|while
  * answer_editor   Quel type d'éditeur pour la réponse (textarea, ckeditor, ckeditorTex), cette propriété n'existait pas dans labomep1
  */
-
-var page = require('../../page')
-var dom = require('../../tools/dom')
-var log = require('../../tools/log')
-var $ = window.jQuery
-/* jshint jquery:true */
-
-var multiEditor = require('../../editors/multiEditor')
-
-module.exports = function urlEdit(ressource, options) {
+module.exports = function edit(ressource, options) {
   /**
    * Vérifie que l'adresse est correctement formatée et n'est pas un domaine interdit, ajoute éventuellement http://
    */

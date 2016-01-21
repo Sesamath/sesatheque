@@ -40,6 +40,7 @@ var page = require('../../page')
 var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
+
 var $ = window.jQuery
 /* jshint jquery:true */
 
@@ -196,20 +197,16 @@ function saveParametres(parametres, next) {
     if (next) next()
   }, 0)
 }
-try {
-  /**
-   * MAIN
-   */
-  if (typeof $ === 'undefined') throw new Error('Problème de chargement jQuery')
 
-  var $editgraphe,                 // iframe
-      egWindow,
-      isSaveAndSubmitDone = false, // on a envoyé le postMessage
-      isSubmitForced = false,      // pour forcer le submit, postMessage fait ou pas
-      $textarea
-  var wd = window.document
+var $editgraphe,                 // iframe
+    egWindow,
+    isSaveAndSubmitDone = false, // on a envoyé le postMessage
+    isSubmitForced = false,      // pour forcer le submit, postMessage fait ou pas
+    $textarea
+var wd = window.document
 
-  module.exports = function j3pEdit(ressource, options) {
+module.exports = function edit(ressource, options) {
+  try {
     if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
     var textarea = wd.getElementById('parametres')
     if (!textarea) throw new Error("Pas de textarea #parametres trouvé dans cette page")
@@ -228,8 +225,8 @@ try {
       $textarea.before(dom.getElement("a", {href:"?editor=graphic"}, "mode graphique (sauvegarder les modifications avant)"))
       $textarea.before(dom.getElement("br"))
     }
+
+  } catch (error) {
+    page.addError(error)
   }
-    
-} catch (error) {
-  page.addError(error)
 }

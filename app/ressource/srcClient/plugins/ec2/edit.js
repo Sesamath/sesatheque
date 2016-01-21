@@ -28,14 +28,18 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+"use strict"
 
-/**
- * @file Édite les paramètres d'une ressource ec2
- */
 var page = require('../../page')
 var jsonMulti = require('../../editors/jsonMulti')
 
-module.exports = function ec2Edit(ressource, options) {
+/**
+ * Édite les paramètres d'une ressource ec2
+ * @module plugins/ec2/edit
+ * @param ressource
+ * @param options
+ */
+module.exports = function edit(ressource, options) {
   try {
     if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
     var textarea = window.document.getElementById('parametres')

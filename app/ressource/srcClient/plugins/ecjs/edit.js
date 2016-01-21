@@ -33,7 +33,6 @@
 var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
-var $ = window.jQuery
 var display = require('./display')
 
 function addSelect(ressource, options) {
@@ -105,20 +104,9 @@ function displayEcOptions(ressource, options) {
   })
 }
 
-function ecJsEdit(ressource, options) {
-  if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
-  var textarea = window.document.getElementById('parametres')
-  if (!textarea) throw new Error("Pas de textarea #parametres trouvé dans cette page")
-  $textarea = $(textarea)
-  log("les options dans ecjs/edit.init", options)
-  if (ressource.parametres.fichierjs) {
-    displayEcOptions(ressource, options)
-  } else {
-    addSelect(ressource, options)
-  }
-}
-
+var $ = window.jQuery
 /* jshint jquery:true */
+
 var $textarea
 
 // récupérer cette liste avec (sur le site ressources)
@@ -173,4 +161,20 @@ var typesEc = ["addiclic",
   "viaduc"
 ]
 
-module.exports = ecJsEdit
+/**
+ * Édite une ressource ecjs
+ * @param ressource
+ * @param options
+ */
+module.exports = function edit(ressource, options) {
+  if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
+  var textarea = window.document.getElementById('parametres')
+  if (!textarea) throw new Error("Pas de textarea #parametres trouvé dans cette page")
+  $textarea = $(textarea)
+  log("les options dans ecjs/edit.init", options)
+  if (ressource.parametres.fichierjs) {
+    displayEcOptions(ressource, options)
+  } else {
+    addSelect(ressource, options)
+  }
+}

@@ -33,9 +33,9 @@
 
 // jsoneditor a une dépendance à jquery
 var $ = window.jQuery
-var dom = require('tools/dom')
-var log = require('tools/log')
-var page = require('page')
+var dom = require('../../tools/dom')
+var log = require('../../tools/log')
+var page = require('../../page')
 
 /**
  * Ajoute les liens pour changer d'éditeur

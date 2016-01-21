@@ -35,24 +35,23 @@ var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
+var isLoaded
+
 /**
- * module pour afficher les ressources ato (atome de manuel ou cahier)
- * @plugin ato
+ * Affiche une ressource ato
+ * @module plugins/ato/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  next       La fct à appeler quand l'atome sera chargé (sans argument ou avec une erreur)
  */
-var ato = {}
+module.exports = function display(ressource, options, next) {
 
-try {
-  // Le moment où ce module a été chargé dans le navigateur
-  var isLoaded
+  function loaded() {
+    isLoaded = true
+    if (next) next()
+  }
 
-  /**
-   * Affiche une ressource ato
-   * @memberOf ato
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand l'atome sera chargé (sans argument ou avec une erreur)
-   */
-  ato.display = function (ressource, options, next) {
+  try {
     var container = options.container
     if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
 
@@ -80,19 +79,10 @@ try {
 
     var url = "http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=" + ressource.idOrigine
     var iframe = dom.addElement(container, 'iframe', {src: url, style: "width:100%;height:100%"})
-    if (iframe.addEventListener) {
-      iframe.addEventListener("load", function () {
-        isLoaded = true
-        next()
-      })
-    } else {
-      isLoaded = true
-      next()
-    }
+    if (iframe.addEventListener) iframe.addEventListener("load", loaded)
+    else loaded()
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = ato

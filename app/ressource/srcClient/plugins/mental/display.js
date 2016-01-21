@@ -38,15 +38,6 @@ var log = require('../../tools/log')
 var swf = require('../../display/swf')
 
 /**
- * Module pour afficher les ressources mental (exercices de calcul mental, avec cm.swf et un xml de paramètres)
- * (avec param en json, mais dans parametres.xml (sic)
- * qui permettent de générer un xml ici avec l'aléatoire paramétré
- * ex 36162 36248 36404 40141 (pris au hasard dans les ressources persos de profs)
- * @plugin mental
- */
-var mental = {}
-
-/**
  * Renvoie le xml qui sera passé au flash à partir de ressource.parametres.xml
  * adaptation en js du code de labomep:outils/mental/display.php
  * @private
@@ -559,74 +550,70 @@ function intRandom(inferieurA) {
   return Math.floor(Math.random() * inferieurA)
 }
 
-try {
-  var baseMental
-  /**
-   * l'historique des réponses de chaque question
-   * @private
-   */
-  var histoReponses = []
+var baseMental
+/**
+ * l'historique des réponses de chaque question
+ * @private
+ */
+var histoReponses = []
 
-  /**
-   * Affiche la ressource
-   * @memberOf mental
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
-   */
-  mental.display = function (ressource, options, next) {
-    var swfUrl
+/**
+ * Affiche les ressources mental (exercices de calcul mental, avec cm.swf et un xml de paramètres)
+ * avec param en json, mais dans parametres.xml (sic)
+ * qui permettent de générer un xml ici avec l'aléatoire paramétré
+ * ex 36162 36248 36404 40141 (pris au hasard dans les ressources persos de profs)
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
+ */
+module.exports = function display(ressource, options, next) {
+  var swfUrl
 
-    log('start mental display avec la ressource', ressource)
+  log('start mental display avec la ressource', ressource)
 
-    try {
-      //les params minimaux
-      if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
-        throw new Error("Paramètres manquants")
-      }
-      // base et swf
-      baseMental = options.pluginBase + 'cm/swf'
-      swfUrl = baseMental + '/cm.swf'
-
-      // les fcts exportées pour le swf
-      if (options && options.resultatCallback) {
-        window.com_mental_resultat = function (nbQuestions, numQuestion, reponse) {
-          // reponse est de la forme o/n
-          histoReponses.push([nbQuestions, reponse])
-          // labomep recevait aussi type_tag : 'mental', node_type: 'mental', idres : ressource.oid, origine & seance_id,
-          // l'appelant devra le mettre dans la callback qu'il nous donne s'il en a besoin
-          options.resultatCallback({
-            reponse: histoReponses
-          })
-        }
-      } else window.com_mental_resultat = function () {
-      }
-
-      // On réinitialise le conteneur
-      var container = options.container
-      dom.empty(container)
-
-      // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-      container.setAttribute("width", 735)
-      container.style.width = '735px'
-
-      var swfOptions = {
-        largeur: 735,
-        hauteur: 450,
-        base: baseMental,
-        flashvars: {
-          parametres_xml: getXmlParam(ressource.parametres.xml)
-        }
-      }
-
-      swf.load(container, swfUrl, swfOptions, next)
-    } catch (error) {
-      page.addError(error)
+  try {
+    //les params minimaux
+    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
+      throw new Error("Paramètres manquants")
     }
+    // base et swf
+    baseMental = options.pluginBase + 'cm/swf'
+    swfUrl = baseMental + '/cm.swf'
+
+    // les fcts exportées pour le swf
+    if (options && options.resultatCallback) {
+      window.com_mental_resultat = function (nbQuestions, numQuestion, reponse) {
+        // reponse est de la forme o/n
+        histoReponses.push([nbQuestions, reponse])
+        // labomep recevait aussi type_tag : 'mental', node_type: 'mental', idres : ressource.oid, origine & seance_id,
+        // l'appelant devra le mettre dans la callback qu'il nous donne s'il en a besoin
+        options.resultatCallback({
+          reponse: histoReponses
+        })
+      }
+    } else window.com_mental_resultat = function () {
+    }
+
+    // On réinitialise le conteneur
+    var container = options.container
+    dom.empty(container)
+
+    // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
+    container.setAttribute("width", 735)
+    container.style.width = '735px'
+
+    var swfOptions = {
+      largeur: 735,
+      hauteur: 450,
+      base: baseMental,
+      flashvars: {
+        parametres_xml: getXmlParam(ressource.parametres.xml)
+      }
+    }
+
+    swf.load(container, swfUrl, swfOptions, next)
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = mental

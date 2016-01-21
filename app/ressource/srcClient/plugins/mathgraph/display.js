@@ -35,12 +35,6 @@ var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
-/**
- * module pour afficher les ressources mathgraph32 (avec le lecteur js)
- * @plugin mathgraph
- */
-var mathgraph = {}
-
 function displayJava(ressource, options, next) {
   var params = ressource.parametres
   var container = options.container
@@ -169,14 +163,14 @@ function displayJs(ressource, options, next) {
 var isLoaded
 
 /**
- * Affiche une ressource mathgraph
- * @memberOf mathgraph
+ * Affiche une ressource mathgraph, avec l'applet java ou le lecteur js (suivant paramétrage de la ressource)
+ * On peut forcer le js en précisant ?js=1 dans l'url
  * @param {Ressource}      ressource  L'objet ressource (une ressource mathgraph a en parametres soit une propriété url
  *                                      avec l'url du xml soit une propriété xml avec la string xml)
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'mathgraph sera chargé (sans argument ou avec une erreur)
  */
-mathgraph.display = function (ressource, options, next) {
+module.exports = function display(ressource, options, next) {
   try {
     var container = options.container
     if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
@@ -189,13 +183,11 @@ mathgraph.display = function (ressource, options, next) {
     if (!ressource.parametres.figure) {
       throw new Error("Pas de figure mathgraph en paramètre")
     }
+    // on utilise java seulement si levelEleve est positif dans les paramètres (et que l'on impose pas js dans l'url)
     if (ressource.parametres.levelEleve > 0 && !tools.getURLParameter("js")) displayJava(ressource, options, next)
     else displayJs(ressource, options, next)
   } catch (error) {
     if (next) next(error)
     else page.addError(error)
   }
-
 }
-
-module.exports = mathgraph

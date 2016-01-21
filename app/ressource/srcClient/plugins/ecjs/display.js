@@ -36,22 +36,16 @@ var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
 /**
- * Module pour afficher les ressources ecjs (exercices calculatice en javascript)
- * @plugin ecjs
+ * Affiche les ressources ecjs (exercices calculatice en javascript)
+ * inspiré de http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/
+ * @module plugins/ecjs/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Possibilité de passer ecjsBase pour modifier http://ressources.sesamath.net/replication_calculatice/javascript
+ * @param {errorCallback}  [next]     La fct à appeler quand le swf sera chargé
  */
-var ecjs = {}
-
-try {
+module.exports = function display(ressource, options, next) {
   /*global head*/
-
-  /**
-   * inspiré de http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/
-   * @memberOf ecjs
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Possibilité de passer ecjsBase pour modifier http://ressources.sesamath.net/replication_calculatice/javascript
-   * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
-   */
-  ecjs.display = function (ressource, options, next) {
+  try {
     // vérifs de base
     if (!options.container) throw new Error("Paramétrage manquant (conteneur)")
     if (!ressource.parametres.fichierjs) throw new Error("Paramétrage manquant (nom de l'exercice à lancer)")
@@ -79,20 +73,20 @@ try {
         var prop, i
         for (i = 0; i < glob.length; i++) {
           prop = glob[i]
-          if (typeof window[prop] === "undefined") throw new Error("Problème de chargement, " +prop +" n'existe pas")
+          if (typeof window[prop] === "undefined") throw new Error("Problème de chargement, " + prop + " n'existe pas")
         }
 
         /*global CLC, $*/
-        function envoyerScoreExoJs(event, data){
+        function envoyerScoreExoJs(event, data) {
           log("résultats reçus du js calculatice", data)
           resultatSent = true; // même si ça plante, pas la peine de recommencer au unload
           var dataToSend = {
-            fin : true
+            fin: true
           }
           if (data.total > 0) {
             var score = parseInt(data.score, 10) || 0
             dataToSend.score = score / data.total
-            dataToSend.reponse = score +" sur " +data.total
+            dataToSend.reponse = score + " sur " + data.total
           } else {
             dataToSend.reponse = "score indéterminé"
           }
@@ -104,9 +98,15 @@ try {
         // On réinitialise le conteneur
         var container = options.container
         dom.empty(container)
-        var exoClc = dom.addElement(container, 'div', {id:"exoclc", style:{margin:"0 auto", width:"735px"}})
-        var footer = dom.addElement(container, 'p', {style:{"text-align":"right", margin:"0 auto", width:"735px"}}, "Exercice original provenant du site ")
-        dom.addElement(footer, 'a', {href:"http://calculatice.ac-lille.fr/", target:"_blank"}, "Calcul@tice")
+        var exoClc = dom.addElement(container, 'div', {id: "exoclc", style: {margin: "0 auto", width: "735px"}})
+        var footer = dom.addElement(container, 'p', {
+          style: {
+            "text-align": "right",
+            margin: "0 auto",
+            width: "735px"
+          }
+        }, "Exercice original provenant du site ")
+        dom.addElement(footer, 'a', {href: "http://calculatice.ac-lille.fr/", target: "_blank"}, "Calcul@tice")
         var $exoClc = $(exoClc)
         // les options et le nom de l'exo
         var optionsClc = ressource.parametres.options || {}
@@ -130,18 +130,18 @@ try {
             log("unload ecjs")
             if (isLoaded && !resultatSent) {
               envoyerScoreExoJs(null, {
-                score : 0,
-                reponse : "Aucune réponse",
-                fin : true
+                score: 0,
+                reponse: "Aucune réponse",
+                fin: true
               })
             }
           })
         }
         // cree un exo de maniere asynchrone
-        var reqExo  = CLC.loadExo(cheminExo + nomExo, optionsClc)
+        var reqExo = CLC.loadExo(cheminExo + nomExo, optionsClc)
 
         // quand l'exo est pret on le met dans son div
-        reqExo.done(function(exercice){
+        reqExo.done(function (exercice) {
           log("exo clc", exercice)
           $exoClc.html(exercice)
           isLoaded = true
@@ -162,7 +162,8 @@ try {
             })
             $exoClc.ready(function () {
               // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
-              var i=0
+              var i = 0
+
               function delayOptions() {
                 if (i++ < 300) {
                   setTimeout(function () {
@@ -172,7 +173,7 @@ try {
                         log.error("On a plusieurs boutons qui répondent au sélecteur 'button .bouton.parametrer'")
                         $button = $button.first()
                       }
-                      log("on a trouvé le bouton après " +i*10 +"ms d'attente")
+                      log("on a trouvé le bouton après " + i * 10 + "ms d'attente")
                       $button.click()
                       i = 0
                       delayOptionsValidate()
@@ -184,6 +185,7 @@ try {
                   log.error("Pas trouvé le bouton paramétrer après 5s", $exoClc.html())
                 }
               }
+
               function delayOptionsValidate() {
                 if (i++ < 300) {
                   setTimeout(function () {
@@ -193,7 +195,7 @@ try {
                         log.error("On a plusieurs boutons qui répondent au sélecteur 'button.tester-parametre'")
                         $button = $button.first()
                       }
-                      log("on a trouvé le bouton valider après " +i*10 +"ms d'attente")
+                      log("on a trouvé le bouton valider après " + i * 10 + "ms d'attente")
                       $button.hide()
                     } else {
                       delayOptionsValidate()
@@ -204,16 +206,16 @@ try {
                 }
                 //$('button.tester-parametre').hide()
               }
+
               delayOptions()
             })
           }
         })
       })
     })
+
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = ecjs

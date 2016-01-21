@@ -34,7 +34,7 @@
  * (page.init et ajouter des comportements de modif dynamique du form)
  */
 "use strict"
-var page = require('page')
+var page = require('../page')
 var $ = window.jQuery
 
 module.exports = function (options, next) {

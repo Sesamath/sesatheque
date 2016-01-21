@@ -28,9 +28,8 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
-/*global head*/
+
 var page = require('../../page')
 var tools = require('../../tools')
 //var dom = require('../../tools/dom')
@@ -40,58 +39,46 @@ var xhr = require('../../tools/xhr')
 var urlBaseJ3p = "http://j3p.sesamath.net"
 
 /**
- * Module pour afficher les ressources j3p (js)
- * @plugin j3p
+ * Affiche la ressource dans l'élément d'id mepRess
+ * @module plugins/j3p/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-var j3p = {}
-
-/**
- * Affiche une ressource de type j3p
- *
- * Cf ../README.md pour plus d'info sur l'écriture de plugins
- */
-
-try {
+module.exports = function display(ressource, options, next) {
   /**
-   * Affiche la ressource dans l'élément d'id mepRess
-   * @memberOf j3p
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
+   * Chargera la ressource quand on aura éventuellement récupéré lastResultat
    */
-  j3p.display = function (ressource, options, next) {
-    /**
-     * Chargera la ressource quand on aura éventuellement récupéré lastResultat
-     */
-    function load() {
-      log("lancement du chargement j3p sur " +urlBaseJ3p)
-      page.loadAsync([urlBaseJ3p + '/outils/loader.js'], function () {
-        var loader = require('j3p/loader')
-        try {
-          // on cache toujours le titre
-          page.hideTitle()
-          // on lui donne nos params
-          loader.init({urlBaseJ3p: urlBaseJ3p, log: log})
-          var j3pOptions = {}
-          if (options.resultatCallback) {
-            j3pOptions.resultatCallback = options.resultatCallback
-          }
-          if (options.lastResultat) {
-            j3pOptions.lastResultat = options.lastResultat
-          }
-          log("loader j3p avec le graphe", ressource.parametres.g)
-          if (ressource.parametres.g instanceof Array) {
-            loader.charge(options.container, ressource.parametres.g, j3pOptions)
-            next(); // le chargement sera pas terminé mais le loader propose pas de callback
-          } else {
-            next(new Error("Le graphe n'est pas un tableau"))
-          }
-        } catch (error) {
-          page.addError(error)
+  function load() {
+    log("lancement du chargement j3p sur " +urlBaseJ3p)
+    page.loadAsync([urlBaseJ3p + '/outils/loader.js'], function () {
+      var loader = require('j3p/loader')
+      try {
+        // on cache toujours le titre
+        page.hideTitle()
+        // on lui donne nos params
+        loader.init({urlBaseJ3p: urlBaseJ3p, log: log})
+        var j3pOptions = {}
+        if (options.resultatCallback) {
+          j3pOptions.resultatCallback = options.resultatCallback
         }
-      })
-    }
+        if (options.lastResultat) {
+          j3pOptions.lastResultat = options.lastResultat
+        }
+        log("loader j3p avec le graphe", ressource.parametres.g)
+        if (ressource.parametres.g instanceof Array) {
+          loader.charge(options.container, ressource.parametres.g, j3pOptions)
+          next(); // le chargement sera pas terminé mais le loader propose pas de callback
+        } else {
+          next(new Error("Le graphe n'est pas un tableau"))
+        }
+      } catch (error) {
+        page.addError(error)
+      }
+    })
+  }
 
+  try {
     log('j3p.display avec ressource et options', ressource, options)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
@@ -122,10 +109,7 @@ try {
     } else {
       load()
     }
+  } catch (error) {
+    page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = j3p

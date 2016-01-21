@@ -30,42 +30,33 @@
  */
 
 "use strict"
+
 var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var jstreeConverter = require('../../display/jstreeConverter')
 
 /**
- * Module pour afficher un arbre
- * @plugin arbre
+ * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles
+ * @module plugins/arbre/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
  */
-var arbre = {}
+module.exports = function display(ressource, options, next) {
+  var error
+  try {
+    log('arbre.display avec', ressource)
+    if (typeof window.jQuery === 'undefined') throw new Error("jQuery n'a pas été chargé")
+    var $ = window.jQuery
+    /* jshint jquery:true */
+    var container = options.container
+    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    var errorsContainer = options.errorsContainer
+    if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs")
 
-try {
-  if (typeof window.jQuery === 'undefined') throw new Error("jQuery n'a pas été chargé")
-  var $ = window.jQuery
-
-  /* jshint jquery:true */
-
-
-
-  /**
-   * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles
-   * @memberOf arbre
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
-   */
-  arbre.display = function (ressource, options, next) {
-    var error
-    try {
-      log('arbre.display avec', ressource)
-      var container = options.container
-      if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
-      var errorsContainer = options.errorsContainer
-      if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs")
-
-      dom.addCss(options.base + 'vendors/jstree/dist/themes/default/style.min.css')
+    dom.addCss(options.base + 'vendor/jstree/dist/themes/default/style.min.css')
+    page.loadAsync(['jstree'], function () {
       var pluginBase = options.pluginBase
       if (!ressource.base) ressource.base = "/"
 
@@ -266,16 +257,10 @@ try {
          // this will follow the link:
          document.location.href = href; */
       })
-
-    } catch (e) {
-      error = e
-    }
-
-    next(error)
+    })
+  } catch (e) {
+    error = e
   }
-
-} catch (error) {
-  page.addError(error)
-}
-
-module.exports = arbre
+  if (next) next(error)
+  else if (error) page.addError(error)
+} // display

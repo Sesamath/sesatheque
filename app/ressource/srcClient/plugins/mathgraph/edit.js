@@ -31,15 +31,13 @@
 
 "use strict"
 
-/**
- * @file Édite les paramètres d'une ressource ecjs
- */
-
 var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
-var $ = window.jQuery
 var formEditor = require('../../edit/formEditor')
+
+var $ = window.jQuery
+/* jshint jquery:true */
 
 function addApplet(isFullSize) {
   if (isFullSize) {
@@ -138,197 +136,192 @@ function onSubmitTrue() {
   return true
 }
 
-function mathgraphEdit(ressource) {
-  if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
-  var parametres = ressource.parametres
-  var divParametres = window.document.getElementById('parametres')
-  if (!divParametres) throw new Error("Pas de conteneur #parametres trouvé dans cette page")
+// var globales à notre module (initialisées par init et utilisées par nos fcts)
+var allowProf, levelEleve, levelProf, figureBase64Ini,
+    width, height, $width, $height,
+    appletContainer,
+    $appletContainer, $figureData,
+    $isFullSize, $dataContainer, $form
+// les fonctionnalités dispo
+var allowDef = {
+  "MenuBar" : "Barre de menu",
+  "LeftToolbar" : "Barre d'outils de gauche",
+  "TopToolbar" : "Barre d'outils du haut",
+  "RightToolbar" : "Barre d'outils de droite",
+  "IndicationArea" : "Zone d'information du bas",
+  "ToolsChoice" : "Choix des outils",
+  FileMenu : "Menu Fichier",
+  OptionsMenu : "Menu Options"
+}
+// le submitHandler, à true par défaut
+// on ne peut appeler $form.submit() qu'une fois puisqu'on lui passe un écouteur,
+// c'est cet écouteur que l'on va modifier si besoin
+var submitHandler = onSubmitTrue
 
-  // param de taille
-  width = parametres.width || Math.max(divParametres.offsetWidth || 0, 600)
-  height = parametres.height || Math.round(width*0.75)
-  var sizeGroup = formEditor.addFormGroup(divParametres)
-  var widthInput = formEditor.addInputText(
-      sizeGroup,
-      {name:"parametres[width]", size:5, value:width, placeholder:"largeur"},
-      {label:"largeur", remarque:"(en pixels)"}
-  )
-  $width = $(widthInput)
-  var heightInput = formEditor.addInputText(
-      sizeGroup,
-      {name:"parametres[height]", size:5, value:height, placeholder:"hauteur", "class":"center"},
-      {label:"hauteur", remarque:"(en pixels)"}
-  )
-  $height = $(heightInput)
-  formEditor.addCheckboxes(
-      sizeGroup,
-      "parametres[profFullSize]",
-      {label:"exception formateur"},
-      [{
-        id : "isFullSize",
-        label: "maximiser l'éditeur ci-dessous",
-        value: true,
-        checked: !!parametres.profFullSize
-      }]
-  )
-  $isFullSize = $("#isFullSize")
+module.exports = function mathgraphEdit(ressource) {
+  try {
+    if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
+    var parametres = ressource.parametres
+    var divParametres = window.document.getElementById('parametres')
+    if (!divParametres) throw new Error("Pas de conteneur #parametres trouvé dans cette page")
 
-  var allowFullList = []
-  var allow
-  for (allow in allowDef) {
-    if (allowDef.hasOwnProperty(allow)) allowFullList.push(allow)
-  }
+    // param de taille
+    width = parametres.width || Math.max(divParametres.offsetWidth || 0, 600)
+    height = parametres.height || Math.round(width*0.75)
+    var sizeGroup = formEditor.addFormGroup(divParametres)
+    var widthInput = formEditor.addInputText(
+        sizeGroup,
+        {name:"parametres[width]", size:5, value:width, placeholder:"largeur"},
+        {label:"largeur", remarque:"(en pixels)"}
+    )
+    $width = $(widthInput)
+    var heightInput = formEditor.addInputText(
+        sizeGroup,
+        {name:"parametres[height]", size:5, value:height, placeholder:"hauteur", "class":"center"},
+        {label:"hauteur", remarque:"(en pixels)"}
+    )
+    $height = $(heightInput)
+    formEditor.addCheckboxes(
+        sizeGroup,
+        "parametres[profFullSize]",
+        {label:"exception formateur"},
+        [{
+          id : "isFullSize",
+          label: "maximiser l'éditeur ci-dessous",
+          value: true,
+          checked: !!parametres.profFullSize
+        }]
+    )
+    $isFullSize = $("#isFullSize")
 
-  // config élève
-  var eleveGroup = formEditor.addFormGroup(divParametres)
-  levelEleve = parseInt(parametres.levelEleve, 10) || 0
-  var levelEleveSelect = formEditor.addSelect(
-      eleveGroup,
-      {id:"selectTypeInterface", name:"parametres[levelEleve]"},
-      {
-        label:"type d'interface élève",
-        wrapperAttributes : {style:"max-width:300px;"}
-      },
-      [
-        {value:"0", content:"lecteur seulement*", selected:(levelEleve === 0)},
-        {value:"1", content:"éditeur élémentaire", selected:(levelEleve === 1)},
-        {value:"2", content:"éditeur collège", selected:(levelEleve === 2)},
-        {value:"3", content:"éditeur avancé sans nombres complexes", selected:(levelEleve === 3)},
-        {value:"4", content:"éditeur avancé avec nombres complexes", selected:(levelEleve === 4)}
-      ]
-  )
-  dom.addElementAfter(levelEleveSelect, 'div', {"class":"remarque"},
-      "* L'éditeur nécessite java, le lecteur simple est conseillé si vous n'avez pas besoin de récupérer la figure de l'élève")
-  var $levelEleveSelect = $(levelEleveSelect)
-
-  var allowEleve = parametres.allowEleve || allowFullList
-  // on remplit ses checkboxes
-  var checkboxes = []
-  for (allow in allowDef) {
-    if (allowDef.hasOwnProperty(allow)) {
-      checkboxes.push({
-        label:allowDef[allow],
-        value:allow,
-        checked:(allowEleve.indexOf(allow) > -1)
-      })
+    var allowFullList = []
+    var allow
+    for (allow in allowDef) {
+      if (allowDef.hasOwnProperty(allow)) allowFullList.push(allow)
     }
-  }
-  var allowEleveCb = formEditor.addCheckboxes(
-      eleveGroup,
-      "parametres[allowEleve]",
-      {label:"fonctionnalités accessibles aux élèves", remarque:"(ne concerne que l'éditeur)"},
-      checkboxes
-  )
-  var $allowEleveCb = $(allowEleveCb.parentNode)
-  if (levelEleve === 0) $allowEleveCb.hide()
 
-  $levelEleveSelect.change(function () {
-    levelEleve = parseInt($(this).val()) || 0
+    // config élève
+    var eleveGroup = formEditor.addFormGroup(divParametres)
+    levelEleve = parseInt(parametres.levelEleve, 10) || 0
+    var levelEleveSelect = formEditor.addSelect(
+        eleveGroup,
+        {id:"selectTypeInterface", name:"parametres[levelEleve]"},
+        {
+          label:"type d'interface élève",
+          wrapperAttributes : {style:"max-width:300px;"}
+        },
+        [
+          {value:"0", content:"lecteur seulement*", selected:(levelEleve === 0)},
+          {value:"1", content:"éditeur élémentaire", selected:(levelEleve === 1)},
+          {value:"2", content:"éditeur collège", selected:(levelEleve === 2)},
+          {value:"3", content:"éditeur avancé sans nombres complexes", selected:(levelEleve === 3)},
+          {value:"4", content:"éditeur avancé avec nombres complexes", selected:(levelEleve === 4)}
+        ]
+    )
+    dom.addElementAfter(levelEleveSelect, 'div', {"class":"remarque"},
+        "* L'éditeur nécessite java, le lecteur simple est conseillé si vous n'avez pas besoin de récupérer la figure de l'élève")
+    var $levelEleveSelect = $(levelEleveSelect)
+
+    var allowEleve = parametres.allowEleve || allowFullList
+    // on remplit ses checkboxes
+    var checkboxes = []
+    for (allow in allowDef) {
+      if (allowDef.hasOwnProperty(allow)) {
+        checkboxes.push({
+          label:allowDef[allow],
+          value:allow,
+          checked:(allowEleve.indexOf(allow) > -1)
+        })
+      }
+    }
+    var allowEleveCb = formEditor.addCheckboxes(
+        eleveGroup,
+        "parametres[allowEleve]",
+        {label:"fonctionnalités accessibles aux élèves", remarque:"(ne concerne que l'éditeur)"},
+        checkboxes
+    )
+    var $allowEleveCb = $(allowEleveCb.parentNode)
     if (levelEleve === 0) $allowEleveCb.hide()
-    else $allowEleveCb.show()
-  })
 
-  // param de l'applet d'édition
-  var profGroup = formEditor.addFormGroup(divParametres)
-  levelProf = parseInt(parametres.levelProf, 10) || 0
-  var isApplet = (levelProf !== -1)
-  var levelProfSelect = formEditor.addSelect(
-      profGroup,
-      {name:"parametres[levelProf]"},
-      {label:"type d'interface formateur", remarque:"(utilisée ci-dessous)"},
-      [
-        {value:"-1", content:"aucune (zone pour coller une figure exportée)", selected:(levelProf === -1)},
-        {value:"0", content:"identique aux élèves", selected:(levelProf === 0)},
-        {value:"1", content:"éditeur élémentaire", selected:(levelProf === 1)},
-        {value:"2", content:"éditeur collège", selected:(levelProf === 2)},
-        {value:"3", content:"éditeur avancé sans nombres complexes", selected:(levelProf === 3)},
-        {value:"4", content:"éditeur avancé avec nombres complexes", selected:(levelProf === 4)}
-      ]
-  )
-  // fonctions de l'applet d'édition
-  allowProf = parametres.allowProf || allowFullList
-  checkboxes = []
-  for (allow in allowDef) {
-    if (allowDef.hasOwnProperty(allow)) {
-      checkboxes.push({
-        label:allowDef[allow],
-        value:allow,
-        checked:(allowProf.indexOf(allow) > -1)
-      })
+    $levelEleveSelect.change(function () {
+      levelEleve = parseInt($(this).val()) || 0
+      if (levelEleve === 0) $allowEleveCb.hide()
+      else $allowEleveCb.show()
+    })
+
+    // param de l'applet d'édition
+    var profGroup = formEditor.addFormGroup(divParametres)
+    levelProf = parseInt(parametres.levelProf, 10) || 0
+    var isApplet = (levelProf !== -1)
+    var levelProfSelect = formEditor.addSelect(
+        profGroup,
+        {name:"parametres[levelProf]"},
+        {label:"type d'interface formateur", remarque:"(utilisée ci-dessous)"},
+        [
+          {value:"-1", content:"aucune (zone pour coller une figure exportée)", selected:(levelProf === -1)},
+          {value:"0", content:"identique aux élèves", selected:(levelProf === 0)},
+          {value:"1", content:"éditeur élémentaire", selected:(levelProf === 1)},
+          {value:"2", content:"éditeur collège", selected:(levelProf === 2)},
+          {value:"3", content:"éditeur avancé sans nombres complexes", selected:(levelProf === 3)},
+          {value:"4", content:"éditeur avancé avec nombres complexes", selected:(levelProf === 4)}
+        ]
+    )
+    // fonctions de l'applet d'édition
+    allowProf = parametres.allowProf || allowFullList
+    checkboxes = []
+    for (allow in allowDef) {
+      if (allowDef.hasOwnProperty(allow)) {
+        checkboxes.push({
+          label:allowDef[allow],
+          value:allow,
+          checked:(allowProf.indexOf(allow) > -1)
+        })
+      }
     }
+    var allowProfCb = formEditor.addCheckboxes(
+        profGroup,
+        "parametres[allowProf]",
+        {label:"fonctionnalités formateur", remarque:"(ci-dessous)"},
+        checkboxes
+    )
+    var $allowProfCb = $(allowProfCb.parentNode)
+
+    // ajout figure
+    var dataContainer = formEditor.addFormGroup(divParametres)
+    $dataContainer = $(dataContainer)
+    figureBase64Ini = ressource.parametres.figure || ""
+    var figureData = formEditor.addTextarea(
+        dataContainer,
+        {id:"figure", name:"parametres[figure]", cols:80, rows:5},
+        {label: "Figure (encodée en base64)", content: figureBase64Ini}
+    )
+    $figureData = $(figureData)
+
+    appletContainer = formEditor.addFormGroup(divParametres)
+    $appletContainer = $(appletContainer)
+
+    $form = $("form#formRessource")
+    $form.submit(function () {
+      submitHandler(); // on peut pas passer sa valeur actuelle en argument, faut l'exécuter à chaque fois
+    })
+
+    // le hide/show au changement de select
+    $(levelProfSelect).change(function () {
+      levelProf = parseInt($(this).val(), 10)
+      if (levelProf === -1) {
+        $allowProfCb.hide()
+        hideApplet()
+      } else {
+        $allowProfCb.show()
+        showApplet()
+      }
+    })
+
+    if (isApplet) showApplet()
+    else $allowProfCb.hide(); // pas de hideApplet tant qu'on l'a pas mise
+
+  } catch (error) {
+    page.addError(error)
   }
-  var allowProfCb = formEditor.addCheckboxes(
-      profGroup,
-      "parametres[allowProf]",
-      {label:"fonctionnalités formateur", remarque:"(ci-dessous)"},
-      checkboxes
-  )
-  var $allowProfCb = $(allowProfCb.parentNode)
-
-  // ajout figure
-  var dataContainer = formEditor.addFormGroup(divParametres)
-  $dataContainer = $(dataContainer)
-  figureBase64Ini = ressource.parametres.figure || ""
-  var figureData = formEditor.addTextarea(
-      dataContainer,
-      {id:"figure", name:"parametres[figure]", cols:80, rows:5},
-      {label: "Figure (encodée en base64)", content: figureBase64Ini}
-  )
-  $figureData = $(figureData)
-
-  appletContainer = formEditor.addFormGroup(divParametres)
-  $appletContainer = $(appletContainer)
-
-  $form = $("form#formRessource")
-  $form.submit(function () {
-    submitHandler(); // on peut pas passer sa valeur actuelle en argument, faut l'exécuter à chaque fois
-  })
-
-  // le hide/show au changement de select
-  $(levelProfSelect).change(function () {
-    levelProf = parseInt($(this).val(), 10)
-    if (levelProf === -1) {
-      $allowProfCb.hide()
-      hideApplet()
-    } else {
-      $allowProfCb.show()
-      showApplet()
-    }
-  })
-
-  if (isApplet) showApplet()
-  else $allowProfCb.hide(); // pas de hideApplet tant qu'on l'a pas mise
-} // mathgraphEdit
-
-try {
-    /**
-     * MAIN
-     */
-    // var globales à notre module (initialisées par init et utilisées par nos fcts)
-    var allowProf, levelEleve, levelProf, figureBase64Ini,
-        width, height, $width, $height,
-        appletContainer,
-        $appletContainer, $figureData,
-        $isFullSize, $dataContainer, $form
-    // les fonctionnalités dispo
-    var allowDef = {
-      "MenuBar" : "Barre de menu",
-      "LeftToolbar" : "Barre d'outils de gauche",
-      "TopToolbar" : "Barre d'outils du haut",
-      "RightToolbar" : "Barre d'outils de droite",
-      "IndicationArea" : "Zone d'information du bas",
-      "ToolsChoice" : "Choix des outils",
-      FileMenu : "Menu Fichier",
-      OptionsMenu : "Menu Options"
-    }
-    // le submitHandler, à true par défaut
-    // on ne peut appeler $form.submit() qu'une fois puisqu'on lui passe un écouteur,
-    // c'est cet écouteur que l'on va modifier si besoin
-    var submitHandler = onSubmitTrue
-
-    module.exports = mathgraphEdit
-
-} catch (error) {
-  page.addError(error)
 }
 

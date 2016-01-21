@@ -56,8 +56,9 @@ var startDate
 
 /**
  * Module d'une seule fonction pour afficher une ressource quelconque.
- * Il chargera le bon afficheur en lui passant les options attendues, en créant si besoin les contereurs dans le dom courant.
- * @service display
+ * Il chargera le bon afficheur en lui passant les options attendues,
+ * en créant si besoin les contereurs dans le dom courant, avec un appel de page.init(options).
+ * @module display
  * @param {Ressource}     ressource La ressource à afficher
  * @param {initOptions}   [options] Les options éventuelles (passer base si ce js est chargé sur un autre domaine)
  * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
@@ -68,13 +69,9 @@ function display(ressource, options, next) {
    * @param {Error} [error] Une erreur éventuelle à l'init
    */
   function load(error) {
-    if (error) next(error)
-    else {
-      /**
-       * Les options complétés par init
-       * @name options
-       * @type {displayOptions}
-       */
+    if (error) {
+      next(error)
+    } else {
       log('display avec la ressource', ressource)
       log('et les options après page.init', options)
 
@@ -83,7 +80,8 @@ function display(ressource, options, next) {
 
       // le display du plugin
       var pluginName = ressource.type
-      var plugin = require('plugins/' +pluginName +'/display')
+      var pluginDisplay = require('../plugins/' +pluginName +'/display')
+      if (!pluginDisplay) throw new Error("L'affichage des ressources de type " +pluginName +" n'est pas encore implémenté")
       // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
       var Resultat, traiteResultat
 
@@ -95,11 +93,10 @@ function display(ressource, options, next) {
       // un cas particulier, le prof qui teste, on fourni une callback qui fait rien,
       // pour éviter des avertissements sur les ressources qui attendent une callback
       if (traiteResultat === "none") traiteResultat = function () {}
-      if (traiteResultat) Resultat = require('Resultat')
+      if (traiteResultat) Resultat = require('../Resultat')
 
       try {
-        if (typeof plugin === 'undefined') throw new Error('Le chargement du plugin ' + pluginName + ' a échoué')
-        if (typeof plugin.display !== 'function') throw new Error('Le plugin ' + pluginName + " n'a pas de méthode display")
+        if (typeof pluginDisplay === 'undefined') throw new Error('Le chargement du plugin ' + pluginName + ' a échoué')
         log('plugin ' + pluginName + ' chargé')
         if (options.container) dom.empty(options.container)
         else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
@@ -120,7 +117,7 @@ function display(ressource, options, next) {
         else if (options.base.substring(-1) !== "/") options.base += "/"
         options.pluginBase = options.base +"/plugins/" +pluginName +"/"
         // on peut afficher
-        plugin.display(ressource, options, function (error) {
+        pluginDisplay(ressource, options, function (error) {
           startDate = new Date()
           if (error) {
             log("le display a terminé mais renvoyé l'erreur", error)

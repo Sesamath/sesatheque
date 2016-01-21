@@ -35,26 +35,18 @@ var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var swf = require('../../display/swf')
 
+var ressId
+var ressType = 'em'
+var isLoaded, lastResult
+
 /**
- * Module pour afficher les ressource em (exercices mathenpoche, en flash)
- * @plugin em
+ * afficher les ressource em (exercices mathenpoche, en flash)
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-var em = {}
-
-try {
-  // nos vars globales
-  var ressId
-  var ressType = 'em'
-  var isLoaded, lastResult
-
-  /**
-   * Affiche la ressource dans l'élément html passé dans les options
-   * @memberOf em
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
-   */
-  em.display = function (ressource, options, next) {
+module.exports = function display(ressource, options, next) {
+  try {
     var container = options.container
     if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
     var errorsContainer = options.errorsContainer
@@ -140,7 +132,7 @@ try {
           nbq: result.nbq || params.nbq_defaut,
           ressId: ressId,
           ressType: ressType,
-          fin : (result.fin === "o"),
+          fin: (result.fin === "o"),
           original: result
         }
         // le score sera calculé d'après la réponse juste avant enregistrement en bdd
@@ -165,8 +157,8 @@ try {
             ressId: ressId,
             ressType: ressType,
             original: null,
-            fin:true,
-            deferSync:true
+            fin: true,
+            deferSync: true
           }
           options.resultatCallback(lastResult)
         }
@@ -180,8 +172,8 @@ try {
       flashvars,
       largeur,
       hauteur,
-      flashversion : 8,
-      base : baseMepSwf + "/"
+      flashversion: 8,
+      base: baseMepSwf + "/"
     }
     // pour debug
     log('flashvars', flashvars)
@@ -190,11 +182,9 @@ try {
       container.removeChild(loadingElt)
       if (next) next()
     })
-    //swfobject.embedSWF(swfUrl, divId, largeur, hauteur, "8", null, flashvars, swfParams, swfAttributes, callbackFn)
+
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = em

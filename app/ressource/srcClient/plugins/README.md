@@ -1,24 +1,21 @@
-Plugin ressource
-================
+Plugins de ressources
+=====================
 
 Pour la doc du code serveur, cf [sesatheque](../index.html)
 
 Cf [global](./global.html) pour la liste des méthodes globales accessibles depuis un plugin.
 
-Tous les plugins doivent exporter une méthode display  
+Tous les plugins doivent exporter un module display (display.js dans le dossier du module) et un module edit (edit.js) 
 
 ```javascript
-define(['moduleRequis1', 'moduleRequis2'], function(module1, module2) {
-  // du code privé pour initialiser ce que l'on veut
-  
-  // la liste des méthodes que l'on exporte 
-  return {
-    display : function (ressource, options) {…},
-    …
-  }
+// Tout le code est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
+// que ce soit dans la fonction exportée ou en dehors (en général on déclare les modules en dépendance en premier 
+// mais ils pourraient être dans la fonction)
+var log = require('../../tools/log')
+function display(ressource, options) {
+  // le code
 })
-
-// Tout le reste est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
+module.exports = display
 ```
 
 Pour passer une fonction de sauvegarde à une ressource chargée en iframe, il faut appeler l'url avec un paramètre 
@@ -48,10 +45,17 @@ Si on veut que la sésatheque ajoute des infos au résultat, par ex le nom qu'on
 ```
 
 On peut aussi utiliser les modules js de la sésathèque en cross-domain, pour mettre les ressources dans son dom et interagir dessus.
-Il faut alors passer `options.base = "http://sesathequeDomain/"`, en général à display() mais ça peut être à init() 
-(si on veut appeler des méthodes de plugins sans passer par display), que le require.js soit celui du domaine appelant ou celui de la sésathèque.
 
-Cette
+Il faut alors passer `options.base = "http://sesathequeDomain/"` à `display(ressource, options)` (si on a chargé display.bundle.js)
+ou bien (si apiClient.bundle.js a été chargé)
+```
+var apiClient = require ('apiClient')
+var client = apiClient('http://bibliotheque.sesamath.net')
+client.getRessource(42, "alias", callbackFct)
+// ou plus compact
+var client = require ('apiClient')('http://bibliotheque.sesamath.net')
+client.getRessource(42, "alias", callbackFct)
+```
 
 Cf {@link initOptions} et {@link displayOptions}
 
@@ -59,7 +63,7 @@ Par exemple, si on a déjà la ressource complète
 
 ```html
 <!-- sur foo.domain -->
-<script type="text/javascript" src="path2/require.js"></script>
+<script type="text/javascript" src="http://sesatheque.domain/display.bundle.js"></script>
 
 <!-- code quelconque -->
 
@@ -81,24 +85,25 @@ Par exemple, si on a déjà la ressource complète
     etc.
   }
   
-  // exemple pour configurer le require de la sesatheque et y charger des modules
-  // ici le module standard display qui chargera le bon plugin, mais on peut charger directement le plugin
-  // si besoin
-  require(['http://sesatheque.domain/display.js'], function(display) {
-    // les options à passer
-    var options = {
-      base = "http://sesathequeDomain/",
-      container : document.getElementById("laRessource"),
-      resultatCallback : saveResultat
-    };
+  // ici le module standard display chargera le bon plugin, il vaut mieux passer par lui 
+  // car il initialise toutes les valeurs par défaut
+  // (on pourrait charger directement le module plugins/xxx/display, mais c'est plus compliqué à gérer)
+  var display = require('display')
+  // les options à passer
+  var options = {
+    base = "http://sesathequeDomain/",
+    container : document.getElementById("laRessource"),
+    resultatCallback : saveResultat
+  };
     
-    // et on affiche
-    display(ressource, options);
-  })
+  // et on affiche
+  display(ressource, options);
 </script>
 ```
 
 Autre exemple où on appelle d'abord la sesathèque pour charger une ressource (avec son apiClient.js)
+
+OBSOLETE, à rectifier quand on aura des bundles qui vont bien
 
 ```html
 <!-- sur foo.domain -->

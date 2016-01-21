@@ -35,29 +35,22 @@ var log = require('../../tools/log')
 var swf = require('../../display/swf')
 
 /**
- * Module d'affichage des ressources calkc (calculatrice cassée), flash
- * @plugin calkc
+ * contient l'historique des réponses de chaque question (utilisé par window.com_calkc_resultat que le swf appelle)
+ * @private
  */
-var calkc = {}
+var histoReponses = []
 
-try {
-  /**
-   * contient l'historique des réponses de chaque question (utilisé par window.com_calkc_resultat que le swf appelle)
-   * @private
-   */
-  var histoReponses = []
-
-  /**
-   * Affiche une ressource calkc
-   * @memberOf calkc
-   * @param {Ressource}      ressource  L'objet ressource
-   * @param {displayOptions} options    Les options après init
-   * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
-   */
-  calkc.display = function (ressource, options, next) {
-    var swfUrl
-
+/**
+ * Affiche une ressource calkc
+ * @module plugins/calkc/display
+ * @param {Ressource}      ressource  L'objet ressource
+ * @param {displayOptions} options    Les options après init
+ * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
+ */
+module.exports = function display(ressource, options, next) {
+  try {
     log('start calkc display avec la ressource', ressource)
+    var swfUrl
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
       throw new Error("Paramètres manquants")
@@ -101,10 +94,9 @@ try {
     }
     log('appel swfobject avec', swfOptions)
     swf.load(container, swfUrl, swfOptions, next)
+
+  } catch (error) {
+    if (next) next(error)
+    else page.addError(error)
   }
-
-} catch (error) {
-  page.addError(error)
 }
-
-module.exports = calkc

@@ -28,22 +28,14 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 "use strict"
 
 var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var swf = require('../../display/swf')
-var $ = window.jQuery
 
-/* jshint jquery:true */
-
-/** 
- * Affiche les ressources de type url (page externe, en iframe)
- * @module plugins/url/display
- */
-var url = {}
+var $ = window.jQuery /*jshint jquery:true*/
 
 /**
  * Ajoute l'iframe (ou un div si c'est un swf directement)
@@ -51,8 +43,10 @@ var url = {}
  */
 function addPage(params, next) {
   log("addPage avec les params", params)
+  var url = params.adresse
   var page = dom.addElement(container, 'div', {id: "page"})
-  var args = {src: params.adresse, id:"pageContent"}
+  var args = {src: url, id:"pageContent"}
+
   // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
   // ff aime pas et sort une erreur js Error: Permission denied to access property 'toString'
   // chrome râle aussi parce que c'est pas un document
@@ -166,12 +160,12 @@ function sendResultat(reponse, deferSync, next) {
 var container, errorsContainer, isBasic, ressId, resultatCallback, isLoaded
 
 /**
- * Affiche la ressource url, en créant une iframe dans le container (ou un div si l'url est un swf)
+ * Affiche les ressources de type url (page externe) en créant une iframe dans le container (ou un div si l'url est un swf)
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
-url.display = function (ressource, options, next) {
+module.exports = function display(ressource, options, next) {
   log('url.display avec les options', options)
   try {
     //les params minimaux
@@ -188,7 +182,7 @@ url.display = function (ressource, options, next) {
 
     // raccourcis
     var params = ressource.parametres
-    url = params.adresse
+    var url = params.adresse
     if (!url) throw new Error("Url manquante")
     if (!/^https?:\/\//.test(url)) throw new Error("Url invalide : " +url)
 
@@ -305,8 +299,7 @@ url.display = function (ressource, options, next) {
       })
     } // fin question-réponse
   } catch (error) {
-    page.addError(error)
+    if (next) next(error)
+    else page.addError(error)
   }
 }
-
-module.exports = url

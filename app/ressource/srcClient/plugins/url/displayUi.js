@@ -38,6 +38,8 @@ var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
+var $ = window.jQuery /*jshint jquery:true*/
+
 /**
  * Retourne une seule fonction qui affectera les comportements de l'interface avec la gestion des étapes pour les ressources url
  * @service urlUi
@@ -46,239 +48,235 @@ var log = require('../../tools/log')
  * @param {errorCallback}  next
  */
 module.exports = function (ressource, options, next) {
-  try {
-    page.loadAsync(["jqueryUiDialog"], function () {
-      // faut attendre que tout soit fini de charger et que jQuery ai fini de manipuler le dom
-      window.jQuery(function ($) {
+  page.loadAsync(["jqueryUiDialog"], function () {
+    // faut attendre que tout soit fini de charger et que jQuery ai fini de manipuler le dom
+    $(function () {
+      function getLienSuivant() {
+        return dom.getElement("img", {
+          "class": 'lienSuivant',
+          src: options.pluginBase +'images/forward.png',
+          align: 'absmiddle',
+          alt: 'suivant',
+          onclick:etapes.next
+        })
+      }
 
-        function getLienSuivant() {
-          return dom.getElement("img", {
-            "class": 'lienSuivant',
-            src: options.pluginBase +'images/forward.png',
-            align: 'absmiddle',
-            alt: 'suivant',
-            onclick:etapes.next
-          })
+      /**
+       * Initialise les fenêtres modales
+       */
+      function init() {
+        // les comportements qui dépendent pas du contexte
+        $lienConsigne.click(consigne.toggle)
+        $lienReponse.click(reponse.toggle)
+
+        // les fenetres modales
+        var informationDialogOptions = {
+          title: 'Information',
+          autoOpen: false,
+          resizable: false,
+          position: {my: 'left+10 top+10', at: 'left bottom', of: '#entete'},
+          buttons: {
+            "OK": function () {
+              $information.dialog("close")
+            }
+          }
+        }
+        $information.dialog(informationDialogOptions)
+
+        var consigneDialogOptions = {
+          //position : [30, 50],
+          // cf http://api.jqueryui.com/position/
+          position: {my: 'left+30 top+50', at: 'left bottom', of: '#entete'},
+          width: 450,
+          height: 350,
+          resizable: true,
+          autoOpen: false,
+          title: 'Consigne',
+          close: function () {
+            $lienConsigne.css('font-weight', 'bold')
+          },
+          open: function () {
+            if (hasTexConsigne) {
+              // @see https://groups.google.com/forum/#!topic/mathjax-users/v6nVeANKihs
+              // http://docs.mathjax.org/en/latest/queues.html
+              log("open consigne")
+              /*global MathJax*/
+              MathJax.Hub.Queue(["Typeset", MathJax.Hub, "consigne"])
+            }
+            $lienConsigne.css('font-weight', 'normal')
+          }
+        }
+        $consigne.dialog(consigneDialogOptions)
+
+        var reponseDialogOptions = {
+          width: hasCkeditor ? 580 :480,
+          height: hasCkeditor ? 400 : 320,
+          //position : [$('body').width() - 30 - 472, 50],
+          position: {my: 'right-30 top+70', at: 'right bottom', of: '#entete'},
+          resizable: true,
+          autoOpen: false,
+          title: 'Ta réponse',
+          ferme: function () {
+            $lienReponse.css('font-weight', 'bold')
+          },
+          ouvre: function () {
+            $lienReponse.css('font-weight', 'normal')
+          }
+        }
+        $reponse.dialog(reponseDialogOptions)
+      } // init
+
+      /**
+       * Charge les éventuelles dépendances avant d'appeler next
+       * @private
+       * @param next
+       */
+      function loadDependencies(next) {
+        var dependances = []
+        if (hasTexConsigne && typeof MathJax === "undefined") dependances.push("mathjax")
+        if (dependances.length) page.loadAsync(dependances, next)
+        else next()
+      }
+
+      /**
+       * Construit la liste des étapes d'après les options
+       * @private
+       */
+      function setEtapes() {
+        /**
+         * Option de l'affichage de la question qui peut prendre les valeurs
+         *   "off"    : pas de question
+         *   "before" : avant la page
+         *   "while"  : pendant la page
+         *   "after"  : après la page
+         * @type {string}
+         */
+        var question_option = ressource.parametres.question_option || "off"
+        /**
+         * Option de l'affichage de la réponse qui peut prendre les valeurs
+         *   "off"      : pas de réponse attendue
+         *   "question" : pendant l'affichage de la question
+         *   "while"    : pendant l'affichage de la page
+         *   "after"    : après la page
+         * @type {string}
+         */
+        var answer_option = ressource.parametres.answer_option || "off"
+        log("lien suivant dans setEtapes", lienSuivant)
+
+        if (question_option == "off") {
+          etapes.liste = [[information, iframe]]
+          // pas de question, pour la réponse :
+          if (answer_option == "while") {
+            etapes.titres = ["Visualisation du document et réponse"]
+            information.setContent("Observe ce document et envoie ta réponse.")
+            // ajout de la réponse à la 1re étape
+            etapes.liste[0].push(reponse)
+
+          } else if (answer_option == "after") {
+            etapes.titres = ["Visualisation du document", "Réponse"]
+            information.setContent("Observe ce document puis clique sur ", getLienSuivant(), " pour répondre.")
+            // ajout de la réponse en 2e étape
+            etapes.liste.push([reponse])
+          }
+
+        } else if (question_option == "before") {
+          // consigne puis page
+          etapes.liste = [[consigne, information], [iframe]]
+          if (answer_option == "off") {
+            etapes.titres = ["Lecture de la consigne", "Visualisation du document"]
+            information.setContent("Commence par lire la consigne, puis clique sur ", getLienSuivant(), " pour voir le document.")
+
+          } else if (answer_option == "while") {
+            etapes.titres = ["Lecture de la consigne", "Visualisation du document et réponse"]
+            information.setContent("Lis la consigne, clique sur ", getLienSuivant(), " pour voir le document et répondre.")
+            etapes.liste[1].push(reponse)
+
+          } else if (answer_option == "after") {
+            etapes.titres = ["Lecture de la consigne", "Visualisation du document", "Réponse"]
+            information.setContent("Lis la consigne, clique sur ", getLienSuivant(), " pour voir le document, puis encore une fois pour répondre.")
+            etapes.liste.push([reponse])
+
+          } else if (answer_option == "question") {
+            etapes.titres = ["Lecture de la consigne et réponse", "Visualisation du document"]
+            information.setContent("Réponds à la question, puis clique sur ", getLienSuivant(), " pour voir le document.")
+            // réponse avant l'info
+            etapes.liste = [[consigne, reponse, information], [iframe]]
+          }
+
+        } else if (question_option == "while") {
+          etapes.liste = [[consigne, iframe]]
+          if (answer_option == "after") {
+            etapes.liste[0].push(information)
+            information.setContent("Lis la consigne, observe bien le document puis clique sur ", getLienSuivant(), " pour pouvoir répondre.")
+            etapes.liste.push([reponse])
+            etapes.titres = ["Réponse", "Visualisation de la consigne et du document"]
+
+          } else if (answer_option == "while" || answer_option == "question") {
+            $filariane.hide()
+            etapes.liste[0].push(reponse)
+            etapes.titres = ["Consigne, visualisation du document et réponse"]
+
+          } else {
+            $filariane.hide()
+            etapes.titres = ["Consigne et visualisation du document"]
+          }
+
+        } else if (question_option == "after") {
+          etapes.liste = [[page, information], [consigne]]
+          if (answer_option == "off") {
+            etapes.titres = ["Visualisation du document", "consigne"]
+            information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne.")
+
+          } else if (answer_option == "after") {
+            etapes.titres = ["Visualisation du document", "Lecture de la consigne", "Réponse"]
+            information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne et encore une fois pour répondre.")
+            etapes.liste.push([reponse])
+          }
+          else {
+            information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne et répondre.")
+            etapes.liste[1].push(reponse)
+            etapes.titres = ["Visualisation du document", "Consigne et réponse"]
+          }
+        }
+      } // setEtapes
+
+      /**
+       * Réactualise l'affichage avec l'étape etapes.currentIndex
+       * @private
+       */
+      function showEtape() {
+        log("showEtape")
+        var i
+        // on ferme tout
+        reponse.desactiver()
+        consigne.desactiver()
+        iframe.desactiver()
+
+        // active les elts de l'etape en cours
+        var etape = etapes.liste[etapes.currentIndex]
+        for (i = 0; i < etape.length; i++) {
+          //log("active " +i +' ' +etapes.titres[i], etape[i])
+          etape[i].activer()
         }
 
-        /**
-         * Initialise les fenêtres modales
-         */
-        function init() {
-          // les comportements qui dépendent pas du contexte
-          $lienConsigne.click(consigne.toggle)
-          $lienReponse.click(reponse.toggle)
-
-          // les fenetres modales
-          var informationDialogOptions = {
-            title: 'Information',
-            autoOpen: false,
-            resizable: false,
-            position: {my: 'left+10 top+10', at: 'left bottom', of: '#entete'},
-            buttons: {
-              "OK": function () {
-                $information.dialog("close")
-              }
-            }
-          }
-          $information.dialog(informationDialogOptions)
-
-          var consigneDialogOptions = {
-            //position : [30, 50],
-            // cf http://api.jqueryui.com/position/
-            position: {my: 'left+30 top+50', at: 'left bottom', of: '#entete'},
-            width: 450,
-            height: 350,
-            resizable: true,
-            autoOpen: false,
-            title: 'Consigne',
-            close: function () {
-              $lienConsigne.css('font-weight', 'bold')
-            },
-            open: function () {
-              if (hasTexConsigne) {
-                // @see https://groups.google.com/forum/#!topic/mathjax-users/v6nVeANKihs
-                // http://docs.mathjax.org/en/latest/queues.html
-                log("open consigne")
-                /*global MathJax*/
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub, "consigne"])
-              }
-              $lienConsigne.css('font-weight', 'normal')
-            }
-          }
-          $consigne.dialog(consigneDialogOptions)
-
-          var reponseDialogOptions = {
-            width: hasCkeditor ? 580 :480,
-            height: hasCkeditor ? 400 : 320,
-            //position : [$('body').width() - 30 - 472, 50],
-            position: {my: 'right-30 top+70', at: 'right bottom', of: '#entete'},
-            resizable: true,
-            autoOpen: false,
-            title: 'Ta réponse',
-            ferme: function () {
-              $lienReponse.css('font-weight', 'bold')
-            },
-            ouvre: function () {
-              $lienReponse.css('font-weight', 'normal')
-            }
-          }
-          $reponse.dialog(reponseDialogOptions)
-        } // init
-
-        /**
-         * Charge les éventuelles dépendances avant d'appeler next
-         * @private
-         * @param next
-         */
-        function loadDependencies(next) {
-          var dependances = []
-          if (hasTexConsigne && typeof MathJax === "undefined") dependances.push("mathjax")
-          if (dependances.length) page.loadAsync(dependances, next)
-          else next()
+        // reconstruction du fil d'ariane, titre des étapes passées
+        // + titre actuel ≠ + suivant)
+        $filariane.empty()
+        var c = etapes.currentIndex
+        for (i = 0; i < c; i++) {
+          $filariane.append("Étape " + (i+1) + " : " + etapes.titres[i] + ' >> ')
         }
+        // ajout titre courant
+        $filariane.append("Étape " + (c + 1) + " : ").append(dom.getElement('span', {"class": 'highlight'}, etapes.titres[c]))
+        // titre suivant éventuel
+        if (etapes.hasNext()) {
+          $filariane.append(getLienSuivant())
+          //$(lienSuivant).click(etapes.next)
+        }
+      } // showEtape
 
-        /**
-         * Construit la liste des étapes d'après les options
-         * @private
-         */
-        function setEtapes() {
-          /**
-           * Option de l'affichage de la question qui peut prendre les valeurs
-           *   "off"    : pas de question
-           *   "before" : avant la page
-           *   "while"  : pendant la page
-           *   "after"  : après la page
-           * @type {string}
-           */
-          var question_option = ressource.parametres.question_option || "off"
-          /**
-           * Option de l'affichage de la réponse qui peut prendre les valeurs
-           *   "off"      : pas de réponse attendue
-           *   "question" : pendant l'affichage de la question
-           *   "while"    : pendant l'affichage de la page
-           *   "after"    : après la page
-           * @type {string}
-           */
-          var answer_option = ressource.parametres.answer_option || "off"
-          log("lien suivant dans setEtapes", lienSuivant)
 
-          if (question_option == "off") {
-            etapes.liste = [[information, iframe]]
-            // pas de question, pour la réponse :
-            if (answer_option == "while") {
-              etapes.titres = ["Visualisation du document et réponse"]
-              information.setContent("Observe ce document et envoie ta réponse.")
-              // ajout de la réponse à la 1re étape
-              etapes.liste[0].push(reponse)
-
-            } else if (answer_option == "after") {
-              etapes.titres = ["Visualisation du document", "Réponse"]
-              information.setContent("Observe ce document puis clique sur ", getLienSuivant(), " pour répondre.")
-              // ajout de la réponse en 2e étape
-              etapes.liste.push([reponse])
-            }
-
-          } else if (question_option == "before") {
-            // consigne puis page
-            etapes.liste = [[consigne, information], [iframe]]
-            if (answer_option == "off") {
-              etapes.titres = ["Lecture de la consigne", "Visualisation du document"]
-              information.setContent("Commence par lire la consigne, puis clique sur ", getLienSuivant(), " pour voir le document.")
-
-            } else if (answer_option == "while") {
-              etapes.titres = ["Lecture de la consigne", "Visualisation du document et réponse"]
-              information.setContent("Lis la consigne, clique sur ", getLienSuivant(), " pour voir le document et répondre.")
-              etapes.liste[1].push(reponse)
-
-            } else if (answer_option == "after") {
-              etapes.titres = ["Lecture de la consigne", "Visualisation du document", "Réponse"]
-              information.setContent("Lis la consigne, clique sur ", getLienSuivant(), " pour voir le document, puis encore une fois pour répondre.")
-              etapes.liste.push([reponse])
-
-            } else if (answer_option == "question") {
-              etapes.titres = ["Lecture de la consigne et réponse", "Visualisation du document"]
-              information.setContent("Réponds à la question, puis clique sur ", getLienSuivant(), " pour voir le document.")
-              // réponse avant l'info
-              etapes.liste = [[consigne, reponse, information], [iframe]]
-            }
-
-          } else if (question_option == "while") {
-            etapes.liste = [[consigne, iframe]]
-            if (answer_option == "after") {
-              etapes.liste[0].push(information)
-              information.setContent("Lis la consigne, observe bien le document puis clique sur ", getLienSuivant(), " pour pouvoir répondre.")
-              etapes.liste.push([reponse])
-              etapes.titres = ["Réponse", "Visualisation de la consigne et du document"]
-
-            } else if (answer_option == "while" || answer_option == "question") {
-              $filariane.hide()
-              etapes.liste[0].push(reponse)
-              etapes.titres = ["Consigne, visualisation du document et réponse"]
-
-            } else {
-              $filariane.hide()
-              etapes.titres = ["Consigne et visualisation du document"]
-            }
-
-          } else if (question_option == "after") {
-            etapes.liste = [[page, information], [consigne]]
-            if (answer_option == "off") {
-              etapes.titres = ["Visualisation du document", "consigne"]
-              information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne.")
-
-            } else if (answer_option == "after") {
-              etapes.titres = ["Visualisation du document", "Lecture de la consigne", "Réponse"]
-              information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne et encore une fois pour répondre.")
-              etapes.liste.push([reponse])
-            }
-            else {
-              information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne et répondre.")
-              etapes.liste[1].push(reponse)
-              etapes.titres = ["Visualisation du document", "Consigne et réponse"]
-            }
-          }
-        } // setEtapes
-
-        /**
-         * Réactualise l'affichage avec l'étape etapes.currentIndex
-         * @private
-         */
-        function showEtape() {
-          log("showEtape")
-          var i
-          // on ferme tout
-          reponse.desactiver()
-          consigne.desactiver()
-          page.desactiver()
-
-          // active les elts de l'etape en cours
-          var etape = etapes.liste[etapes.currentIndex]
-          for (i = 0; i < etape.length; i++) {
-            //log("active " +i +' ' +etapes.titres[i], etape[i])
-            etape[i].activer()
-          }
-
-          // reconstruction du fil d'ariane, titre des étapes passées
-          // + titre actuel ≠ + suivant)
-          $filariane.empty()
-          var c = etapes.currentIndex
-          for (i = 0; i < c; i++) {
-            $filariane.append("Étape " + (i+1) + " : " + etapes.titres[i] + ' >> ')
-          }
-          // ajout titre courant
-          $filariane.append("Étape " + (c + 1) + " : ").append(dom.getElement('span', {"class": 'highlight'}, etapes.titres[c]))
-          // titre suivant éventuel
-          if (etapes.hasNext()) {
-            $filariane.append(getLienSuivant())
-            //$(lienSuivant).click(etapes.next)
-          }
-        } // showEtape
-
-        /**
-         * MAIN
-         */
-
+      try {
         if (!ressource || !ressource.parametres || !ressource.parametres.adresse) throw new Error("ressource manquante ou incomplète")
         log('urlUi avec ', ressource.parametres, options)
         /**
@@ -295,7 +293,7 @@ module.exports = function (ressource, options, next) {
 
         var etapes = {
           currentIndex: 0,
-          // chaque elt est une etape : un tableau avec les objets à afficher (parmi consigne, reponse, information, page)
+          // chaque elt est une etape : un tableau avec les objets à afficher (parmi consigne, reponse, information, iframe)
           liste: [],
           // les titres de chaque étape
           titres: [],
@@ -320,7 +318,7 @@ module.exports = function (ressource, options, next) {
         })
 
         /*
-         * Nos 4 éléments qui peuvent entrer dans une étape
+         * Nos 4 éléments qui peuvent entrer dans une étape : iframe, information, consigne, reponse
          */
 
         /* La page en iframe, ou div si swf */
@@ -367,6 +365,7 @@ module.exports = function (ressource, options, next) {
           }
         }
 
+        /* objet pour la fenêtre modale réponde */
         var reponse = {
           activer: function () {
             $reponse.dialog('open')
@@ -403,9 +402,10 @@ module.exports = function (ressource, options, next) {
           showEtape()
           next()
         })
-      })
-    })
-  } catch (error) {
-    page.addError(error)
-  }
+      } catch (error) {
+        if (next) next(error)
+        else page.addError(error)
+      }
+    }) // $(code)
+  }) // loadAsync
 }

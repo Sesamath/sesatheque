@@ -29,18 +29,19 @@
  * pour une explication en français)
  */
 "use strict"
-/**
- * @file Édite les paramètres d'une ressource ecjs
- */
 
 var page = require('../../page')
 var dom = require('../../tools/dom')
 //var log = require('../../tools/log')
-var $ = window.jQuery
-/* jshint jquery:true */
 var formEditor = require('../../edit/formEditor')
 
-module.exports = function iepEdit(ressource) {
+var $ = window.jQuery
+/* jshint jquery:true */
+
+/**
+ * Édite les paramètres d'une ressource iep
+ */
+module.exports = function edit(ressource) {
   function importXml() {
     var url = $parametresUrl.val()
     if (url && url.substr(0, 4) === "http") {
