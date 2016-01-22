@@ -6,4 +6,3 @@ logs/*
 documentation/*
 *.pid
 *.map
-*.bundle.js
