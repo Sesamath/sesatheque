@@ -49,7 +49,7 @@ var flow = require('an-flow')
 var config = require('./config')
 var appConfig = require('../config')
 //var tools = require('../tools')
-var Alias = require('./constructors/Alias')
+var Alias = require('./srcClient/constructors/Alias')
 var jstreeConverter = require('./srcClient/display/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
 

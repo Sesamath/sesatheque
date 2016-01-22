@@ -23,7 +23,7 @@ var config = {
         // la base avec headjs (doit être chargé par tous)
         'page.bundle.js': [srcs+'tools/*', srcs+'page/*'],
         // les modules d'affichage, avec jQuery mais pas jQueryUi (qui sera chargé en async pour l'édition d'arbre)
-        'display.bundle.js': [srcs+'tools/*', srcs+'page/*', srcs+'display/*', srcs+'plugins/*/display*', constructors+'Resultat'],
+        'display.bundle.js': [srcs+'tools/*', srcs+'page/*', srcs+'display/*', srcs+'plugins/*/display*', srcs +'constructors/Resultat.js'],
         // les modules d'édition
         'edit.bundle.js': [srcs+'tools/*', srcs+'page/*', srcs+'display/*', srcs+'plugins/*/display*', srcs+'edit/*', srcs+'plugins/*/edit*', srcs+'editors/**'],
         // un module à utiliser à distance pour l'api

@@ -32,7 +32,7 @@
 "use strict"
 /* global define, module*/
 
-var filters = require('../srcClient/tools/filters')
+var filters = require('../tools/filters')
 
 /**
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
