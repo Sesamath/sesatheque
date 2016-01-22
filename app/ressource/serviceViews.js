@@ -705,7 +705,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       $metas : {}
     }
     // les js différents suivant la vue
-    if (viewName === "edit") {
+    if (viewName === "formEdit") {
       data.$metas.js = ['/edit.bundle.js']
     } else if (viewName === "display" || viewName === "preview") {
       data.$metas.js = ['/display.bundle.js']
