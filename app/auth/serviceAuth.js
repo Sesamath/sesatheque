@@ -240,14 +240,14 @@ module.exports = function ($accessControl, $views) {
       } else {
         var urlValidate = baseUrl +'validation'
         if (context.get.redirect) urlValidate += '?redirect=' +encodeURIComponent(context.get.redirect)
-        var urlLogout = baseUrl+'deconnexion'
+        var urlLogout = baseUrl+'deconnexion/externe'
         client.login(context, urlValidate, urlLogout)
       }
     }
   }
 
   /**
-   * Redirige vers la déconnexion du serveur d'authentification (elle est déjà faite dans sesatheque)
+   * Déconnecte localement puis redirige vers la déconnexion du serveur d'authentification (qui rappellera logoutFromRemote)
    * ou affiche une erreur
    * @memberOf $auth
    * @param {Context} context
@@ -278,13 +278,11 @@ module.exports = function ($accessControl, $views) {
       var user = $accessControl.getCurrentUser(context)
       if (user) {
         $accessControl.logout(context)
-        var client = getClient(context)
-        // ce serait bizarre d'avoir un user connecté sans client, au cas où…
-        if (client instanceof Error) throw client
-        client.logoutFromRemote(context)
-      } else {
-        throw new Error("Aucun utilisateur connecté")
-      }
+      } // sinon ça peut être normal si on s'est déjà déconnecté ici
+      var client = getClient(context)
+      // ce serait bizarre d'avoir un user connecté sans client, au cas où…
+      if (client instanceof Error) throw client
+      client.logoutFromRemote(context)
     } catch (error) {
       $views.outputError(context, error, "iframe")
     }

@@ -59,7 +59,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
 
 
     /**
-     * déconnexion ici à propager vers le serveur sso
+     * Déconnexion ici (action de l'utilisateur sur ce site), à propager vers le serveur sso qui rappellera deconnexion/externe
      * @route GET /deconnexion
      */
     controller.get('deconnexion', function (context) {
