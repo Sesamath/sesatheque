@@ -3,7 +3,8 @@
   "version": "0.0.7",
   "private": true,
   "scripts": {
-    "start": "./scripts/run",
+    "start": "node app/index.js",
+    "startProd": "./scripts/run -p",
     "wpwatch": "webpack --watch"
   },
   "dependencies": {
