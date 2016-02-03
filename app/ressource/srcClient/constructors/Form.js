@@ -77,7 +77,7 @@ function Form(obj) {
 
   /**
    * Liste de FormFieldGroup
-   * @type {string}
+   * @type {FormFieldGroup[]}
    */
   this.groups = []
   if (obj.groups && obj.groups.length) {
@@ -97,6 +97,26 @@ Form.prototype.addGroup = function addGroup(group) {
   this.groups.push(fieldGroup)
   
   return fieldGroup
+}
+
+/**
+ * Ajoute un champ dans le dernier groupe de champs (le créé si y'en a pas ou si inNewGroup)
+ * @param {object|FormField} field
+ * @param {boolean} [inNewGroup=false]
+ * @returns {FormField}
+ */
+Form.prototype.addField = function addField(field, inNewGroup) {
+  var nb = this.groups.length
+  var fieldGroup
+  if (inNewGroup) {
+    fieldGroup = this.addGroup()
+  } else if (nb) {
+    fieldGroup = this.groups[nb]
+  } else {
+    fieldGroup = this.addGroup()
+  }
+
+  return fieldGroup.addField(field)
 }
 
 /**

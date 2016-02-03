@@ -167,7 +167,12 @@ module.exports = function () {
     $form.addField(group, null, null, value, {widget:'submit'})
   }
 
-  $form.getForm = function (obj) {
+  /**
+   * Retourne un form vide
+   * @param {object|Form} obj
+   * @returns {Form}
+   */
+  $form.get = function (obj) {
     return new Form(obj)
   }
 

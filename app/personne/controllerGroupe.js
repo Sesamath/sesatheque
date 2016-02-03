@@ -46,7 +46,21 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
   var _ = require('lodash')
   var tools = require('../tools')
   var flow = require('an-flow')
-  var appConfig = require('../config')
+
+  /**
+   * Retourne la liste des groupes du user courant (liste vide si pas authentifié)
+   * @param {Context} context
+   * @returns {Array}
+   */
+  function getMyGroupes (context) {
+    var me = $accessControl.getCurrentUser(context)
+    var groupes = []
+    if (me && me.groupes) {
+      groupes = tools.truePropertiesList(me.groupes)
+    }
+
+    return groupes
+  }
 
   /**
    * Affiche un form en ajoutant un token à la ressource
@@ -86,12 +100,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    * @route GET /groupe/perso
    */
   controller.get('perso', function (context) {
-    var me = $accessControl.getCurrentUser(context)
-    var data = $page.getDefaultData(context)
-    var groupes = []
-    if (me && me.groupes) {
-      groupes = tools.truePropertiesList(me.groupes)
-    }
+
     data.contentBloc = {
       $view : 'mesGroupes',
       groupes : groupes
@@ -104,15 +113,23 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    * @route GET /groupe/ajouter
    */
   controller.get('ajouter', function (context) {
-    var data = $page.getDefaultData(context)
-    if ($accessControl.hasGenericPermission('createGroupe', context)) {
-      data.$metas.title = 'Ajouter un groupe'
-      data.contentBloc = $form.get()
-      data.contentBloc.$view = 'form';
-    log('data', data)
-      context.html(data)
+    if ($accessControl.isAuthenticated(context)) {
+      if ($accessControl.hasGenericPermission('createGroupe', context)) {
+        var data = $page.getDefaultData(context)
+        data.$metas.title = 'Ajouter un groupe'
+        var form = $form.get()
+        var formGroup = form.addGroup()
+        formGroup.addField({name: "nom", label:'Nom du groupe'})
+        formGroup.addField({name: "ouvert", value: true, label:'Ouvert à tous'})
+        form.addSubmit('Créer')
+        data.contentBloc = form
+        data.contentBloc.$view = 'form'
+        context.html(data)
+      } else {
+        $page.denied(context, 'Droits insuffisants pour créer un groupe')
+      }
     } else {
-      $page.denied(context, 'Droits insuffisants pour créer un groupe')
+      $page.denied(context, 'Il faut être authentifié pour créer un groupe')
     }
   })
 
@@ -122,63 +139,42 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    * @route POST /groupe/ajouter
    */
   controller.post('ajouter', function (context) {
-    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-    context.tab = 'create'
-    var ressourcePosted = context.post
-    var titrePage = 'Ajouter une ressource'
-
-    if (context.post.oid) {
-      $page.printError(context, "Impossible d'ajouter une ressource existante")
-    } else {
-      flow().seq(function () {
-        checkToken(context, 0, this)
-
-      }).seq(function () {
-        var next = this
-        $accessControl.checkPermission('create', context, ressourcePosted, function (errorMsg) {
-          if (errorMsg) denied(context, errorMsg)
-          else next()
-        })
-
-      }).seq(function () {
-        // on fixe la date de màj avant validation
-        if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date();
-        $ressourceControl.valideRessourceFromPost(context.post, false, this)
-
-      }).seq(function (ressource) {
-        ressourcePosted = ressource
-        if (!_.isEmpty(ressource.errors)) printForm(context, null, ressource, titrePage)
-        else if (!_.isEmpty(ressource.warnings) && !ressource.force) printForm(context, null, ressource, titrePage)
-        else this(null, ressource)
-
-      }).seq(function (ressource) {
-        $personneControl.checkGroupes(context, null, ressource, this)
-
-      }).seq(function (ressource) {
-        $personneControl.checkPersonnes(context, null, ressource, this)
-
-      }).seq(function (ressource) {
-        log.debug("auteurs après checkPersonnes", ressource.auteurs)
-        $ressourceRepository.write(ressource, function (error, ressource) {
-          // on veut gérér les erreurs ici car y'a un bug dans notre code
-          if (error || !_.isEmpty(ressource.errors)) {
-            log.error(new Error("on a une erreur au write mais pas au valide précédent"))
-            printForm(context, error, ressource, 'Ajouter une ressource')
-          } else {
-            log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
-            var url = $routes.getAbs('edit', ressource.oid, context)
-            if (context.layout === "iframe") {
-              url += "?layout=iframe"
-              if (context.get.closerId) url += "&closerId=" +context.get.closerId
+    if ($accessControl.isAuthenticated(context)) {
+      if ($accessControl.hasGenericPermission('createGroupe', context)) {
+        var data = $page.getDefaultData(context)
+        data.$metas.title = 'Ajouter un groupe'
+        var groupe = context.post
+        if (groupe.nom) {
+          // faut vérifier qu'il n'existe pas
+          $groupeRepository.load(groupe.nom, function (error, groupeBdd) {
+            if (error) {
+              $page.printError(context, error)
+            } else if (groupeBdd) {
+              $page.printError(context, "Le groupe « " +groupe.nom +" » existe déjà")
+            } else {
+              $groupeRepository.save(groupe, function (error, groupeSaved) {
+                if (error) {
+                  $page.printError(context, error)
+                } else {
+                  var data = $page.getDefaultData(context)
+                  data.$metas.title = 'Groupe ajouté'
+                  data.contentBloc = {
+                    $view: 'groupes',
+                    contents: ["Le groupe « " +groupeSaved.nom +" » a été créé"]
+                  }
+                  context.html(data)
+                }
+              })
             }
-            context.redirect(url)
-          }
-        }) // write
-
-      }).catch(function (error) {
-        printForm(context, error, ressourcePosted, titrePage)
-      })
-
+          })
+        } else {
+          $page.printError(context, "Données invalides")
+        }
+      } else {
+        $page.denied(context, 'Droits insuffisants pour créer un groupe')
+      }
+    } else {
+      $page.denied(context, 'Il faut être authentifié pour créer un groupe')
     }
   })
 
@@ -186,35 +182,39 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    * formulaire d'édition
    * @route GET /groupe/modifier/:oid
    */
-  controller.get('/modifier/:oid', function (context) {
-    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-    context.tab = 'edit'
-    // pas la peine de la charger si on est pas authentifié
+  controller.get('/modifier/:nom', function (context) {
     if ($accessControl.isAuthenticated(context)) {
-      var oid = context.arguments.oid
-      $ressourceRepository.load(oid, function (error, ressource) {
-        if (error) {
-          log.error(error)
-          $page.printError(context, "Probleme d'accès à la base de données")
-        } else if (ressource) {
-          if ($accessControl.hasPermission('update', context, ressource)) {
-            var options = {
-              $metas: {title: 'Modifier la ressource : ' + ressource.titre}
+      var nom = context.arguments.nom
+      var myGroupes = getMyGroupes(context)
+      if (myGroupes.indexOf(nom) !== -1 && $accessControl.hasGenericPermission('createGroupe', context)) {
+        $groupeRepository.load(nom, function (error, groupeBdd) {
+          if (error) {
+            $page.printError(context, error)
+          } else if (groupeBdd) {
+            var myOid = $accessControl.getCurrentUserOid(context)
+            if (groupeBdd.gestionnaires && groupeBdd.gestionnaires.length && groupeBdd.gestionnaires.indexOf(myOid) !== -1) {
+              var data = $page.getDefaultData(context)
+              data.$metas.title = 'Modifier un groupe'
+              var form = $form.get()
+              var formGroup = form.addGroup({label : "Groupe : " +groupeBdd.nom})
+              formGroup.addField({name: "ouvert", value: true, label:'Ouvert à tous'})
+              // @todo ajouter ce qu'il faut pour modifier les gestionnaires (en ajouter un ou se retirer)
+              form.addSubmit('Modifier')
+              data.contentBloc = form
+              data.contentBloc.$view = 'form'
+              context.html(data)
+            } else {
+              $page.denied(context, 'Droits insuffisants pour modifier ce groupe')
             }
-            options.titre = ressource.titre
-            addToken(context, ressource)
-            $page.printForm(context, error, ressource, options)
           } else {
-            // la ressource existe mais on donne pas l'info si on a pas les droits
-            denied404(context, oid)
+            $page.printError(context, "Le groupe « " + nom + " » n'existe pas")
           }
-        } else {
-          // la ressource n'existe pas mais on donne pas l'info
-          denied404(context, oid)
-        }
-      })
+        })
+      } else {
+        $page.denied(context, 'Droits insuffisants pour modifier ce groupe')
+      }
     } else {
-      denied(context)
+      $page.denied(context, 'Il faut être authentifié pour créer un groupe')
     }
   })
 
@@ -278,8 +278,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
             },
             $views : __dirname +"/../views",
             contentBloc : {
-              $view : "home",
-              content : "Ressource " +ressource.oid +" enregistrée"
+              $view : "contents",
+              contents : ["Ressource " +ressource.oid +" enregistrée"]
             },
             jsBloc : {
               $view : "js",

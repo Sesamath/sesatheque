@@ -12,13 +12,13 @@
     <div class="warning">{.}</div>
   {/warnings}
   {@eq key=widget value="hidden"}
-    {>"formField{widget}" /}
+    {>"formField_{widget}" /}
   {:else}
     <label>
       {label}
       {?required}<span class="required" title="Ce champ est obligatoire">*</span>{/required}
       {?labelInfo}<span class="remarque">({labelInfo})</span>{/labelInfo}
     </label>
-    {>"formField{widget}" /}
+    {>"formField_{widget}" /}
   {/eq}
 </div>

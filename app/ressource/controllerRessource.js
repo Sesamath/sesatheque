@@ -546,8 +546,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             },
             $views : __dirname +"/../views",
             contentBloc : {
-              $view : "home",
-              content : "Ressource " +ressource.oid +" enregistrée"
+              $view : "contents",
+              contents : ["Ressource " +ressource.oid +" enregistrée"]
             },
             jsBloc : {
               $view : "js",

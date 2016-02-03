@@ -110,11 +110,11 @@ function FormField(obj) {
    * @default ''
    */
   this.value = ''
-  if (typeof obj.value === 'string' || typeof obj.value === 'number') {
+  if (typeof obj.value === 'string' || typeof obj.value === 'number' || typeof obj.value === 'undefined') {
     // text par défaut
     if (!this.widget) this.widget = 'text'
-    if (["text", "textarea", "submit", "button"].indexOf(this.widget) > -1) throw new Error("widget incompatible avec la valeur")
-    this.value = obj.value
+    if (["text", "textarea", "submit", "button"].indexOf(this.widget) === -1) throw new Error("widget "+this.widget +" incompatible avec la valeur " +obj.value)
+    this.value = obj.value || ''
 
   } else if (typeof obj.value === 'boolean') {
     // oui / nom sous forme de checkbox
@@ -136,7 +136,7 @@ function FormField(obj) {
   } else if (obj.value instanceof Array) {
     // une liste, checkboxes par défaut
     if (!this.widget) this.widget = 'checkboxes'
-    if (["select", "checkboxes", "radios"].indexOf(this.widget) > -1) throw new Error("widget incompatible avec la valeur")
+    if (["select", "checkboxes", "radios"].indexOf(this.widget) === -1) throw new Error("widget incompatible avec la valeur")
     this.value = []
     if (obj.value.length) {
       for (i = 0; i < obj.value.length; i++) {
@@ -154,7 +154,6 @@ function FormField(obj) {
     // cast de chaque élément en string
     if (obj.selectedValues instanceof Array) {
       for (var i = 0; i < obj.selectedValues.length; i++) {
-        var obj1 = arguments[i];
         this.selectedValues.push(obj.selectedValues[i] +'')
       }
     } else {
@@ -174,10 +173,10 @@ FormField.prototype.addChoice = function addChoice(choice) {
   if (this.id && !choice.id) choice.id = this.id +i
   // et on ajoute les selected s'il y en a (comparaison avec cast en string)
   if (
-      choice.hasOwnProperty('value')
-      && this.selectedValues
-      && this.selectedValues.length
-      && this.selectedValues.indexOf(choice.value +'') > -1
+      choice.hasOwnProperty('value') &&
+      this.selectedValues &&
+      this.selectedValues.length &&
+      this.selectedValues.indexOf(choice.value +'') > -1
   ) {
     choice.selected = true
   }

@@ -1,1 +1,1 @@
-<input id="{id}" type="submit" value="{label}"/>
+<input id="{id}" type="submit" value="{value}"/>

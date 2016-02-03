@@ -68,14 +68,6 @@ function FieldGroup(obj) {
   }
 
   /**
-   * post|get
-   * @type {string}
-   * @default post
-   */
-  this.method = 'post'
-  if (typeof obj.method === 'string' && obj.method.toLowerCase() === 'get') this.method = 'get'
-
-  /**
    * @type {FormField[]}
    */
   this.fields = []
@@ -87,7 +79,9 @@ function FieldGroup(obj) {
 }
 
 FieldGroup.prototype.addField = function addField(field) {
-  this.fields.push(new FormField(field))
+  var formField = new FormField(field)
+  this.fields.push(formField)
+  return formField
 }
 
 module.exports = FieldGroup

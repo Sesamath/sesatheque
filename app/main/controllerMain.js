@@ -47,9 +47,9 @@ module.exports = function (controller) {
     data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
     // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
     data.contentBloc = {
-      $view : 'home',
+      $view : 'contents',
       // ce content est la variable passée au template dust
-      content : "Ce site est encore un prototype expérimental."
+      contents : ["Ce site est encore un prototype expérimental."]
     }
     context.html(data)
   })
