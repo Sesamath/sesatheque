@@ -1,0 +1,7 @@
+<textarea name="{name}"
+  {?id}id="{id}"{/id}
+  {?className}class="{className}"{/className}
+  {?label}placeholder="{label}"{/label}
+  {?attributes}{>attributes /}{/attributes}
+  {?flags.readonly}readonly="readonly"{/flags.readonly}
+>{value|s}</textarea>

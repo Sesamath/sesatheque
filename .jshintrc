@@ -11,6 +11,6 @@
   "undef": true,
   "unused": true,
   "indent": 2,
-  "predef": ["GLOBAL", "lassi", "log", "isProd"],
-  "globals": ["GLOBAL", "lassi", "log","isProd"]
+  "predef": ["GLOBAL", "lassi", "log", "app", "isProd"],
+  "globals": ["GLOBAL", "lassi", "log","app", "isProd"]
 }

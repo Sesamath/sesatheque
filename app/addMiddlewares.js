@@ -55,7 +55,7 @@ module.exports = function afterRailSession(rail) {
     applog("adding middleware", "access log en console (car on est pas en prod)")
     rail.use('/', function(req, res, next) {
       // les requetes non statiques en console et debug
-      if (!isProd && !/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
+      if (!/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
         applog(req.method, req.originalUrl)
         log.debug(req.method +' ' +req.originalUrl)
       }

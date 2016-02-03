@@ -39,7 +39,7 @@ var _ = require('lodash')
 var baseUrl = require('../config').application.baseUrl
 var modLog = require('an-log')('$auth')
 
-module.exports = function ($accessControl, $views) {
+module.exports = function ($accessControl, $ressourcePage) {
   /**
    * Vérifie qu'un service d'authentification est conforme pour pouvoir l'ajouter
    * @private
@@ -232,11 +232,11 @@ module.exports = function ($accessControl, $views) {
   $auth.login = function (context) {
     var user = $accessControl.getCurrentUser(context)
     if (user) {
-      $views.printError(context, new  Error("Utilisateur déjà connecté"))
+      $ressourcePage.printError(context, new  Error("Utilisateur déjà connecté"))
     } else {
       var client = getClient(context)
       if (client instanceof Error) {
-        $views.printError(context, client)
+        $ressourcePage.printError(context, client)
       } else {
         var urlValidate = baseUrl +'validation'
         if (context.get.redirect) urlValidate += '?redirect=' +encodeURIComponent(context.get.redirect)
@@ -257,11 +257,11 @@ module.exports = function ($accessControl, $views) {
     if (user) {
       $accessControl.logout(context)
       var client = getClient(context)
-      if (client instanceof Error) $views.printError(context, client)
+      if (client instanceof Error) $ressourcePage.printError(context, client)
       else client.logout(context)
     } else {
       log.debug("Pas de user en session", context.session)
-      $views.printError(context, new Error("Pas d'utilisateur connecté (donc personne à déconnecter)"))
+      $ressourcePage.printError(context, new Error("Pas d'utilisateur connecté (donc personne à déconnecter)"))
     }
   }
 
@@ -284,7 +284,7 @@ module.exports = function ($accessControl, $views) {
       if (client instanceof Error) throw client
       client.logoutFromRemote(context)
     } catch (error) {
-      $views.outputError(context, error, "iframe")
+      $ressourcePage.outputError(context, error, "iframe")
     }
   }
 
@@ -297,7 +297,7 @@ module.exports = function ($accessControl, $views) {
   $auth.validate = function (context, next) {
     var client = getClient(context)
     if (client instanceof Error) {
-      $views.printError(context, client)
+      $ressourcePage.printError(context, client)
     } else {
       client.validate(context, function (error, personne) {
         if (error) {

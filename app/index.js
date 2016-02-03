@@ -67,14 +67,14 @@ try {
 
   /**
    * Gestion des traces
-   * Attention, ce module m'a déjà joué des tours avec une erreur qui plante node (reproductible, sur une 404)
+   * Attention, le module long-stack-traces m'a déjà joué des tours avec une erreur qui plante node (reproductible, sur une 404)
    *   Uncaught Error: Can't set headers after they are sent.
    *   ...
    *   /sesamath/dev/projets_git/sesatheque/node_modules/long-stack-traces/lib/long-stack-traces.js:80
    *      throw ""; // TODO: throw the original error, or undefined?
    * le désactiver a réglé le problème
    *
-   * Pour augmenter les traces, préférer les options node
+   * Pour augmenter les traces, mieux vaut passer à node ces options
    * --stack_trace_limit=100 --stack-size=2048
    */
   /* if (!isProd) /* * / require('long-stack-traces') /* */
@@ -82,12 +82,22 @@ try {
   var tools = require('./tools')
   //var _ = require('lodash');
 
+  /**
+   * On ajoutera nos middleware après session lorsque lassi mettra les siens
+   * @param {Object} rail le rail express
+   * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
+   */
+  lassi.on('afterRailUse', function (rail, name) {
+    // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
+    if (name === 'session') require('./addMiddlewares')(rail)
+  })
+
   // les déclarations de nos components
-  require('./static')
+  require('./main')
   require('./personne')
   require('./ressource')
   require('./auth')
-  var dependancies = ['static', 'personne', 'ressource', 'auth']
+  var dependancies = ['main', 'personne', 'ressource', 'auth']
 
   // On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
   var privateConfig = require('./_private/config')
@@ -114,7 +124,8 @@ try {
   // Notre appli qui sera mise en global (pour que chacun puisse y ajouter ses controleurs ou services)
   var sesatheque = lassi.component('sesatheque', dependancies)
 
-  sesatheque.config(function ($cache, $settings) {
+  // une fois les composants chargés on ajoutera memcache et nos listeners
+  sesatheque.config(function ($cache, $settings, $accessControl, $routes, $flashMessages) {
     // on ajoute memcache si précisé dans les settings
     var memcache = $settings.get('memcache')
     if (memcache) {
@@ -129,8 +140,9 @@ try {
       throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
     }
 
-    // le listener beforeTransport est ajouté dans le composant static
-
+    // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
+    //if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
+    lassi.transports.html.engine.disableWhiteSpaceCompression()
     // on ajoute nos filtres perso pour dust
     try {
       lassi.transports.html.engine.addFilter('js2', function (value) {
@@ -143,18 +155,11 @@ try {
       log.error("impossible d'ajouter nos filtres à dust", error)
     }
 
+    // le listener beforeTransport
+    lassi.on('beforeTransport', require('./beforeTransport')($accessControl, $routes, $flashMessages))
+
     // log("sesatheque en fin de config", sesatheque)
     appLog("FIN config de l'application " + $settings.get('application.name') + " en mode " + $settings.get('application.staging'))
-  })
-
-  /**
-   * On ajoute nos middleware
-   * @param {Object} rail le rail express
-   * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
-   */
-  lassi.on('afterRailUse', function (rail, name) {
-    // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
-    if (name === 'session') require('./addMiddlewares')(rail)
   })
 
   // pour sesalab-admin

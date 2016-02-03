@@ -38,10 +38,10 @@
  * @requires $ressourceConverter
  * @requires $accessControl
  * @requires $personneControl
- * @requires $views
+ * @requires $ressourcePage
  * @requires $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) {
   var request = require('request')
   //var _ = require('lodash')
   var tools = require('../tools')

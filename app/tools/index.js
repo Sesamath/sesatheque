@@ -56,10 +56,10 @@ tools.clone = function(object) {
   } else if (object instanceof RegExp) {
     copy = new RegExp(object)
   } else if (object instanceof Object) {
-    copy = Object.create(Object.getPrototypeOf(object));
-    tools.update(copy, object);
+    copy = Object.create(Object.getPrototypeOf(object))
+    tools.update(copy, object)
   }
-  return copy;
+  return copy
 }
 
 /**
@@ -252,14 +252,14 @@ tools.parse = function (jsonString) {
 }
 
 /**
- * Vire les espaces et les caractères de contrôle d'une chaine
+ * Remplace les espaces par des underscores et vire les caractères de contrôle d'une chaine
  * @see http://unicode-table.com/en/
  * @memberOf tools
  * @param {string} source La chaîne à nettoyer
  * @returns {string} La chaîne nettoyée
  */
 tools.sanitizeHashKey = function(source) {
-  return source.replace(/[\x00-\x20\x7F-\xA0]/, '');
+  return source.replace(' ', '_').replace(/[\x00-\x20\x7F-\xA0]/, '')
 }
 
 /**
@@ -268,7 +268,7 @@ tools.sanitizeHashKey = function(source) {
  * @returns {void|*|{value}|string|XML}
  */
 tools.sanitizeStrict = function (source) {
-  return source.replace(/[^a-zA-Z0-9_\-]/, '');
+  return source.replace(/[^a-zA-Z0-9_\-]/, '')
 }
 
 /**
@@ -282,12 +282,12 @@ tools.strFormat = function (message, args) {
   var retour
   if (_.isArray(args)) {
     // faut ajouter message en 1er argument et le passer à util.format
-    retour = util.format.apply(null, args.unshift(message));
+    retour = util.format.apply(null, args.unshift(message))
   } else {
     // pas la peine de bosser pour rien
     if (arguments.length < 2) retour = message
     // on transmet tel quel
-    else retour = util.format.apply(null, arguments);
+    else retour = util.format.apply(null, arguments)
   }
 
   return retour
@@ -302,28 +302,27 @@ tools.strFormat = function (message, args) {
  * @returns {string}
  */
 tools.stringify = function(obj, indent) {
-  var buffer;
+  var buffer
 
   if (obj) {
     // ça peut planter en cas de ref circulaire
     try {
-      buffer = indent ? JSON.stringify(obj, null, indent):JSON.stringify(obj);
+      buffer = indent ? JSON.stringify(obj, null, indent):JSON.stringify(obj)
     } catch (error) {
-      // on tente une construction à la static pour chacun des 1ers niveaux
-      var pile = [];
+      var pile = []
       _.each(obj, function(value, key) {
         buffer = '"' + key + '":'
         try {
-          buffer += indent ? JSON.stringify(value, null, indent):JSON.stringify(value);
+          buffer += indent ? JSON.stringify(value, null, indent):JSON.stringify(value)
         } catch (error) {
-          buffer += '"stringifyError : ' + error.toString() +'"';
+          buffer += '"stringifyError : ' + error.toString() +'"'
         }
         pile.push(buffer)
-      });
-      buffer = '{' +pile.join(',\n') +'}';
+      })
+      buffer = '{' +pile.join(',\n') +'}'
     }
   }
-  return buffer;
+  return buffer
 }
 
 /**
@@ -333,7 +332,7 @@ tools.stringify = function(obj, indent) {
  * @returns {string}
  */
 tools.stripTags = function (source) {
-  return source.replace(/(<([^>]+)>)/ig,"");
+  return source.replace(/(<([^>]+)>)/ig,"")
 }
 
 /**
@@ -370,6 +369,21 @@ tools.toJour = function (date) {
 }
 
 /**
+ * Retourne la liste des propriétés vraies d'un objet
+ * @param {object} obj
+ * @returns {Array}
+ */
+tools.truePropertiesList = function (obj) {
+  var list = []
+  if (typeof obj === 'object') {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop) && obj.prop) list.push(prop)
+    }
+  }
+  return list
+}
+
+/**
  * Update object en y ajoutant toutes les propriétés de addition
  * @memberOf tools
  * @param object
@@ -381,8 +395,8 @@ tools.update = function(object, addition) {
         object,
         property,
         Object.getOwnPropertyDescriptor(addition, property)
-    );
-  });
+    )
+  })
 }
 
 /**

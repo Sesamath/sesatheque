@@ -28,20 +28,29 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-'use strict'
-var authComponent = lassi.component('auth')
+'use strict';
 
-authComponent.service('$auth', function($accessControl, $ressourcePage) {
-  return require('./serviceAuth')($accessControl, $ressourcePage)
-})
+module.exports = function (controller) {
+  var baseData = {
+    $metas : {},
+    $views : __dirname +'/../views'
+  }
 
-authComponent.controller(function ($auth, $accessControl, $ressourcePage, $flashMessages) {
-  require('./controllerAuth')(this, $auth, $accessControl, $ressourcePage, $flashMessages)
-})
+  // nos ressources statiques génériques
+  controller.serve(__dirname +'/public')
 
-authComponent.controller(function ($auth, $accessControl, $ressourceRepository) {
-  require('./controllerApi')(this, $auth, $accessControl, $ressourceRepository)
-})
-
-// rien à faire en config
-authComponent.config(function() {})
+  // home
+  controller.get('/', function (context) {
+    context.layout = 'page';
+    var data = baseData
+    // log('le contexte dans le controleur de main, action /',context)
+    data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
+    // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
+    data.contentBloc = {
+      $view : 'home',
+      // ce content est la variable passée au template dust
+      content : "Ce site est encore un prototype expérimental."
+    }
+    context.html(data)
+  })
+}

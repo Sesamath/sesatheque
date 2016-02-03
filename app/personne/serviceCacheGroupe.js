@@ -32,6 +32,20 @@
 'use strict'
 
 var tools = require('../tools')
+var _ = require('lodash')
+
+/**
+ * Retourne la clé de cache d'un groupe
+ * @private
+ * @param {string|Groupe} groupe
+ * @returns {string}
+ */
+function getKey(groupe) {
+  var key
+  if (_.isString(groupe)) key = 'groupe_' +tools.sanitizeHashKey(groupe)
+  else if (groupe && groupe.nom) key = 'groupe_' +tools.sanitizeHashKey(groupe.nom)
+  return key
+}
 
 module.exports = function ($cache, $settings) {
   var ttl = $settings.get('components.personne.cacheTTL', 20*60)
@@ -45,23 +59,15 @@ module.exports = function ($cache, $settings) {
   var $cacheGroupe = {}
 
   /**
-   * Récupère un groupe dans le cache, d'après son oid
-   * @param {Integer} oid
-   * @param {groupeCallback} next
-   * @memberOf $cacheGroupe
-   */
-  $cacheGroupe.get = function (oid, next) {
-    $cache.get('groupe_' +oid, next)
-  }
-  /**
    * Récupère un groupe dans le cache, d'après son nom
    * @param {string} nom
    * @param {groupeCallback} next
    * @memberOf $cacheGroupe
    */
-  $cacheGroupe.getByNom = function (nom, next) {
-    var key = 'groupeNom_' +tools.sanitizeHashKey(nom)
-    $cache.get(key, next)
+  $cacheGroupe.get = function (nom, next) {
+    var key = getKey(nom)
+    if (key) $cache.get(key, next)
+    else next(new Error("Nom de groupe vide"))
   }
   /**
    * Met un groupe en cache
@@ -70,25 +76,20 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cacheGroupe
    */
   $cacheGroupe.set = function (groupe, next) {
-    var nom = tools.sanitizeHashKey(groupe.nom)
-    $cache.set('groupeNom_' +nom, groupe, ttl)
-    $cache.set('groupe_' +groupe.oid, groupe, ttl, next)
+    if (groupe && groupe.nom) $cache.set(getKey(groupe), groupe, ttl, next)
+    else next(new Error("Groupe invalide"))
   }
+
   /**
    * Efface un groupe du cache
-   * @param {Integer} oid
+   * @param {string|Groupe} groupe (l'objet ou son nom)
    * @param {errorCallback} next
    * @memberOf $cacheGroupe
    */
-  $cacheGroupe.delete = function (oid, next) {
-    // faut aller le chercher en cache pour trouver le nom
-    $cache.get('groupe_' +oid, function (error, groupe) {
-      if (groupe && groupe.nom) {
-        var key = 'groupeNom_' +tools.sanitizeHashKey(groupe.nom)
-        $cache.delete(key)
-      }
-    })
-    $cache.delete('groupe_', oid, next)
+  $cacheGroupe.delete = function (groupe, next) {
+    var key = getKey(groupe)
+    if (key) $cache.delete(key, next)
+    else next(new Error("groupe invalide"))
   }
 
   return $cacheGroupe

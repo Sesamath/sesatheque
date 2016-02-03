@@ -101,7 +101,7 @@ function Personne(initObj) {
    */
   this.permissions = initObj.permissions || undefined
   /**
-   * La liste des groupes {groupe:boolean}
+   * La liste des groupes {groupeNom:boolean}
    * @type {Object}
    * @default {}
    */
@@ -115,21 +115,7 @@ function Personne(initObj) {
 }
 
 module.exports = function (EntityPersonne) {
-  /**
-   * Retourne la liste des propriétés vraies d'un objet
-   * @private
-   * @param obj
-   * @returns {Array}
-   */
-  function truePropertiesList(obj) {
-    var list = []
-    for (var prop in obj) {
-      if (obj.hasOwnProperty(prop) && obj.prop) list.push(prop)
-    }
-    return list
-  }
-
-  //var Personne = require('./Personne')
+  var tools = require('../tools')
 
   EntityPersonne.construct(Personne)
 
@@ -149,9 +135,9 @@ module.exports = function (EntityPersonne) {
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
       // une callback qui renvoie la valeur (ou un tableau de valeurs)
       .defineIndex('roles', 'string', function () {
-        return truePropertiesList(this.roles)
+        return tools.truePropertiesList(this.roles)
       })
       .defineIndex('groupes', 'string', function () {
-        return truePropertiesList(this.groupes)
+        return tools.truePropertiesList(this.groupes)
       })
 }

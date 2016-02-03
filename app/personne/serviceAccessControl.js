@@ -268,51 +268,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   //######################
 
   /**
-   * Ajoute un groupe d'après son id à une personne (s'il existe)
-   * @param {Personne} personne
-   * @param {string} groupeNom
-   * @param {personneCallback} next Avec la personne modifiée
-   * @memberOf $accessControl
-   */
-  $accessControl.addGroupeById = function (personne, groupeNom, next) {
-    if (!personne.groupes[groupeNom]) {
-      $personneRepository.loadGroupe(groupeNom, function (error, groupe) {
-        if (error) next(error)
-        else {
-          if (groupe) personne.groupes[groupeNom] = true
-          else log.error("Aucun groupe d'id " +groupeNom)
-          next(null, personne)
-        }
-      })
-    }
-  }
-
-  /**
-   * Ajoute un groupe à la personne (en le créant s'il n'existait pas)
-   * @param {Personne} personne
-   * @param {string} groupeNom Le nom
-   * @param {groupeCallback} next
-   * @memberOf $accessControl
-   */
-  $accessControl.addGroupeByName = function (personne, groupeNom, next) {
-    $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
-      if (error) {
-        next(error, personne)
-      } else if (groupe) {
-        personne.groupes[groupe.oid] = true
-        next(null, personne)
-      } else {
-        // on le créé au passage
-        EntityGroupe.create({nom:groupeNom}).store(function (error, groupe) {
-          log.debug('après store ', groupe)
-          if (groupe) personne.groupes[groupe.oid] = true
-          next(error, personne)
-        })
-      }
-    })
-  }
-
-  /**
    * Vérifie la permission pour l'utilisateur courant et cette ressource
    * @param permission
    * @param {Context}       context
@@ -433,14 +388,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {boolean}
    * @memberOf $accessControl
    */
-  $accessControl.hasGenericPermission = function(permission, context) {
+  function hasGenericPermission(permission, context) {
     return context &&
            context.session &&
            context.session.user &&
            context.session.user.permissions &&
            context.session.user.permissions[permission]
   }
-  var hasGenericPermission = $accessControl.hasGenericPermission
+  $accessControl.hasGenericPermission = hasGenericPermission
 
   /**
    *

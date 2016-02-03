@@ -250,7 +250,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           // on utilise https://lodash.com/docs#isEqual
           if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
             // debug
-            if (!GLOBAL.isProd) {
+            if (!isProd) {
               try {
                 log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
                     '\navant : ' +(ressourceBdd[prop] === undefined) ? undefined : JSON.parse(ressourceBdd[prop]) +

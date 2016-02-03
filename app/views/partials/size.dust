@@ -1,0 +1,2 @@
+{! ajoute les attributs width et height s'ils existent dans l'objet attrs fourni
+!}{?attrs.width} width="{attrs.width}"{/attrs.width}{?attrs.height} height="{attrs.height}"{/attrs.height}

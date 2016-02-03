@@ -1,0 +1,3 @@
+{! ajoute une liste d'attributs, avec un objet attributes qui est un tableau de
+  {name:'nom', value:'valeur'}
+!}{#attributes} {name}="{value}"{/attributes}

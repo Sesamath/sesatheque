@@ -73,12 +73,8 @@ ressourceComponent.service('$ressourceConverter', function (EntityRessource, $re
   return require('./serviceRessourceConverter')(EntityRessource, $ressourceRepository, $routes, $accessControl)
 })
 
-ressourceComponent.service('$views', function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings) {
-  return require('./serviceViews')(EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes, $settings)
-})
-
-ressourceComponent.service('$json', function () {
-  return require('./serviceJson')()
+ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) {
+  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form)
 })
 
 // nos ressources statiques
@@ -87,13 +83,13 @@ ressourceComponent.controller(function () {
 })
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes, EntityRessource) { // jshint ignore:line
-  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes, EntityRessource)
+ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) { // jshint ignore:line
+  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource)
 })
 
 // un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $views, $routes, $settings) {
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $views, $routes, $settings)
+ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $settings) {
+  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $settings)
 })
 
 // l'api json
@@ -102,8 +98,8 @@ ressourceComponent.controller('api', function (EntityAlias, $ressourceRepository
 })
 
 // import calculatice
-ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes) { // jshint ignore:line
-  require('./controllerImportEc')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $views, $routes)
+ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) { // jshint ignore:line
+  require('./controllerImportEc')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes)
 })
 
 // En dev on ajoute des routes de debug
@@ -120,16 +116,4 @@ ressourceComponent.config(function($settings) {
   if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")
   else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
   else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
-
-  // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
-  //if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
-  lassi.transports.html.engine.disableWhiteSpaceCompression()
-})
-
-// ajout de nos listeners
-ressourceComponent.config(function($accessControl, $routes, $flashMessages) {
-  var listeners = require('./listeners')($accessControl, $routes, $flashMessages)
-  for (var eventName in listeners) {
-    if (listeners.hasOwnProperty(eventName)) lassi.on(eventName, listeners[eventName])
-  }
 })

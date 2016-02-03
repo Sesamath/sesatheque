@@ -1,0 +1,7 @@
+<input type="text" name="{name}"
+  {?id}id="{id}"{/id}
+  {?className}class="{className}"{/className}
+  {?value}value="{value}"{/value}
+  {?attributes}{>attributes /}{/attributes}
+  {?readonly}readonly="readonly"{/readonly}
+/>

@@ -21,36 +21,63 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-'use strict';
 
-module.exports = function (controller) {
-  var baseData = {
-    $metas : {},
-    $views : __dirname +'/../views'
+'use strict'
+
+function FormChoice(obj) {
+  if (typeof obj !== 'object') obj = {}
+  if (obj.id) {
+    /**
+     * @type {string}
+     * @default undefined
+     */
+    this.id = obj.id
   }
 
-  // nos ressources statiques génériques
-  controller.serve(__dirname +'/public')
+  if (obj.className) {
+    /**
+     * @type {string}
+     * @default undefined
+     */
+    this.className = obj.className
+  }
 
-  // home
-  controller.get('/', function (context) {
-    context.layout = 'page';
-    var data = baseData
-    // log('le contexte dans le controleur de static, action /',context)
-    data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
-    // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
-    data.contentBloc = {
-      $view : 'home',
-      // ce content est la variable passée au template dust
-      content : "Ce site est encore un prototype expérimental."
-    }
-    context.html(data)
-  })
+  if (obj.label) {
+    /**
+     * @type {string}
+     * @default undefined
+     */
+    this.label = obj.label
+  }
+
+  /**
+   * @type {string}
+   * @default undefined
+   */
+  this.name = obj.name
+
+  if (obj.selected) {
+    /**
+     * @type {boolean}
+     * @default undefined
+     */
+    this.selected = true
+  }
+
+  /**
+   * cast en string si number ou boolean fourni
+   * @type {string}
+   * @default ''
+   */
+  this.value = obj.value || ''
+  if (typeof this.value !== 'string') this.value += ''
 }
+
+module.exports = FormChoice

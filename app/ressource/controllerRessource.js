@@ -41,10 +41,10 @@
  * @requires $ressourceConverter
  * @requires $accessControl
  * @requires $personneControl
- * @requires $views
+ * @requires $ressourcePage
  * @requires $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $views, $routes, EntityRessource) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) {
   var _ = require('lodash')
   var tools = require('../tools')
   var flow = require('an-flow')
@@ -96,7 +96,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function denied(context, message) {
     if (!message) message = "Authentification requise"
-    $views.printError(context, message, 401)
+    $ressourcePage.printError(context, message, 401)
   }
 
   /**
@@ -107,7 +107,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function denied404(context, id) {
     var message = "La ressource " +id +" n'existe pas ou droits insuffisants"
-    $views.printError(context, message, 404)
+    $ressourcePage.printError(context, message, 404)
   }
 
   /**
@@ -125,7 +125,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     addToken(context, ressource)
     var options
     if (titre) options = {$metas : {title: 'Ajouter une ressource'}}
-    $views.printForm(context, error, ressource, options)
+    $ressourcePage.printForm(context, error, ressource, options)
   }
 
   /**
@@ -140,7 +140,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Vérifie les droits avant d'appeler $views.prepareAndSend
+   * Vérifie les droits avant d'appeler $ressourcePage.prepareAndSend
    * @private
    * @param {Context} context
    * @param error
@@ -152,7 +152,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (ressource && !$accessControl.hasReadPermission(context, ressource)) {
       ressource = null // prepare & send renverra son 404 habituel
     }
-    $views.prepareAndSend(context, error, ressource, view, options)
+    $ressourcePage.prepareAndSend(context, error, ressource, view, options)
   }
 
   /**
@@ -333,7 +333,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           // cas particulier du clonage
           $ressourceRepository.load(clonedOid, function (error, ressource) {
             if (error) {
-              $views.printError(context, error)
+              $ressourcePage.printError(context, error)
             } else if (ressource) {
               $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
               delete ressource.oid
@@ -344,24 +344,24 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               if (userOid && ressource.contributeurs.indexOf(userOid) === -1) ressource.contributeurs.push(userOid)
               $ressourceRepository.write(ressource, function (error, ressource) {
                 if (error) {
-                  $views.printError(context, error)
+                  $ressourcePage.printError(context, error)
                 } else if (ressource && ressource.oid) {
                   var url = $routes.getAbs('edit', ressource.oid, context)
                   if (context.layout === "iframe") url += "?layout=iframe"
                   context.redirect(url)
                 } else {
-                  $views.printError(context, new Error("L'enregistrement d'une copie de la ressource " +clonedOid +" a échoué"))
+                  $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource " +clonedOid +" a échoué"))
                 }
               })
             } else {
-              $views.printError(context, "Ressource à dupliquer inexistante ou droits insuffisants pour la lire", 404)
+              $ressourcePage.printError(context, "Ressource à dupliquer inexistante ou droits insuffisants pour la lire", 404)
             }
           })
         } else {
           // creation simple
           var fake = {new:true, oid:0}
           addToken(context, fake)
-          $views.printForm(context, null, fake, options)
+          $ressourcePage.printForm(context, null, fake, options)
         }
       }
     })
@@ -379,7 +379,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var titrePage = 'Ajouter une ressource'
 
     if (context.post.oid) {
-      $views.printError(context, "Impossible d'ajouter une ressource existante")
+      $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
     } else {
       flow().seq(function () {
         checkToken(context, 0, this)
@@ -446,7 +446,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $ressourceRepository.load(oid, function (error, ressource) {
         if (error) {
           log.error(error)
-          $views.printError(context, "Probleme d'accès à la base de données")
+          $ressourcePage.printError(context, "Probleme d'accès à la base de données")
         } else if (ressource) {
           if ($accessControl.hasPermission('update', context, ressource)) {
             var options = {
@@ -454,7 +454,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             }
             options.titre = ressource.titre
             addToken(context, ressource)
-            $views.printForm(context, error, ressource, options)
+            $ressourcePage.printForm(context, error, ressource, options)
           } else {
             // la ressource existe mais on donne pas l'info si on a pas les droits
             denied404(context, oid)
@@ -477,7 +477,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $ressourceRepository.loadByOrigin(context.arguments.origine, context.arguments.idOrigine, function (error, ressource) {
       if (error) {
         log.error(error)
-        $views.printError(context, "Probleme d'accès à la base de données")
+        $ressourcePage.printError(context, "Probleme d'accès à la base de données")
       } else if (ressource) {
         context.redirect($routes.getAbs('edit', ressource.oid))
       } else {
@@ -586,7 +586,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $ressourceRepository.load(oid, function (error, ressource) {
         if (error) {
           log.error(error)
-          $views.printError(context, "Une erreur est survenue, impossible de vérifier l'existence de la ressource")
+          $ressourcePage.printError(context, "Une erreur est survenue, impossible de vérifier l'existence de la ressource")
         } else if (ressource) {
           $accessControl.checkPermission('delete', context, ressource, function (errorMsg) {
             if (errorMsg) {
@@ -612,7 +612,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             }
           })
         } else {
-          $views.printError(context, "La ressource " +oid +" n'existe pas ou vous n'avez pas les droits suffisants pour la supprimer")
+          $ressourcePage.printError(context, "La ressource " +oid +" n'existe pas ou vous n'avez pas les droits suffisants pour la supprimer")
         }
       })
     } else {
@@ -654,11 +654,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               })
             } else {
               log.error(new Error("Token OK mais droits insuffisant pour effacer la ressource " + oid))
-              $views.printError(context, "Erreur interne dans la vérification des droits")
+              $ressourcePage.printError(context, "Erreur interne dans la vérification des droits")
             }
           } else {
             log.error(new Error("Token OK mais la ressource " + oid +" n'existe pas ou plus !"))
-            $views.printError(context, "Erreur interne, ressource introuvable, probablement déjà effacée")
+            $ressourcePage.printError(context, "Erreur interne, ressource introuvable, probablement déjà effacée")
           }
         })
       })
@@ -677,7 +677,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     redirectPublicOrContinue(context, function () {
       if (_.isEmpty(context.get) || context.get.modify) {
         // form de recherche
-        $views.printSearchForm(context)
+        $ressourcePage.printSearchForm(context)
       } else {
         // résultats
         log.debug('search reçoit', context.get)
@@ -713,7 +713,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           // qqun qui veut voir ses ressources
           else if (context.get.auteurs && context.get.auteurs == userOid) visibilite = "auteur/" +userOid
           $ressourceRepository.getListe(visibilite, options, function (error, ressources) {
-            var data = $views.getDefaultData('liste')
+            var data = $ressourcePage.getDefaultData('liste')
             data.$metas.title = 'Résultats de la recherche'
             log.debug('liste avec les options', options)
             log.debug('qui remonte', ressources)
@@ -759,7 +759,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             context.html(data)
           })
         } else {
-          $views.printSearchForm(context, ["il faut choisir au moins un critère"])
+          $ressourcePage.printSearchForm(context, ["il faut choisir au moins un critère"])
         }
       }
     })
@@ -775,9 +775,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var start = context.get.start || 0
     var limit = 500
     EntityRessource.match('oid').grab(limit, start, function (error, ressources) {
-      if (error) $views.printError(context, error)
+      if (error) $ressourcePage.printError(context, error)
       else if (ressources.length === limit) context.redirect('/ressource/rename?start=' +start+limit)
-      else $views.printError(context, 'terminé à ' +start +ressources.length)
+      else $ressourcePage.printError(context, 'terminé à ' +start +ressources.length)
     })
   })
 }

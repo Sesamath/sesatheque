@@ -21,27 +21,73 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+
 'use strict'
-var authComponent = lassi.component('auth')
 
-authComponent.service('$auth', function($accessControl, $ressourcePage) {
-  return require('./serviceAuth')($accessControl, $ressourcePage)
-})
+var FormField = require('./FormField')
 
-authComponent.controller(function ($auth, $accessControl, $ressourcePage, $flashMessages) {
-  require('./controllerAuth')(this, $auth, $accessControl, $ressourcePage, $flashMessages)
-})
+function FieldGroup(obj) {
+  if (typeof obj !== 'object') obj = {}
+  if (obj.id) {
+    /**
+     * @type {string}
+     * @default undefined
+     */
+    this.id = obj.id
+  }
 
-authComponent.controller(function ($auth, $accessControl, $ressourceRepository) {
-  require('./controllerApi')(this, $auth, $accessControl, $ressourceRepository)
-})
+  if (obj.className) {
+    /**
+     * @type {string}
+     * @default undefined
+     */
+    this.className = obj.className
+  }
 
-// rien à faire en config
-authComponent.config(function() {})
+  if (obj.label) {
+    /**
+     * @type {string}
+     * @default undefined
+     */
+    this.label = obj.label
+  }
+
+  if (obj.name) {
+    /**
+     * @type {string}
+     * @default undefined
+     */
+    this.name = obj.name
+  }
+
+  /**
+   * post|get
+   * @type {string}
+   * @default post
+   */
+  this.method = 'post'
+  if (typeof obj.method === 'string' && obj.method.toLowerCase() === 'get') this.method = 'get'
+
+  /**
+   * @type {FormField[]}
+   */
+  this.fields = []
+  if (obj.fields && obj.fields.length) {
+    for (var i = 0; i < obj.fields.length; i++) {
+      this.addField(obj.fields[i])
+    }
+  }
+}
+
+FieldGroup.prototype.addField = function addField(field) {
+  this.fields.push(new FormField(field))
+}
+
+module.exports = FieldGroup

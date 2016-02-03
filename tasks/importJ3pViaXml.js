@@ -209,7 +209,7 @@ function purgeJ3pAndExit() {
             .raw(query)
             .exec(function (error, rows) {
               if (error) throw error
-              // la suite est jamais affichée :-/ (mais suffit de passer une fois la requete ci-dessus à la static)
+              // la suite est jamais affichée :-/
               else {
                 log('retour', rows)
                 next()

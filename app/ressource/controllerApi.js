@@ -140,10 +140,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   function getListePerso(context) {
     /**
-     * Ajoute des refs à une liste en vérifiant qu'elles sont valides
+     * Ajoute des refs (en vérifiant qu'elles sont valides) à nos deux listes globales refs et sequenceModeles
      * @private
      * @param {Ressource[]|Alias[]} ressources La liste des ressources|aliases à ajouter après vérif de leur intégrité
-     * @param {boolean}             [parOrigine=false] Passer true pour récupérer les refs sous la forme origine/idOrigine
+     * @param {string}              droits     Les droits sur ces ressources (lettres WD pour Write & Delete)
      */
     function addRefs(ressources, droits) {
       ressources.forEach(function (ressource) {
@@ -162,7 +162,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       })
     }
     var oid = $accessControl.getCurrentUserOid(context)
+    // liste des ressources perso
     var refs = []
+    // liste des sequenceModeles perso
     var sequenceModeles = []
     if (oid) {
       flow().seq(function () {

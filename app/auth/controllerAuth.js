@@ -31,7 +31,7 @@
 
 'use strict'
 
-module.exports = function (controller, $auth, $accessControl, $views, $flashMessages) {
+module.exports = function (controller, $auth, $accessControl, $ressourcePage, $flashMessages) {
   // on diffère la création des routes à l'ajout du premier client
   $auth.deferController(function () {
     /**
@@ -40,7 +40,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
      * @extends Controller
      * @requires {Object} $auth
      * @requires {Object} $accessControl
-     * @requires {Object} $views
+     * @requires {Object} $ressourcePage
      * @requires {Object} $flashMessages
      */
 
@@ -51,7 +51,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
     controller.get('connexion', function (context) {
       if ($accessControl.isAuthenticated(context)) {
         context.layout = "page"
-        $views.printError(context, new Error("Utilisateur déjà connecté"), 200)
+        $ressourcePage.printError(context, new Error("Utilisateur déjà connecté"), 200)
       } else {
         $auth.login(context)
       }
@@ -67,7 +67,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
         $auth.logout(context)
       } else {
         context.layout = "page"
-        $views.printError(context, new Error("Utilisateur déjà déconnecté (ou jamais connecté)"), 200)
+        $ressourcePage.printError(context, new Error("Utilisateur déjà déconnecté (ou jamais connecté)"), 200)
       }
     })
 
@@ -90,7 +90,7 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
       } else {
         $auth.check(context, function (error) {
           if (!error) error = new Error("calback testConnexion appelée sans erreur, il aurait dû y avoir une redirection ou une erreur")
-          $views.outputError(context)
+          $ressourcePage.outputError(context)
         })
       }
     })
@@ -102,11 +102,11 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
     controller.get('validation', function (context) {
       if ($accessControl.isAuthenticated(context)) {
         context.layout = "page"
-        $views.printError(context, new Error("Utilisateur déjà connecté"), 200)
+        $ressourcePage.printError(context, new Error("Utilisateur déjà connecté"), 200)
       } else {
         $auth.validate(context, function (error, personne) {
           if (error) {
-            $views.printError(context, error)
+            $ressourcePage.printError(context, error)
           } else {
             if (personne && personne.idOrigine) $flashMessages.add(context, "Authentification réussie", "info")
             var uri = context.get.redirect || "/"
@@ -118,7 +118,6 @@ module.exports = function (controller, $auth, $accessControl, $views, $flashMess
 
     /**
      * Controleur sur toutes les routes html pour peupler le authBloc (faut passer après les contrôleurs html),
-     * on ajoutera un timeout plus grand pour la validation du ticket
      * @route GET /*
      */
     controller.get('*', function (context) {

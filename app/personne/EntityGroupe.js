@@ -50,13 +50,19 @@ function Groupe(initObj) {
    * @type {string}
    * @default ""
    */
-  this.nom = initObj.name || '';
+  if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLocaleLowerCase();
+  else this.nom = '';
   /**
    * Visible dans la liste générale des groupes, tout le monde peut rentrer ou sortir à sa guise
    * @type {boolean}
    * @default false
    */
-  this.open = !!initObj.open
+  this.ouvert = !!initObj.ouvert
+  /**
+   * liste d'oid de ceux qui peuvent gérer le groupe (le créateur et ceux à qui il a délégué la gestion)
+   * @type {Integer[]}
+   */
+  this.gestionnaires = initObj.gestionnaires || []
 }
 
 module.exports = function (EntityGroupe, $cacheGroupe) {
@@ -84,5 +90,6 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
 
   EntityGroupe
     .defineIndex('nom', 'string')
-    .defineIndex('open', 'boolean')
+    .defineIndex('ouvert', 'boolean')
+    .defineIndex('gestionnaires', 'integer')
 }

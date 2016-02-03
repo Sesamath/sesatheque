@@ -40,10 +40,10 @@ var moment = require('moment')
 var config = require('./config')
 var appConfig = require("../config")
 
-module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $ressourceConverter, $accessControl, $routes) {
+module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) {
   /**
    * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
-   * @service $views
+   * @service $ressourcePage
    * @requires EntityRessource
    * @requires $ressourceRepository Pour aller chercher des infos complémentaires d'une ressource (les ressources liées) pour certaines vues
    * @requires $personneRepository  Pour aller chercher des infos complémentaires d'une ressource (les auteurs) pour certaines vues
@@ -52,7 +52,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @requires $routes
    * @requires $settings
    */
-  var $views = {}
+  var $ressourcePage = {}
 
   /**
    * Ajoute les groupes au form
@@ -66,7 +66,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var i = 0
     flow(values).seqEach(function (value) {
       var suivant = this
-      $personneRepository.loadGroupe(value, function (error, groupe) {
+      $groupeRepository.load(value, function (error, groupe) {
         if (error) {
           log.error(error)
           formData.errors.push(error.toString())
@@ -196,34 +196,19 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
      * @param cbValue
      */
     function addChoice(label, cbValue) {
-      // cbValue est toujours une string (propriété de l'objet)
+      // cbValue est toujours une string (propriété de l'objet), cast en int si utile
+      // @todo virer ça si c'est pas indispensable (test === possible pour comparer avec id venant de la conf)
       var intValue = parseInt(cbValue, 10)
       if (intValue == cbValue) cbValue = intValue
-      var choice = {
-        value: cbValue
-      }
-      if (label) choice.label = label
-      if (!isUnique) {
-        // faut du name sur chaque checkbox
-        choice.name = key + '[' + i + ']'
-      }
-      // un id
-      choice.id = key + i
-      i++
-      // et on ajoute les selected s'il y en a
-      if (selectedValues && selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
-        choice.selected = true
-      }
-      choices.push(choice)
+      $forms.addChoice(choices, isUnique, label, key, cbValue, selectedValues)
     }
 
     //log.debug("arrayToDust de " +key, selectedValues)
     var choices = []
-    var i = 0
     if (selectedValues && !_.isArray(selectedValues)) {
       log.error(new Error("La propriété " + key + " de la ressource n'est pas un tableau"))
     } else if (config.listesOrdonnees[key]) {
-      _.each(config.listesOrdonnees [key], function (cbValue) {
+      _.each(config.listesOrdonnees[key], function (cbValue) {
         addChoice(config.listes[key][cbValue], cbValue)
       })
     } else if (config.listes[key]) {
@@ -236,12 +221,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // auteurs ou contributeurs ou groupes
       _.each(selectedValues, function (value) {
         if (key === "groupes") {
-          $personneRepository.loadGroupe(value, function (groupe) {
-            addChoice(groupe.nom, value)
+          $groupeRepository.load(value, function (error, groupe) {
+            if (groupe) addChoice(groupe.nom, value)
           })
         } else {
-          $personneRepository.load(value, function (personne) {
-            addChoice(personne.prenom +" " +personne.nom, value)
+          $personneRepository.load(value, function (error, personne) {
+            if (personne) addChoice(personne.prenom +" " +personne.nom, value)
           })
         }
       }) // each
@@ -265,7 +250,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param next
    */
   function enhance(ressource, next) {
-
     // faut aller chercher en asynchrone les infos complémentaires pour la vue describe
     // (éventuels titres de ressources liées, auteurs ou groupes)
     var fluxComplements = flow()
@@ -611,7 +595,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var viewData = {}
     var buffer
     if (error) {
-      $views.addError(error, viewData)
+      $ressourcePage.addError(error, viewData)
     } else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
       var labels = getLabels(ressource)
@@ -670,7 +654,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (ressource.errors && ressource.errors.length) viewData.errors = ressource.errors
     } else {
       // pas d'erreur mais pas de ressource non plus
-      $views.addError("Aucune ressource transmise pour affichage", viewData)
+      $ressourcePage.addError("Aucune ressource transmise pour affichage", viewData)
     }
     if (view) viewData.$view = view
 
@@ -678,33 +662,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   }
 
   /**
-   * Ajoute une erreur à la liste qui sera envoyée à la vue
-   * @memberOf $views
-   * @param error
-   * @param data
-   */
-  $views.addError = function (error, data) {
-    if (!data.errors || !data.errors.errorMessages) data.errors = {
-      errorMessages : []
-    }
-    var errorMsg = (typeof error === "string") ? error : error.toString()
-    data.errors.errorMessages.push(errorMsg)
-    log.error(error)
-  }
-
-  /**
    * Retourne les valeurs par défaut pour une vue ressource
-   * @memberOf $views
+   * @memberOf $ressourcePage
    * @param {string} viewName Le nom de la vue (fichier dust dans views)
-   * @returns {{$views: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
+   * @returns {{$ressourcePage: string, $metas: {css: string[], js: string[]}, contentBloc: {}}}
    */
-  $views.getDefaultData = function (viewName) {
-    var data = {
-      $views : __dirname + '/../views',
-      // css ajouté par le listener à la fin, suivant la valeur de context.layout, js ci-dessous
-      $metas : {}
-    }
-    // les js différents suivant la vue
+  $ressourcePage.getDefaultData = function (viewName) {
+    var data = $page.getDefaultData()
+    // css ajouté par le listener à la fin, suivant la valeur de context.layout,
+    // on ajoute ici les js suivant la vue
     if (viewName === "formEdit") {
       data.$metas.js = ['/edit.bundle.js']
     } else if (viewName === "display" || viewName === "preview") {
@@ -712,7 +678,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else {
       data.$metas.js = ['/page.bundle.js']
     }
-    //if (viewName.substr(0, 1) !== "/") viewName = __dirname +"/../views/" +viewName
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view:viewName}
     else data.contentBloc = {$view:viewName}
@@ -722,19 +687,19 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Affiche une erreur en json ou html ou text, suivant accept, en laissant le status 200
-   * @memberOf $views
+   * @memberOf $ressourcePage
    * @param {Context} context
    * @param {Error}   error
    * @param {string}  [layout=page] Pour la sortie html, passer iframe si on veut pas des header/menu/footer
    */
-  $views.outputError = function (context, error, layout) {
+  $ressourcePage.outputError = function (context, error, layout) {
     // on sait pas sous quelle forme l'utilisateur veut sa réponse, on privilégie json
     if (context.request.accept("json")) {
       log.error(error)
       context.json({success:false, error:error.toString()})
     } else if (context.request.accept("html")) {
       context.layout = layout || "page"
-      $views.printError(context, error)
+      $ressourcePage.printError(context, error)
     } else {
       log.error(error)
       context.text(error.toString())
@@ -743,14 +708,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Prepare les data pour la vue dust et appelle html(data)
-   * @memberOf $views
+   * @memberOf $ressourcePage
    * @param {Context} context
    * @param error
    * @param ressource
    * @param {string} view le nom de la vue
    * @param options Objet de données qui sera mergé avec data avant envoi au rendu
    */
-  $views.prepareAndSend = function (context, error, ressource, view, options) {
+  $ressourcePage.prepareAndSend = function (context, error, ressource, view, options) {
     /**
      * envoie la ressource à la vue (en ajoutant menu si besoin
      * @private
@@ -810,10 +775,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     if (error) {
       log.error(error)
       // on est appelé avec ce qui sort d'un load
-      $views.printError(context, "Problème d'accès à la base de données", 500)
+      $ressourcePage.printError(context, "Problème d'accès à la base de données", 500)
     } else if (ressource) {
       log.debug('prepareAndSend pour la vue ' + view + ' avec la ressource', ressource, 'dust', {max: 1000})
-      var data = $views.getDefaultData(view)
+      var data = $ressourcePage.getDefaultData(view)
 
       if (view === 'describe') {
         // faut ajouter des infos sur les relations
@@ -822,37 +787,37 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         termine()
       }
     } else {
-      $views.printError(context, "Cette ressource n'existe pas ou vous n'avez pas les droits suffisants pour y accéder", 404)
+      $ressourcePage.printError(context, "Cette ressource n'existe pas ou vous n'avez pas les droits suffisants pour y accéder", 404)
     }
   }
 
   /**
    * Affiche un message d'erreur
-   * @memberOf $views
+   * @memberOf $ressourcePage
    * @param {Context}      context
    * @param {string|Error} error
    * @param {number}       [status=200]
    * @param {Ressource}    [ressource] pour ajouter d'éventuels lien de menu contextuels à cette ressource
    */
-  $views.printError = function (context, error, status, ressource) {
-    var data = $views.getDefaultData('errors')
+  $ressourcePage.printError = function (context, error, status, ressource) {
+    var data = $ressourcePage.getDefaultData('errors')
     if (!context.layout) context.layout = 'page'
     if (context.layout === 'page' && ressource) context.ressource = ressource
-    $views.addError(error, data)
+    $ressourcePage.addError(error, data)
     context.status = status || 200
     context.html(data)
   }
 
   /**
    * Prepare les data pour le form dust et appelle html avec
-   * @memberOf $views
+   * @memberOf $ressourcePage
    * @param {Context} context
    * @param error
    * @param ressource
    * @param {object} [options] sera mergé dans data
    */
-  $views.printForm = function (context, error, ressource, options) {
-    var data = $views.getDefaultData('formEdit')
+  $ressourcePage.printForm = function (context, error, ressource, options) {
+    var data = $ressourcePage.getDefaultData('formEdit')
     if (ressource.token && context.session.tokens && !context.session.tokens[ressource.token])
       log.error("dans printForm on a le token " +ressource.token +" avec en session", context.session.tokens)
     // on met la ressource en contexte
@@ -876,12 +841,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
   /**
    * Prepare les data pour le form dust et appelle html avec
-   * @memberOf $views
+   * @memberOf $ressourcePage
    * @param {Context}  context
    * @param {string[]} [errorMessages]
    */
-  $views.printSearchForm = function (context, errorMessages) {
-    var data = $views.getDefaultData('formSearch')
+  $ressourcePage.printSearchForm = function (context, errorMessages) {
+    var data = $ressourcePage.getDefaultData('formSearch')
     if (errorMessages && errorMessages.length) {
       data.errors = errorMessages
     }
@@ -951,5 +916,5 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     })
   }
 
-  return $views
+  return $ressourcePage
 }

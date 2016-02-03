@@ -1,0 +1,24 @@
+{! nouvelle version de wrapper, où toutes les infos sont encapsulée dans l'objet field
+   enveloppe de chaque saisie de propriété, avec
+        o le champ à afficher, avec notamment
+          warnings (facultatif)
+          hidden (le label n'est pas affiché, le input sera hidden)
+          label (le titre de la propriété à saisir)
+          widget le template à utiliser
+          attrs : tableau de {name:'nom', value:'valeur'}, attributs à ajouter sur le champ input
+!}
+<div class="field">
+  {#warnings}
+    <div class="warning">{.}</div>
+  {/warnings}
+  {@eq key=widget value="hidden"}
+    {>"formField{widget}" /}
+  {:else}
+    <label>
+      {label}
+      {?required}<span class="required" title="Ce champ est obligatoire">*</span>{/required}
+      {?labelInfo}<span class="remarque">({labelInfo})</span>{/labelInfo}
+    </label>
+    {>"formField{widget}" /}
+  {/eq}
+</div>

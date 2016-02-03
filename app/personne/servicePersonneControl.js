@@ -31,7 +31,7 @@
 
 'use strict'
 
-module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $accessControl) {
+module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
   /**
    * Ajoute un warning à une ressource
    * @param {Ressource} ressource
@@ -72,25 +72,18 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
    * @memberOf $personneControl
    */
   $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, next) {
-    log.debug("checkGroupes")
+    log.debug("checkGroupes avec " +ressourceNew.groupes.join(','))
     if (!ressourceNew.groupes) ressourceNew.groupes = []
     // les 2 cas où y'a rien à faire
     if (ressourceOriginale && _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes)) {
       // update sans modif de groupe
       next(null, ressourceNew)
     } else if (!ressourceOriginale && !ressourceNew.groupes.length) {
-      // création sans groupes
+      // création de ressource sans groupes
       next(null, ressourceNew)
     } else {
       // faut examiner les différences, on regarde d'abord si c'est le format attendu
-      if (!_.isArray(ressourceNew.groupes)) {
-        // on vide et on signale l'erreur sans aller plus loin
-        log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
-        if (!ressourceNew.errors) ressourceNew.errors = []
-        ressourceNew.errors.push("Groupes invalides")
-        ressourceNew.groupes = []
-        next(null, ressourceNew)
-      } else {
+      if (_.isArray(ressourceNew.groupes)) {
         var groupesVoulus = ressourceNew.groupes
         var tmpGroupes
         ressourceNew.groupes = []
@@ -100,38 +93,42 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $a
           addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
           next(null, ressourceNew)
         } else {
-          // on a les droits, on ajoute les groupes sup si besoin
+          // on a les droits, on ajoute les groupes sup s'il y en a
           if (ressourceNew.groupesSup) {
             tmpGroupes = ressourceNew.groupesSup.split(",")
             tmpGroupes.forEach(function (groupe) {
               groupesVoulus.push(groupe.trim())
             })
           }
-          // groupes contient tous ceux que l'on veut mettre, on vérifie qu'ils existent et que l'utilisateur peut ajouter
+          // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie qu'ils existent et que l'utilisateur peut ajouter
           flow(groupesVoulus).seqEach(function (groupeNom) {
             var nextGroupe = this
-            // si l'utilisateur n'a pas le droit générique sur les groupes, on regarde l'appartenance avant de charger le groupe
-            if (!$accessControl.hasPermission("updateGroupes", context) && !$accessControl.isInGroupe(context, groupeNom)) {
-              ressourceNew.warnings.push("Vous devez faire partie du groupe " + groupeNom + " pour y partager cette ressource")
+            // on regarde s'il existe
+            $groupeRepository.load(groupeNom, function (error, groupe) {
+              if (error) {
+                addError(ressourceNew, error.toString())
+              } else if (groupe) {
+                // le groupe existe déjà
+                if ($accessControl.isInGroupe(context, groupeNom)) ressourceNew.groupes.push(groupe.nom)
+                else ressourceNew.warnings.push("Vous devez faire partie du groupe " + groupeNom + " pour y partager cette ressource")
+              } else {
+                addWarning(ressourceNew, "Le groupe " + groupe.nom + " n'existe pas")
+              }
               nextGroupe()
-            } else {
-              $personneRepository.loadGroupeByNom(groupeNom, function (error, groupe) {
-                if (error) {
-                  addError(ressourceNew, error.toString())
-                } else if (groupe) {
-                  ressourceNew.groupes.push(groupe.nom)
-                } else {
-                  addWarning(ressourceNew, "Le groupe " + groupe.nom + " n'existe pas")
-                }
-                nextGroupe()
-              })
-            }
+            })
           }).seq(function () {
             next(null, ressourceNew)
           }).catch(function (error) {
             next(error)
           })
         }
+      } else {
+        // on vide et on signale l'erreur sans aller plus loin
+        log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
+        if (!ressourceNew.errors) ressourceNew.errors = []
+        ressourceNew.errors.push("Groupes invalides")
+        ressourceNew.groupes = []
+        next(null, ressourceNew)
       }
     }
   }

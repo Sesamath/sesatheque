@@ -30,7 +30,7 @@ exit 0
 
 tmp=/tmp/$(basename $0)
 src=node_modules/requirejs/require.js
-dst=app/static/public/vendors/requirejs/require.min.js
+dst=appmain/public/vendors/requirejs/require.min.js
 echo -n "$dst "
 # on récupère la conf sans le define de fin qui n'aime pas être concaténé tel quel
 sed -e '/BEGIN CUT/, /END CUT/ d; s@// IF CUT@@g;' app/ressource/public/initRequire.js > $tmp

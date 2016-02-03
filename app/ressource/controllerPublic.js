@@ -39,10 +39,10 @@
  * @controller controllerPublic
  * @requires $ressourceRepository
  * @requires $ressourceConverter
- * @requires $views
+ * @requires $ressourcePage
  * @requires $routes
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $views, $routes) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes) {
   var tools = require('../tools')
   var _ = require('lodash')
   var config = require('./config')
@@ -57,7 +57,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function affiche(context, view, options) {
     var oid = context.arguments.oid
     $ressourceRepository.loadPublic(oid, function (error, ressource) {
-      $views.prepareAndSend(context, error, ressource, view, options)
+      $ressourcePage.prepareAndSend(context, error, ressource, view, options)
     })
   }
 
@@ -71,9 +71,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param options
    */
   function checkAndAffiche(context, error, ressource, view, options) {
-    if (error) $views.printError(context, "Problème d'accès à la base de données", 500)
-    else if (ressource && ressource.restriction === 0) $views.prepareAndSend(context, error, ressource, view, options)
-    else $views.printError(context, "La ressource n'existe pas ou n'est pas publique", 404)
+    if (error) $ressourcePage.printError(context, "Problème d'accès à la base de données", 500)
+    else if (ressource && ressource.restriction === 0) $ressourcePage.prepareAndSend(context, error, ressource, view, options)
+    else $ressourcePage.printError(context, "La ressource n'existe pas ou n'est pas publique", 404)
   }
 
   /**
@@ -159,7 +159,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.layout = 'page'
     if (_.isEmpty(context.get)) {
       // form de recherche
-      $views.printSearchForm(context)
+      $ressourcePage.printSearchForm(context)
     } else {
       // résultats
       log.debug('search reçoit', context.get)
@@ -189,7 +189,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         options.nb = parseInt(crit.nb, 10) || 25
         options.orderBy = crit.orderBy || 'oid'
         $ressourceRepository.getListe('public', options, function (error, ressources) {
-          var data = $views.getDefaultData('liste')
+          var data = $ressourcePage.getDefaultData('liste')
           data.$metas.title = 'Résultats de la recherche'
           log.debug('liste avec les options', options)
           log.debug('qui remonte', ressources)
@@ -210,7 +210,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           context.html(data)
         })
       } else {
-        $views.printSearchForm(context, ["il faut choisir au moins un critère"])
+        $ressourcePage.printSearchForm(context, ["il faut choisir au moins un critère"])
       }
     }
   }

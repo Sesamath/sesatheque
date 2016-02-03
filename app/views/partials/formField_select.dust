@@ -1,0 +1,8 @@
+<select name="{name}"
+  {?id}id="{id}"{/id}
+  {?className}class="{className}"{/className}
+>
+  {#choices}
+  <option value="{value}"{?selected} selected="selected"{/selected} />{label}</option>
+  {/choices}
+</select>

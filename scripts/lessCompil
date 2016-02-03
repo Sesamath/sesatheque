@@ -10,8 +10,8 @@ function fin() {
 
 function usage() {
   local exitCode=${1:-0}
-  echo "Compile notre css à partir de app/static/public/styles/page.less"
-  echo "en allant chercher les imports dans app/static/public/styles et app/static/public/vendors/knacss/less"
+  echo "Compile notre css à partir de app/main/public/styles/page.less"
+  echo "en allant chercher les imports dans app/main/public/styles et app/main/public/vendors/knacss/less"
   exit $exitCode
 }
 
@@ -20,11 +20,11 @@ trap fin EXIT
 
 cd $(dirname $0)/../
 dirApp=$PWD
-cd "app/static/public/styles"
+cd "app/main/public/styles"
 
 # sans options on lance en dev
-#lessc --clean-css="--s1 --advanced --compatibility=ie8" --include-path="app/static/public/styles:app/static/public/vendors/knacss/less" app/static/public/styles/page.less app/static/public/styles/page.css \
-#./node_modules/.bin/lessc --clean-css="--compatibility=ie8" --include-path="app/static/public/styles:app/static/public/vendors/knacss/less" --source-map=app/static/public/styles/page.map app/static/public/styles/page.less app/static/public/styles/page.css \
+#lessc --clean-css="--s1 --advanced --compatibility=ie8" --include-path="app/main/public/styles:app/main/public/vendors/knacss/less" app/main/public/styles/page.less app/main/public/styles/page.css \
+#./node_modules/.bin/lessc --clean-css="--compatibility=ie8" --include-path="app/main/public/styles:app/main/public/vendors/knacss/less" --source-map=app/main/public/styles/page.map app/main/public/styles/page.less app/main/public/styles/page.css \
 $dirApp/node_modules/less/bin/lessc --clean-css="--compatibility=ie8" --source-map=page.map page.less page.css \
   && $dirApp/node_modules/less/bin/lessc --clean-css="--compatibility=ie8" --source-map=iframe.map iframe.less iframe.css \
   && echo "OK" \

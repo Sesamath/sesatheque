@@ -1,0 +1,18 @@
+{?error}
+  <p class="error">{error}</p>
+{:else}
+  <ul class="liste">
+    {#groupes}
+    <li>{nom}
+      <span class="links">
+        (
+        {?urlJoin}<a href="{urlJoin}">Rejoindre</a>,{/urlJoin}
+        {?urlQuit}<a href="{urlQuit}">Quitter</a>,{/urlQuit}
+        {?urlEdit}, <a href="{urlEdit}">modifier</a>{/urlEdit}
+        )
+      </span></li>
+    {:else}
+      <p>Aucun groupe</p>
+    {/groupes}
+  </ul>
+{/error}

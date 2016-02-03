@@ -36,22 +36,19 @@
  */
 
 var _ = require('lodash')
-//var tools = require('../tools')
+//var tools = require('./tools')
 
+/**
+ * Listener beforeTransport, qui finalise les datas pour les vues
+ * (toutes, pas seulement celles qui concernent les ressources, il est dans le composant ressource pour être chargé
+ * après l'init des services qu'il utilise)
+ * On aurait pu le mettre dans un controleur sur * mais avec un listener on est sûr de passer après tous les contrôleurs
+ * @param $accessControl
+ * @param $routes
+ * @param $flashMessage
+ * @returns {function}
+ */
 module.exports = function ($accessControl, $routes, $flashMessage) {
-  /**
-   * Les listeners du composant ressource
-   *
-   * Tout ça aurait pu être dans un controleur * mais avec beforeTransport on est sûr de passer après tous les contrôleurs
-   *
-   * Le listener sur afterRailUse est dans app/index.js et il ajoute CORS & logs sur le rail
-   * @service listeners
-   * @requires $accessControl
-   * @requires $routes
-   * @requires $flashMessage
-   */
-  var listeners = {}
-
   /**
    * Ajoute les liens contextuels à une ressource dans data.actions, et refreshAuth.js si on est sur du /public/
    * @private
@@ -123,7 +120,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   } // addActions
 
   /**
-   * Ajoute le menu dans data.navigation
+   * Ajoute le menu (boutons dans le header) dans data.navigation
    * @private
    * @param context
    * @param data
@@ -217,7 +214,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         context.contentType = 'application/json'
       }
       // ajout du layout, page si non précisé
-      if (isHtml && !data.$layout) data.$layout = __dirname + '/../views/layout-' + (context.layout || "page")
+      if (isHtml && !data.$layout) data.$layout = __dirname + '/views/layout-' + (context.layout || "page")
     }
 
     /**
@@ -316,7 +313,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   }
 
   /**
-   * Retourne la requete http (du type GET /path/to/something?args)
+   * Retourne la chaine de la requete http (ex : "GET /path/to/something?args")
    * @private
    * @param context
    * @returns {string}
@@ -327,7 +324,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
 
   /**
    * Ajoute à data nos params par défaut s'il n'existent pas
-   * @todo régler le doublon avec $views.addError
+   * @todo régler le doublon avec $ressourcePage.addError
    * @private
    * @param data     Les données que l'on modifie
    * @param title    Le titre à mettre s'il n'y en avait pas
@@ -336,7 +333,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   function prepareErrorHtmlData(data, title, errorMsg) {
     if (!data.hasOwnProperty('$metas')) data.$metas = {}
     data.$metas.title = title
-    if (!data.$views) data.$views = __dirname + '/../views' // sinon lassi/classes/transport/html/Renderer.js plante avec " Wrong views path"
+    if (!data.$ressourcePage) data.$ressourcePage = __dirname + '/views' // sinon lassi/classes/transport/html/Renderer.js plante avec " Wrong views path"
     if (!data.errors) data.errors = {
       $view : 'errors',
     }
@@ -350,12 +347,11 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * - ajoute $layout d'après context.layout sur les pages html
    * - ajoute menu de navigation et menu contextuel d'une ressource sur le layout page
    * - ajoute des infos dans debug.log si on est pas en prod
-   * @memberOf listeners
    * @listens lassi#event:beforeTransport
    * @param {Context} context
    * @param {Object} data
    */
-  listeners.beforeTransport = function (context, data) {
+  function beforeTransport(context, data) {
     errorHandler(context, data)
 
     // sur les pages html on ajoute les menus
@@ -368,5 +364,5 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     if (!isProd) debug(context, data)
   }
 
-  return listeners
+  return beforeTransport
 }

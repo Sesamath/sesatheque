@@ -1,0 +1,17 @@
+<form
+  {?name}name="{name}"{/name}
+  {?method}method="{method}"{/method}
+  {?id}id="{id}"{/id}
+>
+  {?warnings}
+    <div>
+      Avertissement{@gt key=warnings.length value=1}s{/gt} :
+      {#warnings}<p class="warning">{.}</p>{/warnings}
+    </div>
+  {/warnings}
+
+  {! Attention à masquer l'élément id du form (et ses autres propriétés), sinon le field pourrait hériter de ces propirétés
+     On masque le contexte, en mettant en contexte chaque élément de form.groups et en parent une variable qui n'existe pas ("rien")
+     cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Explicit_context_setting !}
+    {#groups:rien}{>formFieldGroup /}{#groups}
+</form>

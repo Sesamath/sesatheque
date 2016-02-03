@@ -107,16 +107,19 @@ var settings = {
       defaultTTL: 15*60,
       purgeDelay: 5*60
     },
+    groupe : {
+      cacheTTL: 20*60
+    },
     // Permissions (cumulatives) pour chacun des rôles
     personne : {
       roles: {
         // les droits sont dans l'absolu, mais il peut y avoir des modifications liées au contexte
         // (on a toujours le droit de modifier un contenu dont on serait le seul auteur,
         // pas de droits read sur les ressources privées sauf les siennes, etc.)
-        admin      : {create:true, createAll:true, read:true, update:true, updateAuteurs:true, updateGroupes:true, delete:true, deleteVersion:true, index:true, publish:true, correction:true}, // jshint ignore:line
-        editeur    : {create:true, createAll:true, read:true, update:true, updateAuteurs:true, updateGroupes:true, delete:true, deleteVersion:true, index:true, publish:true, correction:true}, // jshint ignore:line
-        indexateur : {index:true},
-        prof       : {create:true, read:true},
+        admin      : {create:true, createAll:true, read:true, update:true, updateAuteurs:true, updateGroupes:true, delete:true, deleteVersion:true, index:true, publish:true, correction:true, createGroupe:true}, // jshint ignore:line
+        editeur    : {create:true, createAll:true, read:true, update:true, updateAuteurs:true, updateGroupes:true, delete:true, deleteVersion:true, index:true, publish:true, correction:true, createGroupe:true}, // jshint ignore:line
+        indexateur : {index:true, createGroupe:true},
+        prof       : {create:true, read:true, createGroupe:true},
         acces_correction : {correction:true},
         eleve      : {read:true}
       },

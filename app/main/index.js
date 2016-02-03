@@ -37,7 +37,7 @@
  * - les controleurs des pages statiques
  * - des controleurs de debug en dev
  */
-var staticComponent = lassi.component('static')
+var mainComponent = lassi.component('main')
 
   /**
    * On ajoute un dust.helper à l'initialisation du framework
@@ -53,18 +53,30 @@ var staticComponent = lassi.component('static')
     return chunk.write('<pre class="debug">' + JSON.stringify(params, null, 2) + '</pre>');
   }); /**/
 
-staticComponent.controller(function () {
+mainComponent.controller(function () {
   require('./controllerMain')(this)
+})
+
+mainComponent.service('$page', function() {
+  return require('./servicePage')()
+})
+
+mainComponent.service('$form', function() {
+  return require('./serviceForm')()
+})
+
+mainComponent.service('$json', function () {
+  return require('./serviceJson')()
 })
 
 /**
  * En dev on ajoute des routes de debug
  */
 if (!isProd) {
-  staticComponent.controller(function () {
+  mainComponent.controller(function () {
     this.serve('doc', __dirname +'/../../documentation')
   })
-  staticComponent.controller('debug', function () {
+  mainComponent.controller('debug', function () {
     require('./controllerDebug')(this)
   })
 }

@@ -31,16 +31,40 @@
 
 'use strict'
 
-module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheGroupe) {
+module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
 
   var _ = require('lodash')
 
   /**
-   * Service d'accès aux personnes (et aux groupes), utilisé par les différents contrôleurs
+   * Service d'accès aux personnes, utilisé par les différents contrôleurs
    * @service $personneRepository
    */
   var $personneRepository = {}
 
+  /**
+   * Ajoute un groupe à la personne (en le créant s'il n'existait pas), ne sauvegarde pas les modifs de personne
+   * @param {Personne} personne
+   * @param {string} groupeNom
+   * @param {personneCallback} next
+   * @memberOf $personneRepository
+   */
+  $personneRepository.addGroupe = function (personne, groupeNom, next) {
+    $groupeRepository.load(groupeNom, function (error, groupe) {
+      if (error) {
+        next(error, personne)
+      } else if (groupe) {
+        personne.groupes[groupe.nom] = true
+        next(null, personne)
+      } else {
+        // on le créé au passage
+        EntityGroupe.create({nom:groupeNom}).store(function (error, groupe) {
+          log.debug('après création du groupe ', groupe)
+          if (groupe) personne.groupes[groupe.nom] = true
+          next(error, personne)
+        })
+      }
+    })
+  }
 
   /**
    * Récupère une personne (en cache ou en bdd)
@@ -108,46 +132,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $cacheG
     } else {
       next(new Error("origine ou idOrigine manquant, impossible de chercher en base de données."))
     }
-  }
-
-  /**
-   * Récupère un groupe d'après son nom
-   * @param {string} groupeNom
-   * @param {groupeCallback} next
-   * @memberOf $personneRepository
-   */
-  $personneRepository.loadGroupeByNom = function (groupeNom, next) {
-    $cacheGroupe.getByNom(groupeNom, function (error, groupe) {
-      if (groupe) return next(null, groupe)
-      EntityGroupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
-        if (error) return next(error)
-        if (groupe) {
-          $cacheGroupe.set(groupe)
-          return next(null, groupe)
-        }
-        next(null, null)
-      })
-    })
-  }
-
-  /**
-   * Récupère un groupe d'après son oid (si erreur on la log)
-   * @param {int} oid
-   * @param {groupeCallback} next
-   * @memberOf $personneRepository
-   */
-  $personneRepository.loadGroupe = function (oid, next) {
-    if (parseInt(oid, 10) !== oid) return next(new Error("Incohérence, groupe.oid doit être entier"))
-    $cacheGroupe.get(oid, function (error, groupe) {
-      if (groupe) return next(null, groupe)
-      EntityGroupe.match('oid').equals(oid).grabOne(function (error, groupe) {
-        if (error) log.error(error)
-        if (groupe) {
-          $cacheGroupe.set(groupe)
-        }
-        next(error, groupe)
-      })
-    })
   }
 
   /**
