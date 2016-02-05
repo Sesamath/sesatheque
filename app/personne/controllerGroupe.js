@@ -105,6 +105,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if (!me.groupes) me.groupes = []
       me.groupes.push(nom)
       $personneRepository.save(me, next)
+      // et faut pas oublier de mettre à jour la session
+      $accessControl.updateCurrentUser(context, me)
     } else {
       next(new Error("Il faut être authentifié pour rejoindre un groupe"))
     }

@@ -31,10 +31,11 @@
 
 'use strict'
 
-module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
+module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository, $groupeRepository) {
   var dns = require('dns')
   var _ = require('lodash')
   var tools = require('../tools')
+  var flow = require('an-seq')
 
   var configRessource = require("../ressource/config")
 
@@ -395,6 +396,21 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Met à jour le user en session
+   * @param {Context} context
+   * @param {Personne} personne
+   * @return {Personne|undefined} Le user mis à jour (ou l'ancien si les oid correspondait pas)
+   * @memberOf $accessControl
+   */
+  $accessControl.updateCurrentUser = function(context, personne) {
+    var old = $accessControl.getCurrentUser(context)
+    if (old && personne && old.oid === personne.oid) context.session.user = personne
+    else log.error(new Error("updateCurrentUser appelé avec un user qui différent de celui en session"))
+
+    return context.session.user
+  }
+
+  /**
    * Retourne la liste de ressources fournie expurgée de celles que l'on a pas le droit de voir
    * @param {Context} context
    * @param {Ressource[]} ressources Liste de ressources
@@ -615,14 +631,36 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     function setSession (error, personne) {
       if (personne) {
         personne.permissions = getPermissions(personne)
-        context.session.user = personne;
+        context.session.user = personne
       } else if (!error) {
         context.session.user = {
           oid:0,
           lastCheck : new Date()
         }
       }
-      next(error, personne)
+      checkGroups(error, personne)
+    }
+
+    function checkGroups(error, personne) {
+      if (personne.groupes && personne.groupes.length) {
+        flow(personne.groupes).seqEach(function (groupeNom) {
+          var nextGroupe = this
+          $groupeRepository.load(groupeNom, function (error, groupe) {
+            if (error) {
+              nextGroupe(error)
+            } else if (groupe) {
+              nextGroupe()
+            } else {
+              // faut l'ajouter, en privé
+              $groupeRepository.save({nom:groupeNom, ouvert:false}, nextGroupe)
+            }
+          })
+        }).seq(function () {
+          next(null, personne)
+        }).catch(function (error) {
+          next(error)
+        })
+      }
     }
 
     if (personne.origine && personne.idOrigine) $personneRepository.update(personne, setSession)
