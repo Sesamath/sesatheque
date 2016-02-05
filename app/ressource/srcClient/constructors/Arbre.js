@@ -41,7 +41,7 @@
  * @constructor
  */
 function Arbre(initObj) {
-  if (! initObj instanceof Object) initObj = {}
+  if (typeof initObj !== "object") initObj = {}
   /**
    * L'identifiant de l'arbre (pour éventuellement le référencer comme enfant d'un autre arbre)
    * @type {(Number|string|undefined)}

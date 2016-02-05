@@ -374,7 +374,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     if (error) {
       errorMsg = (typeof error === 'string') ? error : error.toString()
       $json.send(context, null, {arrayOnly:[{text:"Erreur : " +errorMsg}]})
-    } else if (!data instanceof Array) {
+    } else if (!(data instanceof Array)) {
       log.error(new Error("sendJsonJstreeArray appelé avec autre chose qu'un array"))
       $json.send(context, null, data)
     } else {

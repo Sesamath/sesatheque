@@ -327,7 +327,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
 
   /**
    * Ajoute à data nos params par défaut s'il n'existent pas
-   * @todo régler le doublon avec $ressourcePage.addError
+   * @todo régler le doublon avec $page.addError
    * @private
    * @param data     Les données que l'on modifie
    * @param title    Le titre à mettre s'il n'y en avait pas

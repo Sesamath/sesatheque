@@ -115,7 +115,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // seuls les éditeurs peuvent modifier auteurs et contributeurs,
     if ($accessControl.hasPermission("updateAuteurs", context)) {
       formData[key].choices = []
-      //if (!formData.errors || !formData.errors instanceof Array) {
+      //if (!formData.errors || !(formData.errors instanceof Array)) {
       //  log("addPersonnes récupère un formData sans errors", formData)
       //  formData.errors = []
       //}
@@ -595,7 +595,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var viewData = {}
     var buffer
     if (error) {
-      $ressourcePage.addError(error, viewData)
+      $page.addError(error, viewData)
     } else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
       var labels = getLabels(ressource)
@@ -654,7 +654,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (ressource.errors && ressource.errors.length) viewData.errors = ressource.errors
     } else {
       // pas d'erreur mais pas de ressource non plus
-      $ressourcePage.addError("Aucune ressource transmise pour affichage", viewData)
+      $page.addError("Aucune ressource transmise pour affichage", viewData)
     }
     if (view) viewData.$view = view
 
@@ -803,7 +803,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var data = $ressourcePage.getDefaultData('errors')
     if (!context.layout) context.layout = 'page'
     if (context.layout === 'page' && ressource) context.ressource = ressource
-    $ressourcePage.addError(error, data)
+    $page.addError(error, data)
     context.status = status || 200
     context.html(data)
   }

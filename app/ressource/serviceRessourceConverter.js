@@ -195,7 +195,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     if (ressource.type !== 'arbre') {
       next(new Error("Impossible de peupler une ressource autre qu'un arbre"))
     } else if (!ressource.enfants ||
-               !ressource.enfants instanceof Array ||
+               !(ressource.enfants instanceof Array) ||
                !ressource.enfants.length
     ) {
       log.debug('arbre vide', ressource)

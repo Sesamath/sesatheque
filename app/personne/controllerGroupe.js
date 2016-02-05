@@ -58,6 +58,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     ids = (typeof ids === 'string') ? tools.idListToArray(ids) : ids
     var gests = []
     flow(ids).seqEach(function (id) {
+      log.error("avant load")
       $personneRepository.load(id, this)
     }).seq(function (personnes) {
       personnes.forEach(function (gest) {
@@ -77,12 +78,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   function getMyGroupes(context) {
     var me = $accessControl.getCurrentUser(context)
-    var groupes = []
-    if (me && me.groupes) {
-      groupes = tools.truePropertiesList(me.groupes)
-    }
-
-    return groupes
+    return me && me.groupes || []
   }
 
   /**
@@ -94,6 +90,23 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     var myId = $accessControl.getCurrentUserOid(context)
     if (myId) {
       $groupeRepository.getListManagedBy(myId, next)
+    }
+  }
+
+  /**
+   * Ajoute un groupe à l'utilisateur courant
+   * @param context
+   * @param nom
+   * @param next
+   */
+  function joinGroup(context, nom, next) {
+    var me = $accessControl.getCurrentUser(context)
+    if (me) {
+      if (!me.groupes) me.groupes = []
+      me.groupes.push(nom)
+      $personneRepository.save(me, next)
+    } else {
+      next(new Error("Il faut être authentifié pour rejoindre un groupe"))
     }
   }
 
@@ -229,6 +242,22 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     })
   }
 
+  function printGroupe(context, groupe) {
+    getGestionnairesNames(groupe.gestionnaires, function(error, gestionnaires) {
+      if (error) {
+        $page.printError(context, error)
+      } else {
+        var contentBloc = {
+          $view: 'displayGroupe',
+          nom: groupe.nom,
+          ouvert: groupe.ouvert,
+          gestionnaires: gestionnaires.join(', ')
+        }
+        $page.print(context, 'Groupe ' + groupe.nom, contentBloc)
+      }
+    })
+  }
+
   /**
    * Affiche la liste de tous les groupes ouverts
    * @route GET /groupe/tous
@@ -291,26 +320,49 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   })
 
   /**
-   * Affiche la liste de mes groupes
+   * Affiche un groupe
    * @route GET /groupe/voir/:nom
    */
   controller.get('voir/:nom', function (context) {
     var nom = context.arguments.nom
+    var groupe
     flow().seq(function () {
       $groupeRepository.load(nom, this)
-    }).seq(function (groupe) {
-      var contentBloc
-      if (groupe && (groupe.ouvert || getMyGroupes(context).indexOf(nom) !== -1)) {
-        contentBloc = {
-          $view: 'displayGroupe',
-          nom: nom,
-          ouvert : groupe.ouvert,
-          gestionnaires: getGestionnairesNames(groupe.gestionnaires)
-        }
-        $page.print(context, 'Groupe ' +nom, contentBloc)
+    }).seq(function (grp) {
+      groupe = grp
+      var msg = 'Le groupe ' +nom +" n'existe pas ou n'est pas ouvert"
+      if (!grp) this(msg)
+      else if (grp && (grp.ouvert || getMyGroupes(context).indexOf(nom) !== -1)) this()
+      else this(msg)
+    }).seq(function () {
+      printGroupe(context, groupe)
+    }).catch(function (error) {
+      $page.printError(context, error.toString())
+    })
+  })
+
+  /**
+   * Ajoute le groupe au user courant
+   * @route GET /groupe/rejoindre/:nom
+   */
+  controller.get('rejoindre/:nom', function (context) {
+    var nom = context.arguments.nom
+    var groupe
+    flow().seq(function () {
+      $groupeRepository.load(nom, this)
+    }).seq(function (grp) {
+      groupe = grp
+      if (grp && grp.ouvert) {
+        if (getMyGroupes(context).indexOf(nom) !== -1) this("Vous êtes déjà dans le groupe " +nom)
+        else this()
       } else {
-        $page.printError(context, 'Le groupe ' +nom +" n'existe pas ou n'est pas ouvert")
+        this('Le groupe ' +nom +" n'existe pas ou n'est pas ouvert")
       }
+    }).seq(function () {
+      joinGroup(context, nom, this)
+    }).seq(function () {
+      $flashMessages.add(context, "Vous faites désormais partie de ce groupe")
+      printGroupe(context, groupe)
     }).catch(function (error) {
       $page.printError(context, error.toString())
     })
@@ -347,23 +399,31 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       var uid = $accessControl.getCurrentUserOid(context)
       if (!uid) throw new Error("Il faut être authentifié pour créer un groupe")
       if (!$accessControl.hasGenericPermission('createGroupe', context)) throw new Error("Droits insuffisants pour créer un groupe")
-      if (!groupe.nom) throw new Error("Données invalides")
-      // on peut continuer
       /** @type Groupe */
       var groupe = context.post
-      // faut vérifier qu'il n'existe pas
+      if (!groupe.nom) throw new Error("Données invalides")
+      var nom = groupe.nom
+      // on peut continuer, faut vérifier qu'il n'existe pas
       flow().seq(function () {
-        $groupeRepository.load(groupe.nom, this)
+        $groupeRepository.load(nom, this)
       }).seq(function (groupeBdd) {
-        if (groupeBdd) this("Le groupe « " + groupe.nom + " » existe déjà")
+        if (groupeBdd) this("Le groupe « " + nom + " » existe déjà")
         else this()
       }).seq(function () {
         groupe.gestionnaires = [uid]
         $groupeRepository.save(groupe, this)
       }).seq(function (groupeSaved) {
-        $page.printMessage(context, "Le groupe « " + groupeSaved.nom + " » a été créé", 'Groupe ajouté')
+        if (groupeSaved) {
+          joinGroup(context, nom, this)
+        } else {
+          var error = new Error("Erreur à l'enregistrement du groupe " +tools.stringify(groupe))
+          log.error(error)
+          this(error)
+        }
+      }).seq(function () {
+        $page.printMessage(context, "Le groupe « " + nom + " » a été créé", 'Groupe ajouté')
       }).catch(function (error) {
-        if (error instanceof "Error") log.error(error)
+        if (error instanceof Error) log.error(error)
         $page.printError(context, error)
       })
     } catch (error) {
@@ -375,7 +435,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * formulaire d'édition
    * @route GET /groupe/modifier/:nom
    */
-  controller.get('/modifier/:nom', function (context) {
+  controller.get('modifier/:nom', function (context) {
     try {
       var uid = $accessControl.getCurrentUserOid(context)
       if (!uid) throw new Error("Il faut être authentifié pour modifier un groupe")
@@ -444,7 +504,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           $page.printError(context, error)
         })
       }).catch(function (error) {
-        if (error instanceof "Error") log.error(error)
+        if (error instanceof Error) log.error(error)
         $page.printError(context, error)
       })
     } catch (error) {
@@ -456,7 +516,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * Traitement du formulaire d'édition, réaffiche le formulaire si besoin de confirmation
    * @route POST /groupe/modifier/:nom
    */
-  controller.post('/modifier/:nom', function (context) {
+  controller.post('modifier/:nom', function (context) {
     try {
       var uid = $accessControl.getCurrentUserOid(context)
       if (!uid) throw new Error("Il faut être authentifié pour modifier un groupe")

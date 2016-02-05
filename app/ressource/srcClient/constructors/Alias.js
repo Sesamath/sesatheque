@@ -41,7 +41,7 @@
  * @constructor
  */
 function Alias(initObj) {
-  if (!initObj instanceof Object) initObj = {}
+  if (typeof initObj !== "object") initObj = {}
   if (initObj.oid && initObj.ref && initObj.base) {
     // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et base)
       // c'est un alias

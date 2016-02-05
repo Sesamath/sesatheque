@@ -54,8 +54,8 @@ module.exports = function (EntityRessource) {
     // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
     // plus pratique ici que dans le constructeur qui ne peut faire de require
     if (initObj) {
-      if (initObj.dateCreation && !initObj.dateCreation instanceof Date) initObj.dateCreation = tools.toDate(initObj.dateCreation)
-      if (initObj.dateMiseAJour && !initObj.dateMiseAJour instanceof Date) initObj.dateMiseAJour = tools.toDate(initObj.dateMiseAJour)
+      if (initObj.dateCreation && !(initObj.dateCreation instanceof Date)) initObj.dateCreation = tools.toDate(initObj.dateCreation)
+      if (initObj.dateMiseAJour && !(initObj.dateMiseAJour instanceof Date)) initObj.dateMiseAJour = tools.toDate(initObj.dateMiseAJour)
     }
 
     // ajoute les éventuelles propriétés supplémentaire de notre objet initial

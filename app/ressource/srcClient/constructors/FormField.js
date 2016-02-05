@@ -39,7 +39,7 @@ var FormChoice = require('./FormChoice')
  * @constructor
  */
 function FormField(values) {
-  if (typeof values !== 'object') values = {}
+  if (!values || typeof values !== 'object') values = {}
   if (values.id) {
     /**
      * @type {string}

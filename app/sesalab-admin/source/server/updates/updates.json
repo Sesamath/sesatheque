@@ -18,5 +18,9 @@
   {
     "date": "2015-12-11T19:30:00.000Z",
     "description": "Contributeurs mis en auteurs sur commun (sinon ils peuvent pas effacer leurs clones)"
+  },
+  {
+    "date": "2016-02-05T19:30:00.000Z",
+    "description": "personne.groupes devient un tableau"
   }
 ]

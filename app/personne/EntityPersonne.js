@@ -31,89 +31,13 @@
 
 "use strict"
 
+var Personne = require('../ressource/srcClient/constructors/Personne')
 /**
  * Entity pour un user
  * @entity EntityPersonne
  * @extends Entity
  * @extends Personne
  */
-
-/**
- * Constructeur Personne
- * @constructor
- * @private
- * @param {Object} initObj Un objet ayant des propriétés d'une personne
- */
-function Personne(initObj) {
-  if (!initObj) initObj = {}
-  /**
-   * L'identifiant de la personne dans la sesatheque
-   * @type {Integer}
-   * @default undefined
-   */
-  this.oid = initObj.oid || undefined
-  /**
-   * Source de l'authentification (nom du authClient)
-   * @type {string}
-   * @default null
-   */
-  this.origine = initObj.origine || null
-  /**
-   * Id de la source d'authentification
-   * @type {string}
-   * @default null
-   */
-  this.idOrigine = initObj.idOrigine || null
-  /**
-   * Date de dernière vérification sur le serveur sso (mis au login, inexistant sinon), non stocké
-   * @type {Date}
-   * @default undefined
-   */
-  this.lastCheck = initObj.lastCheck || undefined
-  /**
-   * Prénom
-   * @type {string}
-   * @default ""
-   */
-  this.prenom = initObj.prenom || ''
-  /**
-   * Nom
-   * @type {string}
-   * @default ""
-   */
-  this.nom = initObj.nom || ''
-  /**
-   * Adresse email
-   * @type {string}
-   * @default ""
-   */
-  this.email = initObj.email || ''
-  /**
-   * Liste des roles {role:boolean}
-   * @type {Object}
-   * @default {}
-   */
-  this.roles = initObj.roles || {}
-  /**
-   * Liste des permissions, calculée d'après les roles au login, non sauvegardée donc à priori seulement en session
-   * @type {Object}
-   * @default {}
-   */
-  this.permissions = initObj.permissions || undefined
-  /**
-   * La liste des groupes {groupeNom:boolean}
-   * @type {Object}
-   * @default {}
-   */
-  this.groupes = initObj.groupes || {}
-  /**
-   * D'autres propriétés regroupées dans cet objet, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
-   * @type {Object}
-   * @default undefined
-   */
-  this.infos = initObj.infos || undefined
-}
-
 module.exports = function (EntityPersonne) {
   var tools = require('../tools')
 
@@ -137,7 +61,5 @@ module.exports = function (EntityPersonne) {
       .defineIndex('roles', 'string', function () {
         return tools.truePropertiesList(this.roles)
       })
-      .defineIndex('groupes', 'string', function () {
-        return tools.truePropertiesList(this.groupes)
-      })
+      .defineIndex('groupes', 'string')
 }

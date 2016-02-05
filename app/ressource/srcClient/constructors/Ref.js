@@ -37,7 +37,7 @@
  * @constructor
  */
 function Ref(initObj) {
-  if (!initObj instanceof Object) initObj = {}
+  if (typeof initObj !== "object") initObj = {}
   /**
    * L'oid de la ressource que l'on référence
    * @property ref
