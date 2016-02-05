@@ -1,0 +1,2 @@
+<!-- blocs -->
+{#blocsList}<!-- bloc {partialView} -->{>partialView /}{/blocsList}

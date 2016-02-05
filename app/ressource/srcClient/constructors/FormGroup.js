@@ -33,51 +33,61 @@
 
 var FormField = require('./FormField')
 
-function FieldGroup(obj) {
-  if (typeof obj !== 'object') obj = {}
-  if (obj.id) {
+/**
+ * Groupe de champs d'un Form
+ * @param {object} [values] Des valeurs d'initialisation
+ * @constructor
+ */
+function FieldGroup(values) {
+  if (typeof values !== 'object') values = {}
+  if (values.id) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.id = obj.id
+    this.id = values.id
   }
 
-  if (obj.className) {
+  if (values.className) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.className = obj.className
+    this.className = values.className
   }
 
-  if (obj.label) {
+  if (values.label) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.label = obj.label
+    this.label = values.label
   }
 
-  if (obj.name) {
+  if (values.name) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.name = obj.name
+    this.name = values.name
   }
 
   /**
    * @type {FormField[]}
    */
   this.fields = []
-  if (obj.fields && obj.fields.length) {
-    for (var i = 0; i < obj.fields.length; i++) {
-      this.addField(obj.fields[i])
+  if (values.fields && values.fields.length) {
+    for (var i = 0; i < values.fields.length; i++) {
+      this.addField(values.fields[i])
     }
   }
 }
 
+/**
+ * Ajoute un champ
+ * @param {object|FormField} field
+ * @returns {FormField}
+ */
 FieldGroup.prototype.addField = function addField(field) {
   var formField = new FormField(field)
   this.fields.push(formField)

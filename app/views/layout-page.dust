@@ -23,10 +23,13 @@
   {!titre flottant seulement si on a des actions, qui devront alors gérer le clearfix!}
   {?titre}<h1 {?actions}class="fl"{/actions}>{titre}</h1>{/titre}
   {actions|s}
+  {?error}<p class="error">{error}</p>{/error}
   {errors|s}
   {warnings|s}
   {flashBloc|s}
   {contentBloc|s}
+  {blocs|s}
+  {! jsBloc poussé juste avant /body !}
 </div>
 
 <footer id="footer">

@@ -72,6 +72,25 @@ tools.cloneData = function(object) {
 }
 
 /**
+ * Update object en y ajoutant toutes les propriétés de default qui n'existait pas dans object sans modifier les autres
+ * @memberOf tools
+ * @param {object}  object
+ * @param {object}  defaultValues
+ * @param {boolean} [recursion=true] Passer false pour ne compléter que les propriétés "racine" de l'objet sans récursion
+ */
+tools.complete = function(object, defaultValues, recursion) {
+  // recursion=true par défaut
+  if (recursion !== false) recursion = true
+  function completeObj(obj, values) {
+    _.each(values, function(value, key) {
+      if (!obj.hasOwnProperty(key)) obj[key] = value
+      else if (recursion && _.isObject(obj[key]) && _.isObject(value)) completeObj(obj[key], value)
+    })
+  }
+  if (object instanceof Object && defaultValues instanceof Object) completeObj(object, defaultValues)
+}
+
+/**
  * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
  * @memberOf tools
  * @param int La valeur à contrôler
@@ -91,6 +110,16 @@ tools.encadre = function (int, min, max, label) {
     value = max
   }
   return value
+}
+
+/**
+ * Renvoie un token aléatoire de 22 caractères
+ * Pas aussi random ni unique que l'usage de crypto ou d'un module uuid
+ * mais suffisant dans pas mal de cas (utiliser an-uuid sinon)
+ * @returns {string}
+ */
+tools.getToken = function getToken() {
+  return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
 }
 
 /**
@@ -336,6 +365,19 @@ tools.stripTags = function (source) {
 }
 
 /**
+ * Transforme une liste en tableau de mots valides pour des ids ([A-Za-z0-9_\-])
+ * @param {string} list
+ * @returns {string[]} la liste des ids récupérés (tous les caractères autres que lettres, chiffres, tiret et underscore ont été virés)
+ */
+tools.idListToArray = function idListToArray(list) {
+  var retour = []
+  if (typeof list === 'string') retour = list.match(/([A-Za-z0-9_\-]+)/g)
+  else log.error(new TypeError('faut me donner un type string'))
+
+  return retour
+}
+
+/**
  * Converti un timestamp ou un chaine en objet Date
  * @memberOf tools
  * @param {number|string} value Un timestamp (en ms ou s) ou une chaine ('DD/MM/YYYY' ou ISO_8601)
@@ -391,6 +433,7 @@ tools.truePropertiesList = function (obj) {
  */
 tools.update = function(object, addition) {
   Object.getOwnPropertyNames(addition).forEach(function(property) {
+    // on ajoute ou met à jour la propriété avec son descripteur complet
     Object.defineProperty(
         object,
         property,
@@ -400,22 +443,23 @@ tools.update = function(object, addition) {
 }
 
 /**
- * Update object en y ajoutant toutes les propriétés de default qui n'existait pas dans object sans modifier les autres
+ * Update object en y mettant à jour ses propriétés par celles de values qu'ils ont en commun
+ * (les propriétés en plus de values sont ignorées)
  * @memberOf tools
- * @param {object}  object
- * @param {object}  defaultValues
- * @param {boolean} [recursion=true] Passer false pour ne compléter que les propriétés "racine" de l'objet sans récursion
+ * @param {object} object
+ * @param {object} values
  */
-tools.complete = function(object, defaultValues, recursion) {
-  // recursion=true par défaut
-  if (recursion !== false) recursion = true
-  function completeObj(obj, values) {
-    _.each(values, function(value, key) {
-      if (!obj.hasOwnProperty(key)) obj[key] = value
-      else if (recursion && _.isObject(obj[key]) && _.isObject(value)) completeObj(obj[key], value)
-    })
-  }
-  if (object instanceof Object && defaultValues instanceof Object) completeObj(object, defaultValues)
+tools.updateIfExists = function(object, values) {
+  Object.getOwnPropertyNames(values).forEach(function(property) {
+    if (object.hasOwnProperty(property)) {
+      // on met à jour la propriété avec son descripteur complet
+      Object.defineProperty(
+          object,
+          property,
+          Object.getOwnPropertyDescriptor(values, property)
+      )
+    }
+  })
 }
 
 module.exports = tools

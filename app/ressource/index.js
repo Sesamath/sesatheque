@@ -57,10 +57,6 @@ ressourceComponent.service('$routes', function($accessControl) {
   return require('./serviceRoutes')($accessControl)
 })
 
-ressourceComponent.service('$flashMessages', function() {
-  return require('./serviceFlashMessages')()
-})
-
 ressourceComponent.service('$ressourceRepository', function(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
   return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes)
 })

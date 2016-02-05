@@ -49,6 +49,12 @@
  */
 
 /**
+ * @callback groupeListCallback
+ * @param {Error}  [error] erreur éventuelle
+ * @param {Groupe[]} groupes  tableau d'entity groupe
+ */
+
+/**
  * @callback personneCallback
  * @param {Error}    [error]  erreur éventuelle
  * @param {Personne} personne Entity ou Object

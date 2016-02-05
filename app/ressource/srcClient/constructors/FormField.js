@@ -33,56 +33,61 @@
 
 var FormChoice = require('./FormChoice')
 
-function FormField(obj) {
-  if (typeof obj !== 'object') obj = {}
-  if (obj.id) {
+/**
+ * Un champ de FormGroup
+ * @param {object} [values] Des valeurs d'initialisation
+ * @constructor
+ */
+function FormField(values) {
+  if (typeof values !== 'object') values = {}
+  if (values.id) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.id = obj.id
+    this.id = values.id
   }
 
-  if (obj.className) {
+  if (values.className) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.className = obj.className
+    this.className = values.className
   }
 
-  if (obj.label) {
+  if (values.label) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.label = obj.label
-    if (obj.labelInfo) {
+    this.label = values.label
+    if (values.labelInfo) {
       /**
        * Un complément de label éventuel (qui pourra être stylé différemment pour un complément d'info sur le champ)
        * @type {string}
        * @default undefined
        */
-      this.labelInfo = obj.labelInfo
+      this.labelInfo = values.labelInfo
     }
   }
 
-  if (obj.name) {
+  if (values.name) {
     /**
      * @type {string}
      */
-    this.name = obj.name
+    this.name = values.name
   }
 
-  if (obj.attributes) {
+  if (values.attributes) {
     /**
      * @type {Attribute[]}
      * @default undefined
      */
-    this.attributes = obj.attributes
+    this.attributes = values.attributes
   }
 
-  if (obj.required) {
+  if (values.required) {
     /**
      * @type {boolean}
      * @default undefined
@@ -90,7 +95,7 @@ function FormField(obj) {
     this.required = true
   }
 
-  if (obj.readonly) {
+  if (values.readonly) {
     /**
      * @type {boolean}
      * @default undefined
@@ -103,20 +108,20 @@ function FormField(obj) {
    * @type {string}
    * @default undefined
    */
-  this.widget = obj.widget
+  this.widget = values.widget
 
   /**
    * @type {string|FormChoice[]}
    * @default ''
    */
   this.value = ''
-  if (typeof obj.value === 'string' || typeof obj.value === 'number' || typeof obj.value === 'undefined') {
+  if (typeof values.value === 'string' || typeof values.value === 'number' || typeof values.value === 'undefined') {
     // text par défaut
     if (!this.widget) this.widget = 'text'
-    if (["text", "textarea", "submit", "button"].indexOf(this.widget) === -1) throw new Error("widget "+this.widget +" incompatible avec la valeur " +obj.value)
-    this.value = obj.value || ''
+    if (["text", "textarea", "submit", "button"].indexOf(this.widget) === -1) throw new Error("widget "+this.widget +" incompatible avec la valeur " +values.value)
+    this.value = values.value || ''
 
-  } else if (typeof obj.value === 'boolean') {
+  } else if (typeof values.value === 'boolean') {
     // oui / nom sous forme de checkbox
     this.widget = 'checkboxes'
     // faut mettre label et name sur le choice
@@ -127,40 +132,40 @@ function FormField(obj) {
       value: 'true'
     }
     if (this.readonly) choice.readonly = true
-    if (obj.selectedValues === true) choice.selected = true
+    if (values.selectedValues === true) choice.selected = true
     // required a peu de sens, sinon pour obliger à cocher qqchose
     if (this.required) choice.required = true
     this.addChoice(choice)
     this.label = undefined
 
-  } else if (obj.value instanceof Array) {
+  } else if (values.value instanceof Array) {
     // une liste, checkboxes par défaut
     if (!this.widget) this.widget = 'checkboxes'
     if (["select", "checkboxes", "radios"].indexOf(this.widget) === -1) throw new Error("widget incompatible avec la valeur")
     this.value = []
-    if (obj.value.length) {
-      for (i = 0; i < obj.value.length; i++) {
-        this.addChoice(obj.value[i])
+    if (values.value.length) {
+      for (i = 0; i < values.value.length; i++) {
+        this.addChoice(values.value[i])
       }
     }
   }
 
-  if (obj.selectedValues) {
+  if (values.selectedValues) {
     /**
      * @type {string[]}
      * @default undefined
      */
     this.selectedValues = []
     // cast de chaque élément en string
-    if (obj.selectedValues instanceof Array) {
-      for (var i = 0; i < obj.selectedValues.length; i++) {
-        this.selectedValues.push(obj.selectedValues[i] +'')
+    if (values.selectedValues instanceof Array) {
+      for (var i = 0; i < values.selectedValues.length; i++) {
+        this.selectedValues.push(values.selectedValues[i] +'')
       }
     } else {
-      this.selectedValues.push(obj.selectedValues +'')
+      this.selectedValues.push(values.selectedValues +'')
     }
   }
-}
+} // FormField
 
 FormField.prototype.addChoice = function addChoice(choice) {
   if (!this.value instanceof Array) {

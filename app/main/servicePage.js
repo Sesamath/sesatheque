@@ -31,6 +31,8 @@
 
 'use strict'
 
+var tools = require('../tools')
+
 module.exports = function () {
   /**
    * Service de gestion des pages html
@@ -40,9 +42,8 @@ module.exports = function () {
 
   /**
    * Ajoute une erreur à la liste qui sera envoyée à la vue
-   * @memberOf $page
-   * @param error
-   * @param data
+   * @param {string|error} error
+   * @param {object} data objet qui sera passé à context.html()
    */
   $page.addError = function (error, data) {
     if (!data.errors || !data.errors.errorMessages) data.errors = {
@@ -55,10 +56,8 @@ module.exports = function () {
 
   /**
    * Affiche une 401 avec Authentification requise en html
-   * @private
    * @param {Context} context
    * @param {string} [message="Authentification requise"]
-   * @returns {boolean} true si authentifié
    */
   $page.denied = function denied(context, message) {
     if (!message) message = "Authentification requise"
@@ -66,26 +65,55 @@ module.exports = function () {
   }
 
   /**
-   * Retourne les datas minimales (avec $views, $metas) et initialise context.layout
+   * Retourne les datas minimales (avec $views, $metas) et initialise context.layout (si context fourni)
    * @param {Context} [context]
+   * @param {string}  [titre]
+   * @param {object}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
+   *                                  et les autres propriétés qui seront passées à cette vue)
+   *                                  ou un simple texte (qui sera passé à la vue contents
    * @returns {{$views: string, $metas: {}}}
    */
-  $page.getDefaultData = function getDefaultData(context) {
+  $page.getDefaultData = function getDefaultData(context, titre, contentBloc) {
     var data = {
       $views : __dirname + '/../views',
       $metas : {
         js : ['/page.bundle.js']
       }
     }
+    if (titre) {
+      data.$metas.title = titre
+    }
     if (context) {
       if (context.get.layout === 'iframe') context.layout = 'iframe'
       else context.layout = 'page'
-      data.$layout = 'layout-' +context.layout
-    } else {
-      data.$layout = 'layout-page'
+      // data.$layout est fixé dans beforeTransport
+    }
+    if (typeof contentBloc === 'string') {
+      data.contentBloc = {
+        $view : 'contents',
+        contents : [contentBloc]
+      }
+    } else if (contentBloc) {
+      data.contentBloc = contentBloc
     }
 
     return data
+  }
+
+  /**
+   * Affiche une page simple
+   * @param {Context} [context]
+   * @param {string}  [titre]
+   * @param {object|string}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
+   *                                        et les autres propriétés qui seront passées à cette vue)
+   *                                        ou un simple texte (qui sera passé à la vue contents
+   * @param {object}  [blocs]  Objet qui sera fusionné avec data avant context.html(data), peut donc contenir
+   *                            une propriété blocs ou des ajouts pour $metas
+   */
+  $page.print = function (context, titre, contentBloc, blocs) {
+    var data = $page.getDefaultData(context, titre, contentBloc)
+    if (blocs) tools.merge(data, blocs)
+    context.html(data)
   }
 
   /**
@@ -99,6 +127,23 @@ module.exports = function () {
     var data = $page.getDefaultData(context)
     $page.addError(error, data)
     context.status = status || 200
+    context.html(data)
+  }
+
+  /**
+   * Affiche un ou des message(s)
+   * @memberOf $page
+   * @param {Context}         context
+   * @param {string|string[]} message (en mettre plusieurs dans un array pour avoir plusieurs paragraphes)
+   * @param {string}          titre
+   */
+  $page.printMessage = function (context, message, titre) {
+    var data = $page.getDefaultData(context, titre)
+    var contents = message instanceof Array ? message : [message]
+    data.contentBloc = {
+      $view: 'contents',
+      contents: contents
+    }
     context.html(data)
   }
 

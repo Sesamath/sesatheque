@@ -166,16 +166,6 @@ module.exports = function (EntityRessource) {
   }
 
   /**
-   * Renvoie un token aléatoire
-   * pas aussi random que l'usage de crypto ou d'un module npm dédié mais suffisant pour notre besoin
-   * @returns {string}
-   * @memberOf $ressourceControl
-   */
-  $ressourceControl.getToken = function () {
-    return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
-  }
-
-  /**
    * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
    * Fait du cast sans râler quand les propriétés de ressource sont "presque" du bon type
    * @memberOf $ressourceControl

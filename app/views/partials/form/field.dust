@@ -8,9 +8,8 @@
           attrs : tableau de {name:'nom', value:'valeur'}, attributs à ajouter sur le champ input
 !}
 <div class="field">
-  {#warnings}
-    <div class="warning">{.}</div>
-  {/warnings}
+  {#warnings}<div class="warning">{.}</div>{/warnings}
+
   {@eq key=widget value="hidden"}
     {>"formField_{widget}" /}
   {:else}
@@ -19,6 +18,6 @@
       {?required}<span class="required" title="Ce champ est obligatoire">*</span>{/required}
       {?labelInfo}<span class="remarque">({labelInfo})</span>{/labelInfo}
     </label>
-    {>"formField_{widget}" /}
+    {>"form/field_{widget}" /}
   {/eq}
 </div>

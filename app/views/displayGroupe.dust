@@ -1,0 +1,14 @@
+<div class="groupe">
+  <h1 id="titre">{nom}</h1>
+  <ul>
+    Propriétés de ce groupe
+    <li>Nom : {nom}</li>
+    <li>Ouvert à tous : {?ouvert}oui{:else}non{/ouvert}</li>
+    <li>
+      <ul>
+        Gestionnaire(s) : {#gestionnaires}<li>{.}</li>{/gestionnaires}
+      </ul>
+    </li>
+  </ul>
+  <span class="remarque">Les gestionnaires peuvent ouvrir ou fermer le groupe à tous</span>
+</div>

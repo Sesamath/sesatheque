@@ -31,39 +31,44 @@
 
 'use strict'
 
-function FormChoice(obj) {
-  if (typeof obj !== 'object') obj = {}
-  if (obj.id) {
+/**
+ * Un élément de la propriété value qui est un array pour un FormField ayant widget = select|radio|checkboxes
+ * @param {object} [values] Des valeurs d'initialisation
+ * @constructor
+ */
+function FormChoice(values) {
+  if (typeof values !== 'object') values = {}
+  if (values.id) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.id = obj.id
+    this.id = values.id
   }
 
-  if (obj.className) {
+  if (values.className) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.className = obj.className
+    this.className = values.className
   }
 
-  if (obj.label) {
+  if (values.label) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.label = obj.label
+    this.label = values.label
   }
 
   /**
    * @type {string}
    * @default undefined
    */
-  this.name = obj.name
+  this.name = values.name
 
-  if (obj.selected) {
+  if (values.selected) {
     /**
      * @type {boolean}
      * @default undefined
@@ -76,7 +81,7 @@ function FormChoice(obj) {
    * @type {string}
    * @default ''
    */
-  this.value = obj.value || ''
+  this.value = values.value || ''
   if (typeof this.value !== 'string') this.value += ''
 }
 

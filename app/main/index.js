@@ -61,8 +61,13 @@ mainComponent.service('$page', function() {
   return require('./servicePage')()
 })
 
-mainComponent.service('$form', function() {
-  return require('./serviceForm')()
+
+mainComponent.service('$flashMessages', function() {
+  return require('./serviceFlashMessages')()
+})
+
+mainComponent.service('$form', function($page) {
+  return require('./serviceForm')($page)
 })
 
 mainComponent.service('$json', function () {

@@ -65,6 +65,16 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
   }
 
   /**
+   * Récupère une liste de groupes dont l'oid est gestionnaire
+   * @param {string} groupeNom
+   * @param {groupeListCallback} next
+   * @memberOf $groupeRepository
+   */
+  $groupeRepository.getListManagedBy = function (oid, next) {
+    EntityGroupe.match('gestionnaires').equals(oid).grab(next)
+  }
+
+  /**
    * Récupère tous les groupes ouverts
    * @param {groupeCallback} next
    * @memberOf $groupeRepository

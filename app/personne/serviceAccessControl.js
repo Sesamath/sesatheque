@@ -268,6 +268,64 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   //######################
 
   /**
+   * Ajoute un token et des valeurs associées en session
+   * @param {Context} context
+   * @param {string}  [token]
+   * @param {*} [value=true] Une ou des valeurs à mettre en session associées au token
+   *                      (ne rien passer ici ni à checkToken permet juste de vérifier sa présence)
+   * @returns {boolean|string} false si y'avait pas de user connecté, le token sinon
+   */
+  $accessControl.addToken = function addToken(context, token, value) {
+    var retour = $accessControl.isAuthenticated(context)
+    if (retour) {
+      if (!value) value = true // avec undefined la property n'existe pas, mettre false n'a pas de sens, true parce qu'on veut juste vérifier sa présence
+      if (!token) token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
+      if (!context.session.tokens) context.session.tokens = {}
+      context.session.tokens[token] = value
+      retour = token
+    }
+    return retour
+  }
+
+  /**
+   * Vérifie que le token en session correspond et le supprime
+   * @param {Context} context
+   * @param {string} token
+   * @param {*} [value=true] La valeur qu'il doit avoir (celle qu'on avait passé à addToken précédemment)
+   * @returns {boolean}
+   */
+  $accessControl.checkToken = function (context, token, value) {
+    var retour
+    if (!value) value = true
+    if (context && token) {
+      try {
+        retour = tools.isEqual(context.session.tokens[token], value)
+        delete context.session.tokens[token]
+      } catch (error) {
+        retour = false
+      }
+    }
+
+    return retour
+  }
+
+  /**
+   * Retourne la valeur du token en session et le supprime (donc faut choisir entre getToken et checkToken)
+   * @param {Context} context
+   * @param {string} token
+   * @returns {*} La valeur stockée ou undefined si le token n'était pas en session
+   */
+  $accessControl.getTokenValue = function getTokenValue(context, token) {
+    var value
+    if (context && token && context.session.tokens && context.session.tokens.hasOwnProperty(token)) {
+      value = context.session.tokens[token]
+      delete context.session.tokens[token]
+    }
+
+    return value
+  }
+
+  /**
    * Vérifie la permission pour l'utilisateur courant et cette ressource
    * @param permission
    * @param {Context}       context

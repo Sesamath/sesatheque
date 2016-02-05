@@ -83,8 +83,8 @@ personneComponent.service('$personneControl', function(EntityPersonne, EntityGro
 })
 
 // controleur des pages html de gestion de groupe
-personneComponent.controller('groupe', function (EntityGroupe, $groupeRepository, $accessControl, $page, $form) {
-  require('./controllerGroupe')(this, EntityGroupe, $groupeRepository, $accessControl, $page, $form)
+personneComponent.controller('groupe', function (EntityGroupe, $groupeRepository, $personneRepository, $accessControl, $page, $form, $flashMessages) {
+  require('./controllerGroupe')(this, EntityGroupe, $groupeRepository, $personneRepository, $accessControl, $page, $form, $flashMessages)
 })
 
 // l'api json

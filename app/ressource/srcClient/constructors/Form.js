@@ -31,40 +31,45 @@
 
 'use strict'
 
-var FormFieldGroup = require('./FormFieldGroup')
+var FormGroup = require('./FormGroup')
 
-function Form(obj) {
-  if (typeof obj !== 'object') obj = {}
-  if (obj.id) {
+/**
+ * Formulaire (objet formaté pour la vue form)
+ * @param {object} [values] Des valeurs d'initialisation
+ * @constructor
+ */
+function Form(values) {
+  if (typeof values !== 'object') values = {}
+  if (values.id) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.id = obj.id
+    this.id = values.id
   }
 
-  if (obj.className) {
+  if (values.className) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.className = obj.className
+    this.className = values.className
   }
 
-  if (obj.label) {
+  if (values.label) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.label = obj.label
+    this.label = values.label
   }
 
-  if (obj.name) {
+  if (values.name) {
     /**
      * @type {string}
      * @default undefined
      */
-    this.name = obj.name
+    this.name = values.name
   }
 
   /**
@@ -73,27 +78,27 @@ function Form(obj) {
    * @default post
    */
   this.method = 'post'
-  if (typeof obj.method === 'string' && obj.method.toLowerCase() === 'get') this.method = 'get'
+  if (typeof values.method === 'string' && values.method.toLowerCase() === 'get') this.method = 'get'
 
   /**
-   * Liste de FormFieldGroup
-   * @type {FormFieldGroup[]}
+   * Liste de FormGroup
+   * @type {FormGroup[]}
    */
   this.groups = []
-  if (obj.groups && obj.groups.length) {
-    for (var i = 0; i < obj.groups.length; i++) {
-      this.addGroup(obj.groups[i])
+  if (values.groups && values.groups.length) {
+    for (var i = 0; i < values.groups.length; i++) {
+      this.addGroup(values.groups[i])
     }
   }
-}
+} // Form
 
 /**
  * Ajoute un groupe de champs
- * @param {object|FormFieldGroup} group
- * @returns {FormFieldGroup}
+ * @param {object|FormGroup} group
+ * @returns {FormGroup}
  */
 Form.prototype.addGroup = function addGroup(group) {
-  var fieldGroup = new FormFieldGroup(group)
+  var fieldGroup = new FormGroup(group)
   this.groups.push(fieldGroup)
   
   return fieldGroup
@@ -108,12 +113,10 @@ Form.prototype.addGroup = function addGroup(group) {
 Form.prototype.addField = function addField(field, inNewGroup) {
   var nb = this.groups.length
   var fieldGroup
-  if (inNewGroup) {
+  if (inNewGroup || !nb) {
     fieldGroup = this.addGroup()
-  } else if (nb) {
-    fieldGroup = this.groups[nb]
   } else {
-    fieldGroup = this.addGroup()
+    fieldGroup = this.groups[nb]
   }
 
   return fieldGroup.addField(field)
@@ -126,7 +129,7 @@ Form.prototype.addField = function addField(field, inNewGroup) {
  * @param {string} [label] label qui serait ajouté au fieldset du submit
  * @param {string} className
  */
-Form.prototype.addSubmit = function(value, id, label, className) {
+Form.prototype.addSubmit = function addSubmit(value, id, label, className) {
   var group = {}
   if (label) group.label = label
   var fieldGroup = this.addGroup(group)
@@ -138,5 +141,82 @@ Form.prototype.addSubmit = function(value, id, label, className) {
   if (className) submit.className = className
   fieldGroup.addField(submit)
 }
+
+/**
+ * Retourne le champ d'id demandé s'il existe (undefined sinon)
+ * @param {string} id
+ * @returns {FieldGroup}
+ */
+Form.prototype.getFieldById = function getFieldById(id) {
+  var field
+  if (id) {
+    this.groups.some(function (formGroup) {
+      return formGroup.fields.some(function (formField) {
+        if (formField.id === id) {
+          field = formField
+          return true
+        }
+      })
+    })
+  }
+  return field
+}
+
+/**
+ * Retourne le champ ayant le name demandé s'il existe (undefined sinon)
+ * @param {string} name
+ * @returns {FormField}
+ */
+Form.prototype.getFieldByName = function getFieldByName(name) {
+  var field
+  if (name) {
+    this.groups.some(function (formGroup) {
+      return formGroup.fields.some(function (formField) {
+        if (formField.name === name) {
+          field = formField
+          return true
+        }
+      })
+    })
+  }
+  return field
+}
+
+/**
+ * Retourne le groupe ayant le name demandé s'il existe (undefined sinon)
+ * @param {string} name
+ * @returns {FormGroup}
+ */
+Form.prototype.getGroupByName = function getGroupByName(name) {
+  var group
+  if (name) {
+    this.groups.some(function (formGroup) {
+      if (formGroup.name === name) {
+        group = formGroup
+        return true
+      }
+    })
+  }
+  return group
+}
+
+/**
+ * Retourne le groupe d'id demandé s'il existe (undefined sinon)
+ * @param {string} id
+ * @returns {FormGroup}
+ */
+Form.prototype.getGroupById = function getGroupById(id) {
+  var group
+  if (id) {
+    this.groups.some(function (formGroup) {
+      if (formGroup.id === id) {
+        group = formGroup
+        return true
+      }
+    })
+  }
+  return group
+}
+
 
 module.exports = Form

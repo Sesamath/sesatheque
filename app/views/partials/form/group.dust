@@ -1,4 +1,4 @@
 <fieldset>
   {?label}<legend>{label}</legend>{/label}
-  {#fields:rien}{>formField /}{/fields}
+  {#fields:rien}{>"field" /}{/fields}
 </fieldset>

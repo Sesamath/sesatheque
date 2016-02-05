@@ -31,54 +31,11 @@
 
 'use strict'
 
-var _ = require('lodash')
+//var _ = require('lodash')
+var tools = require('../tools')
 var Form = require('../ressource/srcClient/constructors/Form')
 
-module.exports = function () {
-  /**
-   * Ajoute un choix à une liste de checkboxes / radios
-   * @param {Choice[]}  choices         La liste de choix courante
-   * @param {string}    label           Le label à afficher
-   * @param {string}    key             Le nom du champ parent (attribut name, on ajoutera l'index)
-   * @param {string}    value           La valeur
-   * @param {string[]}  selectedValues  Une liste de valeurs à cocher à l'affichage
-   */
-  function addChoice(choices, label, key, value, selectedValues) {
-    var i = choices.length
-    var choice = {
-      value: value,
-      id: '' +key +i,
-      label: label,
-      name : key + '[' + i + ']'
-    }
-    // et on ajoute les selected s'il y en a
-    if (selectedValues && selectedValues.length && selectedValues.indexOf(value) > -1) {
-      choice.selected = true
-    }
-    choices.push(choice)
-  }
-
-  /**
-   * Retourne la propriété choices pour select/checkboxes/radios (ne gère pas le select multiple)
-   * @private
-   * @param {string}            key       Le nom de la propriété
-   * @param {Array[]}           values    La liste de choix possibles [[valeur,label],[…],…]
-   * @param {string[]|number[]} selected  Les valeurs à présélectionner (tableau d'une seule valeur pour un sélect)
-   * @param {boolean}           isUnique  Si c'est un select et pas des checkbox
-   *                                      (dans ce cas on ajoute pas de propriété name sur chaque choix)
-   * @returns {Array}
-   */
-  function getChoices(key, values, widget, selected) {
-    var choices = []
-    values.forEach(function (value) {
-      var val = value[0]
-      var label = value[1] || value[0]
-      addChoice(choices, label, key, val, selected)
-    })
-
-    return choices
-  }
-
+module.exports = function ($page) {
   /**
    * Service de gestion des formulaires
    * @service $form
@@ -86,85 +43,62 @@ module.exports = function () {
   var $form = {}
 
   /**
-   * Ajoute un champ à fieldGroup.fields si fourni, et le retourne.
-   * Ne gère pas encore les select multiple et les radios
-   * Si value est un tableau et que widget n'est pas précisé ce sera checkboxes (préciser select si besoin)
-   * Si value est une chaine ou un nombre, widget vaudra text (préciser textarea si besoin)
-   * Si value est un booléen il sera dans une checkbox unique
-   * @param {object} form L'objet form que l'on va augmenter et qui sera passé à la vue
-   * @param {string} label
-   * @param {string}                      key Le nom de la propriété qui sera ajouté (aussi utilisé pour le name et l'id)
-   * @param {string|number|boolean|Array} value
-   * @param {object}                      [options] Propriétés possibles :
-   *                                        {boolean} required : pour ajouter l'attribut au html
-   *                                        {boolean} isUnique : utile seulement si value est un array et que widget n'est pas précisé
-   *                                                   (si true impose select, sinon checkboxes)
-   *                                        {string}  widget : text|textarea|select|radios|checkboxes|submit
-   *                                        {string[]} selected : liste des valeurs à précocher/sélectionner
+   * Ajoute un champ au form (dans le fieldGroup demandé ou un nouveau) et le retourne.
+   * Wrapper de formGroup.addField
+   * @param {Form}             form      L'objet form que l'on va augmenter et qui sera passé à la vue
+   * @param {object|FormField} field     Propriétés du champ à créer (passer au moins name et value)
+   * @param {object}           [options] options
+   *                              si fieldGroup existe ses propriétés seront ajoutées au formGroup utilisé (trouvé ou créé)
+   *                              si fieldGroupId existe on cherchera un FieldGroup correspondant dans form
+   *                              sinon, si fieldGroupName existe idem
+   *                              sinon (ou si on a pas trouvé de fieldGroup) on créera un nouveau FormGroup
    */
-  $form.addField = function addField(fieldGroup, label, key, value, options) {
+  $form.addField = function addField(form, field, options) {
     if (!options) options = {}
-    var field = {
-      id   : options.id || key, // le template ajoutera un préfixe de son choix s'il veut
-      label: label,
-      name: key,
-      widget : 'text'
-    }
-    if (options.required) field.required = true
-    // les différents cas possibles
-    if (value instanceof Array) {
-      if (!options.widget) {
-        options.widget = options.isUnique ? 'select' : 'checkboxes'
-      }
-      field.widget = options.widget
-      field.choices = getChoices(key, value, field.widget, options.selected)
-    } else if (typeof value === "boolean") {
-      // une seule checkbox
-      field.choices = getChoices(key, [value], 'checkboxes', options.selected)
-    } else if (typeof value === "string" || typeof value === "number") {
-      // input text ou textarea
-      if (["textarea", "submit", "button"].indexOf(options.widget) > -1) field.widget = options.widget
-      field.value = value
-    } else {
-      log.error(new Error("value incorrecte pour $form.addField " + typeof value))
-    }
-    if (fieldGroup && _.isArray(fieldGroup.fields)) fieldGroup.fields.push(field)
+    var formGroup
+    if (options.fieldGroupId) formGroup = form.getGroupById(options.fieldGroupId)
+    if (options.fieldGroupName) formGroup = form.getGroupByName(options.fieldGroupName)
+    if (!formGroup) formGroup = form.addGroup(options.fieldGroup)
 
-    return field
+    return formGroup.addField(field)
   }
 
   /**
-   * Ajoute un champ à form dans le groupe d'id groupeId et le retourne
+   * Ajoute un token au form en hidden
    * @param {Form} form
-   * @param {string} groupId id du groupe dans lequel ajouter le champ
-   * @param {string} [label]
-   * @param {string} [className]
-   * @param {Field[]} [fields]
-   * @returns {FieldGroup}
+   * @param {Context} context
+   * @returns {string} Le token
    */
-  $form.addGroup = function (form, id, label, className, fields) {
-    var fieldGroup = {
-      fields : fields || []
+  $form.addToken = function (form) {
+    var token = tools.getToken()
+    var field = {
+      name:'token',
+      value:token,
+      widget:'hidden'
     }
-    if (id) fieldGroup.id = id
-    if (label) fieldGroup.label = label
-    if (className) fieldGroup.className = className
-    if (form && _.isArray(form.groups)) form.groups.push(fieldGroup)
+    form.addField(field)
 
-    return fieldGroup
+    return token
   }
 
   /**
-   * Ajoute un bouton submit
-   * @param form
-   * @param value
-   * @param id
-   * @param label
-   * @param className
+   * Retourne un form avec tous les champs dans le même groupe
+   * @param {object|Form}          [formValues]
+   * @param {object|FormGroup}     [groupValues]
+   * @param {object[]|FormField[]} [fields]
+   * @param {string}               [submitValue]
+   * @returns {Form}
    */
-  $form.addSubmit = function(form, value, id, label, className) {
-    var group = $form.addGroup(form, null, label, className)
-    $form.addField(group, null, null, value, {widget:'submit'})
+  $form.construct = function (formValues, groupValues, fields, submitValue) {
+    var form = new Form(formValues)
+    var formGroupField = form.addGroup(groupValues)
+    if (typeof fields === 'object' && !(fields instanceof Array)) fields = [fields]
+    fields.forEach(function (field) {
+      formGroupField.addField(field)
+    })
+    form.addSubmit(submitValue)
+
+    return form
   }
 
   /**
@@ -172,8 +106,24 @@ module.exports = function () {
    * @param {object|Form} obj
    * @returns {Form}
    */
-  $form.get = function (obj) {
-    return new Form(obj)
+  $form.get = function (formValues) {
+    return new Form(formValues)
+  }
+
+  /**
+   * Affiche un formulaire
+   * @param {Context} context
+   * @param {object|Form} formValues
+   * @param {object|FormGroup} groupValues
+   * @param {object[]|FormField[]} fields
+   * @param {string} submitValue
+   * @param {string} pageTitle
+   * @param {object} blocs
+   */
+  $form.print = function print(context, formValues, groupValues, fields, submitValue, pageTitle, blocs) {
+    var contentBloc = $form.construct(formValues, groupValues, fields, submitValue)
+    contentBloc.$view = 'form'
+    $page.print(context, pageTitle, contentBloc, blocs)
   }
 
   return $form

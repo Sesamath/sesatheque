@@ -12,7 +12,7 @@
         )
       </span></li>
     {:else}
-      <p>Aucun groupe</p>
+      <p>{?defaultMessage}{defaultMessage}{:else}Aucun groupe{/defaultMessage}</p>
     {/groupes}
   </ul>
 {/error}

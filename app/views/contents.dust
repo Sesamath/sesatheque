@@ -1,1 +1,4 @@
 {#contents}<p>{.|s}</p>{/contents}
+{?liste}
+<ul>{liste.titre}{#liste.items}<li>{.}<li>{/liste.items}</ul>
+{/liste}

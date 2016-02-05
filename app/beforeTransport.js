@@ -242,7 +242,10 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
 
     } else {
       // erreur 404 ?
-      var isVide = isHtml ? _.isEmpty(data.contentBloc) : isJson ? _.isEmpty(data) : false
+      var isVide
+      if (isHtml) isVide = _.isEmpty(data.contentBloc) && _.isEmpty(data.blocs)
+      else if (isJson) isVide = _.isEmpty(data)
+      else isVide = false
       log.debug("isVide " +isVide)
       if (!context.status && isVide && context.method !== 'options') {
         context.status = 404

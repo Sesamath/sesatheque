@@ -5,11 +5,12 @@
   {head|s}
 </head>
 <body>
-  {?error}<p class="has-error">{error}</p>{/error}
+  {?error}<p class="error">{error}</p>{/error}
   {errors|s}
   {warnings|s}
   {flashBloc|s}
   {contentBloc|s}
+  {#blocs}{>partial /}{/blocs}
   {jsBloc|s}
 </body>
 </html>
