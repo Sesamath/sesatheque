@@ -35,7 +35,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   var dns = require('dns')
   var _ = require('lodash')
   var tools = require('../tools')
-  var flow = require('an-seq')
+  var flow = require('an-flow')
 
   var configRessource = require("../ressource/config")
 
@@ -126,6 +126,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   /**
    * Retourne l'ip du client (la 1re dans la chaine de proxy,
    * ou celle des headers x-real-ip ou x-forwarded-for ou celle de la requete)
+   * @private
    * @param context
    * @returns {*}
    */

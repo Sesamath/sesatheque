@@ -51,6 +51,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Retourne la liste des gestionnaires
+   * @private
    * @param {string|string[]} ids
    * @param next callback appelée avec ({Error}, {EntityPersonne[]})
    */
@@ -73,6 +74,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Retourne la liste des groupes du user courant (liste vide si pas authentifié)
+   * @private
    * @param {Context} context
    * @returns {Array}
    */
@@ -83,6 +85,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Récupère la liste des groupes dont je suis proprio
+   * @private
    * @param {Context} context
    * @param {groupeListCallback} next
    */
@@ -95,6 +98,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Ajoute un groupe à l'utilisateur courant
+   * @private
    * @param context
    * @param nom
    * @param next
@@ -114,6 +118,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Helper de POST /groupe/modifier/:nom dans le cas où il y a une confirmation à demander
+   * @private
    * @param context
    * @param nom
    * @param gestionnairesNames
@@ -188,6 +193,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Helper de POST /groupe/modifier/:nom dans le cas où on a confirmé
+   * @private
    * @param context
    * @param nom
    */
@@ -211,6 +217,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   /**
    * Helper de POST /groupe/modifier/:nom dans le cas où on
    * sauvegarde sans avoir de confirmation à demander
+   * @private
    * @param context
    * @param nom
    */
@@ -244,6 +251,12 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     })
   }
 
+  /**
+   * Affiche le groupe
+   * @private
+   * @param context
+   * @param groupe
+   */
   function printGroupe(context, groupe) {
     getGestionnairesNames(groupe.gestionnaires, function(error, gestionnaires) {
       if (error) {
@@ -401,7 +414,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       var uid = $accessControl.getCurrentUserOid(context)
       if (!uid) throw new Error("Il faut être authentifié pour créer un groupe")
       if (!$accessControl.hasGenericPermission('createGroupe', context)) throw new Error("Droits insuffisants pour créer un groupe")
-      /** @type Groupe */
+      /**
+       * @private
+       * @type Groupe
+       */
       var groupe = context.post
       if (!groupe.nom) throw new Error("Données invalides")
       var nom = groupe.nom

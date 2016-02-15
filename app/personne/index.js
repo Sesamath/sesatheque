@@ -35,6 +35,7 @@
  * Component de gestion des personnes (auteurs) et des groupes
  * On ne peut pas scinder en 2 composants car on aurait des dépendances cycliques
  * avec les services à cheval les deux entités
+ * @private
  */
 var personneComponent = lassi.component('personne')
 
@@ -74,8 +75,8 @@ personneComponent.service('$personneRepository', function(EntityPersonne, Entity
   return require('./servicePersonneRepository')(EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository)
 })
 
-personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
-  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository)
+personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository, $groupeRepository) {
+  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository, $groupeRepository)
 })
 
 personneComponent.service('$personneControl', function(EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
