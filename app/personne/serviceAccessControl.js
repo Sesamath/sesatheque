@@ -643,17 +643,23 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     }
 
     function checkGroups(error, personne) {
-      if (personne.groupes && personne.groupes.length) {
-        flow(personne.groupes).seqEach(function (groupeNom) {
+      personne.groupes = []
+      if (personne.groupesExt && personne.groupesExt.length) {
+        flow(personne.groupesExt).seqEach(function (groupeNom) {
           var nextGroupe = this
           $groupeRepository.load(groupeNom, function (error, groupe) {
             if (error) {
               nextGroupe(error)
             } else if (groupe) {
-              nextGroupe()
+              if (groupe && !groupe.external) {
+                // ennuyeux, on a déjà un groupe interne du même nom, on l'ajoute pas et on signale l'erreur
+                nextGroupe(new Error("Il y a déjà un groupe nommé " +groupe.nom +" dans cette Sésathèque, impossible d'ajouter un groupe externe du même nom"))
+              } else {
+                nextGroupe()
+              }
             } else {
-              // faut l'ajouter, en privé
-              $groupeRepository.save({nom:groupeNom, ouvert:false}, nextGroupe)
+              // faut l'ajouter, en externe
+              $groupeRepository.save({nom:groupeNom, ouvert:false, external:true}, nextGroupe)
             }
           })
         }).seq(function () {
@@ -661,10 +667,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         }).catch(function (error) {
           next(error)
         })
+      } else {
+        // rien à faire sur les groupes
+        next(null, personne)
       }
     }
 
-    if (personne.origine && personne.idOrigine) $personneRepository.update(personne, setSession)
+    if (personne.origine && personne.idOrigine) $personneRepository.updateOrCreate(personne, setSession)
     else setSession(null, personne) // on enregistre que l'on sait ne pas être authentifié sur le serveur sso
   }
 
@@ -694,33 +703,29 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
 
     log.debug("loginFromSesalab avec le domaine " +domaine +" et le user", sesalabUser, "sesasso", {max:10000})
     if (domaine && sesalabUser.oid) {
-      var data = {
+      /**
+       * @private
+       * @type {Personne}
+       */
+      var personne = {
         nom : sesalabUser.nom,
         prenom : sesalabUser.prenom,
         email : sesalabUser.mail,
         roles : {},
         permissions : {},
-        groupes : {}
+        groupesExt : []
       }
       if (sesalabUser.externalId && sesalabUser.externalMech) {
-        data.origine = sesalabUser.externalMech
-        data.idOrigine = sesalabUser.externalId
+        personne.origine = sesalabUser.externalMech
+        personne.idOrigine = sesalabUser.externalId
       } else {
-        data.origine = domaine
-        data.idOrigine = sesalabUser.oid
+        personne.origine = domaine
+        personne.idOrigine = sesalabUser.oid
       }
-      if (sesalabUser.type === 1) data.roles.prof = true
-      if (data.origine === "sesasso") data.roles.acces_correction = true
-      if (sesalabUser.groupes) sesalabUser.groupes.forEach(function (groupe) {
-        data.groupes[groupe] = true
-      })
-      //$personneRepository.loadByOrigin(data.origine, data.idOrigine, function (error, personne) {
-      //  if (error) {
-      //    next(error)
-      //  } else if (personne)
-      //})
-      data.permissions = getPermissions(data)
-      $personneRepository.update(data, setSession)
+      if (sesalabUser.type === 1) personne.roles.prof = true
+      if (personne.origine === "sesasso") personne.roles.acces_correction = true
+      // on attend le vrai client sso pour gérer les groupes
+      $personneRepository.updateOrCreate(personne, setSession)
     } else {
       next(new Error("Impossible de connecter un utilisateur sesalab sans son domaine et oid (manquant dans la réponse de sesalab)"))
     }

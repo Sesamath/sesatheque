@@ -201,7 +201,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Purge les urls publiques de la ressource sur varnish
-   * (asynchrone, rend la main avant de le faire effectivement)
+   * (rend la main avant les réponses mais après avoir lancé les requêtes)
    * @param {Ressource} ressource
    * @returns {{}}
    */
@@ -424,7 +424,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   $ressourceRepository.archive = function (ressource, next) {
     try {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n'existe pas encore")
-      EntityArchive.create(ressource).store(next)
+      EntityArchive.create(ressource).store(function (error, ressource) {
+        if (ressource && !error) $cacheRessource.set(ressource)
+        next(error, ressource)
+      })
     } catch (error) {
       next(error)
     }
@@ -726,7 +729,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       ressource.store(this)
 
     }).seq(function (ressource) {
-      // mise en cache et passage au suivant
+      // mise en cache (pas possible en afterStore car le cache dépend de l'entité), purge varnish et passage au suivant
       if (!ressource.oid) {
         this(new Error("Après un write la ressource n'a toujours pas d'oid"))
       } else {

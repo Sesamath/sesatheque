@@ -1,1 +1,1 @@
-{#blocsList}{partialView}{>partialView /}{/blocsList}
+{#blocList}{>"{partialView}" /}{/blocList}

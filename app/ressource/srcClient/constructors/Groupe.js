@@ -21,68 +21,53 @@
  * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
  * Free Software Foundation.
- * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
  * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
  * Consultez la GNU Affero General Public License pour plus de détails.
  * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
-'use strict'
+"use strict"
 
 /**
- * Un élément de la propriété value d'un FormField ayant widget = select|radio|checkboxes (value est un array dans ce cas)
- * @param {object} [values] Des valeurs d'initialisation
+ * Un groupe d'utilisateurs
  * @constructor
+ * @private
+ * @param {Object} initObj Un objet ayant des propriétés d'un groupe
  */
-function FormChoice(values) {
-  if (!values || typeof values !== 'object') values = {}
-  if (values.id) {
-    /**
-     * @type {string}
-     * @default undefined
-     */
-    this.id = values.id
-  }
-
-  if (values.className) {
-    /**
-     * @type {string}
-     * @default undefined
-     */
-    this.className = values.className
-  }
-
-  if (values.label) {
-    /**
-     * @type {string}
-     * @default undefined
-     */
-    this.label = values.label
-  }
-
+function Groupe(initObj) {
+  if (!initObj) initObj = {}
   /**
-   * @type {string}
+   * L'identifiant interne à la sésathèque
+   * @type {Integer}
    * @default undefined
    */
-  this.name = values.name
-
-  if (values.selected) {
-    /**
-     * @type {boolean}
-     * @default undefined
-     */
-    this.selected = true
-  }
-
+  this.oid = initObj.oid || undefined
   /**
-   * cast en string si number ou boolean fourni
+   * Nom
    * @type {string}
-   * @default ''
+   * @default ""
    */
-  this.value = values.value || ''
-  if (typeof this.value !== 'string') this.value += ''
+  if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLocaleLowerCase();
+  else this.nom = '';
+  /**
+   * Visible dans la liste générale des groupes, tout le monde peut rentrer ou sortir à sa guise
+   * @type {boolean}
+   * @default false
+   */
+  this.ouvert = !!initObj.ouvert
+  /**
+   * True pour les groupes définis par un client SSO (et donc non modifiables, et pas de gestionnaires ici)
+   * @type {boolean}
+   * @default false
+   */
+  this.external = !!initObj.external
+  /**
+   * liste d'oid de ceux qui peuvent gérer le groupe (le créateur et ceux à qui il a délégué la gestion)
+   * @type {Integer[]}
+   */
+  this.gestionnaires = initObj.gestionnaires || []
 }
 
-module.exports = FormChoice
+module.exports = Groupe

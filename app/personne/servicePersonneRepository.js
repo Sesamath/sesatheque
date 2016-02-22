@@ -31,10 +31,10 @@
 
 'use strict'
 
+var _ = require('lodash')
+var flow = require('an-flow')
+
 module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
-
-  var _ = require('lodash')
-
   /**
    * Service d'accès aux personnes, utilisé par les différents contrôleurs
    * @service $personneRepository
@@ -42,28 +42,36 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
   var $personneRepository = {}
 
   /**
-   * Ajoute un groupe à la personne (en le créant s'il n'existait pas), ne sauvegarde pas les modifs de personne
+   * Ajoute un groupe à la personne (en le créant s'il n'existait pas),
+   * sauvegarde les modifs de personne si c'est une EntityPersonne (pas si c'est un autre objet)
    * @param {Personne} personne
    * @param {string} groupeNom
    * @param {personneCallback} next
    * @memberOf $personneRepository
    */
   $personneRepository.addGroupe = function (personne, groupeNom, next) {
-    $groupeRepository.load(groupeNom, function (error, groupe) {
-      if (error) {
+    if (!personne.groupes) personne.groupes = []
+    if (_.include(personne.groupes, groupeNom)) {
+      next(null, personne)
+    } else {
+      flow.seq(function () {
+        $groupeRepository.load(groupeNom, this)
+      }).seq(function (groupe) {
+        var nextStep = this
+        if (groupe) {
+          nextStep(null, groupe)
+        } else {
+          // on le crée
+          EntityGroupe.create({nom: groupeNom}).store(nextStep)
+        }
+      }).seq(function (groupe) {
+        personne.groupes.push(groupe.nom)
+        if (personne.store) personne.store(next)
+        else next(null, personne)
+      }).catch(function (error) {
         next(error, personne)
-      } else if (groupe) {
-        personne.groupes[groupe.nom] = true
-        next(null, personne)
-      } else {
-        // on le créé au passage
-        EntityGroupe.create({nom:groupeNom}).store(function (error, groupe) {
-          log.debug('après création du groupe ', groupe)
-          if (groupe) personne.groupes[groupe.nom] = true
-          next(error, personne)
-        })
-      }
-    })
+      })
+    }
   }
 
   /**
@@ -155,8 +163,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @param {personneCallback} next Avec l'EntityPersonne
    * @memberOf $personneRepository
    */
-  $personneRepository.update = function (personne, next) {
-    //log.debug("$personneRepository.update", personne, {max:2000})
+  $personneRepository.updateOrCreate = function (personne, next) {
+    //log.debug("$personneRepository.updateOrCreate", personne, {max:2000})
     function checkUpdate(personne, personneNew, next) {
       var needUpdate = false
       for (var prop in personneNew) {

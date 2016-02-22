@@ -69,8 +69,8 @@ ressourceComponent.service('$ressourceConverter', function (EntityRessource, $re
   return require('./serviceRessourceConverter')(EntityRessource, $ressourceRepository, $routes, $accessControl)
 })
 
-ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) {
-  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form)
+ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) { // jshint ignore:line
+  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) // jshint ignore:line
 })
 
 // nos ressources statiques
@@ -80,7 +80,7 @@ ressourceComponent.controller(function () {
 
 // les pages html de consultation / modification
 ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) { // jshint ignore:line
-  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource)
+  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) // jshint ignore:line
 })
 
 // un controleur html pour des pages publiques sans session

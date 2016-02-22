@@ -47,17 +47,17 @@ module.exports = function ($page) {
    * Wrapper de formGroup.addField
    * @param {Form}             form      L'objet form que l'on va augmenter et qui sera passé à la vue
    * @param {object|FormField} field     Propriétés du champ à créer (passer au moins name et value)
-   * @param {object}           [options] options
-   *                              si fieldGroup existe ses propriétés seront ajoutées au formGroup utilisé (trouvé ou créé)
+   * @param {object}           [options] options pour le groupe qui enveloppera le champ
    *                              si fieldGroupId existe on cherchera un FieldGroup correspondant dans form
    *                              sinon, si fieldGroupName existe idem
-   *                              sinon (ou si on a pas trouvé de fieldGroup) on créera un nouveau FormGroup
+   *                              sinon, si fieldGroup existe, on crée un FormGroup avec
+   *                              sinon on crée un nouveau FormGroup avec ses valeurs par défaut
    */
   $form.addField = function addField(form, field, options) {
     if (!options) options = {}
     var formGroup
     if (options.fieldGroupId) formGroup = form.getGroupById(options.fieldGroupId)
-    if (options.fieldGroupName) formGroup = form.getGroupByName(options.fieldGroupName)
+    if (!formGroup && options.fieldGroupName) formGroup = form.getGroupByName(options.fieldGroupName)
     if (!formGroup) formGroup = form.addGroup(options.fieldGroup)
 
     return formGroup.addField(field)

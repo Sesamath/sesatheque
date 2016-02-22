@@ -93,7 +93,7 @@ function Personne(initObj) {
    */
   this.permissions = initObj.permissions || undefined
   /**
-   * La liste des groupes {groupeNom:boolean}
+   * La liste des groupes
    * @type {string[]}
    * @default {}
    */
@@ -105,6 +105,12 @@ function Personne(initObj) {
       if (initObj.groupes.hasOwnProperty(groupe) && initObj.groupes[groupe]) this.groupes.push(groupe)
     }
   }
+  /**
+   * La liste des groupes externes
+   * @type {string[]}
+   * @default {}
+   */
+  this.groupesExt = initObj.groupesExt || []
   /**
    * D'autres propriétés regroupées dans cet objet, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
    * @type {Object}

@@ -717,8 +717,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             data.$metas.title = 'Résultats de la recherche'
             log.debug('liste avec les options', options)
             log.debug('qui remonte', ressources)
-            if (error) data.contentBloc.error = error.toString()
-            else {
+            if (error) {
+              log.error(error)
+              data.contentBloc.error = error.toString()
+            } else {
               var nbInit = ressources.length
               // on filtre d'après les droits en lecture
               // @todo ajouter le filtrage dans la requete de recherche...
@@ -756,6 +758,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // et on ajoute des liens sur chaque ressource
               data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources, context)
             }
+            log.debug('les datas search', data, null, {max:20000})
             context.html(data)
           })
         } else {
@@ -770,14 +773,4 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/
    */
   controller.get($routes.get('search'), search)
-
-  controller.get('rename', function (context) {
-    var start = context.get.start || 0
-    var limit = 500
-    EntityRessource.match('oid').grab(limit, start, function (error, ressources) {
-      if (error) $ressourcePage.printError(context, error)
-      else if (ressources.length === limit) context.redirect('/ressource/rename?start=' +start+limit)
-      else $ressourcePage.printError(context, 'terminé à ' +start +ressources.length)
-    })
-  })
 }

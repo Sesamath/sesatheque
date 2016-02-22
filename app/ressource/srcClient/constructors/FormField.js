@@ -32,6 +32,7 @@
 'use strict'
 
 var FormChoice = require('./FormChoice')
+var _ = require('lodash')
 
 /**
  * Un champ de FormGroup
@@ -181,7 +182,7 @@ FormField.prototype.addChoice = function addChoice(choice) {
       choice.hasOwnProperty('value') &&
       this.selectedValues &&
       this.selectedValues.length &&
-      this.selectedValues.indexOf(choice.value +'') > -1
+      _.includes(this.selectedValues, String(choice.value))
   ) {
     choice.selected = true
   }

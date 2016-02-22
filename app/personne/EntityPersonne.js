@@ -38,7 +38,7 @@ var Personne = require('../ressource/srcClient/constructors/Personne')
  * @extends Entity
  * @extends Personne
  */
-module.exports = function (EntityPersonne) {
+module.exports = function (EntityPersonne, $cachePersonne) {
   var tools = require('../tools')
 
   EntityPersonne.construct(Personne)
@@ -51,6 +51,13 @@ module.exports = function (EntityPersonne) {
     next()
   }
 
+  EntityPersonne.afterStore(function(next) {
+    // on met en cache
+    $cachePersonne.set(this, function (error) {if (error) log.debug(error)})
+    // et on passe au suivant sans se préoccuper du retour de mise en cache
+    next()
+  })
+
   EntityPersonne
       .defineIndex('origine', 'string')
       .defineIndex('idOrigine', 'string')
@@ -62,4 +69,5 @@ module.exports = function (EntityPersonne) {
         return tools.truePropertiesList(this.roles)
       })
       .defineIndex('groupes', 'string')
+      .defineIndex('groupesExt', 'string')
 }

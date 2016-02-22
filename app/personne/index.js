@@ -55,8 +55,8 @@ personneComponent.service('$cachePersonne', function($cache, $settings) {
   return require('./serviceCachePersonne')($cache, $settings)
 })
 
-personneComponent.entity('EntityPersonne', function () {
-  require('./EntityPersonne')(this)
+personneComponent.entity('EntityPersonne', function ($cachePersonne) {
+  require('./EntityPersonne')(this, $cachePersonne)
 })
 
 personneComponent.service('$cacheGroupe', function($cache, $settings) {

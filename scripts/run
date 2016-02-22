@@ -42,7 +42,7 @@ function del() {
 }
 
 function runNode() {
-  NODE_ENV=$nodeEnv node app/index.js
+  NODE_ENV=$nodeEnv node --stack_trace_limit=50 app/index.js
 }
 
 function runPm2() {

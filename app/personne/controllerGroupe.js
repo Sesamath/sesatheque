@@ -316,16 +316,29 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if (!$accessControl.isAuthenticated(context)) this("Il faut être authentifié pour voir ses groupes")
       else getMyGroupesManaged(context, this)
     }).seq(function (groupes) {
+      groupes.forEach(function (groupe) {
+        groupe.urlEdit = '/groupe/modifier/' +encodeURIComponent(groupe.nom)
+      })
       blocList.push({
         partialView: '../groupes',
         titre : "Groupes dont je suis gestionnaire",
         groupes: groupes,
         defaultMessage : "Inscrit dans aucun groupe"
       })
+      var myGroupes = getMyGroupes(context)
+      groupes = []
+      myGroupes.forEach(function (groupeNom) {
+        try {
+          groupe.urlQuit = '/groupe/quitter/' +encodeURIComponent(groupe.nom)
+        } catch (error) {
+          log.error(error)
+        }
+      })
+      log.debug("mes groupes", groupes)
       blocList.push({
         partialView: '../groupes',
         titre : "Groupes auxquels j'appartiens",
-        groupes: getMyGroupes(context),
+        groupes: groupes,
         defaultMessage : "Inscrit dans aucun groupe"
       })
       $page.print(context, 'Mes groupes', null, {blocs:{blocList:blocList}})

@@ -5,11 +5,10 @@
     {#groupes}
     <li>{nom}
       <span class="links">
-        (
-        {?urlJoin}<a href="{urlJoin}">Rejoindre</a>,{/urlJoin}
-        {?urlQuit}<a href="{urlQuit}">Quitter</a>,{/urlQuit}
-        {?urlEdit}, <a href="{urlEdit}">modifier</a>{/urlEdit}
-        )
+        -
+        {?urlJoin} <a href="{urlJoin}">Rejoindre</a> {/urlJoin}
+        {?urlQuit} <a href="{urlQuit}">Quitter</a> {/urlQuit}
+        {?urlEdit} <a href="{urlEdit}">modifier</a> {/urlEdit}
       </span></li>
     {:else}
       <p>{?defaultMessage}{defaultMessage}{:else}Aucun groupe{/defaultMessage}</p>

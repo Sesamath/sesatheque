@@ -31,39 +31,7 @@
 
 "use strict";
 
-/**
- * Un groupe d'utilisateurs
- * @constructor
- * @private
- * @param {Object} initObj Un objet ayant des propriétés d'un groupe
- */
-function Groupe(initObj) {
-  if (!initObj) initObj = {}
-  /**
-   * L'identifiant interne à la sésathèque
-   * @type {Integer}
-   * @default undefined
-   */
-  this.oid = initObj.oid || undefined
-  /**
-   * Nom
-   * @type {string}
-   * @default ""
-   */
-  if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLocaleLowerCase();
-  else this.nom = '';
-  /**
-   * Visible dans la liste générale des groupes, tout le monde peut rentrer ou sortir à sa guise
-   * @type {boolean}
-   * @default false
-   */
-  this.ouvert = !!initObj.ouvert
-  /**
-   * liste d'oid de ceux qui peuvent gérer le groupe (le créateur et ceux à qui il a délégué la gestion)
-   * @type {Integer[]}
-   */
-  this.gestionnaires = initObj.gestionnaires || []
-}
+var Groupe = require('../ressource/srcClient/constructors/Groupe')
 
 module.exports = function (EntityGroupe, $cacheGroupe) {
   /**
@@ -76,14 +44,9 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
 
   EntityGroupe.table = "groupe"
 
-  EntityGroupe.beforeStore(function(next) {
-    log.debug('beforeStore groupe ' +this.nom)
-    next()
-  })
-
   EntityGroupe.afterStore(function(next) {
     // on met en cache
-    $cacheGroupe.set(this)
+    $cacheGroupe.set(this, function (error) {if (error) log.debug(error)})
     // et on passe au suivant sans se préoccuper du retour de mise en cache
     next()
   })

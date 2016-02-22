@@ -196,14 +196,29 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
      * @param cbValue
      */
     function addChoice(label, cbValue) {
-      // cbValue est toujours une string (propriété de l'objet), cast en int si utile
-      // @todo virer ça si c'est pas indispensable (test === possible pour comparer avec id venant de la conf)
+      // cbValue est toujours une string (propriété de l'objet)
       var intValue = parseInt(cbValue, 10)
       if (intValue == cbValue) cbValue = intValue
-      $forms.addChoice(choices, isUnique, label, key, cbValue, selectedValues)
+      var choice = {
+        value: cbValue
+      }
+      if (label) choice.label = label
+      if (!isUnique) {
+        // faut du name sur chaque checkbox
+        choice.name = key + '[' + i + ']'
+      }
+      // un id
+      choice.id = key + i
+      i++
+      // et on ajoute les selected s'il y en a
+      if (selectedValues && selectedValues.length && selectedValues.indexOf(cbValue) > -1) {
+        choice.selected = true
+      }
+      choices.push(choice)
     }
 
     //log.debug("arrayToDust de " +key, selectedValues)
+    var i = 0
     var choices = []
     if (selectedValues && !_.isArray(selectedValues)) {
       log.error(new Error("La propriété " + key + " de la ressource n'est pas un tableau"))
@@ -409,7 +424,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     if (!ressource || ressource.new) {
       // on en créé une vide, mais on regarde si on avait un token
       var token = ressource && ressource.token
-      log.debug('dans sendFormData on lance un create')
+      log.debug('dans getFormViewData on lance un create de ressource')
       ressource = EntityRessource.create()
       if (token) ressource.token = token
     }
@@ -417,7 +432,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
     var labels = getLabels(ressource)
-    log.debug("labels de " +ressource.oid, labels)
+    log.debug("labels de la ressource " +ressource.oid, labels)
     // faut un array pour seq
     var labelsArray = []
     _.each(labels, function (label, key) {
@@ -515,8 +530,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
       } else {
         if (ressource.search) {
-          // inutile, getDefaultData l'a initialisé
-          //formData.$view = 'formSearch'
+          // getDefaultData a initialisé $view, on vire juste cette propriété désormais inutile
           delete ressource.search
         } else {
           formData.$view = 'formCreate'
@@ -857,7 +871,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     //log.debug("ressource d'après get", fakeRessource)
     getFormViewData(context, null, fakeRessource, function (formData) {
       tools.complete(data.contentBloc, formData)
-      log.debug("search", data.contentBloc)
+      log.debug("formSearch démarre avec", data.contentBloc)
       // on vire ou modifie ce qui nous intéresse pour la recherche
       var fd = data.contentBloc // raccourci d'écriture (form data)
       delete fd.version
@@ -873,6 +887,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (!$accessControl.isAuthenticated(context)) {
         delete fd.restriction
       }
+      log.debug('data search', fd, null, {max:20000})
       // on ajoute un choix "pas de choix" pour type et langue
       fd.type.choices.unshift({label:'peu importe', value:''})
       // pour la langue on vire le select actuel
