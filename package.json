@@ -5,10 +5,10 @@
   "scripts": {
     "start": "node app/index.js",
     "test" : "./scripts/run_tests -a",
-    "dev": "./scripts/run -xd",
-    "prod": "./scripts/run -xp",
-    "stop": "./scripts/run -x",
-    "watch": "./scripts/run -xwl"
+    "dev": "./scripts/run -sd",
+    "prod": "./scripts/run -sp",
+    "stop": "./scripts/run -s",
+    "watch": "./scripts/run -swl"
   },
   "dependencies": {
     "an-flow": "^1.1.0",
