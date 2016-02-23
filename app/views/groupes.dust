@@ -1,7 +1,7 @@
 {?error}
   <p class="error">{error}</p>
 {:else}
-  <ul class="liste">
+  <ul class="liste"><h2>{titre}</h2>
     {#groupes}
     <li>{nom}
       <span class="links">
