@@ -5,8 +5,10 @@
   "scripts": {
     "start": "node app/index.js",
     "test" : "./scripts/run_tests -a",
-    "prod": "./scripts/run -p",
-    "watch": "webpack --watch"
+    "dev": "./scripts/run -xd",
+    "prod": "./scripts/run -xp",
+    "stop": "./scripts/run -x",
+    "watch": "./scripts/run -xwl"
   },
   "dependencies": {
     "an-flow": "^1.1.0",

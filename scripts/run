@@ -7,8 +7,11 @@ dirApp=$(dirname $0)/../
 PM2=app/_private/pm2App.json5
 nodeEnv=${NODE_ENV:-dev}
 pm2opts=''
+appName='all'
 OK=0
 KO=1
+retour=$OK
+showLogs='no'
 
 function fin() {
   cd "$dirInitial"
@@ -19,16 +22,20 @@ function usage() {
   echo "Lance ou recharge l'application (en mode dev par défaut)"
   echo "option facultative"
   echo "  -c : pour indiquer un autre fichier de conf pm2 que $PM2 (à mettre avant les actions)"
-  echo "  -d : lancement avec $PM2 en mode dev (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
+  echo "  -d : lancement avec $PM2 en mode dev (rappeler le script à l'identique pour recharger, avec -k pour arrêter)"
   echo "  -h : afficher cette aide"
-  echo "  -n : lancement avec node directement en mode dev"
-  echo "  -o : pour passer des options à pm2 (à mettre avant les actions)"
-  echo "  -p : lancement avec $PM2 en mode prod (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
-  echo "  -x : arrête les process pm2 sesatheque qui pourraient tourner"
-  echo "  -w : lancement avec $PM2 en mode dev avec watch + logs"
+  echo "  -l : affiche les logs pm2 (avec pm2 logs, après les autres commandes)"
+  echo "  -n : lancement avec node directement en mode dev, sans watch"
+  echo "  -o : pour passer des options à pm2"
+  echo "  -p : lancement avec $PM2 en mode prod, utiliser -sp si on était en watch)"
+  echo "  -s : stoppe les process pm2 sesatheque qui pourraient tourner (pm2 delete)"
+  echo "  -w : lancement avec $PM2 en mode dev avec watch, utiliser -sw si pm2 tournait déjà (sinon le statut watch n'est pas modifié)"
   exit $exitCode
 }
 
+# récupère un param de la conf $PM2
+# $1 : le nom du param
+# $2 : une valeur par défaut à prendre si on le trouve pas (sinon ce sera chaine vide)
 function getConf() {
   [ $# -lt 1 ] && return 1
   local default="${2:-}"
@@ -37,31 +44,18 @@ function getConf() {
   echo $value
 }
 
-function del() {
-  local name="$(getConf name sesatheque)"
-  pm2 delete $name
-  exit $?
+function startDel() {
+  pm2 delete $appName
 }
 
-function runNode() {
+function startNode() {
   NODE_ENV=$nodeEnv node --stack_trace_limit=50 app/index.js
 }
 
-function runPm2() {
+function startPm2() {
   [ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && usage 1
   pm2 startOrRestart $PM2 --env $nodeEnv $pm2opts
-  exit $?
-}
-
-function runPm2Watch() {
-  [ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && usage 1
-  local cmd="pm2 startOrRestart $PM2 --env watch"
-  echo $cmd
-  eval $cmd
-  local retour=$?
-  echo -e "\nCtrl+c pour arrêter les logs (mais pas pm2), pm2 logs pour les relancer\n"
-  #pm2 logs &
-  exit $retour
+  retour=$?
 }
 
 # on veut exécuter fin avant de sortir
@@ -73,21 +67,50 @@ cd "$dirApp"
 [ $# -lt 1 ] && nodeEnv='dev' && runPm2
 
 # check des options
-while getopts "c:dhno:pxw" OPTION
+runNode='no'
+runPm2='no'
+runDel='no'
+while getopts "c:dhlno:psw" OPTION
 do
   case $OPTION in
     c) PM2="$OPTARG";;
-    d) nodeEnv='dev'; runPm2;; # on laisse NODE_ENV tel qu'il est dans l'environnement mais on impose dev
+    d) nodeEnv='dev'; runPm2='yes' ;; # on laisse NODE_ENV tel qu'il est dans l'environnement mais on impose dev
     h) usage;;
-    n) runNode;;
+    l) showLogs='yes' ;;
+    n) runNode='yes';;
     o) pm2opts="$OPTARG";;
-    p) nodeEnv='prod'; runPm2;;
-    x) del;;
+    p) nodeEnv='prod'; runPm2='yes';;
+    s) runDel='yes';;
     # les options passées en ligne de commande n'écrasent pas celle de la conf
     # en cli le scale sert à rien avec --watch (et donne une erreur à partir de pm2 1.0)
     # pas réussi à faire un env watch qui marche pour avoir du watch dans ce cas mais pas en prod,
     # on passe par un fichier de conf distinct
-    w) nodeEnv='dev'; PM2=${PM2/.json5/Watch.json5}; runPm2;;
+    w) nodeEnv='dev'; PM2=${PM2/.json5/Watch.json5}; runPm2='yes';;
     *) usage 1;;
   esac
 done
+
+# init appName d'après $PM2 initialisé par les options
+appName="$(getConf name sesatheque)"
+
+# les actions, d'abord delete
+[ "$runDel" == 'yes' ] && startDel
+# puis run
+if [ "$runNode" == 'yes' ]
+then
+  startNode
+  retour=$?
+elif [ "$runPm2" == 'yes' ]
+then
+  startPm2
+  retour=$?
+fi
+# et logs à la fin
+if [ "$showLogs" == 'yes' ]
+then
+  # on peut pas lancer pm2 logs en arrière plan sinon on pourra plus l'arrêter
+  echo -e "\nCtrl+c pour arrêter les logs (mais pas pm2), pm2 logs (ou run -l) pour les relancer\n"
+  pm2 logs $appName
+fi
+
+exit $retour
