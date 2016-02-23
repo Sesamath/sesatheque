@@ -31,6 +31,16 @@
 
 'use strict'
 
+// pour passer en es6, en gardant la possibilité d'utiliser pm2 en cluster, il faudra mettre ce code dans un start.js
+// et ne laisser dans ce fichier que ces requires
+// cf http://stackoverflow.com/questions/35436266/how-can-i-use-babel-6-with-pm2-1-0
+// et https://babeljs.io/docs/usage/require/ qui indique qu'il faut ajouter babel-polyfill
+// ça donnerait ici :
+//
+// require('babel-register')
+// require('babel-polyfill')
+// require('./start')
+
 try {
   /**
    * Fichier principal de l'application (à passer en argument de node), avec

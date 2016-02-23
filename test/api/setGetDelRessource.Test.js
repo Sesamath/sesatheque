@@ -52,21 +52,6 @@ function usage() {
   process.exit()
 }
 
-/**
- * Log des infos en console si --debug
- */
-function logInfo() {
-  if (isDebug) {
-    var arg
-    var prefix = '        '
-    for (var i = 0; i < arguments.length; i++) {
-      arg = arguments[i]
-      if (typeof arg === 'string') arg = prefix + arg
-      console.log(arg)
-    }
-  }
-}
-
 // aide
 if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
   usage()
@@ -184,10 +169,13 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
         },
         json   : true
       }
-      request.del(options, function (error, response, ressource) {
+      request.del(options, function (error, response, body) {
         assert.ok(!error)
-        assert.ok(!ressource.error)
-        assert.equal(oid, ressource.deleted)
+        if (body.error) console.error('DEL ' +options.url +" renvoie l'erreur : " +body.error)
+        assert.ok(!body.error)
+        if (body.deleted != oid) console.error('DEL ' +options.url +" retourne\n", body)
+        assert.equal(oid, body.deleted)
+        // faut filer plus d'infos en cas de pb
         done()
       })
     })

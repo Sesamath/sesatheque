@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node app/index.js",
-    "startProd": "./scripts/run -p",
-    "wpwatch": "webpack --watch"
+    "test" : "./scripts/run_tests -a",
+    "prod": "./scripts/run -p",
+    "watch": "webpack --watch"
   },
   "dependencies": {
     "an-flow": "^1.1.0",

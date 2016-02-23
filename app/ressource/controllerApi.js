@@ -62,32 +62,28 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   function deleteAndSend(context, id) {
     log.debug("dans cb api deleteRessource " +id)
-    if (!$accessControl.isAuthenticated(context)) {
-      $json.denied(context, "Vous devez être authentifié pour effacer une ressource")
-    } else {
-      // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
-      $ressourceRepository.load(id, function (error, ressource) {
-        if (error) {
-          $json.send(context, error)
-        } else if (ressource) {
-          $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
-            if (errorMessage) {
-              $json.denied(context, errorMessage)
-            } else {
-              $ressourceRepository.delete(ressource, function (error) {
-                if (error) $json.send(context, error)
-                //else $json.send(context, null, {error:"message d'erreur bidon"})
-                else $json.sendOk(context, {deleted: id})
-              })
-            }
-          })
-        } else {
-          log.debug("La ressource " + id + " n'existait pas, on a rien effacé")
-          // pas de ressource, on vérifie qu'il avait certains droits
-          $json.send(context, new Error("Aucune ressource d'identifiant " + id))
-        }
-      })
-    }
+    // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
+    $ressourceRepository.load(id, function (error, ressource) {
+      if (error) {
+        $json.send(context, error)
+      } else if (ressource) {
+        $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
+          if (errorMessage) {
+            $json.denied(context, errorMessage)
+          } else {
+            $ressourceRepository.delete(ressource, function (error) {
+              if (error) $json.send(context, error)
+              //else $json.send(context, null, {error:"message d'erreur bidon"})
+              else $json.sendOk(context, {deleted: id})
+            })
+          }
+        })
+      } else {
+        log.debug("La ressource " + id + " n'existait pas, on a rien effacé")
+        // pas de ressource, on vérifie qu'il avait certains droits
+        $json.send(context, new Error("Aucune ressource d'identifiant " + id))
+      }
+    })
   }
 
   /**
