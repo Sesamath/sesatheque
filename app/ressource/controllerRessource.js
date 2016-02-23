@@ -674,7 +674,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function search(context) {
     context.layout = 'page'
-    throw new Error("test d'erreur")
     redirectPublicOrContinue(context, function () {
       if (_.isEmpty(context.get) || context.get.modify) {
         // form de recherche
