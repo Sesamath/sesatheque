@@ -7,6 +7,8 @@ dirApp=$(dirname $0)/../
 PM2=app/_private/pm2App.json5
 nodeEnv=${NODE_ENV:-dev}
 pm2opts=''
+OK=0
+KO=1
 
 function fin() {
   cd "$dirInitial"
@@ -23,7 +25,7 @@ function usage() {
   echo "  -o : pour passer des options à pm2 (à mettre avant les actions)"
   echo "  -p : lancement avec $PM2 en mode prod (rappeler le script à l'identique pour recharger, avec -x pour arrêter)"
   echo "  -x : arrête les process pm2 sesatheque qui pourraient tourner"
-  echo "  -w : lancement avec $PM2 en mode dev avec watch"
+  echo "  -w : lancement avec $PM2 en mode dev avec watch + logs"
   exit $exitCode
 }
 
@@ -47,27 +49,19 @@ function runNode() {
 
 function runPm2() {
   [ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && usage 1
-  pm2 startOrGracefulReload $PM2 --env $nodeEnv $pm2opts
+  pm2 startOrRestart $PM2 --env $nodeEnv $pm2opts
   exit $?
 }
 
 function runPm2Watch() {
   [ ! -f "$PM2" ] && echo "le fichier $PM2 n'existe pas" >&2 && usage 1
-  # pénible car les options passées en ligne de commande n'écrasent pas celle de la conf
-  # donc on passe par du start (toujours en fork mode apparemment)
-  local name="$(getConf name sesatheque)"
-  # le merge sert à rien en fork mode
-  local merge="$(getConf merge_logs)"
-  [ -n "$merge" ] && [ "$merge" != 'false' ] && pm2opts="$pm2opts -m"
-  local out="$(getConf out_file $name.log)"
-  local error="$(getConf error_file $name.error.log)"
-  local pid="$(getConf pid_file $name.pid)"
-  # le scale 2 sert à rien, toujours du fork
-  # * pas géré dans le --ignore-watch, on met du app/ressource/public à la place d'un app/*/public générique
-  local cmd="pm2 start app/index.js scale $name 2 --env dev $pm2opts -o '$out' -e '$error' -p '$pid' --watch app --ignore-watch 'node_modules app/qxApps app/ressource/public'"
+  local cmd="pm2 startOrRestart $PM2 --env watch"
   echo $cmd
   eval $cmd
-  exit $?
+  local retour=$?
+  echo -e "\nCtrl+c pour arrêter les logs (mais pas pm2), pm2 logs pour les relancer\n"
+  #pm2 logs &
+  exit $retour
 }
 
 # on veut exécuter fin avant de sortir
@@ -89,8 +83,11 @@ do
     o) pm2opts="$OPTARG";;
     p) nodeEnv='prod'; runPm2;;
     x) del;;
-    w) runPm2Watch;;
-    #w) pm2opts="--watch '[\"app\", \"config\"]' --ignore-watch '[\"app/qxApps\", \"app/*/public\"]'"; runPm2;;
+    # les options passées en ligne de commande n'écrasent pas celle de la conf
+    # en cli le scale sert à rien avec --watch (et donne une erreur à partir de pm2 1.0)
+    # pas réussi à faire un env watch qui marche pour avoir du watch dans ce cas mais pas en prod,
+    # on passe par un fichier de conf distinct
+    w) nodeEnv='dev'; PM2=${PM2/.json5/Watch.json5}; runPm2;;
     *) usage 1;;
   esac
 done
