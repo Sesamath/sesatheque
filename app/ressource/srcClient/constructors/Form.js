@@ -98,10 +98,10 @@ function Form(values) {
  * @returns {FormGroup}
  */
 Form.prototype.addGroup = function addGroup(group) {
-  var fieldGroup = new FormGroup(group)
-  this.groups.push(fieldGroup)
+  var formGroup = new FormGroup(group)
+  this.groups.push(formGroup)
   
-  return fieldGroup
+  return formGroup
 }
 
 /**
@@ -112,14 +112,14 @@ Form.prototype.addGroup = function addGroup(group) {
  */
 Form.prototype.addField = function addField(field, inNewGroup) {
   var nb = this.groups.length
-  var fieldGroup
+  var formGroup
   if (inNewGroup || !nb) {
-    fieldGroup = this.addGroup()
+    formGroup = this.addGroup()
   } else {
-    fieldGroup = this.groups[nb]
+    formGroup = this.groups[nb]
   }
 
-  return fieldGroup.addField(field)
+  return formGroup.addField(field)
 }
 
 /**
@@ -132,20 +132,20 @@ Form.prototype.addField = function addField(field, inNewGroup) {
 Form.prototype.addSubmit = function addSubmit(value, id, label, className) {
   var group = {}
   if (label) group.label = label
-  var fieldGroup = this.addGroup(group)
+  var formGroup = this.addGroup(group)
   var submit = {
     value:value,
     widget:'submit'
   }
   if (id) submit.id = id
   if (className) submit.className = className
-  fieldGroup.addField(submit)
+  formGroup.addField(submit)
 }
 
 /**
  * Retourne le champ d'id demandé s'il existe (undefined sinon)
  * @param {string} id
- * @returns {FieldGroup}
+ * @returns {FormGroup}
  */
 Form.prototype.getFieldById = function getFieldById(id) {
   var field

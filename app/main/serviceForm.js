@@ -43,14 +43,14 @@ module.exports = function ($page) {
   var $form = {}
 
   /**
-   * Ajoute un champ au form (dans le fieldGroup demandé ou un nouveau) et le retourne.
+   * Ajoute un champ au form (dans le formGroup demandé ou un nouveau) et le retourne.
    * Wrapper de formGroup.addField
    * @param {Form}             form      L'objet form que l'on va augmenter et qui sera passé à la vue
    * @param {object|FormField} field     Propriétés du champ à créer (passer au moins name et value)
    * @param {object}           [options] options pour le groupe qui enveloppera le champ
-   *                              si fieldGroupId existe on cherchera un FieldGroup correspondant dans form
+   *                              si fieldGroupId existe on cherchera un FormGroup correspondant dans form
    *                              sinon, si fieldGroupName existe idem
-   *                              sinon, si fieldGroup existe, on crée un FormGroup avec
+   *                              sinon, si formGroup existe, on crée un FormGroup avec
    *                              sinon on crée un nouveau FormGroup avec ses valeurs par défaut
    */
   $form.addField = function addField(form, field, options) {
@@ -58,7 +58,7 @@ module.exports = function ($page) {
     var formGroup
     if (options.fieldGroupId) formGroup = form.getGroupById(options.fieldGroupId)
     if (!formGroup && options.fieldGroupName) formGroup = form.getGroupByName(options.fieldGroupName)
-    if (!formGroup) formGroup = form.addGroup(options.fieldGroup)
+    if (!formGroup) formGroup = form.addGroup(options.formGroup)
 
     return formGroup.addField(field)
   }
@@ -92,11 +92,13 @@ module.exports = function ($page) {
   $form.construct = function (formValues, groupValues, fields, submitValue) {
     var form = new Form(formValues)
     var formGroupField = form.addGroup(groupValues)
-    if (typeof fields === 'object' && !(fields instanceof Array)) fields = [fields]
-    fields.forEach(function (field) {
-      formGroupField.addField(field)
-    })
-    form.addSubmit(submitValue)
+    if (fields) {
+      if (typeof fields === 'object' && !(fields instanceof Array)) fields = [fields]
+      fields.forEach(function (field) {
+        formGroupField.addField(field)
+      })
+    }
+    if (submitValue) form.addSubmit(submitValue)
 
     return form
   }
@@ -118,12 +120,12 @@ module.exports = function ($page) {
    * @param {object[]|FormField[]} fields
    * @param {string} submitValue
    * @param {string} pageTitle
-   * @param {object} blocs
+   * @param {object|Array} moreData
    */
-  $form.print = function print(context, formValues, groupValues, fields, submitValue, pageTitle, blocs) {
+  $form.print = function print(context, formValues, groupValues, fields, submitValue, pageTitle, moreData) {
     var contentBloc = $form.construct(formValues, groupValues, fields, submitValue)
     contentBloc.$view = 'form'
-    $page.print(context, pageTitle, contentBloc, blocs)
+    $page.print(context, pageTitle, contentBloc, moreData)
   }
 
   return $form

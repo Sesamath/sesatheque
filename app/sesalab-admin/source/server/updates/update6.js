@@ -55,18 +55,22 @@ module.exports = function(job) {
       }).seq(function (personnes) {
         flow(personnes).seqEach(function (personne) {
           console.log('trouvé ' +personne.nom)
-          if (typeof personne.groupes === "object" && !(personne.groupes instanceof Array)) {
-            console.log('on va transformer ' +JSON.stringify(personne.groupes))
-            var objGroupes = personne.groupes
-            personne.groupes = []
-            for (var groupe in objGroupes) {
-              if (objGroupes.hasOwnProperty(groupe) && objGroupes[groupe]) personne.groupes.push(groupe)
+          if (typeof personne.groupes === "object") {
+            if (personne.groupes instanceof Array) {
+              personne.groupesMembre = personne.groupes
+              delete personne.groupes
+            } else {
+              console.log('on va transformer ' + JSON.stringify(personne.groupes))
+              var objGroupes = personne.groupes
+              delete personne.groupes
+              personne.groupesMembre = []
+              for (var groupe in objGroupes) {
+                if (objGroupes.hasOwnProperty(groupe) && objGroupes[groupe]) personne.groupesMembre.push(groupe)
+              }
+              console.log('transformé en ' + JSON.stringify(personne.groupesMembre))
             }
-            console.log('transformé en ' +JSON.stringify(personne.groupes))
-            console.log('avant store')
             personne.store(this)
           } else {
-            console.log('pas besoin de transformer ' +JSON.stringify(personne.groupes))
             this()
           }
         }).seq(function (personnes) {

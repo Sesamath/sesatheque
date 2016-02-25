@@ -3,13 +3,18 @@
 {:else}
   <ul class="liste"><h2>{titre}</h2>
     {#groupes}
-    <li>{nom}
+    <li>
+      {nom} ({ouvertString} {publicString})
       <span class="links">
-        -
         {?urlJoin} <a href="{urlJoin}">Rejoindre</a> {/urlJoin}
         {?urlQuit} <a href="{urlQuit}">Quitter</a> {/urlQuit}
-        {?urlEdit} <a href="{urlEdit}">modifier</a> {/urlEdit}
-      </span></li>
+        {?urlFollow} <a href="{urlFollow}">Suivre</a> {/urlFollow}
+        {?urlIgnore} <a href="{urlIgnore}">Ignorer</a> {/urlIgnore}
+        {?urlEdit} <a href="{urlEdit}">Modifier</a> {/urlEdit}
+        {?urlDescribe} <a href="{urlDescribe}">Voir</a> {/urlDescribe}
+      </span>
+      <pre>{description}</pre>
+    </li>
     {:else}
       <p>{?defaultMessage}{defaultMessage}{:else}Aucun groupe{/defaultMessage}</p>
     {/groupes}

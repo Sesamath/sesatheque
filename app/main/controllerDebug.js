@@ -102,4 +102,14 @@ module.exports = function (controller) {
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     throw new Error("Une erreur 500 provoquée")
   })
+
+  // pour déclencher un Wrong views path de lassi
+  controller.get('error', function (context) {
+    context.html({
+      bloc:{
+        $view:'bidon',
+        content:'toto'
+      }
+    })
+  })
 }

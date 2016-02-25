@@ -11,7 +11,7 @@
   {#warnings}<div class="warning">{.}</div>{/warnings}
 
   {@eq key=widget value="hidden"}
-    {>"formField_{widget}" /}
+    {>"form/field_{widget}" /}
   {:else}
     <label>
       {label}

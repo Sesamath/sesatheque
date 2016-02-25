@@ -50,8 +50,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @memberOf $personneRepository
    */
   $personneRepository.addGroupe = function (personne, groupeNom, next) {
-    if (!personne.groupes) personne.groupes = []
-    if (_.include(personne.groupes, groupeNom)) {
+    if (!personne.groupesMembre) personne.groupesMembre = []
+    if (_.include(personne.groupesMembre, groupeNom)) {
       next(null, personne)
     } else {
       flow.seq(function () {
@@ -65,7 +65,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
           EntityGroupe.create({nom: groupeNom}).store(nextStep)
         }
       }).seq(function (groupe) {
-        personne.groupes.push(groupe.nom)
+        personne.groupesMembre.push(groupe.nom)
         if (personne.store) personne.store(next)
         else next(null, personne)
       }).catch(function (error) {

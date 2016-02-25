@@ -52,22 +52,37 @@ function Groupe(initObj) {
   if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLocaleLowerCase();
   else this.nom = '';
   /**
-   * Visible dans la liste générale des groupes, tout le monde peut rentrer ou sortir à sa guise
+   * Description
+   * @type {string}
+   * @default ""
+   */
+  if (typeof initObj.description === 'string') this.description = initObj.description;
+  else this.description = '';
+  /**
+   * Tout le monde peut s'y inscrire
    * @type {boolean}
    * @default false
    */
   this.ouvert = !!initObj.ouvert
   /**
-   * True pour les groupes définis par un client SSO (et donc non modifiables, et pas de gestionnaires ici)
+   * Visible dans la liste générale des groupes, tout le monde peut suivre ses publications
    * @type {boolean}
-   * @default false
    */
-  this.external = !!initObj.external
+  this.public = !!initObj.public
   /**
    * liste d'oid de ceux qui peuvent gérer le groupe (le créateur et ceux à qui il a délégué la gestion)
    * @type {Integer[]}
    */
   this.gestionnaires = initObj.gestionnaires || []
+  /**
+   * @name creationDate
+   * @type {Date}
+   * @default undefined
+   */
+  if (initObj.creationDate) {
+    if (typeof initObj.creationDate === 'string') this.creationDate = new Date(initObj.creationDate)
+    else if (initObj.creationDate instanceof Date) this.creationDate = initObj.creationDate
+  } // sinon, sera ajouté à l'écriture en Bdd
 }
 
 module.exports = Groupe

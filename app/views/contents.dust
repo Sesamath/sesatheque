@@ -1,4 +1,5 @@
+{!rend un tableau de string contents en paragraphes, et une éventuelle liste {titre, items}!}
 {#contents}<p>{.|s}</p>{/contents}
 {?liste}
-<ul>{liste.titre}{#liste.items}<li>{.}<li>{/liste.items}</ul>
+<ul>{liste.titre}{#liste.items}<li>{.}</li>{/liste.items}</ul>
 {/liste}

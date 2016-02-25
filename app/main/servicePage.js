@@ -31,6 +31,7 @@
 
 'use strict'
 
+var _ = require('lodash')
 var tools = require('../tools')
 
 module.exports = function () {
@@ -107,11 +108,15 @@ module.exports = function () {
    * @param {object|string}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
    *                                        et les autres propriétés qui seront passées à cette vue)
    *                                        ou un simple texte (qui sera passé à la vue contents
-   * @param {object}  [moreData]  Objet qui sera fusionné avec data avant context.html(data), peut donc contenir
-   *                            une propriété blocs ou des ajouts pour $metas
+   * @param {object|Array}  [moreData]  Si c'est un array sera traité comme une blocList (d'une propriété blocs ajoutée ici),
+   *                                    sinon sera fusionné avec data avant context.html(data) (par ex pour des ajouts de $metas)
    */
   $page.print = function (context, titre, contentBloc, moreData) {
     var data = $page.getDefaultData(context, titre, contentBloc)
+    if (_.isArray(moreData)) {
+      if (moreData.length) moreData = { blocs : { blocList : moreData } }
+      else moreData = null
+    }
     if (moreData) tools.merge(data, moreData)
     context.html(data)
   }

@@ -80,8 +80,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         ressource.dateMiseAJour = new Date()
       }
       // cohérence de la restriction
-      if (ressource.restriction === config.constantes.restriction.groupe && (!ressource.parametres.allow || !ressource.parametres.allow.groupes)) {
-        log.error("Ressource " + ressource.oid + " restreinte à des groupes sans préciser lesquels, on la passe privée")
+      if (ressource.restriction === config.constantes.restriction.groupe && _.isEmpty(ressource.groupes)) {
+        log.error("Ressource " + ressource.oid + " restreinte à ses groupes sans préciser lesquels, on la passe privée")
         ressource.restriction = config.constantes.restriction.prive
       }
       // on génère la clé si elle manque
@@ -200,7 +200,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   } // setLastLocalId
 
   /**
-   * Purge les urls publiques de la ressource sur varnish
+   * Purge les urls publiques de la ressource sur varnish (si varnish est dans la conf, ne fait rien sinon)
    * (rend la main avant les réponses mais après avoir lancé les requêtes)
    * @param {Ressource} ressource
    * @returns {{}}

@@ -305,15 +305,6 @@ module.exports = function ($accessControl, $ressourcePage) {
         } else if (personne) {
           personne.origine = getOrigine(context)
           personne.lastCheck = new Date()
-          // au cas où un client filerai des groupes et pas des groupesExt
-          if (personne.groupes && personne.groupes.length) {
-            if (personne.groupesExt && personne.groupesExt.length) {
-              personne.groupesExt = personne.groupesExt.concat(personne.groupes)
-            } else {
-              personne.groupesExt = personne.groupes
-            }
-            delete personne.groupes
-          }
           $accessControl.login(context, personne, next)
         } else {
           next(new Error("L'authentification n'a pas retourné d'utilisateur à connecter"))

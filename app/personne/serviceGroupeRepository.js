@@ -71,16 +71,16 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
    * @memberOf $groupeRepository
    */
   $groupeRepository.getListManagedBy = function (oid, next) {
-    EntityGroupe.match('gestionnaires').equals(oid).grab(next)
+    EntityGroupe.match('gestionnaires').equals(oid).sort('oid').grab(next)
   }
 
   /**
-   * Récupère tous les groupes ouverts
+   * Récupère tous les groupes publics
    * @param {groupeCallback} next
    * @memberOf $groupeRepository
    */
-  $groupeRepository.loadOpen = function (next) {
-    EntityGroupe.match('ouvert').equals(true).grab(function (error, groupes) {
+  $groupeRepository.loadPublic = function (next) {
+    EntityGroupe.match('public').equals(true).grab(function (error, groupes) {
       if (error) {
         next(error)
       } else if (groupes) {

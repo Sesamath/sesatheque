@@ -1,14 +1,26 @@
 <div class="groupe">
   <h1 id="titre">{nom}</h1>
+  <span class="links">
+    {?urlJoin} <a href="{urlJoin}">Rejoindre</a> {/urlJoin}
+    {?urlQuit} <a href="{urlQuit}">Quitter</a> {/urlQuit}
+    {?urlEdit} <a href="{urlEdit}">Modifier</a> {/urlEdit}
+  </span>
   <ul>
     Propriétés de ce groupe
     <li>Nom : {nom}</li>
-    <li>Ouvert à tous : {?ouvert}oui{:else}non{/ouvert}</li>
+    <li>Description : <pre>{description}</pre></li>
+    <li>Ouvert à tous :
+      {?ouvert}oui <span class="remarque">(tout le monde peut en devenir membre)</span>
+      {:else}non <span class="remarque">(seul les gestionnaires peuvent ajouter des membres)</span>{/ouvert}</li>
+    <li>Public : 
+      {?public}oui <span class="remarque">(tout le monde peut suivre les publications)</span>
+      {:else}non <span class="remarque">(seuls les membres peuvent suivre les publications)</span>{/public}</li>
     <li>
       <ul>
-        Gestionnaire(s) : {#gestionnaires}<li>{.}</li>{/gestionnaires}
+        Gestionnaire(s) : 
+        <span class="remarque">Les gestionnaires peuvent modifier les propriétés du groupe et y ajouter des membres</span>
+        {#gestionnairesNames}<li>{.}</li>{/gestionnairesNames}
       </ul>
     </li>
   </ul>
-  <span class="remarque">Les gestionnaires peuvent ouvrir ou fermer le groupe à tous</span>
 </div>

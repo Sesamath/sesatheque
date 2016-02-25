@@ -1,5 +1,5 @@
-{#choices}
-  <label for="{id}">{label}
-    <input id="{id}" type="radio" name="{name}" value="{value}"{?selected} checked="checked"{/selected} />
+{#value}
+  <label {?id}for="{id}"{/id}>{label}
+    <input {?id}id="{id}"{/id} type="radio" name="{name}" value="{value}"{?selected} checked="checked"{/selected} />
   </label>
-{/choices}
+{/value}

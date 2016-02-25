@@ -3,4 +3,4 @@
   {?id}id="{id}"{/id}
   class="info{?className} {className}{/className}"
   {?attributes}{>attributes /}{/attributes}
->{value}</p>
+>{value}{htmlValue|s}</p>

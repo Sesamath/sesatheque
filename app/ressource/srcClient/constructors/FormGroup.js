@@ -38,7 +38,7 @@ var FormField = require('./FormField')
  * @param {object} [values] Des valeurs d'initialisation
  * @constructor
  */
-function FieldGroup(values) {
+function FormGroup(values) {
   if (!values || typeof values !== 'object') values = {}
   if (values.id) {
     /**
@@ -88,10 +88,10 @@ function FieldGroup(values) {
  * @param {object|FormField} field
  * @returns {FormField}
  */
-FieldGroup.prototype.addField = function addField(field) {
+FormGroup.prototype.addField = function addField(field) {
   var formField = new FormField(field)
   this.fields.push(formField)
   return formField
 }
 
-module.exports = FieldGroup
+module.exports = FormGroup

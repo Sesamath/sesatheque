@@ -89,28 +89,21 @@ function Personne(initObj) {
   /**
    * Liste des permissions, calculée d'après les roles au login, non sauvegardée donc à priori seulement en session
    * @type {Object}
-   * @default {}
+   * @default undefined
    */
   this.permissions = initObj.permissions || undefined
   /**
-   * La liste des groupes
+   * groupes dont on est membre (on peut y publier)
    * @type {string[]}
-   * @default {}
+   * @default undefined
    */
-  this.groupes = initObj.groupes || []
-  // @todo à virer dès qu'update6 sera passé partout
-  if (typeof this.groupes === "object" && !(this.groupes instanceof Array)) {
-    this.groupes = []
-    for (var groupe in initObj.groupes) {
-      if (initObj.groupes.hasOwnProperty(groupe) && initObj.groupes[groupe]) this.groupes.push(groupe)
-    }
-  }
+  this.groupesMembre = initObj.groupesMembre
   /**
-   * La liste des groupes externes
+   * groupes dont on suit les publications sans en être membre
    * @type {string[]}
-   * @default {}
+   * @default undefined
    */
-  this.groupesExt = initObj.groupesExt || []
+  this.groupesSuivis = initObj.groupesSuivis
   /**
    * D'autres propriétés regroupées dans cet objet, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
    * @type {Object}

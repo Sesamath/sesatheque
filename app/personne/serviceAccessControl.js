@@ -173,7 +173,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
           case restriction.groupe:
             if ($accessControl.isAuteur(context, ressource)) return
             if ($accessControl.isContributeur(context, ressource)) return
-            if (ressource.groupes && !_.empty(_.intersection(ressource.groupes, user.groupes))) return
+            if (ressource.groupes && !_.empty(_.intersection(ressource.groupes, user.groupesMembre))) return
             msg = "Ressource restreinte"
             break
 
@@ -573,14 +573,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Retourne true si l'utilisateur est dans le groupe
+   * Retourne true si l'utilisateur est membre du groupe
    * @param {Context} context
    * @param {string}  groupeNom
    * @returns {boolean}
    */
   $accessControl.isInGroupe = function (context, groupeNom) {
     var user = $accessControl.getCurrentUser(context)
-    return (user.groupes.indexOf(groupeNom) > -1)
+    return (user.groupesMembre.indexOf(groupeNom) > -1)
   }
 
   /**
@@ -639,38 +639,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
           lastCheck : new Date()
         }
       }
-      checkGroups(error, personne)
-    }
-
-    function checkGroups(error, personne) {
-      personne.groupes = []
-      if (personne.groupesExt && personne.groupesExt.length) {
-        flow(personne.groupesExt).seqEach(function (groupeNom) {
-          var nextGroupe = this
-          $groupeRepository.load(groupeNom, function (error, groupe) {
-            if (error) {
-              nextGroupe(error)
-            } else if (groupe) {
-              if (groupe && !groupe.external) {
-                // ennuyeux, on a déjà un groupe interne du même nom, on l'ajoute pas et on signale l'erreur
-                nextGroupe(new Error("Il y a déjà un groupe nommé " +groupe.nom +" dans cette Sésathèque, impossible d'ajouter un groupe externe du même nom"))
-              } else {
-                nextGroupe()
-              }
-            } else {
-              // faut l'ajouter, en externe
-              $groupeRepository.save({nom:groupeNom, ouvert:false, external:true}, nextGroupe)
-            }
-          })
-        }).seq(function () {
-          next(null, personne)
-        }).catch(function (error) {
-          next(error)
-        })
-      } else {
-        // rien à faire sur les groupes
-        next(null, personne)
-      }
+      next(error, personne)
     }
 
     if (personne.origine && personne.idOrigine) $personneRepository.updateOrCreate(personne, setSession)
@@ -712,8 +681,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         prenom : sesalabUser.prenom,
         email : sesalabUser.mail,
         roles : {},
-        permissions : {},
-        groupesExt : []
+        permissions : {}
       }
       if (sesalabUser.externalId && sesalabUser.externalMech) {
         personne.origine = sesalabUser.externalMech

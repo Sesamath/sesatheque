@@ -60,6 +60,14 @@ function FormChoice(values) {
      * @default undefined
      */
     this.label = values.label
+    if (values.labelInfo) {
+      /**
+       * Un complément de label éventuel (qui pourra être stylé différemment pour un complément d'info sur le champ)
+       * @type {string}
+       * @default undefined
+       */
+      this.labelInfo = values.labelInfo
+    }
   }
 
   /**

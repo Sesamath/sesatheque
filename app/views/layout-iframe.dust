@@ -9,6 +9,7 @@
   {errors|s}
   {warnings|s}
   {flashBloc|s}
+  {blocsFirst|s}
   {contentBloc|s}
   {#blocs}{>partial /}{/blocs}
   {jsBloc|s}

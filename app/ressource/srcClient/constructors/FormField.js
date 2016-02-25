@@ -111,46 +111,6 @@ function FormField(values) {
    */
   this.widget = values.widget
 
-  /**
-   * @type {string|FormChoice[]}
-   * @default ''
-   */
-  this.value = ''
-  if (typeof values.value === 'string' || typeof values.value === 'number' || typeof values.value === 'undefined') {
-    // text par défaut
-    if (!this.widget) this.widget = 'text'
-    if (["text", "textarea", "submit", "button"].indexOf(this.widget) === -1) throw new Error("widget "+this.widget +" incompatible avec la valeur " +values.value)
-    this.value = values.value || ''
-
-  } else if (typeof values.value === 'boolean') {
-    // oui / nom sous forme de checkbox
-    this.widget = 'checkboxes'
-    // faut mettre label et name sur le choice
-    this.value = []
-    var choice = {
-      label:this.label,
-      name : this.name,
-      value: 'true'
-    }
-    if (this.readonly) choice.readonly = true
-    if (values.selectedValues === true) choice.selected = true
-    // required a peu de sens, sinon pour obliger à cocher qqchose
-    if (this.required) choice.required = true
-    this.addChoice(choice)
-    this.label = undefined
-
-  } else if (values.value instanceof Array) {
-    // une liste, checkboxes par défaut
-    if (!this.widget) this.widget = 'checkboxes'
-    if (["select", "checkboxes", "radios"].indexOf(this.widget) === -1) throw new Error("widget incompatible avec la valeur")
-    this.value = []
-    if (values.value.length) {
-      for (i = 0; i < values.value.length; i++) {
-        this.addChoice(values.value[i])
-      }
-    }
-  }
-
   if (values.selectedValues) {
     /**
      * @type {string[]}
@@ -164,6 +124,48 @@ function FormField(values) {
       }
     } else {
       this.selectedValues.push(values.selectedValues +'')
+    }
+  }
+
+  /**
+   * @type {string|FormChoice[]}
+   * @default ''
+   */
+  this.value = ''
+  if (typeof values.value === 'string' || typeof values.value === 'number' || typeof values.value === 'undefined') {
+    // text par défaut
+    if (!this.widget) this.widget = 'text'
+    if (["text", "textarea", "submit", "button", "hidden", "info"].indexOf(this.widget) === -1) throw new Error("widget "+this.widget +" incompatible avec la valeur " +values.value)
+    this.value = values.value || ''
+
+  } else if (typeof values.value === 'boolean') {
+    // oui / nom sous forme de checkbox
+    this.widget = 'checkboxes'
+    // faut mettre label et name sur le choice
+    this.value = []
+    var choice = {
+      label:this.label,
+      labelInfo:this.labelInfo,
+      name : this.name,
+      value: 'true'
+    }
+    if (values.value) choice.selected = true
+    if (this.readonly) choice.readonly = true
+    // required a peu de sens, sinon pour obliger à cocher qqchose
+    if (this.required) choice.required = true
+    this.addChoice(choice)
+    this.label = undefined
+    this.labelInfo = undefined
+
+  } else if (values.value instanceof Array) {
+    // une liste, checkboxes par défaut
+    if (!this.widget) this.widget = 'checkboxes'
+    if (["select", "checkboxes", "radios"].indexOf(this.widget) === -1) throw new Error("widget incompatible avec la valeur")
+    this.value = []
+    if (values.value.length) {
+      for (i = 0; i < values.value.length; i++) {
+        this.addChoice(values.value[i])
+      }
     }
   }
 } // FormField

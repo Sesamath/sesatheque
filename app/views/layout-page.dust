@@ -27,6 +27,7 @@
   {errors|s}
   {warnings|s}
   {flashBloc|s}
+  {blocsFirst|s}
   {contentBloc|s}
   {blocs|s}
   {! jsBloc poussé juste avant /body !}

@@ -46,8 +46,10 @@ module.exports = function (EntityPersonne, $cachePersonne) {
   EntityPersonne.table = "personne"
 
   EntityPersonne.beforeStore = function (next) {
-    if (this.lastCheck) delete this.lastCheck
-    if (this.permissions) delete this.permissions
+    // aucun intérêt à le stocker
+    if (this.hasOwnProperty('lastCheck')) delete this.lastCheck
+    // recalculé d'après les roles à chaque load
+    if (this.hasOwnProperty('permissions')) delete this.permissions
     next()
   }
 
@@ -68,6 +70,6 @@ module.exports = function (EntityPersonne, $cachePersonne) {
       .defineIndex('roles', 'string', function () {
         return tools.truePropertiesList(this.roles)
       })
-      .defineIndex('groupes', 'string')
-      .defineIndex('groupesExt', 'string')
+      .defineIndex('groupesMembre', 'string')
+      .defineIndex('groupesSuivis', 'string')
 }

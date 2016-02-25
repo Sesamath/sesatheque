@@ -31,7 +31,7 @@
 
 'use strict'
 
-//var _ = require('lodash')
+var _ = require('lodash')
 var tools = require('../tools')
 var flow = require('an-flow')
 
@@ -50,20 +50,40 @@ var flow = require('an-flow')
 module.exports = function (controller, EntityGroupe, $groupeRepository, $personneRepository, $accessControl, $page, $form, $flashMessages) {
 
   /**
-   * Retourne la liste des gestionnaires
+   * Retourne le nom du groupe (helper des fcts qui prennent un argument groupe|groupeNom)
    * @private
-   * @param {string|string[]} ids
-   * @param next callback appelée avec ({Error}, {EntityPersonne[]})
+   * @param {string|Groupe} groupe Le groupe ou son nom
+   * @returns {string} undefined si groupe n'est ni une string ni un objet avec une propriété nom
    */
-  function getGestionnairesNames(ids, next) {
+  function getNom(groupe) {
+    var nom
+    if (groupe) {
+      if (groupe.nom) nom = groupe.nom
+      else if (typeof groupe === 'string') nom = groupe
+    }
+    if (!nom) log.error('getNom appelé avec un paramètre incorrect', groupe)
+    return nom
+  }
+
+  /**
+   * Retourne une liste de gestionnaires
+   * @private
+   * @param {string|string[]} ids Liste d'id de personnes (array ou string avec séparateur qcq)
+   * @param {boolean} [nameOnly=false] passer true pour récupérer un array de string "prénom nom"
+   * @param next callback appelée avec ({Error}, {Personne[]|string[]})
+   */
+  function loadGestionnaires(ids, nameOnly, next) {
     ids = (typeof ids === 'string') ? tools.idListToArray(ids) : ids
     var gests = []
     flow(ids).seqEach(function (id) {
-      log.error("avant load")
       $personneRepository.load(id, this)
     }).seq(function (personnes) {
+      //log.debug('loadGestionnaires transforme ' +ids.join(','), personnes)
       personnes.forEach(function (gest) {
-        gests.push(gest.prenom + ' ' + gest.nom)
+        if (gest) {
+          if (nameOnly) gests.push(gest.prenom + ' ' + gest.nom)
+          else gests.push(gest)
+        }
       })
       next(null, gests)
     }).catch(function (error) {
@@ -73,47 +93,201 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   }
 
   /**
-   * Retourne la liste des groupes du user courant (liste vide si pas authentifié)
-   * @private
-   * @param {Context} context
-   * @returns {Array}
-   */
-  function getMyGroupes(context) {
-    var me = $accessControl.getCurrentUser(context)
-    return me && me.groupes || []
-  }
-
-  /**
    * Récupère la liste des groupes dont je suis proprio
    * @private
    * @param {Context} context
    * @param {groupeListCallback} next
    */
-  function getMyGroupesManaged(context, next) {
+  function loadMyGroupesManaged(context, next) {
     var myId = $accessControl.getCurrentUserOid(context)
-    if (myId) {
-      $groupeRepository.getListManagedBy(myId, next)
+    if (myId) $groupeRepository.getListManagedBy(myId, next)
+    else next()
+  }
+
+  /**
+   * Retourne la liste des groupes du user courant (liste vide si pas authentifié)
+   * @private
+   * @param {Context} context
+   * @returns {string[]}
+   */
+  function getMyGroupesMembre(context) {
+    var me = $accessControl.getCurrentUser(context)
+    return me && me.groupesMembre || []
+  }
+
+  /**
+   * Retourne la liste des groupes que le user courant suit (liste vide si pas authentifié)
+   * @private
+   * @param {Context} context
+   * @returns {string[]}
+   */
+  function getMyGroupesSuivis(context) {
+    var me = $accessControl.getCurrentUser(context)
+    return me && me.groupesSuivis || []
+  }
+
+  /**
+   * Retourne true si on est gestionnaire du groupe
+   * @param context
+   * @param {Groupe} groupe Le groupe (pas son nom)
+   * @returns {boolean}
+   */
+  function isManaged(context, groupe) {
+    var myUid = $accessControl.getCurrentUserOid(context)
+    var retour = false
+    if (groupe && groupe.gestionnaires) {
+      retour = _.includes(groupe.gestionnaires, myUid)
     }
+    return retour
+  }
+
+  /**
+   * Retourne true si on est dans ce groupe
+   * @param context
+   * @param {string|Groupe} groupe Le groupe ou son nom
+   * @returns {boolean}
+   */
+  function isMine(context, groupe) {
+    var nom = getNom(groupe)
+    return nom ? _.includes(getMyGroupesMembre(context), nom) : false
+  }
+  
+  /**
+   * Retourne true si on suit ce groupe
+   * @param context
+   * @param {string|Groupe} groupe Le groupe ou son nom
+   * @returns {boolean}
+   */
+  function isFollowed(context, groupe) {
+    var groupesSuivis = getMyGroupesSuivis(context)
+    var nom = getNom(groupe)
+    var retour = false
+    if (nom && groupesSuivis.length) {
+      retour = groupesSuivis.some(function (groupeNom) { return groupeNom === nom })
+    }
+    return retour
+  }
+
+  function addUrlDescribe(groupe) {
+    if (groupe && groupe.nom) groupe.urlDescribe = '/groupe/voir/' +encodeURIComponent(groupe.nom)
+  }
+  function addUrlEdit(groupe) {
+    if (groupe && groupe.nom) groupe.urlEdit = '/groupe/modifier/' +encodeURIComponent(groupe.nom)
+  }
+  function addUrlJoin(groupe) {
+    if (groupe && groupe.nom) groupe.urlJoin = '/groupe/rejoindre/' +encodeURIComponent(groupe.nom)
+  }
+  function addUrlQuit(groupe) {
+    if (groupe && groupe.nom) groupe.urlQuit = '/groupe/quitter/' +encodeURIComponent(groupe.nom)
+  }
+  function addUrlFollow(groupe) {
+    if (groupe && groupe.nom) groupe.urlJoin = '/groupe/suivre/' +encodeURIComponent(groupe.nom)
+  }
+  function addUrlIgnore(groupe) {
+    if (groupe && groupe.nom) groupe.urlQuit = '/groupe/ignorer/' +encodeURIComponent(groupe.nom)
   }
 
   /**
    * Ajoute un groupe à l'utilisateur courant
    * @private
-   * @param context
-   * @param nom
-   * @param next
+   * @param {Context} context
+   * @param {string} nom Nom du groupe
+   * @param {boolean} isFollow true pour groupeSuivis, groupesMembre sinon
+   * @param {callbackPersonne} next
+   */
+  function addGroup(context, nom, isFollow, next) {
+    var me = $accessControl.getCurrentUser(context)
+    var prop = isFollow ? 'groupeSuivis' : 'groupesMembre'
+    if (me) {
+      if (!me[prop]) me[prop] = []
+      if (_.includes(me[prop], nom)) {
+        next(me)
+      } else {
+        me[prop].push(nom)
+        // màj session
+        $accessControl.updateCurrentUser(context, me)
+        // màj user en bdd
+        $personneRepository.save(me, next)
+      }
+    } else {
+      next(new Error("Il faut être authentifié pour ajouter un groupe"))
+    }
+  }
+
+  /**
+   * Retire un groupe à l'utilisateur courant
+   * @private
+   * @param {Context} context
+   * @param {string} nom Nom du groupe
+   * @param {boolean} isFollow true pour groupeSuivis, groupesMembre sinon
+   * @param {callbackPersonne} next
+   */
+  function removeGroup(context, nom, isFollow, next) {
+    var me = $accessControl.getCurrentUser(context)
+    var prop = isFollow ? 'groupeSuivis' : 'groupesMembre'
+    if (me) {
+      var deniedMsg = "Vous n'étiez pas dans ce groupe ou il n'existe pas"
+      if (me[prop] && me[prop].length) {
+        var newGroupes = me[prop].filter(function (groupeNom) { return groupeNom !== nom })
+        if (newGroupes.length === me[prop].length) {
+          next(new Error(deniedMsg))
+        } else {
+          me[prop] = newGroupes
+          // màj session
+          $accessControl.updateCurrentUser(context, me)
+          // màj user en bdd
+          $personneRepository.save(me, next)
+        }
+      } else {
+        next(new Error(deniedMsg))
+      }
+    } else {
+      next(new Error("Il faut être authentifié pour modifier les groupe"))
+    }
+  }
+
+  /**
+   * Ajoute un groupe (membre) à l'utilisateur courant
+   * @private
+   * @param {Context} context
+   * @param {string} nom Nom du groupe
+   * @param {callbackPersonne} next
    */
   function joinGroup(context, nom, next) {
-    var me = $accessControl.getCurrentUser(context)
-    if (me) {
-      if (!me.groupes) me.groupes = []
-      me.groupes.push(nom)
-      $personneRepository.save(me, next)
-      // et faut pas oublier de mettre à jour la session
-      $accessControl.updateCurrentUser(context, me)
-    } else {
-      next(new Error("Il faut être authentifié pour rejoindre un groupe"))
-    }
+    addGroup(context, nom, false, next)
+  }
+
+  /**
+   * Retire un groupe (membre) à l'utilisateur courant
+   * @private
+   * @param {Context} context
+   * @param {string} nom Nom du groupe
+   * @param {callbackPersonne} next
+   */
+  function quitGroup(context, nom, next) {
+    removeGroup(context, nom, false, next)
+  }
+
+  /**
+   * Ajoute un groupe suivi pour l'utilisateur courant
+   * @private
+   * @param {Context} context
+   * @param {string} nom Nom du groupe
+   * @param {callbackPersonne} next
+   */
+  function followGroup(context, nom, next) {
+    addGroup(context, nom, true, next)
+  }
+
+  /**
+   * Retire un groupe suivi pour l'utilisateur courant
+   * @private
+   * @param {Context} context
+   * @param {string} nom Nom du groupe
+   * @param {callbackPersonne} next
+   */
+  function ignoreGroup(context, nom, next) {
+    removeGroup(context, nom, true, next)
   }
 
   /**
@@ -123,49 +297,41 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @param nom
    * @param gestionnairesNames
    */
-  function modAskConfirm(context, nom, gestionnairesNames ) {
+  function modAskConfirm(context, nom, gestionnairesNames) {
     // on demande confirmation (en mettant en session tout le groupe modifié d'après la demande)
     var formPosted = context.post
     var uid = $accessControl.getCurrentUserOid(context)
-    var fields = [
-      {name: "confirm", value: true, label: 'Confirmer ces valeurs'}
-    ]
-    var blocs = {
-      infoGest: {
-        $view: 'contents',
-        liste: {
-          titre: 'Gestionnaires existants (non modifiable)',
-          items: gestionnairesNames
-        }
-      }
-    }
+    var fields = []
     var groupe
-    var newOids = []
     flow().seq(function () {
       $groupeRepository.load(nom, this)
-    }).seq(function (groupeBdd) {
-      groupe = groupeBdd
-      if (formPosted.newGestionnaires) getGestionnairesNames(formPosted.newGestionnaires, this)
+    }).seq(function (grp) {
+      groupe = grp
+      // on màj l'objet pour le mettre en session via le token et l'enregistrer après confirmation
+      groupe.description = formPosted.description
+      groupe.ouvert = (formPosted.ouvert === 'true')
+      groupe.public = (formPosted.public === 'true')
+      if (formPosted.newGestionnaires) loadGestionnaires(formPosted.newGestionnaires, false, this)
       else this()
-    }).seq(function (personnes) {
+    }).seq(function (newGestionnaires) {
 
       // nouveaux gestionnaires
-      if (personnes && personnes.length) {
-        blocs.newGests = {
-          $view: 'contents',
-          liste: {
-            titre: 'Gestionnaires à ajouter (non révocables)',
-            items: []
-          }
-        }
-        personnes.forEach(function (personne) {
-          if (groupe.gestionnaires.indexOf(personne.oid) === -1) {
-            newOids.push(personne.oid)
-            groupe.gestionnaires.push(personne.oid)
-            blocs.newGests.liste.items.push(personne.prenom + ' ' + personne.nom)
-          } else {
+      if (newGestionnaires && newGestionnaires.length) {
+        var itemsNewG = []
+        newGestionnaires.forEach(function (personne) {
+          if (_.includes(groupe.gestionnaires, personne.oid)) {
             $flashMessages.add(context, personne.prenom + ' ' + personne.nom + " était déjà gestionnaire et n'a pas été ajouté")
+          } else {
+            groupe.gestionnaires.push(personne.oid)
+            var ng = personne.prenom + ' ' + personne.nom
+            gestionnairesNames.push(ng)
+            itemsNewG.push(ng)
           }
+        })
+        //log.debug('new gest', itemsNewG)
+        fields.push({
+          widget:'info',
+          value: 'Gestionnaires à ajouter (qui deviendront non révocables après validation) : ' +itemsNewG.join(', ') // jshint:ignore line (espace insécable)
         })
       }
 
@@ -173,17 +339,36 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if (formPosted.quit === 'true') {
         var i = groupe.gestionnaires.indexOf(uid)
         if (i > -1) {
-          if (groupe.gestionnaires.length > 1) groupe.gestionnaires.splice(i, 1)
-          else throw new Error("Vous êtes le seul gestionnaire de ce groupe et ne pouvez pas quitter cette fonction")
+          if (groupe.gestionnaires.length > 1) {
+            groupe.gestionnaires.splice(i, 1)
+            fields.push({
+              widget:'info',
+              value: 'Vous ne serez plus gestionnaire de ce groupe'
+            })
+            var me = $accessControl.getCurrentUser(context)
+            var myIndex = gestionnairesNames.indexOf(me.prenom +' ' +me.nom)
+            gestionnairesNames = gestionnairesNames.splice(myIndex, 1)
+          } else {
+            throw new Error("Vous êtes le seul gestionnaire de ce groupe et ne pouvez pas quitter cette fonction")
+          }
         } else {
           throw new Error("Vous n'êtes pas gestionnaire de ce groupe")
         }
       }
 
       // on met ce groupe en session pour le sauvegarder la prochaine fois
-      var token = $accessControl.addToken(context, groupe)
+      var token = $accessControl.addToken(context, null, groupe)
       fields.push({name: 'token', value: token, widget: 'hidden'})
-      $form.print(context, 'Valider les modifications du groupe', blocs)
+      // plutôt que des radios on donne des noms à 2 boutons submit
+      //fields.push({name: "confirm", value: [{label:'oui', value:'oui'}, {label:'non', value:'non'}], selectedValues:['non'], widget:'radios', label: 'Confirmer ces valeurs'})
+      fields.push({name: 'modOk', value: 'Valider', widget: 'submit'})
+      fields.push({name: 'modKo', value: 'Annuler', widget: 'submit'})
+      // on passe l'affichage du groupe via blocsFirst
+      var moreData = { blocsFirst : groupe }
+      //log.debug('groupe à confirmer', groupe)
+      moreData.blocsFirst.$view = 'displayGroupe'
+      moreData.blocsFirst.gestionnairesNames = gestionnairesNames
+      $form.print(context, null, null, fields, null, 'Valider les modifications du groupe', moreData)
 
     }).catch(function (error) {
       log.error(error)
@@ -200,15 +385,18 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   function modConfirmed(context, nom) {
     // Save du form confirmé, on vérifie et enregistre
     var formPosted = context.post
-    var formConfirmed = $accessControl.getTokenValue(context, formPosted.token)
-    if (!formConfirmed || formConfirmed.nom !== nom) throw new Error("Données corrompues")
+    var newGroupe = $accessControl.getTokenValue(context, formPosted.token)
+    log.debug('recup ds modConfirmed', newGroupe)
+    if (!newGroupe || newGroupe.nom !== nom) throw new Error("Données corrompues")
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (groupe) {
-      tools.updateIfExists(groupe, formConfirmed)
+      tools.updateIfExists(groupe, newGroupe)
+      log.debug('av save dans modConfirmed', groupe)
       $groupeRepository.save(groupe, this)
     }).seq(function () {
-      $page.print(context, 'Groupe modifié')
+      $flashMessages.add(context, "groupe sauvegardé")
+      context.redirect('/groupe/voir/' + encodeURIComponent(nom))
     }).catch(function (error) {
       $page.printError(context, error)
     })
@@ -231,12 +419,22 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         this(new Error("Erreur interne, le nom du groupe récupéré en base de donnée ne correspond pas (" + nom + "≠" + groupeBdd.nom + ")"))
       } else {
         var isOuvert = (formPosted.ouvert === 'true')
+        var isPublic = (formPosted.public === 'true')
+        var saveNeeded = false
+        if (groupeBdd.description !== formPosted.description) {
+          groupeBdd.description = formPosted.description
+          saveNeeded = true
+        }
         if (groupeBdd.ouvert !== isOuvert) {
           groupeBdd.ouvert = isOuvert
-          $groupeRepository.save(groupeBdd, this)
-        } else {
-          this()
+          saveNeeded = true
         }
+        if (groupeBdd.public !== isPublic) {
+          groupeBdd.public = isPublic
+          saveNeeded = true
+        }
+        if (saveNeeded) $groupeRepository.save(groupeBdd, this)
+        else this()
       }
     }).seq(function (groupe) {
       if (groupe) {
@@ -252,103 +450,43 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   }
 
   /**
+   * Redirige vers la liste perso avec un message ou affiche une erreur (si on est pas authentifié)
+   * @param {Context} context
+   * @param {string} message
+   * @param {boolean} isError Si c'est un message d'erreur à mettre en flashMessage
+   */
+  function goToPersoOrError(context, message, isError) {
+    var level = isError ? 'error' : 'info'
+    if ($accessControl.isAuthenticated(context)) {
+      $flashMessages.add(context, message, level)
+      context.redirect('/groupe/perso')
+    } else {
+      $page.printError(context, message)
+    }
+  }
+
+  /**
    * Affiche le groupe
    * @private
    * @param context
    * @param groupe
    */
   function printGroupe(context, groupe) {
-    getGestionnairesNames(groupe.gestionnaires, function(error, gestionnaires) {
+    loadGestionnaires(groupe.gestionnaires, true, function(error, gestionnairesNames) {
       if (error) {
         $page.printError(context, error)
       } else {
-        var contentBloc = {
-          $view: 'displayGroupe',
-          nom: groupe.nom,
-          ouvert: groupe.ouvert,
-          gestionnaires: gestionnaires.join(', ')
-        }
-        $page.print(context, 'Groupe ' + groupe.nom, contentBloc)
+        var contentBloc = groupe
+        contentBloc.$view = 'displayGroupe'
+        contentBloc.gestionnairesNames = gestionnairesNames.join(', ')
+        // les actions
+        if (isManaged(context, groupe)) addUrlEdit(contentBloc)
+        else if (isMine(context, groupe.nom)) addUrlQuit(contentBloc)
+        else addUrlJoin(contentBloc)
+        $page.print(context, 'Description du groupe', contentBloc)
       }
     })
   }
-
-  /**
-   * Affiche la liste de tous les groupes ouverts
-   * @route GET /groupe/tous
-   */
-  controller.get('tous', function (context) {
-    var uid = $accessControl.getCurrentUserOid(context)
-    var myGroupes = getMyGroupes(context)
-    $groupeRepository.loadOpen(function (error, groupes) {
-      if (error) {
-        $page.printError(context, error)
-      } else {
-        var contentBloc = {
-          $view: 'groupes',
-          groupes: []
-        }
-        if (groupes && groupes.length) {
-          groupes.forEach(function (groupe) {
-            var item = {nom: groupe.nom}
-            var nomUrl = encodeURIComponent(groupe.nom)
-            if (myGroupes.indexOf(groupe.nom) === -1) item.urlJoin = '/groupe/rejoindre/' + nomUrl
-            else item.urlQuit = '/groupe/quitter/' + nomUrl
-            if (groupe.gestionnaires.indexOf(uid) !== -1) item.urlEdit = '/group/modifier/' + nomUrl
-            contentBloc.groupes.push(item)
-          })
-        } else {
-          contentBloc.defaultMessage = "Aucun groupe public n'a été créé"
-        }
-        $page.print(context, 'Tous les groupes', contentBloc)
-      }
-    })
-  })
-
-  /**
-   * Affiche la liste de mes groupes
-   * @route GET /groupe/perso
-   */
-  controller.get('perso', function (context) {
-    var blocList = []
-    flow().seq(function () {
-      if (!$accessControl.isAuthenticated(context)) this("Il faut être authentifié pour voir ses groupes")
-      else getMyGroupesManaged(context, this)
-    }).seq(function (groupes) {
-      groupes.forEach(function (groupe) {
-        groupe.urlEdit = '/groupe/modifier/' +encodeURIComponent(groupe.nom)
-      })
-      blocList.push({
-        partialView: '../groupes',
-        titre : "Groupes dont je suis gestionnaire",
-        groupes: groupes,
-        defaultMessage : "aucun groupe"
-      })
-      log.debug("groupes dont je suis gestionnaire", groupes)
-      var myGroupes = getMyGroupes(context)
-      groupes = []
-      myGroupes.forEach(function (groupeNom) {
-        groupes.push({
-          nom:groupeNom,
-          urlQuit : '/groupe/quitter/' +encodeURIComponent(groupeNom)
-        })
-      })
-      groupes.push({
-        nom:'grp test',
-        urlQuit : '/groupe/quitter/bidon'
-      })
-      log.debug("mes groupes", groupes)
-      blocList.push({
-        partialView: '../groupes',
-        titre : "Groupes auxquels j'appartiens",
-        groupes: groupes,
-        defaultMessage : "Inscrit dans aucun groupe"
-      })
-      $page.print(context, 'Mes groupes', null, {blocs:{blocList:blocList}})
-    }).catch(function (error) {
-      $page.printError(context, error)
-    })
-  })
 
   /**
    * Affiche un groupe
@@ -361,38 +499,11 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
       groupe = grp
-      var msg = 'Le groupe ' +nom +" n'existe pas ou n'est pas ouvert"
+      var msg = 'Le groupe ' +nom +" n'existe pas ou n'est pas public"
       if (!grp) this(msg)
-      else if (grp && (grp.ouvert || getMyGroupes(context).indexOf(nom) !== -1)) this()
+      else if (grp && (grp.public || isMine(context, nom))) this()
       else this(msg)
     }).seq(function () {
-      printGroupe(context, groupe)
-    }).catch(function (error) {
-      $page.printError(context, error.toString())
-    })
-  })
-
-  /**
-   * Ajoute le groupe au user courant
-   * @route GET /groupe/rejoindre/:nom
-   */
-  controller.get('rejoindre/:nom', function (context) {
-    var nom = context.arguments.nom
-    var groupe
-    flow().seq(function () {
-      $groupeRepository.load(nom, this)
-    }).seq(function (grp) {
-      groupe = grp
-      if (grp && grp.ouvert) {
-        if (getMyGroupes(context).indexOf(nom) !== -1) this("Vous êtes déjà dans le groupe " +nom)
-        else this()
-      } else {
-        this('Le groupe ' +nom +" n'existe pas ou n'est pas ouvert")
-      }
-    }).seq(function () {
-      joinGroup(context, nom, this)
-    }).seq(function () {
-      $flashMessages.add(context, "Vous faites désormais partie de ce groupe")
       printGroupe(context, groupe)
     }).catch(function (error) {
       $page.printError(context, error.toString())
@@ -408,7 +519,9 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if ($accessControl.hasGenericPermission('createGroupe', context)) {
         var fields = [
           {name: "nom", label:'Nom du groupe'},
-          {name: "ouvert", value: true, label:'Ouvert à tous'}
+          {name: "description", label:'Description', widget:'textarea'},
+          {name: "ouvert", value: true, label:'Ouvert à tous', labelInfo:"Tout le monde pourra devenir membre du groupe"},
+          {name: "public", value: true, label:'public', labelInfo:"Tout le monde pourra s'inscrire au suivi des publications du groupe"}
         ]
         $form.print(context, null, null, fields, 'Créer', 'Ajouter un groupe')
       } else {
@@ -447,15 +560,11 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         groupe.gestionnaires = [uid]
         $groupeRepository.save(groupe, this)
       }).seq(function (groupeSaved) {
-        if (groupeSaved) {
-          joinGroup(context, nom, this)
-        } else {
-          var error = new Error("Erreur à l'enregistrement du groupe " +tools.stringify(groupe))
-          log.error(error)
-          this(error)
-        }
+        if (groupeSaved) joinGroup(context, nom, this)
+        else this(new Error("Erreur à l'enregistrement du groupe " +tools.stringify(groupe)))
       }).seq(function () {
-        $page.printMessage(context, "Le groupe « " + nom + " » a été créé", 'Groupe ajouté')
+        $flashMessages.add(context, "Le groupe « " + nom + " » a été créé")
+        context.redirect('/groupe/voir/' +encodeURIComponent(nom))
       }).catch(function (error) {
         if (error instanceof Error) log.error(error)
         $page.printError(context, error)
@@ -470,79 +579,66 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @route GET /groupe/modifier/:nom
    */
   controller.get('modifier/:nom', function (context) {
-    try {
-      var uid = $accessControl.getCurrentUserOid(context)
-      if (!uid) throw new Error("Il faut être authentifié pour modifier un groupe")
-      // on regarde s'il est gestionnaire
+    var uid = $accessControl.getCurrentUserOid(context)
+    if (uid) {
       var nom = context.arguments.nom
-      var myGroupes = getMyGroupes(context)
-      if (myGroupes.indexOf(nom) === -1 || $accessControl.hasGenericPermission('createGroupe', context)) throw new Error("Droits insuffisants")
+      var deniedMsg = "Le groupe « " + nom + " » n'existe pas ou vous n'en êtes pas gestionnaire"
+
       flow().seq(function () {
         $groupeRepository.load(nom, this)
+
       }).seq(function (groupeBdd) {
-        if (!groupeBdd) this("Le groupe « " + nom + " » n'existe pas")
-        if (groupeBdd.nom !== nom)
-          this(new Error("Erreur interne, le nom du groupe récupéré en base de donnée ne correspond pas (" +nom+"≠"+groupeBdd.nom+")"))
-        else if (groupeBdd.gestionnaires.indexOf(uid) === -1) this("Droits insuffisants pour modifier ce groupe (vous n'êtes pas gestionnaire)")
-        else this(null, groupeBdd)
+        // on regarde si on est gestionnaire
+        if (groupeBdd) {
+          if (groupeBdd.nom !== nom) this(new Error("Erreur interne, le nom du groupe récupéré en base de donnée ne correspond pas (" +nom+"≠"+groupeBdd.nom+")"))
+          else if (_.includes(groupeBdd.gestionnaires, uid)) this(null, groupeBdd)
+          else this(deniedMsg)
+        } else {
+          this(deniedMsg)
+        }
+
       }).seq(function (groupeBdd) {
+        var blocList = []
         var fields = [
-          {name: "ouvert", value: true, label:'Ouvert à tous'},
+          {name: "ouvert", value: groupeBdd.ouvert, label:'Ouvert à tous'},
+          {name: "public", value: groupeBdd.public, label:'Visible de tous'},
+          {name: "description", label:'Description', widget:'textarea', value: groupeBdd.description},
           {name: "newGestionnaires", label:'Ajouter des gestionnaires',
-            labelInfo:"L'ajout est irrévocable. Entrer un ou des identifiants séparés par des espaces (confirmation demandée sur la page suivante)"}
+            labelInfo:"L'ajout est irrévocable. Entrer un ou des identifiants séparés par des espaces, la confirmation sera demandée sur la page suivante avec les noms affichés"} // jshint:ignore line
         ]
-        var blocs
-        var gestionnairesNames = []
         flow().seq(function () {
-          var next = this
-          if (groupeBdd.gestionnaires.length > 1) {
-            fields.push({name: "quit", value: true, label: 'Me retirer des gestionnaires de ce groupe'})
-            blocList.push({
-              partialView: '../contents',
-              liste: {
-                titre: 'Autres gestionnaires de ce groupe',
-                items: []
-              }
-            })
-            getGestionnairesNames(groupeBdd.gestionnaires, this)
-          } else {
-            next()
-          }
-        }).seq(function (gests) {
+          if (groupeBdd.gestionnaires.length > 1) fields.push({name: "quit", value: false, label: 'Me retirer des gestionnaires de ce groupe'})
+          loadGestionnaires(groupeBdd.gestionnaires, true, this)
+
+        }).seq(function (gestionnairesNames) {
+          // on va stocker dans tokenValue {nom, gestionnairesNames} pour éviter de retourner chercher la liste
           var tokenValue = {nom:nom}
-          if (gests && gests.length) {
-            // on va stocker dans tokenValue la liste des gestionnaires pour éviter de retourner la chercher
-            fields.push()
-            gests.forEach(function (gest) {
-              gestionnairesNames.push(gest.prenom + ' ' + gest.nom)
-            })
-            // on l'ajoute au groupe mis en session
-            tokenValue.gestionnairesNames = gestionnairesNames
-            // et sur la page
-            blocs = {
-              blocList : [{
-                partialView: '../contents',
-                liste: {
-                  titre: 'Autres gestionnaires de ce groupe',
-                  items: gestionnairesNames
-                }
-              }]
+          // on l'ajoute au groupe mis en session
+          tokenValue.gestionnairesNames = gestionnairesNames
+          // et sur la page
+          blocList.push({
+            partialView: '../contents',
+            liste: {
+              titre: 'Gestionnaires de ce groupe',
+              items: gestionnairesNames
             }
-          }
+          })
           var token = $accessControl.addToken(context, null, tokenValue)
           fields.push({name:'token', value:token, widget:'hidden'})
           var group = {label:"Groupe : " + nom}
-          $form.print(context, null, group, fields, 'Modifier', 'Modifier un groupe', blocs)
+          $form.print(context, null, group, fields, 'Modifier', 'Modifier un groupe', blocList)
+
         }).catch(function (error) {
           log.error(error)
           $page.printError(context, error)
         })
+
       }).catch(function (error) {
         if (error instanceof Error) log.error(error)
         $page.printError(context, error)
       })
-    } catch (error) {
-      $page.denied(context, error.toString())
+    } else {
+      $page.denied(context, "Il faut être authentifié pour modifier un groupe")
     }
   })
 
@@ -556,11 +652,15 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if (!uid) throw new Error("Il faut être authentifié pour modifier un groupe")
       var nom = context.arguments.nom
       var formPosted = context.post
-      if (formPosted.confirm === 'true') {
-        modConfirmed(context)
+      if (formPosted.modOk) {
+        modConfirmed(context, nom)
+      } else if (formPosted.modKo) {
+        $flashMessages.add(context, "modification du groupe annulée")
+        context.redirect('/groupe/voir/' + encodeURIComponent(nom))
       } else {
         // on regarde le post pour savoir s'il faut une demande de confirmation
-        var tokenValue = $accessControl.getToken(context, formPosted.token)
+        var tokenValue = $accessControl.getTokenValue(context, formPosted.token)
+        //log.debug('on récupère via le token', tokenValue)
         if (!tokenValue || tokenValue.nom !== nom) throw new Error("Données corrompues")
         if (formPosted.newGestionnaires || formPosted.quit) {
           modAskConfirm(context, nom, tokenValue.gestionnairesNames)
@@ -572,6 +672,209 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     } catch (error) {
       $page.denied(context, error.toString())
     }
+  })
+
+  /**
+   * Affiche la liste de tous les groupes publics
+   * @route GET /groupe/tous
+   */
+  controller.get('tous', function (context) {
+    $groupeRepository.loadPublic(function (error, groupes) {
+      if (error) {
+        $page.printError(context, error)
+      } else {
+        var contentBloc = {
+          $view: 'groupes',
+          groupes: []
+        }
+        if (groupes && groupes.length) {
+          groupes.forEach(function (groupe) {
+            var item = {nom: groupe.nom, description:groupe.description}
+            if (isManaged(context, groupe)) addUrlEdit(item)
+            else if (isMine(context, groupe.nom)) addUrlQuit(item)
+            else addUrlJoin(item)
+            if (isFollowed(groupe)) addUrlIgnore(groupe)
+            else if (groupe.public) addUrlFollow(groupe)
+            contentBloc.groupes.push(item)
+          })
+        } else {
+          contentBloc.defaultMessage = "Aucun groupe public n'a été créé"
+        }
+        $page.print(context, 'Tous les groupes publics', contentBloc)
+      }
+    })
+  })
+
+  /**
+   * Affiche la liste de mes groupes
+   * @route GET /groupe/perso
+   */
+  controller.get('perso', function (context) {
+    var blocList = []
+    flow().seq(function () {
+      if (!$accessControl.isAuthenticated(context)) this("Il faut être authentifié pour voir ses groupes")
+      else loadMyGroupesManaged(context, this)
+
+    }).seq(function (groupesManaged) {
+      // groupes dont on est gestionnaire
+      groupesManaged.forEach(function (groupe) {
+        addUrlEdit(groupe)
+        groupe.ouvertString = groupe.ouvert ? 'ouvert' : 'fermé'
+        groupe.publicString = groupe.public ? 'public' : 'privé'
+      })
+      blocList.push({
+        partialView: '../groupes',
+        titre : "Groupes dont je suis gestionnaire",
+        groupes: groupesManaged,
+        defaultMessage : "aucun groupe"
+      })
+      // log.debug("groupes dont je suis gestionnaire", groupesManaged)
+
+      // groupes dont on est membres
+      var groupesMembre = getMyGroupesMembre(context)
+      var itemsMembre = []
+      groupesMembre.forEach(function (nom) {
+        var groupe = {
+          nom:nom
+        }
+        addUrlDescribe(groupe)
+        var isManaged = groupesManaged.some(function (groupeManaged) { return groupeManaged.nom === nom})
+        if (isManaged) addUrlEdit(groupe)
+        else addUrlQuit(groupe)
+        itemsMembre.push(groupe)
+      })
+      // log.debug("groupes membre", itemsMembre)
+      blocList.push({
+        partialView: '../groupes',
+        titre : "Groupes dont je suis membre",
+        groupes: itemsMembre,
+        defaultMessage : "aucun groupe"
+      })
+
+      // groupes que l'on suit
+      var groupesSuivis = getMyGroupesSuivis(context)
+      var itemsSuivis = []
+      groupesSuivis.forEach(function (nom) {
+        var groupe = {nom:nom}
+        addUrlDescribe(nom)
+        var isManaged = groupesManaged.some(function (groupeManaged) { return groupeManaged.nom === nom})
+        if (isManaged) addUrlEdit(nom)
+        else if (isMine(context, nom)) addUrlQuit(nom)
+        else addUrlIgnore(nom)
+        itemsSuivis.push(groupe)
+      })
+      // log.debug("groupes suivis", itemsSuivis)
+      blocList.push({
+        partialView: '../groupes',
+        titre : "Groupes suivis",
+        groupes: itemsSuivis,
+        defaultMessage : "aucun groupe"
+      })
+
+      $page.print(context, 'Mes groupes', null, blocList)
+    }).catch(function (error) {
+      $page.printError(context, error)
+    })
+  })
+
+  // Les actions depuis une liste pour modifier ses groupes (redirige sur perso)
+
+  /**
+   * Ajoute le groupe (membre) au user courant
+   * @route GET /groupe/rejoindre/:nom
+   */
+  controller.get('rejoindre/:nom', function (context) {
+    var nom = context.arguments.nom
+    var groupe
+    flow().seq(function () {
+      $groupeRepository.load(nom, this)
+    }).seq(function (grp) {
+      var deniedMsg = 'Le groupe ' +nom +" n'existe pas ou n'est pas ouvert"
+      groupe = grp
+      if (grp) {
+        if (isMine(context, nom)) this("Vous êtes déjà dans le groupe " +nom)
+        else if (grp.ouvert) this()
+        else this(deniedMsg)
+      } else {
+        this(deniedMsg)
+      }
+    }).seq(function () {
+      joinGroup(context, nom, this)
+    }).seq(function () {
+      goToPersoOrError(context, "Vous faites désormais partie du groupe " +nom)
+    }).catch(function (error) {
+      goToPersoOrError(context, error, true)
+    })
+  })
+
+  /**
+   * Retire le groupe au user courant
+   * @route GET /groupe/quitter/:nom
+   */
+  controller.get('quitter/:nom', function (context) {
+    var nom = context.arguments.nom
+    var groupe
+    flow().seq(function () {
+      $groupeRepository.load(nom, this)
+    }).seq(function (grp) {
+      var deniedMsg = 'Le groupe ' +nom +" n'existe pas ou vous n'en faite pas partie"
+      groupe = grp
+      if (grp && isMine(context, nom)) quitGroup(context, nom, this)
+      else this(deniedMsg)
+    }).seq(function () {
+      goToPersoOrError(context, "Vous avez quitté le groupe " +nom)
+    }).catch(function (error) {
+      goToPersoOrError(context, error, true)
+    })
+  })
+
+  /**
+   * Suivre le groupe
+   * @route GET /groupe/suivre/:nom
+   */
+  controller.get('suivre/:nom', function (context) {
+    var nom = context.arguments.nom
+    var groupe
+    flow().seq(function () {
+      $groupeRepository.load(nom, this)
+    }).seq(function (grp) {
+      var deniedMsg = 'Le groupe ' +nom +" n'existe pas ou n'est pas public"
+      groupe = grp
+      if (grp) {
+        if (isFollowed(context, nom)) this("Vous suivez déjà dans le groupe " +nom)
+        else if (grp.public) this()
+        else this(deniedMsg)
+      } else {
+        this(deniedMsg)
+      }
+    }).seq(function () {
+      followGroup(context, nom, this)
+    }).seq(function () {
+      goToPersoOrError(context, "Vous faites désormais partie du groupe " +nom)
+    }).catch(function (error) {
+      goToPersoOrError(context, error, true)
+    })
+  })
+
+  /**
+   * Ne plus suivre le groupe
+   * @route GET /groupe/ignorer/:nom
+   */
+  controller.get('ignorer/:nom', function (context) {
+    var nom = context.arguments.nom
+    var groupe
+    flow().seq(function () {
+      $groupeRepository.load(nom, this)
+    }).seq(function (grp) {
+      var deniedMsg = 'Le groupe ' +nom +" n'existe pas ou vous n'en faite pas partie"
+      groupe = grp
+      if (grp && isFollowed(context, nom)) ignoreGroup(context, nom, this)
+      else this(deniedMsg)
+    }).seq(function () {
+      goToPersoOrError(context, "Vous avez quitté le groupe " +nom)
+    }).catch(function (error) {
+      goToPersoOrError(context, error, true)
+    })
   })
 
 }

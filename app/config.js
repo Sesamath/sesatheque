@@ -158,7 +158,7 @@ var settings = {
       renderer: {name: 'fileRenderer', target:'./logs/entities.log'}
     }
   },
-  varnish : false // mettre true s'il y a un varnish en fromtal pour purger les urls mises en cache
+  varnish : false // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
 }
 
 // on ajoute nos params locaux (accès à la base et port,
