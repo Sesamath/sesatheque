@@ -108,17 +108,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   }
 
   /**
-   * Retourne la liste des groupes du user courant (liste vide si pas authentifié)
-   * @private
-   * @param {Context} context
-   * @returns {string[]}
-   */
-  function getMyGroupesMembre(context) {
-    var me = $accessControl.getCurrentUser(context)
-    return me && me.groupesMembre || []
-  }
-
-  /**
    * Retourne la liste des groupes que le user courant suit (liste vide si pas authentifié)
    * @private
    * @param {Context} context
@@ -152,7 +141,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   function isMine(context, groupe) {
     var nom = getNom(groupe)
-    return nom ? _.includes(getMyGroupesMembre(context), nom) : false
+    return nom ? _.includes($accessControl.getCurrentUserGroupes(context), nom) : false
   }
 
   /**
@@ -798,7 +787,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       // log.debug("groupes dont je suis gestionnaire", groupesManaged)
 
       // groupes dont on est membre
-      var groupesMembre = getMyGroupesMembre(context)
+      var groupesMembre = $accessControl.getCurrentUserGroupes(context)
       var itemsMembre = []
       groupesMembre.forEach(function (nom) {
         var groupe = {

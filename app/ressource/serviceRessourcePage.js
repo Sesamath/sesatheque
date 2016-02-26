@@ -582,6 +582,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         }
         //if (ressource.force) formData.force.choices[0].selected = true
       }
+
+      // des checkbox pour publier dans nos groupes
+      var myGroupes = $accessControl.getCurrentUserGroupes(context)
+      if (myGroupes.length) {
+        var choices = myGroupes.map(function (nom, i) {
+          return {
+            name:'groupes[' +i +']',
+            label:nom,
+            value:nom
+          }
+        })
+        formData.groupes = {
+          id:'groupes',
+          label:'publié dans le(s) groupe(s)',
+          choices : choices
+        }
+      }
       // on vire le champ si y'a pas d'erreurs
       if (!formData.errors.length) delete formData.errors
       //log.debug('formData pour le form', formData.warnings, 'htmlform', {max:50000, indent:2})

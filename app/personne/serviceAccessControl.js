@@ -397,6 +397,19 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Retourne les groupes (membre) du user courant ou undefined
+   * @param {Context} context
+   * @return {string[]} La liste des noms des groupes dont on est membre
+   * @memberOf $accessControl
+   */
+  $accessControl.getCurrentUserGroupes = function(context) {
+    var groupes = []
+    if (context.session.user && context.session.user.groupesMembre) groupes = context.session.user.groupesMembre
+
+    return groupes
+  }
+
+  /**
    * Met à jour le user en session
    * @param {Context} context
    * @param {Personne} personne
