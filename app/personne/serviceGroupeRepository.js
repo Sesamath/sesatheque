@@ -75,6 +75,23 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
   }
 
   /**
+   * Récupère tous les groupes ouverts
+   * @param {groupeCallback} next
+   * @memberOf $groupeRepository
+   */
+  $groupeRepository.loadOuvert = function (next) {
+    EntityGroupe.match('ouvert').equals(true).grab(function (error, groupes) {
+      if (error) {
+        next(error)
+      } else if (groupes) {
+        next(null, groupes)
+      } else {
+        next(null, [])
+      }
+    })
+  }
+
+  /**
    * Récupère tous les groupes publics
    * @param {groupeCallback} next
    * @memberOf $groupeRepository

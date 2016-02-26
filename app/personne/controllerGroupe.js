@@ -28,7 +28,7 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
+/*global log*/
 'use strict'
 
 var _ = require('lodash')
@@ -70,22 +70,25 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @private
    * @param {string|string[]} ids Liste d'id de personnes (array ou string avec séparateur qcq)
    * @param {boolean} [nameOnly=false] passer true pour récupérer un array de string "prénom nom"
-   * @param next callback appelée avec ({Error}, {Personne[]|string[]})
+   * @param next callback appelée avec ({Error}, {Personne[]|string[]}, string[]), le dernier étant les ids en errur
    */
   function loadGestionnaires(ids, nameOnly, next) {
     ids = (typeof ids === 'string') ? tools.idListToArray(ids) : ids
-    var gests = []
     flow(ids).seqEach(function (id) {
       $personneRepository.load(id, this)
     }).seq(function (personnes) {
-      //log.debug('loadGestionnaires transforme ' +ids.join(','), personnes)
-      personnes.forEach(function (gest) {
-        if (gest) {
+      var gests = []
+      var ids404 = []
+      //log.debug('loadGestionnaires transforme ' +ids.join(','), personnes, null, {max:19999})
+      personnes.forEach(function (gest, i) {
+        if (gest && gest.oid) { // si le load ne renvoie rien on récupère un tableau vide !
           if (nameOnly) gests.push(gest.prenom + ' ' + gest.nom)
           else gests.push(gest)
+        } else {
+          ids404.push(ids[i])
         }
       })
-      next(null, gests)
+      next(null, gests, ids404)
     }).catch(function (error) {
       log.error(error)
       next(error)
@@ -151,7 +154,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     var nom = getNom(groupe)
     return nom ? _.includes(getMyGroupesMembre(context), nom) : false
   }
-  
+
   /**
    * Retourne true si on suit ce groupe
    * @param context
@@ -184,7 +187,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     if (groupe && groupe.nom) groupe.urlJoin = '/groupe/suivre/' +encodeURIComponent(groupe.nom)
   }
   function addUrlIgnore(groupe) {
-    if (groupe && groupe.nom) groupe.urlQuit = '/groupe/ignorer/' +encodeURIComponent(groupe.nom)
+    if (groupe && groupe.nom) groupe.urlIgnore = '/groupe/ignorer/' +encodeURIComponent(groupe.nom)
   }
 
   /**
@@ -192,22 +195,26 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @private
    * @param {Context} context
    * @param {string} nom Nom du groupe
-   * @param {boolean} isFollow true pour groupeSuivis, groupesMembre sinon
+   * @param {boolean} isFollow true pour groupesSuivis, groupesMembre sinon
    * @param {callbackPersonne} next
    */
   function addGroup(context, nom, isFollow, next) {
     var me = $accessControl.getCurrentUser(context)
-    var prop = isFollow ? 'groupeSuivis' : 'groupesMembre'
+    var prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
     if (me) {
       if (!me[prop]) me[prop] = []
       if (_.includes(me[prop], nom)) {
-        next(me)
+        log.debug("Le groupe " +nom +" était déjà dans " +prop +' pour le user ' +me.oid)
+        next(null, me)
       } else {
         me[prop].push(nom)
+        // si c'est un ajout de groupesMembre, faut aussi mettre groupesSuivis
+        if (!isFollow) return addGroup(context, nom, true, next)
         // màj session
         $accessControl.updateCurrentUser(context, me)
         // màj user en bdd
         $personneRepository.save(me, next)
+        log.debug('groupe ' +nom +' ajouté à ' +prop)
       }
     } else {
       next(new Error("Il faut être authentifié pour ajouter un groupe"))
@@ -219,12 +226,12 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @private
    * @param {Context} context
    * @param {string} nom Nom du groupe
-   * @param {boolean} isFollow true pour groupeSuivis, groupesMembre sinon
+   * @param {boolean} isFollow true pour groupesSuivis, groupesMembre sinon
    * @param {callbackPersonne} next
    */
   function removeGroup(context, nom, isFollow, next) {
     var me = $accessControl.getCurrentUser(context)
-    var prop = isFollow ? 'groupeSuivis' : 'groupesMembre'
+    var prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
     if (me) {
       var deniedMsg = "Vous n'étiez pas dans ce groupe ou il n'existe pas"
       if (me[prop] && me[prop].length) {
@@ -313,7 +320,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       groupe.public = (formPosted.public === 'true')
       if (formPosted.newGestionnaires) loadGestionnaires(formPosted.newGestionnaires, false, this)
       else this()
-    }).seq(function (newGestionnaires) {
+    }).seq(function (newGestionnaires, ids404) {
 
       // nouveaux gestionnaires
       if (newGestionnaires && newGestionnaires.length) {
@@ -333,6 +340,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           widget:'info',
           value: 'Gestionnaires à ajouter (qui deviendront non révocables après validation) : ' +itemsNewG.join(', ') // jshint:ignore line (espace insécable)
         })
+      }
+      if (ids404 && ids404.length) {
+        var pl = ids404.length > 1 ? 's' : ''
+        $flashMessages.add(context, "Le" +pl +" gestionnaire" +pl +" d'identifiant" +pl +' ' +ids404.join(', ') +" n'existe" +(pl?'nt':'') +" pas")
       }
 
       // ne plus être gestionnaire
@@ -360,9 +371,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       var token = $accessControl.addToken(context, null, groupe)
       fields.push({name: 'token', value: token, widget: 'hidden'})
       // plutôt que des radios on donne des noms à 2 boutons submit
-      //fields.push({name: "confirm", value: [{label:'oui', value:'oui'}, {label:'non', value:'non'}], selectedValues:['non'], widget:'radios', label: 'Confirmer ces valeurs'})
-      fields.push({name: 'modOk', value: 'Valider', widget: 'submit'})
-      fields.push({name: 'modKo', value: 'Annuler', widget: 'submit'})
+      //fields.push({name: "confirm", value: [{label:'oui', value:'oui'}, {label:'non', value:'non'}], selectedValues:['non'], widget:'radios', label: 'Confirmer ces valeurs'}) // jshint:ignore line
+      // id pour les css
+      fields.push({id:'validModif', name: 'modOk', value: 'Valider', widget: 'submit'})
+      fields.push({id:'cancelModif', name: 'modKo', value: 'Annuler', widget: 'submit'})
       // on passe l'affichage du groupe via blocsFirst
       var moreData = { blocsFirst : groupe }
       //log.debug('groupe à confirmer', groupe)
@@ -386,13 +398,11 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     // Save du form confirmé, on vérifie et enregistre
     var formPosted = context.post
     var newGroupe = $accessControl.getTokenValue(context, formPosted.token)
-    log.debug('recup ds modConfirmed', newGroupe)
     if (!newGroupe || newGroupe.nom !== nom) throw new Error("Données corrompues")
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (groupe) {
       tools.updateIfExists(groupe, newGroupe)
-      log.debug('av save dans modConfirmed', groupe)
       $groupeRepository.save(groupe, this)
     }).seq(function () {
       $flashMessages.add(context, "groupe sauvegardé")
@@ -458,6 +468,15 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   function goToPersoOrError(context, message, isError) {
     var level = isError ? 'error' : 'info'
     if ($accessControl.isAuthenticated(context)) {
+      if (typeof message == 'object') {
+        if (message instanceof Error) {
+          level = 'error'
+          log.debug(message.stack)
+        } else {
+          log.error(new Error("goToPersoOrError reçoit un objet qui n'est pas une erreur"), message)
+        }
+        message = message.toString()
+      }
       $flashMessages.add(context, message, level)
       context.redirect('/groupe/perso')
     } else {
@@ -476,13 +495,23 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if (error) {
         $page.printError(context, error)
       } else {
+        // les actions
+        if (isManaged(context, groupe)) {
+          addUrlEdit(groupe)
+        } else {
+          // pas gestionnaire
+          if (isMine(context, groupe.nom)) {
+            addUrlQuit(groupe)
+          } else {
+            // pas membre
+            if (groupe.ouvert) addUrlJoin(groupe)
+            if (isFollowed(context, groupe)) addUrlIgnore(groupe)
+            else if (groupe.public) addUrlFollow(groupe)
+          }
+        }
         var contentBloc = groupe
         contentBloc.$view = 'displayGroupe'
         contentBloc.gestionnairesNames = gestionnairesNames.join(', ')
-        // les actions
-        if (isManaged(context, groupe)) addUrlEdit(contentBloc)
-        else if (isMine(context, groupe.nom)) addUrlQuit(contentBloc)
-        else addUrlJoin(contentBloc)
         $page.print(context, 'Description du groupe', contentBloc)
       }
     })
@@ -590,7 +619,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       }).seq(function (groupeBdd) {
         // on regarde si on est gestionnaire
         if (groupeBdd) {
-          if (groupeBdd.nom !== nom) this(new Error("Erreur interne, le nom du groupe récupéré en base de donnée ne correspond pas (" +nom+"≠"+groupeBdd.nom+")"))
+          if (groupeBdd.nom !== nom) this(new Error("Erreur interne, le nom du groupe récupéré en base de donnée ne correspond pas (" +nom+"≠"+groupeBdd.nom+")")) // jshint:ignore line
           else if (_.includes(groupeBdd.gestionnaires, uid)) this(null, groupeBdd)
           else this(deniedMsg)
         } else {
@@ -675,10 +704,43 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   })
 
   /**
-   * Affiche la liste de tous les groupes publics
-   * @route GET /groupe/tous
+   * Affiche la liste de tous les groupes ouverts
+   * @route GET /groupe/ouvert
    */
-  controller.get('tous', function (context) {
+  controller.get('ouvert', function (context) {
+    $groupeRepository.loadOuvert(function (error, groupes) {
+      if (error) {
+        $page.printError(context, error)
+      } else {
+        var contentBloc = {
+          $view: 'groupes',
+          groupes: []
+        }
+        if (groupes && groupes.length) {
+          groupes.forEach(function (groupe) {
+            var item = {nom: groupe.nom, description:groupe.description}
+            if (isManaged(context, groupe)) addUrlEdit(item)
+            else if (isMine(context, groupe.nom)) addUrlQuit(item)
+            else addUrlJoin(item)
+            if (isFollowed(context, groupe.nom)) addUrlIgnore(item)
+            else addUrlFollow(item)
+            item.publicString = groupe.public ? 'public' : 'privé'
+            contentBloc.groupes.push(item)
+          })
+
+        } else {
+          contentBloc.defaultMessage = "Aucun groupe ouvert n'a été créé"
+        }
+        $page.print(context, 'Tous les groupes ouverts', contentBloc)
+      }
+    })
+  })
+
+  /**
+   * Affiche la liste de tous les groupes publics
+   * @route GET /groupe/public
+   */
+  controller.get('public', function (context) {
     $groupeRepository.loadPublic(function (error, groupes) {
       if (error) {
         $page.printError(context, error)
@@ -693,10 +755,12 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
             if (isManaged(context, groupe)) addUrlEdit(item)
             else if (isMine(context, groupe.nom)) addUrlQuit(item)
             else addUrlJoin(item)
-            if (isFollowed(groupe)) addUrlIgnore(groupe)
-            else if (groupe.public) addUrlFollow(groupe)
+            if (isFollowed(context, groupe.nom)) addUrlIgnore(item)
+            else addUrlFollow(item)
+            item.ouvertString = groupe.ouvert ? 'ouvert' : 'fermé'
             contentBloc.groupes.push(item)
           })
+
         } else {
           contentBloc.defaultMessage = "Aucun groupe public n'a été créé"
         }
@@ -716,21 +780,24 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       else loadMyGroupesManaged(context, this)
 
     }).seq(function (groupesManaged) {
+
       // groupes dont on est gestionnaire
       groupesManaged.forEach(function (groupe) {
         addUrlEdit(groupe)
+        addUrlDescribe(groupe)
         groupe.ouvertString = groupe.ouvert ? 'ouvert' : 'fermé'
         groupe.publicString = groupe.public ? 'public' : 'privé'
       })
       blocList.push({
         partialView: '../groupes',
         titre : "Groupes dont je suis gestionnaire",
+        contents : ['<a href="/groupe/ajouter">Créer un groupe</a>'],
         groupes: groupesManaged,
         defaultMessage : "aucun groupe"
       })
       // log.debug("groupes dont je suis gestionnaire", groupesManaged)
 
-      // groupes dont on est membres
+      // groupes dont on est membre
       var groupesMembre = getMyGroupesMembre(context)
       var itemsMembre = []
       groupesMembre.forEach(function (nom) {
@@ -747,6 +814,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       blocList.push({
         partialView: '../groupes',
         titre : "Groupes dont je suis membre",
+        contents : [
+          '<a href="/groupe/ouvert">Voir la liste des groupes ouverts</a>' +
+            ' <span class="remarque">(pour éventuellement en devenir membre)</span>',
+        ],
         groupes: itemsMembre,
         defaultMessage : "aucun groupe"
       })
@@ -756,17 +827,20 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       var itemsSuivis = []
       groupesSuivis.forEach(function (nom) {
         var groupe = {nom:nom}
-        addUrlDescribe(nom)
+        addUrlDescribe(groupe)
         var isManaged = groupesManaged.some(function (groupeManaged) { return groupeManaged.nom === nom})
         if (isManaged) addUrlEdit(nom)
-        else if (isMine(context, nom)) addUrlQuit(nom)
-        else addUrlIgnore(nom)
+        else if (!isMine(context, nom)) addUrlIgnore(groupe)
         itemsSuivis.push(groupe)
       })
       // log.debug("groupes suivis", itemsSuivis)
       blocList.push({
         partialView: '../groupes',
         titre : "Groupes suivis",
+        contents : [
+          '<a href="/groupe/public">Voir la liste des groupes publics</a>' +
+            ' <span class="remarque">(pour éventuellement suivre leurs publications)</span>'
+        ],
         groupes: itemsSuivis,
         defaultMessage : "aucun groupe"
       })

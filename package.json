@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app/index.js",
-    "test" : "./scripts/run_tests -a",
+    "test": "./scripts/run_tests -a",
     "dev": "./scripts/run -sd",
     "prod": "./scripts/run -sp",
     "stop": "./scripts/run -s",
@@ -49,6 +49,7 @@
     "mysql": "^2.6.0",
     "phantomjs": "^1.9.17",
     "requirejs": "^2.1.20",
+    "rewire": "^2.5.1",
     "through2": "^0.4.2",
     "uglify-js": "^2.4.24",
     "webpack": "^1.12.2",

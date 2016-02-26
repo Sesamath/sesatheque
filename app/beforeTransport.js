@@ -145,7 +145,12 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       hidden: !$accessControl.hasPermission('create', context)
     })
     // un lien vers la recherche
-    links.push({id:"buttonSearch", href: $routes.getAbs('search', null, context), value: 'Recherche', icon: 'search'})
+    links.push({
+      id:"buttonSearch",
+      href: $routes.getAbs('search', null, context),
+      value: 'Recherche',
+      icon: 'search'
+    })
     // un lien mes ressources
     var myOid = $accessControl.getCurrentUserOid(context) || ""
     links.push({
@@ -153,6 +158,14 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       href: $routes.getAbs('search', null, context) + "?auteurs=" + myOid,
       value: 'Mes ressources',
       icon: 'bookmark-o',
+      hidden:!myOid
+    })
+    // mes groupes
+    links.push({
+      id:"buttonMyGroupes",
+      href: '/groupe/perso',
+      value: 'Mes groupes',
+      icon: 'group',
       hidden:!myOid
     })
     // on peut tout ajouter

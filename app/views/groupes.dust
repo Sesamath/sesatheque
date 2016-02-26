@@ -1,17 +1,23 @@
 {?error}
   <p class="error">{error}</p>
 {:else}
-  <ul class="liste"><h2>{titre}</h2>
+  <h2>{titre}</h2>
+  {#contents}<p>{.|s}</p>{/contents}
+  <ul class="liste">
     {#groupes}
     <li>
-      {nom} ({ouvertString} {publicString})
+      {nom}
+      {!franchement pénible de pas pouvoir faire des or dans les conditions d'existence!}
+      {?ouvertString}({:else}{?publicString}({/publicString}{/ouvertString}
+        {ouvertString} {publicString}
+      {?ouvertString}){:else}{?publicString}){/publicString}{/ouvertString}
       <span class="links">
-        {?urlJoin} <a href="{urlJoin}">Rejoindre</a> {/urlJoin}
-        {?urlQuit} <a href="{urlQuit}">Quitter</a> {/urlQuit}
-        {?urlFollow} <a href="{urlFollow}">Suivre</a> {/urlFollow}
-        {?urlIgnore} <a href="{urlIgnore}">Ignorer</a> {/urlIgnore}
-        {?urlEdit} <a href="{urlEdit}">Modifier</a> {/urlEdit}
-        {?urlDescribe} <a href="{urlDescribe}">Voir</a> {/urlDescribe}
+        {?urlJoin}<a href="{urlJoin}">Rejoindre</a>{/urlJoin}
+        {?urlQuit}<a href="{urlQuit}">Quitter</a>{/urlQuit}
+        {?urlFollow}<a href="{urlFollow}">Suivre</a>{/urlFollow}
+        {?urlIgnore}<a href="{urlIgnore}">Ignorer</a>{/urlIgnore}
+        {?urlEdit}<a href="{urlEdit}">Modifier</a>{/urlEdit}
+        {?urlDescribe}<a href="{urlDescribe}">Voir</a>{/urlDescribe}
       </span>
       <pre>{description}</pre>
     </li>
