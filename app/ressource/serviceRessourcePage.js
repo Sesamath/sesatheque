@@ -599,6 +599,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           choices : choices
         }
       }
+
       // on vire le champ si y'a pas d'erreurs
       if (!formData.errors.length) delete formData.errors
       //log.debug('formData pour le form', formData.warnings, 'htmlform', {max:50000, indent:2})

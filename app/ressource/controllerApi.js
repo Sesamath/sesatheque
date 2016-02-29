@@ -839,6 +839,17 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.options('liste/all', optionsOk)
 
+  /**
+   * Récupère la liste des ressources d'un groupe
+   * @route GET /api/liste/groupe/:nom
+   * @returns {reponseListe}
+   */
+  controller.get('liste/groupe/:nom', function (context) {
+    var nom = context.arguments.nom
+    grabListe(context, 'groupe/'+nom)
+  })
+  controller.options('liste/groupe/:nom', optionsOk)
+
 
   getListePerso.timeout = 3000;
   /**

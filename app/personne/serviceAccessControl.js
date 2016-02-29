@@ -410,6 +410,19 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Retourne les groupes suivis par le user courant
+   * @param {Context} context
+   * @return {string[]} La liste des noms des groupes que l'on suit (tableau vide si aucun ou pas identifié)
+   * @memberOf $accessControl
+   */
+  $accessControl.getCurrentUserGroupesSuivis = function(context) {
+    var groupes = []
+    if (context.session.user && context.session.user.groupesSuivis) groupes = context.session.user.groupesSuivis
+
+    return groupes
+  }
+
+  /**
    * Met à jour le user en session
    * @param {Context} context
    * @param {Personne} personne

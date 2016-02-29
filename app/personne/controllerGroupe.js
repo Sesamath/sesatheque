@@ -108,17 +108,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   }
 
   /**
-   * Retourne la liste des groupes que le user courant suit (liste vide si pas authentifié)
-   * @private
-   * @param {Context} context
-   * @returns {string[]}
-   */
-  function getMyGroupesSuivis(context) {
-    var me = $accessControl.getCurrentUser(context)
-    return me && me.groupesSuivis || []
-  }
-
-  /**
    * Retourne true si on est gestionnaire du groupe
    * @param context
    * @param {Groupe} groupe Le groupe (pas son nom)
@@ -151,7 +140,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @returns {boolean}
    */
   function isFollowed(context, groupe) {
-    var groupesSuivis = getMyGroupesSuivis(context)
+    var groupesSuivis = $accessControl.getCurrentUserGroupesSuivis(context)
     var nom = getNom(groupe)
     var retour = false
     if (nom && groupesSuivis.length) {
@@ -812,7 +801,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       })
 
       // groupes que l'on suit
-      var groupesSuivis = getMyGroupesSuivis(context)
+      var groupesSuivis = $accessControl.getCurrentUserGroupesSuivis(context)
       var itemsSuivis = []
       groupesSuivis.forEach(function (nom) {
         var groupe = {nom:nom}

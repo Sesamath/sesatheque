@@ -31,41 +31,11 @@
 
 'use strict'
 
-module.exports = function (controller, EntityGroupe, $groupeRepository, $accessControl) {
+module.exports = function (controller, EntityGroupe, $groupeRepository, $accessControl, $json) {
   /**
    * Controleur de la route /api/groupe/
    * @Controller controllerApiGroupe
    */
-
-  /**
-   * Équivalent de context.denied en json
-   * @private
-   * @param {Context} context
-   * @param msg
-   */
-  function denied(context, msg) {
-    if (!msg) msg = "Accès refusé"
-    context.status = 403;
-    context.json({error: msg})
-  }
-
-  /**
-   * Callback générique de sortie
-   * @private
-   * @param {Context} context
-   * @param error
-   * @param data
-   */
-  function sendJson(context, error, data) {
-    if (error) {
-      log.error(error);
-      log.debug("sendJson va renvoyer l'erreur", error, 'api')
-      context.json({error: error.toString()})
-    } else {
-      log.debug('sendJson va renvoyer', data, 'api')
-      context.json(data)
-    }
-  }
 
   /**
    * Create / update une groupe (poster un objet ayant les propriétés de {@link Groupe})
@@ -86,15 +56,23 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
       if (context.post.origine && context.post.idOrigine) {
         var groupe = EntityGroupe.create(context.post)
         groupe.store(function (error, groupeBdd) {
-          if (error) sendJson(context, error)
-          else if (groupeBdd && groupeBdd.oid) sendJson(context, null, {oid: groupeBdd.oid})
-          else sendJson(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))
+          if (error) $json.sendError(context, error)
+          else if (groupeBdd && groupeBdd.oid) $json.sendOk(context, {oid: groupeBdd.oid})
+          else $json.sendError(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))
         })
       } else {
-        sendJson(context, new Error("origine ou idOrigine manquant"))
+        $json.sendError(context, new Error("origine ou idOrigine manquant"))
       }
     } else {
-      denied(context)
+      $json.denied(context)
     }
+  })
+
+  /**
+   * Récupère la liste des groupes suivis
+   * @route GET /api/groupe/suivis
+   */
+  controller.get('suivis', function (context) {
+    $json.sendOk(context, {groupesSuivis: $accessControl.getCurrentUserGroupesSuivis(context)})
   })
 }
