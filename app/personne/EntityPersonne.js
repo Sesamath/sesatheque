@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-"use strict"
+'use strict'
 
 var Personne = require('../ressource/srcClient/constructors/Personne')
 /**

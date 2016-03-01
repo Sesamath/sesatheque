@@ -703,12 +703,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var data = $page.getDefaultData()
     // css ajouté par le listener à la fin, suivant la valeur de context.layout,
     // on ajoute ici les js suivant la vue
+    data.$metas.js = ['/common.bundle.js']
     if (viewName === "formEdit") {
-      data.$metas.js = ['/edit.bundle.js']
+      data.$metas.js.push('/edit.bundle.js')
     } else if (viewName === "display" || viewName === "preview") {
-      data.$metas.js = ['/display.bundle.js']
-    } else {
-      data.$metas.js = ['/page.bundle.js']
+      data.$metas.js.push('/display.bundle.js')
     }
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view:viewName}
@@ -721,7 +720,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * Affiche une erreur en json ou html ou text, suivant accept, en laissant le status 200
    * @memberOf $ressourcePage
    * @param {Context} context
-   * @param {Error}   error
+   * @param {Error}   [error]
    * @param {string}  [layout=page] Pour la sortie html, passer iframe si on veut pas des header/menu/footer
    */
   $ressourcePage.outputError = function (context, error, layout) {

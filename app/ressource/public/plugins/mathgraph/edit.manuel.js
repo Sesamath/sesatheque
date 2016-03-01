@@ -35,7 +35,7 @@
 try {
   define(["tools/formEditor", "jquery"], function (formEditor, $) {
     /* jshint jquery:true */
-    "use strict"
+    'use strict'
 
     /**
      * MAIN

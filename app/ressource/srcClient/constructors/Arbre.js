@@ -28,7 +28,7 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-"use strict"
+'use strict'
 
 /**
  * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
@@ -105,14 +105,14 @@ Arbre.prototype.toRessource = function () {
    * @type {Arbre}
    */
   var a = this
-  
+
   if (a.id) r.id = a.id
   r.titre = (a.titre) ? a.titre : 'arbre sans titre'
   r.type = 'arbre'
   r.categories = [8]
   r.typeDocumentaires = [1]
   r.parametres = a
-  
+
   return r
 }
 

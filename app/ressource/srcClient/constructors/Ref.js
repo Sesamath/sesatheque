@@ -28,7 +28,7 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-"use strict"
+'use strict'
 
 /**
  * Définition d'une référence à une ressource, que l'on peut rencontrer dans les feuilles d'un arbre

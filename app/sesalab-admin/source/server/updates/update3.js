@@ -30,7 +30,7 @@
  */
 
 /*global log*/
-"use strict"
+'use strict'
 var flow = require('an-flow')
 var uuid = require('an-uuid')
 var configRessource = require('../../../../ressource/config')

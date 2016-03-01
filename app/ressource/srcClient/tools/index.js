@@ -33,7 +33,7 @@
  * Module de base pour les méthodes addCss, addElement, getElement, addError, hideTitle
  * et log (qui ne fait rien sauf si on appelle init avec options.verbose à true), log.error affiche toujours
  */
-"use strict"
+'use strict'
 
 // on ajoute du forEach sur les Array si le navigateur connait pas
 if (!Array.prototype.forEach) {

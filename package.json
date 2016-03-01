@@ -1,19 +1,37 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "private": true,
   "scripts": {
     "start": "node app/index.js",
     "test": "./scripts/run_tests -a",
+    "test:watch": "npm test -- --watch",
+    "build": "webpack",
+    "lint": "standard --verbose | snazzy",
+    "startClient": "hjs-dev-server",
     "dev": "./scripts/run -sd",
     "prod": "./scripts/run -sp",
     "stop": "./scripts/run -s",
     "watch": "./scripts/run -swl"
   },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-2"
+    ],
+    "plugins": []
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "it"
+    ]
+  },
   "dependencies": {
     "an-flow": "^1.1.0",
     "an-log": "1.0.25",
     "an-uuid": "^1.0.0",
+    "autobind-decorator": "^1.3.3",
     "elementtree": "^0.1.6",
     "lassi": "git://src.sesamath.net/lassi#master",
     "lodash": "^3.6.0",
@@ -21,22 +39,24 @@
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "request": "^2.39.0",
-    "sesatheque-client": "git://src.sesamath.net/sesatheque-client#master",
-    "uglify-js-brunch": "1.7.8"
+    "sesatheque-client": "git://src.sesamath.net/sesatheque-client#master"
   },
   "devDependencies": {
-    "after-brunch": "0.0.5",
-    "babel-brunch": "6.0.0",
     "babel-cli": "6.4.0",
+    "babel-core": "^6.4.5",
+    "babel-eslint": "^5.0.0",
+    "babel-loader": "^6.2.2",
+    "babel-plugin-transform-class-properties": "^6.5.2",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "6.3.13",
+    "babel-preset-stage-2": "^6.5.0",
     "bower": "^1.4.1",
     "browserify": "^12.0.1",
-    "brunch": "2.1.3",
     "casperjs": "^1.1.0-beta3",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.2.0",
     "express-debug": "^1.1.0",
-    "gulp": "^3.8.7",
-    "gulp-jshint": "^1.7.0",
-    "gulp-util": "^2.2.16",
+    "hjs-webpack": "^7.3.0",
     "ink-docstrap": "^0.5.2",
     "js-beautify": "^1.5.1",
     "jsdoc": "^3.3.2",
@@ -48,10 +68,13 @@
     "mocha": "^2.2.4",
     "mysql": "^2.6.0",
     "phantomjs": "^1.9.17",
-    "requirejs": "^2.1.20",
-    "rewire": "^2.5.1",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0",
+    "snazzy": "^3.0.0",
+    "standard": "^6.0.1",
     "through2": "^0.4.2",
     "uglify-js": "^2.4.24",
+    "url-loader": "^0.5.7",
     "webpack": "^1.12.2",
     "xml2js": "^0.4.4",
     "zombie": "^2.5.1"

@@ -31,7 +31,7 @@
 
 'use strict'
 
-var dom = require('../../tools/dom')
+var dom = require('../tools/dom')
 
 /**
  * Retourne un control-group avec label

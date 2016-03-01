@@ -125,7 +125,7 @@ function displayJs(ressource, options, next) {
     "http://www.mathgraph32.org/js/4.9.9/mtg32jsmin.js",
     "http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js"
   ]
-  require(dependencies, function () {
+  page.loadAsync(dependencies, function () {
     /*global MathJax, mtg32*/
     if (typeof MathJax === "undefined") throw new Error("Mathjax n'est pas chargé")
     if (typeof mtg32 === "undefined") throw new Error("Mathgraph32 n'est pas chargé")

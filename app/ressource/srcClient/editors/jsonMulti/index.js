@@ -91,17 +91,18 @@ function addLinks(config) {
  * @private
  * @param {errorCallback} next
  */
-function initJsonEditor(next) {
+function initJsonEditor (next) {
   try {
     if (typeof isJseLoaded === "undefined") {
-      isJseLoaded = false; // en cours
+      isJseLoaded = false // en cours
       page.loadAsync('jsoneditor', function () {
         try {
-          var JSONEditor = require('JSONEditor')
-          jsonEditor = new JSONEditor(jsonEditorDiv)
-          dom.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css')
-          isJseLoaded = true
-          next()
+          page.loadAsync('JSONEditor', function () {
+            jsonEditor = new JSONEditor(jsonEditorDiv)
+            dom.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css')
+            isJseLoaded = true
+            next()
+          })
         } catch (error) {
           log.error(error)
           throw new Error('Problème de chargement de jsoneditor')

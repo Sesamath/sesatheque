@@ -97,7 +97,7 @@ AuthClient.prototype.logout = function (context) {
 /**
  * Répond à une demande de déconnexion du serveur d'authentification via context.json
  * @param {Context} context
- * @param {string}        errorMsg Un message d'erreur si la déconnexion n'a pas pu être faite localement
+ * @param {string}  [errorMsg] Un message d'erreur si la déconnexion n'a pas pu être faite localement
  */
 AuthClient.prototype.logoutFromRemote = function (context, errorMsg) {
 

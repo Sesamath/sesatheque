@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-"use strict"
+'use strict'
 
 /**
  * @file Collection de fonctions permettant de filtrer une variable d'après le type attendu

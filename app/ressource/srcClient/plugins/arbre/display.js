@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-"use strict"
+'use strict'
 
 var page = require('../../page')
 var dom = require('../../tools/dom')

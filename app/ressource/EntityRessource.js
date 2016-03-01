@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-"use strict"
+'use strict'
 
 module.exports = function (EntityRessource) {
   //var _ = require('lodash')

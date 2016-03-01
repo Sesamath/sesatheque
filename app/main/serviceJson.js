@@ -108,7 +108,6 @@ module.exports = function () {
    * Callback générique de sortie json avec {success:true}, et d'éventuelles autres data
    * @param {Context} context
    * @param {object} [data] des données à ajouter au {success:true}
-   * @param data
    */
   $json.sendOk = function (context, data) {
     var reponse = {success:true}

@@ -33,7 +33,7 @@
  * Script pour le form d'édition de ressource
  * (page.init et ajouter des comportements de modif dynamique du form)
  */
-"use strict"
+'use strict'
 
 var page = require('../page')
 

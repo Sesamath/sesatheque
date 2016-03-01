@@ -42,18 +42,18 @@ var xhr = require('./tools/xhr')
  * @private
  * @param {Ressource} ressource
  */
-function addUrls(ressource, next) {
-  var id = ressource.id || ressource.ref || ressource.oid;
-  if (!id && ressource.origine && ressource.idOrigine) id = ressource.origine +'/' +ressource.idOrigine;
-  var prefix = (ressource.restriction === 0 || ressource.public) ? 'public' : 'ressource';
+function addUrls (ressource, next) {
+  var id = ressource.id || ressource.ref || ressource.oid
+  if (!id && ressource.origine && ressource.idOrigine) id = ressource.origine + '/' + ressource.idOrigine
+  var prefix = (ressource.restriction === 0 || ressource.public) ? 'public' : 'ressource'
   if (id) {
-    ressource.dataUrl = base +'api/' +prefix +'/' +id;
-    ressource.deleteUrl = base +'api/ressource/' +id;
-    ressource.displayUrl = base +prefix +'/' +id;
-    ressource.editUrl = base +'ressource/modifier/' +id;
-    ressource.public = (ressource.public || ressource.restriction === 0);
+    ressource.dataUrl = base + 'api/' + prefix + '/' + id
+    ressource.deleteUrl = base + 'api/ressource/' + id
+    ressource.displayUrl = base + prefix + '/' + id
+    ressource.editUrl = base +'ressource/modifier/' + id
+    ressource.public = (ressource.public || ressource.restriction === 0)
   }
-  next(null, ressource);
+  next(null, ressource)
 }
 
 /**
@@ -67,7 +67,7 @@ function init(newSesathequeBase) {
     throw new Error("La base " +newSesathequeBase +" n'est pas une racine d'url absolue valide")
   if (typeof name !== "string") throw new Error("Le nom doit être une string")
   if (newSesathequeBase.substr(-1) !== "/") newSesathequeBase += "/"
-  base = newSesathequeBase;
+  base = newSesathequeBase
   return stClient
 }
 
@@ -82,29 +82,29 @@ function init(newSesathequeBase) {
  */
 function callBibli(data, options, next) {
   function end(error, ressource) {
-    if (error) next(error);
-    else addUrls(ressource, next);
+    if (error) next(error)
+    else addUrls(ressource, next)
   }
-  var url, xhrOptions = {};
+  var url, xhrOptions = {}
   if (options && options.format) {
-    xhrOptions.urlParams = {};
-    xhrOptions.urlParams.format = options.format;
+    xhrOptions.urlParams = {}
+    xhrOptions.urlParams.format = options.format
   }
   if (options && options.merge) {
-    if (!xhrOptions.urlParams) xhrOptions.urlParams = {};
-    xhrOptions.urlParams.merge = "1";
+    if (!xhrOptions.urlParams) xhrOptions.urlParams = {}
+    xhrOptions.urlParams.merge = "1"
   }
-  xhrOptions.responseType = "json";
-  xhrOptions.timeout = ajaxTimeout;
+  xhrOptions.responseType = "json"
+  xhrOptions.timeout = ajaxTimeout
   // post ou get ?
   if (typeof data === "object") {
-    url = base + 'api/ressource';
-    xhr.post(url, data, xhrOptions, end);
+    url = base + 'api/ressource'
+    xhr.post(url, data, xhrOptions, end)
   } else {
-    var id = data;
-    if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine");
-    url = base + 'api/ressource/' + id;
-    xhr.get(url, xhrOptions, end);
+    var id = data
+    if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine")
+    url = base + 'api/ressource/' + id
+    xhr.get(url, xhrOptions, end)
   }
 } // callBibli
 
@@ -113,7 +113,7 @@ function callBibli(data, options, next) {
  * @private
  * @type {Integer}
  */
-var ajaxTimeout = 10000;
+var ajaxTimeout = 10000
 
 /**
  * la base de la sesatheque (on ajoutera le / de fin s'il manque mais en cross-domain fallait appeler init avant)
@@ -134,9 +134,9 @@ var stClient = {
    * @param {ressourceCallback} next
    */
   getAlias: function (id, next) {
-    if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
-    else if (id) callBibli(id, {format:"alias"}, next);
-    else next(new Error("Il faut fournir un identifiant"));
+    if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
+    else if (id) callBibli(id, {format:"alias"}, next)
+    else next(new Error("Il faut fournir un identifiant"))
   },
   /**
    * Récupère une ressource sur la bibliothèque en ajax
@@ -146,15 +146,15 @@ var stClient = {
    * @param {ressourceCallback} next
    */
   getRessource: function (id, format, next) {
-    var options;
+    var options
     if (typeof format === "function") {
-      next = format;
+      next = format
     } else {
-      options = {format:format};
+      options = {format:format}
     }
-    if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
-    else if (id) callBibli(id, options, next);
-    else next(new Error("Il faut fournir un identifiant"));
+    if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
+    else if (id) callBibli(id, options, next)
+    else next(new Error("Il faut fournir un identifiant"))
   },
   /**
    * Enregistre une ressource sur la bibliotheque
@@ -163,16 +163,32 @@ var stClient = {
    * @param {ressourceCallback} next
    */
   setRessource: function (ressource, isPartial, next) {
-    var options;
+    var options
     if (typeof isPartial === "function") {
-      next = isPartial;
+      next = isPartial
     } else if (isPartial) {
-      options = {merge:1};
+      options = {merge:1}
     }
-    if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'));
-    else if (ressource) callBibli(ressource, options, next);
-    else next(new Error("Il faut fournir une ressource"));
+    if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
+    else if (ressource) callBibli(ressource, options, next)
+    else next(new Error("Il faut fournir une ressource"))
   }
-};
+}
 
 module.exports = init
+
+// on wrap la fct require du dom si elle existe, et sinon on s'exporte en global
+if (typeof window !== 'undefined') {
+  if (typeof window.require === 'function') {
+    // on s'ajoute en wrapper
+    var requireOrig = window.require
+    window.require = function (moduleName) {
+      return (moduleName === 'apiClient') ? init : requireOrig(moduleName)
+    }
+  } else {
+    // on pourrait utiliser https://github.com/webpack/expose-loader, mais il veut pas exporter un module
+    // qui est aussi un point d'entrée webpack
+    if (typeof window.sesatheque === 'undefined') window.sesatheque = {}
+    window.sesatheque.apiClient = init
+  }
+}

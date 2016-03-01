@@ -4,12 +4,10 @@
   <meta charset="utf-8" />
   <title>test</title>
   <link type="text/css" media="all" rel="stylesheet" href="/styles/iframe.css"/>
-  <script type="text/javascript" src="/sesatheque-client.js"></script>
+  <script type="text/javascript" src="/apiClient.bundle.js"></script>
 </head>
 
 <body>
-
-
 <div id="errors"></div>
 <div id="pictoFeedback" class="feedbackOff"></div>
 <h1 id="titre">Test</h1>
@@ -18,8 +16,11 @@
 
 <script type="application/javascript">
   try {
-    var st = require('sesatheque-client')
-    console.log(st)
+    var client = window.sesatheque.apiClient('http://bibliotheque.devsesamath.net/')
+    console.log(client)
+    console.log(client.getRessource('42', 'alias', function (error, ressource) {
+      console.log(ressource)
+    }))
   } catch(error) {
     document.getElementById('errors').innerHTML = error.toString();
     if (console && console.error) console.error(error)

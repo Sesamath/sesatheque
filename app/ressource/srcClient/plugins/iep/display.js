@@ -111,7 +111,7 @@ module.exports = function display(ressource, options, next) {
       MathJax.Hub.Queue(function () {
         if (isExternal) {
           // faut aller chercher la source
-          var xhr = require('tools/xhr')
+          var xhr = require('../../tools/xhr')
           var options = {}
           if (url.indexOf(".php?") > 0) options.withCredentials = true
           xhr.get(url, options, function (error, xml) {

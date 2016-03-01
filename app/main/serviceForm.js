@@ -66,7 +66,6 @@ module.exports = function ($page) {
   /**
    * Ajoute un token au form en hidden
    * @param {Form} form
-   * @param {Context} context
    * @returns {string} Le token
    */
   $form.addToken = function (form) {
@@ -105,7 +104,7 @@ module.exports = function ($page) {
 
   /**
    * Retourne un form vide
-   * @param {object|Form} obj
+   * @param {object|Form} formValues
    * @returns {Form}
    */
   $form.get = function (formValues) {

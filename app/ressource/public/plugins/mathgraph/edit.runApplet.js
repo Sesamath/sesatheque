@@ -36,7 +36,7 @@ try {
   define(["tools/formEditor", "jquery", "https://www.java.com/js/deployJava.js"], function (formEditor, $) {
     /*global deployJava*/
     /* jshint jquery:true */
-    "use strict"
+    'use strict'
 
     /**
      * MAIN

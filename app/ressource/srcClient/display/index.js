@@ -35,12 +35,13 @@
  *
  * Son chargement déclenche celui de init qui ajoute en global nos méthodes utilitaires, cf {@link namespace:sesamath}
  */
-"use strict"
+'use strict'
 
 var page = require('../page')
 var log = require('../tools/log')
 var dom = require('../tools/dom')
 var tools = require('../tools')
+
 var wd = window.document
 
 /**
@@ -63,13 +64,13 @@ var startDate
  * @param {initOptions}   [options] Les options éventuelles (passer base si ce js est chargé sur un autre domaine)
  * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
  */
-function display(ressource, options, next) {
+function display (ressource, options, next) {
   /**
    * Fait le chargement proprement dit après l'init
    * @private
    * @param {Error} [error] Une erreur éventuelle à l'init
    */
-  function load(error) {
+  function load (error) {
     if (error) {
       next(error)
     } else {
@@ -81,20 +82,20 @@ function display(ressource, options, next) {
 
       // le display du plugin
       var pluginName = ressource.type
-      var pluginDisplay = require('../plugins/' +pluginName +'/display')
-      if (!pluginDisplay) throw new Error("L'affichage des ressources de type " +pluginName +" n'est pas encore implémenté")
+      var pluginDisplay = require('../plugins/' + pluginName + '/display')
+      if (!pluginDisplay) throw new Error("L'affichage des ressources de type " + pluginName + " n'est pas encore implémenté")
       // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
       var Resultat, traiteResultat
 
       if (options) {
-        if (options.resultatCallback && tools.isFunction(options.resultatCallback)) traiteResultat = "function"
-        else if (options.urlResultatCallback && tools.isString(options.urlResultatCallback) && options.urlResultatCallback.substr(0, 4) === 'http') traiteResultat = "ajax" // jshint ignore:line
-        else if (options && options.resultatMessageAction && tools.isString(options.resultatMessageAction)) traiteResultat = "message"
+        if (options.resultatCallback && tools.isFunction(options.resultatCallback)) traiteResultat = 'function'
+        else if (options.urlResultatCallback && tools.isString(options.urlResultatCallback) && options.urlResultatCallback.substr(0, 4) === 'http') traiteResultat = 'ajax' // jshint ignore:line
+        else if (options && options.resultatMessageAction && tools.isString(options.resultatMessageAction)) traiteResultat = 'message'
       }
       // un cas particulier, le prof qui teste, on fourni une callback qui fait rien,
       // pour éviter des avertissements sur les ressources qui attendent une callback
-      if (traiteResultat === "none") traiteResultat = function () {}
-      if (traiteResultat) Resultat = require('../Resultat')
+      if (traiteResultat === 'none') traiteResultat = function () {}
+      if (traiteResultat) Resultat = require('../constructors/Resultat')
 
       try {
         if (typeof pluginDisplay === 'undefined') throw new Error('Le chargement du plugin ' + pluginName + ' a échoué')
@@ -114,9 +115,9 @@ function display(ressource, options, next) {
         // on regarde s'il faut ajouter une fct de sauvegarde des résultats
         if (Resultat) addResultatCallback(options, traiteResultat, Resultat)
         // on lui ajoute toujours ça
-        if (!options.base) options.base = "/"
-        else if (options.base.substring(-1) !== "/") options.base += "/"
-        options.pluginBase = options.base +"/plugins/" +pluginName +"/"
+        if (!options.base) options.base = '/'
+        else if (options.base.substring(-1) !== '/') options.base += '/'
+        options.pluginBase = options.base + '/plugins/' + pluginName + '/'
         // on peut afficher
         pluginDisplay(ressource, options, function (error) {
           startDate = new Date()
@@ -124,7 +125,7 @@ function display(ressource, options, next) {
             log("le display a terminé mais renvoyé l'erreur", error)
             page.addError(error)
           } else {
-            log("le display a terminé sans erreur")
+            log('le display a terminé sans erreur')
           }
           if (next) next(error)
         })
@@ -141,18 +142,18 @@ function display(ressource, options, next) {
    * @param {string}   traiteResultat Le type de traitement (function|ajax|message)
    * @param {function} Resultat       Le constructeur Resultat
    */
-  function addResultatCallback(options, traiteResultat, Resultat) {
+  function addResultatCallback (options, traiteResultat, Resultat) {
     /*global XMLHttpRequest*/
     // Le conteneur du picto enregistrement
     var divFeedback = wd.getElementById('pictoFeedback')
 
     // Éteint le feedback */
-    function feedbackOff() {
+    function feedbackOff () {
       if (divFeedback) divFeedback.className = 'feedbackOff'
     }
 
     // Allume le feedback OK pour 4s
-    function feedbackOk() {
+    function feedbackOk () {
       if (divFeedback) {
         divFeedback.className = 'feedbackOk'
         setTimeout(feedbackOff, 4000)
@@ -160,7 +161,7 @@ function display(ressource, options, next) {
     }
 
     // Allume le feedback KO pour 4s
-    function feedbackKo() {
+    function feedbackKo () {
       if (divFeedback) {
         divFeedback.className = 'feedbackKo'
         setTimeout(feedbackOff, 4000)
@@ -180,7 +181,7 @@ function display(ressource, options, next) {
          * @private
          * @param retour Le retour de l'envoi du score
          */
-        function feedback(retour) {
+        function feedback (retour) {
           log('feedback', retour)
           if (retour && (retour.ok && retour.ok === true) || (retour.success && retour.success === true)) {
             feedbackOk()
@@ -196,10 +197,12 @@ function display(ressource, options, next) {
          * poste resultat en ajax vers traiteResultat puis appellera feedback avec le retour
          * @private
          * @param {Resultat} resultat
+         * @param {boolean}  deferSync Passer true pour envoyer le résultat en local
+         *                             pour que le serveur fasse suivre (pour éviter les pbs de CORS)
          */
-        function sendAjax(resultat, deferSync) {
+        function sendAjax (resultat, deferSync) {
           // c'est une url, on gère l'envoi
-          if (typeof XMLHttpRequest === "undefined") {
+          if (typeof XMLHttpRequest === 'undefined') {
             // cf https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
             throw new Error("Le navigateur ne supporte pas les appels ajax, impossible d'envoyer des résultats")
           }
@@ -207,7 +210,6 @@ function display(ressource, options, next) {
           var xhr = new XMLHttpRequest()
           // pour que le navigateur envoie les cookies
           xhr.withCredentials = true
-
 
           // les différentes callback
           xhr.onload = function () {
@@ -229,16 +231,15 @@ function display(ressource, options, next) {
 
           xhr.onerror = function () {
             // Pb de connexion au serveur
-            feedback({error: "Impossible d'envoyer le résultat (à " + options.urlResultatCallback + ")"})
+            feedback({error: "Impossible d'envoyer le résultat (à " + options.urlResultatCallback + ')'})
           }
-
 
           // et on envoie, mais sur le proxy si sync (car on est sur un event unload et l'envoi de la requete options est annulée en cross domain)
           var url
           if (deferSync) {
             resultat.deferUrl = options.urlResultatCallback
             url = options.base + 'api/deferPost'
-            log("on passe en synchrone vers " + url)
+            log('on passe en synchrone vers ' + url)
           } else {
             // on pouvait pas mettre de timeout en synchrone
             url = options.urlResultatCallback
@@ -251,7 +252,7 @@ function display(ressource, options, next) {
             }
           }
           xhr.open('POST', url, !deferSync)
-          xhr.setRequestHeader('Content-type', 'application/json'); // text/plain évite le preflight mais le body parser interprête pas
+          xhr.setRequestHeader('Content-type', 'application/json') // text/plain évite le preflight mais le body parser interprête pas
           try {
             xhr.send(JSON.stringify(resultat))
           } catch (error) {
@@ -259,21 +260,20 @@ function display(ressource, options, next) {
           }
         }
 
-        function sendMessage(resultat) {
+        function sendMessage (resultat) {
           var chunks = options.resultatMessageAction.split('::')
           var action = options.resultatMessageAction
-          var resultatProp = chunks[1] || "resultat"
+          var resultatProp = chunks[1] || 'resultat'
           var message = {
-            action: action,
+            action: action
           }
           message[resultatProp] = resultat
           // on envoie
-          window.top.postMessage(message, "*")
+          window.top.postMessage(message, '*')
         }
 
-
         // MAIN addResultatCallback
-        log("resultatCallback display a reçu", result)
+        log('resultatCallback display a reçu', result)
         var deferSync = result.deferSync
         var resultat = new Resultat(result)
         // on impose juste date et durée
@@ -283,28 +283,28 @@ function display(ressource, options, next) {
           resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000)
         }
         // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
-        ["sesatheque", "userOrigine", "userId"].forEach(function (paramName) {
+        ['sesatheque', 'userOrigine', 'userId'].forEach(function (paramName) {
           var paramValue = tools.getURLParameter(paramName) || options[paramName]
           if (paramValue) resultat[paramName] = paramValue
         })
         // @todo ajouter des vérifs minimales
 
         // si on nous a passé une fct on lui envoie le résultat
-        if (traiteResultat === "function") {
+        if (traiteResultat === 'function') {
           log('on envoie ce résultat à la fct qui nous a été passé en param', resultat)
           options.resultatCallback(resultat)
-        } else if (traiteResultat === "ajax") {
-          log("on va poster ce résultat vers " + traiteResultat, resultat)
+        } else if (traiteResultat === 'ajax') {
+          log('on va poster ce résultat vers ' + traiteResultat, resultat)
           sendAjax(resultat, deferSync)
-        } else if (traiteResultat === "message") {
-          if (options.resultatMessageAction === "none") {
+        } else if (traiteResultat === 'message') {
+          if (options.resultatMessageAction === 'none') {
             log("On a reçu ce résultat (que l'on ne fait pas suivre on est en test)", resultat)
           } else {
-            log("postMessage de ce résultat vers " + traiteResultat, resultat)
+            log('postMessage de ce résultat vers ' + traiteResultat, resultat)
             sendMessage(resultat)
           }
         }
-      }; // fin définition options.resultatCallback
+      } // fin définition options.resultatCallback
     }
   } // addResultatCallback
 
@@ -312,3 +312,9 @@ function display(ressource, options, next) {
 }
 
 module.exports = display
+
+// et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
+if (typeof window !== 'undefined') {
+  if (typeof window.sesatheque === 'undefined') window.sesatheque = {}
+  window.sesatheque.display = display
+}

@@ -39,43 +39,43 @@
 /**
  * Callback appellée avec une erreur ou sans argument
  * @callback errorCallback
- * @param {Error} Une erreur éventuelle
+ * @param {Error} [error] Une erreur éventuelle
  */
 
 /**
  * @callback groupeCallback
- * @param {Error}  [error] erreur éventuelle
- * @param {Groupe} groupe  Entity ou Object
+ * @param {Error}  [error]  erreur éventuelle
+ * @param {Groupe} [groupe] Entity ou Object
  */
 
 /**
  * @callback groupeListCallback
- * @param {Error}  [error] erreur éventuelle
- * @param {Groupe[]} groupes  tableau d'entity groupe
+ * @param {Error}    [error] erreur éventuelle
+ * @param {Groupe[]} groupes tableau d'entity groupe
  */
 
 /**
  * @callback personneCallback
- * @param {Error}    [error]  erreur éventuelle
- * @param {Personne} personne Entity ou Object
+ * @param {Error}    [error]    erreur éventuelle
+ * @param {Personne} [personne] Entity ou Object
  */
 
 /**
  * @callback entityPersonneCallback
- * @param {Error}          [error]  Erreur éventuelle
- * @param {EntityPersonne} personne Une Entity Personne
+ * @param {Error}          [error]    Erreur éventuelle
+ * @param {EntityPersonne} [personne] Une Entity Personne
  */
 
 /**
  * @callback ressourceCallback
  * @param {Error}     [error]
- * @param {Ressource} ressource
+ * @param {Ressource} [ressource]
  */
 
 /**
  * @callback entityRessourceCallback
  * @param {Error}           [error]
- * @param {EntityRessource} ressource
+ * @param {EntityRessource} [ressource]
  */
 
 /**

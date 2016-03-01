@@ -28,12 +28,10 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-"use strict"
-var page = require('../page')
-//var dom = require('../tools/dom')
-var log = require('../tools/log')
+'use strict'
 
-var swfobject = window.swfobject
+var page = require('../page')
+var log = require('../tools/log')
 
 /**
  * Charge un swf dans l'élément container
@@ -95,7 +93,13 @@ function load(container, swfHref, options, next) {
 
   // swfobject.embedSWF (swfUrl, htmlId, largeur, hauteur, version_requise,
   //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
-  swfobject.embedSWF(swfHref, divId, largeur, hauteur, flashversion, null, flashvars, swfParams, swfAttributes, callbackFn)
+  page.loadAsync('swfobject', function () {
+    try {
+      window.swfobject.embedSWF(swfHref, divId, largeur, hauteur, flashversion, null, flashvars, swfParams, swfAttributes, callbackFn)
+    } catch (error) {
+      page.addError(error)
+    }
+  })
 }
 
 /**

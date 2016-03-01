@@ -28,7 +28,7 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-"use strict"
+'use strict'
 /**
  * @file Module js pour gérer l'affichage / masquage de question / réponse / page
  * D'après l'ancien url.js de l'outil labomep

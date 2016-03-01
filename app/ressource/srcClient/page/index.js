@@ -29,32 +29,38 @@
  * pour une explication en français)
  */
 
-"use strict"
-// l'écriture suivante fonctionne aussi, mais sans avoir l'autocomplétion dans l'IDE :-/
+'use strict'
+
 var tools = require('../tools')
 var dom = require('../tools/dom')
 var log = require('../tools/log')
-var wd = window.document
+
+var w = window
+var wd = w.document
 
 /**
  * En attendant la gestion du load async avec es6, on utilise le bon vieux head.js,
  * on garde ici un mapping vers les modules tiers que l'on utilise
  */
 var externalModules = {
-  ckeditor: '/vendor/ckeditor/ckeditor',
-  ckeditorJquery : '/vendor/ckeditor/adapters/jquery',
-  jquery: '/vendor/jquery/jquery-1.11.3.min',
-  jquery18: '/vendor/jquery/jquery-1.8.3.min',
-  jqueryUi: '/vendor/jqueryUi/1.11.1/jquery-ui.min',
-  jqueryUiDialog: '/vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
-  jsoneditor : '/vendor/jsoneditor/dist/jsoneditor.min.js',
-  jstree: '/vendor/jstree/dist/jstree.min.js',
-  lodash: '/vendor/lodash/lodash.min',
-  mathjax: '/vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
-  mathquill: '/vendor/mathquill-0.9.4/mathquill.min',
-  pluginDetect : '/vendor/pluginDetect/javaFlashDetect.min.js',
-  swfobject: '/vendor/swfobject/swfobject.2.3'
+  ckeditor: 'vendor/ckeditor/ckeditor',
+  ckeditorJquery: 'vendor/ckeditor/adapters/jquery',
+  head: 'vendor/headjs/dist/1.0.0/head.load.min.js',
+  jquery: 'vendor/jquery/jquery-1.11.3.min',
+  jquery18: 'vendor/jquery/jquery-1.8.3.min',
+  jqueryUi: 'vendor/jqueryUi/1.11.1/jquery-ui.min',
+  jqueryUiDialog: 'vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
+  jsoneditor: 'vendor/jsoneditor/dist/jsoneditor.min.js',
+  jstree: 'vendor/jstree/dist/jstree.min.js',
+  lodash: 'vendor/lodash/lodash.min',
+  mathjax: 'vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
+  mathquill: 'vendor/mathquill-0.9.4/mathquill.min',
+  pluginDetect: 'vendor/pluginDetect/javaFlashDetect.min.js',
+  swfobject: 'vendor/swfobject/swfobject.2.3.min.js'
 }
+
+// pour mémoriser les modules déjà chargés
+var loadedModules = {}
 
 var base = '/'
 
@@ -64,19 +70,19 @@ var base = '/'
  * @param {string|Error} error Le message à afficher
  * @param {number} [delay] Un éventuel délai d'affichage en secondes
  */
-function addError(error, delay) {
+function addError (error, delay) {
   // on log toujours en console
   log.error(error)
   var errorsContainer = wd.getElementById('errors') || wd.getElementById('error') || wd.getElementById('warnings')
   var errorMsg = (error instanceof Error) ? error.toString() : error
   if (/^TypeError:/.test(errorMsg)) {
     // on envoie qqchose de plus compréhensible
-    errorMsg = "Une erreur est survenue (voir la console pour les détails)"
+    errorMsg = 'Une erreur est survenue (voir la console pour les détails)'
   }
   if (errorsContainer) {
     // on ajoute un peu de margin à ce div s'il n'en a pas
-    if (errorsContainer.style && !errorsContainer.style.margin) errorsContainer.style.margin = "0.2em"
-    var errorBlock = dom.addElement(errorsContainer, 'p', {"class": "error"}, errorMsg)
+    if (errorsContainer.style && !errorsContainer.style.margin) errorsContainer.style.margin = '0.2em'
+    var errorBlock = dom.addElement(errorsContainer, 'p', {'class': 'error'}, errorMsg)
     if (delay) {
       setTimeout(function () {
         errorsContainer.remove(errorBlock)
@@ -90,14 +96,14 @@ function addError(error, delay) {
 /**
  * Cache le #titre (en global pour que les plugins puissent le faire)
  */
-function hideTitle() {
+function hideTitle () {
   try {
     var titre = wd.getElementById('titre')
-    if (titre && titre.style) titre.style.display = "none"
-    log(titre ? "titre masqué" : "demande de masquage mais titre non trouvé")
+    if (titre && titre.style) titre.style.display = 'none'
+    log(titre ? 'titre masqué' : 'demande de masquage mais titre non trouvé')
     var picto = wd.getElementById('pictoFeedback')
-    if (picto && picto.style) picto.style.display = "none"
-    log(picto ? "picto feedback masqué" : "demande de masquage mais picto feedback non trouvé")
+    if (picto && picto.style) picto.style.display = 'none'
+    log(picto ? 'picto feedback masqué' : 'demande de masquage mais picto feedback non trouvé')
   } catch (e) {
     /* tant pis */
   }
@@ -105,17 +111,17 @@ function hideTitle() {
 
 /**
  * Complète les options si besoin avec base, container, errorsContainer qui seront créés si besoin,
- * et ajoute aux options "urlResultatCallback", "userOrigine", "userId" si elles n'y sont pas et sont dans l'url
+ * et ajoute aux options 'urlResultatCallback', 'userOrigine', 'userId' si elles n'y sont pas et sont dans l'url
  * @param {initOptions}   options
- * @param {errorCallback} next
+ * @param {errorCallback} [next]
  */
-function init(options, next) {
+function init (options, next) {
   if (!options) options = {}
   log('page.init avec les options', options)
   if (!options.base) options.base = base
   // (des)active la fct de log si on le demande, l'url est prioritaire sur options
-  var verbose = tools.getURLParameter("verbose") || options.verbose
-  if (verbose === "0" || verbose === "false") verbose = false
+  var verbose = tools.getURLParameter('verbose') || options.verbose
+  if (verbose === '0' || verbose === 'false') verbose = false
   if (verbose) log.enable()
   else log.disable()
 
@@ -138,12 +144,12 @@ function init(options, next) {
 
   // on regarde si d'autres options ont été passé en GET
   var paramGet
-  ["resultatMessageAction", "urlResultatCallback", "userOrigine", "userId"].forEach(function (param) {
+  ;['resultatMessageAction', 'urlResultatCallback', 'userOrigine', 'userId'].forEach(function (param) {
     paramGet = tools.getURLParameter(param)
     if (!options[param] && paramGet) options[param] = paramGet
   })
-  paramGet = tools.getURLParameter("showTitle")
-  if (paramGet === "0" || paramGet === "false") options.showTitle = false
+  paramGet = tools.getURLParameter('showTitle')
+  if (paramGet === '0' || paramGet === 'false') options.showTitle = false
 
   // terminé
   if (next) next()
@@ -154,26 +160,51 @@ function init(options, next) {
  * @param {Array} moduleNames
  * @param callback
  */
-function loadAsync(moduleNames, callback) {
-  /*global head*/
-  var paths = [], errors = [], path
-  var loader = head.load || head.js // les anciennes versions de head utilisaient head.js avec la même signature
-  moduleNames.forEach(function (moduleName) {
-    path = externalModules[moduleName]
-    if (!path && /^https?:\/\//.test(moduleName)) path = moduleName
-    if (path) paths.push(path)
-    else errors.push(moduleName)
+function loadAsync (moduleNames, callback) {
+  function headLoad (paths, cb) {
+    var loader = w.head.load || w.head.js // les anciennes versions de head utilisaient head.js avec la même signature
+    if (loader) loader(paths, callback)
+    else console.error('Impossible de trouver head pour chargement asynchrone')
+  }
+  function headReady(next) {
+    if (typeof window.head === 'undefined') {
+      dom.addJs(externalModules.head, function () {
+        next()
+      })
+    } else {
+      next()
+    }
+  }
+  if (typeof moduleNames === 'string') moduleNames = [moduleNames]
+
+  // on passe par head qui gèrera au passage l'unicité de l'appel
+  headReady(function () {
+    var paths = []
+    var errors = []
+    moduleNames.forEach(function (moduleName) {
+      if (moduleName !== 'head') {
+        var path = externalModules[ moduleName ]
+        if (path) path = base + path
+        else if (/^https?:\/\//.test(moduleName)) path = moduleName
+        if (path) paths.push(path)
+        else errors.push(moduleName)
+      }
+    })
+    if (errors.length) {
+      addError('Impossible de charger le ou les modules inconnus suivants ' + errors.join(', '))
+    } else if (paths.length) {
+      headLoad(paths, callback)
+    } else {
+      callback()
+    }
   })
-  if (errors.length) addError("Impossible de charger le ou les modules inconnus suivants " +errors.join(", "))
-  else if (paths.length) loader(paths, callback)
-  else log.error("appel de loadAsync sans modules")
 }
 
 /**
  * Change la base (pour la mettre absolue après chargement de ce module en cross domain)
  * @param newBase
  */
-function setBase(newBase) {
+function setBase (newBase) {
   base = newBase
 }
 
@@ -182,7 +213,6 @@ function setBase(newBase) {
  * @service page
  */
 module.exports = {addError, hideTitle, init, loadAsync, setBase}
-
 
 /**
  * Options à passer à init() ou à display(), les autres propriétés seront laissées intactes
@@ -212,7 +242,7 @@ module.exports = {addError, hideTitle, init, loadAsync, setBase}
  * @property {resultatCallback} [resultatCallback]    Une fonction pour recevoir un objet Resultat (si y'a pas de urlScoreCallback)
  * @property {string}           [sesatheque]          Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page),
  *                                                      le nom de la sésathèque pour un client qui récupère des résultats de plusieurs sésatheques
- * @property {boolean}          [showTitle=true]      Passer "0" ou "false" via l'url ou false via options pour cacher le titre
+ * @property {boolean}          [showTitle=true]      Passer '0' ou 'false' via l'url ou false via options pour cacher le titre
  * @property {string}           [userOrigine]         Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
  * @property {string}           [userId]              Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
  * @property {object}           [flashvars]           Pour les plugins qui chargent du swf, sera passé en flashvars en plus

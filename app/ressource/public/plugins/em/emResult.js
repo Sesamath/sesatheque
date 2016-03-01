@@ -34,7 +34,7 @@
  */
 /*global window*/
 (function () {
-  "use strict"
+  'use strict'
 
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")

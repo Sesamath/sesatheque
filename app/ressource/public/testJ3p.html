@@ -3,35 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <title>test Bilan J3P</title>
-  <script type="application/javascript">
-    // on indique ça avant de charger require.min.js, au cas où on voudrait faire des
-    // require(["nomModuleDeLaBiBli"], function (nomModuleDeLaBiBli) { /* du code qui l'utilise */ }
-    var sesamath = {
-      sesatheque : {base:"http://bibliotheque.devsesamath.net/"}
-    };
-  </script>
-  <script type="text/javascript" src="http://bibliotheque.devsesamath.net/vendors/requirejs/require.min.js"></script>
+  <script type="text/javascript" src="/page.bundle.js"></script>
+  <script type="text/javascript" src="/display.bundle.js"></script>
 </head>
 <body>
 <div id="errors"></div>
-<div id="display">
-  Score d'un graphe j3p : <span id="score"></span>
-  Bilan d'un graphe j3p :
-  <div id="reponse"></div>
-</div>
+<div id="display"></div>
 <script type="application/javascript">
-  var resultat = {}; // l'objet qui a été renvoyé par j3p via la méthode j3pOptions.resultatCallback qu'on lui a passé au chargement
-  var score = document.getElementById("score");
-  var reponse = document.getElementById("reponse");
-  // pour utiliser notre sesamath.sesatheque.addError ou d'autre fct sesamath.* de la bibli faudrait charger
-  // require(["initGlobal"], function () { /* sesamath.sesatheque.addError est dispo */ };
-  // ou ajouter "initGlobal" à la liste des truc à charger dans le require ci-dessous
-
-  // on veut tester la version locale de j3pResult
-  require(['./plugins/j3p/j3pResult'], function (j3pResult) {
-    score.innerHTML = j3pResult.getHtmlScore(resultat);
-    reponse.innerHTML = j3pResult.getHtmlReponse(resultat);
-  });
+  try {
+    var options = {
+      /* saveResult: function (resultat, next) {
+       sesamath.log('saveResult', resultat);
+       next();
+       }, /* DEBUG */
+//      base : "http://bibliotheque.devsesamath.net/",
+      isDev :true,
+      verbose :true,
+    };
+    sesatheque.display({"oid":32426,"cle":"","origine":"labomepBIBS","idOrigine":"4002850","type":"j3p","titre":"Graduer un axe","resume":"","description":"","commentaires":"Un axe gradué comportant seulement deux étiquettes est proposé. On demande de compléter les autres graduations.","parametres":{"g":[[1,"cm2exN1_31",[{"pe":">=0","nn":"fin","conclusion":"fin"},{"nbrepetitions":4,"indication":"","limite":"","nbchances":2,"graduation1":[0,0,290,975],"pas":[10,100,10,5],"etiquettes":["consecutives","non-consecutives","consecutives","non-consecutives"],"etiquetteOrigine":[true,true,false,false]}]]]},"niveaux":[],"categories":[7],"typePedagogiques":[9,2],"typeDocumentaires":[9],"relations":[],"auteurs":[],"contributeurs":[],"groupes":[],"langue":"fra","publie":true,"restriction":0,"dateCreation":"2015-06-11T14:59:39.916Z","dateMiseAJour":"2015-06-11T14:59:39.951Z","version":2,"indexable":true,"archiveOid":32426}, options)
+  } catch(error) {
+    document.getElementById('errors').innerHTML = error.toString();
+    if (console && console.error) console.error(error);
+  }
 </script>
 </body>
 </html>

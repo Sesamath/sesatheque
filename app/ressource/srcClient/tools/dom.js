@@ -33,7 +33,7 @@
  * Module de base pour les méthodes addCss, addElement, getElement, addError, hideTitle
  * et log (qui ne fait rien sauf si on appelle init avec options.verbose à true), log.error affiche toujours
  */
-"use strict"
+'use strict'
 
 var log = require('./log')
 var wd = window.document
@@ -50,8 +50,8 @@ var dom = {}
  * @param {string}  file Chemin du fichier css (mis dans href tel quel)
  */
 dom.addCss = function (file) {
-  var head = wd.getElementsByTagName("head")[0]
-  var links = head.getElementsByTagName("link")
+  var head = wd.getElementsByTagName('head')[0]
+  var links = head.getElementsByTagName('link')
   var dejala = false
   for (var i = 0; i < links.length; i++) {
     if (links[i].href === file) {
@@ -61,23 +61,41 @@ dom.addCss = function (file) {
   }
 
   if (dejala) {
-    log(file +" était déjà présent, on ne l'ajoute pas")
+    log(file + " était déjà présent, on ne l'ajoute pas")
   } else {
-    var elt = wd.createElement("link")
-    elt.rel = "stylesheet"
-    elt.type = "text/css"
+    var elt = wd.createElement('link')
+    elt.rel = 'stylesheet'
+    elt.type = 'text/css'
     elt.href = file
     head.appendChild(elt)
   }
 }
 
 /**
+ * Ajoute un js à la fin du body et appelle la callback quand il est chargé
+ * @param {string}  file Chemin du fichier jss (mis dans src tel quel)
+ */
+dom.addJs = function (file, cb) {
+  function callCb () {
+    cb()
+    elt.removeEventListener('load', callCb)
+  }
+  /** @type {HTMLElement} */
+  var body = wd.getElementsByTagName('body')[0]
+  var elt = wd.createElement('script')
+  elt.type = 'text/javascript'
+  elt.src = file
+  elt.addEventListener('load', callCb)
+  body.appendChild(elt)
+}
+
+/**
  * Ajoute un élément html de type tag à parent
- * @param {Element} parent
+ * @param {HTMLElement} parent
  * @param {string} tag
  * @param {Object=} attrs Les attributs
  * @param {string=} content
- * @returns {Element} L'élément ajouté
+ * @returns {HTMLElement} L'élément ajouté
  */
 dom.addElement = function (parent, tag, attrs, content) {
   var elt = dom.getElement(tag, attrs, content)
@@ -88,11 +106,11 @@ dom.addElement = function (parent, tag, attrs, content) {
 
 /**
  * Ajoute un élément html juste après element
- * @param {Element} element
+ * @param {HTMLElement} element
  * @param {string} tag
  * @param {Object=} attrs Les attributs
  * @param {string=} content
- * @returns {Element} L'élément ajouté
+ * @returns {HTMLElement} L'élément ajouté
  */
 dom.addElementAfter = function (element, tag, attrs, content) {
   var newElt = dom.getElement(tag, attrs, content)
@@ -106,11 +124,11 @@ dom.addElementAfter = function (element, tag, attrs, content) {
 
 /**
  * Ajoute un élément html juste avant element
- * @param {Element} element
+ * @param {HTMLElement} element
  * @param {string} tag
  * @param {Object=} attrs Les attributs
  * @param {string=} content
- * @returns {Element} L'élément ajouté
+ * @returns {HTMLElement} L'élément ajouté
  */
 dom.addElementBefore = function (element, tag, attrs, content) {
   var newElt = dom.getElement(tag, attrs, content)
@@ -123,11 +141,11 @@ dom.addElementBefore = function (element, tag, attrs, content) {
 
 /**
  * Ajoute un élément html comme premier enfant de parent
- * @param {Element} parent
+ * @param {HTMLElement} parent
  * @param {string} tag
  * @param {Object=} attrs Les attributs
  * @param {string=} content
- * @returns {Element} L'élément ajouté
+ * @returns {HTMLElement} L'élément ajouté
  */
 dom.addElementFirstChild = function (parent, tag, attrs, content) {
   var newElt = dom.getElement(tag, attrs, content)
@@ -138,11 +156,11 @@ dom.addElementFirstChild = function (parent, tag, attrs, content) {
 
 /**
  * Ajoute un élément html comme frère aîné de elementRef
- * @param {Element} elementRef
+ * @param {HTMLElement} elementRef
  * @param {string} tag
  * @param {Object=} attrs Les attributs
  * @param {string=} content
- * @returns {Element} L'élément ajouté
+ * @returns {HTMLElement} L'élément ajouté
  */
 dom.addElementFirstSibling = function (elementRef, tag, attrs, content) {
   var newElt = dom.getElement(tag, attrs, content)
@@ -155,7 +173,7 @@ dom.addElementFirstSibling = function (elementRef, tag, attrs, content) {
  * Ajoute du texte dans un élément
  *
  * Déclaré par init (dès son chargement)
- * @param {Element} elt
+ * @param {HTMLElement} elt
  * @param {string} text
  */
 dom.addText = function (elt, text) {
@@ -166,7 +184,7 @@ dom.addText = function (elt, text) {
  * Vide un élément html de tous ses enfants
  *
  * Déclaré par init (dès son chargement)
- * @param {Element} element
+ * @param {HTMLElement} element
  */
 dom.empty = function (element) {
   if (element && element.firstChild) {
@@ -186,15 +204,17 @@ dom.getElement = function (tag, attrs, txtContent) {
   var elt = wd.createElement(tag)
   var attr
   try {
-    if (attrs) for (attr in attrs) {
-      if (attrs.hasOwnProperty(attr)) {
-        if (attr === 'class') elt.className = attrs.class
-        else if (attr === 'style') dom.setStyles(elt, attrs.style)
-        else elt.setAttribute(attr, attrs[attr])
+    if (attrs) {
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          if (attr === 'class') elt.className = attrs.class
+          else if (attr === 'style') dom.setStyles(elt, attrs.style)
+          else elt.setAttribute(attr, attrs[attr])
+        }
       }
     }
   } catch (error) {
-    log("plantage dans getElement " +tag +" avec les attributs ", attrs, error)
+    log('plantage dans getElement ' + tag + ' avec les attributs ', attrs, error)
   }
 
   if (txtContent) dom.addText(elt, txtContent)
@@ -226,13 +246,12 @@ dom.getNewId = (function () {
  * sans planter en cas de pb (on le signale juste en console)
  *
  * Déclaré par init (dès son chargement)
- * @param {Element} elt
+ * @param {HTMLElement} elt
  * @param {string|object} styles
  */
 dom.setStyles = function (elt, styles) {
   try {
-    if (elt) {
-      if (!elt.style) elt.style = {}
+    if (elt && elt.style) {
       if (typeof styles === 'string') {
         styles = styles.split(';')
         styles.forEach(function (paire) {

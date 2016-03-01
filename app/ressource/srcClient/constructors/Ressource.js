@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-"use strict"
+'use strict'
 /* global define, module*/
 
 var filters = require('../tools/filters')

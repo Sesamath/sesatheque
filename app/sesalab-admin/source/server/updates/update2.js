@@ -30,7 +30,7 @@
  */
 
 /*global log*/
-"use strict"
+'use strict'
 var flow = require('an-flow')
 
 module.exports = function(job) {

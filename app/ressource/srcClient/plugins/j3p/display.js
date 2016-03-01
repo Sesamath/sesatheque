@@ -32,11 +32,11 @@
 
 var page = require('../../page')
 var tools = require('../../tools')
-//var dom = require('../../tools/dom')
+// var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var xhr = require('../../tools/xhr')
 
-var urlBaseJ3p = "http://j3p.sesamath.net"
+var urlBaseJ3p = 'http://j3p.sesamath.net'
 
 /**
  * Affiche la ressource dans l'élément d'id mepRess
@@ -45,14 +45,16 @@ var urlBaseJ3p = "http://j3p.sesamath.net"
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   /**
    * Chargera la ressource quand on aura éventuellement récupéré lastResultat
    */
-  function load() {
-    log("lancement du chargement j3p sur " +urlBaseJ3p)
-    page.loadAsync([urlBaseJ3p + '/outils/loader.js'], function () {
-      var loader = require('j3p/loader')
+  function load () {
+    log('lancement du chargement j3p sur ' + urlBaseJ3p)
+    // cf https://github.com/petehunt/webpack-howto et
+    // https://webpack.github.io/docs/code-splitting.html
+    require.ensure(['./loader'], function (require) {
+      var loader = require('./loader')
       try {
         // on cache toujours le titre
         page.hideTitle()
@@ -65,10 +67,10 @@ module.exports = function display(ressource, options, next) {
         if (options.lastResultat) {
           j3pOptions.lastResultat = options.lastResultat
         }
-        log("loader j3p avec le graphe", ressource.parametres.g)
+        log('loader j3p avec le graphe', ressource.parametres.g)
         if (ressource.parametres.g instanceof Array) {
           loader.charge(options.container, ressource.parametres.g, j3pOptions)
-          next(); // le chargement sera pas terminé mais le loader propose pas de callback
+          next() // le chargement sera pas terminé mais le loader propose pas de callback
         } else {
           next(new Error("Le graphe n'est pas un tableau"))
         }
@@ -80,22 +82,23 @@ module.exports = function display(ressource, options, next) {
 
   try {
     log('j3p.display avec ressource et options', ressource, options)
-    //les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g)
-      throw new Error("Ressource incomplète")
-    if (!options.container || !options.errorsContainer) throw new Error("Paramètres manquants")
+    // les params minimaux
+    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.g) {
+      throw new Error('Ressource incomplète')
+    }
+    if (!options.container || !options.errorsContainer) throw new Error('Paramètres manquants')
 
     // le domaine où prendre les js j3p
     if (options.isDev) {
       urlBaseJ3p = 'http://j3p.devsesamath.net'
     }
 
-    var lastResultUrl = tools.getURLParameter("lastResultUrl")
+    var lastResultUrl = tools.getURLParameter('lastResultUrl')
     if (lastResultUrl) {
-      log("on va chercher un lastResultat sur " +lastResultUrl)
-      xhr.get(lastResultUrl, {responseType:"json"}, function (error, lastResultat) {
+      log('on va chercher un lastResultat sur ' + lastResultUrl)
+      xhr.get(lastResultUrl, {responseType: 'json'}, function (error, lastResultat) {
         if (error) {
-          page.addError("Impossible de récupérer le dernier résultat")
+          page.addError('Impossible de récupérer le dernier résultat')
           log.error(error)
         } else if (lastResultat) {
           if (lastResultat.success) {

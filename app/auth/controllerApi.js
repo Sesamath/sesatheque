@@ -38,6 +38,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
    * @route GET /api/auth[?ressourceId=xxx]
    */
   controller.get('api/auth', function (context) {
+    /** @type {Context} context */
     var isLogged = $accessControl.isAuthenticated(context)
     var auth = {
       isLogged:isLogged,

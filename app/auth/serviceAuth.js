@@ -183,7 +183,7 @@ module.exports = function ($accessControl, $ressourcePage) {
       urlRedirect = context.request.originalUrl.replace("connexion", "")
       authBloc.user = {
         nom: context.session.user.nom,
-        prenom: context.session.user.prenom,
+        prenom: context.session.user.prenom
       }
       authBloc.ssoLinks = $auth.getSsoLinks(context)
       authBloc.logoutLink = {

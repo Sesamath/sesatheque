@@ -90,7 +90,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
       } else {
         $auth.check(context, function (error) {
           if (!error) error = new Error("calback testConnexion appelée sans erreur, il aurait dû y avoir une redirection ou une erreur")
-          $ressourcePage.outputError(context)
+          $ressourcePage.outputError(context, error)
         })
       }
     })

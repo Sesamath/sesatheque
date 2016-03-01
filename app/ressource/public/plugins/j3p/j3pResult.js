@@ -34,7 +34,7 @@
  */
 /*global window*/
 (function () {
-  "use strict"
+  'use strict'
 
   // vérif minimale du contexte
   if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
@@ -74,10 +74,10 @@
           output+="Vue graphique du parcours de l'élève (à venir)"
     } else {
       output = "pas de réponse"
-    }   
+    }
 
     return output
-    
+
   }
 
   /**
@@ -89,7 +89,7 @@
   j3pResult.getHtmlScore = function (resultat) {
     var output,nbnoeuds,score
     console.log("resultat=",resultat)
-    // pour j3p on s'attend à avoir 
+    // pour j3p on s'attend à avoir
    if ( resultat.contenu && resultat.contenu.score &&  resultat.contenu.score.length) {
       score=0
       nbnoeuds = resultat.contenu.score.length
