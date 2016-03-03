@@ -96,7 +96,7 @@
       for (var i = 0; i < nbnoeuds; i++) {
         score+=resultat.contenu.score[i]
       }
-      score=Math.round(100*score)
+      score=Math.round(100*score/nbnoeuds)
       output = score +' % '
     } else {
       output = "pas de réponse ou réponse à un mauvais format"
