@@ -36,7 +36,7 @@
  * @private
  * @param {Object} initObj Un objet ayant des propriétés d'un groupe
  */
-function Groupe(initObj) {
+function Groupe (initObj) {
   if (!initObj) initObj = {}
   /**
    * L'identifiant interne à la sésathèque
@@ -49,15 +49,15 @@ function Groupe(initObj) {
    * @type {string}
    * @default ''
    */
-  if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLocaleLowerCase();
-  else this.nom = '';
+  if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLocaleLowerCase()
+  else this.nom = ''
   /**
    * Description
    * @type {string}
    * @default ''
    */
-  if (typeof initObj.description === 'string') this.description = initObj.description;
-  else this.description = '';
+  if (typeof initObj.description === 'string') this.description = initObj.description
+  else this.description = ''
   /**
    * Tout le monde peut s'y inscrire
    * @type {boolean}

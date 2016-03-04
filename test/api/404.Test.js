@@ -40,14 +40,10 @@
 /*global describe,it*/
 
 var assert = require('assert')
-var _ = require('lodash')
+// var _ = require('lodash')
 var request = require('request')
 
 var config = require('../../app/config')
-var apiToken = config.apiTokens[0]
-if (process.argv.indexOf('--token') > -1) {
-  apiToken = process.argv[process.argv.indexOf('--token') +1]
-}
 var urlApiBibli = 'http://'
 if (process.argv.indexOf('--prod') > -1) {
   urlApiBibli += 'bibliotheque.sesamath.net'
@@ -63,7 +59,7 @@ urlApiBibli += '/api'
 describe('api get 404', function () {
   it('prend un 404 sur /public/foo/bar', function (done) {
     var options = {
-      url : urlApiBibli + '/public/foo/bar',
+      url: urlApiBibli + '/public/foo/bar',
       json: true
     }
     request.get(options, function (error, response, ressource) {
@@ -76,7 +72,7 @@ describe('api get 404', function () {
 
   it('prend un 404 sur /ressource/foo/bar', function (done) {
     var options = {
-      url : urlApiBibli + '/ressource/foo/bar',
+      url: urlApiBibli + '/ressource/foo/bar',
       json: true
     }
     request.get(options, function (error, response, ressource) {
@@ -89,7 +85,7 @@ describe('api get 404', function () {
 
   it('prend un 404 sur /public/foo', function (done) {
     var options = {
-      url : urlApiBibli + '/public/foo',
+      url: urlApiBibli + '/public/foo',
       json: true
     }
     request.get(options, function (error, response, ressource) {
@@ -102,7 +98,7 @@ describe('api get 404', function () {
 
   it('prend un 404 sur /ressource/foo', function (done) {
     var options = {
-      url : urlApiBibli + '/ressource/foo',
+      url: urlApiBibli + '/ressource/foo',
       json: true
     }
     request.get(options, function (error, response, ressource) {
@@ -115,7 +111,7 @@ describe('api get 404', function () {
 
   it('prend un 404 sur /foo/bar', function (done) {
     var options = {
-      url : urlApiBibli + '/foo/bar',
+      url: urlApiBibli + '/foo/bar',
       json: true
     }
     request.get(options, function (error, response, ressource) {

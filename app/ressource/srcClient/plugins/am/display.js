@@ -37,7 +37,6 @@ var log = require('../../tools/log')
 var swf = require('../../display/swf')
 
 var isLoaded
-var ressOid
 
 /**
  * Affiche une ressource am (aides mathenpoche : animations flash, sans réponse de l'élève)
@@ -46,7 +45,7 @@ var ressOid
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   try {
     var baseSwf, swfUrl, swfOpt
     var container = options.container
@@ -60,7 +59,7 @@ module.exports = function display(ressource, options, next) {
           ressType: 'am',
           ressId: ressource.oid,
           score: 1,
-          fin:true,
+          fin: true,
           deferSync: true
         }
         if (options.sesatheque) resultat.sesatheque = options.sesatheque
@@ -71,12 +70,10 @@ module.exports = function display(ressource, options, next) {
     var params = ressource.parametres
 
     log('start am display avec la ressource', ressource)
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !params) {
       throw new Error('Paramètres manquants')
     }
-    // init de ressOid en global à ce module (pour les appels ultérieurs de getResultat)
-    ressOid = ressource.oid
 
     // On réinitialise le conteneur
     dom.empty(container)

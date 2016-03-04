@@ -31,8 +31,3 @@ Ensuite
     
 Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et `./scripts`, en ajoutant par ex
 `PATH="$PATH:./node_modules/.bin:./scripts"` à votre ~/.bashrc
-
-Memo
-====
-
-Pour configurer standard avec webstorm https://github.com/feross/standard/blob/master/docs/webstorm.md

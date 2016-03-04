@@ -33,9 +33,9 @@
     ],
     "ignore": [
       "node_modules/*",
-      "app/main/public",
+      "app/*/public/*",
       "app/sesalab-admin",
-      "app/ressource/public"
+      "jsdoc/*"
     ]
   },
   "dependencies": {

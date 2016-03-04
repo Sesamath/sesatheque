@@ -44,29 +44,28 @@ var isLoaded
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'iep sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display(ressource, options, next) {
-
+module.exports = function display (ressource, options, next) {
   /**
    * Affiche le xml dans le conteneur passé en options
    * @private
    * @param xml
    */
-  function affiche(xml) {
-    //log('on va afficher le xml : ' +xml)
+  function affiche (xml) {
+    // log('on va afficher le xml : ' +xml)
     // On réinitialise le conteneur
     dom.empty(container)
     var error
     var width = ressource.parametres.width || container.offsetWidth || 800
     var height = ressource.parametres.height || width * 0.75 || 600
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
-    //var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
+    // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.setAttributeNS(null, 'width', width)
     svg.setAttributeNS(null, 'height', height)
     svg.style.display = 'block'
     container.appendChild(svg)
     if (window.iep.iepApp) {
-      var app = new window.iep.iepApp()
+      var app = new window.iep.iepApp() // eslint-disable-line new-cap
       app.addDoc(svg, xml)
     } else {
       error = new Error('Problème de chargement du moteur instrumenpoche (constructeur iepApp absent)')
@@ -79,7 +78,7 @@ module.exports = function display(ressource, options, next) {
     log('start iep display avec la ressource', ressource)
     var container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error('Paramètres manquants')
     if (!ressource.parametres.url && !ressource.parametres.xml) throw new Error('Pas de script instrumenpoche en paramètre')
 
@@ -127,7 +126,6 @@ module.exports = function display(ressource, options, next) {
         }
       })
     })
-
   } catch (error) {
     if (next) next(error)
     else page.addError(error)

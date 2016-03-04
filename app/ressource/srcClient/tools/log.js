@@ -39,7 +39,7 @@
  * puis remplacé par celle qui bosse si init() est appelé avec options.verbose
  * @param {...*} arguments Nombre variable d'arguments, chacun sera passé à console.log ou console.error si c'est une erreur
  */
-function log() {
+function log () {
   if (isLogEnable) {
     var arg
     try {

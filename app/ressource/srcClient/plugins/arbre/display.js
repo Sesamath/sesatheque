@@ -43,7 +43,7 @@ var jstreeConverter = require('../../display/jstreeConverter')
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   var error
   page.loadAsync('jquery', function () {
     var $ = window.jQuery
@@ -62,9 +62,9 @@ module.exports = function display(ressource, options, next) {
         if (!ressource.base) ressource.base = '/'
 
         // un div d'aperçu
-        //var apercuElt = dom.getElement('iframe', {id: dom.getNewId(), width:'50%',height:'400px', style : 'float:right;resize:both;overflow:scroll;'})
-        //var apercuElt = dom.getElement('div', {id: dom.getNewId(), style : 'float:right;width:50%;height:400px;resize:both;border:none;'})
-        //dom.addElement(apercuElt, 'iframe', {style : 'width:100%;height:100%;border:none;'})
+        // var apercuElt = dom.getElement('iframe', {id: dom.getNewId(), width:'50%',height:'400px', style : 'float:right;resize:both;overflow:scroll;'})
+        // var apercuElt = dom.getElement('div', {id: dom.getNewId(), style : 'float:right;width:50%;height:400px;resize:both;border:none;'})
+        // dom.addElement(apercuElt, 'iframe', {style : 'width:100%;height:100%;border:none;'})
         var apercuContainer = dom.addElement(container, 'div', {
           style: {
             position: 'absolute',
@@ -183,8 +183,8 @@ module.exports = function display(ressource, options, next) {
         var jstData = {
           'core': {
             'data': function (node, next) {
-              //log('fct data', node)
-              if (node.id == '#') {
+              // log('fct data', node)
+              if (node.id === '#') {
                 next(rootElt)
               } else {
                 // faut faire l'appel ajax nous même car jstree peut pas mixer json initial + ajax ensuite
@@ -207,7 +207,7 @@ module.exports = function display(ressource, options, next) {
         }
 
         var $tree = $('#' + treeId)
-        //log('$tree', $tree)
+        // log('$tree', $tree)
         $tree.jstree(jstData)
 
         /* Pour récupérer un élément sous sa forme jstree, c'est (id est l'id jstree, sans #)

@@ -43,7 +43,7 @@ var log = require('../../tools/log')
  * @param {displayOptions} options    Possibilité de passer ecjsBase pour modifier http://ressources.sesamath.net/replication_calculatice/javascript
  * @param {errorCallback}  [next]     La fct à appeler quand le swf sera chargé
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   try {
     // vérifs de base
     if (!options.container) throw new Error('Paramétrage manquant (conteneur)')
@@ -56,7 +56,7 @@ module.exports = function display(ressource, options, next) {
 
       // d'après {ecjsBase}/api/clc-api.main.js
       // celui-là détruit notre style et semble ne rien apporter dans les exos
-      //'http://calculatice.ac-lille.fr/calculatice/squelettes/css/clear.css',
+      // 'http://calculatice.ac-lille.fr/calculatice/squelettes/css/clear.css',
       dom.addCss(ecjsBase + '/lib-externes/jquery/css/start/jquery-ui-1.10.4.custom.min.css')
       dom.addCss(ecjsBase + '/clc/css/clc.css')
       // si on prend pas le css original qui reset html et body, ça casse tout (le rectangle clc s'affiche pas),
@@ -64,8 +64,8 @@ module.exports = function display(ressource, options, next) {
       head.ready(function () {
         // on attend que tout soit fini pour virer require que Raphael et Big ne supportent pas
         // on espère que plus personne n'en aura besoin
-        if (typeof require !== 'undefined') require = undefined // jshint ignore:line
-        if (typeof define !== 'undefined') define = undefined // jshint ignore:line
+        if (typeof require !== 'undefined') require = undefined // eslint-disable-line no-native-reassign
+        if (typeof define !== 'undefined') define = undefined // eslint-disable-line no-undef
         // Cf /home/sesamath/bin/fetchCalculatice.sh qui tourne sur le serveur web ressources.sesamath.net
         // pour la liste des js concaténés dans scripts.js
         head.load(ecjsBase + '/scripts.js', function () {
@@ -80,7 +80,7 @@ module.exports = function display(ressource, options, next) {
           /*global CLC, $*/
           function envoyerScoreExoJs (event, data) {
             log('résultats reçus du js calculatice', data)
-            resultatSent = true; // même si ça plante, pas la peine de recommencer au unload
+            resultatSent = true // même si ça plante, pas la peine de recommencer au unload
             var dataToSend = {
               fin: true
             }
@@ -122,7 +122,7 @@ module.exports = function display(ressource, options, next) {
           if (next && typeof next === 'function') {
             setTimeout(function () {
               if (!exoLoaded) next(new Error('Exercice calculatice toujours pas chargé après 10s'))
-            }, 10000); // on laisse 10s avant d'envoyer une erreur de chargement
+            }, 10000) // on laisse 10s avant d'envoyer une erreur de chargement
           }
           // on envoie un score vide au unload si rien n'a été envoyé avant
           if (options && options.resultatCallback) {
@@ -205,7 +205,7 @@ module.exports = function display(ressource, options, next) {
                   } else {
                     log.error('Pas trouvé le bouton paramétrer après 5s', $exoClc.html())
                   }
-                  //$('button.tester-parametre').hide()
+                  // $('button.tester-parametre').hide()
                 }
 
                 delayOptions()

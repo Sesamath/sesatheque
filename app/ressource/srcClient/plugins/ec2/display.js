@@ -43,13 +43,13 @@ var swf = require('../../display/swf')
  * @param {displayOptions} options    Possibilité de passer ec2Base pour modifier http://ressources.sesamath.net/replication_calculatice/flash
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   try {
     var ec2Base = tools.getURLParameter('ec2Base') || options.ec2Base || 'http://ressources.sesamath.net/replication_calculatice/flash'
     var swfUrl
 
     log('start ec2 display avec la ressource', ressource)
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
       throw new Error('Paramètres manquants')
     }
@@ -72,7 +72,7 @@ module.exports = function display(ressource, options, next) {
     dom.empty(options.container)
 
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    options.container.setAttribute('width', 735); // change rien avec ff
+    options.container.setAttribute('width', 735) // change rien avec ff
     options.container.style.width = '735px'
 
     var swfOptions = {
@@ -86,7 +86,6 @@ module.exports = function display(ressource, options, next) {
     }
 
     swf.load(options.container, swfUrl, swfOptions, next)
-
   } catch (error) {
     if (next) next(error)
     else page.addError(error)

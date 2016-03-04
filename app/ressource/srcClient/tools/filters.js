@@ -79,7 +79,6 @@ filters.arrayString = function (arg) {
   return arg
 }
 
-
 /**
  * Retourne l'entier positif fourni ou 0
  * @param {number|string} arg
@@ -87,9 +86,9 @@ filters.arrayString = function (arg) {
  */
 filters.int = function (arg) {
   var int = 0
-  if (typeof arg === 'string') int = parseInt(arg, 10)
-  else if (typeof arg === 'number') int = Math.floor(arg)
-  if (int < 1 || int != arg) int = 0
+  if (typeof arg === 'string') int = Number(arg)
+  if (typeof arg === 'number') int = Math.floor(arg)
+  if (int < 1 || int != arg) int = 0 // eslint-disable-line eqeqeq
   return int
 }
 

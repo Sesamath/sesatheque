@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 /**
  * module log avec ses nos loggers maison
@@ -61,25 +61,25 @@ var streamsVerbose = []
  * @param {boolean} [verbose] Annonce l'ouverture et la fermeture du fichier dans le fichier
  * @returns {stream.Writable}
  */
-function getLogStream(log, verbose) {
-  var file = config.logs.dir +'/' +log
-  var options = {'flags': 'a', mode:'0644'}
+function getLogStream (log, verbose) {
+  var file = config.logs.dir + '/' + log
+  var options = {'flags': 'a', mode: '0644'}
   var stream
   try {
     stream = fs.createWriteStream(file, options)
     if (stream) {
       if (verbose) {
         streamsVerbose.push(stream)
-        stream.write(getPrefix() +'log opened by pid ' +process.pid +'\n')
+        stream.write(getPrefix() + 'log opened by pid ' + process.pid + '\n')
       } else {
         streamsQuiet.push(stream)
       }
-      applog('app', 'ouverture du log ' +file)
+      applog('app', 'ouverture du log ' + file)
     } else {
-      applog('app', 'ouverture du log ' +file +' KO')
+      applog('app', 'ouverture du log ' + file + ' KO')
     }
-  } catch(error) {
-    applog('app', "ERROR : impossible d'ouvrir " +file)
+  } catch (error) {
+    applog('app', "ERROR : impossible d'ouvrir " + file)
   }
 
   return stream
@@ -95,8 +95,7 @@ var errorDataOutputStream = getLogStream(config.logs.errorData, true)
 /** un log pour mesure de performances */
 var perfOutputStream
 
-var env = process.env.NODE_ENV || 'dev';
-
+var env = process.env.NODE_ENV || 'dev'
 
 /**
  * Les messages à exclure
@@ -110,8 +109,8 @@ var exclusions = {}
  * @private
  * @returns {string}
  */
-function getPrefix() {
-  return '[' + moment().format('YYYY-MM-DD HH:mm:ss.SSS') +'] '
+function getPrefix () {
+  return '[' + moment().format('YYYY-MM-DD HH:mm:ss.SSS') + '] '
 }
 
 /**
@@ -125,23 +124,23 @@ function getPrefix() {
  *                                          indent pour indenter objectToDump du nombre d'espaces demandés,
  *                                          max pour modifier la limite de la sortie (200 par défaut)
  */
-function out(message, objectToDump, filter, stream, options) {
+function out (message, objectToDump, filter, stream, options) {
   if (!options) options = {}
   if (!filter || !exclusions[filter]) {
     // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
     if (message instanceof Error) message = message.stack + '\n'
     if (objectToDump) {
-      if (objectToDump instanceof Error) message += '\n' +objectToDump.stack + '\n'
+      if (objectToDump instanceof Error) message += '\n' + objectToDump.stack + '\n'
       else {
         var dump = tools.stringify(objectToDump, options.indent)
         var max = options && options.max || 200
         if (dump.length > max) dump = dump.substr(0, max) + '…'
-        message += '\n' +dump  + '\n';
+        message += '\n' + dump + '\n'
       }
     }
-    message = getPrefix() +message
-    if (!stream) console.log(message)
-    else stream.write(message + '\n')
+    message = getPrefix() + message
+    if (stream) stream.write(message + '\n')
+    else console.log(message)
   }
 }
 // log
@@ -178,8 +177,9 @@ if (config.logs.debug) {
    * @param message
    * @param objectToDump
    * @param filter
+   * @param options
    */
-  log.debug = function(message, objectToDump, filter, options) {
+  log.debug = function (message, objectToDump, filter, options) {
     out(message, objectToDump, filter, debugOutputStream, options)
   }
 
@@ -189,11 +189,10 @@ if (config.logs.debug) {
     })
   }
 
-  applog('app', 'fonction log.debug activée vers ' +config.logs.debug +", avec l'environnement : " +env)
-
+  applog('app', 'fonction log.debug activée vers ' + config.logs.debug + ", avec l'environnement : " + env)
 } else {
-  log.debug = function() {};
-  applog('app', "fonction log.debug désactivée avec l'environnement : " +env)
+  log.debug = function () {}
+  applog('app', "fonction log.debug désactivée avec l'environnement : " + env)
 }
 
 // log.perf
@@ -211,8 +210,8 @@ if (config.logs.perf) {
   log.perf = function (response, strToAdd, noTimer) {
     var timer = !noTimer
     if (response.perf && response.perf.msg) {
-      response.perf.msg += '\t' +strToAdd
-      if (timer) response.perf.msg += ' ' +log.getElapsed(response.perf.start)
+      response.perf.msg += '\t' + strToAdd
+      if (timer) response.perf.msg += ' ' + log.getElapsed(response.perf.start)
     }
   }
   /**
@@ -222,7 +221,7 @@ if (config.logs.perf) {
   log.perf.out = function (response) {
     if (response.perf) {
       log.perf(response, 'end')
-      out((response.statusCode||'000') +'\t' +response.perf.msg, null, null, perfOutputStream)
+      out((response.statusCode || '000') + '\t' + response.perf.msg, null, null, perfOutputStream)
     }
   }
 } else {
@@ -309,7 +308,7 @@ if (_lassi.on) {
     }
     if (streamsVerbose.length) {
       _.each(streamsVerbose, function (stream) {
-        stream.end(getPrefix() +'log closed by pid ' +process.pid +' on shutdown\n', this)
+        stream.end(getPrefix() + 'log closed by pid ' + process.pid + ' on shutdown\n', this)
       })
     }
   })

@@ -47,11 +47,11 @@ var histoReponses = []
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   try {
     log('start calkc display avec la ressource', ressource)
     var swfUrl
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
       throw new Error('Paramètres manquants')
     }
@@ -61,7 +61,7 @@ module.exports = function display(ressource, options, next) {
     // On réinitialise le conteneur
     dom.empty(container)
     // Ajout css
-    dom.addCss(options.pluginBase +'calkc.css')
+    dom.addCss(options.pluginBase + 'calkc.css')
 
     // callback de réponse (toujours appelée par le swf) exportée dans le dom (nom en dur dans le swf)
     if (options.resultatCallback) {
@@ -94,7 +94,6 @@ module.exports = function display(ressource, options, next) {
     }
     log('appel swfobject avec', swfOptions)
     swf.load(container, swfUrl, swfOptions, next)
-
   } catch (error) {
     if (next) next(error)
     else page.addError(error)

@@ -38,7 +38,7 @@ var FormGroup = require('./FormGroup')
  * @param {object} [values] Des valeurs d'initialisation
  * @constructor
  */
-function Form(values) {
+function Form (values) {
   if (!values || typeof values !== 'object') values = {}
   if (values.id) {
     /**
@@ -97,10 +97,10 @@ function Form(values) {
  * @param {object|FormGroup} group
  * @returns {FormGroup}
  */
-Form.prototype.addGroup = function addGroup(group) {
+Form.prototype.addGroup = function addGroup (group) {
   var formGroup = new FormGroup(group)
   this.groups.push(formGroup)
-  
+
   return formGroup
 }
 
@@ -110,7 +110,7 @@ Form.prototype.addGroup = function addGroup(group) {
  * @param {boolean} [inNewGroup=false]
  * @returns {FormField}
  */
-Form.prototype.addField = function addField(field, inNewGroup) {
+Form.prototype.addField = function addField (field, inNewGroup) {
   var nb = this.groups.length
   var formGroup
   if (inNewGroup || !nb) {
@@ -129,13 +129,13 @@ Form.prototype.addField = function addField(field, inNewGroup) {
  * @param {string} [label] label qui serait ajouté au fieldset du submit
  * @param {string} className
  */
-Form.prototype.addSubmit = function addSubmit(value, id, label, className) {
+Form.prototype.addSubmit = function addSubmit (value, id, label, className) {
   var group = {}
   if (label) group.label = label
   var formGroup = this.addGroup(group)
   var submit = {
-    value:value,
-    widget:'submit'
+    value: value,
+    widget: 'submit'
   }
   if (id) submit.id = id
   if (className) submit.className = className
@@ -147,7 +147,7 @@ Form.prototype.addSubmit = function addSubmit(value, id, label, className) {
  * @param {string} id
  * @returns {FormGroup}
  */
-Form.prototype.getFieldById = function getFieldById(id) {
+Form.prototype.getFieldById = function getFieldById (id) {
   var field
   if (id) {
     this.groups.some(function (formGroup) {
@@ -167,7 +167,7 @@ Form.prototype.getFieldById = function getFieldById(id) {
  * @param {string} name
  * @returns {FormField}
  */
-Form.prototype.getFieldByName = function getFieldByName(name) {
+Form.prototype.getFieldByName = function getFieldByName (name) {
   var field
   if (name) {
     this.groups.some(function (formGroup) {
@@ -187,7 +187,7 @@ Form.prototype.getFieldByName = function getFieldByName(name) {
  * @param {string} name
  * @returns {FormGroup}
  */
-Form.prototype.getGroupByName = function getGroupByName(name) {
+Form.prototype.getGroupByName = function getGroupByName (name) {
   var group
   if (name) {
     this.groups.some(function (formGroup) {
@@ -205,7 +205,7 @@ Form.prototype.getGroupByName = function getGroupByName(name) {
  * @param {string} id
  * @returns {FormGroup}
  */
-Form.prototype.getGroupById = function getGroupById(id) {
+Form.prototype.getGroupById = function getGroupById (id) {
   var group
   if (id) {
     this.groups.some(function (formGroup) {
@@ -217,6 +217,5 @@ Form.prototype.getGroupById = function getGroupById(id) {
   }
   return group
 }
-
 
 module.exports = Form

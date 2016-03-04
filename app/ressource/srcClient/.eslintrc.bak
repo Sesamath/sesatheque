@@ -1,9 +1,5 @@
 {
   "browser": true,
   "node": false,
-  "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module"
-  },
   "globals": ["require", "module"]
 }

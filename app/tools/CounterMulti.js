@@ -35,7 +35,7 @@
  * Une série de compteurs, chaque clé étant un compteur pouvant être incrémenté, décrémenté ou supprimé
  * @constructor
  */
-function CounterMulti() {
+function CounterMulti () {
   /**
    * Le nombre de clés
    * @type {number}
@@ -93,7 +93,7 @@ CounterMulti.prototype.total = function () {
  * @returns {number}
  */
 CounterMulti.prototype.resetLength = function () {
-  this.length = Object.keys(this).length -1
+  this.length = Object.keys(this).length - 1
   return this.length
 }
 

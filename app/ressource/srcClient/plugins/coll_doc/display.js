@@ -43,7 +43,7 @@ var baseCollDoc = 'http://ressources.sesamath.net'
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  [next]     La fct à appeler quand le contenu sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   try {
     var container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
@@ -62,7 +62,7 @@ module.exports = function display(ressource, options, next) {
     }
 
     log('start coll_doc display avec la ressource', ressource)
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres) {
       throw new Error('Paramètres manquants')
     }

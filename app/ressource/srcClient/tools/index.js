@@ -37,7 +37,7 @@
 
 // on ajoute du forEach sur les Array si le navigateur connait pas
 if (!Array.prototype.forEach) {
-  Array.prototype.forEach = function (fn) { // jshint ignore:line
+  Array.prototype.forEach = function (fn) { // eslint-disable-line no-extend-native
     for (var i = 0; i < this.length; i++) {
       // on passe en argument (eltDuTableau, index, tableau)
       fn(this[i], i, this)
@@ -52,7 +52,6 @@ var log = require('./log')
  * @module sesamath
  */
 var tools = {}
-
 
 /**
  * Récupère un paramètre de l'url courante
@@ -110,7 +109,7 @@ tools.urlAddSlashAdd = function (url) {
   if (typeof url === 'string') {
     if (url.length === 0 || url.substr(-1) !== '/') url += '/'
   } else {
-    log.error('slashAdd veut une string, reçu ' +typeof url)
+    log.error('slashAdd veut une string, reçu ' + typeof url)
     url = '/'
   }
 
@@ -124,9 +123,9 @@ tools.urlAddSlashAdd = function (url) {
  */
 tools.urlTrimSlash = function (url) {
   if (typeof url === 'string') {
-    if (url.length > 0 && url.substr(-1) === '/') url = url.substr(0, url.length -1)
+    if (url.length > 0 && url.substr(-1) === '/') url = url.substr(0, url.length - 1)
   } else {
-    log.error('slashRemove veut une string, reçu ' +typeof url)
+    log.error('slashRemove veut une string, reçu ' + typeof url)
     url = ''
   }
 

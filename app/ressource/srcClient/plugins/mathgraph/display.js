@@ -35,7 +35,7 @@ var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
-function displayJava(ressource, options, next) {
+function displayJava (ressource, options, next) {
   var params = ressource.parametres
   var container = options.container
   var width = Math.max(container.offsetWidth || 0, 640)
@@ -45,31 +45,31 @@ function displayJava(ressource, options, next) {
   // faut d'abord créer un élément html complet avant de le mettre dans le dom,
   // sinon il peut lancer le jar avant d'avoir tous les params
   var applet = dom.getElement(
-      'applet',
-      {
-        id:appletName,
-        //name: appletName +'name',
-        code: 'mathgraph32.MtgFrame.class',
-        archive: options.pluginBase +'MathGraph32Applet.jar',
-        width: width,
-        height: height,
-        style:'border:#000 solid 1px;'
-      }
+    'applet',
+    {
+      id: appletName,
+      // name: appletName +'name',
+      code: 'mathgraph32.MtgFrame.class',
+      archive: options.pluginBase + 'MathGraph32Applet.jar',
+      width: width,
+      height: height,
+      style: 'border:#000 solid 1px;'
+    }
   )
-  var allowFull = ['MenuBar', 'LeftToolbar', 'TopToolbar', 'RightToolbar', 'IndicationArea', 'ToolsChoice', 'FileMenu','OptionsMenu']
+  var allowFull = ['MenuBar', 'LeftToolbar', 'TopToolbar', 'RightToolbar', 'IndicationArea', 'ToolsChoice', 'FileMenu', 'OptionsMenu']
   var allowEleve = params.allowEleve || allowFull
   allowFull.forEach(function (allow) {
-    dom.addElement(applet, 'param', {name:'allow' +allow, value:(allowEleve.indexOf(allow) > -1)?'true':'false'})
+    dom.addElement(applet, 'param', {name: 'allow' + allow, value: (allowEleve.indexOf(allow) > -1) ? 'true' : 'false'})
   })
-  dom.addElement(applet, 'param', {name:'language', value:'true'})
-  dom.addElement(applet, 'param', {name:'level', value:params.level})
-  if (params.figure) dom.addElement(applet, 'param', {name:'figureData', value: params.figure})
-  else dom.addElement(applet, 'param', {name:'initialFigure', value:'orthonormalFrame'})
+  dom.addElement(applet, 'param', {name: 'language', value: 'true'})
+  dom.addElement(applet, 'param', {name: 'level', value: params.level})
+  if (params.figure) dom.addElement(applet, 'param', {name: 'figureData', value: params.figure})
+  else dom.addElement(applet, 'param', {name: 'initialFigure', value: 'orthonormalFrame'})
   dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
-  dom.addElement(applet, 'a', {href:'http://www.java.com'}, 'java.com')
+  dom.addElement(applet, 'a', {href: 'http://www.java.com'}, 'java.com')
   dom.addText(applet, ' pour installer java.')
   var p = dom.addElement(applet, 'p', {}, 'Sinon, visualiser cette page avec le ')
-  dom.addElement(p, 'a', {href:'?js=1'}, 'lecteur javascript')
+  dom.addElement(p, 'a', {href: '?js=1'}, 'lecteur javascript')
   dom.addText(p, " (mais l'enregistrement de la figure ne sera pas possible).")
   // on peut la mettre dans le dom
   dom.empty(container)
@@ -87,7 +87,7 @@ function displayJava(ressource, options, next) {
           ressType: 'mathgraph',
           ressOid: ressource.oid,
           score: 1,
-          reponse : newFigure
+          reponse: newFigure
         })
       } catch (error) {
         log.error(error)
@@ -100,7 +100,7 @@ function displayJava(ressource, options, next) {
   if (next) next()
 }
 
-function displayJs(ressource, options, next) {
+function displayJs (ressource, options, next) {
   var container = options.container
 
   // on enverra un résultat seulement à la fermeture
@@ -118,7 +118,7 @@ function displayJs(ressource, options, next) {
 
   // on affiche un avertissement si on force
   if (ressource.parametres.levelEleve > 0 && tools.getURLParameter('js')) {
-    dom.addElement(container, 'p', {'class':'warning'}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
+    dom.addElement(container, 'p', {'class': 'warning'}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
   }
 
   var dependencies = [
@@ -135,7 +135,7 @@ function displayJs(ressource, options, next) {
     // la consigne éventuelle
     if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
-    //var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
+    // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.setAttributeNS(null, 'id', svgId)
     svg.setAttributeNS(null, 'width', width)
@@ -151,7 +151,7 @@ function displayJs(ressource, options, next) {
       messageStyle: 'none'
     })
     MathJax.Hub.Queue(function () {
-      var mtg32App = new mtg32.mtg32App()
+      var mtg32App = new mtg32.mtg32App() // eslint-disable-line new-cap
       mtg32App.addDoc(svgId, ressource.parametres.figure, true)
       mtg32App.calculateAndDisplayAll()
       isLoaded = true
@@ -171,13 +171,13 @@ var isLoaded
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'mathgraph sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   try {
     var container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     log('start mathgraph display avec la ressource', ressource)
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres) {
       throw new Error('Paramètres manquants')
     }

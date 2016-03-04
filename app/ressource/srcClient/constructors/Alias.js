@@ -40,22 +40,22 @@
  * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Alias
  * @constructor
  */
-function Alias(initObj) {
+function Alias (initObj) {
   if (typeof initObj !== 'object') initObj = {}
   if (initObj.oid && initObj.ref && initObj.base) {
     // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et base)
-      // c'est un alias
-      /**
-       * oid de l'alias
-       * @type {number}
-       */
-      this.oid = initObj.oid
-      /**
-       * oid ou origine/idOrigine de la ressource que l'on référence
-       * @type {number|string}
-       */
-      this.ref = initObj.ref
-      // this base plus loin car peut exister sur un Alias sans oid (ex Ref)
+    // c'est un alias
+    /**
+     * oid de l'alias
+     * @type {number}
+     */
+    this.oid = initObj.oid
+    /**
+     * oid ou origine/idOrigine de la ressource que l'on référence
+     * @type {number|string}
+     */
+    this.ref = initObj.ref
+    // this base plus loin car peut exister sur un Alias sans oid (ex Ref)
   } else {
     // on nous passe un truc qu'on traite comme une ref ou une ressource
     this.ref = initObj.ref || initObj.oid
@@ -91,7 +91,7 @@ function Alias(initObj) {
    * Un ou des id de catégorie(s) éventuel (pour un picto)
    * @type {Array}
    */
-  this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : []
+  this.categories = (initObj.categories && initObj.categories instanceof Array) ? initObj.categories : []
   /**
    * True si public (sinon il faut être authentifié pour lire la ressource)
    * @type {boolean}

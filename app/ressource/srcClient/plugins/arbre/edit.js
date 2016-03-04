@@ -44,11 +44,11 @@ var jstreeConverter = require('../../display/jstreeConverter')
  * @param arbre
  * @param options
  */
-module.exports = function edit(arbre, options) {
+module.exports = function edit (arbre, options) {
   try {
     page.loadAsync(['jquery', 'apiClient'], function () {
       // nos fcts internes
-      function addApercu(items, node) {
+      function addApercu (items, node) {
         var ref = node.a_attr && node.a_attr['data-ref']
         // Apercu sur tous les éléments dont on a une ref
         if (ref) {
@@ -63,17 +63,18 @@ module.exports = function edit(arbre, options) {
         }
       }
 
-      function addError(errorMessage) {
+      function addError (errorMessage) {
         $loadError.text(errorMessage)
         if (!$loadError.hasClass('error')) $loadError.addClass('error')
-        setTimeout(function () {
-              $loadError.empty()
-            },
-            5000
+        setTimeout(
+          function () {
+            $loadError.empty()
+          },
+          5000
         )
       }
 
-      function addLoadSrc() {
+      function addLoadSrc () {
         dom.addElement(container, 'span', null, 'arbre source à charger ')
         inputRef = dom.addElement(container, 'input', {id: 'loadRef', type: 'text'})
         $inputRef = $(inputRef)
@@ -81,7 +82,7 @@ module.exports = function edit(arbre, options) {
         $inputRef.keypress(function (event) {
           if (event.keyCode === 13) {
             loadSrc()
-            return false; // pour empêcher le submit
+            event.preventDefault() // pour empêcher le submit
           }
         })
         // lien de chargement
@@ -96,7 +97,7 @@ module.exports = function edit(arbre, options) {
        * Crée un json de la liste des enfants de l'arbre destination et le met dans le textarea
        * @private
        */
-      function dstTreeToTextarea() {
+      function dstTreeToTextarea () {
         var jstree = $jstree.reference($dstTree)
         var enfants
         log('dstTreeToTextarea avec', jstree)
@@ -126,7 +127,7 @@ module.exports = function edit(arbre, options) {
        * @private
        * @param options
        */
-      function initDom(options) {
+      function initDom (options) {
         // Ajout css, si on a pas tant pis pour le css mais ça va être moche
         var vendorsBaseUrl = options.vendorsBaseUrl || '/vendors'
         var base = options.base || '/'
@@ -135,7 +136,7 @@ module.exports = function edit(arbre, options) {
         // nos éléments html
         container = window.document.getElementById('display')
         $container = $(container)
-        var blocTexte = window.document.getElementById('groupEnfants'); // le textarea et son titre
+        var blocTexte = window.document.getElementById('groupEnfants') // le textarea et son titre
         // faut ajouter nos eléments en first child
         // ancre
         dom.addElementFirstChild(blocTexte, 'a', {name: 'enfants'})
@@ -154,14 +155,14 @@ module.exports = function edit(arbre, options) {
         }, 'passer en mode texte')
         $linkShowTxt = $(linkShowTxt)
         $linkShowTxt.click(showTxt)
-        //dom.addElement(blocTexte, 'br')
-        //dom.addElement(blocTexte, 'a', {href:'?editor=texte'}, 'passer en mode texte sans sauvegarder')
+        // dom.addElement(blocTexte, 'br')
+        // dom.addElement(blocTexte, 'a', {href:'?editor=texte'}, 'passer en mode texte sans sauvegarder')
       }
 
       /**
        * Initialise les éléments de dom pour le mode graphique
        */
-      function initDomGraphic() {
+      function initDomGraphic () {
         addLoadSrc()
         // la recherche
         var searchContainer = dom.addElement(container, 'div', {class: 'search'})
@@ -188,7 +189,7 @@ module.exports = function edit(arbre, options) {
        * @private
        * @param arbre
        */
-      function loadDst(arbre) {
+      function loadDst (arbre) {
         var rootElt = jstreeConverter.toJstree(arbre)
         log('après conversion on va charger', rootElt)
         rootElt.state = {opened: true}
@@ -240,8 +241,8 @@ module.exports = function edit(arbre, options) {
                 items.create = {
                   label: 'Ajouter un dossier',
                   action: function (data) {
-                    //var name = w.prompt('Nom du dossier')
-                    //if (name) {
+                    // var name = w.prompt('Nom du dossier')
+                    // if (name) {
                     var inst = $jstree.reference(data.reference)
                     log('avant modif on a ' + inst._cnt + ' childs')
                     var node = inst.get_node(data.reference)
@@ -259,7 +260,7 @@ module.exports = function edit(arbre, options) {
                        isDstModified = true
                        }, 0); */
                     })
-                    //}
+                    // }
                   }
                 }
                 // idem pour les ressources
@@ -325,11 +326,10 @@ module.exports = function edit(arbre, options) {
           }
         }
 
-
         $dstTree.jstree('destroy')
         $dstTree.jstree(jstData)
-        //var jstree = $jstree.reference($dstTree)
-        //log('fct qui renvoie les items par défaut', jstree.settings.contextmenu.items.toString())
+        // var jstree = $jstree.reference($dstTree)
+        // log('fct qui renvoie les items par défaut', jstree.settings.contextmenu.items.toString())
 
         // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
         // on écoute donc l'événement select sur le jstree
@@ -349,7 +349,7 @@ module.exports = function edit(arbre, options) {
        * @private
        * @return {boolean}
        */
-      function loadSrc() {
+      function loadSrc () {
         var ref = $inputRef.val()
         log('On va charger en source ' + ref)
         if (ref) {
@@ -357,7 +357,6 @@ module.exports = function edit(arbre, options) {
             if (error) {
               page.addError('Erreur au chargement de ' + ref + ' : ' + error.toString(), 5)
             } else if (ressource && ressource.type === 'arbre') {
-              arbreInitial = ressource
               // on charge
               var rootElt = jstreeConverter.toJstree(ressource)
               rootElt.state = {opened: true}
@@ -396,7 +395,7 @@ module.exports = function edit(arbre, options) {
               var srcTreeRef = $jstree.reference($srcTree)
               if (srcTreeRef) srcTreeRef.destroy()
               $srcTree.jstree(jstData)
-              //log("après chargement de l'arbre source on a", $jstree.reference($srcTree))
+              // log("après chargement de l'arbre source on a", $jstree.reference($srcTree))
 
               // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
               // on écoute donc l'événement select sur le jstree
@@ -417,7 +416,7 @@ module.exports = function edit(arbre, options) {
                 // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
                 // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
                 if (timer) {
-                  clearTimeout(timer);
+                  clearTimeout(timer)
                 }
                 timer = setTimeout(function () {
                   var v = $searchInput.val()
@@ -432,7 +431,7 @@ module.exports = function edit(arbre, options) {
         } else {
           log('appel de load sans ref')
         }
-        return false; // sinon il submit le form !
+        return false // sinon il submit le form !
       } // loadSrc
 
       /**
@@ -440,8 +439,8 @@ module.exports = function edit(arbre, options) {
        * @private
        * @param jstNode
        */
-      function modifIco(jstNode) {
-        //log('modifIco', jstree)
+      function modifIco (jstNode) {
+        // log('modifIco', jstree)
         if (jstNode.children && jstNode.children.forEach) {
           jstNode.children.forEach(function (child) {
             if (child.children && child.children.length) {
@@ -460,7 +459,7 @@ module.exports = function edit(arbre, options) {
        * Récupère l'arbre jstree et complète le champ enfants avec
        * @private
        */
-      function saveDst() {
+      function saveDst () {
         if (!isTextMode) {
           dstTreeToTextarea()
         }
@@ -472,7 +471,7 @@ module.exports = function edit(arbre, options) {
        * Passe en mode texte
        * @private
        */
-      function showTxt() {
+      function showTxt () {
         $linkShowTxt.hide()
         $container.hide()
         dstTreeToTextarea()
@@ -485,7 +484,7 @@ module.exports = function edit(arbre, options) {
        * passe en mode graphique
        * @private
        */
-      function showGraphic() {
+      function showGraphic () {
         if (!$dstTree) initDomGraphic()
         try {
           dstTree.enfants = JSON.parse($textarea.val())
@@ -502,9 +501,9 @@ module.exports = function edit(arbre, options) {
         isTextMode = false
       }
 
-      /*********
-       * MAIN
-       */
+      // ###########
+      // MAIN
+      // ###########
       if (typeof window.jQuery === 'undefined') throw new Error('Problème de chargement jQuery')
       var $ = window.jQuery
       /* jshint jquery:true */
@@ -518,12 +517,11 @@ module.exports = function edit(arbre, options) {
       // quasi les mêmes jquerifiée
       var $container, $inputRef, $loadError, $srcTree, $dstTree, $saveButton, $textarea, $linkShowTxt, $linkShowGraphic
       var isTextMode = true
-      var arbreInitial
       var isDstModified = false
       // le textarea enfants
       $textarea = $('#enfants')
       if (!$textarea) throw new Error('Champ de sauvegarde des enfants non trouvé dans le formulaire')
-      var $jstree = $.jstree; // globale pour $.jstree que l'on perd dans les callbacks
+      var $jstree = $.jstree // globale pour $.jstree que l'on perd dans les callbacks
       $saveButton = $('#saveButton')
       if (!$saveButton) throw new Error('Bouton de sauvegarde non trouvé dans la page')
 

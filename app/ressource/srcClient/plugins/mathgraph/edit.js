@@ -38,7 +38,7 @@ var formEditor = require('../../edit/formEditor')
 
 /* jshint jquery:true */
 
-function addApplet(isFullSize) {
+function addApplet (isFullSize) {
   if (isFullSize) {
     width = Math.max(appletContainer.offsetWidth || 0, width)
     height = Math.max(height, Math.round(width * 0.75))
@@ -47,38 +47,38 @@ function addApplet(isFullSize) {
   // faut d'abord créer un élément html complet avant de le mettre dans le dom,
   // sinon il peut lancer le jar avant d'avoir tous les params
   var applet = dom.getElement(
-      'applet',
-      {
-        id:appletName,
-        //name: appletName +'name',
-        code: 'mathgraph32.MtgFrame.class',
-        archive: '/plugins/mathgraph/MathGraph32Applet.jar',
-        width: width,
-        height: height,
-        style:'border:#000 solid 1px;'
-      },
-      {label:'Figure mathgraph'}
+    'applet',
+    {
+      id: appletName,
+      // name: appletName +'name',
+      code: 'mathgraph32.MtgFrame.class',
+      archive: '/plugins/mathgraph/MathGraph32Applet.jar',
+      width: width,
+      height: height,
+      style: 'border:#000 solid 1px;'
+    },
+    {label: 'Figure mathgraph'}
   )
   for (var allow in allowDef) {
     if (allowDef.hasOwnProperty(allow)) {
-      dom.addElement(applet, 'param', {name:'allow' +allow, value:(allowProf.indexOf(allow) > -1)?'true':'false'})
+      dom.addElement(applet, 'param', {name: 'allow' + allow, value: (allowProf.indexOf(allow) > -1) ? 'true' : 'false'})
     }
   }
-  dom.addElement(applet, 'param', {name:'initialFigure', value:'orthonormalFrame'})
-  dom.addElement(applet, 'param', {name:'language', value:'true'})
+  dom.addElement(applet, 'param', {name: 'initialFigure', value: 'orthonormalFrame'})
+  dom.addElement(applet, 'param', {name: 'language', value: 'true'})
   var level = (levelProf === 0) ? levelEleve : levelProf
-  dom.addElement(applet, 'param', {name:'level', value:level})
-  dom.addElement(applet, 'param', {name:'figureData', value: $figureData.val()})
+  dom.addElement(applet, 'param', {name: 'level', value: level})
+  dom.addElement(applet, 'param', {name: 'figureData', value: $figureData.val()})
 
   dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
-  dom.addElement(applet, 'a', {href:'http://www.java.com'}, 'java.com')
+  dom.addElement(applet, 'a', {href: 'http://www.java.com'}, 'java.com')
   dom.addText(applet, ' pour installer java.')
   // on peut la mettre dans le dom
   dom.empty(appletContainer)
   appletContainer.appendChild(applet)
 }
 
-function hideApplet() {
+function hideApplet () {
   try {
     var newFigure = document.mtgApplet.getScript()
     log('on récupère ' + newFigure)
@@ -95,7 +95,7 @@ function hideApplet() {
   }
 }
 
-function showApplet() {
+function showApplet () {
   // on rafraîchi nos valeurs d'après le form
   width = parseInt($width.val(), 10) || 600
   height = parseInt($height.val(), 10) || Math.round(width * 0.75)
@@ -108,7 +108,7 @@ function showApplet() {
   submitHandler = onSubmitGetMgData
 }
 
-function onSubmitGetMgData() {
+function onSubmitGetMgData () {
   log("submit avec figure à récupérer dans l'applet")
   var retour = false
   try {
@@ -130,27 +130,36 @@ function onSubmitGetMgData() {
   return retour
 }
 
-function onSubmitTrue() {
+function onSubmitTrue () {
   log('submit sans récupération')
   return true
 }
 
 // var globales à notre module (initialisées par init et utilisées par nos fcts)
-var allowProf, levelEleve, levelProf, figureBase64Ini,
-    width, height, $width, $height,
-    appletContainer,
-    $appletContainer, $figureData,
-    $isFullSize, $dataContainer, $form
+var allowProf
+var levelEleve
+var levelProf
+var figureBase64Ini
+var width
+var height
+var $width
+var $height
+var appletContainer
+var $appletContainer
+var $figureData
+var $isFullSize
+var $dataContainer
+var $form
 // les fonctionnalités dispo
 var allowDef = {
-  'MenuBar' : 'Barre de menu',
-  'LeftToolbar' : "Barre d'outils de gauche",
-  'TopToolbar' : "Barre d'outils du haut",
-  'RightToolbar' : "Barre d'outils de droite",
-  'IndicationArea' : "Zone d'information du bas",
-  'ToolsChoice' : 'Choix des outils',
-  FileMenu : 'Menu Fichier',
-  OptionsMenu : 'Menu Options'
+  MenuBar: 'Barre de menu',
+  LeftToolbar: "Barre d'outils de gauche",
+  TopToolbar: "Barre d'outils du haut",
+  RightToolbar: "Barre d'outils de droite",
+  IndicationArea: "Zone d'information du bas",
+  ToolsChoice: 'Choix des outils',
+  FileMenu: 'Menu Fichier',
+  OptionsMenu: 'Menu Options'
 }
 // le submitHandler, à true par défaut
 // on ne peut appeler $form.submit() qu'une fois puisqu'on lui passe un écouteur,
@@ -162,7 +171,7 @@ var submitHandler = onSubmitTrue
  * @service plugins/mathgraph/edit
  * @param {Ressource} ressource
  */
-module.exports = function mathgraphEdit(ressource) {
+module.exports = function mathgraphEdit (ressource) {
   page.loadAsync(['jquery'], function () {
     var $ = window.jQuery
     try {
@@ -308,7 +317,7 @@ module.exports = function mathgraphEdit(ressource) {
 
       $form = $('form#formRessource')
       $form.submit(function () {
-        submitHandler(); // on peut pas passer sa valeur actuelle en argument, faut l'exécuter à chaque fois
+        submitHandler() // on peut pas passer sa valeur actuelle en argument, faut l'exécuter à chaque fois
       })
 
       // le hide/show au changement de select
@@ -324,7 +333,7 @@ module.exports = function mathgraphEdit(ressource) {
       })
 
       if (isApplet) showApplet()
-      else $allowProfCb.hide(); // pas de hideApplet tant qu'on l'a pas mise
+      else $allowProfCb.hide() // pas de hideApplet tant qu'on l'a pas mise
     } catch (error) {
       page.addError(error)
     }

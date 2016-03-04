@@ -59,9 +59,6 @@ var externalModules = {
   swfobject: 'vendor/swfobject/swfobject.2.3.min.js'
 }
 
-// pour mémoriser les modules déjà chargés
-var loadedModules = {}
-
 var base = '/'
 
 /**
@@ -163,10 +160,10 @@ function init (options, next) {
 function loadAsync (moduleNames, callback) {
   function headLoad (paths, cb) {
     var loader = w.head.load || w.head.js // les anciennes versions de head utilisaient head.js avec la même signature
-    if (loader) loader(paths, callback)
+    if (loader) loader(paths, cb)
     else console.error('Impossible de trouver head pour chargement asynchrone')
   }
-  function headReady(next) {
+  function headReady (next) {
     if (typeof window.head === 'undefined') {
       dom.addJs(externalModules.head, function () {
         next()

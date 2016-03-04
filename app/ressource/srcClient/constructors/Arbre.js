@@ -40,7 +40,7 @@
  * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel Arbre
  * @constructor
  */
-function Arbre(initObj) {
+function Arbre (initObj) {
   if (typeof initObj !== 'object') initObj = {}
   /**
    * L'identifiant de l'arbre (pour éventuellement le référencer comme enfant d'un autre arbre)
@@ -57,7 +57,7 @@ function Arbre(initObj) {
    */
   this.ref = initObj.ref
   if (!this.ref && initObj.origine && initObj.idOrigine) {
-    this.ref = initObj.origine +'/' +initObj.idOrigine
+    this.ref = initObj.origine + '/' + initObj.idOrigine
   }
   /**
    * Le nom
@@ -74,7 +74,7 @@ function Arbre(initObj) {
    * Des attributs du node (ou la racine de l'arbre), ça peut être ico pour une icone particulière
    * @type {Object}
    */
-  this.attributes = (initObj.attributes && initObj.attributes instanceof Object ) ? initObj.attributes : {}
+  this.attributes = (initObj.attributes && initObj.attributes instanceof Object) ? initObj.attributes : {}
   /**
    * Les enfants, un tableaux d'objets Arbre (qui peuvent n'être que des références, ou un mix)
    * @type {Arbre[]}

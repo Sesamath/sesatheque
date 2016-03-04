@@ -47,7 +47,7 @@ var tools = {}
  * @param object
  * @returns {Object}
  */
-tools.clone = function(object) {
+tools.clone = function (object) {
   var copy = object
   if (object instanceof Array) {
     copy = object.slice()
@@ -67,7 +67,7 @@ tools.clone = function(object) {
  * @param {object} object
  * @returns {object}
  */
-tools.cloneData = function(object) {
+tools.cloneData = function (object) {
   return tools.parse(tools.stringify(object))
 }
 
@@ -78,11 +78,11 @@ tools.cloneData = function(object) {
  * @param {object}  defaultValues
  * @param {boolean} [recursion=true] Passer false pour ne compléter que les propriétés 'racine' de l'objet sans récursion
  */
-tools.complete = function(object, defaultValues, recursion) {
+tools.complete = function (object, defaultValues, recursion) {
   // recursion=true par défaut
   if (recursion !== false) recursion = true
-  function completeObj(obj, values) {
-    _.each(values, function(value, key) {
+  function completeObj (obj, values) {
+    _.each(values, function (value, key) {
       if (!obj.hasOwnProperty(key)) obj[key] = value
       else if (recursion && _.isObject(obj[key]) && _.isObject(value)) completeObj(obj[key], value)
     })
@@ -102,11 +102,11 @@ tools.complete = function(object, defaultValues, recursion) {
 tools.encadre = function (int, min, max, label) {
   var value = parseInt(int)
   if (value < min) {
-    log.error(label +' trop petit (' +value +'), on le fixe à ' +min)
+    log.error(label + ' trop petit (' + value + '), on le fixe à ' + min)
     value = min
   }
   if (value > max) {
-    log.error(label +' trop grand (' +value +'), on le fixe à ' +max)
+    log.error(label + ' trop grand (' + value + '), on le fixe à ' + max)
     value = max
   }
   return value
@@ -118,7 +118,7 @@ tools.encadre = function (int, min, max, label) {
  * mais suffisant dans pas mal de cas (utiliser an-uuid sinon)
  * @returns {string}
  */
-tools.getToken = function getToken() {
+tools.getToken = function getToken () {
   return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
 }
 
@@ -139,13 +139,14 @@ tools.isEqual = function (obj1, obj2) {
  * @returns {Array} Le tableau copié et éventuellement modifié
  */
 tools.integerify = function (tab) {
-  var i, tabCopy = []
+  var i
+  var tabCopy = []
   if (tab instanceof Array) {
     tab.forEach(function (value) {
       if (_.isArray(value)) tabCopy.push(tools.integerify(value))
       else if (typeof value === 'string' || typeof value === 'number') {
         i = parseInt(value, 10)
-        if (value == i) tabCopy.push(i)
+        if (value == i) tabCopy.push(i) // eslint-disable-line eqeqeq
         else tabCopy.push(value)
       } else {
         tabCopy.push(value)
@@ -197,10 +198,10 @@ tools.isPublic = function (url) {
 tools.link = function (path, texte, args) {
   if (args) {
     if (_.isArray(args)) path += args.join('/')
-    else path += '/' +args
+    else path += '/' + args
   }
 
-  return '<a href="' +path +'">' +texte +'</a>'
+  return '<a href="' + path + '">' + texte + '</a>'
 }
 
 /**
@@ -215,12 +216,12 @@ tools.linkQs = function (path, texte, args) {
   if (args) {
     var paires = []
     for (var p in args) {
-      if (args.hasOwnProperty(p)) paires.push(p +'=' +encodeURIComponent(args[p]))
+      if (args.hasOwnProperty(p)) paires.push(p + '=' + encodeURIComponent(args[p]))
     }
-    if (paires.length) path += '?' +paires.join('&')
+    if (paires.length) path += '?' + paires.join('&')
   }
 
-  return '<a href="' +path +'">' +texte +'</a>'
+  return '<a href="' + path + '">' + texte + '</a>'
 }
 
 /**
@@ -232,8 +233,8 @@ tools.linkQs = function (path, texte, args) {
  * @param {Object} newValues Les valeurs à fusionner
  * @param {boolean} [strict=false] passer true pour lancer une exception si les arguments ne sont pas 2 Object ou 2 Array
  */
-tools.merge = function(object, newValues, strict) {
-  function mergeArray(arDest, arSrc) {
+tools.merge = function (object, newValues, strict) {
+  function mergeArray (arDest, arSrc) {
     var s, d, found
     for (s = 0; s < arSrc.length; s++) {
       found = false
@@ -246,8 +247,8 @@ tools.merge = function(object, newValues, strict) {
       if (!found) arDest.push(arSrc[s])
     }
   }
-  function mergeObj(obj, values) {
-    _.each(values, function(value, key) {
+  function mergeObj (obj, values) {
+    _.each(values, function (value, key) {
       // 2 tableaux à merger
       if (_.isArray(value) && _.isArray(obj[key])) mergeArray(obj[key], value)
       // 2 objets
@@ -287,7 +288,7 @@ tools.parse = function (jsonString) {
  * @param {string} source La chaîne à nettoyer
  * @returns {string} La chaîne nettoyée
  */
-tools.sanitizeHashKey = function(source) {
+tools.sanitizeHashKey = function (source) {
   return source.replace(' ', '_').replace(/[\x00-\x20\x7F-\xA0]/, '')
 }
 
@@ -330,25 +331,25 @@ tools.strFormat = function (message, args) {
  * @param {number} [indent] Le nb d'espaces d'indentation
  * @returns {string}
  */
-tools.stringify = function(obj, indent) {
+tools.stringify = function (obj, indent) {
   var buffer
 
   if (obj) {
     // ça peut planter en cas de ref circulaire
     try {
-      buffer = indent ? JSON.stringify(obj, null, indent):JSON.stringify(obj)
+      buffer = indent ? JSON.stringify(obj, null, indent) : JSON.stringify(obj)
     } catch (error) {
       var pile = []
-      _.each(obj, function(value, key) {
+      _.each(obj, function (value, key) {
         buffer = '"' + key + '":'
         try {
-          buffer += indent ? JSON.stringify(value, null, indent):JSON.stringify(value)
+          buffer += indent ? JSON.stringify(value, null, indent) : JSON.stringify(value)
         } catch (error) {
-          buffer += '"stringifyError : ' + error.toString() +'"'
+          buffer += '"stringifyError : ' + error.toString() + '"'
         }
         pile.push(buffer)
       })
-      buffer = '{' +pile.join(',\n') +'}'
+      buffer = '{' + pile.join(',\n') + '}'
     }
   }
   return buffer
@@ -361,7 +362,7 @@ tools.stringify = function(obj, indent) {
  * @returns {string}
  */
 tools.stripTags = function (source) {
-  return source.replace(/(<([^>]+)>)/ig,'')
+  return source.replace(/(<([^>]+)>)/ig, '')
 }
 
 /**
@@ -369,7 +370,7 @@ tools.stripTags = function (source) {
  * @param {string} list
  * @returns {string[]} la liste des ids récupérés (tous les caractères autres que lettres, chiffres, tiret et underscore ont été virés)
  */
-tools.idListToArray = function idListToArray(list) {
+tools.idListToArray = function idListToArray (list) {
   var retour = []
   if (typeof list === 'string') retour = list.match(/([A-Za-z0-9_\-]+)/g)
   else log.error(new TypeError('faut me donner un type string'))
@@ -431,8 +432,8 @@ tools.truePropertiesList = function (obj) {
  * @param object
  * @param addition
  */
-tools.update = function(object, addition) {
-  Object.getOwnPropertyNames(addition).forEach(function(property) {
+tools.update = function (object, addition) {
+  Object.getOwnPropertyNames(addition).forEach(function (property) {
     // on ajoute ou met à jour la propriété avec son descripteur complet
     Object.defineProperty(
         object,
@@ -449,8 +450,8 @@ tools.update = function(object, addition) {
  * @param {object} object
  * @param {object} values
  */
-tools.updateIfExists = function(object, values) {
-  Object.getOwnPropertyNames(values).forEach(function(property) {
+tools.updateIfExists = function (object, values) {
+  Object.getOwnPropertyNames(values).forEach(function (property) {
     if (object.hasOwnProperty(property)) {
       // on met à jour la propriété avec son descripteur complet
       Object.defineProperty(

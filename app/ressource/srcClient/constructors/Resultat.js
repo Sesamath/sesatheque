@@ -35,7 +35,7 @@
  * @constructor
  * @param {object|string} original Un objet ayant des propriétés d'un résultat, ou une chaine qui sera mise dans reponse
  */
-function Resultat(original) {
+function Resultat (original) {
   var values = {}
   // on accepte une simple chaine, que l'on mettra dans la propriété reponse du résultat construit
   if (typeof original === 'string') values.reponse = original

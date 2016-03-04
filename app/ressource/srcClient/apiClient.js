@@ -65,7 +65,7 @@ function addUrls (ressource, next) {
 function init (newSesathequeBase) {
   if (!newSesathequeBase) throw new Error('Il faut fournir une base absolue de la sesatheque')
   if (!/^https?:\/\/[a-z\-\._]+(:[0-9]+)?(\/.*)?$/.test(newSesathequeBase)) {
-    throw new Error('La base ' +newSesathequeBase + " n'est pas une racine d'url absolue valide")
+    throw new Error('La base ' + newSesathequeBase + " n'est pas une racine d'url absolue valide")
   }
   if (typeof name !== 'string') throw new Error('Le nom doit être une string')
   if (newSesathequeBase.substr(-1) !== '/') newSesathequeBase += '/'
@@ -82,12 +82,13 @@ function init (newSesathequeBase) {
  * @param {ressourceCallback}     next
  * @private
  */
-function callBibli(data, options, next) {
-  function end(error, ressource) {
+function callBibli (data, options, next) {
+  function end (error, ressource) {
     if (error) next(error)
     else addUrls(ressource, next)
   }
-  var url, xhrOptions = {}
+  var url
+  var xhrOptions = {}
   if (options && options.format) {
     xhrOptions.urlParams = {}
     xhrOptions.urlParams.format = options.format
@@ -137,7 +138,7 @@ var stClient = {
    */
   getAlias: function (id, next) {
     if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
-    else if (id) callBibli(id, {format:'alias'}, next)
+    else if (id) callBibli(id, {format: 'alias'}, next)
     else next(new Error('Il faut fournir un identifiant'))
   },
   /**
@@ -152,7 +153,7 @@ var stClient = {
     if (typeof format === 'function') {
       next = format
     } else {
-      options = {format:format}
+      options = {format: format}
     }
     if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
     else if (id) callBibli(id, options, next)

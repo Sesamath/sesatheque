@@ -39,7 +39,7 @@ var _ = require('lodash')
  * @param {object} [values] Des valeurs d'initialisation
  * @constructor
  */
-function FormField(values) {
+function FormField (values) {
   if (!values || typeof values !== 'object') values = {}
   if (values.id) {
     /**
@@ -120,10 +120,10 @@ function FormField(values) {
     // cast de chaque élément en string
     if (values.selectedValues instanceof Array) {
       for (var i = 0; i < values.selectedValues.length; i++) {
-        this.selectedValues.push(values.selectedValues[i] +'')
+        this.selectedValues.push(values.selectedValues[i] + '')
       }
     } else {
-      this.selectedValues.push(values.selectedValues +'')
+      this.selectedValues.push(values.selectedValues + '')
     }
   }
 
@@ -135,18 +135,17 @@ function FormField(values) {
   if (typeof values.value === 'string' || typeof values.value === 'number' || typeof values.value === 'undefined') {
     // text par défaut
     if (!this.widget) this.widget = 'text'
-    if (['text', 'textarea', 'submit', 'button', 'hidden', 'info'].indexOf(this.widget) === -1) throw new Error('widget '+this.widget +' incompatible avec la valeur ' +values.value)
+    if (['text', 'textarea', 'submit', 'button', 'hidden', 'info'].indexOf(this.widget) === -1) throw new Error('widget ' + this.widget + ' incompatible avec la valeur ' + values.value)
     this.value = values.value || ''
-
   } else if (typeof values.value === 'boolean') {
     // oui / nom sous forme de checkbox
     this.widget = 'checkboxes'
     // faut mettre label et name sur le choice
     this.value = []
     var choice = {
-      label:this.label,
-      labelInfo:this.labelInfo,
-      name : this.name,
+      label: this.label,
+      labelInfo: this.labelInfo,
+      name: this.name,
       value: 'true'
     }
     if (values.value) choice.selected = true
@@ -156,7 +155,6 @@ function FormField(values) {
     this.addChoice(choice)
     this.label = undefined
     this.labelInfo = undefined
-
   } else if (values.value instanceof Array) {
     // une liste, checkboxes par défaut
     if (!this.widget) this.widget = 'checkboxes'
@@ -170,7 +168,7 @@ function FormField(values) {
   }
 } // FormField
 
-FormField.prototype.addChoice = function addChoice(choice) {
+FormField.prototype.addChoice = function addChoice (choice) {
   if (!this.value instanceof Array) {
     this.value = []
   }
@@ -178,7 +176,7 @@ FormField.prototype.addChoice = function addChoice(choice) {
   // on propage name et id si nécessaire
   if (this.widget === 'radios') choice.name = this.name
   else if (this.widget === 'checkboxes' && !choice.name) choice.name = this.name + '[' + i + ']'
-  if (this.id && !choice.id) choice.id = this.id +i
+  if (this.id && !choice.id) choice.id = this.id + i
   // et on ajoute les selected s'il y en a (comparaison avec cast en string)
   if (
       choice.hasOwnProperty('value') &&

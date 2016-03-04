@@ -44,9 +44,8 @@ var isLoaded
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'atome sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display(ressource, options, next) {
-
-  function loaded() {
+module.exports = function display (ressource, options, next) {
+  function loaded () {
     isLoaded = true
     if (next) next()
   }
@@ -69,7 +68,7 @@ module.exports = function display(ressource, options, next) {
     }
 
     log('start ato display avec la ressource', ressource)
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre) {
       throw new Error('Paramètres manquants')
     }

@@ -44,33 +44,32 @@ var $
  */
 var multiEditor = {}
 
-
 /**
  * Ajoute les liens pour changer d'éditeur
  * @private
  */
-function addLinks(config) {
+function addLinks (config) {
   /**
    * Ajoute un lien ou un bouton radio suivant config.optionsName
    * @internal
    * @param value
    * @returns {Element}
    */
-  function addLink(value) {
+  function addLink (value) {
     var elt
-    var args = {onclick:editors[value].go}
+    var args = {onclick: editors[value].go}
     if (config.optionsName) {
-      var id = value +'Option'
+      var id = value + 'Option'
       args.id = id
       args.name = config.optionsName
       args.type = 'radio'
       args.value = value
-      args.style = {'line-height':'1.3em','vertical-align':'middle'}
+      args.style = {'line-height': '1.3em', 'vertical-align': 'middle'}
       if (config.editor === value) args.checked = 'checked'
       elt = dom.addElement(divChoices, 'input', args)
-      dom.addElement(divChoices, 'label', {htmlFor:id, style:{'line-height':'1.3em','vertical-align':'middle', margin:'0 1em 0 0.2em'}}, editors[value].label)
+      dom.addElement(divChoices, 'label', {htmlFor: id, style: {'line-height': '1.3em', 'vertical-align': 'middle', margin: '0 1em 0 0.2em'}}, editors[value].label)
     } else {
-      args.style = {padding:'0.3em'}
+      args.style = {padding: '0.3em'}
       elt = dom.addElement(divChoices, 'a', args, editors[value].label)
     }
 
@@ -95,7 +94,7 @@ function addLinks(config) {
  * @private
  * @param error
  */
-function errorCallbackDefault(error) {
+function errorCallbackDefault (error) {
   if (error) page.addError(error)
 }
 
@@ -104,7 +103,7 @@ function errorCallbackDefault(error) {
  * @private
  * @param {errorCallback} next
  */
-function initCKEditor(next) {
+function initCKEditor (next) {
   /*global  CKEDITOR*/
   if (typeof CKEDITOR === 'undefined') {
     try {
@@ -141,7 +140,7 @@ function initCKEditor(next) {
           // @see http://ckeditor.com/comment/123266#comment-123266, sauf que ça marche pas, faut aller modifier config.js
           // ou TeX-AMS_HTML ou TeX-AMS-MML_SVG, cf http://docs.mathjax.org/en/latest/configuration.html#loading
           CKEDITOR.config.mathJaxLib = '/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
-          //log('ckeditor', CKEDITOR)
+          // log('ckeditor', CKEDITOR)
           next()
         })
       })
@@ -159,7 +158,7 @@ function initCKEditor(next) {
  * @private
  * @param editor
  */
-function setCurrent(editor) {
+function setCurrent (editor) {
   if (initConfig.changeCallback) initConfig.changeCallback(editor)
   if ($toSimpleLink) {
     switch (current) {
@@ -186,13 +185,12 @@ function setCurrent(editor) {
     }
   } // sinon on a pas initialisé les liens donc rien à faire
   current = editor
-  log('On est passé en ' +current)
+  log('On est passé en ' + current)
 }
 
 try {
   // objets initialisé par init, globaux à ce module
   var current, initConfig, $textarea, $toCkEditorLink, $toMathquillLink, $toSimpleLink
-
 
   /**
    * Bascule vers CkEditor
@@ -234,7 +232,7 @@ try {
    * @memberOf mqEditor
    */
   multiEditor.toMathquill = function (next) {
-    function init() {
+    function init () {
       mqEditor.init(initConfig.textarea, initConfig.mathquill, null, function (error) {
         if (error) {
           next(error)
@@ -282,10 +280,10 @@ try {
       } else if (current === 'ckeditor') {
         CKEDITOR.instances[$textarea.attr('id')].destroy()
         // on vire le html
-        //var contenu = $textarea.val().replace(/<[^<>]+>/ig, '')
-        //log("avant de simplifier l'éditeur on récupère le texte " +contenu)
-        //$textarea.empty()
-        //$textarea.val(contenu)
+        // var contenu = $textarea.val().replace(/<[^<>]+>/ig, '')
+        // log("avant de simplifier l'éditeur on récupère le texte " +contenu)
+        // $textarea.empty()
+        // $textarea.val(contenu)
       } else {
         throw new Error('État courant ' + current + " non géré, impossible de revenir à l'état simple")
       }
@@ -297,16 +295,16 @@ try {
   }
 
   var editors = {
-    simple : {
-      go:multiEditor.toSimple,
-      label : 'simple'
+    simple: {
+      go: multiEditor.toSimple,
+      label: 'simple'
     },
-    ckeditor : {
-      go:multiEditor.toCkEditor,
-      label : 'texte riche'
+    ckeditor: {
+      go: multiEditor.toCkEditor,
+      label: 'texte riche'
     },
-    mathquill : {
-      go:multiEditor.toMathquill,
+    mathquill: {
+      go: multiEditor.toMathquill,
       label: 'équation'
     }
   }
@@ -346,7 +344,7 @@ try {
         current = 'simple'
         switch (config.editor) {
           case 'simple':
-            setCurrent('simple'); // pour le highlight du lien
+            setCurrent('simple') // pour le highlight du lien
             next()
             break
           case 'mathquill':
@@ -361,8 +359,6 @@ try {
       })
     })
   }
-
-
 } catch (error) {
   page.addError(error)
 }

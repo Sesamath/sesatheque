@@ -30,7 +30,7 @@
  */
 
 'use strict'
-/* global define, module*/
+/* global module*/
 
 var filters = require('../tools/filters')
 
@@ -39,7 +39,7 @@ var filters = require('../tools/filters')
  * @constructor
  * @param {Object} initObj Un objet ayant des propriétés d'une ressource
  */
-function Ressource(initObj) {
+function Ressource (initObj) {
   var values
   if (initObj) {
     // clonage du fainéant (on veut que les propriétés sans prototype)
@@ -57,7 +57,7 @@ function Ressource(initObj) {
    * @default undefined
    * @type {Integer}
    */
-  this.oid = filters.int(values.oid) || undefined; // on préfère l'absence de propriété à 0
+  this.oid = filters.int(values.oid) || undefined // on préfère l'absence de propriété à 0
   /**
    * Une clé permettant de lire la ressource (si elle est publiée) en outrepassant les droits
    * @default undefined

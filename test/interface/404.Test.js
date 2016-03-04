@@ -43,10 +43,6 @@ var assert = require('assert')
 var request = require('request')
 
 var config = require('../../app/config')
-var apiToken = config.apiTokens[0]
-if (process.argv.indexOf('--token') > -1) {
-  apiToken = process.argv[process.argv.indexOf('--token') +1]
-}
 var urlBibli = 'http://'
 if (process.argv.indexOf('--prod') > -1) {
   urlBibli += 'bibliotheque.sesamath.net'
@@ -60,11 +56,10 @@ if (process.argv.indexOf('--prod') > -1) {
 
 describe('get 404', function () {
   it('prend un 404 sur /public/foo/bar', function (done) {
-    var options = {
-      url : urlBibli + '/public/foo/bar'
-    }
+    var options = {url: urlBibli + '/public/foo/bar'}
     request.get(options, function (error, response, ressource) {
-      //console.log(response)
+      if (error) console.error(error)
+      // console.log(response)
       console.log(ressource)
       assert.ok(ressource)
       assert.equal(404, response.statusCode)
@@ -73,10 +68,9 @@ describe('get 404', function () {
   })
 
   it('prend un 404 sur /ressource/foo/bar', function (done) {
-    var options = {
-      url : urlBibli + '/ressource/foo/bar'
-    }
-    request.get(options, function (error, response, ressource) {
+    var options = {url: urlBibli + '/ressource/foo/bar'}
+    request.get(options, function (error, response) {
+      if (error) console.error(error)
       assert.ok(response.body)
       assert.equal(404, response.statusCode)
       done()
@@ -84,10 +78,9 @@ describe('get 404', function () {
   })
 
   it('prend un 404 sur /public/foo', function (done) {
-    var options = {
-      url : urlBibli + '/public/foo'
-    }
-    request.get(options, function (error, response, ressource) {
+    var options = {url: urlBibli + '/public/foo'}
+    request.get(options, function (error, response) {
+      if (error) console.error(error)
       assert.ok(response.body)
       assert.equal(404, response.statusCode)
       done()
@@ -95,10 +88,9 @@ describe('get 404', function () {
   })
 
   it('prend un 404 sur /ressource/foo', function (done) {
-    var options = {
-      url : urlBibli + '/ressource/foo'
-    }
-    request.get(options, function (error, response, ressource) {
+    var options = {url: urlBibli + '/ressource/foo'}
+    request.get(options, function (error, response) {
+      if (error) console.error(error)
       assert.ok(response.body)
       assert.equal(404, response.statusCode)
       done()
@@ -106,10 +98,9 @@ describe('get 404', function () {
   })
 
   it('prend un 404 sur /foo/bar', function (done) {
-    var options = {
-      url : urlBibli + '/foo/bar'
-    }
-    request.get(options, function (error, response, ressource) {
+    var options = {url: urlBibli + '/foo/bar'}
+    request.get(options, function (error, response) {
+      if (error) console.error(error)
       assert.ok(response.body)
       assert.equal(404, response.statusCode)
       done()

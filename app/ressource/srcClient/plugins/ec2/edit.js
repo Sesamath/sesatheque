@@ -39,12 +39,12 @@ var jsonMulti = require('../../editors/jsonMulti')
  * @param ressource
  * @param options
  */
-module.exports = function edit(ressource, options) {
+module.exports = function edit (ressource, options) {
   try {
     if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
     var textarea = window.document.getElementById('parametres')
     if (!textarea) throw new Error('Pas de textarea #parametres trouvé dans cette page')
-    jsonMulti.init(textarea, {}, options)
+    jsonMulti(textarea, {}, options)
   } catch (error) {
     page.addError(error)
   }

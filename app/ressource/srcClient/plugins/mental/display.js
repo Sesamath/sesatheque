@@ -43,7 +43,7 @@ var swf = require('../../display/swf')
  * @private
  * @param params le contenu de ressource.parametres.xml, qui est du json !!
  */
-function getXmlParam(params) {
+function getXmlParam (params) {
   if (!tools.isArray(params.series)) {
     throw new Error('Aucune série à traiter')
   }
@@ -74,7 +74,7 @@ function getXmlParam(params) {
       o.temp_series.push(newSerie)
       o.operations.push(newOperation)
     }
-  }); // params.series.forEach
+  }) // params.series.forEach
 
   // mélanges les opérations des différentes séries si nécéssaire
   if (o.aleatoire_exercice) o.operations = shuffle(o.operations)
@@ -89,7 +89,7 @@ function getXmlParam(params) {
  * @param serie
  * @returns {Array}
  */
-function getNombresFromSerie(serie) {
+function getNombresFromSerie (serie) {
   // le tableau que l'on va retourner
   var nombres = []
   serie.nb.forEach(function (nb) {
@@ -135,7 +135,7 @@ function getNombresFromSerie(serie) {
     if (nb.cts > 2) { // intervalle ou sans restriction
       newNb.chiffres = []
       for (var posChiffre = 0; posChiffre < 8; posChiffre++) {
-        newNb.chiffres.push(nb.ccs.substr(posChiffre, 1) == 1)
+        newNb.chiffres.push(nb.ccs.substr(posChiffre, 1) === '1')
       }
     }
 
@@ -143,15 +143,15 @@ function getNombresFromSerie(serie) {
     newNb.couleur = nb.ccns
     // temps d'affichage du nombre
     newNb.idDelai = (nb.cdns !== 'permanent')
-    if (newNb.isDelai) newNb.delai = parseInt(nb.cdns); // '20 s' => 20
+    if (newNb.isDelai) newNb.delai = parseInt(nb.cdns) // '20 s' => 20
     // fini pour ce nb
     nombres.push(newNb)
-  }); // serie.nb.forEach
+  }) // serie.nb.forEach
 
   return nombres
 }
 
-function getSignesFromSerie(serie) {
+function getSignesFromSerie (serie) {
   // les signes qui seront retournés
   var signes = []
   var type = serie.tdcdcs
@@ -189,7 +189,7 @@ function getSignesFromSerie(serie) {
     }
     signe.signe = symbole
     signe.couleur = s.ccss
-    signe.isdelai = (s.ccds != 'permanent')
+    signe.isdelai = (s.ccds !== 'permanent')
     if (signe.isdelai) signe.delai = parseInt(s.ccds)
     signes.push(signe)
   })
@@ -203,21 +203,22 @@ function getSignesFromSerie(serie) {
  * @param {Object} serie
  * @returns {Array|undefined}
  */
-function getOperations(serie) {
-  var nombres_generes,
-      signes_generes,
-      choix_position_liaison,
-      temp_position,
-      nombre_genere,
-      signe_genere,
-      operation,
-      operations = [],
-      operation_annullee,
-      c, i,
-      resultat,
-      val0,
-      val1,
-      temp
+function getOperations (serie) {
+  var nombres_generes
+  var signes_generes
+  var choix_position_liaison
+  var temp_position
+  var nombre_genere
+  var signe_genere
+  var operation
+  var operations = []
+  var operation_annullee
+  var c
+  var i
+  var resultat
+  var val0
+  var val1
+  var temp
   var maxTentatives = 100
   for (var q = 0; q < serie.quantite; q++) {
     operation_annullee = true
@@ -270,7 +271,7 @@ function getOperations(serie) {
         nombre_genere.couleur = couleur_nom(nombre.couleur)
         // on empile le nombre généré
         nombres_generes.push = nombre_genere
-      }); // jshint ignore:line
+      }) // jshint ignore:line
 
       // si nécéssaire, on mélange les positions des nombres au sein de l'opération
       if (serie.aleatoire) {
@@ -288,7 +289,7 @@ function getOperations(serie) {
         signe_genere.couleur = couleur_nom(signe.couleur)
         // on empile le signe généré
         signes_generes.push(signe_genere)
-      }); // jshint ignore:line
+      }) // jshint ignore:line
 
       // determination du résultat de l'opération
       // - attention, dans le cas d'un quotient, c'est la partie entière du quotient qui constitue le résultat
@@ -347,17 +348,16 @@ function getOperations(serie) {
     operation[1] = signes_generes[0]
     operation[2] = nombres_generes[1]
     operation[3] = signes_generes[1]
-    if (nombres_generes[2])  operation[4] = nombres_generes[2]
-    if (signes_generes[2])   operation[5] = signes_generes[2]
-    if (nombres_generes[3])  operation[6] = nombres_generes[3]
-    if (signes_generes[3])   operation[7] = signes_generes[3]
-    if (nombres_generes[4])  operation[8] = nombres_generes[4]
-    if (signes_generes[4])   operation[9] = signes_generes[4]
+    if (nombres_generes[2]) operation[4] = nombres_generes[2]
+    if (signes_generes[2]) operation[5] = signes_generes[2]
+    if (nombres_generes[3]) operation[6] = nombres_generes[3]
+    if (signes_generes[3]) operation[7] = signes_generes[3]
+    if (nombres_generes[4]) operation[8] = nombres_generes[4]
+    if (signes_generes[4]) operation[9] = signes_generes[4]
     operation.resultat = resultat
     operation.isdelai = serie.isdelai
     operation.delai = serie.delai
     operations.push(operation)
-
   } // for sur quantite
 
   return operations
@@ -369,7 +369,7 @@ function getOperations(serie) {
  * @param o
  * @returns {string}
  */
-function xmlGenerate(o) {
+function xmlGenerate (o) {
   // cf https://developer.mozilla.org/fr/docs/Comment_cr%C3%A9er_un_arbre_DOM
   // https://developer.mozilla.org/en-US/docs/Web/API/XMLDocument
   //
@@ -388,9 +388,9 @@ function xmlGenerate(o) {
     var noeud = {}
     operation.forEach(function (tab, key) {
       // on gère pas ici les propriétés non numériques (cf getOperations)
-      if (parseInt(key) == key) {
+      if (parseInt(key) == key) { // eslint-disable-line eqeqeq
         noeud[key] = parametrage.createElement('affiche', formate_nombre(tab.valeur))
-        if (tab.couleur != 'noir') noeud[key].setAttribute('c', tab.couleur)
+        if (tab.couleur !== 'noir') noeud[key].setAttribute('c', tab.couleur)
         if (tab.isdelai) noeud[key].setAttribute('t', tab.delai)
         noeud_ques.appendChild(noeud[key])
       }
@@ -414,7 +414,7 @@ function xmlGenerate(o) {
  * @param {string|number} nb
  * @returns {number}
  */
-function nettoie_nombre(nb) {
+function nettoie_nombre (nb) {
   if (tools.isString(nb)) return Number(nb.replace(/,/g, '.').replace(/\s/g, ''))
   else return Number(nb)
 }
@@ -425,7 +425,7 @@ function nettoie_nombre(nb) {
  * @param nombre
  * @returns {string}
  */
-function formate_nombre(nombre) {
+function formate_nombre (nombre) {
   var nbString = nombre + ''
   return nbString.replace('.', ',')
 }
@@ -436,7 +436,7 @@ function formate_nombre(nombre) {
  * @param tab
  * @returns {Array}
  */
-function shuffle(tab) {
+function shuffle (tab) {
   if (tab.length < 2) return tab
   var shuffled = []
   var i
@@ -455,7 +455,7 @@ function shuffle(tab) {
  * @param nombre
  * @returns {number}
  */
-function genere_fixe(nombre) {
+function genere_fixe (nombre) {
   return nettoie_nombre(nombre.fixe)
 }
 
@@ -466,7 +466,7 @@ function genere_fixe(nombre) {
  * @param nombre
  * @returns {number}
  */
-function genere_liste_non_liee(nombre) {
+function genere_liste_non_liee (nombre) {
   var i = intRandom(nombre.liste.length)
   return nombre.liste[i]
 }
@@ -478,7 +478,7 @@ function genere_liste_non_liee(nombre) {
  * @param nombre
  * @returns {number|*}
  */
-function genere_position_liste_liee(nombre) {
+function genere_position_liste_liee (nombre) {
   return intRandom(nombre.liste.length)
 }
 
@@ -488,7 +488,7 @@ function genere_position_liste_liee(nombre) {
  * @param {Array} nombre [debut, fin]
  * @return {Integer} Le nombre généré dans
  */
-function genere_intervalle(nombre) {
+function genere_intervalle (nombre) {
   if (!nombre.hasOwnProperty('debut') || !nombre.hasOwnProperty('fin') || nombre.fin < nombre.debut) {
     throw new Error("Paramètres d'intervalle incorrects")
   }
@@ -502,7 +502,7 @@ function genere_intervalle(nombre) {
  * @param nombre
  * @returns {number}
  */
-function genere_sans_restriction(nombre) {
+function genere_sans_restriction (nombre) {
   var presence_un_chiffre = false
   var nombre_genere = 0
   var i, chiffre, puissance
@@ -524,7 +524,7 @@ function genere_sans_restriction(nombre) {
  * @param code_couleur
  * @returns {string}
  */
-function couleur_nom(code_couleur) {
+function couleur_nom (code_couleur) {
   var tab_couleurs = ['orange', 'rouge', 'vert', 'brique', 'bleu', 'noir']
   return tab_couleurs[code_couleur]
 }
@@ -536,7 +536,7 @@ function couleur_nom(code_couleur) {
  * @param max
  * @returns {number} entier >= min et <= max
  */
-function rand(min, max) {
+function rand (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
@@ -546,7 +546,7 @@ function rand(min, max) {
  * @param inferieurA
  * @returns {number|*}
  */
-function intRandom(inferieurA) {
+function intRandom (inferieurA) {
   return Math.floor(Math.random() * inferieurA)
 }
 
@@ -567,13 +567,13 @@ var histoReponses = []
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   var swfUrl
 
   log('start mental display avec la ressource', ressource)
 
   try {
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
       throw new Error('Paramètres manquants')
     }
@@ -592,7 +592,8 @@ module.exports = function display(ressource, options, next) {
           reponse: histoReponses
         })
       }
-    } else window.com_mental_resultat = function () {
+    } else {
+      window.com_mental_resultat = function () {}
     }
 
     // On réinitialise le conteneur

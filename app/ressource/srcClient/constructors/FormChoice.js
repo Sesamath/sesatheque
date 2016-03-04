@@ -36,7 +36,7 @@
  * @param {object} [values] Des valeurs d'initialisation
  * @constructor
  */
-function FormChoice(values) {
+function FormChoice (values) {
   if (!values || typeof values !== 'object') values = {}
   if (values.id) {
     /**

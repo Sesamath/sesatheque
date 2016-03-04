@@ -40,13 +40,13 @@ var log = require('../tools/log')
  * @param {swfloadOptions} [options] Des paramètres utilisés pour le chargement
  * @param {errorCallback}  next      Appelé quand le swf est chargé (mais pas forcément tout ce qu'il charge lui-même)
  */
-function load(container, swfHref, options, next) {
+function load (container, swfHref, options, next) {
   /**
    * Callback appelée après le chargement de swfobject
    * @private
    * @param {Event} e
    */
-  function callbackFn(e) {
+  function callbackFn (e) {
     if (!next) next = function () {}
     if (e) {
       if (e.success) {
@@ -65,7 +65,7 @@ function load(container, swfHref, options, next) {
   var wd = window.document
   var htmlElt, largeur, hauteur, flashversion, flashvars, swfParams, swfAttributes
   // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
-  var divId = options.id || 'sesaSwf' +(new Date()).getTime()
+  var divId = options.id || 'sesaSwf' + (new Date()).getTime()
 
   // le message en attendant le chargement
   htmlElt = wd.createElement('div')
@@ -77,9 +77,9 @@ function load(container, swfHref, options, next) {
 
   // les params pour le player
   swfParams = {
-    'menu' : 'false',
-    'wmode': 'window',
-    'allowScriptAccess': 'always' // important pour que le swf puisse communiquer avec le js de cette page
+    menu: 'false',
+    wmode: 'window',
+    allowScriptAccess: 'always' // important pour que le swf puisse communiquer avec le js de cette page
   }
   if (options.base) swfParams.base = options.base
   // et les attributs pour le loader swfobject.embedSWF
@@ -105,7 +105,7 @@ function load(container, swfHref, options, next) {
 /**
  * @file Un module js pour charger un swf dans un container, utilisé par plusieurs plugins de ressources (utilise swfobject)
  */
-module.exports = {load:load}
+module.exports = {load}
 
 /**
  * @typedef swfloadOptions

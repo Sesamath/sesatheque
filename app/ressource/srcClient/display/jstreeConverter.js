@@ -40,7 +40,7 @@ var baseUrl
  * @private
  * @return {Object}
  */
-function getAttr(ressource, defaultBase) {
+function getAttr (ressource, defaultBase) {
   var attr = {}
   var base = ressource.base || defaultBase || baseUrl
   if (base && base.substr(-1) !== '/') base += '/'
@@ -83,13 +83,13 @@ function getAttr(ressource, defaultBase) {
  * @param {Ressource} ressource
  * @param {string}    [defaultBase]
  */
-function getJstNode(ressource, defaultBase) {
+function getJstNode (ressource, defaultBase) {
   var node
   if (ressource) {
     node = {
-      text  : ressource.titre,
+      text: ressource.titre,
       a_attr: getAttr(ressource, defaultBase),
-      icon  : ressource.type + 'JstNode'
+      icon: ressource.type + 'JstNode'
     }
   } else throw new Error('getJstNode appelé sans ressource')
 
@@ -103,8 +103,8 @@ function getJstNode(ressource, defaultBase) {
  * @param {object} jstree L'objet jstree complet, retourné par $.jstree.reference('#leTree')
  * @return {Array} Le tableau des enfants de nodeId
  */
-function getEnfants(nodeId, jstree) {
-  //log('getEnfants de ' +nodeId, jstree)
+function getEnfants (nodeId, jstree) {
+  // log('getEnfants de ' +nodeId, jstree)
   var enfants = []
   var i = 0
   try {
@@ -113,7 +113,7 @@ function getEnfants(nodeId, jstree) {
     root[nodeId].children.forEach(function (rootChildId) {
       var child = root[rootChildId]
       var enfant = toRef(child, jstree)
-      if (i<5) {
+      if (i < 5) {
         log('traitement child', child)
         log('devenu', enfant)
         i++
@@ -121,10 +121,10 @@ function getEnfants(nodeId, jstree) {
       if (enfant && (enfant.ref || enfant.type === 'arbre')) enfants.push(enfant)
       else log.error('Pb de conversion du child, ni ref ni arbre', child)
     })
-  } catch(error) {
+  } catch (error) {
     log.error(error)
   }
-  //log('pour ' +nodeId +' on va retourner', enfants)
+  // log('pour ' +nodeId +' on va retourner', enfants)
 
   return enfants
 }
@@ -135,7 +135,7 @@ function getEnfants(nodeId, jstree) {
  * @param {string}    [defaultBase]
  * @return {Array} Le tableau des enfants
  */
-function getJstreeChildren(ressource, defaultBase) {
+function getJstreeChildren (ressource, defaultBase) {
   var base = ressource.base || defaultBase || baseUrl
   if (base.substr(-1) !== '/') base += '/'
   var children = []
@@ -159,7 +159,7 @@ function getJstreeChildren(ressource, defaultBase) {
  * (sinon ces urls seront absolues sur le domaine courant)
  * @param {string} url L'url de base http://domaine.tld:port de la sesatheque
  */
-function setBaseUrl(url) {
+function setBaseUrl (url) {
   if (typeof url === 'string') {
     if (url.substr(-1) === '/') url = url.substr(0, url.length - 1)
     baseUrl = url
@@ -173,7 +173,7 @@ function setBaseUrl(url) {
  * @param {string}          [defaultBase]
  * @returns {Object}
  */
-function toJstree(ressource, defaultBase) {
+function toJstree (ressource, defaultBase) {
   var base = ressource.base || defaultBase || baseUrl
   if (base.substr(-1) !== '/') base += '/'
   var node = getJstNode(ressource, base)
@@ -203,8 +203,8 @@ function toJstree(ressource, defaultBase) {
  * @returns {Ref} La ref (presque, ref, titre, type, avec displayUrl & resume en plus,
  *                mais pas categories, et enfants seulement si on passe le jstree complet)
  */
-function toRef(node, jstree) {
-  //log('toRef de', node)
+function toRef (node, jstree) {
+  // log('toRef de', node)
   var item = {}
   var nodeSrc
   if (node.text && node.a_attr) {
@@ -226,7 +226,7 @@ function toRef(node, jstree) {
       if (nodeSrc.a_attr['data-ref']) item.ref = nodeSrc.a_attr['data-ref']
       if (nodeSrc.a_attr.alt) item.resume = nodeSrc.a_attr.alt
     }
-    //log('converti en', item)
+    // log('converti en', item)
   }
 
   return item

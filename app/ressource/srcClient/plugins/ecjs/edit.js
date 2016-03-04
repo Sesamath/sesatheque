@@ -35,17 +35,17 @@ var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var display = require('./display')
 
-function addSelect(ressource, options) {
+function addSelect (ressource, options) {
   var select = dom.getElement('select')
-  dom.addElement(select, 'option', {id:'selectFichier', value:0}, "Choisir un type d'exercice")
+  dom.addElement(select, 'option', {id: 'selectFichier', value: 0}, "Choisir un type d'exercice")
   typesEc.forEach(function (typeEc) {
-    dom.addElement(select, 'option', {value:typeEc}, typeEc)
+    dom.addElement(select, 'option', {value: typeEc}, typeEc)
   })
   $textarea.before(select)
   $textarea.hide()
   // code piqué dans http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/
   var $select = $(select)
-  $select.on('change', function() {
+  $select.on('change', function () {
     var sExo = $select.val()
     if (sExo) {
       if (!ressource.parametres) ressource.parametres = {}
@@ -57,7 +57,7 @@ function addSelect(ressource, options) {
   })
 }
 
-function displayEcOptions(ressource, options) {
+function displayEcOptions (ressource, options) {
   var submitAsked = false
   var submitDone = false
   var $form = $('#formRessource')
@@ -167,8 +167,8 @@ var typesEc = ['addiclic',
  * @param ressource
  * @param options
  */
-module.exports = function edit(ressource, options) {
-  page.loadAsync('jquery', function () {
+module.exports = function edit (ressource, options) {
+  page.loadAsync(['jquery'], function () {
     $ = window.jQuery
     if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
     var textarea = window.document.getElementById('parametres')

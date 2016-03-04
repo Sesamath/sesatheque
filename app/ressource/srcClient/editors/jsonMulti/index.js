@@ -43,7 +43,7 @@ var $ // affecté dans init
  * @private
  * @param {object} config avec les propriétés facultatives optionsName (pour mettre des boutons radio au lieu de liens) et editor (pour cocher l'actuel)
  */
-function addLinks(config) {
+function addLinks (config) {
   /**
    * Ajoute un lien ou un bouton radio suivant config.optionsName
    * @internal
@@ -51,21 +51,21 @@ function addLinks(config) {
    * @param editorName
    * @returns {Element}
    */
-  function addLink(container, editorName) {
+  function addLink (container, editorName) {
     var elt
-    var args = {onclick:function () {setEditor(editorName);}}
+    var args = {onclick: function () { setEditor(editorName) }}
     if (config.optionsName) {
-      var id = editorName +'Option'
+      var id = editorName + 'Option'
       args.id = id
       args.name = config.optionsName
       args.type = 'radio'
       args.editorName = editorName
-      args.style = {'line-height':'1.3em','vertical-align':'middle'}
+      args.style = {'line-height': '1.3em', 'vertical-align': 'middle'}
       if (config.editor === editorName) args.checked = 'checked'
       elt = dom.addElement(container, 'input', args)
-      dom.addElement(container, 'label', {htmlFor:id, style:{'line-height':'1.3em','vertical-align':'middle', margin:'0 1em 0 0.2em'}}, editors[editorName].label)
+      dom.addElement(container, 'label', {htmlFor: id, style: {'line-height': '1.3em', 'vertical-align': 'middle', margin: '0 1em 0 0.2em'}}, editors[editorName].label)
     } else {
-      args.style = {padding:'0.3em'}
+      args.style = {padding: '0.3em'}
       elt = dom.addElement(container, 'a', args, editors[editorName].label)
       // on ajoute un objet jqLink qui sert pour savoir s'il faut modifier des css au changement ou pas
       editors[editorName].jqLink = $(elt)
@@ -99,7 +99,7 @@ function initJsonEditor (next) {
       page.loadAsync('jsoneditor', function () {
         try {
           page.loadAsync('JSONEditor', function () {
-            jsonEditor = new JSONEditor(jsonEditorDiv)
+            jsonEditor = new window.JSONEditor(jsonEditorDiv)
             dom.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css')
             isJseLoaded = true
             next()
@@ -126,13 +126,13 @@ function initJsonEditor (next) {
  * @param {string} json
  * @returns {boolean}
  */
-function isJsonValide(json) {
+function isJsonValide (json) {
   var retour = false
   try {
     JSON.parse(json)
     retour = true
   } catch (error) {
-    dom.log('json invalide', json)
+    log('json invalide', json)
   }
 
   return retour
@@ -144,9 +144,9 @@ function isJsonValide(json) {
  * @private
  * @param editorName
  */
-function setEditor(editorName) {
+function setEditor (editorName) {
   // réalise la bascule visuelle
-  function toggle() {
+  function toggle () {
     if (editors[editorName].jqLink) {
       // css sur les liens
       editors[current].jqLink.css('background-color', '')
@@ -156,17 +156,19 @@ function setEditor(editorName) {
     editors[editorName].jq.show()
   }
   // affecte le nouveau avec du json valide
-  function setNew(obj) {
+  function setNew (obj) {
     editors[editorName].set(obj)
     toggle()
     current = editorName
     if (changeCallback) changeCallback(editorName)
-    dom.log("On est passé à l'éditeur " +editorName)
+    log("On est passé à l'éditeur " + editorName)
   }
 
   try {
-    if (!editors[editorName]) throw new Error('éditeur ' +editorName +' non géré')
-    if (editorName !== current) {
+    if (!editors[editorName]) throw new Error('éditeur ' + editorName + ' non géré')
+    if (editorName === current) {
+      log.error(new Error("On était déjà sur l'éditeur " + editorName))
+    } else {
       if (current === 'simple') {
         var json = $textarea.val()
         if (isJsonValide(json)) setNew(json)
@@ -174,8 +176,6 @@ function setEditor(editorName) {
       } else {
         setSimple(setNew)
       }
-    } else {
-      dom.log.error(new Error("On était déjà sur l'éditeur " +editorName))
     }
   } catch (error) {
     page.addError(error.toString(), 5)
@@ -188,7 +188,7 @@ function setEditor(editorName) {
  * @private
  * @param {function} next sera appelé avec l'objet correspondant au json mis dans le textarea s'il était valide
  */
-function setSimple(next) {
+function setSimple (next) {
   editors[current].getJson(function (jsonString) {
     // on teste que c'est du json valide en récupérant l'objet au passage
     try {
@@ -197,125 +197,114 @@ function setSimple(next) {
       $textarea.val(JSON.stringify(obj, null, 2))
       next(obj)
     } catch (error) {
-      page.addError('Le json est invalide ' +jsonString, 3000)
-      dom.log.error(error)
+      page.addError('Le json est invalide ' + jsonString, 3000)
+      log.error(error)
     }
   })
 }
 
 /**
  * Service pour insérer jsoneditor et basculer avec un textarea classique
- * @service jsonMulti
+ * @module jsonMulti
  */
-var jsonMulti = {}
 
 /**
  * Charge jsonEditor si ça n'a jamais été fait et l'initialise avec l'objet de l'éditeur courant
  * (ou affiche une erreur)
  */
-try {
-  var isInitDone = false
-  var isJseLoaded
-  var changeCallback, current, jsonEditor, jsonEditorDiv, $textarea
+var isJseLoaded
+var changeCallback, current, jsonEditor, jsonEditorDiv, $textarea
 
-  var editors = {
-    simple : {
-      label : 'simple',
-      getJson:function (next) {
-        next($textarea.val())
+var editors = {
+  simple: {
+    label: 'simple',
+    getJson: function (next) {
+      next($textarea.val())
+    }
+    // set inutile, initialisé au chargement puis affecté par setSimple
+  },
+  jsoneditor: {
+    label: 'avancé',
+    getJson: function (next) {
+      if (jsonEditor) {
+        var obj = jsonEditor.get()
+        log("On récupère l'objet", obj)
+        var json = JSON.stringify(obj)
+        next(json)
+      } else {
+        page.addError("jsonEditor n'est pas encore initialisé", 5)
       }
-      // set inutile, initialisé au chargement puis affecté par setSimple
     },
-    jsoneditor : {
-      label : 'avancé',
-      getJson:function (next) {
-        if (jsonEditor) {
-          var obj = jsonEditor.get()
-          dom.log("On récupère l'objet", obj)
-          var json = JSON.stringify(obj)
-          next(json)
-        } else {
-          page.addError("jsonEditor n'est pas encore initialisé", 5)
-        }
-      },
-      set: function (obj) {
-        initJsonEditor(function (error) {
-          if (error) page.addError(error.toString(), 5)
-          else if (jsonEditor) jsonEditor.set(obj)
-          else page.addError("jsonEditor n'a pas été correctement initialisé mais l'initialisation n'a pas renvoyé d'erreur")
-        })
-      }
-    }
-  }
-
-  /**
-   * Initialise jsonMulti (ajoute les liens / radio pour changer d'éditeur et les comportements)
-   * @memberOf jsonMulti
-   * @param {Element}        textarea  Un textarea vers lequel mettre le code LaTeX à la fermeture (on le cachera)
-   * @param {object}         config    Objet avec les propriétés (facultatives entre crochets
-   *                                   - changeCallback : sera appelé avec le nom du nouvel éditeur à chaque changement
-   *                                   - editorIni : le nom de l'éditeur à afficher au load
-   *                                   - editorsSup : un tableau d'objets {
-   *                                       container : le div qui sera masqué / affiché lors des changements
-   *                                       get:fonction appelée avec une callback à laquelle il faudra fournir le contenu à mettre dans le textarea
-   *                                       label:texte affiché pour le lien de bascule,
-   *                                       name : le nom de l'éditeur (sera la valeur du bouton radio)
-   *                                       set:callback pour lancer l'éditeur, appelée avec la string json (valide)
-   *                                     }
-   *                                   - optionsName : un nom pour mettre des boutons radio à la place des liens simples (pour insérer le choix dans le form)
-   * @param {displayOptions} [options] Options (pas utilisé pour le moment, pour rester homogène avec multiEditor)
-   * @param {errorCallback}  [next]
-   */
-  jsonMulti.init = function (textarea, config, options, next) {
-    dom.log('jsonMulti.init avec config et options', config, options)
-    try {
-      page.loadAsync('jquery', function () {
-        $ = window.jQuery
-        $(function () {
-          if (!textarea) throw new Error('Il faut fournir un textarea pour jsonMulti')
-          if (textarea.nodeName !== 'TEXTAREA') throw new Error('Il faut fournir un textarea pour jsonMulti')
-          $textarea = $(textarea)
-          editors.simple.jq = $textarea
-          if (!config) config = {}
-          // on ajoute les boutons
-          addLinks(config)
-          current = 'simple'
-          if (editors.simple.jqLink) editors.simple.jqLink.css('background-color', '#fe7')
-          // on affecte ça si ça existe
-          if (config.changeCallback) changeCallback = options.changeCallback
-          if (config.editorsSup) {
-            try {
-              config.editorsSup.forEach(function (editor) {
-                if (!editor.name) throw new Error('editeur sup sans name')
-                var editorName = editor.name
-                delete editor.name
-                if (!editor.container) throw new Error('editeur sup sans container')
-                editor.jq = $(editor.container)
-                delete editor.container
-                editors[ editorName ] = editor
-              })
-              dom.log('on a ajouté les éditeurs sup pour arriver à', editors)
-            } catch (error) {
-              dom.log.error('La config passée a une propriété editorsSup invalide', error)
-            }
-          }
-          // on crée un div pour jsonEditor
-          jsonEditorDiv = dom.getElement('div', { id: 'jsonEditor' })
-          $textarea.before(jsonEditorDiv)
-          editors.jsoneditor.jq = $(jsonEditorDiv)
-          if (options && options.editorIni) setEditor(options.editorIni)
-          isInitDone = true
-          if (next) next()
-        })
+    set: function (obj) {
+      initJsonEditor(function (error) {
+        if (error) page.addError(error.toString(), 5)
+        else if (jsonEditor) jsonEditor.set(obj)
+        else page.addError("jsonEditor n'a pas été correctement initialisé mais l'initialisation n'a pas renvoyé d'erreur")
       })
-    } catch (error) {
-      if (next) next(error)
-      else throw error
     }
   }
-
-} catch (error) {
-  page.addError(error)
 }
 
-module.exports = jsonMulti
+/**
+ * Initialise jsonMulti (ajoute les liens / radio pour changer d'éditeur et les comportements)
+ * @param {Element}        textarea  Un textarea vers lequel mettre le code LaTeX à la fermeture (on le cachera)
+ * @param {object}         config    Objet avec les propriétés (facultatives entre crochets
+ *                                   - changeCallback : sera appelé avec le nom du nouvel éditeur à chaque changement
+ *                                   - editorIni : le nom de l'éditeur à afficher au load
+ *                                   - editorsSup : un tableau d'objets {
+ *                                       container : le div qui sera masqué / affiché lors des changements
+ *                                       get:fonction appelée avec une callback à laquelle il faudra fournir le contenu à mettre dans le textarea
+ *                                       label:texte affiché pour le lien de bascule,
+ *                                       name : le nom de l'éditeur (sera la valeur du bouton radio)
+ *                                       set:callback pour lancer l'éditeur, appelée avec la string json (valide)
+ *                                     }
+ *                                   - optionsName : un nom pour mettre des boutons radio à la place des liens simples (pour insérer le choix dans le form)
+ * @param {displayOptions} [options] Options (pas utilisé pour le moment, pour rester homogène avec multiEditor)
+ * @param {errorCallback}  [next]
+ */
+export default function init (textarea, config, options, next) {
+  log('init jsonMulti avec config et options', config, options)
+  try {
+    page.loadAsync('jquery', function () {
+      $ = window.jQuery
+      $(function () {
+        if (!textarea) throw new Error('Il faut fournir un textarea pour jsonMulti')
+        if (textarea.nodeName !== 'TEXTAREA') throw new Error('Il faut fournir un textarea pour jsonMulti')
+        $textarea = $(textarea)
+        editors.simple.jq = $textarea
+        if (!config) config = {}
+        // on ajoute les boutons
+        addLinks(config)
+        current = 'simple'
+        if (editors.simple.jqLink) editors.simple.jqLink.css('background-color', '#fe7')
+        // on affecte ça si ça existe
+        if (config.changeCallback) changeCallback = options.changeCallback
+        if (config.editorsSup) {
+          try {
+            config.editorsSup.forEach(function (editor) {
+              if (!editor.name) throw new Error('editeur sup sans name')
+              var editorName = editor.name
+              delete editor.name
+              if (!editor.container) throw new Error('editeur sup sans container')
+              editor.jq = $(editor.container)
+              delete editor.container
+              editors[ editorName ] = editor
+            })
+            log('on a ajouté les éditeurs sup pour arriver à', editors)
+          } catch (error) {
+            log.error('La config passée a une propriété editorsSup invalide', error)
+          }
+        }
+        // on crée un div pour jsonEditor
+        jsonEditorDiv = dom.getElement('div', { id: 'jsonEditor' })
+        $textarea.before(jsonEditorDiv)
+        editors.jsoneditor.jq = $(jsonEditorDiv)
+        if (options && options.editorIni) setEditor(options.editorIni)
+        if (next) next()
+      })
+    })
+  } catch (error) {
+    if (next) next(error)
+    else throw error
+  }
+}

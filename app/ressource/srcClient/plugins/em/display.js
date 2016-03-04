@@ -46,7 +46,7 @@ var isLoaded, lastResult
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display(ressource, options, next) {
+module.exports = function display (ressource, options, next) {
   try {
     var container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
@@ -62,13 +62,13 @@ module.exports = function display(ressource, options, next) {
     ressId = ressource.oid
 
     log('start display em avec la ressource (+options)', ressource, options)
-    //les params minimaux
+    // les params minimaux
     if (!ressource.oid || !ressource.titre || !params) {
       throw new Error('Paramètres manquants')
     }
 
     // Ajout css
-    if (options.baseUrl) dom.addCss(options.baseUrl + 'mep.css'); // si on a pas tant pis pour le css
+    if (options.baseUrl) dom.addCss(options.baseUrl + 'mep.css') // si on a pas tant pis pour le css
     container.className = cssClass
 
     // le message en attendant le chargement
@@ -95,7 +95,7 @@ module.exports = function display(ressource, options, next) {
     }
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
     if (container.style) container.style.width = largeur + 'px'
-    else container.setAttribute('width', largeur + 'px'); // marche pas avec chrome ou ff
+    else container.setAttribute('width', largeur + 'px') // marche pas avec chrome ou ff
 
     /** @see http://redmine.sesamath.net/projects/alibaba/wiki/ExosMep pour les flashvars à passer */
     flashvars = options.flashvars || {}
@@ -109,18 +109,18 @@ module.exports = function display(ressource, options, next) {
     // et la propriété score est ajoutée (un entier donnant le nb de bonnes réponses)
     flashvars.ch = options.ch || 'n'
     // ensuite le facultatif si présent
-    if (params.aide_id)         flashvars.idAide = Number(params.aide_id)
+    if (params.aide_id) flashvars.idAide = Number(params.aide_id)
     // pour les profs (passer les questions et voir l'aide)
     if (options.isFormateur) {
       log("affichage par un formateur, on désactive le score et regarde si on peut activer le bouton suite et l'aide (suivant ressource)")
       // à l'import on ne met pas ces valeurs si c'est o (valeur par défaut)
       if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur
       else flashvars.isBoutonSuite = 'o'
-      if (params.aide_formateur)  flashvars.isBoutonAide = params.aide_formateur
+      if (params.aide_formateur) flashvars.isBoutonAide = params.aide_formateur
       else flashvars.isBoutonAide = 'o'
     }
     // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
-    if (params.nb_wnk)          flashvars.mep_nb_wnk = params.nb_wnk
+    if (params.nb_wnk) flashvars.mep_nb_wnk = params.nb_wnk
 
     // traitement du résultat éventuel
     if (options.resultatCallback && !options.isFormateur) {
@@ -183,7 +183,6 @@ module.exports = function display(ressource, options, next) {
       container.removeChild(loadingElt)
       if (next) next()
     })
-
   } catch (error) {
     if (next) next(error)
     else page.addError(error)

@@ -57,19 +57,9 @@ if (process.argv.indexOf('--prod') > -1) {
 }
 var host = config.$server && config.$server.hostname || 'localhost'
 var port = config.$server && config.$server.port || '3000'
-var baseUrl = 'http://' +host +':' +port
+var baseUrl = 'http://' + host + ':' + port
 
-var browser = Zombie.create({site : baseUrl})
-
-function logInfo() {
-  var arg
-  var prefix = '        '
-  for (var i = 0; i < arguments.length; i++) {
-    arg = arguments[i]
-    if (typeof arg === 'string') arg = prefix +arg
-    console.log(arg)
-  }
-}
+var browser = Zombie.create({site: baseUrl})
 
 describe('get public by oid', function () {
   before(function (done) {
@@ -77,8 +67,6 @@ describe('get public by oid', function () {
   })
 
   it('récupère la page attendue', function (done) {
-    //logInfo(browser.tabs[0])
-    //logInfo(browser.tabs[0]._response)
     browser.assert.success()
     browser.assert.text('h1', 'Droites visiblement parallèles')
     done()
@@ -91,8 +79,6 @@ describe('get public by origine', function () {
   })
 
   it('récupère la page attendue', function (done) {
-    //logInfo(browser.tabs[0])
-    //logInfo(browser.tabs[0]._response)
     browser.assert.success()
     browser.assert.elements('h1', { atLeast: 1, atMost: 1 })
     assert.equal(browser.text('h1').toLowerCase(), 'exercices interactifs')

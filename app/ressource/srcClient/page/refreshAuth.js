@@ -34,7 +34,7 @@ var dom = require('../tools/dom')
 var log = require('../tools/log')
 var xhr = require('../tools/xhr')
 
-function addLink(parent, link) {
+function addLink (parent, link) {
   var li = dom.getElement('li')
   var aOptions = {}
   if (link.href) aOptions.href = link.href
@@ -47,7 +47,7 @@ function addLink(parent, link) {
   } else if (link.iconStack) {
     var spanStack = dom.getElement('span', {class: 'fa-stack fa-lg'})
     link.iconStack.forEach(function (icon) {
-      dom.addElement(spanStack, 'i', {class:'fa fa-' +icon})
+      dom.addElement(spanStack, 'i', {class: 'fa fa-' + icon})
     })
     a.appendChild(spanStack)
     dom.addElement(a, 'span', {}, link.value)
@@ -68,8 +68,8 @@ module.exports = function () {
     var url = '/api/auth'
     // on regarde si on est sur une ressource
     var match = window.location.pathname.match(/\/public\/[a-z]+\/(.+)$/)
-    if (match) url += '?ressourceId=' +match[1]
-    xhr.get(url, {withCredentials:true, responseType:'json'}, function (error, response) {
+    if (match) url += '?ressourceId=' + match[1]
+    xhr.get(url, {withCredentials: true, responseType: 'json'}, function (error, response) {
       log.enable()
       log('on récupère auth', response)
       if (error) {
@@ -81,12 +81,12 @@ module.exports = function () {
           if (authBloc) {
             // Cf views/auth.dust
             dom.empty(authBloc)
-            var a = dom.addElement(authBloc, 'a', {href:'#'})
-            dom.addElement(a, 'i', {class:'fa fa-user'})
+            var a = dom.addElement(authBloc, 'a', {href: '#'})
+            dom.addElement(a, 'i', {class: 'fa fa-user'})
             dom.addText(a, ' ')
-            dom.addElement(a, 'i', {class:'fa fa-ellipsis-v'})
+            dom.addElement(a, 'i', {class: 'fa fa-ellipsis-v'})
             var ul = dom.addElement(authBloc, 'ul')
-            dom.addElement(ul, 'div', {}, data.user.prenom +' ' +data.user.nom)
+            dom.addElement(ul, 'div', {}, data.user.prenom + ' ' + data.user.nom)
             data.ssoLinks.forEach(function (link) {
               addLink(ul, link)
             })
@@ -97,12 +97,12 @@ module.exports = function () {
         }
         // on passe aux boutons d'action si on est sur une ressource
         if (response.permissions && document.getElementById('actions')) {
-          if (response.permissions.indexOf('C') > -1) dom.setStyles(document.getElementById('buttonDuplicate'), {display:'block'})
-          if (response.permissions.indexOf('D') > -1) dom.setStyles(document.getElementById('buttonDelete'), {display:'block'})
-          if (response.permissions.indexOf('W') > -1) dom.setStyles(document.getElementById('buttonEdit'), {display:'block'})
+          if (response.permissions.indexOf('C') > -1) dom.setStyles(document.getElementById('buttonDuplicate'), {display: 'block'})
+          if (response.permissions.indexOf('D') > -1) dom.setStyles(document.getElementById('buttonDelete'), {display: 'block'})
+          if (response.permissions.indexOf('W') > -1) dom.setStyles(document.getElementById('buttonEdit'), {display: 'block'})
         }
         // la navigation
-        if (response.permissions.indexOf('C') > -1) dom.setStyles(document.getElementById('buttonAdd'), {display:'inline-block'})
+        if (response.permissions.indexOf('C') > -1) dom.setStyles(document.getElementById('buttonAdd'), {display: 'inline-block'})
         var buttonMyRessources = document.getElementById('buttonMyRessources')
         if (buttonMyRessources && response.oid) {
           buttonMyRessources.href += response.oid

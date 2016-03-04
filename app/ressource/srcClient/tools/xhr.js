@@ -30,6 +30,7 @@
  */
 'use strict'
 
+/* eslint-env browser */
 var log = require('./log')
 
 /**
@@ -77,12 +78,12 @@ function xhrCall (verb, url, data, options, callback) {
     xhr = new XMLHttpRequest()
   } else if (typeof ActiveXObject !== 'undefined') {
     var versions = ['MSXML2.XmlHttp.5.0', 'MSXML2.XmlHttp.4.0', 'MSXML2.XmlHttp.3.0', 'MSXML2.XmlHttp.2.0', 'Microsoft.XmlHttp']
-    for(var i = 0; i < versions.length; i++) {
+    for (var i = 0; i < versions.length; i++) {
       try {
         /*global ActiveXObject*/
-      xhr = new ActiveXObject(versions[i])
-      break
-      } catch(e) { /* on laisse tomber et on tente le suivant */}
+        xhr = new ActiveXObject(versions[i])
+        break
+      } catch (e) { /* on laisse tomber et on tente le suivant */ }
     }
   }
 
@@ -93,14 +94,14 @@ function xhrCall (verb, url, data, options, callback) {
       for (var p in options.urlParams) {
         if (options.urlParams.hasOwnProperty(p)) {
           url += (url.indexOf('?') > 0) ? '&' : '?'
-          url += p +'='
+          url += p + '='
           url += encodeURIComponent(options.urlParams[p])
         }
       }
     }
     xhr.open(verb, url, true)
-    if (options.withCredentials)          xhr.withCredentials = true
-    if (options.responseType)             xhr.responseType = options.responseType
+    if (options.withCredentials) xhr.withCredentials = true
+    if (options.responseType) xhr.responseType = options.responseType
     // mettre un Content-Type sur du GET déclenche un preflight,
     // Ce Content-Type ne concerne que ce que l'on envoie donc on regarde
     // si y'a qqchose à envoyer, et si c'est un objet on le met d'office,
@@ -111,23 +112,23 @@ function xhrCall (verb, url, data, options, callback) {
           xhr.setRequestHeader(header, options.headers[header])
         }
       }
-    } else if (!!data && typeof data === 'object')  {
+    } else if (!!data && typeof data === 'object') {
       xhr.setRequestHeader('Content-Type', 'application/json')
     }
     xhr.timeout = options.timeout || defaultTimeout
     if (xhr.timeout < minTimeout) {
-      log(new Error('timeout ' +xhr.timeout +"ms trop faible sur l'url " +url +' réinitialisé à ' +(defaultTimeout/1000) +'s'))
+      log(new Error('timeout ' + xhr.timeout + "ms trop faible sur l'url " + url + ' réinitialisé à ' + (defaultTimeout / 1000) + 's'))
       xhr.timeout = defaultTimeout
     }
     if (xhr.timeout > maxTimeout) {
-      log(new Error('timeout ' +xhr.timeout +"ms trop élevé sur l'url " +url +' réinitialisé à ' +(defaultTimeout/1000) +'s'))
+      log(new Error('timeout ' + xhr.timeout + "ms trop élevé sur l'url " + url + ' réinitialisé à ' + (defaultTimeout / 1000) + 's'))
       xhr.timeout = defaultTimeout
     }
     xhr.onerror = function () {
       // Pb de connexion au serveur
       var errMsg = 'Le serveur a renvoyé une erreur'
-      if (xhr.status) errMsg += ' ' +xhr.status
-      errMsg += ' : ' +xhr.responseText
+      if (xhr.status) errMsg += ' ' + xhr.status
+      errMsg += ' : ' + xhr.responseText
       next(new Error(errMsg))
     }
 

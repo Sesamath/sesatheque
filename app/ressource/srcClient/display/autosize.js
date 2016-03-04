@@ -31,21 +31,22 @@
 
 'use strict'
 
-//var dom = require('../../tools/dom')
-var log = require('../../tools/log')
+// var dom = require('../../tools/dom')
+var log = require('../tools/log')
 var $ = window.jQuery /* jshint jquery:true */
 
 var $blocsH, $blocsW, $target
-var offsetHeight = 0,
-    offsetWidth = 0,
-    minHeight = 400,
-    minWidth = 400
+var offsetHeight = 0
+var offsetWidth = 0
+var minHeight = 400
+var minWidth = 400
 
 /**
  * Modifie la taille de l'iframe pour lui donner tout l'espace restant de container
  */
-function resize() {
-  var occupe = offsetHeight, tailleDispo
+function resize () {
+  var occupe = offsetHeight
+  var tailleDispo
   // hauteur
   if ($blocsH) $blocsH.forEach(function ($bloc) { occupe += $bloc.outerHeight(true) })
   tailleDispo = Math.floor(window.innerHeight - occupe)
@@ -68,22 +69,23 @@ function resize() {
  * @param {string}   targetId L'id html du bloc que l'on veut maximiser automatiquement
  * @param {string[]} hBlocIds Liste des ids de bloc dont il faut déduire la hauteur
  * @param {string[]} wBlocIds Liste des ids de bloc dont il faut déduire la largeur
+ * @param {object} [options]
  */
-module.exports = function autosize(targetId, hBlocIds, wBlocIds, options) {
+module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
   // on initialise dès que jQuery est prêt
   $(function () {
-    $target = $('#' +targetId)
+    $target = $('#' + targetId)
     if (hBlocIds && hBlocIds.length) {
       $blocsH = []
       hBlocIds.forEach(function (id) {
-        var $bloc = $('#' +id)
+        var $bloc = $('#' + id)
         if ($bloc) $blocsH.push($bloc)
       })
     }
     if (wBlocIds && wBlocIds.length) {
       $blocsW = []
       wBlocIds.forEach(function (id) {
-        var $bloc = $('#' +id)
+        var $bloc = $('#' + id)
         if ($bloc) $blocsW.push($bloc)
       })
     }

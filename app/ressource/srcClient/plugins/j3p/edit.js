@@ -44,9 +44,9 @@ var $
  * @param {string} urlEditGraphe
  * @param {Element} container
  */
-function addEditGraphe(urlEditGraphe, container) {
-  log('addEditGraphe avec ' +urlEditGraphe)
-  var args = {src: urlEditGraphe, id:'editgraphe'}; // mettre ici allowfullscreen:'true' sert à rien, faut un setAttribute plus loin
+function addEditGraphe (urlEditGraphe, container) {
+  log('addEditGraphe avec ' + urlEditGraphe)
+  var args = {src: urlEditGraphe, id: 'editgraphe'} // mettre ici allowfullscreen:'true' sert à rien, faut un setAttribute plus loin
   var editgraphe = dom.addElement(container, 'iframe', args, 'Si vous lisez ce texte, votre navigateur ne supporte pas les iframes')
   editgraphe.setAttribute('allowfullscreen', true)
   $editgraphe = $(editgraphe)
@@ -59,7 +59,7 @@ function addEditGraphe(urlEditGraphe, container) {
  * @param ressource
  * @param $form
  */
-function addMessageListener(ressource, $form) {
+function addMessageListener (ressource, $form) {
   window.addEventListener('message', function (event) {
     // on teste pas event.origin, on accepte les messages de tous ceux que l'on embarque
     if (event.data) {
@@ -102,7 +102,7 @@ function addMessageListener(ressource, $form) {
  * Helper de loadGraphic qui ajoute l'écouteur sur submit
  * @param $form
  */
-function addSubmitCallback($form) {
+function addSubmitCallback ($form) {
   $form.submit(function () {
     log('submit demandé')
     // on le fait qu'une fois, au cas où le user s'excite sur le bouton enregistrer
@@ -118,7 +118,7 @@ function addSubmitCallback($form) {
       }, 3000)
     }
 
-    return isSubmitForced; // on fera le submit au retour du message
+    return isSubmitForced // on fera le submit au retour du message
   })
 }
 
@@ -126,7 +126,7 @@ function addSubmitCallback($form) {
  * Appelle resizeIframe et le colle comme comportement au resize de la fenêtre
  * @private
  */
-function autosize() {
+function autosize () {
   // on redimensionne dès que jQuery est prêt
   $(resizeIframe)
   // et à chaque changement de la taille de la fenêtre
@@ -139,13 +139,13 @@ function autosize() {
  * @param {Element}   container
  * @param {Ressource} ressource
  */
-function loadGraphic(options, container, ressource) {
+function loadGraphic (options, container, ressource) {
   var urlEditGraphe = 'http://j3p.'
   if (options.isDev) urlEditGraphe += 'dev'
   urlEditGraphe += 'sesamath.net/editgraphes/lanceur_graphique.html'
-  //urlEditGraphe = 'http://j3p.local/editgraphes/lanceur_graphique.html'
+  // urlEditGraphe = 'http://j3p.local/editgraphes/lanceur_graphique.html'
   $textarea.hide()
-  $textarea.before(dom.getElement('a', {href:'?editor=text'}, 'mode texte (sauvegarder les modifications avant)'))
+  $textarea.before(dom.getElement('a', {href: '?editor=text'}, 'mode texte (sauvegarder les modifications avant)'))
   $textarea.before(dom.getElement('br'))
   egWindow = addEditGraphe(urlEditGraphe, container)
   // au submit on veut récupérer le contenu d'éditgraphe
@@ -158,7 +158,7 @@ function loadGraphic(options, container, ressource) {
  * Modifie la taille de l'iframe pour le maximiser sur l'espace visible
  * @private
  */
-function resizeIframe() {
+function resizeIframe () {
   var tailleDispo = Math.floor(window.innerHeight)
   if (tailleDispo < 300) tailleDispo = 300
   $editgraphe.height(tailleDispo)
@@ -174,7 +174,7 @@ function resizeIframe() {
  * @param {object}         parametres
  * @param {simpleCallback} [next]
  */
-function saveParametres(parametres, next) {
+function saveParametres (parametres, next) {
   log('saveParametres', parametres)
   // sans le setTimeout, le $textarea.val(paramString) ne change rien dans le html, aucune idée du pourquoi...
   setTimeout(function () {
@@ -186,17 +186,17 @@ function saveParametres(parametres, next) {
       log('après modif le textarea', $textarea)
     } catch (error) {
       log.error("stringify plante avec l'objet", parametres)
-      page.addError('Impossible de modifier les paramètres, objet malformé (' +error.toString() + ')', 5)
+      page.addError('Impossible de modifier les paramètres, objet malformé (' + error.toString() + ')', 5)
     }
     if (next) next()
   }, 0)
 }
 
-var $editgraphe,                 // iframe
-    egWindow,
-    isSaveAndSubmitDone = false, // on a envoyé le postMessage
-    isSubmitForced = false,      // pour forcer le submit, postMessage fait ou pas
-    $textarea
+var $editgraphe                 // iframe
+var egWindow
+var isSaveAndSubmitDone = false // on a envoyé le postMessage
+var isSubmitForced = false      // pour forcer le submit, postMessage fait ou pas
+var $textarea
 var wd = window.document
 
 /**
@@ -209,7 +209,7 @@ var wd = window.document
  * @param ressource
  * @param options
  */
-module.exports = function edit(ressource, options) {
+module.exports = function edit (ressource, options) {
   page.loadAsync(['jquery'], function () {
     $ = window.jQuery
     try {

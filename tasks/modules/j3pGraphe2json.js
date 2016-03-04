@@ -5,8 +5,8 @@
  * code envoyé par Alexis le 20/01/15 à 16:17, avec correctif du 04/03/15 à 09:56
  *
  * On essaie pas de rendre ce code standard…
- *eslint-disable
  */
+/* eslint-disable */
 function J3PSupprimeEspaces (ch) {
   while (ch.indexOf(' ') !== -1) {
     var pos = ch.indexOf(' ')

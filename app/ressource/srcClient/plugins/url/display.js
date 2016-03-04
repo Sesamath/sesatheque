@@ -161,7 +161,6 @@ function sendResultat (reponse, deferSync, next) {
 }
 
 var container
-var errorsContainer
 var isBasic
 var ressId
 var resultatCallback
@@ -187,7 +186,6 @@ module.exports = function display (ressource, options, next) {
 
       // init de nos var globales
       container = options.container
-      errorsContainer = options.errorsContainer
       if (typeof options.resultatCallback === 'function') resultatCallback = options.resultatCallback
       ressId = ressource.oid
 

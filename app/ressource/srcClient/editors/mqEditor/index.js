@@ -46,23 +46,23 @@ var mqEditor = {}
  * @param parent
  * @param button
  */
-function addButton(parent, button) {
-  var argBtn = {'class': 'mqButton', type:'button'}
+function addButton (parent, button) {
+  var argBtn = {'class': 'mqButton', type: 'button'}
   if (mqTitle[button]) argBtn.title = mqTitle[button]
   var btn = dom.addElement(parent, 'button', argBtn)
-  dom.addElement(btn, 'img', {src:basePath + 'images/' + button + '.png', alt:mqLabel[button]})
-  log('Ajout bouton ' +button, btn)
+  dom.addElement(btn, 'img', {src: basePath + 'images/' + button + '.png', alt: mqLabel[button]})
+  log('Ajout bouton ' + button, btn)
   var value = mqExpr[button]
   if (typeof value === 'string') {
     // une seule commande
     btn.addEventListener('click', function () {
-      log('clic sur ' +button)
+      log('clic sur ' + button)
       $mqDiv.mathquill('cmd', value).focus()
     })
   } else if (value && value.forEach) {
     // un array de commandes
     btn.addEventListener('click', function () {
-      log('clic sur ' +button)
+      log('clic sur ' + button)
       value.forEach(function (args) {
         $mqDiv.mathquill.apply($mqDiv, args)
       })
@@ -70,7 +70,7 @@ function addButton(parent, button) {
     })
   } else {
     // inconnu
-    log.error(button +" n'est pas un bouton connu")
+    log.error(button + " n'est pas un bouton connu")
   }
 }
 
@@ -92,7 +92,7 @@ try {
     supEgal: '\\geq',
     text: '\\text',
     union: '\\cup',
-    vide:'\\emptyset'
+    vide: '\\emptyset'
   }
   var mqLabel = {
     equivaut: 'équivaut',
@@ -107,7 +107,7 @@ try {
     supEgal: 'supérieur ou égal',
     text: 'texte',
     union: 'union',
-    vide:'ensemble vide'
+    vide: 'ensemble vide'
   }
   var mqTitle = {
     equivaut: 'équivaut',
@@ -120,9 +120,9 @@ try {
     puissance: 'puissance',
     racine: 'racine carrée',
     supEgal: 'supérieur ou égal',
-    text : 'ajoute un texte (avec espaces possibles)',
+    text: 'ajoute un texte (avec espaces possibles)',
     union: 'union',
-    vide:'ensemble vide'
+    vide: 'ensemble vide'
   }
 
   var isInitDone = false
@@ -224,7 +224,7 @@ try {
             }
           }
           dom.addElement(mqButtons, 'hr', { style: { visibility: 'hidden', clear: 'left' } })
-          //$mqDiv.mathquill().focus()
+          // $mqDiv.mathquill().focus()
           isInitDone = true
           if (next) next()
         })
@@ -258,7 +258,6 @@ try {
   mqEditor.toggleButtons = function () {
     if (isInitDone) $mqButtons.toggle()
   }
-
 } catch (error) {
   page.addError(error)
 }

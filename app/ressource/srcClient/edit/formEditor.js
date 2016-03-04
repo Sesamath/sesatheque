@@ -41,7 +41,7 @@ var dom = require('../tools/dom')
  * @param {object}  [options] On utilise label, required, remarque, wrapperAttributes
  * @returns {Element} Le div.control-group pour y mettre un input
  */
-function addWrapper(parent, options) {
+function addWrapper (parent, options) {
   if (!parent) parent = addFormGroup()
   var divAttrs = options.wrapperAttributes || {}
   if (divAttrs.class) divAttrs.class = 'control-group'
@@ -49,8 +49,8 @@ function addWrapper(parent, options) {
   var wrapper = dom.addElement(parent, 'div', divAttrs)
   if (options.label) {
     var label = dom.addElement(wrapper, 'label', {}, options.label)
-    if (options.required) dom.addElement(label, 'span', {'class':'required', title:'Ce champ est obligatoire'}, '*')
-    if (options.remarque) dom.addElement(label, 'span', {'class':'remarque'}, options.remarque)
+    if (options.required) dom.addElement(label, 'span', {'class': 'required', title: 'Ce champ est obligatoire'}, '*')
+    if (options.remarque) dom.addElement(label, 'span', {'class': 'remarque'}, options.remarque)
   }
 
   return wrapper
@@ -67,8 +67,8 @@ function addWrapper(parent, options) {
  * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
  * @returns {Element} L'élément ajouté
  */
-function addElement(parent, tag, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group ' +tag})
+function addElement (parent, tag, attrs, options) {
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group ' + tag})
 
   return dom.addElement(container, tag, attrs)
 }
@@ -80,10 +80,10 @@ function addElement(parent, tag, attrs, options) {
  * @param {string}  [position] Si after|before|firstChild|firstSiblings, on positionne le div en frère de element à la position indiquée
  * @returns {Element} Le div.form-group
  */
-function addFormGroup(element, position) {
+function addFormGroup (element, position) {
   if (!element) element = document.getElementById('formRessource')
   if (!element) {
-    element = document.wd.getElementsByTagName('form')
+    element = document.getElementsByTagName('form')
     if (element.length) element = element[0]
     else throw new Error('Aucun form dans la page')
   }
@@ -95,7 +95,7 @@ function addFormGroup(element, position) {
     else if (position === 'firstChild') addMethod = dom.addElementFirstChild
   }
 
-  return addMethod(element, 'div', {'class':'form-group'})
+  return addMethod(element, 'div', {'class': 'form-group'})
 }
 
 /**
@@ -107,15 +107,15 @@ function addFormGroup(element, position) {
  * @param {Array}   checkboxes Une liste d'item avec {label, value, [id], [checked]}, checked sera imposé à 'checked' si true après cast booléen
  * @returns {Element} Le div avec tous les inputs
  */
-function addCheckboxes(parent, name, options, checkboxes) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group checkboxes'})
+function addCheckboxes (parent, name, options, checkboxes) {
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group checkboxes'})
   if (checkboxes instanceof Array) {
     checkboxes.forEach(function (checkbox, i) {
       var id = checkbox.id || dom.getNewId()
-      var label = dom.addElement(container, 'label', {'for':id}, checkbox.label)
-      var attrs = {type:'checkbox', id:id, value:checkbox.value}
+      var label = dom.addElement(container, 'label', {'for': id}, checkbox.label)
+      var attrs = {type: 'checkbox', id: id, value: checkbox.value}
       // on ne renvoie un tableau qui si y'en a plusieurs
-      if (checkboxes.length > 1) attrs.name = name +'[' +i +']'
+      if (checkboxes.length > 1) attrs.name = name + '[' + i + ']'
       else attrs.name = name
       if (checkbox.checked) attrs.checked = 'checked'
       dom.addElement(label, 'input', attrs)
@@ -133,8 +133,8 @@ function addCheckboxes(parent, name, options, checkboxes) {
  * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
  * @returns {Element} L'input text
  */
-function addInputText(parent, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group text'})
+function addInputText (parent, attrs, options) {
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group text'})
   if (!attrs) attrs = {}
   attrs.type = 'text'
 
@@ -151,8 +151,8 @@ function addInputText(parent, attrs, options) {
  *                            selected sera imposé à 'selected' si le cast booléen vaut true
  * @returns {Element} Le select
  */
-function addSelect(parent, attrs, options, choix) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group select'})
+function addSelect (parent, attrs, options, choix) {
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group select'})
   if (!attrs) attrs = {}
   var select = dom.getElement('select', attrs)
   if (choix instanceof Array) {
@@ -180,8 +180,8 @@ function addSelect(parent, attrs, options, choix) {
  * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
  * @returns {Element} Le textarea
  */
-function addTextarea(parent, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group textarea'})
+function addTextarea (parent, attrs, options) {
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group textarea'})
 
   return dom.addElement(container, 'textarea', attrs, options.content || '')
 }
@@ -192,10 +192,10 @@ function addTextarea(parent, attrs, options) {
  * @type {{addCheckboxes: edit.addCheckboxes, addElement: edit.addElement, addFormGroup: edit.addFormGroup, addInputText: edit.addInputText, addSelect: edit.addSelect, addTextarea: edit.addTextarea}}
  */
 module.exports = {
-  addCheckboxes: addCheckboxes,
-  addElement   : addElement,
-  addFormGroup : addFormGroup,
-  addInputText : addInputText,
-  addSelect    : addSelect,
-  addTextarea  : addTextarea
+  addCheckboxes,
+  addElement,
+  addFormGroup,
+  addInputText,
+  addSelect,
+  addTextarea
 }

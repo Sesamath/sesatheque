@@ -36,7 +36,7 @@
  * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte un Alias
  * @constructor
  */
-function Ref(initObj) {
+function Ref (initObj) {
   if (typeof initObj !== 'object') initObj = {}
   /**
    * L'oid de la ressource que l'on référence
@@ -69,7 +69,7 @@ function Ref(initObj) {
    * Un ou des id de catégorie(s) éventuel (pour un picto)
    * @type {Array}
    */
-  this.categories = (initObj.categories && initObj.categories instanceof Array ) ? initObj.categories : []
+  this.categories = (initObj.categories && initObj.categories instanceof Array) ? initObj.categories : []
   /**
    * True si public (sinon il faut être authentifié pour lire la ressource)
    * @type {boolean}
@@ -81,7 +81,7 @@ function Ref(initObj) {
    * Uri d'affichage (facultatif), commence par /public/ ou /ressource/
    * @type {string}
    */
-  this.displayUri = initObj.displayUri || '/' +prefix +'/voir/' +this.ref
+  this.displayUri = initObj.displayUri || '/' + prefix + '/voir/' + this.ref
   /**
    * Url absolue d'affichage (facultatif)
    * @type {string}
@@ -91,7 +91,7 @@ function Ref(initObj) {
    * Uri des data en json (facultatif), commence par /public/ ou /ressource/
    * @type {string}
    */
-  this.dataUri = initObj.dataUri || '/api/' +prefix +'/' +this.ref
+  this.dataUri = initObj.dataUri || '/api/' + prefix + '/' + this.ref
   /**
    * Url absolue des data en json (facultatif)
    * @type {string}

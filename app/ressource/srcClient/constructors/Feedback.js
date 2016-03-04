@@ -36,7 +36,7 @@
  * @param {Object} values
  * @constructor
  */
-function Feedback(values) {
+function Feedback (values) {
   if (typeof values !== 'object') values = {}
   /**
    * Statut du retour (success aussi accepté comme nom de propriété)
@@ -48,7 +48,7 @@ function Feedback(values) {
      * Alternative à la propriété ok
      * @type {boolean}
      */
-    this.success = !! values.success
+    this.success = !!values.success
   }
   /**
    * Message éventuel (si ok = false c'est un message d'erreur et sinon une info)

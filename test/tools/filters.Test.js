@@ -36,8 +36,8 @@
 var assert = require('assert')
 var _ = require('lodash')
 var filters = require('../../app/ressource/srcClient/tools/filters')
-//var flow = require('an-flow');
-//var request = require('request')
+// var flow = require('an-flow');
+// var request = require('request')
 
 describe('filters', function () {
   describe('array', function () {
@@ -53,7 +53,6 @@ describe('filters', function () {
       assert.ok(_.isEqual([], filters.array('foo')))
       assert.ok(_.isEqual([], filters.array(undefined)))
     })
-
   })
 
   describe('arrayInt', function () {
@@ -61,8 +60,8 @@ describe('filters', function () {
       var data
       data = [1, 0, 2, 3]
       assert.ok(_.isEqual(data, filters.arrayInt(data)))
-      assert.ok(_.isEqual([0,1], filters.arrayInt(['un', 0, 'deux', 1])))
-      assert.ok(_.isEqual([0,1], filters.arrayInt([0, -2, 1])))
+      assert.ok(_.isEqual([0, 1], filters.arrayInt(['un', 0, 'deux', 1])))
+      assert.ok(_.isEqual([0, 1], filters.arrayInt([0, -2, 1])))
       assert.ok(_.isEqual([], filters.arrayInt([-3])))
       assert.ok(_.isEqual([], filters.arrayInt({})))
       assert.ok(_.isEqual([], filters.arrayInt('foo')))
@@ -89,7 +88,7 @@ describe('filters', function () {
       assert.strictEqual(0, filters.int(true))
       assert.strictEqual(0, filters.int(undefined))
       assert.strictEqual(0, filters.int([42]))
-      assert.strictEqual(0, filters.int({foo:42}))
+      assert.strictEqual(0, filters.int({foo: 42}))
     })
   })
 
@@ -109,7 +108,6 @@ describe('filters', function () {
     })
   })
 
-
   describe('string', function () {
     it('retourne la string entrée ou une string vide', function () {
       assert.strictEqual('foo', filters.string('foo'))
@@ -122,5 +120,4 @@ describe('filters', function () {
       assert.strictEqual('', filters.string({}))
     })
   })
-
 })

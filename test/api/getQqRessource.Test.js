@@ -40,14 +40,9 @@
 /*global describe,it*/
 
 var assert = require('assert')
-var _ = require('lodash')
 var request = require('request')
 
 var config = require('../../app/config')
-var apiToken = config.apiTokens[0]
-if (process.argv.indexOf('--token') > -1) {
-  apiToken = process.argv[process.argv.indexOf('--token') +1]
-}
 var urlApiBibli = 'http://'
 if (process.argv.indexOf('--prod') > -1) {
   urlApiBibli += 'bibliotheque.sesamath.net'
@@ -60,22 +55,11 @@ if (process.argv.indexOf('--prod') > -1) {
 }
 urlApiBibli += '/api'
 
-
-function logInfo() {
-  var arg
-  var prefix = '        '
-  for (var i = 0; i < arguments.length; i++) {
-    arg = arguments[i]
-    if (typeof arg === 'string') arg = prefix +arg
-    console.log(arg)
-  }
-}
-
 describe('api get public by oid', function () {
   it('récupère public/42', function (doneGet) {
     var options = {
-      url    : urlApiBibli +'/public/42',
-      json   : true
+      url: urlApiBibli + '/public/42',
+      json: true
     }
     request.get(options, function (error, response, ressource) {
       assert.ok(!error)
@@ -91,8 +75,8 @@ describe('api get public by oid', function () {
 describe('api get ressource by oid', function () {
   it('récupère ressource/42', function (doneGet) {
     var options = {
-      url    : urlApiBibli +'/ressource/42',
-      json   : true
+      url: urlApiBibli + '/ressource/42',
+      json: true
     }
     request.get(options, function (error, response, ressource) {
       assert.ok(!error)
@@ -108,8 +92,8 @@ describe('api get ressource by oid', function () {
 describe('api get public by origin', function () {
   it('récupère public/sesaxml/exercices_interactifs', function (doneGet) {
     var options = {
-      url    : urlApiBibli +'/public/sesaxml/exercices_interactifs',
-      json   : true
+      url: urlApiBibli + '/public/sesaxml/exercices_interactifs',
+      json: true
     }
     request.get(options, function (error, response, ressource) {
       assert.ok(!error)
@@ -124,8 +108,8 @@ describe('api get public by origin', function () {
 describe('api get ressource by origin', function () {
   it('récupère ressource/sesaxml/exercices_interactifs', function (doneGet) {
     var options = {
-      url    : urlApiBibli +'/ressource/sesaxml/exercices_interactifs',
-      json   : true
+      url: urlApiBibli + '/ressource/sesaxml/exercices_interactifs',
+      json: true
     }
     request.get(options, function (error, response, ressource) {
       assert.ok(!error)

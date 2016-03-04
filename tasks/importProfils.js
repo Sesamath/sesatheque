@@ -1,19 +1,20 @@
 /**
  * Ce script envoie les profils/*.json vers la bibli et construit le labomep_all
  */
-'use strict';
+'use strict'
 
 // var _ = require('lodash')
-//var request = require('request')
-//var moment = require('moment')
+// var request = require('request')
+// var moment = require('moment')
 var fs = require('fs')
+var path = require('path')
 var flow = require('an-flow')
 
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
 // conf de l'appli
-var serverConf = require('../_private/config')
+var serverConf = require('../app/_private/config')
 var urlBibli = 'http://'
 urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlBibli += ':'
@@ -34,7 +35,7 @@ process.on('SIGINT', function () {
 
 var jsonFiles = []
 // on va chercher les json du dossier json
-var jsonDir = __dirname +'/profils'
+var jsonDir = path.join(__dirname, 'profils')
 
 // on récupère tous les fichiers
 fs.readdirSync(jsonDir).forEach(function (file) {
@@ -50,7 +51,7 @@ common.setAfterAllCb(fluxFile)
 fluxFile.seqEach(function (file) {
   var next = this
   log('analyse de ' + file)
-  fs.readFile(jsonDir +'/' +file, function (error, jsonString) {
+  fs.readFile(path.join(jsonDir, file), function (error, jsonString) {
     try {
       if (error) throw error
       var arbre = JSON.parse(jsonString)
@@ -85,7 +86,7 @@ fluxFile.seqEach(function (file) {
     'enfants': allEnfants
   }
   // on écrit le fichier
-  fs.writeFileSync(jsonDir +'/sesamath-labomep_all.json', JSON.stringify(labomep_all, undefined, 2))
+  fs.writeFileSync(path.join(jsonDir, 'sesamath-labomep_all.json'), JSON.stringify(labomep_all, null, 2))
   // on l'envoie
   common.addRessource(labomep_all, this)
 }).seq(function () {

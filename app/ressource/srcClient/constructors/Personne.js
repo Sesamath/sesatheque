@@ -36,7 +36,7 @@
  * @private
  * @param {Object} initObj Un objet ayant des propriétés d'une personne
  */
-function Personne(initObj) {
+function Personne (initObj) {
   if (!initObj) initObj = {}
   /**
    * L'identifiant de la personne dans la sesatheque
@@ -117,7 +117,7 @@ function Personne(initObj) {
  * @returns {string}
  */
 Personne.prototype.toString = function () {
-  return this.prenom +' ' +this.nom
+  return this.prenom + ' ' + this.nom
 }
 
 module.exports = Personne
