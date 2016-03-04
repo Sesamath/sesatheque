@@ -64,8 +64,14 @@ module.exports = function display (ressource, options, next) {
       head.ready(function () {
         // on attend que tout soit fini pour virer require que Raphael et Big ne supportent pas
         // on espère que plus personne n'en aura besoin
-        if (typeof require !== 'undefined') require = undefined // eslint-disable-line no-native-reassign
-        if (typeof define !== 'undefined') define = undefined // eslint-disable-line no-undef
+        if (typeof window.define !== 'undefined') {
+          console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec requireJs, on désactive define et require')
+          window.define = undefined // eslint-disable-line no-native-reassign
+          if (typeof window.require !== 'undefined') window.require = undefined
+        } else if (typeof window.require !== 'undefined') {
+          console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec commonJs, on désactive require')
+          window.require = undefined
+        }
         // Cf /home/sesamath/bin/fetchCalculatice.sh qui tourne sur le serveur web ressources.sesamath.net
         // pour la liste des js concaténés dans scripts.js
         head.load(ecjsBase + '/scripts.js', function () {
