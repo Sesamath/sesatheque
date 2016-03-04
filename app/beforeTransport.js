@@ -350,8 +350,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   function prepareErrorHtmlData (data, title, errorMsg) {
     if (!data.hasOwnProperty('$metas')) data.$metas = {}
     data.$metas.title = title
-    if (!data.$views) data.$views = path.join(__dirname, 'views') // sinon lassi/classes/transport/html/Renderer.js plante
-    // avec ' Wrong views path'
     if (!data.errors) data.errors = { $view: 'errors' }
     if (!data.errors.errorMessages) data.errors.errorMessages = [errorMsg.replace(/Error[\s]*:[\s]*/, '')]
     log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max: 2000})

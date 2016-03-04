@@ -68,13 +68,13 @@ module.exports = function () {
   }
 
   /**
-   * Retourne les datas minimales (avec $views, $metas) et initialise context.layout (si context fourni)
+   * Retourne les datas minimales ($metas & co) et initialise context.layout (si context fourni)
    * @param {Context} [context]
    * @param {string}  [titre]
    * @param {object}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
    *                                  et les autres propriétés qui seront passées à cette vue)
    *                                  ou un simple texte (qui sera passé à la vue contents
-   * @returns {{$views: string, $metas: {}}}
+   * @returns {{$metas: {}}}
    */
   $page.getDefaultData = function getDefaultData (context, titre, contentBloc) {
     var data = {
