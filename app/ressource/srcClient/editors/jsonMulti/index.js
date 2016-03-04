@@ -35,7 +35,8 @@ var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var page = require('../../page')
 
-var $ = window.jQuery /* jshint jquery:true */
+var $ // affecté dans init
+/* jshint jquery:true */
 
 /**
  * Ajoute les liens pour changer d'éditeur
@@ -54,17 +55,17 @@ function addLinks(config) {
     var elt
     var args = {onclick:function () {setEditor(editorName);}}
     if (config.optionsName) {
-      var id = editorName +"Option"
+      var id = editorName +'Option'
       args.id = id
       args.name = config.optionsName
-      args.type = "radio"
+      args.type = 'radio'
       args.editorName = editorName
-      args.style = {"line-height":"1.3em","vertical-align":"middle"}
-      if (config.editor === editorName) args.checked = "checked"
+      args.style = {'line-height':'1.3em','vertical-align':'middle'}
+      if (config.editor === editorName) args.checked = 'checked'
       elt = dom.addElement(container, 'input', args)
-      dom.addElement(container, 'label', {htmlFor:id, style:{"line-height":"1.3em","vertical-align":"middle", margin:"0 1em 0 0.2em"}}, editors[editorName].label)
+      dom.addElement(container, 'label', {htmlFor:id, style:{'line-height':'1.3em','vertical-align':'middle', margin:'0 1em 0 0.2em'}}, editors[editorName].label)
     } else {
-      args.style = {padding:"0.3em"}
+      args.style = {padding:'0.3em'}
       elt = dom.addElement(container, 'a', args, editors[editorName].label)
       // on ajoute un objet jqLink qui sert pour savoir s'il faut modifier des css au changement ou pas
       editors[editorName].jqLink = $(elt)
@@ -79,7 +80,7 @@ function addLinks(config) {
   for (var editorName in editors) {
     if (editors.hasOwnProperty(editorName)) {
       if (first) first = false
-      else dom.addText(divChoices, " - ")
+      else dom.addText(divChoices, ' - ')
       addLink(divChoices, editorName)
     }
   }
@@ -93,7 +94,7 @@ function addLinks(config) {
  */
 function initJsonEditor (next) {
   try {
-    if (typeof isJseLoaded === "undefined") {
+    if (typeof isJseLoaded === 'undefined') {
       isJseLoaded = false // en cours
       page.loadAsync('jsoneditor', function () {
         try {
@@ -109,7 +110,7 @@ function initJsonEditor (next) {
         }
       })
     } else if (isJseLoaded === false) {
-      alert("Le chargement de jsoneditor est déjà en cours")
+      alert('Le chargement de jsoneditor est déjà en cours')
     } else {
       // load déjà fait
       next()
@@ -131,7 +132,7 @@ function isJsonValide(json) {
     JSON.parse(json)
     retour = true
   } catch (error) {
-    dom.log("json invalide", json)
+    dom.log('json invalide', json)
   }
 
   return retour
@@ -148,8 +149,8 @@ function setEditor(editorName) {
   function toggle() {
     if (editors[editorName].jqLink) {
       // css sur les liens
-      editors[current].jqLink.css("background-color", "")
-      editors[editorName].jqLink.css("background-color", "#fe7")
+      editors[current].jqLink.css('background-color', '')
+      editors[editorName].jqLink.css('background-color', '#fe7')
     } // sinon on a pas initialisé les liens donc rien à faire
     editors[current].jq.hide()
     editors[editorName].jq.show()
@@ -164,12 +165,12 @@ function setEditor(editorName) {
   }
 
   try {
-    if (!editors[editorName]) throw new Error("éditeur " +editorName +" non géré")
+    if (!editors[editorName]) throw new Error('éditeur ' +editorName +' non géré')
     if (editorName !== current) {
-      if (current === "simple") {
+      if (current === 'simple') {
         var json = $textarea.val()
         if (isJsonValide(json)) setNew(json)
-        else throw new Error("Le json est invalide")
+        else throw new Error('Le json est invalide')
       } else {
         setSimple(setNew)
       }
@@ -196,7 +197,7 @@ function setSimple(next) {
       $textarea.val(JSON.stringify(obj, null, 2))
       next(obj)
     } catch (error) {
-      page.addError("Le json est invalide " +jsonString, 3000)
+      page.addError('Le json est invalide ' +jsonString, 3000)
       dom.log.error(error)
     }
   })
@@ -219,14 +220,14 @@ try {
 
   var editors = {
     simple : {
-      label : "simple",
+      label : 'simple',
       getJson:function (next) {
         next($textarea.val())
       }
       // set inutile, initialisé au chargement puis affecté par setSimple
     },
     jsoneditor : {
-      label : "avancé",
+      label : 'avancé',
       getJson:function (next) {
         if (jsonEditor) {
           var obj = jsonEditor.get()
@@ -266,43 +267,46 @@ try {
    * @param {errorCallback}  [next]
    */
   jsonMulti.init = function (textarea, config, options, next) {
-    dom.log("jsonMulti.init avec config et options", config, options)
+    dom.log('jsonMulti.init avec config et options', config, options)
     try {
-      $(function () {
-        if (!textarea) throw new Error("Il faut fournir un textarea pour jsonMulti")
-        if (textarea.nodeName !== "TEXTAREA") throw new Error("Il faut fournir un textarea pour jsonMulti")
-        $textarea = $(textarea)
-        editors.simple.jq = $textarea
-        if (!config) config = {}
-        // on ajoute les boutons
-        addLinks(config)
-        current = "simple"
-        if (editors.simple.jqLink) editors.simple.jqLink.css("background-color", "#fe7")
-        // on affecte ça si ça existe
-        if (config.changeCallback) changeCallback = options.changeCallback
-        if (config.editorsSup) {
-          try {
-            config.editorsSup.forEach(function (editor) {
-              if (!editor.name) throw new Error("editeur sup sans name")
-              var editorName = editor.name
-              delete editor.name
-              if (!editor.container) throw new Error("editeur sup sans container")
-              editor.jq = $(editor.container)
-              delete editor.container
-              editors[editorName] = editor
-            })
-            dom.log("on a ajouté les éditeurs sup pour arriver à", editors)
-          } catch (error) {
-            dom.log.error("La config passée a une propriété editorsSup invalide", error)
+      page.loadAsync('jquery', function () {
+        $ = window.jQuery
+        $(function () {
+          if (!textarea) throw new Error('Il faut fournir un textarea pour jsonMulti')
+          if (textarea.nodeName !== 'TEXTAREA') throw new Error('Il faut fournir un textarea pour jsonMulti')
+          $textarea = $(textarea)
+          editors.simple.jq = $textarea
+          if (!config) config = {}
+          // on ajoute les boutons
+          addLinks(config)
+          current = 'simple'
+          if (editors.simple.jqLink) editors.simple.jqLink.css('background-color', '#fe7')
+          // on affecte ça si ça existe
+          if (config.changeCallback) changeCallback = options.changeCallback
+          if (config.editorsSup) {
+            try {
+              config.editorsSup.forEach(function (editor) {
+                if (!editor.name) throw new Error('editeur sup sans name')
+                var editorName = editor.name
+                delete editor.name
+                if (!editor.container) throw new Error('editeur sup sans container')
+                editor.jq = $(editor.container)
+                delete editor.container
+                editors[ editorName ] = editor
+              })
+              dom.log('on a ajouté les éditeurs sup pour arriver à', editors)
+            } catch (error) {
+              dom.log.error('La config passée a une propriété editorsSup invalide', error)
+            }
           }
-        }
-        // on crée un div pour jsonEditor
-        jsonEditorDiv = dom.getElement("div", {id:"jsonEditor"})
-        $textarea.before(jsonEditorDiv)
-        editors.jsoneditor.jq = $(jsonEditorDiv)
-        if (options && options.editorIni) setEditor(options.editorIni)
-        isInitDone = true
-        if (next) next()
+          // on crée un div pour jsonEditor
+          jsonEditorDiv = dom.getElement('div', { id: 'jsonEditor' })
+          $textarea.before(jsonEditorDiv)
+          editors.jsoneditor.jq = $(jsonEditorDiv)
+          if (options && options.editorIni) setEditor(options.editorIni)
+          isInitDone = true
+          if (next) next()
+        })
       })
     } catch (error) {
       if (next) next(error)

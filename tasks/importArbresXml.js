@@ -5,6 +5,7 @@
 'use strict'
 
 var fs = require('fs')
+var path = require('path')
 var _ = require('lodash')
 var flow = require('an-flow')
 var request = require('request')
@@ -16,11 +17,11 @@ var logProcess = true
 
 common.setOptions({
   /** timeout en ms */
-  timeout : 2000,
-  maxLaunched : 1, // les arbres sont gros et faut appeller l'api pour retrouver tous les enfants...
+  timeout: 2000,
+  maxLaunched: 1, // les arbres sont gros et faut appeller l'api pour retrouver tous les enfants...
   /** pour loguer les ressources dont le retour est ok */
-  logApiCalls : true,
-  logProcess : logProcess
+  logApiCalls: true,
+  logProcess: logProcess
 })
 
 /** origine par défaut (si on la précise pas via --origine), sauf em et am qui ont l'origine du même nom */
@@ -31,17 +32,17 @@ var urlProd = 'http://www.labomep.net/config/xml/'
 
 /** Les url des xml relatives à urlProd */
 var urls = {
-  animations_interactives : 'exercicesInteractifs/animations_interactives.xml',
+  animations_interactives: 'exercicesInteractifs/animations_interactives.xml',
   bibliotheque_iep: 'exercicesInteractifs/bibliotheque_iep.xml',
-  exercices_interactifs_hors : 'exercicesInteractifs/exercices_interactifs_hors.xml',
-  exercices_interactifs : 'exercicesInteractifs/exercices_interactifs.xml',
-  exercices_non : 'exercices_non.xml',
-  labomep_gt_copirelem : 'labomepGT/labomep_gt_copirelem.xml',
-  labomep_gt_geogebra : 'labomepGT/labomep_gt_geogebra.xml',
-  labomep_gt_suisse : 'labomepGT/labomep_gt_suisse.xml',
-  labomep_profil_primaire : 'labomepProfils/labomep_profil_primaire.xml',
-  labomep_profil_suisse : 'labomepProfils/labomep_profil_suisse.xml',
-  partagees : 'partagees.xml',
+  exercices_interactifs_hors: 'exercicesInteractifs/exercices_interactifs_hors.xml',
+  exercices_interactifs: 'exercicesInteractifs/exercices_interactifs.xml',
+  exercices_non: 'exercices_non.xml',
+  labomep_gt_copirelem: 'labomepGT/labomep_gt_copirelem.xml',
+  labomep_gt_geogebra: 'labomepGT/labomep_gt_geogebra.xml',
+  labomep_gt_suisse: 'labomepGT/labomep_gt_suisse.xml',
+  labomep_profil_primaire: 'labomepProfils/labomep_profil_primaire.xml',
+  labomep_profil_suisse: 'labomepProfils/labomep_profil_suisse.xml',
+  partagees: 'partagees.xml',
   tests_algebre: 'bibliotheque.xml'
 }
 
@@ -53,16 +54,16 @@ var urls = {
  htmlparser devrait marcher, mais il renvoie un objet un peu plus complexe que elementtree,
  avec des trucs à éliminer comme
  {
- "raw": "\n        ",
- "data": "\n        ",
- "type": "text"
+ 'raw': '\n        ',
+ 'data': '\n        ',
+ 'type': 'text'
  },
  var htmlparser = require('htmlparser')
  */
 var elementtree = require('elementtree')
 
 // url bibliotheque d'après conf de l'appli
-var serverConf = require('../_private/config')
+var serverConf = require('../app/_private/config')
 var urlApiBibli = 'http://'
 urlApiBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlApiBibli += ':'
@@ -85,16 +86,16 @@ var lastArbres = []
  * @param xmlName
  * @returns {boolean}
  */
-function needToSplit(xmlName) {
+function needToSplit (xmlName) {
   var regexps = [
-      // /^Manuel[^\.]+$/,
-      // /^Cahier[^\.]+$/,
-      // /^tous_les_manuels(\.part[0-9]+)?$/
+    // /^Manuel[^\.]+$/,
+    // /^Cahier[^\.]+$/,
+    // /^tous_les_manuels(\.part[0-9]+)?$/
 
-      // lui a différents suffixes possibles
-      /^animations_interactives$/,  // on a des enfants de niveau 1 sans niveau 2
-      /^exercices_interactifs(\.part[0-9]+)?$/,
-      /^exercices_non(\.part[0-9]+)?$/
+    // lui a différents suffixes possibles
+    /^animations_interactives$/,  // on a des enfants de niveau 1 sans niveau 2
+    /^exercices_interactifs(\.part[0-9]+)?$/,
+    /^exercices_non(\.part[0-9]+)?$/
   ]
   // des cas particuliers
   if (xmlName === 'exercices_interactifs.part14') return false
@@ -112,7 +113,7 @@ function needToSplit(xmlName) {
  * @param xmlName
  * @returns {*}
  */
-function getTitre(arbreXml, xmlName) {
+function getTitre (arbreXml, xmlName) {
   var titre
   if (xmlName === 'exercices_non') titre = 'Exercices non interactifs'
   else if (arbreXml.attrib && arbreXml.attrib.n) titre = arbreXml.attrib.n
@@ -127,16 +128,16 @@ function getTitre(arbreXml, xmlName) {
  * @param {string} titre
  * @returns {{type: string, origine: string, categories: *[], publie: boolean, restriction: number, enfants: Array}}
  */
-function getArbreDefaultValues(idOrigine, titre) {
+function getArbreDefaultValues (idOrigine, titre) {
   return {
-    titre        : titre,
+    titre: titre,
     type: 'arbre',
-    origine      : origineArbre,
-    idOrigine    : idOrigine,
-    categories   : [arbreCateg],
-    publie       : true,
-    restriction  : 0,
-    enfants      : []
+    origine: origineArbre,
+    idOrigine: idOrigine,
+    categories: [arbreCateg],
+    publie: true,
+    restriction: 0,
+    enfants: []
   }
 }
 
@@ -145,23 +146,23 @@ function getArbreDefaultValues(idOrigine, titre) {
  * @param xmlFile
  * @param next
  */
-function parseXml(xmlFile, next) {
+function parseXml (xmlFile, next) {
   /**
    * Cherche les enfants de root pour les filer à processArbreXml
    * @param xmlString
    */
-  function analyse(xmlString) {
-    //log('analyse de ' +xmlString)
+  function analyse (xmlString) {
+    // log('analyse de ' +xmlString)
     var arbreXml = elementtree.parse(xmlString)
-    if (!arbreXml._root) throw new Error("arbreXml sans racine")
-    if (!arbreXml._root._children || !arbreXml._root._children.length) throw new Error("arbreXml vide")
+    if (!arbreXml._root) throw new Error('arbreXml sans racine')
+    if (!arbreXml._root._children || !arbreXml._root._children.length) throw new Error('arbreXml vide')
     /* log(JSON.stringify(arbreXml, null, 2))
      process.exit() */
     // si l'arbreXml n'a qu'un fils qui est un tag d avec enfants c'est lui qu'on prend comme racine
     if (arbreXml._root._children.length === 1 && arbreXml._root._children[0].tag === 'd') {
       if (arbreXml._root._children[0]._children.length) {
         arbreXml = arbreXml._root._children[0]
-      } else throw new Error("arbreXml avec un seul dossier vide")
+      } else throw new Error('arbreXml avec un seul dossier vide')
     } else {
       arbreXml = arbreXml._root
     }
@@ -169,38 +170,35 @@ function parseXml(xmlFile, next) {
   }
 
   // on va chercher xmlString pour l'analyser
-  var xmlName = xmlFile.substr(0, xmlFile.length -4) // sans l'extension .xml
+  var xmlName = xmlFile.substr(0, xmlFile.length - 4) // sans l'extension .xml
 
   try {
     if (logProcess) log('processing ' + xmlName)
 
     if (isOnlineSrc) {
       if (urls[xmlName]) {
-        var url = urlProd +urls[xmlName]
-        log("On va chercher " +url)
+        var url = urlProd + urls[xmlName]
+        log('On va chercher ' + url)
         request.get(url, function (error, response) {
           if (error) next(error)
           else analyse(response.body)
         })
-
       } else {
-        log(xmlName +" n'a pas d'url connue")
+        log(xmlName + " n'a pas d'url connue")
         common.checkEnd()
       }
     } else {
-      var file = __dirname +'/arbresXml/' +xmlFile
+      var file = path.join(__dirname, 'arbresXml', xmlFile)
       if (!fs.existsSync(file)) {
-        console.log('Abandon, ' +file +" n'existe pas")
+        console.log('Abandon, ' + file + " n'existe pas")
         process.exit()
       }
       var xmlString = fs.readFileSync(file).toString()
       analyse(xmlString)
     }
-
   } catch (error) {
-    common.addError(xmlName, "le parsing du xml " +xmlFile +" a planté : " +error.toString())
+    common.addError(xmlName, 'le parsing du xml ' + xmlFile + ' a planté : ' + error.toString())
   }
-
 }
 
 /**
@@ -209,14 +207,14 @@ function parseXml(xmlFile, next) {
  * @param xmlName
  * @param next
  */
-function processArbreXml(arbreXml, xmlName, next) {
+function processArbreXml (arbreXml, xmlName, next) {
   // si manuel ou cahier on ajoute à lastArbres[1] (tous les manuels)
-  //if (/^Manuel/.test(xmlName) || /^Cahier/.test(xmlName)) {
+  // if (/^Manuel/.test(xmlName) || /^Cahier/.test(xmlName)) {
   //  lastArbres[1].push(getArbreDefaultValues(xmlName, arbreXml.titre))
-  //}
+  // }
 
   if (needToSplit(xmlName)) {
-    if (logProcess) log("split " +xmlName)
+    if (logProcess) log('split ' + xmlName)
     var arbre = getArbreDefaultValues(xmlName, getTitre(arbreXml, xmlName))
     // pour stocker les idOrigine des branches qui serviront à récupérer les oid quand elles auront été enregistrées
     arbre.idOrigineBranches = []
@@ -227,42 +225,36 @@ function processArbreXml(arbreXml, xmlName, next) {
       var nextBranche = this
       var brancheName = xmlName + '.part' + num
       num++
-      log('découpage de ' +xmlName +', branche ' +brancheName)
+      log('découpage de ' + xmlName + ', branche ' + brancheName)
       if (branche.tag === 'd') {
         arbre.idOrigineBranches.push(brancheName)
         processArbreXml(branche, brancheName, nextBranche)
       } else {
-        common.addError(xmlName, "doit être découpé mais on a trouvé un " + branche.tag + " à la racine")
+        common.addError(xmlName, 'doit être découpé mais on a trouvé un ' + branche.tag + ' à la racine')
         nextBranche()
       }
-
     }).seq(function () {
       // on lance l'envoi de la pile de branches
-      log('envoi des enfants de ' +xmlName)
+      log('envoi des enfants de ' + xmlName)
       common.checkEnd(this)
-
     }).seq(function () {
-      log('fin traitement des branches de ' +xmlName +', récup des ref')
+      log('fin traitement des branches de ' + xmlName + ', récup des ref')
       // remplace les idOrigineBranches
       getRefEnfants(arbre, this)
-
     }).seq(function () {
       // faut enregistrer l'arbre maintenant car on est peut-être en récursif
-      if (logProcess) log("envoi de l'arbre complété " +xmlName)
+      if (logProcess) log("envoi de l'arbre complété " + xmlName)
       common.addRessource(arbre, this)
-
     }).seq(function () {
-      if (logProcess) log('fin du traitement de ' +xmlName)
+      if (logProcess) log('fin du traitement de ' + xmlName)
       next()
-
     }).catch(function (error) {
-      log('erreur dans le traitement des branches de ' +xmlName +', il ne sera pas ajouté', error)
+      log('erreur dans le traitement des branches de ' + xmlName + ', il ne sera pas ajouté', error)
       common.addError(xmlName, 'erreur dans le traitement des branches, il ne sera pas ajouté')
       next()
     })
-
   } else {
-    if (logProcess) log("not split " +xmlName)
+    if (logProcess) log('not split ' + xmlName)
     convertAndDefer(arbreXml, xmlName, next)
   }
 }
@@ -273,7 +265,7 @@ function processArbreXml(arbreXml, xmlName, next) {
  * @param xmlName
  * @param next
  */
-function convertAndDefer(arbreXml, xmlName, next) {
+function convertAndDefer (arbreXml, xmlName, next) {
   function end () {
     common.deferRessource(arbre)
     next()
@@ -281,9 +273,9 @@ function convertAndDefer(arbreXml, xmlName, next) {
 
   var arbre = getArbreDefaultValues(xmlName, getTitre(arbreXml, xmlName))
   arbre.typePedagogiques = ressConf.categoriesToTypes[arbreCateg].typePedagogiques
-  arbre.typeDocumentaires =ressConf.categoriesToTypes[arbreCateg].typeDocumentaires
+  arbre.typeDocumentaires = ressConf.categoriesToTypes[arbreCateg].typeDocumentaires
   if (arbre.idOrigineBranches) {
-    log(xmlName +' KO, il reste des idOrigineBranches, pas ajouté')
+    log(xmlName + ' KO, il reste des idOrigineBranches, pas ajouté')
     common.addError(xmlName, 'KO, il reste des idOrigineBranches, pas ajouté')
     next()
   } else {
@@ -300,7 +292,7 @@ function convertAndDefer(arbreXml, xmlName, next) {
  * @param arbre
  * @param next appelé avec (error, arbre)
  */
-function getRefEnfants(arbre, next) {
+function getRefEnfants (arbre, next) {
   // faut récupérer les refs des idOrigine de chaque branche
   if (arbre.idOrigineBranches) {
     arbre.enfants = []
@@ -313,22 +305,20 @@ function getRefEnfants(arbre, next) {
           arbre.enfants.push(ref)
         } else {
           arbre.enfants.push({
-            titre        : "erreur, ressource inexistante au moment de l'import",
-            origine      : origineArbre,
-            idOrigine    : idOrigine
+            titre: "erreur, ressource inexistante au moment de l'import",
+            origine: origineArbre,
+            idOrigine: idOrigine
           })
         }
         nextEnfant()
       })
-
     }).seq(function () {
       // tous les enfants ont été récupérés
-      log('fin conversion des idOrigineBranches de ' +arbre.idOrigine)
+      log('fin conversion des idOrigineBranches de ' + arbre.idOrigine)
       delete arbre.idOrigineBranches
       next(null, arbre)
-
     }).catch(function (error) {
-      common.addError(arbre.idOrigine, 'seq a planté pendant la récup des ref de ses branches : ' +error.toString())
+      common.addError(arbre.idOrigine, 'seq a planté pendant la récup des ref de ses branches : ' + error.toString())
       next(error)
     })
   } else {
@@ -342,7 +332,7 @@ function getRefEnfants(arbre, next) {
  * @param {string}   [xmlName] Le xml (nom du fichier sans extension qui sera idOrigine, éventuellement avec un suffixe partXX)
  * @param {Function} next callback appelée avec le tableau d'enfants ou un tableau vide
  */
-function getEnfants(arbreXml, xmlName, next) {
+function getEnfants (arbreXml, xmlName, next) {
   var enfants = []
 
   if (arbreXml._children) {
@@ -358,7 +348,7 @@ function getEnfants(arbreXml, xmlName, next) {
 
       if (child.tag === 'd') {
         if (!enfant.titre) {
-          common.addError(xmlName, "dossier sans titre, n° d'ordre " +child._id)
+          common.addError(xmlName, "dossier sans titre, n° d'ordre " + child._id)
           enfant.titre = 'sans titre'
         }
         enfant.type = 'arbre'
@@ -368,27 +358,26 @@ function getEnfants(arbreXml, xmlName, next) {
           enfants.push(enfant)
           nextSeq()
         })
-
       } else {
         // une ref vers une ressource
         if (idOrigine) {
           var origine
-          if (child.tag == 'em') origine = 'em'
-          else if (child.tag == 'am') origine = 'am'
-          else if (child.tag == 'mn') origine = 'labomepMENUS'
+          if (child.tag === 'em') origine = 'em'
+          else if (child.tag === 'am') origine = 'am'
+          else if (child.tag === 'mn') origine = 'labomepMENUS'
           else if (idOrigine > 1000000 && idOrigine < 4000000) {
             if (idOrigine < 2000000) {
-              origine = 'ato';
+              origine = 'ato'
               idOrigine -= 1000000
             } else if (idOrigine < 3000000) {
-              origine = 'coll_doc';
+              origine = 'coll_doc'
               idOrigine -= 2000000
             } else {
-              origine = 'accomp';
+              origine = 'accomp'
               idOrigine -= 3000000
             }
           } else {
-              origine = 'labomepBIBS'
+            origine = 'labomepBIBS'
           }
           common.getRef(origine, idOrigine, function (ref) {
             if (ref) {
@@ -396,9 +385,9 @@ function getEnfants(arbreXml, xmlName, next) {
             } else {
               enfant = {
                 type: child.tag,
-                origine      : origine,
-                idOrigine    : idOrigine,
-                titre        : "Erreur, n'existait pas dans la bibliothèque au moment de l'import" + ' (' + (enfant.titre || '') + ')'
+                origine: origine,
+                idOrigine: idOrigine,
+                titre: "Erreur, n'existait pas dans la bibliothèque au moment de l'import" + ' (' + (enfant.titre || '') + ')'
               }
             }
             // on lui ajoute ses attributs éventuels
@@ -407,30 +396,28 @@ function getEnfants(arbreXml, xmlName, next) {
                 delete child.attrib.i
                 enfant.attributes = child.attrib
               }
-            } catch(error) {
-              var msg = "L'affectation dans attributes de l'enfant " +(enfant.ref || enfant.idOrigine) +' a planté'
+            } catch (error) {
+              var msg = "L'affectation dans attributes de l'enfant " + (enfant.ref || enfant.idOrigine) + ' a planté'
               log(msg, error)
               log.error(msg, error)
             }
             // on vérifie qu'il a pas d'enfants
-            if (child._children.length) common.addError(xmlName, "L'élément " +child.tag +" a des enfants, n° d'ordre " +child._id)
+            if (child._children.length) common.addError(xmlName, "L'élément " + child.tag + " a des enfants, n° d'ordre " + child._id)
             enfants.push(enfant)
             nextSeq()
           }) // getRef
-
         } else {
-          common.addError(xmlName, "élément " +child.tag +" sans id , n° d'ordre " +child._id)
+          common.addError(xmlName, 'élément ' + child.tag + " sans id , n° d'ordre " + child._id)
           nextSeq()
         }
       }
-
     }).seq(function () {
-      if (logProcess && xmlName) log('fin du traitement des enfants de ' +xmlName)
-      //log('enfants de ' +xmlName, enfants)
+      if (logProcess && xmlName) log('fin du traitement des enfants de ' + xmlName)
+      // log('enfants de ' +xmlName, enfants)
       next(enfants)
     }).catch(function (error) {
       log('plantage dans seq de getEnfants', error)
-      common.addError(xmlName, 'plantage dans seq de getEnfants : ' +error)
+      common.addError(xmlName, 'plantage dans seq de getEnfants : ' + error)
       next(enfants)
     })
   }
@@ -440,14 +427,12 @@ function getEnfants(arbreXml, xmlName, next) {
 var argv = process.argv.slice(2)
 var xmls = []
 
-log('task ' + __filename)
-
 // on peut préciser un ou des nom(s) de fichier
 if (argv[0] === '--xml') {
   xmls = argv[1].split(',')
 } else {
   // on prend ceux du dossier arbresXml
-  fs.readdirSync(__dirname +'/arbresXml').forEach(function (file) {
+  fs.readdirSync(path.join(__dirname, 'arbresXml')).forEach(function (file) {
     if (file.substr(-4) === '.xml') {
       xmls.push(file)
     }
@@ -455,11 +440,11 @@ if (argv[0] === '--xml') {
 }
 
 if (argv[0] === '--prod') {
-  log('mode prod, on ira chercher les xml sur ' +urlProd)
+  log('mode prod, on ira chercher les xml sur ' + urlProd)
   isOnlineSrc = true
 }
 
-log('On va parser les xml : ' +xmls.join(', '))
+log('On va parser les xml : ' + xmls.join(', '))
 
 // yapluka
 flow().seq(function () {
@@ -472,52 +457,42 @@ flow().seq(function () {
   // boucle sur les xml
   flow(xmls).seqEach(function (xml) {
     parseXml(xml, this)
-
   }).seq(function () {
     log("fin de l'analyse des xmls, on envoie les arbres")
     common.checkEnd(this)
-
   }).seq(function () {
     log("fin de l'envoi des arbres issus des xmls")
     nextSeq()
-
   }).catch(function (error) {
     log('error dans la boucle seq sur les xml', error)
     nextSeq()
   })
-
 }).seq(function () {
   /**
    * Etape 2, traitement de lastArbres
    */
   if (lastArbres.length) {
     // on remplace par des ids
-    log('On traite les ' +lastArbres.length +' ressources de lastArbres')
+    log('On traite les ' + lastArbres.length + ' ressources de lastArbres')
 
     flow(lastArbres).seqEach(function (arbre) {
-      log("traitement de " +arbre.idOrigine)
+      log('traitement de ' + arbre.idOrigine)
       convertAndDefer(arbre, arbre.idOrigine, this)
-
     }).seq(function () {
       // fin seqEach lastArbres
-      log("envoi des lastArbres peuplés")
+      log('envoi des lastArbres peuplés')
       common.checkEnd(this)
-
     }).seq(function () {
       log('fin lastArbres')
-
     }).catch(function (error) {
       log('error dans la boucle lastArbres', error)
     })
-
   } else {
     log('Pas de lastArbres à traiter')
     this()
   }
-
 }).seq(function () {
   common.displayResult()
-
 }).catch(function (error) {
   log('Erreur dans le flow :', error)
   common.displayResult()
@@ -531,7 +506,7 @@ flow().seq(function () {
  SET
     io._string = 'sesamath',
     ii._string = replace(ii._string, '.xml', ''),
-    r.data = replace(replace(r.data, 'origine":"sesamath"', 'origine":"sesamath"'), '.xml","type":', '","type":')
+    r.data = replace(replace(r.data, 'origine':'sesamath"', 'origine':'sesamath"'), '.xml','type":', '','type":')
  WHERE io.name = 'origine'
    and io._string = 'labomepXml'
    and ii.name = 'idOrigine'

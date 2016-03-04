@@ -35,7 +35,8 @@ var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var swf = require('../../display/swf')
 
-var $ = window.jQuery /* jshint jquery:true */
+var $
+/* jshint jquery:true */
 
 /**
  * Ajoute l'iframe (ou un div si c'est un swf directement)
@@ -175,142 +176,145 @@ var isLoaded
  */
 module.exports = function display (ressource, options, next) {
   log('url.display avec les options', options)
-  try {
-    // les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.adresse) throw new Error('Ressource incomplète');
-    ['base', 'pluginBase', 'container', 'errorsContainer'].forEach(function (param) {
-      if (!options[param]) throw new Error('Paramètre ' + param + ' manquant')
-    })
+  page.loadAsync('jquery', function () {
+    $ = window.jQuery
+    try {
+      // les params minimaux
+      if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.adresse) throw new Error('Ressource incomplète');
+      [ 'base', 'pluginBase', 'container', 'errorsContainer' ].forEach(function (param) {
+        if (!options[ param ]) throw new Error('Paramètre ' + param + ' manquant')
+      })
 
-    // init de nos var globales
-    container = options.container
-    errorsContainer = options.errorsContainer
-    if (typeof options.resultatCallback === 'function') resultatCallback = options.resultatCallback
-    ressId = ressource.oid
+      // init de nos var globales
+      container = options.container
+      errorsContainer = options.errorsContainer
+      if (typeof options.resultatCallback === 'function') resultatCallback = options.resultatCallback
+      ressId = ressource.oid
 
-    // raccourcis
-    var params = ressource.parametres
-    var url = params.adresse
-    if (!url) throw new Error('Url manquante')
-    if (!/^https?:\/\//.test(url)) throw new Error('Url invalide : ' + url)
+      // raccourcis
+      var params = ressource.parametres
+      var url = params.adresse
+      if (!url) throw new Error('Url manquante')
+      if (!/^https?:\/\//.test(url)) throw new Error('Url invalide : ' + url)
 
-    // init
-    dom.addCss(options.pluginBase + 'url.css')
+      // init
+      dom.addCss(options.pluginBase + 'url.css')
 
-    var hasConsigne = (params.question_option && params.question_option !== 'off')
-    var hasReponse = (params.answer_option && params.answer_option !== 'off')
-    var isBasic = !hasConsigne && !hasReponse
-    // ni question ni réponse
-    if (isBasic) {
-      addPage(params, next)
-      if (resultatCallback) {
-        // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
-        $('body').on('unload', function () {
-          if (isLoaded) sendResultat(null, true)
-        })
-      } // sinon rien à faire
-    } else {
-      /**
-       * Ajout des comportements pour la gestion des panneaux Consigne et Réponse avec jQueryUi
-       * On charge ces dépendances avec notre loader
-       */
-      page.setBase(options.pluginBase)
-      page.loadAsync(['jqueryUiDialog'], function () {
-        // les autres sont des modules à nous chargés par webpack
-        require.ensure([], function (require) {
-          function sendReponse () {
-            if (!isResultatSent) {
-              var reponse = $(textarea).val()
-              sendResultat(reponse, false, function (retour) {
-                if (retour && (retour.ok || retour.success)) isResultatSent = true
-              })
-            }
-          }
-
-          var hasCkeditor = (params.answer_editor && params.answer_editor.indexOf('ckeditor') === 0)
-          var hasMqEditor = (params.answer_editor === 'mqEditor')
-          var editorName
-          if (hasCkeditor) editorName = 'ckeditor'
-          else if (hasMqEditor) editorName = 'mqEditor'
-          var editor
-          if (editorName) editor = require('../../editors/' + editorName)
-          var urlUi = require('./displayUi')
-          // on ajoute tous nos div même si tous ne serviront pas (car urlUi les cherche dans la page)
-          var entete = dom.addElement(container, 'div', {id: 'entete'})
-          dom.addElement(entete, 'div', {id: 'lienConsigne'}, 'Consigne')
-          dom.addElement(entete, 'div', {id: 'lienReponse'}, 'Réponse')
-          dom.addElement(entete, 'div', {id: 'filariane'})
-          dom.addElement(entete, 'div', {id: 'information', 'class': 'invisible'})
-          var divConsigne = dom.addElement(entete, 'div', {id: 'consigne', 'class': 'invisible'})
-          var divReponse = dom.addElement(entete, 'div', {id: 'reponse', 'class': 'invisible'})
-          if (hasConsigne) {
-            if (params.consigne) $(divConsigne).html(params.consigne)
-            else log.error('Pas de consigne alors que question_option vaut ' + params.question_option)
-          }
-          if (hasReponse) {
-            var form = dom.addElement(divReponse, 'form', { action: '' })
-            var textarea = dom.addElement(form, 'textarea', { id: 'answer', cols: '50', rows: '10' })
-            if (hasCkeditor) {
-              /* global CKEDITOR */
-              if (CKEDITOR.env.ie && CKEDITOR.env.version < 9) CKEDITOR.tools.enableHtml5Elements(document)
-              CKEDITOR.config.height = 150
-              CKEDITOR.config.width = 'auto'
-              if (params.answer_editor === 'ckeditorTex') {
-                CKEDITOR.config.extraPlugins = 'mathjax'
-                CKEDITOR.config.mathJaxLib = '/vendors/mathjax/2.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+      var hasConsigne = (params.question_option && params.question_option !== 'off')
+      var hasReponse = (params.answer_option && params.answer_option !== 'off')
+      var isBasic = !hasConsigne && !hasReponse
+      // ni question ni réponse
+      if (isBasic) {
+        addPage(params, next)
+        if (resultatCallback) {
+          // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
+          $('body').on('unload', function () {
+            if (isLoaded) sendResultat(null, true)
+          })
+        } // sinon rien à faire
+      } else {
+        /**
+         * Ajout des comportements pour la gestion des panneaux Consigne et Réponse avec jQueryUi
+         * On charge ces dépendances avec notre loader
+         */
+        page.setBase(options.pluginBase)
+        page.loadAsync([ 'jqueryUiDialog' ], function () {
+          // les autres sont des modules à nous chargés par webpack
+          require.ensure([], function (require) {
+            function sendReponse () {
+              if (!isResultatSent) {
+                var reponse = $(textarea).val()
+                sendResultat(reponse, false, function (retour) {
+                  if (retour && (retour.ok || retour.success)) isResultatSent = true
+                })
               }
-              CKEDITOR.replace('answer', {
-                toolbarGroups: [
-                  { name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
-                  { name: 'editing', groups: [ 'find', 'selection' ] },
-                  { name: 'insert' },
-                  { name: 'forms' },
-                  { name: 'tools' },
-                  { name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
-                  { name: 'others' },
-                  '/',
-                  { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
-                  { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
-                  { name: 'styles' },
-                  { name: 'colors' },
-                  { name: 'about' }
-                ],
-                removeButtons: 'Styles,Source',
-                customConfig: '' // on veut pas charger le config.js
-              })
-            } else if (hasMqEditor) {
-              editor(form, params.mqEditorConfig, options)
             }
-            if (resultatCallback) {
-              var isResultatSent = false
-              dom.addElement(form, 'br')
-              var boutonReponse = dom.addElement(form, 'button', { id: 'envoi' }, 'Enregistrer cette réponse')
-              // on ajoute l'envoi de la réponse sur le bouton et à la fermeture
-              $(boutonReponse).click(sendReponse)
-              $('body').on('unload', function () {
-                sendReponse(null, true)
-              })
-              $(textarea).change(function () {
-                isResultatSent = false
-              })
-            } else if (options.preview) {
-              dom.addElement(form, 'p', null, "Réponse attendue mais pas d'envoi possible en prévisualisation")
-            } else {
-              dom.addElement(form, 'p', { 'class': 'info', style: { margin: '1em;' } },
-                "Aucun enregistrement ne sera effectué (car aucune destination n'a été fournie pour l'envoyer, normal en visualisation seule)")
+
+            var hasCkeditor = (params.answer_editor && params.answer_editor.indexOf('ckeditor') === 0)
+            var hasMqEditor = (params.answer_editor === 'mqEditor')
+            var editorName
+            if (hasCkeditor) editorName = 'ckeditor'
+            else if (hasMqEditor) editorName = 'mqEditor'
+            var editor
+            if (editorName) editor = require('../../editors/' + editorName)
+            var urlUi = require('./displayUi')
+            // on ajoute tous nos div même si tous ne serviront pas (car urlUi les cherche dans la page)
+            var entete = dom.addElement(container, 'div', { id: 'entete' })
+            dom.addElement(entete, 'div', { id: 'lienConsigne' }, 'Consigne')
+            dom.addElement(entete, 'div', { id: 'lienReponse' }, 'Réponse')
+            dom.addElement(entete, 'div', { id: 'filariane' })
+            dom.addElement(entete, 'div', { id: 'information', 'class': 'invisible' })
+            var divConsigne = dom.addElement(entete, 'div', { id: 'consigne', 'class': 'invisible' })
+            var divReponse = dom.addElement(entete, 'div', { id: 'reponse', 'class': 'invisible' })
+            if (hasConsigne) {
+              if (params.consigne) $(divConsigne).html(params.consigne)
+              else log.error('Pas de consigne alors que question_option vaut ' + params.question_option)
             }
-            addPage(params, function () {
-              urlUi(ressource, options, function () {
-                $('#loading').empty()
-                next()
+            if (hasReponse) {
+              var form = dom.addElement(divReponse, 'form', { action: '' })
+              var textarea = dom.addElement(form, 'textarea', { id: 'answer', cols: '50', rows: '10' })
+              if (hasCkeditor) {
+                /* global CKEDITOR */
+                if (CKEDITOR.env.ie && CKEDITOR.env.version < 9) CKEDITOR.tools.enableHtml5Elements(document)
+                CKEDITOR.config.height = 150
+                CKEDITOR.config.width = 'auto'
+                if (params.answer_editor === 'ckeditorTex') {
+                  CKEDITOR.config.extraPlugins = 'mathjax'
+                  CKEDITOR.config.mathJaxLib = '/vendors/mathjax/2.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                }
+                CKEDITOR.replace('answer', {
+                  toolbarGroups: [
+                    { name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
+                    { name: 'editing', groups: [ 'find', 'selection' ] },
+                    { name: 'insert' },
+                    { name: 'forms' },
+                    { name: 'tools' },
+                    { name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
+                    { name: 'others' },
+                    '/',
+                    { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+                    { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
+                    { name: 'styles' },
+                    { name: 'colors' },
+                    { name: 'about' }
+                  ],
+                  removeButtons: 'Styles,Source',
+                  customConfig: '' // on veut pas charger le config.js
+                })
+              } else if (hasMqEditor) {
+                editor(form, params.mqEditorConfig, options)
+              }
+              if (resultatCallback) {
+                var isResultatSent = false
+                dom.addElement(form, 'br')
+                var boutonReponse = dom.addElement(form, 'button', { id: 'envoi' }, 'Enregistrer cette réponse')
+                // on ajoute l'envoi de la réponse sur le bouton et à la fermeture
+                $(boutonReponse).click(sendReponse)
+                $('body').on('unload', function () {
+                  sendReponse(null, true)
+                })
+                $(textarea).change(function () {
+                  isResultatSent = false
+                })
+              } else if (options.preview) {
+                dom.addElement(form, 'p', null, "Réponse attendue mais pas d'envoi possible en prévisualisation")
+              } else {
+                dom.addElement(form, 'p', { 'class': 'info', style: { margin: '1em;' } },
+                  "Aucun enregistrement ne sera effectué (car aucune destination n'a été fournie pour l'envoyer, normal en visualisation seule)")
+              }
+              addPage(params, function () {
+                urlUi(ressource, options, function () {
+                  $('#loading').empty()
+                  next()
+                })
               })
-            })
-          }
-        }) // require.ensure
-      }) // page.loadAsync
-    } // fin question-réponse
-  } catch (error) {
-    if (next) next(error)
-    else page.addError(error)
-  }
+            }
+          }) // require.ensure
+        }) // page.loadAsync
+      } // fin question-réponse
+    } catch (error) {
+      if (next) next(error)
+      else page.addError(error)
+    }
+  })
 }

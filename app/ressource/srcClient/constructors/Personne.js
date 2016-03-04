@@ -65,19 +65,19 @@ function Personne(initObj) {
   /**
    * Prénom
    * @type {string}
-   * @default ""
+   * @default ''
    */
   this.prenom = initObj.prenom || ''
   /**
    * Nom
    * @type {string}
-   * @default ""
+   * @default ''
    */
   this.nom = initObj.nom || ''
   /**
    * Adresse email
    * @type {string}
-   * @default ""
+   * @default ''
    */
   this.email = initObj.email || ''
   /**
@@ -117,7 +117,7 @@ function Personne(initObj) {
  * @returns {string}
  */
 Personne.prototype.toString = function () {
-  return this.prenom +" " +this.nom
+  return this.prenom +' ' +this.nom
 }
 
 module.exports = Personne

@@ -39,18 +39,18 @@ var config = require('../../../../config')
  * Update spécifique à commun, pour mettre en auteur le contributeur à virer dès qu'il sera passé pour jamais le relancer
  */
 module.exports = function(job) {
-  if (config.application.baseUrl.indexOf("commun") === -1) {
+  if (config.application.baseUrl.indexOf('commun') === -1) {
     job.init(0)
-    job.done("")
+    job.done('')
   } else {
-    var EntityRessource = lassi.service("EntityRessource")
+    var EntityRessource = lassi.service('EntityRessource')
     flow().seq(function () {
       EntityRessource.match('contributeurs').count(this)
     }).seq(function (nbRess) {
       var tours = job.init(nbRess, 50)
       flow(tours).seqEach(function (tour) {
         var nextTour = this
-        log("On démarre à " + tour[0])
+        log('On démarre à ' + tour[0])
         flow().seq(function () {
           EntityRessource.match('contributeurs').grab(tour[1], tour[0], this)
         }).seq(function (ressources) {
@@ -64,7 +64,7 @@ module.exports = function(job) {
           }).catch(job.done)
         }).catch(job.done)
       }).seq(function () {
-        job.done("")
+        job.done('')
       }).catch(job.done)
     }).catch(job.done)
   }

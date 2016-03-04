@@ -30,14 +30,13 @@
  */
 'use strict'
 
-// mathquill a une dépendance à jquery
-var $ = window.jQuery
-var tools = require('../../tools')
+// var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 var page = require('../../page')
 
 var mqEditor = require('../../editors/mqEditor')
+var $
 
 /**
  * Service pour insérer du mathquill
@@ -61,17 +60,17 @@ function addLinks(config) {
     var elt
     var args = {onclick:editors[value].go}
     if (config.optionsName) {
-      var id = value +"Option"
+      var id = value +'Option'
       args.id = id
       args.name = config.optionsName
-      args.type = "radio"
+      args.type = 'radio'
       args.value = value
-      args.style = {"line-height":"1.3em","vertical-align":"middle"}
-      if (config.editor === value) args.checked = "checked"
+      args.style = {'line-height':'1.3em','vertical-align':'middle'}
+      if (config.editor === value) args.checked = 'checked'
       elt = dom.addElement(divChoices, 'input', args)
-      dom.addElement(divChoices, 'label', {htmlFor:id, style:{"line-height":"1.3em","vertical-align":"middle", margin:"0 1em 0 0.2em"}}, editors[value].label)
+      dom.addElement(divChoices, 'label', {htmlFor:id, style:{'line-height':'1.3em','vertical-align':'middle', margin:'0 1em 0 0.2em'}}, editors[value].label)
     } else {
-      args.style = {padding:"0.3em"}
+      args.style = {padding:'0.3em'}
       elt = dom.addElement(divChoices, 'a', args, editors[value].label)
     }
 
@@ -80,13 +79,13 @@ function addLinks(config) {
 
   var divChoices = dom.getElement('div')
   dom.addText(divChoices, "Utiliser l'éditeur : ")
-  var link = addLink("simple")
+  var link = addLink('simple')
   if (config.optionsName) $toCkEditorLink = $(link)
-  else dom.addText(divChoices, " - ")
-  link = addLink("mathquill")
+  else dom.addText(divChoices, ' - ')
+  link = addLink('mathquill')
   if (config.optionsName) $toMathquillLink = $(link)
-  else dom.addText(divChoices, " - ")
-  link = addLink("ckeditor")
+  else dom.addText(divChoices, ' - ')
+  link = addLink('ckeditor')
   if (config.optionsName) $toCkEditorLink = $(link)
   $textarea.before(divChoices)
 }
@@ -107,10 +106,10 @@ function errorCallbackDefault(error) {
  */
 function initCKEditor(next) {
   /*global  CKEDITOR*/
-  if (typeof CKEDITOR === "undefined") {
+  if (typeof CKEDITOR === 'undefined') {
     try {
-      page.loadAsync(["ckeditor"], function () {
-        page.loadAsync(["ckeditorJquery"], function () {
+      page.loadAsync(['ckeditor'], function () {
+        page.loadAsync(['ckeditorJquery'], function () {
           if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor')
           if (CKEDITOR.env.ie && CKEDITOR.env.version < 9) CKEDITOR.tools.enableHtml5Elements(document)
           // The trick to keep the editor in the sample quite small unless user specified own height.
@@ -141,7 +140,7 @@ function initCKEditor(next) {
           CKEDITOR.config.extraPlugins = 'mathjax'
           // @see http://ckeditor.com/comment/123266#comment-123266, sauf que ça marche pas, faut aller modifier config.js
           // ou TeX-AMS_HTML ou TeX-AMS-MML_SVG, cf http://docs.mathjax.org/en/latest/configuration.html#loading
-          CKEDITOR.config.mathJaxLib = "/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+          CKEDITOR.config.mathJaxLib = '/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
           //log('ckeditor', CKEDITOR)
           next()
         })
@@ -164,30 +163,30 @@ function setCurrent(editor) {
   if (initConfig.changeCallback) initConfig.changeCallback(editor)
   if ($toSimpleLink) {
     switch (current) {
-      case "simple":
-        $toSimpleLink.css("background-color", "")
+      case 'simple':
+        $toSimpleLink.css('background-color', '')
         break
-      case "mathquill":
-        $toMathquillLink.css("background-color", "")
+      case 'mathquill':
+        $toMathquillLink.css('background-color', '')
         break
-      case "ckeditor":
-        $toCkEditorLink.css("background-color", "")
+      case 'ckeditor':
+        $toCkEditorLink.css('background-color', '')
         break
     }
     switch (editor) {
-      case "simple":
-        $toSimpleLink.css("background-color", "#fe7")
+      case 'simple':
+        $toSimpleLink.css('background-color', '#fe7')
         break
-      case "mathquill":
-        $toMathquillLink.css("background-color", "#fe7")
+      case 'mathquill':
+        $toMathquillLink.css('background-color', '#fe7')
         break
-      case "ckeditor":
-        $toCkEditorLink.css("background-color", "#fe7")
+      case 'ckeditor':
+        $toCkEditorLink.css('background-color', '#fe7')
         break
     }
   } // sinon on a pas initialisé les liens donc rien à faire
   current = editor
-  log("On est passé en " +current)
+  log('On est passé en ' +current)
 }
 
 try {
@@ -200,7 +199,7 @@ try {
    * @memberOf editors/multiEditor
    */
   multiEditor.toCkEditor = function (next) {
-    if (typeof next !== "function") next = errorCallbackDefault
+    if (typeof next !== 'function') next = errorCallbackDefault
     if (initConfig) {
       // si on était en mathquill faut d'abord récupérer le contenu, on repasse par la case simple pour initialiser
       multiEditor.toSimple(function (error) {
@@ -211,15 +210,15 @@ try {
             if (error) {
               next(error)
             } else {
-              var id = $textarea.attr("id")
+              var id = $textarea.attr('id')
               if (!id) {
-                id = "ckeditorSrc"
-                $textarea.attr("id", id)
+                id = 'ckeditorSrc'
+                $textarea.attr('id', id)
               }
               CKEDITOR.replace(id, {
                 customConfig: '' // on veut pas charger le config.js de ck
               })
-              setCurrent("ckeditor")
+              setCurrent('ckeditor')
               next()
             }
           })
@@ -240,13 +239,13 @@ try {
         if (error) {
           next(error)
         } else {
-          setCurrent("mathquill")
+          setCurrent('mathquill')
           next()
         }
       })
     }
 
-    if (typeof next !== "function") next = errorCallbackDefault
+    if (typeof next !== 'function') next = errorCallbackDefault
     try {
       if (!initConfig) throw new Error("Il faut initialiser multiEditor avant d'appeler ses autres méthodes")
       multiEditor.toSimple(function (error) {
@@ -254,15 +253,10 @@ try {
           next(error)
         } else {
           // on regarde si y'a des espaces hors de balises \text{}
-          var contenuSsTxt = $textarea.val().replace(/\\text{[^}]*}/g, "")
-          //if (contenu.length && contenu.indexOf("$") === -1) {
-          //  // on ajoute un $$ à la fin
-          //  $textarea.val(contenu +" $$")
-          //}
+          var contenuSsTxt = $textarea.val().replace(/\\text{[^}]*}/g, '')
           if (
-              contenuSsTxt.indexOf(" ") === -1 ||
-              window.confirm("Attention, l'éditeur d'équation supprime les espaces (hors commande \text{})," +
-                  " annuler pour revenir à l'éditeur simple")
+              contenuSsTxt.indexOf(' ') === -1 ||
+              window.confirm("Attention, l'éditeur d'équation supprime les espaces (hors commande \text{}), annuler pour revenir à l'éditeur simple")
           ) {
             init()
           }
@@ -278,24 +272,24 @@ try {
    * @memberOf mqEditor
    */
   multiEditor.toSimple = function (next) {
-    if (typeof next !== "function") next = errorCallbackDefault
+    if (typeof next !== 'function') next = errorCallbackDefault
     try {
       if (!initConfig) throw new Error("Il faut initialiser le choix de l'éditeur avant")
-      if (current === "simple") {
-        log("On était déjà en simple, on fait rien")
-      } else if (current === "mathquill") {
+      if (current === 'simple') {
+        log('On était déjà en simple, on fait rien')
+      } else if (current === 'mathquill') {
         mqEditor.close()
-      } else if (current === "ckeditor") {
-        CKEDITOR.instances[$textarea.attr("id")].destroy()
+      } else if (current === 'ckeditor') {
+        CKEDITOR.instances[$textarea.attr('id')].destroy()
         // on vire le html
-        //var contenu = $textarea.val().replace(/<[^<>]+>/ig, "")
+        //var contenu = $textarea.val().replace(/<[^<>]+>/ig, '')
         //log("avant de simplifier l'éditeur on récupère le texte " +contenu)
         //$textarea.empty()
         //$textarea.val(contenu)
       } else {
-        throw new Error("État courant " +current +" non géré, impossible de revenir à l'état simple")
+        throw new Error('État courant ' + current + " non géré, impossible de revenir à l'état simple")
       }
-      setCurrent("simple")
+      setCurrent('simple')
       next()
     } catch (error) {
       next(error)
@@ -305,15 +299,15 @@ try {
   var editors = {
     simple : {
       go:multiEditor.toSimple,
-      label : "simple"
+      label : 'simple'
     },
     ckeditor : {
       go:multiEditor.toCkEditor,
-      label : "texte riche"
+      label : 'texte riche'
     },
     mathquill : {
       go:multiEditor.toMathquill,
-      label:"équation"
+      label: 'équation'
     }
   }
 
@@ -332,36 +326,39 @@ try {
    * @param {errorCallback}  [next]
    */
   multiEditor.init = function (textarea, config, next) {
-    $(function () {
-      log("multiEditor.init avec la config", config)
-      if (typeof next !== "function") next = errorCallbackDefault
-      if (!config) config = {}
-      if (!config.editor) config.editor = "simple"
-      if (!config.choices) config.choices = ['simple', 'mathquill', 'ckeditor']
-      if (!config.ckeditor) config.ckeditor = {}
-      if (!config.mathquill) config.mathquill = "full"
-      if (!config.changeCallback) config.changeCallback = function () {}
-      $textarea = $(textarea)
-      if (config.choices.length > 1) {
-        addLinks(config)
-      }
-      initConfig = config
-      initConfig.textarea = textarea
-      current = "simple"
-      switch (config.editor) {
-        case "simple":
-          setCurrent("simple"); // pour le highlight du lien
-          next()
-          break
-        case "mathquill":
-          multiEditor.toMathquill(next)
-          break
-        case "ckeditor":
-          multiEditor.toCkEditor(next)
-          break
-        default :
-          throw new Error("Éditeur " +config.editor +" non géré")
-      }
+    page.loadAsync('jquery', function () {
+      $ = window.jQuery
+      $(function () {
+        log('multiEditor.init avec la config', config)
+        if (typeof next !== 'function') next = errorCallbackDefault
+        if (!config) config = {}
+        if (!config.editor) config.editor = 'simple'
+        if (!config.choices) config.choices = [ 'simple', 'mathquill', 'ckeditor' ]
+        if (!config.ckeditor) config.ckeditor = {}
+        if (!config.mathquill) config.mathquill = 'full'
+        if (!config.changeCallback) config.changeCallback = function () {}
+        $textarea = $(textarea)
+        if (config.choices.length > 1) {
+          addLinks(config)
+        }
+        initConfig = config
+        initConfig.textarea = textarea
+        current = 'simple'
+        switch (config.editor) {
+          case 'simple':
+            setCurrent('simple'); // pour le highlight du lien
+            next()
+            break
+          case 'mathquill':
+            multiEditor.toMathquill(next)
+            break
+          case 'ckeditor':
+            multiEditor.toCkEditor(next)
+            break
+          default :
+            throw new Error('Éditeur ' + config.editor + ' non géré')
+        }
+      })
     })
   }
 

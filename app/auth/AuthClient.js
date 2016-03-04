@@ -40,18 +40,18 @@
  * Un modèle pour un client SSO qui devra s'inscrire dans la sésathèque via $auth.addClient(authClient)
  * @constructor
  */
-function AuthClient() {
+function AuthClient () {
   /**
    * Le nom du service
    * @type {string}
    */
-  var name = undefined
+  this.name = undefined
 
   /**
    * Un peu de texte qui sera affiché à l'utilisateur pour lui permettre de choisir son serveur d'authentification si plusieurs sont enregistrés
    * @type {string}
    */
-  var description = undefined
+  this.description = undefined
 }
 
 /**

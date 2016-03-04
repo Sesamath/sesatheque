@@ -33,7 +33,7 @@
 
 /*global describe,it*/
 
-var assert = require("assert")
+var assert = require('assert')
 var _ = require('lodash')
 var filters = require('../../app/ressource/srcClient/tools/filters')
 //var flow = require('an-flow');
@@ -94,7 +94,7 @@ describe('filters', function () {
   })
 
   describe('date', function () {
-    it("retourne la date entrée ou undefined", function () {
+    it('retourne la date entrée ou undefined', function () {
       var date = new Date()
       assert.strictEqual(date, filters.date(date))
       var dateString = '2015-04-10T23:40:19.962Z'

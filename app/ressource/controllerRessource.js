@@ -58,13 +58,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Context} context
    * @param ressource
    */
-  function addToken(context, ressource) {
+  function addToken (context, ressource) {
     var token = tools.getToken()
     if (!context.session.tokens) context.session.tokens = {}
-    log.debug("avant ajout du token on a en session", context.session.tokens);
+    log.debug('avant ajout du token on a en session', context.session.tokens)
     context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n'existe pas
     ressource.token = token
-    log.debug("on a ajouté le token " +token +" en session avec l'oid " +ressource.oid, context.session.tokens);
+    log.debug('on a ajouté le token ' + token + " en session avec l'oid " + ressource.oid, context.session.tokens)
   }
 
   /**
@@ -75,15 +75,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string|Integer} oid
    * @param {errorCallback} next appelé sans argument si ok, sinon on affichera une erreur
    */
-  function checkToken(context, oid, next) {
+  function checkToken (context, oid, next) {
     var token = context.post.token
-    var result = (token && context.session.tokens && context.session.tokens[token] == oid)
+    var result = (token && context.session.tokens && context.session.tokens[token] == oid) // eslint-disable-line eqeqeq
     if (result) {
       delete context.session.tokens[token]
       next()
     } else {
-      log.debug("checkToken KO, reçu " +token +" pour l'oid " +oid +" avec en session", context.session.tokens)
-      next(new  Error("Jeton invalide, demande probablement déjà soumise et en cours de traitement"))
+      log.debug('checkToken KO, reçu ' + token + " pour l'oid " + oid + ' avec en session', context.session.tokens)
+      next(new Error('Jeton invalide, demande probablement déjà soumise et en cours de traitement'))
     }
   }
 
@@ -91,11 +91,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Affiche une 401 avec Authentification requise en html
    * @private
    * @param {Context} context
-   * @param {string} [message="Authentification requise"]
+   * @param {string} [message='Authentification requise']
    * @returns {boolean} true si authentifié
    */
-  function denied(context, message) {
-    if (!message) message = "Authentification requise"
+  function denied (context, message) {
+    if (!message) message = 'Authentification requise'
     $ressourcePage.printError(context, message, 401)
   }
 
@@ -105,8 +105,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Context} context
    * @param {string} [id=] Identifiant de la ressource (ou son titre), pour le mettre dans le message
    */
-  function denied404(context, id) {
-    var message = "La ressource " +id +" n'existe pas ou droits insuffisants"
+  function denied404 (context, id) {
+    var message = 'La ressource ' + id + " n'existe pas ou droits insuffisants"
     $ressourcePage.printError(context, message, 404)
   }
 
@@ -118,13 +118,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Ressource} ressource
    * @param {string}    [titre] Le titre de la page
    */
-  function printForm(context, error, ressource, titre) {
+  function printForm (context, error, ressource, titre) {
     if (error) log.error('une erreur au post update', error)
     if (ressource.errors) log.debug('errors au post update', ressource.errors)
-    if (ressource.warnings) log.debug('warnings au post update avec force=' +context.post.force, ressource.warnings)
+    if (ressource.warnings) log.debug('warnings au post update avec force=' + context.post.force, ressource.warnings)
     addToken(context, ressource)
     var options
-    if (titre) options = {$metas : {title: 'Ajouter une ressource'}}
+    if (titre) options = {$metas: {title: 'Ajouter une ressource'}}
     $ressourcePage.printForm(context, error, ressource, options)
   }
 
@@ -134,7 +134,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Context}  context Le contexte
    * @param {function} next    Sera appelée sans arguments si on est authentifié
    */
-  function redirectPublicOrContinue(context, next) {
+  function redirectPublicOrContinue (context, next) {
     if ($accessControl.isAuthenticated(context)) next()
     else context.redirect(context.request.originalUrl.replace('ressource/', 'public/'), 302)
   }
@@ -148,7 +148,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param view
    * @param options
    */
-  function send(context, error, ressource, view, options) {
+  function send (context, error, ressource, view, options) {
     if (ressource && !$accessControl.hasReadPermission(context, ressource)) {
       ressource = null // prepare & send renverra son 404 habituel
     }
@@ -156,41 +156,40 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Iframe de connexion pour loguer un user d'un sesalab localement, appelle sendMessage avec {action:"connexion",success:{boolean}[,error:msgErreur]}
+   * Iframe de connexion pour loguer un user d'un sesalab localement, appelle sendMessage avec {action:'connexion',success:{boolean}[,error:msgErreur]}
    * Dupliqué dans app/connexion, qu'il remplace vu que pas mal de navigateurs déconnent pour affecter le cookie en xhr
    * @Route GET /ressource/connexion
    * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
    * @param {string} token   Le token de sesalab qui servira à récupérer le user
    */
   controller.get('connexion', function (context) {
-    function end(error) {
+    function end (error) {
       var retour = {
-        action : "connexion",
-        success : !error
+        action: 'connexion',
+        success: !error
       }
       if (error) retour.error = error.toString()
       var data = {
-        $views : __dirname + '/../views',
-        jsBloc : {
-          $view : "js",
-          jsCode : 'if (parent.postMessage) parent.postMessage(' +JSON.stringify(retour) +', "*")'
+        jsBloc: {
+          $view: 'js',
+          jsCode: 'if (parent.postMessage) parent.postMessage(' + JSON.stringify(retour) + ', "*")'
         }
       }
       context.html(data)
     }
 
-    var token = context.get.token;
-    var origine = context.get.origine;
+    var token = context.get.token
+    var origine = context.get.origine
     var timeout = 5000
 
     context.layout = 'iframe'
     context.status = 200 // sinon le listener va traduire l'absence de contenu par une 404
 
     if (token && origine) {
-      if (origine.substr(-1) !== "/") origine += "/"
+      if (origine.substr(-1) !== '/') origine += '/'
       if (appConfig.sesalabs && appConfig.sesalabs.indexOf(origine) > -1) {
         var postOptions = {
-          url: origine + "api/utilisateur/check-token",
+          url: origine + 'api/utilisateur/check-token',
           json: true,
           content_type: 'charset=UTF-8',
           timeout: timeout,
@@ -208,7 +207,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           } else if (body.ok && body.utilisateur) {
             // on peut connecter
             $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
-              log.debug("dans cb loginFromSesalab on a en session", context.session.user)
+              log.debug('dans cb loginFromSesalab on a en session', context.session.user)
               if (error) end(error)
               else end()
             })
@@ -219,10 +218,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
         })
       } else {
-        end(new Error("Origine " +origine +"non autorisée à se connecter ici"))
+        end(new Error('Origine ' + origine + 'non autorisée à se connecter ici'))
       }
     } else {
-      end(new Error("token ou origine manquant"))
+      end(new Error('token ou origine manquant'))
     }
   })
 
@@ -338,7 +337,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
               delete ressource.oid
               delete ressource.idOrigine
-              ressource.origine = "local"
+              ressource.origine = 'local'
               var userOid = $accessControl.getCurrentUserOid(context)
               if (!ressource.contributeurs) ressource.contributeurs = []
               if (userOid && ressource.contributeurs.indexOf(userOid) === -1) ressource.contributeurs.push(userOid)
@@ -347,19 +346,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   $ressourcePage.printError(context, error)
                 } else if (ressource && ressource.oid) {
                   var url = $routes.getAbs('edit', ressource.oid, context)
-                  if (context.layout === "iframe") url += "?layout=iframe"
+                  if (context.layout === 'iframe') url += '?layout=iframe'
                   context.redirect(url)
                 } else {
-                  $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource " +clonedOid +" a échoué"))
+                  $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
                 }
               })
             } else {
-              $ressourcePage.printError(context, "Ressource à dupliquer inexistante ou droits insuffisants pour la lire", 404)
+              $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
             }
           })
         } else {
           // creation simple
-          var fake = {new:true, oid:0}
+          var fake = {new: true, oid: 0}
           addToken(context, fake)
           $ressourcePage.printForm(context, null, fake, options)
         }
@@ -383,53 +382,45 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } else {
       flow().seq(function () {
         checkToken(context, 0, this)
-
       }).seq(function () {
         var next = this
         $accessControl.checkPermission('create', context, ressourcePosted, function (errorMsg) {
           if (errorMsg) denied(context, errorMsg)
           else next()
         })
-
       }).seq(function () {
         // on fixe la date de màj avant validation
-        if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date();
+        if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
         $ressourceControl.valideRessourceFromPost(context.post, false, this)
-
       }).seq(function (ressource) {
         ressourcePosted = ressource
         if (!_.isEmpty(ressource.errors)) printForm(context, null, ressource, titrePage)
         else if (!_.isEmpty(ressource.warnings) && !ressource.force) printForm(context, null, ressource, titrePage)
         else this(null, ressource)
-
       }).seq(function (ressource) {
         $personneControl.checkGroupes(context, null, ressource, this)
-
       }).seq(function (ressource) {
         $personneControl.checkPersonnes(context, null, ressource, this)
-
       }).seq(function (ressource) {
-        log.debug("auteurs après checkPersonnes", ressource.auteurs)
+        log.debug('auteurs après checkPersonnes', ressource.auteurs)
         $ressourceRepository.write(ressource, function (error, ressource) {
           // on veut gérér les erreurs ici car y'a un bug dans notre code
           if (error || !_.isEmpty(ressource.errors)) {
-            log.error(new Error("on a une erreur au write mais pas au valide précédent"))
+            log.error(new Error('on a une erreur au write mais pas au valide précédent'))
             printForm(context, error, ressource, 'Ajouter une ressource')
           } else {
-            log.debug("Après le save on récupère l'oid " + ressource.oid + ", on lance le redirect")
+            log.debug("Après le save on récupère l'oid ' + ressource.oid + ', on lance le redirect")
             var url = $routes.getAbs('edit', ressource.oid, context)
-            if (context.layout === "iframe") {
-              url += "?layout=iframe"
-              if (context.get.closerId) url += "&closerId=" +context.get.closerId
+            if (context.layout === 'iframe') {
+              url += '?layout=iframe'
+              if (context.get.closerId) url += '&closerId=' + context.get.closerId
             }
             context.redirect(url)
           }
         }) // write
-
       }).catch(function (error) {
         printForm(context, error, ressourcePosted, titrePage)
       })
-
     }
   })
 
@@ -481,7 +472,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       } else if (ressource) {
         context.redirect($routes.getAbs('edit', ressource.oid))
       } else {
-        denied404(context, context.arguments.origine +"/" +context.arguments.idOrigine)
+        denied404(context, context.arguments.origine + '/' + context.arguments.idOrigine)
       }
     })
   })
@@ -494,78 +485,70 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.timeout = 10000
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
-    var titrePage = "Modifier une ressource"
+    var titrePage = 'Modifier une ressource'
     var ressourceNew = context.post
     var ressourceOriginale
 
     if ($accessControl.isAuthenticated(context)) {
       flow().seq(function () {
         checkToken(context, ressourceNew.oid, this)
-
       }).seq(function () {
         $ressourceControl.valideRessourceFromPost(ressourceNew, false, this)
-
       }).seq(function (ressourceNormee) {
         if (!_.isEmpty(ressourceNew.errors)) {
           printForm(context, null, ressourceNew, titrePage)
-        } else if (!_.isEmpty(ressourceNew.warnings) && ressourceNew.force !== "forced") {
+        } else if (!_.isEmpty(ressourceNew.warnings) && ressourceNew.force !== 'forced') {
           printForm(context, null, ressourceNew, titrePage)
         } else {
           ressourceNew = ressourceNormee
           // faut charger pour vérifier groupes et personnes
           $ressourceRepository.load(ressourceNew.oid, this)
         }
-
       }).seq(function (ressourceBdd) {
-        if (!ressourceBdd) {
-          var error = new Error("La ressource " +ressourceNew.oid +" n'existe plus")
-          log.error(error)
-          this(error)
-        } else {
+        if (ressourceBdd) {
           ressourceOriginale = ressourceBdd
           $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, this)
+        } else {
+          var error = new Error('La ressource ' + ressourceNew.oid + " n'existe plus")
+          log.error(error)
+          this(error)
         }
-
       }).seq(function (ressource) {
         ressourceNew = ressource
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
-
       }).seq(function (ressource) {
-        log.debug("auteurs après checkPersonnes", ressource.auteurs)
+        log.debug('auteurs après checkPersonnes', ressource.auteurs)
         ressourceNew = ressource
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         tools.update(ressourceOriginale, ressource)
         $ressourceRepository.write(ressourceOriginale, this)
-
       }).seq(function (ressource) {
         // si on a du closerId=YYY dans l'url, on affiche une page qui envoie un message (Cf sesatheque-client.modifyItem)
         if (context.get.closerId) {
           context.html({
-            $metas : {
-              title: "Enregistrement réussi, fermeture automatique"
+            $metas: {
+              title: 'Enregistrement réussi, fermeture automatique'
             },
-            $views : __dirname +"/../views",
-            contentBloc : {
-              $view : "contents",
-              contents : ["Ressource " +ressource.oid +" enregistrée"]
+            contentBloc: {
+              $view: 'contents',
+              contents: ['Ressource ' + ressource.oid + ' enregistrée']
             },
-            jsBloc : {
-              $view : "js",
-              jsCode : 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-                context.get.closerId +'", ressource:' +JSON.stringify($ressourceConverter.toRef(ressource)) +'}, "*")'
+            jsBloc: {
+              $view: 'js',
+              jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
+                context.get.closerId + '", ressource:' + JSON.stringify($ressourceConverter.toRef(ressource)) + '}, "*")'
             }
           })
         } else {
           // redirection normale
-          var url = "/ressource/" + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
-          if (context.layout === "iframe") url += "?layout=iframe"
-          log.debug("update " + ressource.oid + " ok, on lance le redirect vers " + url)
+          var url = '/ressource/' + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
+          if (context.layout === 'iframe') url += '?layout=iframe'
+          log.debug('update ' + ressource.oid + ' ok, on lance le redirect vers ' + url)
           context.redirect(url)
         }
-
       }).catch(function (error) {
-        log.debug("erreur au post", error)
-        log.debug("avec la ressource", ressourceNew)
+        log.debug('erreur au post', error)
+        log.debug('avec la ressource', ressourceNew)
         printForm(context, error, ressourceNew, titrePage)
       })
     } else {
@@ -596,14 +579,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // faut ajouter le token dans les options, car c'est un rendu describe que l'on appelle (pas de form)
               // le token, présent pour delete qui utilise aussi la vue describe
               var options = {
-                $metas     : {title: 'Supprimer la ressource : ' + ressource.titre},
-                titre : ressource.titre,
+                $metas: {title: 'Supprimer la ressource : ' + ressource.titre},
+                titre: ressource.titre,
                 contentBloc: {
                   $view: 'delete',
-                  token : {
-                    value:ressource.token,
-                    name:'token',
-                    hidden:true
+                  token: {
+                    value: ressource.token,
+                    name: 'token',
+                    hidden: true
                   }
                 }
               }
@@ -612,7 +595,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             }
           })
         } else {
-          $ressourcePage.printError(context, "La ressource " +oid +" n'existe pas ou vous n'avez pas les droits suffisants pour la supprimer")
+          $ressourcePage.printError(context, 'La ressource ' + oid + " n'existe pas ou vous n'avez pas les droits suffisants pour la supprimer")
         }
       })
     } else {
@@ -630,8 +613,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if ($accessControl.isAuthenticated(context)) {
       var oid = context.arguments.oid
       var data = {
-        $views     : __dirname + '/../views',
-        $metas     : {title: 'Suppression de ressource'},
+        $metas: {title: 'Suppression de ressource'},
         contentBloc: {$view: 'delete'}
       }
       checkToken(context, oid, function () {
@@ -639,13 +621,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $ressourceRepository.load(oid, function (error, ressource) {
           if (error) {
             log.error(error)
-            data.contentBloc.error = "Impossible d'accéder à la ressource " + ressource.titre + ' (' + oid + ")"
+            data.contentBloc.error = "Impossible d'accéder à la ressource " + ressource.titre + ' (' + oid + ')'
           } else if (ressource) {
             if ($accessControl.hasPermission('delete', context, ressource)) {
               $ressourceRepository.delete(ressource, function (error) {
                 if (error) {
                   log.error(error)
-                  data.contentBloc.error = "Erreur lors de la suppression de la ressource " + ressource.titre + ' (' + oid + ')'
+                  data.contentBloc.error = 'Erreur lors de la suppression de la ressource ' + ressource.titre + ' (' + oid + ')'
                 } else {
                   data.contentBloc.deletedOid = oid
                   data.contentBloc.titre = ressource.titre
@@ -653,12 +635,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 context.html(data)
               })
             } else {
-              log.error(new Error("Token OK mais droits insuffisant pour effacer la ressource " + oid))
-              $ressourcePage.printError(context, "Erreur interne dans la vérification des droits")
+              log.error(new Error('Token OK mais droits insuffisant pour effacer la ressource ' + oid))
+              $ressourcePage.printError(context, 'Erreur interne dans la vérification des droits')
             }
           } else {
-            log.error(new Error("Token OK mais la ressource " + oid +" n'existe pas ou plus !"))
-            $ressourcePage.printError(context, "Erreur interne, ressource introuvable, probablement déjà effacée")
+            log.error(new Error('Token OK mais la ressource ' + oid + " n'existe pas ou plus !"))
+            $ressourcePage.printError(context, 'Erreur interne, ressource introuvable, probablement déjà effacée')
           }
         })
       })
@@ -672,7 +654,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @private
    * @param {Context} context
    */
-  function search(context) {
+  function search (context) {
     context.layout = 'page'
     redirectPublicOrContinue(context, function () {
       if (_.isEmpty(context.get) || context.get.modify) {
@@ -690,13 +672,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         for (var prop in crit) {
           if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
             filter = {
-              index : prop,
+              index: prop,
               values: _.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
             }
             filters.push(filter)
           }
         }
-        log.debug("traduits en filters", filters)
+        log.debug('traduits en filters', filters)
         // @todo ajouter des critères de tri
         if (filters.length) {
           var options = {
@@ -709,9 +691,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var visibilite = 'public'
           var userOid = $accessControl.getCurrentUserOid(context)
           // avec une exception pour l'admin qui peut passer ?all=1
-          if (context.get.all && $accessControl.hasAllRights(context)) visibilite = "all"
+          if (context.get.all && $accessControl.hasAllRights(context)) visibilite = 'all'
           // qqun qui veut voir ses ressources
-          else if (context.get.auteurs && context.get.auteurs == userOid) visibilite = "auteur/" +userOid
+          else if (context.get.auteurs && context.get.auteurs == userOid) visibilite = 'auteur/' + userOid // eslint-disable-line eqeqeq
           $ressourceRepository.getListe(visibilite, options, function (error, ressources) {
             var data = $ressourcePage.getDefaultData('liste')
             data.$metas.title = 'Résultats de la recherche'
@@ -726,43 +708,43 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // @todo ajouter le filtrage dans la requete de recherche...
               ressources = $accessControl.getListeLisible(context, ressources)
               if (ressources.length < nbInit) {
-                log.error((nbInit - ressources.length) +" ressources de la liste ont été filtrées par les droits avec " +context.request.originalUrl)
+                log.error((nbInit - ressources.length) + ' ressources de la liste ont été filtrées par les droits avec ' + context.request.originalUrl)
               }
               // les actions (en float right, dust sait pas boucler en partant de la fin, faudrait écrire un helper, on empile de droite à gauche)
               data.actions = {
-                links:[]
+                links: []
               }
               // lien suivant (si on est au max)
-              if (ressources.length == options.nb) {
+              if (ressources.length === options.nb) {
                 crit.start = options.start + options.nb
-                data.actions.links.push({html :tools.linkQs($routes.get('search'), 'Résultats suivants', crit)})
+                data.actions.links.push({html: tools.linkQs($routes.get('search'), 'Résultats suivants', crit)})
               }
-              // "titre" avec le nb de ressources
-              var html = ressources.length +' ressource'
+              // 'titre' avec le nb de ressources
+              var html = ressources.length + ' ressource'
               if (ressources.length) {
                 var last = Math.min(options.start + options.nb, options.start + ressources.length)
-                html += 's (' + (options.start + 1) + ' à ' +last + ')'
+                html += 's (' + (options.start + 1) + ' à ' + last + ')'
               }
-              data.actions.links.push({html :html, selected:true})
+              data.actions.links.push({html: html, selected: true})
               // liens précédents
               if (options.start) {
                 // on démarre pas à 0, donc y'a des précédents
                 crit.start = options.start - options.nb
                 if (crit.start < 0) crit.start = 0
-                data.actions.links.push({html : tools.linkQs($routes.get('search'), 'Résultats précédents', crit)})
+                data.actions.links.push({html: tools.linkQs($routes.get('search'), 'Résultats précédents', crit)})
               }
               // un spacer
-              data.actions.links.push({spacer:true})
+              data.actions.links.push({spacer: true})
               // le lien pour modifier les critères
-              data.actions.links.push({href: context.request.originalUrl +'&modify=1', value:"Modifier cette recherche"})
+              data.actions.links.push({href: context.request.originalUrl + '&modify=1', value: 'Modifier cette recherche'})
               // et on ajoute des liens sur chaque ressource
               data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources, context)
             }
-            log.debug('les datas search', data, null, {max:20000})
+            log.debug('les datas search', data, null, {max: 20000})
             context.html(data)
           })
         } else {
-          $ressourcePage.printSearchForm(context, ["il faut choisir au moins un critère"])
+          $ressourcePage.printSearchForm(context, ['il faut choisir au moins un critère'])
         }
       }
     })

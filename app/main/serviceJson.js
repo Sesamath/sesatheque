@@ -29,11 +29,10 @@
  * pour une explication en français)
  */
 
-'use strict';
-
+'use strict'
 
 module.exports = function () {
-  var tools = require('../tools');
+  var tools = require('../tools')
   var _ = require('lodash')
 
   /**
@@ -48,8 +47,8 @@ module.exports = function () {
    * @param msg
    */
   $json.denied = function (context, msg) {
-    if (!msg) msg = "Accès refusé"
-    context.status = 403;
+    if (!msg) msg = 'Accès refusé'
+    context.status = 403
     $json.sendError(context, msg)
   }
 
@@ -59,8 +58,8 @@ module.exports = function () {
    * @param {string}  msg
    */
   $json.notFound = function (context, msg) {
-    if (!msg) msg = "Contenu inexistant"
-    context.status = 404;
+    if (!msg) msg = 'Contenu inexistant'
+    context.status = 404
     $json.sendError(context, msg)
   }
 
@@ -77,11 +76,11 @@ module.exports = function () {
         log.error(error)
         error = error.toString()
       } else if (_.isArray(error)) {
-        error = error.join(", ")
+        error = error.join(', ')
       }
       $json.sendError(context, error)
     } else {
-      if (!data) data = {success:true}
+      if (!data) data = {success: true}
       log.debug('$json.send va renvoyer', data, 'api')
       // pas la peine de faire le stringify pour rien, on teste avant
       // if (log.perf.out) log.perf(context.response, 'jsonSentLength ' +tools.stringify(data).length, true)
@@ -100,8 +99,8 @@ module.exports = function () {
       log.error(error)
       error = error.toString()
     }
-    log.debug("$json va renvoyer l'erreur " +error, 'api')
-    context.json({success:false, error: error})
+    log.debug("$json va renvoyer l'erreur", error, 'api')
+    context.json({success: false, error: error})
   }
 
   /**
@@ -110,7 +109,7 @@ module.exports = function () {
    * @param {object} [data] des données à ajouter au {success:true}
    */
   $json.sendOk = function (context, data) {
-    var reponse = {success:true}
+    var reponse = {success: true}
     if (data) tools.merge(reponse, data)
     context.json(reponse)
   }

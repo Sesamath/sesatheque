@@ -44,13 +44,13 @@ var dom = require('../tools/dom')
 function addWrapper(parent, options) {
   if (!parent) parent = addFormGroup()
   var divAttrs = options.wrapperAttributes || {}
-  if (divAttrs.class) divAttrs.class = "control-group"
-  else divAttrs.class += " control-group"
+  if (divAttrs.class) divAttrs.class = 'control-group'
+  else divAttrs.class += ' control-group'
   var wrapper = dom.addElement(parent, 'div', divAttrs)
   if (options.label) {
     var label = dom.addElement(wrapper, 'label', {}, options.label)
-    if (options.required) dom.addElement(label, 'span', {"class":"required", title:"Ce champ est obligatoire"}, "*")
-    if (options.remarque) dom.addElement(label, 'span', {"class":"remarque"}, options.remarque)
+    if (options.required) dom.addElement(label, 'span', {'class':'required', title:'Ce champ est obligatoire'}, '*')
+    if (options.remarque) dom.addElement(label, 'span', {'class':'remarque'}, options.remarque)
   }
 
   return wrapper
@@ -68,7 +68,7 @@ function addWrapper(parent, options) {
  * @returns {Element} L'élément ajouté
  */
 function addElement(parent, tag, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {"class":"input-group " +tag})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group ' +tag})
 
   return dom.addElement(container, tag, attrs)
 }
@@ -81,43 +81,43 @@ function addElement(parent, tag, attrs, options) {
  * @returns {Element} Le div.form-group
  */
 function addFormGroup(element, position) {
-  if (!element) element = document.getElementById("formRessource")
+  if (!element) element = document.getElementById('formRessource')
   if (!element) {
-    element = document.wd.getElementsByTagName("form")
+    element = document.wd.getElementsByTagName('form')
     if (element.length) element = element[0]
-    else throw new Error("Aucun form dans la page")
+    else throw new Error('Aucun form dans la page')
   }
   var addMethod = dom.addElement
   if (element && position) {
-    if (position === "after") addMethod = dom.addElementAfter
-    else if (position === "before") addMethod = dom.addElementBefore
-    else if (position === "firstSibling") addMethod = dom.addElementFirstSibling
-    else if (position === "firstChild") addMethod = dom.addElementFirstChild
+    if (position === 'after') addMethod = dom.addElementAfter
+    else if (position === 'before') addMethod = dom.addElementBefore
+    else if (position === 'firstSibling') addMethod = dom.addElementFirstSibling
+    else if (position === 'firstChild') addMethod = dom.addElementFirstChild
   }
 
-  return addMethod(element, 'div', {"class":"form-group"})
+  return addMethod(element, 'div', {'class':'form-group'})
 }
 
 /**
  * Ajoute un groupe de Checkboxes avec l'emballage qui va bien pour le form ressource
  * @memberOf edit/formEditor
  * @param {Element} [parent]   Le parent (si non fourni on ajoutera un div.form-group à la fin du form
- * @param {string}  name       Le nom du groupe de checkboxes (qui auront chacun un name="{nom}[{i}]", sauf s'il n'y en qu'un, pas de [i] dans ce cas)
+ * @param {string}  name       Le nom du groupe de checkboxes (qui auront chacun un name='{nom}[{i}]', sauf s'il n'y en qu'un, pas de [i] dans ce cas)
  * @param {object}  [options]  On regarde label, required, remarque, wrapperAttributes
- * @param {Array}   checkboxes Une liste d'item avec {label, value, [id], [checked]}, checked sera imposé à "checked" si true après cast booléen
+ * @param {Array}   checkboxes Une liste d'item avec {label, value, [id], [checked]}, checked sera imposé à 'checked' si true après cast booléen
  * @returns {Element} Le div avec tous les inputs
  */
 function addCheckboxes(parent, name, options, checkboxes) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {"class":"input-group checkboxes"})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group checkboxes'})
   if (checkboxes instanceof Array) {
     checkboxes.forEach(function (checkbox, i) {
       var id = checkbox.id || dom.getNewId()
-      var label = dom.addElement(container, 'label', {"for":id}, checkbox.label)
-      var attrs = {type:"checkbox", id:id, value:checkbox.value}
+      var label = dom.addElement(container, 'label', {'for':id}, checkbox.label)
+      var attrs = {type:'checkbox', id:id, value:checkbox.value}
       // on ne renvoie un tableau qui si y'en a plusieurs
-      if (checkboxes.length > 1) attrs.name = name +"[" +i +"]"
+      if (checkboxes.length > 1) attrs.name = name +'[' +i +']'
       else attrs.name = name
-      if (checkbox.checked) attrs.checked = "checked"
+      if (checkbox.checked) attrs.checked = 'checked'
       dom.addElement(label, 'input', attrs)
     })
   }
@@ -134,9 +134,9 @@ function addCheckboxes(parent, name, options, checkboxes) {
  * @returns {Element} L'input text
  */
 function addInputText(parent, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {"class":"input-group text"})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group text'})
   if (!attrs) attrs = {}
-  attrs.type = "text"
+  attrs.type = 'text'
 
   return dom.addElement(container, 'input', attrs)
 }
@@ -148,11 +148,11 @@ function addInputText(parent, attrs, options) {
  * @param {object}  [attrs]   Les attributs éventuels du select
  * @param {object}  [options] On regarde label, required, remarque, wrapperAttributes
  * @param {Array}   choix   Les attributs des tag option à mettre, content sera pris pour le contenu text et viré des attributs,
- *                            selected sera imposé à "selected" si le cast booléen vaut true
+ *                            selected sera imposé à 'selected' si le cast booléen vaut true
  * @returns {Element} Le select
  */
 function addSelect(parent, attrs, options, choix) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {"class":"input-group select"})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group select'})
   if (!attrs) attrs = {}
   var select = dom.getElement('select', attrs)
   if (choix instanceof Array) {
@@ -162,7 +162,7 @@ function addSelect(parent, attrs, options, choix) {
         content = optionAttrs.content
         delete optionAttrs.content
       }
-      if (optionAttrs.selected) optionAttrs.selected = "selected"
+      if (optionAttrs.selected) optionAttrs.selected = 'selected'
       else delete optionAttrs.selected
       dom.addElement(select, 'option', optionAttrs, content)
     })
@@ -181,9 +181,9 @@ function addSelect(parent, attrs, options, choix) {
  * @returns {Element} Le textarea
  */
 function addTextarea(parent, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {"class":"input-group textarea"})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {'class':'input-group textarea'})
 
-  return dom.addElement(container, 'textarea', attrs, options.content || "")
+  return dom.addElement(container, 'textarea', attrs, options.content || '')
 }
 
 /**

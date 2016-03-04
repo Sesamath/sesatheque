@@ -36,7 +36,8 @@
  */
 
 var _ = require('lodash')
-//var tools = require('./tools')
+// var tools = require('./tools')
+var path = require('path')
 
 /**
  * Listener beforeTransport, qui finalise les datas pour les vues
@@ -55,7 +56,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param context
    * @param data
    */
-  function addActions(context, data) {
+  function addActions (context, data) {
     if (context.ressource && context.ressource.oid) {
       var links = []
       var ressource = context.ressource
@@ -77,39 +78,38 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           href: $routes.getAbs('display', ressource, context),
           value: 'Voir',
           icon: 'eye', // material icons open_in_new était pas terrible
-          attributes : [
-            {name:"target", value:"_blank"}
+          attributes: [
+            {name: 'target', value: '_blank'}
           ]
         })
         // pour tous les suivants, on met les liens mais on les cache si on a pas les droits,
         // c'est le js qui les affichera si on est dans /public/ donc sans session
         links.push({
-          id : "buttonEdit",
+          id: 'buttonEdit',
           href: $routes.getAbs('edit', oid, context),
           value: 'Modifier',
-          icon: "edit", // mode_edit pour material icons
+          icon: 'edit', // mode_edit pour material icons
           selected: (context.tab === 'edit'),
           hidden: !$accessControl.hasPermission('update', context, ressource)
         })
         links.push({
-          id:"buttonDuplicate",
+          id: 'buttonDuplicate',
           href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
           icon: 'copy', // ma call_split
           selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1),
-          hidden : !$accessControl.hasPermission('create', context)
+          hidden: !$accessControl.hasPermission('create', context)
         })
         links.push({
-          id:"buttonDelete",
+          id: 'buttonDelete',
           href: $routes.getAbs('delete', oid, context),
           value: 'Supprimer',
           icon: 'trash', // ma delete
           selected: (context.tab === 'delete'),
-          hidden : !$accessControl.hasPermission('delete', context, ressource)
+          hidden: !$accessControl.hasPermission('delete', context, ressource)
         })
-
       } else {
-        log.error(new Error("On a une ressource dans listeners::addActions sans les droits pour la lire"))
+        log.error(new Error('On a une ressource dans listeners::addActions sans les droits pour la lire'))
       }
 
       data.actions = {
@@ -125,7 +125,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param context
    * @param data
    */
-  function addNavigation(context, data) {
+  function addNavigation (context, data) {
     var links = []
     // lien ajout
     if ($accessControl.hasPermission('create', context)) {
@@ -133,12 +133,12 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       links.push({
         href: $routes.getAbs('create'),
         value: 'Ajouter une ressource',
-        iconStack: ["file-o fa-stack-2x", "plus fa-stack-1x"] // ma note_add
+        iconStack: ['file-o fa-stack-2x', 'plus fa-stack-1x'] // ma note_add
       })
       /* */
     }
     links.push({
-      id: "buttonAdd",
+      id: 'buttonAdd',
       href: $routes.getAbs('create', null, context),
       value: 'Ajouter une ressource',
       icon: 'plus-circle',
@@ -146,36 +146,36 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     })
     // un lien vers la recherche
     links.push({
-      id:"buttonSearch",
+      id: 'buttonSearch',
       href: $routes.getAbs('search', null, context),
       value: 'Recherche',
       icon: 'search'
     })
     // un lien mes ressources
-    var myOid = $accessControl.getCurrentUserOid(context) || ""
+    var myOid = $accessControl.getCurrentUserOid(context) || ''
     links.push({
-      id:"buttonMyRessources",
-      href: $routes.getAbs('search', null, context) + "?auteurs=" + myOid,
+      id: 'buttonMyRessources',
+      href: $routes.getAbs('search', null, context) + '?auteurs=' + myOid,
       value: 'Mes ressources',
       icon: 'bookmark-o',
-      hidden:!myOid
+      hidden: !myOid
     })
     // mes groupes
     links.push({
-      id:"buttonMyGroupes",
+      id: 'buttonMyGroupes',
       href: '/groupe/perso',
       value: 'Mes groupes',
       icon: 'group',
-      hidden:!myOid
+      hidden: !myOid
     })
     // on peut tout ajouter
     data.navigation = {
       links: links
     }
     // et on ajoute notre js qui les gère si on est sur du /public/
-    if (context.request.originalUrl.indexOf("/public/") > -1) {
-      if (!data.jsBloc) data.jsBloc = {$view:'js'}
-      if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ""
+    if (context.request.originalUrl.indexOf('/public/') > -1) {
+      if (!data.jsBloc) data.jsBloc = {$view: 'js'}
+      if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ''
       data.jsBloc.jsCode += 'require("page/refreshAuth")();'
     }
   }
@@ -186,19 +186,19 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param context
    * @param data
    */
-  function debug(context, data) {
+  function debug (context, data) {
     var reqHttp = getReqHttp(context)
     var isJson = getIsJson(context)
     var isHtml = getIsHtml(context)
     log.debug(
-        'listener on beforeTransport sur '  +reqHttp +' (' +context.contentType +' status ' +context.status +') avec les data ',
+        'listener on beforeTransport sur ' + reqHttp + ' (' + context.contentType + ' status ' + context.status + ') avec les data ',
         data,
         'beforeTransport',
-        {max:1000}
+        {max: 1000}
     )
-    if (isHtml) log.debug("html vide ? " +_.isEmpty(data.contentBloc))
-    else if (isJson) log.debug("api vide ? " +_.isEmpty(data))
-    else log.debug("statique")
+    if (isHtml) log.debug('html vide ? ' + _.isEmpty(data.contentBloc))
+    else if (isJson) log.debug('api vide ? ' + _.isEmpty(data))
+    else log.debug('statique')
   }
 
   /**
@@ -208,26 +208,28 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param {Context} context
    * @param data
    */
-  function errorHandler(context, data) {
+  function errorHandler (context, data) {
     var reqHttp = getReqHttp(context)
     var isJson = getIsJson(context)
     var isHtml = getIsHtml(context)
 
-    if (context.method === "get" || context.method === "post") {
+    if (context.method === 'get' || context.method === 'post') {
       // on fixe déjà le contentType s'il ne l'est pas
       if (context.contentType) {
         // on signale une incohérence sans changer le contentType
-        if (isJson && context.contentType !== 'application/json')
-          log.error(new Error("On a un appel " + reqHttp + " avec un contentType " + context.contentType))
-        if (isHtml && context.contentType !== 'text/html')
-          log.error(new Error("On a un layout html " + context.layout + " avec un contentType " + context.contentType))
+        if (isJson && context.contentType !== 'application/json') {
+          log.error(new Error('On a un appel ' + reqHttp + ' avec un contentType ' + context.contentType))
+        }
+        if (isHtml && context.contentType !== 'text/html') {
+          log.error(new Error('On a un layout html ' + context.layout + ' avec un contentType ' + context.contentType))
+        }
       } else if (isHtml) {
         context.contentType = 'text/html'
       } else if (isJson) {
         context.contentType = 'application/json'
       }
       // ajout du layout, page si non précisé
-      if (isHtml && !data.$layout) data.$layout = __dirname + '/views/layout-' + (context.layout || "page")
+      if (isHtml && !data.$layout) data.$layout = path.join(__dirname, 'views', 'layout-' + (context.layout || 'page'))
     }
 
     /**
@@ -236,15 +238,15 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     if (context.error) {
       // erreurs 500 détectée par lassi qui l'a récupéré mais pas notre code
       // (qui manipule les data mais n'affecte pas context.error)
-      log.error('lassi a récupéré une erreur 500 sur ' +reqHttp, context.error)
+      log.error('lassi a récupéré une erreur 500 sur ' + reqHttp, context.error)
       context.status = 500
       // on façonne notre erreur 500
       var errorMsg = context.error.toString()
       // on évite le un message incompréhensible pour l'utilisateur (le dev ira dans les logs)
-      if (errorMsg.indexOf("TypeError") === 0) errorMsg = "Erreur interne : problème de types incohérents"
-      else errorMsg = "Erreur interne : " +errorMsg
+      if (errorMsg.indexOf('TypeError') === 0) errorMsg = 'Erreur interne : problème de types incohérents'
+      else errorMsg = 'Erreur interne : ' + errorMsg
       if (isJson) {
-        if (data.error) data.error += "\n" + errorMsg
+        if (data.error) data.error += '\n' + errorMsg
         else data.error = errorMsg
       } else if (isHtml) {
         prepareErrorHtmlData(data, 'Erreur interne', errorMsg)
@@ -252,21 +254,20 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         data.content = errorMsg
       }
       delete context.error // on vient de le traiter, pas la peine que lassi le fasse aussi
-
     } else {
       // erreur 404 ?
       var isVide
       if (isHtml) isVide = _.isEmpty(data.contentBloc) && _.isEmpty(data.blocs)
       else if (isJson) isVide = _.isEmpty(data)
       else isVide = false
-      log.debug("isVide " +isVide)
+      log.debug('isVide ' + isVide)
       if (!context.status && isVide && context.method !== 'options') {
         context.status = 404
         log.debug(reqHttp + ' : pas de status ni content => 404')
       }
       // et on gère ici les autres erreurs
       if (context.status && context.status > 400) {
-        log.debug('erreur ' +context.status +(isJson ? ' api' : ' html'), data)
+        log.debug('erreur ' + context.status + (isJson ? ' api' : ' html'), data)
         var msg
         switch (context.status) {
           case 404:
@@ -276,13 +277,13 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           case 403:
             // $accessControl pas dispo ici
             if (context.session && context.session.user && context.session.user.oid) msg = 'Droits insuffisants'
-            else msg = "Authentification requise"
+            else msg = 'Authentification requise'
             break
           default:
-            msg = "Ooops, une erreur " +context.status +' est survenue'
+            msg = 'Ooops, une erreur ' + context.status + ' est survenue'
         }
         if (isHtml) {
-          prepareErrorHtmlData(data, 'erreur ' +context.status, msg)
+          prepareErrorHtmlData(data, 'erreur ' + context.status, msg)
         } else if (isJson) {
           if (!data.error) data.error = msg // sinon on laisse celle qu'il y avait probablement plus explicite
         } else {
@@ -314,7 +315,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param context
    * @returns {boolean}
    */
-  function getIsJson(context) {
+  function getIsJson (context) {
     return context.contentType === 'application/json' || context.request.originalUrl.substr(0, 5) === '/api/'
   }
 
@@ -324,18 +325,18 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param context
    * @returns {boolean}
    */
-  function getIsHtml(context) {
+  function getIsHtml (context) {
     return !getIsJson(context) && !!context.layout
   }
 
   /**
-   * Retourne la chaine de la requete http (ex : "GET /path/to/something?args")
+   * Retourne la chaine de la requete http (ex : 'GET /path/to/something?args')
    * @private
    * @param context
    * @returns {string}
    */
-  function getReqHttp(context) {
-    return context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+  function getReqHttp (context) {
+    return context.request.method + ' ' + context.request.parsedUrl.pathname + (context.request.parsedUrl.search || '')
   }
 
   /**
@@ -346,15 +347,14 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param title    Le titre à mettre s'il n'y en avait pas
    * @param errorMsg Le message d'erreur à mettre s'il n'y en avait pas déjà un
    */
-  function prepareErrorHtmlData(data, title, errorMsg) {
+  function prepareErrorHtmlData (data, title, errorMsg) {
     if (!data.hasOwnProperty('$metas')) data.$metas = {}
     data.$metas.title = title
-    if (!data.$views) data.$views = __dirname + '/views' // sinon lassi/classes/transport/html/Renderer.js plante avec " Wrong views path"
-    if (!data.errors) data.errors = {
-      $view : 'errors',
-    }
+    if (!data.$views) data.$views = path.join(__dirname, 'views') // sinon lassi/classes/transport/html/Renderer.js plante
+    // avec ' Wrong views path'
+    if (!data.errors) data.errors = { $view: 'errors' }
     if (!data.errors.errorMessages) data.errors.errorMessages = [errorMsg.replace(/Error[\s]*:[\s]*/, '')]
-    log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max:2000})
+    log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max: 2000})
   } // prepareErrorHtmlData
 
   /**
@@ -367,7 +367,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param {Context} context
    * @param {Object} data
    */
-  function beforeTransport(context, data) {
+  function beforeTransport (context, data) {
     errorHandler(context, data)
 
     // sur les pages html on ajoute les menus

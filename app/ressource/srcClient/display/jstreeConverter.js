@@ -43,7 +43,7 @@ var baseUrl
 function getAttr(ressource, defaultBase) {
   var attr = {}
   var base = ressource.base || defaultBase || baseUrl
-  if (base && base.substr(-1) !== "/") base += "/"
+  if (base && base.substr(-1) !== '/') base += '/'
   // ref
   var ref = ressource.id || ressource.ref || ressource.oid
   if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine
@@ -91,7 +91,7 @@ function getJstNode(ressource, defaultBase) {
       a_attr: getAttr(ressource, defaultBase),
       icon  : ressource.type + 'JstNode'
     }
-  } else throw new Error("getJstNode appelé sans ressource")
+  } else throw new Error('getJstNode appelé sans ressource')
 
   return node
 }
@@ -114,17 +114,17 @@ function getEnfants(nodeId, jstree) {
       var child = root[rootChildId]
       var enfant = toRef(child, jstree)
       if (i<5) {
-        log("traitement child", child)
-        log("devenu", enfant)
+        log('traitement child', child)
+        log('devenu', enfant)
         i++
       }
       if (enfant && (enfant.ref || enfant.type === 'arbre')) enfants.push(enfant)
-      else log.error("Pb de conversion du child, ni ref ni arbre", child)
+      else log.error('Pb de conversion du child, ni ref ni arbre', child)
     })
   } catch(error) {
     log.error(error)
   }
-  //log("pour " +nodeId +" on va retourner", enfants)
+  //log('pour ' +nodeId +' on va retourner', enfants)
 
   return enfants
 }
@@ -137,7 +137,7 @@ function getEnfants(nodeId, jstree) {
  */
 function getJstreeChildren(ressource, defaultBase) {
   var base = ressource.base || defaultBase || baseUrl
-  if (base.substr(-1) !== "/") base += "/"
+  if (base.substr(-1) !== '/') base += '/'
   var children = []
   if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.forEach) {
     ressource.enfants.forEach(function (enfant) {
@@ -175,7 +175,7 @@ function setBaseUrl(url) {
  */
 function toJstree(ressource, defaultBase) {
   var base = ressource.base || defaultBase || baseUrl
-  if (base.substr(-1) !== "/") base += "/"
+  if (base.substr(-1) !== '/') base += '/'
   var node = getJstNode(ressource, base)
   if (ressource.type === 'arbre') {
     if (ressource.enfants && ressource.enfants.length) {
@@ -212,7 +212,7 @@ function toRef(node, jstree) {
   } else if (node.original) {
     nodeSrc = node.original
   } else {
-    log.error("node impossible à convertir en ref", node)
+    log.error('node impossible à convertir en ref', node)
   }
   if (nodeSrc) {
     item.titre = nodeSrc.text

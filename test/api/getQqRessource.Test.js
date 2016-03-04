@@ -39,7 +39,7 @@
 'use strict'
 /*global describe,it*/
 
-var assert = require("assert")
+var assert = require('assert')
 var _ = require('lodash')
 var request = require('request')
 
@@ -72,7 +72,7 @@ function logInfo() {
 }
 
 describe('api get public by oid', function () {
-  it("récupère public/42", function (doneGet) {
+  it('récupère public/42', function (doneGet) {
     var options = {
       url    : urlApiBibli +'/public/42',
       json   : true
@@ -89,7 +89,7 @@ describe('api get public by oid', function () {
 })
 
 describe('api get ressource by oid', function () {
-  it("récupère ressource/42", function (doneGet) {
+  it('récupère ressource/42', function (doneGet) {
     var options = {
       url    : urlApiBibli +'/ressource/42',
       json   : true
@@ -106,7 +106,7 @@ describe('api get ressource by oid', function () {
 })
 
 describe('api get public by origin', function () {
-  it("récupère public/sesaxml/exercices_interactifs", function (doneGet) {
+  it('récupère public/sesaxml/exercices_interactifs', function (doneGet) {
     var options = {
       url    : urlApiBibli +'/public/sesaxml/exercices_interactifs',
       json   : true
@@ -122,7 +122,7 @@ describe('api get public by origin', function () {
 })
 
 describe('api get ressource by origin', function () {
-  it("récupère ressource/sesaxml/exercices_interactifs", function (doneGet) {
+  it('récupère ressource/sesaxml/exercices_interactifs', function (doneGet) {
     var options = {
       url    : urlApiBibli +'/ressource/sesaxml/exercices_interactifs',
       json   : true

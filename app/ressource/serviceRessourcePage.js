@@ -38,9 +38,9 @@ var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
-var appConfig = require("../config")
+var appConfig = require('../config')
 
-module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) {
+module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) {
   /**
    * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
    * @service $ressourcePage
@@ -61,7 +61,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {string[]}      values
    * @param {errorCallback} next
    */
-  function addGroupes(formData, values, next) {
+  function addGroupes (formData, values, next) {
     var choices = []
     var i = 0
     flow(values).seqEach(function (value) {
@@ -72,25 +72,25 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           formData.errors.push(error.toString())
         } else if (groupe) {
           choices.push({
-            value:value,
-            label:groupe.nom,
-            isOpen:groupe.open,
-            id : "groupes" +i,
-            name : "groupes[" +i +"]"
+            value: value,
+            label: groupe.nom,
+            isOpen: groupe.open,
+            id: 'groupes' + i,
+            name: 'groupes[' + i + ']'
           })
           i++
         } else {
-          formData.errors.push("Le groupe " +value +" n'existe pas")
+          formData.errors.push('Le groupe ' + value + " n'existe pas")
         }
         suivant()
       })
     }).seq(function () {
       formData.groupes.choices = choices
       formData.groupes.new = {
-        name : "groupesSup",
-        id: "groupesSup",
-        label : "Nouveau(x) groupe(s) à ajouter (à séparer par des virgules s'il y en a plusieurs)",
-        placeholder : "nom du groupe"
+        name: 'groupesSup',
+        id: 'groupesSup',
+        label: "Nouveau(x) groupe(s) à ajouter (à séparer par des virgules s'il y en a plusieurs)",
+        placeholder: 'nom du groupe'
       }
       next()
       this()
@@ -108,47 +108,48 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Integer[]}     values
    * @param {errorCallback} next
    */
-  function addPersonnes(context, formData, key, values, next) {
+  function addPersonnes (context, formData, key, values, next) {
     if (!values) values = []
-    log.debug("addPersonnes avec " +key +" qui vaut " +values.join(",") +
-        " ; formData.errors est un Array ? " +(formData instanceof Array) +" " +(formData.errors && !!formData.errors.push))
+    log.debug('addPersonnes avec ' + key + ' qui vaut ' + values.join(',') +
+        ' ; formData.errors est un Array ? ' + (formData instanceof Array) + ' ' +
+        (formData.errors && !!formData.errors.push))
     // seuls les éditeurs peuvent modifier auteurs et contributeurs,
-    if ($accessControl.hasPermission("updateAuteurs", context)) {
+    if ($accessControl.hasPermission('updateAuteurs', context)) {
       formData[key].choices = []
-      //if (!formData.errors || !(formData.errors instanceof Array)) {
-      //  log("addPersonnes récupère un formData sans errors", formData)
+      // if (!formData.errors || !(formData.errors instanceof Array)) {
+      //  log('addPersonnes récupère un formData sans errors', formData)
       //  formData.errors = []
-      //}
+      // }
       var i = 0
       flow(values).seqEach(function (value) {
-        log.debug("entrée seq, appel personne.load " +value)
+        log.debug('entrée seq, appel personne.load ' + value)
         var suivant = this
         $personneRepository.load(value, function (error, personne) {
-          log.debug("formData dans cb load personne " +value, formData, {max:5000})
-          log.debug("formData.errors dans cb load personne " +(formData.errors && formData.errors.push), formData.errors)
+          log.debug('formData dans cb load personne ' + value, formData, {max: 5000})
+          log.debug('formData.errors dans cb load personne ' + (formData.errors && formData.errors.push), formData.errors)
           if (error) {
             log.error(error)
             formData.errors.push(error.toString())
           } else if (personne) {
             formData[key].choices.push({
-              value:value,
-              label:personne.prenom +" " +personne.nom,
-              id : key +i,
-              name : key +"[" +i +"]",
-              selected : true
+              value: value,
+              label: personne.prenom + ' ' + personne.nom,
+              id: key + i,
+              name: key + '[' + i + ']',
+              selected: true
             })
           } else {
-            formData.errors.push("Aucune personne d'identifiant " +value)
+            formData.errors.push("Aucune personne d'identifiant " + value)
           }
           suivant()
         })
       }).seq(function () {
-        log.debug("addPersonnes fin seq " +key)
+        log.debug('addPersonnes fin seq ' + key)
         formData[key].new = {
-          name :  key +"Add",
-          id: key +"Add",
-          label : "Nouvelle personne à ajouter aux " +config.labels[key],
-          placeholder: "identifiant de la personne"
+          name: key + 'Add',
+          id: key + 'Add',
+          label: 'Nouvelle personne à ajouter aux ' + config.labels[key],
+          placeholder: 'identifiant de la personne'
         }
         next()
         this()
@@ -158,7 +159,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else {
       formData[key].name = key
       formData[key].hidden = true
-      formData[key].value = values.join(",")
+      formData[key].value = values.join(',')
       next()
     }
   }
@@ -169,13 +170,13 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param data
    * @param ressource
    */
-  function addJsVars(data, ressource) {
+  function addJsVars (data, ressource) {
     data.contentBloc.verbose = (appConfig.application.staging !== 'prod')
-    data.contentBloc.isDev   = (appConfig.application.staging !== 'prod')
-    data.contentBloc.base    = appConfig.application.baseUrl
+    data.contentBloc.isDev = (appConfig.application.staging !== 'prod')
+    data.contentBloc.base = appConfig.application.baseUrl
     if (ressource) {
       // une string pour que dust le mette dans le source
-      data.contentBloc.ressource     = tools.stringify(ressource)
+      data.contentBloc.ressource = tools.stringify(ressource)
     }
   }
 
@@ -188,17 +189,17 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    *                           (dans ce cas on ajoute pas de propriété name sur chaque choix)
    * @returns {Array}
    */
-  function arrayToDust(key, selectedValues, isUnique) {
+  function arrayToDust (key, selectedValues, isUnique) {
     /**
      * Ajoute un choix à la liste
      * @internal
      * @param label
      * @param cbValue
      */
-    function addChoice(label, cbValue) {
+    function addChoice (label, cbValue) {
       // cbValue est toujours une string (propriété de l'objet)
       var intValue = parseInt(cbValue, 10)
-      if (intValue == cbValue) cbValue = intValue
+      if (intValue == cbValue) cbValue = intValue // eslint-disable-line eqeqeq
       var choice = {
         value: cbValue
       }
@@ -217,11 +218,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       choices.push(choice)
     }
 
-    //log.debug("arrayToDust de " +key, selectedValues)
+    // log.debug('arrayToDust de ' +key, selectedValues)
     var i = 0
     var choices = []
     if (selectedValues && !_.isArray(selectedValues)) {
-      log.error(new Error("La propriété " + key + " de la ressource n'est pas un tableau"))
+      log.error(new Error('La propriété ' + key + " de la ressource n'est pas un tableau"))
     } else if (config.listesOrdonnees[key]) {
       _.each(config.listesOrdonnees[key], function (cbValue) {
         addChoice(config.listes[key][cbValue], cbValue)
@@ -231,25 +232,27 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       _.each(config.listes[key], function (label, cbValue) {
         addChoice(label, cbValue)
       })
-      //log.debug("renvoie ", choices)
+      // log.debug('renvoie ', choices)
     } else {
       // auteurs ou contributeurs ou groupes
       _.each(selectedValues, function (value) {
-        if (key === "groupes") {
+        if (key === 'groupes') {
           $groupeRepository.load(value, function (error, groupe) {
+            if (error) log.error(error)
             if (groupe) addChoice(groupe.nom, value)
           })
         } else {
           $personneRepository.load(value, function (error, personne) {
-            if (personne) addChoice(personne.prenom +" " +personne.nom, value)
+            if (error) log.error(error)
+            if (personne) addChoice(personne.prenom + ' ' + personne.nom, value)
           })
         }
       }) // each
       // et on ajoute une case à cocher pour ajouter une personne / groupe
       choices.push({
-        value: "",
-        label: "Ajouter",
-        id: key + "New",
+        value: '',
+        label: 'Ajouter',
+        id: key + 'New',
         name: key + '[New]',
         selected: false
       })
@@ -264,7 +267,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param ressource
    * @param next
    */
-  function enhance(ressource, next) {
+  function enhance (ressource, next) {
     // faut aller chercher en asynchrone les infos complémentaires pour la vue describe
     // (éventuels titres de ressources liées, auteurs ou groupes)
     var fluxComplements = flow()
@@ -289,7 +292,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               ressource.relations[index].push(ressourceLiee.type)
             } else {
               log.errorData(error)
-              ressource.warnings.push("la ressource liée " + relation[1] + " n'existe pas")
+              ressource.warnings.push('la ressource liée ' + relation[1] + " n'existe pas")
             }
             nextSeq()
           })
@@ -319,7 +322,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           $personneRepository.load(auteurId, function (error, personne) {
             if (error) log.error(error)
             else if (personne) auteurs.push({nom: personne.prenom + ' ' + personne.nom})
-            else auteurs.push({nom: 'auteur ' + auteurId + " inconnu"})
+            else auteurs.push({nom: 'auteur ' + auteurId + ' inconnu'})
             nextSeq()
           })
         })
@@ -328,7 +331,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           nextComplement()
         })
         fluxAuteurs.catch(function (error) {
-          log.error("erreur dans le flux auteurs de la ressource " + ressource.oid, error)
+          log.error('erreur dans le flux auteurs de la ressource ' + ressource.oid, error)
           nextComplement()
         })
       }
@@ -352,7 +355,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         })
         fluxContributeurs.seq(nextComplement)
         fluxContributeurs.catch(function (error) {
-          log.error("erreur dans le flux contributeurs de la ressource " + ressource.oid, error)
+          log.error('erreur dans le flux contributeurs de la ressource ' + ressource.oid, error)
           nextComplement()
         })
       }
@@ -374,7 +377,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @private
    * @param {Ressource} ressource
    */
-  function getLabels(ressource) {
+  function getLabels (ressource) {
     var labels = tools.clone(config.labels)
     // avec pour les arbres la propriété parametres remplacée par enfants
     if (ressource && ressource.type === 'arbre') {
@@ -410,7 +413,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Ressource} ressource Une ressource qui peut contenir des erreurs (si elle vient d'un post)
    * @param {function}  next appelée avec formData (data pour la vue dust du form, avec le token)
    */
-  function getFormViewData(context, error, ressource, next) {
+  function getFormViewData (context, error, ressource, next) {
     var formData = {
       errors: ressource && ressource.errors || []
     }
@@ -428,11 +431,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       ressource = EntityRessource.create()
       if (token) ressource.token = token
     }
-    //log.debug('ressource traitée par sendFormData', ressource)
+    // log.debug('ressource traitée par sendFormData', ressource)
 
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
     var labels = getLabels(ressource)
-    log.debug("labels de la ressource " +ressource.oid, labels)
+    log.debug('labels de la ressource ' + ressource.oid, labels)
     // faut un array pour seq
     var labelsArray = []
     _.each(labels, function (label, key) {
@@ -447,7 +450,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
       // pour tout le monde
       formData[key] = {
-        id   : key, // le template ajoutera un préfixe de son choix s'il veut
+        id: key, // le template ajoutera un préfixe de son choix s'il veut
         label: label
       }
       // required ?
@@ -468,40 +471,36 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         if (config.listes[key]) {
           formData[key].choices = arrayToDust(key, value, isUnique)
           labelSuivant()
-        } else if (key === "groupes") {
+        } else if (key === 'groupes') {
           if (value) addGroupes(formData, value, labelSuivant)
-        } else if (key === "auteurs" || key === "contributeurs") {
+        } else if (key === 'auteurs' || key === 'contributeurs') {
           if (value) addPersonnes(context, formData, key, value, labelSuivant)
         } else {
-          log.error(new Error("On tombe sur la clé inatendue " +key))
+          log.error(new Error('On tombe sur la clé inatendue ' + key))
         }
-
       } else if (config.typesVar[key] === 'Boolean') {
         // checkbox tout seul (pas de label dans les choices, c'est le parent qui le porte)
-        formData[key].choices = [{name : key, value: [true]}]
+        formData[key].choices = [{name: key, value: [true]}]
         if (value) formData[key].choices[0].selected = true
         labelSuivant()
-
       } else {
         // objet ou scalaire => input ou textarea
         // on formate en strings (date formatée ou objet en json)
         formData[key].name = key
         if (_.isDate(value)) {
           value = moment(value).format(config.formats.jour)
-
         } else if (_.isObject(value)) { // comprend ArrayOfObjects car un Array est aussi object
           try {
             value = JSON.stringify(value, undefined, 2)
           } catch (error) {
             // a priori si c'est un object on ne peut tomber là qu'en cas de référence circulaire
-            log.error('erreur lors du stringify sur le champ ' +key +' de la ressource ' +ressource.oid)
+            log.error('erreur lors du stringify sur le champ ' + key + ' de la ressource ' + ressource.oid)
             value = 'Erreur'
           }
         }
         formData[key].value = value
         labelSuivant()
       }
-
     }).seq(function () {
       // on a passé tous les labels, faut ajouter nos cas particulier
       formData.version.readonly = true
@@ -509,32 +508,31 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // si modif
       if (ressource && ressource.oid) {
         formData.oid = {
-          name  : 'oid',
-          value : ressource.oid,
-          label : labels.oid,
+          name: 'oid',
+          value: ressource.oid,
+          label: labels.oid,
           readonly: true
         }
         // c'est une modif, on ne peut plus changer le type, on remplace le select par un text
         formData.type = {
-          name : "type",
-          value : ressource.type,
-          label : labels.type,
-          readonly : true
+          name: 'type',
+          value: ressource.type,
+          label: labels.type,
+          readonly: true
         }
         // origine & idOrigine en lecture seule pour modif mais pas création
-        formData.origine.readonly = true;
-        if (formData.idOrigine) formData.idOrigine.readonly = true;
+        formData.origine.readonly = true
+        if (formData.idOrigine) formData.idOrigine.readonly = true
         else delete formData.idOrigine // idOrigine pas obligatoire, si on l'a pas mis à l'insert on peut plus l'ajouter
         // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
         formData.$view = 'formEdit'
-
       } else {
         if (ressource.search) {
           // getDefaultData a initialisé $view, on vire juste cette propriété désormais inutile
           delete ressource.search
         } else {
           formData.$view = 'formCreate'
-          if (!$accessControl.hasPermission("createAll", context)) {
+          if (!$accessControl.hasPermission('createAll', context)) {
             // faut restreindre type
             var ttChoices = []
             formData.type.choices.forEach(function (choice) {
@@ -542,7 +540,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             })
             formData.type.choices = ttChoices
             // et imposer origine local
-            formData.origine.value = "local"
+            formData.origine.value = 'local'
             formData.origine.hidden = true
             formData.idOrigine.hidden = true
             // publié par défaut
@@ -554,16 +552,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // un token si y'en a un dans la ressource
       if (ressource.token) {
         formData.token = {
-          name  : 'token',
-          value : ressource.token,
+          name: 'token',
+          value: ressource.token,
           hidden: true
         }
       }
       // idem pour la clé
       if (ressource.cle) {
         formData.cle = {
-          name  : 'cle',
-          value : ressource.cle,
+          name: 'cle',
+          value: ressource.cle,
           hidden: true
         }
       }
@@ -572,15 +570,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (ressource.warnings && ressource.warnings.length && !formData.errors.length) {
         formData.warnings = ressource.warnings
         formData.force = {
-          id    : 'force',
-          label : config.labels.force,
-          choices : [{
+          id: 'force',
+          label: config.labels.force,
+          choices: [{
             label: "Cocher cette case pour forcer l'enregistrement margré les avertissements",
-            name : "force",
+            name: 'force',
             value: ['forced']
           }]
         }
-        //if (ressource.force) formData.force.choices[0].selected = true
+        // if (ressource.force) formData.force.choices[0].selected = true
       }
 
       // des checkbox pour publier dans nos groupes
@@ -588,25 +586,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (myGroupes.length) {
         var choices = myGroupes.map(function (nom, i) {
           return {
-            name:'groupes[' +i +']',
-            label:nom,
-            value:nom
+            name: 'groupes[' + i + ']',
+            label: nom,
+            value: nom
           }
         })
         formData.groupes = {
-          id:'groupes',
-          label:'publié dans le(s) groupe(s)',
-          choices : choices
+          id: 'groupes',
+          label: 'publié dans le(s) groupe(s)',
+          choices: choices
         }
       }
 
       // on vire le champ si y'a pas d'erreurs
       if (!formData.errors.length) delete formData.errors
-      //log.debug('formData pour le form', formData.warnings, 'htmlform', {max:50000, indent:2})
-      log.debug('auteurs pour le form', formData.auteurs, 'htmlform', {max:50000, indent:2})
-      log.debug('contributeurs pour le form', formData.contributeurs, 'htmlform', {max:50000, indent:2})
+      log.debug('auteurs pour le form', formData.auteurs, 'htmlform', {max: 50000, indent: 2})
+      log.debug('contributeurs pour le form', formData.contributeurs, 'htmlform', {max: 50000, indent: 2})
       next(formData)
-
     }).catch(function (error) {
       log.error(error)
       if (!formData.errors) formData.errors = []
@@ -623,7 +619,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {string}    [view=''] Le nom de la vue (en absolu ou relatif)
    * @returns {Object} L'objet à passser à la vue dust
    */
-  function getViewData(error, ressource, view) {
+  function getViewData (error, ressource, view) {
     var viewData = {}
     var buffer
     if (error) {
@@ -631,7 +627,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
       var labels = getLabels(ressource)
-      log.debug("labels de " +ressource.oid, labels)
+      log.debug('labels de ' + ressource.oid, labels)
       _.each(labels, function (label, key) {
         var value = ressource[key]
         viewData[key] = {
@@ -639,40 +635,33 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         }
         // on traite chaque type de contenu, Array|Date|le reste
         if (config.typesVar[key] === 'Array') {
-
           // cas particulier de relations qui est un tableau de tableaux que l'on remplace par un objet
           if (key === 'relations' && value.length) {
             if (view === 'describe') {
               viewData.relations.value = []
               value.forEach(function (relation) {
                 viewData.relations.value.push({
-                  predicat     : config.listes.relations[relation[0]],
-                  oid          : relation[1],
-                  lien         : relation[2],
+                  predicat: config.listes.relations[relation[0]],
+                  oid: relation[1],
+                  lien: relation[2],
                   type: relation[3]
                 })
               })
             } // sinon on l'ajoute pas, seul describe s'en sert
-
           } else if (config.listes[key]) {
             // c'est une liste d'id, faut remplacer les ids par des labels
             buffer = []
             _.each(value, function (id) {
-              if (config.listes[key][id])  buffer.push(config.listes[key][id])
-              else log.error("La ressource " + ressource.oid + " a une valeur " + id +
-                             " pour la propriété " + key + " qui n'est pas dans la liste prédéfinie dans la configuration")
+              if (config.listes[key][id]) buffer.push(config.listes[key][id])
+              else log.error('La ressource ' + ressource.oid + ' a une valeur ' + id + ' pour la propriété ' + key + " qui n'est pas dans la liste prédéfinie dans la configuration")
             })
             viewData[key].value = buffer.join(', ')
-
           } else {
             // un tableau qui n'est pas une liste d'ids on le laisse tel quel (auteurs & co ou des propriétés supplémentaires)
             viewData[key].value = value
           }
-
-
         } else if (config.typesVar[key] === 'Date') {
           viewData[key].value = value ? moment(value).format(config.formats.jour) : value
-
         } else {
           // Object ou string ou number ou boolean, on laisse tel quel
           viewData[key].value = value
@@ -686,7 +675,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (ressource.errors && ressource.errors.length) viewData.errors = ressource.errors
     } else {
       // pas d'erreur mais pas de ressource non plus
-      $page.addError("Aucune ressource transmise pour affichage", viewData)
+      $page.addError('Aucune ressource transmise pour affichage', viewData)
     }
     if (view) viewData.$view = view
 
@@ -704,14 +693,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // css ajouté par le listener à la fin, suivant la valeur de context.layout,
     // on ajoute ici les js suivant la vue
     data.$metas.js = ['/common.bundle.js']
-    if (viewName === "formEdit") {
+    if (viewName === 'formEdit') {
       data.$metas.js.push('/edit.bundle.js')
-    } else if (viewName === "display" || viewName === "preview") {
+    } else if (viewName === 'display' || viewName === 'preview') {
       data.$metas.js.push('/display.bundle.js')
     }
     // les erreurs sont pas dans le bloc contenu
-    if (viewName === 'errors') data.errors = {$view:viewName}
-    else data.contentBloc = {$view:viewName}
+    if (viewName === 'errors') data.errors = {$view: viewName}
+    else data.contentBloc = {$view: viewName}
 
     return data
   }
@@ -725,11 +714,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   $ressourcePage.outputError = function (context, error, layout) {
     // on sait pas sous quelle forme l'utilisateur veut sa réponse, on privilégie json
-    if (context.request.accept("json")) {
+    if (context.request.accept('json')) {
       log.error(error)
-      context.json({success:false, error:error.toString()})
-    } else if (context.request.accept("html")) {
-      context.layout = layout || "page"
+      context.json({success: false, error: error.toString()})
+    } else if (context.request.accept('html')) {
+      context.layout = layout || 'page'
       $ressourcePage.printError(context, error)
     } else {
       log.error(error)
@@ -752,15 +741,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
      * @private
      * @param error
      */
-    function termine(error) {
-      if (view === "display" && context.layout === "page" && !error && ressource && config.typeIframe[ressource.type]) {
+    function termine (error) {
+      if (view === 'display' && context.layout === 'page' && !error && ressource && config.typeIframe[ressource.type]) {
         // simplement une iframe
         data.contentBloc = {
-          $view : "iframe",
-          url : $routes.getAbs('display', ressource, context)
+          $view: 'iframe',
+          url: $routes.getAbs('display', ressource, context)
         }
-        if (!data.jsBloc) data.jsBloc = { $view:'js'}
-        if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ""
+        if (!data.jsBloc) data.jsBloc = {$view: 'js'}
+        if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ''
         data.jsBloc.jsCode += 'require("display/autosize")("main", ["header", "footer"], null, {minHeight:500, minWidth:600});'
       } else {
         // et la ressource (ou erreur)
@@ -768,7 +757,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         // pour display faut ajouter les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
         if (view === 'display') {
           addJsVars(data, ressource)
-          data.contentBloc.isFormateur = $accessControl.hasRole("acces_correction", context)
+          data.contentBloc.isFormateur = $accessControl.hasRole('acces_correction', context)
         } else if (view === 'describe' && ressource && ressource.type === 'arbre') {
           // on ajoute la liste des urls des enfants si on les a
           if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
@@ -791,14 +780,13 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         if (!options || !options.$metas || !options.$metas.title) {
           if (ressource) {
             if (ressource.titre) data.$metas.title = ressource.titre
-            else data.$metas.title = "Ressource sans titre"
+            else data.$metas.title = 'Ressource sans titre'
           } else {
-            data.$metas.title = "Pas de ressource à afficher"
+            data.$metas.title = 'Pas de ressource à afficher'
           }
         }
         // éventuels overrides
         if (options) tools.merge(data, options)
-        //log.debug('envoi à ' + view, data, 'dust', {max: 10000, indent:2})
       }
       context.html(data)
     } // termine
@@ -849,15 +837,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   $ressourcePage.printForm = function (context, error, ressource, options) {
     var data = $ressourcePage.getDefaultData('formEdit')
-    if (ressource.token && context.session.tokens && !context.session.tokens[ressource.token])
-      log.error("dans printForm on a le token " +ressource.token +" avec en session", context.session.tokens)
+    if (ressource.token && context.session.tokens && !context.session.tokens[ressource.token]) {
+      log.error('dans printForm on a le token ' + ressource.token + ' avec en session', context.session.tokens)
+    }
     // on met la ressource en contexte
     if (context.layout === 'page' && ressource) context.ressource = ressource
     // les datas pour le form
     getFormViewData(context, error, ressource, function (formData) {
       tools.merge(data.contentBloc, formData)
       // le titre
-      data.$metas.title = 'Modifier la ressource ' +ressource.titre
+      data.$metas.title = 'Modifier la ressource ' + ressource.titre
       // et d'éventuels overrides
       if (options) tools.merge(data, options)
       // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source, donc on passe ici du json)
@@ -865,7 +854,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // faut aussi ajouter ça pour les vues dust (data.contentBloc.type existe déjà mais c'est un select)
       data.contentBloc.editeur = ressource.type
       // avant d'envoyer
-      //log.debug("on va envoyer au form ", data, 'form', {max:2000, indent:2})
+      // log.debug('on va envoyer au form ', data, 'form', {max:2000, indent:2})
       context.html(data)
     })
   }
@@ -885,10 +874,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var fakeRessource = EntityRessource.create(context.get)
     // on ajoute un flag pour getFormViewData (oui c'est crade)
     fakeRessource.search = true
-    //log.debug("ressource d'après get", fakeRessource)
+    // log.debug("ressource d'après get', fakeRessource)
     getFormViewData(context, null, fakeRessource, function (formData) {
       tools.complete(data.contentBloc, formData)
-      log.debug("formSearch démarre avec", data.contentBloc)
+      log.debug('formSearch démarre avec', data.contentBloc)
       // on vire ou modifie ce qui nous intéresse pour la recherche
       var fd = data.contentBloc // raccourci d'écriture (form data)
       delete fd.version
@@ -904,23 +893,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (!$accessControl.isAuthenticated(context)) {
         delete fd.restriction
       }
-      log.debug('data search', fd, null, {max:20000})
-      // on ajoute un choix "pas de choix" pour type et langue
-      fd.type.choices.unshift({label:'peu importe', value:''})
+      log.debug('data search', fd, null, {max: 20000})
+      // on ajoute un choix 'pas de choix' pour type et langue
+      fd.type.choices.unshift({label: 'peu importe', value: ''})
       // pour la langue on vire le select actuel
       fd.langue.choices.forEach(function (choice) {
         if (choice.selected) choice.selected = false
       })
-      fd.langue.choices.unshift({label:'peu importe', value:''})
+      fd.langue.choices.unshift({label: 'peu importe', value: ''})
       // pour le booléen publié, on transforme en select
       fd.publie = {
-        id:"publie",
-        label:"Publié",
-        name : "publie",
-        choices : [
-          {label:'peu importe', value:''},
-          {label:'oui', value:'true'},
-          {label:'non', value:'false'},
+        id: 'publie',
+        label: 'Publié',
+        name: 'publie',
+        choices: [
+          {label: 'peu importe', value: ''},
+          {label: 'oui', value: 'true'},
+          {label: 'non', value: 'false'}
         ]
       }
       // on vire tous les required et on ajoute des valeurs si besoin
@@ -928,18 +917,18 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         if (fd.hasOwnProperty(key)) {
           if (fd[key].required) delete fd[key].required
           if (context.get.modify && context.get[key]) {
-            if (fd[key].hasOwnProperty("value")) {
+            if (fd[key].hasOwnProperty('value')) {
               fd[key].value = context.get[key]
             } else if (fd[key].choices) {
               for (var i = 0; i < fd[key].choices.length; i++) {
-                var choice = fd[key].choices[i];
-                if (choice.value == context.get[key]) choice.selected = true
+                var choice = fd[key].choices[i]
+                if (choice.value == context.get[key]) choice.selected = true // eslint-disable-line eqeqeq
               }
             }
           }
         }
       }
-      //log.debug("search form data", fd)
+      // log.debug('search form data', fd)
 
       // titre de la page
       data.$metas.title = 'Recherche de ressources'

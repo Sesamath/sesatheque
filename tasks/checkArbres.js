@@ -17,7 +17,7 @@ var logfile = './logs/checkArbres.log'
  * @param msg
  */
 function logError(msg) {
-  msg = '[' +moment().format('YYYY-MM-DD HH:mm:ss') +'] ' +msg +"\n"
+  msg = '[' +moment().format('YYYY-MM-DD HH:mm:ss') +'] ' +msg +'\n'
   writeStream.write(msg)
   log(msg)
 }
@@ -55,16 +55,16 @@ function checkArbre(arbre, next) {
       } else if (enfant && enfant.enfants) {
         checkArbre(enfant, nextEnfant)
       } else {
-        logError("KO, on a un enfant sans oid ni enfants : " +tools.stringify(enfant))
+        logError('KO, on a un enfant sans oid ni enfants : ' +tools.stringify(enfant))
         nextEnfant()
       }
     }).seq(function () {
       next()
     }).catch(function (error) {
-      logError("KO, erreur dans le flux enfant", error)
+      logError('KO, erreur dans le flux enfant', error)
     })
   } else {
-    logError("KO, arbre sans enfants " +idArbre)
+    logError('KO, arbre sans enfants ' +idArbre)
     next()
   }
 }

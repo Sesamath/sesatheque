@@ -39,7 +39,7 @@
 'use strict'
 /*global describe,it, before */
 
-var assert = require("assert")
+var assert = require('assert')
 /**
  * Un browser plus simple que phantomJs pour tester le html que l'on récupère
  * @see http://www.redotheweb.com/2013/01/15/functional-testing-for-nodejs-using-mocha-and-zombie-js.html
@@ -76,11 +76,11 @@ describe('get public by oid', function () {
     browser.visit('/public/decrire/42', done)
   })
 
-  it("récupère la page attendue", function (done) {
+  it('récupère la page attendue', function (done) {
     //logInfo(browser.tabs[0])
     //logInfo(browser.tabs[0]._response)
     browser.assert.success()
-    browser.assert.text('h1', "Droites visiblement parallèles")
+    browser.assert.text('h1', 'Droites visiblement parallèles')
     done()
   })
 })
@@ -90,7 +90,7 @@ describe('get public by origine', function () {
     browser.visit('/public/decrire/sesaxml/exercices_interactifs', done)
   })
 
-  it("récupère la page attendue", function (done) {
+  it('récupère la page attendue', function (done) {
     //logInfo(browser.tabs[0])
     //logInfo(browser.tabs[0]._response)
     browser.assert.success()

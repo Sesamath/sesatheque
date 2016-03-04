@@ -4,6 +4,7 @@
 'use strict'
 
 var fs = require('fs')
+var path = require('path')
 var _ = require('lodash')
 var request = require('request')
 var moment = require('moment')
@@ -13,13 +14,13 @@ var tools = require('../../app/tools')
 var CounterMulti = require('../../app/tools/CounterMulti')
 
 // conf de l'appli
-var confSesatheque = require('../../_private/config')
+var confSesatheque = require('../../app/_private/config')
 var urlApi = 'http://'
 urlApi += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
 urlApi += ':'
 urlApi += confSesatheque.$server && confSesatheque.$server.port || '3000'
 urlApi += '/api'
-var urlBibli = urlApi +'/ressource'
+var urlBibli = urlApi + '/ressource'
 var apiToken = confSesatheque.apiTokens[0]
 
 // conf ressource
@@ -35,14 +36,14 @@ var catCode = confRessource.constantes.categories
  */
 var opt = {
   /** timeout en ms */
-  timeout     : 6000,
+  timeout: 6000,
   /** Le nb max de requetes vers l'api en attente de réponse */
-  maxLaunched : 1,
+  maxLaunched: 1,
   /** pour logguer les relations en console */
   logRelations: false,
   /** pour loguer les résultat des appels de l'api */
-  logApiCalls : false,
-  logProcess : false
+  logApiCalls: false,
+  logProcess: false
 }
 
 /**
@@ -58,13 +59,13 @@ var timerId
 var callbacks = []
 /** La callback a appeler quand toutes les ressources ont été postées et que l'on a les réponses (ou timeout) */
 var afterAllCb = function () {
-  throw new Error("il fallait appeler setAfterAllCb avant de lancer des enregistrements")
+  throw new Error('il fallait appeler setAfterAllCb avant de lancer des enregistrements')
 }
 
 // les ids traités
-var idsToRec  = new CounterMulti()
-var idsRec    = new CounterMulti()
-var errors = {length:0}
+var idsToRec = new CounterMulti()
+var idsRec = new CounterMulti()
+var errors = {length: 0}
 var pendingRelations = {}
 /** liste idComb:oid */
 var oids = {}
@@ -83,9 +84,9 @@ var common = {}
  * @param ressource
  */
 common.addCatExoInteractif = function (ressource) {
-  ressource.categories       = [catCode.exerciceInteractif]
+  ressource.categories = [catCode.exerciceInteractif]
   ressource.typePedagogiques = [tpCode.exercice, tpCode.autoEvaluation]
-  ressource.typeDocumentaires= [tdCode.interactif]
+  ressource.typeDocumentaires = [tdCode.interactif]
 }
 
 /**
@@ -95,17 +96,17 @@ common.addCatExoInteractif = function (ressource) {
  */
 common.addPersonne = function (personne, next) {
   var options = {
-    url    : urlBibli.replace('ressource', 'personne') +'/add',
+    url: urlBibli.replace('ressource', 'personne') + '/add',
     headers: {
-      "X-ApiToken": apiToken
+      'X-ApiToken': apiToken
     },
-    json   : true,
-    body   : personne
+    json: true,
+    body: personne
   }
   request.post(options, function (error, response, body) {
     if (error || body.error || !body.oid) {
-      log("error, on avait envoyé", options.body)
-      var errorString = 'erreur sur le post '+options.url +' : '
+      log('error, on avait envoyé', options.body)
+      var errorString = 'erreur sur le post ' + options.url + ' : '
       if (error) errorString += error.toString()
       else if (body.error) errorString += body.error
       else errorString += tools.stringify(body)
@@ -114,7 +115,7 @@ common.addPersonne = function (personne, next) {
       personne.oid = body.oid
       next(null, personne)
     } else {
-      next(new Error("ni erreur ni oid en réponse à un post sur " +options.url))
+      next(new Error('ni erreur ni oid en réponse à un post sur ' + options.url))
     }
   })
 }
@@ -125,23 +126,23 @@ common.addPersonne = function (personne, next) {
  * @param ressource
  * @param next
  */
-function addRessource(ressource, next) {
+function addRessource (ressource, next) {
   var idComb = common.getIdComb(ressource)
   idsToRec.inc(idComb)
   nbLaunched++
   var options = {
-    url    : urlBibli,
+    url: urlBibli,
     headers: {
-      "X-ApiToken": apiToken
+      'X-ApiToken': apiToken
     },
-    json   : true,
-    body   : ressource
+    json: true,
+    body: ressource
   }
   request.post(options, function (error, response, body) {
     nbLaunched--
     if (error || body.error || !body.oid) {
       // KO, le msg d'erreur
-      var errorString = 'erreur sur le post '+options.url +' : '
+      var errorString = 'erreur sur le post ' + options.url + ' : '
       if (error) errorString += error.toString()
       else if (body.error) errorString += body.error
       else errorString += tools.stringify(body)
@@ -165,15 +166,15 @@ common.addRessource = addRessource
  * @param id
  * @param {string} errorString
  */
-function addError(id, errorString) {
+function addError (id, errorString) {
   if (!_.isString(errorString)) errorString = errorString.toString()
   if (!errorString || errorString === 'undefined') errorString = (new Error("addError sans message d'erreur")).stack
   // on a un message non vide
   if (!id) {
     id = 'general'
-    errorString += '\n' +(new Error('id undefined')).stack
+    errorString += '\n' + (new Error('id undefined')).stack
   }
-  if (errors[id]) errors[id] += '\n' +errorString
+  if (errors[id]) errors[id] += '\n' + errorString
   else {
     errors[id] = errorString
     errors.length++
@@ -197,17 +198,17 @@ common.addPendingRelation = function (idComb, relation) {
  */
 common.checkEnd = function (cb) {
   var next = cb || afterAllCb
-  function checkAndNext() {
+  function checkAndNext () {
     common.checkEnd(next)
   }
 
   // le timeout
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(function () {
-    var msg = 'timeout, ' +Math.floor(opt.timeout / 1000) +
-              's sans rien depuis le dernier retour de bdd, il restait ' +nbLaunched +' ressources en cours et ' +
-              waitingRessource.length +' en attente de traitement\n' +
-              'enregistrées ' +idsRec.length  +', failed ' +errors.length
+    var msg = 'timeout, ' + Math.floor(opt.timeout / 1000) +
+              's sans rien depuis le dernier retour de bdd, il restait ' + nbLaunched + ' ressources en cours et ' +
+              waitingRessource.length + ' en attente de traitement\n' +
+              'enregistrées ' + idsRec.length + ', failed ' + errors.length
     addError('general', msg)
     log(msg)
     next()
@@ -220,7 +221,7 @@ common.checkEnd = function (cb) {
     }
   } else if (nbLaunched === 0) {
     log('toutes les ressources de cette étape ont été traitées (on en est à ' + idsRec.length + '/' + idsToRec.length +
-        ' et ' +waitingRessource.length +' en attente)')
+        ' et ' + waitingRessource.length + ' en attente)')
     clearTimeout(timerId)
     next()
   }
@@ -233,10 +234,10 @@ common.checkEnd = function (cb) {
  */
 common.checkListOfInt = function (ids) {
   if (_.isString(ids)) {
-    if (ids != parseInt(ids, 10)) {
+    if (ids != parseInt(ids, 10)) { // eslint-disable-line eqeqeq
       var a = ids.split(',')
       a.forEach(function (elt) {
-        if (elt != parseInt(elt, 10)) throw new Error("L'élément " + elt + " n'est pas un entier")
+        if (elt != parseInt(elt, 10)) throw new Error("L'élément " + elt + " n'est pas un entier") // eslint-disable-line eqeqeq
       })
     }
   } else {
@@ -257,25 +258,25 @@ common.deferRessource = function (ressource) {
  * @param next
  */
 common.displayResult = function (next) {
-  log(idsRec.length +' ressources enregistrées en ' +idsRec.total() +' appels')
-  log('sur ' +idsToRec.length +' à enregistrer (reste ' +idsToRec.total() +' appels à faire)')
+  log(idsRec.length + ' ressources enregistrées en ' + idsRec.total() + ' appels')
+  log('sur ' + idsToRec.length + ' à enregistrer (reste ' + idsToRec.total() + ' appels à faire)')
   if (errors.length) {
-    var logfile = __dirname + '/../../logs/import.error.log'
+    var logfile = path.resolve(__dirname, '../../logs/import.error.log')
     var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
-    log('erreurs vers '+logfile)
-    log(errors.length +' ressources avec erreurs :')
-    writeStream.write("Erreurs d'importation de " +__filename +' à ' +moment().format('YYYY-MM-DD HH:mm:ss'))
+    log('erreurs vers ' + logfile)
+    log(errors.length + ' ressources avec erreurs :')
+    writeStream.write("Erreurs d'importation de " + __filename + ' à ' + moment().format('YYYY-MM-DD HH:mm:ss')) // eslint-disable-line no-path-concat
     var id, msg
     for (id in errors) {
-      if (errors.hasOwnProperty(id) && id !=='length') {
+      if (errors.hasOwnProperty(id) && id !== 'length') {
         msg = id + ' : ' + errors[id]
         log(msg)
         writeStream.write(msg)
       }
     }
-    writeStream.write("Fin des erreurs d'importation, " +moment().format('YYYY-MM-DD HH:mm:ss'))
+    writeStream.write("Fin des erreurs d'importation, " + moment().format('YYYY-MM-DD HH:mm:ss'))
   } else log('Aucune erreur rencontrée')
-  log('Durée : ' +common.getElapsed(topDepart)/1000 +'s')
+  log('Durée : ' + common.getElapsed(topDepart) / 1000 + 's')
   if (next) next()
   else process.exit()
 }
@@ -287,13 +288,13 @@ common.displayResult = function (next) {
 common.fixLabomepBIBS = function (ressource) {
   if (ressource.origine === 'labomepBIBS' && ressource.idOrigine > 1000000) {
     if (ressource.idOrigine < 2000000) {
-      ressource.origine = 'ato';
+      ressource.origine = 'ato'
       ressource.idOrigine -= 1000000
     } else if (ressource.idOrigine < 3000000) {
-      ressource.origine = 'coll_doc';
+      ressource.origine = 'coll_doc'
       ressource.idOrigine -= 2000000
     } else if (ressource.idOrigine < 4000000) {
-      ressource.origine = 'accomp';
+      ressource.origine = 'accomp'
       ressource.idOrigine -= 3000000
     }
     // au delà de 4M c'est normalement que du j3p ajouté à la main par Alexis, on y touche pas
@@ -338,8 +339,8 @@ common.flushPendingRelations = function (next) {
           // faut récupérer les oid de toutes ses relations (dont on a que les idComb dans relations)
           subFlow(relations).seqMap(function (relation) {
             var thisSubFlow = this
-            //log('dans subFlow on a le 1er elt de la pile', thisSubFlow.stack[0])
-            //log('dans subFlow on a le 1er elt de la pile parente', thisFlow.stack[0])
+            // log('dans subFlow on a le 1er elt de la pile', thisSubFlow.stack[0])
+            // log('dans subFlow on a le 1er elt de la pile parente', thisFlow.stack[0])
             if (opt.logRelations) log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
             // avec parMap la stack sera composée de tous les retours passé à this()
             // le 1er param change pas, c'est la nature de la relation
@@ -347,7 +348,7 @@ common.flushPendingRelations = function (next) {
             var idCombLie = relation[1]
             if (oids[idCombLie]) {
               newRel[1] = oids[idCombLie]
-              if (opt.logRelations) log('on connaissait ' +idCombLie +' qui est ' +newRel[1])
+              if (opt.logRelations) log('on connaissait ' + idCombLie + ' qui est ' + newRel[1])
               newRelations.push(newRel)
               thisSubFlow()
             } else if (idCombLie) {
@@ -355,7 +356,7 @@ common.flushPendingRelations = function (next) {
               common.getRessource(idCombLie, function (ressource) {
                 if (ressource && ressource.oid) {
                   newRel[1] = ressource.oid
-                  if (opt.logRelations) log(idCombLie +' est ' +newRel[1])
+                  if (opt.logRelations) log(idCombLie + ' est ' + newRel[1])
                   newRelations.push(newRel)
                   thisSubFlow()
                 } else {
@@ -365,7 +366,7 @@ common.flushPendingRelations = function (next) {
                 }
               })
             } else {
-              addError(idComb, " on avait une relation " + newRel + " vers rien")
+              addError(idComb, ' on avait une relation ' + newRel + ' vers rien')
             }
           }).seq(function () {
             if (opt.logRelations) log('on va merger dans ' + ressource.oid, newRelations)
@@ -374,25 +375,22 @@ common.flushPendingRelations = function (next) {
             common.mergeRessource({oid: ressource.oid, relations: mergedRelations}, this)
           }).seq(function () {
             // fin de subFlow
-            if (opt.logRelations) log('fin relations de ' +idComb)
+            if (opt.logRelations) log('fin relations de ' + idComb)
             thisFlow()
           }).catch(function (error) {
-            log('erreur dans le traitement des relations de ' +idComb, error.stack || error)
-            addError(idComb, 'erreur de relations : ' +error.toString())
+            log('erreur dans le traitement des relations de ' + idComb, error.stack || error)
+            addError(idComb, 'erreur de relations : ' + error.toString())
             thisFlow()
           })
           // fin du subFlow
-
         } else {
           log('on a rien récupéré pour ' + idComb)
           thisFlow()
         }
       }) // getRessource
-
     }).seq(function () {
       log('fin du traitement des relations en attente')
       next()
-
     }).catch(function (error) {
       log('erreur dans le traitement de la pile de relations', error)
       next()
@@ -413,7 +411,7 @@ common.getAfterAllCb = function () {
  * @param {number} start Passer le top de départ (ou 0 pour récupérer un top de départ)
  */
 common.getElapsed = function (start) {
-  return (new Date()).getTime() -start
+  return (new Date()).getTime() - start
 }
 
 /**
@@ -422,7 +420,7 @@ common.getElapsed = function (start) {
  * @returns {string}
  */
 common.getIdComb = function (ressource) {
-  return ressource.origine +'/' +ressource.idOrigine
+  return ressource.origine + '/' + ressource.idOrigine
 }
 
 /**
@@ -432,22 +430,22 @@ common.getIdComb = function (ressource) {
  */
 common.getListe = function (qsOptions, next) {
   var options = {
-    url         : urlApi + '/by',
-    qs          : qsOptions,
-    headers     : {
-      "X-ApiToken": apiToken
+    url: urlApi + '/by',
+    qs: qsOptions,
+    headers: {
+      'X-ApiToken': apiToken
     },
-    json        : true,
+    json: true,
     content_type: 'charset=UTF-8'
   }
-  //log('dans getRessource ' +idComb)
+  // log('dans getRessource ' +idComb)
   request.get(options, function (error, response, result) {
     if (error) next(error)
-    else if (result.error) next("Sur l'url " +options.url +" on a eu l'erreur " +result.error)
+    else if (result.error) next("Sur l'url " + options.url + " on a eu l'erreur " + result.error)
     else if (result.success) next(null, result.liste)
     else {
-      log("Réponse inattendue : ", response)
-      next(new Error("l'url " +options.url +" n'a pas répondu correctement" ))
+      log('Réponse inattendue : ', response)
+      next(new Error("l'url " + options.url + " n'a pas répondu correctement"))
     }
   })
 }
@@ -459,22 +457,22 @@ common.getListe = function (qsOptions, next) {
  * @param next appelé avec {ref, titre, type}
  */
 common.getRef = function (origine, idOrigine, next) {
-  var idComb = origine +'/' +idOrigine
+  var idComb = origine + '/' + idOrigine
   var options = {
-    url         : urlBibli + '/' +idComb +'?format=ref',
-    headers     : {
-      "X-ApiToken": apiToken
+    url: urlBibli + '/' + idComb + '?format=ref',
+    headers: {
+      'X-ApiToken': apiToken
     },
-    json        : true,
+    json: true,
     content_type: 'charset=UTF-8'
   }
-  //log('dans getRessource ' +idComb)
+  // log('dans getRessource ' +idComb)
   request.get(options, function (error, response, ref) {
     if (error) {
-      addError(idComb, 'erreur sur le get '+options.url +' : ' +error.toString())
+      addError(idComb, 'erreur sur le get ' + options.url + ' : ' + error.toString())
       next(null)
     } else if (ref.error) {
-      addError(idComb, 'erreur renvoyé par get '+options.url +' : ' +ref.error)
+      addError(idComb, 'erreur renvoyé par get ' + options.url + ' : ' + ref.error)
       next(null)
     } else {
       next(ref)
@@ -497,27 +495,27 @@ common.getRessource = function (origine, idOrigine, next) {
     idComb = origine
   }
   var options = {
-    url         : urlBibli + '/' + idComb,
-    headers     : {
-      "X-ApiToken": apiToken
+    url: urlBibli + '/' + idComb,
+    headers: {
+      'X-ApiToken': apiToken
     },
-    json        : true,
+    json: true,
     content_type: 'charset=UTF-8'
   }
-  //log('dans getRessource ' +idComb)
+  // log('dans getRessource ' +idComb)
   request.get(options, function (error, response, ressource) {
-    //log("on récupère l'erreur", error)
-    //log("et la ressource", ressource)
+    // log("on récupère l'erreur', error)
+    // log('et la ressource", ressource)
     if (error) {
-      addError(idComb, 'erreur sur le get '+options.url +' : ' +error.toString())
+      addError(idComb, 'erreur sur le get ' + options.url + ' : ' + error.toString())
       next(null)
     } else if (ressource.error) {
-      addError(idComb, 'erreur retournée par get '+options.url +' : ' +ressource.error)
+      addError(idComb, 'erreur retournée par get ' + options.url + ' : ' + ressource.error)
       next(null)
     } else if (ressource.oid) {
       next(ressource)
     } else {
-      next(new Error("La ressource récupérée avec " +idComb +" n'a pas d'oid " +tools.stringify(ressource)))
+      next(new Error('La ressource récupérée avec ' + idComb + " n'a pas d'oid " + tools.stringify(ressource)))
     }
   })
 }
@@ -527,8 +525,8 @@ common.getRessource = function (origine, idOrigine, next) {
  * @param msg
  * @param objToDump
  */
-function log(msg, objToDump) {
-  var prefix = '[' +moment().format('HH:mm:ss.SSS') +'] '
+function log (msg, objToDump) {
+  var prefix = '[' + moment().format('HH:mm:ss.SSS') + '] '
   console.log(prefix + msg)
   if (objToDump) {
     if (objToDump.stack) console.error(objToDump.stack)
@@ -545,12 +543,12 @@ common.log = log
 common.mergeRessource = function (ressourcePartielle, next) {
   nbLaunched++
   var options = {
-    url    : urlBibli + '?merge=1',
+    url: urlBibli + '?merge=1',
     headers: {
-      "X-ApiToken": apiToken
+      'X-ApiToken': apiToken
     },
-    json   : true,
-    body   : ressourcePartielle
+    json: true,
+    body: ressourcePartielle
   }
 
   request.post(options, function (error, response, body) {
@@ -561,7 +559,7 @@ common.mergeRessource = function (ressourcePartielle, next) {
     } else {
       var errStr = error ? error.toString() : (body.error ? body.error : 'Erreur inconnue')
       var idErr = ressourcePartielle.oid || 0
-      addError(idErr, 'erreur sur le post '+options.url +' : ' +errStr)
+      addError(idErr, 'erreur sur le post ' + options.url + ' : ' + errStr)
       log('pb au retour du merge ' + errStr, ressourcePartielle)
     }
     next()
@@ -574,7 +572,7 @@ common.mergeRessource = function (ressourcePartielle, next) {
  */
 common.pushRessource = function (ressource) {
   var idComb = common.getIdComb(ressource)
-  if (opt.logProcess) log('push ' +idComb)
+  if (opt.logProcess) log('push ' + idComb)
   if (nbLaunched < opt.maxLaunched) addRessource(ressource, common.checkEnd)
   else waitingRessource.push(ressource)
 }
@@ -585,20 +583,20 @@ common.pushRessource = function (ressource) {
  */
 common.setAfterAllCb = function (cb) {
   callbacks.push(afterAllCb)
-  //log('on ajoute à la pile de cb', afterAllCb)
+  // log('on ajoute à la pile de cb', afterAllCb)
   afterAllCb = cb
 }
 
 /**
  * Remet la callback précédente
- * @param cb
  */
 common.setPreviousAfterAllCb = function () {
   if (callbacks.length) {
     afterAllCb = callbacks.pop()
     log('récupère de la pile de cb', afterAllCb)
+  } else {
+    throw new Error('Plus de callbacks dans la pile, il doit manquer un appel de setAfterAllCb')
   }
-  else throw new Error("Plus de callbacks dans la pile, il doit manquer un appel de setAfterAllCb")
 }
 
 /**

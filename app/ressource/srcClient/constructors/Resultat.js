@@ -126,7 +126,7 @@ function Resultat(original) {
 
   /**
    * Le résultat sous une forme qualitative (rrvb pour mep, phrase d'état pour j3p, etc.)
-   * @default ""
+   * @default ''
    * @type {string|*}
    */
   this.reponse = values.reponse || ''
@@ -143,7 +143,7 @@ function Resultat(original) {
  * @returns {string}
  */
 Resultat.prototype.toString = function () {
-  return (typeof this.reponse === "string") ? this.reponse : this.reponse.toString()
+  return (typeof this.reponse === 'string') ? this.reponse : this.reponse.toString()
 }
 
 module.exports = Resultat

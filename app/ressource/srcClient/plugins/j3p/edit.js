@@ -35,7 +35,8 @@ var tools = require('../../tools')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
-var $ = window.jQuery /* jshint jquery:true */
+var $
+/* jshint jquery:true */
 
 /**
  * Ajoute l'iframe d'editgraphe
@@ -44,10 +45,10 @@ var $ = window.jQuery /* jshint jquery:true */
  * @param {Element} container
  */
 function addEditGraphe(urlEditGraphe, container) {
-  log("addEditGraphe avec " +urlEditGraphe)
-  var args = {src: urlEditGraphe, id:"editgraphe"}; // mettre ici allowfullscreen:"true" sert à rien, faut un setAttribute plus loin
-  var editgraphe = dom.addElement(container, 'iframe', args, "Si vous lisez ce texte, votre navigateur ne supporte pas les iframes")
-  editgraphe.setAttribute("allowfullscreen", true)
+  log('addEditGraphe avec ' +urlEditGraphe)
+  var args = {src: urlEditGraphe, id:'editgraphe'}; // mettre ici allowfullscreen:'true' sert à rien, faut un setAttribute plus loin
+  var editgraphe = dom.addElement(container, 'iframe', args, 'Si vous lisez ce texte, votre navigateur ne supporte pas les iframes')
+  editgraphe.setAttribute('allowfullscreen', true)
   $editgraphe = $(editgraphe)
   autosize()
   return editgraphe.contentWindow
@@ -59,21 +60,21 @@ function addEditGraphe(urlEditGraphe, container) {
  * @param $form
  */
 function addMessageListener(ressource, $form) {
-  window.addEventListener("message", function (event) {
+  window.addEventListener('message', function (event) {
     // on teste pas event.origin, on accepte les messages de tous ceux que l'on embarque
     if (event.data) {
       log("Message reçu dans l'édition de la ressource", event)
-      if (event.data.action === "editGrapheReady") {
-        egWindow.postMessage({action: "load", ressource: ressource}, "*")
-      } else if (event.data && event.data.action === "saveParametres") {
+      if (event.data.action === 'editGrapheReady') {
+        egWindow.postMessage({action: 'load', ressource: ressource}, '*')
+      } else if (event.data && event.data.action === 'saveParametres') {
         if (event.data.parametres) saveParametres(event.data.parametres)
         else page.addError("editgraphe envoi un message avec l'action saveParametres sans fournir parametres")
-      } else if (event.data && event.data.action === "saveAndSubmit") {
+      } else if (event.data && event.data.action === 'saveAndSubmit') {
         if (event.data.parametres) {
-          log("Dans saveAndSubmit on récupère les parametres", event.data.parametres)
+          log('Dans saveAndSubmit on récupère les parametres', event.data.parametres)
           saveParametres(event.data.parametres, function () {
             if (isSubmitForced) {
-              log("submit déjà fait en timeout")
+              log('submit déjà fait en timeout')
             } else {
               isSubmitForced = true
               $form.submit()
@@ -83,7 +84,7 @@ function addMessageListener(ressource, $form) {
           page.addError("editgraphe envoi un message avec l'action saveAndSubmit sans fournir parametres, on sauvegarde en l'état dans 2s")
           setTimeout(function () {
             if (isSubmitForced) {
-              log("submit déjà fait en timeout")
+              log('submit déjà fait en timeout')
             } else {
               isSubmitForced = true
               $form.submit()
@@ -92,7 +93,7 @@ function addMessageListener(ressource, $form) {
         }
       }
     } else {
-      log("message reçu sans data ???", event)
+      log('message reçu sans data ???', event)
     }
   })
 }
@@ -103,14 +104,14 @@ function addMessageListener(ressource, $form) {
  */
 function addSubmitCallback($form) {
   $form.submit(function () {
-    log("submit demandé")
+    log('submit demandé')
     // on le fait qu'une fois, au cas où le user s'excite sur le bouton enregistrer
     if (!isSaveAndSubmitDone) {
-      log("on transfère à saveAndSubmit et on attend")
-      egWindow.postMessage({action: "saveAndSubmit"}, "*")
+      log('on transfère à saveAndSubmit et on attend')
+      egWindow.postMessage({action: 'saveAndSubmit'}, '*')
       isSaveAndSubmitDone = true
       setTimeout(function () {
-        log("timeout sans réponse, on force le submit tel quel")
+        log('timeout sans réponse, on force le submit tel quel')
         // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
         isSubmitForced = true
         $form.submit()
@@ -139,16 +140,16 @@ function autosize() {
  * @param {Ressource} ressource
  */
 function loadGraphic(options, container, ressource) {
-  var urlEditGraphe = "http://j3p."
-  if (options.isDev) urlEditGraphe += "dev"
-  urlEditGraphe += "sesamath.net/editgraphes/lanceur_graphique.html"
-  //urlEditGraphe = "http://j3p.local/editgraphes/lanceur_graphique.html"
+  var urlEditGraphe = 'http://j3p.'
+  if (options.isDev) urlEditGraphe += 'dev'
+  urlEditGraphe += 'sesamath.net/editgraphes/lanceur_graphique.html'
+  //urlEditGraphe = 'http://j3p.local/editgraphes/lanceur_graphique.html'
   $textarea.hide()
-  $textarea.before(dom.getElement("a", {href:"?editor=text"}, "mode texte (sauvegarder les modifications avant)"))
-  $textarea.before(dom.getElement("br"))
+  $textarea.before(dom.getElement('a', {href:'?editor=text'}, 'mode texte (sauvegarder les modifications avant)'))
+  $textarea.before(dom.getElement('br'))
   egWindow = addEditGraphe(urlEditGraphe, container)
   // au submit on veut récupérer le contenu d'éditgraphe
-  var $form = $("#formRessource")
+  var $form = $('#formRessource')
   addMessageListener(ressource, $form)
   addSubmitCallback($form)
 } // loadGraphic
@@ -164,7 +165,7 @@ function resizeIframe() {
   log('resize iframe height à ' + tailleDispo)
   tailleDispo = $editgraphe.width()
   if (tailleDispo < 300) $editgraphe.width(300)
-  else $editgraphe.css("width", '100%')
+  else $editgraphe.css('width', '100%')
   $editgraphe.scrollTop(0)
 }
 
@@ -174,18 +175,18 @@ function resizeIframe() {
  * @param {simpleCallback} [next]
  */
 function saveParametres(parametres, next) {
-  log("saveParametres", parametres)
+  log('saveParametres', parametres)
   // sans le setTimeout, le $textarea.val(paramString) ne change rien dans le html, aucune idée du pourquoi...
   setTimeout(function () {
     try {
       var paramString = JSON.stringify(parametres, null, 2)
-      log("on met dans le textarea", paramString)
+      log('on met dans le textarea', paramString)
       $textarea.val(paramString)
-      log("après modif le textarea contient", $textarea.val())
-      log("après modif le textarea", $textarea)
+      log('après modif le textarea contient', $textarea.val())
+      log('après modif le textarea', $textarea)
     } catch (error) {
       log.error("stringify plante avec l'objet", parametres)
-      page.addError("Impossible de modifier les paramètres, objet malformé (" +error.toString() +")", 5)
+      page.addError('Impossible de modifier les paramètres, objet malformé (' +error.toString() + ')', 5)
     }
     if (next) next()
   }, 0)
@@ -209,27 +210,29 @@ var wd = window.document
  * @param options
  */
 module.exports = function edit(ressource, options) {
-  try {
-    if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
-    var textarea = wd.getElementById('parametres')
-    if (!textarea) throw new Error("Pas de textarea #parametres trouvé dans cette page")
-    $textarea = $(textarea)
-    // le container pour l'iframe
-    var container = wd.getElementById('groupParametres')
-    if (!container) {
-      log("pas trouvé de #groupParametres, on prend le parent du textarea en container")
-      container = textarea.parentNode()
+  page.loadAsync(['jquery'], function () {
+    $ = window.jQuery
+    try {
+      if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
+      var textarea = wd.getElementById('parametres')
+      if (!textarea) throw new Error('Pas de textarea #parametres trouvé dans cette page')
+      $textarea = $(textarea)
+      // le container pour l'iframe
+      var container = wd.getElementById('groupParametres')
+      if (!container) {
+        log('pas trouvé de #groupParametres, on prend le parent du textarea en container')
+        container = textarea.parentNode
+      }
+      var editor = tools.getURLParameter('editor') || 'graphic'
+      if (editor === 'graphic') {
+        loadGraphic(options, container, ressource)
+      } else {
+        if (editor !== 'text') page.addError('Éditeur ' + editor + ' inconnu, on prend text')
+        $textarea.before(dom.getElement('a', { href: '?editor=graphic' }, 'mode graphique (sauvegarder les modifications avant)'))
+        $textarea.before(dom.getElement('br'))
+      }
+    } catch (error) {
+      page.addError(error)
     }
-    var editor = tools.getURLParameter('editor') || "graphic"
-    if (editor === "graphic") {
-      loadGraphic(options, container, ressource)
-    } else {
-      if (editor !== "text") page.addError("Éditeur " +editor +" inconnu, on prend text")
-      $textarea.before(dom.getElement("a", {href:"?editor=graphic"}, "mode graphique (sauvegarder les modifications avant)"))
-      $textarea.before(dom.getElement("br"))
-    }
-
-  } catch (error) {
-    page.addError(error)
-  }
+  })
 }

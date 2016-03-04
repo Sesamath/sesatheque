@@ -36,26 +36,28 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
    * Renvoie en json les infos pour le bloc d'authentification et les droits sur une ressource éventuelle
    * (pour ajouter les boutons modifier / supprimer sur les pages publiques)
    * @route GET /api/auth[?ressourceId=xxx]
+   *
+   * @param {Context} context
    */
   controller.get('api/auth', function (context) {
     /** @type {Context} context */
     var isLogged = $accessControl.isAuthenticated(context)
     var auth = {
-      isLogged:isLogged,
-      permissions:""
+      isLogged: isLogged,
+      permissions: ''
     }
-    log("auth", auth)
+    log('auth', auth)
     if (isLogged) {
       auth.oid = $accessControl.getCurrentUserOid(context)
       auth.authBloc = $auth.getAuthBloc(context)
-      if ($accessControl.hasPermission("create", context)) auth.permissions += "C"
+      if ($accessControl.hasPermission('create', context)) auth.permissions += 'C'
     }
     if (isLogged && context.get.ressourceId) {
       $ressourceRepository.load(context.get.ressourceId, function (error, ressource) {
         if (error) log.error(error)
         else if (ressource) {
-          if ($accessControl.hasPermission("delete", context, ressource)) auth.permissions += "D"
-          if ($accessControl.hasPermission("update", context, ressource)) auth.permissions += "W"
+          if ($accessControl.hasPermission('delete', context, ressource)) auth.permissions += 'D'
+          if ($accessControl.hasPermission('update', context, ressource)) auth.permissions += 'W'
         }
         context.json(auth)
       })

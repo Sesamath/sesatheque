@@ -2,7 +2,7 @@ var _ = require('lodash');
 module.exports = function($scope, $state, $rootScope) {
 
   function  updateState(state) {
-    $scope.stateId="state-"+state.name.replace('.', '-');
+    $scope.stateId='state-'+state.name.replace('.', '-');
     _.each($scope.menu.items, function(item) {
       _.each(item.items, function(subItem) {
         if (subItem.state===state.name) {

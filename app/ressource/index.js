@@ -30,7 +30,8 @@
  */
 
 'use strict'
-/*global lassi*/
+
+var path = require('path')
 
 /**
  * Composant de gestion des ressources
@@ -49,19 +50,19 @@ ressourceComponent.entity('EntityRessource', function () {
   require('./EntityRessource')(this)
 })
 
-ressourceComponent.service('$cacheRessource', function($cache, $settings, EntityRessource) {
+ressourceComponent.service('$cacheRessource', function ($cache, $settings, EntityRessource) {
   return require('./serviceCacheRessource')($cache, $settings, EntityRessource)
 })
 
-ressourceComponent.service('$routes', function($accessControl) {
+ressourceComponent.service('$routes', function ($accessControl) {
   return require('./serviceRoutes')($accessControl)
 })
 
-ressourceComponent.service('$ressourceRepository', function(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
+ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
   return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes)
 })
 
-ressourceComponent.service('$ressourceControl', function(EntityRessource) {
+ressourceComponent.service('$ressourceControl', function (EntityRessource) {
   return require('./serviceRessourceControl')(EntityRessource)
 })
 
@@ -69,13 +70,13 @@ ressourceComponent.service('$ressourceConverter', function (EntityRessource, $re
   return require('./serviceRessourceConverter')(EntityRessource, $ressourceRepository, $routes, $accessControl)
 })
 
-ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) { // jshint ignore:line
-  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $form) // jshint ignore:line
+ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) { // jshint ignore:line
+  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) // jshint ignore:line
 })
 
 // nos ressources statiques
 ressourceComponent.controller(function () {
-  this.serve(__dirname + '/public')
+  this.serve(path.join(__dirname, 'public'))
 })
 
 // les pages html de consultation / modification
@@ -106,10 +107,10 @@ if (!isProd) {
 }
 
 // settings
-ressourceComponent.config(function($settings) {
+ressourceComponent.config(function ($settings) {
   // on vérifie que l'on a un cache avec des valeur acceptables
   var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
-  if (!cacheTTL) log("Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h")
+  if (!cacheTTL) log('Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h')
   else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
-  else if (cacheTTL > 24*3600) throw new Error("Le cache ressource doit avoir un TTL inférieur à 24h (86400s)")
+  else if (cacheTTL > 24 * 3600) throw new Error('Le cache ressource doit avoir un TTL inférieur à 24h (86400s)')
 })

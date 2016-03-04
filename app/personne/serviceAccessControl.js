@@ -31,13 +31,13 @@
 
 'use strict'
 
-module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository, $groupeRepository) {
+module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
   var dns = require('dns')
   var _ = require('lodash')
   var tools = require('../tools')
-  var flow = require('an-flow')
+  // var flow = require('an-flow')
 
-  var configRessource = require("../ressource/config")
+  var configRessource = require('../ressource/config')
 
   /**
    * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
@@ -53,13 +53,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getCorrectionDeniedMessage(context, ressource) {
+  function getCorrectionDeniedMessage (context, ressource) {
     var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user.permissions.create)
-      msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.typePerso[ressource.type])
-      msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.type
+    if (!user.permissions.create) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    else if (!configRessource.typePerso[ressource.type]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
 
     return msg
   }
@@ -71,13 +69,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getCreateDeniedMessage(context, ressource) {
+  function getCreateDeniedMessage (context, ressource) {
     var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user.permissions.create)
-      msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.typePerso[ressource.type])
-      msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " +ressource.type
+    if (!user.permissions.create) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    else if (!configRessource.typePerso[ressource.type]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
 
     return msg
   }
@@ -88,7 +84,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Context}   context
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getCreateAllDeniedMessage(context) {
+  function getCreateAllDeniedMessage (context) {
     var msg
     var user = $accessControl.getCurrentUser(context)
     if (!user.permissions.createAll) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
@@ -103,24 +99,43 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getDeleteDeniedMessage(context, ressource) {
+  function getDeleteDeniedMessage (context, ressource) {
     var msg
     if ($accessControl.isAuteur(context, ressource)) {
       // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
       // (sinon d'autres peuvent s'en servir)
-      if (ressource.auteurs.length > 1)
-          msg = "Vous êtes auteur de cette ressource mais n'êtes pas le seul, vous ne pouvez pas la supprimer"
-      else if (ressource.contributeurs.length) msg = "Vous êtes l'auteur de cette ressource" +
-          " mais il y a d'autres contributeurs, vous ne pouvez plus la supprimer"
+      if (ressource.auteurs.length > 1) {
+        msg = "Vous êtes auteur de cette ressource mais n'êtes pas le seul, vous ne pouvez pas la supprimer"
+      } else if (ressource.contributeurs.length) {
+        msg = "Vous êtes l'auteur de cette ressource mais il y a d'autres contributeurs, vous ne pouvez plus la supprimer"
+      }
       // @todo que fait-on pour les ressources publiques ? Difficile de savoir si qqun l'utilise...
-      //else if (ressource.restriction != 2) msg = "Vous êtes l'auteur de cette ressource" +
-      //    " mais elle est partagée avec d'autres, vous ne pouvez plus la supprimer"
+      // else if (ressource.restriction != 2) msg = "Vous êtes l'auteur de cette ressource' +
+      //    ' mais elle est partagée avec d'autres, vous ne pouvez plus la supprimer'
     } else {
       msg = "Vous n'avez pas de droits suffisants pour supprimer cette ressource"
     }
-    if (msg) log.debug("dans getDeleteDeniedMessage on a le message d'erreur " +msg +" avec " +(ressource.auteurs && ressource.auteurs.length) +" auteurs :", ressource.auteurs)
+    if (msg) {
+      log.debug("dans getDeleteDeniedMessage on a le message d'erreur " + msg + ' avec ' +
+        (ressource.auteurs && ressource.auteurs.length) + ' auteurs :', ressource.auteurs)
+    }
 
     return msg
+  }
+
+  function getDeleteVersionDeniedMessage (context, ressource) {
+    // @todo implémenter getDeleteVersionDeniedMessage
+    return 'Permission à implémenter'
+  }
+
+  function getIndexDeniedMessage (context, ressource) {
+    // @todo implémenter getDeleteVersionDeniedMessage
+    return 'Permission à implémenter'
+  }
+
+  function getPublishDeniedMessage (context, ressource) {
+    // @todo implémenter getDeleteVersionDeniedMessage
+    return 'Permission à implémenter'
   }
 
   /**
@@ -130,7 +145,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param context
    * @returns {*}
    */
-  function getClientIp(context) {
+  function getClientIp (context) {
     // on regarde si par hasard ce serait pas l'ip du proxy
     var ipClient = context.request.ip
     if (context.ips && context.ips.length) ipClient = context.ips[0]
@@ -147,7 +162,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Ressource} ressource
    * @returns {string|undefined} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getReadDeniedMessage(context, ressource) {
+  function getReadDeniedMessage (context, ressource) {
     // nos ips ont le droit de tout lire via l'api
     if (hasAllRights(context)) return
 
@@ -155,7 +170,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (ressource.publie) {
       var restriction = $settings.get('components.ressource.constantes.restriction')
       if (ressource.restriction === restriction.aucune) return
-      else if (!$accessControl.isAuthenticated(context)) msg = "Vous devez être authentifié pour consulter cette ressource"
+      else if (!$accessControl.isAuthenticated(context)) msg = 'Vous devez être authentifié pour consulter cette ressource'
       else {
         var user = $accessControl.getCurrentUser(context)
         switch (ressource.restriction) {
@@ -174,25 +189,25 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
             if ($accessControl.isAuteur(context, ressource)) return
             if ($accessControl.isContributeur(context, ressource)) return
             if (ressource.groupes && !_.empty(_.intersection(ressource.groupes, user.groupesMembre))) return
-            msg = "Ressource restreinte"
+            msg = 'Ressource restreinte'
             break
 
           // privée
           case restriction.prive:
             if ($accessControl.isAuteur(context, ressource)) return
             if ($accessControl.isContributeur(context, ressource)) return
-            msg = "Ressource privée"
+            msg = 'Ressource privée'
             break
 
           default:
-            msg = "Restriction non gérée"
+            msg = 'Restriction non gérée'
         }
       }
     } else {
       // pas publié, faut avoir les droits d'édition pour la voir
       msg = getUpdateDeniedMessage(context, ressource)
       // mais avec un message adapté
-      if (msg) msg = "Ressource non publiée"
+      if (msg) msg = 'Ressource non publiée'
     }
 
     return msg
@@ -204,10 +219,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Personne} personne
    * @returns {Object} avec les permissions en propriété (valeur true|false|undefined)
    */
-  function getPermissions(personne) {
+  function getPermissions (personne) {
     var permissions = {}
     var config = $settings.get('components.personne')
-    _.each(personne.roles, function(hasRole, role) {
+    _.each(personne.roles, function (hasRole, role) {
       // on ajoute les permissions définies pour ce role en config
       if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
     })
@@ -222,9 +237,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getUpdateDeniedMessage(context, ressource) {
-    if ($accessControl.isAuteur(context, ressource)) return
-    else if ($accessControl.isContributeur(context, ressource)) return
+  function getUpdateDeniedMessage (context, ressource) {
+    if ($accessControl.isAuteur(context, ressource)) return ''
+    else if ($accessControl.isContributeur(context, ressource)) return ''
     // pour le moment tout le reste est interdit
     else return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
   }
@@ -236,7 +251,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getUpdateAuteursDeniedMessage(context, ressource) {
+  function getUpdateAuteursDeniedMessage (context, ressource) {
     var msg
     if (!$accessControl.isAuteur(context, ressource)) msg = "Vous ne pouvez pas modifier les auteurs ou contributeur si vous n'êtes pas auteur de la ressource"
     return msg
@@ -249,7 +264,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {Ressource} ressource
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
-  function getUpdateGroupesDeniedMessage(context, ressource) {
+  function getUpdateGroupesDeniedMessage (context, ressource) {
     // pour le moment idem update
     return getUpdateDeniedMessage(context, ressource)
   }
@@ -260,14 +275,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param ip
    * @returns {boolean}
    */
-  function isOnLan(ip) {
+  function isOnLan (ip) {
     // avec pm2 on a du bind ipv6
     return (/^(::ffff:)?(127\.0|192\.168)/.test(ip) || /^::1/.test(ip))
   }
 
-  //######################
+  // ######################
   // Méthodes publiques
-  //######################
+  // ######################
 
   /**
    * Ajoute un token et des valeurs associées en session
@@ -277,7 +292,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    *                      (ne rien passer ici ni à checkToken permet juste de vérifier sa présence)
    * @returns {boolean|string} false si y'avait pas de user connecté, le token sinon
    */
-  $accessControl.addToken = function addToken(context, token, value) {
+  $accessControl.addToken = function addToken (context, token, value) {
     var retour = $accessControl.isAuthenticated(context)
     if (retour) {
       if (!value) value = true // avec undefined la property n'existe pas, mettre false n'a pas de sens, true parce qu'on veut juste vérifier sa présence
@@ -317,7 +332,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {string} token
    * @returns {*} La valeur stockée ou undefined si le token n'était pas en session
    */
-  $accessControl.getTokenValue = function getTokenValue(context, token) {
+  $accessControl.getTokenValue = function getTokenValue (context, token) {
     var value
     if (context && token && context.session.tokens && context.session.tokens.hasOwnProperty(token)) {
       value = context.session.tokens[token]
@@ -348,23 +363,27 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       next(null, ressource)
     } else {
       var msg
-      if (!$accessControl.isAuthenticated(context)) {
-        msg = "Authentification requise"
-      } else {
+      if ($accessControl.isAuthenticated(context)) {
         // on regarde donc ce user pour cette ressource
         switch (permission) {
           // sinon on délègue suivant la permission
           case 'create':
-            msg = getCreateDeniedMessage(context); break
+            msg = getCreateDeniedMessage(context)
+            break
           case 'delete':
-            msg = getDeleteDeniedMessage(context, ressource, next); break
+            msg = getDeleteDeniedMessage(context, ressource, next)
+            break
           case 'read':
-            msg = getReadDeniedMessage(context, ressource, next); break
+            msg = getReadDeniedMessage(context, ressource, next)
+            break
           case 'update':
-            msg = getUpdateDeniedMessage(context, ressource, next); break
+            msg = getUpdateDeniedMessage(context, ressource, next)
+            break
           default:
-            msg = "Permission " + permission + " inconnue, refusée par défaut"
+            msg = 'Permission ' + permission + ' inconnue, refusée par défaut'
         }
+      } else {
+        msg = 'Authentification requise'
       }
       next(msg, ressource)
     }
@@ -376,7 +395,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {Integer} L'oid
    * @memberOf $accessControl
    */
-  $accessControl.getCurrentUserOid = function(context) {
+  $accessControl.getCurrentUserOid = function (context) {
     var oid
     if (context.session.user && context.session.user.oid) oid = context.session.user.oid
 
@@ -389,7 +408,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @return {Personne|undefined} Le user
    * @memberOf $accessControl
    */
-  $accessControl.getCurrentUser = function(context) {
+  $accessControl.getCurrentUser = function (context) {
     var personne
     if (context.session.user && context.session.user.oid) personne = context.session.user
 
@@ -402,7 +421,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @return {string[]} La liste des noms des groupes dont on est membre
    * @memberOf $accessControl
    */
-  $accessControl.getCurrentUserGroupes = function(context) {
+  $accessControl.getCurrentUserGroupes = function (context) {
     var groupes = []
     if (context.session.user && context.session.user.groupesMembre) groupes = context.session.user.groupesMembre
 
@@ -415,7 +434,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @return {string[]} La liste des noms des groupes que l'on suit (tableau vide si aucun ou pas identifié)
    * @memberOf $accessControl
    */
-  $accessControl.getCurrentUserGroupesSuivis = function(context) {
+  $accessControl.getCurrentUserGroupesSuivis = function (context) {
     var groupes = []
     if (context.session.user && context.session.user.groupesSuivis) groupes = context.session.user.groupesSuivis
 
@@ -429,10 +448,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @return {Personne|undefined} Le user mis à jour (ou l'ancien si les oid correspondait pas)
    * @memberOf $accessControl
    */
-  $accessControl.updateCurrentUser = function(context, personne) {
+  $accessControl.updateCurrentUser = function (context, personne) {
     var old = $accessControl.getCurrentUser(context)
     if (old && personne && old.oid === personne.oid) context.session.user = personne
-    else log.error(new Error("updateCurrentUser appelé avec un user qui différent de celui en session"))
+    else log.error(new Error('updateCurrentUser appelé avec un user qui différent de celui en session'))
 
     return context.session.user
   }
@@ -463,12 +482,12 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.hasAllRights = function (context) {
-    var retour = false;
+    var retour = false
     var token = context.request.header('X-ApiToken')
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
       if ($settings.get('apiTokens', []).indexOf(token) > -1) {
-        log.debug("token api ok")
+        log.debug('token api ok')
         // token ok donc retour ok si client local
         retour = $accessControl.isLanClient(context)
       }
@@ -489,7 +508,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {boolean}
    * @memberOf $accessControl
    */
-  function hasGenericPermission(permission, context) {
+  function hasGenericPermission (permission, context) {
     return context &&
            context.session &&
            context.session.user &&
@@ -504,7 +523,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param context
    * @returns {*|data.roles|{}|settings.components.personne.roles|{admin, editeur, indexateur, prof, acces_correction, eleve}|Object}
    */
-  $accessControl.hasRole = function(role, context) {
+  $accessControl.hasRole = function (role, context) {
     return context &&
            context.session &&
            context.session.user &&
@@ -531,6 +550,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
 
     if ($accessControl.isAuthenticated(context)) {
       switch (permission) {
+        /* eslint-disable no-multi-spaces */
         case 'correction'    : return !getCorrectionDeniedMessage(context)
         case 'create'        : return !getCreateDeniedMessage(context, ressource)
         case 'createAll'     : return !getCreateAllDeniedMessage(context)
@@ -543,6 +563,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         case 'updateAuteurs' : return !getUpdateAuteursDeniedMessage(context, ressource)
         case 'updateGroupes' : return !getUpdateGroupesDeniedMessage(context, ressource)
         default: return false
+        /* eslint-enable */
       }
     } else {
       return false
@@ -564,7 +585,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (hasGenericPermission('read', context) && ressource.publie) return true
     return (!getReadDeniedMessage(context, ressource))
   }
-
 
   /**
    * Retourne true si on a un user en session
@@ -616,7 +636,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.isLanClient = function (context) {
     var ipClient = getClientIp(context)
-    log.debug("isLanClient analyse l'ip " +ipClient)
+    log.debug("isLanClient analyse l'ip " + ipClient)
     return isOnLan(ipClient)
   }
 
@@ -628,22 +648,22 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.isSesamathClient = function (context, next) {
     var isSesamathClient = $accessControl.isLanClient(context)
-    if (!isSesamathClient) {
+    if (isSesamathClient) {
+      next(null, true)
+    } else {
       var ipClient = getClientIp(context)
       dns.reverse(ipClient, function (error, hostnames) {
         if (error) {
           log.error(error)
-          next(new Error("La recherche du reverse de " +ipClient +" a échoué"))
+          next(new Error('La recherche du reverse de ' + ipClient + ' a échoué'))
         } else {
           var isSesamath = false
           hostnames.forEach(function (hostname) {
             if (/^([^\.]+\.)?(dev)?sesamath.net$/.test(hostname)) isSesamath = true
           })
-          next(null, isSesamath);
+          next(null, isSesamath)
         }
       })
-    } else {
-      next(null, true);
     }
   }
 
@@ -661,8 +681,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         context.session.user = personne
       } else if (!error) {
         context.session.user = {
-          oid:0,
-          lastCheck : new Date()
+          oid: 0,
+          lastCheck: new Date()
         }
       }
       next(error, personne)
@@ -682,32 +702,32 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.loginFromSesalab = function (context, sesalabUser, domaine, next) {
     function setSession (error, personne) {
-      log.debug("setSession error", error)
-      log.debug("setSession personne", personne)
+      log.debug('setSession error', error)
+      log.debug('setSession personne', personne)
       if (personne) {
         personne.permissions = getPermissions(personne)
-        context.session.user = personne;
+        context.session.user = personne
       } else if (!error) {
         context.session.user = {
-          oid:0,
-          lastCheck : new Date()
+          oid: 0,
+          lastCheck: new Date()
         }
       }
       next(error, personne)
     }
 
-    log.debug("loginFromSesalab avec le domaine " +domaine +" et le user", sesalabUser, "sesasso", {max:10000})
+    log.debug('loginFromSesalab avec le domaine ' + domaine + ' et le user', sesalabUser, 'sesasso', {max: 10000})
     if (domaine && sesalabUser.oid) {
       /**
        * @private
        * @type {Personne}
        */
       var personne = {
-        nom : sesalabUser.nom,
-        prenom : sesalabUser.prenom,
-        email : sesalabUser.mail,
-        roles : {},
-        permissions : {}
+        nom: sesalabUser.nom,
+        prenom: sesalabUser.prenom,
+        email: sesalabUser.mail,
+        roles: {},
+        permissions: {}
       }
       if (sesalabUser.externalId && sesalabUser.externalMech) {
         personne.origine = sesalabUser.externalMech
@@ -717,11 +737,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         personne.idOrigine = sesalabUser.oid
       }
       if (sesalabUser.type === 1) personne.roles.prof = true
-      if (personne.origine === "sesasso") personne.roles.acces_correction = true
+      if (personne.origine === 'sesasso') personne.roles.acces_correction = true
       // on attend le vrai client sso pour gérer les groupes
       $personneRepository.updateOrCreate(personne, setSession)
     } else {
-      next(new Error("Impossible de connecter un utilisateur sesalab sans son domaine et oid (manquant dans la réponse de sesalab)"))
+      next(new Error('Impossible de connecter un utilisateur sesalab sans son domaine et oid (manquant dans la réponse de sesalab)'))
     }
   }
 
@@ -731,7 +751,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.logout = function (context) {
-    log.debug("déconnexion")
+    log.debug('déconnexion')
     context.session.user = {}
   }
 

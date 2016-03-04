@@ -31,6 +31,8 @@
 
 'use strict'
 
+var path = require('path')
+
 /**
  * Component qui défini
  * - le layout et les vues pour le html
@@ -50,23 +52,22 @@ var mainComponent = lassi.component('main')
    * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
    * this.application.templateEngines.dust existe plus /
   this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
-    return chunk.write('<pre class="debug">' + JSON.stringify(params, null, 2) + '</pre>');
+    return chunk.write('<pre class='debug'>' + JSON.stringify(params, null, 2) + '</pre>');
   }); /**/
 
 mainComponent.controller(function () {
   require('./controllerMain')(this)
 })
 
-mainComponent.service('$page', function() {
+mainComponent.service('$page', function () {
   return require('./servicePage')()
 })
 
-
-mainComponent.service('$flashMessages', function() {
+mainComponent.service('$flashMessages', function () {
   return require('./serviceFlashMessages')()
 })
 
-mainComponent.service('$form', function($page) {
+mainComponent.service('$form', function ($page) {
   return require('./serviceForm')($page)
 })
 
@@ -79,7 +80,7 @@ mainComponent.service('$json', function () {
  */
 if (!isProd) {
   mainComponent.controller(function () {
-    this.serve('doc', __dirname +'/../../documentation')
+    this.serve('doc', path.resolve(__dirname, '/../../documentation'))
   })
   mainComponent.controller('debug', function () {
     require('./controllerDebug')(this)

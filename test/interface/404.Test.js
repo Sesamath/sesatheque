@@ -39,7 +39,7 @@
 'use strict'
 /*global describe,it*/
 
-var assert = require("assert")
+var assert = require('assert')
 var request = require('request')
 
 var config = require('../../app/config')
@@ -59,7 +59,7 @@ if (process.argv.indexOf('--prod') > -1) {
 }
 
 describe('get 404', function () {
-  it("prend un 404 sur /public/foo/bar", function (done) {
+  it('prend un 404 sur /public/foo/bar', function (done) {
     var options = {
       url : urlBibli + '/public/foo/bar'
     }
@@ -72,7 +72,7 @@ describe('get 404', function () {
     })
   })
 
-  it("prend un 404 sur /ressource/foo/bar", function (done) {
+  it('prend un 404 sur /ressource/foo/bar', function (done) {
     var options = {
       url : urlBibli + '/ressource/foo/bar'
     }
@@ -83,7 +83,7 @@ describe('get 404', function () {
     })
   })
 
-  it("prend un 404 sur /public/foo", function (done) {
+  it('prend un 404 sur /public/foo', function (done) {
     var options = {
       url : urlBibli + '/public/foo'
     }
@@ -94,7 +94,7 @@ describe('get 404', function () {
     })
   })
 
-  it("prend un 404 sur /ressource/foo", function (done) {
+  it('prend un 404 sur /ressource/foo', function (done) {
     var options = {
       url : urlBibli + '/ressource/foo'
     }
@@ -105,7 +105,7 @@ describe('get 404', function () {
     })
   })
 
-  it("prend un 404 sur /foo/bar", function (done) {
+  it('prend un 404 sur /foo/bar', function (done) {
     var options = {
       url : urlBibli + '/foo/bar'
     }

@@ -31,7 +31,7 @@
 
 'use strict'
 
-//var _ = require('lodash')
+// var _ = require('lodash')
 var tools = require('../tools')
 var Form = require('../ressource/srcClient/constructors/Form')
 
@@ -53,7 +53,7 @@ module.exports = function ($page) {
    *                              sinon, si formGroup existe, on crée un FormGroup avec
    *                              sinon on crée un nouveau FormGroup avec ses valeurs par défaut
    */
-  $form.addField = function addField(form, field, options) {
+  $form.addField = function addField (form, field, options) {
     if (!options) options = {}
     var formGroup
     if (options.fieldGroupId) formGroup = form.getGroupById(options.fieldGroupId)
@@ -71,9 +71,9 @@ module.exports = function ($page) {
   $form.addToken = function (form) {
     var token = tools.getToken()
     var field = {
-      name:'token',
-      value:token,
-      widget:'hidden'
+      name: 'token',
+      value: token,
+      widget: 'hidden'
     }
     form.addField(field)
 
@@ -121,7 +121,7 @@ module.exports = function ($page) {
    * @param {string} pageTitle
    * @param {object|Array} moreData
    */
-  $form.print = function print(context, formValues, groupValues, fields, submitValue, pageTitle, moreData) {
+  $form.print = function print (context, formValues, groupValues, fields, submitValue, pageTitle, moreData) {
     var contentBloc = $form.construct(formValues, groupValues, fields, submitValue)
     contentBloc.$view = 'form'
     $page.print(context, pageTitle, contentBloc, moreData)

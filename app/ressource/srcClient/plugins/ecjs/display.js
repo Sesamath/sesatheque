@@ -44,176 +44,177 @@ var log = require('../../tools/log')
  * @param {errorCallback}  [next]     La fct à appeler quand le swf sera chargé
  */
 module.exports = function display(ressource, options, next) {
-  /*global head*/
   try {
     // vérifs de base
-    if (!options.container) throw new Error("Paramétrage manquant (conteneur)")
+    if (!options.container) throw new Error('Paramétrage manquant (conteneur)')
     if (!ressource.parametres.fichierjs) throw new Error("Paramétrage manquant (nom de l'exercice à lancer)")
 
-    // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
-    var ecjsBase = tools.getURLParameter("ecjsBase") || options.ecjsBase || "http://ressources.sesamath.net/replication_calculatice/javascript"
+    page.loadAsync('head', function () {
+      /*global head*/
+      // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
+      var ecjsBase = tools.getURLParameter('ecjsBase') || options.ecjsBase || 'http://ressources.sesamath.net/replication_calculatice/javascript'
 
-    // d'après {ecjsBase}/api/clc-api.main.js
-    // celui-là détruit notre style et semble ne rien apporter dans les exos
-    //"http://calculatice.ac-lille.fr/calculatice/squelettes/css/clear.css",
-    dom.addCss(ecjsBase + "/lib-externes/jquery/css/start/jquery-ui-1.10.4.custom.min.css")
-    dom.addCss(ecjsBase + "/clc/css/clc.css")
-    // si on prend pas le css original qui reset html et body, ça casse tout (le rectangle clc s'affiche pas),
-    // mais en le laissant ça casse nos styles, faudrait le mettre toujours en iframe :-/
-    head.ready(function () {
-      // on attend que tout soit fini pour virer require que Raphael et Big ne supportent pas
-      // on espère que plus personne n'en aura besoin
-      if (typeof require !== "undefined") require = undefined // jshint ignore:line
-      if (typeof define !== "undefined") define = undefined // jshint ignore:line
-      // Cf /home/sesamath/bin/fetchCalculatice.sh qui tourne sur le serveur web ressources.sesamath.net
-      // pour la liste des js concaténés dans scripts.js
-      head.load(ecjsBase + "/scripts.js", function () {
-        // on vérifie que l'on a tous les objets globaux souhaités
-        var glob = ["Modernizr", "$", "SVG", "Raphael", "Big", "createjs", "CLC"]
-        var prop, i
-        for (i = 0; i < glob.length; i++) {
-          prop = glob[i]
-          if (typeof window[prop] === "undefined") throw new Error("Problème de chargement, " + prop + " n'existe pas")
-        }
+      // d'après {ecjsBase}/api/clc-api.main.js
+      // celui-là détruit notre style et semble ne rien apporter dans les exos
+      //'http://calculatice.ac-lille.fr/calculatice/squelettes/css/clear.css',
+      dom.addCss(ecjsBase + '/lib-externes/jquery/css/start/jquery-ui-1.10.4.custom.min.css')
+      dom.addCss(ecjsBase + '/clc/css/clc.css')
+      // si on prend pas le css original qui reset html et body, ça casse tout (le rectangle clc s'affiche pas),
+      // mais en le laissant ça casse nos styles, faudrait le mettre toujours en iframe :-/
+      head.ready(function () {
+        // on attend que tout soit fini pour virer require que Raphael et Big ne supportent pas
+        // on espère que plus personne n'en aura besoin
+        if (typeof require !== 'undefined') require = undefined // jshint ignore:line
+        if (typeof define !== 'undefined') define = undefined // jshint ignore:line
+        // Cf /home/sesamath/bin/fetchCalculatice.sh qui tourne sur le serveur web ressources.sesamath.net
+        // pour la liste des js concaténés dans scripts.js
+        head.load(ecjsBase + '/scripts.js', function () {
+          // on vérifie que l'on a tous les objets globaux souhaités
+          var glob = [ 'Modernizr', '$', 'SVG', 'Raphael', 'Big', 'createjs', 'CLC' ]
+          var prop, i
+          for (i = 0; i < glob.length; i++) {
+            prop = glob[ i ]
+            if (typeof window[ prop ] === 'undefined') throw new Error('Problème de chargement, ' + prop + " n'existe pas")
+          }
 
-        /*global CLC, $*/
-        function envoyerScoreExoJs(event, data) {
-          log("résultats reçus du js calculatice", data)
-          resultatSent = true; // même si ça plante, pas la peine de recommencer au unload
-          var dataToSend = {
-            fin: true
+          /*global CLC, $*/
+          function envoyerScoreExoJs (event, data) {
+            log('résultats reçus du js calculatice', data)
+            resultatSent = true; // même si ça plante, pas la peine de recommencer au unload
+            var dataToSend = {
+              fin: true
+            }
+            if (data.total > 0) {
+              var score = parseInt(data.score, 10) || 0
+              dataToSend.score = score / data.total
+              dataToSend.reponse = score + ' sur ' + data.total
+            } else {
+              dataToSend.reponse = 'score indéterminé'
+            }
+            if (options && options.resultatCallback) {
+              options.resultatCallback(dataToSend)
+            }
           }
-          if (data.total > 0) {
-            var score = parseInt(data.score, 10) || 0
-            dataToSend.score = score / data.total
-            dataToSend.reponse = score + " sur " + data.total
-          } else {
-            dataToSend.reponse = "score indéterminé"
+
+          // On réinitialise le conteneur
+          var container = options.container
+          dom.empty(container)
+          var exoClc = dom.addElement(container, 'div', { id: 'exoclc', style: { margin: '0 auto', width: '735px' } })
+          var footer = dom.addElement(container, 'p', {
+            style: {
+              'text-align': 'right',
+              margin: '0 auto',
+              width: '735px'
+            }
+          }, 'Exercice original provenant du site ')
+          dom.addElement(footer, 'a', { href: 'http://calculatice.ac-lille.fr/', target: '_blank' }, 'Calcul@tice')
+          var $exoClc = $(exoClc)
+          // les options et le nom de l'exo
+          var optionsClc = ressource.parametres.options || {}
+          optionsClc.parametrable = !!options.isFormateur || options.optionsClcCallback
+          var nomExo = ressource.parametres.fichierjs
+          var cheminExo = ecjsBase + '/exercices/'
+          var exoLoaded = false
+          var isLoaded
+          var resultatSent = false
+
+          // si ça intéresse l'appelant et que le chargement est KO on finira par le dire après 10s
+          if (next && typeof next === 'function') {
+            setTimeout(function () {
+              if (!exoLoaded) next(new Error('Exercice calculatice toujours pas chargé après 10s'))
+            }, 10000); // on laisse 10s avant d'envoyer une erreur de chargement
           }
+          // on envoie un score vide au unload si rien n'a été envoyé avant
           if (options && options.resultatCallback) {
-            options.resultatCallback(dataToSend)
+            // on ajoute un envoi au unload si rien n'a été envoyé avant
+            window.addEventListener('unload', function () {
+              log('unload ecjs')
+              if (isLoaded && !resultatSent) {
+                envoyerScoreExoJs(null, {
+                  score: 0,
+                  reponse: 'Aucune réponse',
+                  fin: true
+                })
+              }
+            })
           }
-        }
+          // cree un exo de maniere asynchrone
+          var reqExo = CLC.loadExo(cheminExo + nomExo, optionsClc)
 
-        // On réinitialise le conteneur
-        var container = options.container
-        dom.empty(container)
-        var exoClc = dom.addElement(container, 'div', {id: "exoclc", style: {margin: "0 auto", width: "735px"}})
-        var footer = dom.addElement(container, 'p', {
-          style: {
-            "text-align": "right",
-            margin: "0 auto",
-            width: "735px"
-          }
-        }, "Exercice original provenant du site ")
-        dom.addElement(footer, 'a', {href: "http://calculatice.ac-lille.fr/", target: "_blank"}, "Calcul@tice")
-        var $exoClc = $(exoClc)
-        // les options et le nom de l'exo
-        var optionsClc = ressource.parametres.options || {}
-        optionsClc.parametrable = !!options.isFormateur || options.optionsClcCallback
-        var nomExo = ressource.parametres.fichierjs
-        var cheminExo = ecjsBase + "/exercices/"
-        var exoLoaded = false
-        var isLoaded
-        var resultatSent = false
+          // quand l'exo est pret on le met dans son div
+          reqExo.done(function (exercice) {
+            log('exo clc', exercice)
+            $exoClc.html(exercice)
+            isLoaded = true
+            // le 2e arg se retrouve dans event.data (event 1er arg passé à la callback)
+            // pour la liste des événements, chercher 'publier' dans les sources calculatice
+            // on a validationQuestion, validationOption, finExercice
+            // l'evt est lancé sur
+            // pour finExercice on récupère {idExo, numExo, score {int, nb de bonnes réponses}, total {int, nb total de questions}, duree {int, en secondes}}
+            exercice.on('finExercice', null, envoyerScoreExoJs)
+            if (next && typeof next === 'function') {
+              exoLoaded = true
+              next()
+            }
+            // si l'utilisateur veut récupérer les paramètres, on les lui affiche directement
+            if (typeof options.optionsClcCallback === 'function') {
+              exercice.on('validationOption', null, function (event, optionsClc) {
+                options.optionsClcCallback(optionsClc)
+              })
+              $exoClc.ready(function () {
+                // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
+                var i = 0
 
-        // si ça intéresse l'appelant et que le chargement est KO on finira par le dire après 10s
-        if (next && typeof next === "function") {
-          setTimeout(function () {
-            if (!exoLoaded) next(new Error("Exercice calculatice toujours pas chargé après 10s"))
-          }, 10000); // on laisse 10s avant d'envoyer une erreur de chargement
-        }
-        // on envoie un score vide au unload si rien n'a été envoyé avant
-        if (options && options.resultatCallback) {
-          // on ajoute un envoi au unload si rien n'a été envoyé avant
-          window.addEventListener('unload', function () {
-            log("unload ecjs")
-            if (isLoaded && !resultatSent) {
-              envoyerScoreExoJs(null, {
-                score: 0,
-                reponse: "Aucune réponse",
-                fin: true
+                function delayOptions () {
+                  if (i++ < 300) {
+                    setTimeout(function () {
+                      var $button = $('button.parametrer')
+                      if ($button.length > 0) {
+                        if ($button.length > 1) {
+                          log.error("On a plusieurs boutons qui répondent au sélecteur 'button .bouton.parametrer'")
+                          $button = $button.first()
+                        }
+                        log('on a trouvé le bouton après ' + i * 10 + "ms d'attente")
+                        $button.click()
+                        i = 0
+                        delayOptionsValidate()
+                      } else {
+                        delayOptions()
+                      }
+                    }, 10)
+                  } else {
+                    log.error('Pas trouvé le bouton paramétrer après 5s', $exoClc.html())
+                  }
+                }
+
+                function delayOptionsValidate () {
+                  if (i++ < 300) {
+                    setTimeout(function () {
+                      var $button = $('button.tester-parametre')
+                      if ($button.length > 0) {
+                        if ($button.length > 1) {
+                          log.error("On a plusieurs boutons qui répondent au sélecteur 'button.tester-parametre'")
+                          $button = $button.first()
+                        }
+                        log('on a trouvé le bouton valider après ' + i * 10 + "ms d'attente")
+                        $button.hide()
+                      } else {
+                        delayOptionsValidate()
+                      }
+                    }, 10)
+                  } else {
+                    log.error('Pas trouvé le bouton paramétrer après 5s', $exoClc.html())
+                  }
+                  //$('button.tester-parametre').hide()
+                }
+
+                delayOptions()
               })
             }
           })
-        }
-        // cree un exo de maniere asynchrone
-        var reqExo = CLC.loadExo(cheminExo + nomExo, optionsClc)
-
-        // quand l'exo est pret on le met dans son div
-        reqExo.done(function (exercice) {
-          log("exo clc", exercice)
-          $exoClc.html(exercice)
-          isLoaded = true
-          // le 2e arg se retrouve dans event.data (event 1er arg passé à la callback)
-          // pour la liste des événements, chercher "publier" dans les sources calculatice
-          // on a validationQuestion, validationOption, finExercice
-          // l'evt est lancé sur
-          // pour finExercice on récupère {idExo, numExo, score {int, nb de bonnes réponses}, total {int, nb total de questions}, duree {int, en secondes}}
-          exercice.on("finExercice", null, envoyerScoreExoJs)
-          if (next && typeof next === "function") {
-            exoLoaded = true
-            next()
-          }
-          // si l'utilisateur veut récupérer les paramètres, on les lui affiche directement
-          if (typeof options.optionsClcCallback === "function") {
-            exercice.on('validationOption', null, function (event, optionsClc) {
-              options.optionsClcCallback(optionsClc)
-            })
-            $exoClc.ready(function () {
-              // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
-              var i = 0
-
-              function delayOptions() {
-                if (i++ < 300) {
-                  setTimeout(function () {
-                    var $button = $('button.parametrer')
-                    if ($button.length > 0) {
-                      if ($button.length > 1) {
-                        log.error("On a plusieurs boutons qui répondent au sélecteur 'button .bouton.parametrer'")
-                        $button = $button.first()
-                      }
-                      log("on a trouvé le bouton après " + i * 10 + "ms d'attente")
-                      $button.click()
-                      i = 0
-                      delayOptionsValidate()
-                    } else {
-                      delayOptions()
-                    }
-                  }, 10)
-                } else {
-                  log.error("Pas trouvé le bouton paramétrer après 5s", $exoClc.html())
-                }
-              }
-
-              function delayOptionsValidate() {
-                if (i++ < 300) {
-                  setTimeout(function () {
-                    var $button = $('button.tester-parametre')
-                    if ($button.length > 0) {
-                      if ($button.length > 1) {
-                        log.error("On a plusieurs boutons qui répondent au sélecteur 'button.tester-parametre'")
-                        $button = $button.first()
-                      }
-                      log("on a trouvé le bouton valider après " + i * 10 + "ms d'attente")
-                      $button.hide()
-                    } else {
-                      delayOptionsValidate()
-                    }
-                  }, 10)
-                } else {
-                  log.error("Pas trouvé le bouton paramétrer après 5s", $exoClc.html())
-                }
-                //$('button.tester-parametre').hide()
-              }
-
-              delayOptions()
-            })
-          }
         })
       })
-    })
-
+    }) // loadAsync
   } catch (error) {
     if (next) next(error)
     else page.addError(error)

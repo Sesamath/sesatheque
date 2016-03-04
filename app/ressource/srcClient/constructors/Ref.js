@@ -37,7 +37,7 @@
  * @constructor
  */
 function Ref(initObj) {
-  if (typeof initObj !== "object") initObj = {}
+  if (typeof initObj !== 'object') initObj = {}
   /**
    * L'oid de la ressource que l'on référence
    * @property ref
@@ -76,12 +76,12 @@ function Ref(initObj) {
    */
   this.public = (initObj.public || initObj.restriction === 0)
 
-  var prefix = (initObj.restriction === 0) ? "public" : "ressource"
+  var prefix = (initObj.restriction === 0) ? 'public' : 'ressource'
   /**
    * Uri d'affichage (facultatif), commence par /public/ ou /ressource/
    * @type {string}
    */
-  this.displayUri = initObj.displayUri || "/" +prefix +"/voir/" +this.ref
+  this.displayUri = initObj.displayUri || '/' +prefix +'/voir/' +this.ref
   /**
    * Url absolue d'affichage (facultatif)
    * @type {string}
@@ -91,7 +91,7 @@ function Ref(initObj) {
    * Uri des data en json (facultatif), commence par /public/ ou /ressource/
    * @type {string}
    */
-  this.dataUri = initObj.dataUri || "/api/" +prefix +"/" +this.ref
+  this.dataUri = initObj.dataUri || '/api/' +prefix +'/' +this.ref
   /**
    * Url absolue des data en json (facultatif)
    * @type {string}

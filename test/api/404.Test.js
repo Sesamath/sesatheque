@@ -39,7 +39,7 @@
 'use strict'
 /*global describe,it*/
 
-var assert = require("assert")
+var assert = require('assert')
 var _ = require('lodash')
 var request = require('request')
 
@@ -61,7 +61,7 @@ if (process.argv.indexOf('--prod') > -1) {
 urlApiBibli += '/api'
 
 describe('api get 404', function () {
-  it("prend un 404 sur /public/foo/bar", function (done) {
+  it('prend un 404 sur /public/foo/bar', function (done) {
     var options = {
       url : urlApiBibli + '/public/foo/bar',
       json: true
@@ -74,7 +74,7 @@ describe('api get 404', function () {
     })
   })
 
-  it("prend un 404 sur /ressource/foo/bar", function (done) {
+  it('prend un 404 sur /ressource/foo/bar', function (done) {
     var options = {
       url : urlApiBibli + '/ressource/foo/bar',
       json: true
@@ -87,7 +87,7 @@ describe('api get 404', function () {
     })
   })
 
-  it("prend un 404 sur /public/foo", function (done) {
+  it('prend un 404 sur /public/foo', function (done) {
     var options = {
       url : urlApiBibli + '/public/foo',
       json: true
@@ -100,7 +100,7 @@ describe('api get 404', function () {
     })
   })
 
-  it("prend un 404 sur /ressource/foo", function (done) {
+  it('prend un 404 sur /ressource/foo', function (done) {
     var options = {
       url : urlApiBibli + '/ressource/foo',
       json: true
@@ -113,7 +113,7 @@ describe('api get 404', function () {
     })
   })
 
-  it("prend un 404 sur /foo/bar", function (done) {
+  it('prend un 404 sur /foo/bar', function (done) {
     var options = {
       url : urlApiBibli + '/foo/bar',
       json: true

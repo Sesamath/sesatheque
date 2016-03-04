@@ -45,14 +45,14 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @private
    * @param {AuthClient} authClient
    */
-  function checkValidClient(authClient) {
+  function checkValidClient (authClient) {
     var msg = "Service d'authentification invalide, il manque "
-    if (typeof authClient.name !== "string") throw new Error(msg +"name")
-    if (clients[authClient.name]) throw new Error("Le client " +authClient.name +" est déjà enregistré")
-    if (typeof authClient.description !== "string") throw new Error(msg +"description")
-    if (typeof authClient.login !== "function") throw new Error(msg +"login")
-    if (typeof authClient.validate !== "function") throw new Error(msg +"validate")
-    if (typeof authClient.logout !== "function") throw new Error(msg +"logout")
+    if (typeof authClient.name !== 'string') throw new Error(msg + 'name')
+    if (clients[authClient.name]) throw new Error('Le client ' + authClient.name + ' est déjà enregistré')
+    if (typeof authClient.description !== 'string') throw new Error(msg + 'description')
+    if (typeof authClient.login !== 'function') throw new Error(msg + 'login')
+    if (typeof authClient.validate !== 'function') throw new Error(msg + 'validate')
+    if (typeof authClient.logout !== 'function') throw new Error(msg + 'logout')
   }
 
   /**
@@ -61,7 +61,7 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @param {Context} context
    * @returns {AuthClient|Error}
    */
-  function getClient(context) {
+  function getClient (context) {
     var client
     var origine = getOrigine(context)
     if (origine instanceof Error) client = origine
@@ -76,10 +76,10 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @param {Context} context
    * @returns {string|Error}
    */
-  function getOrigine(context) {
+  function getOrigine (context) {
     var origine = context.get.origine || context.post.origine || defaultClient
     if (origine) {
-      if (!clients[origine]) origine = new Error("Aucun client d'authentification " +origine +" n'a été enregistré")
+      if (!clients[origine]) origine = new Error("Aucun client d'authentification " + origine + " n'a été enregistré")
     } else {
       origine = new Error("Aucun client d'authentification n'a été enregistré")
     }
@@ -110,7 +110,7 @@ module.exports = function ($accessControl, $ressourcePage) {
    * Service d'authentification, proxy vers les différents authClient enregistrés
    * @service $auth
    */
-  var $auth = {};
+  var $auth = {}
 
   /**
    * Inscrit un client d'authentification
@@ -127,7 +127,7 @@ module.exports = function ($accessControl, $ressourcePage) {
         if (deferredInitController) deferredInitController()
       }
       clients[authClient.name] = authClient
-      modLog("has registered", "authClient" +authClient.name)
+      modLog('has registered', 'authClient' + authClient.name)
     } catch (error) {
       log.error(error)
     }
@@ -143,14 +143,14 @@ module.exports = function ($accessControl, $ressourcePage) {
     try {
       var user = $accessControl.getCurrentUser(context)
       if (user) {
-        throw new Error("Utilisateur déjà connecté")
+        throw new Error('Utilisateur déjà connecté')
       } else if (context.session.user && context.session.user.lastCheck) {
         var origine = getOrigine(context)
         if (origine instanceof Error) {
           throw origine
         } else {
           var client = getClient(context)
-          client.check(context, baseUrl +'validation?origine=' +origine, baseUrl+'deconnexion')
+          client.check(context, baseUrl + 'validation?origine=' + origine, baseUrl + 'deconnexion')
         }
       }
     } catch (error) {
@@ -164,7 +164,7 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @param {function} initController
    */
   $auth.deferController = function (initController) {
-    modLog("adding", "controller")
+    modLog('adding', 'controller')
     if (_.isEmpty(clients)) deferredInitController = initController
     else initController()
   }
@@ -175,30 +175,30 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @param {Context} context
    * @returns {object}
    */
-  $auth.getAuthBloc = function(context) {
+  $auth.getAuthBloc = function (context) {
     var authBloc = {}
     var urlRedirect
     if ($accessControl.isAuthenticated(context)) {
       // on veut pas rediriger sur la connexion après déconnexion
-      urlRedirect = context.request.originalUrl.replace("connexion", "")
+      urlRedirect = context.request.originalUrl.replace('connexion', '')
       authBloc.user = {
         nom: context.session.user.nom,
         prenom: context.session.user.prenom
       }
       authBloc.ssoLinks = $auth.getSsoLinks(context)
       authBloc.logoutLink = {
-        href : "/deconnexion?redirect=" +encodeURIComponent(urlRedirect),
-        icon : "sign-out",
-        value: "Déconnexion"
+        href: '/deconnexion?redirect=' + encodeURIComponent(urlRedirect),
+        icon: 'sign-out',
+        value: 'Déconnexion'
       }
     } else {
       // on veut pas rediriger sur deconnexion après connexion
-      urlRedirect = context.request.originalUrl.replace("deconnexion", "")
+      urlRedirect = context.request.originalUrl.replace('deconnexion', '')
       // faut envoyer au moins une propriété sinon la vue n'est pas rendue (ici on en a une mais sinon faut mettre un foo:bar qcq)
       authBloc.loginLink = {
-        href : "/connexion?redirect=" +encodeURIComponent(urlRedirect),
-        icon : "sign-in",
-        value: "Connexion"
+        href: '/connexion?redirect=' + encodeURIComponent(urlRedirect),
+        icon: 'sign-in',
+        value: 'Connexion'
       }
     }
 
@@ -232,15 +232,15 @@ module.exports = function ($accessControl, $ressourcePage) {
   $auth.login = function (context) {
     var user = $accessControl.getCurrentUser(context)
     if (user) {
-      $ressourcePage.printError(context, new  Error("Utilisateur déjà connecté"))
+      $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'))
     } else {
       var client = getClient(context)
       if (client instanceof Error) {
         $ressourcePage.printError(context, client)
       } else {
-        var urlValidate = baseUrl +'validation'
-        if (context.get.redirect) urlValidate += '?redirect=' +encodeURIComponent(context.get.redirect)
-        var urlLogout = baseUrl+'deconnexion/externe'
+        var urlValidate = baseUrl + 'validation'
+        if (context.get.redirect) urlValidate += '?redirect=' + encodeURIComponent(context.get.redirect)
+        var urlLogout = baseUrl + 'deconnexion/externe'
         client.login(context, urlValidate, urlLogout)
       }
     }
@@ -260,7 +260,7 @@ module.exports = function ($accessControl, $ressourcePage) {
       if (client instanceof Error) $ressourcePage.printError(context, client)
       else client.logout(context)
     } else {
-      log.debug("Pas de user en session", context.session)
+      log.debug('Pas de user en session', context.session)
       $ressourcePage.printError(context, new Error("Pas d'utilisateur connecté (donc personne à déconnecter)"))
     }
   }
@@ -284,7 +284,7 @@ module.exports = function ($accessControl, $ressourcePage) {
       if (client instanceof Error) throw client
       client.logoutFromRemote(context)
     } catch (error) {
-      $ressourcePage.outputError(context, error, "iframe")
+      $ressourcePage.outputError(context, error, 'iframe')
     }
   }
 

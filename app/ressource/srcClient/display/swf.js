@@ -50,7 +50,7 @@ function load(container, swfHref, options, next) {
     if (!next) next = function () {}
     if (e) {
       if (e.success) {
-        log("Lancement de " + swfHref + ' réussi')
+        log('Lancement de ' + swfHref + ' réussi')
         next()
       } else {
         var errorMsg = "Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource."
@@ -68,18 +68,18 @@ function load(container, swfHref, options, next) {
   var divId = options.id || 'sesaSwf' +(new Date()).getTime()
 
   // le message en attendant le chargement
-  htmlElt = wd.createElement("div")
+  htmlElt = wd.createElement('div')
   htmlElt.id = divId
-  htmlElt.appendChild(wd.createTextNode("Chargement de la ressource en cours"))
+  htmlElt.appendChild(wd.createTextNode('Chargement de la ressource en cours'))
   container.appendChild(htmlElt)
 
   flashvars = options.flashvars || {}
 
   // les params pour le player
   swfParams = {
-    "menu" : "false",
-    "wmode": "window",
-    "allowScriptAccess": "always" // important pour que le swf puisse communiquer avec le js de cette page
+    'menu' : 'false',
+    'wmode': 'window',
+    'allowScriptAccess': 'always' // important pour que le swf puisse communiquer avec le js de cette page
   }
   if (options.base) swfParams.base = options.base
   // et les attributs pour le loader swfobject.embedSWF

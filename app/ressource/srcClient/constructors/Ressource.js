@@ -65,50 +65,50 @@ function Ressource(initObj) {
    */
   this.cle = filters.string(values.cle)
   /**
-   * identifiant du dépôt d'origine (où est stockée et géré la ressource), "local" si créé sur cette sesatheque
-   * @default ""
+   * identifiant du dépôt d'origine (où est stockée et géré la ressource), 'local' si créé sur cette sesatheque
+   * @default ''
    * @type {string}
    */
   this.origine = filters.string(values.origine)
   /**
    * Id de la ressource dans son dépôt d'origine
-   * @default ""
+   * @default ''
    * @type {string}
    */
   this.idOrigine = filters.string(values.idOrigine)
   /**
    * Le code du plugin qui gère la ressource
-   * @default ""
+   * @default ''
    * @type {string}
    */
   this.type = filters.string(values.type)
   /**
    * Titre
-   * @default ""
+   * @default ''
    * @type {string}
    */
   this.titre = filters.string(values.titre)
   /**
    * Résumé qui apparait souvent au survol du titre ou dans les descriptions brèves, destiné à tous
-   * @default ""
+   * @default ''
    * @type {string}
    */
   this.resume = filters.string(values.resume)
   /**
    *  Description plus complète, facultative (préférer le résumé)
-   *  @default ""
+   *  @default ''
    *  @type {string}
    */
   this.description = filters.string(values.description)
   /**
    * Commentaires destinés aux éditeurs, ou au prescipteur de la ressource mais pas à l'utilisateur
-   * @default ""
+   * @default ''
    * @type {string}
    */
   this.commentaires = filters.string(values.commentaires)
   if (this.type === 'arbre') {
     /**
-     * Les enfants de l'arbre (à la place de la propriété parametres si type vaut "arbre")
+     * Les enfants de l'arbre (à la place de la propriété parametres si type vaut 'arbre')
      * @type {Object}
      */
     this.enfants = (values.enfants instanceof Array) ? values.enfants : []
@@ -117,7 +117,7 @@ function Ressource(initObj) {
       try {
         var enfants = JSON.parse(values.enfants)
         if (enfants instanceof Array) this.enfants = enfants
-        else throw new Error("enfants invalides")
+        else throw new Error('enfants invalides')
       } catch (error) {
         if (console && console.error) console.error(error)
       }
@@ -145,7 +145,7 @@ function Ressource(initObj) {
    */
   this.niveaux = filters.arrayInt(values.niveaux)
   /**
-   * Un id de catégorie correspond à un recoupement de types, par ex [7] pour "exercice interactif"
+   * Un id de catégorie correspond à un recoupement de types, par ex [7] pour 'exercice interactif'
    * @type {Array}
    */
   this.categories = filters.arrayInt(values.categories)
@@ -223,7 +223,7 @@ function Ressource(initObj) {
   this.version = filters.int(values.version) || 1
   /**
    * Si la ressource est indexable elle peut sortir dans un résultat de recherche
-   * Passer à false pour des ressources "obsolètes" car remplacées par d'autres, mais toujours publiées car utilisées.
+   * Passer à false pour des ressources 'obsolètes' car remplacées par d'autres, mais toujours publiées car utilisées.
    * @type {boolean}
    * @default true
    */

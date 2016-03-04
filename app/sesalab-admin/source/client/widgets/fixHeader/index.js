@@ -11,7 +11,7 @@ app.directive('fixedHeader', function ($timeout) {
       }
 
       function isTableReady() {
-        return isVisible(elem.querySelector("tbody")) && elem.querySelector('tbody tr:first-child') != null;
+        return isVisible(elem.querySelector('tbody')) && elem.querySelector('tbody tr:first-child') != null;
       }
 
           var elem = element[0];

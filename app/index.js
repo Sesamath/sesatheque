@@ -81,16 +81,13 @@ try {
    *   Uncaught Error: Can't set headers after they are sent.
    *   ...
    *   /sesamath/dev/projets_git/sesatheque/node_modules/long-stack-traces/lib/long-stack-traces.js:80
-   *      throw ""; // TODO: throw the original error, or undefined?
+   *      throw ''; // TODO: throw the original error, or undefined?
    * le désactiver a réglé le problème
    *
    * Pour augmenter les traces, mieux vaut passer à node ces options
    * --stack_trace_limit=100 --stack-size=2048
    */
   /* if (!isProd) /* * / require('long-stack-traces') /* */
-
-  var tools = require('./tools')
-  //var _ = require('lodash');
 
   /**
    * On ajoutera nos middleware après session lorsque lassi mettra les siens
@@ -114,19 +111,19 @@ try {
   // des modules sup à charger
   if (privateConfig.extraModules) {
     privateConfig.extraModules.forEach(function (module) {
-      appLog("ajout du module supplémentaire " + module)
+      appLog('ajout du module supplémentaire ' + module)
       require(module)
     })
   }
   if (privateConfig.extraDependenciesFirst) {
     privateConfig.extraDependenciesFirst.forEach(function (dependency) {
-      appLog("ajout en premier de la dépendance supplémentaire " + dependency)
+      appLog('ajout en premier de la dépendance supplémentaire ' + dependency)
       dependancies.unshift(dependency)
     })
   }
   if (privateConfig.extraDependenciesLast) {
     privateConfig.extraDependenciesLast.forEach(function (dependency) {
-      appLog("ajout en dernier de la dépendance supplémentaire " + dependency)
+      appLog('ajout en dernier de la dépendance supplémentaire ' + dependency)
       dependancies.push(dependency)
     })
   }
@@ -137,21 +134,22 @@ try {
   // une fois les composants chargés on ajoutera memcache et nos listeners
   sesatheque.config(function ($cache, $settings, $accessControl, $routes, $flashMessages) {
     // on ajoute memcache si précisé dans les settings
-    var memcache = $settings.get('memcache')
+    var memcache = $settings.get('memcache', null)
     if (memcache) {
       if (typeof memcache !== 'object' || !memcache.host || !memcache.port) {
-        throw new Error("Il faut indiquer pour memcache un objet {host:xxx,port:nn}. L'application sesatheque ne peut pas tourner avec un cluster memcache" +
-            " car elle utilise memcache comme stockage commun aux différents workers nodejs")
+        throw new Error('Il faut indiquer pour memcache un objet {host:xxx,port:nn}. ' +
+          " L'application sesatheque ne peut pas tourner avec un cluster memcache" +
+          ' car elle utilise memcache comme stockage commun aux différents workers nodejs')
       }
-      $cache.addEngine('', 'memcache', memcache);
-      appLog('Memcache ajouté avec ' + memcache.host +":" +memcache.port)
+      $cache.addEngine('', 'memcache', memcache)
+      appLog('Memcache ajouté avec ' + memcache.host + ':' + memcache.port)
     } else if (process.env.NODE_UNIQUE_ID) {
       // @see https://nodejs.org/api/cluster.html#cluster_cluster_ismaster
       throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
     }
 
     // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
-    //if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
+    // if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
     lassi.transports.html.engine.disableWhiteSpaceCompression()
     // on ajoute nos filtres perso pour dust
     try {
@@ -168,15 +166,16 @@ try {
     // le listener beforeTransport
     lassi.on('beforeTransport', require('./beforeTransport')($accessControl, $routes, $flashMessages))
 
-    // log("sesatheque en fin de config", sesatheque)
-    appLog("FIN config de l'application " + $settings.get('application.name') + " en mode " + $settings.get('application.staging'))
+    // log('sesatheque en fin de config', sesatheque)
+    appLog("FIN config de l'application " + $settings.get('application.name', 'inconnue') +
+      ' en mode ' + $settings.get('application.staging', 'inconnu'))
   })
 
   // pour sesalab-admin
   // utile aussi pour d'autres modules npm qui voudrait ajouter du app.service('$newService', function () {…})
   // ou app.controller('path', function () {this.get('path', function (context) {…} })
   GLOBAL.app = sesatheque
-  require('./sesalab-admin');
+  require('./sesalab-admin')
 
   // et on lance le boot
   sesatheque.bootstrap()

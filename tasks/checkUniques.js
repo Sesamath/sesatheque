@@ -1,18 +1,19 @@
 /**
  * Ce script passe en revue les ressources (dans la base) pour vérifier que les id sont uniques
  */
-'use strict';
+'use strict'
 
 /** La limite max du nb de dump en console */
 var maxDumps = 50
 
+var path = require('path')
 var knex = require('knex')
 var moment = require('moment')
 var flow = require('an-flow')
 
-var dbConfig = require(__dirname + '/../_private/config')
+var dbConfig = require('../app/_private/config')
 var confKnex = {
-  client: "mysql",
+  client: 'mysql',
   connection: dbConfig.$entities.database
 }
 var kdb = knex(confKnex)
@@ -27,9 +28,10 @@ var duplicates = []
 /**
  * Écrit en console avec le moment en préfixe
  * @param msg
+ * @param objToDump
  */
-function log(msg, objToDump) {
-  var prefix = '[' +moment().format('HH:mm:ss.SSS') +'] '
+function log (msg, objToDump) {
+  var prefix = '[' + moment().format('HH:mm:ss.SSS') + '] '
   console.log(prefix + msg)
   if (objToDump) console.log(objToDump)
 }
@@ -39,22 +41,22 @@ function log(msg, objToDump) {
  *
  * @param {Function} next fct à appeler quand tous les mep auront été importés
  */
-function checkId(next) {
-  var query = "SELECT _string AS id, count( * ) AS nb FROM ressource_index ri" +
-              " INNER JOIN  ressource_index ri2 USING(oid) " +
+function checkId (next) {
+  var query = 'SELECT _string AS id, count( * ) AS nb FROM ressource_index ri' +
+              ' INNER JOIN  ressource_index ri2 USING(oid) ' +
               " WHERE ri2.name = 'origine' AND ri2._string = 'em'" +
               " AND ri.name = 'idOrigine' "
-  if (idsAsked) query += "AND ri._string IN (" +idsAsked +')'
-  query += " GROUP BY _string HAVING nb > 1 ORDER BY _string DESC"
+  if (idsAsked) query += 'AND ri._string IN (' + idsAsked + ')'
+  query += ' GROUP BY _string HAVING nb > 1 ORDER BY _string DESC'
   kdb.raw(query).exec(function (error, rows) {
     if (error) next(error)
     else {
       var results = rows[0]
       if (results.length) {
-        log("Il y a des doublons !")
+        log('Il y a des doublons !')
         results.forEach(function (row) {
           duplicates.push(row.id)
-          log('ID ' + row.id + " existe en " +row.nb +' exemplaires')
+          log('ID ' + row.id + ' existe en ' + row.nb + ' exemplaires')
         })
       }
       next()
@@ -66,43 +68,47 @@ function checkId(next) {
  * Passe en revue les ressources avec id en doublons et les dump (jusqu'au max autorisé)
  * @param next
  */
-function dumpDup(next) {
-  if (!dumpAsked) next()
-  else {
+function dumpDup (next) {
+  if (dumpAsked) {
     if (duplicates.length) {
-      var query = "SELECT i._integer AS id, d.oid AS oid, d.data AS data FROM ressource d" +
-          " INNER JOIN ressource_index i ON d.oid = i.oid" +
-          " WHERE i.name = 'id' AND i._integer IN (" +duplicates.join(',') +")" +
-          " ORDER BY id DESC" +
-          " LIMIT " +maxDumps
+      var query = 'SELECT i._integer AS id, d.oid AS oid, d.data AS data FROM ressource d' +
+        ' INNER JOIN ressource_index i ON d.oid = i.oid' +
+        " WHERE i.name = 'id' AND i._integer IN (" + duplicates.join(',') + ')' +
+        ' ORDER BY id DESC' +
+        ' LIMIT ' + maxDumps
       var id = 0
       kdb.raw(query).exec(function (error, rows) {
-        var results = rows[0]
-        if (results.length == maxDumps) log("Les résultats ont été limités à " +maxDumps)
+        if (error) log.error(error)
+        var results = rows[ 0 ]
+        if (results.length === maxDumps) log('Les résultats ont été limités à ' + maxDumps)
         results.forEach(function (row) {
-          if (row.id != id) {
+          if (row.id !== id) {
             console.log('\n')
-            log("Pour l'id " + row.id + " on a les ressources suivantes")
+            log("Pour l'id " + row.id + ' on a les ressources suivantes')
             id = row.id
           }
-          console.log("oid " + row.oid + "\n" + row.data +'\n')
+          console.log('oid ' + row.oid + '\n' + row.data + '\n')
         })
         next()
       })
-    } else log("Aucune ressource en doublon à afficher")
+    } else {
+      log('Aucune ressource en doublon à afficher')
+    }
+  } else {
+    next()
   }
 }
 
 module.exports = function () {
   // les 3 premiers args sont node, /path/2/gulp, importMEPS
   var argv = process.argv.slice(3)
-  log('task ' + __filename);
+  log(path.join('task ', __filename))
 
   // sauf si on précise l'un ou l'autre (on impose le log dans ce cas
   if (argv[0] === '--dump') {
     dumpAsked = true
     idsAsked = argv.slice(1)[0]
-    if (idsAsked) log('On ne traitera que les id ' +idsAsked)
+    if (idsAsked) log('On ne traitera que les id ' + idsAsked)
   }
 
   flow()
@@ -115,13 +121,13 @@ module.exports = function () {
       .seq(function () {
         if (!dumpAsked && duplicates.length) {
           // on suggère de le réclamer
-          log("Pour voir le détail des doublons trouvés, vous pouvez relancer la commande en ajoutant en option")
-          console.log("--dump " +duplicates.join(','))
+          log('Pour voir le détail des doublons trouvés, vous pouvez relancer la commande en ajoutant en option')
+          console.log('--dump ' + duplicates.join(','))
         }
         log('END')
         process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
       })
       .catch(function (error) {
-        console.error('Erreur dans le flow : \n' + error.stack);
+        console.error('Erreur dans le flow : \n' + error.stack)
       })
 }

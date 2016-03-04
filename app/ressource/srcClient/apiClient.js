@@ -41,6 +41,7 @@ var xhr = require('./tools/xhr')
  * Ajoute les propriétés xxxUrl et public
  * @private
  * @param {Ressource} ressource
+ * @param {ressourceCallback} next
  */
 function addUrls (ressource, next) {
   var id = ressource.id || ressource.ref || ressource.oid
@@ -50,7 +51,7 @@ function addUrls (ressource, next) {
     ressource.dataUrl = base + 'api/' + prefix + '/' + id
     ressource.deleteUrl = base + 'api/ressource/' + id
     ressource.displayUrl = base + prefix + '/' + id
-    ressource.editUrl = base +'ressource/modifier/' + id
+    ressource.editUrl = base + 'ressource/modifier/' + id
     ressource.public = (ressource.public || ressource.restriction === 0)
   }
   next(null, ressource)
@@ -61,12 +62,13 @@ function addUrls (ressource, next) {
  * @param {string} newSesathequeBase L'url absolue de la sesathèque (le slash de fin sera ajouté si manquant)
  * @returns {stClient}
  */
-function init(newSesathequeBase) {
-  if (!newSesathequeBase) throw new Error("Il faut fournir une base absolue de la sesatheque")
-  if (! /^https?:\/\/[a-z\-\._]+(:[0-9]+)?(\/.*)?$/.test(newSesathequeBase))
-    throw new Error("La base " +newSesathequeBase +" n'est pas une racine d'url absolue valide")
-  if (typeof name !== "string") throw new Error("Le nom doit être une string")
-  if (newSesathequeBase.substr(-1) !== "/") newSesathequeBase += "/"
+function init (newSesathequeBase) {
+  if (!newSesathequeBase) throw new Error('Il faut fournir une base absolue de la sesatheque')
+  if (!/^https?:\/\/[a-z\-\._]+(:[0-9]+)?(\/.*)?$/.test(newSesathequeBase)) {
+    throw new Error('La base ' +newSesathequeBase + " n'est pas une racine d'url absolue valide")
+  }
+  if (typeof name !== 'string') throw new Error('Le nom doit être une string')
+  if (newSesathequeBase.substr(-1) !== '/') newSesathequeBase += '/'
   base = newSesathequeBase
   return stClient
 }
@@ -75,7 +77,7 @@ function init(newSesathequeBase) {
  * Gère les appels ajax vers l'api de la bibliothèque
  * @private
  * @param {Integer|string|object} data    Si data est un id on fera un get, si data est une ressource (un objet) un post
- * @param {object}                options Passer {format:"alias|compact"} pour formater la réponse
+ * @param {object}                options Passer {format:'alias|compact'} pour formater la réponse
  *                                          (ou {merge:1} pour mettre à jour une ressource en envoyant seulement certaines propriétés)
  * @param {ressourceCallback}     next
  * @private
@@ -92,17 +94,17 @@ function callBibli(data, options, next) {
   }
   if (options && options.merge) {
     if (!xhrOptions.urlParams) xhrOptions.urlParams = {}
-    xhrOptions.urlParams.merge = "1"
+    xhrOptions.urlParams.merge = '1'
   }
-  xhrOptions.responseType = "json"
+  xhrOptions.responseType = 'json'
   xhrOptions.timeout = ajaxTimeout
   // post ou get ?
-  if (typeof data === "object") {
+  if (typeof data === 'object') {
     url = base + 'api/ressource'
     xhr.post(url, data, xhrOptions, end)
   } else {
     var id = data
-    if (!id) throw new Error("il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine")
+    if (!id) throw new Error('il faut fournir une ressource à poster ou un id pour la récupérer (un oid ou origine/idOrigine')
     url = base + 'api/ressource/' + id
     xhr.get(url, xhrOptions, end)
   }
@@ -135,8 +137,8 @@ var stClient = {
    */
   getAlias: function (id, next) {
     if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
-    else if (id) callBibli(id, {format:"alias"}, next)
-    else next(new Error("Il faut fournir un identifiant"))
+    else if (id) callBibli(id, {format:'alias'}, next)
+    else next(new Error('Il faut fournir un identifiant'))
   },
   /**
    * Récupère une ressource sur la bibliothèque en ajax
@@ -147,31 +149,32 @@ var stClient = {
    */
   getRessource: function (id, format, next) {
     var options
-    if (typeof format === "function") {
+    if (typeof format === 'function') {
       next = format
     } else {
       options = {format:format}
     }
     if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
     else if (id) callBibli(id, options, next)
-    else next(new Error("Il faut fournir un identifiant"))
+    else next(new Error('Il faut fournir un identifiant'))
   },
   /**
    * Enregistre une ressource sur la bibliotheque
    * @memberOf stClient
-   * @param {Ressource}         ressource
+   * @param {Ressource} ressource
+   * @param {boolean}   [isPartial] Passer true pour permettre de passer seulerement qq propriétés et faire un merge avec l'existant
    * @param {ressourceCallback} next
    */
   setRessource: function (ressource, isPartial, next) {
     var options
-    if (typeof isPartial === "function") {
+    if (typeof isPartial === 'function') {
       next = isPartial
     } else if (isPartial) {
-      options = {merge:1}
+      options = {merge: 1}
     }
     if (!next || typeof next !== 'function') next(new Error('Il faut fournir une fonction de rappel'))
     else if (ressource) callBibli(ressource, options, next)
-    else next(new Error("Il faut fournir une ressource"))
+    else next(new Error('Il faut fournir une ressource'))
   }
 }
 

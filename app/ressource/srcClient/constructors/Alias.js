@@ -41,7 +41,7 @@
  * @constructor
  */
 function Alias(initObj) {
-  if (typeof initObj !== "object") initObj = {}
+  if (typeof initObj !== 'object') initObj = {}
   if (initObj.oid && initObj.ref && initObj.base) {
     // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et base)
       // c'est un alias
@@ -62,7 +62,7 @@ function Alias(initObj) {
     if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine
   }
   // cast en string
-  if (this.ref && typeof this.ref !== "string") this.ref += ""
+  if (this.ref && typeof this.ref !== 'string') this.ref += ''
   /**
    * Titre
    * @type {string}

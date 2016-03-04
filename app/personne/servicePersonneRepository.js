@@ -83,18 +83,19 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
   $personneRepository.load = function (id, next) {
     log.debug('load personne ' + id)
     // cast en string
-    id += ""
+    id += ''
     // on découpe sur le premier slash avec deux morceaux non vides
     var match = id.match(/^([^\/]+)\/(.+)$/)
     if (match && match.length === 3) {
       $personneRepository.loadByOrigin(match[1], match[2], next)
     } else if (id) {
       $cachePersonne.get(id, function (error, personneCached) {
+        if (error) log.error(error)
         if (personneCached) {
           next(null, EntityPersonne.create(personneCached))
         } else {
           EntityPersonne.match('oid').equals(id).grabOne(function (error, personne) {
-            //log.debug('personne load remonte ', personne)
+            // log.debug('personne load remonte ', personne)
             if (error) {
               next(error)
             } else if (personne) {
@@ -107,7 +108,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
         }
       })
     } else {
-      next(new Error("id manquant, impossible de charger une personne."))
+      next(new Error('id manquant, impossible de charger une personne.'))
     }
   }
 
@@ -119,14 +120,15 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @memberOf $personneRepository
    */
   $personneRepository.loadByOrigin = function (origine, idOrigine, next) {
-    log.debug('loadByOrigin personne ' + origine +'/' +idOrigine)
+    log.debug('loadByOrigin personne ' + origine + '/' + idOrigine)
     if (origine && idOrigine) {
       $cachePersonne.getByOrigine(origine, idOrigine, function (error, personneCached) {
+        if (error) log.error(error)
         if (personneCached) {
           next(null, EntityPersonne.create(personneCached))
         } else {
           EntityPersonne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
-            //log.debug('personne load remonte ', personne)
+            // log.debug('personne load remonte ', personne)
             if (error) next(error)
             else if (personne) {
               $cachePersonne.set(personne)
@@ -138,7 +140,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
         }
       })
     } else {
-      next(new Error("origine ou idOrigine manquant, impossible de chercher en base de données."))
+      next(new Error('origine ou idOrigine manquant, impossible de chercher en base de données.'))
     }
   }
 
@@ -164,8 +166,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @memberOf $personneRepository
    */
   $personneRepository.updateOrCreate = function (personne, next) {
-    //log.debug("$personneRepository.updateOrCreate", personne, {max:2000})
-    function checkUpdate(personne, personneNew, next) {
+    // log.debug("$personneRepository.updateOrCreate", personne, {max:2000})
+    function checkUpdate (personne, personneNew, next) {
       var needUpdate = false
       for (var prop in personneNew) {
         if (personneNew.hasOwnProperty(prop) && !_.isEqual(personne[prop], personneNew[prop])) {
@@ -177,7 +179,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
       else next(null, personne)
     }
 
-    function modify(error, personneBdd) {
+    function modify (error, personneBdd) {
       if (error) {
         next(error)
       } else if (personneBdd) {
@@ -189,7 +191,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
 
     if (personne.oid) $personneRepository.load(personne.oid, modify)
     else if (personne.origine && personne.idOrigine) $personneRepository.loadByOrigin(personne.origine, personne.idOrigine, modify)
-    else next(new Error("Il manque un identifiant pour mettre à jour les données de cet utilisateur"))
+    else next(new Error('Il manque un identifiant pour mettre à jour les données de cet utilisateur'))
   }
 
   return $personneRepository

@@ -51,7 +51,7 @@ function resize() {
   tailleDispo = Math.floor(window.innerHeight - occupe)
   if (tailleDispo < minHeight) tailleDispo = minHeight
   log('resize height à ' + tailleDispo)
-  $target.css("height", tailleDispo + 'px')
+  $target.css('height', tailleDispo + 'px')
 
   // largeur
   occupe = offsetWidth
@@ -59,7 +59,7 @@ function resize() {
   tailleDispo = Math.floor(window.innerWidth - occupe)
   if (tailleDispo < minWidth) tailleDispo = minWidth
   log('resize width à ' + tailleDispo)
-  $target.css("width", tailleDispo + 'px')
+  $target.css('width', tailleDispo + 'px')
 }
 
 /**
@@ -72,18 +72,18 @@ function resize() {
 module.exports = function autosize(targetId, hBlocIds, wBlocIds, options) {
   // on initialise dès que jQuery est prêt
   $(function () {
-    $target = $("#" +targetId)
+    $target = $('#' +targetId)
     if (hBlocIds && hBlocIds.length) {
       $blocsH = []
       hBlocIds.forEach(function (id) {
-        var $bloc = $("#" +id)
+        var $bloc = $('#' +id)
         if ($bloc) $blocsH.push($bloc)
       })
     }
     if (wBlocIds && wBlocIds.length) {
       $blocsW = []
       wBlocIds.forEach(function (id) {
-        var $bloc = $("#" +id)
+        var $bloc = $('#' +id)
         if ($bloc) $blocsW.push($bloc)
       })
     }

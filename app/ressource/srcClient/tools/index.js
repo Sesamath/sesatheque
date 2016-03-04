@@ -60,7 +60,7 @@ var tools = {}
  * Attention, les + sont transformés en espace (RFC 1738), les %20 aussi (RFC 3986),
  * pour récupérer des + faut qu'ils soient correctement encodés en %2B
  * @param {string}  name              Le nom du paramètre
- * @param {boolean} [noPlusTransform] Passer true pour conserver les "+" dans le retour,
+ * @param {boolean} [noPlusTransform] Passer true pour conserver les '+' dans le retour,
  *                                      sinon ils seront transformés en espace (un + devrait être encodé %2B)
  * @returns {*} Sa valeur (ou null s'il n'existait pas)
  */
@@ -107,11 +107,11 @@ tools.isString = function (arg) {
  * @returns {string}
  */
 tools.urlAddSlashAdd = function (url) {
-  if (typeof url === "string") {
-    if (url.length === 0 || url.substr(-1) !== "/") url += "/"
+  if (typeof url === 'string') {
+    if (url.length === 0 || url.substr(-1) !== '/') url += '/'
   } else {
-    log.error("slashAdd veut une string, reçu " +typeof url)
-    url = "/"
+    log.error('slashAdd veut une string, reçu ' +typeof url)
+    url = '/'
   }
 
   return url
@@ -123,11 +123,11 @@ tools.urlAddSlashAdd = function (url) {
  * @returns {string}
  */
 tools.urlTrimSlash = function (url) {
-  if (typeof url === "string") {
-    if (url.length > 0 && url.substr(-1) === "/") url = url.substr(0, url.length -1)
+  if (typeof url === 'string') {
+    if (url.length > 0 && url.substr(-1) === '/') url = url.substr(0, url.length -1)
   } else {
-    log.error("slashRemove veut une string, reçu " +typeof url)
-    url = ""
+    log.error('slashRemove veut une string, reçu ' +typeof url)
+    url = ''
   }
 
   return url

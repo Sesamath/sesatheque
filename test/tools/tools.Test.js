@@ -33,15 +33,15 @@
 
 /*global describe,it*/
 
-var assert = require("assert")
+var assert = require('assert')
 var _ = require('lodash')
 var tools = require('../../app/tools')
 // tools fait du log.error
 GLOBAL.log = require('../../app/tools/log')
 
 var CounterMulti = require('../../app/tools/CounterMulti')
-//var flow = require('an-flow');
-//var request = require('request')
+// var flow = require('an-flow');
+// var request = require('request')
 
 describe('tools', function () {
   describe('clone', function () {
@@ -53,7 +53,7 @@ describe('tools', function () {
       objects.push(['un', 2, 0])
       objects.push([])
       objects.push({})
-      objects.push({foo:'bar',bar:null,baz:42,})
+      objects.push({foo: 'bar', bar: null, baz: 42})
       objects.push(new Date())
       objects.push(/foo/)
       objects.forEach(function (data) {
@@ -77,44 +77,44 @@ describe('tools', function () {
   describe('complete', function () {
     var src = {
       foo: 'bar',
-      bar : {
-        titi : {
-          toto : 'foo',
-          tata : 'bar',
-          tutu : 42
+      bar: {
+        titi: {
+          toto: 'foo',
+          tata: 'bar',
+          tutu: 42
         }
       },
-      nullprop:null
+      nullprop: null
     }
     var addons = {
-      foo:"modif",
-      bar : {
-        titi : {
-          tata : 'bartabac',
-          tyty : 2
+      foo: 'modif',
+      bar: {
+        titi: {
+          tata: 'bartabac',
+          tyty: 2
         },
-        truc : 42,
+        truc: 42
       },
       baz: 43,
-      nullprop : 42
+      nullprop: 42
     }
     var expected = {
       foo: 'bar',
-      bar : {
-        titi : {
-          toto : 'foo',
-          tata : 'bar',
-          tutu : 42
+      bar: {
+        titi: {
+          toto: 'foo',
+          tata: 'bar',
+          tutu: 42
         }
       },
       baz: 43,
-      nullprop:null
+      nullprop: null
     }
-    it("ajoute les propriétés manquantes de la racine", function () {
+    it('ajoute les propriétés manquantes de la racine', function () {
       tools.complete(src, addons, false)
       assert.ok(_.isEqual(src, expected))
     })
-    it("ajoute les propriétés manquantes récursivement", function () {
+    it('ajoute les propriétés manquantes récursivement', function () {
       expected.bar.titi.tyty = addons.bar.titi.tyty
       expected.bar.truc = addons.bar.truc
       tools.complete(src, addons)
@@ -126,18 +126,18 @@ describe('tools', function () {
     it("retourne la valeur fournie si dans l'intervalle", function () {
       assert.strictEqual(42, tools.encadre(42, -2, 48))
     })
-    it("retourne la borne inf si trop petit", function () {
+    it('retourne la borne inf si trop petit', function () {
       assert.strictEqual(42, tools.encadre(-2, 42, 48))
     })
-    it("retourne la borne sup si trop grand", function () {
+    it('retourne la borne sup si trop grand', function () {
       assert.strictEqual(42, tools.encadre(52, 2, 42))
     })
   })
 
   describe('integerify', function () {
-    it("retourne le tableau avec les chaines représentant des entiers en entiers", function () {
-      var tabResult = tools.integerify([0, "-2", 3, "4", "cinq", 6])
-      var tabExpected = [0, -2, 3, 4, "cinq", 6]
+    it('retourne le tableau avec les chaines représentant des entiers en entiers', function () {
+      var tabResult = tools.integerify([0, '-2', 3, '4', 'cinq', 6])
+      var tabExpected = [0, -2, 3, 4, 'cinq', 6]
       for (var i = 0; i < tabResult.length; i++) {
         assert.strictEqual(tabResult[i], tabExpected[i])
       }
@@ -146,22 +146,22 @@ describe('tools', function () {
   })
 
   describe('merge', function () {
-    var src = [0, "-2", 3, "4", "cinq", 6]
+    var src = [0, '-2', 3, '4', 'cinq', 6]
     var srcClone = tools.clone(src)
     var addons = [3, 8, -2, 'foo']
-    var expected = [0, "-2", 3, "4", "cinq", 6, 8, -2, 'foo']
+    var expected = [0, '-2', 3, '4', 'cinq', 6, 8, -2, 'foo']
     tools.merge(src, addons)
-    it("tableaux simple", function () {
+    it('tableaux simple', function () {
       assert(!_.isEqual(src, srcClone))
       for (var i = 0; i < expected.length; i++) {
         assert.strictEqual(src[i], expected[i])
       }
       assert.strictEqual(src.length, expected.length)
     })
-    it("tableaux mixtes", function () {
-      src = [6, {foo:'bar', baz:'42'}, [1,2], {foo:'bar'}]
-      addons = [{foo:'bar', baz:'42'}, {baz:'42'}, [3, 4, 5], [1,2], {foo:'baz'}]
-      expected = [6, {foo:'bar', baz:'42'}, [1,2], {foo:'bar'}, {baz:'42'}, [3, 4, 5], {foo:'baz'}]
+    it('tableaux mixtes', function () {
+      src = [6, {foo: 'bar', baz: '42'}, [1, 2], {foo: 'bar'}]
+      addons = [{foo: 'bar', baz: '42'}, {baz: '42'}, [3, 4, 5], [1, 2], {foo: 'baz'}]
+      expected = [6, {foo: 'bar', baz: '42'}, [1, 2], {foo: 'bar'}, {baz: '42'}, [3, 4, 5], {foo: 'baz'}]
       tools.merge(src, addons)
       for (var i = 0; i < expected.length; i++) {
         if (typeof expected[i] === 'object') assert.ok(_.isEqual(src[i], expected[i]))
@@ -174,38 +174,38 @@ describe('tools', function () {
         foo: 'bar',
         arr: [1, 3, 'qat'],
         baz: '42',
-        bar : {
-          titi : {
-            toto : 'foo',
-            tata : 'bar',
-            tutu : 42
+        bar: {
+          titi: {
+            toto: 'foo',
+            tata: 'bar',
+            tutu: 42
           }
         }
       }
       addons = {
         baz: 43,
-        bar : {
-          titi : {
-            tata : 'bartabac',
-            tyty : 2
+        bar: {
+          titi: {
+            tata: 'bartabac',
+            tyty: 2
           }
         },
-        arr : [3, 'cinq', -2],
-        tutu : 'foo'
+        arr: [3, 'cinq', -2],
+        tutu: 'foo'
       }
       expected = {
         arr: [1, 3, 'qat', 'cinq', -2],
         foo: 'bar',
         baz: 43,
-        bar : {
-          titi : {
-            toto : 'foo',
-            tata : 'bartabac',
-            tutu : 42,
-            tyty : 2
+        bar: {
+          titi: {
+            toto: 'foo',
+            tata: 'bartabac',
+            tutu: 42,
+            tyty: 2
           }
         },
-        tutu : 'foo'
+        tutu: 'foo'
       }
       tools.merge(src, addons)
       assert.ok(_.isEqual(src, expected))
@@ -218,36 +218,36 @@ describe('tools', function () {
         foo: 'bar',
         arr: [1, 3, 'qat'],
         baz: '42',
-        bar : {
-          titi : {
-            toto : 'foo',
-            tata : 'bar',
-            tutu : 42
+        bar: {
+          titi: {
+            toto: 'foo',
+            tata: 'bar',
+            tutu: 42
           }
         }
       }
       var addons = {
         baz: 43,
-        bar : {
-          titi : {
-            tata : 'bartabac',
-            tyty : 2
+        bar: {
+          titi: {
+            tata: 'bartabac',
+            tyty: 2
           }
         },
-        arr : [3, 'cinq', -2],
-        tutu : 'foo'
+        arr: [3, 'cinq', -2],
+        tutu: 'foo'
       }
       var expected = {
         foo: 'bar',
         arr: [3, 'cinq', -2],
         baz: 43,
-        bar : {
-          titi : {
-            tata : 'bartabac',
-            tyty : 2
+        bar: {
+          titi: {
+            tata: 'bartabac',
+            tyty: 2
           }
         },
-        tutu : 'foo'
+        tutu: 'foo'
       }
       tools.update(src, addons)
       assert.ok(_.isEqual(src, expected))

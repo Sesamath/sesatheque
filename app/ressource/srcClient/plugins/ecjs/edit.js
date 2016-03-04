@@ -36,7 +36,7 @@ var log = require('../../tools/log')
 var display = require('./display')
 
 function addSelect(ressource, options) {
-  var select = dom.getElement("select")
+  var select = dom.getElement('select')
   dom.addElement(select, 'option', {id:'selectFichier', value:0}, "Choisir un type d'exercice")
   typesEc.forEach(function (typeEc) {
     dom.addElement(select, 'option', {value:typeEc}, typeEc)
@@ -45,7 +45,7 @@ function addSelect(ressource, options) {
   $textarea.hide()
   // code piqué dans http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/
   var $select = $(select)
-  $select.on("change", function() {
+  $select.on('change', function() {
     var sExo = $select.val()
     if (sExo) {
       if (!ressource.parametres) ressource.parametres = {}
@@ -60,7 +60,7 @@ function addSelect(ressource, options) {
 function displayEcOptions(ressource, options) {
   var submitAsked = false
   var submitDone = false
-  var $form = $("#formRessource")
+  var $form = $('#formRessource')
   $form.submit(function () {
     if (!submitDone) {
       submitAsked = true
@@ -77,11 +77,11 @@ function displayEcOptions(ressource, options) {
     return submitDone
   })
   options.optionsClcCallback = function (optionsClc) {
-    log("dans edit on récupère les options", optionsClc)
+    log('dans edit on récupère les options', optionsClc)
     try {
       var parametres = JSON.parse($textarea.val())
       if (!parametres) {
-        log.error("parametres vide quand on voulait affecter options (il devrait y avoir fichierjs)")
+        log.error('parametres vide quand on voulait affecter options (il devrait y avoir fichierjs)')
         parametres = {}
       }
       if (!parametres.fichierjs && ressource.parametres.fichierjs) parametres.fichierjs = ressource.parametres.fichierjs
@@ -91,12 +91,12 @@ function displayEcOptions(ressource, options) {
         $textarea.val(JSON.stringify(parametres, null, 2))
         if (submitAsked) {
           submitDone = true
-          log("on lance le submit avec " + $textarea.val())
+          log('on lance le submit avec ' + $textarea.val())
           $form.submit()
         }
       }, 0)
     } catch (error) {
-      page.addError("la modification des paramètres a échoué")
+      page.addError('la modification des paramètres a échoué')
     }
   }
   display(ressource, options, function (error) {
@@ -104,61 +104,61 @@ function displayEcOptions(ressource, options) {
   })
 }
 
-var $ = window.jQuery
+var $
 /* jshint jquery:true */
 
 var $textarea
 
 // récupérer cette liste avec (sur le site ressources)
-// ls -1 replication_calculatice/javascript/exercices/|tr '\n' ','|sed -e 's/,/", "/g'
+// ls -1 replication_calculatice/javascript/exercices/|tr '\n' ','|sed -e 's/,/', '/g'
 // et virer complement et lang
-var typesEc = ["addiclic",
-  "approximationsomme",
-  "balance",
-  "balanceadd",
-  "basketmath",
-  "basketmath2p",
-  "basketmath3p",
-  "bocal",
-  "bouleetboule",
-  "bouleetbouledecimaux",
-  "calculdiffere",
-  "carre",
-  "chocolat1",
-  "chocolat2",
-  "cibles",
-  "complement",
-  "croupier",
-  "decollage",
-  "diviclic",
-  "elephants",
-  "estimation",
-  "frise",
-  "grenouille",
-  "lacaisse",
-  "lebanquier",
-  "lesbornes",
-  "mbrique",
-  "memory",
-  "mistral",
-  "multiclic",
-  "nombresympathique",
-  "numbercrushdecimaux",
-  "oiseauaddition",
-  "oiseaumultiplication",
-  "operationsatrous",
-  "planeteaddition",
-  "quadricalc",
-  "quadricalcinv",
-  "recette",
-  "rectangle",
-  "sommeenligne",
-  "supermarche",
-  "surfacebleue",
-  "tableattaque",
-  "tapisdecarte",
-  "train",
-  "viaduc"
+var typesEc = ['addiclic',
+  'approximationsomme',
+  'balance',
+  'balanceadd',
+  'basketmath',
+  'basketmath2p',
+  'basketmath3p',
+  'bocal',
+  'bouleetboule',
+  'bouleetbouledecimaux',
+  'calculdiffere',
+  'carre',
+  'chocolat1',
+  'chocolat2',
+  'cibles',
+  'complement',
+  'croupier',
+  'decollage',
+  'diviclic',
+  'elephants',
+  'estimation',
+  'frise',
+  'grenouille',
+  'lacaisse',
+  'lebanquier',
+  'lesbornes',
+  'mbrique',
+  'memory',
+  'mistral',
+  'multiclic',
+  'nombresympathique',
+  'numbercrushdecimaux',
+  'oiseauaddition',
+  'oiseaumultiplication',
+  'operationsatrous',
+  'planeteaddition',
+  'quadricalc',
+  'quadricalcinv',
+  'recette',
+  'rectangle',
+  'sommeenligne',
+  'supermarche',
+  'surfacebleue',
+  'tableattaque',
+  'tapisdecarte',
+  'train',
+  'viaduc'
 ]
 
 /**
@@ -168,14 +168,17 @@ var typesEc = ["addiclic",
  * @param options
  */
 module.exports = function edit(ressource, options) {
-  if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
-  var textarea = window.document.getElementById('parametres')
-  if (!textarea) throw new Error("Pas de textarea #parametres trouvé dans cette page")
-  $textarea = $(textarea)
-  log("les options dans ecjs/edit.init", options)
-  if (ressource.parametres.fichierjs) {
-    displayEcOptions(ressource, options)
-  } else {
-    addSelect(ressource, options)
-  }
+  page.loadAsync('jquery', function () {
+    $ = window.jQuery
+    if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
+    var textarea = window.document.getElementById('parametres')
+    if (!textarea) throw new Error('Pas de textarea #parametres trouvé dans cette page')
+    $textarea = $(textarea)
+    log('les options dans ecjs/edit.init', options)
+    if (ressource.parametres.fichierjs) {
+      displayEcOptions(ressource, options)
+    } else {
+      addSelect(ressource, options)
+    }
+  })
 }

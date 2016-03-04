@@ -59,13 +59,13 @@ module.exports = function ($cache, $settings) {
    */
   $cachePersonne.getByOrigine = function (origine, idOrigine, next) {
     if (origine && idOrigine) {
-      $cache.get('personne_' + origine +"/" +idOrigine, function (error, oid) {
+      $cache.get('personne_' + origine + '/' + idOrigine, function (error, oid) {
         if (error) next(error)
         else if (oid) $cachePersonne.get(oid, next)
         else next(null, undefined)
       })
     } else {
-      next(new Error("origine ou idOrigine manquant"))
+      next(new Error('origine ou idOrigine manquant'))
     }
   }
 
@@ -76,7 +76,7 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cachePersonne
    */
   $cachePersonne.set = function (personne, next) {
-    $cache.set('personne_' + personne.origine +"/" +personne.idOrigine, personne.oid, ttl)
+    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl)
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }
 

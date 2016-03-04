@@ -43,7 +43,7 @@ module.exports = function (EntityPersonne, $cachePersonne) {
 
   EntityPersonne.construct(Personne)
 
-  EntityPersonne.table = "personne"
+  EntityPersonne.table = 'personne'
 
   EntityPersonne.beforeStore = function (next) {
     // aucun intérêt à le stocker
@@ -53,9 +53,9 @@ module.exports = function (EntityPersonne, $cachePersonne) {
     next()
   }
 
-  EntityPersonne.afterStore(function(next) {
+  EntityPersonne.afterStore(function (next) {
     // on met en cache
-    $cachePersonne.set(this, function (error) {if (error) log.debug(error)})
+    $cachePersonne.set(this, function (error) { if (error) log.debug(error) })
     // et on passe au suivant sans se préoccuper du retour de mise en cache
     next()
   })

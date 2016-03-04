@@ -34,37 +34,39 @@
 /**
  * Configuration de l'application
  */
-var tools = require("./tools")
+var tools = require('./tools')
+var path = require('path')
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
-var privateConfModule = __dirname + "/_private/"
+var privateConfModule = path.join(__dirname, '_private')
 if (process.env.SESATHEQUE_CONF && /^[^\/]+$/.test(process.env.SESATHEQUE_CONF)) {
   // on peut préciser un autre fichier de conf via l'environnement (utile pour faire tourner plusieurs instances de l'appli)
   privateConfModule += process.env.SESATHEQUE_CONF
 } else {
-  privateConfModule += "config"
+  privateConfModule += 'config'
 }
 var localConfig = require(privateConfModule)
 
 // la conf du composant ressource à part
-var ressourceConfig = require("./ressource/config")
+var ressourceConfig = require('./ressource/config')
 
 /** La racine du projet */
-var root  = __dirname +'/..'
+var root = path.resolve(__dirname, '..')
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
  * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
  */
-var staging = (process.env.NODE_ENV === "production") ? "prod" : "dev"
+var staging = (process.env.NODE_ENV === 'production') ? 'prod' : 'dev'
 
 /** La config */
 var settings = {
   // dans localConf, sinon conf par défaut i.e. port 3000
-  application : {
-    name : "bibliotheque",
+  application: {
+    name: 'bibliotheque',
+    defaultViewsPath: 'app/views',
     // mis dans _private/config.js car dépendant de l'instance
-    baseUrl      : "http://.../",
-    mail : "user@example.com",
+    baseUrl: 'http://.../',
+    mail: 'user@example.com',
     staging: staging
   },
   /* dans _private aussi
@@ -77,16 +79,16 @@ var settings = {
     port:process.env.PORT || 3001
   }
    */
-  $rail    : {
-    public        : true,
-    //compression : {},
+  $rail: {
+    public: true,
+    // compression : {},
     cookie: {
-      key: "asqlSTsrl78lAsg"
+      key: 'asqlSTsrl78lAsg'
     },
-    bodyParser : {limit:"8mb"}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
+    bodyParser: {limit: '8mb'}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
     session: {
-      //name: "mySessName",
-      secret: "asqlSTsrl78lAsg",
+      // name: 'mySessName',
+      secret: 'asqlSTsrl78lAsg',
       saveUninitialized: true,
       /* cookie : {
         httpOnly : false
@@ -96,69 +98,69 @@ var settings = {
     authentication: {}
   },
   components: {
-    auth : {
-      paths : {
-        login         :"connexion",
-        logout        :"deconnexion",
-        externalLogout:"deconnexion/externe"
+    auth: {
+      paths: {
+        login: 'connexion',
+        logout: 'deconnexion',
+        externalLogout: 'deconnexion/externe'
       }
     },
-    cache : {
-      defaultTTL: 15*60,
-      purgeDelay: 5*60
+    cache: {
+      defaultTTL: 15 * 60,
+      purgeDelay: 5 * 60
     },
-    groupe : {
-      cacheTTL: 20*60
+    groupe: {
+      cacheTTL: 20 * 60
     },
     // Permissions (cumulatives) pour chacun des rôles
-    personne : {
+    personne: {
       roles: {
         // les droits sont dans l'absolu, mais il peut y avoir des modifications liées au contexte
         // (on a toujours le droit de modifier un contenu dont on serait le seul auteur,
         // pas de droits read sur les ressources privées sauf les siennes, etc.)
-        admin      : {create:true, createAll:true, read:true, update:true, updateAuteurs:true, updateGroupes:true, delete:true, deleteVersion:true, index:true, publish:true, correction:true, createGroupe:true}, // jshint ignore:line
-        editeur    : {create:true, createAll:true, read:true, update:true, updateAuteurs:true, updateGroupes:true, delete:true, deleteVersion:true, index:true, publish:true, correction:true, createGroupe:true}, // jshint ignore:line
-        indexateur : {index:true, createGroupe:true},
-        prof       : {create:true, read:true, createGroupe:true},
-        acces_correction : {correction:true},
-        eleve      : {read:true}
+        admin: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true}, // eslint-disable-line eqeqeq
+        editeur: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true}, // jshint ignore:line
+        indexateur: {index: true, createGroupe: true},
+        prof: {create: true, read: true, createGroupe: true},
+        acces_correction: {correction: true},
+        eleve: {read: true}
       },
-      cacheTTL: 20*60
+      cacheTTL: 20 * 60
     },
-    ressource : ressourceConfig
+    ressource: ressourceConfig
   },
-  // une liste de domaines "sesalab" pouvant servir de source d'authentification et stocker chez nous, cf /api/connexion
-  sesalabs : [
-    "https://www.labomep.net/"
+  // une liste de domaines 'sesalab' pouvant servir de source d'authentification et stocker chez nous, cf /api/connexion
+  sesalabs: [
+    'https://www.labomep.net/'
   ],
   // une liste de login / pass admin
-  admin : {
-    // foo:"passDeFoo"
+  admin: {
+    // foo:'passDeFoo'
   },
 
   // le reste est spécifique à sesatheque et ignoré par lassi
   // Cf _private.example/config.js
 
   // les différents logs
-  logs : {
-    dir       : process.env.LOGS || root + "/logs",
-    access    : "access.log",
-    error     : "error.log",
-    errorData : staging + "errorData.log",
-    debug     : "debug.log",
-    //perf      : "perf.log", log les perfs si présent
-    //sql       : "sql.log", log les requetes sql si présent
-    // ajouter les exclusions voulues parmi ["cache", "resssourceRepository", "personneRepository", "accessControl"]
-    debugExclusions : []
+  logs: {
+    dir: process.env.LOGS || root + '/logs',
+    access: 'access.log',
+    error: 'error.log',
+    errorData: staging + 'errorData.log',
+    debug: 'debug.log',
+    // perf      : 'perf.log', log les perfs si présent
+    // sql       : 'sql.log', log les requetes sql si présent
+    // ajouter les exclusions voulues parmi ['cache', 'resssourceRepository', 'personneRepository', 'accessControl']
+    debugExclusions: []
   },
   // pour an-log, si on veut récupérer les logs sql
-  lassiLogger : {
+  lassiLogger: {
     '$entities': {
       logLevel: 'debug',
-      renderer: {name: 'fileRenderer', target:'./logs/entities.log'}
+      renderer: {name: 'fileRenderer', target: './logs/entities.log'}
     }
   },
-  varnish : false // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
+  varnish: false // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
 }
 
 // on ajoute nos params locaux (accès à la base et port,
@@ -166,11 +168,11 @@ var settings = {
 if (localConfig) tools.merge(settings, localConfig)
 
 // on enlève le debug mysql en prod
-if (settings.application.staging === "prod" && settings.$entities.database.debug) {
+if (settings.application.staging === 'prod' && settings.$entities.database.debug) {
   delete settings.$entities.database.debug
 }
 // on ajoute toujours un slash de fin à baseUrl
-if (settings.application.baseUrl.substr(-1) !== "/") settings.application.baseUrl += "/"
+if (settings.application.baseUrl.substr(-1) !== '/') settings.application.baseUrl += '/'
 
 // Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,
 // cf _private.example/config.js

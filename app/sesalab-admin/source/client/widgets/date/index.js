@@ -7,7 +7,7 @@ app.directive('anDatePicker', function($rootScope, $timeout, $popover) {
     'Novembre', 'Décembre'];
 
   return {
-    restrict: "E",
+    restrict: 'E',
     replace: true,
     scope: {
       model:'=ngModel'

@@ -53,7 +53,7 @@ module.exports = function display(ressource, options, next) {
 
   try {
     var container = options.container
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     // on enverra un résultat seulement à la fermeture
     if (options.resultatCallback && container.addEventListener) {
@@ -71,15 +71,15 @@ module.exports = function display(ressource, options, next) {
     log('start ato display avec la ressource', ressource)
     //les params minimaux
     if (!ressource.oid || !ressource.titre) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
 
     // On réinitialise le conteneur
     dom.empty(container)
 
-    var url = "http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=" + ressource.idOrigine
-    var iframe = dom.addElement(container, 'iframe', {src: url, style: "width:100%;height:100%"})
-    if (iframe.addEventListener) iframe.addEventListener("load", loaded)
+    var url = 'http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=' + ressource.idOrigine
+    var iframe = dom.addElement(container, 'iframe', {src: url, style: 'width:100%;height:100%'})
+    if (iframe.addEventListener) iframe.addEventListener('load', loaded)
     else loaded()
   } catch (error) {
     if (next) next(error)

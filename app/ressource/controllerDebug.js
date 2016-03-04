@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 /**
  * Controleur de la route /debug/ (existe seulement si on est pas en prod)
@@ -51,9 +51,9 @@ module.exports = function (controller, $ressourceRepository, EntityRessource) {
     var hidden = !!context.get.hidden
     var terminal = !!context.get.terminal
     $ressourceRepository.load(oid, function (error, ressource) {
-      if (error) context.json({error:error.toString()})
+      if (error) context.json({error: error.toString()})
       else {
-        var util = require('util');
+        var util = require('util')
         var options = {showHidden: hidden, depth: depth, colors: terminal}
         var objStr = util.inspect(ressource, options)
         if (terminal) {
@@ -62,20 +62,20 @@ module.exports = function (controller, $ressourceRepository, EntityRessource) {
         } else {
           if (hidden) {
             // faut envoyer du texte (chrome râle quand même parce que ça ressemble à du json mais il n'est pas valide
-            context.plain("la ressource avec ses champs cachés en texte\n" +objStr)
+            context.plain('la ressource avec ses champs cachés en texte\n' + objStr)
           } else {
             // on peut parser
             var objInspected
             try {
               // mais c'est pas du json, et eval est pas permis, on ruse
-              var objectify = new Function('return ' + objStr) //jshint ignore: line
+              var objectify = new Function('return ' + objStr) // eslint-disable-line no-new-func
               objInspected = objectify()
             } catch (error) {
-              objInspected = {error: "erreur de parsing de la ressource " + oid}
+              objInspected = {error: 'erreur de parsing de la ressource ' + oid}
               log(objInspected.error)
               log(objStr)
             }
-            context.json(objInspected);
+            context.json(objInspected)
           }
         }
       }
@@ -88,17 +88,17 @@ module.exports = function (controller, $ressourceRepository, EntityRessource) {
     var nb = context.nb || 10
     var start = context.start || 0
     if (index && value) {
-      EntityRessource.match(index).like(value).grab(nb, start, function(error, ressources) {
-        if (error) context.json({error:error.toString()})
-        else context.json({ressources:ressources})
+      EntityRessource.match(index).like(value).grab(nb, start, function (error, ressources) {
+        if (error) context.json({error: error.toString()})
+        else context.json({ressources: ressources})
       })
     }
   })
 
   controller.get('headers', function (context) {
-    context.json({success:true, headers:context.request.headers})
+    context.json({success: true, headers: context.request.headers})
   })
   controller.post('headers', function (context) {
-    context.json({success:true, headers:context.request.headers})
+    context.json({success: true, headers: context.request.headers})
   })
 }

@@ -76,7 +76,7 @@ tools.cloneData = function(object) {
  * @memberOf tools
  * @param {object}  object
  * @param {object}  defaultValues
- * @param {boolean} [recursion=true] Passer false pour ne compléter que les propriétés "racine" de l'objet sans récursion
+ * @param {boolean} [recursion=true] Passer false pour ne compléter que les propriétés 'racine' de l'objet sans récursion
  */
 tools.complete = function(object, defaultValues, recursion) {
   // recursion=true par défaut
@@ -102,11 +102,11 @@ tools.complete = function(object, defaultValues, recursion) {
 tools.encadre = function (int, min, max, label) {
   var value = parseInt(int)
   if (value < min) {
-    log.error(label +" trop petit (" +value +"), on le fixe à " +min)
+    log.error(label +' trop petit (' +value +'), on le fixe à ' +min)
     value = min
   }
   if (value > max) {
-    log.error(label +" trop grand (" +value +"), on le fixe à " +max)
+    log.error(label +' trop grand (' +value +'), on le fixe à ' +max)
     value = max
   }
   return value
@@ -270,7 +270,7 @@ tools.merge = function(object, newValues, strict) {
  */
 tools.parse = function (jsonString) {
   var obj
-  if (typeof jsonString === "string") {
+  if (typeof jsonString === 'string') {
     try {
       obj = JSON.parse(jsonString)
     } catch (e) {
@@ -361,7 +361,7 @@ tools.stringify = function(obj, indent) {
  * @returns {string}
  */
 tools.stripTags = function (source) {
-  return source.replace(/(<([^>]+)>)/ig,"")
+  return source.replace(/(<([^>]+)>)/ig,'')
 }
 
 /**

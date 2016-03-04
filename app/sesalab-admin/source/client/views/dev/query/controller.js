@@ -122,15 +122,15 @@ module.exports = function($scope, $http) {
   }
 
   function h(obj) {
-    var output = ['<div class="object" onclick="jQuery(this).toggleClass(\'visible\')">'];
+    var output = ['<div class='object' onclick="jQuery(this).toggleClass(\'visible\')">'];
     _.each(obj, function(value, key) {
-      output.push('<div class="property">');
-      output.push('<span class="name">');
+      output.push('<div class='property'>');
+      output.push('<span class='name'>');
       output.push(key);
       output.push('</span>');
-      output.push('<div class="value">');
+      output.push('<div class='value'>');
       if (value === null) {
-        value = "NULL";
+        value = 'NULL';
       } else if (_.isObject(value) || _.isArray(value)) {
         value = h(value);
       } else {

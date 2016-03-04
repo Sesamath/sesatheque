@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 /**
  * Component de gestion des personnes (auteurs) et des groupes
@@ -39,19 +39,21 @@
  */
 var personneComponent = lassi.component('personne')
 
-//var _ = require('lodash')
-//var tools = require('../tools')
+// var _ = require('lodash')
+// var tools = require('../tools')
 
-personneComponent.config(function($settings) {
+personneComponent.config(function ($settings) {
   // on vérifie que l'on a un cache avec des valeur acceptables
   var cacheTTL = $settings.get('components.personne.cacheTTL', null)
-  if (!cacheTTL) log("Il faudrait indiquer un TTL pour le cache de personne" +
-  " (en s, dans components.personne.cacheTTL), on le fixe à 1h")
+  if (!cacheTTL) {
+    log('Il faudrait indiquer un TTL pour le cache de personne' +
+      ' (en s, dans components.personne.cacheTTL), on le fixe à 1h')
+  }
   if (cacheTTL < 60) throw new Error("Le cache personne doit avoir un TTL d'au moins 60s")
-  if (cacheTTL > 24*3600) throw new Error("Le cache personne doit avoir un TTL inférieur à 24h (86400s)")
+  if (cacheTTL > 24 * 3600) throw new Error('Le cache personne doit avoir un TTL inférieur à 24h (86400s)')
 })
 
-personneComponent.service('$cachePersonne', function($cache, $settings) {
+personneComponent.service('$cachePersonne', function ($cache, $settings) {
   return require('./serviceCachePersonne')($cache, $settings)
 })
 
@@ -59,7 +61,7 @@ personneComponent.entity('EntityPersonne', function ($cachePersonne) {
   require('./EntityPersonne')(this, $cachePersonne)
 })
 
-personneComponent.service('$cacheGroupe', function($cache, $settings) {
+personneComponent.service('$cacheGroupe', function ($cache, $settings) {
   return require('./serviceCacheGroupe')($cache, $settings)
 })
 
@@ -67,19 +69,19 @@ personneComponent.entity('EntityGroupe', function ($cacheGroupe) {
   require('./EntityGroupe')(this, $cacheGroupe)
 })
 
-personneComponent.service('$groupeRepository', function(EntityGroupe, $cacheGroupe) {
+personneComponent.service('$groupeRepository', function (EntityGroupe, $cacheGroupe) {
   return require('./serviceGroupeRepository')(EntityGroupe, $cacheGroupe)
 })
 
-personneComponent.service('$personneRepository', function(EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
+personneComponent.service('$personneRepository', function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
   return require('./servicePersonneRepository')(EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository)
 })
 
-personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository, $groupeRepository) {
-  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository, $groupeRepository)
+personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
+  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository)
 })
 
-personneComponent.service('$personneControl', function(EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
+personneComponent.service('$personneControl', function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
   return require('./servicePersonneControl')(EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl)
 })
 

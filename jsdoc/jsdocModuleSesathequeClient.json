@@ -6,7 +6,7 @@
   "source"   : {
     "include":["./node_modules/sesatheque-client"],
     "includePattern": ".+\\.(js|md)$",
-    "excludePattern": "(node_modules|.+\\.bak\\.js)"
+    "excludePattern": "(node_modules/sesatheque-client/node_modules|.+\\.bak\\.js)"
   },
   "plugins"  : [
     "plugins/markdown",

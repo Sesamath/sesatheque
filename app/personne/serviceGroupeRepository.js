@@ -46,6 +46,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
    */
   $groupeRepository.load = function (groupeNom, next) {
     $cacheGroupe.get(groupeNom, function (error, groupe) {
+      if (error) log.error(error)
       if (groupe) {
         next(null, groupe)
       } else {
@@ -66,7 +67,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
 
   /**
    * Récupère une liste de groupes dont l'oid est gestionnaire
-   * @param {string} groupeNom
+   * @param {number} oid
    * @param {groupeListCallback} next
    * @memberOf $groupeRepository
    */

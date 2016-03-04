@@ -48,7 +48,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
       var msg = 'start-pers-' + context.post.id
       log.perf(context.response, msg)
     }
-    //log.debug('post /api/groupe a reçu', context.post, 'api', {max: 1000})
+    // log.debug('post /api/groupe a reçu', context.post, 'api', {max: 1000})
     log.debug('post /api/groupe a reçu', context.post, 'api')
     if ($accessControl.hasAllRights(context)) {
       // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
@@ -61,7 +61,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
           else $json.sendError(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))
         })
       } else {
-        $json.sendError(context, new Error("origine ou idOrigine manquant"))
+        $json.sendError(context, new Error('origine ou idOrigine manquant'))
       }
     } else {
       $json.denied(context)

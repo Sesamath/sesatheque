@@ -31,7 +31,7 @@
 'use strict'
 var authComponent = lassi.component('auth')
 
-authComponent.service('$auth', function($accessControl, $ressourcePage) {
+authComponent.service('$auth', function ($accessControl, $ressourcePage) {
   return require('./serviceAuth')($accessControl, $ressourcePage)
 })
 
@@ -44,4 +44,4 @@ authComponent.controller(function ($auth, $accessControl, $ressourceRepository) 
 })
 
 // rien à faire en config
-authComponent.config(function() {})
+authComponent.config(function () {})

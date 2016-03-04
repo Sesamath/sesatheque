@@ -59,7 +59,7 @@ app.controller(function($entities, $job) {
         code += ')';
       })
     }
-    //code+= '.sort("oid", "asc")';
+    //code+= '.sort('oid', 'asc')';
     if (query.limit) {
       code += '.grab('+query.limit+', callback);';
     } else {

@@ -45,7 +45,7 @@ var swf = require('../../display/swf')
  */
 function getXmlParam(params) {
   if (!tools.isArray(params.series)) {
-    throw new Error("Aucune série à traiter")
+    throw new Error('Aucune série à traiter')
   }
 
   // L'objet js que l'on construit à partir des params
@@ -128,7 +128,7 @@ function getNombresFromSerie(serie) {
         break
 
       default :
-        page.addError("ressource incohérente (type de série inconnu)")
+        page.addError('ressource incohérente (type de série inconnu)')
     }
 
     // chiffres admissibles
@@ -185,7 +185,7 @@ function getSignesFromSerie(serie) {
         symbole = (numsigne < 2) ? '-' : '='
         break
       default :
-        page.addError("ressource incohérente (type de série inconnu)")
+        page.addError('ressource incohérente (type de série inconnu)')
     }
     signe.signe = symbole
     signe.couleur = s.ccss
@@ -260,7 +260,7 @@ function getOperations(serie) {
             break
 
           default :
-            page.addError("ressource incohérente (type liste/intervalle inconnu)")
+            page.addError('ressource incohérente (type liste/intervalle inconnu)')
         }
 
         // temps d'affichage
@@ -331,12 +331,12 @@ function getOperations(serie) {
           operation_annullee = (resultat !== Math.floor(resultat))
           break
         default :
-          page.addError("ressource incohérente (type de série inconnu)")
+          page.addError('ressource incohérente (type de série inconnu)')
       }
     } // while operation_annullee
 
     if (c === maxTentatives) {
-      log("Impossible de trouver un tirage aléatoire satisfaisant toutes les conditions")
+      log('Impossible de trouver un tirage aléatoire satisfaisant toutes les conditions')
       // ça va annuler la série
       return undefined
     }
@@ -374,24 +374,24 @@ function xmlGenerate(o) {
   // https://developer.mozilla.org/en-US/docs/Web/API/XMLDocument
   //
   if (!window.document.implementation || typeof window.document.implementation.createDocument !== 'function') {
-    throw new Error("Votre navigateur ne supporte pas la méthode document.implementation.createDocument " +
-        "et ne peut donc pas afficher de ressource de calcul mental")
+    throw new Error('Votre navigateur ne supporte pas la méthode document.implementation.createDocument ' +
+        'et ne peut donc pas afficher de ressource de calcul mental')
   }
   // notre arbre, on commence par la racine
-  var parametrage = window.document.implementation.createDocument("", "", null)
+  var parametrage = window.document.implementation.createDocument('', '', null)
   var noeud_poseur = parametrage.createElement('CALCUL_MENTAL')
-  noeud_poseur.setAttribute("version", "1")
-  if (o.isDelai) noeud_poseur.setAttribute("t", o.delai)
+  noeud_poseur.setAttribute('version', '1')
+  if (o.isDelai) noeud_poseur.setAttribute('t', o.delai)
   o.operations.forEach(function (operation) {
     var noeud_ques = parametrage.createElement('saisie')
-    if (operation.isdelai) noeud_ques.setAttribute("t", operation.delai)
+    if (operation.isdelai) noeud_ques.setAttribute('t', operation.delai)
     var noeud = {}
     operation.forEach(function (tab, key) {
       // on gère pas ici les propriétés non numériques (cf getOperations)
       if (parseInt(key) == key) {
         noeud[key] = parametrage.createElement('affiche', formate_nombre(tab.valeur))
-        if (tab.couleur != 'noir') noeud[key].setAttribute("c", tab.couleur)
-        if (tab.isdelai) noeud[key].setAttribute("t", tab.delai)
+        if (tab.couleur != 'noir') noeud[key].setAttribute('c', tab.couleur)
+        if (tab.isdelai) noeud[key].setAttribute('t', tab.delai)
         noeud_ques.appendChild(noeud[key])
       }
     })
@@ -405,7 +405,7 @@ function xmlGenerate(o) {
   })
   parametrage.appendChild(noeud_poseur)
 
-  return parametrage.toString().replace(/\n/g, '').replace(/\+/g, "#").replace(/"/g, "'")
+  return parametrage.toString().replace(/\n/g, '').replace(/\+/g, '#').replace(/"/g, '\'')
 } // xmlGenerate
 
 /**
@@ -525,7 +525,7 @@ function genere_sans_restriction(nombre) {
  * @returns {string}
  */
 function couleur_nom(code_couleur) {
-  var tab_couleurs = ["orange", "rouge", "vert", "brique", "bleu", "noir"]
+  var tab_couleurs = ['orange', 'rouge', 'vert', 'brique', 'bleu', 'noir']
   return tab_couleurs[code_couleur]
 }
 
@@ -575,7 +575,7 @@ module.exports = function display(ressource, options, next) {
   try {
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
     // base et swf
     baseMental = options.pluginBase + 'cm/swf'
@@ -600,7 +600,7 @@ module.exports = function display(ressource, options, next) {
     dom.empty(container)
 
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    container.setAttribute("width", 735)
+    container.setAttribute('width', 735)
     container.style.width = '735px'
 
     var swfOptions = {

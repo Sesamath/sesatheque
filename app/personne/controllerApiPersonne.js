@@ -43,9 +43,9 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
    * @param {Context} context
    * @param msg
    */
-  function denied(context, msg) {
-    if (!msg) msg = "Accès refusé"
-    context.status = 403;
+  function denied (context, msg) {
+    if (!msg) msg = 'Accès refusé'
+    context.status = 403
     context.json({error: msg})
   }
 
@@ -56,9 +56,9 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
    * @param error
    * @param data
    */
-  function sendJson(context, error, data) {
+  function sendJson (context, error, data) {
     if (error) {
-      log.error(error);
+      log.error(error)
       log.debug("sendJson va renvoyer l'erreur", error, 'api')
       context.json({error: error.toString()})
     } else {
@@ -78,7 +78,7 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
       var msg = 'start-pers-' + context.post.id
       log.perf(context.response, msg)
     }
-    //log.debug('post /api/personne a reçu', context.post, 'api', {max: 1000})
+    // log.debug('post /api/personne a reçu', context.post, 'api', {max: 1000})
     log.debug('post /api/personne a reçu', context.post, 'api')
     if ($accessControl.hasAllRights(context)) {
       // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
@@ -91,7 +91,7 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
           else sendJson(context, new Error("Erreur interne (personne.store ne renvoie pas d'objet avec oid)"))
         })
       } else {
-        sendJson(context, new Error("origine ou idOrigine manquant"))
+        sendJson(context, new Error('origine ou idOrigine manquant'))
       }
     } else {
       denied(context)

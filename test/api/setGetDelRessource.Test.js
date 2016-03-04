@@ -42,13 +42,13 @@
 /**
  * Affiche les options possibles
  */
-function usage() {
+function usage () {
   console.log("Ce test enregistre une ressource sur l'api, puis la récupère pour vérifier et l'efface.\n" +
-              "Les options possibles sont :\n" +
-              "--token : passe un token (sinon on prend le 1er trouvé dans la conf de cette appli)\n" +
-              "--prod ou --dev : pour tester bibliotheque.sesamath.net ou bibliotheque.devsesamath.net (sinon locale)\n" +
+              'Les options possibles sont :\n' +
+              '--token : passe un token (sinon on prend le 1er trouvé dans la conf de cette appli)\n' +
+              '--prod ou --dev : pour tester bibliotheque.sesamath.net ou bibliotheque.devsesamath.net (sinon locale)\n' +
               "--debug : affiche qq infos sur ce que l'api retourne\n" +
-              "-h ou --help : affiche cette aide")
+              '-h ou --help : affiche cette aide')
   process.exit()
 }
 
@@ -56,7 +56,7 @@ function usage() {
 if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
   usage()
 } else {
-  var assert = require("assert")
+  var assert = require('assert')
   var _ = require('lodash')
   var tools = require('../../app/tools')
   var request = require('request')
@@ -81,25 +81,25 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
   }
   urlBibli += '/api/ressource'
 
-  var isDebug = (process.argv.indexOf('--debug') > -1)
+  // var isDebug = (process.argv.indexOf('--debug') > -1)
 
   var oid
   /** {Ressource} Ressource de test */
   var ressTest = {
-    origine      : 'em',
-    idOrigine    : '5000', // celle là est pas près d'exister
-    titre        : "Ressource pour tester l'api",
+    origine: 'em',
+    idOrigine: '5000', // celle là est pas près d'exister
+    titre: "Ressource pour tester l'api",
     type: 'em',
-    resume       : 'Un résumé bidon sur\ndeux lignes',
-    description  : 'Une description bidon sur\ndeux lignes',
-    commentaires : 'Un commentaire bidon sur\ndeux lignes',
-    niveaux      : [10, 6],
-    categories   : [1, 2],
+    resume: 'Un résumé bidon sur\ndeux lignes',
+    description: 'Une description bidon sur\ndeux lignes',
+    commentaires: 'Un commentaire bidon sur\ndeux lignes',
+    niveaux: [10, 6],
+    categories: [1, 2],
     // typePedagogiques
     // typeDocumentaires
-    relations    : [[1, 1], [14, 2]],
-    parametres   : {foo: 'bar'}, // ajouter des vrais params pour tester le display
-    publie       : false
+    relations: [[1, 1], [14, 2]],
+    parametres: {foo: 'bar'}, // ajouter des vrais params pour tester le display
+    publie: false
     // auteurs
     // contributeurs
     // langue
@@ -111,16 +111,16 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
 
     it("set retourne l'oid de la ressource stockée", function (doneSet) {
       var options = {
-        url    : urlBibli,
+        url: urlBibli,
         headers: {
-          "X-ApiToken": apiToken
+          'X-ApiToken': apiToken
         },
-        json   : true,
-        body   : ressTest
+        json: true,
+        body: ressTest
       }
-      //logInfo('on va poster vers ' + urlBibli)
+      // logInfo('on va poster vers ' + urlBibli)
       request.post(options, function (error, response, body) {
-        //logInfo('retour du post pour set', body)
+        // logInfo('retour du post pour set', body)
         assert.ok(!error)
         assert.ok(!body.error)
         assert.ok(body.oid)
@@ -132,9 +132,9 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
       })
     })
 
-    it("récupère la ressource em/5000 envoyée précédemment", function (done) {
+    it('récupère la ressource em/5000 envoyée précédemment', function (done) {
       var options = {
-        url : urlBibli + '/em/5000',
+        url: urlBibli + '/em/5000',
         json: true
       }
       request.get(options, function (error, response, ressource) {
@@ -143,14 +143,14 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
         for (var key in ressCloned) {
           if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
         }
-        //logInfo('la ressource récupérée', ressource)
+        // logInfo('la ressource récupérée', ressource)
         done()
       })
     })
 
-    it("prend un 403 si on veut effacer sans token", function (done) {
+    it('prend un 403 si on veut effacer sans token', function (done) {
       var options = {
-        url : urlBibli + '/' + oid,
+        url: urlBibli + '/' + oid,
         json: true
       }
       request.del(options, function (error, response, ressource) {
@@ -163,22 +163,21 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
 
     it("vire la ressource que l'on vient d'enregistrer", function (done) {
       var options = {
-        url    : urlBibli + '/' + oid,
+        url: urlBibli + '/' + oid,
         headers: {
-          "X-ApiToken": apiToken
+          'X-ApiToken': apiToken
         },
-        json   : true
+        json: true
       }
       request.del(options, function (error, response, body) {
         assert.ok(!error)
-        if (body.error) console.error('DEL ' +options.url +" renvoie l'erreur : " +body.error)
+        if (body.error) console.error('DEL ' + options.url + " renvoie l'erreur : " + body.error)
         assert.ok(!body.error)
-        if (body.deleted != oid) console.error('DEL ' +options.url +" retourne\n", body)
+        if (body.deleted != oid) console.error('DEL ' + options.url + ' retourne\n', body) // eslint-disable-line eqeqeq
         assert.equal(oid, body.deleted)
         // faut filer plus d'infos en cas de pb
         done()
       })
     })
-
   })
 }

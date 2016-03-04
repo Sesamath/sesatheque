@@ -32,7 +32,7 @@
 'use strict'
 
 module.exports = function (EntityRessource) {
-  //var _ = require('lodash')
+  // var _ = require('lodash')
   var tools = require('../tools')
   var Ressource = require('./srcClient/constructors/Ressource')
   var configRessource = require('./config')
@@ -59,9 +59,9 @@ module.exports = function (EntityRessource) {
     }
 
     // ajoute les éventuelles propriétés supplémentaire de notre objet initial
-    //_.each(initObj, function (value, key) {
-    //  if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug("la propriété " +key +" a été ignorée dans le constructeur de Ressource")
-    //})
+    // _.each(initObj, function (value, key) {
+    //  if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug('la propriété ' +key +' a été ignorée dans le constructeur de Ressource')
+    // })
 
     // la langue par défaut
     if (this.langue) {
@@ -89,16 +89,16 @@ module.exports = function (EntityRessource) {
     .defineIndex('typeDocumentaires', 'integer')
     // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir une callback qui la remplace
     // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
-    // c'est une string car ça peut être "alias/xxx" où xxx est l'oid de l'alias et pas l'oid d'une ressource
+    // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
     // (pour gérer les relations avec des oid externes)
-    .defineIndex('relations', 'string', function() {
-      return this.relations.map(function(relation) {
+    .defineIndex('relations', 'string', function () {
+      return this.relations.map(function (relation) {
         // on retourne pour chaque relation l'item lié
         return relation[1]
       })
     })
     // pour les arbres on veut avoir tous les enfants qu'ils contiennent (toutes générations comprises)
-    .defineIndex('enfants', 'string', function() {
+    .defineIndex('enfants', 'string', function () {
       var refsEnfants, enfant, i
       function addRefsEnfants (enfants) {
         for (i = 0; i < enfants.length; i++) {

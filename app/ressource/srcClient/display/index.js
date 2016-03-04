@@ -83,7 +83,7 @@ function display (ressource, options, next) {
       // le display du plugin
       var pluginName = ressource.type
       var pluginDisplay = require('../plugins/' + pluginName + '/display')
-      if (!pluginDisplay) throw new Error("L'affichage des ressources de type " + pluginName + " n'est pas encore implémenté")
+      if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
       // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
       var Resultat, traiteResultat
 
@@ -245,10 +245,7 @@ function display (ressource, options, next) {
             url = options.urlResultatCallback
             xhr.timeout = ajaxTimeout
             xhr.ontimeout = function () {
-              feedback({
-                error: "Pas de réponse de l'enregistrement du résultat après " +
-                Math.floor(ajaxTimeout / 1000) + "s d'attente."
-              })
+              feedback({error: "Pas de réponse de l'enregistrement du résultat après " + Math.floor(ajaxTimeout / 1000) + "s d'attente."})
             }
           }
           xhr.open('POST', url, !deferSync)

@@ -37,7 +37,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {Ressource} ressource
    * @param {string}    warning
    */
-  function addWarning(ressource, warning) {
+  function addWarning (ressource, warning) {
     if (!ressource.warnings) ressource.warnings = []
     ressource.warnings.push(warning)
   }
@@ -46,14 +46,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {Ressource} ressource
    * @param {string}    errorMsg
    */
-  function addError(ressource, errorMsg) {
+  function addError (ressource, errorMsg) {
     if (!ressource.errors) ressource.errors = []
     ressource.errors.push(errorMsg)
   }
 
   var flow = require('an-flow')
   var _ = require('lodash')
-  //var tools = require('../tools')
+  // var tools = require('../tools')
 
   /**
    * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
@@ -72,7 +72,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @memberOf $personneControl
    */
   $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, next) {
-    log.debug("checkGroupes avec " +ressourceNew.groupes.join(','))
+    log.debug('checkGroupes avec ' + ressourceNew.groupes.join(','))
     if (!ressourceNew.groupes) ressourceNew.groupes = []
     // les 2 cas où y'a rien à faire
     if (ressourceOriginale && _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes)) {
@@ -88,14 +88,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         var tmpGroupes
         ressourceNew.groupes = []
         // les droits, seulement si la ressource existait (sinon on suppose que si on est appelé c'est qu'il a les droits de création)
-        if (ressourceOriginale && !$accessControl.hasPermission("updateGroupes", context, ressourceOriginale)) {
+        if (ressourceOriginale && !$accessControl.hasPermission('updateGroupes', context, ressourceOriginale)) {
           ressourceNew.groupes = ressourceOriginale.groupes
           addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
           next(null, ressourceNew)
         } else {
           // on a les droits, on ajoute les groupes sup s'il y en a
           if (ressourceNew.groupesSup) {
-            tmpGroupes = ressourceNew.groupesSup.split(",")
+            tmpGroupes = ressourceNew.groupesSup.split(',')
             tmpGroupes.forEach(function (groupe) {
               groupesVoulus.push(groupe.trim())
             })
@@ -110,9 +110,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
               } else if (groupe) {
                 // le groupe existe déjà
                 if ($accessControl.isInGroupe(context, groupeNom)) ressourceNew.groupes.push(groupe.nom)
-                else ressourceNew.warnings.push("Vous devez faire partie du groupe " + groupeNom + " pour y partager cette ressource")
+                else ressourceNew.warnings.push('Vous devez faire partie du groupe ' + groupeNom + ' pour y partager cette ressource')
               } else {
-                addWarning(ressourceNew, "Le groupe " + groupe.nom + " n'existe pas")
+                addWarning(ressourceNew, 'Le groupe ' + groupe.nom + " n'existe pas")
               }
               nextGroupe()
             })
@@ -126,7 +126,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         // on vide et on signale l'erreur sans aller plus loin
         log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
         if (!ressourceNew.errors) ressourceNew.errors = []
-        ressourceNew.errors.push("Groupes invalides")
+        ressourceNew.errors.push('Groupes invalides')
         ressourceNew.groupes = []
         next(null, ressourceNew)
       }
@@ -141,8 +141,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {ressourceCallback} next
    */
   $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
-    log.debug("checkPersonnes avec les auteurs initiaux", ressourceOriginale && ressourceOriginale.auteurs)
-    log.debug("et les nouveaux auteurs", ressourceNew.auteurs)
+    log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
+    log.debug('et les nouveaux auteurs', ressourceNew.auteurs)
     // les cas où on a rien à faire
     if (
         ressourceOriginale &&
@@ -153,12 +153,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     ) {
       // y'avait une ressource et on a rien changé
       next(null, ressourceNew)
-
-    } else if ($accessControl.hasPermission("updateAuteurs", context, ressourceOriginale)) {
+    } else if ($accessControl.hasPermission('updateAuteurs', context, ressourceOriginale)) {
       // on a tous les droits sur les auteurs et qqchose a changé, on mémorise ce que l'on veut mettre
-      var auteurs = ressourceNew.auteurs,
-          contributeurs = ressourceNew.contributeurs,
-          tmp
+      var auteurs = ressourceNew.auteurs
+      var contributeurs = ressourceNew.contributeurs
+      var tmp
       // puis reset des personnes sur la nouvelle ressource
       ressourceNew.auteurs = []
       ressourceNew.contributeurs = []
@@ -167,10 +166,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         var nextStep = this
         // on passe en revue les auteurs demandés, en ajoutant à la wishlist les auteurs sup s'il y en a
         if (ressourceNew.auteursAdd) {
-          tmp = ressourceNew.auteursAdd.split(",")
+          tmp = ressourceNew.auteursAdd.split(',')
           delete ressourceNew.auteursAdd
           tmp.forEach(function (id) {
-            log.debug("push auteur " +id)
+            log.debug('push auteur ' + id)
             var idClean = id.trim()
             if (idClean) auteurs.push(idClean)
           })
@@ -192,12 +191,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         }).catch(function (error) {
           nextStep(error)
         })
-
       }).seq(function () {
         var nextStep = this
         // aj contributeurs sup
         if (ressourceNew.contributeursAdd) {
-          tmp = ressourceNew.contributeursAdd.split(",")
+          tmp = ressourceNew.contributeursAdd.split(',')
           delete ressourceNew.contributeursAdd
           tmp.forEach(function (oid) {
             var id = oid.trim()
@@ -213,7 +211,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
             } else if (personne) {
               ressourceNew.contributeurs.push(personne.oid)
             } else {
-              addWarning(ressourceNew, "Le contributeur d'identifiant " + oid + " n'existe pas")
+              addWarning(ressourceNew, "Le contributeur d'identifiant ' + oid + ' n'existe pas")
             }
             nextContributeur()
           })
@@ -222,13 +220,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         }).catch(function (error) {
           nextStep(error)
         })
-
       }).seq(function () {
         // terminé
         next(null, ressourceNew)
-
       }).catch(next)
-
     } else {
       // pas tous les droits sur les auteurs, on ajoute le user courant en auteur (nouvelle ressource) ou contributeur (modif existante) sans toucher au reste
       var currentUserOid = $accessControl.getCurrentUserOid(context)
@@ -240,7 +235,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         // il est pas auteur
         if (ressourceOriginale) {
           // y'avait une ressource, on l'ajoute en contributeurs s'il n'y était pas
-          if (ressourceNew.contributeurs.indexOf(currentUserOid) < 0) ressourceNew.contributeurs.push(currentUserOid);
+          if (ressourceNew.contributeurs.indexOf(currentUserOid) < 0) ressourceNew.contributeurs.push(currentUserOid)
         } else {
           // creation, mise d'office en auteur
           ressourceNew.auteurs = [currentUserOid]

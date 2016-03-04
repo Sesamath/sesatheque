@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 'use strict'
-var $ = window.jQuery
+
 var log = require('../../tools/log')
 var dom = require('../../tools/dom')
 var page = require('../../page')
@@ -47,22 +47,22 @@ var mqEditor = {}
  * @param button
  */
 function addButton(parent, button) {
-  var argBtn = {"class": "mqButton", type:"button"}
+  var argBtn = {'class': 'mqButton', type:'button'}
   if (mqTitle[button]) argBtn.title = mqTitle[button]
   var btn = dom.addElement(parent, 'button', argBtn)
-  dom.addElement(btn, 'img', {src:basePath + "images/" + button + ".png", alt:mqLabel[button]})
-  log("Ajout bouton " +button, btn)
+  dom.addElement(btn, 'img', {src:basePath + 'images/' + button + '.png', alt:mqLabel[button]})
+  log('Ajout bouton ' +button, btn)
   var value = mqExpr[button]
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     // une seule commande
     btn.addEventListener('click', function () {
-      log("clic sur " +button)
+      log('clic sur ' +button)
       $mqDiv.mathquill('cmd', value).focus()
     })
   } else if (value && value.forEach) {
     // un array de commandes
     btn.addEventListener('click', function () {
-      log("clic sur " +button)
+      log('clic sur ' +button)
       value.forEach(function (args) {
         $mqDiv.mathquill.apply($mqDiv, args)
       })
@@ -120,7 +120,7 @@ try {
     puissance: 'puissance',
     racine: 'racine carrée',
     supEgal: 'supérieur ou égal',
-    text : "ajoute un texte (avec espaces possibles)",
+    text : 'ajoute un texte (avec espaces possibles)',
     union: 'union',
     vide:'ensemble vide'
   }
@@ -161,70 +161,73 @@ try {
    */
   mqEditor.init = function (textarea, config, options, next) {
     try {
-      $(function () {
-        if (!textarea) throw new Error("Il faut fournir un div ou un textarea pour mathquill")
-        basePath = (options && options.base) || "/"
-        basePath += "editors/mqEditor/"
-        if (textarea.nodeName === "TEXTAREA") {
-          $textarea = $(textarea)
-          $textarea.hide()
-          // on crée un div
-          var mqDiv = dom.getElement("div")
-          $textarea.before(mqDiv)
-          $mqDiv = $(mqDiv)
-          $mqDiv.html($textarea.val())
-        } else {
-          // on suppose que c'est un élément mathquillifiable sans vérifier une liste de tags
-          log("init mathquill avec un contenu dans un tag " + textarea.nodeName)
-          $mqDiv = $(textarea)
-        }
-        // on regarde si on trouve des éléments
-        $mqDiv.attr("contenteditable", true)
-        $mqDiv.mathquill('editable').focus()
-
-        // les boutons mathquill
-        var mqButtons = window.document.getElementById("mqButtons")
-        if (!mqButtons) {
-          mqButtons = dom.getElement('div', {id: "mqButtons"})
-          $mqDiv.before(mqButtons)
-          $mqButtons = $(mqButtons)
-        }
-        var defaultConfig = {
-          fraction: true,
-          infEgal: true,
-          pi: true,
-          puissance: true,
-          racine: true,
-          supEgal: true
-        }
-        var fullConfig = {
-          equivaut: true,
-          exponentielle: true,
-          fraction: true,
-          infEgal: true,
-          infini: true,
-          inter: true,
-          pi: true,
-          puissance: true,
-          racine: true,
-          supEgal: true,
-          text: true,
-          union: true,
-          vide: true
-        }
-        if (!config) config = defaultConfig
-        else if (config === "default") config = defaultConfig
-        else if (config === "full") config = fullConfig
-        // on ajoute ces boutons
-        for (var btn in config) {
-          if (config.hasOwnProperty(btn) && config[btn]) {
-            addButton(mqButtons, btn)
+      page.loadAsync('jquery', function () {
+        var $ = window.jQuery
+        $(function () {
+          if (!textarea) throw new Error('Il faut fournir un div ou un textarea pour mathquill')
+          basePath = (options && options.base) || '/'
+          basePath += 'editors/mqEditor/'
+          if (textarea.nodeName === 'TEXTAREA') {
+            $textarea = $(textarea)
+            $textarea.hide()
+            // on crée un div
+            var mqDiv = dom.getElement('div')
+            $textarea.before(mqDiv)
+            $mqDiv = $(mqDiv)
+            $mqDiv.html($textarea.val())
+          } else {
+            // on suppose que c'est un élément mathquillifiable sans vérifier une liste de tags
+            log('init mathquill avec un contenu dans un tag ' + textarea.nodeName)
+            $mqDiv = $(textarea)
           }
-        }
-        dom.addElement(mqButtons, "hr", {style: {visibility: "hidden", clear: "left"}})
-        //$mqDiv.mathquill().focus()
-        isInitDone = true
-        if (next) next()
+          // on regarde si on trouve des éléments
+          $mqDiv.attr('contenteditable', true)
+          $mqDiv.mathquill('editable').focus()
+
+          // les boutons mathquill
+          var mqButtons = window.document.getElementById('mqButtons')
+          if (!mqButtons) {
+            mqButtons = dom.getElement('div', { id: 'mqButtons' })
+            $mqDiv.before(mqButtons)
+            $mqButtons = $(mqButtons)
+          }
+          var defaultConfig = {
+            fraction: true,
+            infEgal: true,
+            pi: true,
+            puissance: true,
+            racine: true,
+            supEgal: true
+          }
+          var fullConfig = {
+            equivaut: true,
+            exponentielle: true,
+            fraction: true,
+            infEgal: true,
+            infini: true,
+            inter: true,
+            pi: true,
+            puissance: true,
+            racine: true,
+            supEgal: true,
+            text: true,
+            union: true,
+            vide: true
+          }
+          if (!config) config = defaultConfig
+          else if (config === 'default') config = defaultConfig
+          else if (config === 'full') config = fullConfig
+          // on ajoute ces boutons
+          for (var btn in config) {
+            if (config.hasOwnProperty(btn) && config[ btn ]) {
+              addButton(mqButtons, btn)
+            }
+          }
+          dom.addElement(mqButtons, 'hr', { style: { visibility: 'hidden', clear: 'left' } })
+          //$mqDiv.mathquill().focus()
+          isInitDone = true
+          if (next) next()
+        })
       })
     } catch (error) {
       if (next) next(error)

@@ -43,12 +43,12 @@ var $ressourceConverter = {}
 
 var _ = require('lodash')
 var flow = require('an-flow')
-//var moment = require('moment')
+// var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
 var appConfig = require('../config')
-//var tools = require('../tools')
+// var tools = require('../tools')
 var Alias = require('./srcClient/constructors/Alias')
 var jstreeConverter = require('./srcClient/display/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
@@ -69,13 +69,13 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
       relations.forEach(function (relation) {
         if (relation && relation.length === 2) {
           var idRelation = relation[0]
-          if (relation[1] == ressource.oid || relation[1] === (ressource.origine +'/' +ressource.idOrigine))
-              errors.push("Impossible de lier une ressource à elle-même")
-          else if (config.listes.relations[idRelation]) {
+          if (relation[1] === ressource.oid || relation[1] === (ressource.origine + '/' + ressource.idOrigine)) {
+            errors.push('Impossible de lier une ressource à elle-même')
+          } else if (config.listes.relations[idRelation]) {
             // on regarde si cette relation n'y est pas déjà...
             var exists = false
             _.each(ressource.relations, function (relationExistante) {
-              if (relationExistante[0] == relation[0] && relationExistante[1] == relation[1]) {
+              if (relationExistante[0] === relation[0] && relationExistante[1] === relation[1]) {
                 exists = true
                 return false // pas la peine de continuer
               }
@@ -84,10 +84,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
               ressource.relations.push(relation)
               isModif = true
             }
+          } else {
+            errors.push(idRelation + " n'est pas un identifiant de relation valide")
           }
-          else errors.push(idRelation +" n'est pas un identifiant de relation valide")
         } else {
-          errors.push("une relation doit être un tableau à deux éléments (idRelation, idRessource, ce dernier peut être un oid ou une chaine origine/idOrigine")
+          errors.push('une relation doit être un tableau à deux éléments (idRelation, idRessource, ce dernier peut être un oid ou une chaine origine/idOrigine')
         }
       })
     } else errors.push('relations incorrectes')
@@ -105,17 +106,19 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
    * @returns {Array} ressources
    */
   $ressourceConverter.addUrlsToList = function (ressources, context) {
-    if (ressources && ressources.length) ressources.forEach(function (ressource) {
-      ressource.urlDescribe = $routes.getAbs('describe', ressource)
-      ressource.urlPreview = $routes.getAbs('preview', ressource)
-      ressource.urlDisplay = $routes.getAbs('display', ressource)
-      if (context && $accessControl.hasPermission('update', context, ressource)) ressource.urlEdit = $routes.getAbs('edit', ressource)
-    })
+    if (ressources && ressources.length) {
+      ressources.forEach(function (ressource) {
+        ressource.urlDescribe = $routes.getAbs('describe', ressource)
+        ressource.urlPreview = $routes.getAbs('preview', ressource)
+        ressource.urlDisplay = $routes.getAbs('display', ressource)
+        if (context && $accessControl.hasPermission('update', context, ressource)) ressource.urlEdit = $routes.getAbs('edit', ressource)
+      })
+    }
 
     return ressources
   }
 
-  //noinspection FunctionWithMoreThanThreeNegationsJS
+  // noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Peuple les enfants d'un arbre en allant les chercher en bdd
    * @memberOf $ressourceConverter
@@ -131,7 +134,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
      * @param parent
      * @param nextStep
      */
-    function populateEnfants(parent, nextStep) {
+    function populateEnfants (parent, nextStep) {
       /**
        * Met à jour un enfant chez son parent d'après une ressource récupérée en bdd
        * @private
@@ -139,12 +142,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
        * @param ressourceBdd
        * @param next
        */
-      function updateEnfant(enfantIndex, ressourceBdd, next) {
+      function updateEnfant (enfantIndex, ressourceBdd, next) {
         var enfant = parent.enfants[enfantIndex]
         if (ressourceBdd) {
           var newEnfant = {
-            oid          : ressourceBdd.oid,
-            titre        : ressourceBdd.titre,
+            oid: ressourceBdd.oid,
+            titre: ressourceBdd.titre,
             type: ressourceBdd.type
           }
           if (enfant.contenu) newEnfant.contenu = enfant.contenu
@@ -153,7 +156,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
           parent.enfants[enfantIndex] = newEnfant
         } else {
           // sinon on laisse en l'état mais on logue
-          log.errorData("On a pas trouvé la ressource " +enfant.idOrigine +' ' +enfant.id)
+          log.errorData('On a pas trouvé la ressource ' + enfant.idOrigine + ' ' + enfant.id)
           parent.enfants[enfantIndex].titre += ' (non trouvé)'
         }
         populateEnfants(parent.enfants[enfantIndex], next)
@@ -165,27 +168,29 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
           // pour permettre de récupérer des objets d'après leur ref d'origine, on accepte aussi id et idOrigine (à la place de ref)
           if (enfant.origine && enfant.idOrigine) {
             // on le cherche en db
-            //var logSuffix = enfant.idOrigine + ' - ' + enfant.id
-            //log('load ' + logSuffix)
+            // var logSuffix = enfant.idOrigine + ' - ' + enfant.id
+            // log('load ' + logSuffix)
             $ressourceRepository.loadByOrigin(enfant.origine, enfant.idOrigine, function (error, ressource) {
-              log("on traite l'enfant " +enfant.titre +" et on a récupéré ", ressource)
+              if (error) log.error(error)
+              log("on traite l'enfant ' +enfant.titre +' et on a récupéré ", ressource)
               updateEnfant(enfantIndex, ressource, finEach)
             })
           } else if (enfant.ref) {
             $ressourceRepository.load(enfant.ref, function (error, ressource) {
+              if (error) log.error(error)
               updateEnfant(enfantIndex, ressource, finEach)
             })
           } else {
             // pas de ref ni idOrigine
             populateEnfants(enfant, finEach)
           }
-         }).seq(function () {
-           nextStep()
-         }).catch(function(error) {
-           log.error(new Error("L'analyse de l'arbre a planté (cf aussi erreur suivante)"), parent)
-           log.error(error)
-           nextStep()
-         })
+        }).seq(function () {
+          nextStep()
+        }).catch(function (error) {
+          log.error(new Error("L'analyse de l'arbre a planté (cf aussi erreur suivante)"), parent)
+          log.error(error)
+          nextStep()
+        })
       } else {
         nextStep()
       }
@@ -199,7 +204,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
                !ressource.enfants.length
     ) {
       log.debug('arbre vide', ressource)
-      next(new Error("Impossible de peupler un arbre vide"))
+      next(new Error('Impossible de peupler un arbre vide'))
     } else {
       // go
       populateEnfants(ressource, next)
@@ -216,11 +221,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     if (ressource.type === 'arbre') {
       var clone = _.clone(ressource)
       arbre = {
-        oid          : clone.oid,
-        titre        : clone.titre,
+        oid: clone.oid,
+        titre: clone.titre,
         type: 'arbre',
-        attributes   : clone.parametres.attributes || {},
-        enfants      : clone.enfants || []
+        attributes: clone.parametres.attributes || {},
+        enfants: clone.enfants || []
       }
     }
 
@@ -249,7 +254,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     // on vire le proprio
     if (alias.userOid) delete alias.userOid
     // et on ajoute d'éventuels enfants
-    if (alias.type === "arbre" && ressource.enfants) alias.enfants = ressource.enfants
+    if (alias.type === 'arbre' && ressource.enfants) alias.enfants = ressource.enfants
 
     return alias
   }
@@ -262,14 +267,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
    */
   $ressourceConverter.toCompactFormat = function (ressource) {
     return {
-      oid          : ressource.oid,
-      origine      : ressource.origine,
-      idOrigine    : ressource.idOrigine,
-      titre        : ressource.titre,
+      oid: ressource.oid,
+      origine: ressource.origine,
+      idOrigine: ressource.idOrigine,
+      titre: ressource.titre,
       type: ressource.type,
-      categories   : ressource.categories,
-      restriction  : ressource.restriction,
-      dataUri      : ressource.dataUri || $routes.getAbs('api', ressource)
+      categories: ressource.categories,
+      restriction: ressource.restriction,
+      dataUri: ressource.dataUri || $routes.getAbs('api', ressource)
     }
   }
 
@@ -289,8 +294,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
         } else {
           child = jstreeConverter.getJstNode(enfant, defaultBase)
         }
-        children.push(child);
-      });
+        children.push(child)
+      })
     }
 
     return children

@@ -64,10 +64,10 @@ module.exports = function (EntityAlias) {
     } else if (this.ref === this.oid && (!this.base || this.base === config.application.baseUrl)) {
       next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))
     } else if (!this.base) {
-      next(new Error("Impossible de sauvegarder un alias sans base"))
+      next(new Error('Impossible de sauvegarder un alias sans base'))
     } else {
       // on sauvegarde toujours la base avec le slash de fin
-      if (this.base.substr(-1) !== '/') this.base += "/"
+      if (this.base.substr(-1) !== '/') this.base += '/'
       next()
     }
   })

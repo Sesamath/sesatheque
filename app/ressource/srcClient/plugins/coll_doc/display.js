@@ -34,7 +34,7 @@ var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
-var baseCollDoc = "http://ressources.sesamath.net"
+var baseCollDoc = 'http://ressources.sesamath.net'
 
 /**
  * Affiche la ressource coll_doc (atome de manuel ou cahier)
@@ -46,7 +46,7 @@ var baseCollDoc = "http://ressources.sesamath.net"
 module.exports = function display(ressource, options, next) {
   try {
     var container = options.container
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     // on enverra le résultat à la fermeture
     if (options.resultatCallback && container.addEventListener) {
@@ -64,7 +64,7 @@ module.exports = function display(ressource, options, next) {
     log('start coll_doc display avec la ressource', ressource)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
     var url
     try {
@@ -77,12 +77,12 @@ module.exports = function display(ressource, options, next) {
     dom.empty(container)
     if (ressource.parametres.url) {
       // on affiche le lecteur d'origine
-      dom.addElement(container, 'iframe', {src: url, style: "width:100%;height:100%", onload: next})
+      dom.addElement(container, 'iframe', {src: url, style: 'width:100%;height:100%', onload: next})
     } else if (url) {
       // on affiche les lien de téléchargement
       var msg
-      if (ressource.parametres.files.length > 1) msg = "Fichiers composant la ressource"
-      else msg = "Voici le lien pour télécharger la ressource"
+      if (ressource.parametres.files.length > 1) msg = 'Fichiers composant la ressource'
+      else msg = 'Voici le lien pour télécharger la ressource'
       var ul = dom.addElement(container, 'ul', null, msg)
       ressource.parametres.files.forEach(function (file) {
         var li = dom.addElement(ul, 'li')
@@ -92,7 +92,7 @@ module.exports = function display(ressource, options, next) {
           var name = file.uri.substr(pos + 1)
           dom.addElement(li, 'a', {href: url}, name)
         } else {
-          dom.addElement(li, 'span', {class: "error"}, "Url manquante")
+          dom.addElement(li, 'span', {class: 'error'}, 'Url manquante')
         }
       })
       next()

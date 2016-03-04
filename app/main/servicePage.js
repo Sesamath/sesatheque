@@ -47,10 +47,12 @@ module.exports = function () {
    * @param {object} data objet qui sera passé à context.html()
    */
   $page.addError = function (error, data) {
-    if (!data.errors || !data.errors.errorMessages) data.errors = {
-      errorMessages : []
+    if (!data.errors || !data.errors.errorMessages) {
+      data.errors = {
+        errorMessages: []
+      }
     }
-    var errorMessage = (typeof error === "string") ? error : error.toString()
+    var errorMessage = (typeof error === 'string') ? error : error.toString()
     data.errors.errorMessages.push(errorMessage)
     log.error(error)
   }
@@ -58,10 +60,10 @@ module.exports = function () {
   /**
    * Affiche une 401 avec Authentification requise en html
    * @param {Context} context
-   * @param {string} [message="Authentification requise"]
+   * @param {string} [message='Authentification requise']
    */
-  $page.denied = function denied(context, message) {
-    if (!message) message = "Authentification requise"
+  $page.denied = function denied (context, message) {
+    if (!message) message = 'Authentification requise'
     $page.printError(context, message, 401)
   }
 
@@ -74,11 +76,10 @@ module.exports = function () {
    *                                  ou un simple texte (qui sera passé à la vue contents
    * @returns {{$views: string, $metas: {}}}
    */
-  $page.getDefaultData = function getDefaultData(context, titre, contentBloc) {
+  $page.getDefaultData = function getDefaultData (context, titre, contentBloc) {
     var data = {
-      $views : __dirname + '/../views',
-      $metas : {
-        js : ['/page.bundle.js']
+      $metas: {
+        js: ['/page.bundle.js']
       }
     }
     if (titre) {
@@ -91,8 +92,8 @@ module.exports = function () {
     }
     if (typeof contentBloc === 'string') {
       data.contentBloc = {
-        $view : 'contents',
-        contents : [contentBloc]
+        $view: 'contents',
+        contents: [contentBloc]
       }
     } else if (contentBloc) {
       data.contentBloc = contentBloc
@@ -114,7 +115,7 @@ module.exports = function () {
   $page.print = function (context, titre, contentBloc, moreData) {
     var data = $page.getDefaultData(context, titre, contentBloc)
     if (_.isArray(moreData)) {
-      if (moreData.length) moreData = { blocs : { blocList : moreData } }
+      if (moreData.length) moreData = { blocs: { blocList: moreData } }
       else moreData = null
     }
     if (moreData) tools.merge(data, moreData)
@@ -154,5 +155,3 @@ module.exports = function () {
 
   return $page
 }
-
-

@@ -53,7 +53,7 @@ module.exports = function (EntityArchive) {
     this.dateArchivage = new Date()
   }
 
-  EntityArchive.table = "archive"
+  EntityArchive.table = 'archive'
 
   EntityArchive
     .defineIndex('origine', 'string')

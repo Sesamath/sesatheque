@@ -45,25 +45,25 @@ var swf = require('../../display/swf')
  */
 module.exports = function display(ressource, options, next) {
   try {
-    var ec2Base = tools.getURLParameter("ec2Base") || options.ec2Base || "http://ressources.sesamath.net/replication_calculatice/flash"
+    var ec2Base = tools.getURLParameter('ec2Base') || options.ec2Base || 'http://ressources.sesamath.net/replication_calculatice/flash'
     var swfUrl
 
     log('start ec2 display avec la ressource', ressource)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
     // le swf
     swfUrl = ec2Base + '/' + ressource.parametres.swf
     // les fcts exportées pour le swf
-    var optionsChargement = ressource.parametres.json || "defaut"
+    var optionsChargement = ressource.parametres.json || 'defaut'
     window.charger_options = function () {
       return optionsChargement
     }
 
     window.enregistrer_score = function (datasCalculatice) {
       if (options && options.resultatCallback) {
-        log("résultats reçus", datasCalculatice)
+        log('résultats reçus', datasCalculatice)
         options.resultatCallback({reponse: datasCalculatice})
       }
     }
@@ -72,7 +72,7 @@ module.exports = function display(ressource, options, next) {
     dom.empty(options.container)
 
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    options.container.setAttribute("width", 735); // change rien avec ff
+    options.container.setAttribute('width', 735); // change rien avec ff
     options.container.style.width = '735px'
 
     var swfOptions = {

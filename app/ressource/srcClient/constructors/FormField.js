@@ -135,7 +135,7 @@ function FormField(values) {
   if (typeof values.value === 'string' || typeof values.value === 'number' || typeof values.value === 'undefined') {
     // text par défaut
     if (!this.widget) this.widget = 'text'
-    if (["text", "textarea", "submit", "button", "hidden", "info"].indexOf(this.widget) === -1) throw new Error("widget "+this.widget +" incompatible avec la valeur " +values.value)
+    if (['text', 'textarea', 'submit', 'button', 'hidden', 'info'].indexOf(this.widget) === -1) throw new Error('widget '+this.widget +' incompatible avec la valeur ' +values.value)
     this.value = values.value || ''
 
   } else if (typeof values.value === 'boolean') {
@@ -160,7 +160,7 @@ function FormField(values) {
   } else if (values.value instanceof Array) {
     // une liste, checkboxes par défaut
     if (!this.widget) this.widget = 'checkboxes'
-    if (["select", "checkboxes", "radios"].indexOf(this.widget) === -1) throw new Error("widget incompatible avec la valeur")
+    if (['select', 'checkboxes', 'radios'].indexOf(this.widget) === -1) throw new Error('widget incompatible avec la valeur')
     this.value = []
     if (values.value.length) {
       for (i = 0; i < values.value.length; i++) {

@@ -111,7 +111,7 @@ var exclusions = {}
  * @returns {string}
  */
 function getPrefix() {
-  return '[' + moment().format("YYYY-MM-DD HH:mm:ss.SSS") +'] '
+  return '[' + moment().format('YYYY-MM-DD HH:mm:ss.SSS') +'] '
 }
 
 /**
@@ -136,12 +136,12 @@ function out(message, objectToDump, filter, stream, options) {
         var dump = tools.stringify(objectToDump, options.indent)
         var max = options && options.max || 200
         if (dump.length > max) dump = dump.substr(0, max) + '…'
-        message += '\n' +dump  + "\n";
+        message += '\n' +dump  + '\n';
       }
     }
     message = getPrefix() +message
     if (!stream) console.log(message)
-    else stream.write(message + "\n")
+    else stream.write(message + '\n')
   }
 }
 // log
@@ -189,7 +189,7 @@ if (config.logs.debug) {
     })
   }
 
-  applog('app', "fonction log.debug activée vers " +config.logs.debug +", avec l'environnement : " +env)
+  applog('app', 'fonction log.debug activée vers ' +config.logs.debug +", avec l'environnement : " +env)
 
 } else {
   log.debug = function() {};
@@ -232,12 +232,12 @@ if (config.logs.perf) {
 /*
 if (config.logs.sql) {
   // pour que ça sorte qqchose, ajouter à node_modules/lassi/classes/entities/EntityQuery.js la ligne
-  // if (typeof log !== "undefined" && log.sql) log.sql(query.toString(), query.args);
+  // if (typeof log !== 'undefined' && log.sql) log.sql(query.toString(), query.args);
   // juste avant l'appel de database.query
   var sqlOutputStream = getLogStream(config.logs.sql)
   log.sql = function (queryString, args) {
     for (var i = 0; i < args.length; i++) {
-      queryString = queryString.replace("?", "'" +args[i] +"'")
+      queryString = queryString.replace('?', "'' +args[i] +''")
     }
     out(queryString, null, null, sqlOutputStream)
   }

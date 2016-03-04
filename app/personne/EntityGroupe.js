@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 var Groupe = require('../ressource/srcClient/constructors/Groupe')
 
@@ -42,16 +42,16 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
    */
   EntityGroupe.construct(Groupe)
 
-  EntityGroupe.table = "groupe"
+  EntityGroupe.table = 'groupe'
 
-  EntityGroupe.beforeStore(function(next) {
-    if (!this.creationDate) this.creationDate = new Date();
+  EntityGroupe.beforeStore(function (next) {
+    if (!this.creationDate) this.creationDate = new Date()
     next()
   })
 
-  EntityGroupe.afterStore(function(next) {
+  EntityGroupe.afterStore(function (next) {
     // on met en cache
-    $cacheGroupe.set(this, function (error) {if (error) log.debug(error)})
+    $cacheGroupe.set(this, function (error) { if (error) log.debug(error) })
     // et on passe au suivant sans se préoccuper du retour de mise en cache
     next()
   })

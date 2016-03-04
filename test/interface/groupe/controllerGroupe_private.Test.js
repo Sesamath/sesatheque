@@ -36,7 +36,7 @@
 'use strict'
 /*global describe,it*/
 
-var assert = require("assert")
+var assert = require('assert')
 var rewire = require('rewire')
 var controllerGroupe = rewire('../../../app/personne/controllerGroupe')
 

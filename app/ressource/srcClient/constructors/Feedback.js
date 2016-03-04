@@ -43,7 +43,7 @@ function Feedback(values) {
    * @type {boolean}
    */
   this.ok = !!values.ok
-  if (values.hasOwnProperty("success")) {
+  if (values.hasOwnProperty('success')) {
     /**
      * Alternative à la propriété ok
      * @type {boolean}

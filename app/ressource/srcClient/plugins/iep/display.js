@@ -52,24 +52,24 @@ module.exports = function display(ressource, options, next) {
    * @param xml
    */
   function affiche(xml) {
-    //log("on va afficher le xml : " +xml)
+    //log('on va afficher le xml : ' +xml)
     // On réinitialise le conteneur
     dom.empty(container)
     var error
     var width = ressource.parametres.width || container.offsetWidth || 800
     var height = ressource.parametres.height || width * 0.75 || 600
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
-    //var svg = dom.addElement(container, 'svg', {id:'svg', width:"800px", height:"500px", xmlns:"http://www.w3.org/2000/svg"})
-    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-    svg.setAttributeNS(null, "width", width)
-    svg.setAttributeNS(null, "height", height)
-    svg.style.display = "block"
+    //var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svg.setAttributeNS(null, 'width', width)
+    svg.setAttributeNS(null, 'height', height)
+    svg.style.display = 'block'
     container.appendChild(svg)
     if (window.iep.iepApp) {
       var app = new window.iep.iepApp()
       app.addDoc(svg, xml)
     } else {
-      error = new Error("Problème de chargement du moteur instrumenpoche (constructeur iepApp absent)")
+      error = new Error('Problème de chargement du moteur instrumenpoche (constructeur iepApp absent)')
     }
     if (next) next(error)
     else if (error) page.addError(error)
@@ -78,10 +78,10 @@ module.exports = function display(ressource, options, next) {
   try {
     log('start iep display avec la ressource', ressource)
     var container = options.container
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
     //les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error("Paramètres manquants")
-    if (!ressource.parametres.url && !ressource.parametres.xml) throw new Error("Pas de script instrumenpoche en paramètre")
+    if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error('Paramètres manquants')
+    if (!ressource.parametres.url && !ressource.parametres.xml) throw new Error('Pas de script instrumenpoche en paramètre')
 
     // on enverra un résultat seulement à la fermeture
     if (options.resultatCallback && container.addEventListener) {
@@ -102,10 +102,10 @@ module.exports = function display(ressource, options, next) {
       /*global MathJax*/
       MathJax.Hub.Config({
         tex2jax: {
-          inlineMath: [["$", "$"], ["\\(", "\\)"]]
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
         },
-        jax: ["input/TeX", "output/SVG"],
-        TeX: {extensions: ["color.js"]},
+        jax: ['input/TeX', 'output/SVG'],
+        TeX: {extensions: ['color.js']},
         messageStyle: 'none'
       })
       MathJax.Hub.Queue(function () {
@@ -113,11 +113,11 @@ module.exports = function display(ressource, options, next) {
           // faut aller chercher la source
           var xhr = require('../../tools/xhr')
           var options = {}
-          if (url.indexOf(".php?") > 0) options.withCredentials = true
+          if (url.indexOf('.php?') > 0) options.withCredentials = true
           xhr.get(url, options, function (error, xml) {
             if (error) {
               log.error(error)
-              page.addError("L'appel de " + url + " a échoué")
+              page.addError("L'appel de ' + url + ' a échoué")
             } else {
               affiche(xml)
             }

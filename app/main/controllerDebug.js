@@ -29,18 +29,16 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 module.exports = function (controller) {
-
   var tools = require('../tools/index')
-  //var _ = require('lodash')
+  // var _ = require('lodash')
 
-  function getDefaultData() {
+  function getDefaultData () {
     return {
-      $views : __dirname + '/../views',
-      contentBloc : {
-        $view : 'debug'
+      contentBloc: {
+        $view: 'debug'
       }
     }
   }
@@ -48,14 +46,14 @@ module.exports = function (controller) {
   /**
    * Une route pour afficher des objets en dev (debug)
    */
-  controller.get('session', function(context) {
+  controller.get('session', function (context) {
     context.layout = 'page'
     log('ctrl session ')
     // on ajoute un compteur pour vérifier que ça s'incrémente de 1 à chaque affichage
     if (context.session.compteur) context.session.compteur++
     else context.session.compteur = 1
     var data = getDefaultData()
-    data.$metas = {title : 'La session courante'}
+    data.$metas = {title: 'La session courante'}
     data.contentBloc.debug = tools.stringify(context.session, 2)
     context.html(data)
   })
@@ -78,7 +76,7 @@ module.exports = function (controller) {
   controller.get('test', function (context) {
     context.layout = 'page'
     var data = getDefaultData()
-    data.contentBloc.debug = tools.stringify({foo:'bar'})
+    data.contentBloc.debug = tools.stringify({foo: 'bar'})
     context.html(data)
   })
 
@@ -87,28 +85,28 @@ module.exports = function (controller) {
     context.json(context.post)
   })
 
-  // Renvoie {result:"ok"}
+  // Renvoie {result:'ok'}
   controller.get('resultOk', function (context) {
-    context.json({result:"ok"})
+    context.json({result: 'ok'})
   })
 
-  // Renvoie {error:"Une erreur déclenchée exprès"}
+  // Renvoie {error:'Une erreur déclenchée exprès'}
   controller.get('resultKo', function (context) {
-    context.json({error:"Une erreur déclenchée exprès"})
+    context.json({error: 'Une erreur déclenchée exprès'})
   })
 
   // déclenche une erreur 500
   controller.get('erreur500', function (context) {
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-    throw new Error("Une erreur 500 provoquée")
+    throw new Error('Une erreur 500 provoquée')
   })
 
   // pour déclencher un Wrong views path de lassi
   controller.get('error', function (context) {
     context.html({
-      bloc:{
-        $view:'bidon',
-        content:'toto'
+      bloc: {
+        $view: 'bidon',
+        content: 'toto'
       }
     })
   })

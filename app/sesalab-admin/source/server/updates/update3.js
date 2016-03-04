@@ -36,7 +36,7 @@ var uuid = require('an-uuid')
 var configRessource = require('../../../../ressource/config')
 
 module.exports = function(job) {
-  var EntityRessource = lassi.service("EntityRessource")
+  var EntityRessource = lassi.service('EntityRessource')
   var correctionId = configRessource.constantes.restriction.correction
   flow().seq(function () {
     EntityRessource.match('restriction').equals(correctionId).count(this)
@@ -44,7 +44,7 @@ module.exports = function(job) {
     var tours = job.init(nbRess, 50)
     flow(tours).seqEach(function (tour) {
       var nextTour = this
-      log("On démarre à " + tour[0])
+      log('On démarre à ' + tour[0])
       flow().seq(function () {
         EntityRessource.match('restriction').equals(correctionId).grab(tour[1], tour[0], this)
       }).seq(function (ressources) {
@@ -61,8 +61,8 @@ module.exports = function(job) {
         }).catch(job.done)
       }).catch(job.done)
     }).seq(function () {
-      // log("dernier tour terminé")
-      job.done("")
+      // log('dernier tour terminé')
+      job.done('')
     }).catch(job.done)
   }).catch(job.done)
 }

@@ -50,12 +50,12 @@ module.exports = function display(ressource, options, next) {
   try {
     var baseSwf, swfUrl, swfOpt
     var container = options.container
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     // on enverra le résultat à la fermeture (si y'a eu un chargement, isLoaded sert de flag)
     if (options.resultatCallback && window.addEventListener) {
       window.addEventListener('unload', function () {
-        log("unload am")
+        log('unload am')
         var resultat = {
           ressType: 'am',
           ressId: ressource.oid,
@@ -73,7 +73,7 @@ module.exports = function display(ressource, options, next) {
     log('start am display avec la ressource', ressource)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !params) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
     // init de ressOid en global à ce module (pour les appels ultérieurs de getResultat)
     ressOid = ressource.oid
@@ -84,15 +84,15 @@ module.exports = function display(ressource, options, next) {
     // notre base (si ça vient pas de l'interface de développement des exo mathenpoche
     // faudra le préciser via ressource.parametres.baseUrl)
     if (ressource.origine !== 'am' && ressource.parametres.baseUrl) baseSwf = ressource.parametres.baseUrl
-    else baseSwf = "http://mep-col.sesamath.net/dev/aides/" + (params.mep_langue_id ? params.mep_langue_id : 'fr')
+    else baseSwf = 'http://mep-col.sesamath.net/dev/aides/' + (params.mep_langue_id ? params.mep_langue_id : 'fr')
     // url du swf
-    swfUrl = baseSwf + '/aide' + ressource.idOrigine + ".swf"
+    swfUrl = baseSwf + '/aide' + ressource.idOrigine + '.swf'
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    container.setAttribute("width", 735)
+    container.setAttribute('width', 735)
     container.style.width = '735px'
 
     swfOpt = {
-      base: baseSwf + "/",
+      base: baseSwf + '/',
       largeur: 735,
       hauteur: 450
     }

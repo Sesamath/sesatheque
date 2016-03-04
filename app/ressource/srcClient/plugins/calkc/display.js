@@ -53,10 +53,10 @@ module.exports = function display(ressource, options, next) {
     var swfUrl
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.xml) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
     var container = options.container
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     // On réinitialise le conteneur
     dom.empty(container)
@@ -84,7 +84,7 @@ module.exports = function display(ressource, options, next) {
     // url du swf
     swfUrl = options.pluginBase + 'calkc.swf'
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
-    container.setAttribute("width", 589)
+    container.setAttribute('width', 589)
     var swfOptions = {
       largeur: 589,
       hauteur: 393,

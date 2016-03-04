@@ -1,12 +1,14 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "private": true,
   "scripts": {
     "start": "node app/index.js",
     "test": "./scripts/run_tests -a",
     "test:watch": "npm test -- --watch",
     "build": "webpack",
+    "build-dev": "webpack --debug --verbose",
+    "build-watch": "webpack --debug --verbose -w",
     "lint": "standard --verbose | snazzy",
     "startClient": "hjs-dev-server",
     "dev": "./scripts/run -sd",
@@ -24,7 +26,16 @@
   "standard": {
     "globals": [
       "describe",
-      "it"
+      "it",
+      "isProd",
+      "lassi",
+      "log"
+    ],
+    "ignore": [
+      "node_modules/*",
+      "app/main/public",
+      "app/sesalab-admin",
+      "app/ressource/public"
     ]
   },
   "dependencies": {

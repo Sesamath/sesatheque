@@ -50,9 +50,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   var request = require('request')
   var flow = require('an-flow')
   var tools = require('../tools')
-  var config = require("../config")
-  var configRessource = require("./config")
-  var Alias = require("./srcClient/constructors/Alias")
+  var config = require('../config')
+  var configRessource = require('./config')
+  var Alias = require('./srcClient/constructors/Alias')
 
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
@@ -60,8 +60,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    * @param id
    */
-  function deleteAndSend(context, id) {
-    log.debug("dans cb api deleteRessource " +id)
+  function deleteAndSend (context, id) {
+    log.debug('dans cb api deleteRessource ' + id)
     // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
     $ressourceRepository.load(id, function (error, ressource) {
       if (error) {
@@ -73,13 +73,13 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           } else {
             $ressourceRepository.delete(ressource, function (error) {
               if (error) $json.send(context, error)
-              //else $json.send(context, null, {error:"message d'erreur bidon"})
+              // else $json.send(context, null, {error:"message d'erreur bidon"})
               else $json.sendOk(context, {deleted: id})
             })
           }
         })
       } else {
-        log.debug("La ressource " + id + " n'existait pas, on a rien effacé")
+        log.debug('La ressource ' + id + " n'existait pas, on a rien effacé")
         // pas de ressource, on vérifie qu'il avait certains droits
         $json.send(context, new Error("Aucune ressource d'identifiant " + id))
       }
@@ -92,7 +92,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    * @returns {string} oid ou origine/idOrigine ou undefined
    */
-  function extractId(context) {
+  function extractId (context) {
     var id
     if (context.post.origine && context.post.idOrigine) id = context.post.origine + '/' + context.post.idOrigine
     else if (context.get.origine && context.get.idOrigine) id = context.get.origine + '/' + context.get.idOrigine
@@ -106,7 +106,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @private
    * @param {Context} context
    */
-  function getListeAll(context) {
+  function getListeAll (context) {
     // si on lance la requete faut filtrer d'après les droits avec $accessControl.getListeLisible,
     // donc il récupèrera pas forcément nb résultats :-/
     // franchement pas terrible, donc on laisse tomber et on vérifie les droits all avant de lancer la requete
@@ -119,13 +119,13 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @private
    * @param {Context} context
    */
-  function getListeProf(context) {
+  function getListeProf (context) {
     if ($accessControl.hasGenericPermission('correction', context)) {
       grabListe(context, 'correction')
     } else if ($accessControl.isAuthenticated(context)) {
       $json.denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
     } else {
-      $json.denied(context, "Il faut être authentifié pour accéder aux corrigés")
+      $json.denied(context, 'Il faut être authentifié pour accéder aux corrigés')
     }
   }
 
@@ -134,25 +134,25 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @private
    * @param {Context} context
    */
-  function getListePerso(context) {
+  function getListePerso (context) {
     /**
      * Ajoute des refs (en vérifiant qu'elles sont valides) à nos deux listes globales refs et sequenceModeles
      * @private
      * @param {Ressource[]|Alias[]} ressources La liste des ressources|aliases à ajouter après vérif de leur intégrité
      * @param {string}              droits     Les droits sur ces ressources (lettres WD pour Write & Delete)
      */
-    function addRefs(ressources, droits) {
+    function addRefs (ressources, droits) {
       ressources.forEach(function (ressource) {
-        if (ressource.type === "sequenceModele") {
+        if (ressource.type === 'sequenceModele') {
           if (ressource.parametres) sequenceModeles.push(ressource.parametres)
-          else log.errorData("sequenceModele sans parametres", ressource)
+          else log.errorData('sequenceModele sans parametres', ressource)
         } else {
           var alias = new Alias(ressource)
           if (alias.ref && alias.titre && alias.type && (alias.public || alias.cle)) {
             if (droits) alias.$droits = droits
             refs.push(alias)
           } else {
-            log.errorData("ressource pas utilisable pour sesalab", ressource)
+            log.errorData('ressource pas utilisable pour sesalab', ressource)
           }
         }
       })
@@ -164,16 +164,16 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     var sequenceModeles = []
     if (oid) {
       flow().seq(function () {
-        $ressourceRepository.getListe("all", {filters:[{index:"auteurs", values:[oid]}]}, this)
+        $ressourceRepository.getListe('all', {filters: [{index: 'auteurs', values: [oid]}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'WD')
-        $ressourceRepository.getListe("all", {filters:[{index:"contributeurs", values:[oid]}]}, this)
+        $ressourceRepository.getListe('all', {filters: [{index: 'contributeurs', values: [oid]}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'W')
         EntityAlias.match('userOid').equals(oid).grab(this)
       }).seq(function (aliases) {
         if (aliases.length) addRefs(aliases, 'D')
-        $json.sendOk(context, {liste: refs, sequenceModeles:sequenceModeles})
+        $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -187,7 +187,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @private
    * @param context
    */
-  function getListePublic(context) {
+  function getListePublic (context) {
     grabListe(context, 'public')
   }
 
@@ -197,7 +197,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    * @param {string} visibility
    */
-  function grabListe(context, visibility) {
+  function grabListe (context, visibility) {
     var args
     if (context.get.json) {
       args = tools.parse(context.get.json)
@@ -209,7 +209,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       }
     }
     tools.merge(args, context.post)
-    log.debug("grabListe " +visibility, args)
+    log.debug('grabListe ' + visibility, args)
     $ressourceRepository.getListe(visibility, args, function (error, ressources) {
       sendListe(context, error, ressources)
     })
@@ -220,8 +220,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @private
    * @param {Context} context
    */
-  function optionsOk(context) {
-    log.debug("headers de la requete options", context.request.headers, 'xhr', {max:5000, indent:2})
+  function optionsOk (context) {
+    log.debug('headers de la requete options', context.request.headers, 'xhr', {max: 5000, indent: 2})
     // on laisse le middleware CORS faire son boulot
     context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
   }
@@ -229,20 +229,20 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   /**
    * Répond ok pour les options delete
    */
-  function optionsDeleteOk(context) {
+  function optionsDeleteOk (context) {
     context.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS')
-    //context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept')
+    // context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept')
     // et on laisse le middleware CORS faire son boulot
     context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
   }
 
-  //noinspection FunctionWithMoreThanThreeNegationsJS
+  // noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Traite la ressource de POST /api/ressource
    * @private
    * @param {Context} context
    */
-  function postRessource(context) {
+  function postRessource (context) {
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
     var ressourcePostee = context.post
@@ -250,12 +250,12 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
     if (context.perf) {
       var msg = 'start-'
-      if (ressourcePostee.origine && ressourcePostee.idOrigine) msg += ressourcePostee.origine +'/' +ressourcePostee.idOrigine
+      if (ressourcePostee.origine && ressourcePostee.idOrigine) msg += ressourcePostee.origine + '/' + ressourcePostee.idOrigine
       else msg += ressourcePostee.oid
       log.perf(context.response, msg)
     }
 
-    log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max:10000})
+    log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max: 10000})
 
     if ($accessControl.isAuthenticated(context) || $accessControl.hasAllRights(context)) {
       flow().seq(function () {
@@ -269,19 +269,17 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           // l'idOrigine n'est pas obligatoire ($ressourceRepository.write créera une clé si besoin
           next(null, ressourcePostee)
         } else {
-          next(new Error("Il faut fournir oid ou au moins origine"))
+          next(new Error('Il faut fournir oid ou au moins origine'))
         }
-
       }).seq(function (ressourceBdd) {
         if (log.perf) log.perf(context.response, 'loaded')
         if (ressourceBdd && ressourceBdd.oid) {
-          if ($accessControl.hasPermission("update", context, ressourceBdd)) this(null, ressourceBdd)
+          if ($accessControl.hasPermission('update', context, ressourceBdd)) this(null, ressourceBdd)
           else $json.denied(context, "Vous n'avez pas les droits suffisants pour modifier cette ressource")
         } else {
-          if ($accessControl.hasPermission("create", context, ressourcePostee)) this(null, null)
+          if ($accessControl.hasPermission('create', context, ressourcePostee)) this(null, null)
           else $json.denied(context, "Vous n'avez pas les droits suffisants pour créer cette ressource")
         }
-
       }).seq(function (ressourceBdd) {
         // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
         var tt = ressourcePostee.type
@@ -294,7 +292,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         }
         ressourceOriginale = ressourceBdd
         $ressourceControl.valideRessourceFromPost(ressourcePostee, partial, this)
-
       }).seq(function (ressourceNew) {
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
         $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, this)
@@ -304,13 +301,11 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         if (ressourceOriginale) tools.update(ressourceOriginale, ressourceNew)
         else ressourceOriginale = ressourceNew
         writeAndOut(context, ressourceOriginale)
-
       }).catch(function (error) {
         $json.send(context, error)
       })
-
     } else {
-      $json.denied(context, "Vous devez être authentifié pour ajouter une ressource")
+      $json.denied(context, 'Vous devez être authentifié pour ajouter une ressource')
     }
   }
 
@@ -322,7 +317,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   function postRessourceAddRelations (context) {
     if (context.perf) {
       var msg = 'start-'
-      if (context.post.origine && context.post.idOrigine) msg += context.post.origine +'/' +context.post.idOrigine
+      if (context.post.origine && context.post.idOrigine) msg += context.post.origine + '/' + context.post.idOrigine
       else msg += context.post.oid
       log.perf(context.response, msg)
     }
@@ -335,7 +330,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         $ressourceRepository.load(ref, function (error, ressource) {
           if (error) $json.send(context, error)
           else if (ressource) {
-            if ($accessControl.hasPermission("update", context, ressource)) {
+            if ($accessControl.hasPermission('update', context, ressource)) {
               var errors = $ressourceConverter.addRelations(ressource, relations)
               // rien changé
               if (errors === false) $json.sendOk(context, {oid: ressource.oid})
@@ -347,7 +342,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               $json.denied(context, "Vous n'avez pas les droits suffisants pour modifier cette ressource")
             }
           } else {
-            $json.notFound(context, "La ressource " + ref + " n'existe pas")
+            $json.notFound(context, 'La ressource ' + ref + " n'existe pas")
           }
         })
       } else {
@@ -365,17 +360,17 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param error
    * @param data
    */
-  function sendJsonJstreeArray(context, error, data) {
+  function sendJsonJstreeArray (context, error, data) {
     var errorMsg
     if (error) {
       errorMsg = (typeof error === 'string') ? error : error.toString()
-      $json.send(context, null, {arrayOnly:[{text:"Erreur : " +errorMsg}]})
+      $json.send(context, null, {arrayOnly: [{text: 'Erreur : ' + errorMsg}]})
     } else if (!(data instanceof Array)) {
       log.error(new Error("sendJsonJstreeArray appelé avec autre chose qu'un array"))
       $json.send(context, null, data)
     } else {
       log.debug('sendJson va renvoyer le tableau', data, 'api')
-      $json.send(context, null, {arrayOnly:data})
+      $json.send(context, null, {arrayOnly: data})
     }
   }
 
@@ -386,7 +381,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param error
    * @param ressources
    */
-  function sendListe(context, error, ressources) {
+  function sendListe (context, error, ressources) {
     if (error) $json.send(context, error)
     else {
       var liste = []
@@ -411,18 +406,18 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param error
    * @param ressource
    */
-  function sendRessource(context, error, ressource) {
-    log.debug("sendRessource api avec", ressource, 'avirer', {max:5000})
+  function sendRessource (context, error, ressource) {
+    log.debug('sendRessource api avec', ressource, 'avirer', {max: 5000})
     if (error) {
       $json.send(context, error)
     } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
       var format = context.get.format
-      if (format === "alias" || format === "ref") {
+      if (format === 'alias' || format === 'ref') {
         ressource = $ressourceConverter.toRef(ressource)
         // au format ref on ajoute les droits
-        ressource.$droits = "R"
-        if ($accessControl.hasPermission("update", context, ressource)) ressource.$droits += "W"
-        if ($accessControl.hasPermission("delete", context, ressource)) ressource.$droits += "D"
+        ressource.$droits = 'R'
+        if ($accessControl.hasPermission('update', context, ressource)) ressource.$droits += 'W'
+        if ($accessControl.hasPermission('delete', context, ressource)) ressource.$droits += 'D'
       } else if (format === 'compact') {
         ressource = $ressourceConverter.toCompactFormat(ressource)
       } else {
@@ -431,7 +426,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       }
       $json.send(context, null, ressource)
     } else {
-      log.debug("lecture ko", ressource, 'avirer', {max:5000})
+      log.debug('lecture ko', ressource, 'avirer', {max: 5000})
       $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
     }
   }
@@ -443,10 +438,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    * @param ressource
    */
-  function writeAndOut(context, ressource) {
+  function writeAndOut (context, ressource) {
     if (_.isEmpty(ressource.errors)) {
       $ressourceRepository.write(ressource, function (error, ressource) {
-        log.debug("dans cb api writeAndOut après $ressourceRepository.write", ressource, 'repository', {max: 500})
+        log.debug('dans cb api writeAndOut après $ressourceRepository.write', ressource, 'repository', {max: 500})
         if (error) {
           $json.send(context, error)
         } else {
@@ -501,7 +496,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             case "Test diagnostique d'algèbre":
             case 'Exercice Calcul@TICE':
               // on sauvegarde le nouveau titre
-              log.debug("titre de " +ressource.oid +" changé : " +ressource.titre +' => ' +newTitre)
+              log.debug('titre de ' +ressource.oid +' changé : ' +ressource.titre +' => ' +newTitre)
               ressource.titre = newTitre
               $ressourceRepository.write(ressource) // pas de next, on laisse comme c'était si ça plante
           }
@@ -527,7 +522,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               // on clone
               delete ressource.oid
               delete ressource.idOrigine
-              ressource.origine = "local"
+              ressource.origine = 'local'
               // faut mettre le user en auteur sinon il aura pas le droit de supprimer
               if (ressource.auteurs.indexOf(userOid) < 0) ressource.auteurs.push(userOid)
               ressource.publie = true
@@ -545,13 +540,13 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                 if (error) {
                   $json.sendError(context, error.toString())
                 } else if (alias) {
-                  $json.sendOk(context, {oid:alias.oid})
+                  $json.sendOk(context, {oid: alias.oid})
                 } else {
                   alias = EntityAlias.create(new Alias(ressource))
                   alias.userOid = userOid
                   alias.store(function (error, alias) {
                     if (error) $json.sendError(context, error)
-                    else $json.sendOk(context, {oid:alias.oid})
+                    else $json.sendOk(context, {oid: alias.oid})
                   })
                 }
               })
@@ -560,11 +555,11 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             $json.denied(context, "Vous n'avez pas les droits suffisant pour lire la ressource " + oid)
           }
         } else {
-          $json.notFound(context, "La ressource " + oid + " n'existe pas")
+          $json.notFound(context, 'La ressource ' + oid + " n'existe pas")
         }
       })
     } else {
-      $json.denied(context, "Vous devez être authentifié pour cloner une ressource")
+      $json.denied(context, 'Vous devez être authentifié pour cloner une ressource')
     }
   })
 
@@ -580,23 +575,23 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
      * Ajoute $droits et envoie
      * @param item
      */
-    function sendItem(item) {
-      item.$droits = "WD"
+    function sendItem (item) {
+      item.$droits = 'WD'
       $json.send(context, null, item)
     }
 
     var oid = context.arguments.oid
     var base = context.get.base
     try {
-      if (!base) throw new Error("Il faut préciser une base pour la ressource à cloner")
-      if (!oid) throw new Error("Paramètre manquant")
+      if (!base) throw new Error('Il faut préciser une base pour la ressource à cloner')
+      if (!oid) throw new Error('Paramètre manquant')
       // on normalise avec slash de fin
-      if (base.substr(-1) !== "/") base += "/"
-      if (base === config.application.baseUrl) throw new Error("La source est déjà sur cette sésathèque, clonage externe inutile")
+      if (base.substr(-1) !== '/') base += '/'
+      if (base === config.application.baseUrl) throw new Error('La source est déjà sur cette sésathèque, clonage externe inutile')
       var userOid = $accessControl.getCurrentUserOid(context)
-      if (!userOid) throw new Error("Vous devez être authentifié pour créer une ressource")
+      if (!userOid) throw new Error('Vous devez être authentifié pour créer une ressource')
       // on peut aller chercher la ressource
-      var url = base + "api/ressource/" + oid
+      var url = base + 'api/ressource/' + oid
       var options = {
         uri: url,
         gzip: true,
@@ -607,26 +602,26 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         if (error) {
           $json.send(context, error)
         } else if (response.statusCode === 200 && ressource) {
-          log.debug("externalClone a récupéré la ressource", ressource, 'clone', {max: 5000, indent: 2})
+          log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
           if (configRessource.editable[ressource.type]) {
             // on vire ce que l'on ne veut plus
-            ["oid", "idOrigine", "version", "archiveOid", "displayUri", "describeUri", "dataUri"].forEach(function (prop) {
+            ['oid', 'idOrigine', 'version', 'archiveOid', 'displayUri', 'describeUri', 'dataUri'].forEach(function (prop) {
               if (ressource.hasOwnProperty(prop)) delete ressource[prop]
             })
             // on impose qq propriétés
-            ressource.origine = "local"
+            ressource.origine = 'local'
             ressource.dateCreation = new Date()
             ressource.publie = true
             if (ressource.auteurs && ressource.auteurs.length) {
               if (!ressource.auteursParents) ressource.auteursParents = []
               ressource.auteurs.forEach(function (auteur) {
-                ressource.auteursParents.push(base + "auteur/" + auteur)
+                ressource.auteursParents.push(base + 'auteur/' + auteur)
               })
             }
             ressource.auteurs = [userOid]
             ressource.restriction = configRessource.constantes.restriction.prive
             if (!ressource.relations) ressource.relations = []
-            var originalUrl = base + "ressource/" + configRessource.constantes.routes.describe + "/" + oid
+            var originalUrl = base + 'ressource/' + configRessource.constantes.routes.describe + '/' + oid
             ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
             $ressourceRepository.write(ressource, function (error, ressource) {
               if (error) $json.send(context, error)
@@ -653,7 +648,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             })
           }
         } else {
-          $json.notFound(context, "La ressource " + oid + " n'existe pas sur la sesatheque " + base)
+          $json.notFound(context, 'La ressource ' + oid + " n'existe pas sur la sesatheque " + base)
         }
       })
     } catch (error) {
@@ -669,14 +664,14 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {string} token   Le token de sesalab qui servira à récupérer le user
    */
   controller.get('connexion', function (context) {
-    var token = context.get.token;
-    var origine = context.get.origine;
+    var token = context.get.token
+    var origine = context.get.origine
     var timeout = 5000
     if (token && origine) {
-      if (origine.substr(-1) !== "/") origine += "/"
+      if (origine.substr(-1) !== '/') origine += '/'
       if (config.sesalabs.indexOf(origine) > -1) {
         var postOptions = {
-          url: origine + "api/utilisateur/check-token",
+          url: origine + 'api/utilisateur/check-token',
           json: true,
           content_type: 'charset=UTF-8',
           timeout: timeout,
@@ -694,7 +689,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           } else if (body.ok && body.utilisateur) {
             // on peut connecter
             $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
-              log.debug("dans cb loginFromSesalab on a en session", context.session.user)
+              log.debug('dans cb loginFromSesalab on a en session', context.session.user)
               if (error) $json.send(context, error)
               else $json.sendOk(context, {random: +new Date()})
             })
@@ -705,10 +700,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           }
         })
       } else {
-        $json.send(context, new Error("Origine " +origine +"non autorisée à se connecter ici"))
+        $json.send(context, new Error('Origine ' + origine + 'non autorisée à se connecter ici'))
       }
     } else {
-      $json.send(context, new Error("token ou origine manquant"))
+      $json.send(context, new Error('token ou origine manquant'))
     }
   })
 
@@ -720,7 +715,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       $accessControl.logout(context)
       $json.sendOk(context)
     } else {
-      $json.sendOk(context, {warning: "Utilisateur non connecté"})
+      $json.sendOk(context, {warning: 'Utilisateur non connecté'})
     }
   })
 
@@ -730,11 +725,11 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.post('deferPost', function (context) {
     var resultat = context.post
-    log.debug("deferPost appelé avec", resultat)
-    if (typeof resultat.deferUrl === "string") {
-      var ok = false;
-      var url = resultat.deferUrl;
-      delete resultat.deferUrl;
+    log.debug('deferPost appelé avec', resultat)
+    if (typeof resultat.deferUrl === 'string') {
+      var ok = false
+      var url = resultat.deferUrl
+      delete resultat.deferUrl
       config.sesalabs.forEach(function (sesalab) {
         if (url.indexOf(sesalab) === 0) ok = true
       })
@@ -745,24 +740,24 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           content_type: 'charset=UTF-8',
           timeout: 3000,
           headers: {
-            "Cookie": context.request.cookies
+            'Cookie': context.request.cookies
           },
           form: context.post
         }
         request.post(postOptions, function (error, response, body) {
           // pas la peine de répondre personne n'écoute
-          log.debug("deferPost, après envoi vers " + postOptions.url + " de ", postOptions.form)
+          log.debug('deferPost, après envoi vers ' + postOptions.url + ' de ', postOptions.form)
           log.debug("on récupère l'erreur", error)
-          log.debug("on récupère la réponse", response)
-          log.debug("on récupère et le body", body)
+          log.debug('on récupère la réponse', response)
+          log.debug('on récupère et le body', body)
           // mais si on renvoie rien ça donne une erreur 500 en timeout, context.next() donne une 404 car pas de contenu
           $json.sendOk(context)
         })
       } else {
-        $json.send(context, new Error("deferPost appelé pour faire suivre à " +resultat.defer +" qui n'est pas dans les sesalab autorisés"))
+        $json.send(context, new Error('deferPost appelé pour faire suivre à ' + resultat.defer + " qui n'est pas dans les sesalab autorisés"))
       }
     } else {
-      $json.send(context, new Error("Il faut poster une url via deferUrl"))
+      $json.send(context, new Error('Il faut poster une url via deferUrl'))
     }
   })
 
@@ -771,9 +766,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @Route POST /api/notifyError
    */
   controller.post('notifyError', function (context) {
-    log("notifyError", context.post)
-    if (context.post.ref) log.errorData("notifyError", context.post)
-    else log.error("notifyError", context.post)
+    log('notifyError', context.post)
+    if (context.post.ref) log.errorData('notifyError', context.post)
+    else log.error('notifyError', context.post)
     $json.sendOk(context)
   })
   controller.options('notifyError', optionsOk)
@@ -797,8 +792,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           if (onlyChildren) {
             if (ressource.type === 'arbre') {
               jstData = $ressourceConverter.getJstreeChildren(ressource)
-              log.debug("à partir de", ressource, 'avirer', {max: 5000, indent: 2})
-              log.debug("on récupère les enfants", jstData, 'avirer', {max: 5000, indent: 2})
+              log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
+              log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
               sendJsonJstreeArray(context, null, jstData)
             } else {
               sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
@@ -808,14 +803,13 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
           }
         } else {
-          sendJsonJstreeArray(context, "la ressource " + ref + " n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
+          sendJsonJstreeArray(context, 'la ressource ' + ref + " n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
         }
       })
     } else {
-      sendJsonJstreeArray(context, "il faut fournir un id de ressource")
+      sendJsonJstreeArray(context, 'il faut fournir un id de ressource')
     }
   })
-
 
   getListeAll.timeout = 3000
   /**
@@ -846,12 +840,11 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.get('liste/groupe/:nom', function (context) {
     var nom = context.arguments.nom
-    grabListe(context, 'groupe/'+nom)
+    grabListe(context, 'groupe/' + nom)
   })
   controller.options('liste/groupe/:nom', optionsOk)
 
-
-  getListePerso.timeout = 3000;
+  getListePerso.timeout = 3000
   /**
    * Cherche parmi les ressources du user courant (qui doit être connecté avant)
    * @route GET /api/liste/perso
@@ -874,7 +867,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.options('liste/perso', optionsOk)
 
-
   getListeProf.timeout = 3000
   /**
    * Cherche parmi les ressources publiques ou les corrections
@@ -896,7 +888,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @route OPTIONS /api/liste/prof
    */
   controller.options('liste/prof', optionsOk)
-
 
   /**
    * Cherche parmi les ressources publiques publiées
@@ -933,7 +924,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       $ressourceRepository.loadPublic(oid, function (error, ressource) {
         if (error) $json.send(context, error)
         else if (ressource) sendRessource(context, null, ressource)
-        else $json.notFound(context, "La ressource " + oid + " n'existe pas ou n'est pas publique")
+        else $json.notFound(context, 'La ressource ' + oid + " n'existe pas ou n'est pas publique")
       })
     }
   })
@@ -951,7 +942,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       if (error) $json.send(context, error)
       else if (ressource && ressource.restriction === 0) sendRessource(context, null, ressource)
-      else $json.notFound(context, "La ressource " + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
+      else $json.notFound(context, 'La ressource ' + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
     })
   })
 
@@ -961,7 +952,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @route DEL /api/public/:origine/:idOrigine
    */
   controller.delete('public/:origine/:idOrigine', function (context) {
-    $json.denied(context, "droits insuffisant pour effacer cette ressource")
+    $json.denied(context, 'droits insuffisant pour effacer cette ressource')
   })
 
   /**
@@ -970,7 +961,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @route DEL /api/public/:oid
    */
   controller.delete('public/:oid', function (context) {
-    $json.denied(context, "droits insuffisant pour effacer cette ressource")
+    $json.denied(context, 'droits insuffisant pour effacer cette ressource')
   })
 
   postRessource.timeout = 5000
@@ -1055,7 +1046,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         }
       })
     } else {
-      $json.denied(context, "droits insuffisant pour effacer cette ressource")
+      $json.denied(context, 'droits insuffisant pour effacer cette ressource')
     }
   })
   controller.options('alias/:oid', optionsDeleteOk)
@@ -1067,7 +1058,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {string} :idOrigine
    */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
-    var ref = context.arguments.origine +'/' +context.arguments.idOrigine
+    var ref = context.arguments.origine + '/' + context.arguments.idOrigine
     deleteAndSend(context, ref)
   })
   controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
@@ -1090,7 +1081,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.options('ressource/addRelations', optionsOk)
 }
-
 
 /**
  * Format de la réponse à une demande de liste
@@ -1137,7 +1127,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
  * @property {boolean}   public
  * @property {string}    base
  */
-
 
 /**
  * Arguments à donner à une requête qui renvoie une liste de ressources

@@ -41,35 +41,35 @@ function displayJava(ressource, options, next) {
   var width = Math.max(container.offsetWidth || 0, 640)
   var height = Math.round(width * 0.75)
   if (params.height && params.height > 400) height = params.height
-  var appletName = "mtgApplet"
+  var appletName = 'mtgApplet'
   // faut d'abord créer un élément html complet avant de le mettre dans le dom,
   // sinon il peut lancer le jar avant d'avoir tous les params
   var applet = dom.getElement(
       'applet',
       {
         id:appletName,
-        //name: appletName +"name",
-        code: "mathgraph32.MtgFrame.class",
-        archive: options.pluginBase +"MathGraph32Applet.jar",
+        //name: appletName +'name',
+        code: 'mathgraph32.MtgFrame.class',
+        archive: options.pluginBase +'MathGraph32Applet.jar',
         width: width,
         height: height,
-        style:"border:#000 solid 1px;"
+        style:'border:#000 solid 1px;'
       }
   )
-  var allowFull = ["MenuBar", "LeftToolbar", "TopToolbar", "RightToolbar", "IndicationArea", "ToolsChoice", "FileMenu","OptionsMenu"]
+  var allowFull = ['MenuBar', 'LeftToolbar', 'TopToolbar', 'RightToolbar', 'IndicationArea', 'ToolsChoice', 'FileMenu','OptionsMenu']
   var allowEleve = params.allowEleve || allowFull
   allowFull.forEach(function (allow) {
-    dom.addElement(applet, 'param', {name:"allow" +allow, value:(allowEleve.indexOf(allow) > -1)?"true":"false"})
+    dom.addElement(applet, 'param', {name:'allow' +allow, value:(allowEleve.indexOf(allow) > -1)?'true':'false'})
   })
-  dom.addElement(applet, 'param', {name:"language", value:"true"})
-  dom.addElement(applet, 'param', {name:"level", value:params.level})
-  if (params.figure) dom.addElement(applet, 'param', {name:"figureData", value: params.figure})
-  else dom.addElement(applet, 'param', {name:"initialFigure", value:"orthonormalFrame"})
-  dom.addText(applet, "Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ")
-  dom.addElement(applet, 'a', {href:"http://www.java.com"}, "java.com")
-  dom.addText(applet, " pour installer java.")
-  var p = dom.addElement(applet, 'p', {}, "Sinon, visualiser cette page avec le ")
-  dom.addElement(p, 'a', {href:"?js=1"}, "lecteur javascript")
+  dom.addElement(applet, 'param', {name:'language', value:'true'})
+  dom.addElement(applet, 'param', {name:'level', value:params.level})
+  if (params.figure) dom.addElement(applet, 'param', {name:'figureData', value: params.figure})
+  else dom.addElement(applet, 'param', {name:'initialFigure', value:'orthonormalFrame'})
+  dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
+  dom.addElement(applet, 'a', {href:'http://www.java.com'}, 'java.com')
+  dom.addText(applet, ' pour installer java.')
+  var p = dom.addElement(applet, 'p', {}, 'Sinon, visualiser cette page avec le ')
+  dom.addElement(p, 'a', {href:'?js=1'}, 'lecteur javascript')
   dom.addText(p, " (mais l'enregistrement de la figure ne sera pas possible).")
   // on peut la mettre dans le dom
   dom.empty(container)
@@ -77,10 +77,10 @@ function displayJava(ressource, options, next) {
 
   if (options.resultatCallback && container.addEventListener) {
     // et on ajoute un bouton pour envoyer
-    p = dom.addElement(container, "p")
-    var button = dom.addElement(p, "button", {}, "Envoyer la figure")
-    button.addEventListener("click", function () {
-      log("envoi de la figure")
+    p = dom.addElement(container, 'p')
+    var button = dom.addElement(p, 'button', {}, 'Envoyer la figure')
+    button.addEventListener('click', function () {
+      log('envoi de la figure')
       try {
         var newFigure = document[appletName].getScript()
         options.resultatCallback({
@@ -117,37 +117,37 @@ function displayJs(ressource, options, next) {
   }
 
   // on affiche un avertissement si on force
-  if (ressource.parametres.levelEleve > 0 && tools.getURLParameter("js")) {
-    dom.addElement(container, "p", {"class":"warning"}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
+  if (ressource.parametres.levelEleve > 0 && tools.getURLParameter('js')) {
+    dom.addElement(container, 'p', {'class':'warning'}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
   }
 
   var dependencies = [
-    "http://www.mathgraph32.org/js/4.9.9/mtg32jsmin.js",
-    "http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js"
+    'http://www.mathgraph32.org/js/4.9.9/mtg32jsmin.js',
+    'http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js'
   ]
   page.loadAsync(dependencies, function () {
     /*global MathJax, mtg32*/
-    if (typeof MathJax === "undefined") throw new Error("Mathjax n'est pas chargé")
-    if (typeof mtg32 === "undefined") throw new Error("Mathgraph32 n'est pas chargé")
+    if (typeof MathJax === 'undefined') throw new Error("Mathjax n'est pas chargé")
+    if (typeof mtg32 === 'undefined') throw new Error("Mathgraph32 n'est pas chargé")
     var width = ressource.parametres.width || container.offsetWidth || 800
     var height = ressource.parametres.height || width * 0.75 || 600
-    var svgId = "mtg32svg"
+    var svgId = 'mtg32svg'
     // la consigne éventuelle
     if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
-    //var svg = dom.addElement(container, 'svg', {id:'svg', width:"800px", height:"500px", xmlns:"http://www.w3.org/2000/svg"})
-    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-    svg.setAttributeNS(null, "id", svgId)
-    svg.setAttributeNS(null, "width", width)
-    svg.setAttributeNS(null, "height", height)
-    svg.style.display = "block"
+    //var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svg.setAttributeNS(null, 'id', svgId)
+    svg.setAttributeNS(null, 'width', width)
+    svg.setAttributeNS(null, 'height', height)
+    svg.style.display = 'block'
     container.appendChild(svg)
     MathJax.Hub.Config({
       tex2jax: {
-        inlineMath: [["$", "$"], ["\\(", "\\)"]]
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
       },
-      jax: ["input/TeX", "output/SVG"],
-      TeX: {extensions: ["color.js"]},
+      jax: ['input/TeX', 'output/SVG'],
+      TeX: {extensions: ['color.js']},
       messageStyle: 'none'
     })
     MathJax.Hub.Queue(function () {
@@ -174,18 +174,18 @@ var isLoaded
 module.exports = function display(ressource, options, next) {
   try {
     var container = options.container
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     log('start mathgraph display avec la ressource', ressource)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
     if (!ressource.parametres.figure) {
-      throw new Error("Pas de figure mathgraph en paramètre")
+      throw new Error('Pas de figure mathgraph en paramètre')
     }
     // on utilise java seulement si levelEleve est positif dans les paramètres (et que l'on impose pas js dans l'url)
-    if (ressource.parametres.levelEleve > 0 && !tools.getURLParameter("js")) displayJava(ressource, options, next)
+    if (ressource.parametres.levelEleve > 0 && !tools.getURLParameter('js')) displayJava(ressource, options, next)
     else displayJs(ressource, options, next)
   } catch (error) {
     if (next) next(error)

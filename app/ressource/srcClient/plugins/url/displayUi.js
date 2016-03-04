@@ -38,7 +38,8 @@ var page = require('../../page')
 var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
-var $ = window.jQuery /*jshint jquery:true*/
+var $
+/* jshint jquery:true */
 
 /**
  * Retourne une seule fonction qui affectera les comportements de l'interface avec la gestion des étapes pour les ressources url
@@ -48,23 +49,24 @@ var $ = window.jQuery /*jshint jquery:true*/
  * @param {errorCallback}  next
  */
 module.exports = function (ressource, options, next) {
-  page.loadAsync(["jqueryUiDialog"], function () {
+  page.loadAsync(['jquery', 'jqueryUiDialog'], function () {
+    $ = window.jQuery
     // faut attendre que tout soit fini de charger et que jQuery ai fini de manipuler le dom
     $(function () {
-      function getLienSuivant() {
-        return dom.getElement("img", {
-          "class": 'lienSuivant',
-          src: options.pluginBase +'images/forward.png',
+      function getLienSuivant () {
+        return dom.getElement('img', {
+          'class': 'lienSuivant',
+          src: options.pluginBase + 'images/forward.png',
           align: 'absmiddle',
           alt: 'suivant',
-          onclick:etapes.next
+          onclick: etapes.next
         })
       }
 
       /**
        * Initialise les fenêtres modales
        */
-      function init() {
+      function init () {
         // les comportements qui dépendent pas du contexte
         $lienConsigne.click(consigne.toggle)
         $lienReponse.click(reponse.toggle)
@@ -76,15 +78,15 @@ module.exports = function (ressource, options, next) {
           resizable: false,
           position: {my: 'left+10 top+10', at: 'left bottom', of: '#entete'},
           buttons: {
-            "OK": function () {
-              $information.dialog("close")
+            'OK': function () {
+              $information.dialog('close')
             }
           }
         }
         $information.dialog(informationDialogOptions)
 
         var consigneDialogOptions = {
-          //position : [30, 50],
+          // position : [30, 50],
           // cf http://api.jqueryui.com/position/
           position: {my: 'left+30 top+50', at: 'left bottom', of: '#entete'},
           width: 450,
@@ -99,9 +101,9 @@ module.exports = function (ressource, options, next) {
             if (hasTexConsigne) {
               // @see https://groups.google.com/forum/#!topic/mathjax-users/v6nVeANKihs
               // http://docs.mathjax.org/en/latest/queues.html
-              log("open consigne")
+              log('open consigne')
               /*global MathJax*/
-              MathJax.Hub.Queue(["Typeset", MathJax.Hub, "consigne"])
+              MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'consigne'])
             }
             $lienConsigne.css('font-weight', 'normal')
           }
@@ -109,9 +111,9 @@ module.exports = function (ressource, options, next) {
         $consigne.dialog(consigneDialogOptions)
 
         var reponseDialogOptions = {
-          width: hasCkeditor ? 580 :480,
+          width: hasCkeditor ? 580 : 480,
           height: hasCkeditor ? 400 : 320,
-          //position : [$('body').width() - 30 - 472, 50],
+          // position : [$('body').width() - 30 - 472, 50],
           position: {my: 'right-30 top+70', at: 'right bottom', of: '#entete'},
           resizable: true,
           autoOpen: false,
@@ -131,9 +133,9 @@ module.exports = function (ressource, options, next) {
        * @private
        * @param next
        */
-      function loadDependencies(next) {
+      function loadDependencies (next) {
         var dependances = []
-        if (hasTexConsigne && typeof MathJax === "undefined") dependances.push("mathjax")
+        if (hasTexConsigne && typeof MathJax === 'undefined') dependances.push('mathjax')
         if (dependances.length) page.loadAsync(dependances, next)
         else next()
       }
@@ -142,100 +144,89 @@ module.exports = function (ressource, options, next) {
        * Construit la liste des étapes d'après les options
        * @private
        */
-      function setEtapes() {
+      function setEtapes () {
         /**
          * Option de l'affichage de la question qui peut prendre les valeurs
-         *   "off"    : pas de question
-         *   "before" : avant la page
-         *   "while"  : pendant la page
-         *   "after"  : après la page
+         *   'off'    : pas de question
+         *   'before' : avant la page
+         *   'while'  : pendant la page
+         *   'after'  : après la page
          * @type {string}
          */
-        var question_option = ressource.parametres.question_option || "off"
+        var question_option = ressource.parametres.question_option || 'off'
         /**
          * Option de l'affichage de la réponse qui peut prendre les valeurs
-         *   "off"      : pas de réponse attendue
-         *   "question" : pendant l'affichage de la question
-         *   "while"    : pendant l'affichage de la page
-         *   "after"    : après la page
+         *   'off'      : pas de réponse attendue
+         *   'question' : pendant l'affichage de la question
+         *   'while'    : pendant l'affichage de la page
+         *   'after'    : après la page
          * @type {string}
          */
-        var answer_option = ressource.parametres.answer_option || "off"
-        log("lien suivant dans setEtapes", lienSuivant)
+        var answer_option = ressource.parametres.answer_option || 'off'
+        log('lien suivant dans setEtapes', lienSuivant)
 
-        if (question_option == "off") {
+        if (question_option === 'off') {
           etapes.liste = [[information, iframe]]
           // pas de question, pour la réponse :
-          if (answer_option == "while") {
-            etapes.titres = ["Visualisation du document et réponse"]
-            information.setContent("Observe ce document et envoie ta réponse.")
+          if (answer_option === 'while') {
+            etapes.titres = ['Visualisation du document et réponse']
+            information.setContent('Observe ce document et envoie ta réponse.')
             // ajout de la réponse à la 1re étape
             etapes.liste[0].push(reponse)
-
-          } else if (answer_option == "after") {
-            etapes.titres = ["Visualisation du document", "Réponse"]
-            information.setContent("Observe ce document puis clique sur ", getLienSuivant(), " pour répondre.")
+          } else if (answer_option === 'after') {
+            etapes.titres = ['Visualisation du document', 'Réponse']
+            information.setContent('Observe ce document puis clique sur ', getLienSuivant(), ' pour répondre.')
             // ajout de la réponse en 2e étape
             etapes.liste.push([reponse])
           }
-
-        } else if (question_option == "before") {
+        } else if (question_option === 'before') {
           // consigne puis page
           etapes.liste = [[consigne, information], [iframe]]
-          if (answer_option == "off") {
-            etapes.titres = ["Lecture de la consigne", "Visualisation du document"]
-            information.setContent("Commence par lire la consigne, puis clique sur ", getLienSuivant(), " pour voir le document.")
-
-          } else if (answer_option == "while") {
-            etapes.titres = ["Lecture de la consigne", "Visualisation du document et réponse"]
-            information.setContent("Lis la consigne, clique sur ", getLienSuivant(), " pour voir le document et répondre.")
+          if (answer_option === 'off') {
+            etapes.titres = ['Lecture de la consigne', 'Visualisation du document']
+            information.setContent('Commence par lire la consigne, puis clique sur ', getLienSuivant(), ' pour voir le document.')
+          } else if (answer_option === 'while') {
+            etapes.titres = ['Lecture de la consigne', 'Visualisation du document et réponse']
+            information.setContent('Lis la consigne, clique sur ', getLienSuivant(), ' pour voir le document et répondre.')
             etapes.liste[1].push(reponse)
-
-          } else if (answer_option == "after") {
-            etapes.titres = ["Lecture de la consigne", "Visualisation du document", "Réponse"]
-            information.setContent("Lis la consigne, clique sur ", getLienSuivant(), " pour voir le document, puis encore une fois pour répondre.")
+          } else if (answer_option === 'after') {
+            etapes.titres = ['Lecture de la consigne', 'Visualisation du document', 'Réponse']
+            information.setContent('Lis la consigne, clique sur ', getLienSuivant(), ' pour voir le document, puis encore une fois pour répondre.')
             etapes.liste.push([reponse])
-
-          } else if (answer_option == "question") {
-            etapes.titres = ["Lecture de la consigne et réponse", "Visualisation du document"]
-            information.setContent("Réponds à la question, puis clique sur ", getLienSuivant(), " pour voir le document.")
+          } else if (answer_option === 'question') {
+            etapes.titres = ['Lecture de la consigne et réponse', 'Visualisation du document']
+            information.setContent('Réponds à la question, puis clique sur ', getLienSuivant(), ' pour voir le document.')
             // réponse avant l'info
             etapes.liste = [[consigne, reponse, information], [iframe]]
           }
-
-        } else if (question_option == "while") {
+        } else if (question_option === 'while') {
           etapes.liste = [[consigne, iframe]]
-          if (answer_option == "after") {
+          if (answer_option === 'after') {
             etapes.liste[0].push(information)
-            information.setContent("Lis la consigne, observe bien le document puis clique sur ", getLienSuivant(), " pour pouvoir répondre.")
+            information.setContent('Lis la consigne, observe bien le document puis clique sur ', getLienSuivant(), ' pour pouvoir répondre.')
             etapes.liste.push([reponse])
-            etapes.titres = ["Réponse", "Visualisation de la consigne et du document"]
-
-          } else if (answer_option == "while" || answer_option == "question") {
+            etapes.titres = ['Réponse', 'Visualisation de la consigne et du document']
+          } else if (answer_option === 'while' || answer_option === 'question') {
             $filariane.hide()
             etapes.liste[0].push(reponse)
-            etapes.titres = ["Consigne, visualisation du document et réponse"]
-
+            etapes.titres = ['Consigne, visualisation du document et réponse']
           } else {
             $filariane.hide()
-            etapes.titres = ["Consigne et visualisation du document"]
+            etapes.titres = ['Consigne et visualisation du document']
           }
-
-        } else if (question_option == "after") {
+        } else if (question_option === 'after') {
           etapes.liste = [[page, information], [consigne]]
-          if (answer_option == "off") {
-            etapes.titres = ["Visualisation du document", "consigne"]
-            information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne.")
-
-          } else if (answer_option == "after") {
-            etapes.titres = ["Visualisation du document", "Lecture de la consigne", "Réponse"]
-            information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne et encore une fois pour répondre.")
+          if (answer_option === 'off') {
+            etapes.titres = ['Visualisation du document', 'consigne']
+            information.setContent('Observe bien le document puis clique sur ', getLienSuivant(), ' pour lire la consigne.')
+          } else if (answer_option === 'after') {
+            etapes.titres = ['Visualisation du document', 'Lecture de la consigne', 'Réponse']
+            information.setContent('Observe bien le document puis clique sur ', getLienSuivant(), ' pour lire la consigne et encore une fois pour répondre.')
             etapes.liste.push([reponse])
-          }
-          else {
-            information.setContent("Observe bien le document puis clique sur ", getLienSuivant(), " pour lire la consigne et répondre.")
+          } else {
+            information.setContent('Observe bien le document puis clique sur ', getLienSuivant(), ' pour lire la consigne et répondre.')
             etapes.liste[1].push(reponse)
-            etapes.titres = ["Visualisation du document", "Consigne et réponse"]
+            etapes.titres = ['Visualisation du document', 'Consigne et réponse']
           }
         }
       } // setEtapes
@@ -244,8 +235,8 @@ module.exports = function (ressource, options, next) {
        * Réactualise l'affichage avec l'étape etapes.currentIndex
        * @private
        */
-      function showEtape() {
-        log("showEtape")
+      function showEtape () {
+        log('showEtape')
         var i
         // on ferme tout
         reponse.desactiver()
@@ -255,7 +246,7 @@ module.exports = function (ressource, options, next) {
         // active les elts de l'etape en cours
         var etape = etapes.liste[etapes.currentIndex]
         for (i = 0; i < etape.length; i++) {
-          //log("active " +i +' ' +etapes.titres[i], etape[i])
+          // log('active ' +i +' ' +etapes.titres[i], etape[i])
           etape[i].activer()
         }
 
@@ -264,20 +255,19 @@ module.exports = function (ressource, options, next) {
         $filariane.empty()
         var c = etapes.currentIndex
         for (i = 0; i < c; i++) {
-          $filariane.append("Étape " + (i+1) + " : " + etapes.titres[i] + ' >> ')
+          $filariane.append('Étape ' + (i + 1) + ' : ' + etapes.titres[i] + ' >> ')
         }
         // ajout titre courant
-        $filariane.append("Étape " + (c + 1) + " : ").append(dom.getElement('span', {"class": 'highlight'}, etapes.titres[c]))
+        $filariane.append('Étape ' + (c + 1) + ' : ').append(dom.getElement('span', {'class': 'highlight'}, etapes.titres[c]))
         // titre suivant éventuel
         if (etapes.hasNext()) {
           $filariane.append(getLienSuivant())
-          //$(lienSuivant).click(etapes.next)
+          // $(lienSuivant).click(etapes.next)
         }
       } // showEtape
 
-
       try {
-        if (!ressource || !ressource.parametres || !ressource.parametres.adresse) throw new Error("ressource manquante ou incomplète")
+        if (!ressource || !ressource.parametres || !ressource.parametres.adresse) throw new Error('ressource manquante ou incomplète')
         log('urlUi avec ', ressource.parametres, options)
         /**
          * Editeur à utiliser pour la réponse
@@ -287,9 +277,9 @@ module.exports = function (ressource, options, next) {
          * @private
          * @type {string}
          */
-        var answer_editor = ressource.parametres.answer_editor || "textarea"
+        var answer_editor = ressource.parametres.answer_editor || 'textarea'
 
-        dom.addCss(options.base +"vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css")
+        dom.addCss(options.base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css')
 
         var etapes = {
           currentIndex: 0,
@@ -297,8 +287,8 @@ module.exports = function (ressource, options, next) {
           liste: [],
           // les titres de chaque étape
           titres: [],
-          hasNext : function () {
-            return etapes.currentIndex < (etapes.liste.length -1)
+          hasNext: function () {
+            return etapes.currentIndex < (etapes.liste.length - 1)
           },
           next: function () {
             if (etapes.hasNext()) {
@@ -309,12 +299,12 @@ module.exports = function (ressource, options, next) {
         }
 
         /** Le html du lien suivant */
-        var lienSuivant = dom.getElement("img", {
-          "class": 'lienSuivant',
+        var lienSuivant = dom.getElement('img', {
+          'class': 'lienSuivant',
           src: options.pluginBaseUrl + 'images/forward.png',
           align: 'absmiddle',
           alt: 'suivant',
-          onclick:etapes.next
+          onclick: etapes.next
         })
 
         /*
@@ -390,15 +380,15 @@ module.exports = function (ressource, options, next) {
         var $page = $('#divPage')
 
         // ce truc renvoie toujours 0 !!! (il ne compte que le visible ?)
-        //var hasTexConsigne = ($consigne.filter(".math-tex").length > 0)
-        var hasTexConsigne = ($consigne.find(".math-tex").length > 0)
-        //var hasTexConsigne = $consigne.html().indexOf('class="math-tex"')
-        var hasCkeditor = (answer_editor !== "textarea")
+        // var hasTexConsigne = ($consigne.filter('.math-tex').length > 0)
+        var hasTexConsigne = ($consigne.find('.math-tex').length > 0)
+        // var hasTexConsigne = $consigne.html().indexOf('class='math-tex'')
+        var hasCkeditor = (answer_editor !== 'textarea')
 
         loadDependencies(function () {
           init()
           setEtapes()
-          log("les etapes", etapes)
+          log('les etapes', etapes)
           showEtape()
           next()
         })

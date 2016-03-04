@@ -46,11 +46,11 @@ module.exports = function () {
    * @memberOf $flashMessages
    */
   $flashMessages.add = function (context, message, level) {
-    if (["info", "warning", "error"].indexOf(level) < 0) level = "info"
+    if (['info', 'warning', 'error'].indexOf(level) < 0) level = 'info'
     if (!context.session.flashMessages) context.session.flashMessages = []
     context.session.flashMessages.push({
-      cssClass : level,
-      value : message
+      cssClass: level,
+      value: message
     })
   }
 
@@ -63,9 +63,9 @@ module.exports = function () {
     var data
     if (context.session.flashMessages) {
       data = {
-        flashBloc : {
-          $view : 'flash',
-          messages : context.session.flashMessages
+        flashBloc: {
+          $view: 'flash',
+          messages: context.session.flashMessages
         }
       }
       delete context.session.flashMessages

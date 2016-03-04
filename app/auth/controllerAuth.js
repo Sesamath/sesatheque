@@ -50,13 +50,12 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
      */
     controller.get('connexion', function (context) {
       if ($accessControl.isAuthenticated(context)) {
-        context.layout = "page"
-        $ressourcePage.printError(context, new Error("Utilisateur déjà connecté"), 200)
+        context.layout = 'page'
+        $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
       } else {
         $auth.login(context)
       }
     })
-
 
     /**
      * Déconnexion ici (action de l'utilisateur sur ce site), à propager vers le serveur sso qui rappellera deconnexion/externe
@@ -66,8 +65,8 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
       if ($accessControl.isAuthenticated(context)) {
         $auth.logout(context)
       } else {
-        context.layout = "page"
-        $ressourcePage.printError(context, new Error("Utilisateur déjà déconnecté (ou jamais connecté)"), 200)
+        context.layout = 'page'
+        $ressourcePage.printError(context, new Error('Utilisateur déjà déconnecté (ou jamais connecté)'), 200)
       }
     })
 
@@ -85,11 +84,11 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
     controller.get('testConnexion', function (context) {
       var urlRedirect = context.get.redirect || '/'
       if ($accessControl.isAuthenticated(context)) {
-        log.error(new Error("appel de /testConnexion pour un utilisateur déjà connecté"))
+        log.error(new Error('appel de /testConnexion pour un utilisateur déjà connecté'))
         context.redirect(urlRedirect)
       } else {
         $auth.check(context, function (error) {
-          if (!error) error = new Error("calback testConnexion appelée sans erreur, il aurait dû y avoir une redirection ou une erreur")
+          if (!error) error = new Error('calback testConnexion appelée sans erreur, il aurait dû y avoir une redirection ou une erreur')
           $ressourcePage.outputError(context, error)
         })
       }
@@ -101,15 +100,15 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
      */
     controller.get('validation', function (context) {
       if ($accessControl.isAuthenticated(context)) {
-        context.layout = "page"
-        $ressourcePage.printError(context, new Error("Utilisateur déjà connecté"), 200)
+        context.layout = 'page'
+        $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
       } else {
         $auth.validate(context, function (error, personne) {
           if (error) {
             $ressourcePage.printError(context, error)
           } else {
-            if (personne && personne.idOrigine) $flashMessages.add(context, "Authentification réussie", "info")
-            var uri = context.get.redirect || "/"
+            if (personne && personne.idOrigine) $flashMessages.add(context, 'Authentification réussie', 'info')
+            var uri = context.get.redirect || '/'
             context.redirect(uri)
           }
         })
@@ -121,12 +120,12 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
      * @route GET /*
      */
     controller.get('*', function (context) {
-      //log.debug("controlleur auth avec " +context.layout)
+      // log.debug('controlleur auth avec ' +context.layout)
       if (context.layout === 'page') {
         var data = {
           authBloc: $auth.getAuthBloc(context)
         }
-        data.authBloc.$view = "auth"
+        data.authBloc.$view = 'auth'
         context.next(null, data)
       } else {
         // Pas concerné

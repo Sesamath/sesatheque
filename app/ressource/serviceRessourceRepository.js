@@ -29,14 +29,13 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
-
-var _           = require('lodash')
-var flow        = require('an-flow')
+var _ = require('lodash')
+var flow = require('an-flow')
 var elementtree = require('elementtree')
-var request     = require('request')
-//var util = require('util')
+var request = require('request')
+// var util = require('util')
 var uuid = require('an-uuid')
 
 var config = require('./config')
@@ -60,19 +59,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   var listeNbDefault = config.limites.listeNbDefault || 10
 
   /**
-   * Le dernier (plus grand) idOrigine utilisé pour l'origine "local"
-   * @private
-   * @type {number}
-   */
-  var lastLocalId = 0
-
-  /**
    * Fait un peu de nettoyage avant d'enregistrer en base de données
    * @private
    * @param ressource
    * @param next
    */
-  function beforeStore(ressource, next) {
+  function beforeStore (ressource, next) {
     if (ressource) {
       // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
       // et pas de celle de son indexation ici
@@ -81,19 +73,19 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       }
       // cohérence de la restriction
       if (ressource.restriction === config.constantes.restriction.groupe && _.isEmpty(ressource.groupes)) {
-        log.error("Ressource " + ressource.oid + " restreinte à ses groupes sans préciser lesquels, on la passe privée")
+        log.error('Ressource ' + ressource.oid + ' restreinte à ses groupes sans préciser lesquels, on la passe privée')
         ressource.restriction = config.constantes.restriction.prive
       }
       // on génère la clé si elle manque
       if (ressource.restriction && !ressource.cle) {
-        ressource.cle = uuid();
+        ressource.cle = uuid()
       }
       // si le tableau d'erreur est vide (devrait toujours être le cas),
       // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
       if (_.isEmpty(ressource.warnings)) delete ressource.warnings
       // bizarre, parfois errors est un object, on cherche à savoir comment
       if (ressource.errors && !ressource.errors.push) {
-        log.error("ressource.errors n'est pas un array " +typeof ressource.errors, ressource.errors)
+        log.error("ressource.errors n'est pas un array " + typeof ressource.errors, ressource.errors)
         ressource.errors = []
       }
       // on vérifie que l'on peut sauvegarder
@@ -102,10 +94,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       } else {
         // on bloque le save en renvoyant une erreur à next
         var error
-        if (!ressource.origine) error = new Error("propriété origine obligatoire")
-        else if (!ressource.idOrigine) error = new Error("propriété idOrigine obligatoire")
-        else error = new Error("Il reste des erreurs qui empêchent la sauvegarde : \n" +ressource.errors.join("\n"))
-        log.error("erreur au beforeStore", error)
+        if (!ressource.origine) error = new Error('propriété origine obligatoire')
+        else if (!ressource.idOrigine) error = new Error('propriété idOrigine obligatoire')
+        else error = new Error('Il reste des erreurs qui empêchent la sauvegarde : \n' + ressource.errors.join('\n'))
+        log.error('erreur au beforeStore', error)
         next(error)
       }
     } else {
@@ -114,98 +106,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
-   * Récupère le premier idOrigine numérique dispo (incrémente par rapport au dernier jusqu'à en trouver un bon)
-   * @private
-   * @param ressource
-   * @param next
-   */
-  function setLastLocalId(ressource, next) {
-    var ttl = 3600 * 24 * 7
-    var nbTest = 0
-
-    /**
-     * Récupère le dernier id en bdd (0 si aucune ressource local)
-     * @private
-     * @param cb callback appelée avec cb(error, id)
-     */
-    function getFromDb(cb) {
-      EntityRessource.match('origine').equals('local').sort('idOrigine', 'desc').grabOne(function (error, entity) {
-        if (error) cb(error)
-        else if (entity) cb(null, entity.idOrigine)
-        else cb(null, 0) // aucune ressource d'origine local
-      })
-    }
-
-    /**
-     * appelle next(error, id) ou elle même (10x max)
-     * @private
-     */
-    function getReserved(next) {
-      nbTest ++
-      if (nbTest > 10) next(new Error("impossible de récupérer le dernier idOrigine pour l'origine 'local'"))
-      else {
-        $cache.get('lastLocalId', function (error, id) {
-          if (error) next(error)
-          else if (id >= lastLocalId) {
-            log("lastLocalId valait " +id +" en cache")
-            // ça pourrait être le bon, on réserve, incrémente et vérifie que personne n'a modifié ça pendant ce temps là
-            // sinon on recommence car c'est la faute à pas de chance (demandes simultanées à qq ms près)
-            var idReserved = id + 1
-            lastLocalId = idReserved
-            $cache.set('lastLocalId', lastLocalId, ttl, function (error) {
-              if (error) next(error)
-              else {
-                $cache.get('lastLocalId', function (error, id) {
-                  if (error) next(error)
-                  else if (id && id === idReserved) next(null, idReserved)
-                  else getReserved(next) // faut recommencer car qqun a incrémenté entre temps
-                })
-              }
-            })
-          } else {
-            // faut aller en db
-            getFromDb(function (error, id) {
-              if (error) next(error)
-              else {
-                log("lastLocalId valait " +id +" en db")
-                lastLocalId = id
-                $cache.set('lastLocalId', lastLocalId, ttl, function (error) {
-                  if (error) next(error)
-                  else getReserved(next)
-                })
-              }
-            })
-          }
-        })
-      }
-    } // getReserved
-
-    // et on lance la recherche éventuelle
-    try {
-      if (ressource.origine === 'local' && !ressource.idOrigine) {
-        getReserved(function (error, id) {
-          if (error) {
-            next(error)
-          } else {
-            ressource.idOrigine = id
-            next(null, ressource)
-          }
-        })
-      } else {
-        next(null, ressource)
-      }
-    } catch(error) {
-      next(error, ressource)
-    }
-  } // setLastLocalId
-
-  /**
    * Purge les urls publiques de la ressource sur varnish (si varnish est dans la conf, ne fait rien sinon)
    * (rend la main avant les réponses mais après avoir lancé les requêtes)
    * @param {Ressource} ressource
    * @returns {{}}
    */
-  function purgeVarnish(ressource) {
+  function purgeVarnish (ressource) {
     // on ne purge que les ressources publiques (les autres ne sont pas en cache)
     if (appConfig.varnish && ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
       [
@@ -215,10 +121,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         $routes.getAbs('preview', ressource)
       ].forEach(function (url) {
         request({
-          method : "PURGE",
-          url : url
+          method: 'PURGE',
+          url: url
         }, function (response) {
-          if (response.status !== 200) log.error("purge KO pour " +url)
+          if (response.status !== 200) log.error('purge KO pour ' + url)
         })
       })
     }
@@ -233,7 +139,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {EntityRessource} ressource
    * @param {Function} next
    */
-  function updateVersion(ressource, next) {
+  function updateVersion (ressource, next) {
     /**
      * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
      * @private
@@ -241,24 +147,24 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
      * @param ressourceBdd
      * @param next
      */
-    function compare(ressource, ressourceBdd, next) {
+    function compare (ressource, ressourceBdd, next) {
       var needIncrement = !!ressource.versionNeedIncrement
       // on regarde si nos champs qui déclenchent un changement de version on changé
       if (!needIncrement && ressourceBdd.oid) {
         _.forEach(config.versionTriggers, function (prop) {
           // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
           // on utilise https://lodash.com/docs#isEqual
-          if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
+          if (!_.isEqual(ressource[ prop ], ressourceBdd[ prop ])) {
             // debug
             if (!isProd) {
               try {
                 log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
-                    '\navant : ' +(ressourceBdd[prop] === undefined) ? undefined : JSON.parse(ressourceBdd[prop]) +
-                    '\naprès : ' +(ressourceBdd[prop] === undefined) ? undefined : JSON.parse(ressource[prop]))
+                '\navant : ' + (ressourceBdd[ prop ] === undefined) ? undefined : JSON.parse(ressourceBdd[ prop ]) +
+                '\naprès : ' + (ressourceBdd[ prop ] === undefined) ? undefined : JSON.parse(ressource[ prop ]))
               } catch (e) {
                 log.error(
-                    'le parsing de ressource[' +prop +'] a planté pour ' +ressource.oid +' ' +ressource.origine +'/' +ressource.idOrigine,
-                    [ressourceBdd[prop], ressource[prop]]
+                  'le parsing de ressource[' + prop + '] a planté pour ' + ressource.oid + ' ' + ressource.origine + '/' + ressource.idOrigine,
+                  [ ressourceBdd[ prop ], ressource[ prop ] ]
                 )
               }
             }
@@ -280,8 +186,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
             next(null, ressource)
           }
         })
+      } else {
+        next(null, ressource)
       }
-      else next(null, ressource)
     } // compare
 
     if (ressource.oid) {
@@ -291,7 +198,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
         if (error) next(error)
         else if (ressourceBdd) compare(ressource, ressourceBdd, next)
-        else next(new Error("updateVersion a reçu une ressource qui n'existait pas (oid=" +ressource.oid +')'))
+        else next(new Error("updateVersion a reçu une ressource qui n'existait pas (oid=" + ressource.oid + ')'))
       })
     } else if (ressource.idOrigine) {
       $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
@@ -302,7 +209,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     } else { // normal à la création
       next(null, ressource)
     }
-
   }
 
   /**
@@ -314,14 +220,14 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param next appelé avec (error, ressources)
    * @throws {Error} Si ressources est défini mais n'est pas une ressource ou un tableau de ressources
    */
-  function cacheAndNext(error, ressources, next) {
+  function cacheAndNext (error, ressources, next) {
     /**
      * Helper qui process une ressource et la met en cache (et rend la main sans attendre le résultat)
      * @private
      * @param ressource
      */
-    function processOne(ressource) {
-      if (!ressource || !ressource.oid) throw new Error("Paramètre invalide (ressource attendue)")
+    function processOne (ressource) {
+      if (!ressource || !ressource.oid) throw new Error('Paramètre invalide (ressource attendue)')
       // pour ec2 on regarde si on a un xml et rien d'autre pour le mettre directement en parametres
       // (car c'est pas du xml mais du json)
       if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {
@@ -341,7 +247,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         else if (ressources) processOne(ressources)
         next(null, ressources)
       }
-    } catch(error) {
+    } catch (error) {
       next(error)
     }
   }
@@ -350,7 +256,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * Converti un xml qui trainerait en parametres en json pour les ec2
    * @param ressource
    */
-  function convertXmlEc2(ressource) {
+  function convertXmlEc2 (ressource) {
     var config = elementtree.parse(ressource.parametres.xml)
     var params = {}
     /*
@@ -381,32 +287,32 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     if (config._root && config._root.tag === 'config' && config._root._children) {
       config._root._children.forEach(function (child) {
         if (child.tag) {
-          params[child.tag] = child.text
+          params[ child.tag ] = child.text
         }
       })
       ressource.parametres = params
       // on enregistre la ressource modifiée en async
       $ressourceRepository.write(ressource)
     }
-    log("convertXmlEc2", params)
+    log('convertXmlEc2', params)
   }
 
   /**
    * Modifie les parametres de ressource pour remplacer un éventuel xml par un graphe
    * @param {Ressource} ressource
    */
-  function convertXmlJ3p(ressource) {
+  function convertXmlJ3p (ressource) {
     if (ressource.parametres && ressource.parametres.xml) {
       var string = j3pGraphe2json(ressource.parametres.xml)
       try {
         var graphe = JSON.parse(string)
         ressource.parametres = {
-          g : graphe
+          g: graphe
         }
       } catch (error) {
-        log.error("plantage dans la conversion du xml de la ressource j3p")
+        log.error('plantage dans la conversion du xml de la ressource j3p')
         if (!ressource.errors) ressource.errors = []
-        ressource.errors.push("la propriété xml des parametres ne contient pas de graphe valide")
+        ressource.errors.push('la propriété xml des parametres ne contient pas de graphe valide')
       }
     }
   }
@@ -421,7 +327,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {EntityRessource} ressource
    * @param next appelé avec (error, archive)
    */
-  $ressourceRepository.archive = function (ressource, next) {
+  $ressourceRepository.archive = function archive (ressource, next) {
     try {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n'existe pas encore")
       EntityArchive.create(ressource).store(function (error, ressource) {
@@ -440,21 +346,21 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {errorCallback}   next
    * @returns {undefined}
    */
-  $ressourceRepository.delete = function(ressource, next) {
+  $ressourceRepository.delete = function repoDelete (ressource, next) {
     if (ressource && ressource.oid) {
-      log.debug("La ressource " + ressource.oid + " va être effacée")
+      log.debug('La ressource ' + ressource.oid + ' va être effacée')
       ressource.delete(function (error) {
         // on vire du cache de toute façon
         $cacheRessource.delete(ressource.oid)
         if (error) {
           next(error)
         } else {
-          log.debug("La ressource " + ressource.oid + ' (' + ressource.oid + ") a été effacée")
+          log.debug('La ressource ' + ressource.oid + ' (' + ressource.oid + ') a été effacée')
           next()
         }
       })
     } else {
-      next(new Error("delete appelé sans ressource"))
+      next(new Error('delete appelé sans ressource'))
     }
   }
 
@@ -472,9 +378,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    *                                nb      : Le nombre de ressources à remonter
    * @param {Function} next       La callback qui sera appelée en lui passant la liste de ressources en argument
    */
-  $ressourceRepository.getListe = function(visibilite, options, next) {
+  $ressourceRepository.getListe = function getListe (visibilite, options, next) {
     try {
-      log.debug('getListe avec visibilite : ' +visibilite, options, next)
+      log.debug('getListe avec visibilite : ' + visibilite, options, next)
 
       // avant de construire la query on fait un minimum de vérifications
       var start, nb
@@ -483,17 +389,16 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       }
       // filtres
       if (options.filters) {
-        if (!_.isArray(options.filters)) throw new Error("Filtres incorrects")
+        if (!_.isArray(options.filters)) throw new Error('Filtres incorrects')
         options.filters.forEach(function (filter) {
           if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant')
-          if (!_.isArray(filter.values)) throw new Error('values invalides (pas un tableau) pour filter ' +filter.index)
+          if (!_.isArray(filter.values)) throw new Error('values invalides (pas un tableau) pour filter ' + filter.index)
           // on ne prend que ce que l'on connait, et on ignore le filtre restriction (c'est visibilite qui l'impose éventuellement)
-          if (config.labels[filter.index] && filter.index !== 'restriction') optionsSafe.filters.push(filter)
+          if (config.labels[ filter.index ] && filter.index !== 'restriction') optionsSafe.filters.push(filter)
         })
-
       } else {
         // donc tous, mais faut un argument à match
-        optionsSafe.filters.push({index: 'idOrigine'})
+        optionsSafe.filters.push({ index: 'idOrigine' })
       }
       // le reste
       if (options.orderBy && !_.isString(options.orderBy)) throw new Error('orderBy invalide')
@@ -502,7 +407,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       start = parseInt(options.start, 10) || 0
       nb = parseInt(options.nb, 10) || listeNbDefault
       if (nb > limitMax) {
-        log.error(new Error("nb de résultats demandés supérieur à la limite max " +nb +'>' +limitMax))
+        log.error(new Error('nb de résultats demandés supérieur à la limite max ' + nb + '>' + limitMax))
         nb = limitMax
       }
       // le format est géré par le controleur
@@ -510,15 +415,15 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       // si on est toujours là on peut construire la requete
       var query = EntityRessource
       optionsSafe.filters.forEach(function (filter) {
-        log.debug("filter", filter)
+        log.debug('filter', filter)
         if (filter.values && filter.values.length) {
           if (filter.values.length > 1) {
             query = query.match(filter.index).in(filter.values)
           } else {
             // une seule valeur, on regarde si on veut du like
-            var value = filter.values[0]
-            var action = (typeof value === "string" && (value.indexOf("%") > -1 || value.indexOf("_") > -1)) ? "like":"equals"
-            query = query.match(filter.index)[action](filter.values[0])
+            var value = filter.values[ 0 ]
+            var action = (typeof value === 'string' && (value.indexOf('%') > -1 || value.indexOf('_') > -1)) ? 'like' : 'equals'
+            query = query.match(filter.index)[ action ](filter.values[ 0 ])
           }
         } else {
           query = query.match(filter.index)
@@ -526,25 +431,25 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       })
 
       // restriction d'après la visibilité
-      if (visibilite == 'public') {
+      if (visibilite === 'public') {
         query = query.match('restriction').equals(config.constantes.restriction.aucune)
-      } else if (visibilite == 'correction') {
+      } else if (visibilite === 'correction') {
         query = query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
       } else if (visibilite.indexOf('/') > 0) {
         var fragments = visibilite.split('/', 2)
-        if (fragments[0] === 'auteur') {
-          query = query.match('auteurs').equals(fragments[1])
-        } else if (fragments[0] === 'groupe') {
-          query = query.match('groupes').equals(fragments[1])
+        if (fragments[ 0 ] === 'auteur') {
+          query = query.match('auteurs').equals(fragments[ 1 ])
+        } else if (fragments[ 0 ] === 'groupe') {
+          query = query.match('groupes').equals(fragments[ 1 ])
         } else {
-          throw new Error('Clé de recherche ' +visibilite +' incorrecte')
+          throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
         }
-      } else if (visibilite == 'all') {
+      } else if (visibilite === 'all') {
         log.debug('recherche sur tout')
       } else {
         // on a pas mis de restriction, c'est pas normal, on met public
         query = query.match('restriction').equals(config.constantes.restriction.aucune)
-        log.error(new Error("Appel de getListe avec visibilite " +visibilite))
+        log.error(new Error('Appel de getListe avec visibilite ' + visibilite))
       }
 
       // orderBy
@@ -553,10 +458,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         else query = query.sort(optionsSafe.orderBy)
       }
 
-      query.grab(nb, start, function(error, ressources) {
+      query.grab(nb, start, function (error, ressources) {
         cacheAndNext(error, ressources, next)
       })
-
     } catch (error) {
       log.error(error)
       next(error)
@@ -570,21 +474,25 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {ressourceCallback} next appelée avec une EntityRessource
    * @returns {undefined}
    */
-  $ressourceRepository.load = function(oid, next) {
+  $ressourceRepository.load = function load (oid, next) {
     if (_.isString(oid) && oid.indexOf('/') > 0) {
       var p = oid.split('/')
       if (p.length === 2) {
-        if (p[0] === "cle") $ressourceRepository.loadByCle(p[1], next)
-        else $ressourceRepository.loadByOrigin(p[0], p[1], next)
+        if (p[ 0 ] === 'cle') $ressourceRepository.loadByCle(p[ 1 ], next)
+        else $ressourceRepository.loadByOrigin(p[ 0 ], p[ 1 ], next)
       } else {
-        next(new Error("identifiant invalide : " +oid))
+        next(new Error('identifiant invalide : ' + oid))
       }
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
-        if (ressourceCached) next(null, EntityRessource.create(ressourceCached))
-        else EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
-          cacheAndNext(error, ressource, next)
-        })
+        if (error) log.error(error)
+        if (ressourceCached) {
+          next(null, EntityRessource.create(ressourceCached))
+        } else {
+          EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
+            cacheAndNext(error, ressource, next)
+          })
+        }
       })
     }
   }
@@ -595,24 +503,23 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {string}            cle
    * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
-  $ressourceRepository.loadByCle = function(cle, next) {
+  $ressourceRepository.loadByCle = function loadByCle (cle, next) {
     if (cle) {
-      $cacheRessource.getByOrigine("cle", cle, function(error, ressourceCached) {
+      $cacheRessource.getByOrigine('cle', cle, function (error, ressourceCached) {
+        if (error) log.error(error)
         if (ressourceCached) {
           next(null, EntityRessource.create(ressourceCached))
         } else {
           EntityRessource
-              .match('cle').equals(cle)
-              .grabOne(function (error, ressource) {
-                cacheAndNext(error, ressource, next)
-              })
+            .match('cle').equals(cle)
+            .grabOne(function (error, ressource) {
+              cacheAndNext(error, ressource, next)
+            })
         }
-
       })
     } else {
-      return next(new Error("Clé manquante, impossible de charger la ressource"))
+      return next(new Error('Clé manquante, impossible de charger la ressource'))
     }
-
   } // loadByOrigin
 
   /**
@@ -622,29 +529,28 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {string}            idOrigine
    * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
-  $ressourceRepository.loadByOrigin = function(origine, idOrigine, next) {
+  $ressourceRepository.loadByOrigin = function loadByOrigin (origine, idOrigine, next) {
     if (origine && idOrigine) {
-      if (origine === "cle") {
+      if (origine === 'cle') {
         $ressourceRepository.loadByCle(idOrigine, next)
       } else {
         $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
+          if (error) log.error(error)
           if (ressourceCached) {
             next(null, EntityRessource.create(ressourceCached))
           } else {
             EntityRessource
-                .match('origine').equals(origine)
-                .match('idOrigine').equals(idOrigine)
-                .grabOne(function (error, ressource) {
-                  cacheAndNext(error, ressource, next)
-                })
+              .match('origine').equals(origine)
+              .match('idOrigine').equals(idOrigine)
+              .grabOne(function (error, ressource) {
+                cacheAndNext(error, ressource, next)
+              })
           }
-
         })
       }
     } else {
-      return next(new Error("Origine ou idOrigine manquant, impossible de charger la ressource"))
+      return next(new Error('Origine ou idOrigine manquant, impossible de charger la ressource'))
     }
-
   } // loadByOrigin
 
   /**
@@ -654,18 +560,19 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {ressourceCallback}  next avec une EntityRessource
    * @returns {undefined}
    */
-  $ressourceRepository.loadPublic = function(oid, next) {
+  $ressourceRepository.loadPublic = function loadPublic (oid, next) {
     $cacheRessource.get(oid, function (error, ressourceCached) {
+      if (error) log.error(error)
       if (ressourceCached) {
         if (ressourceCached.restriction === config.constantes.restriction.aucune) next(null, EntityRessource.create(ressourceCached))
         else next(null, null)
       } else {
         EntityRessource
-            .match('oid').equals(oid)
-            .match('restriction').equals(config.constantes.restriction.aucune)
-            .grabOne(function (error, ressource) {
-              cacheAndNext(error, ressource, next)
-            })
+          .match('oid').equals(oid)
+          .match('restriction').equals(config.constantes.restriction.aucune)
+          .grabOne(function (error, ressource) {
+            cacheAndNext(error, ressource, next)
+          })
       }
     })
   }
@@ -677,13 +584,14 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {string}            idOrigine
    * @param {ressourceCallback} next      Appelée avec une EntityRessource
    */
-  $ressourceRepository.loadPublicByOrigin = function(origine, idOrigine, next) {
+  $ressourceRepository.loadPublicByOrigin = function loadPublicByOrigin (origine, idOrigine, next) {
     if (!origine || !idOrigine) {
       log.error('origine ou idOrigine manquant dans loadByOrigin')
       return next()
     }
 
-    $cacheRessource.getByOrigine(origine, idOrigine, function(error, ressourceCached) {
+    $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
+      if (error) log.error(error)
       if (ressourceCached) {
         if (ressourceCached.restriction === config.constantes.restriction.aucune) next(null, EntityRessource.create(ressourceCached))
         else next(null, null)
@@ -705,16 +613,14 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {EntityRessource}   ressource
    * @param {ressourceCallback} [next]    appelée avec une EntityRessource
    */
-  $ressourceRepository.write = function(ressource, next) {
+  $ressourceRepository.write = function write (ressource, next) {
     if (ressource.constructor.name !== 'Entity') {
       ressource = EntityRessource.create(ressource)
     }
-    flow().seq(function() {
+    flow().seq(function () {
       $ressourceControl.valide(ressource, this)
-
     }).seq(function (ressource) {
       updateVersion(ressource, this)
-
     }).seq(function (ressource) {
       if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {
         convertXmlEc2(ressource)
@@ -723,23 +629,20 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         log.debug('ressource j3p après conversion avant write', ressource)
       }
       beforeStore(ressource, this)
-
     }).seq(function (ressource) {
-      log.debug('on va enregistrer ' +ressource.origine +'/' +ressource.idOrigine)
+      log.debug('on va enregistrer ' + ressource.origine + '/' + ressource.idOrigine)
       ressource.store(this)
-
     }).seq(function (ressource) {
       // mise en cache (pas possible en afterStore car le cache dépend de l'entité), purge varnish et passage au suivant
-      if (!ressource.oid) {
-        this(new Error("Après un write la ressource n'a toujours pas d'oid"))
-      } else {
+      if (ressource.oid) {
         $cacheRessource.set(ressource)
         purgeVarnish(ressource)
         log.debug('write ' + ressource.oid + ' ok')
         if (next) next(null, ressource)
+      } else {
+        this(new Error("Après un write la ressource n'a toujours pas d'oid"))
       }
-
-    }).catch(function(error, ressKo) {
+    }).catch(function (error, ressKo) {
       var ressRenvoyee = ressKo || ressource
       log.error(error)
       if (next) next(error, ressRenvoyee) // on passe quand même la ressource dans l'état où elle était avant le pb

@@ -49,9 +49,9 @@ var isLoaded, lastResult
 module.exports = function display(ressource, options, next) {
   try {
     var container = options.container
-    if (!container) throw new Error("Il faut passer dans les options un conteneur html pour afficher cette ressource")
+    if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
     var errorsContainer = options.errorsContainer
-    if (!errorsContainer) throw new Error("Il faut passer dans les options un conteneur html pour les erreurs")
+    if (!errorsContainer) throw new Error('Il faut passer dans les options un conteneur html pour les erreurs')
 
     /** class utilisée dans notre css */
     var cssClass = 'mepRess'
@@ -64,7 +64,7 @@ module.exports = function display(ressource, options, next) {
     log('start display em avec la ressource (+options)', ressource, options)
     //les params minimaux
     if (!ressource.oid || !ressource.titre || !params) {
-      throw new Error("Paramètres manquants")
+      throw new Error('Paramètres manquants')
     }
 
     // Ajout css
@@ -73,16 +73,16 @@ module.exports = function display(ressource, options, next) {
 
     // le message en attendant le chargement
     dom.empty(container)
-    var loadingElt = dom.addElement(container, 'p', {}, "Chargement de la ressource " + ressource.oid + " en cours.")
+    var loadingElt = dom.addElement(container, 'p', {}, 'Chargement de la ressource ' + ressource.oid + ' en cours.')
 
     // notre base
     if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf = ressource.baseUrl
-    else if (options.verbose) baseMepSwf = "http://mep-col.devsesamath.net/dev/swf"
-    else baseMepSwf = "http://mep-col.sesamath.net/dev/swf"
+    else if (options.verbose) baseMepSwf = 'http://mep-col.devsesamath.net/dev/swf'
+    else baseMepSwf = 'http://mep-col.sesamath.net/dev/swf'
     // id du swf
     idSwf = Number(params.swf_id ? params.swf_id : ressource.idOrigine)
     // url du swf
-    swfUrl = baseMepSwf + '/exo' + idSwf + ".swf"
+    swfUrl = baseMepSwf + '/exo' + idSwf + '.swf'
     /**
      * Lance le chargement avec swfobject
      */
@@ -95,16 +95,16 @@ module.exports = function display(ressource, options, next) {
     }
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)
     if (container.style) container.style.width = largeur + 'px'
-    else container.setAttribute("width", largeur + 'px'); // marche pas avec chrome ou ff
+    else container.setAttribute('width', largeur + 'px'); // marche pas avec chrome ou ff
 
     /** @see http://redmine.sesamath.net/projects/alibaba/wiki/ExosMep pour les flashvars à passer */
     flashvars = options.flashvars || {}
     // ces flashvars pour le swf sont obligatoires et on les impose ici
     flashvars.idMep = Number(ressource.idOrigine)
-    flashvars.modeleMep = (params.mep_modele === "mep1") ? "1" : "2"
+    flashvars.modeleMep = (params.mep_modele === 'mep1') ? '1' : '2'
     flashvars.abreviationLangue = params.mep_langue_id
     flashvars.idSwf = idSwf
-    // si n on a pas de chiffrement de la réponse qui sera une string au format "vrrp..."
+    // si n on a pas de chiffrement de la réponse qui sera une string au format 'vrrp...'
     // (sinon c'est un nombre qui correspond à cette réponse chiffrée)
     // et la propriété score est ajoutée (un entier donnant le nb de bonnes réponses)
     flashvars.ch = options.ch || 'n'
@@ -115,9 +115,9 @@ module.exports = function display(ressource, options, next) {
       log("affichage par un formateur, on désactive le score et regarde si on peut activer le bouton suite et l'aide (suivant ressource)")
       // à l'import on ne met pas ces valeurs si c'est o (valeur par défaut)
       if (params.suite_formateur) flashvars.isBoutonSuite = params.suite_formateur
-      else flashvars.isBoutonSuite = "o"
+      else flashvars.isBoutonSuite = 'o'
       if (params.aide_formateur)  flashvars.isBoutonAide = params.aide_formateur
-      else flashvars.isBoutonAide = "o"
+      else flashvars.isBoutonAide = 'o'
     }
     // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
     if (params.nb_wnk)          flashvars.mep_nb_wnk = params.nb_wnk
@@ -127,13 +127,13 @@ module.exports = function display(ressource, options, next) {
       // faut une fonction qui va transformer le résultat au format attendu
       // et la pour rendre accessible au swf dans son dom
       window.resultatCallback = function (result) {
-        log("resultatCallback em reçoit", result)
+        log('resultatCallback em reçoit', result)
         var resultMod = {
           reponse: result.reponse,
           nbq: result.nbq || params.nbq_defaut,
           ressId: ressId,
           ressType: ressType,
-          fin: (result.fin === "o"),
+          fin: (result.fin === 'o'),
           original: result
         }
         // le score sera calculé d'après la réponse juste avant enregistrement en bdd
@@ -150,10 +150,10 @@ module.exports = function display(ressource, options, next) {
 
       // on ajoute un envoi au unload si rien n'a été envoyé avant
       window.addEventListener('unload', function () {
-        log("unload em")
+        log('unload em')
         if (isLoaded && !lastResult) {
           lastResult = {
-            reponse: "",
+            reponse: '',
             nbq: params.nbq_defaut,
             ressId: ressId,
             ressType: ressType,
@@ -174,7 +174,7 @@ module.exports = function display(ressource, options, next) {
       largeur,
       hauteur,
       flashversion: 8,
-      base: baseMepSwf + "/"
+      base: baseMepSwf + '/'
     }
     // pour debug
     log('flashvars', flashvars)

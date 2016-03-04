@@ -28,8 +28,6 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
-/*jshint asi:true */
 'use strict'
 
 var log = require('./log')
@@ -54,30 +52,31 @@ var maxTimeout = 60000
  * @param {object}   data
  * @param {object}   options
  * @param {function} callback Sera appelée avec (error, réponse),
- *                              si options.responseType === "json" la réponse sera un objet,
+ *                              si options.responseType === 'json' la réponse sera un objet,
  *                              sinon l'objet response du XMLHttpRequest
  */
-function xhrCall(verb, url, data, options, callback) {
-  var xhr, isNextCalled = false
-    // pour s'assurer qu'on ne l'appelle qu'une fois, entre timeout, error et done
-    function next(error, data) {
-      if (!isNextCalled) {
+function xhrCall (verb, url, data, options, callback) {
+  var xhr
+  var isNextCalled = false
+  // pour s'assurer qu'on ne l'appelle qu'une fois, entre timeout, error et done
+  function next (error, data) {
+    if (!isNextCalled) {
       isNextCalled = true
       callback(error, data)
-      }
     }
+  }
 
-  if (typeof verb !== "string") verb = 'GET'
+  if (typeof verb !== 'string') verb = 'GET'
   else verb = verb.toUpperCase()
-  if (typeof options !== "object") options = {}
+  if (typeof options !== 'object') options = {}
 
-    // on est une méthode privée, tous les appels sont listés plus bas
-  //if (['GET', 'POST', 'PUT', 'DELETE'].indexOf(verb) < 0) return next(new Error("Verbe http " +verb +" non géré"))
+  // on est une méthode privée, tous les appels sont listés plus bas
+  // if (['GET', 'POST', 'PUT', 'DELETE'].indexOf(verb) < 0) return next(new Error('Verbe http ' +verb +' non géré'))
 
   if (typeof window.XMLHttpRequest !== 'undefined') {
     xhr = new XMLHttpRequest()
-  } else if (typeof ActiveXObject !== "undefined") {
-    var versions = ["MSXML2.XmlHttp.5.0", "MSXML2.XmlHttp.4.0", "MSXML2.XmlHttp.3.0", "MSXML2.XmlHttp.2.0", "Microsoft.XmlHttp"]
+  } else if (typeof ActiveXObject !== 'undefined') {
+    var versions = ['MSXML2.XmlHttp.5.0', 'MSXML2.XmlHttp.4.0', 'MSXML2.XmlHttp.3.0', 'MSXML2.XmlHttp.2.0', 'Microsoft.XmlHttp']
     for(var i = 0; i < versions.length; i++) {
       try {
         /*global ActiveXObject*/
@@ -93,8 +92,8 @@ function xhrCall(verb, url, data, options, callback) {
     if (options.urlParams) {
       for (var p in options.urlParams) {
         if (options.urlParams.hasOwnProperty(p)) {
-          url += (url.indexOf("?") > 0) ? '&' : '?'
-          url += p +"="
+          url += (url.indexOf('?') > 0) ? '&' : '?'
+          url += p +'='
           url += encodeURIComponent(options.urlParams[p])
         }
       }
@@ -108,25 +107,25 @@ function xhrCall(verb, url, data, options, callback) {
     // sinon on laisse l'appelant préciser s'il veut (on peut poster du xml par ex)
     if (options.headers) {
       for (var header in options.headers) {
-        if (options.headers.hasOwnProperty(header) && typeof options.headers[header] === "string") {
+        if (options.headers.hasOwnProperty(header) && typeof options.headers[header] === 'string') {
           xhr.setRequestHeader(header, options.headers[header])
         }
       }
-    } else if (!!data && typeof data === "object")  {
+    } else if (!!data && typeof data === 'object')  {
       xhr.setRequestHeader('Content-Type', 'application/json')
     }
     xhr.timeout = options.timeout || defaultTimeout
     if (xhr.timeout < minTimeout) {
-      log(new Error("timeout " +xhr.timeout +"ms trop faible sur l'url " +url +" réinitialisé à " +(defaultTimeout/1000) +"s"))
+      log(new Error('timeout ' +xhr.timeout +"ms trop faible sur l'url " +url +' réinitialisé à ' +(defaultTimeout/1000) +'s'))
       xhr.timeout = defaultTimeout
     }
     if (xhr.timeout > maxTimeout) {
-      log(new Error("timeout " +xhr.timeout +"ms trop élevé sur l'url " +url +" réinitialisé à " +(defaultTimeout/1000) +"s"))
+      log(new Error('timeout ' +xhr.timeout +"ms trop élevé sur l'url " +url +' réinitialisé à ' +(defaultTimeout/1000) +'s'))
       xhr.timeout = defaultTimeout
     }
     xhr.onerror = function () {
       // Pb de connexion au serveur
-      var errMsg = "Le serveur a renvoyé une erreur"
+      var errMsg = 'Le serveur a renvoyé une erreur'
       if (xhr.status) errMsg += ' ' +xhr.status
       errMsg += ' : ' +xhr.responseText
       next(new Error(errMsg))
@@ -134,33 +133,32 @@ function xhrCall(verb, url, data, options, callback) {
 
     xhr.ontimeout = function () {
       var msg = "Le serveur n'a pas répondu"
-      if (options.timeout) msg += " après " +Math.floor(options.timeout / 1000) +"s d'attente."
+      if (options.timeout) msg += ' après ' + Math.floor(options.timeout / 1000) + "s d'attente."
       next(new Error(msg))
     }
 
     xhr.onreadystatechange = function () {
-      if (this.readyState == this.DONE) {
+      if (this.readyState == this.DONE) { // eslint-disable-line eqeqeq
         var error, retour
 
         if (this.status === 200) {
           retour = this.response
-
         } else {
           // KO (les redirections sont normalement gérées par le navigateur)
           var message
-            switch (this.status) {
-              case 0:
-              message = "Pas de connexion"
+          switch (this.status) {
+            case 0:
+              message = 'Pas de connexion'
               break
-              case 403:
-              message = "Accès refusé"
+            case 403:
+              message = 'Accès refusé'
               break
-              default:
-              message = "Erreur " + this.status
-            }
-          message += " sur " + verb + " " + url
+            default:
+              message = 'Erreur ' + this.status
+          }
+          message += ' sur ' + verb + ' ' + url
           // au cas où c'est du json qui renvoie une erreur
-          if (this.response && this.response.error) message += " qui précise « " +this.response.error +" »"
+          if (this.response && this.response.error) message += ' qui précise « ' + this.response.error + ' »'
           error = new Error(message)
           error.status = this.status
           error.content = this.response
@@ -189,8 +187,8 @@ module.exports = {
    * @param {xhrOptions}       options
    * @param {responseCallback} callback
    */
-  delete : function del(url, data, options, callback) {
-    xhrCall("DELETE", url, data, options, callback)
+  delete: function del (url, data, options, callback) {
+    xhrCall('DELETE', url, data, options, callback)
   },
   /**
    * Appel ajax en GET
@@ -198,8 +196,8 @@ module.exports = {
    * @param {xhrOptions}       options
    * @param {responseCallback} callback
    */
-  get : function get(url, options, callback) {
-    xhrCall("GET", url, null, options, callback)
+  get: function get (url, options, callback) {
+    xhrCall('GET', url, null, options, callback)
   },
   /**
    * Appel ajax en POST
@@ -208,7 +206,7 @@ module.exports = {
    * @param {xhrOptions}       options
    * @param {responseCallback} callback
    */
-  post : function post(url, data, options, callback) {
+  post: function post (url, data, options, callback) {
     xhrCall('POST', url, data, options, callback)
   },
   /**
@@ -218,17 +216,16 @@ module.exports = {
    * @param {xhrOptions}       options
    * @param {responseCallback} callback
    */
-  put : function put(url, data, options, callback) {
+  put: function put (url, data, options, callback) {
     xhrCall('PUT', url, data, options, callback)
   }
 }
-
 
 /**
  * Options éventuelles à passer avec la requête xhr
  * @typedef xhrOptions
  * @param {string}  responseType    Préciser json pour récupérer un objet plutôt qu'une string dans la réponse
- * @param {object}  headers         Liste de headers à ajouter à l'appel, sous la forme header:headerValue (par ex {"Content-Type":"text/xml"})
+ * @param {object}  headers         Liste de headers à ajouter à l'appel, sous la forme header:headerValue (par ex {'Content-Type':'text/xml'})
  * @param {boolean} withCredentials Passer true pour l'ajouter
  * @param {object}  urlParams       Liste de clé:valeur à ajouter à l'url (les valeurs seront passées à encodeURIComponent)
  */
@@ -236,6 +233,5 @@ module.exports = {
 /**
  * @callback responseCallback
  * @param {Error}         error    Erreur éventuelle
- * @param {string|object} response L'objet response du XMLHttpRequest, un objet si on avait précisé options.responseType = "json", une string sinon
+ * @param {string|object} response L'objet response du XMLHttpRequest, un objet si on avait précisé options.responseType = 'json', une string sinon
  */
- 

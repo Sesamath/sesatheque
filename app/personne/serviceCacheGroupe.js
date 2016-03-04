@@ -40,15 +40,15 @@ var _ = require('lodash')
  * @param {string|Groupe} groupe
  * @returns {string}
  */
-function getKey(groupe) {
+function getKey (groupe) {
   var key
-  if (_.isString(groupe)) key = 'groupe_' +tools.sanitizeHashKey(groupe)
-  else if (groupe && groupe.nom) key = 'groupe_' +tools.sanitizeHashKey(groupe.nom)
+  if (_.isString(groupe)) key = 'groupe_' + tools.sanitizeHashKey(groupe)
+  else if (groupe && groupe.nom) key = 'groupe_' + tools.sanitizeHashKey(groupe.nom)
   return key
 }
 
 module.exports = function ($cache, $settings) {
-  var ttl = $settings.get('components.personne.cacheTTL', 20*60)
+  var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
 
   /**
    * Service helper de $personneRepository
@@ -67,7 +67,7 @@ module.exports = function ($cache, $settings) {
   $cacheGroupe.get = function (nom, next) {
     var key = getKey(nom)
     if (key) $cache.get(key, next)
-    else next(new Error("Nom de groupe vide"))
+    else next(new Error('Nom de groupe vide'))
   }
   /**
    * Met un groupe en cache
@@ -77,7 +77,7 @@ module.exports = function ($cache, $settings) {
    */
   $cacheGroupe.set = function (groupe, next) {
     if (groupe && groupe.nom) $cache.set(getKey(groupe), groupe, ttl, next)
-    else next(new Error("Groupe invalide"))
+    else next(new Error('Groupe invalide'))
   }
 
   /**
@@ -89,7 +89,7 @@ module.exports = function ($cache, $settings) {
   $cacheGroupe.delete = function (groupe, next) {
     var key = getKey(groupe)
     if (key) $cache.delete(key, next)
-    else next(new Error("groupe invalide"))
+    else next(new Error('groupe invalide'))
   }
 
   return $cacheGroupe

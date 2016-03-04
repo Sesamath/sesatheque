@@ -31,7 +31,7 @@
 'use strict'
 
 /**
- * Définition d'un arbre, sous sa forme "data" (pour stockage et échange, pas forcément affichage)
+ * Définition d'un arbre, sous sa forme 'data' (pour stockage et échange, pas forcément affichage)
  * C'est aussi la définition d'une branche ou d'une feuille
  *
  * La présence d'un attribut oid, laisse supposer titre et type sont renseignés,
@@ -41,14 +41,14 @@
  * @constructor
  */
 function Arbre(initObj) {
-  if (typeof initObj !== "object") initObj = {}
+  if (typeof initObj !== 'object') initObj = {}
   /**
    * L'identifiant de l'arbre (pour éventuellement le référencer comme enfant d'un autre arbre)
    * @type {(Number|string|undefined)}
    */
   this.oid = initObj.oid || null
   /**
-   * Une référence vers l'oid du "vrai" Arbre|feuille sur la sesatheque courante, si on n'est
+   * Une référence vers l'oid du 'vrai' Arbre|feuille sur la sesatheque courante, si on n'est
    * qu'une référence et pas l'objet complet.
    *
    * Si une appli mélange des références en provenance de différentes sesatheques, elle pourra ajouter une

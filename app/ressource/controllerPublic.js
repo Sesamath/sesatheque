@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 
-'use strict';
+'use strict'
 
 /**
  * Le controleur html des routes /public/ (pages sans authentification)
@@ -54,7 +54,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param view
    * @param options
    */
-  function affiche(context, view, options) {
+  function affiche (context, view, options) {
     var oid = context.arguments.oid
     $ressourceRepository.loadPublic(oid, function (error, ressource) {
       $ressourcePage.prepareAndSend(context, error, ressource, view, options)
@@ -70,7 +70,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param view
    * @param options
    */
-  function checkAndAffiche(context, error, ressource, view, options) {
+  function checkAndAffiche (context, error, ressource, view, options) {
     if (error) $ressourcePage.printError(context, "Problème d'accès à la base de données", 500)
     else if (ressource && ressource.restriction === 0) $ressourcePage.prepareAndSend(context, error, ressource, view, options)
     else $ressourcePage.printError(context, "La ressource n'existe pas ou n'est pas publique", 404)
@@ -115,7 +115,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.layout = 'iframe'
     var origine = context.arguments.origine
     var idOrigine = context.arguments.idOrigine
-    if (origine === "cle") {
+    if (origine === 'cle') {
       $ressourceRepository.loadByCle(idOrigine, function (error, ressource) {
         // on fait sauter la restriction si c'est une ressource publiée dont on connait la clé
         if (!error && ressource && ressource.publie) ressource.restriction = 0
@@ -150,12 +150,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     })
   })
 
-
   /**
    * La recherche (form et résultats)
    * @private
    */
-  function search(context) {
+  function search (context) {
     context.layout = 'page'
     if (_.isEmpty(context.get)) {
       // form de recherche
@@ -178,7 +177,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           filters.push(filter)
         }
       }
-      log.debug("traduits en filters", filters)
+      log.debug('traduits en filters', filters)
       // @todo ajouter des critères de tri
       if (filters.length) {
         var options = {
@@ -195,8 +194,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           log.debug('qui remonte', ressources)
           if (error) data.contentBloc.error = error.toString()
           else {
-            if (ressources.length == options.nb) {
-              crit.start = options.start +options.nb
+            if (ressources.length === options.nb) {
+              crit.start = options.start + options.nb
               data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
             }
             if (options.start) {
@@ -204,13 +203,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               if (crit.start < 0) crit.start = 0
               data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
             }
-            if (ressources.length) data.contentBloc.pagination = '(' +(options.start +1) +' à ' +(options.start +1 +ressources.length) +')'
+            if (ressources.length) data.contentBloc.pagination = '(' + (options.start + 1) + ' à ' + (options.start + 1 + ressources.length) + ')'
             data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
           }
           context.html(data)
         })
       } else {
-        $ressourcePage.printSearchForm(context, ["il faut choisir au moins un critère"])
+        $ressourcePage.printSearchForm(context, ['il faut choisir au moins un critère'])
       }
     }
   }
@@ -220,5 +219,4 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /public/recherche
    */
   controller.get($routes.get('search'), search)
-
 }

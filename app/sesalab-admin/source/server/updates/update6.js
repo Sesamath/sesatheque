@@ -39,23 +39,23 @@ var config = require('../../../../config')
  * Modifie toutes les entities personne pour passer la propriété groupes en array
  */
 module.exports = function(job) {
-  console.log("update6")
-  var EntityPersonne = lassi.service("EntityPersonne")
+  console.log('update6')
+  var EntityPersonne = lassi.service('EntityPersonne')
   flow().seq(function () {
     EntityPersonne.match('nom').count(this)
   }).seq(function (nb) {
-    console.log("nb " +nb)
+    console.log('nb ' +nb)
     var tours = job.init(nb, 50)
     console.log('les tours ' +JSON.stringify(tours))
     flow(tours).seqEach(function (tour) {
       var nextTour = this
-      console.log("On démarre à " + tour[0])
+      console.log('On démarre à ' + tour[0])
       flow().seq(function () {
         EntityPersonne.match('nom').grab(tour[1], tour[0], this)
       }).seq(function (personnes) {
         flow(personnes).seqEach(function (personne) {
           console.log('trouvé ' +personne.nom)
-          if (typeof personne.groupes === "object") {
+          if (typeof personne.groupes === 'object') {
             if (personne.groupes instanceof Array) {
               personne.groupesMembre = personne.groupes
               delete personne.groupes
@@ -81,7 +81,7 @@ module.exports = function(job) {
         }).catch(job.done)
       }).catch(job.done)
     }).seq(function () {
-      job.done("")
+      job.done('')
     }).catch(job.done)
   }).catch(job.done)
 }

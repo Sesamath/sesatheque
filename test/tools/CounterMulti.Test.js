@@ -33,15 +33,15 @@
 
 /*global describe,it*/
 
-var assert = require("assert")
+var assert = require('assert')
 var CounterMulti = require('../../app/tools/CounterMulti')
 
 describe('CounterMulti', function () {
   var cm = new CounterMulti()
-  it("construct retourne un objet avec une propriété length de 0", function () {
+  it('construct retourne un objet avec une propriété length de 0', function () {
     assert.strictEqual(0, cm.length)
   })
-  it("inc incrémente ", function () {
+  it('inc incrémente ', function () {
     cm.inc('foo')
     cm.inc('foo')
     cm.inc('bar')
@@ -49,24 +49,24 @@ describe('CounterMulti', function () {
     assert.strictEqual(2, cm.foo)
     assert.strictEqual(1, cm.bar)
   })
-  it("dec décrémente ", function () {
+  it('dec décrémente ', function () {
     cm.dec('foo')
     cm.dec('baz')
     assert.strictEqual(3, cm.length)
     assert.strictEqual(1, cm.foo)
     assert.strictEqual(-1, cm.baz)
   })
-  it("delete efface ", function () {
+  it('delete efface ', function () {
     cm.delete('foo')
     assert.strictEqual(2, cm.length)
     assert.strictEqual(undefined, cm.foo)
   })
-  it("resetLength recalcule la longueur si on ajoute manuellement des compteurs", function () {
+  it('resetLength recalcule la longueur si on ajoute manuellement des compteurs', function () {
     cm.foo = 4
     cm.resetLength()
     assert.strictEqual(3, cm.length)
   })
-  it("total additionne tout", function () {
+  it('total additionne tout', function () {
     assert.strictEqual(4, cm.total())
     cm.delete('baz')
     assert.strictEqual(5, cm.total())

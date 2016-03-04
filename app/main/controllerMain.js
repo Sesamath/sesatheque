@@ -28,28 +28,29 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-'use strict';
+'use strict'
+
+var path = require('path')
 
 module.exports = function (controller) {
   var baseData = {
-    $metas : {},
-    $views : __dirname +'/../views'
+    $metas: {}
   }
 
   // nos ressources statiques génériques
-  controller.serve(__dirname +'/public')
+  controller.serve(path.join(__dirname, 'public'))
 
   // home
   controller.get('/', function (context) {
-    context.layout = 'page';
+    context.layout = 'page'
     var data = baseData
     // log('le contexte dans le controleur de main, action /',context)
-    data.$metas.title  = "Bienvenue dans la bibliothèque Sésamath"
+    data.$metas.title = 'Bienvenue dans la bibliothèque Sésamath'
     // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
     data.contentBloc = {
-      $view : 'contents',
+      $view: 'contents',
       // ce content est la variable passée au template dust
-      contents : ["Ce site est encore un prototype expérimental."]
+      contents: ['Ce site est encore un prototype expérimental.']
     }
     context.html(data)
   })

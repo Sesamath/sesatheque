@@ -47,14 +47,14 @@ function Groupe(initObj) {
   /**
    * Nom
    * @type {string}
-   * @default ""
+   * @default ''
    */
   if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLocaleLowerCase();
   else this.nom = '';
   /**
    * Description
    * @type {string}
-   * @default ""
+   * @default ''
    */
   if (typeof initObj.description === 'string') this.description = initObj.description;
   else this.description = '';

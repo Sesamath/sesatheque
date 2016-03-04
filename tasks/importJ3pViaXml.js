@@ -37,7 +37,7 @@ var idsFound = []
  */
 function getJ3pIds(arbre) {
   if (arbre.n) {
-    log("parsing de la branche xml " +arbre.n)
+    log('parsing de la branche xml ' +arbre.n)
   }
   var j3pIds = []
   if (arbre._children) arbre._children.forEach(function(child) {
@@ -45,7 +45,7 @@ function getJ3pIds(arbre) {
       if (child.attrib.i) {
         j3pIds.push(child.attrib.i)
       } else {
-        common.addError("élément " +child.tag +" sans id , n° d'ordre " +child._id)
+        common.addError('élément ' +child.tag +" sans id , n° d'ordre " +child._id)
       }
     } else if (child.tag === 'd') {
       j3pIds = j3pIds.concat(getJ3pIds(child))
@@ -65,7 +65,7 @@ function getOnlineXml(next) {
     content_type: 'charset=UTF-8'
   }
   //log('dans getRessource ' +idComb)
-  log("On va chercher " +options.url)
+  log('On va chercher ' +options.url)
   request.get(options, function (error, response) {
     if (error) next(error)
     else next(response.body)
@@ -81,16 +81,16 @@ function parseIds(idsFound) {
     idsFound.forEach(function (id) {
       flow().seq(function () {
         var row,
-            query = "SELECT bib_id AS id, bib_titre AS titre, bib_descriptif AS descriptif," +
-                    " bib_commentaire AS commentaire, bib_xml AS graphe FROM BIBS"
+            query = 'SELECT bib_id AS id, bib_titre AS titre, bib_descriptif AS descriptif,' +
+                    ' bib_commentaire AS commentaire, bib_xml AS graphe FROM BIBS'
         common.setAfterAllCb(this)
-        kLabomep.raw(query + " WHERE bib_id = " + id).exec(function (error, rows) {
+        kLabomep.raw(query + ' WHERE bib_id = ' + id).exec(function (error, rows) {
           if (error) throw error
           if (rows[0] && rows[0][0]) {
             row = rows[0][0]
             // faut voir si on complète avec les infos de oldBibli
             if (!row.bib_descriptif || !row.bib_commentaire) {
-              kOldBibli.raw("SELECT description, commentaires FROM Ressource WHERE id = " + id).exec(function (error,
+              kOldBibli.raw('SELECT description, commentaires FROM Ressource WHERE id = ' + id).exec(function (error,
                                                                                                                rows) {
                 var result
                 if (error) throw error
@@ -99,7 +99,7 @@ function parseIds(idsFound) {
                   if (result && !row.descriptif && result.description) row.descriptif = result.description
                   if (result && !row.commentaire && result.commentaires) row.commentaire = result.commentaires
                 }
-                else log("Pas de ressources avec " + query)
+                else log('Pas de ressources avec ' + query)
               })
             }
             parseRessource(row)
@@ -114,7 +114,7 @@ function parseIds(idsFound) {
       })
     })
   } else {
-    log("Aucune ressource j3p trouvée dans le xml")
+    log('Aucune ressource j3p trouvée dans le xml')
   }
 }
 
@@ -131,13 +131,13 @@ function parseJ3pXml(xmlString, next) {
       xmlString = fs.readFileSync(__dirname +'/arbresXml/' +xmlName +'.xml').toString()
     }
     var arbre = elementtree.parse(xmlString)
-    if (!arbre._root) throw new Error("arbre sans racine")
-    if (!arbre._root._children || !arbre._root._children.length) throw new Error("arbre vide")
+    if (!arbre._root) throw new Error('arbre sans racine')
+    if (!arbre._root._children || !arbre._root._children.length) throw new Error('arbre vide')
     // si l'arbre n'a qu'un fils qui est un tag d avec enfants c'est lui qu'on prend comme racine
     if (arbre._root._children.length === 1 && arbre._root._children[0].tag === 'd') {
       if (arbre._root._children[0]._children.length) {
         arbre = arbre._root._children[0]
-      } else throw new Error("arbre avec un seul dossier vide")
+      } else throw new Error('arbre avec un seul dossier vide')
     } else {
       arbre = arbre._root
     }
@@ -146,7 +146,7 @@ function parseJ3pXml(xmlString, next) {
     next(getJ3pIds(arbre))
 
   } catch (error) {
-    common.addError(xmlName, "le parsing du xml " +xmlName +" a planté : " +error.toString())
+    common.addError(xmlName, 'le parsing du xml ' +xmlName +' a planté : ' +error.toString())
     process.exit()
   }
 }
@@ -192,12 +192,12 @@ function parseRessource(row) {
 function purgeJ3pAndExit() {
   log('On vire toutes les ressources j3p existantes')
 
-  var query = "DELETE ressource, ri2 FROM ressource_index ri INNER JOIN ressource USING(oid)" +
-      " INNER JOIN ressource_index ri2 USING(oid)" +
+  var query = 'DELETE ressource, ri2 FROM ressource_index ri INNER JOIN ressource USING(oid)' +
+      ' INNER JOIN ressource_index ri2 USING(oid)' +
       " WHERE ri.name = 'type' AND ri._string = 'j3p'"
   var dbConfigBibli = require(__dirname + '/../_private/config')
   var confKnex = {
-    client: "mysql",
+    client: 'mysql',
     connection: dbConfigBibli.entities.database
   }
   var kBibli = knex(confKnex)

@@ -80,7 +80,7 @@ function Chargement_j3p () {
 * @returns {Boolean}
 */
 function Estdans (ch, tab) {
-  // estdans("toto",["toto","tata"] renvoie TRUE
+  // estdans('toto',['toto','tata'] renvoie TRUE
   var bool = false
   for (var k = 0; k < tab.length; k++) {
     if (tab[k] === ch) return true
@@ -97,10 +97,10 @@ function Estdans (ch, tab) {
 Chargement_j3p.prototype.chargement = function (eltHtml) {
   /*global head, jQuery*/
   function oncontinue1 () {
-    // alert("pause")
+    // alert('pause')
     // On charge les CSS :
     dom.addCss(pathOutils + 'stylesactivite.css')
-    // dom.addCss_2(pathOutils +"j3pcss/j3pbases.css")
+    // dom.addCss_2(pathOutils +'j3pcss/j3pbases.css')
 
     // on parcours toutes les sections du graphe (ATTENTION, faut sauter l'indice 0)
     for (var k = 1; k < that.graphe.length; k++) {
@@ -237,7 +237,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
 
     // maths => mathquill
     if (Estdans('maths', that.listedesoutils)) {
-      // alert("maths")
+      // alert('maths')
       dom.addCss(pathOutilsExt + 'mathquill/home.css')
       dom.addCss(pathOutilsExt + 'mathquill/mathquill_maj.css')
       piledappels.push(pathOutilsExt + 'mathquill/mathquill_maj.js')

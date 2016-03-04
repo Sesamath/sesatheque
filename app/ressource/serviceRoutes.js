@@ -33,7 +33,7 @@
 
 var configRessource = require('./config')
 var routes = configRessource.constantes.routes
-var restriction = configRessource.constantes.restriction
+// var restriction = configRessource.constantes.restriction
 
 module.exports = function ($accessControl) {
   /**
@@ -49,10 +49,10 @@ module.exports = function ($accessControl) {
    * @param {string} action
    * @returns {string} La route
    */
-  $routes.get = function(action) {
+  $routes.get = function (action) {
     var route = routes[action]
     for (var i = 1; i < arguments.length; i++) {
-      if (arguments[i]) if (route) route += '/' +arguments[i]
+      if (arguments[i]) if (route) route += '/' + arguments[i]
     }
 
     return route
@@ -67,10 +67,12 @@ module.exports = function ($accessControl) {
    * @param {Context}          [context]
    * @returns {string} La route absolue
    */
-  $routes.getAbs = function(action, ressource, context) {
-    var route, id, isPublic = true
+  $routes.getAbs = function (action, ressource, context) {
+    var route
+    var id
+    var isPublic = true
     if (ressource) {
-      if (typeof ressource === "object") id = ressource.oid || ressource.ref || ressource.idOrigine
+      if (typeof ressource === 'object') id = ressource.oid || ressource.ref || ressource.idOrigine
       else id = ressource
       if (ressource.restriction || $accessControl.isAuthenticated(context)) isPublic = false
     } else if ($accessControl.isAuthenticated(context)) {
@@ -85,9 +87,9 @@ module.exports = function ($accessControl) {
       // et on ajoute l'oid éventuel
       route += $routes.get(action, id)
     } else {
-      log.error(new Error("appel de $routes.getAbs avec une action non gérée : " +action))
+      log.error(new Error('appel de $routes.getAbs avec une action non gérée : ' + action))
     }
-    //log("getAbs " +action +" va retourner " +route)
+    // log('getAbs ' +action +' va retourner " +route)
 
     return route
   }
@@ -104,7 +106,7 @@ module.exports = function ($accessControl) {
     var html
     var route = $routes.getAbs(actionName, ressource)
     if (route) {
-      html =  '<a href="' +route +'">'
+      html = '<a href="' + route + '">'
       html += label || ressource.titre || 'sans titre'
       html += '</a>'
     }

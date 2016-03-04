@@ -10,18 +10,22 @@ Pour le découpage des chunks
 
  https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
  https://github.com/webpack/webpack/tree/master/examples/named-chunks
+
+Pour charger des librairies tierces, on utilise page.loadAsync
+sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
 
 // var path = require('path');
 var webpack = require('webpack')
 
-module.exports = {
+// la conf identique dev/prod
+var conf = {
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     apiClient: './app/ressource/srcClient/apiClient.js',
-    sesathequeClient: 'sesatheque-client',
+    client: 'sesatheque-client',
     page: [
       './app/ressource/srcClient/page/index.js',
       './app/ressource/srcClient/page/refreshAuth.js'
@@ -32,7 +36,10 @@ module.exports = {
   output: {
     path: 'app/ressource/public/',
     // [name] est remplacé par le nom de la propriété de entry
-    filename: '[name].bundle.js'
+    filename: '[name].bundle.js',
+    // cf https://webpack.github.io/docs/configuration.html#output-library
+    library: 'st[name]',
+    crossOriginLoading: 'anonymous'
   },
   module: {
     loaders: [
@@ -55,7 +62,32 @@ module.exports = {
   stats: {
     // Nice colored output
     colors: true
-  },
+  }
   // Create Sourcemaps for the bundle
-  devtool: 'source-map'
 } /* */
+
+// passer --debug pour ne pas avoir de minification
+var isDev = process.argv.indexOf('--debug') > -1
+var isHjs = process.argv.length > 1 && process.argv[1].indexOf('hjs-dev-server') > -1
+if (isHjs) {
+  // pas trop la peine de s'énerver, visiblement hjs-webpack est prévu pour une single page app
+  // de toute façon faudrait modifier l'appli pour que ce soit elle qui lance hjs-webpack et utilise ses urls
+  // on verra plus tard…
+  conf.devServer = {
+    // sans lui préciser ça il répond Listening at http://undefined:undefined
+    hostname: 'localhost',
+    port: 3000,
+    // sans ça il plante dès le départ
+    https: process.argv.indexOf('--https') !== -1
+    // mais ça suffit pas, ça plante qq secondes après le démarrage
+  }
+  isDev = true
+}
+if (isDev) {
+  conf.devtool = 'source-map'
+  // pour hjs-webpack
+} else {
+  conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
+}
+
+module.exports = conf
