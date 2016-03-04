@@ -44,7 +44,7 @@ var conf = {
   module: {
     loaders: [
       {
-        test: /app\/ressource\/srcClient\/.*\.js/,
+        test: /app\/srcClient\/.*\.js/,
         loader: 'babel-loader'
       }
     ]
