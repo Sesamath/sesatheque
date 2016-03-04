@@ -37,14 +37,15 @@
 var tools = require('./tools')
 var path = require('path')
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
-var privateConfModule = path.join(__dirname, '_private')
+var privateConfPath = [__dirname, '_private']
 if (process.env.SESATHEQUE_CONF && /^[^\/]+$/.test(process.env.SESATHEQUE_CONF)) {
   // on peut préciser un autre fichier de conf via l'environnement (utile pour faire tourner plusieurs instances de l'appli)
-  privateConfModule += process.env.SESATHEQUE_CONF
+  privateConfPath.push(process.env.SESATHEQUE_CONF)
 } else {
-  privateConfModule += 'config'
+  privateConfPath.push('config')
 }
-var localConfig = require(privateConfModule)
+
+var localConfig = require(path.join.apply(this, privateConfPath))
 
 // la conf du composant ressource à part
 var ressourceConfig = require('./ressource/config')

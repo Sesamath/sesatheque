@@ -106,28 +106,25 @@ try {
   require('./auth')
   var dependancies = ['main', 'personne', 'ressource', 'auth']
 
-  // On lit notre config directement (sans passer par $settings) avant de lancer lassi.component
-  var privateConfig = require('./_private/config')
   // des modules sup à charger
-  if (privateConfig.extraModules) {
-    privateConfig.extraModules.forEach(function (module) {
+  if (config.extraModules) {
+    config.extraModules.forEach(function (module) {
       appLog('ajout du module supplémentaire ' + module)
       require(module)
     })
   }
-  if (privateConfig.extraDependenciesFirst) {
-    privateConfig.extraDependenciesFirst.forEach(function (dependency) {
+  if (config.extraDependenciesFirst) {
+    config.extraDependenciesFirst.forEach(function (dependency) {
       appLog('ajout en premier de la dépendance supplémentaire ' + dependency)
       dependancies.unshift(dependency)
     })
   }
-  if (privateConfig.extraDependenciesLast) {
-    privateConfig.extraDependenciesLast.forEach(function (dependency) {
+  if (config.extraDependenciesLast) {
+    config.extraDependenciesLast.forEach(function (dependency) {
       appLog('ajout en dernier de la dépendance supplémentaire ' + dependency)
       dependancies.push(dependency)
     })
   }
-
   // Notre appli qui sera mise en global (pour que chacun puisse y ajouter ses controleurs ou services)
   var sesatheque = lassi.component('sesatheque', dependancies)
 
