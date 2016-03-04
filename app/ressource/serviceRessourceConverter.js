@@ -50,7 +50,7 @@ var config = require('./config')
 var appConfig = require('../config')
 // var tools = require('../tools')
 var Alias = require('../constructors/Alias')
-var jstreeConverter = require('././display/jstreeConverter')
+var jstreeConverter = require('../srcClient/display/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl) {
