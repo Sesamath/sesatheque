@@ -4,9 +4,9 @@
     "allowUnknownTags": true
   },
   "source"   : {
-    "includeIgnored": ["./app/_typedef.doc.js", "./app/ressource/srcClient", "./app/ressource/srcClient/plugins/README.md"],
-    "include": ["./app/ressource/srcClient"],
-    "includePattern": ".+\\.(js|md)$",
+    "includeIgnored": ["./app/_typedef.doc.js"],
+    "include": ["./app/srcClient", "./app/srcClient/plugins/README.md"],
+    "includePattern": ".+\\.(js)$",
     "excludePattern": "(.+\\.bak\\.js|.+\\.bundle\\.js)"
   },
   "plugins"  : [

@@ -56,7 +56,7 @@ module.exports = function(job) {
             }
           } else {
             // pas de base, on signale
-            log.errorData("l'alias ' +alias.oid +' n'a pas de base', alias)
+            log.errorData("l'alias " +alias.oid +" n'a pas de base", alias)
             this()
           }
         }).seq(function () {
@@ -64,7 +64,7 @@ module.exports = function(job) {
         }).catch(job.done)
       }).catch(job.done)
     }).seq(function () {
-      job.done('")
+      job.done('')
     }).catch(job.done)
   }).catch(job.done)
 }

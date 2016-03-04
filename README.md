@@ -38,6 +38,11 @@ Module pour normaliser les réponses de la sésathèque [sesatheque-client](modu
 
 Module (AMD client) pour récupérer ou enregistrer des ressources sur la sésathèque [apiClient](modules/apiClient/)
 
+API client
+----------
+
+Cf aussi la doc du [module sesatheque-client](modules/sesatheque-client/module-sesatheque-client.html)
+
 
 Scripts
 -------

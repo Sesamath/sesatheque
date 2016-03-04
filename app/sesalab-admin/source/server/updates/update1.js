@@ -34,7 +34,7 @@
 var flow = require('an-flow')
 //var _ = require('lodash')
 
-var Alias = require('../../../../ressource/constructors/Alias')
+var Alias = require('../../../../constructors/Alias')
 var configRessource = require('../../../../ressource/config')
 
 module.exports = function(job) {
@@ -55,7 +55,7 @@ module.exports = function(job) {
             delete newEnfant.public
           } else {
             // un enfant sans ref qui n'est pas un arbre
-            log.errorData("Error : pas de ref dans l'arbre ' + (arbre.oid || arbre.ref || arbre.titre) + ' pour l'enfant ', enfant)
+            log.errorData("Error : pas de ref dans l'arbre " + (arbre.oid || arbre.ref || arbre.titre) + " pour l'enfant ", enfant)
           }
         }
         if (enfant.type === 'arbre' && enfant.enfants && enfant.enfants.length) {
@@ -69,7 +69,7 @@ module.exports = function(job) {
     arbre.categories = [configRessource.constantes.categories.liste]
   }
 
-  var EntityRessource = lassi.service('EntityRessource")
+  var EntityRessource = lassi.service('EntityRessource')
   flow().seq(function () {
     EntityRessource.match('type').equals('arbre').sort('oid').count(this)
   }).seq(function (nbArbres) {

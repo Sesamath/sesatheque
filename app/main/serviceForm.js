@@ -33,7 +33,7 @@
 
 // var _ = require('lodash')
 var tools = require('../tools')
-var Form = require('../ressource/srcClient/constructors/Form')
+var Form = require('../constructors/Form')
 
 module.exports = function ($page) {
   /**

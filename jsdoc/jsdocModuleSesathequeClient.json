@@ -4,8 +4,8 @@
     "allowUnknownTags": true
   },
   "source"   : {
-    "include":["./node_modules/sesatheque-client"],
-    "includePattern": ".+\\.(js|md)$",
+    "include":["./node_modules/sesatheque-client", "./node_modules/sesatheque-client/README.md"],
+    "includePattern": ".+\\.(js)$",
     "excludePattern": "(node_modules/sesatheque-client/node_modules|.+\\.bak\\.js)"
   },
   "plugins"  : [
@@ -36,8 +36,9 @@
   },
   "opts"     : {
     "destination": "./documentation/modules/sesatheque-client",
-    "recurse"    : true,
+//    "template"   : "../node_modules/ink-docstrap/template",
     "template"   : "./jaguarjs-jsdoc",
+    "recurse"    : true,
     "private"    : false
   }
 }

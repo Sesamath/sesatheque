@@ -35,7 +35,7 @@
 
 var assert = require('assert')
 var _ = require('lodash')
-var filters = require('../../app/ressource/srcClient/tools/filters')
+var filters = require('.././tools/filters')
 // var flow = require('an-flow');
 // var request = require('request')
 

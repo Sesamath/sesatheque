@@ -43,7 +43,7 @@ jsdoc=node_modules/.bin/jsdoc
 while getopts "achlprs" OPTION
 do
   case $OPTION in
-    a) for f in jsdoc/jsdoc*.json; do cas=$(basename ${f/jsdoc\/jsdoc/} .json); go $cas; done;;
+    a) rm -rf documentation/*; for f in jsdoc/jsdoc*.json; do cas=$(basename ${f/jsdoc\/jsdoc/} .json); go $cas; done;;
     c) go ModuleSesathequeClient;;
     h) usage;;
     l) go Lassi;;

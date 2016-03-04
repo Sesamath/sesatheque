@@ -80,7 +80,7 @@ mainComponent.service('$json', function () {
  */
 if (!isProd) {
   mainComponent.controller(function () {
-    this.serve('doc', path.resolve(__dirname, '/../../documentation'))
+    this.serve('doc', path.resolve(__dirname, '../../documentation'))
   })
   mainComponent.controller('debug', function () {
     require('./controllerDebug')(this)

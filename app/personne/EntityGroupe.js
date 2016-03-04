@@ -31,7 +31,7 @@
 
 'use strict'
 
-var Groupe = require('../ressource/srcClient/constructors/Groupe')
+var Groupe = require('../constructors/Groupe')
 
 module.exports = function (EntityGroupe, $cacheGroupe) {
   /**

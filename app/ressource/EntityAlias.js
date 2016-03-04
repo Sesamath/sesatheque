@@ -33,7 +33,7 @@
 
 module.exports = function (EntityAlias) {
   var config = require('../config')
-  var Alias = require('./srcClient/constructors/Alias')
+  var Alias = require('../constructors/Alias')
   var tools = require('../tools')
 
   /**

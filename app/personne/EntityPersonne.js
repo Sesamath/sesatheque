@@ -31,7 +31,7 @@
 
 'use strict'
 
-var Personne = require('../ressource/srcClient/constructors/Personne')
+var Personne = require('../constructors/Personne')
 /**
  * Entity pour un user
  * @entity EntityPersonne
