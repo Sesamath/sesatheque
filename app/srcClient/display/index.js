@@ -117,7 +117,8 @@ function display (ressource, options, next) {
         // on lui ajoute toujours ça
         if (!options.base) options.base = '/'
         else if (options.base.substring(-1) !== '/') options.base += '/'
-        options.pluginBase = options.base + '/plugins/' + pluginName + '/'
+        page.setBase(options.base)
+        options.pluginBase = options.base + 'plugins/' + pluginName + '/'
         // on peut afficher
         pluginDisplay(ressource, options, function (error) {
           startDate = new Date()

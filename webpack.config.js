@@ -24,7 +24,7 @@ var conf = {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
-    apiClient: './app/srcClient/apiClient.js',
+    // apiClient: './app/srcClient/apiClient.js',
     client: 'sesatheque-client',
     page: [
       './app/srcClient/page/index.js',
