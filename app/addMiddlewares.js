@@ -74,7 +74,7 @@ module.exports = function afterRailSession (rail) {
       if (tools.isStatic(req.url) || tools.isPublic(req.url)) res.header('Access-Control-Allow-Origin', '*')
       else {
         // ça dépend de l'appelant
-        if (/https?:\/\/[^/]+\.(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.exec(origin)) {
+        if (/https?:\/\/([^/]+\.)?(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)) {
           res.header('Access-Control-Allow-Origin', origin)
           res.header('Access-Control-Allow-Credentials', 'true')
 
