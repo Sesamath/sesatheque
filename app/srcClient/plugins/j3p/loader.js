@@ -23,6 +23,11 @@
  *   les XMLHttpRequest sont plus compliqués)
  */
 
+var dom = require('sesajstools/dom')
+
+var log = require('../../tools/log')
+var page = require('../../page/index')
+
 /**
  * L'url de base de j3p
  * @private
@@ -36,13 +41,6 @@ if (typeof w.console === 'undefined') w.console = {}
 if (!w.console.log) w.console.log = function () {}
 if (!w.console.info) w.console.info = function () {}
 if (!w.console.error) w.console.error = function () {}
-/**
- * fct de log
- * @private
- */
-var log = require('../../tools/log')
-var dom = require('../../tools/dom')
-var page = require('../../page/index')
 
 /** variable globale utilisée dans la fonction globale alerte */
 if (typeof w.j3pdebug === 'undefined') w.j3pdebug = false

@@ -30,10 +30,12 @@
  */
 'use strict'
 
+var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
+
 var page = require('../../page/index')
-var dom = require('../../tools/dom')
-var log = require('../../tools/log')
 var swf = require('../../display/swf')
+var autosize = require('../../page/autosize')
 
 var $
 /* jshint jquery:true */
@@ -45,99 +47,79 @@ var $
 function addPage (params, next) {
   log('addPage avec les params', params)
   var url = params.adresse
-  var page = dom.addElement(container, 'div', {id: 'page'})
-  var args = {src: url, id: 'pageContent'}
+  var divIframeId = 'page'
+  var divIframe = dom.addElement(container, 'div', {id: divIframeId})
+  var divIframeSrcId = 'urlSrc'
+  dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + url)
+  // toujours autosize sur le conteneur
+  page.autosize(divIframeId, [divIframeSrcId])
+  // url sera ajouté après l'appel de pageLoaded, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
+  var args = {id: 'pageContent'}
 
   // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
   // ff aime pas et sort une erreur js Error: Permission denied to access property 'toString'
   // chrome râle aussi parce que c'est pas un document
   if (/^[^?]+.swf(\?.*)?$/.test(url)) { // faut pas prendre les truc.php?toto=truc.swf
     log("C'est un swf, on ajoute un div et pas une iframe")
-    var swfContainer = dom.addElement(page, 'div', args)
     var swfId = 'swf' + (new Date()).getTime()
-    var options = {
-      id: swfId,
-      hauteur: params.hauteur || Math.floor(window.innerHeight - 60),
-      largeur: params.largeur || Math.floor(window.innerWidth - 40)
+    var options = {id: swfId}
+    if (params.hauteur) {
+      args.height = params.hauteur
+      options.hauteur = params.hauteur
     }
-    if (isBasic) options.hauteur -= 60
-    if (options.hauteur < 100) options.hauteur = 100
-    if (options.largeur < 100) options.largeur = 100
+    if (params.largeur) {
+      args.width = params.largeur
+      options.largeur = params.largeur
+    }
+    var swfContainer = dom.addElement(divIframe, 'div', args)
     log('On charge ' + url + ' dans #page avec', options)
+    // ne pas passer directement next en cb sinon il sera appelé avec un argument, qui sera interprété comme une erreur
     swf.load(swfContainer, url, options, function () {
-      if (!options.hauteur && !options.largeur) autosize()
       // on est appelé quand swfobject a mis l'object dans le dom, mais le swf est pas forcément chargé
       // on regarde la hauteur pour savoir si c'est fait
       var $swfId = $('#' + swfId)
       if ($swfId.innerHeight() > 10) {
+        isLoaded = true
         next()
       } else {
         $swfId.on('load', function () {
           isLoaded = true
           next()
         })
-      } // ne pas passer directement next en cb sinon il sera appelé avec un argument, qui sera interprété comme une erreur
+      }
+      if (!options.height || !options.width) page.autosize(swfId, [divIframeSrcId])
     })
     /* */
   } else if (/^[^?]+.(png|jpe?g|gif)(\?.*)?$/.test(url)) {
+    // c'est un tag img
     if (params.hauteur > 100) args.height = params.hauteur
     if (params.largeur > 100) args.width = params.largeur
     log("c'est une image, pas d'iframe mais un tag img", args, params)
-    dom.addElement(page, 'img', args)
-    isLoaded = true
-    next()
+    var img = dom.addElement(divIframe, 'img', args)
+    pageLoaded(img, next)
+    img.src = url
   } else {
-    var iframe = dom.addElement(page, 'iframe', args, 'Si vous lisez ce texte,' +
+    // c'est bien une iframe, le texte sera écrasé à son chargement
+    var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
         ' votre navigateur ne supporte probablement pas les iframes')
     // url source (non cliquable) en footer
-    autosize()
-    if (iframe.addEventListener) {
-      iframe.addEventListener('load', function () {
-        isLoaded = true
-        next()
-      })
-    } else {
+    autosize('page', ['errors', 'warnings', 'titre', 'entete', 'urlSrc'], [], {minHeight: 300, minWidth: 300})
+    pageLoaded(iframe, next)
+    iframe.src = url
+  }
+}
+
+function pageLoaded (elt, next) {
+  if (elt && elt.addEventListener) {
+    elt.addEventListener('load', function () {
       isLoaded = true
       next()
-    }
+    })
+  } else {
+    // pas de addEventListener, on la considère déjà chargée
+    isLoaded = true
+    next()
   }
-  dom.addElement(page, 'p', {id: 'urlSrc'}, 'source : ' + params.adresse)
-}
-
-/**
- * Appelle resizePage et le colle comme comportement au resize de la fenêtre
- */
-function autosize () {
-  // on redimensionne dès que jQuery est prêt
-  $(resizePage)
-  // et à chaque changement de la taille de la fenêtre
-  $(window).resize(resizePage)
-}
-
-/**
- * Modifie la taille de l'iframe pour lui donner tout l'espace restant de container
- */
-function resizePage () {
-  var $page = $('#page')
-  var $pageContent = $('#pageContent')
-  var occupe = 0;
-  ['#errors', '#warnings', '#titre', '#entete', '#urlSrc'].forEach(function (selector) {
-    occupe += $(selector).outerHeight(true)
-  })
-  var tailleDispo = Math.floor(window.innerHeight - occupe)
-  if (tailleDispo < 300) tailleDispo = 300
-  $('#display').css('height', tailleDispo + 'px')
-  log('resize iframe à ' + tailleDispo)
-  // pour l'iframe de l'url, faut retirer ce que l'on utilise pour consigne & co
-  if (!isBasic) tailleDispo -= $('#entete').innerHeight()
-  $page.css('height', tailleDispo + 'px')
-  $pageContent.css('height', tailleDispo + 'px')
-  // et la largeur de l'iframe
-  tailleDispo = $(container).innerWidth() - 4 // 2px de marge dans le css
-  if (tailleDispo < 300) tailleDispo = 300
-  log('resize largeur à ' + tailleDispo)
-  $page.css('width', tailleDispo + 'px')
-  $pageContent.css('width', tailleDispo + 'px')
 }
 
 /**
@@ -161,7 +143,6 @@ function sendResultat (reponse, deferSync, next) {
 }
 
 var container
-var isBasic
 var ressId
 var resultatCallback
 var isLoaded

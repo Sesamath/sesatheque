@@ -23,10 +23,16 @@ Plugins
 
 Pour écrire ou utiliser un plugin (qui gère un type de ressource), voir la [documentation des plugins](plugins/index.html)
 
-Routage
+Routes
 -------
 
-[/ressource/](controllerRessource.html) et [/public/](controllerPublic.html)
+Cf la doc des différents contrôleurs
+* [/](controllerMain.html)
+* [/auth/](controllerAuth.html)
+* [/groupe/](controllerGroupe.html)
+* [/public/](controllerPublic.html)
+* [/ressource/](controllerRessource.html)
+et ci-dessous pour la route /api/
 
 
 API http
@@ -34,15 +40,15 @@ API http
 
 Doc [dédiée](restApi/) qui pour le moment est identique à [/api/](controllerApi.html)
 
-Module pour normaliser les réponses de la sésathèque [sesatheque-client](modules/sesatheque-client/)
-
-Module (AMD client) pour récupérer ou enregistrer des ressources sur la sésathèque [apiClient](modules/apiClient/)
-
 API client
 ----------
 
-Cf aussi la doc du [module sesatheque-client](modules/sesatheque-client/module-sesatheque-client.html)
+Cf la doc du [module sesatheque-client](modules/sesatheque-client/)
 
+Module sesaJsTools
+------------------
+
+Qui peut être utilisé indépendamment d'une sésathèque, cf sa [doc](modules/sesajstools/)
 
 Scripts
 -------
@@ -59,4 +65,6 @@ On utilise jsdoc3 avec le template jaguar-jsdoc, et des tags supplémentaires `@
 
 Le template jaguar-jsdoc ne rend pas les `@module`, c'est dommage (mais des tests avec ink-docstrap montraient d'autres inconvénients)
 et pour se simplifier la vie on utilise `@service` dans ces cas là. 
-Il faut utiliser `@memberOf leNomDuModuleDéclaréCommeService` sur chaque méthode exportée par le module pour la voir apparaître correctement dans la doc.
+
+Il faut utiliser `@memberOf leNomDuModuleDéclaréCommeService` sur chaque méthode exportée par le module 
+pour la voir apparaître correctement dans la doc, pas trouvé de moyen de contournement.

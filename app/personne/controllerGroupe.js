@@ -37,15 +37,7 @@ var flow = require('an-flow')
 
 /**
  * Controleur du chemin /groupe/ (pour voir/modifier les groupes d'auteurs)
- *
  * @controller controllerGroupe
- * @requires $ressourceRepository {@link $ressourceRepository]
- * @requires EntityGroupe {@link EntityGroupe}
- * @requires $groupeRepository {@link $groupeRepository}
- * @requires $personneRepository {@link $personneRepository}
- * @requires $accessControl {@link $accessControl}
- * @requires $page {@link $page}
- * @requires $form {@link $form}
  */
 module.exports = function (controller, EntityGroupe, $groupeRepository, $personneRepository, $accessControl, $page, $form, $flashMessages) {
   /**
@@ -108,6 +100,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Retourne true si on est gestionnaire du groupe
+   * @private
    * @param context
    * @param {Groupe} groupe Le groupe (pas son nom)
    * @returns {boolean}
@@ -123,6 +116,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Retourne true si on est dans ce groupe
+   * @private
    * @param context
    * @param {string|Groupe} groupe Le groupe ou son nom
    * @returns {boolean}
@@ -134,6 +128,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Retourne true si on suit ce groupe
+   * @private
    * @param context
    * @param {string|Groupe} groupe Le groupe ou son nom
    * @returns {boolean}
@@ -439,6 +434,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
   /**
    * Redirige vers la liste perso avec un message ou affiche une erreur (si on est pas authentifié)
+   * @private
    * @param {Context} context
    * @param {string} message
    * @param {boolean} isError Si c'est un message d'erreur à mettre en flashMessage

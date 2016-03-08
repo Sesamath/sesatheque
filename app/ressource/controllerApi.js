@@ -32,19 +32,11 @@
 'use strict'
 
 /**
- * Le controleur de la route /api/ (qui répond en json)
- * Toutes les routes contenant /public/ sont sans tenir compte de la session (cookies viré par varnish,
+ * Controleur de la route /api/ (qui répond en json) pour les ressources
+ * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
- * @requires {@link EntityAlias}
- * @requires {@link $ressourceRepository}
- * @requires {@link $ressourceConverter}
- * @requires {@link $ressourceControl}
- * @requires {@link $accessControl}
- * @requires {@link $personneControl}
- * @requires {@link $json}
  */
-
 module.exports = function (controller, EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
   var _ = require('lodash')
   var request = require('request')
@@ -228,6 +220,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Répond ok pour les options delete
+   * @private
+   * @param {Context} context
    */
   function optionsDeleteOk (context) {
     context.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS')
@@ -505,9 +499,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
+   * Retourne {@link reponseRessourceOid}
    * @route GET /api/clone/:oid
-   * @param {object} Les propriétés de la ressource
-   * @returns {reponseRessourceOid}
    */
   controller.get('clone/:oid', function (context) {
     var oid = context.arguments.oid
@@ -566,13 +559,13 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   /**
    * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant en auteur
    * (sinon il pourra pas la supprimer), avec publié et privé
+   * Retourne {@link reponseRessourceOid}
    * @route GET /api/externalClone/:oid?base=url
-   * @param {object} Les propriétés de la ressource
-   * @returns {reponseRessourceOid}
    */
   controller.get('externalClone/:oid', function (context) {
     /**
      * Ajoute $droits et envoie
+     * @private
      * @param item
      */
     function sendItem (item) {
@@ -774,11 +767,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('notifyError', optionsOk)
 
   /**
-   * Récupère un arbre au format jstree
+   * Récupère un arbre au format jstree (cf le plugin arbre pour un exemple d'utilisation)
    * @route GET /api/jstree?ref=xx[&children=1]
    * @param {string} ref        Un oid ou origine/idOrigine
    * @param {string} [children] Passer 1 pour ne récupérer que les enfants
-   * @returns {Object} Un objet pour jstree (Cf le plugin arbre pour un exemple d'utilisation)
    */
   controller.get('jstree', function (context) {
     var ref = context.get.ref || context.get.id
@@ -813,17 +805,17 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   getListeAll.timeout = 3000
   /**
-   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
+   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin.
+   * Retourne {@link reponseListe}
    * @route GET /api/liste/all
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.get('liste/all', getListeAll)
   /**
    * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
+   * Retourne {@link reponseListe}
    * @route POST /api/liste/all
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.post('liste/all', getListeAll)
   /**
@@ -835,8 +827,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Récupère la liste des ressources d'un groupe
+   * Retourne {@link reponseListe}
    * @route GET /api/liste/groupe/:nom
-   * @returns {reponseListe}
    */
   controller.get('liste/groupe/:nom', function (context) {
     var nom = context.arguments.nom
@@ -847,39 +839,35 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   getListePerso.timeout = 3000
   /**
    * Cherche parmi les ressources du user courant (qui doit être connecté avant)
+   * Retourne {@link reponseListe}
    * @route GET /api/liste/perso
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.get('liste/perso', getListePerso)
   /**
-   * Cherche parmi les ressources du user courant (qui doit être connecté avant)
+   * Cherche parmi les ressources du user courant (qui doit être connecté avant), retourne {@link reponseListe}
    * @route POST /api/liste/perso
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.post('liste/perso', getListePerso)
   /**
-   * Pour le preflight
+   * Pour le preflight, ajoute les headers allow… si autorisé
    * @route OPTIONS /api/liste/perso
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.options('liste/perso', optionsOk)
 
   getListeProf.timeout = 3000
   /**
-   * Cherche parmi les ressources publiques ou les corrections
+   * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
    * @route GET /api/liste/prof
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.get('liste/prof', getListeProf)
   /**
-   * Cherche parmi les ressources publiques ou les corrections
+   * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
    * @route POST /api/liste/prof
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.post('liste/prof', getListeProf)
   /**
@@ -890,17 +878,15 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('liste/prof', optionsOk)
 
   /**
-   * Cherche parmi les ressources publiques publiées
+   * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
    * @route GET /api/liste/public
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.get('liste/public', getListePublic)
   /**
-   * Cherche parmi les ressources publiques publiées
+   * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
    * @route POST /api/liste/public
    * @param {requeteListe}
-   * @returns {reponseListe}
    */
   controller.post('liste/public', function (context) {
     grabListe(context, 'public')
@@ -914,9 +900,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|compact|normalized)
+   * Retourne {@link reponseListe}
    * @route GET /api/public/:oid
-   * @param {Integer} oid
-   * @return {reponseRessource}
+   * @param {Integer} :oid
    */
   controller.get('public/:oid', function (context) {
     var oid = context.arguments.oid
@@ -931,10 +917,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|compact|normalized)
+   * Retourne {@link reponseRessource}
    * @route GET /api/public/:origine/:idOrigine
    * @param {string} :origine
    * @param {string} :idOrigine
-   * @return {reponseRessource}
    */
   controller.get('public/:origine/:idOrigine', function (context) {
     var origine = context.arguments.origine
@@ -971,10 +957,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * Si le titre et la catégorie sont manquants, ou que l'on passe ?merge=1 à l'url, ça merge avec la ressource
    * existante que l'on update, sinon on écrase (ou on créé si elle n'existait pas)
    *
-   * Retourne d'autres propriétés de la ressource enregistrée si on le réclame avec ?format=(alias|compact|normalized)
+   * Retourne {@link reponseRessourceOid} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
    * @route POST /api/ressource
    * @param {object} Les propriétés de la ressource
-   * @returns {reponseRessourceOid|reponseRessourceAlias}
    */
   controller.post('ressource', postRessource)
   /**
@@ -986,9 +971,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|compact|normalized)
+   * Au format {@link reponseRessource} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
    * @Route GET /api/ressource/:oid
    * @param {Integer} oid
-   * @return {reponseRessource}
    */
   controller.get('ressource/:oid', function (context) {
     var oid = context.arguments.oid
@@ -999,10 +984,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|compact|normalized)
+   * Au format {@link reponseRessource} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
    * @route GET /api/ressource/:origine/:idOrigine
    * @param {string} :origine
    * @param {string} :idOrigine
-   * @return {reponseRessource}
    */
   controller.get('ressource/:origine/:idOrigine', function (context) {
     var idOrigine = context.arguments.idOrigine
@@ -1013,7 +998,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
 
   /**
-   * Delete ressource par oid
+   * Delete ressource par oid, retourne {@link reponseDeleted}
    * @route DEL /api/ressource/:oid
    * @param {Integer} oid
    */
@@ -1023,7 +1008,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('ressource/:oid', optionsDeleteOk)
 
   /**
-   * Delete alias par oid
+   * Delete alias par oid, retourne {@link reponseDeleted}
    * @route DEL /api/ressource/:oid
    * @param {Integer} oid
    */
@@ -1052,7 +1037,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('alias/:oid', optionsDeleteOk)
 
   /**
-   * Delete par id d'origine
+   * Delete par id d'origine, retourne {@link reponseDeleted}
    * @route DEL /api/ressource/:origine/:idOrigine
    * @param {string} :origine
    * @param {string} :idOrigine
@@ -1066,6 +1051,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   postRessourceAddRelations.timeout = 5000
   /**
    * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
+   * Retourne {@link reponseRessourceOid} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
    * @param {Integer} [oid]
    * @param {string} [origine]
    * @param {string} [idOrigine]
@@ -1081,6 +1067,15 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.options('ressource/addRelations', optionsOk)
 }
+
+/**
+ * Format de la réponse à une demande de suppression
+ * @typedef reponseDeleted
+ * @type {Object}
+ * @property {boolean} success
+ * @property {string}  [error] Message d'erreur éventuel (si success vaut false)
+ * @property {string}  deleted L'id passé en argument (DEPRECATED, pour compatibilité avec les versions anterieures)
+ */
 
 /**
  * Format de la réponse à une demande de liste
@@ -1139,7 +1134,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
  * @property {Integer}            [start]   offset
  * @property {Integer}            [nb]      Nombre de résultats voulus (Cf settings.ressource.limites.listeNbDefault, à priori 25),
  *                                          sera ramené à settings.ressource.limites.maxSql si supérieur (à priori 500)
- * @property {string}             [format]  compact|full par défaut on remonte les ressource au format ref
+ * @property {string}             [format]  compact|full par défaut on remonte les ressource au format {@link Alias}
  */
 
 /**
@@ -1147,5 +1142,5 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
  * @typedef requeteArgFilter
  * @type {Object}
  * @property {string} index  Le nom de l'index
- * @property {Array}  [values] Une liste de valeurs à chercher (avec des ou), remontera toutes les ressource ayant index si omis
+ * @property {Array}  [values] Une liste de valeurs à chercher (avec des ou), remontera toutes les ressource ayant l'index si omis
  */

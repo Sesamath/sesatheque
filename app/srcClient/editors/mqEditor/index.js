@@ -30,8 +30,9 @@
  */
 'use strict'
 
+var dom = require('sesajstools/dom')
+
 var log = require('../../tools/log')
-var dom = require('../../tools/dom')
 var page = require('../../page/index')
 
 /**

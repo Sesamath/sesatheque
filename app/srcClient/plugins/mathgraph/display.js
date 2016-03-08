@@ -30,9 +30,10 @@
  */
 'use strict'
 
+var dom = require('sesajstools/dom')
+
 var page = require('../../page/index')
 var tools = require('../../tools/index')
-var dom = require('../../tools/dom')
 var log = require('../../tools/log')
 
 function displayJava (ressource, options, next) {

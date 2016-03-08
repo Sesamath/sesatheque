@@ -4,9 +4,9 @@
     "allowUnknownTags": true
   },
   "source"   : {
-    "include":["./node_modules/sesatheque-client"],
-    "includePattern": ".+\\.(js|md)$",
-    "excludePattern": "(node_modules|.+\\.bak\\.js)"
+    "include":["./node_modules/sesajstools", "./node_modules/sesajstools/README.md"],
+    "includePattern": ".+\\.(js)$",
+    "excludePattern": "(node_modules/sesajstools/node_modules|.+\\.bak\\.js)"
   },
   "plugins"  : [
     "plugins/markdown",
@@ -17,7 +17,7 @@
     "hardwrap": true
   },
   "templates": {
-    "applicationName": "sesatheque-client",
+    "applicationName": "sesajstools",
     "disqus"         : "",
     "googleAnalytics": "",
     "openGraph"      : {
@@ -35,9 +35,10 @@
 
   },
   "opts"     : {
-    "destination": "./documentation/modules/sesatheque-client",
-    "recurse"    : true,
+    "destination": "./documentation/modules/sesajstools",
+//    "template"   : "../node_modules/ink-docstrap/template",
     "template"   : "./jaguarjs-jsdoc",
+    "recurse"    : true,
     "private"    : false
   }
 }

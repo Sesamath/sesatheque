@@ -12,6 +12,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
+ *
  * along with Sesatheque (LICENCE.txt).
  * @see http://www.gnu.org/licenses/agpl.txt
  *
@@ -37,12 +38,6 @@
  * Toutes ses routes exposées ici seront traitées par le controleur {@link controllerPublic} si on est pas authentifié (via une redirection interne)
  *
  * @controller controllerRessource
- * @requires $ressourceRepository {@link $ressourceRepository]
- * @requires $ressourceConverter
- * @requires $accessControl
- * @requires $personneControl
- * @requires $ressourcePage
- * @requires $routes
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) {
   var _ = require('lodash')

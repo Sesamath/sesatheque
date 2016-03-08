@@ -50,6 +50,7 @@
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "request": "^2.39.0",
+    "sesajstools": "git://src.sesamath.net/sesajstools",
     "sesatheque-client": "git://src.sesamath.net/sesatheque-client#master"
   },
   "devDependencies": {

@@ -5,7 +5,7 @@
   },
   "source"   : {
     "includeIgnored": ["./app/_typedef.doc.js"],
-    "include": ["./app/srcClient", "./app/srcClient/plugins/README.md"],
+    "include": ["./app/srcClient", "./app/srcClient/README.md"],
     "includePattern": ".+\\.(js)$",
     "excludePattern": "(.+\\.bak\\.js|.+\\.bundle\\.js)"
   },

@@ -34,9 +34,10 @@
  * D'après l'ancien url.js de l'outil labomep
  */
 
+var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
+
 var page = require('../../page/index')
-var dom = require('../../tools/dom')
-var log = require('../../tools/log')
 
 var $
 /* jshint jquery:true */

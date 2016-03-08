@@ -30,9 +30,10 @@
  */
 'use strict'
 
+var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
+
 var page = require('../../page/index')
-var dom = require('../../tools/dom')
-var log = require('../../tools/log')
 var multiEditor = require('../../editors/multiEditor')
 
 var $

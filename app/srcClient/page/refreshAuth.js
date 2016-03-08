@@ -30,9 +30,9 @@
  */
 'use strict'
 
-var dom = require('../tools/dom')
+var xhr = require('sesajstools/http/xhr')
+var dom = require('sesajstools/dom')
 var log = require('../tools/log')
-var xhr = require('../tools/xhr')
 
 function addLink (parent, link) {
   var li = dom.getElement('li')
@@ -61,7 +61,6 @@ function addLink (parent, link) {
 /**
  * Met à jour l'affichage des infos du user sur les pages publiques (dont le source est en cache, en version non authentifié)
  * (vérifie si on est authentifié avec un appel ajax, pour ajouter les infos et les boutons qui vont bien)
- * @service page/refreshAuth
  */
 module.exports = function () {
   if (window.location.pathname.indexOf('/public/') > -1) {

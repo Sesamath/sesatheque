@@ -37,10 +37,11 @@
  */
 'use strict'
 
+var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
+var tools = require('sesajstools')
+
 var page = require('../page/index')
-var log = require('../tools/log')
-var dom = require('../tools/dom')
-var tools = require('../tools/index')
 
 var wd = window.document
 
@@ -196,6 +197,7 @@ function display (ressource, options, next) {
 
         /**
          * poste resultat en ajax vers traiteResultat puis appellera feedback avec le retour
+         * @todo utiliser sesajstools/http/xhr
          * @private
          * @param {Resultat} resultat
          * @param {boolean}  deferSync Passer true pour envoyer le résultat en local

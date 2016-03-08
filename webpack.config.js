@@ -26,10 +26,7 @@ var conf = {
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     // apiClient: './app/srcClient/apiClient.js',
     client: 'sesatheque-client',
-    page: [
-      './app/srcClient/page/index.js',
-      './app/srcClient/page/refreshAuth.js'
-    ],
+    page: './app/srcClient/page/index.js',
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/init.js'
   },

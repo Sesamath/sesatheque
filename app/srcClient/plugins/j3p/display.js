@@ -30,11 +30,11 @@
  */
 'use strict'
 
+var log = require('sesajstools/utils/log')
+var tools = require('sesajstools')
+
 var page = require('../../page/index')
-var tools = require('../../tools/index')
-// var dom = require('../../tools/dom')
-var log = require('../../tools/log')
-var xhr = require('../../tools/xhr')
+var xhr = require('sesajstools/http/xhr')
 
 var urlBaseJ3p = 'http://j3p.sesamath.net'
 

@@ -31,9 +31,12 @@
 
 'use strict'
 
-var tools = require('../tools/index')
-var dom = require('../tools/dom')
-var log = require('../tools/log')
+var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
+var tools = require('sesajstools')
+
+var autosize = require('./autosize')
+var refreshAuth = require('./refreshAuth')
 
 var w = window
 var wd = w.document
@@ -198,6 +201,19 @@ function loadAsync (moduleNames, callback) {
 }
 
 /**
+ * Affecte un comportement de redimensionnement automatique à un élément
+ * @param {string}   targetId   L'id html du bloc que l'on veut maximiser automatiquement
+ * @param {string[]} [hBlocIds] Liste des ids de bloc dont il faut déduire la hauteur
+ * @param {string[]} [wBlocIds] Liste des ids de bloc dont il faut déduire la largeur
+ * @param {object} [options]    Options avec les éventuelles propriétés : minHeight, minWidth, offsetHeight, offsetWidth, callback
+ */
+function doAutoSize (targetId, hBlocIds, wBlocIds, options) {
+  loadAsync(['jquery'], function () {
+    autosize(targetId, hBlocIds, wBlocIds, options)
+  })
+}
+
+/**
  * Change la base (pour la mettre absolue après chargement de ce module en cross domain)
  * @param newBase
  */
@@ -209,7 +225,7 @@ function setBase (newBase) {
  * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
  * @service page
  */
-module.exports = {addError, hideTitle, init, loadAsync, setBase}
+module.exports = {addError, hideTitle, init, loadAsync, refreshAuth, setBase, autosize: doAutoSize}
 
 /**
  * Options à passer à init() ou à display(), les autres propriétés seront laissées intactes

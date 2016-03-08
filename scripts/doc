@@ -16,9 +16,10 @@ function usage() {
   echo "  -a : toutes les documentations"
   echo "  -h : afficher cette aide"
   echo "  -l : documentation de lassi"
-  echo "  -p : documentation des plugins"
+  echo "  -m : documentation de nos modules (sesajstools et sesatheque-client)"
+  echo "  -p : documentation du code client (plugins)"
   echo "  -r : documentation de l'api REST"
-  echo "  -s : documentation du code serveur"
+  echo "  -s : documentation du code de l'appli serveur"
   exit $exitCode
 }
 
@@ -40,13 +41,13 @@ jsdoc=node_modules/.bin/jsdoc
 [ ! -x $jsdoc ] && echo "$jsdoc n'est pas exécutable" >&2 && exit 1
 
 # check des options
-while getopts "achlprs" OPTION
+while getopts "ahlmprs" OPTION
 do
   case $OPTION in
     a) rm -rf documentation/*; for f in jsdoc/jsdoc*.json; do cas=$(basename ${f/jsdoc\/jsdoc/} .json); go $cas; done;;
-    c) go ModuleSesathequeClient;;
     h) usage;;
     l) go Lassi;;
+    m) go ModuleSesathequeClient; go ModuleSesaJsTools ;;
     p) go Plugins;;
     r) go RestApi;;
     s) go App;;

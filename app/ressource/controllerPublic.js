@@ -37,10 +37,6 @@
  *
  * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
  * @controller controllerPublic
- * @requires $ressourceRepository
- * @requires $ressourceConverter
- * @requires $ressourcePage
- * @requires $routes
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes) {
   var tools = require('../tools')

@@ -32,7 +32,7 @@
 'use strict'
 
 module.exports = function (controller) {
-  var tools = require('../tools/index')
+  var tools = require('../tools')
   // var _ = require('lodash')
 
   function getDefaultData () {

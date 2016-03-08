@@ -31,10 +31,6 @@
 
 'use strict'
 
-/**
- * service $auth, pour centraliser l'authentification (chaque module d'authentification devra y inscrire son client)
- */
-
 var _ = require('lodash')
 var baseUrl = require('../config').application.baseUrl
 var modLog = require('an-log')('$auth')
@@ -107,7 +103,7 @@ module.exports = function ($accessControl, $ressourcePage) {
   var deferredInitController
 
   /**
-   * Service d'authentification, proxy vers les différents authClient enregistrés
+   * Service d'authentification, qui sert de proxy vers les différents authClient enregistrés
    * @service $auth
    */
   var $auth = {}

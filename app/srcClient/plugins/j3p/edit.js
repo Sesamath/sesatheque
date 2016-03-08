@@ -30,10 +30,11 @@
  */
 'use strict'
 
+var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
+var tools = require('sesajstools')
+
 var page = require('../../page/index')
-var tools = require('../../tools/index')
-var dom = require('../../tools/dom')
-var log = require('../../tools/log')
 
 var $
 /* jshint jquery:true */
@@ -50,7 +51,7 @@ function addEditGraphe (urlEditGraphe, container) {
   var editgraphe = dom.addElement(container, 'iframe', args, 'Si vous lisez ce texte, votre navigateur ne supporte pas les iframes')
   editgraphe.setAttribute('allowfullscreen', true)
   $editgraphe = $(editgraphe)
-  autosize()
+  page.autosize('editgraphe', null, null, {minHeight: 500, minWidth: 500, callback: scrollEg})
   return editgraphe.contentWindow
 }
 
@@ -123,17 +124,6 @@ function addSubmitCallback ($form) {
 }
 
 /**
- * Appelle resizeIframe et le colle comme comportement au resize de la fenêtre
- * @private
- */
-function autosize () {
-  // on redimensionne dès que jQuery est prêt
-  $(resizeIframe)
-  // et à chaque changement de la taille de la fenêtre
-  $(window).resize(resizeIframe)
-}
-
-/**
  * Ajoute l'iframe, la gestion de messages et la sauvegarde auto du graphe
  * @param {object}    options
  * @param {Element}   container
@@ -153,21 +143,6 @@ function loadGraphic (options, container, ressource) {
   addMessageListener(ressource, $form)
   addSubmitCallback($form)
 } // loadGraphic
-
-/**
- * Modifie la taille de l'iframe pour le maximiser sur l'espace visible
- * @private
- */
-function resizeIframe () {
-  var tailleDispo = Math.floor(window.innerHeight)
-  if (tailleDispo < 300) tailleDispo = 300
-  $editgraphe.height(tailleDispo)
-  log('resize iframe height à ' + tailleDispo)
-  tailleDispo = $editgraphe.width()
-  if (tailleDispo < 300) $editgraphe.width(300)
-  else $editgraphe.css('width', '100%')
-  $editgraphe.scrollTop(0)
-}
 
 /**
  * Met dans le textarea la string json de l'objet passé en param
@@ -190,6 +165,14 @@ function saveParametres (parametres, next) {
     }
     if (next) next()
   }, 0)
+}
+
+/**
+ * Scrolle pour mettre editgraphe en haut de la fenêtre visible
+ * @private
+ */
+function scrollEg() {
+  $editgraphe.scrollTop(0)
 }
 
 var $editgraphe                 // iframe

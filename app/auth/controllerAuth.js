@@ -31,19 +31,14 @@
 
 'use strict'
 
+/**
+ * Controleur pour gérer l'authentification
+ * @controller controllerAuth
+ * @extends Controller
+ */
 module.exports = function (controller, $auth, $accessControl, $ressourcePage, $flashMessages) {
   // on diffère la création des routes à l'ajout du premier client
   $auth.deferController(function () {
-    /**
-     * Controleur pour gérer l'authentification
-     * @controller authController
-     * @extends Controller
-     * @requires {Object} $auth
-     * @requires {Object} $accessControl
-     * @requires {Object} $ressourcePage
-     * @requires {Object} $flashMessages
-     */
-
     /**
      * connexion, redirige vers le serveur d'authentification par défaut ou précisé par ?source=xxx
      * @route GET /connexion

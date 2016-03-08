@@ -30,10 +30,13 @@
  */
 'use strict'
 
-var xhr = require('./tools/xhr')
+var xhr = require('sesajstools/http/xhr')
 
 /**
  * Une fonction qui prend une base de sésathèque et renvoie un client dessus
+ *
+ * OBSOLETE Utiliser le module npm sesatheque-client à la place
+ * @deprecated
  * @module apiClient
  */
 

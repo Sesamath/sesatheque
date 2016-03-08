@@ -31,20 +31,23 @@
 
 'use strict'
 
-// var dom = require('../../tools/dom')
 var log = require('../tools/log')
-var $ = window.jQuery /* jshint jquery:true */
+var $ = window.jQuery
 
-var $blocsH, $blocsW, $target
+var $blocsH
+var $blocsW
+var $target
 var offsetHeight = 0
 var offsetWidth = 0
 var minHeight = 400
 var minWidth = 400
 
 /**
- * Modifie la taille de l'iframe pour lui donner tout l'espace restant de container
+ * Modifie la taille de l'élément pour lui donner tout l'espace restant de container
+ * @private
+ * @param {function} cb Callback éventuelle
  */
-function resize () {
+function resize (cb) {
   var occupe = offsetHeight
   var tailleDispo
   // hauteur
@@ -61,40 +64,31 @@ function resize () {
   if (tailleDispo < minWidth) tailleDispo = minWidth
   log('resize width à ' + tailleDispo)
   $target.css('width', tailleDispo + 'px')
+  if (cb) cb()
 }
 
-/**
- * Affecte un comportement de redimensionnement automatique à un élément
- * @service display/autosize
- * @param {string}   targetId L'id html du bloc que l'on veut maximiser automatiquement
- * @param {string[]} hBlocIds Liste des ids de bloc dont il faut déduire la hauteur
- * @param {string[]} wBlocIds Liste des ids de bloc dont il faut déduire la largeur
- * @param {object} [options]
- */
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
-  // on initialise dès que jQuery est prêt
-  $(function () {
-    $target = $('#' + targetId)
-    if (hBlocIds && hBlocIds.length) {
-      $blocsH = []
-      hBlocIds.forEach(function (id) {
-        var $bloc = $('#' + id)
-        if ($bloc) $blocsH.push($bloc)
-      })
-    }
-    if (wBlocIds && wBlocIds.length) {
-      $blocsW = []
-      wBlocIds.forEach(function (id) {
-        var $bloc = $('#' + id)
-        if ($bloc) $blocsW.push($bloc)
-      })
-    }
-    if (options && options.minHeight) minHeight = options.minHeight
-    if (options && options.minWidth) minWidth = options.minWidth
-    if (options && options.offsetHeight) offsetHeight = options.offsetHeight
-    if (options && options.offsetWidth) offsetWidth = options.offsetWidth
-    resize()
-    // et à chaque changement de la taille de la fenêtre
-    $(window).resize(resize)
-  })
+  if (!options) options = {}
+  $target = $('#' + targetId)
+  if (hBlocIds && hBlocIds.length) {
+    $blocsH = []
+    hBlocIds.forEach(function (id) {
+      var $bloc = $('#' + id)
+      if ($bloc) $blocsH.push($bloc)
+    })
+  }
+  if (wBlocIds && wBlocIds.length) {
+    $blocsW = []
+    wBlocIds.forEach(function (id) {
+      var $bloc = $('#' + id)
+      if ($bloc) $blocsW.push($bloc)
+    })
+  }
+  if (options.minHeight) minHeight = options.minHeight
+  if (options.minWidth) minWidth = options.minWidth
+  if (options.offsetHeight) offsetHeight = options.offsetHeight
+  if (options.offsetWidth) offsetWidth = options.offsetWidth
+  resize(options.callback)
+  // et à chaque changement de la taille de la fenêtre
+  $(window).resize(resize)
 }

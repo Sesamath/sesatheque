@@ -176,7 +176,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     if (context.request.originalUrl.indexOf('/public/') > -1) {
       if (!data.jsBloc) data.jsBloc = {$view: 'js'}
       if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ''
-      data.jsBloc.jsCode += 'require("page/refreshAuth")();'
+      data.jsBloc.jsCode += 'stpage.refreshAuth();'
     }
   }
 

@@ -32,6 +32,10 @@
 
 var path = require('path')
 
+/**
+ * Controleur du composant main pour les routes "statiques"
+ * @Controller controllerMain
+ */
 module.exports = function (controller) {
   var baseData = {
     $metas: {}
@@ -40,7 +44,10 @@ module.exports = function (controller) {
   // nos ressources statiques génériques
   controller.serve(path.join(__dirname, 'public'))
 
-  // home
+  /**
+   * La home
+   * @route GET /
+   */
   controller.get('/', function (context) {
     context.layout = 'page'
     var data = baseData

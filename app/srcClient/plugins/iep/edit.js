@@ -30,9 +30,9 @@
  */
 'use strict'
 
+var dom = require('sesajstools/dom')
+
 var page = require('../../page/index')
-var dom = require('../../tools/dom')
-// var log = require('../../tools/log')
 var formEditor = require('../../edit/formEditor')
 
 /* jshint jquery:true */
