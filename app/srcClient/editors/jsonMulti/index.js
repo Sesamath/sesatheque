@@ -32,8 +32,8 @@
 'use strict'
 
 var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
 
-var log = require('../../tools/log')
 var page = require('../../page/index')
 
 var $ // affecté dans init

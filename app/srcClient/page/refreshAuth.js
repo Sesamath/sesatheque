@@ -32,7 +32,7 @@
 
 var xhr = require('sesajstools/http/xhr')
 var dom = require('sesajstools/dom')
-var log = require('../tools/log')
+var log = require('sesajstools/utils/log')
 
 function addLink (parent, link) {
   var li = dom.getElement('li')

@@ -31,9 +31,9 @@
 'use strict'
 
 var dom = require('sesajstools/dom')
+var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
-var log = require('../../tools/log')
 var display = require('./display')
 
 function addSelect (ressource, options) {

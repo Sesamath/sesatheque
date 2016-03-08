@@ -26,7 +26,12 @@ var conf = {
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     // apiClient: './app/srcClient/apiClient.js',
     client: 'sesatheque-client',
-    page: './app/srcClient/page/index.js',
+    // on laisse les 2 fichiers sinon il râle dans les fichiers avec du require(page) en disant
+    // Error: a dependency to an entry point is not allowed
+    page: [
+      './app/srcClient/page/index.js',
+      './app/srcClient/page/refreshAuth.js'
+    ],
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/init.js'
   },

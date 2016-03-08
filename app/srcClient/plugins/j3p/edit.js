@@ -171,7 +171,7 @@ function saveParametres (parametres, next) {
  * Scrolle pour mettre editgraphe en haut de la fenêtre visible
  * @private
  */
-function scrollEg() {
+function scrollEg () {
   $editgraphe.scrollTop(0)
 }
 

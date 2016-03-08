@@ -30,8 +30,9 @@
  */
 'use strict'
 
+var log = require('sesajstools/utils/log')
+
 var page = require('../page/index')
-var log = require('../tools/log')
 
 /**
  * Charge un swf dans l'élément container

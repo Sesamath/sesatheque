@@ -30,7 +30,7 @@
  */
 'use strict'
 
-var log = require('../tools/log')
+var log = require('sesajstools/utils/log')
 
 var baseUrl
 
