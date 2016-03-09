@@ -26,23 +26,34 @@ var conf = {
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     // apiClient: './app/srcClient/apiClient.js',
     client: 'sesatheque-client',
+    test: './app/srcClient/test2',
     // on laisse les 2 fichiers sinon il râle dans les fichiers avec du require(page) en disant
     // Error: a dependency to an entry point is not allowed
     page: [
-      './app/srcClient/page/index.js',
-      './app/srcClient/page/refreshAuth.js'
+      './app/srcClient/page/refreshAuth.js',
+      './app/srcClient/page/index.js'
     ],
     display: './app/srcClient/display/index.js',
-    edit: './app/srcClient/edit/init.js'
+    edit: './app/srcClient/edit/index.js'
   },
   output: {
     path: 'app/ressource/public/',
+    publicPath: '/',
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].bundle.js',
     // cf https://webpack.github.io/docs/configuration.html#output-library
+    // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     library: 'st[name]',
+    // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library, ici var => globale
+    libraryTarget: 'var',
+    // ça c'est juste pour hjs-webpack ?
     crossOriginLoading: 'anonymous'
   },
+  devtool: 'source-map', // même en prod
+  /* externals: {
+    stePage: 'page',
+    steDisplay: 'display'
+  },*/
   module: {
     loaders: [
       {
@@ -53,13 +64,13 @@ var conf = {
   },
   plugins: [
     // Avoid publishing files when compilation failed
-    new webpack.NoErrorsPlugin(),
+    new webpack.NoErrorsPlugin() /* */,
     // la mise en commun, on met dans page ce qui est commun à ces 3 chunks
     new webpack.optimize.CommonsChunkPlugin({
       name: 'page',
       minChunks: 2,
       chunks: ['page', 'display', 'edit']
-    })
+    }) /* */
   ],
   stats: {
     // Nice colored output
@@ -85,10 +96,7 @@ if (isHjs) {
   }
   isDev = true
 }
-if (isDev) {
-  conf.devtool = 'source-map'
-  // pour hjs-webpack
-} else {
+if (!isDev) {
   conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
 }
 

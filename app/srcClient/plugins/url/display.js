@@ -35,7 +35,6 @@ var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
 var swf = require('../../display/swf')
-var autosize = require('../../page/autosize')
 
 var $
 /* jshint jquery:true */
@@ -103,7 +102,7 @@ function addPage (params, next) {
     var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
         ' votre navigateur ne supporte probablement pas les iframes')
     // url source (non cliquable) en footer
-    autosize('page', ['errors', 'warnings', 'titre', 'entete', 'urlSrc'], [], {minHeight: 300, minWidth: 300})
+    page.autosize('page', ['errors', 'warnings', 'titre', 'entete', 'urlSrc'], [], {minHeight: 300, minWidth: 300})
     pageLoaded(iframe, next)
     iframe.src = url
   }

@@ -184,7 +184,7 @@ var stClient = {
 
 module.exports = init
 
-// on wrap la fct require du dom si elle existe, et sinon on s'exporte en global
+/* on wrap la fct require du dom si elle existe, et sinon on s'exporte en global
 if (typeof window !== 'undefined') {
   if (typeof window.require === 'function') {
     // on s'ajoute en wrapper
@@ -198,4 +198,4 @@ if (typeof window !== 'undefined') {
     if (typeof window.sesatheque === 'undefined') window.sesatheque = {}
     window.sesatheque.apiClient = init
   }
-}
+} /* */

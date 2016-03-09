@@ -1,21 +1,19 @@
 {! Ce bloc partiel insère le code pour charger le js d'édition du type et appelle son init !}
 <script type="application/javascript">
-  var page = require('page');
   try {
     var options = {
       isDev :{?isDev}{isDev}{:else}false{/isDev},
       verbose :{?verbose}{verbose}{:else}false{/verbose}
     };
-    page.init(options, function (error) {
+    stedit.init(options, function (error) {
       if (error) throw error;
-      var edit = require('plugins/{type.value}/edit');
-      if (typeof edit === 'undefined') throw new Error('Le chargement a échoué, impossible de charger le module edit');
+      if (typeof stedit === 'undefined') throw new Error("Le chargement a échoué, impossible de charger le module d'édition");
       var ressource = {?ressource}{ressource|s}{:else}null{/ressource};
-      if (ressource) edit(ressource, options);
+      if (ressource) stedit.edit(ressource, options);
       else throw new Error("Il manque la ressource à modifier");
     });
   } catch(error) {
-    if (page && page.addError) page.addError(error.toString());
+    if (typeof page !== 'undefined' && stpage.addError) stpage.addError(error.toString());
     if (typeof console !== "undefined" && console.error) console.error(error);
   }
 </script>

@@ -37,14 +37,7 @@
 
 var page = require('../page/index')
 
-/**
- * Ajoute des comportement aux éléments du formulaire d'édition de ressource
- * (change parametres|enfants en fonction du type)
- * @service edit/init
- * @param options
- * @param next
- */
-module.exports = function (options, next) {
+function init (options, next) {
   page.init(options)
   page.loadAsync('jquery', function () {
     var $ = window.jQuery
@@ -74,3 +67,31 @@ module.exports = function (options, next) {
     next()
   })
 }
+
+/**
+ * wrapper pour appeler le bon edit suivant le type de la ressource
+ * @param {Ressource} ressource
+ * @param {object} options Objet passé tel quel au plugin
+ */
+function edit (ressource, options) {
+  if (ressource && ressource.type) {
+    var editFn = require('../plugins/' + ressource.type + '/edit')
+    editFn(ressource, options)
+  }
+}
+
+/**
+ * Ajoute des comportement aux éléments du formulaire d'édition de ressource
+ * (change parametres|enfants en fonction du type)
+ * @service edit/init
+ * @param options
+ * @param next
+ */
+module.exports = {edit, init}
+
+/* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
+if (typeof window !== 'undefined') {
+  if (typeof window.sesatheque === 'undefined') window.sesatheque = {}
+  if (!window.sesatheque.edit) window.sesatheque.edit = {}
+  window.sesatheque.edit.init = module.exports
+} /**/

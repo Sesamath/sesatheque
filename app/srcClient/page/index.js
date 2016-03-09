@@ -46,18 +46,20 @@ var wd = w.document
  * on garde ici un mapping vers les modules tiers que l'on utilise
  */
 var externalModules = {
-  ckeditor: 'vendor/ckeditor/ckeditor',
-  ckeditorJquery: 'vendor/ckeditor/adapters/jquery',
+  ckeditor: 'vendor/ckeditor/ckeditor.js',
+  ckeditorJquery: 'vendor/ckeditor/adapters/jquery.js',
   head: 'vendor/headjs/dist/1.0.0/head.load.min.js',
-  jquery: 'vendor/jquery/jquery-1.11.3.min',
-  jquery18: 'vendor/jquery/jquery-1.8.3.min',
-  jqueryUi: 'vendor/jqueryUi/1.11.1/jquery-ui.min',
-  jqueryUiDialog: 'vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min',
+  // installé avec `bower install jquery1=jquery#1.11`
+  jquery: 'vendor/jquery1/dist/jquery.min.js',
+  // installé avec `bower install jquery2=jquery#2`
+  jquery2: 'vendor/jquery2/dist/jquery.min.js',
+  // une version mise à la main, on a aussi jquery-ui via bower
+  jqueryUi: 'vendor/jqueryUi/1.11.1/jquery-ui.min.js',
+  jqueryUiDialog: 'vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.js',
   jsoneditor: 'vendor/jsoneditor/dist/jsoneditor.min.js',
   jstree: 'vendor/jstree/dist/jstree.min.js',
-  lodash: 'vendor/lodash/lodash.min',
   mathjax: 'vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
-  mathquill: 'vendor/mathquill-0.9.4/mathquill.min',
+  mathquill: 'vendor/mathquill-0.9.4/mathquill.min.js',
   pluginDetect: 'vendor/pluginDetect/javaFlashDetect.min.js',
   swfobject: 'vendor/swfobject/swfobject.2.3.min.js'
 }
@@ -168,7 +170,7 @@ function loadAsync (moduleNames, callback) {
   }
   function headReady (next) {
     if (typeof window.head === 'undefined') {
-      dom.addJs(externalModules.head, function () {
+      dom.addJs(base + externalModules.head, function () {
         next()
       })
     } else {
@@ -226,6 +228,12 @@ function setBase (newBase) {
  * @service page
  */
 module.exports = {addError, hideTitle, init, loadAsync, refreshAuth, setBase, autosize: doAutoSize}
+
+/* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
+if (typeof window !== 'undefined') {
+  if (typeof window.sesatheque === 'undefined') window.sesatheque = {}
+  window.sesatheque.page = module.exports
+} /**/
 
 /**
  * Options à passer à init() ou à display(), les autres propriétés seront laissées intactes

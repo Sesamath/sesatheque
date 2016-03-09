@@ -36,7 +36,6 @@ var log = require('sesajstools/utils/log')
 var tools = require('sesajstools')
 
 var page = require('../../page/index')
-var display = require('../../display/index')
 var jstreeConverter = require('../../display/jstreeConverter')
 
 /**
@@ -511,7 +510,6 @@ module.exports = function edit (arbre, options) {
       // todo changer pour utiliser sesatheque-client exporté dans window.stClient
       var apiClient = window.stapiClient
       if (typeof jstreeConverter === 'undefined') throw new Error('Problème de chargement des dépendances')
-      if (typeof display === 'undefined') throw new Error('Problème de chargement des dépendances')
 
       // les containers (variables locales au module), qui seront affectés par initDom()
       var iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree

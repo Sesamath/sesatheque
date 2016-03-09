@@ -32,8 +32,9 @@
 'use strict'
 
 var log = require('sesajstools/utils/log')
-
-var $ = window.jQuery
+// on peut pas requérir page car il nous inclu, on appellera autosize
+// via page.autosize qui charge jquery avant de nous appeler
+var $
 
 var $blocsH
 var $blocsW
@@ -69,6 +70,7 @@ function resize (cb) {
 }
 
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
+  $ = window.jQuery
   if (!options) options = {}
   $target = $('#' + targetId)
   if (hBlocIds && hBlocIds.length) {

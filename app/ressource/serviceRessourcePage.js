@@ -692,11 +692,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var data = $page.getDefaultData()
     // css ajouté par le listener à la fin, suivant la valeur de context.layout,
     // on ajoute ici les js suivant la vue
-    data.$metas.js = ['/common.bundle.js']
-    if (viewName === 'formEdit') {
-      data.$metas.js.push('/edit.bundle.js')
-    } else if (viewName === 'display' || viewName === 'preview') {
+    data.$metas.js = ['/page.bundle.js']
+    if (viewName === 'display' || viewName === 'preview' || viewName === 'formEdit') {
       data.$metas.js.push('/display.bundle.js')
+      if (viewName === 'formEdit') data.$metas.js.push('/edit.bundle.js')
     }
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view: viewName}

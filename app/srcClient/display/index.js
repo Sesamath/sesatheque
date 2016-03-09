@@ -313,8 +313,8 @@ function display (ressource, options, next) {
 
 module.exports = display
 
-// et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
+/* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
 if (typeof window !== 'undefined') {
   if (typeof window.sesatheque === 'undefined') window.sesatheque = {}
   window.sesatheque.display = display
-}
+} /**/
