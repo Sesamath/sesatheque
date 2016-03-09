@@ -1,14 +1,6 @@
 # JSON Editor
-https://github.com/josdejong/jsoneditor
-http://jsoneditoronline.org/
 
-Website: http://jsoneditoronline.org/
-Github: https://github.com/josdejong/jsoneditor
-
-
-## Description
-
-JSON Editor is a web-based tool to view, edit, and format JSON.
+JSON Editor is a web-based tool to view, edit, format, and validate JSON.
 It has various modes such as a tree editor, a code editor, and a plain text
 editor.
 
@@ -17,9 +9,7 @@ can be loaded as CommonJS module, AMD module, or as a regular javascript file.
 
 Supported browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 9+.
 
-<img alt="json editor" src="https://raw.github.com/josdejong/jsoneditor/master/misc/jsoneditor.png">
-
-<img alt="code editor" src="https://raw.github.com/josdejong/jsoneditor/master/misc/codeeditor.png">
+<img alt="json editor" src="https://raw.github.com/josdejong/jsoneditor/master/misc/jsoneditor.png"> &nbsp; <img alt="code editor" src="https://raw.github.com/josdejong/jsoneditor/master/misc/codeeditor.png">
 
 
 ## Features
@@ -29,16 +19,19 @@ Supported browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 9+.
 - Change type of values.
 - Sort arrays and objects.
 - Colorized code.
-- Search & highlight text in the treeview.
+- Search & highlight text in the tree view.
 - Undo and redo all actions.
+- JSON schema validation (powered by [ajv](https://github.com/epoberezkin/ajv)).
 
 ### Code editor
+- Colorized code (powered by [Ace](https://ace.c9.io)).
+- Inspect JSON (powered by [Ace](https://ace.c9.io)).
 - Format and compact JSON.
-- Colorized code (powered by Ace).
-- Inspect JSON (powered by Ace).
+- JSON schema validation (powered by [ajv](https://github.com/epoberezkin/ajv)).
 
 ### Text editor
 - Format and compact JSON.
+- JSON schema validation (powered by [ajv](https://github.com/epoberezkin/ajv)).
 
 
 ## Documentation
@@ -54,17 +47,13 @@ Supported browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 9+.
 
 ## Install
 
-with npm:
+with npm (recommended):
 
     npm install jsoneditor
 
 with bower:
 
     bower install jsoneditor
-
-download:
-
-[http://jsoneditoronline.org/downloads/](http://jsoneditoronline.org/downloads/)
 
 
 #### More
@@ -92,7 +81,8 @@ There is a directive available for using JSONEditor in Angular.js:
     <script>
         // create the editor
         var container = document.getElementById("jsoneditor");
-        var editor = new JSONEditor(container);
+        var options = {};
+        var editor = new JSONEditor(container, options);
 
         // set json
         var json = {
@@ -131,7 +121,17 @@ jsoneditor:
   ```
 
   This will generate the files `./jsoneditor.js`, `./jsoneditor.css`, and  
-  minified versions in the root of the project.
+  minified versions in the dist of the project.
+
+- To automatically build when a source file has changed:
+
+  ```
+  npm run watch
+  ```
+
+  This will update `./jsoneditor.js` and `./jsoneditor.css` in the dist folder
+  on every change, but it will **NOT** update the minified versions as that's
+  an expensive operation.
 
 
 ## Custom builds
@@ -152,3 +152,4 @@ size of the library. To exclude the Ace editor from the bundle:
 To minify the generated bundle, use [uglifyjs](https://github.com/mishoo/UglifyJS2):
 
     uglifyjs ./jsoneditor.custom.js -o ./jsoneditor.custom.min.js -m -c
+

@@ -1,8 +1,8 @@
 {
   "name": "jsoneditor",
-  "version": "4.2.1",
+  "version": "5.1.5",
   "main": "./index",
-  "description": "A web-based tool to view, edit and format JSON",
+  "description": "A web-based tool to view, edit, format, and validate JSON",
   "tags": [
     "json",
     "editor",
@@ -10,7 +10,8 @@
     "formatter"
   ],
   "author": "Jos de Jong <wjosdejong@gmail.com>",
-  "homepage": "http://jsoneditoronline.org/",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/josdejong/jsoneditor",
   "repository": {
     "type": "git",
     "url": "https://github.com/josdejong/jsoneditor.git"
@@ -18,21 +19,23 @@
   "bugs": "https://github.com/josdejong/jsoneditor/issues",
   "scripts": {
     "build": "gulp",
+    "watch": "watch",
     "test": "mocha test"
   },
   "dependencies": {
-    "brace": "^0.4.1",
-    "jsonlint": "josdejong/jsonlint#85a19d7"
+    "ajv": "3.4.0",
+    "brace": "0.7.0"
   },
   "devDependencies": {
-    "gulp": "^3.8.11",
-    "gulp-concat-css": "^2.0.0",
-    "gulp-minify-css": "^0.4.5",
-    "gulp-shell": "^0.3.0",
-    "gulp-util": "^3.0.3",
-    "mkdirp": "^0.5.0",
-    "mocha": "^2.1.0",
-    "uglify-js": "^2.4.16",
-    "webpack": "^1.5.3"
+    "gulp": "3.9.0",
+    "gulp-concat-css": "2.2.0",
+    "gulp-minify-css": "1.2.3",
+    "gulp-shell": "0.5.1",
+    "gulp-util": "3.0.7",
+    "json-loader": "0.5.4",
+    "mkdirp": "0.5.1",
+    "mocha": "2.3.4",
+    "uglify-js": "2.6.1",
+    "webpack": "1.12.11"
   }
 }
