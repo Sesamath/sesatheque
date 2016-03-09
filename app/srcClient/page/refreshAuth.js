@@ -62,7 +62,7 @@ function addLink (parent, link) {
  * Met à jour l'affichage des infos du user sur les pages publiques (dont le source est en cache, en version non authentifié)
  * (vérifie si on est authentifié avec un appel ajax, pour ajouter les infos et les boutons qui vont bien)
  */
-module.exports = function () {
+module.exports = function refreshAuth () {
   if (window.location.pathname.indexOf('/public/') > -1) {
     var url = '/api/auth'
     // on regarde si on est sur une ressource

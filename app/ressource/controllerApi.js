@@ -433,7 +433,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param ressource
    */
   function writeAndOut (context, ressource) {
-    if (_.isEmpty(ressource.errors)) {
+    if (_.isEmpty(ressource._errors)) {
       $ressourceRepository.write(ressource, function (error, ressource) {
         log.debug('dans cb api writeAndOut après $ressourceRepository.write', ressource, 'repository', {max: 500})
         if (error) {
@@ -446,15 +446,15 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           } else {
             // on ne renvoie que l'oid et des warnings éventuels
             var data = {oid: ressource.oid}
-            if (!_.isEmpty(ressource.warnings)) {
-              data.warnings = ressource.warnings
+            if (!_.isEmpty(ressource._warnings)) {
+              data.warnings = ressource._warnings
             }
             $json.send(context, null, data)
           }
         }
       })
     } else {
-      $json.send(context, ressource.errors)
+      $json.send(context, ressource._errors)
     }
   }
 

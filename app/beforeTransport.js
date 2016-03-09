@@ -92,6 +92,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           selected: (context.tab === 'edit'),
           hidden: !$accessControl.hasPermission('update', context, ressource)
         })
+        log.debug("sur la ressource " +ressource.oid +"on a les droits update " +$accessControl.hasPermission('update', context, ressource) +" avec le user " +$accessControl.getCurrentUserOid(context) +' et les auteurs', ressource.auteurs)
         links.push({
           id: 'buttonDuplicate',
           href: $routes.getAbs('create') + '?clone=' + oid,
@@ -109,7 +110,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           hidden: !$accessControl.hasPermission('delete', context, ressource)
         })
       } else {
-        log.error(new Error('On a une ressource dans listeners::addActions sans les droits pour la lire'))
+        log.error(new Error('On a une ressource dans beforeTransport::addActions sans les droits pour la lire'))
       }
 
       data.actions = {

@@ -82,21 +82,21 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       }
       // si le tableau d'erreur est vide (devrait toujours être le cas),
       // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-      if (_.isEmpty(ressource.warnings)) delete ressource.warnings
+      if (_.isEmpty(ressource._warnings)) delete ressource._warnings
       // bizarre, parfois errors est un object, on cherche à savoir comment
-      if (ressource.errors && !ressource.errors.push) {
-        log.error("ressource.errors n'est pas un array " + typeof ressource.errors, ressource.errors)
-        ressource.errors = []
+      if (ressource._errors && !ressource._errors.push) {
+        log.error("ressource._errors n'est pas un array " + typeof ressource._errors, ressource._errors)
+        ressource._errors = []
       }
       // on vérifie que l'on peut sauvegarder
-      if (ressource.origine && (!ressource.errors || !ressource.errors.length)) {
+      if (ressource.origine && (!ressource._errors || !ressource._errors.length)) {
         next(null, ressource)
       } else {
         // on bloque le save en renvoyant une erreur à next
         var error
         if (!ressource.origine) error = new Error('propriété origine obligatoire')
         else if (!ressource.idOrigine) error = new Error('propriété idOrigine obligatoire')
-        else error = new Error('Il reste des erreurs qui empêchent la sauvegarde : \n' + ressource.errors.join('\n'))
+        else error = new Error('Il reste des erreurs qui empêchent la sauvegarde : \n' + ressource._errors.join('\n'))
         log.error('erreur au beforeStore', error)
         next(error)
       }
@@ -311,8 +311,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         }
       } catch (error) {
         log.error('plantage dans la conversion du xml de la ressource j3p')
-        if (!ressource.errors) ressource.errors = []
-        ressource.errors.push('la propriété xml des parametres ne contient pas de graphe valide')
+        if (!ressource._errors) ressource._errors = []
+        ressource._errors.push('la propriété xml des parametres ne contient pas de graphe valide')
       }
     }
   }

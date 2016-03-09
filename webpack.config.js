@@ -20,18 +20,16 @@ var webpack = require('webpack')
 
 // la conf identique dev/prod
 var conf = {
+  // cf http://webpack.github.io/docs/configuration.html#entry
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     // apiClient: './app/srcClient/apiClient.js',
     client: 'sesatheque-client',
-    // on laisse les 2 fichiers sinon il râle dans les fichiers avec du require(page) en disant
+    // faut un array, sinon il râle dans les fichiers ayant du require(page) en disant
     // Error: a dependency to an entry point is not allowed
-    page: [
-      './app/srcClient/page/refreshAuth.js',
-      './app/srcClient/page/index.js'
-    ],
+    page: ['./app/srcClient/page/index.js'],
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/index.js'
   },

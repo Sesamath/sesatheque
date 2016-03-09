@@ -273,6 +273,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var fluxComplements = flow()
 
     // étape relations
+    ressource._relations = []
     fluxComplements.seq(function () {
       var nextComplement = this
       if (_.isEmpty(ressource.relations)) {
@@ -285,14 +286,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
             if (error) {
               log.error(error)
-              ressource.warnings.push(error)
+              ressource._warnings.push(error)
             } else if (ressourceLiee) {
               // on ajoute le tag a et le type
-              ressource.relations[index].push($routes.getTagA('describe', ressourceLiee))
-              ressource.relations[index].push(ressourceLiee.type)
+              ressource._relations[index].push($routes.getTagA('describe', ressourceLiee))
+              ressource._relations[index].push(ressourceLiee.type)
             } else {
               log.errorData(error)
-              ressource.warnings.push('la ressource liée ' + relation[1] + " n'existe pas")
+              ressource._warnings.push('la ressource liée ' + relation[1] + " n'existe pas")
             }
             nextSeq()
           })
@@ -309,8 +310,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       }
     })
 
-    // étape auteurs, on remplace les ids par des objets
-    var auteurs = []
+    // étape auteurs, on ajoute le champ _auteurs pour avoir des objets {nom, prenom} plutôt que des ids
+    ressource._auteurs = []
     fluxComplements.seq(function () {
       var nextComplement = this
       if (_.isEmpty(ressource.auteurs)) {
@@ -321,13 +322,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           var nextSeq = this
           $personneRepository.load(auteurId, function (error, personne) {
             if (error) log.error(error)
-            else if (personne) auteurs.push({nom: personne.prenom + ' ' + personne.nom})
-            else auteurs.push({nom: 'auteur ' + auteurId + ' inconnu'})
+            else if (personne) ressource._auteurs.push({nom: personne.prenom + ' ' + personne.nom})
+            else ressource._auteurs.push({nom: 'auteur ' + auteurId + ' inconnu'})
             nextSeq()
           })
         })
         fluxAuteurs.seq(function () {
-          if (auteurs.length) ressource.auteurs = auteurs
           nextComplement()
         })
         fluxAuteurs.catch(function (error) {
@@ -338,6 +338,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     })
 
     // étape contributeurs
+    ressource._contributeurs = []
     fluxComplements.seq(function () {
       var nextComplement = this
       if (_.isEmpty(ressource.contributeurs)) {
@@ -348,12 +349,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           var nextSeq = this
           $personneRepository.load(contributeurId, function (error, personne) {
             if (error) log.error(error)
-            else if (personne) ressource.contributeurs[index] = {nom: personne.prenom + ' ' + personne.nom}
-            else ressource.contributeurs[index] = {nom: 'contributeur ' + contributeurId + ' inconnu'}
+            else if (personne) ressource._contributeurs.push({nom: personne.prenom + ' ' + personne.nom})
+            else ressource._contributeurs.push({nom: 'contributeur ' + contributeurId + ' inconnu'})
             nextSeq()
           })
         })
-        fluxContributeurs.seq(nextComplement)
+        fluxContributeurs.seq(function () {
+          nextComplement()
+        })
         fluxContributeurs.catch(function (error) {
           log.error('erreur dans le flux contributeurs de la ressource ' + ressource.oid, error)
           nextComplement()
@@ -415,7 +418,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   function getFormViewData (context, error, ressource, next) {
     var formData = {
-      errors: ressource && ressource.errors || []
+      errors: ressource && ressource._errors || []
     }
 
     if (error) {
@@ -567,8 +570,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       }
 
       // un checkbox pour forcer malgré les warnings si y'en a (mais qu'il n'y a pas d'erreurs)
-      if (ressource.warnings && ressource.warnings.length && !formData.errors.length) {
-        formData.warnings = ressource.warnings
+      if (ressource._warnings && ressource._warnings.length && !formData.errors.length) {
+        formData.warnings = ressource._warnings
         formData.force = {
           id: 'force',
           label: config.labels.force,
@@ -649,7 +652,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               })
             } // sinon on l'ajoute pas, seul describe s'en sert
           } else if (config.listes[key]) {
-            // c'est une liste d'id, faut remplacer les ids par des labels
+            // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
             buffer = []
             _.each(value, function (id) {
               if (config.listes[key][id]) buffer.push(config.listes[key][id])
@@ -657,8 +660,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             })
             viewData[key].value = buffer.join(', ')
           } else {
-            // un tableau qui n'est pas une liste d'ids on le laisse tel quel (auteurs & co ou des propriétés supplémentaires)
-            viewData[key].value = value
+            // un tableau qui n'est pas une liste d'ids on regarde si on a la propriété préfixée par _ ou on laisse tel quel
+            // (auteurs & co ou des propriétés supplémentaires)
+            viewData[key].value = ressource['_' + key] || value
           }
         } else if (config.typesVar[key] === 'Date') {
           viewData[key].value = value ? moment(value).format(config.formats.jour) : value
@@ -671,8 +675,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // on ajoute oid
       if (ressource.oid) viewData.oid = ressource.oid
       // warnings et errors éventuels
-      if (ressource.warnings && ressource.warnings.length) viewData.warnings = ressource.warnings
-      if (ressource.errors && ressource.errors.length) viewData.errors = ressource.errors
+      if (ressource._warnings && ressource._warnings.length) viewData.warnings = ressource._warnings
+      if (ressource._errors && ressource._errors.length) viewData.errors = ressource._errors
     } else {
       // pas d'erreur mais pas de ressource non plus
       $page.addError('Aucune ressource transmise pour affichage', viewData)
@@ -773,7 +777,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             data.contentBloc.enfantsDescribe = enfantsDescribe
           }
         }
-        // pour le menu qui en aura besoin
+        // pour les boutons d'actions ajoutés dans beforeTransport on ajoute la ressource à context
         if (context.layout === 'page' && ressource) context.ressource = ressource
         // le titre s'il n'est pas fourni en options
         if (!options || !options.$metas || !options.$metas.title) {

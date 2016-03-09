@@ -38,8 +38,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {string}    warning
    */
   function addWarning (ressource, warning) {
-    if (!ressource.warnings) ressource.warnings = []
-    ressource.warnings.push(warning)
+    if (!ressource._warnings) ressource._warnings = []
+    ressource._warnings.push(warning)
   }
   /**
    * Ajoute une erreur à une ressource
@@ -47,8 +47,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {string}    errorMsg
    */
   function addError (ressource, errorMsg) {
-    if (!ressource.errors) ressource.errors = []
-    ressource.errors.push(errorMsg)
+    if (!ressource._errors) ressource._errors = []
+    ressource._errors.push(errorMsg)
   }
 
   var flow = require('an-flow')
@@ -110,7 +110,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
               } else if (groupe) {
                 // le groupe existe déjà
                 if ($accessControl.isInGroupe(context, groupeNom)) ressourceNew.groupes.push(groupe.nom)
-                else ressourceNew.warnings.push('Vous devez faire partie du groupe ' + groupeNom + ' pour y partager cette ressource')
+                else ressourceNew._warnings.push('Vous devez faire partie du groupe ' + groupeNom + ' pour y partager cette ressource')
               } else {
                 addWarning(ressourceNew, 'Le groupe ' + groupe.nom + " n'existe pas")
               }
@@ -125,8 +125,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       } else {
         // on vide et on signale l'erreur sans aller plus loin
         log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
-        if (!ressourceNew.errors) ressourceNew.errors = []
-        ressourceNew.errors.push('Groupes invalides')
+        if (!ressourceNew._errors) ressourceNew._errors = []
+        ressourceNew._errors.push('Groupes invalides')
         ressourceNew.groupes = []
         next(null, ressourceNew)
       }

@@ -115,8 +115,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function printForm (context, error, ressource, titre) {
     if (error) log.error('une erreur au post update', error)
-    if (ressource.errors) log.debug('errors au post update', ressource.errors)
-    if (ressource.warnings) log.debug('warnings au post update avec force=' + context.post.force, ressource.warnings)
+    if (ressource._errors) log.debug('errors au post update', ressource._errors)
+    if (ressource._warnings) log.debug('warnings au post update avec force=' + context.post.force, ressource._warnings)
     addToken(context, ressource)
     var options
     if (titre) options = {$metas: {title: 'Ajouter une ressource'}}
@@ -389,8 +389,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $ressourceControl.valideRessourceFromPost(context.post, false, this)
       }).seq(function (ressource) {
         ressourcePosted = ressource
-        if (!_.isEmpty(ressource.errors)) printForm(context, null, ressource, titrePage)
-        else if (!_.isEmpty(ressource.warnings) && !ressource.force) printForm(context, null, ressource, titrePage)
+        if (!_.isEmpty(ressource._errors)) printForm(context, null, ressource, titrePage)
+        else if (!_.isEmpty(ressource._warnings) && !ressource.force) printForm(context, null, ressource, titrePage)
         else this(null, ressource)
       }).seq(function (ressource) {
         $personneControl.checkGroupes(context, null, ressource, this)
@@ -400,7 +400,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.debug('auteurs après checkPersonnes', ressource.auteurs)
         $ressourceRepository.write(ressource, function (error, ressource) {
           // on veut gérér les erreurs ici car y'a un bug dans notre code
-          if (error || !_.isEmpty(ressource.errors)) {
+          if (error || !_.isEmpty(ressource._errors)) {
             log.error(new Error('on a une erreur au write mais pas au valide précédent'))
             printForm(context, error, ressource, 'Ajouter une ressource')
           } else {
@@ -490,9 +490,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function () {
         $ressourceControl.valideRessourceFromPost(ressourceNew, false, this)
       }).seq(function (ressourceNormee) {
-        if (!_.isEmpty(ressourceNew.errors)) {
+        if (!_.isEmpty(ressourceNew._errors)) {
           printForm(context, null, ressourceNew, titrePage)
-        } else if (!_.isEmpty(ressourceNew.warnings) && ressourceNew.force !== 'forced') {
+        } else if (!_.isEmpty(ressourceNew._warnings) && ressourceNew.force !== 'forced') {
           printForm(context, null, ressourceNew, titrePage)
         } else {
           ressourceNew = ressourceNormee

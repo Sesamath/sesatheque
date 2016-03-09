@@ -92,8 +92,8 @@ module.exports = function (EntityRessource) {
    */
   function addWarnings (ressource) {
     function addWarning (warning) {
-      if (!ressource.warnings) ressource.warnings = []
-      ressource.warnings.push(warning)
+      if (!ressource._warnings) ressource._warnings = []
+      ressource._warnings.push(warning)
     }
     // on ajoute un warning pour les enfants
     if (ressource.type === 'arbre' && (!ressource.enfants || !ressource.enfants.length)) {
@@ -107,7 +107,6 @@ module.exports = function (EntityRessource) {
 
   /**
    * Vérifie que tous les champs qui doivent être des array le sont et met des tableaux vides sinon
-   * ajoute warnings et errors, qui seront éventuellement virés s'ils sont vides avant envoi à la vue
    * @private
    * @param {EntityRessource} ressource
    */
@@ -116,6 +115,7 @@ module.exports = function (EntityRessource) {
       var tmp
       if (ressource.hasOwnProperty(key) && typeVar === 'Array' && !_.isArray(ressource[key])) {
         if (_.isString(ressource[key])) {
+          // on voulait un array et on a une string, on découpe
           tmp = ressource[key].split(',')
           ressource[key] = []
           tmp.forEach(function (val) {
@@ -123,7 +123,7 @@ module.exports = function (EntityRessource) {
             if (value) ressource[key].push(value)
           })
         } else {
-          log.debug('la propriété ' + key + " n'était pas un array ni une string, init avec array vide")
+          log.error(new Error('la propriété ' + key + 'de la ressource' + ressource.oid + " n'était pas un array ni une string, init avec array vide"))
           ressource[key] = []
         }
       }
@@ -303,25 +303,24 @@ module.exports = function (EntityRessource) {
         }
       }
       addWarnings(ressource)
-      // log.debug('après addWarnings', ressource.warnings)
+      // log.debug('après addWarnings', ressource._warnings)
       // log.debug('après addWarnings, enfants de ' +ressource.type, ressource.enfants)
     } // else non vide
 
     if (errors.length) {
-      if (ressource) ressource.errors = errors
-      // error = new Error('Ressource invalide : \n' + errors.join('\n'))
+      if (ressource) ressource._errors = errors
     }
 
-    // nettoyage
-    if (ressource.errors && !ressource.errors.length) delete ressource.errors
-    if (ressource.warnings && !ressource.warnings.length) delete ressource.warnings
+    /* nettoyage
+    if (ressource._errors && !ressource._errors.length) delete ressource._errors
+    if (ressource._warnings && !ressource._warnings.length) delete ressource._warnings */
 
     next(error, ressource)
   }
 
   /**
    * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
-   * Ajoute des choses dans ressource.warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
+   * Ajoute des choses dans ressource._warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
    * @memberOf $ressourceControl
    * @param {Object} data Le post
    * @param {boolean} [partial=false] Passer true pour ne pas générer d'erreur sur des champs requis manquants

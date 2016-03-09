@@ -60,7 +60,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
    * @memberOf $ressourceConverter
    * @param ressource
    * @param relations
-   * @returns {Array} Les erreurs éventuelles, ou false si y'a pas eu d'erreur mais que l'on a rien modifié (la relation y était déjà)
+   * @returns {string[]} Les erreurs éventuelles, ou false si y'a pas eu d'erreur mais que l'on a rien modifié (la relation y était déjà)
    */
   $ressourceConverter.addRelations = function (ressource, relations) {
     var errors = []

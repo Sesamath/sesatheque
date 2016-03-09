@@ -228,31 +228,33 @@ function Ressource (initObj) {
    * @default true
    */
   this.indexable = values.hasOwnProperty('indexable') ? !!values.indexable : true
-  if (values.warnings) {
-    /**
-     * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
-     * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
-     * Viré au save s'il est vide
-     * @default undefined
-     * @type {string[]}
-     */
-    this.warnings = filters.arrayString(values.warnings)
-  }
-  if (values.errors) {
-    /**
-     * Une liste d'erreurs éventuelles (incohérences, données manquantes, etc.)
-     * Bloque l'enregistrement s'il n'est pas vide (sinon viré avant enregistrement)
-     * @default undefined
-     * @type {string[]}
-     */
-    this.errors = filters.arrayString(values.errors)
-  }
   /**
    * L'oid de l'archive correspondant à la version précédente
    * @default undefined
    * @type {Integer}
    */
   this.archiveOid = filters.int(values.archiveOid)
+  /**
+   * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
+   * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
+   * Non sauvegardé
+   * @default {[]}
+   * @type {string[]}
+   */
+  this._warnings = []
+  if (values._warnings) {
+    this._warnings = filters.arrayString(values._warnings)
+  }
+  /**
+   * Une liste d'erreurs éventuelles (incohérences, données manquantes, etc.)
+   * Bloque l'enregistrement s'il n'est pas vide (sinon viré avant enregistrement)
+   * @default {[]}
+   * @type {string[]}
+   */
+  this._errors = []
+  if (values._errors) {
+    this._errors = filters.arrayString(values._errors)
+  }
 }
 
 /**
