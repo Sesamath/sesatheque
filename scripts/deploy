@@ -1,5 +1,9 @@
 #!/bin/bash
 
+ROUGE='\e[0;31m'
+VERTC='\e[1;32m'
+DEFAUT='\e[0m' 
+
 dirInitial="$PWD"
 dirApp=$(dirname $0)/../
 PM2=app/_private/pm2Deploy.json5
@@ -41,7 +45,7 @@ cd "$dirApp"
 
 if [ "$dest" == "prod" ]
 then
-  echo "Vous allez déployer en PRODUCTION, sûr ? [o/N]"
+  echo "${ROUGE}Vous allez déployer en PRODUCTION, sûr ? [o/N]$DEFAUT"
   read rep
   [ "$rep" != "o" ] && echo "Abandon" && exit 0
 fi
