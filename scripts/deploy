@@ -45,7 +45,7 @@ cd "$dirApp"
 
 if [ "$dest" == "prod" ]
 then
-  echo "${ROUGE}Vous allez déployer en PRODUCTION, sûr ? [o/N]$DEFAUT"
+  echo -e "${ROUGE}Vous allez déployer en PRODUCTION, sûr ? [o/N]$DEFAUT"
   read rep
   [ "$rep" != "o" ] && echo "Abandon" && exit 0
 fi

@@ -66,9 +66,6 @@ var externalModules = {
 
 var base = '/'
 
-// l'élément html body, pour éviter un getElementByName à chaque fois
-var body
-
 /**
  * Ajoute un texte d'erreur dans errorsContainer (#errors ou #error ou #warnings) ET dans console.error (si ça existe)
  * L'existence de cette fonction est testée par init.js pour savoir si on doit être chargé.
