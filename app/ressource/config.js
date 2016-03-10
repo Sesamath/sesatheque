@@ -65,8 +65,15 @@ var ressourceConfig = {
       4: 'quatrième',
       3: 'troisième',
       2: 'seconde',
+      '2p': 'seconde pro',
       1: 'première',
-      12: 'terminale'
+      '1p': 'première pro',
+      12: 'terminale',
+      '12p': 'terminale pro',
+      cap1: 'CAP 1re année',
+      cap2: 'CAP 2e année',
+      bep1: 'BEP 1re année',
+      bep2: 'BEP 2e année'
     },
     categories: {
       1: 'Activité fixe',
@@ -150,7 +157,7 @@ var ressourceConfig = {
   },
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
   listesOrdonnees: {
-    niveaux: [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12],
+    niveaux: [11, 10, 9, 8, 7, 6, 5, 4, 3, 'cap1', 'cap2', 'bep1', 'bep2', 2, '2p', 1, '1p', 12, '12p'],
     typeDocumentaires: [9, 5, 6, 12, 11, 1, 2],
     typePedagogiques: [3, 9, 91, 92, 191, 7, 2, 81, 82, 13, 141, 151, 21, 22]
   }, // fin des listes
