@@ -520,6 +520,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressource) {
         // si on a du closerId=YYY dans l'url, on affiche une page qui envoie un message (Cf sesatheque-client.modifyItem)
         if (context.get.closerId) {
+          // on apelle le closer mis par sesatheque-client, mais faut ajouter $droits à la ressource
+          ressource.$droits = 'DWR'
           context.html({
             $metas: {
               title: 'Enregistrement réussi, fermeture automatique'
@@ -530,8 +532,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             },
             jsBloc: {
               $view: 'js',
+              // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
               jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-                context.get.closerId + '", ressource:' + JSON.stringify($ressourceConverter.toRef(ressource)) + '}, "*")'
+                context.get.closerId + '", ressource:' + JSON.stringify(ressource) + '}, "*")'
             }
           })
         } else {
