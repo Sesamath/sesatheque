@@ -70,6 +70,9 @@ function resize (cb) {
 }
 
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
+  function callResize() {
+    resize(options.callback)
+  }
   $ = window.jQuery
   if (!options) options = {}
   $target = $('#' + targetId)
@@ -91,7 +94,7 @@ module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
   if (options.minWidth) minWidth = options.minWidth
   if (options.offsetHeight) offsetHeight = options.offsetHeight
   if (options.offsetWidth) offsetWidth = options.offsetWidth
-  resize(options.callback)
+  callResize()
   // et à chaque changement de la taille de la fenêtre
-  $(window).resize(resize)
+  $(window).resize(callResize)
 }

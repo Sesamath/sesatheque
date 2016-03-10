@@ -51,7 +51,7 @@ function addPage (params, next) {
   var divIframeSrcId = 'urlSrc'
   dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + url)
   // toujours autosize sur le conteneur
-  page.autosize(divIframeId, [divIframeSrcId])
+  page.autosize(divIframeId, [divIframeSrcId], null, {offsetHeight:20, offsetWidth: 40})
   // url sera ajouté après l'appel de pageLoaded, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
   var args = {id: 'pageContent'}
 
@@ -102,7 +102,7 @@ function addPage (params, next) {
     var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
         ' votre navigateur ne supporte probablement pas les iframes')
     // url source (non cliquable) en footer
-    page.autosize('page', ['errors', 'warnings', 'titre', 'entete', 'urlSrc'], [], {minHeight: 300, minWidth: 300})
+    page.autosize(args.id, ['errors', 'warnings', 'titre', 'entete', 'urlSrc'], [], {minHeight: 300, minWidth: 300})
     pageLoaded(iframe, next)
     iframe.src = url
   }
@@ -154,7 +154,6 @@ var isLoaded
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
 module.exports = function display (ressource, options, next) {
-  log('url.display avec les options', options)
   page.loadAsync('jquery', function () {
     $ = window.jQuery
     try {
@@ -195,7 +194,6 @@ module.exports = function display (ressource, options, next) {
          * Ajout des comportements pour la gestion des panneaux Consigne et Réponse avec jQueryUi
          * On charge ces dépendances avec notre loader
          */
-        page.setBase(options.pluginBase)
         page.loadAsync([ 'jqueryUiDialog' ], function () {
           // les autres sont des modules à nous chargés par webpack
           require.ensure([], function (require) {
@@ -238,7 +236,7 @@ module.exports = function display (ressource, options, next) {
                 CKEDITOR.config.width = 'auto'
                 if (params.answer_editor === 'ckeditorTex') {
                   CKEDITOR.config.extraPlugins = 'mathjax'
-                  CKEDITOR.config.mathJaxLib = '/vendors/mathjax/2.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                  CKEDITOR.config.mathJaxLib = '/vendor/mathjax/2.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
                 }
                 CKEDITOR.replace('answer', {
                   toolbarGroups: [

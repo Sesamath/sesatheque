@@ -66,6 +66,9 @@ var externalModules = {
 
 var base = '/'
 
+// l'élément html body, pour éviter un getElementByName à chaque fois
+var body
+
 /**
  * Ajoute un texte d'erreur dans errorsContainer (#errors ou #error ou #warnings) ET dans console.error (si ça existe)
  * L'existence de cette fonction est testée par init.js pour savoir si on doit être chargé.
@@ -119,8 +122,8 @@ function hideTitle () {
  */
 function init (options, next) {
   if (!options) options = {}
-  log('page.init avec les options', options)
   if (!options.base) options.base = base
+  else setBase(options.base)
   // (des)active la fct de log si on le demande, l'url est prioritaire sur options
   var verbose = tools.getURLParameter('verbose') || options.verbose
   if (verbose === '0' || verbose === 'false') verbose = false
@@ -165,9 +168,17 @@ function init (options, next) {
 function loadAsync (moduleNames, callback) {
   function headLoad (paths, cb) {
     var loader = w.head.load || w.head.js // les anciennes versions de head utilisaient head.js avec la même signature
-    if (loader) loader(paths, cb)
+    if (loader) {
+      var body = wd.getElementsByTagName('body')[0]
+      var waitingElt = dom.addElement(body, 'div', {className: "waiting"}, 'chargement en cours…')
+      loader(paths, function () {
+        body.removeChild(waitingElt)
+        cb()
+      })
+    }
     else console.error('Impossible de trouver head pour chargement asynchrone')
   }
+
   function headReady (next) {
     if (typeof window.head === 'undefined') {
       dom.addJs(base + externalModules.head, function () {
@@ -177,6 +188,8 @@ function loadAsync (moduleNames, callback) {
       next()
     }
   }
+
+  // on accepte les string
   if (typeof moduleNames === 'string') moduleNames = [moduleNames]
 
   // on passe par head qui gèrera au passage l'unicité de l'appel
@@ -220,6 +233,7 @@ function doAutoSize (targetId, hBlocIds, wBlocIds, options) {
  * @param newBase
  */
 function setBase (newBase) {
+  if (newBase.substring(-1) !== '/') newBase += '/'
   base = newBase
 }
 

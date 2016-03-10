@@ -101,7 +101,7 @@ function initJsonEditor (next) {
         try {
           page.loadAsync('JSONEditor', function () {
             jsonEditor = new window.JSONEditor(jsonEditorDiv)
-            dom.addCss('/vendors/jsoneditor/dist/jsoneditor.min.css')
+            dom.addCss('/vendor/jsoneditor/dist/jsoneditor.min.css')
             isJseLoaded = true
             next()
           })

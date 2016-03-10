@@ -280,7 +280,7 @@ module.exports = function (ressource, options, next) {
          */
         var answer_editor = ressource.parametres.answer_editor || 'textarea'
 
-        dom.addCss(options.base + 'vendors/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css')
+        dom.addCss(options.base + 'vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.css')
 
         var etapes = {
           currentIndex: 0,
@@ -302,7 +302,7 @@ module.exports = function (ressource, options, next) {
         /** Le html du lien suivant */
         var lienSuivant = dom.getElement('img', {
           'class': 'lienSuivant',
-          src: options.pluginBaseUrl + 'images/forward.png',
+          src: options.pluginBase + 'images/forward.png',
           align: 'absmiddle',
           alt: 'suivant',
           onclick: etapes.next

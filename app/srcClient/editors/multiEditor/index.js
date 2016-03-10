@@ -139,7 +139,7 @@ function initCKEditor (next) {
           CKEDITOR.config.extraPlugins = 'mathjax'
           // @see http://ckeditor.com/comment/123266#comment-123266, sauf que ça marche pas, faut aller modifier config.js
           // ou TeX-AMS_HTML ou TeX-AMS-MML_SVG, cf http://docs.mathjax.org/en/latest/configuration.html#loading
-          CKEDITOR.config.mathJaxLib = '/vendors/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+          CKEDITOR.config.mathJaxLib = '/vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
           // log('ckeditor', CKEDITOR)
           next()
         })

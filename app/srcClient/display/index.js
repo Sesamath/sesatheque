@@ -67,7 +67,7 @@ var startDate
  */
 function display (ressource, options, next) {
   /**
-   * Fait le chargement proprement dit après l'init
+   * Fait le chargement proprement dit après page.init
    * @private
    * @param {Error} [error] Une erreur éventuelle à l'init
    */
@@ -86,7 +86,7 @@ function display (ressource, options, next) {
       var pluginDisplay = require('../plugins/' + pluginName + '/display')
       if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
       // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
-      var Resultat, traiteResultat
+      var traiteResultat
 
       if (options) {
         if (options.resultatCallback && tools.isFunction(options.resultatCallback)) traiteResultat = 'function'
@@ -95,11 +95,9 @@ function display (ressource, options, next) {
       }
       // un cas particulier, le prof qui teste, on fourni une callback qui fait rien,
       // pour éviter des avertissements sur les ressources qui attendent une callback
-      if (traiteResultat === 'none') traiteResultat = function () {}
-      if (traiteResultat) Resultat = require('../../constructors/Resultat')
+      // if (traiteResultat === 'none') traiteResultat = function () {}
 
       try {
-        if (typeof pluginDisplay === 'undefined') throw new Error('Le chargement du plugin ' + pluginName + ' a échoué')
         log('plugin ' + pluginName + ' chargé')
         if (options.container) dom.empty(options.container)
         else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
@@ -114,11 +112,10 @@ function display (ressource, options, next) {
           page.hideTitle()
         }
         // on regarde s'il faut ajouter une fct de sauvegarde des résultats
-        if (Resultat) addResultatCallback(options, traiteResultat, Resultat)
-        // on lui ajoute toujours ça
-        if (!options.base) options.base = '/'
-        else if (options.base.substring(-1) !== '/') options.base += '/'
-        page.setBase(options.base)
+        if (traiteResultat) {
+          var Resultat = require('../../constructors/Resultat')
+          addResultatCallback(options, traiteResultat, Resultat)
+        }
         options.pluginBase = options.base + 'plugins/' + pluginName + '/'
         // on peut afficher
         pluginDisplay(ressource, options, function (error) {
@@ -307,7 +304,7 @@ function display (ressource, options, next) {
       } // fin définition options.resultatCallback
     }
   } // addResultatCallback
-
+  console.log('options avant page.init', options)
   page.init(options, load)
 }
 

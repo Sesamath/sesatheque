@@ -129,7 +129,7 @@ module.exports = function edit (arbre, options) {
        */
       function initDom (options) {
         // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-        var vendorsBaseUrl = options.vendorsBaseUrl || '/vendors'
+        var vendorsBaseUrl = options.vendorsBaseUrl || '/vendor'
         var base = options.base || '/'
         dom.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css')
         dom.addCss(base + 'styles/ressources.css')
