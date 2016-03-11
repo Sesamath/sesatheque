@@ -449,7 +449,7 @@ module.exports = {
     // on lance analyse du graphe et chargement des outils puis lancement
     // mais faut forcer cet id qui est en dur un peu partout dans le code j3p, on créé un div pour ça
     var j3pConteneur = dom.addElement(eltHtml, 'div', {id: 'Mepact'})
-    page.loadAsync(['head', 'jquery'], function () {
+    page.loadAsync(['head'], function () {
       'use strict'
       chargement_j3p.chargement(j3pConteneur)
       // qqun veut être rappelé ?
