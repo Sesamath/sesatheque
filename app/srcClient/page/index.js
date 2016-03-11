@@ -31,6 +31,8 @@
 
 'use strict'
 
+// @todo mettre les conteneurs (titre et feedback) et les fcts qui les utilisent dans la fct init pour être local à l'invocation mais pas au module
+
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var tools = require('sesajstools')
@@ -172,8 +174,9 @@ function loadAsync (moduleNames, callback) {
         body.removeChild(waitingElt)
         cb()
       })
+    } else {
+      console.error('Impossible de trouver head pour chargement asynchrone')
     }
-    else console.error('Impossible de trouver head pour chargement asynchrone')
   }
 
   function headReady (next) {
@@ -250,39 +253,11 @@ if (typeof window !== 'undefined') {
  * Options à passer à init() ou à display(), les autres propriétés seront laissées intactes
  * @typedef initOptions
  * @type {Object}
- * @property {string}  [base=/] Le préfixe de chemin vers la racine de la sésathèque.
- *                                        Il faut passer un chemin http://… complet si ce module est utilisé sur un autre domaine que la sésathèque
- *                                        Inutile si l'info a déjà été donnée à requireConfig avant
- * @property {Element} [container]        L'élément html qui servira de conteneur au plugin pour afficher sa ressource, créé si non fourni
- * @property {Element} [errorsContainer]  L'élément html pour afficher des erreurs éventuelles, créé si non fourni
- * @property {boolean} [verbose=false]      Passer true pour ajouter des log en console
- */
-
-/**
- * Options à passer à une méthode display d'un plugin
- * @typedef displayOptions
- * @type {Object}
- * @property {string}           base        Le préfixe de chemin vers la racine de la sésathèque (chemin http absolu en cas d'appel d'un autre domaine)
- * @property {string}           pluginBase            Le préfixe de chemin vers le dossier du plugin (mis par display)
- * @property {Element}          container             L'élément html qui servira de conteneur au plugin pour afficher sa ressource
- * @property {Element}          errorsContainer       L'élément html pour afficher des erreurs éventuelles
- * @property {boolean}          [verbose=false]       Passer true pour ajouter des log en console
- * @property {boolean}          [isDev=false]         Passer true pour initialiser le dom source en devsesamath (pour certains plugins)
- * @property {string}           [urlResultatCallback] Une url vers laquelle poster le résultat
- *                                                    (idem si la page de la ressource contient ?urlScoreCallback=http…)
- * @property {string}           [resultatMessageAction] Un nom d'action pour passer le résultat en postMessage
- * @property {resultatCallback} [resultatCallback]    Une fonction pour recevoir un objet Resultat (si y'a pas de urlScoreCallback)
- * @property {string}           [sesatheque]          Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page),
- *                                                      le nom de la sésathèque pour un client qui récupère des résultats de plusieurs sésatheques
- * @property {boolean}          [showTitle=true]      Passer '0' ou 'false' via l'url ou false via options pour cacher le titre
- * @property {string}           [userOrigine]         Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
- * @property {string}           [userId]              Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
- * @property {object}           [flashvars]           Pour les plugins qui chargent du swf, sera passé en flashvars en plus
- */
-
-/**
- * @callback resultatCallback
- * @param {Resultat} Un objet Resultat
+ * @property {string}  [base=/]          Le préfixe de chemin vers la racine de la sésathèque.
+ *                                         Il faut passer un chemin http://… complet si ce module est utilisé sur un autre domaine que la sésathèque
+ * @property {Element} [container]       L'élément html qui servira de conteneur au plugin pour afficher sa ressource, créé si non fourni
+ * @property {Element} [errorsContainer] L'élément html pour afficher des erreurs éventuelles, créé si non fourni
+ * @property {boolean} [verbose=false]   Passer true pour ajouter des log en console
  */
 
 /**
