@@ -123,7 +123,7 @@ module.exports = function (EntityRessource) {
             if (value) ressource[key].push(value)
           })
         } else {
-          log.error(new Error('la propriété ' + key + 'de la ressource' + ressource.oid + " n'était pas un array ni une string, init avec array vide"))
+          log.error(new Error('la propriété ' + key + ' de la ressource ' + ressource.oid + " n'était pas un array ni une string, init avec array vide"))
           ressource[key] = []
         }
       }

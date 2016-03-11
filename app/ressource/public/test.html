@@ -4,7 +4,9 @@
   <meta charset="utf-8" />
   <title>test</title>
   <link type="text/css" media="all" rel="stylesheet" href="/styles/iframe.css"/>
-  <script type="text/javascript" src="/apiClient.bundle.js"></script>
+  <script type="text/javascript" src="/page.bundle.js"></script>
+  <script type="text/javascript" src="/display.bundle.js"></script>
+  <script type="text/javascript" src="/edit.bundle.js"></script>
 </head>
 
 <body>
@@ -15,12 +17,23 @@
   Chargement en cours</div>
 
 <script type="application/javascript">
+  // page pour tester rapidement une nouvelle méthode
+  // démarrer webpack avec npm run build-watch et tester ici stpage.truc() ou stdislay() ou stedit.bidule()
   try {
-    var client = window.sesatheque.apiClient('http://bibliotheque.devsesamath.net/')
-    console.log(client)
-    console.log(client.getRessource('42', 'alias', function (error, ressource) {
-      console.log(ressource)
-    }))
+    var obj = {
+      toto:'toto',
+      titi: 42,
+      $truc: 2,
+      $machin : {
+        tata: 3
+      },
+      tata: {
+        tutu: 3,
+        $titi: 4,
+        _tutu: 5
+      }
+    }
+    console.log(obj, 'devient', stpage.filters.object(obj, /^(\$|_)/))
   } catch(error) {
     document.getElementById('errors').innerHTML = error.toString();
     if (console && console.error) console.error(error)

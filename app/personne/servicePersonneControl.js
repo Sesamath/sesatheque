@@ -72,8 +72,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @memberOf $personneControl
    */
   $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, next) {
-    log.debug('checkGroupes avec ' + ressourceNew.groupes.join(','))
     if (!ressourceNew.groupes) ressourceNew.groupes = []
+    log.debug('checkGroupes avec ' + ressourceNew.groupes.join(','))
     // les 2 cas où y'a rien à faire
     if (ressourceOriginale && _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes)) {
       // update sans modif de groupe
@@ -225,16 +225,19 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         next(null, ressourceNew)
       }).catch(next)
     } else {
-      // pas tous les droits sur les auteurs, on ajoute le user courant en auteur (nouvelle ressource) ou contributeur (modif existante) sans toucher au reste
+      // pas tous les droits sur les auteurs, on ajoute le user courant en auteur (nouvelle ressource)
+      // ou contributeur (modif existante) sans toucher au reste
       var currentUserOid = $accessControl.getCurrentUserOid(context)
       if (ressourceOriginale) {
         ressourceNew.auteurs = ressourceOriginale.auteurs || []
         ressourceNew.contributeurs = ressourceOriginale.contributeurs || []
       }
-      if (ressourceNew.auteurs.indexOf(currentUserOid) < 0) {
+      if (!ressourceNew.auteurs) ressourceNew.auteurs = []
+      if (ressourceNew.auteurs.indexOf(currentUserOid) === -1) {
         // il est pas auteur
         if (ressourceOriginale) {
           // y'avait une ressource, on l'ajoute en contributeurs s'il n'y était pas
+          if (!ressourceNew.contributeurs) ressourceNew.contributeurs = []
           if (ressourceNew.contributeurs.indexOf(currentUserOid) < 0) ressourceNew.contributeurs.push(currentUserOid)
         } else {
           // creation, mise d'office en auteur
