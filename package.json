@@ -10,6 +10,7 @@
     "build-dev": "webpack --debug --verbose",
     "build-watch": "webpack --debug --verbose -w",
     "lint": "standard --verbose | snazzy",
+    "maj": "git pull && npm install && npm build && npm start",
     "startClient": "hjs-dev-server",
     "dev": "./scripts/run -sd",
     "prod": "./scripts/run -sp",
