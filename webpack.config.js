@@ -26,7 +26,7 @@ var conf = {
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     // apiClient: './app/srcClient/apiClient.js',
-    client: 'sesatheque-client',
+    client: ['sesatheque-client'],
     // faut un array, sinon il râle dans les fichiers ayant du require(page) en disant
     // Error: a dependency to an entry point is not allowed
     page: ['./app/srcClient/page/index.js'],

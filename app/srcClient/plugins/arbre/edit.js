@@ -34,6 +34,7 @@
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var tools = require('sesajstools')
+var client = require('sesatheque-client')(window.location.protocol + '//' + window.location.host)
 
 var page = require('../../page/index')
 var jstreeConverter = require('../../display/jstreeConverter')
@@ -46,7 +47,7 @@ var jstreeConverter = require('../../display/jstreeConverter')
  */
 module.exports = function edit (arbre, options) {
   try {
-    page.loadAsync(['jquery', 'apiClient'], function () {
+    page.loadAsync(['jquery', 'jstree'], function () {
       // nos fcts internes
       function addApercu (items, node) {
         var ref = node.a_attr && node.a_attr['data-ref']
@@ -270,7 +271,7 @@ module.exports = function edit (arbre, options) {
                     var id = window.prompt('Id de la ressource (oid ou origine/idOrigine')
                     var inst = $jstree.reference(data.reference)
                     var node = inst.get_node(data.reference)
-                    apiClient.getRessource(id, function (error, ressource) {
+                    client.getRessource(id, function (error, ressource) {
                       if (error) addError(error)
                       else {
                         log('ressource récupérée', ressource)
@@ -353,7 +354,7 @@ module.exports = function edit (arbre, options) {
         var ref = $inputRef.val()
         log('On va charger en source ' + ref)
         if (ref) {
-          apiClient.getRessource(ref, function (error, ressource) {
+          client.getRessource(ref, function (error, ressource) {
             if (error) {
               page.addError('Erreur au chargement de ' + ref + ' : ' + error.toString(), 5)
             } else if (ressource && ressource.type === 'arbre') {
@@ -507,8 +508,6 @@ module.exports = function edit (arbre, options) {
       if (typeof window.jQuery === 'undefined') throw new Error('Problème de chargement jQuery')
       var $ = window.jQuery
       /* jshint jquery:true */
-      // todo changer pour utiliser sesatheque-client exporté dans window.stClient
-      var apiClient = window.stapiClient
       if (typeof jstreeConverter === 'undefined') throw new Error('Problème de chargement des dépendances')
 
       // les containers (variables locales au module), qui seront affectés par initDom()
@@ -531,8 +530,8 @@ module.exports = function edit (arbre, options) {
         initDomGraphic()
         // on ajoute un lien pour passer à la version graphique
         jstreeConverter.setBaseUrl(options.base)
-        log.debug("edit de l'arbre", arbre)
-        log.debug('$dstTree', $dstTree)
+        log("edit de l'arbre", arbre)
+        log('$dstTree', $dstTree)
 
         // on charge l'arbre à éditer
         loadDst(arbre)

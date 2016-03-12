@@ -22,11 +22,17 @@ var log = common.log // jshint ignore:line
 var graphe2Json = require('./modules/j3pGraphe2json')
 
 // databases
-var dbConfigOldBibli = require('../app/_private/bddConfigs/oldbibli')
+var dbConfigOldBibli
 var dbConfigLabomep = require('../app/_private/bddConfigs/labomep')
 // les connexions aux bases
-var kOldBibli = knex(dbConfigOldBibli)
+var kOldBibli
 var kLabomep = knex(dbConfigLabomep)
+
+var checkOldBibli = false
+if (checkOldBibli) {
+  dbConfigOldBibli = require('../app/_private/bddConfigs/oldbibli')
+  kOldBibli = knex(dbConfigOldBibli)
+}
 
 /**
  * Passe en revue l'objet elementtree issu du xml pour en extraire les ids des tags j3p (récursif)
@@ -78,34 +84,43 @@ function getOnlineXml (next) {
 function parseIds (idsFound) {
   if (idsFound && idsFound.length) {
     idsFound.forEach(function (id) {
+      log('parsing ' + id)
       flow().seq(function () {
         var row
         var query = 'SELECT bib_id AS id, bib_titre AS titre, bib_descriptif AS descriptif,' +
                     ' bib_commentaire AS commentaire, bib_xml AS graphe FROM BIBS'
         common.setAfterAllCb(this)
         kLabomep.raw(query + ' WHERE bib_id = ' + id).exec(function (error, rows) {
-          if (error) throw error
-          if (rows[0] && rows[0][0]) {
-            row = rows[0][0]
-            // faut voir si on complète avec les infos de oldBibli
-            if (!row.bib_descriptif || !row.bib_commentaire) {
-              kOldBibli.raw('SELECT description, commentaires FROM Ressource WHERE id = ' + id).exec(function (error,
-                                                                                                               rows) {
-                var result
-                if (error) throw error
-                if (rows[0]) {
-                  result = rows[0][0]
-                  if (result && !row.descriptif && result.description) row.descriptif = result.description
-                  if (result && !row.commentaire && result.commentaires) row.commentaire = result.commentaires
-                } else {
-                  log('Pas de ressources avec ' + query)
+          try {
+            if (error) throw error
+            if (rows[ 0 ] && rows[ 0 ][ 0 ]) {
+              row = rows[ 0 ][ 0 ]
+              // faut voir si on complète avec les infos de oldBibli
+              if (checkOldBibli) {
+                if (!row.bib_descriptif || !row.bib_commentaire) {
+                  kOldBibli.raw('SELECT description, commentaires FROM Ressource WHERE id = ' + id).exec(function (error,
+                                                                                                                   rows) {
+                    var result
+                    if (error) throw error
+                    if (rows[ 0 ]) {
+                      result = rows[ 0 ][ 0 ]
+                      if (result && !row.descriptif && result.description) row.descriptif = result.description
+                      if (result && !row.commentaire && result.commentaires) row.commentaire = result.commentaires
+                    } else {
+                      log('Pas de ressources avec ' + query)
+                    }
+                  })
                 }
-              })
-            }
-            parseRessource(row)
-          } else log("Pas de ressources dans BIBS d'id " + id)
+              }
+              parseRessource(row)
+            } else log("Pas de ressources dans BIBS d'id " + id)
+          } catch (error) {
+            log('erreur dans le select sur labomep')
+            log(error)
+          }
         })
       }).seq(function () {
+        log('fin parsing')
         common.displayResult()
       }).catch(function (error) {
         log('Erreur dans le flow :', error)
