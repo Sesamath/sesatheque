@@ -31,88 +31,84 @@
 
 'use strict'
 
-module.exports = function () {
-  var tools = require('../tools')
-  var _ = require('lodash')
+/**
+ * Équivalent de context.denied en json
+ * @param {Context} context
+ * @param msg
+ */
+function denied (context, msg) {
+  if (!msg) msg = 'Accès refusé'
+  context.status = 403
+  sendError(context, msg)
+}
 
-  /**
-   * Service contenant les méthodes communes aux contrôleurs qui répondent en json
-   * @service $json
-   */
-  var $json = {}
+/**
+ * Équivalent de context.notFound en json
+ * @param {Context} context
+ * @param {string}  msg
+ */
+function notFound (context, msg) {
+  if (!msg) msg = 'Contenu inexistant'
+  context.status = 404
+  sendError(context, msg)
+}
 
-  /**
-   * Équivalent de context.denied en json
-   * @param {Context} context
-   * @param msg
-   */
-  $json.denied = function (context, msg) {
-    if (!msg) msg = 'Accès refusé'
-    context.status = 403
-    $json.sendError(context, msg)
-  }
-
-  /**
-   * Équivalent de context.notFound en json
-   * @param {Context} context
-   * @param {string}  msg
-   */
-  $json.notFound = function (context, msg) {
-    if (!msg) msg = 'Contenu inexistant'
-    context.status = 404
-    $json.sendError(context, msg)
-  }
-
-  /**
-   * Callback générique de sortie json
-   * @param {Context} context
-   * @param {string|string[]|Error} error
-   * @param data
-   */
-  $json.send = function (context, error, data) {
-    if (error) {
-      // on logge l'erreur si s'en est vraiment une (pas les strings simples)
-      if (error.stack) {
-        log.error(error)
-        error = error.toString()
-      } else if (_.isArray(error)) {
-        error = error.join(', ')
-      }
-      $json.sendError(context, error)
-    } else {
-      if (!data) data = {success: true}
-      log.debug('$json.send va renvoyer', data, 'api')
-      // pas la peine de faire le stringify pour rien, on teste avant
-      // if (log.perf.out) log.perf(context.response, 'jsonSentLength ' +tools.stringify(data).length, true)
-      // commenté car Content-Length dispo dans le onFinish, sauf 204 et 304 (logique)
-      context.json(data)
-    }
-  }
-
-  /**
-   * Envoie un message d'erreur {success:false, error: errorMessage}
-   * @param {Context}      context
-   * @param {Error|string} error
-   */
-  $json.sendError = function (context, error) {
-    if (error && error instanceof Error) {
+/**
+ * Callback générique de sortie json
+ * @param {Context} context
+ * @param {string|string[]|Error} error
+ * @param data
+ */
+function send (context, error, data) {
+  if (error) {
+    // on logge l'erreur si s'en est vraiment une (pas les strings simples)
+    if (error.stack) {
       log.error(error)
       error = error.toString()
+    } else if (error instanceof Array) {
+      error = error.join(', ')
     }
-    log.debug("$json va renvoyer l'erreur", error, 'api')
-    context.json({success: false, error: error})
+    sendError(context, error)
+  } else {
+    if (!data) data = {success: true}
+    log.debug('$json.send va renvoyer', data, 'api')
+    context.json(data)
   }
+}
 
-  /**
-   * Callback générique de sortie json avec {success:true}, et d'éventuelles autres data
-   * @param {Context} context
-   * @param {object} [data] des données à ajouter au {success:true}
-   */
-  $json.sendOk = function (context, data) {
-    var reponse = {success: true}
-    if (data) tools.merge(reponse, data)
-    context.json(reponse)
+/**
+ * Envoie un message d'erreur {success:false, error: errorMessage}
+ * @param {Context}      context
+ * @param {Error|string} error
+ */
+function sendError (context, error) {
+  if (error && error instanceof Error) {
+    log.error(error)
+    error = error.toString()
   }
+  log.debug("$json va renvoyer l'erreur", error, 'api')
+  context.json({success: false, error: error})
+}
 
-  return $json
+/**
+ * Callback générique de sortie json avec {success:true}, et d'éventuelles autres data
+ * @param {Context} context
+ * @param {object} [data] des données à ajouter au {success:true}
+ */
+function sendOk (context, data) {
+  if (!data) data = {}
+  data.success = true
+  context.json(data)
+}
+
+/**
+* Service contenant les méthodes communes aux contrôleurs qui répondent en json
+* @service $json
+*/
+module.exports = {
+  denied: denied,
+  notFound: notFound,
+  send: send,
+  sendError: sendError,
+  sendOk: sendOk
 }
