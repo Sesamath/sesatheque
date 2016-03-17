@@ -105,10 +105,12 @@ function sendOk (context, data) {
 * Service contenant les méthodes communes aux contrôleurs qui répondent en json
 * @service $json
 */
-module.exports = {
-  denied: denied,
-  notFound: notFound,
-  send: send,
-  sendError: sendError,
-  sendOk: sendOk
+module.exports = function () {
+  return {
+    denied: denied,
+    notFound: notFound,
+    send: send,
+    sendError: sendError,
+    sendOk: sendOk
+  }
 }
