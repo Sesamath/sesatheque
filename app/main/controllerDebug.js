@@ -101,13 +101,33 @@ module.exports = function (controller) {
     throw new Error('Une erreur 500 provoquée')
   })
 
-  // pour déclencher un Wrong views path de lassi
+  // pour afficher une erreur passée en get
   controller.get('error', function (context) {
-    context.html({
-      bloc: {
-        $view: 'bidon',
-        content: 'toto'
-      }
-    })
+    var error = context.get.error || 'demande d’affichage d’erreur sans erreur fournie'
+    context.layout = 'page'
+    throw new Error(error)
+  })
+
+  // un formulaire de login
+  controller.get('login', function (context) {
+    context.layout = 'page'
+    var data = getDefaultData()
+    data.contentBloc.debug = 'page de login factice'
+    context.html(data)
+  })
+
+  // une page de logout bidon
+  controller.get('login', function (context) {
+    context.layout = 'page'
+    var data = getDefaultData()
+    data.contentBloc.debug = 'page de logout factice'
+    context.html(data)
+  })
+
+  // une page pour propager le login courant chez les clients
+  controller.get('startSso', function (context) {
+    var $sesalabSso = lassi.service('$sesalabSso')
+    context.layout = 'page'
+    $sesalabSso.loginOnClients(context, context.session.user)
   })
 }

@@ -521,7 +521,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    *
    * @param role
    * @param context
-   * @returns {*|data.roles|{}|settings.components.personne.roles|{admin, editeur, indexateur, prof, acces_correction, eleve}|Object}
+   * @returns {*|data.roles|{}|settings.components.personne.roles|{admin, editeur, indexateur, formateur, acces_correction, eleve}|Object}
    */
   $accessControl.hasRole = function (role, context) {
     return context &&
@@ -668,7 +668,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Connecte un user (regarde s'il existe et s'il faut le mettre à jour et le met en session)
+   * Connecte un user externe (regarde s'il existe et s'il faut le mettre à jour et le met en session)
    * @param {Context}     context
    * @param {Personne}  personne
    * @param {personneCallback}  next
@@ -689,7 +689,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     }
 
     if (personne.origine && personne.idOrigine) $personneRepository.updateOrCreate(personne, setSession)
-    else setSession(null, personne) // on enregistre que l'on sait ne pas être authentifié sur le serveur sso
+    else setSession() // on enregistre que l'on sait ne pas être authentifié sur le serveur sso
   }
 
   /**
@@ -736,7 +736,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         personne.origine = domaine
         personne.idOrigine = sesalabUser.oid
       }
-      if (sesalabUser.type === 1) personne.roles.prof = true
+      if (sesalabUser.type === 1) personne.roles.formateur = true
       if (personne.origine === 'sesasso') personne.roles.acces_correction = true
       // on attend le vrai client sso pour gérer les groupes
       $personneRepository.updateOrCreate(personne, setSession)

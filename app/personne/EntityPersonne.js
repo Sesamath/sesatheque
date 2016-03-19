@@ -32,6 +32,8 @@
 'use strict'
 
 var Personne = require('../constructors/Personne')
+var tools = require('../tools')
+
 /**
  * Entity pour un user
  * @entity EntityPersonne
@@ -39,8 +41,6 @@ var Personne = require('../constructors/Personne')
  * @extends Personne
  */
 module.exports = function (EntityPersonne, $cachePersonne) {
-  var tools = require('../tools')
-
   EntityPersonne.construct(Personne)
 
   EntityPersonne.table = 'personne'

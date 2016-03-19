@@ -122,7 +122,7 @@ var settings = {
         admin: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true}, // eslint-disable-line eqeqeq
         editeur: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true}, // jshint ignore:line
         indexateur: {index: true, createGroupe: true},
-        prof: {create: true, read: true, createGroupe: true},
+        formateur: {create: true, read: true, createGroupe: true},
         acces_correction: {correction: true},
         eleve: {read: true}
       },

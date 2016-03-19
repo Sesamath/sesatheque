@@ -1,3 +1,4 @@
+
 /**
  * This file is part of Sesatheque.
  *   Copyright 2014-2015, Association Sésamath
@@ -126,6 +127,7 @@ try {
     })
   }
   // Notre appli qui sera mise en global (pour que chacun puisse y ajouter ses controleurs ou services)
+  // console.log('au boot', dependancies)
   var sesatheque = lassi.component('sesatheque', dependancies)
 
   // une fois les composants chargés on ajoutera memcache et nos listeners
@@ -138,6 +140,8 @@ try {
           " L'application sesatheque ne peut pas tourner avec un cluster memcache" +
           ' car elle utilise memcache comme stockage commun aux différents workers nodejs')
       }
+      if (!memcache.prefix) log.error('Pas de propriété prefix pour memcache en configuration (préfixe de clé)')
+      // le slot permet de préciser que cet engine ne gère que les clés qui commence par cette chaîne, '' prend donc tout
       $cache.addEngine('', 'memcache', memcache)
       appLog('Memcache ajouté avec ' + memcache.host + ':' + memcache.port)
     } else if (process.env.NODE_UNIQUE_ID) {
@@ -162,6 +166,26 @@ try {
 
     // le listener beforeTransport
     lassi.on('beforeTransport', require('./beforeTransport')($accessControl, $routes, $flashMessages))
+
+    // si $sesalabSso existe, faut appler son setLoginCallback pour la définir maintenant que nos services sont dispos
+    if (dependancies.indexOf('sesalab-sso') !== -1) {
+      var $sesalabSso = lassi.service('$sesalabSso')
+      $sesalabSso.setLoginCallback(function (context, user, next) {
+        var $accessControl = lassi.service('$accessControl')
+        // on lui file d'office le role formateur, parce que l'on sait que nos serveurs d'authentificationne renvoient
+        // que des formateurs, sinon il faudrait controler d'apres user.origine (qui est le baseUrl du serveur d'authentification)
+        if (user.original.externalMech && user.original.externalId) {
+          // c'est un user d'un sesalab qui venait d'ailleurs
+          user.origine = user.original.externalMech
+          user.idOrigine = user.original.externalId
+        }
+        $accessControl.login(context, user, function (error, personne) {
+          if (error) next(error)
+          else if (personne) next()
+          else next(new Error('L’enregistrement de l’utilisateur sur ' + config.application.baseUrl + ' a échoué'))
+        })
+      })
+    }
 
     // log('sesatheque en fin de config', sesatheque)
     appLog("FIN config de l'application " + $settings.get('application.name', 'inconnue') +

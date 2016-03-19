@@ -191,7 +191,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
 
     if (personne.oid) $personneRepository.load(personne.oid, modify)
     else if (personne.origine && personne.idOrigine) $personneRepository.loadByOrigin(personne.origine, personne.idOrigine, modify)
-    else next(new Error('Il manque un identifiant pour mettre à jour les données de cet utilisateur'))
+    else next(new Error('Il manque un identifiant pour mettre à jour ou créer les données de cet utilisateur'))
   }
 
   return $personneRepository
