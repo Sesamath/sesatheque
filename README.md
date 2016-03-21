@@ -50,6 +50,12 @@ Module sesaJsTools
 
 Qui peut être utilisé indépendamment d'une sésathèque, cf sa [doc](modules/sesajstools/)
 
+Module sesalabSso
+------------------
+
+Peut être utilisé indépendamment d'une sésathèque, utilisé pour le moment pour propager une authentification 
+sesalab=>sesathèque, cf sa [doc](modules/sesalab-sso/)
+
 Scripts
 -------
 

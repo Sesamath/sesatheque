@@ -69,8 +69,8 @@ module.exports = function refreshAuth () {
     var match = window.location.pathname.match(/\/public\/[a-z]+\/(.+)$/)
     if (match) url += '?ressourceId=' + match[1]
     xhr.get(url, {withCredentials: true, responseType: 'json'}, function (error, response) {
-      log.enable()
-      log('on récupère auth', response)
+      // log.enable()
+      // log('on récupère auth', response)
       if (error) {
         log.error(error)
       } else if (response && response.isLogged) {

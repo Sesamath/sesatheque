@@ -16,7 +16,7 @@ function usage() {
   echo "  -a : toutes les documentations"
   echo "  -h : afficher cette aide"
   echo "  -l : documentation de lassi"
-  echo "  -m : documentation de nos modules (sesajstools et sesatheque-client)"
+  echo "  -m : documentation de nos modules (sesajstools, sesatheque-client et sesalab-sso)"
   echo "  -p : documentation du code client (plugins)"
   echo "  -r : documentation de l'api REST"
   echo "  -s : documentation du code de l'appli serveur"
@@ -25,7 +25,7 @@ function usage() {
 
 function go() {
   local cas=$1
-  echo -n "$cas "
+  echo -n "Génération de la documentation pour $cas "
   $jsdoc -c jsdoc/jsdoc$cas.json && echo "ok" || echo "KO"
 }
 # on veut exécuter fin avant de sortir
@@ -47,7 +47,7 @@ do
     a) rm -rf documentation/*; for f in jsdoc/jsdoc*.json; do cas=$(basename ${f/jsdoc\/jsdoc/} .json); go $cas; done;;
     h) usage;;
     l) go Lassi;;
-    m) go ModuleSesathequeClient; go ModuleSesaJsTools ;;
+    m) go ModuleSesathequeClient; go ModuleSesaJsTools; go ModuleSesalabSso ;;
     p) go Plugins;;
     r) go RestApi;;
     s) go App;;

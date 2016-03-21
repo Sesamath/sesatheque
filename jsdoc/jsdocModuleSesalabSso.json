@@ -1,0 +1,44 @@
+{
+  "comment"  : "cf http://usejsdoc.org/about-configuring-jsdoc.html",
+  "tags"     : {
+    "allowUnknownTags": true
+  },
+  "source"   : {
+    "include":["./node_modules/sesalab-sso", "./node_modules/sesalab-sso/README.md"],
+    "includePattern": ".+\\.(js)$",
+    "excludePattern": "(node_modules/sesalab-sso/node_modules|.+\\.bak\\.js)"
+  },
+  "plugins"  : [
+    "plugins/markdown",
+    "plugins_sup/ngdoc"
+  ],
+  "markdown" : {
+    "parser"  : "gfm",
+    "hardwrap": true
+  },
+  "templates": {
+    "applicationName": "sesalab-sso",
+    "disqus"         : "",
+    "googleAnalytics": "",
+    "openGraph"      : {
+      "title"    : "",
+      "type"     : "website",
+      "image"    : "",
+      "site_name": "",
+      "url"      : ""
+    },
+    "meta"           : {
+      "title"      : "",
+      "description": "",
+      "keyword"    : ""
+    }
+
+  },
+  "opts"     : {
+    "destination": "./documentation/modules/sesalab-sso",
+//    "template"   : "../node_modules/ink-docstrap/template",
+    "template"   : "./jaguarjs-jsdoc",
+    "recurse"    : true,
+    "private"    : false
+  }
+}
