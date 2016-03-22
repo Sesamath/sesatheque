@@ -39,9 +39,12 @@ var page = require('../../page/index')
 function displayJava (ressource, options, next) {
   var params = ressource.parametres
   var container = options.container
-  var width = Math.max(container.offsetWidth || 0, 640)
-  var height = Math.round(width * 0.75)
-  if (params.height && params.height > 400) height = params.height
+  var width = params.width || container.offsetWidth || 800
+  if (width > 1024) width = 1024
+  if (width < 300) width = 300
+  var height = params.height || Math.round(width * 0.75)
+  if (height > 1024) height = 1024
+  if (height < 200) height = 200
   var appletName = 'mtgApplet'
   // faut d'abord créer un élément html complet avant de le mettre dans le dom,
   // sinon il peut lancer le jar avant d'avoir tous les params
@@ -131,7 +134,11 @@ function displayJs (ressource, options, next) {
     if (typeof MathJax === 'undefined') throw new Error("Mathjax n'est pas chargé")
     if (typeof mtg32 === 'undefined') throw new Error("Mathgraph32 n'est pas chargé")
     var width = ressource.parametres.width || container.offsetWidth || 800
-    var height = ressource.parametres.height || width * 0.75 || 600
+    if (width > 1024) width = 1024
+    if (width < 300) width = 300
+    var height = ressource.parametres.height || Math.round(width * 0.75)
+    if (height > 1024) height = 1024
+    if (height < 200) height = 200
     var svgId = 'mtg32svg'
     // la consigne éventuelle
     if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
