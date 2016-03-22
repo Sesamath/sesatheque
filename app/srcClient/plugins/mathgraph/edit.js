@@ -42,7 +42,13 @@ var formEditor = require('../../edit/formEditor')
 function addApplet (isFullSize) {
   if (isFullSize) {
     width = Math.max(appletContainer.offsetWidth || 0, width)
+    // faut limiter, dixit Yves
+    if (width > 1024) width = 1024
+    if (width < 300) width = 300
     height = Math.max(height, Math.round(width * 0.75))
+    if (height > 2 * width) height = 2 * width
+    if (height > 1024) height = 1024
+    if (height < 200) height = 200
   }
   var appletName = 'mtgApplet'
   // faut d'abord créer un élément html complet avant de le mettre dans le dom,
@@ -184,7 +190,11 @@ module.exports = function mathgraphEdit (ressource) {
 
       // param de taille
       width = parametres.width || Math.max(divParametres.offsetWidth || 0, 600)
+      if (width > 1024) width = 1024
+      if (width < 300) width = 300
       height = parametres.height || Math.round(width * 0.75)
+      if (height > 1024) height = 1024
+      if (height < 200) height = 200
       var sizeGroup = formEditor.addFormGroup(divParametres)
       var widthInput = formEditor.addInputText(
         sizeGroup,
