@@ -51,7 +51,7 @@ function displayJava (ressource, options, next) {
       id: appletName,
       // name: appletName +'name',
       code: 'mathgraph32.MtgFrame.class',
-      archive: options.pluginBase + 'MathGraph32Applet.jar',
+      archive: 'http://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
       width: width,
       height: height,
       style: 'border:#000 solid 1px;'

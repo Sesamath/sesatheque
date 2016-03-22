@@ -53,7 +53,7 @@ function addApplet (isFullSize) {
       id: appletName,
       // name: appletName +'name',
       code: 'mathgraph32.MtgFrame.class',
-      archive: '/plugins/mathgraph/MathGraph32Applet.jar',
+      archive: 'http://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
       // archive: 'http://www.mathgraph32.org/ftp/ExercicesEnLigne/MathGraph32Applet.jar',
       width: width,
       height: height,
