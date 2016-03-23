@@ -137,6 +137,10 @@ module.exports = function display (ressource, options, next) {
           fin: (result.fin === 'o'),
           original: result
         }
+        // on ajoute des b à reponse si c'est pas la dernière question
+        if (!resultMod.fin && result.nbq && result.reponse && result.reponse.length !== result.nbq) {
+          resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
+        }
         // le score sera calculé d'après la réponse juste avant enregistrement en bdd
         // (après déchiffrement coté serveur), mais si c'est j3p qui charge il veut l'intercepter
         if (resultMod.nbq) {
