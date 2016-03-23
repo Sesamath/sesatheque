@@ -96,7 +96,16 @@ function Alias (initObj) {
    * True si public (sinon il faut être authentifié pour lire la ressource)
    * @type {boolean}
    */
-  this.public = (initObj.public || initObj.restriction === 0)
+  this.public = !!initObj.public || initObj.restriction === 0
+  /**
+   * Indique que la ressource est partagée (dans un groupe)
+   * @property partage
+   * @type {boolean}
+   * @default undefined
+   */
+  if (this.groupes) this.partage = true
+  else if (this.restriction === 2) this.partage = true
+
   /**
    * Clé de lecture
    * @type {string}
