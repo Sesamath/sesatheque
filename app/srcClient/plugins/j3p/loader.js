@@ -440,7 +440,7 @@ module.exports = {
       }
       if (options.lastResultat) {
         chargement_j3p.lastResultat = options.lastResultat
-        if (options.lastResultat.contenu && options.lastResultat.contenu.score !== undefined) {
+        if (options.lastResultat.contenu && options.lastResultat.contenu.scores !== undefined) {
           chargement_j3p.numeronoeud = options.lastResultat.contenu.noeuds[options.lastResultat.contenu.length - 1]
         }
       }
