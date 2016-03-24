@@ -62,12 +62,12 @@
   j3pResult.getHtmlReponse = function (resultat, baseUrl) {
     var output,nbnoeuds,score
     console.log("resultat=",resultat)
-    // pour j3p on s'attend à avoir resultat.reponse sous la forme d'une chaine vvprbb
-   if ( resultat.contenu && resultat.contenu.score &&  resultat.contenu.score.length) {
+    // pour j3p on s'attend à avoir resultat.contenu.scores sous la forme d'un tableau de scores
+   if ( resultat.contenu && resultat.contenu.scores &&  resultat.contenu.scores.length) {
         output = ""
-        nbnoeuds = resultat.contenu.score.length
+        nbnoeuds = resultat.contenu.scores.length
         for (var i = 0; i < nbnoeuds; i++) {
-            score=resultat.contenu.score[i]
+            score=resultat.contenu.scores[i]
             output+="Nœud n°"+resultat.contenu.noeuds[i]+" : "+Math.round(100*score)+"<br>"
           }
           if(nbnoeuds>1)
@@ -90,11 +90,11 @@
     var output,nbnoeuds,score
     console.log("resultat=",resultat)
     // pour j3p on s'attend à avoir
-   if ( resultat.contenu && resultat.contenu.score &&  resultat.contenu.score.length) {
+   if ( resultat.contenu && resultat.contenu.scores &&  resultat.contenu.scores.length) {
       score=0
-      nbnoeuds = resultat.contenu.score.length
+      nbnoeuds = resultat.contenu.scores.length
       for (var i = 0; i < nbnoeuds; i++) {
-        score+=resultat.contenu.score[i]
+        score+=resultat.contenu.scores[i]
       }
       score=Math.round(100*score/nbnoeuds)
       output = score +' % '
