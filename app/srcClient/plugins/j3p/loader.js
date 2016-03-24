@@ -401,12 +401,13 @@ module.exports = {
    * Fonction qui sera appellée par la sesatheque quand ce fichier js sera chargé
    * (pour nous passer les params)
    * @param {EntityReference} eltHtml    L'élément html dans lequel on doit charger le graphe j3p
-   * @param {object}          graphe     Le graphe à charger
+   * @param {Ressource}       ressource  La ressource à charger (le graphe est dans ressource.parametres.g)
    * @param {object} options  [optional] Peut contenir un nom de fct dans la propriété nomFctScore (pour récupérer le score),
    *      ou une fct dans loadCallback à rappeler à la fin, ou une propriété showTitle
    * @returns {undefined}
    */
-  charge: function (eltHtml, graphe, options) {
+  charge: function (eltHtml, ressource, options) {
+    var graphe = ressource.parametres.g
     if (!urlBaseJ3p) throw new Error('Il faut appeler init avant de lancer le chargement')
     if (!eltHtml || !graphe || !options) throw new Error('paramètres manquants, chargement impossible')
     // on vérifie que le graphe est au moins un tableau
