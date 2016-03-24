@@ -28,91 +28,62 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+'use strict'
 
 /**
  * @file Script autonome pour afficher un résultat d'un exercice de type j3p
+ * Ce script ne sert à rien ici, il est à répercuter dans
  */
-/*global window*/
-(function () {
-  'use strict'
-
-  // vérif minimale du contexte
-  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
-  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
-
-  /**
-   * Peut être chargé sur n'importe quelle appli, sans dépendance à une lib externe
-   * Exporte 3 méthodes,
-   * - soit pour requireJs (si define existe)
-   * - soit en module amd (si on a module.exports)
-   * - soit dans window.sesamath.sesatheque.j3pResult
-   * (ce code est dupliqué dans sesalab pour des questions de commodité, tous les trucResult sont dans
-   * sesalab-front/source/services/formatter/index.js)
-   * @module j3pResult
-   */
-  var j3pResult = {}
-
+module.exports = {
   /**
    * Retourne le code html qui affiche le bilan (ici les carrés colorés)
-   * @memberOf j3pResult
    * @param {Resultat} resultat L'objet Resultat dont on veut le bilan
    * @param {string}   baseUrl  Le prefix d'url de notre dossier sans / de fin (si on veut charger des css ou des images dedans)
    * @returns {string} Le code html
    */
-  j3pResult.getHtmlReponse = function (resultat, baseUrl) {
-    var output,nbnoeuds,score
-    console.log("resultat=",resultat)
+  getHtmlReponse: function getHtmlReponse (resultat, baseUrl) {
+    var output
+    var nbnoeuds
+    var score
+    console.log('resultat=', resultat)
     // pour j3p on s'attend à avoir resultat.contenu.scores sous la forme d'un tableau de scores
-   if ( resultat.contenu && resultat.contenu.scores &&  resultat.contenu.scores.length) {
-        output = ""
-        nbnoeuds = resultat.contenu.scores.length
-        for (var i = 0; i < nbnoeuds; i++) {
-            score=resultat.contenu.scores[i]
-            output+="Nœud n°"+resultat.contenu.noeuds[i]+" : "+Math.round(100*score)+"<br>"
-          }
-          if(nbnoeuds>1)
-          output+="Vue graphique du parcours de l'élève (à venir)"
+    if (resultat.contenu && resultat.contenu.scores && resultat.contenu.scores.length) {
+      output = ''
+      nbnoeuds = resultat.contenu.scores.length
+      for (var i = 0; i < nbnoeuds; i++) {
+        score = resultat.contenu.scores[i]
+        output += 'Nœud n°' + resultat.contenu.noeuds[i] + ' : ' + Math.round(100 * score) + '<br />'
+      }
+      if (nbnoeuds > 1) output += 'Vue graphique du parcours de l’élève (à venir)'
     } else {
-      output = "pas de réponse"
+      output = 'pas de réponse'
     }
 
     return output
-
-  }
+  },
 
   /**
    * Retourne le code html qui affiche le score (ici x/y en texte seul)
-   * @memberOf j3pResult
    * @param {Resultat} resultat
    * @returns {string} Le code html
    */
-  j3pResult.getHtmlScore = function (resultat) {
-    var output,nbnoeuds,score
-    console.log("resultat=",resultat)
+  getHtmlScore: function getHtmlScore (resultat) {
+    var output
+    var nbnoeuds
+    var score
+    console.log('resultat=', resultat)
     // pour j3p on s'attend à avoir
-   if ( resultat.contenu && resultat.contenu.scores &&  resultat.contenu.scores.length) {
-      score=0
+    if (resultat.contenu && resultat.contenu.scores && resultat.contenu.scores.length) {
+      score = 0
       nbnoeuds = resultat.contenu.scores.length
       for (var i = 0; i < nbnoeuds; i++) {
-        score+=resultat.contenu.scores[i]
+        score += resultat.contenu.scores[i]
       }
-      score=Math.round(100*score/nbnoeuds)
-      output = score +' % '
+      score = Math.round(100 * score / nbnoeuds)
+      output = score + ' % '
     } else {
-      output = "pas de réponse ou réponse à un mauvais format"
+      output = 'pas de réponse ou réponse à un mauvais format'
     }
     return output
   }
-
-  // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
-  if (typeof define === 'function') {
-    define(j3pResult); // jshint ignore:line
-  } else if (typeof module === 'object' && module.exports) {
-    module.exports = j3pResult
-  } else {
-    if (typeof window.sesamath === "undefined") window.sesamath = {}
-    if (!window.sesamath.sesatheque) window.sesamath.sesatheque = {}
-    window.sesamath.sesatheque.j3pResult = j3pResult
-  }
-
-})()
+}
