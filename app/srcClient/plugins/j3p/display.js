@@ -69,8 +69,8 @@ module.exports = function display (ressource, options, next) {
         }
         log('loader j3p avec le graphe', ressource.parametres.g)
         if (ressource.parametres.g instanceof Array) {
+          j3pOptions.loadCallback = next
           loader.charge(options.container, ressource, j3pOptions)
-          next() // le chargement sera pas terminé mais le loader propose pas de callback
         } else {
           next(new Error("Le graphe n'est pas un tableau"))
         }

@@ -22,6 +22,7 @@
  * - en faisant des appels jsonP (car on est pas sur le même nom de domaine donc
  *   les XMLHttpRequest sont plus compliqués)
  */
+'use strict'
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
@@ -40,7 +41,13 @@ var w = window
 if (typeof w.console === 'undefined') w.console = {}
 if (!w.console.log) w.console.log = function () {}
 if (!w.console.info) w.console.info = function () {}
+if (!w.console.warn) w.console.warn = function () {}
 if (!w.console.error) w.console.error = function () {}
+// et nos alias locaux
+var cLog = w.console.log
+// var cInfo = w.console.info
+var cWarn = w.console.warn
+var cError = w.console.error
 
 /** variable globale utilisée dans la fonction globale alerte */
 if (typeof w.j3pdebug === 'undefined') w.j3pdebug = false
@@ -50,7 +57,7 @@ if (typeof w.alerte === 'undefined') w.j3pdebug = false
 */
 if (typeof w.alerte === 'undefined') {
   w.alerte = function (n, ch) {
-    console.log(ch)
+    cLog(ch)
   }
 }
 
@@ -83,7 +90,7 @@ function Chargement_j3p () {
 * @param {Array} tab
 * @returns {Boolean}
 */
-function Estdans (ch, tab) {
+function estDans (ch, tab) {
   // estdans('toto',['toto','tata'] renvoie TRUE
   var bool = false
   for (var k = 0; k < tab.length; k++) {
@@ -109,7 +116,12 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
     // on parcours toutes les sections du graphe (ATTENTION, faut sauter l'indice 0)
     for (var k = 1; k < that.graphe.length; k++) {
       // et on stocke son nom si c'est la 1re fois qu'il apparait
-      if (Estdans(that.graphe[k][1], that.listedessections) === false && that.graphe[k][1] !== 'fin' && that.graphe[k][1] !== 'Fin' && that.graphe[k][1] !== 'FIN') {
+      if (
+          estDans(that.graphe[k][1], that.listedessections) === false &&
+          that.graphe[k][1] !== 'fin' &&
+          that.graphe[k][1] !== 'Fin' &&
+          that.graphe[k][1] !== 'FIN'
+      ) {
         that.listedessections.push(that.graphe[k][1])
       }
     }
@@ -180,16 +192,14 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
         outils = w.j3p['Section' + name].outils
         for (var j = 0; j < outils.length; j++) {
           // pour chaque outil, on le note si c'était pas encore fait
-          if (Estdans(outils[j], that.listedesoutils) === false) {
+          if (estDans(outils[j], that.listedesoutils) === false) {
             that.listedesoutils.push(outils[j])
           }
         }
       } else {
         // bizarre, on lance pas d'erreur mais on log
-        if (console && console.warn) {
-          console.warn('La section ' + name + " n'a aucun outil déclaré")
-          log(w.j3p)
-        }
+        cWarn('La section ' + name + " n'a aucun outil déclaré")
+        cLog(w.j3p)
       }
     } // fin boucle sur les sections
     oncontinue7()
@@ -207,7 +217,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
         document.getElementsByTagName('head')[0].appendChild(script)
         return true
       } catch (e) {
-        console.error(e)
+        cError(e)
         return false
       }
     }
@@ -229,103 +239,103 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
     piledappels.push(pathOutils + 'infobulle/j3pbulle.js')
     piledappels.push(pathOutilsExt + 'fractions/Ratio-0.4.0.js')
     // mg32 => mathgraph32
-    if (Estdans('mg32', that.listedesoutils)) {
+    if (estDans('mg32', that.listedesoutils)) {
       piledappels.push(pathOutils + 'calcul_mtg32/mtg32calc.min.js')
     }
 
-    if (Estdans('mtg32', that.listedesoutils)) {
-      J3PInclude2("MathJax.Hub.Config({  tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]},        jax: ['input/TeX','output/SVG'],TeX: {extensions: ['color.js']},messageStyle:'none' });", 'text/x-mathjax-config')
+    if (estDans('mtg32', that.listedesoutils)) {
+      w.J3PInclude2("MathJax.Hub.Config({  tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]},        jax: ['input/TeX','output/SVG'],TeX: {extensions: ['color.js']},messageStyle:'none' });", 'text/x-mathjax-config')
       piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
       piledappels.push(pathOutils + 'mtg32/mtg32jsmax.js')
     }
 
     // maths => mathquill
-    if (Estdans('maths', that.listedesoutils)) {
+    if (estDans('maths', that.listedesoutils)) {
       // alert('maths')
       dom.addCss(pathOutilsExt + 'mathquill/home.css')
       dom.addCss(pathOutilsExt + 'mathquill/mathquill_maj.css')
       piledappels.push(pathOutilsExt + 'mathquill/mathquill_maj.js')
     }
     // jsx
-    if (Estdans('jsx', that.listedesoutils)) {
+    if (estDans('jsx', that.listedesoutils)) {
       log('jsx chargé')
       dom.addCss(pathOutilsExt + 'jsxtep/distrib/jsxgraph.css')
       w.J3Pinclude(pathOutilsExt + 'jsx/jsxgraphcore.js')
     }
     // formel => xcas
-    if (Estdans('formel', that.listedesoutils)) {
+    if (estDans('formel', that.listedesoutils)) {
       piledappels.push(pathOutils + 'xcas/base.js')
     }
-    if (Estdans('webxcas', that.listedesoutils)) {
+    if (estDans('webxcas', that.listedesoutils)) {
       piledappels.push(pathOutilsExt + 'webxcas/webxcas.js')
     }
 
-    if (Estdans('swiffy', that.listedesoutils)) {
+    if (estDans('swiffy', that.listedesoutils)) {
       piledappels.push(pathOutilsExt + 'runtime/runtime.js')
     }
 
-    if (Estdans('compteestbon', that.listedesoutils)) {
+    if (estDans('compteestbon', that.listedesoutils)) {
       piledappels.push(pathOutils + 'compteestbon/compteestbon.js')
     }
 
-    if (Estdans('algebria', that.listedesoutils)) {
+    if (estDans('algebria', that.listedesoutils)) {
       piledappels.push(pathOutils + 'algebria/swfobject.js')
       piledappels.push(pathOutils + 'algebria/json2.js')
       piledappels.push(pathOutils + 'algebria/services.js')
     }
 
-    if (Estdans('calculette', that.listedesoutils)) {
+    if (estDans('calculette', that.listedesoutils)) {
       piledappels.push(pathOutils + 'calculatrice/calculatrice_ecole.js')
     }
 
-    if (Estdans('boulier', that.listedesoutils)) {
+    if (estDans('boulier', that.listedesoutils)) {
       piledappels.push(pathOutils + 'boulier/boulier.js')
     }
 
-    if (Estdans('animation', that.listedesoutils)) {
+    if (estDans('animation', that.listedesoutils)) {
       piledappels.push(pathOutilsExt + 'runtime/runtime.js')
     }
 
-    if (Estdans('droitegraduee', that.listedesoutils)) {
+    if (estDans('droitegraduee', that.listedesoutils)) {
       piledappels.push(pathOutils + 'droitegraduee/droitegraduee.js')
     }
 
-    if (Estdans('sokoban', that.listedesoutils)) {
+    if (estDans('sokoban', that.listedesoutils)) {
       piledappels.push(pathOutils + 'sokoban/sokoban.js')
     }
-    if (Estdans('geogebra', that.listedesoutils)) that.ggbestpresent = true
+    if (estDans('geogebra', that.listedesoutils)) that.ggbestpresent = true
     else that.ggbestpresent = false
 
-    if (Estdans('geometrie', that.listedesoutils)) {
+    if (estDans('geometrie', that.listedesoutils)) {
       piledappels.push(pathOutils + 'geometrie/geometrie.js')
     }
-    if (Estdans('3D', that.listedesoutils)) {
+    if (estDans('3D', that.listedesoutils)) {
       piledappels.push(pathOutils + '3D/3D.js')
     }
-    if (Estdans('quadrillage', that.listedesoutils)) {
+    if (estDans('quadrillage', that.listedesoutils)) {
       piledappels.push(pathOutils + 'quadrillage/quadrillage.js')
     }
-    if (Estdans('tableauconversion', that.listedesoutils)) {
+    if (estDans('tableauconversion', that.listedesoutils)) {
       piledappels.push(pathOutils + 'tableauconversion/tableauconversion.js')
     }
 
-    if (Estdans('tableur', that.listedesoutils)) {
+    if (estDans('tableur', that.listedesoutils)) {
       piledappels.push(pathOutils + 'tableur/fauxtableur.js')
     }
 
-    if (Estdans('psylvia', that.listedesoutils)) {
+    if (estDans('psylvia', that.listedesoutils)) {
       piledappels.push(pathOutils + 'psylvia2/psylvia.js')
       dom.addCss(pathOutils + 'psylvia2/psylvia.css')
     }
 
-    if (Estdans('algo', that.listedesoutils)) {
+    if (estDans('algo', that.listedesoutils)) {
       piledappels.push(pathOutils + 'algo/algo.js')
     }
 
     piledappels.push(
       function () {
         // var t=setTimeout(oncontinue8(),9000)
-        if (Estdans('mtg32', that.listedesoutils)) {
+        if (estDans('mtg32', that.listedesoutils)) {
           log('etape 0')
           /*global mtg32*/
           w.mtg32App = new mtg32.mtg32App() // eslint-disable-line new-cap
@@ -345,7 +355,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
     // la fonction EquivalentIndexVersNoeud doit être dispo donc on peut
     if (typeof w.chargement_j3p.numeronoeud !== 'undefined') {
       w.chargement_j3p.noeudinitial = w.j3p.EquivalentIndexVersNoeud(w.chargement_j3p.numeronoeud)
-      console.log('On récupère le dernier noeud enregistré cad',
+      cLog('On récupère le dernier noeud enregistré cad',
         w.chargement_j3p.numeronoeud,
         ' et son index dans le graphe est ',
         w.chargement_j3p.noeudinitial)
@@ -435,7 +445,7 @@ module.exports = {
     chargement_j3p.graphe.unshift([])
     // Récupération des infos sur l'état du parcours
     if (options) {
-      console.log('les options que je rècupère :', options)
+      cLog('les options que je rècupère :', options)
       if (options.resultatCallback) {
         chargement_j3p.resultatCallback = options.resultatCallback
       }
@@ -451,7 +461,6 @@ module.exports = {
     // mais faut forcer cet id qui est en dur un peu partout dans le code j3p, on créé un div pour ça
     var j3pConteneur = dom.addElement(eltHtml, 'div', {id: 'Mepact'})
     page.loadAsync(['head'], function () {
-      'use strict'
       chargement_j3p.chargement(j3pConteneur)
       // qqun veut être rappelé ?
       if (typeof options !== 'undefined' && typeof options.loadCallback === 'function') {
