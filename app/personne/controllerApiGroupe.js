@@ -31,41 +31,110 @@
 
 'use strict'
 
-module.exports = function (controller, EntityGroupe, $groupeRepository, $accessControl, $json) {
+var _ = require('lodash')
+var flow = require('an-flow')
+
+module.exports = function (controller, EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
+  var h = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
   /**
    * Controleur de la route /api/groupe/
    * @Controller controllerApiGroupe
    */
 
   /**
-   * Create / update une groupe (poster un objet ayant les propriétés de {@link Groupe})
-   * @route POST /api/groupe/add
+   * Retourne true si on est dans ce groupe
+   * @private
+   * @param context
+   * @param {string|Groupe} groupe Le groupe ou son nom
+   * @returns {boolean}
    */
-  controller.post('add', function (context) {
+  function isMine (context, groupe) {
+    return groupe.nom ? _.includes($accessControl.getCurrentUserGroupes(context), groupe.nom) : false
+  }
+
+  /**
+   * Create un groupe
+   * @route GET /api/groupe/add/:nom
+   */
+  controller.get('ajouter/:nom', function (context) {
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
     if (context.perf) {
       var msg = 'start-pers-' + context.post.id
       log.perf(context.response, msg)
     }
-    // log.debug('post /api/groupe a reçu', context.post, 'api', {max: 1000})
-    log.debug('post /api/groupe a reçu', context.post, 'api')
-    if ($accessControl.hasAllRights(context)) {
-      // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
-      // pour garantir l'intégrité des données
-      if (context.post.origine && context.post.idOrigine) {
-        var groupe = EntityGroupe.create(context.post)
-        groupe.store(function (error, groupeBdd) {
-          if (error) $json.sendError(context, error)
-          else if (groupeBdd && groupeBdd.oid) $json.sendOk(context, {oid: groupeBdd.oid})
-          else $json.sendError(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))
-        })
-      } else {
-        $json.sendError(context, new Error('origine ou idOrigine manquant'))
-      }
+    if ($accessControl.hasGenericPermission('createGroupe', context)) {
+      var nom = context.arguments.nom
+      $groupeRepository.load(nom, function (error, groupeBdd) {
+        if (error) {
+          $json.sendError(context, new Error('Erreur interne (impossible de vérifier l’existence préalable du groupe)'))
+        } else if (groupeBdd) {
+          $json.sendError(context, 'Le groupe ' + nom + 'existait déjà')
+        } else {
+          // par défaut fermé et public
+          var groupe = EntityGroupe.create({
+            nom: nom,
+            ouvert: false,
+            public: true,
+            gestionnaires: [$accessControl.getCurrentUserOid(context)]
+          })
+          groupe.store(function (error, groupeBdd) {
+            if (error) {
+              $json.sendError(context, error)
+            } else if (groupeBdd && groupeBdd.oid) {
+              h.addGroup(context, nom, false, function (error, personne) {
+                if (!error && personne) $json.sendOk(context)
+                else $json.sendError(context, new Error("Erreur interne (enregistrement des modifications sur la personne)"))
+              })
+            } else {
+              $json.sendError(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))
+            }
+          })
+        }
+      })
     } else {
+      console.log(context.session.user.permissions)
+      console.log(context.session.user.permissions['createGroupe'])
       $json.denied(context)
     }
+  })
+
+  /**
+   * Ne plus suivre le groupe
+   * @route GET /api/groupe/ignorer/:nom
+   */
+  controller.get('ignorer/:nom', function (context) {
+    var nom = context.arguments.nom
+    flow().seq(function () {
+      $groupeRepository.load(nom, this)
+    }).seq(function (grp) {
+      var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou vous n'en faite pas partie"
+      if (grp && h.isFollowed(context, nom)) h.ignoreGroup(context, nom, this)
+      else this(deniedMsg)
+    }).seq(function () {
+      $json.sendOk(context)
+    }).catch(function (error) {
+      $json.sendError(context, error)
+    })
+  })
+
+  /**
+   * Retire le groupe au user courant
+   * @route GET /groupe/quitter/:nom
+   */
+  controller.get('quitter/:nom', function (context) {
+    var nom = context.arguments.nom
+    flow().seq(function () {
+      $groupeRepository.load(nom, this)
+    }).seq(function (grp) {
+      var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou vous n'en faite pas partie"
+      if (grp && isMine(context, nom)) h.quitGroup(context, nom, this)
+      else this(deniedMsg)
+    }).seq(function () {
+      $json.send(context, 'Vous avez quitté le groupe ' + nom)
+    }).catch(function (error) {
+      $json.sendError(context, error)
+    })
   })
 
   /**
@@ -81,19 +150,20 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
         if (error) throw error
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {
-            groupesSuivis.push({ name: groupe.nom, admin: true, publish: true })
+            groupesSuivis.push({ name: groupe.nom, admin: true })
             done[groupe.nom] = true
           })
         }
         $accessControl.getCurrentUserGroupes(context).forEach(function (groupeName) {
           if (!done[groupeName]) {
-            groupesSuivis.push({ name: groupeName, admin: false, publish: true })
+            groupesSuivis.push({ name: groupeName, member: true })
             done[groupeName] = true
           }
         })
         $accessControl.getCurrentUserGroupesSuivis(context).forEach(function (groupeName) {
           if (!done[groupeName]) {
-            groupesSuivis.push({ name: groupeName, admin: false, publish: false })
+        // on ajoute les urls pour ne plus suivre
+            groupesSuivis.push({ name: groupeName, follower: true })
             done[groupeName] = true
           }
         })
@@ -103,6 +173,5 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
         $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
       }
     })
-
   })
 }

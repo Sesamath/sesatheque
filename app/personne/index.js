@@ -94,6 +94,6 @@ personneComponent.controller('groupe', function (EntityGroupe, $groupeRepository
 personneComponent.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl) {
   require('./controllerApiPersonne')(this, EntityPersonne, $personneRepository, $accessControl)
 })
-personneComponent.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json) {
-  require('./controllerApiGroupe')(this, EntityGroupe, $groupeRepository, $accessControl, $json)
+personneComponent.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
+  require('./controllerApiGroupe')(this, EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository)
 })
