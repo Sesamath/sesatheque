@@ -52,9 +52,11 @@ module.exports = {
       nbnoeuds = resultat.contenu.scores.length
       for (var i = 0; i < nbnoeuds; i++) {
         score = resultat.contenu.scores[i]
-        output += 'Nœud n°' + resultat.contenu.noeuds[i] + ' : ' + Math.round(100 * score) + '<br />'
+        output += 'Nœud n°' + resultat.contenu.noeuds[i] + ' : ' + Math.round(100 * score) + '%<br />'
       }
-      if (nbnoeuds > 1) output += 'Vue graphique du parcours de l’élève (à venir)'
+      if (nbnoeuds > 1){
+          output += 'Vue graphique du parcours de l’élève (à venir)'
+      }
     } else {
       output = 'pas de réponse'
     }

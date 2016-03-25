@@ -449,6 +449,9 @@ module.exports = {
       if (options.resultatCallback) {
         chargement_j3p.resultatCallback = options.resultatCallback
       }
+      if(ressource.parametres.editgraphes){
+          chargement_j3p.editgraphes = ressource.parametres.editgraphes
+      }
       if (options.lastResultat) {
         chargement_j3p.lastResultat = options.lastResultat
         if (options.lastResultat.contenu && options.lastResultat.contenu.scores !== undefined) {
