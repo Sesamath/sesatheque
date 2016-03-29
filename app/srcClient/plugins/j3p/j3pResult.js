@@ -32,7 +32,7 @@
 
 /**
  * @file Script autonome pour afficher un résultat d'un exercice de type j3p
- * Ce script ne sert à rien ici, il est à répercuter dans
+ * Ce script ne sert à rien ici, il est à répercuter dans sesalab:sesalab-front/source/client/services/formatter/index.js
  */
 module.exports = {
   /**
