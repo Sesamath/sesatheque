@@ -244,7 +244,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
     }
 
     if (estDans('mtg32', that.listedesoutils)) {
-      w.J3PInclude2("MathJax.Hub.Config({  tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]},        jax: ['input/TeX','output/SVG'],TeX: {extensions: ['color.js']},messageStyle:'none' });", 'text/x-mathjax-config')
+      J3PInclude2("MathJax.Hub.Config({  tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]},        jax: ['input/TeX','output/SVG'],TeX: {extensions: ['color.js']},messageStyle:'none' });", 'text/x-mathjax-config')
       piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
       piledappels.push(pathOutils + 'mtg32/mtg32jsmax.js')
     }
