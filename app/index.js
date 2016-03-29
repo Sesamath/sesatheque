@@ -104,8 +104,9 @@ try {
   require('./main')
   require('./personne')
   require('./ressource')
+  require('./update')
   require('./auth')
-  var dependancies = ['main', 'personne', 'ressource', 'auth']
+  var dependancies = ['main', 'personne', 'ressource', 'update', 'auth']
 
   // des modules sup à charger
   if (config.extraModules) {
