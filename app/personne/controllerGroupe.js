@@ -385,6 +385,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @route POST /groupe/ajouter
    */
   controller.post('ajouter', function (context) {
+    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     try {
       // premiers contrôles qui renverront denied
       var uid = $accessControl.getCurrentUserOid(context)
@@ -440,7 +441,25 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         }
       }).catch(function (error) {
         if (error instanceof Error) log.error(error)
-        $page.printError(context, error)
+        if (context.get.closerId) {
+          context.html({
+            $metas: {
+              title: 'Enregistrement échoué, fermeture automatique'
+            },
+            contentBloc: {
+              $view: 'contents',
+              contents: ['L’enregistrement du groupe ' + nom + ' a échoué : ' + error.toString()]
+            },
+            jsBloc: {
+              $view: 'js',
+              // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
+              jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
+              context.get.closerId + '", error:"' + error.toString().replace('"', '\\"') + '"}, "*")'
+            }
+          })
+        } else {
+          $page.printError(context, error)
+        }
       })
     } catch (error) {
       $page.denied(context, error.toString())
