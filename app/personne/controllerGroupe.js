@@ -407,11 +407,37 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         groupe.gestionnaires = [uid]
         $groupeRepository.save(groupe, this)
       }).seq(function (groupeSaved) {
-        if (groupeSaved) h.joinGroup(context, nom, this)
-        else this(new Error("Erreur à l'enregistrement du groupe " + tools.stringify(groupe)))
-      }).seq(function () {
-        $flashMessages.add(context, 'Le groupe « ' + nom + ' » a été créé')
-        context.redirect('/groupe/voir/' + encodeURIComponent(nom))
+        var nextStep = this
+        if (groupeSaved) {
+          h.joinGroup(context, nom, function (error) {
+            nextStep(error, groupeSaved)
+          })
+        } else {
+          nextStep(new Error("Erreur à l'enregistrement du groupe " + tools.stringify(groupe)))
+        }
+      }).seq(function (groupeSaved) {
+        if (context.get.closerId) {
+          // on apelle le closer mis par sesatheque-client
+          context.html({
+            $metas: {
+              title: 'Enregistrement réussi, fermeture automatique'
+            },
+            contentBloc: {
+              $view: 'contents',
+              contents: ['Groupe ' + nom + ' enregistré']
+            },
+            jsBloc: {
+              $view: 'js',
+              // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
+              jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
+              context.get.closerId + '", groupe:' + JSON.stringify(groupeSaved) + '}, "*")'
+            }
+          })
+        } else {
+          // redirection normale
+          $flashMessages.add(context, 'Le groupe « ' + nom + ' » a été créé')
+          context.redirect('/groupe/voir/' + encodeURIComponent(nom))
+        }
       }).catch(function (error) {
         if (error instanceof Error) log.error(error)
         $page.printError(context, error)
