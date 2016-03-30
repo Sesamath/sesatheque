@@ -106,6 +106,62 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
+   * Met à jour titre/résumé/description en tâche de fond sur tous les arbres qui contiennent cette ressource
+   * Passe les enfants
+   * @private
+   * @param {Ressource} ressource
+   */
+  function majArbres (ressource) {
+    var refOrig = ressource.origine + '/' + ressource.idOrigine
+    // cherche un enfant et le modifie si besoin, retourne true si on a fait une modif
+    function findChild (arbre, ref) {
+      var modif
+      // avec _.each on pourrait sortir dès qu'on a trouvé, mais un arbre pourrait avoir
+      // deux fois le même enfant, on les parse tous
+      arbre.enfants.forEach(function (enfant) {
+        var mod
+        if (enfant.ref === ref) {
+          mod = majChild(enfant)
+        } else if (enfant.enfants) {
+          mod = findChild(enfant, ref)
+        }
+        if (!modif && mod) modif = true
+      })
+      return modif
+    }
+
+    // regarde s'il faut mettre à jour l'enfant et retourne true si c'est le cas
+    function majChild (child) {
+      var modif = false
+      // on passe la ref sur l'oid si c'est pas le cas
+      if (child.ref === refOrig) {
+        child.ref = ressource.oid
+        modif = true
+      }
+      if (child.ref === ressource.oid) {
+        if (child.titre !== ressource.titre || child.resume !== ressource.resume || child.description !== ressource.description) {
+          modif = true
+          child.titre = ressource.titre
+          child.resume = ressource.resume
+          child.description = ressource.description
+        }
+      } else {
+        log.error(new Error('majChild appelée avec des paramètres incohérents sur la ressource ' +ressource.oid), child)
+      }
+      return modif
+    }
+
+    // on cherche les enfants d'après l'oid de la ressource
+    [ressource.oid, refOrig].forEach(function (ref) {
+      flow().seq(function () {
+        EntityRessource.match('enfants').equals(ref).grab(this)
+      }).seqEach(function (arbre) {
+        if (findChild(arbre, ressource.oid)) arbre.store()
+      }).catch(log.error)
+    })
+  }
+
+  /**
    * Purge les urls publiques de la ressource sur varnish (si varnish est dans la conf, ne fait rien sinon)
    * (rend la main avant les réponses mais après avoir lancé les requêtes)
    * @param {Ressource} ressource
@@ -241,8 +297,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }
 
     try {
-      if (error) next(error)
-      else {
+      if (error) {
+        next(error)
+      } else {
         if (_.isArray(ressources)) ressources.forEach(processOne)
         else if (ressources) processOne(ressources)
         next(null, ressources)
@@ -637,6 +694,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       if (ressource.oid) {
         $cacheRessource.set(ressource)
         purgeVarnish(ressource)
+        majArbres(ressource)
         log.debug('write ' + ressource.oid + ' ok')
         if (next) next(null, ressource)
       } else {
