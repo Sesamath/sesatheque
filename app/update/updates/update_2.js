@@ -34,54 +34,74 @@
 var flow = require('an-flow')
 var applog = require('an-log')(lassi.settings.application.name)
 
-var name = 'ajout résumés aux arbres'
-var description = 'ajoute les résumés et commentaires dans tous les arbres'
+var name = 'recherche et remplacement d’enfants référencés par origine/idOrigine'
+var description = 'Cherche tous les enfants référencés par origine/idOrigine, essaie de trouver leur oid où l’origine correcte'
 
 var limit = 100
 
-function enhanceChildren (arbre, next) {
+function findChildByOrig (arbre, next) {
   var $ressourceRepository = lassi.service('$ressourceRepository')
   var modif = false
+  // pour les logs
+  var refArbre = arbre.oid || arbre.ref || arbre.titre.replace(' ', '_')
   flow(arbre.enfants).seqEach(function (enfant) {
     var nextEnfant = this
-    var ref = enfant.ref
-    if (ref) {
-      // s'il a une ref il devrait pas avoir d'enfants
-      if (enfant.enfants) {
-        log.errorData('L’enfant ' + ref + ' de l’arbre ' + (arbre.oid || arbre.ref) + ' avait des enfants, on les vire')
-        delete enfant.enfants
-        if (!modif) modif = true
+    if (enfant.ref) {
+      var chunks = enfant.ref.split('/')
+      if (chunks.length === 2) {
+        flow().seq(function () {
+          $ressourceRepository.load(enfant.ref, this)
+        }).seq(function (ressource) {
+          if (ressource) {
+            enfant.ref = ressource.oid
+            modif = true
+            nextEnfant()
+          } else {
+            this()
+          }
+        }).seq(function () {
+          // faut se creuser
+          var origine = chunks[0]
+          var idOrigine = chunks[1]
+          var newRef
+          if (origine === 'labomepBIBS' && idOrigine > 1000000 && idOrigine < 4000000) {
+            // ils ont probablement été remplacé par la vraie ressource d'origine
+            if (idOrigine < 2000000) {
+              newRef = 'ato/' + (idOrigine - 1000000)
+            } else if (idOrigine < 3000000) {
+              newRef = 'coll_doc/' + (idOrigine - 2000000)
+            } else {
+              newRef = 'accomp/' + (idOrigine - 3000000)
+            }
+            $ressourceRepository.load(newRef, function (error, newEnfant) {
+              if (newEnfant) {
+                enfant = newEnfant
+                modif = true
+              } else {
+                log.errorData('arbre ' + refArbre + ' avait un orphelin ' + enfant.ref + ', on a pas trouvé ' + newRef + ' non plus')
+              }
+              nextEnfant(error)
+            })
+          } else {
+            // on sait pas où chercher
+            log.errorData('arbre ' + refArbre + ' a un orphelin ' + enfant.ref)
+            nextEnfant()
+          }
+        }).catch(log.error)
+      } else {
+        nextEnfant()
       }
-      $ressourceRepository.load(ref, function (error, ressource) {
-        if (!error && ressource) {
-          if (ressource.resume !== enfant.resume) {
-            enfant.resume = ressource.resume
-            if (!modif) modif = true
-          }
-          if (ressource.description !== enfant.description) {
-            enfant.description = ressource.description
-            if (!modif) modif = true
-          }
-        } else if (!error) {
-          log.errorData('Impossible de trouver l’enfant ' + ref + ' de l’arbre ' + (arbre.oid || arbre.ref || arbre.titre))
-        }
-        nextEnfant(error)
-      })
     } else if (enfant.enfants) {
-      enhanceChildren(enfant, function (modifEnfant) {
-        if (!modif && modifEnfant) modif = true
+      findChildByOrig(enfant, function (isEnfantMod) {
+        if (isEnfantMod) modif = true
         nextEnfant()
       })
     } else {
-      log.errorData('arbre ' + (arbre.oid || arbre.ref || arbre.titre) + ' avec un enfant sans ref ni enfants', enfant)
-      nextEnfant()
+      log.errorData('arbre ' + refArbre + ' avec enfant sans ref ni enfants', enfant)
     }
   }).seq(function () {
     next(modif)
-  }).catch(function (error) {
-    log.errorData('erreur ' + error.toString() + ' avec un enfant de l’arbre', arbre)
-    next(false)
-  })
+  }).catch(log.error)
 }
 
 module.exports = {
@@ -89,7 +109,8 @@ module.exports = {
   description: description,
   run: function run (next) {
     var EntityRessource = lassi.service('EntityRessource')
-    EntityRessource.match('type').equals('arbre').count(function (error, nb) {
+    var query = EntityRessource.match('enfants').like('%/%')
+    query.count(function (error, nb) {
       if (error) {
         next(error)
       } else {
@@ -101,20 +122,14 @@ module.exports = {
         flow(offsets).seqEach(function (offset) {
           var nextPaquet = this
           flow().seq(function () {
-            applog('update n°1', 'traitement des arbres de', offset, 'à', offset + limit - 1, 'sur', nb)
-            EntityRessource.match('type').equals('arbre').grab(limit, offset, this)
+            applog('update n°2', 'traitement des enfants de', offset, 'à', offset + limit - 1, 'sur', nb)
+            query.grab(limit, offset, this)
           }).seq(function (arbres) {
             flow(arbres).seqEach(function (arbre) {
               var nextArbre = this
-              enhanceChildren(arbre, function (modif) {
-                if (modif) {
-                  arbre.store(function (error, arbre) {
-                    if (!error && arbre) result.modifs.push(arbre.oid)
-                    nextArbre(error)
-                  })
-                } else {
-                  nextArbre()
-                }
+              findChildByOrig(arbre, function (isArbreMod) {
+                if (isArbreMod) result.modifs.push(arbre.oid)
+                nextArbre()
               })
             }).seq(function () {
               nextPaquet()

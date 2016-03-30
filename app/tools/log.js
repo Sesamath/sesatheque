@@ -275,6 +275,9 @@ log.error = function (message, objectToDump, filter) {
  * @param filter
  */
 log.errorData = function (message, objectToDump, filter) {
+  // pour les errorData, on met un max élevé s'il est pas précisé
+  if (!filter) filter = {}
+  if (!filter.max) filter.max = 50000
   out(message, objectToDump, filter, errorDataOutputStream)
 }
 
