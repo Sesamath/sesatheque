@@ -46,6 +46,11 @@ updateComponent.entity('EntityUpdate', function () {
 })
 
 lassi.on('startup', function () {
+  // si on est en mode cluster avec pm2, on ne se lance que sur le 1er
+  if (process.env.NODE_APP_INSTANCE && process.env.NODE_APP_INSTANCE > 0) {
+    applog('update', 'instance n° ' + process.env.NODE_APP_INSTANCE + ', abandon pour laisser la première faire le job')
+    return
+  }
   var EntityUpdate = lassi.service('EntityUpdate')
   // on cherche le dernier update appliqué
   EntityUpdate.match('num').sort('num', 'desc').grabOne(function (error, update) {
