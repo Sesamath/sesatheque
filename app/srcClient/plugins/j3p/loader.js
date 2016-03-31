@@ -43,11 +43,6 @@ if (!w.console.log) w.console.log = function () {}
 if (!w.console.info) w.console.info = function () {}
 if (!w.console.warn) w.console.warn = function () {}
 if (!w.console.error) w.console.error = function () {}
-// et nos alias locaux
-var cLog = w.console.log
-// var cInfo = w.console.info
-var cWarn = w.console.warn
-var cError = w.console.error
 
 /** variable globale utilisée dans la fonction globale alerte */
 if (typeof w.j3pdebug === 'undefined') w.j3pdebug = false
@@ -57,7 +52,7 @@ if (typeof w.alerte === 'undefined') w.j3pdebug = false
 */
 if (typeof w.alerte === 'undefined') {
   w.alerte = function (n, ch) {
-    cLog(ch)
+    log(ch)
   }
 }
 
@@ -198,8 +193,8 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
         }
       } else {
         // bizarre, on lance pas d'erreur mais on log
-        cWarn('La section ' + name + " n'a aucun outil déclaré")
-        cLog(w.j3p)
+        log.warn('La section ' + name + " n'a aucun outil déclaré")
+        log(w.j3p)
       }
     } // fin boucle sur les sections
     oncontinue7()
@@ -217,7 +212,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
         document.getElementsByTagName('head')[0].appendChild(script)
         return true
       } catch (e) {
-        cError(e)
+        log.error(e)
         return false
       }
     }
@@ -355,7 +350,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
     // la fonction EquivalentIndexVersNoeud doit être dispo donc on peut
     if (typeof w.chargement_j3p.numeronoeud !== 'undefined') {
       w.chargement_j3p.noeudinitial = w.j3p.EquivalentIndexVersNoeud(w.chargement_j3p.numeronoeud)
-      cLog('On récupère le dernier noeud enregistré cad',
+      log('On récupère le dernier noeud enregistré cad',
         w.chargement_j3p.numeronoeud,
         ' et son index dans le graphe est ',
         w.chargement_j3p.noeudinitial)
@@ -445,12 +440,12 @@ module.exports = {
     chargement_j3p.graphe.unshift([])
     // Récupération des infos sur l'état du parcours
     if (options) {
-      cLog('les options que je rècupère :', options)
+      log('les options que je rècupère :', options)
       if (options.resultatCallback) {
         chargement_j3p.resultatCallback = options.resultatCallback
       }
-      if(ressource.parametres.editgraphes){
-          chargement_j3p.editgraphes = ressource.parametres.editgraphes
+      if (ressource.parametres.editgraphes) {
+        chargement_j3p.editgraphes = ressource.parametres.editgraphes
       }
       if (options.lastResultat) {
         chargement_j3p.lastResultat = options.lastResultat
