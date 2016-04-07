@@ -665,6 +665,19 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
+   * Met en cache la ressource et le user pour modification ultérieure
+   * @param {Context} context
+   * @param {Ressource} ressource
+   */
+  $ressourceRepository.saveDeferred = function (context, ressourceOid, next) {
+    var token = uuid()
+    $cache.set('defer_' + token, {oid: ressourceOid, user: context.session.user}, function (error) {
+      if (error) next(error)
+      else next(null, token)
+    })
+  }
+
+  /**
    * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin)
    * @memberOf $ressourceRepository
    * @param {EntityRessource}   ressource

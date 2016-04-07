@@ -750,7 +750,73 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   search.timeout = 3000
   /**
    * Affiche le formulaire de recherche (s'il n'y a pas de critères) ou la liste de résultat
-   * @route GET /ressource/
+   * @route GET /ressource/recherche
    */
   controller.get($routes.get('search'), search)
+
+  /**
+   * Récupère un jnlp pour lancer la version desktop de mathgraph sur cette ressource
+   * et l'enregistrer plus tard (depuis mathgraph) par un post sur /api/deferredAction
+   * @route GET /ressource/jnlp/mathgraph/:oid
+   */
+  controller.get('jnlp/mathgraph/:oid', function (context) {
+    if ($accessControl.isAuthenticated(context)) {
+      var oid = context.arguments.oid
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (!error && ressource && ressource.type !== 'mathgraph') error = 'Cette url ne fonctionne qu’avec des ressources de type mathgraph'
+        if (error) {
+          send(context, error)
+        } else if (ressource) {
+          if ($accessControl.hasPermission('update', context, ressource)) {
+            $ressourceRepository.saveDeferred(context, ressource, function (error, token) {
+              if (!error && !token) error = new Error('saveDeferred ne renvoie ni erreur ni token')
+              if (error) $ressourcePage.printError(context, error)
+              else {
+                var url = appConfig.application.baseUrl + 'api/deferAction/' + token
+                var options = {attachment: 'mathgraph-' + token + '.jnlp'}
+                var content = '<?xml version="1.0" encoding="UTF-8"?>' +
+                  '<jnlp spec="1.0+" codebase="http://www.mathgraph32.org/jaws" href="MathGraph32.jnlp" >' +
+                  '  <information>' +
+                  '    <title>MathGraph32</title>' +
+                  '    <vendor>Association Sesamath</vendor>' +
+                  '     <homepage href="http://mathgraph32.org/"/>' +
+                  '    <icon href="logoMathGraph.png"/>' +
+                  '    <icon href="SplashScreen.png" kind="splash"/>' +
+                  '    <offline-allowed/>' +
+                  '    <shortcut online="false">' +
+                  '    <desktop/>' +
+                  '      <menu submenu="MathGraph32 WebStart" />' +
+                  '    </shortcut>' +
+                  '    <association extensions="mgj" mime-type="x-application/mgj"/>    ' +
+                  '  </information>' +
+                  '  <security>' +
+                  '    <all-permissions/>' +
+                  '  </security>' +
+                  '  <resources>' +
+                  '    <!-- Application Resources -->' +
+                  '    <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se"/>  ' +
+                  '    <jar href="MathGraph32.jar" main="true" version ="5.0.0"/>' +
+                  '    <property name="jnlp.versionEnabled" value="true"/>' +
+                  '  </resources> ' +
+                  '  <application-desc name="MathGraph32" main-class="mathgraph32.Main" width="800" height="600">' +
+                  '    <argument>online</argument>' +
+                  '    <argument>' + url + '</argument>' +
+                  '    <argument>' + ressource.parametres.figure + '</argument>' +
+                  '  </application-desc>' +
+                  '  <update check="background"/>' +
+                  '</jnlp>'
+                context.raw(content, options)
+              }
+            })
+          } else {
+            denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
+          }
+        } else {
+          $ressourcePage.printError(context, 'La ressource d’identifiant ' + oid + ' n’existe pas', 404)
+        }
+      })
+    } else {
+      denied(context)
+    }
+  })
 }

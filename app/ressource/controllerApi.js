@@ -712,6 +712,31 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     }
   })
 
+  controller.get('deferAction/saveRessource/:id', function (context) {
+    if ($accessControl.isAuthenticated(context)) {
+      var id = context.arguments.id
+      $ressourceRepository.load(id, function (error, ressource) {
+        if (error) {
+          $json.sendError(context, error)
+        } else if (ressource) {
+          if ($accessControl.hasPermission('update', context, ressource)) {
+            $ressourceRepository.saveDeferred(context, ressource, function (error, token) {
+              if (!error && !token) error = new Error('saveDeferred ne renvoie ni erreur ni token')
+              if (error) $json.sendError(context, error)
+              else $json.sendOk(context, {url: config.application.baseUrl + 'api/deferAction/' + token})
+            })
+          } else {
+            $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
+          }
+        } else {
+          $json.notFound(context, 'La ressource d’identifiant ' + id + ' n’existe pas')
+        }
+      })
+    } else {
+      $json.denied(context)
+    }
+  })
+
   /**
    * Forward un post (au unload on ne peut pas poster en crossdomain, on le fait en synchrone ici qui fera suivre)
    * @Route POST /api/deferPost
