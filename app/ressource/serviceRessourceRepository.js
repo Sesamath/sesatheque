@@ -683,10 +683,11 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param next
    */
   $ressourceRepository.getDeferred = function (token, next) {
-    $cache.get('defer_' + token, function (error, data) {
+    /* $cache.get('defer_' + token, function (error, data) {
       if (!error && data) $cache.delete('defer_' + token, function () {})
       next(error, data)
-    })
+    }) */
+    $cache.get('defer_' + token, next)
   }
 
   /**

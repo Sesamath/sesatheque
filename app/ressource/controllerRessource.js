@@ -780,21 +780,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   '  <information>' +
                   '    <title>MathGraph32</title>' +
                   '    <vendor>Association Sesamath</vendor>' +
-                  '     <homepage href="http://mathgraph32.org/"/>' +
+                  '    <homepage href="http://mathgraph32.org/"/>' +
                   '    <icon href="logoMathGraph.png"/>' +
                   '    <icon href="SplashScreen.png" kind="splash"/>' +
                   '    <offline-allowed/>' +
-                  '    <shortcut online="false">' +
-                  '    <desktop/>' +
-                  '      <menu submenu="MathGraph32 WebStart" />' +
-                  '    </shortcut>' +
-                  '    <association extensions="mgj" mime-type="x-application/mgj"/>    ' +
                   '  </information>' +
                   '  <security>' +
                   '    <all-permissions/>' +
                   '  </security>' +
                   '  <resources>' +
-                  '    <!-- Application Resources -->' +
                   '    <j2se version="1.7+"/>  ' +
                   '    <jar href="MathGraph32.jar" main="true" version ="5.0.0"/>' +
                   '    <property name="jnlp.versionEnabled" value="true"/>' +
