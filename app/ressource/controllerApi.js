@@ -755,11 +755,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         $json.sendError(context, 'jeton invalide ou périmé')
       }
     })
-    if ($accessControl.isAuthenticated(context)) {
-      var id = context.arguments.id
-    } else {
-      $json.denied(context)
-    }
   })
 
   /**
