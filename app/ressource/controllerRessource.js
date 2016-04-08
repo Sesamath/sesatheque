@@ -768,14 +768,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           send(context, error)
         } else if (ressource) {
           if ($accessControl.hasPermission('update', context, ressource)) {
-            $ressourceRepository.saveDeferred(context, ressource, function (error, token) {
+            $ressourceRepository.saveDeferred(ressource.oid, function (error, token) {
               if (!error && !token) error = new Error('saveDeferred ne renvoie ni erreur ni token')
               if (error) $ressourcePage.printError(context, error)
               else {
-                var url = appConfig.application.baseUrl + 'api/deferAction/' + token
-                var options = {attachment: 'mathgraph-' + token + '.jnlp'}
+                var url = appConfig.application.baseUrl + 'api/action/' + token
+                var dateSuffix = Math.floor((new Date()).getTime() / 1000)
+                var options = {attachment: 'figure_mathgraph_' + ressource.oid + '-' + dateSuffix + '.jnlp'}
                 var content = '<?xml version="1.0" encoding="UTF-8"?>' +
-                  '<jnlp spec="1.0+" codebase="http://www.mathgraph32.org/jaws" href="MathGraph32.jnlp" >' +
+                  '<jnlp spec="1.0+" codebase="http://www.mathgraph32.org/jaws" >' +
                   '  <information>' +
                   '    <title>MathGraph32</title>' +
                   '    <vendor>Association Sesamath</vendor>' +
@@ -794,14 +795,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   '  </security>' +
                   '  <resources>' +
                   '    <!-- Application Resources -->' +
-                  '    <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se"/>  ' +
+                  '    <j2se version="1.7+"/>  ' +
                   '    <jar href="MathGraph32.jar" main="true" version ="5.0.0"/>' +
                   '    <property name="jnlp.versionEnabled" value="true"/>' +
                   '  </resources> ' +
                   '  <application-desc name="MathGraph32" main-class="mathgraph32.Main" width="800" height="600">' +
                   '    <argument>online</argument>' +
                   '    <argument>' + url + '</argument>' +
-                  '    <argument>' + ressource.parametres.figure + '</argument>' +
+                  '    <argument>' + (ressource.parametres.figure || '') + '</argument>' +
                   '  </application-desc>' +
                   '  <update check="background"/>' +
                   '</jnlp>'

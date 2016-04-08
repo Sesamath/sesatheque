@@ -313,6 +313,14 @@ module.exports = function mathgraphEdit (ressource) {
       )
       var $allowProfCb = $(allowProfCb.parentNode)
 
+      // lien jnlp pour éditer la figure dans mathgraph32
+      var jnlpBloc = formEditor.addFormGroup(divParametres)
+      dom.addText(jnlpBloc, 'Abandonner cette édition (sauvegarder d’abord si vous avez fait des modifications)' +
+          ' pour ouvrir la figure dans mathgraph sur mon ordinateur' +
+          ' (télécharger ce fichier puis l’ouvrir avec java web start pour lancer mathgraph en local, qui pourra ensuite la sauvegarder ici) ')
+      var url = window.location.protocol + '//' + window.location.host + '/ressource/jnlp/mathgraph/' + ressource.oid
+      dom.addElement(jnlpBloc, 'a', {href: url}, 'figure_mathgraph_' + ressource.oid + '.jnlp')
+
       // ajout figure
       var dataContainer = formEditor.addFormGroup(divParametres)
       $dataContainer = $(dataContainer)

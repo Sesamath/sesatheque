@@ -712,26 +712,51 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     }
   })
 
-  controller.get('deferAction/saveRessource/:id', function (context) {
+  controller.post('action/:token', function (context) {
+    $ressourceRepository.getDeferred(context.arguments.token, function (error, data) {
+      if (error) {
+        $json.sendError(context, error)
+      } else if (data) {
+        if (data.user && data.action === 'saveRessource' && data.oid) {
+          $ressourceRepository.load(data.oid, function (error, ressource) {
+            if (error) {
+              $json.sendError(context, error)
+            } else if (ressource) {
+              // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
+              if (ressource.type === 'mathgraph') {
+                if (context.post.base64) {
+                  ressource.parametres.figure = context.post.base64
+                  $ressourceRepository.write(ressource, function (error, ressource) {
+                    if (error) {
+                      log.error(error)
+                      context.plain('Erreur : ' + error.toString())
+                    } else if (ressource) {
+                      context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
+                    } else {
+                      log.error(new Error('Le write de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
+                    }
+                  })
+                } else {
+                  context.plain('Erreur : impossible de trouver une figure dans les données envoyées')
+                }
+              } else {
+                $json.sendError(context, 'La mise à jour partielle de ressource n’existe pas encore pour le type ' + ressource.type)
+              }
+            } else {
+              $json.notFound(context, 'La ressource d’identifiant ' + id + ' n’existe pas')
+            }
+          })
+        } else {
+          var msg = 'jeton valide mais données impossibles à traiter'
+          log.error(msg, data)
+          $json.sendError(context, msg)
+        }
+      } else {
+        $json.sendError(context, 'jeton invalide ou périmé')
+      }
+    })
     if ($accessControl.isAuthenticated(context)) {
       var id = context.arguments.id
-      $ressourceRepository.load(id, function (error, ressource) {
-        if (error) {
-          $json.sendError(context, error)
-        } else if (ressource) {
-          if ($accessControl.hasPermission('update', context, ressource)) {
-            $ressourceRepository.saveDeferred(context, ressource, function (error, token) {
-              if (!error && !token) error = new Error('saveDeferred ne renvoie ni erreur ni token')
-              if (error) $json.sendError(context, error)
-              else $json.sendOk(context, {url: config.application.baseUrl + 'api/deferAction/' + token})
-            })
-          } else {
-            $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
-          }
-        } else {
-          $json.notFound(context, 'La ressource d’identifiant ' + id + ' n’existe pas')
-        }
-      })
     } else {
       $json.denied(context)
     }

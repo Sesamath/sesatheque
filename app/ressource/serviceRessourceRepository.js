@@ -666,14 +666,26 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Met en cache la ressource et le user pour modification ultérieure
-   * @param {Context} context
-   * @param {Ressource} ressource
+   * @param oid
    */
-  $ressourceRepository.saveDeferred = function (context, ressourceOid, next) {
+  $ressourceRepository.saveDeferred = function (oid, next) {
     var token = uuid()
-    $cache.set('defer_' + token, {oid: ressourceOid, user: context.session.user}, function (error) {
+    // on met 10h en cache, vu le peu de data c'est pas un souci
+    $cache.set('defer_' + token, {oid: oid, action: 'saveRessource'}, 36000, function (error) {
       if (error) next(error)
       else next(null, token)
+    })
+  }
+
+  /**
+   * Récupère oid et user d'après le token
+   * @param token
+   * @param next
+   */
+  $ressourceRepository.getDeferred = function (token, next) {
+    $cache.get('defer_' + token, function (error, data) {
+      if (!error && data) $cache.delete('defer_' + token, function () {})
+      next(error, data)
     })
   }
 
@@ -713,10 +725,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       } else {
         this(new Error("Après un write la ressource n'a toujours pas d'oid"))
       }
-    }).catch(function (error, ressKo) {
-      var ressRenvoyee = ressKo || ressource
+    }).catch(function (error) {
       log.error(error)
-      if (next) next(error, ressRenvoyee) // on passe quand même la ressource dans l'état où elle était avant le pb
+      if (next) next(error)
     })
   }
 
