@@ -772,7 +772,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               if (!error && !token) error = new Error('saveDeferred ne renvoie ni erreur ni token')
               if (error) $ressourcePage.printError(context, error)
               else {
-                var url = appConfig.application.baseUrl + 'api/action/' + token
+                var url = appConfig.application.baseUrl + 'api/action/mathgraph/' + token
                 var dateSuffix = Math.floor((new Date()).getTime() / 1000)
                 var options = {attachment: 'figure_mathgraph_' + ressource.oid + '-' + dateSuffix + '.jnlp'}
                 var content = '<?xml version="1.0" encoding="UTF-8"?>' +

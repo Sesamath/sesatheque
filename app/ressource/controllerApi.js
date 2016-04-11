@@ -712,47 +712,51 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     }
   })
 
-  controller.post('action/:token', function (context) {
+  /**
+   * Une route pour mathgraph qui répond en plain/text
+   * @route POST /api/action/:token
+   */
+  controller.post('action/mathgraph/:token', function (context) {
+    function sendError (error) {
+      if (error.stack) log.error(error)
+      context.status = 500
+      context.plain('Erreur : ' + error.toString())
+    }
     $ressourceRepository.getDeferred(context.arguments.token, function (error, data) {
       if (error) {
-        $json.sendError(context, error)
+        sendError(error)
       } else if (data) {
-        if (data.user && data.action === 'saveRessource' && data.oid) {
+        if (data.action === 'saveRessource' && data.oid) {
           $ressourceRepository.load(data.oid, function (error, ressource) {
             if (error) {
-              $json.sendError(context, error)
+              sendError(error)
             } else if (ressource) {
               // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
               if (ressource.type === 'mathgraph') {
                 if (context.post.base64) {
                   ressource.parametres.figure = context.post.base64
                   $ressourceRepository.write(ressource, function (error, ressource) {
-                    if (error) {
-                      log.error(error)
-                      context.plain('Erreur : ' + error.toString())
-                    } else if (ressource) {
-                      context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
-                    } else {
-                      log.error(new Error('Le write de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
-                    }
+                    if (error) sendError(error)
+                    else if (ressource) context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
+                    else sendError(new Error('Le write de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
                   })
                 } else {
                   context.plain('Erreur : impossible de trouver une figure dans les données envoyées')
                 }
               } else {
-                $json.sendError(context, 'La mise à jour partielle de ressource n’existe pas encore pour le type ' + ressource.type)
+                sendError('Cette ressource n’est pas de type mathgraph (' + ressource.type + ')')
               }
             } else {
-              $json.notFound(context, 'La ressource d’identifiant ' + id + ' n’existe pas')
+              context.status = 404
+              context.plain('La ressource d’identifiant ' + data.oid + ' n’existe pas (ou plus)')
             }
           })
         } else {
-          var msg = 'jeton valide mais données impossibles à traiter'
-          log.error(msg, data)
-          $json.sendError(context, msg)
+          sendError(new Error('jeton valide mais données impossibles à traiter'))
         }
       } else {
-        $json.sendError(context, 'jeton invalide ou périmé')
+        context.status = 404
+        context.plain('jeton invalide ou périmé')
       }
     })
   })
