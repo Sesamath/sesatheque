@@ -353,7 +353,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           })
         } else {
           // creation simple
-          var fake = {new: true, oid: 0}
+          var fake = {new: true, publie: true}
           addToken(context, fake)
           $ressourcePage.printForm(context, null, fake, options)
         }
@@ -393,14 +393,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         else if (!_.isEmpty(ressource._warnings) && !ressource.force) printForm(context, null, ressource, titrePage)
         else this(null, ressource)
       }).seq(function (ressource) {
-        $personneControl.checkGroupes(context, null, ressource, this)
-      }).seq(function (ressource) {
-        $personneControl.checkPersonnes(context, null, ressource, this)
-      }).seq(function (ressource) {
-        log.debug('auteurs après checkPersonnes', ressource.auteurs)
+        // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
+        ressource.auteurs = [$accessControl.getCurrentUserOid(context)]
         $ressourceRepository.write(ressource, function (error, ressource) {
-          // on veut gérér les erreurs ici car y'a un bug dans notre code
           if (error || !_.isEmpty(ressource._errors)) {
+            // on veut gérér les erreurs ici, signe d'un bug dans notre code
             log.error(new Error('on a une erreur au write mais pas au valide précédent'))
             printForm(context, error, ressource, 'Ajouter une ressource')
           } else {

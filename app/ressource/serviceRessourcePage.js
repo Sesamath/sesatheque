@@ -149,7 +149,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           name: key + 'Add',
           id: key + 'Add',
           label: 'Nouvelle personne à ajouter aux ' + config.labels[key],
-          placeholder: 'identifiant de la personne'
+          placeholder: 'oid de la personne'
         }
         next()
         this()
@@ -431,7 +431,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // on en créé une vide, mais on regarde si on avait un token
       var token = ressource && ressource.token
       log.debug('dans getFormViewData on lance un create de ressource')
-      ressource = EntityRessource.create()
+      ressource = EntityRessource.create(ressource)
       if (token) ressource.token = token
     }
     // log.debug('ressource traitée par sendFormData', ressource)

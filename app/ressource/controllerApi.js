@@ -702,6 +702,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Déconnecte l'utilisateur courant
+   * @route GET /api/deconnexion
    */
   controller.get('deconnexion', function (context) {
     if ($accessControl.isAuthenticated(context)) {
@@ -714,7 +715,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Une route pour mathgraph qui répond en plain/text
-   * @route POST /api/action/:token
+   * @route POST /api/action/mathgraph/:token
    */
   controller.post('action/mathgraph/:token', function (context) {
     function sendError (error) {
