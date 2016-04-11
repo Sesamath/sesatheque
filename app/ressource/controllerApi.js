@@ -735,6 +735,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
               if (ressource.type === 'mathgraph') {
                 if (context.post.base64) {
+                  log.debug('la ressource ' + data.oid + ' avait la figure ' + ressource.parametres.figure + ' que l’on remplace par ' + context.post.base64)
                   ressource.parametres.figure = context.post.base64
                   $ressourceRepository.write(ressource, function (error, ressource) {
                     if (error) sendError(error)

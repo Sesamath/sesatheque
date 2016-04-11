@@ -126,7 +126,7 @@ function displayJs (ressource, options, next) {
   }
 
   var dependencies = [
-    'http://www.mathgraph32.org/js/4.9.9/mtg32jsmin.js',
+    'http://www.mathgraph32.org/js/5.0.0/mtg32jsmin.js',
     'http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js'
   ]
   page.loadAsync(dependencies, function () {
