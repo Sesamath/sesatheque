@@ -181,6 +181,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           url: url
         }, function (response) {
           if (response.status !== 200) log.error('purge KO pour ' + url)
+          log.debug('purge ' + url + ' ' + response.status)
         })
       })
     }
