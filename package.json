@@ -51,6 +51,7 @@
     "moment": "^2.6.0",
     "morgan": "^1.1.1",
     "request": "^2.39.0",
+    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#master",
     "sesajstools": "git://src.sesamath.net/sesajstools",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso",
     "sesatheque-client": "git://src.sesamath.net/sesatheque-client"
