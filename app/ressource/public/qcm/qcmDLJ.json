@@ -1,0 +1,61 @@
+{
+  "id": "qcm1",
+  "title": "test de qcm",
+  "options": {
+    "type": "Unique"
+  },
+
+  "questions": [
+    {
+      "enounce": "Une question quelconque",
+      "choices": [
+        {
+          "label":"réponse 1",
+          "isCorrect":true
+        },
+        {
+          "label": "réponse 2",
+          "isCorrect":false
+        },
+        {
+          "label": "réponse 3",
+          "isCorrect":true
+        }
+      ]
+    },
+    {
+      "enounce": "Une deuxième question quelconque",
+      "choices": [
+        {
+          "label":"autre réponse 1",
+          "isCorrect":false
+        },
+        {
+          "label": "autre réponse 2",
+          "isCorrect":true
+        },
+        {
+          "label": "autre réponse 3",
+          "isCorrect":true
+        }
+      ]
+    },
+    {
+      "enounce": "Une troisième question quelconque",
+      "choices": [
+        {
+          "label":"3eme réponse 1",
+          "isCorrect":false
+        },
+        {
+          "label": "autre réponse 2",
+          "isCorrect":true
+        },
+        {
+          "label": "autre réponse 3",
+          "isCorrect":true
+        }
+      ]
+    }
+  ]
+}
