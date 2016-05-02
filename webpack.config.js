@@ -31,7 +31,8 @@ var conf = {
     // Error: a dependency to an entry point is not allowed
     page: ['./app/srcClient/page/index.js'],
     display: './app/srcClient/display/index.js',
-    edit: './app/srcClient/edit/index.js'
+    edit: './app/srcClient/edit/index.js',
+    import: './app/srcClient/edit/import.js'
   },
   output: {
     path: 'app/ressource/public/',

@@ -551,6 +551,29 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
   })
 
+  controller.get('import', function (context) {
+    context.layout = 'page'
+    if ($accessControl.isAuthenticated(context)) {
+      var data = {
+        $metas: {
+          title: 'Importer une ressource'
+        },
+        titre: 'Import d’une ressource',
+        contentBloc: {
+          $view: 'import'
+        },
+        jsBloc: {
+          $view: 'js',
+          jsFiles: ['/import.bundle.js'],
+          jsCode: 'stimport()'
+        }
+      }
+      context.html(data)
+    } else {
+      denied(context)
+    }
+  })
+
   /**
    * Affiche la demande de confirmation pour effacement
    * (utilise la vue describe pour montrer le détail de ce que l'on va effacer)

@@ -198,12 +198,14 @@ function sendAjax (url, resultat, deferSync, next) {
 }
 
 /**
- * Envoie le résultat via un postMessage mais ne gère pas encore de feedback
+ * Envoie le résultat au dom parent (à priori sesalab) avec un postMessage mais ne gère pas de feedback
  * (faudrait passer dans le message une action de retour et un id, et ajouter un écouteur dessus)
+ * c'est le parent qui affichera le feedback
  */
 function sendMessage (options, resultat) {
   var chunks = options.resultatMessageAction.split('::')
   var action = options.resultatMessageAction
+  // le nom de la propriété attendue par celui qui écoute
   var resultatProp = chunks[1] || 'resultat'
   var message = {
     action: action
