@@ -139,7 +139,9 @@ module.exports = function ($accessControl, $ressourcePage) {
     try {
       var user = $accessControl.getCurrentUser(context)
       if (user) {
-        throw new Error('Utilisateur déjà connecté')
+        context.layout = 'page'
+        if (context.get.redirect) context.redirect(context.get.redirect)
+        else throw new Error('Utilisateur déjà connecté')
       } else if (context.session.user && context.session.user.lastCheck) {
         var origine = getOrigine(context)
         if (origine instanceof Error) {
@@ -228,7 +230,8 @@ module.exports = function ($accessControl, $ressourcePage) {
   $auth.login = function (context) {
     var user = $accessControl.getCurrentUser(context)
     if (user) {
-      $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'))
+      if (context.get.redirect) context.redirect(context.get.redirect)
+      else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
     } else {
       var client = getClient(context)
       if (client instanceof Error) {

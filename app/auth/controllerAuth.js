@@ -37,6 +37,12 @@
  * @extends Controller
  */
 module.exports = function (controller, $auth, $accessControl, $ressourcePage, $flashMessages) {
+  function redirectOrError (context) {
+    context.layout = 'page'
+    if (context.get.redirect) context.redirect(context.get.redirect)
+    else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
+  }
+  
   // on diffère la création des routes à l'ajout du premier client
   $auth.deferController(function () {
     /**
@@ -45,8 +51,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
      */
     controller.get('connexion', function (context) {
       if ($accessControl.isAuthenticated(context)) {
-        context.layout = 'page'
-        $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
+        redirectOrError(context)
       } else {
         $auth.login(context)
       }
@@ -95,8 +100,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
      */
     controller.get('validation', function (context) {
       if ($accessControl.isAuthenticated(context)) {
-        context.layout = 'page'
-        $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
+        redirectOrError(context)
       } else {
         $auth.validate(context, function (error, personne) {
           if (error) {
