@@ -29,158 +29,131 @@
  * pour une explication en français)
  */
 'use strict'
+// pour l'édition de graphe via l'injection d'une iframe et de listener sur les postmessage,
+// cf commits antérieurs au 17/05/2016
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var tools = require('sesajstools')
+var embedEditGraphe = require('babel-loader!sesaeditgraphe/src/embed').default
 
 var page = require('../../page/index')
 
-var $
-/* jshint jquery:true */
-
 /**
- * Ajoute l'iframe d'editgraphe
- * @private
- * @param {string} urlEditGraphe
- * @param {Element} container
+ * Ajoute le listener sur submit pour remplir le textarea avec les params d'éditgraphe
  */
-function addEditGraphe (urlEditGraphe, container) {
-  log('addEditGraphe avec ' + urlEditGraphe)
-  var args = {src: urlEditGraphe, id: 'editgraphe'} // mettre ici allowfullscreen:'true' sert à rien, faut un setAttribute plus loin
-  var editgraphe = dom.addElement(container, 'iframe', args, 'Si vous lisez ce texte, votre navigateur ne supporte pas les iframes')
-  editgraphe.setAttribute('allowfullscreen', true)
-  $editgraphe = $(editgraphe)
-  page.autosize('editgraphe', null, null, {minHeight: 500, minWidth: 500, callback: scrollEg})
-  return editgraphe.contentWindow
-}
-
-/**
- * Helper de loadGraphic qui ajoute un écouteur sur les messages envoyés par editGraphe
- * @param ressource
- * @param $form
- */
-function addMessageListener (ressource, $form) {
-  window.addEventListener('message', function (event) {
-    // on teste pas event.origin, on accepte les messages de tous ceux que l'on embarque
-    if (event.data) {
-      log("Message reçu dans l'édition de la ressource", event)
-      if (event.data.action === 'editGrapheReady') {
-        egWindow.postMessage({action: 'load', ressource: ressource}, '*')
-      } else if (event.data && event.data.action === 'saveParametres') {
-        if (event.data.parametres) saveParametres(event.data.parametres)
-        else page.addError("editgraphe envoi un message avec l'action saveParametres sans fournir parametres")
-      } else if (event.data && event.data.action === 'saveAndSubmit') {
-        if (event.data.parametres) {
-          log('Dans saveAndSubmit on récupère les parametres', event.data.parametres)
-          saveParametres(event.data.parametres, function () {
-            if (isSubmitForced) {
-              log('submit déjà fait en timeout')
-            } else {
-              isSubmitForced = true
-              $form.submit()
-            }
-          })
-        } else {
-          page.addError("editgraphe envoi un message avec l'action saveAndSubmit sans fournir parametres, on sauvegarde en l'état dans 2s")
-          setTimeout(function () {
-            if (isSubmitForced) {
-              log('submit déjà fait en timeout')
-            } else {
-              isSubmitForced = true
-              $form.submit()
-            }
-          }, 2000)
-        }
-      }
-    } else {
-      log('message reçu sans data ???', event)
-    }
-  })
-}
-
-/**
- * Helper de loadGraphic qui ajoute l'écouteur sur submit
- * @param $form
- */
-function addSubmitCallback ($form) {
+function addSubmitHandler () {
+  // au submit on veut récupérer le contenu d'éditgraphe
+  var $form = $('#formRessource')
   $form.submit(function () {
     log('submit demandé')
-    // on le fait qu'une fois, au cas où le user s'excite sur le bouton enregistrer
-    if (!isSaveAndSubmitDone) {
-      log('on transfère à saveAndSubmit et on attend')
-      egWindow.postMessage({action: 'saveAndSubmit'}, '*')
-      isSaveAndSubmitDone = true
-      setTimeout(function () {
-        log('timeout sans réponse, on force le submit tel quel')
-        // au cas où j3p répond pas (navigateur qui gère pas les messages par ex, on soumet dans 3s
-        isSubmitForced = true
-        $form.submit()
-      }, 3000)
+    // si on a mis le flag la dernière fois on sort direct pour validation du form
+    if (isSubmitForced) return true
+    // sinon on essaie de récupérer les paramètres
+    try {
+      var parametres = getEgParams()
+      if (parametres && parametres.g) {
+        try {
+          var paramString = JSON.stringify(parametres, null, 2)
+        } catch (error) {
+          log.error(error)
+          throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe valide, valider de nouveau enregistrera l’ancien graphe')
+        }
+        log('on met dans le textarea', paramString)
+        $textarea.val(paramString)
+        log('après modif le textarea contient', $textarea.val())
+        log('après modif le textarea', $textarea)
+        return true
+      } else {
+        throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe, valider de nouveau enregistrera l’ancien graphe')
+      }
+    } catch (error) {
+      page.addError(error)
+      // on passe à true pour pouvoir valider au prochain submit
+      isSubmitForced = true
     }
-
-    return isSubmitForced // on fera le submit au retour du message
+    return false
   })
 }
 
 /**
- * Ajoute l'iframe, la gestion de messages et la sauvegarde auto du graphe
- * @param {object}    options
+ *
+ * @param {Element} toggleButton
+ * @param {Element} container
+ * @param {Ressource} ressource
+ */
+function addToggleHandler (toggleButton, container, ressource) {
+  log('addToggleHandler')
+  toggleButton.addEventListener('click', function () {
+    log('clic toggleButton')
+    if (isGraphic) {
+      try {
+        var strParams = JSON.stringify(getEgParams(), null, 2)
+        $textarea.val(strParams)
+        $editgraphe.hide()
+        $textarea.show()
+        $toggleButton.html(graphMode)
+        isGraphic = false
+      } catch (error) {
+        log.error(error)
+        page.addError('L’éditeur de graphe a renvoyé des paramètres invalides')
+      }
+    } else {
+      try {
+        var params = JSON.parse($textarea.val())
+        ressource.parametres = params
+        loadGraphic(container, ressource)
+        $toggleButton.html(textMode)
+        isGraphic = true
+      } catch (error) {
+        log.error(error)
+        page.addError('Paramètres invalides (pb json)')
+      }
+    }
+  })
+}
+
+/**
+ * Ajoute editgraphe dans le container
  * @param {Element}   container
  * @param {Ressource} ressource
  */
-function loadGraphic (options, container, ressource) {
-  var urlEditGraphe = 'http://j3p.'
-  if (options.isDev) urlEditGraphe += 'dev'
-  urlEditGraphe += 'sesamath.net/editgraphes/lanceur_graphique.html'
-  // urlEditGraphe = 'http://j3p.local/editgraphes/lanceur_graphique.html'
-  $textarea.hide()
-  $textarea.before(dom.getElement('a', {href: '?editor=text'}, 'mode texte (sauvegarder les modifications avant)'))
-  $textarea.before(dom.getElement('br'))
-  egWindow = addEditGraphe(urlEditGraphe, container)
-  // au submit on veut récupérer le contenu d'éditgraphe
-  var $form = $('#formRessource')
-  addMessageListener(ressource, $form)
-  addSubmitCallback($form)
+function loadGraphic (container, ressource) {
+  dom.empty(container)
+  var assets = {
+    // cf https://github.com/webpack/file-loader
+    js: require('file!sesaeditgraphe/dist/editGraphe.js'),
+    css: require('file!sesaeditgraphe/dist/editGraphe.css')
+  }
+  embedEditGraphe(container, ressource, assets, function (error, getRessourceParametres) {
+    log('retour de embedEditGraphe avec', error, getRessourceParametres, typeof getRessourceParametres)
+    if (error) {
+      page.addError(error)
+    } else if (getRessourceParametres) {
+      // on teste cette fct globale pour savoir si on a déjà ajouté le handler
+      if (!getEgParams) addSubmitHandler()
+      // mais faut de toute façon l'écraser avec la nouvelle
+      getEgParams = getRessourceParametres
+    } else {
+      page.addError(new Error('Le chargement de l’éditeur de graphe n’a pas renvoyé de moyen de récupérer le graphe construit'))
+    }
+  })
 } // loadGraphic
 
-/**
- * Met dans le textarea la string json de l'objet passé en param
- * @param {object}         parametres
- * @param {simpleCallback} [next]
- */
-function saveParametres (parametres, next) {
-  log('saveParametres', parametres)
-  // sans le setTimeout, le $textarea.val(paramString) ne change rien dans le html, aucune idée du pourquoi...
-  setTimeout(function () {
-    try {
-      var paramString = JSON.stringify(parametres, null, 2)
-      log('on met dans le textarea', paramString)
-      $textarea.val(paramString)
-      log('après modif le textarea contient', $textarea.val())
-      log('après modif le textarea', $textarea)
-    } catch (error) {
-      log.error("stringify plante avec l'objet", parametres)
-      page.addError('Impossible de modifier les paramètres, objet malformé (' + error.toString() + ')', 5)
-    }
-    if (next) next()
-  }, 0)
-}
-
-/**
- * Scrolle pour mettre editgraphe en haut de la fenêtre visible
- * @private
- */
-function scrollEg () {
-  $editgraphe.scrollTop(0)
-}
-
-var $editgraphe                 // iframe
-var egWindow
-var isSaveAndSubmitDone = false // on a envoyé le postMessage
-var isSubmitForced = false      // pour forcer le submit, postMessage fait ou pas
-var $textarea
 var wd = window.document
+var $
+/* jshint jquery:true */
+var isSubmitForced = false      // pour forcer le submit au coup suivant en cas d'erreur de récupération de graphe sur le 1er
+var $editgraphe
+var $textarea
+var $toggleButton
+var getEgParams = function () {
+  log.error('L’éditeur de graphe n’a pas encore été chargé')
+}
+var isGraphic = true
+// nos libellés de bouton
+var graphMode = 'Mode graphique'
+var textMode = 'Mode texte'
 
 /**
  * Édite une ressource j3p
@@ -200,19 +173,27 @@ module.exports = function edit (ressource, options) {
       var textarea = wd.getElementById('parametres')
       if (!textarea) throw new Error('Pas de textarea #parametres trouvé dans cette page')
       $textarea = $(textarea)
-      // le container pour l'iframe
-      var container = wd.getElementById('groupParametres')
-      if (!container) {
+      // le container pour editgraphe
+      var parent = wd.getElementById('groupParametres')
+      if (!parent) {
         log('pas trouvé de #groupParametres, on prend le parent du textarea en container')
-        container = textarea.parentNode
+        parent = textarea.parentNode
       }
       var editor = tools.getURLParameter('editor') || 'graphic'
-      if (editor === 'graphic') {
-        loadGraphic(options, container, ressource)
+      isGraphic = (editor === 'graphic')
+      // le bouton toggle
+      var toggleButton = dom.addElement(parent, 'button', {id: 'toggleButton'}, isGraphic ? textMode : graphMode)
+      var container = dom.addElement(parent, 'div', {id: 'editgraphe'})
+      $editgraphe = $(container)
+      addToggleHandler(toggleButton, container, ressource)
+      // et l'init avec le bon éditeur
+      if (isGraphic) {
+        loadGraphic(container, ressource)
+        $textarea.hide()
+        // Scrolle pour mettre editgraphe en haut de la fenêtre visible, seulement à l'init et plus au toggle
+        $editgraphe.scrollTop(0)
       } else {
         if (editor !== 'text') page.addError('Éditeur ' + editor + ' inconnu, on prend text')
-        $textarea.before(dom.getElement('a', { href: '?editor=graphic' }, 'mode graphique (sauvegarder les modifications avant)'))
-        $textarea.before(dom.getElement('br'))
       }
     } catch (error) {
       page.addError(error)

@@ -44,7 +44,7 @@ var conf = {
     library: 'st[name]',
     // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library, ici var => globale
     libraryTarget: 'var',
-    // ça c'est juste pour hjs-webpack ?
+    // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
   },
   devtool: 'source-map', // même en prod
@@ -57,6 +57,14 @@ var conf = {
       {
         test: /app\/srcClient\/.*\.js/,
         loader: 'babel-loader'
+      },
+      // idem pour editgraphe chargé par srcClient/plugins/j3p/edit.js
+      {
+        test: /sesaeditgraphe\/src\/.*\.js/,
+        loader: 'babel-loader',
+        query: {
+          presets: ['es2015', 'stage-2']
+        }
       }
     ]
   },
