@@ -87,6 +87,8 @@ function addError (error, delay) {
     // on ajoute un peu de margin à ce div s'il n'en a pas
     if (errorsContainer.style && !errorsContainer.style.margin) errorsContainer.style.margin = '0.2em'
     var errorBlock = dom.addElement(errorsContainer, 'p', {'class': 'error'}, errorMsg)
+    // si on a jQuery sous la main on scroll, sinon tant pis
+    if (window.jQuery) window.jQuery(errorsContainer).scrollTop(0)
     if (delay) {
       setTimeout(function () {
         errorsContainer.remove(errorBlock)

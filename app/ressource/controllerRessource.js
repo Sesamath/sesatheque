@@ -116,7 +116,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function printForm (context, error, ressource, titre) {
     if (error) log.error('une erreur au post update', error)
     if (ressource._errors) log.debug('errors au post update', ressource._errors)
-    if (ressource._warnings) log.debug('warnings au post update avec force=' + context.post.force, ressource._warnings)
+    if (ressource._warnings) log.debug('warnings au post update avec force=' + (context.post && context.post.force), ressource._warnings)
     addToken(context, ressource)
     var options
     if (titre) options = {$metas: {title: 'Ajouter une ressource'}}
