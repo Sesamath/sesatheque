@@ -44,32 +44,34 @@ var page = require('../../page/index')
  */
 function addSubmitHandler () {
   // au submit on veut récupérer le contenu d'éditgraphe
-  var $form = $('#formRessource')
-  $form.submit(function () {
+  $('#formRessource').submit(function () {
     log('submit demandé')
     // si on a mis le flag la dernière fois on sort direct pour validation du form
     if (isSubmitForced) return true
+    // si on est mode texte on cherche pas plus loin
+    if (isTextMode()) return true
     // sinon on essaie de récupérer les paramètres
     try {
       var parametres = getEgParams()
       if (parametres && parametres.g) {
         try {
           var paramString = JSON.stringify(parametres, null, 2)
+          log('on met dans le textarea', paramString)
+          $textarea.val(paramString)
+          log('après modif le textarea contient', $textarea.val())
+          log('après modif le textarea', $textarea)
+          return true
         } catch (error) {
           log.error(error)
           throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe valide, valider de nouveau enregistrera l’ancien graphe')
         }
-        log('on met dans le textarea', paramString)
-        $textarea.val(paramString)
-        log('après modif le textarea contient', $textarea.val())
-        log('après modif le textarea', $textarea)
-        return true
       } else {
         throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe, valider de nouveau enregistrera l’ancien graphe')
       }
     } catch (error) {
       page.addError(error)
-      // on passe à true pour pouvoir valider au prochain submit
+      // on passe à true pour pouvoir valider au prochain submit, histoire de pas bloquer
+      // la modif des autres champs de la ressource
       isSubmitForced = true
     }
     return false
@@ -78,39 +80,58 @@ function addSubmitHandler () {
 
 /**
  *
- * @param {Element} toggleButton
+ * @param {Element} toggleLink
  * @param {Element} container
  * @param {Ressource} ressource
  */
-function addToggleHandler (toggleButton, container, ressource) {
-  log('addToggleHandler')
-  toggleButton.addEventListener('click', function () {
-    log('clic toggleButton')
-    if (isGraphic) {
+function addToggleHandler (toggleLink, container, ressource) {
+  function toggleHandler () {
+    log('hashchange detected')
+    var params
+    if (isTextMode()) {
       try {
-        var strParams = JSON.stringify(getEgParams(), null, 2)
-        $textarea.val(strParams)
+        if (isEditgrapheLoaded) {
+          log('on va appeler getEgParams')
+          params = getEgParams()
+          log('getEgParams renvoie', params)
+          var strParams = JSON.stringify(params, null, 2)
+          $textarea.val(strParams)
+        } // else rien à faire, on veut du texte et on a jamais chargé editgraphe
         $editgraphe.hide()
         $textarea.show()
-        $toggleButton.html(graphMode)
-        isGraphic = false
+        dom.empty(toggleLink)
+        dom.addText(toggleLink, graphMode)
+        toggleLink.href = '#graphic'
       } catch (error) {
         log.error(error)
-        page.addError('L’éditeur de graphe a renvoyé des paramètres invalides')
+        page.addError('L’éditeur de graphe a renvoyé des paramètres invalides', params)
       }
     } else {
       try {
-        var params = JSON.parse($textarea.val())
+        params = JSON.parse($textarea.val())
         ressource.parametres = params
         loadGraphic(container, ressource)
-        $toggleButton.html(textMode)
-        isGraphic = true
+        $textarea.hide()
+        $editgraphe.show()
+        dom.empty(toggleLink)
+        dom.addText(toggleLink, textMode)
+        toggleLink.href = '#text'
       } catch (error) {
         log.error(error)
-        page.addError('Paramètres invalides (pb json)')
+        page.addError('Paramètres invalides (pb json)', params)
       }
     }
-  })
+  }
+  window.addEventListener('hashchange', toggleHandler)
+  toggleHandler()
+}
+
+/**
+ * Retourne true si on est en mode texte
+ * @returns {boolean}
+ */
+function isTextMode () {
+  return window.location.hash === '#text'
 }
 
 /**
@@ -130,10 +151,12 @@ function loadGraphic (container, ressource) {
     if (error) {
       page.addError(error)
     } else if (getRessourceParametres) {
-      // on teste cette fct globale pour savoir si on a déjà ajouté le handler
-      if (!getEgParams) addSubmitHandler()
-      // mais faut de toute façon l'écraser avec la nouvelle
+      if (!isEditgrapheLoaded) {
+        isEditgrapheLoaded = true
+        addSubmitHandler()
+      }
       getEgParams = getRessourceParametres
+      $editgraphe.scrollTop(0)
     } else {
       page.addError(new Error('Le chargement de l’éditeur de graphe n’a pas renvoyé de moyen de récupérer le graphe construit'))
     }
@@ -142,18 +165,16 @@ function loadGraphic (container, ressource) {
 
 var wd = window.document
 var $
-/* jshint jquery:true */
 var isSubmitForced = false      // pour forcer le submit au coup suivant en cas d'erreur de récupération de graphe sur le 1er
+var isEditgrapheLoaded = false
 var $editgraphe
 var $textarea
-var $toggleButton
 var getEgParams = function () {
   log.error('L’éditeur de graphe n’a pas encore été chargé')
 }
-var isGraphic = true
 // nos libellés de bouton
-var graphMode = 'Mode graphique'
-var textMode = 'Mode texte'
+var graphMode = 'Passer en mode graphique'
+var textMode = 'Passer en mode texte'
 
 /**
  * Édite une ressource j3p
@@ -179,22 +200,17 @@ module.exports = function edit (ressource, options) {
         log('pas trouvé de #groupParametres, on prend le parent du textarea en container')
         parent = textarea.parentNode
       }
-      var editor = tools.getURLParameter('editor') || 'graphic'
-      isGraphic = (editor === 'graphic')
-      // le bouton toggle
-      var toggleButton = dom.addElement(parent, 'button', {id: 'toggleButton'}, isGraphic ? textMode : graphMode)
       var container = dom.addElement(parent, 'div', {id: 'editgraphe'})
       $editgraphe = $(container)
-      addToggleHandler(toggleButton, container, ressource)
-      // et l'init avec le bon éditeur
-      if (isGraphic) {
-        loadGraphic(container, ressource)
-        $textarea.hide()
-        // Scrolle pour mettre editgraphe en haut de la fenêtre visible, seulement à l'init et plus au toggle
-        $editgraphe.scrollTop(0)
-      } else {
-        if (editor !== 'text') page.addError('Éditeur ' + editor + ' inconnu, on prend text')
-      }
+      // on autorise de forcer l'éditeur avec du ?editor=(text|graphic)
+      var editor = tools.getURLParameter('editor')
+      // on met toujours un hash (utilisé pour toggle), graphic par défaut
+      if (editor) window.location.hash = '#' + editor
+      else if (!window.location.hash) window.location.hash = '#graphic'
+      // le bouton toggle
+      var toggleLink = dom.addElementBefore(textarea, 'a', {id: 'toggleLink', href: '#', style: {display: 'block'}})
+      // ajoute le handler et le lance
+      addToggleHandler(toggleLink, container, ressource)
     } catch (error) {
       page.addError(error)
     }
