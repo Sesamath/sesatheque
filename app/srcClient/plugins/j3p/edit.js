@@ -141,12 +141,7 @@ function isTextMode () {
  */
 function loadGraphic (container, ressource) {
   dom.empty(container)
-  var assets = {
-    // cf https://github.com/webpack/file-loader
-    js: require('file!sesaeditgraphe/dist/editGraphe.js'),
-    css: require('file!sesaeditgraphe/dist/editGraphe.css')
-  }
-  embedEditGraphe(container, ressource, assets, function (error, getRessourceParametres) {
+  embedEditGraphe(container, ressource, function (error, getRessourceParametres) {
     log('retour de embedEditGraphe avec', error, getRessourceParametres, typeof getRessourceParametres)
     if (error) {
       page.addError(error)
