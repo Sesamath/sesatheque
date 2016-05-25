@@ -129,6 +129,14 @@ function out (message, objectToDump, filter, stream, options) {
   if (!filter || !exclusions[filter]) {
     // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
     if (message instanceof Error) message = message.stack + '\n'
+    else if (typeof message === 'string' && message.indexOf('[object') === 0) {
+      // y'a eu un pb avant l'appel de cette fct, on génère une erreur pour récupérer la pile d'appel
+      try {
+        throw new Error('erreur inconnue passé à log')
+      } catch (error) {
+        message = error.stack
+      }
+    }
     if (objectToDump) {
       if (objectToDump instanceof Error) message += '\n' + objectToDump.stack + '\n'
       else {
