@@ -69,43 +69,42 @@ module.exports = function afterRailSession (rail) {
   applog('adding middleware', 'CORS')
   rail.use('/', function (req, res, next) {
     var origin = req.header('Origin')
-    if (origin) {
-      // le public est mis en cache, on autorise pour tout le monde (sinon faut filtrer sur varnish)
-      if (tools.isStatic(req.url) || tools.isPublic(req.url)) res.header('Access-Control-Allow-Origin', '*')
-      else {
-        // ça dépend de l'appelant
-        if (/https?:\/\/([^/]+\.)?(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)) {
-          res.header('Access-Control-Allow-Origin', origin)
-          res.header('Access-Control-Allow-Credentials', 'true')
+    // le public est mis en cache, faut donc autoriser pour tout le monde (sinon faut filtrer sur varnish)
+    if (tools.isStatic(req.url) || tools.isPublic(req.url)) {
+      res.header('Access-Control-Allow-Origin', '*')
+    } else if (origin) {
+      // ça dépend de l'appelant
+      if (/https?:\/\/([^/]+\.)?(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)) {
+        res.header('Access-Control-Allow-Origin', origin)
+        res.header('Access-Control-Allow-Credentials', 'true')
 
-          // cf https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-          // If the server specifies an origin host rather than '*', then it must also include Origin in the Vary response header
-          // to indicate to clients that server responses will differ based on the value of the Origin request header.
-          res.header('Vary', 'Origin')
+        // cf https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+        // If the server specifies an origin host rather than '*', then it must also include Origin in the Vary response header
+        // to indicate to clients that server responses will differ based on the value of the Origin request header.
+        res.header('Vary', 'Origin')
 
-          // ça aide pour ff ? http://stackoverflow.com/a/17957579
-          // res.header('Access-Control-Expose-Headers','Access-Control-Allow-Origin');
+        // ça aide pour ff ? http://stackoverflow.com/a/17957579
+        // res.header('Access-Control-Expose-Headers','Access-Control-Allow-Origin');
 
-          /* Apparemmet pas utile
-          if (req.headers['access-control-request-method']) {
-            res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method'])
-          } else {
-            res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-          } /* on laisse le classique */
-          res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-
-          // sans cela sur l'options du preflight firefox refuse de faire le post (ça répond 'pas de connexion réseau' car xhr.status vaut 0)
-          if (req.method === 'OPTIONS' && req.headers['access-control-request-headers']) {
-            res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
-          } /* */
-        } else if (origin.substr(0, 4) !== 'http') {
-          // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
-          res.header('Access-Control-Allow-Origin', origin)
-          res.header('Access-Control-Allow-Credentials', 'true')
-          res.header('Vary', 'Origin,Cookie')
+        /* Apparemmet pas utile
+        if (req.headers['access-control-request-method']) {
+          res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method'])
         } else {
-          log.debug('cors avec ' + origin + ' refusé')
-        }
+          res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        } /* on laisse le classique */
+        res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+
+        // sans cela sur l'options du preflight firefox refuse de faire le post (ça répond 'pas de connexion réseau' car xhr.status vaut 0)
+        if (req.method === 'OPTIONS' && req.headers['access-control-request-headers']) {
+          res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
+        } /* */
+      } else if (origin.substr(0, 4) !== 'http') {
+        // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
+        res.header('Access-Control-Allow-Origin', origin)
+        res.header('Access-Control-Allow-Credentials', 'true')
+        res.header('Vary', 'Origin,Cookie')
+      } else {
+        log.debug('cors avec ' + origin + ' refusé')
       }
     }
     next()
