@@ -91,7 +91,7 @@ function Alias (initObj) {
    * Un ou des id de catégorie(s) éventuel (pour un picto)
    * @type {Array}
    */
-  this.categories = (initObj.categories && initObj.categories instanceof Array) ? initObj.categories : []
+  this.categories = Array.isArray(initObj.categories) ? initObj.categories : []
   /**
    * True si public (sinon il faut être authentifié pour lire la ressource)
    * @type {boolean}

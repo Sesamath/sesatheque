@@ -56,7 +56,7 @@ module.exports = function(job) {
         flow(personnes).seqEach(function (personne) {
           console.log('trouvé ' +personne.nom)
           if (typeof personne.groupes === 'object') {
-            if (personne.groupes instanceof Array) {
+            if (Array.isArray(personne.groupes)) {
               personne.groupesMembre = personne.groupes
               delete personne.groupes
             } else {

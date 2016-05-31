@@ -240,6 +240,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
     var ressourcePostee = context.post
+    var groupesSup = ressourcePostee.hasOwnProperty('groupesSup') ? ressourcePostee.groupesSup : ''
     var ressourceOriginale
 
     if (context.perf) {
@@ -288,7 +289,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         $ressourceControl.valideRessourceFromPost(ressourcePostee, partial, this)
       }).seq(function (ressourceNew) {
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
-        $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, this)
+        $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
       }).seq(function (ressourceNew) {
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
@@ -359,7 +360,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     if (error) {
       errorMsg = (typeof error === 'string') ? error : error.toString()
       $json.send(context, null, {arrayOnly: [{text: 'Erreur : ' + errorMsg}]})
-    } else if (!(data instanceof Array)) {
+    } else if (!Array.isArray(data)) {
       log.error(new Error("sendJsonJstreeArray appelé avec autre chose qu'un array"))
       $json.send(context, null, data)
     } else {

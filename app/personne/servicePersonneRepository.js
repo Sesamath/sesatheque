@@ -43,35 +43,55 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
 
   /**
    * Ajoute un groupe à la personne (en le créant s'il n'existait pas),
-   * sauvegarde les modifs de personne si c'est une EntityPersonne (pas si c'est un autre objet)
+   * et sauvegarde les modifs de personne
    * @param {Personne} personne
    * @param {string} groupeNom
-   * @param {personneCallback} next
+   * @param {groupeCallback} next
    * @memberOf $personneRepository
    */
   $personneRepository.addGroupe = function (personne, groupeNom, next) {
-    if (!personne.groupesMembre) personne.groupesMembre = []
+    var uid = personne.oid
+    if (!uid) return next(new Error('Impossible d’ajouter un groupe à une personne sans oid'))
     if (_.include(personne.groupesMembre, groupeNom)) {
-      next(null, personne)
-    } else {
-      flow.seq(function () {
-        $groupeRepository.load(groupeNom, this)
-      }).seq(function (groupe) {
-        var nextStep = this
-        if (groupe) {
-          nextStep(null, groupe)
-        } else {
-          // on le crée
-          EntityGroupe.create({nom: groupeNom}).store(nextStep)
-        }
-      }).seq(function (groupe) {
-        personne.groupesMembre.push(groupe.nom)
-        if (personne.store) personne.store(next)
-        else next(null, personne)
-      }).catch(function (error) {
-        next(error, personne)
-      })
+      return next(null, {nom: groupeNom})
     }
+    // on commence par récupérer une entity si on en a pas déjà une
+    flow().seq(function () {
+      if (!personne.store) $personneRepository.load(uid, this)
+      else this(null, personne)
+    }).seq(function (entityPersonne) {
+      if (entityPersonne) {
+        personne = entityPersonne
+        $groupeRepository.load(groupeNom, this)
+      } else {
+        this(new Error('Aucun utilisateur d’oid ' + uid))
+      }
+    }).seq(function (groupe) {
+      if (groupe) {
+        this(null, groupe)
+      } else {
+        // on le crée
+        var newGroupe = {
+          nom: groupeNom,
+          gestionnaires: [uid]
+        }
+        EntityGroupe.create(newGroupe).store(this)
+      }
+    }).seq(function (groupe) {
+      if (groupe && groupe.nom) {
+        if (!personne.groupesMembre) personne.groupesMembre = []
+        personne.groupesMembre.push(groupe.nom)
+        personne.store(function (error, personne) {
+          if (error) next(error)
+          else if (personne) next(null, groupe)
+          else next(new Error('Erreur à l’affectation du groupe ' + groupeNom))
+        })
+      } else {
+        next(new Error('Erreur à l’enregistrement du groupe ' + groupeNom))
+      }
+    }).catch(function (error) {
+      next(error)
+    })
   }
 
   /**

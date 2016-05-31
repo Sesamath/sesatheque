@@ -118,7 +118,7 @@ function FormField (values) {
      */
     this.selectedValues = []
     // cast de chaque élément en string
-    if (values.selectedValues instanceof Array) {
+    if (Array.isArray(values.selectedValues)) {
       for (var i = 0; i < values.selectedValues.length; i++) {
         this.selectedValues.push(values.selectedValues[i] + '')
       }
@@ -155,7 +155,7 @@ function FormField (values) {
     this.addChoice(choice)
     this.label = undefined
     this.labelInfo = undefined
-  } else if (values.value instanceof Array) {
+  } else if (Array.isArray(values.value)) {
     // une liste, checkboxes par défaut
     if (!this.widget) this.widget = 'checkboxes'
     if (['select', 'checkboxes', 'radios'].indexOf(this.widget) === -1) throw new Error('widget incompatible avec la valeur')
@@ -169,7 +169,7 @@ function FormField (values) {
 } // FormField
 
 FormField.prototype.addChoice = function addChoice (choice) {
-  if (!this.value instanceof Array) {
+  if (!Array.isArray(this.value)) {
     this.value = []
   }
   var i = this.value.length

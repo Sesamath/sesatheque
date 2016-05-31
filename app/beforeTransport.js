@@ -261,7 +261,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       if (isHtml) isVide = _.isEmpty(data.contentBloc) && _.isEmpty(data.blocs)
       else if (isJson) isVide = _.isEmpty(data)
       else isVide = false
-      log.debug('isVide ' + isVide)
+      // log.debug('dans beforeTransport page isVide ' + isVide)
       if (!context.status && isVide && context.method !== 'options') {
         context.status = 404
         log.debug(reqHttp + ' : pas de status ni content => 404')

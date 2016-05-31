@@ -37,7 +37,7 @@
  * @param {Object} initObj Un objet ayant des propriétés d'un groupe
  */
 function Groupe (initObj) {
-  if (!initObj) initObj = {}
+  if (!initObj || typeof initObj !== 'object') initObj = {}
   /**
    * L'identifiant interne à la sésathèque
    * @type {Integer}

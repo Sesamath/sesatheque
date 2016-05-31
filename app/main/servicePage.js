@@ -145,7 +145,7 @@ module.exports = function () {
    */
   $page.printMessage = function (context, message, titre) {
     var data = $page.getDefaultData(context, titre)
-    var contents = message instanceof Array ? message : [message]
+    var contents = Array.isArray(message) ? message : [message]
     data.contentBloc = {
       $view: 'contents',
       contents: contents

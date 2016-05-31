@@ -195,6 +195,9 @@ module.exports = function edit (ressource, options) {
         log('pas trouvé de #groupParametres, on prend le parent du textarea en container')
         parent = textarea.parentNode
       }
+      // on ajoute nos deux ancres text et graphic
+      dom.addElement(parent, 'a', {name: 'text'})
+      dom.addElement(parent, 'a', {name: 'graphic'})
       var container = dom.addElement(parent, 'div', {id: 'editgraphe'})
       $editgraphe = $(container)
       // on autorise de forcer l'éditeur avec du ?editor=(text|graphic)

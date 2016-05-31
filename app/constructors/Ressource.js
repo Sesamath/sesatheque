@@ -111,12 +111,12 @@ function Ressource (initObj) {
      * Les enfants de l'arbre (à la place de la propriété parametres si type vaut 'arbre')
      * @type {Object}
      */
-    this.enfants = (values.enfants instanceof Array) ? values.enfants : []
+    this.enfants = Array.isArray(values.enfants) ? values.enfants : []
     // on accepte une chaîne json
     if (values.enfants && typeof values.enfants === 'string') {
       try {
         var enfants = JSON.parse(values.enfants)
-        if (enfants instanceof Array) this.enfants = enfants
+        if (Array.isArray(enfants)) this.enfants = enfants
         else throw new Error('enfants invalides')
       } catch (error) {
         if (console && console.error) console.error(error)

@@ -32,6 +32,7 @@
 'use strict'
 
 var tools = require('../tools')
+var sTools = require('sesajstools')
 var _ = require('lodash')
 var flow = require('an-flow')
 var moment = require('moment')
@@ -55,45 +56,68 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   var $ressourcePage = {}
 
   /**
-   * Ajoute les groupes au form
+   * Ajoute les cases à cocher de groupes et l'input groupesSup au form
    * @private
+   * @param {Context}       context
    * @param {object}        formData
-   * @param {string[]}      values
+   * @param {string[]}      values La liste des groupes existants
    * @param {errorCallback} next
    */
-  function addGroupes (formData, values, next) {
-    var choices = []
-    var i = 0
-    flow(values).seqEach(function (value) {
+  function addGroupes (context, formData, values, next) {
+    // on ajoute déjà nos groupes
+    var myGroupes = $accessControl.getCurrentUserGroupes(context)
+    var choices = myGroupes.map(function (nom, i) {
+      return {
+        name: 'groupes[' + i + ']',
+        label: nom,
+        value: nom
+      }
+    })
+    // init à l'index suivant
+    var i = myGroupes.length
+    // faut cocher ce qui doit l'être et ajouter éventuellement les groupes déjà présents mais pas à nous, non modifiables
+    flow(values).seqEach(function (groupeNom) {
       var suivant = this
-      $groupeRepository.load(value, function (error, groupe) {
+      $groupeRepository.load(groupeNom, function (error, groupe) {
         if (error) {
           log.error(error)
           formData.errors.push(error.toString())
         } else if (groupe) {
-          choices.push({
-            value: value,
-            label: groupe.nom,
-            isOpen: groupe.open,
-            id: 'groupes' + i,
-            name: 'groupes[' + i + ']'
-          })
-          i++
+          var myIndex = myGroupes.indexOf(groupe.nom)
+          if (myIndex !== -1) {
+            // on l'avait déjà, on le coche
+            choices[myIndex].selected = true
+          } else {
+            // groupe existant sur cette ressource mais pas à nous
+            choices.push({
+              value: groupeNom,
+              label: groupe.nom,
+              isOpen: groupe.open,
+              name: 'groupes[' + i++ + ']',
+              selected: true,
+              readonly: true
+            })
+          }
         } else {
-          formData.errors.push('Le groupe ' + value + " n'existe pas")
+          formData.errors.push('Le groupe ' + groupeNom + " n'existe pas")
         }
         suivant()
       })
     }).seq(function () {
-      formData.groupes.choices = choices
+      formData.groupes = {
+        id: 'groupes',
+        label: 'publié dans le(s) groupe(s)',
+        choices: choices
+      }
+      // wrapper.dust gère le .new sur n'importe quel champ
       formData.groupes.new = {
         name: 'groupesSup',
         id: 'groupesSup',
-        label: "Nouveau(x) groupe(s) à ajouter (à séparer par des virgules s'il y en a plusieurs)",
+        label: "Nouveau(x) groupe(s) à créer et ajouter à cette ressource (à séparer par des virgules s'il y en a plusieurs)",
         placeholder: 'nom du groupe'
       }
+      log.debug('groupes dans addGroupes', formData.groupes, 'form', {max: 2000})
       next()
-      this()
     }).catch(function (error) {
       next(error)
     })
@@ -109,10 +133,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {errorCallback} next
    */
   function addPersonnes (context, formData, key, values, next) {
-    if (!values) values = []
-    log.debug('addPersonnes avec ' + key + ' qui vaut ' + values.join(',') +
-        ' ; formData.errors est un Array ? ' + (formData instanceof Array) + ' ' +
-        (formData.errors && !!formData.errors.push))
+    if (!formData.errors) formData.errors = []
+    log.debug('addPersonnes avec ' + key + ' qui vaut ' + values && values.join(','))
     // seuls les éditeurs peuvent modifier auteurs et contributeurs,
     if ($accessControl.hasPermission('updateAuteurs', context)) {
       formData[key].choices = []
@@ -122,13 +144,13 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // }
       var i = 0
       flow(values).seqEach(function (value) {
-        log.debug('entrée seq, appel personne.load ' + value)
+        log.debug('entrée seq addPersonnes, appel personne.load ' + value)
         var suivant = this
         $personneRepository.load(value, function (error, personne) {
-          log.debug('formData dans cb load personne ' + value, formData, {max: 5000})
-          log.debug('formData.errors dans cb load personne ' + (formData.errors && formData.errors.push), formData.errors)
+          log.debug('formData dans cb load personne ' + value, formData, 'form', {max: 5000})
+          log.debug('formData.errors dans cb load personne', formData.errors)
           if (error) {
-            log.error(error)
+            log.error('error load personne ' + value, error)
             formData.errors.push(error.toString())
           } else if (personne) {
             formData[key].choices.push({
@@ -439,6 +461,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
     var labels = getLabels(ressource)
     log.debug('labels de la ressource ' + ressource.oid, labels)
+    log.debug('type ' + ressource.type)
     // faut un array pour seq
     var labelsArray = []
     _.each(labels, function (label, key) {
@@ -460,7 +483,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (config.required[key]) formData[key].required = true
       if (isUnique) formData[key].unique = true
 
-      if (config.typesVar[key] === 'Array' || config.uniques[key]) {
+      if (config.typesVar[key] === 'Array' || isUnique) {
         // c'est un tableau ou une valeur unique (donc select ou radios)
         // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
         // et la liste des possibles dans config.liste[prop]
@@ -470,16 +493,17 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           formData[key].name = key
         }
         // les Array ne sont pas tous des tableaux d'ids connus, faut différencier
-        // et l'ajout d'auteurs, contributeurs et groupes est asynchrone, faut du seq
         if (config.listes[key]) {
+          // c'est une liste d'id (ou de clés connues)
           formData[key].choices = arrayToDust(key, value, isUnique)
           labelSuivant()
         } else if (key === 'groupes') {
-          if (value) addGroupes(formData, value, labelSuivant)
+          addGroupes(context, formData, value, labelSuivant)
         } else if (key === 'auteurs' || key === 'contributeurs') {
-          if (value) addPersonnes(context, formData, key, value, labelSuivant)
+          addPersonnes(context, formData, key, value, labelSuivant)
         } else {
           log.error(new Error('On tombe sur la clé inatendue ' + key))
+          labelSuivant()
         }
       } else if (config.typesVar[key] === 'Boolean') {
         // checkbox tout seul (pas de label dans les choices, c'est le parent qui le porte)
@@ -505,6 +529,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         labelSuivant()
       }
     }).seq(function () {
+      log.debug('après labels type', ressource.type)
       // on a passé tous les labels, faut ajouter nos cas particulier
       formData.version.readonly = true
 
@@ -584,30 +609,13 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         // if (ressource.force) formData.force.choices[0].selected = true
       }
 
-      // des checkbox pour publier dans nos groupes
-      var myGroupes = $accessControl.getCurrentUserGroupes(context)
-      if (myGroupes.length) {
-        var choices = myGroupes.map(function (nom, i) {
-          return {
-            name: 'groupes[' + i + ']',
-            label: nom,
-            value: nom
-          }
-        })
-        formData.groupes = {
-          id: 'groupes',
-          label: 'publié dans le(s) groupe(s)',
-          choices: choices
-        }
-      }
-
       // on vire le champ si y'a pas d'erreurs
       if (!formData.errors.length) delete formData.errors
       log.debug('auteurs pour le form', formData.auteurs, 'htmlform', {max: 50000, indent: 2})
       log.debug('contributeurs pour le form', formData.contributeurs, 'htmlform', {max: 50000, indent: 2})
       next(formData)
     }).catch(function (error) {
-      log.error(error)
+      log.error('plantage dans getFormViewData', error)
       if (!formData.errors) formData.errors = []
       formData.errors.push(error.toString())
       next(formData)
@@ -852,7 +860,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       data.$metas.title = 'Modifier la ressource ' + ressource.titre
       // et d'éventuels overrides
       if (options) tools.merge(data, options)
-      // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source, donc on passe ici du json)
+      // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source)
       addJsVars(data, ressource)
       // faut aussi ajouter ça pour les vues dust (data.contentBloc.type existe déjà mais c'est un select)
       data.contentBloc.editeur = ressource.type

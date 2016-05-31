@@ -1,6 +1,12 @@
 {#value}
   <label>{label}
-    <input {?id}id="{id}"{/id} type="checkbox" name="{name}" value="{value}"{?selected} checked="checked"{/selected}{?readonly} readonly="readonly"{/readonly} />
+    {!pas de readonly sur les checkboxes, on le met disabled (ça poste rien) + hidden si checked pour poster!}
+    {?readonly}
+      <input type="checkbox" disabled="disabled" {?selected} checked="checked"{/selected}/>
+      {?selected}<input {?id}id="{id}"{/id} type="hidden" name="{name}" value="{value}"/>{/selected}
+    {:else}
+      <input {?id}id="{id}"{/id} type="checkbox" name="{name}" value="{value}"{?selected} checked="checked"{/selected}/>
+    {/readonly}
     {?labelInfo}<span class="remarque">({labelInfo})</span>{/labelInfo}
   </label>
 {/value}

@@ -37,7 +37,7 @@
  * @service $ressourceConverter
  * @requires $ressourceRepository
  * @requires $routes
- * @requires $settings
+ * @requires $accessControl
  */
 var $ressourceConverter = {}
 
@@ -52,6 +52,8 @@ var appConfig = require('../config')
 var Alias = require('../constructors/Alias')
 var jstreeConverter = require('../srcClient/display/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
+
+var sTools = require('sesajstools')
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl) {
   /**
@@ -199,10 +201,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     // checks
     if (ressource.type !== 'arbre') {
       next(new Error("Impossible de peupler une ressource autre qu'un arbre"))
-    } else if (!ressource.enfants ||
-               !(ressource.enfants instanceof Array) ||
-               !ressource.enfants.length
-    ) {
+    } else if (!sTools.isArrayNotEmpty(ressource.enfants)) {
       log.debug('arbre vide', ressource)
       next(new Error('Impossible de peupler un arbre vide'))
     } else {

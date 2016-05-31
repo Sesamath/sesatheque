@@ -65,7 +65,7 @@ function send (context, error, data) {
     if (error.stack) {
       log.error(error)
       error = error.toString()
-    } else if (error instanceof Array) {
+    } else if (Array.isArray(error)) {
       error = error.join(', ')
     }
     sendError(context, error)

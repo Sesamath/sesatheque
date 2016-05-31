@@ -37,6 +37,7 @@ var elementtree = require('elementtree')
 var request = require('request')
 // var util = require('util')
 var uuid = require('an-uuid')
+var tools = require('sesajstools')
 
 var config = require('./config')
 var appConfig = require('../config')
@@ -211,19 +212,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         _.forEach(config.versionTriggers, function (prop) {
           // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
           // on utilise https://lodash.com/docs#isEqual
-          if (!_.isEqual(ressource[ prop ], ressourceBdd[ prop ])) {
+          if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
             // debug
             if (!isProd) {
-              try {
-                log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
-                '\navant : ' + (ressourceBdd[ prop ] === undefined) ? undefined : JSON.parse(ressourceBdd[ prop ]) +
-                '\naprès : ' + (ressourceBdd[ prop ] === undefined) ? undefined : JSON.parse(ressource[ prop ]))
-              } catch (e) {
-                log.error(
-                  'le parsing de ressource[' + prop + '] a planté pour ' + ressource.oid + ' ' + ressource.origine + '/' + ressource.idOrigine,
-                  [ ressourceBdd[ prop ], ressource[ prop ] ]
-                )
-              }
+              log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
+                '\navant : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : tools.stringify(ressourceBdd[prop]) +
+                '\naprès : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : tools.stringify(ressource[prop]))
             }
             needIncrement = true
             return false // pas la peine de continuer le forEach, cf https://lodash.com/docs#forEach

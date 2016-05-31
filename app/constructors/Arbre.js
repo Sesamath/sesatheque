@@ -74,12 +74,12 @@ function Arbre (initObj) {
    * Des attributs du node (ou la racine de l'arbre), ça peut être ico pour une icone particulière
    * @type {Object}
    */
-  this.attributes = (initObj.attributes && initObj.attributes instanceof Object) ? initObj.attributes : {}
+  this.attributes = (initObj.attributes && typeof initObj.attributes === 'object') ? initObj.attributes : {}
   /**
    * Les enfants, un tableaux d'objets Arbre (qui peuvent n'être que des références, ou un mix)
    * @type {Arbre[]}
    */
-  this.enfants = (initObj.enfants && initObj.enfants instanceof Array) ? initObj.enfants : []
+  this.enfants = Array.isArray(initObj.enfants) ? initObj.enfants : []
 }
 
 /**

@@ -49,7 +49,7 @@ var tools = {}
  */
 tools.clone = function (object) {
   var copy = object
-  if (object instanceof Array) {
+  if (Array.isArray(object)) {
     copy = object.slice()
   } else if (object instanceof Date) {
     copy = new Date(object)
@@ -141,7 +141,7 @@ tools.isEqual = function (obj1, obj2) {
 tools.integerify = function (tab) {
   var i
   var tabCopy = []
-  if (tab instanceof Array) {
+  if (Array.isArray(tab)) {
     tab.forEach(function (value) {
       if (_.isArray(value)) tabCopy.push(tools.integerify(value))
       else if (typeof value === 'string' || typeof value === 'number') {
@@ -258,8 +258,8 @@ tools.merge = function (object, newValues, strict) {
     })
   }
 
-  if (object instanceof Array && newValues instanceof Array) mergeArray(object, newValues)
-  else if (object instanceof Object && newValues instanceof Object) mergeObj(object, newValues)
+  if (Array.isArray(object) && Array.isArray(newValues)) mergeArray(object, newValues)
+  else if (object && newValues && typeof object === 'object' && typeof newValues === 'object') mergeObj(object, newValues)
   else if (strict) log.error(new Error('tools.merge réclame 2 Object ou 2 Array'))
 }
 

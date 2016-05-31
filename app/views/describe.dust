@@ -56,6 +56,12 @@
         </ul>
     {/relations.value}
 
+    {?groupes.value}
+      <ul class="groupes">{groupes.title}
+        {#groupes.value}<li>{.}</li>{/groupes.value}
+      </ul>
+    {/groupes.value}
+
 {/error}
 </div>
 {!

@@ -128,13 +128,19 @@ function out (message, objectToDump, filter, stream, options) {
   if (!options) options = {}
   if (!filter || !exclusions[filter]) {
     // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
-    if (message instanceof Error) message = message.stack + '\n'
-    else if (typeof message === 'string' && message.indexOf('[object') === 0) {
-      // y'a eu un pb avant l'appel de cette fct, on génère une erreur pour récupérer la pile d'appel
-      try {
-        throw new Error('erreur inconnue passé à log')
-      } catch (error) {
-        message = error.stack
+    if (message instanceof Error) {
+      message = message.stack + '\n'
+    } else if (message && typeof message !== 'string') {
+      var msg = message.toString()
+      if (msg.indexOf('[object') === 0) {
+        // y'a eu un pb avant l'appel de cette fct, on génère une erreur pour récupérer la pile d'appel
+        try {
+          throw new Error('erreur inconnue passé à log')
+        } catch (error) {
+          message = error.stack
+        }
+      } else {
+        message = msg
       }
     }
     if (objectToDump) {
@@ -162,13 +168,17 @@ if (env === 'prod') {
    * @type {function}
    * @param {string|object} message
    * @param {Object}        [objectToDump] Un objet éventuel qui sera rendu en json avec indentation
-   * @param {string}        filter         Un nom de filtre pour exclusion éventuelle
-   * @param {Object}         [options]     Passer une propriété
+   * @param {string}        [filter]       Un nom de filtre pour exclusion éventuelle
+   * @param {Object}        [options]      Passer les propriétés facultatives
    *                                         indent pour indenter objectToDump du nombre d'espaces demandés,
    *                                         max pour modifier la limite de la sortie (200 par défaut)
    */
   GLOBAL.log = function (message, objectToDump, filter, options) { // jshint ignore:line
     // (log étant défini en global dans la conf jshint il râle si on le redéfini)
+    if (arguments.length === 3 && typeof filter === 'object') {
+      options = filter
+      filter = 'info'
+    }
     out(message, objectToDump, filter, null, options)
   }
   applog('app', "fonction de log activée avec l'environnement : " + env)
@@ -184,10 +194,14 @@ if (config.logs.debug) {
    * @memberOf log
    * @param message
    * @param objectToDump
-   * @param filter
+   * @param [filter]
    * @param options
    */
   log.debug = function (message, objectToDump, filter, options) {
+    if (arguments.length === 3 && typeof filter === 'object') {
+      options = filter
+      filter = 'info'
+    }
     out(message, objectToDump, filter, debugOutputStream, options)
   }
 
@@ -272,7 +286,7 @@ log.getElapsed = function (start) {
  * @param filter
  */
 log.error = function (message, objectToDump, filter) {
-  out(message, objectToDump, filter, errorOutputStream)
+  out(message, objectToDump, filter, errorOutputStream, {max: 2000})
 }
 
 /**
@@ -286,7 +300,7 @@ log.errorData = function (message, objectToDump, filter) {
   // pour les errorData, on met un max élevé s'il est pas précisé
   if (!filter) filter = {}
   if (!filter.max) filter.max = 50000
-  out(message, objectToDump, filter, errorDataOutputStream)
+  out(message, objectToDump, filter, errorDataOutputStream, {max: 2000})
 }
 
 /**

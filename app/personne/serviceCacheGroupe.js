@@ -76,8 +76,13 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cacheGroupe
    */
   $cacheGroupe.set = function (groupe, next) {
-    if (groupe && groupe.nom) $cache.set(getKey(groupe), groupe, ttl, next)
-    else next(new Error('Groupe invalide'))
+    if (groupe && groupe.nom) {
+      $cache.set(getKey(groupe), groupe, ttl, next)
+    } else {
+      var error = new Error('Groupe invalide')
+      log.error(error, groupe)
+      if (next) next(error)
+    }
   }
 
   /**

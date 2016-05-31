@@ -28,33 +28,57 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
+
+var flow = require('an-flow')
+var _ = require('lodash')
+var tools = require('sesajstools')
+var rTools = require('../tools/ressource')
 
 module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
   /**
-   * Ajoute un warning à une ressource
+   * Charge groupeNom pour voir s'il existe, sinon, et si on a précisé shouldBeNew on le crée,
+   * et ensuite l'ajoute à la ressource si on en est membre ou qu'il était dans whiteList
+   * @private
+   * @param {Context} context
    * @param {Ressource} ressource
-   * @param {string}    warning
+   * @param {string} groupeNom
+   * @param {boolean} shouldBeNew Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
+   * @param {Array} whiteList Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
+   * @param {errorCallback} next
    */
-  function addWarning (ressource, warning) {
-    if (!ressource._warnings) ressource._warnings = []
-    ressource._warnings.push(warning)
+  function checkGroupe (context, ressource, groupeNom, shouldBeNew, whiteList, next) {
+    if (!_.isArray(ressource.groupes)) ressource.groupes = []
+    $groupeRepository.load(groupeNom, function (error, groupe) {
+      if (error) {
+        next(error)
+      } else if (groupe) {
+        if (_.includes(whiteList, groupe.nom)) ressource.groupes.push(groupe.nom)
+        else if ($accessControl.isInGroupe(context, groupe.nom)) ressource.groupes.push(groupe.nom)
+        else rTools.addWarning(ressource, 'Vous devez faire partie du groupe ' + groupe.nom + ' pour y partager cette ressource')
+        next()
+      } else if (shouldBeNew) {
+        // il est bien nouveau et on voulait justement l'ajouter
+        var currentUser = $accessControl.getCurrentUser(context)
+        // à priori on récupère une Personne de la session mais pas une EntityPersonne, on teste quand même au cas où ça évoluerait
+        if (!currentUser.store) currentUser = EntityPersonne.create(currentUser)
+        $personneRepository.addGroupe(currentUser, groupeNom, function (error, groupe) {
+          if (error) {
+            next(error)
+          } else if (groupe) {
+            ressource.groupes.push(groupe.nom)
+            next()
+          } else {
+            next(new Error('Erreur interne (addGroupe)'))
+          }
+        })
+      } else {
+        // il est nouveau et c'est pas normal
+        rTools.addWarning(ressource, 'Le groupe ' + groupeNom + " n'existe pas (ou plus)")
+        next()
+      }
+    })
   }
-  /**
-   * Ajoute une erreur à une ressource
-   * @param {Ressource} ressource
-   * @param {string}    errorMsg
-   */
-  function addError (ressource, errorMsg) {
-    if (!ressource._errors) ressource._errors = []
-    ressource._errors.push(errorMsg)
-  }
-
-  var flow = require('an-flow')
-  var _ = require('lodash')
-  // var tools = require('../tools')
-
   /**
    * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
    * à la jonction entre personne et ressource.
@@ -65,72 +89,71 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
   /**
    * Normalise la propriété groupes d'une ressource (en vérifiant les droits et que les groupes existent)
    * Un prof peut enlever/ajouter des groupes s'il est auteur (rien sinon)
-   * @param {Context}       context
-   * @param {Ressource}     [ressourceOriginale]
-   * @param {Ressource}     ressourceNew
+   * @param {Context}           context
+   * @param {Ressource}         ressourceOriginale
+   * @param {Ressource}         ressourceNew
+   * @param {string}            groupesSup La liste des groupes à ajouter (délimiteur , ou ; ou espace)
    * @param {ressourceCallback} next
    * @memberOf $personneControl
    */
-  $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, next) {
-    if (!ressourceNew.groupes) ressourceNew.groupes = []
-    log.debug('checkGroupes avec ' + ressourceNew.groupes.join(','))
-    // les 2 cas où y'a rien à faire
-    if (ressourceOriginale && _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes)) {
-      // update sans modif de groupe
+  $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, groupesSup, next) {
+    /**
+     * ajoute l'erreur à la ressource et la passe à next
+     * @private
+     * @inner
+     * @param {Error} error
+     */
+    function addErrorAndNext (error) {
+      log.error(error)
+      rTools.addError(ressourceNew, error.toString())
       next(null, ressourceNew)
-    } else if (!ressourceOriginale && !ressourceNew.groupes.length) {
-      // création de ressource sans groupes
-      next(null, ressourceNew)
-    } else {
-      // faut examiner les différences, on regarde d'abord si c'est le format attendu
-      if (_.isArray(ressourceNew.groupes)) {
-        var groupesVoulus = ressourceNew.groupes
-        var tmpGroupes
-        ressourceNew.groupes = []
-        // les droits, seulement si la ressource existait (sinon on suppose que si on est appelé c'est qu'il a les droits de création)
-        if (ressourceOriginale && !$accessControl.hasPermission('updateGroupes', context, ressourceOriginale)) {
-          ressourceNew.groupes = ressourceOriginale.groupes
-          addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
-          next(null, ressourceNew)
-        } else {
-          // on a les droits, on ajoute les groupes sup s'il y en a
-          if (ressourceNew.groupesSup) {
-            tmpGroupes = ressourceNew.groupesSup.split(',')
-            tmpGroupes.forEach(function (groupe) {
-              groupesVoulus.push(groupe.trim())
-            })
-          }
-          // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie qu'ils existent et que l'utilisateur peut ajouter
-          flow(groupesVoulus).seqEach(function (groupeNom) {
-            var nextGroupe = this
-            // on regarde s'il existe
-            $groupeRepository.load(groupeNom, function (error, groupe) {
-              if (error) {
-                addError(ressourceNew, error.toString())
-              } else if (groupe) {
-                // le groupe existe déjà
-                if ($accessControl.isInGroupe(context, groupeNom)) ressourceNew.groupes.push(groupe.nom)
-                else ressourceNew._warnings.push('Vous devez faire partie du groupe ' + groupeNom + ' pour y partager cette ressource')
-              } else {
-                addWarning(ressourceNew, 'Le groupe ' + groupe.nom + " n'existe pas")
-              }
-              nextGroupe()
-            })
-          }).seq(function () {
-            next(null, ressourceNew)
-          }).catch(function (error) {
-            next(error)
-          })
-        }
-      } else {
-        // on vide et on signale l'erreur sans aller plus loin
-        log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
-        if (!ressourceNew._errors) ressourceNew._errors = []
-        ressourceNew._errors.push('Groupes invalides')
-        ressourceNew.groupes = []
-        next(null, ressourceNew)
-      }
     }
+
+    if (!ressourceNew.groupes) ressourceNew.groupes = []
+    if (!_.isArray(ressourceNew.groupes)) {
+      // on vide et on signale l'erreur sans aller plus loin
+      log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
+      rTools.addError(ressourceNew, 'Groupes invalides')
+      ressourceNew.groupes = []
+      return next(null, ressourceNew)
+    }
+    // on a un array qu'on peut analyser
+    log.debug('checkGroupes avec les groupes ' + ressourceNew.groupes.join(',') + ' et les nouveaux ' + groupesSup)
+    // les 2 cas où y'a rien à faire
+    if (ressourceOriginale && _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes) && !groupesSup) {
+      // update sans modif de groupe
+      return next(null, ressourceNew)
+    } else if (!ressourceOriginale && !ressourceNew.groupes.length && !groupesSup) {
+      // création de ressource sans groupes
+      return next(null, ressourceNew)
+    }
+
+    // vérif des droits sur les groupes, seulement si la ressource existait
+    // (sinon on suppose que si on est appelé c'est que le user a les droits de création de ressource donc d'updateGroupes dessus)
+    if (ressourceOriginale && !$accessControl.hasPermission('updateGroupes', context, ressourceOriginale)) {
+      ressourceNew.groupes = ressourceOriginale.groupes
+      rTools.addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
+      return next(null, ressourceNew)
+    }
+
+    // on a les droits, on mémorise ce qui est demandé et ajoute les groupes sup s'il y en a
+    var groupesVoulus = ressourceNew.groupes
+    ressourceNew.groupes = []
+    // on boucle sur les groupes à ajouter
+    flow(tools.splitAndTrim(groupesSup, /[,;]+/)).seqEach(function (groupeNom) {
+      log.debug('ajout du nouveau groupe ' + groupeNom)
+      checkGroupe(context, ressourceNew, groupeNom, true, [], this)
+    }).seq(function () {
+      // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie qu'ils existent
+      // et que l'utilisateur peut ajouter ou qu'il y était déjà
+      flow(groupesVoulus).seqEach(function (groupeNom) {
+        log.debug('affectation du groupe ' + groupeNom)
+        checkGroupe(context, ressourceNew, groupeNom, false, ressourceOriginale.groupes, this)
+      }).seq(function () {
+        // @todo faudrait vérifier que l'on a pas viré de groupe auxquel on appartient pas, et si c'était le cas cloner pour simuler du "copy on write" ?
+        next(null, ressourceNew)
+      }).catch(addErrorAndNext)
+    }).catch(addErrorAndNext)
   }
 
   /**
@@ -178,11 +201,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
           var nextAuteur = this
           $personneRepository.load(id, function (error, personne) {
             if (error) {
-              addError(ressourceNew, error.toString())
+              rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
               ressourceNew.auteurs.push(personne.oid)
             } else {
-              addWarning(ressourceNew, "L'auteur d'identifiant " + id + " n'existe pas")
+              rTools.addWarning(ressourceNew, "L'auteur d'identifiant " + id + " n'existe pas")
             }
             nextAuteur()
           })
@@ -207,11 +230,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
           var nextContributeur = this
           $personneRepository.load(oid, function (error, personne) {
             if (error) {
-              addError(ressourceNew, error.toString())
+              rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
               ressourceNew.contributeurs.push(personne.oid)
             } else {
-              addWarning(ressourceNew, "Le contributeur d'identifiant ' + oid + ' n'existe pas")
+              rTools.addWarning(ressourceNew, "Le contributeur d'identifiant ' + oid + ' n'existe pas")
             }
             nextContributeur()
           })

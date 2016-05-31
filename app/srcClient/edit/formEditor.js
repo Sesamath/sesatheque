@@ -109,7 +109,7 @@ function addFormGroup (element, position) {
  */
 function addCheckboxes (parent, name, options, checkboxes) {
   var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group checkboxes'})
-  if (checkboxes instanceof Array) {
+  if (Array.isArray(checkboxes)) {
     checkboxes.forEach(function (checkbox, i) {
       var id = checkbox.id || dom.getNewId()
       var label = dom.addElement(container, 'label', {'for': id}, checkbox.label)
@@ -155,7 +155,7 @@ function addSelect (parent, attrs, options, choix) {
   var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group select'})
   if (!attrs) attrs = {}
   var select = dom.getElement('select', attrs)
-  if (choix instanceof Array) {
+  if (Array.isArray(choix)) {
     choix.forEach(function (optionAttrs) {
       var content
       if (optionAttrs.content) {

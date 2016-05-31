@@ -92,7 +92,7 @@ module.exports = function ($page) {
     var form = new Form(formValues)
     var formGroupField = form.addGroup(groupValues)
     if (fields) {
-      if (typeof fields === 'object' && !(fields instanceof Array)) fields = [fields]
+      if (!Array.isArray(fields)) fields = [fields]
       fields.forEach(function (field) {
         formGroupField.addField(field)
       })

@@ -38,7 +38,7 @@ function getResume (arbre) {
  */
 function checkArbre (arbre, next) {
   var idArbre = arbre.oid ? getResume(arbre) : lastArbre + ' > ' + arbre.titre
-  if (arbre.enfants && arbre.enfants instanceof Array) {
+  if (tools.isArray(arbre.enfants)) {
     flow(arbre.enfants).seqEach(function (enfant) {
       var nextEnfant = this
       var ref = enfant.ref || enfant.oid

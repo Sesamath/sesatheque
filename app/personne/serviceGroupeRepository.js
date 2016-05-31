@@ -116,12 +116,14 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
    * @memberOf $groupeRepository
    */
   $groupeRepository.save = function (groupe, next) {
+    if (!groupe.nom) {
+      var error = new Error('Impossible d’enregistrer un groupe sans nom')
+      log.error(error)
+      return next(error)
+    }
     if (!groupe.store) groupe = EntityGroupe.create(groupe)
-    groupe.store(function (error, groupe) {
-      if (!error && groupe) $cacheGroupe.set(groupe)
-      // on passe à next sans attendre le résultat de la mise en cache
-      next(error, groupe)
-    })
+    // la mise en cache est dans afterStore de l'entity
+    groupe.store(next)
   }
 
   return $groupeRepository

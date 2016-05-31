@@ -68,7 +68,7 @@ module.exports = function display (ressource, options, next) {
           j3pOptions.lastResultat = options.lastResultat
         }
         log('loader j3p avec le graphe', ressource.parametres.g)
-        if (ressource.parametres.g instanceof Array) {
+        if (Array.isArray(ressource.parametres.g)) {
           j3pOptions.loadCallback = next
           loader.charge(options.container, ressource, j3pOptions)
         } else {

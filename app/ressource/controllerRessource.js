@@ -432,12 +432,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $ressourcePage.printError(context, "Probleme d'accès à la base de données")
         } else if (ressource) {
           if ($accessControl.hasPermission('update', context, ressource)) {
-            var options = {
-              $metas: {title: 'Modifier la ressource : ' + ressource.titre}
-            }
-            options.titre = ressource.titre
             addToken(context, ressource)
-            $ressourcePage.printForm(context, error, ressource, options)
+            $ressourcePage.printForm(context, error, ressource)
           } else {
             // la ressource existe mais on donne pas l'info si on a pas les droits
             denied404(context, oid)
@@ -478,43 +474,53 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
     var titrePage = 'Modifier une ressource'
-    var ressourceNew = context.post
+    var oid = context.arguments.oid
+    var ressourcePostee = context.post
+    var groupesSup = ressourcePostee.hasOwnProperty('groupesSup') ? ressourcePostee.groupesSup : ''
+    var ressourceNormee
     var ressourceOriginale
 
     if ($accessControl.isAuthenticated(context)) {
       flow().seq(function () {
-        checkToken(context, ressourceNew.oid, this)
+        log.debug('groupes ress', ressourcePostee.groupes)
+        log.debug('groupesSup ress', ressourcePostee.groupesSup)
+        // log.debug('ressource postée', ressourcePostee, 'form', {max: 5000})
+        checkToken(context, oid, this)
       }).seq(function () {
-        $ressourceControl.valideRessourceFromPost(ressourceNew, false, this)
-      }).seq(function (ressourceNormee) {
-        if (!_.isEmpty(ressourceNew._errors)) {
-          printForm(context, null, ressourceNew, titrePage)
-        } else if (!_.isEmpty(ressourceNew._warnings) && ressourceNew.force !== 'forced') {
-          printForm(context, null, ressourceNew, titrePage)
+        $ressourceControl.valideRessourceFromPost(ressourcePostee, false, this)
+      }).seq(function (ressource) {
+        log.debug('groupes ress normée', ressource.groupes)
+        // faut la mémoriser pour comparer avec la bdd
+        ressourceNormee = ressource
+        if (!_.isEmpty(ressource._errors)) {
+          printForm(context, null, ressource, titrePage)
+        } else if (!_.isEmpty(ressource._warnings) && ressource.force !== 'forced') {
+          printForm(context, null, ressource, titrePage)
         } else {
-          ressourceNew = ressourceNormee
-          // faut charger pour vérifier groupes et personnes
-          $ressourceRepository.load(ressourceNew.oid, this)
+          // faut charger l'ancienne pour vérifier groupes et personnes
+          $ressourceRepository.load(oid, this)
         }
       }).seq(function (ressourceBdd) {
+        log.debug('grps ress bdd', ressourceBdd.groupes)
+        log.debug('av checkGroupes')
         if (ressourceBdd) {
           ressourceOriginale = ressourceBdd
-          $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, this)
+          $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
         } else {
-          var error = new Error('La ressource ' + ressourceNew.oid + " n'existe plus")
+          var error = new Error('La ressource ' + oid + " n'existe plus")
           log.error(error)
           this(error)
         }
       }).seq(function (ressource) {
-        ressourceNew = ressource
-        $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
+        log.debug('av checkPersonnes', ressource)
+        $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
       }).seq(function (ressource) {
         log.debug('auteurs après checkPersonnes', ressource.auteurs)
-        ressourceNew = ressource
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         tools.update(ressourceOriginale, ressource)
         $ressourceRepository.write(ressourceOriginale, this)
       }).seq(function (ressource) {
+        log.debug('ressource enregistrée', ressource)
         // si on a du closerId=YYY dans l'url, on affiche une page qui envoie un message (Cf sesatheque-client.modifyItem)
         if (context.get.closerId) {
           // on apelle le closer mis par sesatheque-client, mais faut ajouter $droits à la ressource
@@ -543,14 +549,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         }
       }).catch(function (error) {
         log.debug('erreur au post', error)
-        log.debug('avec la ressource', ressourceNew)
-        printForm(context, error, ressourceNew, titrePage)
+        log.debug('avec la ressource', ressourcePostee)
+        printForm(context, error, ressourcePostee, titrePage)
       })
     } else {
       denied(context)
     }
   })
 
+  /**
+   * Importe une ressource (via du js client qui appelera l'api
+   * @route GET /ressource/import
+   */
   controller.get('import', function (context) {
     context.layout = 'page'
     if ($accessControl.isAuthenticated(context)) {
