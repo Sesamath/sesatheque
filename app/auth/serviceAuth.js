@@ -304,7 +304,11 @@ module.exports = function ($accessControl, $ressourcePage) {
         } else if (personne) {
           personne.origine = getOrigine(context)
           personne.lastCheck = new Date()
-          $accessControl.login(context, personne, next)
+          $accessControl.login(context, personne, function (error, personne) {
+            if (error) next(error)
+            else if (context.get.redirect) context.redirect(context.get.redirect)
+            else next(null, personne)
+          })
         } else {
           next(new Error("L'authentification n'a pas retourné d'utilisateur à connecter"))
         }

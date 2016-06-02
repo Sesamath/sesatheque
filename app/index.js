@@ -173,7 +173,7 @@ try {
       var $sesalabSso = lassi.service('$sesalabSso')
       $sesalabSso.setLoginCallback(function (context, user, next) {
         var $accessControl = lassi.service('$accessControl')
-        // on lui file d'office le role formateur, parce que l'on sait que nos serveurs d'authentificationne renvoient
+        // on lui file d'office le role formateur, parce que l'on sait que nos serveurs d'authentification ne renvoient
         // que des formateurs, sinon il faudrait controler d'apres user.origine (qui est le baseUrl du serveur d'authentification)
         if (user.original.externalMech && user.original.externalId) {
           // c'est un user d'un sesalab qui venait d'ailleurs

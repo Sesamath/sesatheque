@@ -42,7 +42,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
     if (context.get.redirect) context.redirect(context.get.redirect)
     else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
   }
-  
+
   // on diffère la création des routes à l'ajout du premier client
   $auth.deferController(function () {
     /**
