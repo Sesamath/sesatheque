@@ -33,7 +33,7 @@ var conf = {
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/index.js',
     import: './app/srcClient/edit/import.js',
-    // showParcours: 'sesaeditgraphe/src/showParcours.js'
+    showParcours: 'sesaeditgraphe/src/embed/sp.js'
   },
   output: {
     path: 'app/ressource/public/',
