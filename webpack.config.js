@@ -17,6 +17,9 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 
 // var path = require('path');
 var webpack = require('webpack')
+var appConfig = require('./app/config')
+var baseUrl = appConfig.application.baseUrl
+if (baseUrl.substr(-1) !== '/') baseUrl += '/'
 
 // la conf identique dev/prod
 var conf = {
@@ -37,7 +40,7 @@ var conf = {
   },
   output: {
     path: 'app/ressource/public/',
-    publicPath: '/',
+    publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].bundle.js',
     // cf https://webpack.github.io/docs/configuration.html#output-library
