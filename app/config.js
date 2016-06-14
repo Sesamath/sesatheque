@@ -60,7 +60,7 @@ var root = path.resolve(__dirname, '..')
 var staging = (process.env.NODE_ENV === 'production') ? 'prod' : 'dev'
 
 /** La config */
-var settings = {
+var config = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application: {
     name: 'bibliotheque',
@@ -128,9 +128,14 @@ var settings = {
       },
       cacheTTL: 20 * 60
     },
+    sesalabSso: {
+      authServers: []
+    },
     ressource: ressourceConfig
   },
-  // une liste de domaines 'sesalab' pouvant servir de source d'authentification et stocker chez nous, cf /api/connexion
+  // une liste de domaines 'sesalab' autorisés à
+  // - appeler /connexion (ça va virer avec sesalab-sso)
+  // - appeler l'api pour stocker des séquences
   sesalabs: [
     'https://www.labomep.net/'
   ],
@@ -166,16 +171,36 @@ var settings = {
 
 // on ajoute nos params locaux (accès à la base et port,
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
-if (localConfig) tools.merge(settings, localConfig)
+if (localConfig) tools.merge(config, localConfig)
 
 // on enlève le debug mysql en prod
-if (settings.application.staging === 'prod' && settings.$entities.database.debug) {
-  delete settings.$entities.database.debug
+if (config.application.staging === 'prod' && config.$entities.database.debug) {
+  delete config.$entities.database.debug
 }
 // on ajoute toujours un slash de fin à baseUrl
-if (settings.application.baseUrl.substr(-1) !== '/') settings.application.baseUrl += '/'
+if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
 
 // Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,
 // cf _private.example/config.js
 
-module.exports = settings
+/**
+ * On passe à la conf de sesalabSso, déduite du reste
+ */
+config.components.sesalabSso = {
+  // On est client, on donne la conf de notre serveur d'authentification
+  authServers: []
+}
+config.sesalabs.forEach(function (sesalabUrl) {
+  if (sesalabUrl.substr(-1) !== '/') sesalabUrl += '/'
+  config.components.sesalabSso.authServers.push({
+    baseUrl: sesalabUrl,
+    // pour demander un login
+    loginPage: '/sso/login',
+    // pour une demande de logout (de sesalab et des autres sesatheques)
+    logoutPage: '/sso/logout',
+    // pour signaler une erreur
+    errorPage: '/sso/error'
+  })
+})
+
+module.exports = config
