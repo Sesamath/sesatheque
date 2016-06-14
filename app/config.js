@@ -136,6 +136,7 @@ var config = {
   // une liste de domaines 'sesalab' autorisés à
   // - appeler /connexion (ça va virer avec sesalab-sso)
   // - appeler l'api pour stocker des séquences
+  // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
   sesalabs: [
     'https://www.labomep.net/'
   ],
@@ -184,23 +185,30 @@ if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl +=
 // cf _private.example/config.js
 
 /**
- * On passe à la conf de sesalabSso, déduite du reste
+ * On passe à la conf de sesalabSso, déduite du reste si on a mis des sesalabs
  */
-config.components.sesalabSso = {
-  // On est client, on donne la conf de notre serveur d'authentification
-  authServers: []
-}
-config.sesalabs.forEach(function (sesalabUrl) {
-  if (sesalabUrl.substr(-1) !== '/') sesalabUrl += '/'
-  config.components.sesalabSso.authServers.push({
-    baseUrl: sesalabUrl,
-    // pour demander un login
-    loginPage: '/sso/login',
-    // pour une demande de logout (de sesalab et des autres sesatheques)
-    logoutPage: '/sso/logout',
-    // pour signaler une erreur
-    errorPage: '/sso/error'
+if (config.sesalabs && config.sesalabs.length) {
+  config.components.sesalabSso = {
+    // On est client, on donne la conf de notre serveur d'authentification
+    authServers: []
+  }
+  config.sesalabs.forEach(function (sesalabUrl) {
+    if (sesalabUrl.substr(-1) !== '/') sesalabUrl += '/'
+    config.components.sesalabSso.authServers.push({
+      baseUrl: sesalabUrl,
+      // pour demander un login
+      loginPage: '/sso/login',
+      // pour une demande de logout (de sesalab et des autres sesatheques)
+      logoutPage: '/sso/logout',
+      // pour signaler une erreur
+      errorPage: '/sso/error'
+    })
   })
-})
+  // et on ajoute le component sesalab-sso
+  if (!config.extraModules) config.extraModules = []
+  config.extraModules.push('sesalab-sso')
+  if (!config.extraDependenciesLast) config.extraDependenciesLast = []
+  config.extraDependenciesLast.push('sesalab-sso')
+}
 
 module.exports = config
