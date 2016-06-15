@@ -192,9 +192,10 @@ if (config.sesalabs && config.sesalabs.length) {
     // On est client, on donne la conf de notre serveur d'authentification
     authServers: []
   }
+  var confSso = config.components.sesalabSso
   config.sesalabs.forEach(function (sesalabUrl) {
     if (sesalabUrl.substr(-1) !== '/') sesalabUrl += '/'
-    config.components.sesalabSso.authServers.push({
+    confSso.authServers.push({
       baseUrl: sesalabUrl,
       // pour demander un login
       loginPage: '/sso/login',
@@ -204,6 +205,17 @@ if (config.sesalabs && config.sesalabs.length) {
       errorPage: '/sso/error'
     })
   })
+  // une callback pour loguer un user ici, cette fonction sera appelée après un validate réussi,
+  // le user est envoyé par le serveur d'authentification et mis au format User
+  // on a pas accès au service $sesalabSso ici, ça doit être initialisé dans
+  confSso.loginCallback = function (context, user, next) {
+    throw new Error('Il fallait définir une callback de login avec $sesalabSso.setLoginCallback')
+  }
+  // callback de logout, vire le user en session et on appelle next
+  confSso.logoutCallback = function (context, next) {
+    context.session.user = null
+    next()
+  }
   // et on ajoute le component sesalab-sso
   if (!config.extraModules) config.extraModules = []
   config.extraModules.push('sesalab-sso')
