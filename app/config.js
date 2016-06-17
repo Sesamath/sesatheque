@@ -200,7 +200,7 @@ if (config.sesalabs && config.sesalabs.length) {
   } else {
     // on vérifie que ce qui est déjà défini n'est pas du grand n'importe quoi
     confSso.authServers = confSso.authServers.filter((server) => {
-      if (server && server.baseUrl) return server
+      if (server && server.baseUrl) return true
       console.error('faut pas mettre n’importe quoi en authServers, baseUrl est obligatoire', server)
     })
   }
@@ -218,8 +218,7 @@ if (config.sesalabs && config.sesalabs.length) {
       return console.error('Configuration de sesalabs non conforme', sesalab)
     }
     if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
-    // on regarde s'il a pas déjà été défini (comment server peut être undefined ici ???)
-    var confServer = confSso.authServers.find((server) => server && server.baseUrl === sesalab.baseUrl)
+    // ça donne ce server
     var authServer = {
       name: sesalab.name || stools.urlGetDomain(sesalab.baseUrl),
       baseUrl: sesalab.baseUrl,
@@ -230,8 +229,20 @@ if (config.sesalabs && config.sesalabs.length) {
       // pour signaler une erreur
       errorPage: 'sso/error'
     }
-    if (confServer) authServer = tools.merge(authServer, confServer)
-    confSso.authServers.push(authServer)
+    // on regarde s'il a pas déjà été défini, pour empêcher les doublons
+    var existingIndex
+    confSso.authServers.some(function (server, index) {
+      if (server.name === authServer.name || server.baseUrl === authServer.baseUrl) {
+        existingIndex = index
+        tools.merge(authServer, server)
+        return true
+      }
+    })
+    if (existingIndex) {
+      confSso.authServers[existingIndex] = authServer
+    } else {
+      confSso.authServers.push(authServer)
+    }
   })
   console.error('DEBUG, après ajout sesalab on a authServers', confSso.authServers)
 
