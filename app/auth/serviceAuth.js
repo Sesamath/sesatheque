@@ -122,7 +122,7 @@ module.exports = function ($accessControl, $ressourcePage) {
         if (deferredInitController) deferredInitController()
       }
       clients[authClient.name] = authClient
-      modLog('has registered', 'authClient' + authClient.name)
+      modLog('has registered', 'authClient ' + authClient.name)
     } catch (error) {
       log.error(error)
     }
@@ -213,11 +213,9 @@ module.exports = function ($accessControl, $ressourcePage) {
     var personne = $accessControl.getCurrentUser(context)
     if (personne) {
       var client = getClient(context)
-      log('$auth.getSsoLinks client', client)
       if (client instanceof Error) log.error(client)
       else if (client.getSsoLinks) links = client.getSsoLinks(personne.idOrigine)
     }
-    log('$auth.getSsoLinks', links, client.getSsoLinks)
 
     return links
   }

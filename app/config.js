@@ -204,6 +204,7 @@ if (config.sesalabs && config.sesalabs.length) {
       console.error('faut pas mettre n’importe quoi en authServers, baseUrl est obligatoire', server)
     })
   }
+  console.error('DEBUG, avant ajout sesalab on a authServers', confSso.authServers)
   // et on ajoute un authServer pour chaque sesalab
   config.sesalabs.forEach(function (sesalab, index) {
     // pour accepter une liste de baseUrl
@@ -217,8 +218,8 @@ if (config.sesalabs && config.sesalabs.length) {
       return console.error('Configuration de sesalabs non conforme', sesalab)
     }
     if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
-    // on regarde s'il a pas déjà été défini
-    var confServer = confSso.authServers.find((server) => server.baseUrl === sesalab.baseUrl)
+    // on regarde s'il a pas déjà été défini (comment server peut être undefined ici ???)
+    var confServer = confSso.authServers.find((server) => server && server.baseUrl === sesalab.baseUrl)
     var authServer = {
       name: sesalab.name || stools.urlGetDomain(sesalab.baseUrl),
       baseUrl: sesalab.baseUrl,
@@ -232,6 +233,7 @@ if (config.sesalabs && config.sesalabs.length) {
     if (confServer) authServer = tools.merge(authServer, confServer)
     confSso.authServers.push(authServer)
   })
+  console.error('DEBUG, après ajout sesalab on a authServers', confSso.authServers)
 
   // loginCallback pour loguer un user ici, cette fonction sera appelée après un validate réussi,
   // le user est envoyé par le serveur d'authentification et mis au format User
