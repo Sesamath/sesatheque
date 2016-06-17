@@ -48,6 +48,8 @@ module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessCont
     // on lui file d'office le role formateur, parce que l'on sait que nos serveurs d'authentification ne renvoient
     // que des formateurs, sinon il faudrait controler d'apres user.origine
     // (qui est le domaine du serveur d'authentification)
+    if (!user.roles) user.roles = {}
+    user.roles.formateur = true
     $accessControl.login(context, user, function (error, personne) {
       if (error) {
         next(error)

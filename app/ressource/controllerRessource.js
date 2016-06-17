@@ -321,6 +321,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
       if (errorMsg) {
+        var user = $accessControl.getCurrentUser(context)
+        log.debug('permissions insuffisantes pour ajouter', user.permissions)
         denied(context, errorMsg)
       } else {
         var clonedOid = context.get.clone
