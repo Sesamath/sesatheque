@@ -113,16 +113,6 @@ tools.encadre = function (int, min, max, label) {
 }
 
 /**
- * Renvoie un token aléatoire de 22 caractères
- * Pas aussi random ni unique que l'usage de crypto ou d'un module uuid
- * mais suffisant dans pas mal de cas (utiliser an-uuid sinon)
- * @returns {string}
- */
-tools.getToken = function getToken () {
-  return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
-}
-
-/**
  * Compare les data des objets (via stringify)
  * @param obj1
  * @param obj2

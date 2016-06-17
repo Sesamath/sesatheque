@@ -108,7 +108,7 @@ if (!isProd) {
 ressourceComponent.config(function ($settings) {
   // on vérifie que l'on a un cache avec des valeur acceptables
   var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
-  if (!cacheTTL) log('Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h')
+  if (!cacheTTL) log.error('Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h')
   else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
   else if (cacheTTL > 24 * 3600) throw new Error('Le cache ressource doit avoir un TTL inférieur à 24h (86400s)')
 })

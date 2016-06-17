@@ -93,8 +93,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
         }
       })
     } else {
-      console.log(context.session.user.permissions)
-      console.log(context.session.user.permissions['createGroupe'])
       $json.denied(context)
     }
   })

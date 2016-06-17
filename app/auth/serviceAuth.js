@@ -32,7 +32,7 @@
 'use strict'
 
 var _ = require('lodash')
-var baseUrl = require('../config').application.baseUrl
+var tools = require('sesajstools')
 var modLog = require('an-log')('$auth')
 
 module.exports = function ($accessControl, $ressourcePage) {
@@ -47,7 +47,6 @@ module.exports = function ($accessControl, $ressourcePage) {
     if (clients[authClient.name]) throw new Error('Le client ' + authClient.name + ' est déjà enregistré')
     if (typeof authClient.description !== 'string') throw new Error(msg + 'description')
     if (typeof authClient.login !== 'function') throw new Error(msg + 'login')
-    if (typeof authClient.validate !== 'function') throw new Error(msg + 'validate')
     if (typeof authClient.logout !== 'function') throw new Error(msg + 'logout')
   }
 
@@ -73,7 +72,7 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @returns {string|Error}
    */
   function getOrigine (context) {
-    var origine = context.get.origine || context.post.origine || defaultClient
+    var origine = context.session.authOrigine || context.get.origine || context.post.origine || defaultOrigine
     if (origine) {
       if (!clients[origine]) origine = new Error("Aucun client d'authentification " + origine + " n'a été enregistré")
     } else {
@@ -94,7 +93,7 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @private
    * @type {string}
    */
-  var defaultClient
+  var defaultOrigine
 
   /**
    * Le controleur en attente de client
@@ -118,46 +117,20 @@ module.exports = function ($accessControl, $ressourcePage) {
     try {
       checkValidClient(authClient)
       if (_.isEmpty(clients)) {
-        defaultClient = authClient.name
+        defaultOrigine = authClient.name
         // on peut activer le controleur
         if (deferredInitController) deferredInitController()
       }
       clients[authClient.name] = authClient
       modLog('has registered', 'authClient' + authClient.name)
+      console.log('ajout ', authClient.getSsoLinks)
     } catch (error) {
       log.error(error)
     }
   }
 
   /**
-   * Redirige vers le serveur d'authentification pour savoir si on y est connecté (reviendra sur /validation?origine=…)
-   * @param {Context}       context
-   * @param {errorCallback} next
-   * @memberOf $auth
-   */
-  $auth.check = function (context, next) {
-    try {
-      var user = $accessControl.getCurrentUser(context)
-      if (user) {
-        context.layout = 'page'
-        if (context.get.redirect) context.redirect(context.get.redirect)
-        else throw new Error('Utilisateur déjà connecté')
-      } else if (context.session.user && context.session.user.lastCheck) {
-        var origine = getOrigine(context)
-        if (origine instanceof Error) {
-          throw origine
-        } else {
-          var client = getClient(context)
-          client.check(context, baseUrl + 'validation?origine=' + origine, baseUrl + 'deconnexion')
-        }
-      }
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  /**
-   * Lance  initController() si un client est déjà enregistré ou le garde en attente pour le lancer au premier client qui s'enregistre
+   * Lance  initController() si un client est déjà enregistré ou le garde en attente pour le lancer au premier client qui s'enregistrera
    * @memberOf $auth
    * @param {function} initController
    */
@@ -175,29 +148,56 @@ module.exports = function ($accessControl, $ressourcePage) {
    */
   $auth.getAuthBloc = function (context) {
     var authBloc = {}
-    var urlRedirect
+    // si on est sur /connexion ou /deconnexion on revient sur la home, sinon la page courante
+    var urlRetour = context.request.originalUrl.replace(/\/(:?de)?connexion/, '')
     if ($accessControl.isAuthenticated(context)) {
-      // on veut pas rediriger sur la connexion après déconnexion
-      urlRedirect = context.request.originalUrl.replace('connexion', '')
+      // menu authentifié
       authBloc.user = {
         nom: context.session.user.nom,
         prenom: context.session.user.prenom
       }
+      // éventuels liens spécifiques au sso
       authBloc.ssoLinks = $auth.getSsoLinks(context)
+      // lien de logout
+      var client = getClient(context)
+      var urlLogout = client.getLogoutUrl && client.getLogoutUrl(context) || '/deconnexion?redirect=' + encodeURIComponent(urlRetour)
       authBloc.logoutLink = {
-        href: '/deconnexion?redirect=' + encodeURIComponent(urlRedirect),
+        href: urlLogout,
         icon: 'sign-out',
         value: 'Déconnexion'
       }
     } else {
-      // on veut pas rediriger sur deconnexion après connexion
-      urlRedirect = context.request.originalUrl.replace('deconnexion', '')
-      // faut envoyer au moins une propriété sinon la vue n'est pas rendue (ici on en a une mais sinon faut mettre un foo:bar qcq)
-      authBloc.loginLink = {
-        href: '/connexion?redirect=' + encodeURIComponent(urlRedirect),
-        icon: 'sign-in',
-        value: 'Connexion'
+      // lien(s) de connexion
+      var loginLinks = []
+      _.forOwn(clients, function (client) {
+        var url = client.getLoginUrl && client.getLoginUrl(context)
+        if (url) {
+          url = tools.urlComplete(url, {redirect: urlRetour})
+          loginLinks.push({
+            href: url,
+            icon: 'arrow-right',
+            value: client.description
+          })
+        }
+      })
+      if (loginLinks.length > 1) {
+        // y'en a plusieurs, un bouton pour ouvrir le menu
+        authBloc.loginLink = {
+          href: '#',
+          icon: 'sign-in',
+          value: 'Connexion'
+        }
+        // et les liens
+        authBloc.loginLinks = loginLinks
+      } else if (loginLinks.length === 1) {
+        // y'en a qu'un, un seul bouton
+        authBloc.loginLink = {
+          href: loginLinks[0].href,
+          icon: 'sign-in',
+          value: 'Connexion'
+        }
       }
+      // sinon, aucun lien, authBloc reste vide et la vue ne sera pas rendue
     }
 
     return authBloc
@@ -214,22 +214,23 @@ module.exports = function ($accessControl, $ressourcePage) {
     var personne = $accessControl.getCurrentUser(context)
     if (personne) {
       var client = getClient(context)
+      log('$auth.getSsoLinks client', client)
       if (client instanceof Error) log.error(client)
-      else links = client.getSsoLinks(personne.idOrigine)
+      else if (client.getSsoLinks) links = client.getSsoLinks(personne.idOrigine)
     }
+    log('$auth.getSsoLinks', links, client.getSsoLinks)
 
     return links
   }
 
   /**
-   * Redirige vers la connexion du serveur d'authentification (elle est déjà faite dans sesatheque)
+   * Redirige vers la connexion du serveur d'authentification
    * ou affiche une erreur
    * @memberOf $auth
    * @param {Context} context
    */
   $auth.login = function (context) {
-    var user = $accessControl.getCurrentUser(context)
-    if (user) {
+    if ($accessControl.isAuthenticated(context)) {
       if (context.get.redirect) context.redirect(context.get.redirect)
       else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
     } else {
@@ -237,10 +238,7 @@ module.exports = function ($accessControl, $ressourcePage) {
       if (client instanceof Error) {
         $ressourcePage.printError(context, client)
       } else {
-        var urlValidate = baseUrl + 'validation'
-        if (context.get.redirect) urlValidate += '?redirect=' + encodeURIComponent(context.get.redirect)
-        var urlLogout = baseUrl + 'deconnexion/externe'
-        client.login(context, urlValidate, urlLogout)
+        client.login(context)
       }
     }
   }
@@ -252,8 +250,7 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @param {Context} context
    */
   $auth.logout = function (context) {
-    var user = $accessControl.getCurrentUser(context)
-    if (user) {
+    if ($accessControl.isAuthenticated(context)) {
       $accessControl.logout(context)
       var client = getClient(context)
       if (client instanceof Error) $ressourcePage.printError(context, client)
@@ -261,58 +258,6 @@ module.exports = function ($accessControl, $ressourcePage) {
     } else {
       log.debug('Pas de user en session', context.session)
       $ressourcePage.printError(context, new Error("Pas d'utilisateur connecté (donc personne à déconnecter)"))
-    }
-  }
-
-  /**
-   * Répond à une demande de déconnexion du serveur d'authentification
-   * (forward vers authClient ou affiche une erreur au format json|html|txt suivant accept)
-   * @memberOf $auth
-   * @param {Context} context
-   * @param {Error}   error
-   */
-  $auth.logoutFromRemote = function (context, error) {
-    try {
-      if (error) throw error
-      var user = $accessControl.getCurrentUser(context)
-      if (user) {
-        $accessControl.logout(context)
-      } // sinon ça peut être normal si on s'est déjà déconnecté ici
-      var client = getClient(context)
-      // ce serait bizarre d'avoir un user connecté sans client, au cas où…
-      if (client instanceof Error) throw client
-      client.logoutFromRemote(context)
-    } catch (error) {
-      $ressourcePage.outputError(context, error, 'iframe')
-    }
-  }
-
-  /**
-   * Valide une authentification (au retour du serveur SSO) et rappelle next(error, personne)
-   * @memberOf $auth
-   * @param {Context}    context
-   * @param {personneCallback} next
-   */
-  $auth.validate = function (context, next) {
-    var client = getClient(context)
-    if (client instanceof Error) {
-      $ressourcePage.printError(context, client)
-    } else {
-      client.validate(context, function (error, personne) {
-        if (error) {
-          next(error)
-        } else if (personne) {
-          personne.origine = getOrigine(context)
-          personne.lastCheck = new Date()
-          $accessControl.login(context, personne, function (error, personne) {
-            if (error) next(error)
-            else if (context.get.redirect) context.redirect(context.get.redirect)
-            else next(null, personne)
-          })
-        } else {
-          next(new Error("L'authentification n'a pas retourné d'utilisateur à connecter"))
-        }
-      })
     }
   }
 

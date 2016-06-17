@@ -33,6 +33,7 @@
 
 // var _ = require('lodash')
 var tools = require('../tools')
+var stools = require('sesajstools')
 var Form = require('../constructors/Form')
 
 module.exports = function ($page) {
@@ -69,7 +70,7 @@ module.exports = function ($page) {
    * @returns {string} Le token
    */
   $form.addToken = function (form) {
-    var token = tools.getToken()
+    var token = stools.getToken()
     var field = {
       name: 'token',
       value: token,

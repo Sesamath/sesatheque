@@ -35,6 +35,7 @@
  * Configuration de l'application
  */
 var tools = require('./tools')
+var stools = require('sesajstools')
 var path = require('path')
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
 var privateConfPath = [__dirname, '_private']
@@ -137,9 +138,10 @@ var config = {
   // - appeler /connexion (ça va virer avec sesalab-sso)
   // - appeler l'api pour stocker des séquences
   // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
-  sesalabs: [
-    'https://www.labomep.net/'
-  ],
+  sesalabs: [ {
+    name: 'Labomep',
+    baseUrl: 'https://www.labomep.net/'
+  }],
   // une liste de login / pass admin
   admin: {
     // foo:'passDeFoo'
@@ -186,37 +188,57 @@ if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl +=
 
 /**
  * On passe à la conf de sesalabSso, déduite du reste si on a mis des sesalabs
+ * (dans ce cas on est obligatoirement client sso de ces sesalab,
+ * ce qui n'empêcherait pas d'être client sso d'autres sesatheques qui implémenteraient un $sesalabSsoServer)
  */
 if (config.sesalabs && config.sesalabs.length) {
-  config.components.sesalabSso = {
-    // On est client, on donne la conf de notre serveur d'authentification
-    authServers: []
-  }
+  if (!config.components) config.components = {}
+  if (!config.components.sesalabSso) config.components.sesalabSso = {}
   var confSso = config.components.sesalabSso
-  config.sesalabs.forEach(function (sesalabUrl) {
-    if (sesalabUrl.substr(-1) !== '/') sesalabUrl += '/'
-    confSso.authServers.push({
-      baseUrl: sesalabUrl,
-      // pour demander un login
-      loginPage: '/sso/login',
+  if (!confSso.authServers) confSso.authServers = []
+  // et on ajoute un authServer pour chaque sesalab
+  config.sesalabs.forEach(function (sesalab, index) {
+    // pour rester compatible avec l'ancien format qui ne listait que des baseUrl en string[]
+    if (typeof sesalab === 'string') {
+      sesalab = {baseUrl: sesalab}
+      // on rectifie la conf
+      console.error('config obsolète, sesalabs doit être un tableau d’objets {name, baseUrl}')
+      config.sesalabs[index] = sesalab
+    }
+    // si c'est mal formaté on râle et on passe au suivant
+    if (!sesalab || !sesalab.baseUrl || typeof sesalab.baseUrl !== 'string') {
+      return console.error('Configuration de sesalabs non conforme', sesalab)
+    }
+    if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
+    // on regarde s'il a pas déjà été défini
+    var confServer = confSso.authServers.find((server) => server.baseUrl === sesalab.baseUrl)
+    var authServer = {
+      name: sesalab.name || stools.urlGetDomain(sesalab.baseUrl),
+      baseUrl: sesalab.baseUrl,
+      // les urls sur ce serveur, pour demander un login
+      loginPage: 'sso/login',
       // pour une demande de logout (de sesalab et des autres sesatheques)
-      logoutPage: '/sso/logout',
+      logoutPage: 'sso/logout',
       // pour signaler une erreur
-      errorPage: '/sso/error'
-    })
+      errorPage: 'sso/error'
+    }
+    if (confServer) authServer = tools.merge(authServer, confServer)
+    confSso.authServers.push(authServer)
   })
-  // une callback pour loguer un user ici, cette fonction sera appelée après un validate réussi,
+
+  // loginCallback pour loguer un user ici, cette fonction sera appelée après un validate réussi,
   // le user est envoyé par le serveur d'authentification et mis au format User
-  // on a pas accès au service $sesalabSso ici, ça doit être initialisé dans
-  confSso.loginCallback = function (context, user, next) {
-    throw new Error('Il fallait définir une callback de login avec $sesalabSso.setLoginCallback')
-  }
+  // on a pas accès au service $sesalabSsoClient ici, ça sera initialisé dans app/index.js
+  // en attendant le component sesalab-sso met une fct qui renverra une erreu
+  // confSso.loginCallback = function (context, user, next) { throw new Error('…') }
   // callback de logout, vire le user en session et on appelle next
+
+  // pour le logout on peut déjà la fournir
   confSso.logoutCallback = function (context, next) {
     context.session.user = null
     next()
   }
-  // et on ajoute le component sesalab-sso
+  // et on ajoute le component sesalab-sso en dépendances
   if (!config.extraModules) config.extraModules = []
   config.extraModules.push('sesalab-sso')
   if (!config.extraDependenciesLast) config.extraDependenciesLast = []

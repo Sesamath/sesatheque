@@ -30,15 +30,14 @@
  */
 
 'use strict'
+var dns = require('dns')
+var _ = require('lodash')
+var tools = require('../tools')
+// var flow = require('an-flow')
+var config = require('../config')
+var configRessource = require('../ressource/config')
 
 module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
-  var dns = require('dns')
-  var _ = require('lodash')
-  var tools = require('../tools')
-  // var flow = require('an-flow')
-
-  var configRessource = require('../ressource/config')
-
   /**
    * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
    * à la jonction entre personne et ressource.
@@ -327,22 +326,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Retourne la valeur du token en session et le supprime (donc faut choisir entre getToken et checkToken)
-   * @param {Context} context
-   * @param {string} token
-   * @returns {*} La valeur stockée ou undefined si le token n'était pas en session
-   */
-  $accessControl.getTokenValue = function getTokenValue (context, token) {
-    var value
-    if (context && token && context.session.tokens && context.session.tokens.hasOwnProperty(token)) {
-      value = context.session.tokens[token]
-      delete context.session.tokens[token]
-    }
-
-    return value
-  }
-
-  /**
    * Vérifie la permission pour l'utilisateur courant et cette ressource
    * @param permission
    * @param {Context}       context
@@ -442,18 +425,28 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Met à jour le user en session
+   * Retourne la valeur du token en session et le supprime (donc faut choisir entre getToken et checkToken)
    * @param {Context} context
-   * @param {Personne} personne
-   * @return {Personne|undefined} Le user mis à jour (ou l'ancien si les oid correspondait pas)
-   * @memberOf $accessControl
+   * @param {string} token
+   * @returns {*} La valeur stockée ou undefined si le token n'était pas en session
    */
-  $accessControl.updateCurrentUser = function (context, personne) {
-    var old = $accessControl.getCurrentUser(context)
-    if (old && personne && old.oid === personne.oid) context.session.user = personne
-    else log.error(new Error('updateCurrentUser appelé avec un user qui différent de celui en session'))
+  $accessControl.getTokenValue = function getTokenValue (context, token) {
+    var value
+    if (context && token && context.session.tokens && context.session.tokens.hasOwnProperty(token)) {
+      value = context.session.tokens[token]
+      delete context.session.tokens[token]
+    }
 
-    return context.session.user
+    return value
+  }
+
+  /**
+   * Renvoie true si origine est listé dans les sesalabs en config
+   * @param origine
+   * @returns {boolean}
+   */
+  $accessControl.isSesalab = function (origine) {
+    return config.sesalabs && config.sesalabs.length && config.sesalabs.some((sesalab) => sesalab.baseUrl === origine)
   }
 
   /**
@@ -753,6 +746,21 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.logout = function (context) {
     log.debug('déconnexion')
     context.session.user = {}
+  }
+
+  /**
+   * Met à jour le user en session
+   * @param {Context} context
+   * @param {Personne} personne
+   * @return {Personne|undefined} Le user mis à jour (ou l'ancien si les oid correspondait pas)
+   * @memberOf $accessControl
+   */
+  $accessControl.updateCurrentUser = function (context, personne) {
+    var old = $accessControl.getCurrentUser(context)
+    if (old && personne && old.oid === personne.oid) context.session.user = personne
+    else log.error(new Error('updateCurrentUser appelé avec un user qui différent de celui en session'))
+
+    return context.session.user
   }
 
   return $accessControl

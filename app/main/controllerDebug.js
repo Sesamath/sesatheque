@@ -48,7 +48,6 @@ module.exports = function (controller) {
    */
   controller.get('session', function (context) {
     context.layout = 'page'
-    log('ctrl session ')
     // on ajoute un compteur pour vérifier que ça s'incrémente de 1 à chaque affichage
     if (context.session.compteur) context.session.compteur++
     else context.session.compteur = 1
@@ -122,12 +121,5 @@ module.exports = function (controller) {
     var data = getDefaultData()
     data.contentBloc.debug = 'page de logout factice'
     context.html(data)
-  })
-
-  // une page pour propager le login courant chez les clients
-  controller.get('startSso', function (context) {
-    var $sesalabSso = lassi.service('$sesalabSso')
-    context.layout = 'page'
-    $sesalabSso.loginOnClients(context, context.session.user)
   })
 }

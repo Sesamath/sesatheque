@@ -46,7 +46,7 @@ personneComponent.config(function ($settings) {
   // on vérifie que l'on a un cache avec des valeur acceptables
   var cacheTTL = $settings.get('components.personne.cacheTTL', null)
   if (!cacheTTL) {
-    log('Il faudrait indiquer un TTL pour le cache de personne' +
+    log.error('Il faudrait indiquer un TTL pour le cache de personne' +
       ' (en s, dans components.personne.cacheTTL), on le fixe à 1h')
   }
   if (cacheTTL < 60) throw new Error("Le cache personne doit avoir un TTL d'au moins 60s")

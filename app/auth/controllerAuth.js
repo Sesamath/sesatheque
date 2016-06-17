@@ -58,7 +58,11 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
     })
 
     /**
-     * Déconnexion ici (action de l'utilisateur sur ce site), à propager vers le serveur sso qui rappellera deconnexion/externe
+     * Déconnexion ici (action de l'utilisateur sur ce site),
+     * et redirection vers la déconnexion du serveur sso (qui rappellera son client ici)
+     * On est juste là en fallBack, normalement le lien de déconnexion pointe directement sur
+     * l'url de déconnexion de notre serveur d'authentification (ou ici si on l'a pas trouvé,
+     * pour au moins déconnecter localement)
      * @route GET /deconnexion
      */
     controller.get('deconnexion', function (context) {
@@ -67,30 +71,6 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
       } else {
         context.layout = 'page'
         $ressourcePage.printError(context, new Error('Utilisateur déjà déconnecté (ou jamais connecté)'), 200)
-      }
-    })
-
-    /**
-     * Déconnexion demandée par le serveur sso
-     * @route GET /deconnexion/externe
-     */
-    controller.get('deconnexion/externe', $auth.logoutFromRemote)
-
-    /**
-     * Redirige vers le serveur d'authentification pour savoir si on est connecté là-bas mais reviendra sur /validation
-     * même si on est pas connecté là-bas
-     * @route GET /testConnexion
-     */
-    controller.get('testConnexion', function (context) {
-      var urlRedirect = context.get.redirect || '/'
-      if ($accessControl.isAuthenticated(context)) {
-        log.error(new Error('appel de /testConnexion pour un utilisateur déjà connecté'))
-        context.redirect(urlRedirect)
-      } else {
-        $auth.check(context, function (error) {
-          if (!error) error = new Error('calback testConnexion appelée sans erreur, il aurait dû y avoir une redirection ou une erreur')
-          $ressourcePage.outputError(context, error)
-        })
       }
     })
 

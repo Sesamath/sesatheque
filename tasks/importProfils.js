@@ -73,7 +73,7 @@ fluxFile.seqEach(function (file) {
   common.checkEnd(this)
 }).seq(function () {
   log('tout semble terminé, on peut poster labomep_all')
-  var labomep_all = {
+  var labomepAll = {
     'titre': 'Ressources Sésamath',
     'resume': 'Liste des arbres affichables dans le panneau « Ressources Sésamath » de Labomep',
     'type': 'arbre',
@@ -86,9 +86,9 @@ fluxFile.seqEach(function (file) {
     'enfants': allEnfants
   }
   // on écrit le fichier
-  fs.writeFileSync(path.join(jsonDir, 'sesamath-labomep_all.json'), JSON.stringify(labomep_all, null, 2))
+  fs.writeFileSync(path.join(jsonDir, 'sesamath-labomep_all.json'), JSON.stringify(labomepAll, null, 2))
   // on l'envoie
-  common.addRessource(labomep_all, this)
+  common.addRessource(labomepAll, this)
 }).seq(function () {
   log('fin')
   common.displayResult()

@@ -52,7 +52,6 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
       isLogged: isLogged,
       permissions: ''
     }
-    log('auth', auth)
     if (isLogged) {
       auth.oid = $accessControl.getCurrentUserOid(context)
       auth.authBloc = $auth.getAuthBloc(context)

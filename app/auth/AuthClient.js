@@ -55,13 +55,11 @@ function AuthClient () {
 }
 
 /**
- * Redirige vers le serveur d'authentification qui redirigera vers urlValidate sans demander de login si l'utilisateur n'était pas connecté
- * (pour savoir si l'utilisateur serait connecté sur son serveur sans l'être encore ici)
- * @param {Context} context
- * @param {string}  urlValidate
- * @param {string}  urlLogout
+ * Pour fournir au client des méthodes de l'appli
+ * (appelé à l'enregistrement si ça existe, sinon il s'est débrouillé autrement)
+ * @param {{loginCallback, logoutCallback, errorCallback, authServer, prefix}} props
  */
-AuthClient.prototype.check = function (context, urlValidate, urlLogout) {
+AuthClient.prototype.init = function (props) {
 
 }
 
@@ -91,23 +89,6 @@ AuthClient.prototype.login = function (context, urlValidate, urlLogout) {
  * @param {Context} context
  */
 AuthClient.prototype.logout = function (context) {
-
-}
-
-/**
- * Répond à une demande de déconnexion du serveur d'authentification via context.json
- * @param {Context} context
- * @param {string}  [errorMsg] Un message d'erreur si la déconnexion n'a pas pu être faite localement
- */
-AuthClient.prototype.logoutFromRemote = function (context, errorMsg) {
-
-}
-/**
- * Valide une authentification (au retour du serveur SSO) et rappelle next(error, personne)
- * @param {Context}          context
- * @param {personneCallback} next
- */
-AuthClient.prototype.validate = function (context, next) {
 
 }
 

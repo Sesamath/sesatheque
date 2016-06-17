@@ -169,7 +169,7 @@ module.exports = function afterRailSession (rail) {
       log.error("Impossible d'ouvrir le log " + accessLog)
     }
   } catch (error) {
-    console.log(error.stack)
+    console.error(error.stack)
   }
 
   /**

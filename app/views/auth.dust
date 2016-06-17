@@ -13,5 +13,10 @@
   </ul>
 {:else}
   {#loginLink}{>"link" /}{/loginLink}
+  {?loginLinks}
+    <ul>
+      {#loginLinks}<li>{>"link" /}</li>{/loginLinks}
+    </ul>
+  {/loginLinks}
 {/user}
 </div>

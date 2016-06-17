@@ -663,7 +663,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     var timeout = 5000
     if (token && origine) {
       if (origine.substr(-1) !== '/') origine += '/'
-      if (config.sesalabs.indexOf(origine) > -1) {
+      if (isSesalab(origine)) {
         var postOptions = {
           url: origine + 'api/utilisateur/check-token',
           json: true,
@@ -772,13 +772,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     var resultat = context.post
     log.debug('deferPost appelé avec', resultat)
     if (typeof resultat.deferUrl === 'string') {
-      var ok = false
       var url = resultat.deferUrl
       delete resultat.deferUrl
-      config.sesalabs.forEach(function (sesalab) {
-        if (url.indexOf(sesalab) === 0) ok = true
-      })
-      if (ok) {
+      if (config.sesalabs.some((sesalab) => url.indexOf(sesalab.baseUrl) === 0)) {
         var postOptions = {
           url: url,
           json: true,
@@ -807,11 +803,11 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
 
   /**
-   * Une url pour envoyer des notifications d'erreur, à priori par un client qui trouve des incohérences dans ce qu'on lui a envoyé
+   * Une url pour envoyer des notifications d'erreur, à priori par un client
+   * qui trouve des incohérences dans ce qu'on lui a envoyé
    * @Route POST /api/notifyError
    */
   controller.post('notifyError', function (context) {
-    log('notifyError', context.post)
     if (context.post.ref) log.errorData('notifyError', context.post)
     else log.error('notifyError', context.post)
     $json.sendOk(context)

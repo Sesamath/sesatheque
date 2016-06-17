@@ -76,6 +76,10 @@ try {
   GLOBAL.log = require('./tools/log.js')
   appLog("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
 
+  // Si on veut passer un préfixe à sesalabSso, ou si d'autres components veulent la config
+  // avant que lassi n'affecte ça et que $settings ne soit dispo, faut le mettre en global dès maintenant
+  GLOBAL.app = {settings: config}
+
   /**
    * Gestion des traces
    * Attention, le module long-stack-traces m'a déjà joué des tours avec une erreur qui plante node (reproductible, sur une 404)
@@ -131,8 +135,14 @@ try {
   // console.log('au boot', dependancies)
   var sesatheque = lassi.component('sesatheque', dependancies)
 
+  // pour sesalab-admin et sesalab-sso
+  // utile aussi pour des modules npm qui voudrait ajouter des services sans définir de composants pour autant
+  // avec app.service('$newService', function () {…})
+  // ou app.controller('path', function () {this.get('path', function (context) {…} })
+  GLOBAL.app = sesatheque
+
   // une fois les composants chargés on ajoutera memcache et nos listeners
-  sesatheque.config(function ($cache, $settings, $accessControl, $routes, $flashMessages) {
+  sesatheque.config(function ($cache, $settings, $accessControl, $routes, $flashMessages, $auth, $page) {
     // on ajoute memcache si précisé dans les settings
     var memcache = $settings.get('memcache', null)
     if (memcache) {
@@ -168,24 +178,12 @@ try {
     // le listener beforeTransport
     lassi.on('beforeTransport', require('./beforeTransport')($accessControl, $routes, $flashMessages))
 
-    // si $sesalabSso existe, faut appler son setLoginCallback pour la définir maintenant que nos services sont dispos
+    // si $sesalabSsoClient existe, faut l'ajouter en client d'authentification
+    // maintenant que nos services sont dispos, on lui donne ceux dont il aura besoin
     if (dependancies.indexOf('sesalab-sso') !== -1) {
-      var $sesalabSso = lassi.service('$sesalabSso')
-      $sesalabSso.setLoginCallback(function (context, user, next) {
-        var $accessControl = lassi.service('$accessControl')
-        // on lui file d'office le role formateur, parce que l'on sait que nos serveurs d'authentification ne renvoient
-        // que des formateurs, sinon il faudrait controler d'apres user.origine (qui est le baseUrl du serveur d'authentification)
-        if (user.original.externalMech && user.original.externalId) {
-          // c'est un user d'un sesalab qui venait d'ailleurs
-          user.origine = user.original.externalMech
-          user.idOrigine = user.original.externalId
-        }
-        $accessControl.login(context, user, function (error, personne) {
-          if (error) next(error)
-          else if (personne) next()
-          else next(new Error('L’enregistrement de l’utilisateur sur ' + config.application.baseUrl + ' a échoué'))
-        })
-      })
+      var $sesalabSsoClient = lassi.service('$sesalabSsoClient')
+      var authServerName = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].name || 'Sesalab'
+      require('./auth/authClientSesalabSso')(authServerName, $sesalabSsoClient, $auth, $accessControl, $page)
     }
 
     // log('sesatheque en fin de config', sesatheque)
@@ -193,10 +191,6 @@ try {
       ' en mode ' + $settings.get('application.staging', 'inconnu'))
   })
 
-  // pour sesalab-admin
-  // utile aussi pour d'autres modules npm qui voudrait ajouter du app.service('$newService', function () {…})
-  // ou app.controller('path', function () {this.get('path', function (context) {…} })
-  GLOBAL.app = sesatheque
   require('./sesalab-admin')
 
   // et on lance le boot

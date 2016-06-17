@@ -42,6 +42,7 @@
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) {
   var _ = require('lodash')
   var tools = require('../tools')
+  var stools = require('sesajstools')
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
@@ -54,7 +55,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function addToken (context, ressource) {
-    var token = tools.getToken()
+    var token = stools.getToken()
     if (!context.session.tokens) context.session.tokens = {}
     log.debug('avant ajout du token on a en session', context.session.tokens)
     context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n'existe pas
@@ -182,7 +183,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     if (token && origine) {
       if (origine.substr(-1) !== '/') origine += '/'
-      if (appConfig.sesalabs && appConfig.sesalabs.indexOf(origine) > -1) {
+      if ($accessControl.isSesalab(origine)) {
         var postOptions = {
           url: origine + 'api/utilisateur/check-token',
           json: true,
