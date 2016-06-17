@@ -198,11 +198,10 @@ if (config.sesalabs && config.sesalabs.length) {
   if (!confSso.authServers) confSso.authServers = []
   // et on ajoute un authServer pour chaque sesalab
   config.sesalabs.forEach(function (sesalab, index) {
-    // pour rester compatible avec l'ancien format qui ne listait que des baseUrl en string[]
+    // pour accepter une liste de baseUrl
     if (typeof sesalab === 'string') {
       sesalab = {baseUrl: sesalab}
       // on rectifie la conf
-      console.error('config obsolète, sesalabs doit être un tableau d’objets {name, baseUrl}')
       config.sesalabs[index] = sesalab
     }
     // si c'est mal formaté on râle et on passe au suivant
@@ -210,6 +209,7 @@ if (config.sesalabs && config.sesalabs.length) {
       return console.error('Configuration de sesalabs non conforme', sesalab)
     }
     if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
+    // on vérifie que ce qui est déjà défini n'est pas du grand n'importe
     // on regarde s'il a pas déjà été défini
     var confServer = confSso.authServers.find((server) => server.baseUrl === sesalab.baseUrl)
     var authServer = {

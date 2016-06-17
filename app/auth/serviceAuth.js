@@ -123,7 +123,6 @@ module.exports = function ($accessControl, $ressourcePage) {
       }
       clients[authClient.name] = authClient
       modLog('has registered', 'authClient' + authClient.name)
-      console.log('ajout ', authClient.getSsoLinks)
     } catch (error) {
       log.error(error)
     }
