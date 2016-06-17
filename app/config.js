@@ -222,7 +222,7 @@ if (config.sesalabs && config.sesalabs.length) {
       // pour signaler une erreur
       errorPage: 'sso/error'
     }
-    if (confServer) authServer = tools.merge(authServer, confServer)
+    if (confServer) authServer = merge(authServer, confServer)
     confSso.authServers.push(authServer)
   })
 
