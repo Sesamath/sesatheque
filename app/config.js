@@ -195,7 +195,15 @@ if (config.sesalabs && config.sesalabs.length) {
   if (!config.components) config.components = {}
   if (!config.components.sesalabSso) config.components.sesalabSso = {}
   var confSso = config.components.sesalabSso
-  if (!confSso.authServers) confSso.authServers = []
+  if (!confSso.authServers) {
+    confSso.authServers = []
+  } else {
+    // on vérifie que ce qui est déjà défini n'est pas du grand n'importe quoi
+    confSso.authServers = confSso.authServers.filter((server) => {
+      if (server && server.baseUrl) return server
+      console.error('faut pas mettre n’importe quoi en authServers, baseUrl est obligatoire', server)
+    })
+  }
   // et on ajoute un authServer pour chaque sesalab
   config.sesalabs.forEach(function (sesalab, index) {
     // pour accepter une liste de baseUrl
@@ -209,7 +217,6 @@ if (config.sesalabs && config.sesalabs.length) {
       return console.error('Configuration de sesalabs non conforme', sesalab)
     }
     if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
-    // on vérifie que ce qui est déjà défini n'est pas du grand n'importe
     // on regarde s'il a pas déjà été défini
     var confServer = confSso.authServers.find((server) => server.baseUrl === sesalab.baseUrl)
     var authServer = {
