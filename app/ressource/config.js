@@ -30,7 +30,7 @@
  */
 
 'use strict'
-
+var commonConfig = require('sesatheque-client/config')
 /**
  * Nos listes de types & co, qui changent rarement
  */
@@ -54,27 +54,7 @@ var ressourceConfig = {
       sequenceModele: 'modèle de séquence',
       url: 'page externe'
     },
-    niveaux: {
-      11: 'CP',
-      10: 'CE1',
-      9: 'CE2',
-      8: 'CM1',
-      7: 'CM2',
-      6: 'sixième',
-      5: 'cinquième',
-      4: 'quatrième',
-      3: 'troisième',
-      2: 'seconde',
-      '2p': 'seconde pro',
-      1: 'première',
-      '1p': 'première pro',
-      12: 'terminale',
-      '12p': 'terminale pro',
-      cap1: 'CAP 1re année',
-      cap2: 'CAP 2e année',
-      bep1: 'BEP 1re année',
-      bep2: 'BEP 2e année'
-    },
+    niveaux: commonConfig.niveaux,
     categories: {
       1: 'Activité fixe',
       2: 'Activité animée',
@@ -157,7 +137,7 @@ var ressourceConfig = {
   },
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
   listesOrdonnees: {
-    niveaux: [11, 10, 9, 8, 7, 6, 5, 4, 3, 'cap1', 'cap2', 'bep1', 'bep2', 2, '2p', 1, '1p', 12, '12p'],
+    niveaux: commonConfig.ordre.niveaux,
     typeDocumentaires: [9, 5, 6, 12, 11, 1, 2],
     typePedagogiques: [3, 9, 91, 92, 191, 7, 2, 81, 82, 13, 141, 151, 21, 22]
   }, // fin des listes
@@ -352,20 +332,7 @@ var ressourceConfig = {
       liste: 8,
       aucune: 9 // déclenchera un warning dans $ressourceControl.valide
     },
-    niveaux: {
-      cp: 11,
-      ce1: 10,
-      ce2: 9,
-      cm1: 8,
-      cm2: 7,
-      '6e': 6,
-      '5e': 5,
-      '4e': 4,
-      '3e': 3,
-      '2de': 2,
-      '1re': 1,
-      'Tle': 12
-    },
+    niveaux: commonConfig.constantes.niveaux,
     typePedagogiques: {
       cours: 3,
       exercice: 9,
