@@ -126,5 +126,44 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
     groupe.store(next)
   }
 
+  /**
+   * Supprime un groupe (ET modifie les ressources liées)
+   * @param groupe
+   * @param next
+   * @memberOf $groupeRepository
+   */
+  $groupeRepository.delete = function (groupe, next) {
+    if (!groupe.nom) {
+      var error = new Error('Impossible d’effacer un groupe sans nom')
+      log.error(error)
+      return next(error)
+    }
+    // on ne peut pas le mettre en dépendance du controleur, car il est déclaré après nous
+    var $ressourceRepository = lassi.service('$ressourceRepository')
+    // on efface d'abord des ressources
+    flow().seq(function () {
+      $ressourceRepository.getListe('groupe/' + groupe.nom, {}, this)
+    }).seqEach(function (ressource) {
+      ressource.groupes = ressource.groupes.filter(function (groupeNom) {
+        return groupeNom !== groupe.nom
+      })
+      $ressourceRepository.save(ressource, this)
+    }).seq(function () {
+      // on peut effacer le groupe
+      if (!groupe.delete) groupe = EntityGroupe.create(groupe)
+      // afterStore n'est pas appelé sur un delete, faut gérer le cache
+      groupe.delete(function (error) {
+        if (error) return next(error)
+        $cacheGroupe.delete(groupe.nom, function (error) {
+          if (error) log.error(error)
+          // on fait pas suivre l'erreur car y'en a pas eu à la suppression en bdd
+          next()
+        })
+      })
+    }).catch(function (error) {
+      next(error)
+    })
+  }
+
   return $groupeRepository
 }

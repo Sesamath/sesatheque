@@ -84,7 +84,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
             } else if (groupeBdd && groupeBdd.oid) {
               h.addGroup(context, nom, false, function (error, personne) {
                 if (!error && personne) $json.sendOk(context)
-                else $json.sendError(context, new Error("Erreur interne (enregistrement des modifications sur la personne)"))
+                else $json.sendError(context, new Error('Erreur interne (enregistrement des modifications sur la personne)'))
               })
             } else {
               $json.sendError(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))

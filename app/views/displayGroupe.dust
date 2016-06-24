@@ -6,9 +6,9 @@
     {?urlFollow} <a href="{urlFollow}">Suivre</a> {/urlFollow}
     {?urlIgnore} <a href="{urlIgnore}">Ignorer</a> {/urlIgnore}
     {?urlEdit} <a href="{urlEdit}">Modifier</a> {/urlEdit}
+    {?urlDelete} <a href="{urlDelete}">Supprimer</a> {/urlDelete}
   </span>
   <ul>
-    Propriétés de ce groupe
     <li>Nom : {nom}</li>
     <li>Description : <pre>{description}</pre></li>
     <li>Ouvert à tous :
@@ -23,6 +23,10 @@
         <span class="remarque">Les gestionnaires peuvent modifier les propriétés du groupe et y ajouter des membres</span>
         {#gestionnairesNames}<li>{.}</li>{/gestionnairesNames}
       </ul>
+    </li>
+    <li>
+      Ressources publiées dans ce groupe
+      {>"../liste" /}
     </li>
   </ul>
 </div>
