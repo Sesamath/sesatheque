@@ -36,7 +36,7 @@ var conf = {
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/index.js',
     import: './app/srcClient/edit/import.js',
-    showParcours: 'sesaeditgraphe/src/embed/sp.js'
+    showParcours: 'babel!sesaeditgraphe/src/embed/sp.js'
   },
   output: {
     path: 'app/ressource/public/',
@@ -60,15 +60,7 @@ var conf = {
     loaders: [
       {
         test: /app\/srcClient\/.*\.js/,
-        loader: 'babel-loader'
-      },
-      // idem pour editgraphe chargé par srcClient/plugins/j3p/edit.js
-      {
-        test: /sesaeditgraphe\/src\/.*\.js/,
-        loader: 'babel-loader',
-        query: {
-          presets: ['es2015', 'stage-2']
-        }
+        loader: 'babel'
       }
     ]
   },
