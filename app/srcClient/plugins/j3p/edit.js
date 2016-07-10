@@ -35,7 +35,7 @@
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var tools = require('sesajstools')
-var embedEditGraphe = require('babel-loader!sesaeditgraphe/src/embed').default
+var embedEditGraphe = require('sesaeditgraphe/src/embed').default
 
 var page = require('../../page/index')
 
