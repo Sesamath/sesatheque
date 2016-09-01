@@ -4,10 +4,12 @@
   </div>
 
   {?warnings}
-  <p class="warning">
-  Avertissement{@gt key=warnings.length value=1}s{/gt} :
-  {#warnings}<p>{.}</p>{/warnings}
-  {>wrapper widget="checkboxes" o=force /}
+  <div class="warning floatContainer">
+    Avertissement{@gt key=warnings.length value=1}s{/gt} :
+    <ul>
+      {#warnings}<li>{.}</li>{/warnings}
+    </ul>
+    {>wrapper widget="checkboxes" o=force /}
   </div>
   {/warnings}
 

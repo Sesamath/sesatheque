@@ -601,7 +601,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           id: 'force',
           label: config.labels.force,
           choices: [{
-            label: "Cocher cette case pour forcer l'enregistrement margré les avertissements",
+            label: "Cocher cette case pour forcer l'enregistrement malgré les avertissements",
             name: 'force',
             value: ['forced']
           }]

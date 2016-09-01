@@ -389,23 +389,30 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function () {
         // on fixe la date de màj avant validation
         if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
-        $ressourceControl.valideRessourceFromPost(context.post, false, this)
+        // on met l'origine à local si y'en a pas
+        if (!ressourcePosted.origine) {
+          ressourcePosted.origine = 'local'
+          ressourcePosted.idOrigine = undefined
+        }
+        $ressourceControl.valideRessourceFromPost(ressourcePosted, false, this)
       }).seq(function (ressource) {
         ressourcePosted = ressource
         if (!_.isEmpty(ressource._errors)) printForm(context, null, ressource, titrePage)
-        else if (!_.isEmpty(ressource._warnings) && !ressource.force) printForm(context, null, ressource, titrePage)
+        else if (!_.isEmpty(ressource._warnings) && !context.post.force) printForm(context, null, ressource, titrePage)
         else this(null, ressource)
       }).seq(function (ressource) {
         // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
         ressource.auteurs = [$accessControl.getCurrentUserOid(context)]
-        $ressourceRepository.write(ressource, function (error, ressource) {
-          if (error || !_.isEmpty(ressource._errors)) {
+        $ressourceRepository.write(ressource, function (error, ressourceSaved) {
+          if (error) {
             // on veut gérér les erreurs ici, signe d'un bug dans notre code
             log.error(new Error('on a une erreur au write mais pas au valide précédent'))
             printForm(context, error, ressource, 'Ajouter une ressource')
+          } else if (!_.isEmpty(ressourceSaved._errors)) {
+            printForm(context, error, ressourceSaved, 'Ajouter une ressource')
           } else {
             log.debug("Après le save on récupère l'oid ' + ressource.oid + ', on lance le redirect")
-            var url = $routes.getAbs('edit', ressource.oid, context)
+            var url = $routes.getAbs('edit', ressourceSaved.oid, context)
             if (context.layout === 'iframe') {
               url += '?layout=iframe'
               if (context.get.closerId) url += '&closerId=' + context.get.closerId

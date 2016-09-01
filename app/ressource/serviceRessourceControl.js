@@ -178,9 +178,11 @@ module.exports = function (EntityRessource) {
    */
   function addWarnings (ressource) {
     // on ajoute un warning pour les enfants
-    if (ressource.type === 'arbre' && (!ressource.enfants || !ressource.enfants.length)) {
+    log('ressource dans addWarnings', ressource, 'form', {max: 2000})
+    // on désactive ça car à la création c'est normal, on verra plus tard
+    /* if (ressource.type === 'arbre' && !ressource.new && (!ressource.enfants || !ressource.enfants.length)) {
       rTools.addWarning(ressource, 'arbre sans enfants')
-    }
+    } */
     // la catégorie non définie
     if (!ressource.categories || ressource.categories[0] === config.constantes.categories.aucune) {
       rTools.addWarning(ressource, 'pas de catégorie définie')
@@ -229,6 +231,7 @@ module.exports = function (EntityRessource) {
    *                        ressource pourra avoir _errors ou _warnings (cast éventuels effectués)
    */
   $ressourceControl.valide = function (ressource, partial, next) {
+    log('ressource dans valide', ressource, 'form', {max: 2000})
     if (!next) {
       next = partial
       partial = false

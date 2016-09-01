@@ -17,6 +17,13 @@ body {min-width: 300px;}
   .lt-medium-only { display: none; }
 }
 
+/* cf http://stackoverflow.com/a/1633170 */
+.floatContainer::after {
+  content:"";
+  display:block;
+  clear:both;
+}
+
 /**
  * Couleurs
  */

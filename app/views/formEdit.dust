@@ -6,9 +6,9 @@
   <form name="editRessource" method="post" id="formRessource">
 
     {?warnings}
-      <div>
+      <div class="warning">
         Avertissement{@gt key=warnings.length value=1}s{/gt} :
-        {#warnings}<p class="warning">{.}</p>{/warnings}
+        {#warnings}<p>{.}</p>{/warnings}
         {>wrapper widget="checkboxes" o=force /}
       </div>
     {/warnings}

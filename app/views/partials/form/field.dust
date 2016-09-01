@@ -8,7 +8,7 @@
           attrs : tableau de {name:'nom', value:'valeur'}, attributs à ajouter sur le champ input
 !}
 <div class="field">
-  {#warnings}<div class="warning">{.}</div>{/warnings}
+  {#warnings}<p class="warning">{.}</p>{/warnings}
 
   {@eq key=widget value="hidden"}
     {>"form/field_{widget}" /}
