@@ -816,11 +816,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 var dateSuffix = Math.floor((new Date()).getTime() / 1000)
                 var options = {attachment: 'figure_mathgraph_' + ressource.oid + '-' + dateSuffix + '.jnlp'}
                 var content = '<?xml version="1.0" encoding="UTF-8"?>' +
-                  '<jnlp spec="1.0+" codebase="http://www.mathgraph32.org/jaws" >' +
+                  '<jnlp spec="1.0+" codebase="https://www.mathgraph32.org/jaws" >' +
                   '  <information>' +
                   '    <title>MathGraph32</title>' +
                   '    <vendor>Association Sesamath</vendor>' +
-                  '    <homepage href="http://mathgraph32.org/"/>' +
+                  '    <homepage href="https://mathgraph32.org/"/>' +
                   '    <icon href="logoMathGraph.png"/>' +
                   '    <icon href="SplashScreen.png" kind="splash"/>' +
                   '    <offline-allowed/>' +

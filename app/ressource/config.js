@@ -408,7 +408,7 @@ var ressourceConfig = {
   },
   cacheTTL: 3600,
   imports: {
-    ecBase: 'http://ressources.sesamath.net/replication_calculatice'
+    ecBase: 'https://ressources.sesamath.net/replication_calculatice'
   }
 }
 

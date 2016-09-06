@@ -59,7 +59,7 @@ function addApplet (isFullSize) {
       id: appletName,
       // name: appletName +'name',
       code: 'mathgraph32.MtgFrame.class',
-      archive: 'http://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
+      archive: 'https://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
       // archive: 'http://www.mathgraph32.org/ftp/ExercicesEnLigne/MathGraph32Applet.jar',
       width: width,
       height: height,
@@ -79,7 +79,7 @@ function addApplet (isFullSize) {
   dom.addElement(applet, 'param', {name: 'figureData', value: $figureData.val()})
 
   dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
-  dom.addElement(applet, 'a', {href: 'http://www.java.com'}, 'java.com')
+  dom.addElement(applet, 'a', {href: 'https://www.java.com'}, 'java.com')
   dom.addText(applet, ' pour installer java.')
   // on peut la mettre dans le dom
   dom.empty(appletContainer)

@@ -58,7 +58,8 @@ module.exports = function edit (ressource, options) {
     // vérification : est-ce que l'adresse comporte http://
     var url = $adresse.val()
     if (url && !/https?:\/\//.exec(url)) {
-      url = 'http://' + url
+      // on met https d'office, faudra retirer le s si ça marche pas (et alors on passera par notre proxy)
+      url = 'https://' + url
       $adresse.val(url)
     }
     // vérif exclus

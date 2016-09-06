@@ -54,7 +54,7 @@ function displayJava (ressource, options, next) {
       id: appletName,
       // name: appletName +'name',
       code: 'mathgraph32.MtgFrame.class',
-      archive: 'http://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
+      archive: 'https://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
       width: width,
       height: height,
       style: 'border:#000 solid 1px;'
@@ -70,7 +70,7 @@ function displayJava (ressource, options, next) {
   if (params.figure) dom.addElement(applet, 'param', {name: 'figureData', value: params.figure})
   else dom.addElement(applet, 'param', {name: 'initialFigure', value: 'orthonormalFrame'})
   dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
-  dom.addElement(applet, 'a', {href: 'http://www.java.com'}, 'java.com')
+  dom.addElement(applet, 'a', {href: 'https://www.java.com'}, 'java.com')
   dom.addText(applet, ' pour installer java.')
   var p = dom.addElement(applet, 'p', {}, 'Sinon, visualiser cette page avec le ')
   dom.addElement(p, 'a', {href: '?js=1'}, 'lecteur javascript')
@@ -126,8 +126,8 @@ function displayJs (ressource, options, next) {
   }
 
   var dependencies = [
-    'http://www.mathgraph32.org/js/5.0.0/mtg32jsmin.js',
-    'http://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js'
+    'https://www.mathgraph32.org/js/5.0.0/mtg32jsmin.js',
+    'https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js'
   ]
   page.loadAsync(dependencies, function () {
     /*global MathJax, mtg32*/
@@ -144,7 +144,7 @@ function displayJs (ressource, options, next) {
     if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
     // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    var svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg')
     svg.setAttributeNS(null, 'id', svgId)
     svg.setAttributeNS(null, 'width', width)
     svg.setAttributeNS(null, 'height', height)

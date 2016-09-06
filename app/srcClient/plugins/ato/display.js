@@ -77,7 +77,7 @@ module.exports = function display (ressource, options, next) {
     // On réinitialise le conteneur
     dom.empty(container)
 
-    var url = 'http://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=' + ressource.idOrigine
+    var url = 'https://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=' + ressource.idOrigine
     var iframe = dom.addElement(container, 'iframe', {src: url, style: 'width:100%;height:100%'})
     if (iframe.addEventListener) iframe.addEventListener('load', loaded)
     else loaded()

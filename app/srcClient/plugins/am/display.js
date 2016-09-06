@@ -82,7 +82,7 @@ module.exports = function display (ressource, options, next) {
     // notre base (si ça vient pas de l'interface de développement des exo mathenpoche
     // faudra le préciser via ressource.parametres.baseUrl)
     if (ressource.origine !== 'am' && ressource.parametres.baseUrl) baseSwf = ressource.parametres.baseUrl
-    else baseSwf = 'http://mep-col.sesamath.net/dev/aides/' + (params.mep_langue_id ? params.mep_langue_id : 'fr')
+    else baseSwf = 'https://mep-col.sesamath.net/dev/aides/' + (params.mep_langue_id ? params.mep_langue_id : 'fr')
     // url du swf
     swfUrl = baseSwf + '/aide' + ressource.idOrigine + '.swf'
     // on dimensionne le div parent (sinon la moitié du swf pourrait être dehors)

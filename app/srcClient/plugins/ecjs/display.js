@@ -48,7 +48,7 @@ module.exports = function display (ressource, options, next) {
   function displayEcjs () {
     /*global head*/
     // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
-    var ecjsBase = tools.getURLParameter('ecjsBase') || options.ecjsBase || 'http://ressources.sesamath.net/replication_calculatice/javascript'
+    var ecjsBase = tools.getURLParameter('ecjsBase') || options.ecjsBase || 'https://ressources.sesamath.net/replication_calculatice/javascript'
 
     // d'après {ecjsBase}/api/clc-api.main.js
     // celui-là détruit notre style et semble ne rien apporter dans les exos

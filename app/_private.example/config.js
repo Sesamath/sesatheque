@@ -9,7 +9,7 @@ var Personne = require('../constructors/Personne')
 
 module.exports = {
   application: {
-    baseUrl: 'http://example.com/',
+    baseUrl: 'https://example.com/',
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
   },
@@ -65,7 +65,7 @@ module.exports = {
     'token2'
   ],
   sesalabs: [
-    'http://sesalab.example.com/'
+    'https://sesalab.example.com/'
   ],
   admin: {
     // user1:'password1',

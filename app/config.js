@@ -67,7 +67,7 @@ var config = {
     name: 'bibliotheque',
     defaultViewsPath: 'app/views',
     // mis dans _private/config.js car dépendant de l'instance
-    baseUrl: 'http://.../',
+    baseUrl: 'http(s)://.../',
     mail: 'user@example.com',
     staging: staging
   },

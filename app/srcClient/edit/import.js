@@ -98,7 +98,7 @@ module.exports = function importByUrl () {
       importButtonElt.addEventListener('click', function () {
         try {
           var urlImport = urlImportElt.value
-          if (urlImport && urlImport.substr(0, 4) !== 'http') throw new Error('Url invalide, il faut une adresse absolue (qui commence par http://…)')
+          if (urlImport && urlImport.substr(0, 4) !== 'http') throw new Error('Url invalide, il faut une adresse absolue (qui commence par https:// ou http://…)')
           else doImport(urlImport)
         } catch (error) {
           page.addError(error, 5)

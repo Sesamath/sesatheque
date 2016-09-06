@@ -35,7 +35,7 @@ var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
 
-var baseCollDoc = 'http://ressources.sesamath.net'
+var baseCollDoc = 'https://ressources.sesamath.net'
 
 /**
  * Affiche la ressource coll_doc (atome de manuel ou cahier)

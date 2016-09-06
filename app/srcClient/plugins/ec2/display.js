@@ -46,7 +46,7 @@ var swf = require('../../display/swf')
  */
 module.exports = function display (ressource, options, next) {
   try {
-    var ec2Base = tools.getURLParameter('ec2Base') || options.ec2Base || 'http://ressources.sesamath.net/replication_calculatice/flash'
+    var ec2Base = tools.getURLParameter('ec2Base') || options.ec2Base || 'https://ressources.sesamath.net/replication_calculatice/flash'
     var swfUrl
 
     log('start ec2 display avec la ressource', ressource)

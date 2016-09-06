@@ -384,7 +384,7 @@ module.exports = {
   init: function (options) {
     if (!options) throw new Error('Paramètres de chargement absents')
     urlBaseJ3p = options.urlBaseJ3p
-    if (!urlBaseJ3p || urlBaseJ3p.substr(0, 4) !== 'http') {
+    if (!urlBaseJ3p || (urlBaseJ3p.substr(0, 2) !== '//' && urlBaseJ3p.substr(0, 4) !== 'http')) {
       throw new Error('Il faut donner une url absolue pour le domaine j3p')
     }
     log = options.log

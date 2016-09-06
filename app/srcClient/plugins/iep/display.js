@@ -60,7 +60,7 @@ module.exports = function display (ressource, options, next) {
     var height = ressource.parametres.height || width * 0.75 || 600
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
     // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    var svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg')
     svg.setAttributeNS(null, 'width', width)
     svg.setAttributeNS(null, 'height', height)
     svg.style.display = 'block'
@@ -98,7 +98,7 @@ module.exports = function display (ressource, options, next) {
     var xml = ressource.parametres.xml
     var url = ressource.parametres.url
     var isExternal = url && !xml
-    page.loadAsync(['mathjax', 'http://iep.sesamath.net/iepjsmin.js'], function () {
+    page.loadAsync(['mathjax', 'https://iep.sesamath.net/iepjsmin.js'], function () {
       /*global MathJax*/
       MathJax.Hub.Config({
         tex2jax: {

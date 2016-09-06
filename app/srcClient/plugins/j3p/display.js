@@ -36,7 +36,7 @@ var tools = require('sesajstools')
 var page = require('../../page/index')
 var xhr = require('sesajstools/http/xhr')
 
-var urlBaseJ3p = 'http://j3p.sesamath.net'
+var urlBaseJ3p = '//j3p.sesamath.net'
 
 /**
  * Affiche la ressource dans l'élément d'id mepRess
@@ -90,7 +90,7 @@ module.exports = function display (ressource, options, next) {
 
     // le domaine où prendre les js j3p
     if (options.isDev) {
-      urlBaseJ3p = 'http://j3p.devsesamath.net'
+      urlBaseJ3p = '//j3p.devsesamath.net'
     }
 
     var lastResultUrl = tools.getURLParameter('lastResultUrl')
