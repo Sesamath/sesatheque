@@ -43,13 +43,12 @@ var $
  * Ajoute l'iframe (ou un div si c'est un swf directement)
  * @private
  */
-function addPage (params, next) {
+function addPage (url, params, next) {
   log('addPage avec les params', params)
-  var url = params.adresse
   var divIframeId = 'page'
   var divIframe = dom.addElement(container, 'div', {id: divIframeId})
   var divIframeSrcId = 'urlSrc'
-  dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + url)
+  dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + params.adresse)
   // toujours autosize sur le conteneur
   page.autosize(divIframeId, [divIframeSrcId], null, {offsetHeight:20, offsetWidth: 40})
   // url sera ajouté après l'appel de pageLoaded, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
@@ -173,7 +172,11 @@ module.exports = function display (ressource, options, next) {
       var url = params.adresse
       if (!url) throw new Error('Url manquante')
       if (!/^https?:\/\//.test(url)) throw new Error('Url invalide : ' + url)
-
+      // si c'est pas du https on passe par notre proxy maison, en filant l'id de la ressource,
+      // pour éviter de servir de proxy à n'importe quoi
+      if (!/^https:\/\//.test(url)) {
+        url = '/public/urlProxy/' + ressource.oid
+      }
       // init
       dom.addCss(options.pluginBase + 'url.css')
 
@@ -182,7 +185,7 @@ module.exports = function display (ressource, options, next) {
       var isBasic = !hasConsigne && !hasReponse
       // ni question ni réponse
       if (isBasic) {
-        addPage(params, next)
+        addPage(url, params, next)
         if (resultatCallback) {
           // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
           $('body').on('unload', function () {
@@ -278,7 +281,7 @@ module.exports = function display (ressource, options, next) {
                 dom.addElement(form, 'p', { 'class': 'info', style: { margin: '1em;' } },
                   "Aucun enregistrement ne sera effectué (car aucune destination n'a été fournie pour l'envoyer, normal en visualisation seule)")
               }
-              addPage(params, function () {
+              addPage(url, params, function () {
                 urlUi(ressource, options, function () {
                   $('#loading').empty()
                   next()

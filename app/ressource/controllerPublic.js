@@ -38,9 +38,10 @@
  * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
  * @controller controllerPublic
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes) {
-  var tools = require('../tools')
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache) {
   var _ = require('lodash')
+  var request = require('request')
+  var tools = require('../tools')
   var config = require('./config')
 
   /**
@@ -215,4 +216,62 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /public/recherche
    */
   controller.get($routes.get('search'), search)
+  /**
+   * Un proxy pour les pages externes en http (mais pas https)
+   * @route GET /public/urlProxy/:oid
+   */
+  controller.get('urlProxy/:oid', function (context) {
+    function sendRawHtml (body, contentType) {
+      var options = {
+        headers: {
+          'Content-Type': contentType
+        }
+      }
+      context.raw(body, options)
+    }
+
+    var oid = context.arguments.oid
+
+    $ressourceRepository.load(oid, function (error, ressource) {
+      if (error) {
+        log.error(error)
+        context.text(error.toString())
+      } else if (ressource && ressource.type === 'url') {
+        var url = ressource && ressource.parametres && ressource.parametres.adresse
+        if (url && url.substr(0, 7) === 'http://') {
+          var cacheKey = 'urlProxy' + oid
+          var page = $cache.get(cacheKey)
+          if (page && page.body) {
+            sendRawHtml(page.body, page.contentType)
+          } else {
+            // faut aller le chercher
+            var options = {
+              url: url,
+              timeout: 5000,
+              gzip: true
+            }
+            request(options, function (error, response, body) {
+              if (!error && response.statusCode === 200) {
+                // on met ça en cache pendant 10min
+                var page = {
+                  body: body,
+                  contentType: response.headers['content-type'] || 'text/html'
+                }
+                $cache.set('urlProxy' + oid, page, 600)
+                sendRawHtml(page.body, page.contentType)
+              } else {
+                context.text('Impossible de récupérer la page ' + url)
+              }
+            })
+          }
+        } else {
+          var msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
+          log.error(msg)
+          context.text(msg)
+        }
+      } else {
+        context.text('Il n’y a pas de ressource ' + oid + ' de type page externe')
+      }
+    })
+  })
 }

@@ -83,8 +83,8 @@ ressourceComponent.controller('ressource', function ($ressourceRepository, $ress
 })
 
 // un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $settings) {
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $settings)
+ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache) {
+  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache)
 })
 
 // l'api json
