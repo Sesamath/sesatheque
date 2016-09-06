@@ -65,7 +65,7 @@ var conf = {
       // idem pour editgraphe chargé par srcClient/plugins/j3p/edit.js ou showParcours ci-dessus
       {
         test: /sesaeditgraphe\/src\/embed\/.*\.js/,
-        loader: 'babel-loader',
+        loader: 'babel',
         query: {
           presets: ['es2015', 'stage-2']
         }
