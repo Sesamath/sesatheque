@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "engines": {
     "node": ">4.4.0"
   },
@@ -93,7 +93,6 @@
     "uglify-js": "^2.4.24",
     "url-loader": "^0.5.7",
     "webpack": "^1.12.2",
-    "xml2js": "^0.4.4",
-    "zombie": "^2.5.1"
+    "xml2js": "^0.4.4"
   }
 }
