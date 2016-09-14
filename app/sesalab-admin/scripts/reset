@@ -18,18 +18,13 @@ function clean() {
   rm -rf public/app.*
 }
 
-function prepare() {
-  [[ ! -d node_modules ]] && npm install
-}
-
 function build() {
-  prepare
   build_styles
   build_scripts
 }
 
 function reset() {
-  clean && build
+  clean && npm install && build && npm prune --production
 }
 
 cd $(dirname $0)/..
