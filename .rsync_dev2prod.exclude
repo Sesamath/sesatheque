@@ -4,3 +4,5 @@ robots.txt
 _private
 *.md
 logs
+.bin
+tasks
