@@ -14,7 +14,7 @@ var tools = require('../../app/tools')
 var CounterMulti = require('../../app/tools/CounterMulti')
 
 // conf de l'appli
-var confSesatheque = require('../../app/_private/config')
+var confSesatheque = require('../../_private/config')
 var urlApi = 'http://'
 urlApi += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
 urlApi += ':'

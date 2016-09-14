@@ -14,7 +14,7 @@ var moment = require('moment')
 var fs = require('fs')
 
 // conf de l'appli
-var serverConf = require('../app/_private/config')
+var serverConf = require('../_private/config')
 var urlBibli = 'http://'
 urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlBibli += ':'

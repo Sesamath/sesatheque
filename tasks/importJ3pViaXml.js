@@ -23,14 +23,14 @@ var graphe2Json = require('./modules/j3pGraphe2json')
 
 // databases
 var dbConfigOldBibli
-var dbConfigLabomep = require('../app/_private/bddConfigs/labomep')
+var dbConfigLabomep = require('../_private/bddConfigs/labomep')
 // les connexions aux bases
 var kOldBibli
 var kLabomep = knex(dbConfigLabomep)
 
 var checkOldBibli = false
 if (checkOldBibli) {
-  dbConfigOldBibli = require('../app/_private/bddConfigs/oldbibli')
+  dbConfigOldBibli = require('../_private/bddConfigs/oldbibli')
   kOldBibli = knex(dbConfigOldBibli)
 }
 
@@ -204,7 +204,7 @@ function purgeJ3pAndExit () {
   var query = 'DELETE ressource, ri2 FROM ressource_index ri INNER JOIN ressource USING(oid)' +
       ' INNER JOIN ressource_index ri2 USING(oid)' +
       " WHERE ri.name = 'type' AND ri._string = 'j3p'"
-  var dbConfigBibli = require('../app/_private/config')
+  var dbConfigBibli = require('../_private/config')
   var confKnex = {
     client: 'mysql',
     connection: dbConfigBibli.entities.database

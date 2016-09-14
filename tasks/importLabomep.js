@@ -33,7 +33,7 @@ var logProcess = true
 // conf de l'appli
 var config = require('../app/ressource/config.js')
 // conf de l'appli
-var serverConf = require('../app/_private/config')
+var serverConf = require('../_private/config')
 var urlBibli = 'http://'
 urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlBibli += ':'
@@ -46,7 +46,7 @@ var tpCode = config.constantes.typePedagogiques
 var catCode = config.constantes.categories
 
 // databases
-var dbConfigLabomep = require('../app/_private/bddConfigs/labomep')
+var dbConfigLabomep = require('../_private/bddConfigs/labomep')
 // les connexions aux bases, labomep
 var klabomep = knex(dbConfigLabomep)
 // et bibli, pour aller chercher les auteurs

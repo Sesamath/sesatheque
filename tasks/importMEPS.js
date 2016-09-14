@@ -20,7 +20,7 @@ var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
 // conf de l'appli
-var confSesatheque = require('../app/_private/config')
+var confSesatheque = require('../_private/config')
 var urlBibli = 'http://'
 urlBibli += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
 urlBibli += ':'
@@ -35,7 +35,7 @@ var catCode = confRessource.constantes.categories
 var relCode = confRessource.constantes.relations
 
 // databases
-var confMeps = require('../app/_private/bddConfigs/mepcol')
+var confMeps = require('../_private/bddConfigs/mepcol')
 // les connexions aux bases
 var kmepcol = knex(confMeps)
 

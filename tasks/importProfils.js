@@ -14,7 +14,7 @@ var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
 // conf de l'appli
-var serverConf = require('../app/_private/config')
+var serverConf = require('../_private/config')
 var urlBibli = 'http://'
 urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlBibli += ':'

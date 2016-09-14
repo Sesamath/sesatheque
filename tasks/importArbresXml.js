@@ -63,7 +63,7 @@ var urls = {
 var elementtree = require('elementtree')
 
 // url bibliotheque d'après conf de l'appli
-var serverConf = require('../app/_private/config')
+var serverConf = require('../_private/config')
 var urlApiBibli = 'http://'
 urlApiBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
 urlApiBibli += ':'

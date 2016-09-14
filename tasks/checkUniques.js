@@ -11,7 +11,7 @@ var knex = require('knex')
 var moment = require('moment')
 var flow = require('an-flow')
 
-var dbConfig = require('../app/_private/config')
+var dbConfig = require('../_private/config')
 var confKnex = {
   client: 'mysql',
   connection: dbConfig.$entities.database

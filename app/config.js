@@ -37,22 +37,22 @@
 var tools = require('./tools')
 var stools = require('sesajstools')
 var path = require('path')
+
+/** La racine du projet */
+var root = path.resolve(__dirname, '..')
+
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
-var privateConfPath = [__dirname, '_private']
+var privateConfPath = [root, '_private']
 if (process.env.SESATHEQUE_CONF && /^[^\/]+$/.test(process.env.SESATHEQUE_CONF)) {
-  // on peut préciser un autre fichier de conf via l'environnement (utile pour faire tourner plusieurs instances de l'appli)
+  // on peut préciser un autre fichier de conf via l'environnement
+  // (utile pour faire tourner plusieurs instances de l'appli)
   privateConfPath.push(process.env.SESATHEQUE_CONF)
 } else {
   privateConfPath.push('config')
 }
-
 var localConfig = require(path.join.apply(this, privateConfPath))
-
 // la conf du composant ressource à part
 var ressourceConfig = require('./ressource/config')
-
-/** La racine du projet */
-var root = path.resolve(__dirname, '..')
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
