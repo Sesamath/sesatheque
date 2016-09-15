@@ -65,6 +65,10 @@ var config = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application: {
     name: 'bibliotheque',
+    // ajouté en title
+    title: 'Sésathèque',
+    // h1 de la page d'accueil
+    homeTitle: 'Bienvenue sur cette Sésathèque',
     defaultViewsPath: 'app/views',
     // mis dans _private/config.js car dépendant de l'instance
     baseUrl: 'http(s)://.../',

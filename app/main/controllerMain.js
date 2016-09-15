@@ -30,7 +30,14 @@
  */
 'use strict'
 
+var fs = require('fs')
 var path = require('path')
+
+var config = require('../config')
+
+var homeContent = fs.readFileSync(path.join(__dirname, '../../_private/home.inc.html'))
+if (homeContent) homeContent = homeContent.toString()
+else homeContent = 'Ce site est encore un prototype expérimental.'
 
 /**
  * Controleur du composant main pour les routes "statiques"
@@ -52,12 +59,12 @@ module.exports = function (controller) {
     context.layout = 'page'
     var data = baseData
     // log('le contexte dans le controleur de main, action /',context)
-    data.$metas.title = 'Bienvenue dans la bibliothèque Sésamath'
+    data.$metas.title = config.application.homeTitle
     // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
     data.contentBloc = {
       $view: 'contents',
       // ce content est la variable passée au template dust
-      contents: ['Ce site est encore un prototype expérimental.']
+      contents: [homeContent]
     }
     context.html(data)
   })
