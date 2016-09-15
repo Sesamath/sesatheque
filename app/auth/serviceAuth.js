@@ -152,6 +152,7 @@ module.exports = function ($accessControl, $ressourcePage) {
     if ($accessControl.isAuthenticated(context)) {
       // menu authentifié
       authBloc.user = {
+        oid: context.session.user.oid,
         nom: context.session.user.nom,
         prenom: context.session.user.prenom
       }

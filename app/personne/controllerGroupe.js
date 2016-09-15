@@ -64,7 +64,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   }
 
   function addUrlFollow (groupe) {
-    if (groupe && groupe.nom) groupe.urlJoin = '/groupe/suivre/' + encodeURIComponent(groupe.nom)
+    if (groupe && groupe.nom) groupe.urlFollow = '/groupe/suivre/' + encodeURIComponent(groupe.nom)
   }
 
   function addUrlIgnore (groupe) {
@@ -630,6 +630,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
             else addUrlFollow(item)
             item.publicString = groupe.public ? 'public' : 'privé'
             contentBloc.groupes.push(item)
+            console.log('groupe ouvert', groupe, '\ndonne\n', item)
           })
         } else {
           contentBloc.defaultMessage = "Aucun groupe ouvert n'a été créé"
@@ -837,7 +838,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if (grp && h.isFollowed(context, nom)) h.ignoreGroup(context, nom, this)
       else this(deniedMsg)
     }).seq(function () {
-      goToPersoOrError(context, 'Vous avez quitté le groupe ' + nom)
+      goToPersoOrError(context, 'Vous avez cessé de suivre les publications du groupe ' + nom)
     }).catch(function (error) {
       goToPersoOrError(context, error, true)
     })

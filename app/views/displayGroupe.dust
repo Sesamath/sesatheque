@@ -4,7 +4,7 @@
     {?urlJoin} <a href="{urlJoin}">Rejoindre</a> {/urlJoin}
     {?urlQuit} <a href="{urlQuit}">Quitter</a> {/urlQuit}
     {?urlFollow} <a href="{urlFollow}">Suivre</a> {/urlFollow}
-    {?urlIgnore} <a href="{urlIgnore}">Ignorer</a> {/urlIgnore}
+    {?urlIgnore} <a href="{urlIgnore}">Ne plus suivre</a> {/urlIgnore}
     {?urlEdit} <a href="{urlEdit}">Modifier</a> {/urlEdit}
     {?urlDelete} <a href="{urlDelete}">Supprimer</a> {/urlDelete}
   </span>
