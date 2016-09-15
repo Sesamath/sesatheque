@@ -209,7 +209,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             })
           } else {
             error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
-            log.debug(error, body)
+            log.debug(error.message, body)
             end(error)
           }
         })
@@ -486,20 +486,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var titrePage = 'Modifier une ressource'
     var oid = context.arguments.oid
     var ressourcePostee = context.post
+    // les propriétés qui ne sont pas des champs de ressource
     var groupesSup = ressourcePostee.hasOwnProperty('groupesSup') ? ressourcePostee.groupesSup : ''
     var ressourceNormee
     var ressourceOriginale
 
     if ($accessControl.isAuthenticated(context)) {
       flow().seq(function () {
-        log.debug('groupes ress', ressourcePostee.groupes)
-        log.debug('groupesSup ress', ressourcePostee.groupesSup)
         // log.debug('ressource postée', ressourcePostee, 'form', {max: 5000})
         checkToken(context, oid, this)
       }).seq(function () {
         $ressourceControl.valideRessourceFromPost(ressourcePostee, false, this)
       }).seq(function (ressource) {
-        log.debug('groupes ress normée', ressource.groupes)
         // faut la mémoriser pour comparer avec la bdd
         ressourceNormee = ressource
         if (!_.isEmpty(ressource._errors)) {
@@ -511,21 +509,23 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $ressourceRepository.load(oid, this)
         }
       }).seq(function (ressourceBdd) {
-        log.debug('grps ress bdd', ressourceBdd.groupes)
-        log.debug('av checkGroupes')
+        log.debug('av checkGroupes', ressourceNormee)
         if (ressourceBdd) {
           ressourceOriginale = ressourceBdd
           $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
         } else {
-          var error = new Error('La ressource ' + oid + " n'existe plus")
+          var error = new Error('La ressource ' + oid + " n'existe pas ou plus")
           log.error(error)
           this(error)
         }
       }).seq(function (ressource) {
-        log.debug('av checkPersonnes', ressource)
+        // faut remettre auteursAdd et contributeursAdd virés à la validation (pas des champs de ressource)
+        if (ressourcePostee.auteursAdd) ressource.auteursAdd = ressourcePostee.auteursAdd
+        if (ressourcePostee.contributeursAdd) ressource.contributeursAdd = ressourcePostee.contributeursAdd
+        log.debug('av checkPersonnes', ressource, 'formRess', {max: 2000})
         $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
       }).seq(function (ressource) {
-        log.debug('auteurs après checkPersonnes', ressource.auteurs)
+        log.debug('auteurs & contributeurs après checkPersonnes', ressource.auteurs, ressource.contributeurs)
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         tools.update(ressourceOriginale, ressource)
         $ressourceRepository.write(ressourceOriginale, this)

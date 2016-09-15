@@ -158,6 +158,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
 
   /**
    * Normalise les propriétés auteurs et contributeurs (en vérifiant qu'ils existent)
+   * Vérifie que le user courant peut modifier les auteurs
    * @param {Context}       context
    * @param {Ressource}     ressourceOriginale
    * @param {Ressource}     ressourceNew
@@ -165,7 +166,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    */
   $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
     log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
-    log.debug('et les nouveaux auteurs', ressourceNew.auteurs)
+    log.debug('et les nouveaux auteurs', ressourceNew.auteursAdd)
     // les cas où on a rien à faire
     if (
         ressourceOriginale &&

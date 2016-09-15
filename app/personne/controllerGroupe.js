@@ -302,7 +302,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       if (typeof message === 'object') {
         if (message instanceof Error) {
           level = 'error'
-          log.debug(message.stack)
+          log.debug('error stack', message.stack)
         } else {
           log.error(new Error("goToPersoOrError reçoit un objet qui n'est pas une erreur"), message)
         }

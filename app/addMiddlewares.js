@@ -57,7 +57,7 @@ module.exports = function afterRailSession (rail) {
       // les requetes non statiques en console et debug
       if (!/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
         applog(req.method, req.originalUrl)
-        log.debug(req.method + ' ' + req.originalUrl)
+        log.debug('requete ' + req.method + ' ' + req.originalUrl)
       }
       next()
     })

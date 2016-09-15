@@ -366,8 +366,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (_.isEmpty(ressource.contributeurs)) {
         nextComplement()
       } else {
+        log.debug('av parSeq', ressource.contributeurs)
         var fluxContributeurs = flow(ressource.contributeurs)
-        fluxContributeurs.parSeq(2, function (contributeurId, index) {
+        fluxContributeurs.seqEach(function (contributeurId, index) {
           var nextSeq = this
           $personneRepository.load(contributeurId, function (error, personne) {
             if (error) log.error(error)

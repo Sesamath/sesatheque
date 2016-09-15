@@ -92,7 +92,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           selected: (context.tab === 'edit'),
           hidden: !$accessControl.hasPermission('update', context, ressource)
         })
-        log.debug("sur la ressource " +ressource.oid +"on a les droits update " +$accessControl.hasPermission('update', context, ressource) +" avec le user " +$accessControl.getCurrentUserOid(context) +' et les auteurs', ressource.auteurs)
+        log.debug('sur la ressource ' + ressource.oid + 'on a les droits update ' + $accessControl.hasPermission('update', context, ressource) + ' avec le user ' +$accessControl.getCurrentUserOid(context) + ' et les auteurs', ressource.auteurs)
         links.push({
           id: 'buttonDuplicate',
           href: $routes.getAbs('create') + '?clone=' + oid,

@@ -689,7 +689,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             })
           } else {
             error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
-            log.debug(error, body)
+            log.error(error)
+            log.debug(error.message, body)
             $json.send(context, error)
           }
         })
