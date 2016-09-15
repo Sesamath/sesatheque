@@ -33,6 +33,7 @@
 
 var _ = require('lodash')
 var flow = require('an-flow')
+var merge = require('sesajstools').merge
 
 module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
   /**
@@ -192,7 +193,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
       for (var prop in personneNew) {
         if (personneNew.hasOwnProperty(prop) && !_.isEqual(personne[prop], personneNew[prop])) {
           needUpdate = true
-          personne[prop] = personneNew[prop]
+          // pour groupesMembre on fusionne, histoire de pas écraser les groupes locaux
+          // par des groupes donnés par l'authentification
+          if (prop === 'groupesMembre') merge(personne.groupesMembre, personneNew.groupesMembre)
+          // et pour les autres on remplace
+          else personne[prop] = personneNew[prop]
         }
       }
       if (needUpdate) personne.store(next)

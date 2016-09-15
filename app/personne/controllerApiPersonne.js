@@ -97,4 +97,12 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
       denied(context)
     }
   })
+
+  /**
+   * Affiche les infos du user courant, pour debug
+   * @route GET /api/personne/me
+   */
+  controller.get('me', function (context) {
+    sendJson(context, null, context.session.user)
+  })
 }
