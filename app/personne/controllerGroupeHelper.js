@@ -119,8 +119,10 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
         me[prop].push(nom)
         // si c'est un ajout de groupesMembre, faut aussi mettre groupesSuivis
         if (!isFollow) {
+          // c'est lui qui fera la mise à jour en bdd et en cache, puis appelera next
           addGroup(context, nom, true, next)
-          return // en 2 lignes sinon il râle pour une tail recursion inutile
+          // on arrête donc là (et avec 2 lignes jslint râle plus pour une tail recursion inutile)
+          return
         }
         // màj session
         $accessControl.updateCurrentUser(context, me)
@@ -152,9 +154,9 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
           next(new Error(deniedMsg))
         } else {
           me[prop] = newGroupes
-          // màj session
+          // màj session, pas très utile car on doit avoir une ref dessus, mais plus propre
           $accessControl.updateCurrentUser(context, me)
-          // màj user en bdd
+          // màj user en bdd (et en cache)
           $personneRepository.save(me, next)
         }
       } else {

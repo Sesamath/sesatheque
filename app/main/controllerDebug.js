@@ -34,6 +34,7 @@
 module.exports = function (controller) {
   var tools = require('../tools')
   // var _ = require('lodash')
+  var $cache = lassi.service('$cache')
 
   function getDefaultData () {
     return {
@@ -115,11 +116,21 @@ module.exports = function (controller) {
     context.html(data)
   })
 
-  // une page de logout bidon
-  controller.get('login', function (context) {
-    context.layout = 'page'
-    var data = getDefaultData()
-    data.contentBloc.debug = 'page de logout factice'
-    context.html(data)
+  // une page pour voir le cache
+  controller.get('cache/:key', function (context) {
+    var key = context.arguments.key
+    $cache.get(key, function (error, data) {
+      if (error) context.json({error: error.toString()})
+      else if (data) context.json(data)
+      else context.json({success: true, message: 'la clé ' + key + ' n’existait pas en cache'})
+    })
+  })
+  // une autre pour l'effacer
+  controller.get('purgeCache/:key', function (context) {
+    var key = context.arguments.key
+    $cache.delete(key, function (error) {
+      if (error) context.json({error: error.toString()})
+      else context.json({success: true, message: 'clé ' + key + ' effacée'})
+    })
   })
 }

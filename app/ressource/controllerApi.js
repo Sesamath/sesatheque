@@ -261,7 +261,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
           $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
         } else if (ressourcePostee.origine) {
-          // l'idOrigine n'est pas obligatoire ($ressourceRepository.write créera une clé si besoin
+          // l'idOrigine n'est pas obligatoire ($ressourceRepository.save créera une clé si besoin
           next(null, ressourcePostee)
         } else {
           next(new Error('Il faut fournir oid ou au moins origine'))
@@ -435,8 +435,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   function writeAndOut (context, ressource) {
     if (_.isEmpty(ressource._errors)) {
-      $ressourceRepository.write(ressource, function (error, ressource) {
-        log.debug('dans cb api writeAndOut après $ressourceRepository.write', ressource, 'repository', {max: 500})
+      $ressourceRepository.save(ressource, function (error, ressource) {
+        log.debug('dans cb api writeAndOut après $ressourceRepository.save', ressource, 'repository', {max: 500})
         if (error) {
           $json.send(context, error)
         } else {
@@ -493,7 +493,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               // on sauvegarde le nouveau titre
               log.debug('titre de ' +ressource.oid +' changé : ' +ressource.titre +' => ' +newTitre)
               ressource.titre = newTitre
-              $ressourceRepository.write(ressource) // pas de next, on laisse comme c'était si ça plante
+              $ressourceRepository.save(ressource) // pas de next, on laisse comme c'était si ça plante
           }
     }
   } /* */
@@ -523,7 +523,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               ressource.restriction = configRessource.constantes.restriction.prive
               if (!ressource.relations) ressource.relations = []
               ressource.relations.push([configRessource.constantes.relations.estVersionDe, oid])
-              $ressourceRepository.write(ressource, function (error, ressource) {
+              $ressourceRepository.save(ressource, function (error, ressource) {
                 if (error) $json.send(context, error)
                 else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
                 else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
@@ -617,7 +617,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             if (!ressource.relations) ressource.relations = []
             var originalUrl = base + 'ressource/' + configRessource.constantes.routes.describe + '/' + oid
             ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
-            $ressourceRepository.write(ressource, function (error, ressource) {
+            $ressourceRepository.save(ressource, function (error, ressource) {
               if (error) $json.send(context, error)
               else if (ressource && ressource.oid) sendItem(new Alias(ressource))
               else $json.sendError(context, new Error("L'enregistrement de la ressource a échoué"))
@@ -739,10 +739,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                 if (context.post.base64) {
                   log.debug('la ressource ' + data.oid + ' avait la figure ' + ressource.parametres.figure + ' que l’on remplace par ' + context.post.base64)
                   ressource.parametres.figure = context.post.base64
-                  $ressourceRepository.write(ressource, function (error, ressource) {
+                  $ressourceRepository.save(ressource, function (error, ressource) {
                     if (error) sendError(error)
                     else if (ressource) context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
-                    else sendError(new Error('Le write de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
+                    else sendError(new Error('Le save de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
                   })
                 } else {
                   context.plain('Erreur : impossible de trouver une figure dans les données envoyées')

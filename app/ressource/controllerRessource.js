@@ -339,7 +339,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               var userOid = $accessControl.getCurrentUserOid(context)
               if (!ressource.contributeurs) ressource.contributeurs = []
               if (userOid && ressource.contributeurs.indexOf(userOid) === -1) ressource.contributeurs.push(userOid)
-              $ressourceRepository.write(ressource, function (error, ressource) {
+              $ressourceRepository.save(ressource, function (error, ressource) {
                 if (error) {
                   $ressourcePage.printError(context, error)
                 } else if (ressource && ressource.oid) {
@@ -403,10 +403,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressource) {
         // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
         ressource.auteurs = [$accessControl.getCurrentUserOid(context)]
-        $ressourceRepository.write(ressource, function (error, ressourceSaved) {
+        $ressourceRepository.save(ressource, function (error, ressourceSaved) {
           if (error) {
             // on veut gérér les erreurs ici, signe d'un bug dans notre code
-            log.error(new Error('on a une erreur au write mais pas au valide précédent'))
+            log.error(new Error('on a une erreur au save mais pas au valide précédent'))
             printForm(context, error, ressource, 'Ajouter une ressource')
           } else if (!_.isEmpty(ressourceSaved._errors)) {
             printForm(context, error, ressourceSaved, 'Ajouter une ressource')
@@ -528,7 +528,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.debug('auteurs & contributeurs après checkPersonnes', ressource.auteurs, ressource.contributeurs)
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         tools.update(ressourceOriginale, ressource)
-        $ressourceRepository.write(ressourceOriginale, this)
+        $ressourceRepository.save(ressourceOriginale, this)
       }).seq(function (ressource) {
         log.debug('ressource enregistrée', ressource)
         // si on a du closerId=YYY dans l'url, on affiche une page qui envoie un message (Cf sesatheque-client.modifyItem)

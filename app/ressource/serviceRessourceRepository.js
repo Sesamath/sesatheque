@@ -344,7 +344,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       })
       ressource.parametres = params
       // on enregistre la ressource modifiée en async
-      $ressourceRepository.write(ressource)
+      $ressourceRepository.save(ressource)
     }
     log('convertXmlEc2', params)
   }
@@ -467,7 +467,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       // si on est toujours là on peut construire la requete
       var query = EntityRessource
       optionsSafe.filters.forEach(function (filter) {
-        log.debug('filter', filter)
+        // log.debug('getListe filter ' + filter.index)
         if (filter.values && filter.values.length) {
           if (filter.values.length > 1) {
             query = query.match(filter.index).in(filter.values)
@@ -691,7 +691,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {EntityRessource}   ressource
    * @param {ressourceCallback} [next]    appelée avec une EntityRessource
    */
-  $ressourceRepository.write = function write (ressource, next) {
+  $ressourceRepository.save = function save (ressource, next) {
     if (ressource.constructor.name !== 'Entity') {
       ressource = EntityRessource.create(ressource)
     }

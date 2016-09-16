@@ -763,5 +763,27 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     return context.session.user
   }
 
+  /**
+   * Rafraîchi la session d'après les données en cache ou en base
+   * @param {Context}          context
+   * @param {personneCallback} next
+   */
+  $accessControl.refreshCurrentUser = function (context, next) {
+    if (!$accessControl.isAuthenticated(context)) return next(new Error('refreshCurrentUser appelé sans session'))
+    var oid = $accessControl.getCurrentUserOid(context)
+    $personneRepository.load(oid, function (error, user) {
+      if (error) {
+        next(error)
+      } else if (user) {
+        context.session.user = user
+        next(null, user)
+      } else {
+        error = new Error('L’utilisateur ' + oid + ' a été supprimé depuis l’ouverture de la session')
+        log.error(error)
+        next(error)
+      }
+    })
+  }
+
   return $accessControl
 }

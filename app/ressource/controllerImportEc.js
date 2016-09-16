@@ -264,7 +264,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             next(null, ressourceNew)
           } else {
             log.debug('ressource calculatice/' + ressource.idOrigine + ' modifiée')
-            $ressourceRepository.write(ressourceNew, next)
+            $ressourceRepository.save(ressourceNew, next)
           }
         }
       })

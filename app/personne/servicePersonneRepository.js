@@ -33,7 +33,7 @@
 
 var _ = require('lodash')
 var flow = require('an-flow')
-var merge = require('sesajstools').merge
+var merge = require('../tools').merge
 
 module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
   /**
@@ -163,6 +163,77 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
     } else {
       next(new Error('origine ou idOrigine manquant, impossible de chercher en base de données.'))
     }
+  }
+
+  /**
+   * Efface un groupe chez toutes les personnes qui en sont membre ou qui le suivent
+   * @param {string}            groupName Nom du groupe
+   * @param {errorCallback} next      Avec la liste des personnes (ou un tableau vide)
+   * @memberOf $personneRepository
+   */
+  $personneRepository.removeGroup = function (groupName, next) {
+    var offset = 0
+    var nb = 100
+    flow().seq(function recup () {
+      var nextStep = this
+      // log.debug('removeGroup membres de ' + groupName)
+      EntityPersonne.match('groupesMembre').equals(groupName).grab(nb, offset, function (error, personnes) {
+        // log.debug('on trouve ' + personnes.length + ' membres')
+        if (error) throw error
+
+        flow(personnes).seqEach(function (personne) {
+          // log.debug('membre ' + personne.nom)
+          // si on est là personne.groupesMembre contient forcément groupName
+          personne.groupesMembre = personne.groupesMembre.filter(function (elt) { return elt !== groupName })
+          // mais on peut avoir une anomalie et que groupName ne soit pas dans groupesSuivis, on check
+          var index = personne.groupesSuivis && personne.groupesSuivis.indexOf(groupName)
+          if (index) {
+            personne.groupesSuivis = personne.groupesSuivis.filter(function (elt, i) { return index !== i })
+          } else {
+            log.error('La personne ' + personne.oid + ' avait le groupe ' + groupName + ' dans groupesMembre mais pas dans groupesSuivis')
+          }
+          // log.debug('avant store', personne.groupesMembre)
+          // log.debug('avant store', personne.groupesSuivis)
+          personne.store(this)
+        }).seq(function () {
+          // log.debug('fin personne pour membre')
+          if (personnes.length < nb) {
+            offset = 0
+            nextStep()
+          } else {
+            offset += nb
+            recup()
+          }
+        }).catch(function (error) {
+          throw error
+        })
+        // fin du flow personnes
+      })
+    }).seq(function recup () {
+      // log.debug('removeGroup suivi de ' + groupName)
+      EntityPersonne.match('groupesSuivis').equals(groupName).grab(nb, offset, function (error, personnes) {
+        // log.debug('on trouve les followers', personnes)
+        if (error) throw error
+        flow(personnes).seqEach(function (personne) {
+          // log.debug('personne pour suivi', personne.nom)
+          personne.groupesSuivis = personne.groupesSuivis.filter(function (elt) { return elt !== groupName })
+          // log.debug('avant store', personne.groupesSuivis)
+          personne.store(this)
+        }).seq(function () {
+          if (personnes.length < nb) {
+            next()
+          } else {
+            offset += nb
+            recup()
+          }
+        }).catch(function (error) {
+          throw error
+        })
+      })
+    }).catch(function (error) {
+      log.error(error)
+      next(error)
+    })
   }
 
   /**

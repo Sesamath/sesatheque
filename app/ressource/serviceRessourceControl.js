@@ -178,7 +178,7 @@ module.exports = function (EntityRessource) {
    */
   function addWarnings (ressource) {
     // on ajoute un warning pour les enfants
-    log('ressource dans addWarnings', ressource, 'form', {max: 2000})
+    log.debug('ressource dans addWarnings', ressource, 'form', {max: 2000})
     // on désactive ça car à la création c'est normal, on verra plus tard
     /* if (ressource.type === 'arbre' && !ressource.new && (!ressource.enfants || !ressource.enfants.length)) {
       rTools.addWarning(ressource, 'arbre sans enfants')
