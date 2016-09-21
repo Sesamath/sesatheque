@@ -49,7 +49,6 @@
 
     {! todo widget relations !}
 
-    {! todo widget auteurs et contributeurs !}
     <div class="form-group">
       {?auteurs.hidden}
         {>wrapper widget="text" o=auteurs /}

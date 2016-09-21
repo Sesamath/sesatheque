@@ -160,6 +160,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               name: key + '[' + i + ']',
               selected: true
             })
+            i++
           } else {
             formData.errors.push("Aucune personne d'identifiant " + value)
           }
