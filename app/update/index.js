@@ -34,7 +34,6 @@
 var path = require('path')
 var fs = require('fs')
 
-var flow = require('an-flow')
 var config = require('../config')
 var applog = require('an-log')(config.application.name)
 
@@ -54,53 +53,37 @@ lassi.on('startup', function () {
   var EntityUpdate = lassi.service('EntityUpdate')
   // on cherche le dernier update appliqué
   EntityUpdate.match('num').sort('num', 'desc').grabOne(function (error, update) {
-    try {
-      if (error) throw error
-      var last = update && update.num || 0
-      lassi.settings.application.dbVersion = last
-      var i = last + 1
-      var file = path.join(__dirname, 'updates/update_' + i + '.js')
-      var files = []
-      while (fs.existsSync(file)) {
-        files.push(file)
-        i++
-        file = path.join(__dirname, 'batch/update_' + i + '.js')
-      }
-      if (files.length) {
-        i = last
-        flow(files).seqEach(function (file) {
-          i++
-          var nextUpdate = this
-          var todo = require(file)
-          applog('updates', 'lancement update n° ' + i)
-          flow().seq(function () {
-            todo.run(this)
-          }).seq(function (result) {
-            if (!result) {
-              this(new Error(file + ' n’a pas renvoyé d’erreur ni de result'))
-            } else {
-              var update = EntityUpdate.create()
-              update.date = new Date()
-              update.name = todo.name
-              update.description = todo.description
-              update.num = i
-              update.result = result
-              update.store(this)
-            }
-          }).seq(function (update) {
-            applog('updates', 'update n° ' + update.num + ' OK, base en version ' + update.num)
-            lassi.settings.application.dbVersion = update.num
-          }).catch(nextUpdate)
-        }).catch(function (error) {
-          applog('updates', 'Une erreur est survenue, cf le log d’erreurs', config.logs.error)
-          log.error(error)
-        })
+    function done (error) {
+      if (error) {
+        log.error(error)
+        applog('updates', 'Une erreur est survenue, cf le log d’erreurs', config.logs.error)
       } else {
-        applog('updates', 'aucun update à faire, base en version', lassi.settings.application.dbVersion)
+        applog('updates', 'plus d’update à faire, base en version', dbVersion)
       }
-    } catch (error) {
-      log.error(error)
     }
+    function nextUpdate (error) {
+      if (error) return done(error)
+      var update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
+      fs.access(update, fs.R_OK, function (error) {
+        if (error) return done()
+        dbVersion++
+        applog('updates', 'lancement update n° ' + dbVersion)
+        var currentUpdate = require(update)
+        currentUpdate.run(function (error) {
+          if (error) return done(error)
+          EntityUpdate.create({
+            date: new Date(),
+            name: currentUpdate.name,
+            description: currentUpdate.description,
+            num: dbVersion
+          }).store(nextUpdate)
+          applog('updates', 'update n° ' + dbVersion + ' OK, base en version ' + dbVersion)
+        })
+      })
+    }
+    if (error) return done(error)
+    var dbVersion = update && update.num || 0
+    nextUpdate()
   })
 })
 /* */
