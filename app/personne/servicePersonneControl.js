@@ -186,14 +186,15 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       var contributeurs = ressourceNew.contributeurs
       // en ajoutant les supplémentaires
       var tmp
+      var idClean
       // aj auteurs sup
       if (ressourceNew.auteursAdd) {
         tmp = ressourceNew.auteursAdd.split(',')
         delete ressourceNew.auteursAdd
         tmp.forEach(function (id) {
           log.debug('push auteur ' + id)
-          var idClean = id.trim()
-          if (idClean) auteurs.push(idClean)
+          idClean = id.trim()
+          if (idClean && !tools.isInArray(auteurs, idClean)) auteurs.push(idClean)
         })
       }
       // aj contributeurs sup
@@ -201,8 +202,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         tmp = ressourceNew.contributeursAdd.split(',')
         delete ressourceNew.contributeursAdd
         tmp.forEach(function (oid) {
-          var id = oid.trim()
-          if (id) contributeurs.push(id)
+          idClean = oid.trim()
+          if (idClean && !tools.isInArray(contributeurs, idClean) && !tools.isInArray(auteurs, idClean)) contributeurs.push(idClean)
         })
       }
       var currentUserOid = $accessControl.getCurrentUserOid(context)
@@ -214,15 +215,15 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       flow().seq(function () {
         // auteurs voulus
         var nextStep = this
-        flow(auteurs).seqEach(function (id) {
+        flow(auteurs).seqEach(function (oid) {
           var nextAuteur = this
-          $personneRepository.load(id, function (error, personne) {
+          $personneRepository.load(oid, function (error, personne) {
             if (error) {
               rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
               ressourceNew.auteurs.push(personne.oid)
             } else {
-              rTools.addWarning(ressourceNew, "L'auteur d'identifiant " + id + " n'existe pas")
+              rTools.addWarning(ressourceNew, 'L’auteur d’identifiant ' + oid + ' n’existe pas')
             }
             nextAuteur()
           })
@@ -237,21 +238,16 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         // flow contributeurs demandés
         flow(contributeurs).seqEach(function (oid) {
           var nextContributeur = this
-          if (ressourceNew.auteurs.indexOf(oid)) {
-            // s'il est déjà auteur on passe
+          $personneRepository.load(oid, function (error, personne) {
+            if (error) {
+              rTools.addError(ressourceNew, error.toString())
+            } else if (personne) {
+              ressourceNew.contributeurs.push(personne.oid)
+            } else {
+              rTools.addWarning(ressourceNew, 'Le contributeur d’identifiant ' + oid + ' n’existe pas')
+            }
             nextContributeur()
-          } else {
-            $personneRepository.load(oid, function (error, personne) {
-              if (error) {
-                rTools.addError(ressourceNew, error.toString())
-              } else if (personne) {
-                ressourceNew.contributeurs.push(personne.oid)
-              } else {
-                rTools.addWarning(ressourceNew, "Le contributeur d'identifiant ' + oid + ' n'existe pas")
-              }
-              nextContributeur()
-            })
-          }
+          })
         }).seq(function () {
           nextStep()
         }).catch(function (error) {
