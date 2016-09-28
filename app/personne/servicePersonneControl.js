@@ -182,31 +182,47 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       // on a tous les droits sur les auteurs et qqchose a changé
 
       // on mémorise ce que l'on veut mettre (case à cocher, parmi les précédents)
-      var auteurs = ressourceNew.auteurs
-      var contributeurs = ressourceNew.contributeurs
+      var oids = []
+      var auteurs = ressourceNew.auteurs.filter(function (id) {
+        id = Number(id)
+        if (tools.isInArray(oids, id)) return false
+        oids.push(id)
+        return true
+      })
       // en ajoutant les supplémentaires
       var tmp
-      var idClean
       // aj auteurs sup
       if (ressourceNew.auteursAdd) {
         tmp = ressourceNew.auteursAdd.split(',')
         delete ressourceNew.auteursAdd
         tmp.forEach(function (id) {
           log.debug('push auteur ' + id)
-          idClean = id.trim()
-          if (idClean && !tools.isInArray(auteurs, idClean)) auteurs.push(idClean)
+          id = Number(id) // vire d'éventuels espaces
+          if (id && !tools.isInArray(auteurs, id)) {
+            auteurs.push(id)
+          }
         })
       }
+      // idem contributeurs
+      oids = auteurs
+      var contributeurs = ressourceNew.contributeurs.filter(function (id) {
+        id = Number(id)
+        if (tools.isInArray(oids, id)) return false
+        oids.push(id)
+        return true
+      })
       // aj contributeurs sup
       if (ressourceNew.contributeursAdd) {
         tmp = ressourceNew.contributeursAdd.split(',')
         delete ressourceNew.contributeursAdd
-        tmp.forEach(function (oid) {
-          idClean = oid.trim()
-          if (idClean && !tools.isInArray(contributeurs, idClean) && !tools.isInArray(auteurs, idClean)) contributeurs.push(idClean)
+        tmp.forEach(function (id) {
+          id = Number(id)
+          if (id && !tools.isInArray(contributeurs, id) && !tools.isInArray(auteurs, id)) contributeurs.push(id)
         })
       }
       var currentUserOid = $accessControl.getCurrentUserOid(context)
+      log('auteurs', auteurs)
+      log('contrib', contributeurs)
 
       // puis reset des personnes sur la nouvelle ressource
       ressourceNew.auteurs = []
@@ -221,17 +237,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
             if (error) {
               rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
+              log('ajout ' +personne.nom)
               ressourceNew.auteurs.push(personne.oid)
             } else {
               rTools.addWarning(ressourceNew, 'L’auteur d’identifiant ' + oid + ' n’existe pas')
             }
             nextAuteur()
           })
-        }).seq(function () {
-          nextStep()
-        }).catch(function (error) {
-          nextStep(error)
-        })
+        }).done(nextStep)
       }).seq(function () {
         // contributeurs voulus
         var nextStep = this
@@ -248,11 +261,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
             }
             nextContributeur()
           })
-        }).seq(function () {
-          nextStep()
-        }).catch(function (error) {
-          nextStep(error)
-        })
+        }).done(nextStep)
       }).seq(function () {
         // terminé, mais si y'a pas d'auteurs on met au moins le user courant
         if (_.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(currentUserOid)
