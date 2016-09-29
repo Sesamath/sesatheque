@@ -51,7 +51,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
 
   EntityGroupe.afterStore(function (next) {
     // on met en cache
-    $cacheGroupe.set(this, function (error) { if (error) log.debug(error) })
+    $cacheGroupe.set(this, function (error) { if (error) log.error(error) })
     // et on passe au suivant sans se préoccuper du retour de mise en cache
     next()
   })

@@ -263,7 +263,7 @@ var ressourceConfig = {
     relations: 'Ressources liées',
     auteurs: 'Auteurs',
     contributeurs: 'Contributeurs',
-    groupes: 'Groupes',
+    groupes: 'Groupes de publication',
     groupesAuteurs: 'Groupes éditeurs',
     langue: 'Langue',
     publie: 'Publié',

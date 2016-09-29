@@ -92,7 +92,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           selected: (context.tab === 'edit'),
           hidden: !$accessControl.hasPermission('update', context, ressource)
         })
-        log.debug('sur la ressource ' + ressource.oid + 'on a les droits update ' + $accessControl.hasPermission('update', context, ressource) + ' avec le user ' +$accessControl.getCurrentUserOid(context) + ' et les auteurs', ressource.auteurs)
+        // log.debug('sur la ressource ' + ressource.oid + 'on a les droits update ' + $accessControl.hasPermission('update', context, ressource) + ' avec le user ' + $accessControl.getCurrentUserOid(context) + ' et les auteurs', ressource.auteurs)
         links.push({
           id: 'buttonDuplicate',
           href: $routes.getAbs('create') + '?clone=' + oid,
@@ -191,15 +191,14 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     var reqHttp = getReqHttp(context)
     var isJson = getIsJson(context)
     var isHtml = getIsHtml(context)
-    log.debug(
+    if (isHtml || isJson) {
+      log.debug(
         'listener on beforeTransport sur ' + reqHttp + ' (' + context.contentType + ' status ' + context.status + ') avec les data ',
         data,
         'beforeTransport',
         {max: 1000}
-    )
-    if (isHtml) log.debug('html vide ? ' + _.isEmpty(data.contentBloc))
-    else if (isJson) log.debug('api vide ? ' + _.isEmpty(data))
-    else log.debug('statique')
+      )
+    }
   }
 
   /**

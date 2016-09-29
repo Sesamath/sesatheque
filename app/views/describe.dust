@@ -61,12 +61,6 @@
         {#groupes.value}<li>{.}</li>{/groupes.value}
       </ul>
     {/groupes.value}
-    {?groupesAuteurs.value}
-      <ul class="groupes">{groupesAuteurs.title}
-        {#groupesAuteurs.value}<li>{.}</li>{/groupesAuteurs.value}
-      </ul>
-    {/groupesAuteurs.value}
-
 {/error}
 </div>
 {!

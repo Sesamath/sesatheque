@@ -60,9 +60,10 @@ module.exports = function ($cache, $settings, EntityRessource) {
     $cache.get(getKey(oid), function (error, ressourceCached) {
       var ressource
       if (!error) {
-        if (ressourceCached) ressource = EntityRessource.create(ressourceCached)
-        log.debug('ressource ' + oid + ' récupérée en cache', ressourceCached, 'cache')
-        log.debug('devenue ', ressource, 'cache')
+        if (ressourceCached) {
+          ressource = EntityRessource.create(ressourceCached)
+          log.debug('ressource ' + oid + ' récupérée en cache')
+        }
       }
       next(null, ressource)
     })
@@ -83,8 +84,10 @@ module.exports = function ($cache, $settings, EntityRessource) {
         $cache.get(getKey(oid), function (error, ressourceCached) {
           var ressource
           if (!error) {
-            if (ressourceCached) ressource = EntityRessource.create(ressourceCached)
-            log.debug('ressource ' + origine + '/' + idOrigine + ' récupérée en cache', ressourceCached, 'cache')
+            if (ressourceCached) {
+              ressource = EntityRessource.create(ressourceCached)
+              log.debug('ressource ' + origine + '/' + idOrigine + ' récupérée en cache')
+            }
           }
           next(null, ressource)
         })

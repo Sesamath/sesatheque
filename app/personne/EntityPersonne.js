@@ -56,7 +56,7 @@ module.exports = function (EntityPersonne, $cachePersonne) {
   EntityPersonne.afterStore(function (next) {
     // on met en cache, attention à mettre la session à jour si besoin (pas de contexte ici)
     $cachePersonne.set(this, function (error) {
-      if (error) log.debug(error)
+      if (error) log.error(error)
     })
     // et on passe au suivant sans se préoccuper du retour de mise en cache
     next()

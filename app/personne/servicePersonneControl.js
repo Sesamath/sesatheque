@@ -184,13 +184,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie qu'ils existent
       // et que l'utilisateur peut ajouter ou qu'il y était déjà
       flow(groupesVoulus).seqEach(function (groupeNom) {
-        log.debug('affectation du groupe ' + groupeNom)
+        // log.debug('affectation du groupe ' + groupeNom)
         checkGroupe(context, ressourceNew, groupeNom, {whiteList: ressourceOriginale.groupes}, this)
       }).done(this)
       // @todo faudrait vérifier que l'on a pas viré de groupe auxquel on appartient pas, et si c'était le cas cloner ?
     }).seq(function () {
       flow(groupesAuteurVoulus).seqEach(function (groupeNom) {
-        log.debug('affectation du groupeAuteur ' + groupeNom)
+        // log.debug('affectation du groupeAuteur ' + groupeNom)
         checkGroupe(context, ressourceNew, groupeNom, {whiteList: ressourceOriginale.groupesAuteurs, isGroupeAuteur: true}, this)
       }).done(this)
     }).seq(function () {
