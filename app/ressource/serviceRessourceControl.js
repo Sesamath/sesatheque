@@ -178,7 +178,7 @@ module.exports = function (EntityRessource) {
    */
   function addWarnings (ressource) {
     // on ajoute un warning pour les enfants
-    log.debug('ressource dans addWarnings', ressource, 'form', {max: 2000})
+    // log.debug('ressource dans addWarnings', ressource, 'form', {max: 2000})
     // on désactive ça car à la création c'est normal, on verra plus tard
     /* if (ressource.type === 'arbre' && !ressource.new && (!ressource.enfants || !ressource.enfants.length)) {
       rTools.addWarning(ressource, 'arbre sans enfants')
@@ -307,9 +307,8 @@ module.exports = function (EntityRessource) {
         // si partiel, faut pas retourner un objet ressource complet mais seulement ce que l'on a construit à partir des datas
         next(null, ressource)
       } else {
-        // mais sinon on renvoie une vraie 'Ressource'
-        var objRessource = EntityRessource.create(ressource)
-        next(null, objRessource)
+        // mais sinon on renvoie une vraie entité Ressource
+        next(null, EntityRessource.create(ressource))
       }
     })
   }

@@ -5,9 +5,9 @@
         widget le template à utiliser
         extra des attributs supplémentaires pour le widget
 !}
-<div class="control-group  {?o.warnings}warning{/o.warnings}">
-  {#o.warnings}
-    <div class="help-block">{.}</div>{/o.warnings}
+<div class="control-group  {?o.warnings}warning{/o.warnings}{#o.className} {.}{/o.className}">
+  {#o.warnings}<div class="help-block">{.}</div>{/o.warnings}
+
   {?o.hidden}
   {:else}
     <label>{o.label}

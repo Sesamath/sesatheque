@@ -42,9 +42,8 @@
  */
 function Alias (initObj) {
   if (typeof initObj !== 'object') initObj = {}
-  if (initObj.oid && initObj.ref && initObj.base) {
-    // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et base)
-    // c'est un alias
+  if (initObj.oid && initObj.ref && (initObj.baseName || initObj.base)) {
+    // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et baseName)
     /**
      * oid de l'alias
      * @type {number}
@@ -112,14 +111,21 @@ function Alias (initObj) {
    */
   if (!this.public && initObj.cle) this.cle = initObj.cle
   /**
-   * Base de la sesatheque qui gère la cible
+   * Nom de la sesatheque qui gère la référence ciblée
    * @type {string}
    */
+  if (initObj.baseName) this.baseName = initObj.baseName
+  /**
+   * Url de la sesatheque baseName
+   * @deprecated
+   */
   if (initObj.base) this.base = initObj.base
-    /**
-     * L'oid du user qui créé l'alias (quand c'est un user qui copie une ressource non éditable dans les siennes)
-     * @type {Integer}
-     */
+  /**
+   * L'oid du user qui créé l'alias (quand c'est un user qui copie une ressource
+   * non éditable dans les siennes, il pourra éditer l'alias mais pas la ressource
+   * dont il n'est pas auteur)
+   * @type {Integer}
+   */
   if (initObj.userOid) this.userOid = initObj.userOid
 }
 

@@ -509,7 +509,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $ressourceRepository.load(oid, this)
         }
       }).seq(function (ressourceBdd) {
-        log.debug('av checkGroupes', ressourceNormee)
         if (ressourceBdd) {
           ressourceOriginale = ressourceBdd
           $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
@@ -522,10 +521,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         // faut remettre auteursAdd et contributeursAdd virés à la validation (pas des champs de ressource)
         if (ressourcePostee.auteursAdd) ressource.auteursAdd = ressourcePostee.auteursAdd
         if (ressourcePostee.contributeursAdd) ressource.contributeursAdd = ressourcePostee.contributeursAdd
-        log.debug('av checkPersonnes', ressource, 'formRess', {max: 2000})
         $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
       }).seq(function (ressource) {
-        log.debug('auteurs & contributeurs après checkPersonnes', ressource.auteurs, ressource.contributeurs)
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         tools.update(ressourceOriginale, ressource)
         $ressourceRepository.save(ressourceOriginale, this)

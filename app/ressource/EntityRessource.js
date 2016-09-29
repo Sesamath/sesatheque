@@ -116,6 +116,7 @@ module.exports = function (EntityRessource) {
     .defineIndex('auteurs', 'string')
     .defineIndex('contributeurs', 'integer')
     .defineIndex('groupes', 'string')
+    .defineIndex('groupesAuteurs', 'string')
     .defineIndex('langue', 'string')
     .defineIndex('publie', 'boolean')
     .defineIndex('indexable', 'boolean')

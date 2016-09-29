@@ -43,22 +43,37 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {Context} context
    * @param {Ressource} ressource
    * @param {string} groupeNom
-   * @param {boolean} shouldBeNew Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
-   * @param {Array} whiteList Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
+   * @param {object} options  peut contenir les propriétés
+   *                            shouldBeNew (boolean) Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
+   *                            isGroupeAuteur (boolean) Ajouter le groupe à groupesAuteurs et pas groupes
+   *                            whiteList (Array) Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
    * @param {errorCallback} next
    */
-  function checkGroupe (context, ressource, groupeNom, shouldBeNew, whiteList, next) {
+  function checkGroupe (context, ressource, groupeNom, options, next) {
+    var shouldBeNew = options && options.shouldBeNew || false
+    var isGroupeAuteur = options && options.isGroupeAuteur || false
+    var whiteList = options && options.whiteList || []
     if (!_.isArray(ressource.groupes)) ressource.groupes = []
     $groupeRepository.load(groupeNom, function (error, groupe) {
-      if (error) {
-        next(error)
-      } else if (groupe) {
-        if (_.includes(whiteList, groupe.nom)) ressource.groupes.push(groupe.nom)
-        else if ($accessControl.isInGroupe(context, groupe.nom)) ressource.groupes.push(groupe.nom)
-        else rTools.addWarning(ressource, 'Vous devez faire partie du groupe ' + groupe.nom + ' pour y partager cette ressource')
+      if (error) return next(error)
+      if (groupe) {
+        if (_.includes(whiteList, groupe.nom)) {
+          if (isGroupeAuteur) ressource.groupesAuteurs.push(groupe.nom)
+          else ressource.groupes.push(groupe.nom)
+        } else if ($accessControl.isInGroupe(context, groupe.nom)) {
+          if (isGroupeAuteur) {
+            // il faut en plus les droits updateAuteurs
+            if ($accessControl.hasPermission('updateAuteurs', context, ressource)) ressource.groupesAuteurs.push(groupe.nom)
+            else rTools.addWarning(ressource, 'Vous n’avez pas les droits suffirants pour modifier les groupes pouvant modifier cette ressource')
+          } else {
+            ressource.groupes.push(groupe.nom)
+          }
+        } else {
+          rTools.addWarning(ressource, 'Vous devez faire partie du groupe ' + groupe.nom + ' pour y partager cette ressource')
+        }
         next()
       } else if (shouldBeNew) {
-        // il est bien nouveau et on voulait justement l'ajouter
+        // il est nouveau et on voulait justement l'ajouter
         var currentUser = $accessControl.getCurrentUser(context)
         // à priori on récupère une Personne de la session mais pas une EntityPersonne, on teste quand même au cas où ça évoluerait
         if (!currentUser.store) currentUser = EntityPersonne.create(currentUser)
@@ -79,6 +94,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       }
     })
   }
+
   /**
    * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
    * à la jonction entre personne et ressource.
@@ -110,6 +126,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     }
 
     if (!ressourceNew.groupes) ressourceNew.groupes = []
+    if (!ressourceNew.groupesAuteurs) ressourceNew.groupesAuteurs = []
     if (!_.isArray(ressourceNew.groupes)) {
       // on vide et on signale l'erreur sans aller plus loin
       log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
@@ -117,13 +134,28 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       ressourceNew.groupes = []
       return next(null, ressourceNew)
     }
-    // on a un array qu'on peut analyser
-    log.debug('checkGroupes avec les groupes ' + ressourceNew.groupes.join(',') + ' et les nouveaux ' + groupesSup)
+    if (!_.isArray(ressourceNew.groupesAuteurs)) {
+      log.error(new Error("groupesAuteurs n'était pas un array"), ressourceNew.groupesAuteurs)
+      rTools.addError(ressourceNew, 'Groupes auteurs invalides')
+      ressourceNew.groupesAuteurs = []
+      return next(null, ressourceNew)
+    }
+    log.debug('checkGroupes avec les groupes (' + ressourceNew.groupes.join(',') + ') groupesAuteurs (' + ressourceNew.groupesAuteurs.join(',') + ') et les nouveaux (' + groupesSup + ')')
     // les 2 cas où y'a rien à faire
-    if (ressourceOriginale && _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes) && !groupesSup) {
+    if (
+      ressourceOriginale &&
+      _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes) &&
+      _.isEqual(ressourceNew.groupesAuteurs, ressourceOriginale.groupesAuteurs) &&
+      !groupesSup
+    ) {
       // update sans modif de groupe
       return next(null, ressourceNew)
-    } else if (!ressourceOriginale && !ressourceNew.groupes.length && !groupesSup) {
+    } else if (
+      !ressourceOriginale &&
+      !ressourceNew.groupes.length &&
+      !ressourceNew.groupesAuteurs.length &&
+      !groupesSup
+    ) {
       // création de ressource sans groupes
       return next(null, ressourceNew)
     }
@@ -132,27 +164,37 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     // (sinon on suppose que si on est appelé c'est que le user a les droits de création de ressource donc d'updateGroupes dessus)
     if (ressourceOriginale && !$accessControl.hasPermission('updateGroupes', context, ressourceOriginale)) {
       ressourceNew.groupes = ressourceOriginale.groupes
+      ressourceNew.groupesAuteurs = ressourceOriginale.groupesAuteurs
       rTools.addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
       return next(null, ressourceNew)
     }
 
     // on a les droits, on mémorise ce qui est demandé et ajoute les groupes sup s'il y en a
     var groupesVoulus = ressourceNew.groupes
+    var groupesAuteurVoulus = ressourceNew.groupesAuteurs
     ressourceNew.groupes = []
-    // on boucle sur les groupes à ajouter
-    flow(tools.splitAndTrim(groupesSup, /[,;]+/)).seqEach(function (groupeNom) {
-      log.debug('ajout du nouveau groupe ' + groupeNom)
-      checkGroupe(context, ressourceNew, groupeNom, true, [], this)
+    ressourceNew.groupesAuteurs = []
+    flow().seq(function () {
+      // on boucle sur les groupes à ajouter
+      flow(tools.splitAndTrim(groupesSup, /[,;]+/)).seqEach(function (groupeNom) {
+        log.debug('ajout du nouveau groupe ' + groupeNom)
+        checkGroupe(context, ressourceNew, groupeNom, {shoulBeNew: true}, this)
+      }).done(this)
     }).seq(function () {
       // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie qu'ils existent
       // et que l'utilisateur peut ajouter ou qu'il y était déjà
       flow(groupesVoulus).seqEach(function (groupeNom) {
         log.debug('affectation du groupe ' + groupeNom)
-        checkGroupe(context, ressourceNew, groupeNom, false, ressourceOriginale.groupes, this)
-      }).seq(function () {
-        // @todo faudrait vérifier que l'on a pas viré de groupe auxquel on appartient pas, et si c'était le cas cloner pour simuler du "copy on write" ?
-        next(null, ressourceNew)
-      }).catch(addErrorAndNext)
+        checkGroupe(context, ressourceNew, groupeNom, {whiteList: ressourceOriginale.groupes}, this)
+      }).done(this)
+      // @todo faudrait vérifier que l'on a pas viré de groupe auxquel on appartient pas, et si c'était le cas cloner ?
+    }).seq(function () {
+      flow(groupesAuteurVoulus).seqEach(function (groupeNom) {
+        log.debug('affectation du groupeAuteur ' + groupeNom)
+        checkGroupe(context, ressourceNew, groupeNom, {whiteList: ressourceOriginale.groupesAuteurs, isGroupeAuteur: true}, this)
+      }).done(this)
+    }).seq(function () {
+      next(null, ressourceNew)
     }).catch(addErrorAndNext)
   }
 
@@ -165,9 +207,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {ressourceCallback} next
    */
   $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
-    log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
-    log.debug('les nouveaux auteurs (parmi les anciens)', ressourceNew.auteurs)
-    log.debug('et les auteurs à ajouter', ressourceNew.auteursAdd)
+    // log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
+    // log.debug('les nouveaux auteurs (parmi les anciens)', ressourceNew.auteurs)
+    // log.debug('et les auteurs à ajouter', ressourceNew.auteursAdd)
     // les cas où on a rien à faire
     if (
         ressourceOriginale &&
@@ -196,7 +238,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         tmp = ressourceNew.auteursAdd.split(',')
         delete ressourceNew.auteursAdd
         tmp.forEach(function (id) {
-          log.debug('push auteur ' + id)
           id = Number(id) // vire d'éventuels espaces
           if (id && !tools.isInArray(auteurs, id)) {
             auteurs.push(id)

@@ -138,14 +138,12 @@ var config = {
     },
     ressource: ressourceConfig
   },
-  // une liste de domaines 'sesalab' autorisés à
-  // - appeler /connexion (ça va virer avec sesalab-sso)
-  // - appeler l'api pour stocker des séquences
+  // urls absolues des sésathèques utilisées par nos ressources (pour les alias ou les sesalab connectés)
+  // sous la forme nom:baseUrl
+  sesatheques: {},
+  // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences
   // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
-  sesalabs: [ {
-    name: 'Labomep',
-    baseUrl: 'https://www.labomep.net/'
-  }],
+  sesalabs: [],
   // une liste de login / pass admin
   admin: {
     // foo:'passDeFoo'

@@ -66,7 +66,7 @@
     </div>
 
     <div class="form-group">
-      {>wrapper widget="checkboxes" o=groupes /}
+      {>wrapper widget="checkboxesGroupes" o=groupes /}
     </div>
 
     <div class="form-group">

@@ -3,10 +3,6 @@
  *
  * Dans un fichier js (et pas json) pour pouvoir mettre des commentaires
  */
-
-// pour la callback sesalabSso.loginCallback
-var Personne = require('../constructors/Personne')
-
 module.exports = {
   application: {
     baseUrl: 'https://example.com/',
@@ -64,6 +60,14 @@ module.exports = {
     'token1',
     'token2'
   ],
+  // urls absolues des sésathèques utilisées par nos ressources (pour les alias ou sesalab)
+  // ces noms doivent être les mêmes que ceux des sesalabs qui nous contactent
+  sesatheques: {
+    // sesatheque des ressources présentées à gauche dans un sesalab
+    bibli: 'https://bibliotheque.sesamath.net/',
+    // sesatheque des ressources personnelles des utilisateurs d'un sesalab
+    commun: 'https://commun.sesamath.net/'
+  },
   sesalabs: [
     'https://sesalab.example.com/'
   ],

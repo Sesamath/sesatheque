@@ -1,0 +1,53 @@
+{! pour les groupes c'est particulier, on veut fusionner deux séries de choices !}
+<div class="control-group  {?o.warnings}warning{/o.warnings}{#o.className} {.}{/o.className}">
+  {#o.warnings}<div class="help-block">{.}</div>{/o.warnings}
+  <div class="input-group {widget}"{?width} width="{width}"{/width}>
+    <table><thead><tr>
+      <th>Nom du groupe</th>
+      <th>Publié dans ce groupe</th>
+      <th>Les membres du groupe peuvent modifier cette ressource</th>
+    </tr></thead><tbody>
+      {#o.choices}
+      <tr>
+        <td>{value}</td>
+        <td>
+        {!pas de readonly sur les checkboxes, on le met disabled (ça poste rien) !}
+        {?readonly}
+          <input
+              type="checkbox"
+              disabled="disabled"
+              {?selected}checked="checked"{/selected}
+          /></td><td id="tdga{id}">
+          <input
+              type="checkbox"
+              disabled="disabled"
+              {?selected}checked="checked"{/selected}
+          />
+          {! + hidden si checked, pour le poster !}
+          {?selected}<input type="hidden" name="{name}" value="{value}" />{/selected}
+          {?gaSelected}<input type="hidden" name="{gaName}" value="{value}" />{/gaSelected}
+        {:else}
+          {! c'est modifiable !}
+          <input
+              id="{id}"
+              type="checkbox"
+              name="{name}"
+              value="{value}"
+              {?selected}checked="checked"{/selected}
+          /></td><td id="ga{id}">
+            <input
+                id="{gaId}"
+                type="checkbox"
+                name="{gaName}"
+                value="{value}"
+                {?gaSelected}checked="checked"{/gaSelected}
+            />
+        {/readonly}
+        </td>
+      </tr>
+      {/o.choices}
+    </tbody></table>
+  </div>
+
+  {?o.new}{>wrapper widget="text" o=o.new /}{/o.new}
+</div>

@@ -696,8 +696,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       ressource = EntityRessource.create(ressource)
     }
     flow().seq(function () {
-      $ressourceControl.valide(ressource, this)
-    }).seq(function (ressource) {
       updateVersion(ressource, this)
     }).seq(function (ressource) {
       if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {

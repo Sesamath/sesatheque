@@ -185,10 +185,15 @@ function Ressource (initObj) {
    */
   this.contributeurs = filters.arrayInt(values.contributeurs)
   /**
-   * Liste de noms de groupes partageant cette ressource
+   * Liste de noms de groupes dans lesquels cette ressource est publiée
    * @type {string[]}
    */
   this.groupes = filters.arrayString(values.groupes)
+  /**
+   * Liste de noms de groupes dont les membres peuvent modifier cette ressource
+   * @type {string[]}
+   */
+  this.groupesAuteurs = filters.arrayString(values.groupesAuteurs)
   /**
    * code langue ISO 639-2
    * @see {@link http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2}

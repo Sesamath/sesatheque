@@ -575,10 +575,12 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     }
 
     var oid = context.arguments.oid
-    var base = context.get.base
+    var baseName = context.get.baseName
     try {
-      if (!base) throw new Error('Il faut préciser une base pour la ressource à cloner')
+      if (!baseName) throw new Error('Il faut préciser une base pour la ressource à cloner')
       if (!oid) throw new Error('Paramètre manquant')
+      var base = config.sesatheques[baseName]
+      if (!base) throw new Error('Sésathèque ' + baseName + ' inconnue')
       // on normalise avec slash de fin
       if (base.substr(-1) !== '/') base += '/'
       if (base === config.application.baseUrl) throw new Error('La source est déjà sur cette sésathèque, clonage externe inutile')
@@ -615,8 +617,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             ressource.auteurs = [userOid]
             ressource.restriction = configRessource.constantes.restriction.prive
             if (!ressource.relations) ressource.relations = []
-            var originalUrl = base + 'ressource/' + configRessource.constantes.routes.describe + '/' + oid
-            ressource.relations.push([configRessource.constantes.relations.estVersionDe, originalUrl])
+            ressource.relations.push([configRessource.constantes.relations.estVersionDe, base + ':' + oid])
             $ressourceRepository.save(ressource, function (error, ressource) {
               if (error) $json.send(context, error)
               else if (ressource && ressource.oid) sendItem(new Alias(ressource))
@@ -624,7 +625,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             })
           } else {
             // pas éditable, on en fait un alias, on regarde si on l'avait pas déjà
-            EntityAlias.match('ref').equals(ressource.oid).match('base').equals(base).grabOne(function (error, alias) {
+            EntityAlias.match('ref').equals(ressource.oid).match('baseName').equals(baseName).grabOne(function (error, alias) {
               if (error) {
                 $json.send(context, error)
               } else if (alias) {
@@ -633,7 +634,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                 // faut le créer
                 alias = EntityAlias.create(ressource)
                 alias.userOid = userOid
-                alias.base = base
+                alias.baseName = baseName
                 alias.store(function (error, alias) {
                   if (error) $json.sendError(context, error)
                   else sendItem(alias)
@@ -663,7 +664,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     var timeout = 5000
     if (token && origine) {
       if (origine.substr(-1) !== '/') origine += '/'
-      if (isSesalab(origine)) {
+      if ($accessControl.isSesalab(origine)) {
         var postOptions = {
           url: origine + 'api/utilisateur/check-token',
           json: true,
@@ -704,7 +705,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Déconnecte l'utilisateur courant
-   * @route GET /api/deconnexion
+   * @route GET /api/deconnexion
    */
   controller.get('deconnexion', function (context) {
     if ($accessControl.isAuthenticated(context)) {

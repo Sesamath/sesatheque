@@ -32,7 +32,7 @@
 'use strict'
 
 var tools = require('../tools')
-var sTools = require('sesajstools')
+// var sTools = require('sesajstools')
 var _ = require('lodash')
 var flow = require('an-flow')
 var moment = require('moment')
@@ -56,15 +56,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   var $ressourcePage = {}
 
   /**
-   * Ajoute les cases à cocher de groupes et l'input groupesSup au form
+   * Ajoute les cases à cocher de groupes, groupesAuteurs et l'input groupesSup au form
    * @private
    * @param {Context}       context
    * @param {object}        formData
-   * @param {string[]}      values La liste des groupes existants
+   * @param {string[]}      groupes        La liste des groupes existants
+   * @param {string[]}      groupesAuteurs La liste des groupesAuteurs existants
    * @param {errorCallback} next
    */
-  function addGroupes (context, formData, values, next) {
-    // on ajoute déjà nos groupes
+  function addGroupes (context, formData, groupes, groupesAuteurs, next) {
+    // on ajoute déjà les groupes de celui qui édite
     var myGroupes = $accessControl.getCurrentUserGroupes(context)
     var choices = myGroupes.map(function (nom, i) {
       return {
@@ -75,8 +76,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     })
     // init à l'index suivant
     var i = myGroupes.length
-    // faut cocher ce qui doit l'être et ajouter éventuellement les groupes déjà présents mais pas à nous, non modifiables
-    flow(values).seqEach(function (groupeNom) {
+    // faut cocher ce qui doit l'être et ajouter éventuellement les groupes déjà présents
+    // mais dont on est pas membre (donc publication non modifiable)
+    // on boucle sur les groupes voulus
+    flow(groupes).seqEach(function (groupeNom) {
       var suivant = this
       $groupeRepository.load(groupeNom, function (error, groupe) {
         if (error) {
@@ -84,19 +87,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           formData.errors.push(error.toString())
         } else if (groupe) {
           var myIndex = myGroupes.indexOf(groupe.nom)
+          var isGroupeAuteur = (groupesAuteurs.indexOf(groupe.nom) !== -1)
           if (myIndex !== -1) {
-            // on l'avait déjà, on le coche
+            // on est membre, on le coche
             choices[myIndex].selected = true
+            // idem pour groupesAuteurs
+            choices[myIndex].gaSelected = isGroupeAuteur
           } else {
-            // groupe existant sur cette ressource mais pas à nous
+            // groupe existant sur cette ressource mais on en est pas membre (donc readonly)
             choices.push({
               value: groupeNom,
               label: groupe.nom,
               isOpen: groupe.open,
-              name: 'groupes[' + i++ + ']',
               selected: true,
-              readonly: true
+              readonly: true,
+              gaSelected: isGroupeAuteur
             })
+            i++
           }
         } else {
           formData.errors.push('Le groupe ' + groupeNom + " n'existe pas")
@@ -107,7 +114,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       formData.groupes = {
         id: 'groupes',
         label: 'publié dans le(s) groupe(s)',
-        choices: choices
+        choices: choices.map(function (choice, i) {
+          // on ajoute name et id
+          choice.id = 'groupe' + i
+          choice.name = 'groupes[' + i + ']'
+          choice.gaId = 'groupeAuteur' + i
+          choice.gaName = 'groupesAuteurs[' + i + ']'
+          return choice
+        })
       }
       // wrapper.dust gère le .new sur n'importe quel champ
       formData.groupes.new = {
@@ -116,7 +130,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         label: "Nouveau(x) groupe(s) à créer et ajouter à cette ressource (à séparer par des virgules s'il y en a plusieurs)",
         placeholder: 'nom du groupe'
       }
-      log.debug('groupes dans addGroupes', formData.groupes, 'form', {max: 2000})
+      log.debug('groupes à là fin de addGroupes', formData.groupes, 'form', {max: 2000})
       next()
     }).catch(function (error) {
       next(error)
@@ -147,8 +161,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         log.debug('entrée seq addPersonnes, appel personne.load ' + value)
         var suivant = this
         $personneRepository.load(value, function (error, personne) {
-          log.debug('formData dans cb load personne ' + value, formData, 'form', {max: 5000})
-          log.debug('formData.errors dans cb load personne', formData.errors)
+          // log.debug('formData dans cb load personne ' + value, formData, 'form', {max: 5000})
+          // log.debug('formData.errors dans cb load personne', formData.errors)
           if (error) {
             log.error('error load personne ' + value, error)
             formData.errors.push(error.toString())
@@ -500,7 +514,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           formData[key].choices = arrayToDust(key, value, isUnique)
           labelSuivant()
         } else if (key === 'groupes') {
-          addGroupes(context, formData, value, labelSuivant)
+          addGroupes(context, formData, value, ressource.groupesAuteurs, labelSuivant)
+        } else if (key === 'groupesAuteurs') {
+          // rien, déjà traité avec les groupes
+          log.debug('groupes en édition', formData.groupes)
+          log.debug('groupes en édition', formData.groupesAuteurs)
+          labelSuivant()
         } else if (key === 'auteurs' || key === 'contributeurs') {
           addPersonnes(context, formData, key, value, labelSuivant)
         } else {
@@ -613,8 +632,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
       // on vire le champ si y'a pas d'erreurs
       if (!formData.errors.length) delete formData.errors
-      log.debug('auteurs pour le form', formData.auteurs, 'htmlform', {max: 50000, indent: 2})
-      log.debug('contributeurs pour le form', formData.contributeurs, 'htmlform', {max: 50000, indent: 2})
+      // log.debug('auteurs pour le form', formData.auteurs, 'htmlform', {max: 50000, indent: 2})
+      // log.debug('contributeurs pour le form', formData.contributeurs, 'htmlform', {max: 50000, indent: 2})
       next(formData)
     }).catch(function (error) {
       log.error('plantage dans getFormViewData', error)
