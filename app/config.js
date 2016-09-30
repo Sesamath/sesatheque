@@ -36,7 +36,7 @@
  */
 var path = require('path')
 var sjtObj = require('sesajstools/utils/object')
-var sjtUrl = require('sesajstools/utils/url')
+var sjtUrl = require('sesajstools/http/url')
 
 /** La racine du projet */
 var root = path.resolve(__dirname, '..')

@@ -32,7 +32,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var sjt = require('sesajstools')
+var sjtUrl = require('sesajstools/http/url')
 
 var page = require('../../page/index')
 
@@ -121,7 +121,7 @@ function displayJs (ressource, options, next) {
   }
 
   // on affiche un avertissement si on force
-  if (ressource.parametres.levelEleve > 0 && sjt.getURLParameter('js')) {
+  if (ressource.parametres.levelEleve > 0 && sjtUrl.getParameter('js')) {
     dom.addElement(container, 'p', {'class': 'warning'}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
   }
 
@@ -193,7 +193,7 @@ module.exports = function display (ressource, options, next) {
       throw new Error('Pas de figure mathgraph en paramètre')
     }
     // on utilise java seulement si levelEleve est positif dans les paramètres (et que l'on impose pas js dans l'url)
-    if (ressource.parametres.levelEleve > 0 && !sjt.getURLParameter('js')) displayJava(ressource, options, next)
+    if (ressource.parametres.levelEleve > 0 && !sjtUrl.getParameter('js')) displayJava(ressource, options, next)
     else displayJs(ressource, options, next)
   } catch (error) {
     if (next) next(error)

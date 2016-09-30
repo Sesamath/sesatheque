@@ -32,7 +32,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var sjt = require('sesajstools')
+var sjtUrl = require('sesajstools/http/url')
 
 var page = require('../../page/index')
 var swf = require('../../display/swf')
@@ -46,7 +46,7 @@ var swf = require('../../display/swf')
  */
 module.exports = function display (ressource, options, next) {
   try {
-    var ec2Base = sjt.getURLParameter('ec2Base') || options.ec2Base || 'https://ressources.sesamath.net/replication_calculatice/flash'
+    var ec2Base = sjtUrl.getParameter('ec2Base') || options.ec2Base || 'https://ressources.sesamath.net/replication_calculatice/flash'
     var swfUrl
 
     log('start ec2 display avec la ressource', ressource)

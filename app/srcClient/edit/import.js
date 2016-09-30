@@ -35,7 +35,7 @@
 'use strict'
 
 var page = require('../page/index')
-var sjt = require('sesajstools')
+var sjtUrl = require('sesajstools/http/url')
 var dom = require('sesajstools/dom')
 var xhr = require('sesajstools/http/xhr')
 
@@ -88,7 +88,7 @@ module.exports = function importByUrl () {
       dom.empty(options.container)
       dom.addElement(options.container, 'p', null, 'Indiquer ci-dessous l’url absolue de la ressource à importer dans vos ressources')
       var attrs = {type: 'text', placeholder: 'Url absolue de la ressource à importer', style: {margin: '1em', width: '80%'}}
-      var url = sjt.getURLParameter('url')
+      var url = sjtUrl.getParameter('url')
       if (url) attrs.value = url
       var urlImportElt = dom.addElement(options.container, 'input', attrs)
       var importButtonElt = dom.addElement(options.container, 'button', null, 'Importer')

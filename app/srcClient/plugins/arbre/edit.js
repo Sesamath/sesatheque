@@ -33,7 +33,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var sjt = require('sesajstools')
+var sjtUrl = require('sesajstools/http/url')
 var client = require('sesatheque-client')(window.location.protocol + '//' + window.location.host)
 
 var page = require('../../page/index')
@@ -523,7 +523,7 @@ module.exports = function edit (arbre, options) {
       $saveButton = $('#saveButton')
       if (!$saveButton) throw new Error('Bouton de sauvegarde non trouvé dans la page')
 
-      var editor = sjt.getURLParameter('editor') || 'graphic'
+      var editor = sjtUrl.getParameter('editor') || 'graphic'
       initDom(options)
       dstTree = arbre
       if (editor === 'graphic') {

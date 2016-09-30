@@ -34,7 +34,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var sjt = require('sesajstools')
+var sjtUrl = require('sesajstools/http/url')
 var embedEditGraphe = require('sesaeditgraphe/src/embed').default
 
 var page = require('../../page/index')
@@ -201,7 +201,7 @@ module.exports = function edit (ressource, options) {
       var container = dom.addElement(parent, 'div', {id: 'editgraphe'})
       $editgraphe = $(container)
       // on autorise de forcer l'éditeur avec du ?editor=(text|graphic)
-      var editor = sjt.getURLParameter('editor')
+      var editor = sjtUrl.getParameter('editor')
       // on met toujours un hash (utilisé pour toggle), graphic par défaut
       if (editor) window.location.hash = '#' + editor
       else if (!window.location.hash) window.location.hash = '#graphic'

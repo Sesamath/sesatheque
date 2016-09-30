@@ -32,7 +32,7 @@
 'use strict'
 
 var _ = require('lodash')
-var sjtUrl = require('sesajstools/utils/url')
+var sjtUrl = require('sesajstools/http/url')
 var modLog = require('an-log')('$auth')
 
 module.exports = function ($accessControl, $ressourcePage) {

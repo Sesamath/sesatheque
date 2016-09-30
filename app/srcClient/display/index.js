@@ -42,6 +42,7 @@
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var sjt = require('sesajstools')
+var sjtUrl = require('sesajstools/http/url')
 
 var page = require('../page/index')
 var Resultat = require('../../constructors/Resultat')
@@ -137,7 +138,7 @@ function addResultatCallback (options) {
       }
       // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
       [ 'sesatheque', 'userOrigine', 'userId' ].forEach(function (paramName) {
-        var paramValue = sjt.getURLParameter(paramName) || options[ paramName ]
+        var paramValue = sjtUrl.getParameter(paramName) || options[ paramName ]
         if (paramValue) resultat[ paramName ] = paramValue
       })
       log('display envoie à la callback de résultat', resultat)

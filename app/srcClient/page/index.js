@@ -35,7 +35,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var sjt = require('sesajstools')
+var sjtUrl = require('sesajstools/http/url')
 
 var autosize = require('./autosize')
 var refreshAuth = require('./refreshAuth')
@@ -126,7 +126,7 @@ function init (options, next) {
   if (options.base) setBase(options.base)
   else options.base = base
   // (des)active la fct de log si on le demande, l'url est prioritaire sur options
-  var verbose = sjt.getURLParameter('verbose') || options.verbose
+  var verbose = sjtUrl.getParameter('verbose') || options.verbose
   if (verbose === '0' || verbose === 'false') verbose = false
   if (verbose) log.enable()
   else log.disable()
@@ -151,10 +151,10 @@ function init (options, next) {
   // on regarde si d'autres options ont été passé en GET
   var paramGet
   ;['resultatMessageAction', 'urlResultatCallback', 'userOrigine', 'userId'].forEach(function (param) {
-    paramGet = sjt.getURLParameter(param)
+    paramGet = sjtUrl.getParameter(param)
     if (!options[param] && paramGet) options[param] = paramGet
   })
-  paramGet = sjt.getURLParameter('showTitle')
+  paramGet = sjtUrl.getParameter('showTitle')
   if (paramGet === '0' || paramGet === 'false') options.showTitle = false
 
   // terminé
