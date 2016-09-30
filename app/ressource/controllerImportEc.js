@@ -31,6 +31,15 @@
 
 'use strict'
 
+var request = require('request')
+var flow = require('an-flow')
+var elementtree = require('elementtree')
+var config = require('./config')
+var arbreCateg = config.constantes.categories.liste
+var sjtObj = require('sesajstools/utils/object')
+
+var xmls = ['cp', 'ce1', 'ce2', 'cm1', 'cm2', '6eme']
+
 /**
  * Controleur /importEc/ pour importer les xml calculatice
  * @controller controllerImportEc
@@ -42,21 +51,14 @@
  * @requires $routes
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) {
-  var request = require('request')
-  // var _ = require('lodash')
-  var tools = require('../tools')
-  var flow = require('an-flow')
-  var elementtree = require('elementtree')
-  var config = require('./config')
-  var arbreCateg = config.constantes.categories.liste
-
-  var xmls = ['cp', 'ce1', 'ce2', 'cm1', 'cm2', '6eme']
   var niveaux // affecté dans getArbreDefaultValues et utilisé au save
 
   /**
    * Met à jour un arbre calculatice
    * @route GET /importEc/:xml
-   * @param {string} xmlSuffix Le suffixe du xml (cm2 pour ressources-cm2.xml)
+   * @param {Context} context
+   * @param {string} xmlSuffifx Le suffixe du xml (cm2 pour ressources-cm2.xml)
+   * @param {ressourceCallback} next
    */
   function getAndParseXml (context, xmlSuffix, next) {
     var arbre = getArbreDefaultValues(xmlSuffix)
@@ -84,11 +86,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }).seq(function (xmlString) {
       // log.debug('analyse de', xmlString)
       var arbreXml = elementtree.parse(xmlString)
-      if (!arbreXml._root) this(new Error('xml ' + xmlSuffix + ' sans racine'))
-      else if (!arbreXml._root._children || !arbreXml._root._children.length) this(new Error('xml ' + xmlSuffix + ' vide'))
-      else if (arbreXml._root.tag !== 'niveau') this(new Error('xml ' + xmlSuffix + ' ne contient pas de tag niveau à la racine'))
-      else if (arbreXml._root.attrib.id !== xmlSuffix) this(new Error('xml ' + xmlSuffix + ' ne contient pas le bon niveau (trouvé ' + arbreXml._root.attrib.id + ')'))
-      else this(null, arbreXml._root._children)
+      if (arbreXml._root) {
+        if (!arbreXml._root._children || !arbreXml._root._children.length) this(new Error('xml ' + xmlSuffix + ' vide'))
+        else if (arbreXml._root.tag !== 'niveau') this(new Error('xml ' + xmlSuffix + ' ne contient pas de tag niveau à la racine'))
+        else if (arbreXml._root.attrib.id !== xmlSuffix) this(new Error('xml ' + xmlSuffix + ' ne contient pas le bon niveau (trouvé ' + arbreXml._root.attrib.id + ')'))
+        else this(null, arbreXml._root._children)
+      } else {
+        this(new Error('xml ' + xmlSuffix + ' sans racine'))
+      }
     }).seq(function (children) {
       // log.debug('obj xml', children, 'xml', {max:1000, indent:2})
       log.debug('parsing des enfants de ' + xmlSuffix)
@@ -254,13 +259,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           log.error('pb au chargement : ' + error.toString(), ressource)
           next(new Error('Impossible de sauvegarder la ressource récupérée (probablement mal interprétée)'))
         } else {
-          var ressourceNew = tools.clone(ressourceLoaded) || {}
-          tools.update(ressourceNew, ressource)
+          var ressourceNew = sjtObj.clone(ressourceLoaded) || {}
+          sjtObj.update(ressourceNew, ressource)
           if (ressource.idOrigine == 1) { // eslint-disable-line eqeqeq
             log.debug('ressource 1 en bdd', ressourceLoaded.parametres)
             log.debug('ressource 1 passée', ressourceNew.parametres)
           }
-          if (tools.isEqual(ressourceLoaded, ressourceNew)) {
+          if (sjtObj.isEqual(ressourceLoaded, ressourceNew)) {
             next(null, ressourceNew)
           } else {
             log.debug('ressource calculatice/' + ressource.idOrigine + ' modifiée')

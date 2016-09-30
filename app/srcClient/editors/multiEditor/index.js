@@ -104,7 +104,7 @@ function errorCallbackDefault (error) {
  * @param {errorCallback} next
  */
 function initCKEditor (next) {
-  /*global  CKEDITOR*/
+  /* global  CKEDITOR */
   if (typeof CKEDITOR === 'undefined') {
     try {
       page.loadAsync(['ckeditor'], function () {

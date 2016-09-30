@@ -35,7 +35,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 
 var autosize = require('./autosize')
 var refreshAuth = require('./refreshAuth')
@@ -123,10 +123,10 @@ function hideTitle () {
  */
 function init (options, next) {
   if (!options) options = {}
-  if (!options.base) options.base = base
-  else setBase(options.base)
+  if (options.base) setBase(options.base)
+  else options.base = base
   // (des)active la fct de log si on le demande, l'url est prioritaire sur options
-  var verbose = tools.getURLParameter('verbose') || options.verbose
+  var verbose = sjt.getURLParameter('verbose') || options.verbose
   if (verbose === '0' || verbose === 'false') verbose = false
   if (verbose) log.enable()
   else log.disable()
@@ -151,10 +151,10 @@ function init (options, next) {
   // on regarde si d'autres options ont été passé en GET
   var paramGet
   ;['resultatMessageAction', 'urlResultatCallback', 'userOrigine', 'userId'].forEach(function (param) {
-    paramGet = tools.getURLParameter(param)
+    paramGet = sjt.getURLParameter(param)
     if (!options[param] && paramGet) options[param] = paramGet
   })
-  paramGet = tools.getURLParameter('showTitle')
+  paramGet = sjt.getURLParameter('showTitle')
   if (paramGet === '0' || paramGet === 'false') options.showTitle = false
 
   // terminé
@@ -171,7 +171,7 @@ function loadAsync (moduleNames, callback) {
     var loader = w.head.load || w.head.js // les anciennes versions de head utilisaient head.js avec la même signature
     if (loader) {
       var body = wd.getElementsByTagName('body')[0]
-      var waitingElt = dom.addElement(body, 'div', {className: "waiting"}, 'chargement en cours…')
+      var waitingElt = dom.addElement(body, 'div', {className: 'waiting'}, 'chargement en cours…')
       loader(paths, function () {
         body.removeChild(waitingElt)
         cb()

@@ -33,7 +33,7 @@
 
 var _ = require('lodash')
 var flow = require('an-flow')
-var merge = require('../tools').merge
+var merge = require('sesajstools/utils/object').merge
 
 module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
   /**
@@ -58,8 +58,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
     }
     // on commence par récupérer une entity si on en a pas déjà une
     flow().seq(function () {
-      if (!personne.store) $personneRepository.load(uid, this)
-      else this(null, personne)
+      if (personne.store) this(null, personne)
+      else $personneRepository.load(uid, this)
     }).seq(function (entityPersonne) {
       if (entityPersonne) {
         personne = entityPersonne

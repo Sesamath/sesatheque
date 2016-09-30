@@ -54,20 +54,20 @@ module.exports = {
         score = resultat.contenu.scores[i]
         output += 'Nœud n°' + resultat.contenu.noeuds[i] + ' : ' + Math.round(100 * score) + '%<br />'
       }
-      if (nbnoeuds > 1){
-          output += 'Vue graphique du parcours de l’élève (à venir)'
-          /* Pour Daniel (au 26 mars 2016)
-           * Pour pouvoir avoir l'affichage du parcours de l'élève :
-           * - virer la ligne 56 ci dessus, je conseille même la ligne 54 tant que le pb de hauteur limitée à 30 px n'est pas réglé dans labomep, sinon tu risques de rien voir (si plus de 2 noeuds donc le cas ici...)
-           * - ajouter un bouton 'Voir le parcours détaillé de l'élève'
-           * - au clic du bouton lancer dans un nouvel onglet (chépo comment on fait) mon init.js de j3peditgraphes qui attend un rootElt et un objet options avec :
-           * options.scores = resultat.contenu.scores
-           * options.pe = resultat.contenu.pe
-           * options.graphe = resultat.contenu.graphe
-           * options.editgraphes = resultat.contenu.editgraphes (c'est un objet ayant deux pptes de type Array)
-           * Un pb cependant actuellement cette dernière ppté n'est pas en bdd (resultat.contenu ne contient pas de ppte editgraphes)
-           * Je pense que mes modifs du loader.js ne sont pas déployées
-          */
+      if (nbnoeuds > 1) {
+        output += 'Vue graphique du parcours de l’élève (à venir)'
+        /* Pour Daniel (au 26 mars 2016)
+         * Pour pouvoir avoir l'affichage du parcours de l'élève :
+         * - virer la ligne 56 ci dessus, je conseille même la ligne 54 tant que le pb de hauteur limitée à 30 px n'est pas réglé dans labomep, sinon tu risques de rien voir (si plus de 2 noeuds donc le cas ici...)
+         * - ajouter un bouton 'Voir le parcours détaillé de l'élève'
+         * - au clic du bouton lancer dans un nouvel onglet (chépo comment on fait) mon init.js de j3peditgraphes qui attend un rootElt et un objet options avec :
+         * options.scores = resultat.contenu.scores
+         * options.pe = resultat.contenu.pe
+         * options.graphe = resultat.contenu.graphe
+         * options.editgraphes = resultat.contenu.editgraphes (c'est un objet ayant deux pptes de type Array)
+         * Un pb cependant actuellement cette dernière ppté n'est pas en bdd (resultat.contenu ne contient pas de ppte editgraphes)
+         * Je pense que mes modifs du loader.js ne sont pas déployées
+        */
       }
     } else {
       output = 'pas de réponse'

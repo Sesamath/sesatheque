@@ -30,9 +30,10 @@
  */
 
 'use strict'
+/* eslint-disable camelcase */
 
 var dom = require('sesajstools/dom')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
@@ -45,7 +46,7 @@ var swf = require('../../display/swf')
  * @param params le contenu de ressource.parametres.xml, qui est du json !!
  */
 function getXmlParam (params) {
-  if (!tools.isArray(params.series)) {
+  if (!sjt.isArray(params.series)) {
     throw new Error('Aucune série à traiter')
   }
 
@@ -225,7 +226,7 @@ function getOperations (serie) {
     operation_annullee = true
     c = 0
     // Si le tirage convient pas on recommence, mais pas trop quand même
-    while (operation_annullee && c < maxTentatives) {
+    while (operation_annullee && c < maxTentatives) { // eslint-disable-line no-unmodified-loop-condition
       nombres_generes = []
       signes_generes = []
       choix_position_liaison = false
@@ -416,7 +417,7 @@ function xmlGenerate (o) {
  * @returns {number}
  */
 function nettoie_nombre (nb) {
-  if (tools.isString(nb)) return Number(nb.replace(/,/g, '.').replace(/\s/g, ''))
+  if (sjt.isString(nb)) return Number(nb.replace(/,/g, '.').replace(/\s/g, ''))
   else return Number(nb)
 }
 

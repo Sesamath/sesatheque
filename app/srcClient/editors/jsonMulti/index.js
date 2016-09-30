@@ -28,7 +28,7 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-/*global alert*/
+/* global alert */
 'use strict'
 
 var dom = require('sesajstools/dom')

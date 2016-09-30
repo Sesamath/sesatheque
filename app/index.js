@@ -52,7 +52,7 @@ try {
    * - boot de l'appli
    */
 
-  var tools = require('./tools')
+  var sjt = require('sesajstools')
   var config = require('./config')
   require('an-log').config(config.lassiLogger)
   var appLog = require('an-log')(config.application.name)
@@ -166,7 +166,7 @@ try {
     // on ajoute nos filtres perso pour dust
     try {
       lassi.transports.html.engine.addFilter('js2', function (value) {
-        return tools.stringify(value, 2)
+        return sjt.stringify(value, 2)
       })
       lassi.transports.html.engine.addFilter('nl2br', function (value) {
         return value.replace('\n', '<br />\n')

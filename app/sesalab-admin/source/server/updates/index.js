@@ -60,7 +60,6 @@ app.controller(function($entities, $job, $update, AppliedUpdate) {
       $job.create(
 
       function(job) {
-        var id = parseInt(id);
         fn(job);
       },
 

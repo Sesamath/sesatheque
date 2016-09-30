@@ -37,7 +37,7 @@
  */
 
 'use strict'
-/*global describe,it*/
+/* global describe,it */
 
 var assert = require('assert')
 var request = require('request')

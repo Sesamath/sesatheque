@@ -30,9 +30,10 @@
  */
 
 'use strict'
-/* global module*/
+/* global module */
 
 var filters = require('sesajstools/utils/filters')
+var sjtObj = require('sesajstools/utils/object')
 
 /**
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
@@ -42,9 +43,9 @@ var filters = require('sesajstools/utils/filters')
 function Ressource (initObj) {
   var values
   if (initObj) {
-    // clonage du fainéant (on veut que les propriétés sans prototype)
+    // clonage du fainéant (on veut que les propriétés sans le prototype)
     try {
-      values = JSON.parse(JSON.stringify(initObj))
+      values = sjtObj.cloneData(initObj)
     } catch (e) {
       if (console && typeof console.error === 'function') console.error(e)
       values = {}
@@ -131,8 +132,7 @@ function Ressource (initObj) {
     // on accepte une chaîne json
     if (values.parametres && typeof values.parametres === 'string') {
       try {
-        var parametres = JSON.parse(values.parametres)
-        this.parametres = parametres
+        this.parametres = JSON.parse(values.parametres)
       } catch (error) {
         if (console && console.error) console.error(error)
       }

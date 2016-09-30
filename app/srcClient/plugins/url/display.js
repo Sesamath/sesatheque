@@ -50,7 +50,7 @@ function addPage (url, params, next) {
   var divIframeSrcId = 'urlSrc'
   dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + params.adresse)
   // toujours autosize sur le conteneur
-  page.autosize(divIframeId, [divIframeSrcId], null, {offsetHeight:20, offsetWidth: 40})
+  page.autosize(divIframeId, [divIframeSrcId], null, {offsetHeight: 20, offsetWidth: 40})
   // url sera ajouté après l'appel de pageLoaded, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
   var args = {id: 'pageContent'}
 

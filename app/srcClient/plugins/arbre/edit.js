@@ -33,7 +33,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 var client = require('sesatheque-client')(window.location.protocol + '//' + window.location.host)
 
 var page = require('../../page/index')
@@ -250,14 +250,14 @@ module.exports = function edit (arbre, options) {
                     inst.create_node(node, {
                       icon: 'arbreJstNode',
                       a_attr: {'data-type': 'arbre'}
-                    }, 'last', function (new_node) {
-                      inst.edit(new_node, 'titre', function (new_node, status) {
+                    }, 'last', function (newNode) {
+                      inst.edit(newNode, 'titre', function (newNode, status) {
                         if (status) isDstModified = true
                         log('après modif', inst)
                       })
                       /* pourquoi faut le sortir de la pile ?
                        setTimeout(function () {
-                       inst.edit(new_node)
+                       inst.edit(newNode)
                        isDstModified = true
                        }, 0); */
                     })
@@ -287,8 +287,8 @@ module.exports = function edit (arbre, options) {
                           text: ressource.titre,
                           icon: tt + 'JstNode',
                           a_attr: attr
-                        }, 'last', function (new_node) {
-                          log('node créé', new_node)
+                        }, 'last', function (newNode) {
+                          log('node créé', newNode)
                         })
                       }
                     })
@@ -523,7 +523,7 @@ module.exports = function edit (arbre, options) {
       $saveButton = $('#saveButton')
       if (!$saveButton) throw new Error('Bouton de sauvegarde non trouvé dans la page')
 
-      var editor = tools.getURLParameter('editor') || 'graphic'
+      var editor = sjt.getURLParameter('editor') || 'graphic'
       initDom(options)
       dstTree = arbre
       if (editor === 'graphic') {

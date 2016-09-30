@@ -43,8 +43,7 @@ module.exports = function($scope, $http) {
 
   $scope.filterOperators = function(field) {
     return function(operator) {
-      var result = operator.types.indexOf(field.index.type)!==-1;
-      return result;
+      return operator.types.indexOf(field.index.type)!==-1;
     }
   }
 

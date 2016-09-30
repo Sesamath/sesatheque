@@ -34,7 +34,7 @@
 module.exports = function (EntityAlias) {
   var config = require('../config')
   var Alias = require('../constructors/Alias')
-  var tools = require('../tools')
+  var merge = require('sesajstools/utils/object').merge
 
   /**
    * Notre entité Alias cf [Entity](lassi/Entity.html)
@@ -46,7 +46,7 @@ module.exports = function (EntityAlias) {
    * @extends Alias
    */
   EntityAlias.construct(function (init) {
-    tools.merge(this, new Alias(init))
+    merge(this, new Alias(init))
   })
 
   EntityAlias.table = 'alias'

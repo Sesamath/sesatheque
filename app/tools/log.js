@@ -41,7 +41,7 @@ var fs = require('fs')
 var moment = require('moment')
 var _ = require('lodash')
 var config = require('../config') // jshint ignore:line
-var tools = require('./index') // jshint ignore:line
+var sjt = require('sesajstools')
 var applog = require('an-log')(config.application.name)
 
 var _lassi = (typeof GLOBAL.lassi === 'undefined') ? console : GLOBAL.lassi
@@ -146,7 +146,7 @@ function out (message, objectToDump, filter, stream, options) {
     if (objectToDump) {
       if (objectToDump instanceof Error) message += '\n' + objectToDump.stack + '\n'
       else {
-        var dump = tools.stringify(objectToDump, options.indent)
+        var dump = sjt.stringify(objectToDump, options.indent)
         var max = options && options.max || 200
         if (dump.length > max) dump = dump.substr(0, max) + '…'
         message += '\n' + dump + '\n'

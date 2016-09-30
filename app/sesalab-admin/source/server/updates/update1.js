@@ -66,7 +66,6 @@ module.exports = function(job) {
       }
     }
     arbre.type = 'arbre'
-    arbre.categories = [configRessource.constantes.categories.liste]
   }
 
   var EntityRessource = lassi.service('EntityRessource')

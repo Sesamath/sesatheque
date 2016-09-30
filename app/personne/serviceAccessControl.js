@@ -32,8 +32,8 @@
 'use strict'
 var dns = require('dns')
 var _ = require('lodash')
-var tools = require('../tools')
-// var flow = require('an-flow')
+var sjtObj = require('sesajstools/utils/object')
+
 var config = require('../config')
 var configRessource = require('../ressource/config')
 
@@ -223,7 +223,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     var config = $settings.get('components.personne')
     _.each(personne.roles, function (hasRole, role) {
       // on ajoute les permissions définies pour ce role en config
-      if (hasRole && config.roles[role]) tools.merge(permissions, config.roles[role])
+      if (hasRole && config.roles[role]) sjtObj.merge(permissions, config.roles[role])
     })
 
     return permissions
@@ -315,7 +315,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (!value) value = true
     if (context && token) {
       try {
-        retour = tools.isEqual(context.session.tokens[token], value)
+        retour = sjtObj.isEqual(context.session.tokens[token], value)
         delete context.session.tokens[token]
       } catch (error) {
         retour = false
@@ -480,7 +480,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
       if ($settings.get('apiTokens', []).indexOf(token) > -1) {
-        log.debug('token api ok')
+        // log.debug('token api ok')
         // token ok donc retour ok si client local
         retour = $accessControl.isLanClient(context)
       }
@@ -629,7 +629,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.isLanClient = function (context) {
     var ipClient = getClientIp(context)
-    log.debug("isLanClient analyse l'ip " + ipClient)
+    // log.debug("isLanClient analyse l'ip " + ipClient)
     return isOnLan(ipClient)
   }
 

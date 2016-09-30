@@ -42,7 +42,8 @@
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) {
   var _ = require('lodash')
   var tools = require('../tools')
-  var stools = require('sesajstools')
+  var sjt = require('sesajstools')
+  var sjtObj = require('sesajstools/utils/object')
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
@@ -55,7 +56,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function addToken (context, ressource) {
-    var token = stools.getToken()
+    var token = sjt.getToken()
     if (!context.session.tokens) context.session.tokens = {}
     log.debug('avant ajout du token on a en session', context.session.tokens)
     context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n'existe pas
@@ -168,7 +169,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       var data = {
         jsBloc: {
           $view: 'js',
-          jsCode: 'if (parent.postMessage) parent.postMessage(' + JSON.stringify(retour) + ', "*")'
+          jsCode: 'if (parent.postMessage) parent.postMessage(' + sjt.stringify(retour) + ', "*")'
         }
       }
       context.html(data)
@@ -208,8 +209,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               else end()
             })
           } else {
-            error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
-            log.debug(error.message, body)
+            var msg = 'réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url
+            error = new Error(msg)
+            log.debug(msg, body)
             end(error)
           }
         })
@@ -500,13 +502,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressource) {
         // faut la mémoriser pour comparer avec la bdd
         ressourceNormee = ressource
-        if (!_.isEmpty(ressource._errors)) {
-          printForm(context, null, ressource, titrePage)
-        } else if (!_.isEmpty(ressource._warnings) && ressource.force !== 'forced') {
-          printForm(context, null, ressource, titrePage)
+        if (_.isEmpty(ressource._errors)) {
+          if (!_.isEmpty(ressource._warnings) && ressource.force !== 'forced') {
+            printForm(context, null, ressource, titrePage)
+          } else {
+            // faut charger l'ancienne pour vérifier groupes et personnes
+            $ressourceRepository.load(oid, this)
+          }
         } else {
-          // faut charger l'ancienne pour vérifier groupes et personnes
-          $ressourceRepository.load(oid, this)
+          printForm(context, null, ressource, titrePage)
         }
       }).seq(function (ressourceBdd) {
         if (ressourceBdd) {
@@ -524,7 +528,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
       }).seq(function (ressource) {
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
-        tools.update(ressourceOriginale, ressource)
+        sjtObj.update(ressourceOriginale, ressource)
         $ressourceRepository.save(ressourceOriginale, this)
       }).seq(function (ressource) {
         log.debug('ressource enregistrée', ressource)
@@ -544,7 +548,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $view: 'js',
               // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
               jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-                context.get.closerId + '", ressource:' + JSON.stringify(ressource) + '}, "*")'
+                context.get.closerId + '", ressource:' + sjt.stringify(ressource) + '}, "*")'
             }
           })
         } else {

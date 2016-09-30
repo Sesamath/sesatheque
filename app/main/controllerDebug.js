@@ -32,7 +32,7 @@
 'use strict'
 
 module.exports = function (controller) {
-  var tools = require('../tools')
+  var sjt = require('sesajstools')
   // var _ = require('lodash')
   var $cache = lassi.service('$cache')
 
@@ -54,21 +54,21 @@ module.exports = function (controller) {
     else context.session.compteur = 1
     var data = getDefaultData()
     data.$metas = {title: 'La session courante'}
-    data.contentBloc.debug = tools.stringify(context.session, 2)
+    data.contentBloc.debug = sjt.stringify(context.session, 2)
     context.html(data)
   })
 
   controller.get('request', function (context) {
     context.layout = 'page'
     var data = getDefaultData()
-    data.contentBloc.debug = tools.stringify(context.request)
+    data.contentBloc.debug = sjt.stringify(context.request)
     context.html(data)
   })
 
   controller.get('response', function (context) {
     context.layout = 'page'
     var data = getDefaultData()
-    data.contentBloc.debug = tools.stringify(context.response)
+    data.contentBloc.debug = sjt.stringify(context.response)
     context.html(data)
   })
 
@@ -76,7 +76,7 @@ module.exports = function (controller) {
   controller.get('test', function (context) {
     context.layout = 'page'
     var data = getDefaultData()
-    data.contentBloc.debug = tools.stringify({foo: 'bar'})
+    data.contentBloc.debug = sjt.stringify({foo: 'bar'})
     context.html(data)
   })
 

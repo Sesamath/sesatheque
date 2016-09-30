@@ -15,7 +15,7 @@ var flow = require('an-flow')
 var xml2js = require('xml2js')
 // pour ec2, fct piquée dans le repository
 var elementtree = require('elementtree')
-var tools = require('../app/tools')
+var sjt = require('sesajstools')
 
 // nos méthodes mutualisées
 var common = require('./modules/common')
@@ -34,11 +34,6 @@ var logProcess = true
 var config = require('../app/ressource/config.js')
 // conf de l'appli
 var serverConf = require('../_private/config')
-var urlBibli = 'http://'
-urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
-urlBibli += ':'
-urlBibli += serverConf.$server && serverConf.$server.port || '3000'
-urlBibli += '/api/ressource'
 
 // constantes
 var tdCode = config.constantes.typeDocumentaires
@@ -263,7 +258,7 @@ function addAuteurs (ressource, next) {
                     var errorString = 'erreur sur le get ' + options.url + ' : '
                     if (error) errorString += error.toString()
                     else if (data.error) errorString += data.error
-                    else errorString += tools.stringify(data)
+                    else errorString += sjt.stringify(data)
                     common.addError(idComb, errorString)
                     nextAuteur()
                   } else if (data.id && data.id == idSslSesa) { // eslint-disable-line eqeqeq
@@ -405,9 +400,9 @@ function modifyUrl (ressource, next) {
           } else if (p.consigne) {
             // faut remettre le html
             p.consigne = p.consigne
-                .replace(/\&amp;/g, '&')
-                .replace(/\&lt;/g, '<')
-                .replace(/\&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
             // log('la consigne : ' +p.consigne)
           }
         } else {

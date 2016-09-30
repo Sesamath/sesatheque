@@ -35,6 +35,7 @@ var fs = require('fs')
 var _ = require('lodash')
 var morgan = require('morgan')
 var moment = require('moment')
+var sjt = require('sesajstools')
 
 var tools = require('./tools')
 var config = require('./config')
@@ -159,7 +160,7 @@ module.exports = function afterRailSession (rail) {
       // en dev on ajoute les var postées
       if (config.application.staging === 'dev') {
         morgan.token('post', function (req) {
-          return (_.isEmpty(req.body)) ? '' : tools.stringify(req.body)
+          return (_.isEmpty(req.body)) ? '' : sjt.stringify(req.body)
         })
         format += ' :post'
       }

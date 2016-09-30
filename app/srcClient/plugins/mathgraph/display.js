@@ -32,7 +32,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 
 var page = require('../../page/index')
 
@@ -121,7 +121,7 @@ function displayJs (ressource, options, next) {
   }
 
   // on affiche un avertissement si on force
-  if (ressource.parametres.levelEleve > 0 && tools.getURLParameter('js')) {
+  if (ressource.parametres.levelEleve > 0 && sjt.getURLParameter('js')) {
     dom.addElement(container, 'p', {'class': 'warning'}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
   }
 
@@ -130,7 +130,7 @@ function displayJs (ressource, options, next) {
     'https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js'
   ]
   page.loadAsync(dependencies, function () {
-    /*global MathJax, mtg32*/
+    /* global MathJax, mtg32 */
     if (typeof MathJax === 'undefined') throw new Error("Mathjax n'est pas chargé")
     if (typeof mtg32 === 'undefined') throw new Error("Mathgraph32 n'est pas chargé")
     var width = ressource.parametres.width || container.offsetWidth || 800
@@ -193,7 +193,7 @@ module.exports = function display (ressource, options, next) {
       throw new Error('Pas de figure mathgraph en paramètre')
     }
     // on utilise java seulement si levelEleve est positif dans les paramètres (et que l'on impose pas js dans l'url)
-    if (ressource.parametres.levelEleve > 0 && !tools.getURLParameter('js')) displayJava(ressource, options, next)
+    if (ressource.parametres.levelEleve > 0 && !sjt.getURLParameter('js')) displayJava(ressource, options, next)
     else displayJs(ressource, options, next)
   } catch (error) {
     if (next) next(error)

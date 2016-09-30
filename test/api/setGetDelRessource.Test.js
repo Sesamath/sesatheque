@@ -37,7 +37,7 @@
  */
 
 'use strict'
-/*global describe,it*/
+/* global describe,it */
 
 /**
  * Affiche les options possibles
@@ -58,7 +58,7 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
 } else {
   var assert = require('assert')
   var _ = require('lodash')
-  var tools = require('../../app/tools')
+  var clone = require('sesajstools/utils/object').clone
   var request = require('request')
 
   // conf de l'appli
@@ -107,7 +107,7 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
   }
 
   describe('api set, get & del', function () {
-    var ressCloned = tools.clone(ressTest)
+    var ressCloned = clone(ressTest)
 
     it("set retourne l'oid de la ressource stockée", function (doneSet) {
       var options = {

@@ -99,7 +99,7 @@ module.exports = function display (ressource, options, next) {
     var url = ressource.parametres.url
     var isExternal = url && !xml
     page.loadAsync(['mathjax', 'https://iep.sesamath.net/iepjsmin.js'], function () {
-      /*global MathJax*/
+      /* global MathJax */
       MathJax.Hub.Config({
         tex2jax: {
           inlineMath: [['$', '$'], ['\\(', '\\)']]

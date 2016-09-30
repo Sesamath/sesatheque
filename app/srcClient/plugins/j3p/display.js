@@ -31,7 +31,7 @@
 'use strict'
 
 var log = require('sesajstools/utils/log')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 
 var page = require('../../page/index')
 var xhr = require('sesajstools/http/xhr')
@@ -93,7 +93,7 @@ module.exports = function display (ressource, options, next) {
       urlBaseJ3p = '//j3p.devsesamath.net'
     }
 
-    var lastResultUrl = tools.getURLParameter('lastResultUrl')
+    var lastResultUrl = sjt.getURLParameter('lastResultUrl')
     if (lastResultUrl) {
       log('on va chercher un lastResultat sur ' + lastResultUrl)
       xhr.get(lastResultUrl, {responseType: 'json'}, function (error, lastResultat) {

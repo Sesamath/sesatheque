@@ -1,5 +1,5 @@
 <select id="{o.id}" name="{o.name}">
     {#o.choices}
-    <option value="{value}"{?selected} selected="selected"{/selected} />{label}</option>
+    <option value="{value}"{?selected} selected="selected"{/selected}>{label}</option>
     {/o.choices}
 </select>

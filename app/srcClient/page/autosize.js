@@ -70,7 +70,7 @@ function resize (cb) {
 }
 
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
-  function callResize() {
+  function callResize () {
     resize(options.callback)
   }
   $ = window.jQuery

@@ -19,14 +19,6 @@ var tools = require('../app/tools')
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
-// conf de l'appli
-var confSesatheque = require('../_private/config')
-var urlBibli = 'http://'
-urlBibli += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
-urlBibli += ':'
-urlBibli += confSesatheque.$server && confSesatheque.$server.port || '3000'
-urlBibli += '/api/ressource'
-
 // constantes
 var confRessource = require('../app/ressource/config')
 var tdCode = confRessource.constantes.typeDocumentaires
@@ -58,10 +50,10 @@ function getMepModele (mepRow) {
 
 /**
  * Renvoie le code langue à 3 char d'après le code à 2 char
- * @param mep_langue_id
+ * @param mepLangueId
  * @returns {*}
  */
-function getLangue (mep_langue_id) {
+function getLangue (mepLangueId) {
   var corres = {
     'ar': 'ara',
     'br': 'bre',
@@ -74,10 +66,10 @@ function getLangue (mep_langue_id) {
     'it': 'ita',
     'pt': 'por'
   }
-  if (corres[mep_langue_id]) {
-    return corres[mep_langue_id]
+  if (corres[mepLangueId]) {
+    return corres[mepLangueId]
   } else {
-    console.error(mep_langue_id + " n'est pas un code connu")
+    console.error(mepLangueId + " n'est pas un code connu")
     return 'fra'
   }
 }
@@ -95,7 +87,7 @@ function initRessourceMep (row) {
   // parametres
   parametres.nbq_defaut = row.mep_nbq_defaut // obligatoire
   parametres.mep_modele = getMepModele(row)
-  parametres.mep_langue_id = row.mep_langue_id || 'fr' // le swf veut le code langue à 2 lettres
+  parametres.mepLangueId = row.mepLangueId || 'fr' // le swf veut le code langue à 2 lettres
   parametres.swf_id = row.mep_swf_id
   if (row.mep_projet !== 'mep') parametres.projet = row.mep_projet
   if (row.mep_old) parametres.old = row.mep_old
@@ -137,7 +129,7 @@ function initRessourceMep (row) {
     parametres: parametres,
     // auteurs
     // contributeurs
-    langue: getLangue(row.mep_langue_id),
+    langue: getLangue(row.mepLangueId),
     publie: (row.mep_statut_public === 'en_public'),
     restriction: 0,
     dateCreation: tools.toDate(row.dateCreation),

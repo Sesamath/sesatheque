@@ -32,7 +32,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 
 var page = require('../../page/index')
 
@@ -46,9 +46,9 @@ var page = require('../../page/index')
  */
 module.exports = function display (ressource, options, next) {
   function displayEcjs () {
-    /*global head*/
+    /* global head */
     // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
-    var ecjsBase = tools.getURLParameter('ecjsBase') || options.ecjsBase || 'https://ressources.sesamath.net/replication_calculatice/javascript'
+    var ecjsBase = sjt.getURLParameter('ecjsBase') || options.ecjsBase || 'https://ressources.sesamath.net/replication_calculatice/javascript'
 
     // d'après {ecjsBase}/api/clc-api.main.js
     // celui-là détruit notre style et semble ne rien apporter dans les exos
@@ -79,7 +79,7 @@ module.exports = function display (ressource, options, next) {
           if (typeof window[ prop ] === 'undefined') throw new Error('Problème de chargement, ' + prop + " n'existe pas")
         }
 
-        /*global CLC, $*/
+        /* global CLC, $ */
         function envoyerScoreExoJs (event, data) {
           log('résultats reçus du js calculatice', data)
           resultatSent = true // même si ça plante, pas la peine de recommencer au unload

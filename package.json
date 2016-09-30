@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.38",
+  "version": "0.0.39",
   "engines": {
     "node": ">4.4.0"
   },
@@ -95,5 +95,12 @@
     "url-loader": "^0.5.7",
     "webpack": "^1.12.2",
     "xml2js": "^0.4.4"
+  },
+  "eslintConfig": {
+    "extends": ["standard"],
+    "globals": {
+      "lassi": true,
+      "log": true
+    }
   }
 }

@@ -16,7 +16,7 @@
     </label>
   {/o.hidden}
 
-  <div class="input-group {widget}"{?width} width="{width}"{/width}>
+  <div class="input-group {widget}"{?width} style="width: {width}"{/width}>
     {>"{widget}" /}
   </div>
 

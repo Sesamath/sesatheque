@@ -34,9 +34,9 @@
 /**
  * Configuration de l'application
  */
-var tools = require('./tools')
-var stools = require('sesajstools')
 var path = require('path')
+var sjtObj = require('sesajstools/utils/object')
+var sjtUrl = require('sesajstools/utils/url')
 
 /** La racine du projet */
 var root = path.resolve(__dirname, '..')
@@ -176,7 +176,7 @@ var config = {
 
 // on ajoute nos params locaux (accès à la base et port,
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
-if (localConfig) tools.merge(config, localConfig)
+if (localConfig) sjtObj.merge(config, localConfig)
 
 // on enlève le debug mysql en prod
 if (config.application.staging === 'prod' && config.$entities.database.debug) {
@@ -197,14 +197,14 @@ if (config.sesalabs && config.sesalabs.length) {
   if (!config.components) config.components = {}
   if (!config.components.sesalabSso) config.components.sesalabSso = {}
   var confSso = config.components.sesalabSso
-  if (!confSso.authServers) {
-    confSso.authServers = []
-  } else {
+  if (confSso.authServers) {
     // on vérifie que ce qui est déjà défini n'est pas du grand n'importe quoi
-    confSso.authServers = confSso.authServers.filter((server) => {
+    confSso.authServers = confSso.authServers.filter(function (server) {
       if (server && server.baseUrl) return true
       console.error('faut pas mettre n’importe quoi en authServers, baseUrl est obligatoire', server)
     })
+  } else {
+    confSso.authServers = []
   }
   // et on ajoute un authServer pour chaque sesalab
   config.sesalabs.forEach(function (sesalab, index) {
@@ -221,7 +221,7 @@ if (config.sesalabs && config.sesalabs.length) {
     if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
     // ça donne ce server
     var authServer = {
-      name: sesalab.name || stools.urlGetDomain(sesalab.baseUrl),
+      name: sesalab.name || sjtUrl.getDomain(sesalab.baseUrl),
       baseUrl: sesalab.baseUrl,
       // les urls sur ce serveur, pour demander un login
       loginPage: 'sso/login',
@@ -235,7 +235,7 @@ if (config.sesalabs && config.sesalabs.length) {
     confSso.authServers.some(function (server, index) {
       if (server.name === authServer.name || server.baseUrl === authServer.baseUrl) {
         existingIndex = index
-        tools.merge(authServer, server)
+        sjtObj.merge(authServer, server)
         return true
       }
     })

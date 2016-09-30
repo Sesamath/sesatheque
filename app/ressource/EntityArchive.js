@@ -31,7 +31,7 @@
 
 'use strict'
 
-var tools = require('../tools')
+var merge = require('sesajstools/utils/object').merge
 
 module.exports = function (EntityArchive) {
   /**
@@ -46,7 +46,7 @@ module.exports = function (EntityArchive) {
       return
     }
     // on garde tout
-    tools.merge(this, ressource)
+    merge(this, ressource)
     // sauf l'oid
     delete this.oid
     // et on ajoute la date d'archivage

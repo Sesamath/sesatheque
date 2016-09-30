@@ -32,7 +32,7 @@
 'use strict'
 
 var _ = require('lodash')
-var tools = require('../tools')
+var sjtObj = require('sesajstools/utils/object')
 
 module.exports = function () {
   /**
@@ -118,7 +118,7 @@ module.exports = function () {
       if (moreData.length) moreData = { blocs: { blocList: moreData } }
       else moreData = null
     }
-    if (moreData) tools.merge(data, moreData)
+    if (moreData) sjtObj.merge(data, moreData)
     context.html(data)
   }
 

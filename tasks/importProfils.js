@@ -13,13 +13,6 @@ var flow = require('an-flow')
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
-// conf de l'appli
-var serverConf = require('../_private/config')
-var urlBibli = 'http://'
-urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
-urlBibli += ':'
-urlBibli += serverConf.$server && serverConf.$server.port || '3000'
-
 /** Les enfants que l'on mettra dans sesamath-labomep_all.json */
 var allEnfants = []
 /** Les ids origine/idOrigine que l'on a déjà mis */

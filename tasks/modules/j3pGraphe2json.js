@@ -171,7 +171,7 @@ function bibliotheque(ch) {
       var tab_temp = tab2[tab2.length - 1].split(':');
       // console.log('tab_temp=', tab_temp)
       //tab_temp est alors un tableau avec le premier un paramètre et ensuite la valeur d'un param une virgule et un nouveau param, sauf pour le dernier
-      var tab3 = new Array;
+      var tab3 = [];
       tab3[0] = J3PSupprimeEspaces(tab_temp[0]);
       if (tab3[0].charAt(0) != '"') {
         tab3[0] = '"' + tab3[0] + '"';

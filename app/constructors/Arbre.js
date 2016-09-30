@@ -106,7 +106,6 @@ Arbre.prototype.toRessource = function () {
    */
   var a = this
 
-  if (a.id) r.id = a.id
   r.titre = (a.titre) ? a.titre : 'arbre sans titre'
   r.type = 'arbre'
   r.categories = [8]

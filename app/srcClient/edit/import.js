@@ -35,7 +35,7 @@
 'use strict'
 
 var page = require('../page/index')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 var dom = require('sesajstools/dom')
 var xhr = require('sesajstools/http/xhr')
 
@@ -78,11 +78,8 @@ function doImport (url) {
 }
 
 /**
- * Ajoute des comportement aux éléments du formulaire d'édition de ressource
- * (change parametres|enfants en fonction du type)
- * @service edit/init
- * @param options
- * @param next
+ * Importe une ressource externe (via l'api)
+ * @service edit/import
  */
 module.exports = function importByUrl () {
   var options = {}
@@ -91,7 +88,7 @@ module.exports = function importByUrl () {
       dom.empty(options.container)
       dom.addElement(options.container, 'p', null, 'Indiquer ci-dessous l’url absolue de la ressource à importer dans vos ressources')
       var attrs = {type: 'text', placeholder: 'Url absolue de la ressource à importer', style: {margin: '1em', width: '80%'}}
-      var url = tools.getURLParameter('url')
+      var url = sjt.getURLParameter('url')
       if (url) attrs.value = url
       var urlImportElt = dom.addElement(options.container, 'input', attrs)
       var importButtonElt = dom.addElement(options.container, 'button', null, 'Importer')

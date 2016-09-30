@@ -48,11 +48,11 @@ module.exports = function(job) {
         flow(aliases).seqEach(function (alias) {
           job.tick()
           if (alias.base) {
-            if (alias.base.substr(-1) !== '/') {
+            if (alias.base.substr(-1) === '/') {
+              this()
+            } else {
               alias.base += '/'
               alias.store(this)
-            } else {
-              this()
             }
           } else {
             // pas de base, on signale

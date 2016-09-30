@@ -32,7 +32,7 @@
 'use strict'
 
 var _ = require('lodash')
-var tools = require('sesajstools')
+var sjtUrl = require('sesajstools/utils/url')
 var modLog = require('an-log')('$auth')
 
 module.exports = function ($accessControl, $ressourcePage) {
@@ -172,7 +172,7 @@ module.exports = function ($accessControl, $ressourcePage) {
       _.forOwn(clients, function (client) {
         var url = client.getLoginUrl && client.getLoginUrl(context)
         if (url) {
-          url = tools.urlComplete(url, {redirect: urlRetour})
+          url = sjtUrl.complete(url, {redirect: urlRetour})
           loginLinks.push({
             href: url,
             icon: 'arrow-right',

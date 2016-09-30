@@ -32,7 +32,7 @@
 'use strict'
 
 var Personne = require('../constructors/Personne')
-var tools = require('../tools')
+var sjtObj = require('sesajstools/utils/object')
 
 /**
  * Entity pour un user
@@ -70,7 +70,7 @@ module.exports = function (EntityPersonne, $cachePersonne) {
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
       // une callback qui renvoie la valeur (ou un tableau de valeurs)
       .defineIndex('roles', 'string', function () {
-        return tools.truePropertiesList(this.roles)
+        return sjtObj.truePropertiesList(this.roles)
       })
       .defineIndex('groupesMembre', 'string')
       .defineIndex('groupesSuivis', 'string')

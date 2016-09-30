@@ -32,7 +32,7 @@
 'use strict'
 
 module.exports = function (EntityRessource) {
-  // var _ = require('lodash')
+  var merge = require('sesajstools/utils/object').merge
   var tools = require('../tools')
   var Ressource = require('../constructors/Ressource')
   var configRessource = require('./config')
@@ -49,7 +49,7 @@ module.exports = function (EntityRessource) {
     // on récupère un objet Ressource correctement typé et initialisé
     var ressource = new Ressource(initObj)
     // que l'on merge à notre objet Entity
-    tools.merge(entity, ressource)
+    merge(entity, ressource)
 
     // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
     // plus pratique ici que dans le constructeur qui ne peut faire de require

@@ -6,7 +6,7 @@
  * Il faut avoir chargé headjs séparément, si jQuery n'est pas chargé on prendra celui de j3p
  *
  * Il reprend j3p.html + outils/j3pchargementlabomep.js, mais
- * - chargement_j3p.graphe est un tableau de tableaux (pas une chaine), ou on a inséré un tableau vide en indice 0
+ * - chargementJ3p.graphe est un tableau de tableaux (pas une chaine), ou on a inséré un tableau vide en indice 0
  * - ne reprend pas ce qui ne concerne pas la bibli (chargement des sections)
  *   - pas de fct verschainegraphe
  *   - pas de XMLHttpRequest
@@ -69,7 +69,7 @@ w.j3p = {}
 * Il doit être global car des js inclus lui ajoutent des prototypes
 * Était dans j3plabomep.html avec l'instanciation de l'objet
 */
-function Chargement_j3p () {
+function ChargementJ3p () {
   this.sources = ''
   this.graphe = [] // le graphe (un tableau de tableaux)
   this.grapheTab = [] // le graphe (un tableau de tableaux)
@@ -87,11 +87,10 @@ function Chargement_j3p () {
 */
 function estDans (ch, tab) {
   // estdans('toto',['toto','tata'] renvoie TRUE
-  var bool = false
   for (var k = 0; k < tab.length; k++) {
     if (tab[k] === ch) return true
   }
-  return bool
+  return false
 }
 
 /**
@@ -100,8 +99,8 @@ function estDans (ch, tab) {
 * @param {EntityReference} eltHtml
 * @returns {undefined}
 */
-Chargement_j3p.prototype.chargement = function (eltHtml) {
-  /*global head, jQuery*/
+ChargementJ3p.prototype.chargement = function (eltHtml) {
+  /* global head, jQuery */
   function oncontinue1 () {
     // alert('pause')
     // On charge les CSS :
@@ -124,7 +123,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
   }
 
   function oncontinue3 () {
-    // on charge adresses.js qui ajoute un gros objet chargement_j3p.adresses avec les correspondances
+    // on charge adresses.js qui ajoute un gros objet chargementJ3p.adresses avec les correspondances
     // nomSection : chemin du js de la section
     head.js(w.j3p.config.arborescence.adresses + 'adresses.js', // intialisation de j3p.config
       function () {
@@ -166,7 +165,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
     piledappels.push(w.j3p.config.arborescence.outils + 'methodesmodele.js')
     for (k = 0; k < that.listedessections.length; k++) {
       nomSection = that.listedessections[k]
-      if (typeof w.chargement_j3p.adresses[nomSection] !== 'undefined') prefixechemin = w.chargement_j3p.adresses[nomSection] + '/'
+      if (typeof w.chargementJ3p.adresses[nomSection] !== 'undefined') prefixechemin = w.chargementJ3p.adresses[nomSection] + '/'
       piledappels.push(pathSections + prefixechemin + 'section' + nomSection + '.js')
     }
     log('On a trouvé les sections', that.listedessections, piledappels[1])
@@ -298,8 +297,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
     if (estDans('sokoban', that.listedesoutils)) {
       piledappels.push(pathOutils + 'sokoban/sokoban.js')
     }
-    if (estDans('geogebra', that.listedesoutils)) that.ggbestpresent = true
-    else that.ggbestpresent = false
+    that.ggbestpresent = estDans('geogebra', that.listedesoutils)
 
     if (estDans('geometrie', that.listedesoutils)) {
       piledappels.push(pathOutils + 'geometrie/geometrie.js')
@@ -332,7 +330,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
         // var t=setTimeout(oncontinue8(),9000)
         if (estDans('mtg32', that.listedesoutils)) {
           log('etape 0')
-          /*global mtg32*/
+          /* global mtg32 */
           w.mtg32App = new mtg32.mtg32App() // eslint-disable-line new-cap
         }
         oncontinue8()
@@ -346,17 +344,17 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
   // lancement de j3p
   function oncontinue8 () {
     // on définit le démarrage au premier noeud
-    w.chargement_j3p.noeudinitial = 1
+    w.chargementJ3p.noeudinitial = 1
     // la fonction EquivalentIndexVersNoeud doit être dispo donc on peut
-    if (typeof w.chargement_j3p.numeronoeud !== 'undefined') {
-      w.chargement_j3p.noeudinitial = w.j3p.EquivalentIndexVersNoeud(w.chargement_j3p.numeronoeud)
+    if (typeof w.chargementJ3p.numeronoeud !== 'undefined') {
+      w.chargementJ3p.noeudinitial = w.j3p.EquivalentIndexVersNoeud(w.chargementJ3p.numeronoeud)
       log('On récupère le dernier noeud enregistré cad',
-        w.chargement_j3p.numeronoeud,
+        w.chargementJ3p.numeronoeud,
         ' et son index dans le graphe est ',
-        w.chargement_j3p.noeudinitial)
+        w.chargementJ3p.noeudinitial)
     }
-    /*global Parcours*/
-    w.j3p = new Parcours(eltHtml.id, 'Mep', 'exemple', false, w.chargement_j3p.noeudinitial)
+    /* global Parcours */
+    w.j3p = new Parcours(eltHtml.id, 'Mep', 'exemple', false, w.chargementJ3p.noeudinitial)
     log('fin du chargement, j3p est créé comme instance de Parcours', w.j3p)
   }
 
@@ -365,7 +363,7 @@ Chargement_j3p.prototype.chargement = function (eltHtml) {
   var pathOutils = w.j3p.config.arborescence.outils
   var pathOutilsExt = w.j3p.config.arborescence.outilsexternes
   var pathSections = w.j3p.config.arborescence.sections
-  var that = this // Chargement_j3p pour nos fct incluses
+  var that = this // ChargementJ3p pour nos fct incluses
   // On démarre le lancement
   oncontinue1()
 // On rend la main tout de suite
@@ -431,26 +429,26 @@ module.exports = {
     // pour virer le dernier / car sinon on a des chemins du genre http://j3p.devsesamath.net//sections...
     if (urlBaseJ3p.substr(urlBaseJ3p.length) === '/') urlBaseJ3p = urlBaseJ3p.substring(0, urlBaseJ3p.length - 1)
 
-    var chargement_j3p = new Chargement_j3p()
-    // faut mettre chargement_j3p à la racine du dom car les autres scripts le cherchent là
-    w.chargement_j3p = chargement_j3p
+    var chargementJ3p = new ChargementJ3p()
+    // faut mettre chargementJ3p à la racine du dom car les autres scripts le cherchent là
+    w.chargementJ3p = chargementJ3p
     // on affecte le graphe de la sesatheque
-    chargement_j3p.graphe = graphe
+    chargementJ3p.graphe = graphe
     // ATTENTION, le modèle veut un indice 0 vide et la 1re section à l'indice 1, on ajoute un elt vide au début
-    chargement_j3p.graphe.unshift([])
+    chargementJ3p.graphe.unshift([])
     // Récupération des infos sur l'état du parcours
     if (options) {
       log('les options que je rècupère :', options)
       if (options.resultatCallback) {
-        chargement_j3p.resultatCallback = options.resultatCallback
+        chargementJ3p.resultatCallback = options.resultatCallback
       }
       if (ressource.parametres.editgraphes) {
-        chargement_j3p.editgraphes = ressource.parametres.editgraphes
+        chargementJ3p.editgraphes = ressource.parametres.editgraphes
       }
       if (options.lastResultat) {
-        chargement_j3p.lastResultat = options.lastResultat
+        chargementJ3p.lastResultat = options.lastResultat
         if (options.lastResultat.contenu && options.lastResultat.contenu.scores !== undefined) {
-          chargement_j3p.numeronoeud = options.lastResultat.contenu.noeuds[options.lastResultat.contenu.length - 1]
+          chargementJ3p.numeronoeud = options.lastResultat.contenu.noeuds[options.lastResultat.contenu.length - 1]
         }
       }
     }
@@ -459,7 +457,7 @@ module.exports = {
     // mais faut forcer cet id qui est en dur un peu partout dans le code j3p, on créé un div pour ça
     var j3pConteneur = dom.addElement(eltHtml, 'div', {id: 'Mepact'})
     page.loadAsync(['head'], function () {
-      chargement_j3p.chargement(j3pConteneur)
+      chargementJ3p.chargement(j3pConteneur)
       // qqun veut être rappelé ?
       if (typeof options !== 'undefined' && typeof options.loadCallback === 'function') {
         options.loadCallback()

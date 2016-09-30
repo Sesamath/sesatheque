@@ -10,7 +10,8 @@ var request = require('request')
 var moment = require('moment')
 var flow = require('an-flow')
 
-var tools = require('../../app/tools')
+var sjtObj = require('sesajstools/utils/object')
+var sjt = require('sesajstools')
 var CounterMulti = require('../../app/tools/CounterMulti')
 
 // conf de l'appli
@@ -109,7 +110,7 @@ common.addPersonne = function (personne, next) {
       var errorString = 'erreur sur le post ' + options.url + ' : '
       if (error) errorString += error.toString()
       else if (body.error) errorString += body.error
-      else errorString += tools.stringify(body)
+      else errorString += sjt.stringify(body)
       next(new Error(errorString))
     } else if (body.oid) {
       personne.oid = body.oid
@@ -145,7 +146,7 @@ function addRessource (ressource, next) {
       var errorString = 'erreur sur le post ' + options.url + ' : '
       if (error) errorString += error.toString()
       else if (body.error) errorString += body.error
-      else errorString += tools.stringify(body)
+      else errorString += sjt.stringify(body)
       addError(idComb, errorString)
       if (opt.logApiCalls) log(idComb + ' KO : ' + errorString)
     } else {
@@ -371,7 +372,7 @@ common.flushPendingRelations = function (next) {
           }).seq(function () {
             if (opt.logRelations) log('on va merger dans ' + ressource.oid, newRelations)
             var mergedRelations = ressource.relations || []
-            tools.merge(mergedRelations, newRelations)
+            sjtObj.merge(mergedRelations, newRelations)
             common.mergeRessource({oid: ressource.oid, relations: mergedRelations}, this)
           }).seq(function () {
             // fin de subFlow
@@ -515,7 +516,7 @@ common.getRessource = function (origine, idOrigine, next) {
     } else if (ressource.oid) {
       next(ressource)
     } else {
-      next(new Error('La ressource récupérée avec ' + idComb + " n'a pas d'oid " + tools.stringify(ressource)))
+      next(new Error('La ressource récupérée avec ' + idComb + " n'a pas d'oid " + sjt.stringify(ressource)))
     }
   })
 }
@@ -604,7 +605,7 @@ common.setPreviousAfterAllCb = function () {
  * @param options
  */
 common.setOptions = function (options) {
-  tools.update(opt, options)
+  sjtObj.update(opt, options)
 }
 
 // en cas d'interruption on veut le résultat quand même

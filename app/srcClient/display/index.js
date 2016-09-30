@@ -41,7 +41,7 @@
 
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 
 var page = require('../page/index')
 var Resultat = require('../../constructors/Resultat')
@@ -62,7 +62,9 @@ var startDate
 /**
  * Fait le chargement proprement dit après page.init
  * @private
- * @param {Error} [error] Une erreur éventuelle à l'init
+ * @param ressource
+ * @param options
+ * @param next
  */
 function load (ressource, options, next) {
   log('display avec la ressource', ressource)
@@ -135,7 +137,7 @@ function addResultatCallback (options) {
       }
       // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
       [ 'sesatheque', 'userOrigine', 'userId' ].forEach(function (paramName) {
-        var paramValue = tools.getURLParameter(paramName) || options[ paramName ]
+        var paramValue = sjt.getURLParameter(paramName) || options[ paramName ]
         if (paramValue) resultat[ paramName ] = paramValue
       })
       log('display envoie à la callback de résultat', resultat)
@@ -147,13 +149,13 @@ function addResultatCallback (options) {
 
   // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
   // on prend en callback par ordre de priorité resultatCallback, urlResultatCallback, resultatMessageAction+
-  if (options.resultatCallback && tools.isFunction(options.resultatCallback)) {
+  if (options.resultatCallback && sjt.isFunction(options.resultatCallback)) {
     // fct de callback
     var next = options.resultatCallback
     options.resultatCallback = function resultatCallbackWrapper (result) {
       formatResult(result, next)
     }
-  } else if (options.urlResultatCallback && tools.isUrlAbsolute(options.urlResultatCallback)) {
+  } else if (options.urlResultatCallback && sjt.isUrlAbsolute(options.urlResultatCallback)) {
     // callback ajax
     options.resultatCallback = function resultatCallbackWrapper (result) {
       var deferSync = !!result.deferSync
@@ -161,7 +163,7 @@ function addResultatCallback (options) {
         sendAjax(options.urlResultatCallback, resultat, deferSync, next)
       })
     }
-  } else if (options && options.resultatMessageAction && tools.isString(options.resultatMessageAction)) {
+  } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
     // callback message
     options.resultatCallback = function resultatCallbackWrapper (result) {
       formatResult(result, function (resultat) {
@@ -240,7 +242,7 @@ function feedbackKo () {
  * Gère l'affichage du feedback puis appelle next(retour)
  * @private
  * @type feedbackCallback
- * @param {feedbackArg} retour Le retour de l'envoi du résultat
+ * @param {retour} retour Le retour de l'envoi du résultat
  */
 function feedback (retour) {
   log('feedback', retour)
@@ -313,6 +315,7 @@ if (typeof window !== 'undefined') {
  * @property {string}           [userOrigine]           Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
  * @property {string}           [userId]                Sera ajoutée en propriété du résultat (peut être passé en param du GET de la page)
  * @property {object}           [flashvars]             Pour les plugins qui chargent du swf, sera passé en flashvars en plus
+ * @property {Resultat}         [lastResultat]          Un éventuel Resultat
  */
 
 /**

@@ -33,7 +33,7 @@
  * @file Module js pour gérer l'affichage / masquage de question / réponse / page
  * D'après l'ancien url.js de l'outil labomep
  */
-
+/* eslint-disable camelcase */
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 
@@ -103,7 +103,7 @@ module.exports = function (ressource, options, next) {
               // @see https://groups.google.com/forum/#!topic/mathjax-users/v6nVeANKihs
               // http://docs.mathjax.org/en/latest/queues.html
               log('open consigne')
-              /*global MathJax*/
+              /* global MathJax */
               MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'consigne'])
             }
             $lienConsigne.css('font-weight', 'normal')

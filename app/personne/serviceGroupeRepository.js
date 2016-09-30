@@ -130,8 +130,8 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
 
   /**
    * Supprime un groupe (ET modifie les ressources liées)
-   * @param groupe
-   * @param next
+   * @param {string} groupeName
+   * @param {errorCallback} next
    * @memberOf $groupeRepository
    */
   $groupeRepository.delete = function (groupName, next) {

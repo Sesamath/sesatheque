@@ -37,10 +37,9 @@
  */
 
 'use strict'
-/*global describe,it*/
+/* global describe,it */
 
 var assert = require('assert')
-// var _ = require('lodash')
 var request = require('request')
 
 var config = require('../../app/config')

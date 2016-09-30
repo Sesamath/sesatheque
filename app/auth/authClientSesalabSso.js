@@ -36,7 +36,7 @@ var baseUrl = require('../config').application.baseUrl
 module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessControl, $page) {
   /**
    * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée chez nous
-   * @param {string} userId
+   * @param {string} idAuthServer
    * @returns {Link[]} La liste de liens
    */
   function getSsoLinks (idAuthServer) {
@@ -81,5 +81,3 @@ module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessCont
     logout: $sesalabSsoClient.logout
   })
 }
-
-

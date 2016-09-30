@@ -6,7 +6,7 @@
 var fs = require('fs')
 var moment = require('moment')
 var flow = require('an-flow')
-var tools = require('../app/tools')
+var sjt = require('sesajstools')
 
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
@@ -38,7 +38,7 @@ function getResume (arbre) {
  */
 function checkArbre (arbre, next) {
   var idArbre = arbre.oid ? getResume(arbre) : lastArbre + ' > ' + arbre.titre
-  if (tools.isArray(arbre.enfants)) {
+  if (sjt.isArray(arbre.enfants)) {
     flow(arbre.enfants).seqEach(function (enfant) {
       var nextEnfant = this
       var ref = enfant.ref || enfant.oid
@@ -48,14 +48,14 @@ function checkArbre (arbre, next) {
             if (ressource.oid === ref) log(ref + ' OK')
             else if (ref === ressource.origine + '/' + ressource.idOrigine === ref) log(ref + ' OK (combinée')
           } else {
-            logError('KO ' + ref + " n'existe pas (était dans l'arbre " + idArbre + ') ' + tools.stringify(ressource))
+            logError('KO ' + ref + " n'existe pas (était dans l'arbre " + idArbre + ') ' + sjt.stringify(ressource))
           }
           nextEnfant()
         })
       } else if (enfant && enfant.enfants) {
         checkArbre(enfant, nextEnfant)
       } else {
-        logError('KO, on a un enfant sans oid ni enfants : ' + tools.stringify(enfant))
+        logError('KO, on a un enfant sans oid ni enfants : ' + sjt.stringify(enfant))
         nextEnfant()
       }
     }).seq(function () {

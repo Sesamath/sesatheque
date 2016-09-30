@@ -32,8 +32,9 @@
 'use strict'
 
 var _ = require('lodash')
+var sjt = require('sesajstools')
+var integerify = require('sesajstools/utils/array').integerify
 var tools = require('../tools')
-var sTools = require('sesajstools')
 var rTools = require('../tools/ressource')
 
 var config = require('./config')
@@ -99,7 +100,7 @@ function castValue (ressource, prop) {
     else rTools.addError(ressource, 'Le champ ' + label + ' vaut ' + value + " qui n'est pas une date valide")
   } else if (typeWanted === 'Number') {
     buffer = Number(value)
-    if (sTools.isIntPos(buffer)) ressource[prop] = buffer
+    if (sjt.isIntPos(buffer)) ressource[prop] = buffer
     else rTools.addError(ressource, 'Le champ ' + label + ' vaut ' + value + " qui n'est pas un entier positif")
   } else if (typeWanted === 'Boolean') {
     if (value === 'true' || value == 1) ressource[prop] = true // eslint-disable-line eqeqeq
@@ -110,7 +111,7 @@ function castValue (ressource, prop) {
     if (_.isString(value) && value.substr(0, 1) === '[' && value.substr(-1) === ']') {
       try {
         buffer = JSON.parse(value)
-        ressource[prop] = tools.integerify(buffer) // c'était du json valide
+        ressource[prop] = integerify(buffer) // c'était du json valide
       } catch (e) {
         rTools.addError(ressource, 'Le champ ' + label + ' vaut ' + value + " qui n'est pas une liste")
       }
@@ -151,7 +152,7 @@ function normalizeArrays (ressource) {
     if (typeVar === 'Array' && !_.isArray(ressource[key])) {
       if (_.isString(ressource[key])) {
         // on voulait un array et on a une string, on découpe
-        ressource[key] = sTools.splitAndTrim(ressource[key])
+        ressource[key] = sjt.splitAndTrim(ressource[key])
       } else {
         if (typeof ressource[key] !== 'undefined') {
           log.error(new Error('la propriété ' + key + ' de la ressource ' + ressource.oid +
@@ -250,9 +251,9 @@ module.exports = function (EntityRessource) {
       // propriétés obligatoires
       if (strict && config.required[prop]) {
         // un checkbox false est [false]
-        if (!value || sTools.isArrayEmpty(value)) {
+        if (!value || sjt.isArrayEmpty(value)) {
           rTools.addError(ressource, 'Le champ ' + label + ' est obligatoire ')
-          log.errorData(ressource.oid + ' a une valeur requise manquante : ' + prop + ' => ' + tools.stringify(value))
+          log.errorData(ressource.oid + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(value))
         }
       }
 
@@ -267,7 +268,7 @@ module.exports = function (EntityRessource) {
           if (value < 0) rTools.addError(ressource, 'Le champ ' + label + ' ne contient pas un entier positif')
         } else if (typeVar === 'Array') {
           // c'est déjà un array, on passe les strings d'entiers en entiers
-          ressource[prop] = tools.integerify(value)
+          ressource[prop] = integerify(value)
         }
       }
     }) // fin each

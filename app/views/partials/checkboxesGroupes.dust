@@ -1,7 +1,7 @@
 {! pour les groupes c'est particulier, on veut fusionner deux séries de choices !}
 <div class="control-group  {?o.warnings}warning{/o.warnings}{#o.className} {.}{/o.className}">
   {#o.warnings}<div class="help-block">{.}</div>{/o.warnings}
-  <div class="input-group {widget}"{?width} width="{width}"{/width}>
+  <div class="input-group {widget}"{?width} style="width: {width}"{/width}>
     <table><thead><tr>
       <th>Nom du groupe</th>
       <th>Publié dans ce groupe</th>

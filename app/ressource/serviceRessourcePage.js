@@ -31,9 +31,9 @@
 
 'use strict'
 
-var tools = require('../tools')
-// var sTools = require('sesajstools')
 var _ = require('lodash')
+var sjt = require('sesajstools')
+var sjtObj = require('sesajstools/utils/object')
 var flow = require('an-flow')
 var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
@@ -65,21 +65,21 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {errorCallback} next
    */
   function addGroupes (context, formData, groupes, groupesAuteurs, next) {
+    log.debug('addGroupes avec', {groupes: groupes, groupeAuteurs: groupesAuteurs}, 'form', {max: 2000})
     // on ajoute déjà les groupes de celui qui édite
     var myGroupes = $accessControl.getCurrentUserGroupes(context)
-    var choices = myGroupes.map(function (nom, i) {
+    var choices = myGroupes.map(function (nom) {
       return {
-        name: 'groupes[' + i + ']',
         label: nom,
         value: nom
       }
     })
-    // init à l'index suivant
-    var i = myGroupes.length
+    var allGroupes = groupes
+    sjtObj.merge(allGroupes, groupesAuteurs)
     // faut cocher ce qui doit l'être et ajouter éventuellement les groupes déjà présents
     // mais dont on est pas membre (donc publication non modifiable)
     // on boucle sur les groupes voulus
-    flow(groupes).seqEach(function (groupeNom) {
+    flow(allGroupes).seqEach(function (groupeNom) {
       var suivant = this
       $groupeRepository.load(groupeNom, function (error, groupe) {
         if (error) {
@@ -87,23 +87,22 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           formData.errors.push(error.toString())
         } else if (groupe) {
           var myIndex = myGroupes.indexOf(groupe.nom)
-          var isGroupeAuteur = (groupesAuteurs.indexOf(groupe.nom) !== -1)
-          if (myIndex !== -1) {
-            // on est membre, on le coche
-            choices[myIndex].selected = true
-            // idem pour groupesAuteurs
-            choices[myIndex].gaSelected = isGroupeAuteur
-          } else {
+          var isInGroupe = (sjt.isInArray(groupes, groupe.nom))
+          var isInGroupeAuteur = (sjt.isInArray(groupesAuteurs, groupe.nom))
+          if (myIndex === -1) {
             // groupe existant sur cette ressource mais on en est pas membre (donc readonly)
             choices.push({
               value: groupeNom,
               label: groupe.nom,
               isOpen: groupe.open,
-              selected: true,
               readonly: true,
-              gaSelected: isGroupeAuteur
+              selected: isInGroupe,
+              gaSelected: isInGroupeAuteur
             })
-            i++
+          } else {
+            // on est membre, c'est modifiable
+            choices[ myIndex ].selected = isInGroupe
+            choices[ myIndex ].gaSelected = isInGroupeAuteur
           }
         } else {
           formData.errors.push('Le groupe ' + groupeNom + " n'existe pas")
@@ -158,7 +157,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // }
       var i = 0
       flow(values).seqEach(function (value) {
-        log.debug('entrée seq addPersonnes, appel personne.load ' + value)
         var suivant = this
         $personneRepository.load(value, function (error, personne) {
           // log.debug('formData dans cb load personne ' + value, formData, 'form', {max: 5000})
@@ -181,7 +179,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           suivant()
         })
       }).seq(function () {
-        log.debug('addPersonnes fin seq ' + key)
         formData[key].new = {
           name: key + 'Add',
           id: key + 'Add',
@@ -213,7 +210,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     data.contentBloc.base = appConfig.application.baseUrl
     if (ressource) {
       // une string pour que dust le mette dans le source
-      data.contentBloc.ressource = tools.stringify(ressource)
+      data.contentBloc.ressource = sjt.stringify(ressource)
     }
   }
 
@@ -383,7 +380,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       } else {
         log.debug('av parSeq', ressource.contributeurs)
         var fluxContributeurs = flow(ressource.contributeurs)
-        fluxContributeurs.seqEach(function (contributeurId, index) {
+        fluxContributeurs.seqEach(function (contributeurId) {
           var nextSeq = this
           $personneRepository.load(contributeurId, function (error, personne) {
             if (error) log.error(error)
@@ -419,7 +416,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Ressource} ressource
    */
   function getLabels (ressource) {
-    var labels = tools.clone(config.labels)
+    var labels = sjtObj.clone(config.labels)
     // avec pour les arbres la propriété parametres remplacée par enfants
     if (ressource && ressource.type === 'arbre') {
       delete labels.parametres
@@ -472,12 +469,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       ressource = EntityRessource.create(ressource)
       if (token) ressource.token = token
     }
-    // log.debug('ressource traitée par sendFormData', ressource)
 
     // on boucle sur les propriétés déclarées dans config pour récupérer les labels
     var labels = getLabels(ressource)
-    log.debug('labels de la ressource ' + ressource.oid, labels)
-    log.debug('type ' + ressource.type)
     // faut un array pour seq
     var labelsArray = []
     _.each(labels, function (label, key) {
@@ -517,8 +511,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           addGroupes(context, formData, value, ressource.groupesAuteurs, labelSuivant)
         } else if (key === 'groupesAuteurs') {
           // rien, déjà traité avec les groupes
-          log.debug('groupes en édition', formData.groupes)
-          log.debug('groupes en édition', formData.groupesAuteurs)
+          log.debug('groupes dans getFormViewData', formData.groupes, 'form', {max: 1000})
           labelSuivant()
         } else if (key === 'auteurs' || key === 'contributeurs') {
           addPersonnes(context, formData, key, value, labelSuivant)
@@ -550,7 +543,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         labelSuivant()
       }
     }).seq(function () {
-      log.debug('après labels type', ressource.type)
       // on a passé tous les labels, faut ajouter nos cas particulier
       formData.version.readonly = true
 
@@ -659,7 +651,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else if (ressource) {
       // on boucle sur les propriétés que l'on veut afficher
       var labels = getLabels(ressource)
-      log.debug('labels de ' + ressource.oid, labels)
       _.each(labels, function (label, key) {
         var value = ressource[key]
         viewData[key] = {
@@ -669,7 +660,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         if (config.typesVar[key] === 'Array') {
           // cas particulier de relations qui est un tableau de tableaux que l'on remplace par un objet
           if (key === 'relations' && value.length) {
-            if (view === 'describe') {
+            if (value.length && view === 'describe') {
               viewData.relations.value = []
               value.forEach(function (relation) {
                 viewData.relations.value.push({
@@ -680,6 +671,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
                 })
               })
             } // sinon on l'ajoute pas, seul describe s'en sert
+          } else if (key === 'groupesAuteurs') {
+            if (value.length && view === 'describe') {
+              if (!viewData.auteurs || !viewData.auteurs.value) {
+                log.error(new Error('Pas de champ auteurs'))
+              } else {
+                _.each(value, function (groupeNom) {
+                  viewData.auteurs.value.push({nom: 'Tous les membres du groupe ' + groupeNom})
+                })
+              }
+            }
           } else if (config.listes[key]) {
             // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
             buffer = []
@@ -818,8 +819,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           }
         }
         // éventuels overrides
-        if (options) tools.merge(data, options)
+        if (options) sjtObj.merge(data, options)
       }
+      log.debug('prepareAndSend pour la vue ' + view + ' va renvoyer ', data, 'dust', {max: 1000})
       context.html(data)
     } // termine
 
@@ -876,14 +878,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     if (context.layout === 'page' && ressource) context.ressource = ressource
     // les datas pour le form
     getFormViewData(context, error, ressource, function (formData) {
-      tools.merge(data.contentBloc, formData)
+      sjtObj.merge(data.contentBloc, formData)
       // le titre
       data.$metas.title = 'Modifier la ressource ' + ressource.titre
       // et d'éventuels overrides
-      if (options) tools.merge(data, options)
+      if (options) sjtObj.merge(data, options)
       // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source)
       addJsVars(data, ressource)
-      // faut aussi ajouter ça pour les vues dust (data.contentBloc.type existe déjà mais c'est un select)
+      // faut aussi ajouter ça pour les vues dust (data.contentBloc.type existe déjà
+      // mais sous la forme de data pour un select dust)
       data.contentBloc.editeur = ressource.type
       // avant d'envoyer
       // log.debug('on va envoyer au form ', data, 'form', {max:2000, indent:2})
@@ -908,7 +911,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     fakeRessource.search = true
     // log.debug("ressource d'après get', fakeRessource)
     getFormViewData(context, null, fakeRessource, function (formData) {
-      tools.complete(data.contentBloc, formData)
+      sjtObj.complete(data.contentBloc, formData)
       log.debug('formSearch démarre avec', data.contentBloc)
       // on vire ou modifie ce qui nous intéresse pour la recherche
       var fd = data.contentBloc // raccourci d'écriture (form data)

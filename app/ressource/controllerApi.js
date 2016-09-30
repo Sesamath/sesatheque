@@ -41,7 +41,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   var _ = require('lodash')
   var request = require('request')
   var flow = require('an-flow')
-  var tools = require('../tools')
+  var sjt = require('sesajstools')
+  var sjtObj = require('sesajstools/utils/object')
   var config = require('../config')
   var configRessource = require('./config')
   var Alias = require('../constructors/Alias')
@@ -192,15 +193,15 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   function grabListe (context, visibility) {
     var args
     if (context.get.json) {
-      args = tools.parse(context.get.json)
+      args = sjt.parse(context.get.json)
     } else {
       args = context.get
       // en get on a des string, faut parser ce qui devrait être un objet
       if (args.filters) {
-        args.filters = tools.parse(args.filters)
+        args.filters = sjt.parse(args.filters)
       }
     }
-    tools.merge(args, context.post)
+    sjtObj.merge(args, context.post)
     log.debug('grabListe ' + visibility, args)
     $ressourceRepository.getListe(visibility, args, function (error, ressources) {
       sendListe(context, error, ressources)
@@ -293,7 +294,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       }).seq(function (ressourceNew) {
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
-        if (ressourceOriginale) tools.update(ressourceOriginale, ressourceNew)
+        if (ressourceOriginale) sjtObj.update(ressourceOriginale, ressourceNew)
         else ressourceOriginale = ressourceNew
         writeAndOut(context, ressourceOriginale)
       }).catch(function (error) {
@@ -689,9 +690,10 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               else $json.sendOk(context, {random: +new Date()})
             })
           } else {
-            error = new Error('réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url)
+            var msg = 'réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url
+            error = new Error(msg)
             log.error(error)
-            log.debug(error.message, body)
+            log.debug(msg, body)
             $json.send(context, error)
           }
         })
@@ -834,8 +836,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           if (onlyChildren) {
             if (ressource.type === 'arbre') {
               jstData = $ressourceConverter.getJstreeChildren(ressource)
-              log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
-              log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
+              // log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
+              // log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
               sendJsonJstreeArray(context, null, jstData)
             } else {
               sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")

@@ -37,7 +37,7 @@
  */
 
 'use strict'
-/*global describe,it, before */
+/* global describe,it, before */
 
 var assert = require('assert')
 /**
@@ -47,14 +47,6 @@ var assert = require('assert')
 var Zombie = require('zombie')
 
 var config = require('../../app/config')
-var urlBibli = 'http://'
-if (process.argv.indexOf('--prod') > -1) {
-  urlBibli += 'bibliotheque.sesamath.net'
-} else if (process.argv.indexOf('--dev') > -1) {
-  urlBibli += 'bibliotheque.devsesamath.net'
-} else {
-  urlBibli += ':'
-}
 var host = config.$server && config.$server.hostname || 'localhost'
 var port = config.$server && config.$server.port || '3000'
 var baseUrl = 'http://' + host + ':' + port

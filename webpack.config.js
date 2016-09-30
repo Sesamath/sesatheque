@@ -55,7 +55,7 @@ var conf = {
   /* externals: {
     stePage: 'page',
     steDisplay: 'display'
-  },*/
+  }, */
   module: {
     loaders: [
       {

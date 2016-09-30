@@ -31,7 +31,7 @@
 
 'use strict'
 
-/*global describe,it*/
+/* global describe,it */
 
 var assert = require('assert')
 var CounterMulti = require('../../app/tools/CounterMulti')

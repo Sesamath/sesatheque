@@ -32,7 +32,7 @@
 
 var flow = require('an-flow')
 var _ = require('lodash')
-var tools = require('sesajstools')
+var sjt = require('sesajstools')
 var rTools = require('../tools/ressource')
 
 module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
@@ -176,7 +176,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     ressourceNew.groupesAuteurs = []
     flow().seq(function () {
       // on boucle sur les groupes à ajouter
-      flow(tools.splitAndTrim(groupesSup, /[,;]+/)).seqEach(function (groupeNom) {
+      flow(sjt.splitAndTrim(groupesSup, /[,;]+/)).seqEach(function (groupeNom) {
         log.debug('ajout du nouveau groupe ' + groupeNom)
         checkGroupe(context, ressourceNew, groupeNom, {shoulBeNew: true}, this)
       }).done(this)
@@ -210,6 +210,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     // log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
     // log.debug('les nouveaux auteurs (parmi les anciens)', ressourceNew.auteurs)
     // log.debug('et les auteurs à ajouter', ressourceNew.auteursAdd)
+    var currentUserOid = $accessControl.getCurrentUserOid(context)
     // les cas où on a rien à faire
     if (
         ressourceOriginale &&
@@ -227,7 +228,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       var oids = []
       var auteurs = ressourceNew.auteurs.filter(function (id) {
         id = Number(id)
-        if (tools.isInArray(oids, id)) return false
+        if (sjt.isInArray(oids, id)) return false
         oids.push(id)
         return true
       })
@@ -239,7 +240,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         delete ressourceNew.auteursAdd
         tmp.forEach(function (id) {
           id = Number(id) // vire d'éventuels espaces
-          if (id && !tools.isInArray(auteurs, id)) {
+          if (id && !sjt.isInArray(auteurs, id)) {
             auteurs.push(id)
           }
         })
@@ -248,7 +249,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       oids = auteurs
       var contributeurs = ressourceNew.contributeurs.filter(function (id) {
         id = Number(id)
-        if (tools.isInArray(oids, id)) return false
+        if (sjt.isInArray(oids, id)) return false
         oids.push(id)
         return true
       })
@@ -258,10 +259,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         delete ressourceNew.contributeursAdd
         tmp.forEach(function (id) {
           id = Number(id)
-          if (id && !tools.isInArray(contributeurs, id) && !tools.isInArray(auteurs, id)) contributeurs.push(id)
+          if (id && !sjt.isInArray(contributeurs, id) && !sjt.isInArray(auteurs, id)) contributeurs.push(id)
         })
       }
-      var currentUserOid = $accessControl.getCurrentUserOid(context)
       log('auteurs', auteurs)
       log('contrib', contributeurs)
 
@@ -278,7 +278,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
             if (error) {
               rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
-              log('ajout ' +personne.nom)
+              log('ajout ' + personne.nom)
               ressourceNew.auteurs.push(personne.oid)
             } else {
               rTools.addWarning(ressourceNew, 'L’auteur d’identifiant ' + oid + ' n’existe pas')

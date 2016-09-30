@@ -61,15 +61,6 @@ var urls = {
  var htmlparser = require('htmlparser')
  */
 var elementtree = require('elementtree')
-
-// url bibliotheque d'après conf de l'appli
-var serverConf = require('../_private/config')
-var urlApiBibli = 'http://'
-urlApiBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
-urlApiBibli += ':'
-urlApiBibli += serverConf.$server && serverConf.$server.port || '3000'
-urlApiBibli += '/api'
-
 var ressConf = require('../app/ressource/config')
 var arbreCateg = ressConf.constantes.categories.liste
 

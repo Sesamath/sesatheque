@@ -23,8 +23,6 @@
           {?maxlength}maxlength="{maxlength}"{/maxlength}
           {?cols}cols="{cols}"{/cols}
           {?rows}rows="{rows}"{/rows}
-          {?width}width="{width}"{/width}
-          {?height}height="{height}"{/height}
           {?o.label}placeholder="{o.label}"{/o.label}
           {?o.readonly}readonly="readonly"{:else}{?readonly}readonly="readonly"{/readonly}{/o.readonly}
     >{o.value|s}</textarea>

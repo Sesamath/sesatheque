@@ -28,12 +28,13 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-/*global log*/
+/* global log */
 'use strict'
 
 var _ = require('lodash')
 var tools = require('../tools')
-var stools = require('sesajstools')
+var sjt = require('sesajstools')
+var sjtObj = require('sesajstools/utils/object')
 var flow = require('an-flow')
 
 /**
@@ -232,7 +233,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (groupe) {
-      tools.updateIfExists(groupe, newGroupe)
+      sjtObj.updateIfExists(groupe, newGroupe)
       $groupeRepository.save(groupe, this)
     }).seq(function () {
       $flashMessages.add(context, 'groupe sauvegardé')
@@ -357,9 +358,12 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     }).seq(function (grp) {
       groupe = grp
       var msg = 'Le groupe ' + nom + " n'existe pas ou n'est pas public"
-      if (!grp) this(msg)
-      else if (grp && (grp.public || isMine(context, nom))) this()
-      else this(msg)
+      if (grp) {
+        if (grp.public || isMine(context, nom)) this()
+        else this(msg)
+      } else {
+        this(msg)
+      }
     }).seq(function () {
       var $ressourceRepository = lassi.service('$ressourceRepository')
       $ressourceRepository.getListe('groupe/' + nom, {}, this)
@@ -466,7 +470,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
               $view: 'js',
               // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
               jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-              context.get.closerId + '", groupe:' + JSON.stringify(groupeBdd) + '}, "*")'
+              context.get.closerId + '", groupe:' + sjt.stringify(groupeBdd) + '}, "*")'
             }
           })
         } else {
@@ -529,7 +533,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           { name: 'public', value: groupeBdd.public, label: 'Visible de tous' },
           { name: 'description', label: 'Description', widget: 'textarea', value: groupeBdd.description },
           {
-            name: 'newGestionnaires', label: 'Ajouter des gestionnaires',
+            name: 'newGestionnaires',
+            label: 'Ajouter des gestionnaires',
             labelInfo: "L'ajout est irrévocable. Entrer un ou des identifiants séparés par des espaces, la confirmation sera demandée sur la page suivante avec les noms affichés"
           } // jshint:ignore line
         ]
@@ -674,8 +679,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   controller.get('perso', function (context) {
     var blocList = []
     flow().seq(function () {
-      if (!$accessControl.isAuthenticated(context)) this('Il faut être authentifié pour voir ses groupes')
-      else this()
+      if ($accessControl.isAuthenticated(context)) this()
+      else this('Il faut être authentifié pour voir ses groupes')
     }).seq(function () {
       $accessControl.refreshCurrentUser(context, this)
     }).seq(function () {
@@ -876,7 +881,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           if (grp && h.isManaged(context, grp)) this(null, grp)
           else this('Le groupe ' + nom + " n'existe pas ou vous n'en êtes pas gestionnaire")
         }).seq(function (grp) {
-          var token = stools.getToken()
+          var token = sjt.getToken()
           context.session.delGroup = { groupe: grp, token: token }
           var link = '/groupe/supprimer/' + encodeURIComponent(nom) + '?token=' + token
           context.html({

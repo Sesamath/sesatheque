@@ -35,9 +35,7 @@ var _ = require('lodash')
 var flow = require('an-flow')
 var elementtree = require('elementtree')
 var request = require('request')
-// var util = require('util')
 var uuid = require('an-uuid')
-var tools = require('sesajstools')
 
 var config = require('./config')
 var appConfig = require('../config')
@@ -147,7 +145,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           child.description = ressource.description
         }
       } else {
-        log.error(new Error('majChild appelée avec des paramètres incohérents sur la ressource ' +ressource.oid), child)
+        log.error(new Error('majChild appelée avec des paramètres incohérents sur la ressource ' + ressource.oid), child)
       }
       return modif
     }
@@ -209,15 +207,15 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       var needIncrement = !!ressource.versionNeedIncrement
       // on regarde si nos champs qui déclenchent un changement de version on changé
       if (!needIncrement && ressourceBdd.oid) {
-        _.forEach(config.versionTriggers, function (prop) {
+        config.versionTriggers.forEach(function (prop) {
           // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
           // on utilise https://lodash.com/docs#isEqual
           if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
             // debug
             if (!isProd) {
               log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
-                '\navant : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : tools.stringify(ressourceBdd[prop]) +
-                '\naprès : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : tools.stringify(ressource[prop]))
+                '\navant : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressourceBdd[prop]) +
+                '\naprès : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressource[prop]))
             }
             needIncrement = true
             return false // pas la peine de continuer le forEach, cf https://lodash.com/docs#forEach
@@ -661,7 +659,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
   /**
    * Met en cache la ressource et le user pour modification ultérieure
-   * @param oid
+   * @param {number} oid
+   * @param {function} next
    */
   $ressourceRepository.saveDeferred = function (oid, next) {
     var token = uuid()
