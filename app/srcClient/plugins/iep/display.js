@@ -55,7 +55,7 @@ module.exports = function display (ressource, options, next) {
     // log('on va afficher le xml : ' +xml)
     // faut mettre du https partout si on est en https
     if (window.location.protocol === 'https:') {
-      xml = xml.replace('http://', 'https://')
+      xml = xml.replace(/http:/g, 'https:')
     }
     // On réinitialise le conteneur
     dom.empty(container)
@@ -66,14 +66,18 @@ module.exports = function display (ressource, options, next) {
     // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
     var ns = 'https://www.w3.org/2000/svg'
     var svg = document.createElementNS(ns, 'svg')
-    // en mettant ns à la place de null ça marche pas mieux
-    svg.setAttributeNS(null, 'width', width + 'px')
-    svg.setAttributeNS(null, 'height', height + 'px')
-    // avec ça non plus
-    // svg.setAttribute('width', width + 'px')
-    // svg.setAttribute('height', height + 'px')
-    // utile ce truc ?
+    // rien qui marche parmi tout ça pour fixer la taille
+    // svg.setAttributeNS(ns, 'width', width + 'px')
+    // svg.setAttributeNS(ns, 'height', height + 'px')
+    // svg.setAttributeNS(null, 'width', width + 'px')
+    // svg.setAttributeNS(null, 'height', height + 'px')
+    svg.setAttribute('width', width)
+    svg.setAttribute('height', height)
     // svg.setAttributeNS(ns, 'style', 'display: block')
+    dom.setStyles(svg, {height: height + 'px', width: width + 'px', display: 'block'})
+    container.setAttribute('width', width + 'px')
+    container.setAttribute('height', height + 'px')
+    dom.setStyles(container, {height: height + 'px', width: width + 'px'})
     container.appendChild(svg)
     if (window.iep.iepApp) {
       var app = new window.iep.iepApp() // eslint-disable-line new-cap
@@ -107,6 +111,7 @@ module.exports = function display (ressource, options, next) {
     }
     var xml = ressource.parametres.xml
     var url = ressource.parametres.url
+    log(window.location.protocol + ', on veut charger ' + url)
     var isExternal = url && !xml
     page.loadAsync(['mathjax', 'https://iep.sesamath.net/iepjsmin.js'], function () {
       /* global MathJax */
@@ -125,6 +130,7 @@ module.exports = function display (ressource, options, next) {
           var options = {}
           if (url.indexOf('.php?') > 0) options.withCredentials = true
           if (window.location.protocol === 'https:' && url.substr(0, 5) === 'http:') url = url.replace('http://', 'https://')
+          log(window.location.protocol + ', on charge ' + url)
           xhr.get(url, options, function (error, xml) {
             if (error) {
               log.error(error)
