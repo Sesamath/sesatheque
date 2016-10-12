@@ -53,6 +53,10 @@ module.exports = function display (ressource, options, next) {
    */
   function affiche (xml) {
     // log('on va afficher le xml : ' +xml)
+    // faut mettre du https partout si on est en https
+    if (window.location.protocol === 'https:') {
+      xml = xml.replace('http://', 'https://')
+    }
     // On réinitialise le conteneur
     dom.empty(container)
     var error
@@ -120,6 +124,7 @@ module.exports = function display (ressource, options, next) {
           var xhr = require('sesajstools/http/xhr')
           var options = {}
           if (url.indexOf('.php?') > 0) options.withCredentials = true
+          if (window.location.protocol === 'https:' && url.substr(0, 5) === 'http:') url = url.replace('http://', 'https://')
           xhr.get(url, options, function (error, xml) {
             if (error) {
               log.error(error)
