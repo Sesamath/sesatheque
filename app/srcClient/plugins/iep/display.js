@@ -64,20 +64,13 @@ module.exports = function display (ressource, options, next) {
     var height = ressource.parametres.height || width * 0.75 || 600
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
     // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
-    var ns = 'https://www.w3.org/2000/svg'
+    // et surtout pas mettre de https ici !
+    var ns = 'http://www.w3.org/2000/svg'
     var svg = document.createElementNS(ns, 'svg')
-    // rien qui marche parmi tout ça pour fixer la taille
-    // svg.setAttributeNS(ns, 'width', width + 'px')
-    // svg.setAttributeNS(ns, 'height', height + 'px')
-    // svg.setAttributeNS(null, 'width', width + 'px')
-    // svg.setAttributeNS(null, 'height', height + 'px')
     svg.setAttribute('width', width)
     svg.setAttribute('height', height)
-    // svg.setAttributeNS(ns, 'style', 'display: block')
-    dom.setStyles(svg, {height: height + 'px', width: width + 'px', display: 'block'})
-    container.setAttribute('width', width + 'px')
-    container.setAttribute('height', height + 'px')
-    dom.setStyles(container, {height: height + 'px', width: width + 'px'})
+    dom.setStyles(svg, {display: 'block'})
+    // dom.setStyles(container, {height: height + 'px', width: width + 'px'})
     container.appendChild(svg)
     if (window.iep.iepApp) {
       var app = new window.iep.iepApp() // eslint-disable-line new-cap
