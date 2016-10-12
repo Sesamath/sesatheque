@@ -31,12 +31,15 @@
 'use strict'
 
 /**
- * Définition d'un alias d'une ressource, à priori d'une autre sesatheque
- * On prend en argument du constructeur une Ressource ou un Alias
- * Si on passe au constructeur un Alias avec oid mais sans ref il sera considéré comme une ref et va se référencer lui-même,
- * mais probablement sur une autre sesathèque, ce qui donnerait du grand n'importe quoi => le store de l'entity va planter
- * Ce constructeur est utilisé pour passer les ressources au format ref pour sesatheque-client,
- * un item sera traité comme un alias s'il a à la fois oid et ref (et base, mais oid & ref suffisent, la base pouvant être ajoutée aux ressources)
+ * Définition d'un alias d'une ressource, qui sert à référencer sur une sésathèque une ressource
+ * d'une autre sesatheque.
+ * Il a les quasiment les même propriétés que Ref, avec
+ * - oid en plus (c'est une entité, contrairement à Ref)
+ * - jamais de propriétés enfants (si c'est un arbre il faudra aller chercher l'original pour avoir les enfants)
+ * - baseName obligatoire
+ * Le constructeur prend une Ressource ou un Alias
+ *
+ * Un item sera traité comme un alias s'il a à la fois oid et ref (et base, mais oid & ref suffisent, la base pouvant être ajoutée aux ressources)
  * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Alias
  * @constructor
  */

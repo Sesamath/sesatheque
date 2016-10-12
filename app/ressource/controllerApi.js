@@ -386,8 +386,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         // on regarde le format reçu en get ou post
         var format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
-          if (format === 'compact') liste.push($ressourceConverter.toCompactFormat(ressource))
-          else if (format === 'full') liste.push(ressource)
+          if (format === 'full') liste.push(ressource)
           else liste.push($ressourceConverter.toRef(ressource))
         })
       }
@@ -396,7 +395,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   }
 
   /**
-   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (alias ou compact ou normalized)
+   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (alias ou normalized)
    * @private
    * @param {Context} context
    * @param error
@@ -414,8 +413,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         ressource.$droits = 'R'
         if ($accessControl.hasPermission('update', context, ressource)) ressource.$droits += 'W'
         if ($accessControl.hasPermission('delete', context, ressource)) ressource.$droits += 'D'
-      } else if (format === 'compact') {
-        ressource = $ressourceConverter.toCompactFormat(ressource)
       } else {
         // full, on ajoute la base
         if (!ressource.base) ressource.base = config.application.baseUrl
@@ -429,7 +426,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
 
   /**
    * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels
-   * ou le ?format= demandé (alias ou compact ou normalized, le reste donnant la ressource complète)
+   * ou le ?format= demandé (alias ou normalized, le reste donnant la ressource complète)
    * @private
    * @param {Context} context
    * @param ressource
@@ -602,7 +599,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
           if (configRessource.editable[ressource.type]) {
             // on vire ce que l'on ne veut plus
-            ['oid', 'idOrigine', 'version', 'archiveOid', 'displayUri', 'describeUri', 'dataUri'].forEach(function (prop) {
+            ['oid', 'idOrigine', 'version', 'archiveOid'].forEach(function (prop) {
               if (ressource.hasOwnProperty(prop)) delete ressource[prop]
             })
             // on impose qq propriétés
@@ -951,7 +948,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('liste/public', optionsOk)
 
   /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|compact|normalized)
+   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|normalized)
    * Retourne {@link reponseListe}
    * @route GET /api/public/:oid
    * @param {Integer} :oid
@@ -968,7 +965,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
 
   /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|compact|normalized)
+   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|normalized)
    * Retourne {@link reponseRessource}
    * @route GET /api/public/:origine/:idOrigine
    * @param {string} :origine
@@ -1022,7 +1019,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   controller.options('ressource', optionsOk)
 
   /**
-   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|compact|normalized)
+   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
    * Au format {@link reponseRessource} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
    * @Route GET /api/ressource/:oid
    * @param {Integer} oid
@@ -1035,7 +1032,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
 
   /**
-   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|compact|normalized)
+   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
    * Au format {@link reponseRessource} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
    * @route GET /api/ressource/:origine/:idOrigine
    * @param {string} :origine
@@ -1186,7 +1183,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
  * @property {Integer}            [start]   offset
  * @property {Integer}            [nb]      Nombre de résultats voulus (Cf settings.ressource.limites.listeNbDefault, à priori 25),
  *                                          sera ramené à settings.ressource.limites.maxSql si supérieur (à priori 500)
- * @property {string}             [format]  compact|full par défaut on remonte les ressource au format {@link Alias}
+ * @property {string}             [format]  alias|full par défaut on remonte les ressource au format {@link Alias}
  */
 
 /**

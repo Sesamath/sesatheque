@@ -38,13 +38,14 @@
  */
 function Ref (initObj) {
   if (typeof initObj !== 'object') initObj = {}
+  var ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined
+  if (!ref && initObj.origine && initObj.idOrigine) ref = initObj.origine + '/' + initObj.idOrigine
   /**
    * L'oid de la ressource que l'on référence
    * @property ref
    * @type {Integer|string}
    */
-  this.ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined
-  if (!this.ref && initObj.origine && initObj.idOrigine) this.ref = initObj.origine + '/' + initObj.idOrigine
+  if (ref) this.ref = ref
   /**
    * Titre
    * @type {string}
@@ -64,44 +65,27 @@ function Ref (initObj) {
    * Le type qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {string}
    */
-  this.type = (initObj.type && typeof initObj.type === 'string') ? initObj.type : 'arbre'
+  if (initObj.type) this.type = initObj.type
   /**
    * Un ou des id de catégorie(s) éventuel (pour un picto)
    * @type {Array}
    */
-  this.categories = Array.isArray(initObj.categories) ? initObj.categories : []
+  if (Array.isArray(initObj.categories)) this.categories = initObj.categories
   /**
    * True si public (sinon il faut être authentifié pour lire la ressource)
    * @type {boolean}
    */
   this.public = (initObj.public || initObj.restriction === 0)
-
-  var prefix = (initObj.restriction === 0) ? 'public' : 'ressource'
   /**
-   * Uri d'affichage (facultatif), commence par /public/ ou /ressource/
+   * Éventuelle clé de lecture, pour que des élèves puissent lire
+   * la ressource non publique si leur prof la leur affecte
+   */
+  if (!this.public && initObj.cle) this.cle = initObj.cle
+  /**
+   * Le nom de la sesathèque concernée
    * @type {string}
    */
-  this.displayUri = initObj.displayUri || '/' + prefix + '/voir/' + this.ref
-  /**
-   * Url absolue d'affichage (facultatif)
-   * @type {string}
-   */
-  this.displayUrl = initObj.displayUrl
-  /**
-   * Uri des data en json (facultatif), commence par /public/ ou /ressource/
-   * @type {string}
-   */
-  this.dataUri = initObj.dataUri || '/api/' + prefix + '/' + this.ref
-  /**
-   * Url absolue des data en json (facultatif)
-   * @type {string}
-   */
-  this.dataUrl = initObj.dataUrl
-  /**
-   * La base de la sesathèque concernée
-   * @type {string}
-   */
-  this.base = initObj.base
+  if (initObj.baseName) this.baseName = initObj.baseName
 }
 
 /**

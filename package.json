@@ -12,7 +12,7 @@
     "build": "webpack",
     "build-dev": "webpack --debug --verbose",
     "build-watch": "webpack --debug --verbose -w",
-    "deploy-dev" : "pm2 _private/pm2Deploy.json5 dev",
+    "deploy-dev": "pm2 _private/pm2Deploy.json5 dev",
     "lint": "standard --verbose | snazzy",
     "maj": "git pull && npm install && npm build && npm start",
     "startClient": "hjs-dev-server",
@@ -88,8 +88,8 @@
     "mysql": "^2.6.0",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "snazzy": "^3.0.0",
-    "standard": "^6.0.1",
+    "snazzy": "5.0.0",
+    "standard": "8.3.0",
     "through2": "^0.4.2",
     "uglify-js": "^2.4.24",
     "url-loader": "^0.5.7",
@@ -97,7 +97,9 @@
     "xml2js": "^0.4.4"
   },
   "eslintConfig": {
-    "extends": ["standard"],
+    "extends": [
+      "standard"
+    ],
     "globals": {
       "lassi": true,
       "log": true

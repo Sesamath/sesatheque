@@ -49,6 +49,7 @@ module.exports = function (EntityUpdate) {
     }
     this.name = initObj.name || 'sans nom'
     this.num = initObj.num || 0
+    this.date = initObj.date || new Date()
   })
 
   EntityUpdate.table = 'updates'

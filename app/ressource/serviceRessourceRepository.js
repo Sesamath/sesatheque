@@ -344,7 +344,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       // on enregistre la ressource modifiée en async
       $ressourceRepository.save(ressource)
     }
-    log('convertXmlEc2', params)
+    log.debug('convertXmlEc2', params)
   }
 
   /**

@@ -50,6 +50,7 @@ var config = require('./config')
 var appConfig = require('../config')
 // var tools = require('../tools')
 var Alias = require('../constructors/Alias')
+var Ref = require('../constructors/Ref')
 var jstreeConverter = require('../srcClient/display/jstreeConverter')
 var defaultBase = appConfig.application.baseUrl
 
@@ -174,7 +175,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
             // log('load ' + logSuffix)
             $ressourceRepository.loadByOrigin(enfant.origine, enfant.idOrigine, function (error, ressource) {
               if (error) log.error(error)
-              log("on traite l'enfant ' +enfant.titre +' et on a récupéré ", ressource)
+              log.debug('on traite l’enfant ' + enfant.titre + ' et on a récupéré ', ressource)
               updateEnfant(enfantIndex, ressource, finEach)
             })
           } else if (enfant.ref) {
@@ -242,39 +243,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
   }
 
   /**
-   * Renvoie une Ref à une ressource, c'est un Alias sans userOid, avec enfants éventuels
+   * Renvoie une Ref à une ressource, avec enfants éventuels
    * (si ce qui sort contient oid ET ref, c'était un alias)
    * @memberOf $ressourceConverter
    * @param {Ressource} ressource
-   * @return {Object} un Alias sans oid ni userOid, mais avec enfants éventuels
+   * @return {Ref} avec enfants éventuels
    */
   $ressourceConverter.toRef = function (ressource) {
-    var alias = new Alias(ressource)
-    // on vire le proprio
-    if (alias.userOid) delete alias.userOid
-    // et on ajoute d'éventuels enfants
-    if (alias.type === 'arbre' && ressource.enfants) alias.enfants = ressource.enfants
-
-    return alias
-  }
-
-  /**
-   * Renvoie la ressource au format compact (oid, origine, idOrigine, titre, type, categories, restriction, dataUri)
-   * @memberOf $ressourceConverter
-   * @param ressource
-   * @return {Object}
-   */
-  $ressourceConverter.toCompactFormat = function (ressource) {
-    return {
-      oid: ressource.oid,
-      origine: ressource.origine,
-      idOrigine: ressource.idOrigine,
-      titre: ressource.titre,
-      type: ressource.type,
-      categories: ressource.categories,
-      restriction: ressource.restriction,
-      dataUri: ressource.dataUri || $routes.getAbs('api', ressource)
-    }
+    return new Ref(ressource)
   }
 
   /**

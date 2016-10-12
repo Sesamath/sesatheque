@@ -56,7 +56,7 @@ lassi.on('startup', function () {
     function done (error) {
       if (error) {
         log.error(error)
-        applog('updates', 'Une erreur est survenue, cf le log d’erreurs', config.logs.error)
+        applog('updates', 'Une erreur est survenue dans l’update', dbVersion, ', cf le log d’erreurs', config.logs.error)
       } else {
         applog('updates', 'plus d’update à faire, base en version', dbVersion)
       }
@@ -72,7 +72,6 @@ lassi.on('startup', function () {
         currentUpdate.run(function (error) {
           if (error) return done(error)
           EntityUpdate.create({
-            date: new Date(),
             name: currentUpdate.name,
             description: currentUpdate.description,
             num: dbVersion

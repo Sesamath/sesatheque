@@ -273,9 +273,6 @@ var ressourceConfig = {
     version: 'Version',
     indexable: 'Indexable',
     archiveOid: 'Version précédente',
-    displayUri: 'Voir la ressource',
-    describeUri: 'Voir la description',
-    dataUri: 'url des données',
     // facultatifs
     enfants: 'Enfants' // utilisé seulement pour les arbres (à la place de parametres)
   },
@@ -311,9 +308,6 @@ var ressourceConfig = {
     version: 'Number',
     indexable: 'Boolean',
     archiveOid: 'Number',
-    displayUri: 'String',
-    describeUri: 'String',
-    dataUri: 'String',
     // facultatifs
     enfants: 'Object' // en fait un Array, mais pas un array d'id, et comme un Array est aussi un Object...
   },

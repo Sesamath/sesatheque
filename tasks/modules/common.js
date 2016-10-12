@@ -330,20 +330,14 @@ common.flushPendingRelations = function (next) {
       if (opt.logRelations) log('on va chercher ' + idComb)
       common.getRessource(idComb, function (ressource) {
         // error loggée dans getRessource, on traite pas ici
-        var subFlow = require('an-flow')
         if (ressource) {
-          // on gère notre accumulateur, car parMap ou seqMap ne passent pas l'ensemble des résultats au seq suivant
-          // (qui doit lire this.stack pour tout récupérer), et ça rend l'ensemble plus lisible
-          var newRelations = []
           if (opt.logRelations) log(idComb + ' est ' + ressource.oid + ' et va lui ajouter les relations ', relations)
-
+          // accumulateur hors flow
+          var newRelations = []
           // faut récupérer les oid de toutes ses relations (dont on a que les idComb dans relations)
-          subFlow(relations).seqMap(function (relation) {
-            var thisSubFlow = this
-            // log('dans subFlow on a le 1er elt de la pile', thisSubFlow.stack[0])
-            // log('dans subFlow on a le 1er elt de la pile parente', thisFlow.stack[0])
+          flow(relations).seqEach(function (relation) {
+            var nextRelation = this
             if (opt.logRelations) log(idComb + ' et sa relation ' + relation[0] + ' => ' + relation[1])
-            // avec parMap la stack sera composée de tous les retours passé à this()
             // le 1er param change pas, c'est la nature de la relation
             var newRel = relation.slice(0, 1)
             var idCombLie = relation[1]
@@ -351,7 +345,7 @@ common.flushPendingRelations = function (next) {
               newRel[1] = oids[idCombLie]
               if (opt.logRelations) log('on connaissait ' + idCombLie + ' qui est ' + newRel[1])
               newRelations.push(newRel)
-              thisSubFlow()
+              nextRelation()
             } else if (idCombLie) {
               // faut aller chercher l'oid de cette ressource liée
               common.getRessource(idCombLie, function (ressource) {
@@ -359,11 +353,11 @@ common.flushPendingRelations = function (next) {
                   newRel[1] = ressource.oid
                   if (opt.logRelations) log(idCombLie + ' est ' + newRel[1])
                   newRelations.push(newRel)
-                  thisSubFlow()
+                  nextRelation()
                 } else {
                   addError(idComb, 'une relation pointait vers ' + idCombLie + " qui n'existe pas")
                   if (opt.logRelations) log('une relation pointait vers ' + idCombLie + " qui n'existe pas")
-                  thisSubFlow()
+                  nextRelation()
                 }
               })
             } else {

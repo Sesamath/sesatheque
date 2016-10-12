@@ -32,7 +32,13 @@
 
 var log = require('sesajstools/utils/log')
 
-var baseUrl
+var baseUrl = '/'
+/**
+ * La liste des sesatheques
+ * @private
+ * @type {Object}
+ */
+var sesatheques = {}
 
 /**
  * Retourne les datas qui nous intéressent à mettre sur le tag a
@@ -42,29 +48,26 @@ var baseUrl
  */
 function getAttr (ressource, defaultBase) {
   var attr = {}
-  var base = ressource.base || defaultBase || baseUrl
-  if (base && base.substr(-1) !== '/') base += '/'
+  var base = getBase(ressource, defaultBase)
   // ref
   var ref = ressource.id || ressource.ref || ressource.oid
   if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine
   var isPublic = (ressource.public || !ressource.restriction)
-  var displayUrl = ressource.displayUrl
-  var dataUrl = ressource.dataUrl
+  var displayUrl
+  var dataUrl
   if (ref) {
     attr['data-ref'] = ref
-    if (!displayUrl) {
-      if (isPublic) displayUrl = base + 'public/voir/' + ref
-      else if (ressource.cle) displayUrl = base + 'public/voir/cle/' + ressource.cle
-      else displayUrl = base + 'ressource/voir/' + ref
-    }
-    if (!dataUrl) {
-      if (isPublic) dataUrl = base + 'api/public/' + ref
-      else if (ressource.cle) dataUrl = base + 'api/public/cle/' + ressource.cle
-      else dataUrl = base + 'api/ressource/' + ref
-    }
+    // displayUrl
+    if (isPublic) displayUrl = base + 'public/voir/' + ref
+    else if (ressource.cle) displayUrl = base + 'public/voir/cle/' + ressource.cle
+    else displayUrl = base + 'ressource/voir/' + ref
+    // dataUrl
+    if (isPublic) dataUrl = base + 'api/public/' + ref
+    else if (ressource.cle) dataUrl = base + 'api/public/cle/' + ressource.cle
+    else dataUrl = base + 'api/ressource/' + ref
   } else if (ressource.cle) {
-    if (!displayUrl) displayUrl = base + 'public/voir/cle/' + ressource.cle
-    if (!dataUrl) dataUrl = base + 'api/public/cle/' + ressource.cle
+    displayUrl = base + 'public/voir/cle/' + ressource.cle
+    dataUrl = base + 'api/public/cle/' + ressource.cle
   }
   if (displayUrl) {
     attr.href = displayUrl
@@ -75,6 +78,28 @@ function getAttr (ressource, defaultBase) {
   if (ressource.resume) attr.alt = ressource.resume
 
   return attr
+}
+
+/**
+ * Retourne la base d'une ressource
+ * @private
+ * @param ressource
+ * @param defaultBase
+ * @returns {*}
+ */
+function getBase (ressource, defaultBase) {
+  if (!ressource) return defaultBase || baseUrl
+  var base
+  if (ressource.baseName) {
+    if (sesatheques[ressource.baseName]) {
+      base = sesatheques[ressource.baseName]
+    } else {
+      log.error('base ' + ressource.baseName + ' inconnue')
+    }
+  }
+  if (!base) base = ressource.base || defaultBase || baseUrl
+  if (base.substr(-1) !== '/') base += '/'
+  return base
 }
 
 /**
@@ -136,8 +161,7 @@ function getEnfants (nodeId, jstree) {
  * @return {Array} Le tableau des enfants
  */
 function getJstreeChildren (ressource, defaultBase) {
-  var base = ressource.base || defaultBase || baseUrl
-  if (base.substr(-1) !== '/') base += '/'
+  var base = getBase(ressource, defaultBase)
   var children = []
   if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.forEach) {
     ressource.enfants.forEach(function (enfant) {
@@ -155,14 +179,28 @@ function getJstreeChildren (ressource, defaultBase) {
 }
 
 /**
- * Affecte la base de la sésathèque pour les urls mis dans les éléments de l'arbre
+ * Affecte les bases des sésathèques pour les urls mis dans les éléments de l'arbre
  * (sinon ces urls seront absolues sur le domaine courant)
- * @param {string} url L'url de base http://domaine.tld:port de la sesatheque
+ * @param {string|object} url L'url de base http://domaine.tld:port de la sesatheque courante ou un objet {baseName:baseUrl,…}
  */
 function setBaseUrl (url) {
   if (typeof url === 'string') {
-    if (url.substr(-1) === '/') url = url.substr(0, url.length - 1)
     baseUrl = url
+    if (baseUrl.substr(-1) !== '/') baseUrl += '/'
+    sesatheques.default = baseUrl
+  } else {
+    var newSesatheques = url // pour la lisibilité
+    for (var baseName in newSesatheques) {
+      if (
+        newSesatheques.hasOwnProperty(baseName) &&
+        (newSesatheques[baseName].substr(0, 4) === 'http' ||
+          newSesatheques[baseName].substr(0, 1) === '/')
+      ) {
+        sesatheques[baseName] = newSesatheques[baseName]
+        if (sesatheques[baseName].substr(-1) !== '/') sesatheques[baseName] += '/'
+        if (baseName === 'default') baseUrl = sesatheques[baseName]
+      }
+    }
   }
 }
 
@@ -174,8 +212,7 @@ function setBaseUrl (url) {
  * @returns {Object}
  */
 function toJstree (ressource, defaultBase) {
-  var base = ressource.base || defaultBase || baseUrl
-  if (base.substr(-1) !== '/') base += '/'
+  var base = getBase(ressource, defaultBase)
   var node = getJstNode(ressource, base)
   if (ressource.type === 'arbre') {
     if (ressource.enfants && ressource.enfants.length) {
@@ -221,8 +258,6 @@ function toRef (node, jstree) {
       if (item.type === 'arbre' && node.children && node.children.length && jstree) {
         item.enfants = getEnfants(node.id, jstree)
       }
-      if (nodeSrc.a_attr['data-displayurl']) item.displayUrl = nodeSrc.a_attr['data-displayurl']
-      if (nodeSrc.a_attr['data-dataurl']) item.dataUrl = nodeSrc.a_attr['data-dataurl']
       if (nodeSrc.a_attr['data-ref']) item.ref = nodeSrc.a_attr['data-ref']
       if (nodeSrc.a_attr.alt) item.resume = nodeSrc.a_attr.alt
     }

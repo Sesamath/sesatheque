@@ -3,6 +3,13 @@
  *
  * Ça lui permettra d'être déplacé sur un autre serveur et de tourner de manière autonome
  * sans l'appli bibliothèque ni lassi
+ *
+ * il doit être appelé avec
+ *   node tasks/importMEPS
+ * ou (pour ne traiter que les MEPS xx, yy et zz)
+ *   node tasks/importMEPS --mep xx,yy,zz
+ * ou pour des aides
+ *   node tasks/importMEPS --aide xx,yy,zz
  */
 'use strict'
 
@@ -50,10 +57,10 @@ function getMepModele (mepRow) {
 
 /**
  * Renvoie le code langue à 3 char d'après le code à 2 char
- * @param mepLangueId
- * @returns {*}
+ * @param langueId
+ * @returns {string} code langue à 3 lettres, fra par défaut
  */
-function getLangue (mepLangueId) {
+function getLangue (langueId) {
   var corres = {
     'ar': 'ara',
     'br': 'bre',
@@ -66,10 +73,10 @@ function getLangue (mepLangueId) {
     'it': 'ita',
     'pt': 'por'
   }
-  if (corres[mepLangueId]) {
-    return corres[mepLangueId]
+  if (corres[langueId]) {
+    return corres[langueId]
   } else {
-    console.error(mepLangueId + " n'est pas un code connu")
+    console.error(langueId + " n'est pas un code connu")
     return 'fra'
   }
 }
@@ -87,7 +94,7 @@ function initRessourceMep (row) {
   // parametres
   parametres.nbq_defaut = row.mep_nbq_defaut // obligatoire
   parametres.mep_modele = getMepModele(row)
-  parametres.mepLangueId = row.mepLangueId || 'fr' // le swf veut le code langue à 2 lettres
+  parametres.mep_langue_id = row.mep_langue_id || 'fr' // le swf veut le code langue à 2 lettres
   parametres.swf_id = row.mep_swf_id
   if (row.mep_projet !== 'mep') parametres.projet = row.mep_projet
   if (row.mep_old) parametres.old = row.mep_old
@@ -129,7 +136,7 @@ function initRessourceMep (row) {
     parametres: parametres,
     // auteurs
     // contributeurs
-    langue: getLangue(row.mepLangueId),
+    langue: getLangue(row.mep_langue_id),
     publie: (row.mep_statut_public === 'en_public'),
     restriction: 0,
     dateCreation: tools.toDate(row.dateCreation),
@@ -247,7 +254,7 @@ function importAIDES (ids, next) {
 /**
  * MAIN
  */
-// les 3 premiers args sont node, /path/2/gulp, importMEPS
+// les 2 premiers sont node et ce fichier
 var argv = process.argv.slice(2)
 // tout par défaut
 var mepIds, aideIds, i

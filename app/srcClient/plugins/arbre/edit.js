@@ -271,20 +271,18 @@ module.exports = function edit (arbre, options) {
                     var id = window.prompt('Id de la ressource (oid ou origine/idOrigine')
                     var inst = $jstree.reference(data.reference)
                     var node = inst.get_node(data.reference)
-                    client.getRessource(id, function (error, ressource) {
+                    client.getItem(id, function (error, item) {
                       if (error) addError(error)
                       else {
-                        log('ressource récupérée', ressource)
-                        log(ressource)
-                        var tt = ressource.type
+                        log.debug('item récupéré', item)
+                        var tt = item.type
                         var attr = {
                           'data-type': tt,
-                          'data-ref': ressource.oid
+                          'data-ref': item.oid
                         }
-                        if (ressource.dataUri) attr['data-dataUri'] = ressource.dataUri
-                        if (ressource.displayUri) attr['data-displayUri'] = ressource.displayUri
+                        if (item.$displayUri) attr['data-displayUri'] = item.$displayUri
                         inst.create_node(node, {
-                          text: ressource.titre,
+                          text: item.titre,
                           icon: tt + 'JstNode',
                           a_attr: attr
                         }, 'last', function (newNode) {

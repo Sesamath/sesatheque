@@ -262,8 +262,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
           if (id && !sjt.isInArray(contributeurs, id) && !sjt.isInArray(auteurs, id)) contributeurs.push(id)
         })
       }
-      log('auteurs', auteurs)
-      log('contrib', contributeurs)
 
       // puis reset des personnes sur la nouvelle ressource
       ressourceNew.auteurs = []
@@ -278,7 +276,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
             if (error) {
               rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
-              log('ajout ' + personne.nom)
               ressourceNew.auteurs.push(personne.oid)
             } else {
               rTools.addWarning(ressourceNew, 'L’auteur d’identifiant ' + oid + ' n’existe pas')
