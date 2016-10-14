@@ -52,17 +52,29 @@ module.exports = function display (ressource, options, next) {
    * @param xml
    */
   function affiche (xml) {
-    // log('on va afficher le xml : ' + xml)
+    // log('on va afficher le xml : ' +xml)
+    // faut mettre du https partout si on est en https
+    if (window.location.protocol === 'https:') {
+      xml = xml.replace(/http:/g, 'https:')
+    }
     // On réinitialise le conteneur
     dom.empty(container)
     var error
     var width = ressource.parametres.width || container.offsetWidth || 800
     var height = ressource.parametres.height || width * 0.75 || 600
+    // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
+    // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
+    // et surtout pas mettre de https ici !
+    var ns = 'http://www.w3.org/2000/svg'
+    var svg = document.createElementNS(ns, 'svg')
+    svg.setAttribute('width', width)
+    svg.setAttribute('height', height)
+    dom.setStyles(svg, {display: 'block'})
+    // dom.setStyles(container, {height: height + 'px', width: width + 'px'})
+    container.appendChild(svg)
     if (window.iep.iepApp) {
-      var svgContainer = dom.addElement(container, 'div', {id: 'svgContainer', width: width, height: height})
       var app = new window.iep.iepApp() // eslint-disable-line new-cap
-      log('on appelle iepApp.addDoc avec le container et le xml', svgContainer, xml)
-      app.addDoc(svgContainer, xml, true)
+      app.addDoc(svg, xml)
     } else {
       error = new Error('Problème de chargement du moteur instrumenpoche (constructeur iepApp absent)')
     }
@@ -92,6 +104,7 @@ module.exports = function display (ressource, options, next) {
     }
     var xml = ressource.parametres.xml
     var url = ressource.parametres.url
+    log(window.location.protocol + ', on veut charger ' + url)
     var isExternal = url && !xml
     page.loadAsync(['mathjax', 'https://iep.sesamath.net/iepjsmin.js'], function () {
       /* global MathJax */
@@ -109,6 +122,8 @@ module.exports = function display (ressource, options, next) {
           var xhr = require('sesajstools/http/xhr')
           var options = {}
           if (url.indexOf('.php?') > 0) options.withCredentials = true
+          if (window.location.protocol === 'https:' && url.substr(0, 5) === 'http:') url = url.replace('http://', 'https://')
+          log(window.location.protocol + ', on charge ' + url)
           xhr.get(url, options, function (error, xml) {
             if (error) {
               log.error(error)
