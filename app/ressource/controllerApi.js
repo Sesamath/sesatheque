@@ -573,12 +573,12 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     }
 
     var oid = context.arguments.oid
-    var baseName = context.get.baseName
+    var baseId = context.get.baseId
     try {
-      if (!baseName) throw new Error('Il faut préciser une base pour la ressource à cloner')
+      if (!baseId) throw new Error('Il faut préciser une base pour la ressource à cloner')
       if (!oid) throw new Error('Paramètre manquant')
-      var base = config.sesatheques[baseName]
-      if (!base) throw new Error('Sésathèque ' + baseName + ' inconnue')
+      var base = config.sesatheques[baseId]
+      if (!base) throw new Error('Sésathèque ' + baseId + ' inconnue')
       // on normalise avec slash de fin
       if (base.substr(-1) !== '/') base += '/'
       if (base === config.application.baseUrl) throw new Error('La source est déjà sur cette sésathèque, clonage externe inutile')
@@ -623,7 +623,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
             })
           } else {
             // pas éditable, on en fait un alias, on regarde si on l'avait pas déjà
-            EntityAlias.match('ref').equals(ressource.oid).match('baseName').equals(baseName).grabOne(function (error, alias) {
+            EntityAlias.match('ref').equals(ressource.oid).match('baseId').equals(baseId).grabOne(function (error, alias) {
               if (error) {
                 $json.send(context, error)
               } else if (alias) {
@@ -632,7 +632,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
                 // faut le créer
                 alias = EntityAlias.create(ressource)
                 alias.userOid = userOid
-                alias.baseName = baseName
+                alias.baseId = baseId
                 alias.store(function (error, alias) {
                   if (error) $json.sendError(context, error)
                   else sendItem(alias)

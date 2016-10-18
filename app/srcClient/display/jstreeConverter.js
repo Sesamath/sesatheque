@@ -90,11 +90,11 @@ function getAttr (ressource, defaultBase) {
 function getBase (ressource, defaultBase) {
   if (!ressource) return defaultBase || baseUrl
   var base
-  if (ressource.baseName) {
-    if (sesatheques[ressource.baseName]) {
-      base = sesatheques[ressource.baseName]
+  if (ressource.baseId) {
+    if (sesatheques[ressource.baseId]) {
+      base = sesatheques[ressource.baseId]
     } else {
-      log.error('base ' + ressource.baseName + ' inconnue')
+      log.error('base ' + ressource.baseId + ' inconnue')
     }
   }
   if (!base) base = ressource.base || defaultBase || baseUrl
@@ -181,7 +181,7 @@ function getJstreeChildren (ressource, defaultBase) {
 /**
  * Affecte les bases des sésathèques pour les urls mis dans les éléments de l'arbre
  * (sinon ces urls seront absolues sur le domaine courant)
- * @param {string|object} url L'url de base http://domaine.tld:port de la sesatheque courante ou un objet {baseName:baseUrl,…}
+ * @param {string|object} url L'url de base http://domaine.tld:port de la sesatheque courante ou un objet {baseId:baseUrl,…}
  */
 function setBaseUrl (url) {
   if (typeof url === 'string') {
@@ -190,15 +190,15 @@ function setBaseUrl (url) {
     sesatheques.default = baseUrl
   } else {
     var newSesatheques = url // pour la lisibilité
-    for (var baseName in newSesatheques) {
+    for (var baseId in newSesatheques) {
       if (
-        newSesatheques.hasOwnProperty(baseName) &&
-        (newSesatheques[baseName].substr(0, 4) === 'http' ||
-          newSesatheques[baseName].substr(0, 1) === '/')
+        newSesatheques.hasOwnProperty(baseId) &&
+        (newSesatheques[baseId].substr(0, 4) === 'http' ||
+          newSesatheques[baseId].substr(0, 1) === '/')
       ) {
-        sesatheques[baseName] = newSesatheques[baseName]
-        if (sesatheques[baseName].substr(-1) !== '/') sesatheques[baseName] += '/'
-        if (baseName === 'default') baseUrl = sesatheques[baseName]
+        sesatheques[baseId] = newSesatheques[baseId]
+        if (sesatheques[baseId].substr(-1) !== '/') sesatheques[baseId] += '/'
+        if (baseId === 'default') baseUrl = sesatheques[baseId]
       }
     }
   }

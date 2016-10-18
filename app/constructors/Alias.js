@@ -36,7 +36,7 @@
  * Il a les quasiment les même propriétés que Ref, avec
  * - oid en plus (c'est une entité, contrairement à Ref)
  * - jamais de propriétés enfants (si c'est un arbre il faudra aller chercher l'original pour avoir les enfants)
- * - baseName obligatoire
+ * - baseId obligatoire
  * Le constructeur prend une Ressource ou un Alias
  *
  * Un item sera traité comme un alias s'il a à la fois oid et ref (et base, mais oid & ref suffisent, la base pouvant être ajoutée aux ressources)
@@ -45,8 +45,8 @@
  */
 function Alias (initObj) {
   if (typeof initObj !== 'object') initObj = {}
-  if (initObj.oid && initObj.ref && (initObj.baseName || initObj.base)) {
-    // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et baseName)
+  if (initObj.oid && initObj.ref && (initObj.baseId || initObj.base)) {
+    // on nous passe un alias (on accepte d'affecter l'oid que si l'on a ref et baseId)
     /**
      * oid de l'alias
      * @type {number}
@@ -117,12 +117,7 @@ function Alias (initObj) {
    * Nom de la sesatheque qui gère la référence ciblée
    * @type {string}
    */
-  if (initObj.baseName) this.baseName = initObj.baseName
-  /**
-   * Url de la sesatheque baseName
-   * @deprecated
-   */
-  if (initObj.base) this.base = initObj.base
+  if (initObj.baseIdOriginal) this.baseIdOriginal = initObj.baseIdOriginal
   /**
    * L'oid du user qui créé l'alias (quand c'est un user qui copie une ressource
    * non éditable dans les siennes, il pourra éditer l'alias mais pas la ressource

@@ -38,7 +38,7 @@
  */
 function Ref (initObj) {
   if (typeof initObj !== 'object') initObj = {}
-  var ref = parseInt(initObj.ref, 10) || parseInt(initObj.oid, 10) || undefined
+  var ref = initObj.ref || parseInt(initObj.oid, 10) || undefined
   if (!ref && initObj.origine && initObj.idOrigine) ref = initObj.origine + '/' + initObj.idOrigine
   /**
    * L'oid de la ressource que l'on référence
@@ -82,10 +82,10 @@ function Ref (initObj) {
    */
   if (!this.public && initObj.cle) this.cle = initObj.cle
   /**
-   * Le nom de la sesathèque concernée
+   * L'id de la sesathèque concernée
    * @type {string}
    */
-  if (initObj.baseName) this.baseName = initObj.baseName
+  if (initObj.baseId) this.baseId = initObj.baseId
 }
 
 /**

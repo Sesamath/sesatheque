@@ -53,9 +53,10 @@ module.exports = function (EntityAlias) {
 
   EntityAlias
     .defineIndex('ref', 'string')
-    // @todo virer cet index base quand l'update3 aura été appliqué partout (en le virant aussi)
+    // @todo virer ces 2 index base et baseName quand l'update3 aura été appliqué partout (en le virant aussi)
     .defineIndex('base', 'string')
     .defineIndex('baseName', 'string')
+    .defineIndex('baseIdOriginal', 'string')
     .defineIndex('userOid', 'integer')
 
   EntityAlias.beforeStore(function (next) {
@@ -63,10 +64,12 @@ module.exports = function (EntityAlias) {
       next(new Error("Impossible d'enregistrer un alias sans propriétaire"))
     } else if (!this.type) {
       next(new Error("Impossible d'enregistrer un alias sans type"))
-    } else if (this.ref === this.oid && (!this.base || this.base === config.application.baseUrl)) {
+    } else if (this.ref === this.oid && this.baseIdOriginal === config.application.id) {
       next(new Error("Cet alias se référence lui-même, impossible de l'enregistrer"))
-    } else if (!this.baseName) {
-      next(new Error('Impossible de sauvegarder un alias sans base'))
+    } else if (!this.ref) {
+      next(new Error('Impossible de sauvegarder un alias sans ref'))
+    } else if (!this.baseIdOriginal) {
+      next(new Error('Impossible de sauvegarder un alias sans la base de l’original'))
     } else {
       next()
     }

@@ -62,7 +62,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
       if (!error) {
         if (ressourceCached) {
           ressource = EntityRessource.create(ressourceCached)
-          log.debug('ressource ' + oid + ' récupérée en cache')
+          // log.debug('ressource ' + oid + ' récupérée en cache')
         }
       }
       next(null, ressource)
@@ -86,7 +86,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
           if (!error) {
             if (ressourceCached) {
               ressource = EntityRessource.create(ressourceCached)
-              log.debug('ressource ' + origine + '/' + idOrigine + ' récupérée en cache')
+              // log.debug('ressource ' + origine + '/' + idOrigine + ' récupérée en cache')
             }
           }
           next(null, ressource)

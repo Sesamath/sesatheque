@@ -5,6 +5,7 @@
  */
 module.exports = {
   application: {
+    id: 'xxx', // identifiant de cette sésathèque
     baseUrl: 'https://example.com/',
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
@@ -64,9 +65,9 @@ module.exports = {
   // ces noms doivent être les mêmes que ceux des sesalabs qui nous contactent
   sesatheques: {
     // sesatheque des ressources présentées à gauche dans un sesalab
-    bibli: 'https://bibliotheque.sesamath.net/',
+    idSesathequeGlobale: 'https://…/',
     // sesatheque des ressources personnelles des utilisateurs d'un sesalab
-    commun: 'https://commun.sesamath.net/'
+    idSesathequeCommune: 'https://…/'
   },
   sesalabs: [
     'https://sesalab.example.com/'

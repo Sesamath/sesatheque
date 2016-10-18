@@ -71,6 +71,7 @@ var config = {
     homeTitle: 'Bienvenue sur cette Sésathèque',
     defaultViewsPath: 'app/views',
     // mis dans _private/config.js car dépendant de l'instance
+    baseId: 'xxxx', // l'id de cette sésathèque
     baseUrl: 'http(s)://.../',
     mail: 'user@example.com',
     staging: staging

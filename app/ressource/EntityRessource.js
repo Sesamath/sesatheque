@@ -32,6 +32,7 @@
 'use strict'
 
 module.exports = function (EntityRessource) {
+  var uuid = require('an-uuid')
   var merge = require('sesajstools/utils/object').merge
   var tools = require('../tools')
   var Ressource = require('../constructors/Ressource')
@@ -126,6 +127,10 @@ module.exports = function (EntityRessource) {
 
   EntityRessource.beforeStore(function (next) {
     if (this.token) delete this.token
+    if (this.origine && !this.idOrigine) {
+      if (this.origine === 'local') this.idOrigine = uuid()
+      else log.errorData('ressource avec origine sans idOrigine', this)
+    }
     next()
   })
 }
