@@ -32,6 +32,7 @@
 'use strict'
 
 var flow = require('an-flow')
+var replace = require('sesajstools/utils/object').replace
 var Ref = require('../../constructors/Ref')
 var config = require('../../config')
 
@@ -107,14 +108,14 @@ function cleanEnfant (enfant, arbreOid, nextEnfant) {
   cleanBase(enfant)
   // on nettoie le reste en mettant de coté enfants
   var enfants = enfant.enfants
-  sjtObj.replace(enfant, new Ref(enfant))
+  replace(enfant, new Ref(enfant))
   enfant.enfants = enfants
   if (enfant.ref) {
     $ressourceRepository.load(enfant.ref, function (error, ressource) {
       if (error) return nextEnfant(error)
       if (ressource) {
         // on peut pas faire simplement enfant = new Ref(ressource), sinon on perd la ref à l'objet initial
-        sjtObj.replace(enfant, new Ref(ressource))
+        replace(enfant, new Ref(ressource))
       } else {
         // on essaie de retrouver cette ressource, si c'est du labomepBIBS/xxx on a une petite idée…
         var prefix = 'labomepBIBS/'
@@ -133,7 +134,7 @@ function cleanEnfant (enfant, arbreOid, nextEnfant) {
             $ressourceRepository.load(newRef, function (error, ressource) {
               if (error) return nextEnfant(error)
               if (ressource) {
-                sjtObj.replace(enfant, new Ref(ressource))
+                replace(enfant, new Ref(ressource))
                 nextEnfant()
               } else {
                 log.debug('on a cherché ' + newRef + ' à partir de ' + enfant.ref + ' sans succès ' + arbreOid)
