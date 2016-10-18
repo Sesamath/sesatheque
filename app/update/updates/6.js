@@ -33,42 +33,39 @@
 
 var flow = require('an-flow')
 
-var name = 'check de tous les alias pour normalisation'
-var description = 'on vire toute url absolue pour ne garder que des baseId'
+var name = 'correction des origine erronée mep_coll en coll_doc'
+var description = ''
 
 var limit = 100
+
+var EntityRessource = lassi.service('EntityRessource')
+var $ressourceRepository = lassi.service('$ressourceRepository')
 
 module.exports = {
   name: name,
   description: description,
   run: function run (next) {
     function grab () {
-      EntityAlias.match('oid').greaterThan(0).grab(limit, offset, function (error, aliases) {
+      console.log('traitement des origine mep_coll de ' + offset + ' à ' + (offset + limit))
+      EntityRessource.match('origine').equals('mep_coll').sort('oid').grab(limit, offset, function (error, ressources) {
         if (error) return next(error)
-        flow(aliases).seqEach(function (alias) {
-          if (alias.base.indexOf('bibliotheque') !== -1) {
-            alias.baseIdOriginal = 'sesabibli'
-          } else if (alias.base.indexOf('commun') !== -1) {
-            alias.baseIdOriginal = 'sesacommun'
-          } else if (!alias.baseIdOriginal) {
-            log.error('alias de base inconnue ' + alias.base)
-            alias.baseIdOriginal = 'unknown'
-          }
-          if (alias.base) delete alias.base
-          log.debug('nouvel alias', alias)
-          alias.store(this)
+        flow(ressources).seqEach(function (ressource) {
+          ressource.origine = 'coll_doc'
+          $ressourceRepository.save(ressource, this)
         }).seq(function () {
-          if (aliases.length === limit) {
+          if (ressources.length === limit) {
             offset += limit
-            grab()
+            // on laisse refroidir un peu le disque
+            setTimeout(grab, 100)
           } else {
             this()
           }
         }).done(next)
       })
     }
-    var EntityAlias = lassi.service('EntityAlias')
+    // init
     var offset = 0
+    // go
     grab()
   } // run
 }

@@ -34,7 +34,6 @@
 var flow = require('an-flow')
 var Ref = require('../../constructors/Ref')
 var config = require('../../config')
-var sjtObj = require('sesajstools/utils/object')
 
 var name = 'normalisation des arbres'
 var description = 'remplacement origine/idOrigine par oid et commentaires à la place de description'
@@ -119,7 +118,7 @@ function cleanEnfant (enfant, arbreOid, nextEnfant) {
       } else {
         // on essaie de retrouver cette ressource, si c'est du labomepBIBS/xxx on a une petite idée…
         var prefix = 'labomepBIBS/'
-        if (enfant.ref.indexOf(prefix) === 0) {
+        if (typeof enfant.ref === 'string' && enfant.ref.indexOf(prefix) === 0) {
           var idOrigine = Number(enfant.ref.substr(prefix.length))
           var newRef
           if (idOrigine > 1000000 && idOrigine < 4000000) {
@@ -163,23 +162,23 @@ function cleanEnfant (enfant, arbreOid, nextEnfant) {
 } // cleanEnfant
 
 /**
- * Vire base si y'a pour remplacer par baseName (si on la connait)
+ * Vire base si y'a pour remplacer par baseId (si on la connait)
  * @param arbre sera modifié
  */
 function cleanBase (arbre) {
   if (arbre.base) {
     if (arbre.base.substr(-1) !== '/') arbre.base += '/'
-    if (arbre.baseName && config.sesatheques && config.sesatheques[arbre.baseName] === arbre.base) {
+    if (arbre.baseId && config.sesatheques && config.sesatheques[arbre.baseId] === arbre.base) {
       delete arbre.base
-    } else if (arbre.baseName) {
-      log.errorData('arbre ' + arbre.oid + ' avec baseName inconnue ' + arbre.baseName + ' et base ' + arbre.base)
+    } else if (arbre.baseId) {
+      log.errorData('arbre ' + arbre.oid + ' avec baseId inconnue ' + arbre.baseId + ' et base ' + arbre.base)
     } else {
       if (arbre.base === config.application.baseUrl) {
         delete arbre.base
       } else {
         for (var p in config.sesatheques) {
           if (config.sesatheques.hasOwnProperty('p') && config.sesatheques[p] === arbre.base) {
-            arbre.baseName = p
+            arbre.baseId = p
             delete arbre.base
           }
         }
