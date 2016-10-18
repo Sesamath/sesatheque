@@ -455,7 +455,7 @@ if (ids) {
 } // else query += ' LIMIT 1000'
 
 common.setOptions({
-  timeout: 2000,
+  timeout: 6000,
   maxLaunched: 1,
   logApiCalls: logProcess,
   logProcess: logProcess,
