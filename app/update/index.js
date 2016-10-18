@@ -64,6 +64,14 @@ lassi.on('startup', function () {
     function nextUpdate (error) {
       if (error) return done(error)
       var update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
+      var lock = path.join(__dirname, '../../_private/updates.lock')
+      try {
+        fs.accessSync(lock, fs.R_OK)
+        return applog('updates', lock + ' présent, on ignore les updates automatiques, base en version ' + dbVersion)
+      } catch (error) {
+        // lock n'existe pas, on met ça pour rappeler qu'il pourrait exister
+        applog('updates', lock + ' non présent, on étudie les éventuels updates à lancer')
+      }
       fs.access(update, fs.R_OK, function (error) {
         if (error) return done()
         dbVersion++
