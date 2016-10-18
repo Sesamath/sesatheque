@@ -147,8 +147,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   function getClientIp (context) {
     // on regarde si par hasard ce serait pas l'ip du proxy
     var ipClient = context.request.ip
-    if (context.ips && context.ips.length) ipClient = context.ips[0]
-    else if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
+    // à priori varnish ou nginx devrait renseigner ça
+    if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
+    // sinon on prend la 1re de x-forwarded-for, pas très safe car ça peut être forgé,
+    // faudrait plutôt remonter de la fin et éliminer nos ip puis prendre la 1re qui reste
+    // mais ça suppose de mettre les ips de nos proxy possible en conf
     else if (context.request.headers['x-forwarded-for']) ipClient = context.request.header('x-forwarded-for').split(',')[0]
 
     return ipClient
@@ -475,21 +478,23 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.hasAllRights = function (context) {
-    var retour = false
+    if ($accessControl.hasRole('admin', context)) return true
+    // sinon faut regarder un peu mieux le contexte
     var token = context.request.header('X-ApiToken')
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
-      if ($settings.get('apiTokens', []).indexOf(token) > -1) {
+      if ($settings.get('apiTokens', []).indexOf(token) !== -1) {
         // log.debug('token api ok')
-        // token ok donc retour ok si client local
-        retour = $accessControl.isLanClient(context)
+        // token ok donc retour ok si le client a une ip connue
+        var ip = getClientIp(context)
+        if (config.apiIpsAllowed && config.apiIpsAllowed.indexOf(ip) !== -1) return true
+        // ou est local
+        if ($accessControl.isLanClient(context)) return true
+        log.error('token ok depuis une ip non autorisée ' + ip)
       }
-    } else {
-      // false sauf si admin
-      retour = $accessControl.hasRole('admin', context)
     }
 
-    return retour
+    return false
   }
   // alias
   var hasAllRights = $accessControl.hasAllRights

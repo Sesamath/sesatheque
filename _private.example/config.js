@@ -61,6 +61,9 @@ module.exports = {
     'token1',
     'token2'
   ],
+  apiIpsAllowed: [
+    // une éventuelle liste d'ip hors lan autorisées à utiliser les tokens
+  ],
   // urls absolues des sésathèques utilisées par nos ressources (pour les alias ou sesalab)
   // ces noms doivent être les mêmes que ceux des sesalabs qui nous contactent
   sesatheques: {
