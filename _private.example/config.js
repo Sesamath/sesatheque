@@ -72,9 +72,11 @@ module.exports = {
     // sesatheque des ressources personnelles des utilisateurs d'un sesalab
     idSesathequeCommune: 'https://…/'
   },
-  sesalabs: [
-    'https://sesalab.example.com/'
-  ],
+  // pour avoir du sso entre un sesalab et une sesatheque, il faut préciser ici
+  sesalabs: [ {
+    name: 'un nom pour ce sesalab',
+    baseUrl: 'https://sesalab.example.com/'
+  }],
   admin: {
     // user1:'password1',
     // user2:'password2'
