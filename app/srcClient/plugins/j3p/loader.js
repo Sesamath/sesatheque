@@ -165,7 +165,7 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
     piledappels.push(w.j3p.config.arborescence.outils + 'methodesmodele.js')
     for (k = 0; k < that.listedessections.length; k++) {
       nomSection = that.listedessections[k]
-      if (typeof w.chargementJ3p.adresses[nomSection] !== 'undefined') prefixechemin = w.chargementJ3p.adresses[nomSection] + '/'
+      if (typeof w.chargement_j3p.adresses[nomSection] !== 'undefined') prefixechemin = w.chargement_j3p.adresses[nomSection] + '/'
       piledappels.push(pathSections + prefixechemin + 'section' + nomSection + '.js')
     }
     log('On a trouvé les sections', that.listedessections, piledappels[1])
@@ -344,17 +344,17 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
   // lancement de j3p
   function oncontinue8 () {
     // on définit le démarrage au premier noeud
-    w.chargementJ3p.noeudinitial = 1
+    w.chargement_j3p.noeudinitial = 1
     // la fonction EquivalentIndexVersNoeud doit être dispo donc on peut
-    if (typeof w.chargementJ3p.numeronoeud !== 'undefined') {
-      w.chargementJ3p.noeudinitial = w.j3p.EquivalentIndexVersNoeud(w.chargementJ3p.numeronoeud)
+    if (typeof w.chargement_j3p.numeronoeud !== 'undefined') {
+      w.chargement_j3p.noeudinitial = w.j3p.EquivalentIndexVersNoeud(w.chargement_j3p.numeronoeud)
       log('On récupère le dernier noeud enregistré cad',
-        w.chargementJ3p.numeronoeud,
+        w.chargement_j3p.numeronoeud,
         ' et son index dans le graphe est ',
-        w.chargementJ3p.noeudinitial)
+        w.chargement_j3p.noeudinitial)
     }
     /* global Parcours */
-    w.j3p = new Parcours(eltHtml.id, 'Mep', 'exemple', false, w.chargementJ3p.noeudinitial)
+    w.j3p = new Parcours(eltHtml.id, 'Mep', 'exemple', false, w.chargement_j3p.noeudinitial)
     log('fin du chargement, j3p est créé comme instance de Parcours', w.j3p)
   }
 
@@ -431,7 +431,7 @@ module.exports = {
 
     var chargementJ3p = new ChargementJ3p()
     // faut mettre chargementJ3p à la racine du dom car les autres scripts le cherchent là
-    w.chargementJ3p = chargementJ3p
+    w.chargement_j3p = chargementJ3p
     // on affecte le graphe de la sesatheque
     chargementJ3p.graphe = graphe
     // ATTENTION, le modèle veut un indice 0 vide et la 1re section à l'indice 1, on ajoute un elt vide au début
