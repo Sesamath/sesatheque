@@ -49,9 +49,10 @@ var Zombie = require('zombie')
 var config = require('../../app/config')
 var host = config.$server && config.$server.hostname || 'localhost'
 var port = config.$server && config.$server.port || '3000'
-var baseUrl = 'http://' + host + ':' + port
+// var baseUrl = 'http://' + host + ':' + port
 
-var browser = Zombie.create({site: baseUrl})
+Zombie.localhost(host, port)
+var browser = new Zombie()
 
 describe('get public by oid', function () {
   before(function (done) {
