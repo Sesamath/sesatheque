@@ -6,6 +6,8 @@
       {>wrapper widget="text" o=idOrigine /}
     {/origine}
     {>wrapper widget="text" o=titre /}
+  </div>
+  <div class="form-group">
     {>wrapper widget="select" o=type size=2 /}
     {>wrapper widget="select" o=publie /}
     {>wrapper widget="select" o=langue /}

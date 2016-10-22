@@ -963,6 +963,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           }
         }
       }
+      // on ajoute une remarque
+      fd.titre.rmq = 'Vous pouvez utiliser le caractère % comme joker, par exemple "%Pytagore%" pour trouver toutes les ressources dont le titre contient le mot "Pythagore" (il n’y a pas de distinction minuscule/majuscule)'
       // log.debug('search form data', fd)
 
       // titre de la page

@@ -20,5 +20,6 @@
     {>"{widget}" /}
   </div>
 
+  {?o.rmq}<span class="rmq">{o.rmq}</span>{/o.rmq}
   {?o.new}{>wrapper widget="text" o=o.new /}{/o.new}
 </div>
