@@ -879,10 +879,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // les datas pour le form
     getFormViewData(context, error, ressource, function (formData) {
       sjtObj.merge(data.contentBloc, formData)
-      // le titre
-      data.$metas.title = 'Modifier la ressource ' + ressource.titre
       // et d'éventuels overrides
       if (options) sjtObj.merge(data, options)
+      // le titre
+      if (ressource.new) {
+        data.$metas.title = 'Créer une ressource ' + ressource.titre
+        data.contentBloc.type.choices.unshift({label: 'Choisir le type', value: ''})
+      } else {
+        data.$metas.title = 'Modifier la ressource ' + ressource.titre
+      }
       // pour les form, les js d'édition auront besoin de la ressource, on l'ajoute comme pour display (dans le source)
       addJsVars(data, ressource)
       // faut aussi ajouter ça pour les vues dust (data.contentBloc.type existe déjà

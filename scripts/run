@@ -4,7 +4,7 @@ set -u
 
 dirInitial="$PWD"
 dirApp=$(dirname $0)/../
-PM2=app/_private/pm2App.json5
+PM2=_private/pm2App.json5
 nodeEnv=${NODE_ENV:-dev}
 pm2opts=''
 appName='all'
