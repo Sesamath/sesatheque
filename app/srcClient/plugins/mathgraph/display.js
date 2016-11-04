@@ -144,10 +144,10 @@ function displayJs (ressource, options, next) {
     if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
     // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
-    var svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg')
-    svg.setAttributeNS(null, 'id', svgId)
-    svg.setAttributeNS(null, 'width', width)
-    svg.setAttributeNS(null, 'height', height)
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svg.setAttribute('id', svgId)
+    svg.setAttribute('width', width)
+    svg.setAttribute('height', height)
     svg.style.display = 'block'
     container.appendChild(svg)
     MathJax.Hub.Config({
