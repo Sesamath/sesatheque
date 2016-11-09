@@ -1,4 +1,3 @@
-
 /**
  * This file is part of Sesatheque.
  *   Copyright 2014-2015, Association Sésamath
@@ -61,7 +60,7 @@ try {
   require('lassi')(__dirname)
   // sesalab-admin sera appelé après mise en global de l'appli
 
-  /* attention, ici GLOBAL.lassi existe mais pas toujours lassi !!!
+  /* attention, ici global.lassi existe mais pas toujours lassi !!!
    if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
    else console.log('lassi existe dès le départ')
    for (var i = 10; i < 1000; i +=100) {
@@ -70,15 +69,15 @@ try {
    }, i)
    }
    /* */
-  GLOBAL.isProd = ((lassi.settings.application.staging === 'prod'))
+  global.isProd = ((lassi.settings.application.staging === 'prod'))
 
   // nos loggers
-  GLOBAL.log = require('./tools/log.js')
+  global.log = require('./tools/log.js')
   appLog("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
 
   // Si on veut passer un préfixe à sesalabSso, ou si d'autres components veulent la config
   // avant que lassi n'affecte ça et que $settings ne soit dispo, faut le mettre en global dès maintenant
-  GLOBAL.app = {settings: config}
+  global.app = {settings: config}
 
   /**
    * Gestion des traces
@@ -139,7 +138,7 @@ try {
   // utile aussi pour des modules npm qui voudrait ajouter des services sans définir de composants pour autant
   // avec app.service('$newService', function () {…})
   // ou app.controller('path', function () {this.get('path', function (context) {…} })
-  GLOBAL.app = sesatheque
+  global.app = sesatheque
 
   // une fois les composants chargés on ajoutera memcache et nos listeners
   sesatheque.config(function ($cache, $settings, $accessControl, $routes, $flashMessages, $auth, $page) {
