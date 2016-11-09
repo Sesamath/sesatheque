@@ -44,7 +44,7 @@ var config = require('../config') // jshint ignore:line
 var sjt = require('sesajstools')
 var applog = require('an-log')(config.application.name)
 
-var _lassi = (typeof GLOBAL.lassi === 'undefined') ? console : GLOBAL.lassi
+var _lassi = (typeof global.lassi === 'undefined') ? console : global.lassi
 
 /**
  * une pile pour les streams que l'on créé (pour les fermer au shutdown)
@@ -159,7 +159,7 @@ function out (message, objectToDump, filter, stream, options) {
 }
 // log
 if (env === 'prod') {
-  GLOBAL.log = function () { } // jshint ignore:line
+  global.log = function () { } // jshint ignore:line
   applog('app', "fonction log désactivée avec l'environnement : " + env)
 } else {
   /**
@@ -173,7 +173,7 @@ if (env === 'prod') {
    *                                         indent pour indenter objectToDump du nombre d'espaces demandés,
    *                                         max pour modifier la limite de la sortie (200 par défaut)
    */
-  GLOBAL.log = function (message, objectToDump, filter, options) { // jshint ignore:line
+  global.log = function (message, objectToDump, filter, options) { // jshint ignore:line
     // (log étant défini en global dans la conf jshint il râle si on le redéfini)
     if (arguments.length === 3 && typeof filter === 'object') {
       options = filter
