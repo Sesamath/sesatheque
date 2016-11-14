@@ -28,8 +28,8 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
+/* global process */
 
 /**
  * Configuration de l'application
@@ -40,10 +40,11 @@ var sjtUrl = require('sesajstools/http/url')
 
 /** La racine du projet */
 var root = path.resolve(__dirname, '..')
+var logDir = process.env.LOGS || root + '/logs'
 
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
 var privateConfPath = [root, '_private']
-if (process.env.SESATHEQUE_CONF && /^[^\/]+$/.test(process.env.SESATHEQUE_CONF)) {
+if (process.env.SESATHEQUE_CONF && /^[^/]+$/.test(process.env.SESATHEQUE_CONF)) {
   // on peut préciser un autre fichier de conf via l'environnement
   // (utile pour faire tourner plusieurs instances de l'appli)
   privateConfPath.push(process.env.SESATHEQUE_CONF)
@@ -155,7 +156,7 @@ var config = {
 
   // les différents logs
   logs: {
-    dir: process.env.LOGS || root + '/logs',
+    dir: logDir,
     access: 'access.log',
     error: 'error.log',
     errorData: staging + 'errorData.log',
@@ -169,7 +170,7 @@ var config = {
   lassiLogger: {
     '$entities': {
       logLevel: 'debug',
-      renderer: {name: 'fileRenderer', target: './logs/entities.log'}
+      renderer: {name: 'fileRenderer', target: logDir + '/entities.log'}
     }
   },
   varnish: false // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
