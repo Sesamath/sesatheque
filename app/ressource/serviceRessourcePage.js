@@ -40,6 +40,7 @@ var moment = require('moment')
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
 var appConfig = require('../config')
+var sesatheques = require('sesatheque-client/sesatheques.js')
 
 module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) {
   /**
@@ -797,10 +798,18 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             var enfantsDescribe = []
             ressource.enfants.forEach(function (enfant) {
               if (enfant.ref) {
+                var url = $routes.getAbs('describe', enfant.ref)
+                if (enfant.baseId) {
+                  var base = sesatheques.getBase(enfant.baseId)
+                  if (base) {
+                    if (base.substr(-1) === '/') base = base.substr(0, base.length - 1)
+                    url = base + url
+                  }
+                }
                 enfantsDescribe.push({
                   oid: enfant.ref,
                   titre: enfant.titre,
-                  url: $routes.getAbs('describe', enfant.ref)
+                  url: url
                 })
               }
             })

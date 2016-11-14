@@ -349,84 +349,97 @@ module.exports = function edit (arbre, options) {
        * @return {boolean}
        */
       function loadSrc () {
-        var ref = $inputRef.val()
-        log('On va charger en source ' + ref)
-        if (ref) {
-          client.getRessource(ref, function (error, ressource) {
-            if (error) {
-              page.addError('Erreur au chargement de ' + ref + ' : ' + error.toString(), 5)
-            } else if (ressource && ressource.type === 'arbre') {
-              // on charge
-              var rootElt = jstreeConverter.toJstree(ressource)
-              rootElt.state = {opened: true}
-              modifIco(rootElt)
-              log('On a récupéré un arbre, devenu', rootElt)
-              var jstData = {
-                core: {
-                  check_callback: false,
-                  data: rootElt
-                },
-                plugins: ['contextmenu', 'dnd', 'search'],
-                contextmenu: {
-                  items: function (node, cb) {
-                    // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
-                    var items = {}
-                    addApercu(items, node)
-                    // ajout du 'charger ici'
-                    var ref = node.a_attr && node.a_attr['data-ref']
-                    if (ref && node.a_attr['data-type'] === 'arbre') {
-                      items.replace = {
-                        label: 'Charger ici',
-                        action: function () {
-                          log('Charger en source ' + ref)
-                          $inputRef.val(ref)
-                          loadSrc()
-                        }
+        function showSrc (error, ressource) {
+          if (error) {
+            page.addError('Erreur au chargement de ' + ref + ' : ' + error.toString(), 5)
+          } else if (ressource && ressource.type === 'arbre') {
+            if (!ressource.baseId && baseId) ressource.baseId = baseId
+            log('arbre', ressource)
+            // on charge
+            var rootElt = jstreeConverter.toJstree(ressource)
+            rootElt.state = {opened: true}
+            modifIco(rootElt)
+            log('On a récupéré un arbre, devenu', rootElt)
+            var jstData = {
+              core: {
+                check_callback: false,
+                data: rootElt
+              },
+              plugins: ['contextmenu', 'dnd', 'search'],
+              contextmenu: {
+                items: function (node, cb) {
+                  // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
+                  var items = {}
+                  addApercu(items, node)
+                  // ajout du 'charger ici'
+                  var ref = node.a_attr && node.a_attr['data-ref']
+                  if (ref && node.a_attr['data-type'] === 'arbre') {
+                    items.replace = {
+                      label: 'Charger ici',
+                      action: function () {
+                        log('Charger en source ' + ref)
+                        $inputRef.val(ref)
+                        loadSrc()
                       }
                     }
-                    log('clic droit dans la source sur', node)
-                    cb(items)
                   }
-                },
-                dnd: {always_copy: true}
-              }
-              // si on ne détruit pas un éventuel jstree existant il refuse d'en charger un autre
-              var srcTreeRef = $jstree.reference($srcTree)
-              if (srcTreeRef) srcTreeRef.destroy()
-              $srcTree.jstree(jstData)
-              // log("après chargement de l'arbre source on a", $jstree.reference($srcTree))
-
-              // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
-              // on écoute donc l'événement select sur le jstree
-              $srcTree.on('select_node.jstree', function (e, data) {
-                var jstNode = data.node.original
-                log('clic sur', jstNode)
-                if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
-                  // on fait du toggle
-                  if ($srcTree.jstree('is_open', data.node)) $srcTree.jstree('close_node', data.node)
-                  else $srcTree.jstree('open_node', data.node)
+                  log('clic droit dans la source sur', node)
+                  cb(items)
                 }
-              })
-
-              // pour la recherche, on remet le comportement de la modif de l'input sur l'arbre
-              var timer
-              var $searchInput = $(searchInput)
-              $searchInput.keyup(function () {
-                // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
-                // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
-                if (timer) {
-                  clearTimeout(timer)
-                }
-                timer = setTimeout(function () {
-                  var v = $searchInput.val()
-                  $srcTree.jstree(true).search(v)
-                }, 250)
-              })
-            } else {
-              addError('La ressource ' + ref + " n'existe pas ou n'est pas un arbre")
-              log("Ressource chargée qui n'est pas un arbre", ressource)
+              },
+              dnd: {always_copy: true}
             }
-          })
+            // si on ne détruit pas un éventuel jstree existant il refuse d'en charger un autre
+            var srcTreeRef = $jstree.reference($srcTree)
+            if (srcTreeRef) srcTreeRef.destroy()
+            $srcTree.jstree(jstData)
+            // log("après chargement de l'arbre source on a", $jstree.reference($srcTree))
+
+            // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
+            // on écoute donc l'événement select sur le jstree
+            $srcTree.on('select_node.jstree', function (e, data) {
+              var jstNode = data.node.original
+              log('clic sur', jstNode)
+              if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
+                // on fait du toggle
+                if ($srcTree.jstree('is_open', data.node)) $srcTree.jstree('close_node', data.node)
+                else $srcTree.jstree('open_node', data.node)
+              }
+            })
+
+            // pour la recherche, on remet le comportement de la modif de l'input sur l'arbre
+            var timer
+            var $searchInput = $(searchInput)
+            $searchInput.keyup(function () {
+              // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
+              // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
+              if (timer) {
+                clearTimeout(timer)
+              }
+              timer = setTimeout(function () {
+                var v = $searchInput.val()
+                $srcTree.jstree(true).search(v)
+              }, 250)
+            })
+          } else {
+            addError('La ressource ' + ref + " n'existe pas ou n'est pas un arbre")
+            log("Ressource chargée qui n'est pas un arbre", ressource)
+          }
+        }
+
+        var ref = $inputRef.val()
+        var baseId
+        log('On va charger en source ' + ref)
+        if (ref) {
+          if (ref.indexOf(':') !== -1) {
+            var chunks = ref.split(':')
+            if (chunks.length === 2) {
+              baseId = chunks[0]
+              ref = chunks[1]
+              log('baseId fixé à ' + baseId)
+            }
+          }
+          client.getRessource(baseId, ref, showSrc)
         } else {
           log('appel de load sans ref')
         }

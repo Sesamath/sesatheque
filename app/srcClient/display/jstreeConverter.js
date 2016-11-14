@@ -38,7 +38,7 @@ var baseUrl = '/'
  * @private
  * @type {Object}
  */
-var sesatheques = {}
+var sesatheques = require('sesatheque-client/sesatheques.js')
 
 /**
  * Retourne les datas qui nous intéressent à mettre sur le tag a
@@ -74,6 +74,9 @@ function getAttr (ressource, defaultBase) {
     attr['data-displayurl'] = displayUrl
   }
   if (dataUrl) attr['data-dataurl'] = dataUrl
+  if (ressource.baseId) attr['data-baseid'] = ressource.baseId
+  else if (ressource.base) attr['data-baseid'] = getBaseId(ressource.base)
+  else if (base) attr['data-baseid'] = getBaseId(base)
   if (ressource.type) attr['data-type'] = ressource.type
   if (ressource.resume) attr.alt = ressource.resume
 
@@ -100,6 +103,12 @@ function getBase (ressource, defaultBase) {
   if (!base) base = ressource.base || defaultBase || baseUrl
   if (base.substr(-1) !== '/') base += '/'
   return base
+}
+
+function getBaseId (base) {
+  for (var id in sesatheques) {
+    if (sesatheques[id] === base) return id
+  }
 }
 
 /**
@@ -259,6 +268,7 @@ function toRef (node, jstree) {
         item.enfants = getEnfants(node.id, jstree)
       }
       if (nodeSrc.a_attr['data-ref']) item.ref = nodeSrc.a_attr['data-ref']
+      if (nodeSrc.a_attr['data-baseid']) item.baseId = nodeSrc.a_attr['data-baseid']
       if (nodeSrc.a_attr.alt) item.resume = nodeSrc.a_attr.alt
     }
     // log('converti en', item)
