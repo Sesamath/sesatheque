@@ -227,15 +227,9 @@ function toJstree (ressource, defaultBase) {
     if (ressource.enfants && ressource.enfants.length) {
       node.children = getJstreeChildren(ressource, base)
     } else {
+      node.children = []
       // url pour récupérer les enfants
-      var path
-      if (ressource.oid) path = 'api/jstree?ref=' + ressource.oid
-      else if (ressource.ref) path = 'api/jstree?ref=' + ressource.ref
-      else if (ressource.origine && ressource.idOrigine) path = 'api/jstree?ref=' + ressource.origine + '/' + ressource.idOrigine
-      if (path) {
-        node.children = true
-        node.data = {url: base + path + '&children=1'}
-      }
+      // var pathlog.debug
     }
   }
 

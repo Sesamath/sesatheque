@@ -197,10 +197,13 @@ module.exports = function edit (arbre, options) {
         modifIco(rootElt)
         var jstData = {
           core: {
+            // https://www.jstree.com/api/#/?f=$.jstree.defaults.core.check_callback
             check_callback: function (action, node, parent) {
               log('check_callback avec', arguments)
               // on accepte le drop seulement dans des arbres (dossiers)
-              return (parent.id !== '#' && parent.a_attr && parent.a_attr['data-type'] === 'arbre')
+              if (action === 'copy_node') return (parent.id !== '#' && parent.a_attr && parent.a_attr['data-type'] === 'arbre')
+              // tout le reste est autorisé
+              else return true
             },
             data: rootElt
           },
@@ -242,54 +245,58 @@ module.exports = function edit (arbre, options) {
                 items.create = {
                   label: 'Ajouter un dossier',
                   action: function (data) {
-                    // var name = w.prompt('Nom du dossier')
-                    // if (name) {
+                    // la cb appellé avec le node créé
+                    function createCb (newNode) {
+                      // ici inst.edit existe bien, mais si c'est le 1er enfant d'un arbre vide
+                      // log('dans createCb', newNode, inst)
+                      inst.edit(
+                        newNode,
+                        'titre',
+                        function (newNode, status) {
+                          if (status) isDstModified = true
+                          log('après modif', inst)
+                        }
+                      )
+                    }
                     var inst = $jstree.reference(data.reference)
                     log('avant modif on a ' + inst._cnt + ' childs')
-                    var node = inst.get_node(data.reference)
-                    inst.create_node(node, {
+                    var parentNode = inst.get_node(data.reference)
+                    var newNode = {
                       icon: 'arbreJstNode',
                       a_attr: {'data-type': 'arbre'}
-                    }, 'last', function (newNode) {
-                      inst.edit(newNode, 'titre', function (newNode, status) {
-                        if (status) isDstModified = true
-                        log('après modif', inst)
-                      })
-                      /* pourquoi faut le sortir de la pile ?
-                       setTimeout(function () {
-                       inst.edit(newNode)
-                       isDstModified = true
-                       }, 0); */
-                    })
-                    // }
+                    }
+                    inst.create_node(parentNode, newNode, 'last', createCb)
                   }
                 }
                 // idem pour les ressources
                 items.add = {
                   label: 'Ajouter une ressource',
                   action: function (data) {
-                    var id = window.prompt('Id de la ressource (oid ou origine/idOrigine')
-                    var inst = $jstree.reference(data.reference)
-                    var node = inst.get_node(data.reference)
-                    client.getItem(id, function (error, item) {
-                      if (error) addError(error)
-                      else {
-                        log.debug('item récupéré', item)
+                    function addCb (newNode) {
+                      log('node créé', newNode)
+                    }
+                    var id = window.prompt('Id de la ressource (oid ou origine/idOrigine)\nPréfixe “sesabibli:” ou “sesacommun:” possible')
+                    if (id) {
+                      var inst = $jstree.reference(data.reference)
+                      var parentNode = inst.get_node(data.reference)
+                      // on tente de charger la ressource demandée
+                      client.getItem(id, function (error, item) {
+                        if (error) return addError(error)
+                        log('item récupéré', item)
                         var tt = item.type
                         var attr = {
                           'data-type': tt,
                           'data-ref': item.oid
                         }
-                        if (item.$displayUri) attr['data-displayUri'] = item.$displayUri
-                        inst.create_node(node, {
+                        if (item.$displayUri) attr[ 'data-displayUri' ] = item.$displayUri
+                        var newNode = {
                           text: item.titre,
                           icon: tt + 'JstNode',
                           a_attr: attr
-                        }, 'last', function (newNode) {
-                          log('node créé', newNode)
-                        })
-                      }
-                    })
+                        }
+                        inst.create_node(parentNode, newNode, 'last', addCb)
+                      })
+                    }
                   }
                 }
               }
@@ -461,7 +468,7 @@ module.exports = function edit (arbre, options) {
               // on change l'icone
               child.icon = 'arbreJstNodeRef'
               // on vire ça pour pas avoir le triangle qui laisse supposer que ça se déplie
-              child.children = false
+              child.children = []
             }
           })
         }
