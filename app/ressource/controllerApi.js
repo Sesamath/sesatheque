@@ -31,6 +31,15 @@
 
 'use strict'
 
+var _ = require('lodash')
+var request = require('request')
+var flow = require('an-flow')
+var sjt = require('sesajstools')
+var sjtObj = require('sesajstools/utils/object')
+var config = require('../config')
+var configRessource = require('./config')
+var Alias = require('../constructors/Alias')
+
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
@@ -38,15 +47,6 @@
  * @Controller controllerApi
  */
 module.exports = function (controller, EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
-  var _ = require('lodash')
-  var request = require('request')
-  var flow = require('an-flow')
-  var sjt = require('sesajstools')
-  var sjtObj = require('sesajstools/utils/object')
-  var config = require('../config')
-  var configRessource = require('./config')
-  var Alias = require('../constructors/Alias')
-
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
@@ -100,6 +100,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    */
   function getListeAll (context) {
+    context.timeout = 3000
     // si on lance la requete faut filtrer d'après les droits avec $accessControl.getListeLisible,
     // donc il récupèrera pas forcément nb résultats :-/
     // franchement pas terrible, donc on laisse tomber et on vérifie les droits all avant de lancer la requete
@@ -113,6 +114,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    */
   function getListeProf (context) {
+    context.timeout = 3000
     if ($accessControl.hasGenericPermission('correction', context)) {
       grabListe(context, 'correction')
     } else if ($accessControl.isAuthenticated(context)) {
@@ -150,6 +152,8 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         }
       })
     }
+
+    context.timeout = 3000
     var oid = $accessControl.getCurrentUserOid(context)
     // liste des ressources perso
     var refs = []
@@ -238,6 +242,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    */
   function postRessource (context) {
+    context.timeout = 5000
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
     var ressourcePostee = context.post
@@ -311,6 +316,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    * @param {Context} context
    */
   function postRessourceAddRelations (context) {
+    context.timeout = 5000
     if (context.perf) {
       var msg = 'start-'
       if (context.post.origine && context.post.idOrigine) msg += context.post.origine + '/' + context.post.idOrigine
@@ -673,7 +679,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           }
         }
         // on ne garde que le nom de domaine en origine
-        var domaine = /https?:\/\/([a-z\.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
+        var domaine = /https?:\/\/([a-z.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
         request.post(postOptions, function (error, response, body) {
           if (error) {
             $json.send(context, error)
@@ -852,7 +858,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     }
   })
 
-  getListeAll.timeout = 3000
   /**
    * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin.
    * Retourne {@link reponseListe}
@@ -885,7 +890,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
   controller.options('liste/groupe/:nom', optionsOk)
 
-  getListePerso.timeout = 3000
   /**
    * Cherche parmi les ressources du user courant (qui doit être connecté avant)
    * Retourne {@link reponseListe}
@@ -906,7 +910,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
    */
   controller.options('liste/perso', optionsOk)
 
-  getListeProf.timeout = 3000
   /**
    * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
    * @route GET /api/liste/prof
@@ -999,7 +1002,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
     $json.denied(context, 'droits insuffisant pour effacer cette ressource')
   })
 
-  postRessource.timeout = 5000
   /**
    * Create / update une ressource
    * Prend un objet ressource, éventuellement incomplète mais oid ou origine/idOrigine sont obligatoires
@@ -1097,7 +1099,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   })
   controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
 
-  postRessourceAddRelations.timeout = 5000
   /**
    * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
    * Retourne {@link reponseRessourceOid} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
