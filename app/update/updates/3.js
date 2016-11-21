@@ -46,15 +46,17 @@ module.exports = {
       EntityAlias.match('oid').greaterThan(0).grab(limit, offset, function (error, aliases) {
         if (error) return next(error)
         flow(aliases).seqEach(function (alias) {
-          if (alias.base.indexOf('bibliotheque') !== -1) {
-            alias.baseIdOriginal = 'sesabibli'
-          } else if (alias.base.indexOf('commun') !== -1) {
-            alias.baseIdOriginal = 'sesacommun'
+          if (alias.base) {
+            if (alias.base.indexOf('bibliotheque') !== -1) {
+              alias.baseIdOriginal = 'sesabibli'
+            } else if (alias.base.indexOf('commun') !== -1) {
+              alias.baseIdOriginal = 'sesacommun'
+            }
+            delete alias.base
           } else if (!alias.baseIdOriginal) {
             log.error('alias de base inconnue ' + alias.base)
             alias.baseIdOriginal = 'unknown'
           }
-          if (alias.base) delete alias.base
           log.debug('nouvel alias', alias)
           alias.store(this)
         }).seq(function () {
