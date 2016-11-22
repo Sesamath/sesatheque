@@ -45,6 +45,14 @@ module.exports = {
     hostname: 'example.com',
     port: process.env.PORT || 3001
   },
+  $rail: {
+    cookie: {
+      key: 'asNTr!l7Dqtsg' // en mettre un autre dans _private/config !
+    },
+    session: {
+      secret: 'ap68!&nVGq§ot' // en mettre un autre dans _private/config !
+    }
+  },
   logs: {
     debugExclusions: ['cache'],
     perf: 'perf.log'
