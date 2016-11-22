@@ -34,6 +34,15 @@
 var _ = require('lodash')
 var flow = require('an-flow')
 
+/**
+ * Répond sur certaines requetes OPTIONS
+ * @private
+ * @param {Context} context
+ */
+function optionsOk (context) {
+  context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
+}
+
 module.exports = function (controller, EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
   var h = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
   /**
@@ -172,4 +181,5 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
       }
     })
   })
+  controller.options('suivis', optionsOk)
 }
