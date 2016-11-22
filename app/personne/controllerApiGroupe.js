@@ -152,34 +152,38 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
     var groupesSuivis = []
     var done = {}
     var uid = $accessControl.getCurrentUserOid(context)
-    $groupeRepository.getListManagedBy(uid, function (error, groupesManaged) {
-      try {
-        if (error) throw error
-        if (groupesManaged && groupesManaged.length) {
-          groupesManaged.forEach(function (groupe) {
-            groupesSuivis.push({ name: groupe.nom, admin: true })
-            done[groupe.nom] = true
+    if (uid) {
+      $groupeRepository.getListManagedBy(uid, function (error, groupesManaged) {
+        try {
+          if (error) throw error
+          if (groupesManaged && groupesManaged.length) {
+            groupesManaged.forEach(function (groupe) {
+              groupesSuivis.push({ name: groupe.nom, admin: true })
+              done[ groupe.nom ] = true
+            })
+          }
+          $accessControl.getCurrentUserGroupes(context).forEach(function (groupeName) {
+            if (!done[ groupeName ]) {
+              groupesSuivis.push({ name: groupeName, member: true })
+              done[ groupeName ] = true
+            }
           })
+          $accessControl.getCurrentUserGroupesSuivis(context).forEach(function (groupeName) {
+            if (!done[ groupeName ]) {
+              // on ajoute les urls pour ne plus suivre
+              groupesSuivis.push({ name: groupeName, follower: true })
+              done[ groupeName ] = true
+            }
+          })
+          $json.sendOk(context, { groupesSuivis: groupesSuivis })
+        } catch (error) {
+          console.error(error)
+          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
         }
-        $accessControl.getCurrentUserGroupes(context).forEach(function (groupeName) {
-          if (!done[groupeName]) {
-            groupesSuivis.push({ name: groupeName, member: true })
-            done[groupeName] = true
-          }
-        })
-        $accessControl.getCurrentUserGroupesSuivis(context).forEach(function (groupeName) {
-          if (!done[groupeName]) {
-        // on ajoute les urls pour ne plus suivre
-            groupesSuivis.push({ name: groupeName, follower: true })
-            done[groupeName] = true
-          }
-        })
-        $json.sendOk(context, {groupesSuivis: groupesSuivis})
-      } catch (error) {
-        console.error(error)
-        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
-      }
-    })
+      })
+    } else {
+      $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes suivis")
+    }
   })
   controller.options('suivis', optionsOk)
 }
