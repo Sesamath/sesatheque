@@ -5,6 +5,11 @@
     "node": ">4.4.0"
   },
   "private": true,
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git+ssh",
+    "url": "git@src.sesamath.net:sesatheque"
+  },
   "scripts": {
     "start": "node app/index.js",
     "test": "./scripts/run_tests -a",
