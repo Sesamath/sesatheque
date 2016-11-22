@@ -286,7 +286,7 @@ log.getElapsed = function (start) {
  * @param filter
  */
 log.error = function (message, objectToDump, filter) {
-  out(message, objectToDump, filter, errorOutputStream, {max: 2000})
+  if (message || objectToDump) out(message, objectToDump, filter, errorOutputStream, {max: 2000})
 }
 
 /**

@@ -106,8 +106,8 @@ module.exports = function ($cache, $settings, EntityRessource) {
     log.debug('cache set ressource ' + ressource.oid, null, 'cache')
     if (ressource.oid) {
       // next appelé seulement sur le set principal (le dernier)
-      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, dummy)
-      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, dummy)
+      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, log.error)
+      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, log.error)
       $cache.set(getKey(ressource.oid), ressource, ttl, next)
     } else {
       log.error(new Error('cacheSet sur une ressource sans oid'))
@@ -127,7 +127,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
     $cache.get(getKey(oid), function (error, ressource) {
       if (error) log.error(error)
       if (ressource) {
-        $cache.delete(getKey(ressource.idOrigine, ressource.origine), dummy)
+        $cache.delete(getKey(ressource.idOrigine, ressource.origine), log.error)
       }
       $cache.delete(getKey(oid), next)
     })
