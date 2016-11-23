@@ -22,7 +22,7 @@ function purge_varnish() {
   local file
   local url
   # faut l'interpréteur js car l'url peut être construite en js
-  local baseUrl = node -e "var c = require('./' + '$CONFIG'); console.log(c.application.baseUrl)"
+  local baseUrl=$(node -e "var c = require('./' + '$CONFIG'); console.log(c.application.baseUrl)")
   local findOpt=''
   [ -f $LAST_FILE ] && findOpt="-newer $LAST_FILE"
   if [ -z "$vhost" ]
