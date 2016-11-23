@@ -60,8 +60,8 @@
     "morgan": "1.1.1",
     "request": "2.75.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#master",
-    "sesajstools": "git://src.sesamath.net/sesajstools",
-    "sesalab-sso": "git://src.sesamath.net/sesalab-sso#0.0.8",
+    "sesajstools": "git://src.sesamath.net/sesajstools#1.0.3",
+    "sesalab-sso": "git://src.sesamath.net/sesalab-sso#0.0.10",
     "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.0.42"
   },
   "devDependencies": {
