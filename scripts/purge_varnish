@@ -21,7 +21,8 @@ function usage() {
 function purge_varnish() {
   local file
   local url
-  local vhost=$(sed -nre "/baseUrl/ s/^.*:[^\"']*[\"']([^\"']+)[\"'].*\$/\1/p" $CONFIG)
+  # faut l'interpréteur js car l'url peut être construite en js
+  local baseUrl = node -e "var c = require('./' + '$CONFIG'); console.log(c.application.baseUrl)"
   local findOpt=''
   [ -f $LAST_FILE ] && findOpt="-newer $LAST_FILE"
   if [ -z "$vhost" ]
@@ -31,7 +32,7 @@ function purge_varnish() {
 
     find */public -type f $findOpt | while read file
     do
-      url=$vhost${file#*public} # on démarre au / qui suit build
+      url=$baseUrl${file#*public} # on démarre au / qui suit build
       echo -n "$url : "
       curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
       echo
