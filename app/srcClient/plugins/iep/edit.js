@@ -103,14 +103,14 @@ module.exports = function edit (ressource) {
       var xmlElt = formEditor.addTextarea(
         xmlWrapper,
         { name: 'parametres[xml]', cols: 80, rows: 20, style: { resize: 'both' } },
-        { label: 'Script instrumenpoche' }
+        { label: 'Script instrumenpoche', content: parametres.xml }
       )
       $xmlElt = $(xmlElt)
       $('form#formRessource').submit(function () {
         var url = $parametresUrl.val()
         var xml = $xmlElt.val()
         var retour = false
-        if (url && /https?:\/\/[a-z][a-z0-9\-_\.]+\.[a-z]+\/.+/.test(url)) retour = true
+        if (url && /https?:\/\/[a-z][a-z0-9\-_.]+\.[a-z]+\/.+/.test(url)) retour = true
         else if (url) page.addError('Url invalide')
         else if (xml) retour = true
         else page.addError('Il faut au moins une url ou un script')
