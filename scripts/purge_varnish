@@ -2,8 +2,8 @@
 set -u
 
 # relatif à dirApp
-LAST_FILE=_private/purge_varnish.last
-CONFIG=_private/config.js
+LAST_FILE=../_private/purge_varnish.last
+CONFIG=../_private/config.js
 
 dirInitial="$PWD"
 dirApp=$(dirname $0)/../app
@@ -25,11 +25,11 @@ function purge_varnish() {
   local baseUrl=$(node -e "var c = require('./' + '$CONFIG'); console.log(c.application.baseUrl)")
   local findOpt=''
   [ -f $LAST_FILE ] && findOpt="-newer $LAST_FILE"
-  if [ -z "$vhost" ]
+  if [ -z "$baseUrl" ]
   then
     echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
   else
-
+    # on est dans app
     find */public -type f $findOpt | while read file
     do
       url=$baseUrl${file#*public} # on démarre au / qui suit build
@@ -55,3 +55,4 @@ done
 
 cd "$dirApp"
 purge_varnish
+cd "$dirInitial" 2>/dev/null
