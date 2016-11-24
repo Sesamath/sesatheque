@@ -258,3 +258,11 @@ body {min-width: 300px;}
 }
 /* On écrase ces valeurs de knacss qui nous plaisent pas */
 label {cursor: inherit;}
+/* pour les pointillés que firefox ajoute sur les button
+cf http://stackoverflow.com/questions/5517744/remove-extra-button-spacing-padding-in-firefox
+(mais pour iep les boutons de zoom restent rectangles et moches) */
+button::-moz-focus-inner {
+  padding: 0;
+  margin:0;
+  border: 0;
+}
