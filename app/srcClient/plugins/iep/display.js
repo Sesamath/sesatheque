@@ -52,16 +52,36 @@ module.exports = function display (ressource, options, next) {
    * @param xml
    */
   function affiche (xml) {
+    function scale (ratio) {
+      console.log('ratio ' + ratio, width * ratio, height * ratio)
+      svg.setAttribute('style', 'display:inline-block;margin:0;padding:0;transform-origin:0px 0px 0px;' +
+        'transform:scale(' + ratio + ');')
+      // après avoir appliqué le transform en css, il faut aussi fixer la taille en css
+      // pour que le reste autour s'adapte, changer les attributs width et height ne modifie pas le rendu
+      // mais il faut fixer ça sur le parent, sinon ça déborde aussi
+      // (le navigateur applique à la taille fixée la transformation)
+      container.setAttribute('style', 'position:relative;margin:0;width:' + Math.round(width * ratio) + 'px;' +
+        'height:' + Math.round(height * ratio) + 'px')
+      // faut réaffecter les styles aux boutons, sinon on perd le z-index, pourquoi, ça…
+      var styleButton = 'position:absolute;z-index:99;text-align:center;padding:0;width:1.8em;height:1.8em;left:0.1em;-moz-padding:-2px;'
+      buttonZoomOut.setAttribute('style', styleButton + 'top:0.1em')
+      buttonZoomIn.setAttribute('style', styleButton + 'top:2em')
+    }
     // log('on va afficher le xml : ' +xml)
     // faut mettre du https partout si on est en https
     if (window.location.protocol === 'https:') {
       xml = xml.replace(/http:/g, 'https:')
     }
-    // On réinitialise le conteneur
-    dom.empty(container)
     var error
     var width = ressource.parametres.width || container.offsetWidth || 800
     var height = ressource.parametres.height || width * 0.75 || 600
+    // On réinitialise le conteneur
+    dom.empty(container)
+    // que l'on positionne (pour que le absolute des enfants se fasse par rapport à lui), avec d'éventuelle scroll
+    dom.setStyles(container, {position: 'relative'})
+    // on ajoute nos boutons de zoom
+    var buttonZoomIn = dom.addElement(container, 'button', {}, '+')
+    var buttonZoomOut = dom.addElement(container, 'button', {}, '-')
     // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
     // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
     // et surtout pas mettre de https ici !
@@ -69,9 +89,22 @@ module.exports = function display (ressource, options, next) {
     var svg = document.createElementNS(ns, 'svg')
     svg.setAttribute('width', width)
     svg.setAttribute('height', height)
-    dom.setStyles(svg, {display: 'block'})
-    // dom.setStyles(container, {height: height + 'px', width: width + 'px'})
+    // var svgContainer = dom.addElement(container, 'div')
     container.appendChild(svg)
+
+    // on passe au contrôle du zoom
+    var ratio = 1
+    buttonZoomOut.addEventListener('click', function () {
+      ratio *= 0.9
+      scale(ratio)
+    }, false)
+    buttonZoomIn.addEventListener('click', function () {
+      ratio *= 1.1
+      scale(ratio)
+    }, false)
+    // init des styles
+    scale(ratio)
+
     if (window.iep.iepApp) {
       var app = new window.iep.iepApp() // eslint-disable-line new-cap
       app.addDoc(svg, xml)
