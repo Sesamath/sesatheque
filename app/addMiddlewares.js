@@ -68,14 +68,24 @@ module.exports = function afterRailSession (rail) {
    * Ajout du CORS
    */
   applog('adding middleware', 'CORS')
+  var knownOrigins = {}
   rail.use('/', function (req, res, next) {
     var origin = req.header('Origin')
     // le public est mis en cache, faut donc autoriser pour tout le monde (sinon faut filtrer sur varnish)
     if (tools.isStatic(req.url) || tools.isPublic(req.url)) {
       res.header('Access-Control-Allow-Origin', '*')
     } else if (origin) {
-      // ça dépend de l'appelant
-      if (/https?:\/\/([^/]+\.)?(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)) {
+      // ça dépend de l'appelant, on regarde ceux que l'on a déjà autorisé
+      var isKnown = knownOrigins[origin]
+      // ceux-là sont toujours autorisés
+      if (!isKnown) {
+        isKnown = /https?:\/\/([^/]+\.)?(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)
+        // si pas trouvé, on autorise aussi les sesalab déclarés en configuration
+        if (!isKnown && config.sesalabs && config.sesalabs.length) isKnown = config.sesalabs.some((sesalab) => sesalab.baseUrl && sesalab.baseUrl === origin + '/')
+        // et on ajoute si trouvé pour pas chercher la prochaine fois
+        if (isKnown) knownOrigins[origin] = true
+      }
+      if (isKnown) {
         res.header('Access-Control-Allow-Origin', origin)
         res.header('Access-Control-Allow-Credentials', 'true')
 
@@ -99,7 +109,7 @@ module.exports = function afterRailSession (rail) {
         if (req.method === 'OPTIONS' && req.headers['access-control-request-headers']) {
           res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
         } /* */
-      } else if (origin.substr(0, 4) !== 'http') {
+      } else if (origin.substr(0, 7) === 'file://') {
         // pour le moment on accepte les requete depuis du file:// pour autoriser editgraphe de j3p en local
         res.header('Access-Control-Allow-Origin', origin)
         res.header('Access-Control-Allow-Credentials', 'true')
