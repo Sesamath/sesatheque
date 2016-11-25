@@ -64,8 +64,8 @@ module.exports = function display (ressource, options, next) {
         'height:' + Math.round(height * ratio) + 'px')
       // faut réaffecter les styles aux boutons, sinon on perd le z-index, pourquoi, ça…
       var styleButton = 'position:absolute;z-index:99;text-align:center;padding:0;width:1.8em;height:1.8em;left:0.1em;-moz-padding:-2px;'
-      buttonZoomOut.setAttribute('style', styleButton + 'top:0.1em')
-      buttonZoomIn.setAttribute('style', styleButton + 'top:2em')
+      buttonZoomIn.setAttribute('style', styleButton + 'top:0.1em')
+      buttonZoomOut.setAttribute('style', styleButton + 'top:2em')
     }
     // log('on va afficher le xml : ' +xml)
     // faut mettre du https partout si on est en https
