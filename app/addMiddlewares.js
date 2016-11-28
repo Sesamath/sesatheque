@@ -53,7 +53,7 @@ module.exports = function afterRailSession (rail) {
    * En dev, ajout des requetes http en console et dans le log de debug
    */
   if (!isProd) {
-    applog('adding middleware', 'access log en console (car on est pas en prod)')
+    applog('adding middleware', 'ajout access log en console (car on est pas en prod)')
     rail.use('/', function (req, res, next) {
       // les requetes non statiques en console et debug
       if (!/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
@@ -160,7 +160,9 @@ module.exports = function afterRailSession (rail) {
       // morgan.token('moment', function () {
       //   return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
       // })
-      format = 'combined'
+      // on met pas ça, car si on ajoute le :post plus loin ça marche plus
+      // format = 'combined'
+      format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
       /** Les options morgan */
       var options = {
         skip: function (req) {
