@@ -59,8 +59,9 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
     }
     if (isLogged && context.get.ressourceId) {
       $ressourceRepository.load(context.get.ressourceId, function (error, ressource) {
-        if (error) log.error(error)
-        else if (ressource) {
+        if (error) {
+          log.error(error)
+        } else if (ressource) {
           if ($accessControl.hasPermission('delete', context, ressource)) auth.permissions += 'D'
           if ($accessControl.hasPermission('update', context, ressource)) auth.permissions += 'W'
         }

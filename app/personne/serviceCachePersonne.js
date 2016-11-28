@@ -76,7 +76,7 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cachePersonne
    */
   $cachePersonne.set = function (personne, next) {
-    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl, log.error)
+    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl)
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }
 

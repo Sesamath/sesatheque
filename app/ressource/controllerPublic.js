@@ -257,7 +257,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   body: body,
                   contentType: response.headers['content-type'] || 'text/html'
                 }
-                $cache.set('urlProxy' + oid, page, 600, log.error)
+                $cache.set('urlProxy' + oid, page, 600)
                 sendRawHtml(page.body, page.contentType)
               } else {
                 context.text('Impossible de récupérer la page ' + url)

@@ -657,7 +657,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         } else {
           var isSesamath = false
           hostnames.forEach(function (hostname) {
-            if (/^([^\.]+\.)?(dev)?sesamath.net$/.test(hostname)) isSesamath = true
+            if (/^([^.]+\.)?(dev)?sesamath.net$/.test(hostname)) isSesamath = true
           })
           next(null, isSesamath)
         }
