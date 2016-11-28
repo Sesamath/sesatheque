@@ -153,10 +153,14 @@ module.exports = function afterRailSession (rail) {
       })
       /** le format morgan */
       var format = ':moment :method :url :status :res[content-length] :response-time ms'
-      // def de notre token moment
-      morgan.token('moment', function () {
-        return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
-      })
+      // cf https://www.npmjs.com/package/morgan
+      // combined => :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"
+      // common => :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]
+      // def de notre token :moment
+      // morgan.token('moment', function () {
+      //   return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
+      // })
+      format = 'combined'
       /** Les options morgan */
       var options = {
         skip: function (req) {
