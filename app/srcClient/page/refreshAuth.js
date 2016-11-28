@@ -100,13 +100,21 @@ module.exports = function refreshAuth () {
           if (response.permissions.indexOf('D') > -1) dom.setStyles(document.getElementById('buttonDelete'), {display: 'block'})
           if (response.permissions.indexOf('W') > -1) dom.setStyles(document.getElementById('buttonEdit'), {display: 'block'})
         }
-        // la navigation
-        if (response.permissions.indexOf('C') > -1) dom.setStyles(document.getElementById('buttonAdd'), {display: 'inline-block'})
-        var buttonMyRessources = document.getElementById('buttonMyRessources')
-        if (buttonMyRessources && response.oid) {
-          buttonMyRessources.href += response.oid
-          dom.setStyles(buttonMyRessources, {display: 'inline-block'})
+        // et la navigation du header
+        if (response.permissions.indexOf('C') !== -1) {
+          // bouton ajouter une ressource
+          dom.setStyles(document.getElementById('buttonAdd'), {display: 'inline-block'})
+          // bouton mes ressources
+          var buttonMyRessources = document.getElementById('buttonMyRessources')
+          if (buttonMyRessources && response.oid) {
+            buttonMyRessources.href += response.oid
+            dom.setStyles(buttonMyRessources, {display: 'inline-block'})
+          }
         }
+        // bouton mes groupes
+        var buttonMyGroupes = document.getElementById('buttonMyGroupes')
+        if (buttonMyGroupes) dom.setStyles(buttonMyRessources, {display: 'inline-block'})
+        // url de la recherche
         var buttonSearch = document.getElementById('buttonSearch')
         if (buttonSearch) buttonSearch.href = buttonSearch.href.replace('public', 'ressource')
       }
