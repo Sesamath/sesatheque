@@ -178,8 +178,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         request({
           method: 'PURGE',
           url: url
-        }, function (response) {
-          if (response.status !== 200) log.error('purge KO pour ' + url)
+        }, function (error, response) {
+          if (error || response.status !== 200) log.error('purge KO pour ' + url, error)
           log.debug('purge ' + url + ' ' + response.status)
         })
       })
