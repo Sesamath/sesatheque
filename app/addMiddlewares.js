@@ -165,6 +165,7 @@ module.exports = function afterRailSession (rail) {
       format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
       /** Les options morgan */
       var options = {
+        format: format,
         skip: function (req) {
           var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
           var i = req.url.lastIndexOf('.')
@@ -181,7 +182,7 @@ module.exports = function afterRailSession (rail) {
         format += ' :post'
       }
       applog('adding middleware', 'access.log with ' + accessLog)
-      rail.use('/', morgan(format, options))
+      rail.use('/', morgan(options))
     } else {
       log.error("Impossible d'ouvrir le log " + accessLog)
     }
