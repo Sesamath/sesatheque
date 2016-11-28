@@ -44,10 +44,6 @@ else homeContent = 'Ce site est encore un prototype expérimental.'
  * @Controller controllerMain
  */
 module.exports = function (controller) {
-  var baseData = {
-    $metas: {}
-  }
-
   // nos ressources statiques génériques
   controller.serve(path.join(__dirname, 'public'))
 
@@ -57,15 +53,14 @@ module.exports = function (controller) {
    */
   controller.get('/', function (context) {
     context.layout = 'page'
-    var data = baseData
-    // log('le contexte dans le controleur de main, action /',context)
-    data.$metas.title = config.application.homeTitle
-    // ce contentBloc est le nom du bloc du layout qui récupèrera le rendu de la vue
-    data.contentBloc = {
-      $view: 'contents',
-      // ce content est la variable passée au template dust
-      contents: [homeContent]
-    }
-    context.html(data)
+    context.html({
+      $metas: {
+        title: config.application.homeTitle
+      },
+      contentBloc: {
+        $view: 'contents',
+        contents: [homeContent]
+      }
+    })
   })
 }

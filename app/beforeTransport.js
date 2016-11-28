@@ -300,11 +300,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       // on ajoute d'éventuels messages flash si on est en html (erreur ou pas)
       var flashData = $flashMessage.getAndPurge(context)
       if (flashData) _.merge(data, flashData)
-      // et impose une vue en absolu à errors et warnings
-      if (!data.$metas) data.$metas = {}
-      if (!data.$metas.css) data.$metas.css = []
-      if (context.layout === 'iframe') data.$metas.css.push('/styles/iframe.css')
-      else data.$metas.css.push('/styles/page.css')
       // s'il n'y est pas, on met le titre en data pour que le layout l'affiche aussi (l'appelant peut en mettre 2 ≠)
       if (data.$metas.title && !data.titre) {
         data.titre = data.$metas.title
