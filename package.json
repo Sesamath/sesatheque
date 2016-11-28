@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "engines": {
     "node": ">4.4.0"
   },
@@ -57,7 +57,7 @@
     "lodash": "4.16.4",
     "memcached": "^2.1.0",
     "moment": "2.15.1",
-    "morgan": "1.1.1",
+    "morgan": "1.7.0",
     "request": "2.75.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.0",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.3",

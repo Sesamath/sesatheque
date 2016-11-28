@@ -151,18 +151,18 @@ module.exports = function afterRailSession (rail) {
       lassi.on('shutdown', function () {
         logAccessWriteStream.end()
       })
-      /** le format morgan */
-      var format = ':moment :method :url :status :res[content-length] :response-time ms'
       // cf https://www.npmjs.com/package/morgan
-      // combined => :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"
-      // common => :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]
-      // def de notre token :moment
-      // morgan.token('moment', function () {
-      //   return moment().format('YYYY-MM-DD HH:mm:ss.SSS')
-      // })
-      // on met pas ça, car si on ajoute le :post plus loin ça marche plus
-      // format = 'combined'
-      format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+      // on met pas la forme réduite "combined", car si on ajoute le :post plus loin ça marche plus
+      var format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+      // on réécrit le token remote-addr pour prendre x-real-ip en premier s'il existe
+      morgan.token('remote-addr', function (req) {
+        if (req.headers && req.headers['x-real-ip']) return req.headers['x-real-ip']
+        // le reste est la fct originale, cf node_modules/morgan/index.js
+        if (req.ip) return req.ip
+        if (req._remoteAddress) return req._remoteAddress
+        if (req.connection) return req.connection.remoteAddress
+        return undefined
+      })
       /** Les options morgan */
       var options = {
         format: format,
