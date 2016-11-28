@@ -209,6 +209,9 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param data
    */
   function errorHandler (context, data) {
+    // apparemment y'a des cas où ça boucle…
+    if (context.errorHandled) return log.error(new Error('2e passage dans errorHandler'))
+    context.errorHandled = true
     var reqHttp = getReqHttp(context)
     var isJson = getIsJson(context)
     var isHtml = getIsHtml(context)
