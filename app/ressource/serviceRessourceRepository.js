@@ -180,7 +180,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           method: 'PURGE',
           url: base + url.substr(1) // pour pas avoir de double slash
         }, function (error, response) {
-          if (error || !response || response.status !== 200) {
+          if (error || !response || response.statusCode !== 200) {
             if (error) {
               log.error('purge KO pour ' + url, error)
             } else {
@@ -188,7 +188,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
               log.error('avec le body', arguments[2])
             }
           }
-          log.debug('purge ' + url + ' ' + (response && response.status))
+          log.debug('purge ' + url + ' ' + (response && response.statusCode))
         })
       })
     }
