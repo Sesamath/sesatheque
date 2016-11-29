@@ -167,6 +167,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @returns {{}}
    */
   function purgeVarnish (ressource) {
+    var base = appConfig.application.baseUrl
     // on ne purge que les ressources publiques (les autres ne sont pas en cache)
     if (appConfig.varnish && ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
       [
@@ -177,7 +178,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       ].forEach(function (url) {
         request({
           method: 'PURGE',
-          url: url
+          url: base + url.substr(1) // pour pas avoir de double slash
         }, function (error, response) {
           if (error || !response || response.status !== 200) {
             if (error) {
@@ -187,7 +188,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
               log.error('avec le body', arguments[2])
             }
           }
-          log.debug('purge ' + url + ' ' + response && response.status)
+          log.debug('purge ' + url + ' ' + (response && response.status))
         })
       })
     }
