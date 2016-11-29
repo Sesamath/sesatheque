@@ -19,7 +19,7 @@
     "build-watch": "webpack --debug --verbose -w",
     "deploy-dev": "pm2 _private/pm2Deploy.json5 dev",
     "lint": "standard --verbose | snazzy",
-    "maj": "git pull && npm install && npm build && npm start",
+    "maj": "git pull && npm install && npm run build",
     "startClient": "hjs-dev-server",
     "dev": "./scripts/run -sd",
     "prod": "./scripts/run -sp",
