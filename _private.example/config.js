@@ -53,6 +53,17 @@ module.exports = {
       secret: 'ap68!&nVGq§ot' // en mettre un autre dans _private/config !
     }
   },
+  /* pour modifier le comportement par défaut on peut préciser ici qq overrides,
+  cf app/config.js pour les valeurs par défaut
+  par ex pour empêcher un formateur de créer des groupes ou des ressources
+  components: {
+    personne: {
+      roles: {
+        formateur: {create: false, createGroupe: false}
+      }
+    }
+  },
+   */
   logs: {
     debugExclusions: ['cache'],
     perf: 'perf.log'

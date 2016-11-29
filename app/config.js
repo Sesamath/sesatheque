@@ -126,8 +126,8 @@ var config = {
         // les droits sont dans l'absolu, mais il peut y avoir des modifications liées au contexte
         // (on a toujours le droit de modifier un contenu dont on serait le seul auteur,
         // pas de droits read sur les ressources privées sauf les siennes, etc.)
-        admin: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true}, // eslint-disable-line eqeqeq
-        editeur: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true}, // jshint ignore:line
+        admin: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true},
+        editeur: {create: true, createAll: true, read: true, update: true, updateAuteurs: true, updateGroupes: true, delete: true, deleteVersion: true, index: true, publish: true, correction: true, createGroupe: true},
         indexateur: {index: true, createGroupe: true},
         formateur: {create: true, read: true, createGroupe: true},
         acces_correction: {correction: true},

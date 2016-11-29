@@ -693,10 +693,11 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         groupe.ouvertString = groupe.ouvert ? 'ouvert' : 'fermé'
         groupe.publicString = groupe.public ? 'public' : 'privé'
       })
+      // le lien pour ajouter un groupe
       blocList.push({
         partialView: '../groupes',
         titre: 'Groupes dont je suis gestionnaire',
-        contents: [ '<a href="/groupe/ajouter">Créer un groupe</a>' ],
+        contents: $accessControl.hasGenericPermission('createGroupe', context) ? [ '<a href="/groupe/ajouter">Créer un groupe</a>' ] : '',
         groupes: groupesManaged,
         defaultMessage: 'aucun groupe'
       })

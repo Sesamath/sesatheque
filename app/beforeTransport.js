@@ -128,22 +128,15 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    */
   function addNavigation (context, data) {
     var links = []
+    var canCreate = $accessControl.hasPermission('create', context)
+    var myOid = $accessControl.getCurrentUserOid(context) || ''
     // lien ajout
-    if ($accessControl.hasPermission('create', context)) {
-      /* @todo : voir si on peut superposer, mais ce code marche pas, pb de float, faudrait revoir les autres css
-      links.push({
-        href: $routes.getAbs('create'),
-        value: 'Ajouter une ressource',
-        iconStack: ['file-o fa-stack-2x', 'plus fa-stack-1x'] // ma note_add
-      })
-      /* */
-    }
     links.push({
       id: 'buttonAdd',
       href: $routes.getAbs('create', null, context),
       value: 'Ajouter une ressource',
       icon: 'plus-circle',
-      hidden: !$accessControl.hasPermission('create', context)
+      hidden: !canCreate
     })
     // un lien vers la recherche
     links.push({
@@ -153,13 +146,12 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       icon: 'search'
     })
     // un lien mes ressources
-    var myOid = $accessControl.getCurrentUserOid(context) || ''
     links.push({
       id: 'buttonMyRessources',
       href: $routes.getAbs('search', null, context) + '?auteurs=' + myOid,
       value: 'Mes ressources',
       icon: 'bookmark-o',
-      hidden: !myOid
+      hidden: !canCreate
     })
     // mes groupes
     links.push({

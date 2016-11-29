@@ -13,6 +13,11 @@ Installation
 
 Cf INSTALL.md à la racine du projet
 
+Mise à jour
+-----------
+
+`npm run maj` va récupérer les dernières sources et reconstruire le js client. 
+
 Framework Lassi
 ---------------
 
