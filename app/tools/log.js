@@ -233,7 +233,7 @@ if (config.logs.perf) {
     var timer = !noTimer
     if (response.perf && response.perf.msg) {
       response.perf.msg += '\t' + strToAdd
-      if (timer) response.perf.msg += ' ' + log.getElapsed(response.perf.start)
+      if (timer) response.perf.msg += ' ' + log.getElapsed(response.perf.start) + 'ms'
     }
   }
   /**

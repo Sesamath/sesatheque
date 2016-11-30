@@ -389,7 +389,8 @@ var ressourceConfig = {
       edit: 'modifier',
       describe: 'decrire',
       delete: 'supprimer',
-      search: 'rechercher'
+      search: 'rechercher',
+      viewHistory: 'voirHistorique'
     }
   }, // fin constantes
   /**

@@ -72,7 +72,7 @@ module.exports = function ($accessControl) {
     var id
     var isPublic = true
     if (ressource) {
-      if (typeof ressource === 'object') id = ressource.oid || ressource.ref || ressource.idOrigine
+      if (typeof ressource === 'object') id = ressource.oid || ressource.ref || (ressource.origine && ressource.idOrigine && ressource.origine + '/' + ressource.idOrigine)
       else id = ressource
       if (ressource.restriction || $accessControl.isAuthenticated(context)) isPublic = false
     } else if ($accessControl.isAuthenticated(context)) {

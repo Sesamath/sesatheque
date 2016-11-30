@@ -771,7 +771,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   $ressourcePage.prepareAndSend = function (context, error, ressource, view, options) {
     /**
-     * envoie la ressource à la vue (en ajoutant menu si besoin
+     * envoie la ressource à la vue
      * @private
      * @param error
      */
@@ -792,28 +792,37 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         if (view === 'display') {
           addJsVars(data, ressource)
           data.contentBloc.isFormateur = $accessControl.hasRole('acces_correction', context)
-        } else if (view === 'describe' && ressource && ressource.type === 'arbre') {
-          // on ajoute la liste des urls des enfants si on les a
-          if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
-            var enfantsDescribe = []
-            ressource.enfants.forEach(function (enfant) {
-              if (enfant.ref) {
-                var url = $routes.getAbs('describe', enfant.ref)
-                if (enfant.baseId) {
-                  var base = sesatheques.getBase(enfant.baseId)
-                  if (base) {
-                    if (base.substr(-1) === '/') base = base.substr(0, base.length - 1)
-                    url = base + url
+        } else if (view === 'describe' && ressource) {
+          // ajout des enfants pour les arbres
+          if (ressource.type === 'arbre') {
+            // on ajoute la liste des urls des enfants si on les a
+            if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
+              var enfantsDescribe = []
+              ressource.enfants.forEach(function (enfant) {
+                if (enfant.ref) {
+                  var url = $routes.getAbs('describe', enfant.ref)
+                  if (enfant.baseId) {
+                    var base = sesatheques.getBase(enfant.baseId)
+                    if (base) {
+                      if (base.substr(-1) === '/') base = base.substr(0, base.length - 1)
+                      url = base + url
+                    }
                   }
+                  enfantsDescribe.push({
+                    oid: enfant.ref,
+                    titre: enfant.titre,
+                    url: url
+                  })
                 }
-                enfantsDescribe.push({
-                  oid: enfant.ref,
-                  titre: enfant.titre,
-                  url: url
-                })
-              }
-            })
-            data.contentBloc.enfantsDescribe = enfantsDescribe
+              })
+              data.contentBloc.enfantsDescribe = enfantsDescribe
+            }
+          }
+          // ajout du lien vers l'historique
+          if (ressource.version > 1) {
+            data.contentBloc.history = {
+              url: $routes.getAbs('history', ressource.oid)
+            }
           }
         }
         // pour les boutons d'actions ajoutés dans beforeTransport on ajoute la ressource à context
@@ -892,7 +901,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (options) sjtObj.merge(data, options)
       // le titre
       if (ressource.new) {
-        data.$metas.title = 'Créer une ressource ' + ressource.titre
+        data.$metas.title = 'Créer une ressource'
         data.contentBloc.type.choices.unshift({label: 'Choisir le type', value: ''})
       } else {
         data.$metas.title = 'Modifier la ressource ' + ressource.titre
