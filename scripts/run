@@ -58,13 +58,13 @@ function startPm2() {
   retour=$?
 }
 
+# sans options on va pas plus loin
+[ $# -lt 1 ] && usage
+
 # on veut exécuter fin avant de sortir
 trap fin EXIT
 
 cd "$dirApp"
-
-# sans options on lance en dev
-[ $# -lt 1 ] && nodeEnv='dev' && runPm2
 
 # check des options
 runNode='no'
