@@ -316,7 +316,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       } else {
         log.debug('faut ajouter des titres de relations', ressource.relations)
         var fluxRelations = flow(ressource.relations)
-        fluxRelations.parEach(2, function (relation, index) {
+        fluxRelations.seqEach(function (relation, index) {
           var nextSeq = this
           $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
             if (error) {
