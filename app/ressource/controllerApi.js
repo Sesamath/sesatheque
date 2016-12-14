@@ -425,7 +425,6 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
       }
       $json.send(context, null, ressource)
     } else {
-      log.debug('lecture ko', ressource, 'avirer', {max: 5000})
       $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
     }
   }
