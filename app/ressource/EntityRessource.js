@@ -128,10 +128,30 @@ module.exports = function (EntityRessource) {
     .defineIndex('dateMiseAJour', 'date')
 
   EntityRessource.beforeStore(function (next) {
+    // on vire un éventuel token
     if (this.token) delete this.token
+    // check de la paire origine / idOrigine
     if (this.origine && !this.idOrigine) {
       if (this.origine === 'local') this.idOrigine = uuid()
-      else log.errorData('ressource avec origine sans idOrigine', this)
+      else throw new Error('ressource avec origine sans idOrigine')
+    } else if (this.idOrigine && !this.origine) {
+      throw new Error('ressource avec idOrigine ' + this.idOrigine + ' sans origine')
+    }
+    // check des relations
+    if (this.relations && this.relations.length) {
+      var id = this.oid || (this.origine && this.origine + this.idOrigine) || this.titre
+      // on gère l'unicité avec un objet Map, en prenant une string qui concatene
+      // les deux éléments de la relation comme clé
+      var relations = new Map()
+      this.relations.forEach(function (relation) {
+        if (Array.isArray(relation) && relation.length === 2) relations.set('' + relation[0] + relation[1], relation)
+        else log.errorData('relation invalide dans ' + id, relation)
+      })
+      // on ne parse le Map que s'il y avait des doublons
+      if (relations.size < this.relations.length) {
+        this.relations = Array.from(relations.values())
+        log.errorData('Il y avait des relations en double (ou invalides) dans ' + id)
+      }
     }
     next()
   })
