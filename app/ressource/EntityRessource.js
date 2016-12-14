@@ -100,7 +100,6 @@ module.exports = function (EntityRessource) {
     })
     // pour les arbres on veut avoir tous les enfants qu'ils contiennent (toutes générations comprises)
     .defineIndex('enfants', 'string', function () {
-      var refsEnfants, enfant, i
       function addRefsEnfants (enfants) {
         for (i = 0; i < enfants.length; i++) {
           enfant = enfants[i]
@@ -108,10 +107,13 @@ module.exports = function (EntityRessource) {
           else if (enfant.oid) refsEnfants.push(enfant.oid)
         }
       }
+      var refsEnfants, enfant, i
+
       if (this.enfants && this.enfants.length) {
         refsEnfants = []
         addRefsEnfants(this.enfants)
       }
+
       return refsEnfants
     })
     .defineIndex('auteurs', 'string')
