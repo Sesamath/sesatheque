@@ -308,7 +308,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var fluxComplements = flow()
 
     // étape relations
-    ressource._relations = []
+    ressource._relations = [] // clé pour la vue, avec tag <a> et type
     fluxComplements.seq(function () {
       var nextComplement = this
       if (_.isEmpty(ressource.relations)) {
@@ -321,14 +321,14 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
             if (error) {
               log.error(error)
-              ressource._warnings.push(error)
+              ressource._warnings.push(error.toString())
             } else if (ressourceLiee) {
               // on ajoute le tag a et le type
-              ressource._relations[index].push($routes.getTagA('describe', ressourceLiee))
-              ressource._relations[index].push(ressourceLiee.type)
+              ressource._relations.push([$routes.getTagA('describe', ressourceLiee), ressourceLiee.type])
             } else {
-              log.errorData(error)
-              ressource._warnings.push('la ressource liée ' + relation[1] + " n'existe pas")
+              var msg = 'la ressource ' + ressource.oid + ' est liée à ' + relation[1] + ' qui n’existe pas'
+              ressource._warnings.push(msg)
+              log.errorData(msg)
             }
             nextSeq()
           })
