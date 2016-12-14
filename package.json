@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.57",
+  "version": "0.0.58",
   "engines": {
     "node": ">4.4.0"
   },
@@ -53,7 +53,7 @@
     "an-log": "^3.0.4",
     "an-uuid": "^1.0.0",
     "elementtree": "0.1.6",
-    "lassi": "git://src.sesamath.net/lassi#testMysql",
+    "lassi": "git://src.sesamath.net/lassi#2.0.12",
     "lodash": "4.16.4",
     "memcached": "^2.1.0",
     "moment": "2.15.1",
