@@ -153,7 +153,8 @@ module.exports = function afterRailSession (rail) {
       })
       // cf https://www.npmjs.com/package/morgan
       // on met pas la forme réduite "combined", car si on ajoute le :post plus loin ça marche plus
-      var format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+      // et de toute façon on ajoute :response-time (en ms, un seul chiffre après la virgule)
+      var format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :response-time[1]'
       // on réécrit le token remote-addr pour prendre x-real-ip en premier s'il existe
       morgan.token('remote-addr', function (req) {
         if (req.headers && req.headers['x-real-ip']) return req.headers['x-real-ip']
