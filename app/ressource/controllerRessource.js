@@ -195,7 +195,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           }
         }
         // on ne garde que le nom de domaine en origine
-        var domaine = /https?:\/\/([a-z\.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
+        var domaine = /https?:\/\/([a-z.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
         request.post(postOptions, function (error, response, body) {
           if (error) {
             end(error)
@@ -522,6 +522,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           this(error)
         }
       }).seq(function (ressource) {
+        // on remet les relations, qui sont pas éditables
+        ressource.relations = ressourceOriginale.relations
         // faut remettre auteursAdd et contributeursAdd virés à la validation (pas des champs de ressource)
         if (ressourcePostee.auteursAdd) ressource.auteursAdd = ressourcePostee.auteursAdd
         if (ressourcePostee.contributeursAdd) ressource.contributeursAdd = ressourcePostee.contributeursAdd

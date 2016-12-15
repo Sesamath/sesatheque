@@ -133,9 +133,9 @@ module.exports = function (EntityRessource) {
     // check de la paire origine / idOrigine
     if (this.origine && !this.idOrigine) {
       if (this.origine === 'local') this.idOrigine = uuid()
-      else throw new Error('ressource avec origine sans idOrigine')
+      else return next(new Error('ressource avec origine sans idOrigine'))
     } else if (this.idOrigine && !this.origine) {
-      throw new Error('ressource avec idOrigine ' + this.idOrigine + ' sans origine')
+      return next(new Error('ressource avec idOrigine ' + this.idOrigine + ' sans origine'))
     }
     // check des relations
     if (this.relations && this.relations.length) {

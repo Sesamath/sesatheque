@@ -305,37 +305,40 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   function enhance (ressource, next) {
     // faut aller chercher en asynchrone les infos complémentaires pour la vue describe
     // (éventuels titres de ressources liées, auteurs ou groupes)
+    // on ajoute ces valeurs enrichies dans un champ préfixé par _ que termine utilisera
     var fluxComplements = flow()
 
     // étape relations
-    ressource._relations = [] // clé pour la vue, avec tag <a> et type
+    ressource._relations = []
     fluxComplements.seq(function () {
       var nextComplement = this
       if (_.isEmpty(ressource.relations)) {
+        log.debug('pas de relations')
         nextComplement()
       } else {
         log.debug('faut ajouter des titres de relations', ressource.relations)
         var fluxRelations = flow(ressource.relations)
-        fluxRelations.seqEach(function (relation, index) {
-          var nextSeq = this
+        fluxRelations.seqEach(function (relation) {
+          var nextRelation = this
           $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
             if (error) {
               log.error(error)
-              ressource._warnings.push(error.toString())
             } else if (ressourceLiee) {
-              // on ajoute le tag a et le type
-              ressource._relations.push([$routes.getTagA('describe', ressourceLiee), ressourceLiee.type])
+              ressource._relations.push({
+                predicat: config.listes.relations[relation[0]],
+                lien: $routes.getTagA('describe', ressourceLiee),
+                oid: ressourceLiee.oid,
+                type: ressourceLiee.type
+              })
             } else {
-              var msg = 'la ressource ' + ressource.oid + ' est liée à ' + relation[1] + ' qui n’existe pas'
-              ressource._warnings.push(msg)
-              log.errorData(msg)
+              log.errorData('la ressource ' + ressource.oid + ' est liée à ' + relation[1] + ' qui n’existe pas')
             }
-            nextSeq()
+            nextRelation()
           })
         })
         // on a tout chargé
         fluxRelations.seq(function () {
-          log.debug('on a ajouté les titres des relations', ressource.relations)
+          log.debug('on a ajouté les titres des relations', ressource._relations)
           nextComplement()
         })
         fluxRelations.catch(function (e) {
@@ -354,12 +357,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       } else {
         var fluxAuteurs = flow(ressource.auteurs)
         fluxAuteurs.seqEach(function (auteurId) {
-          var nextSeq = this
+          var nextAuteur = this
           $personneRepository.load(auteurId, function (error, personne) {
             if (error) log.error(error)
             else if (personne) ressource._auteurs.push({nom: personne.prenom + ' ' + personne.nom})
             else ressource._auteurs.push({nom: 'auteur ' + auteurId + ' inconnu'})
-            nextSeq()
+            nextAuteur()
           })
         })
         fluxAuteurs.seq(function () {
@@ -382,12 +385,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         log.debug('av parSeq', ressource.contributeurs)
         var fluxContributeurs = flow(ressource.contributeurs)
         fluxContributeurs.seqEach(function (contributeurId) {
-          var nextSeq = this
+          var nextContributeur = this
           $personneRepository.load(contributeurId, function (error, personne) {
             if (error) log.error(error)
             else if (personne) ressource._contributeurs.push({nom: personne.prenom + ' ' + personne.nom})
             else ressource._contributeurs.push({nom: 'contributeur ' + contributeurId + ' inconnu'})
-            nextSeq()
+            nextContributeur()
           })
         })
         fluxContributeurs.seq(function () {
@@ -659,19 +662,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         }
         // on traite chaque type de contenu, Array|Date|le reste
         if (config.typesVar[key] === 'Array') {
-          // cas particulier de relations qui est un tableau de tableaux que l'on remplace par un objet
-          if (key === 'relations' && value.length) {
-            if (value.length && view === 'describe') {
-              viewData.relations.value = []
-              value.forEach(function (relation) {
-                viewData.relations.value.push({
-                  predicat: config.listes.relations[relation[0]],
-                  oid: relation[1],
-                  lien: relation[2],
-                  type: relation[3]
-                })
-              })
-            } // sinon on l'ajoute pas, seul describe s'en sert
+          if (key === 'relations') {
+            // on veut pas passer dans le if config.listes[key]
+            if (ressource._relations) viewData.relations.value = ressource._relations
           } else if (key === 'groupesAuteurs') {
             if (value.length && view === 'describe') {
               if (!viewData.auteurs || !viewData.auteurs.value) {
@@ -852,7 +845,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       var data = $ressourcePage.getDefaultData(view)
 
       if (view === 'describe') {
-        // faut ajouter des infos sur les relations
+        // faut ajouter des infos sur les relations et les auteurs/contributeurs en allant les charger
         enhance(ressource, termine)
       } else {
         termine()

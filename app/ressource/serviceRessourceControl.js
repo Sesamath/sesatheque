@@ -233,6 +233,7 @@ module.exports = function (EntityRessource) {
    */
   $ressourceControl.valide = function (ressource, partial, next) {
     log.debug('ressource dans valide', ressource, 'form', {max: 2000})
+    log.debug('relations', ressource.relations, 'avirer', {max: 2000})
     if (!next) {
       next = partial
       partial = false
