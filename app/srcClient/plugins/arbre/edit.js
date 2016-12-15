@@ -454,24 +454,28 @@ module.exports = function edit (arbre, options) {
       } // loadSrc
 
       /**
-       * Remplace les icones classique des dossiers par une icone 'ref" quand c'est une ref (qui ne montre pas ses enfants)
+       * Remplace l'icone sur un child
+       * @param child
+       */
+      function modifIcoChild (child) {
+        if (child.a_attr && child.a_attr['data-type'] === 'arbre' && child.a_attr['data-ref']) {
+          // on change l'icone
+          child.icon = 'arbreJstNodeRef'
+          // on vire ça pour pas avoir le triangle qui laisse supposer que ça se déplie
+          child.children = []
+        }
+      }
+
+      /**
+       * Remplace récursivement les icones classique des dossiers par une icone 'ref' quand c'est une ref
+       * (qui ne montre pas ses enfants)
        * @private
        * @param jstNode
        */
       function modifIco (jstNode) {
-        // log('modifIco', jstree)
-        if (jstNode.children && jstNode.children.forEach) {
-          jstNode.children.forEach(function (child) {
-            if (child.children && child.children.length) {
-              child.children.forEach(modifIco)
-            } else if (child.a_attr && child.a_attr['data-type'] === 'arbre' && child.a_attr['data-ref']) {
-              // on change l'icone
-              child.icon = 'arbreJstNodeRef'
-              // on vire ça pour pas avoir le triangle qui laisse supposer que ça se déplie
-              child.children = []
-            }
-          })
-        }
+        // console.log('modifIco', jstNode)
+        if (jstNode.children && jstNode.children.length && jstNode.children.forEach) jstNode.children.forEach(modifIco)
+        else modifIcoChild(jstNode)
       }
 
       /**
