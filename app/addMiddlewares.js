@@ -50,26 +50,13 @@ var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les
  */
 module.exports = function afterRailSession (rail) {
   /**
-   * En dev, ajout des requetes http en console et dans le log de debug
-   */
-  if (!isProd) {
-    applog('adding middleware', 'ajout access log en console (car on est pas en prod)')
-    rail.use('/', function (req, res, next) {
-      // les requetes non statiques en console et debug
-      if (!/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
-        applog(req.method, req.originalUrl)
-        log.debug('requete ' + req.method + ' ' + req.originalUrl)
-      }
-      next()
-    })
-  }
-
-  /**
-   * Ajout du CORS
+   * Ajout du CORS (et timestamp dans res.locals.start)
    */
   applog('adding middleware', 'CORS')
   var knownOrigins = {}
   rail.use('/', function (req, res, next) {
+    // un timestamp
+    req.start = moment().format('HH:mm:ss.SSS')
     var origin = req.header('Origin')
     // le public est mis en cache, faut donc autoriser pour tout le monde (sinon faut filtrer sur varnish)
     if (tools.isStatic(req.url) || tools.isPublic(req.url)) {
@@ -154,7 +141,7 @@ module.exports = function afterRailSession (rail) {
       // cf https://www.npmjs.com/package/morgan
       // on met pas la forme réduite "combined", car si on ajoute le :post plus loin ça marche plus
       // et de toute façon on ajoute :response-time (en ms, un seul chiffre après la virgule)
-      var format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :response-time[1]'
+      var format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :response-time[1] :start'
       // on réécrit le token remote-addr pour prendre x-real-ip en premier s'il existe
       morgan.token('remote-addr', function (req) {
         if (req.headers && req.headers['x-real-ip']) return req.headers['x-real-ip']
@@ -164,9 +151,9 @@ module.exports = function afterRailSession (rail) {
         if (req.connection) return req.connection.remoteAddress
         return undefined
       })
+      morgan.token('start', (req) => req.start)
       /** Les options morgan */
       var options = {
-        format: format,
         skip: function (req) {
           var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
           var i = req.url.lastIndexOf('.')
@@ -182,13 +169,27 @@ module.exports = function afterRailSession (rail) {
         })
         format += ' :post'
       }
-      applog('adding middleware', 'access.log with ' + accessLog)
-      rail.use('/', morgan(options))
+      applog('adding middleware', 'access.log', 'with format', accessLog, format)
+      rail.use('/', morgan(format, options))
     } else {
       log.error("Impossible d'ouvrir le log " + accessLog)
     }
   } catch (error) {
     console.error(error.stack)
+  }
+  /**
+   * En dev, ajout des requetes http en console et dans le log de debug
+   */
+  if (!isProd) {
+    applog('adding middleware', 'ajout access log en console (car on est pas en prod)')
+    rail.use('/', function (req, res, next) {
+      // les requetes non statiques en console et debug
+      if (!/\.(js|css|png|jpg|jpeg)/.exec(req.originalUrl)) {
+        applog(req.method, req.originalUrl)
+        log.debug('requete ' + req.method + ' ' + req.originalUrl)
+      }
+      next()
+    })
   }
 
   /**
