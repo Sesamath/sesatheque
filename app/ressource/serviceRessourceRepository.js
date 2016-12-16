@@ -492,7 +492,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    *                                order   : asc ou desc
    *                                start   : L'indice de la 1re valeur à remonter
    *                                nb      : Le nombre de ressources à remonter
-   * @param {Function} next       La callback qui sera appelée en lui passant la liste de ressources en argument
+   * @param {Function} next       La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
    */
   $ressourceRepository.getListe = function getListe (visibilite, options, next) {
     try {
@@ -573,10 +573,18 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         if (optionsSafe.order === 'desc') query = query.sort(optionsSafe.orderBy, 'desc')
         else query = query.sort(optionsSafe.orderBy)
       }
-
-      query.grab(nb, start, function (error, ressources) {
-        cacheAndNext(error, ressources, next)
-      })
+      let nbTotal = 0
+      flow().seq(function () {
+        // le nb total de résultats
+        query.count(this)
+      }).seq(function (nbTot) {
+        nbTotal = nbTot
+        query.grab(nb, start, this)
+      }).seq(function (ressources) {
+        cacheAndNext(null, ressources, this)
+      }).seq(function (ressources) {
+        next(null, ressources, nbTotal)
+      }).catch(next)
     } catch (error) {
       log.error(error)
       next(error)

@@ -735,7 +735,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (context.get.all && $accessControl.hasAllRights(context)) visibilite = 'all'
           // qqun qui veut voir ses ressources
           else if (context.get.auteurs && context.get.auteurs == userOid) visibilite = 'auteur/' + userOid // eslint-disable-line eqeqeq
-          $ressourceRepository.getListe(visibilite, options, function (error, ressources) {
+          $ressourceRepository.getListe(visibilite, options, function (error, ressources, nbTotal) {
             var data = $ressourcePage.getDefaultData('liste')
             data.$metas.title = 'Résultats de la recherche'
             log.debug('liste avec les options', options)
@@ -761,7 +761,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 data.actions.links.push({html: tools.linkQs($routes.get('search'), 'Résultats suivants', crit)})
               }
               // 'titre' avec le nb de ressources
-              var html = ressources.length + ' ressource'
+              var html = nbTotal + ' ressource'
               if (ressources.length) {
                 var last = Math.min(options.start + options.nb, options.start + ressources.length)
                 html += 's (' + (options.start + 1) + ' à ' + last + ')'
