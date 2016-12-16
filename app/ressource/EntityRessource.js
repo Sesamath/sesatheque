@@ -28,15 +28,16 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
 module.exports = function (EntityRessource) {
-  var uuid = require('an-uuid')
-  var merge = require('sesajstools/utils/object').merge
-  var tools = require('../tools')
-  var Ressource = require('../constructors/Ressource')
-  var configRessource = require('./config')
+  const merge = require('sesajstools/utils/object').merge
+
+  const tools = require('../tools')
+  const Ressource = require('../constructors/Ressource')
+  const config = require('../config')
+  // idem config.component.ressource, mais le require permet une meilleure autocompletion
+  const configRessource = require('./config')
 
   /**
    * Notre entité ressource, cf [Entity](lassi/Entity.html)
@@ -46,9 +47,9 @@ module.exports = function (EntityRessource) {
    * @extends Ressource
    */
   EntityRessource.construct(function (initObj) {
-    var entity = this
+    const entity = this
     // on récupère un objet Ressource correctement typé et initialisé
-    var ressource = new Ressource(initObj)
+    const ressource = new Ressource(initObj)
     // que l'on merge à notre objet Entity
     merge(entity, ressource)
 
@@ -93,26 +94,23 @@ module.exports = function (EntityRessource) {
     // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
     // (pour gérer les relations avec des oid externes)
     .defineIndex('relations', 'string', function () {
-      return this.relations.map(function (relation) {
-        // on retourne pour chaque relation l'item lié
-        return relation[1]
-      })
+      // on retourne pour chaque relation l'item lié, tant pis pour la nature de la relation
+      return this.relations.map((relation) => relation[1])
     })
-    // pour les arbres on veut avoir tous les enfants qu'ils contiennent (toutes générations comprises)
+    // pour les arbres, on indexe tous les enfants, c'est lourd en écriture d'index
+    // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
+    // (pour mettre à jour titre & résumé par ex).
     .defineIndex('enfants', 'string', function () {
+      if (this.type !== 'arbre') return
       function addRefsEnfants (enfants) {
-        for (i = 0; i < enfants.length; i++) {
-          enfant = enfants[i]
+        enfants.forEach((enfant) => {
           if (enfant.ref) refsEnfants.push(enfant.ref)
           else if (enfant.oid) refsEnfants.push(enfant.oid)
-        }
+          else if (enfant.enfants && enfant.enfants.length) addRefsEnfants(enfant.enfants)
+        })
       }
-      var refsEnfants, enfant, i
-
-      if (this.enfants && this.enfants.length) {
-        refsEnfants = []
-        addRefsEnfants(this.enfants)
-      }
+      const refsEnfants = []
+      if (this.enfants && this.enfants.length) addRefsEnfants(this.enfants)
 
       return refsEnfants
     })
@@ -127,32 +125,17 @@ module.exports = function (EntityRessource) {
     .defineIndex('dateCreation', 'date')
     .defineIndex('dateMiseAJour', 'date')
 
-  EntityRessource.beforeStore(function (next) {
-    // on vire un éventuel token
-    if (this.token) delete this.token
-    // check de la paire origine / idOrigine
-    if (this.origine && !this.idOrigine) {
-      if (this.origine === 'local') this.idOrigine = uuid()
-      else return next(new Error('ressource avec origine sans idOrigine'))
-    } else if (this.idOrigine && !this.origine) {
-      return next(new Error('ressource avec idOrigine ' + this.idOrigine + ' sans origine'))
+  // beforeStore est dans $ressourceRepository, historiquement,
+  // pour des questions de cycle d'injection de dépendances
+
+  // met en idOrigine l'oid de la ressource si origine locale et que ça n'y était pas encore
+  EntityRessource.afterStore(function (next) {
+    if (this.origine === config.application.baseId && !this.idOrigine) {
+      this.idOrigine = this.oid
+      // et faut resauver…
+      this.store(next)
+    } else {
+      next()
     }
-    // check des relations
-    if (this.relations && this.relations.length) {
-      var id = this.oid || (this.origine && this.origine + this.idOrigine) || this.titre
-      // on gère l'unicité avec un objet Map, en prenant une string qui concatene
-      // les deux éléments de la relation comme clé
-      var relations = new Map()
-      this.relations.forEach(function (relation) {
-        if (Array.isArray(relation) && relation.length === 2) relations.set('' + relation[0] + relation[1], relation)
-        else log.errorData('relation invalide dans ' + id, relation)
-      })
-      // on ne parse le Map que s'il y avait des doublons
-      if (relations.size < this.relations.length) {
-        this.relations = Array.from(relations.values())
-        log.errorData('Il y avait des relations en double (ou invalides) dans ' + id)
-      }
-    }
-    next()
   })
 }

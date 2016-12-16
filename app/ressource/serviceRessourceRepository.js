@@ -65,39 +65,49 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   function beforeStore (ressource, next) {
     if (ressource) {
-      // on ne met à jour cette date que si elle n'existait pas, sinon on veut garder la date de maj de la ressource
-      // et pas de celle de son indexation ici
-      if (!ressource.dateMiseAJour) {
-        ressource.dateMiseAJour = new Date()
+      // pour les messages d'erreur
+      const id = ressource.oid || (ressource.origine && ressource.origine + ressource.idOrigine) || ressource.titre
+      const myBaseId = appConfig.application.baseId
+      // bizarre, parfois errors est un object, on cherche à savoir d'où ça vient
+      if (ressource._errors && !Array.isArray(ressource._errors)) {
+        return next(new Error(`ressource._errors n'est pas un array ${typeof ressource._errors}`), ressource._errors)
       }
-      // cohérence de la restriction
-      if (ressource.restriction === config.constantes.restriction.groupe && _.isEmpty(ressource.groupes)) {
-        log.error('Ressource ' + ressource.oid + ' restreinte à ses groupes sans préciser lesquels, on la passe privée')
-        ressource.restriction = config.constantes.restriction.prive
+      // on vérifie que l'on a bien la paire origine et idOrigine
+      if (ressource.origine) {
+        // rectif ancienne origine
+        if (ressource.origine === 'local') ressource.origine = myBaseId
+        if (ressource.origine === myBaseId) {
+          if (!ressource.idOrigine && ressource.oid) ressource.idOrigine = ressource.oid
+          // sinon faudra le mettre en afterStore
+        } else if (!ressource.idOrigine) {
+          return next(new Error('propriété idOrigine obligatoire'))
+        }
+      } else {
+        // on pourrait mettre une origine locale ici, mais on préfère laisser le contrôleur le faire
+        return next(new Error('propriété origine obligatoire'))
       }
+      // on vire un éventuel token
+      if (ressource.token) delete ressource.token
       // on génère la clé si elle manque
       if (ressource.restriction && !ressource.cle) {
         ressource.cle = uuid()
       }
-      // si le tableau d'erreur est vide (devrait toujours être le cas),
-      // on se réserve le droit de stocker des ressources imparfaites mais on plantera probablement ici ensuite)
-      if (_.isEmpty(ressource._warnings)) delete ressource._warnings
-      // bizarre, parfois errors est un object, on cherche à savoir comment
-      if (ressource._errors && !ressource._errors.push) {
-        log.error("ressource._errors n'est pas un array " + typeof ressource._errors, ressource._errors)
-        ressource._errors = []
+      // date de mise à jour
+      ressource.dateMiseAJour = new Date()
+      // cohérence de la restriction
+      if (ressource.restriction === config.constantes.restriction.groupe && _.isEmpty(ressource.groupes)) {
+        log.error(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
+        ressource.restriction = config.constantes.restriction.prive
       }
-      // on vérifie que l'on peut sauvegarder
-      if (ressource.origine && (!ressource._errors || !ressource._errors.length)) {
-        next(null, ressource)
+      // check des relations
+      if (ressource.relations && ressource.relations.length) {
+        checkRelations(ressource.relations, id, function (error, relations) {
+          if (error) return next(error)
+          ressource.relations = relations
+          next(null, ressource)
+        })
       } else {
-        // on bloque le save en renvoyant une erreur à next
-        var error
-        if (!ressource.origine) error = new Error('propriété origine obligatoire')
-        else if (!ressource.idOrigine) error = new Error('propriété idOrigine obligatoire')
-        else error = new Error('Il reste des erreurs qui empêchent la sauvegarde : \n' + ressource._errors.join('\n'))
-        log.error('erreur au beforeStore', error)
-        next(error)
+        next()
       }
     } else {
       next(new Error("beforeStore n'a pas reçu de ressource"))
@@ -105,8 +115,56 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
-   * Met à jour titre/résumé/description en tâche de fond sur tous les arbres qui contiennent cette ressource
-   * Passe les enfants
+   * Nettoie les relations
+   * @private
+   * @param {Array} relations
+   * @param {string|number} id identifiant de la ressource pour l'ajouter aux messages d'erreur
+   * @param next
+   */
+  function checkRelations (relations, id, next) {
+    // on gère l'unicité avec un objet Map, en prenant une string qui concatene
+    // les deux éléments de la relation comme clé
+    const map = new Map()
+    const cleanRelations = relations.filter((relation) => Array.isArray(relation) && relation.length === 2)
+    if (cleanRelations.length < relations.length) log.errorData(`Il y avait une relation invalide dans ${id}`, relations)
+    if (cleanRelations.length) {
+      flow(cleanRelations).parEach(function (relation) {
+        const nextRelation = this
+        // on regarde si on a des cibles sous la forme origine/idOrigine
+        if (typeof relation[ 1 ] === 'string' && relation[ 1 ].indexOf('/') !== -1) {
+          const [origine, idOrigine] = relation[ 1 ].split('/')
+          $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+            if (error) {
+              log.error(error)
+              nextRelation(null, relation)
+            } else if (ressource) {
+              nextRelation(null, [ relation[ 0 ], ressource.oid ])
+            } else {
+              log.errorData(`La ressource ${id} a une relation vers ${relation[ 1 ]} qui n’existe pas`)
+              // on la laisse, pour les cas où 2 ressources sont mutuellement liées et insérées en suivant
+              nextRelation(null, relation)
+            }
+          })
+        } else {
+          nextRelation(null, relation)
+        }
+      }).seq(function (relations) {
+        relations.forEach((relation) => map.set('' + relation[ 0 ] + relation[ 1 ], relation))
+        if (map.size < relations.length) {
+          log.errorData('Il y avait des relations en double (ou invalides) dans ' + id)
+          next(null, Array.from(map.values()))
+        } else {
+          next(null, relations)
+        }
+      }).catch(next)
+    } else {
+      next(null, [])
+    }
+  }
+
+  /**
+   * Met à jour titre/résumé/description de cette ressource dans tous les arbres la contiennent,
+   * en tâche de fond
    * @private
    * @param {Ressource} ressource
    */
@@ -151,13 +209,13 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }
 
     // on cherche les enfants d'après l'oid de la ressource
-    [ressource.oid, refOrig].forEach(function (ref) {
-      flow().seq(function () {
-        EntityRessource.match('enfants').equals(ref).grab(this)
-      }).seqEach(function (arbre) {
-        if (findChild(arbre, ressource.oid)) arbre.store()
-      }).catch(log.error)
-    })
+    flow().seq(function () {
+      EntityRessource.match('enfants').equals(ressource.oid).grab(this)
+    }).seqEach(function (arbre) {
+      // ici arbre vient direct de la base, on zappe notre beforeStore
+      // pour éviter la mise en cache et la modif de dateMiseAJour
+      if (findChild(arbre, ressource.oid)) arbre.store(log.error)
+    }).catch(log.error)
   }
 
   /**

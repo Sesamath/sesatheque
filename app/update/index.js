@@ -73,7 +73,7 @@ lassi.on('startup', function () {
         applog('updates', lock + ' non présent, on étudie les éventuels updates à lancer')
       }
       fs.access(update, fs.R_OK, function (error) {
-        if (error) return done()
+        if (error) return done() // plus d'updates à passer, c'est pas une erreur
         dbVersion++
         applog('updates', 'lancement update n° ' + dbVersion)
         var currentUpdate = require(update)
