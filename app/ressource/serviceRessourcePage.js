@@ -584,8 +584,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               if (config.typePerso[choice.value]) ttChoices.push(choice)
             })
             formData.type.choices = ttChoices
-            // et imposer origine local
-            formData.origine.value = 'local'
+            // et imposer l'origine locale
+            formData.origine.value = config.application.baseId
             formData.origine.hidden = true
             formData.idOrigine.hidden = true
             // publié par défaut

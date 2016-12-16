@@ -337,7 +337,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
               delete ressource.oid
               delete ressource.idOrigine
-              ressource.origine = 'local'
+              ressource.origine = config.application.baseId
               var userOid = $accessControl.getCurrentUserOid(context)
               if (!ressource.contributeurs) ressource.contributeurs = []
               if (userOid && ressource.contributeurs.indexOf(userOid) === -1) ressource.contributeurs.push(userOid)

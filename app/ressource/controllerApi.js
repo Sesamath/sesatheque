@@ -519,7 +519,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               // on clone
               delete ressource.oid
               delete ressource.idOrigine
-              ressource.origine = 'local'
+              ressource.origine = config.application.baseId
               // faut mettre le user en auteur sinon il aura pas le droit de supprimer
               if (ressource.auteurs.indexOf(userOid) < 0) ressource.auteurs.push(userOid)
               ressource.publie = true
