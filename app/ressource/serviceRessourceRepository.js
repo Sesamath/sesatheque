@@ -107,7 +107,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           next(null, ressource)
         })
       } else {
-        next()
+        next(null, ressource)
       }
     } else {
       next(new Error("beforeStore n'a pas reçu de ressource"))
