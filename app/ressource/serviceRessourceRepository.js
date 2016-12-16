@@ -214,7 +214,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }).seqEach(function (arbre) {
       // ici arbre vient direct de la base, on zappe notre beforeStore
       // pour éviter la mise en cache et la modif de dateMiseAJour
-      if (findChild(arbre, ressource.oid)) arbre.store(log.error)
+      if (findChild(arbre, ressource.oid)) arbre.store((error) => log.error(error))
     }).catch(log.error)
   }
 
