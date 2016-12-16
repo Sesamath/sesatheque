@@ -390,7 +390,7 @@ var ressourceConfig = {
       describe: 'decrire',
       delete: 'supprimer',
       search: 'rechercher',
-      viewHistory: 'voirHistorique'
+      history: 'voirHistorique'
     }
   }, // fin constantes
   /**
