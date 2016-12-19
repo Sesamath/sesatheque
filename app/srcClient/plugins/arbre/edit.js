@@ -295,6 +295,7 @@ module.exports = function edit (arbre, options) {
                           icon: tt + 'JstNode',
                           a_attr: attr
                         }
+                        modifIcoChild(newNode)
                         inst.create_node(parentNode, newNode, 'last', addCb)
                       })
                     }
