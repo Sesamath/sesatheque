@@ -282,11 +282,12 @@ module.exports = function edit (arbre, options) {
                       // on tente de charger la ressource demandée
                       client.getItem(id, function (error, item) {
                         if (error) return addError(error)
+                        if (!item) return addError(new Error('Aucune ressource ' + id))
                         log('item récupéré', item)
                         var tt = item.type
                         var attr = {
                           'data-type': tt,
-                          'data-ref': item.oid
+                          'data-ref': item.id || item.oid || id
                         }
                         if (item.$displayUri) attr[ 'data-displayUri' ] = item.$displayUri
                         var newNode = {
