@@ -208,7 +208,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   function addJsVars (data, ressource) {
     data.contentBloc.verbose = (appConfig.application.staging !== 'prod')
     data.contentBloc.isDev = (appConfig.application.staging !== 'prod')
-    data.contentBloc.base = appConfig.application.baseUrl
+    data.contentBloc.baseId = appConfig.application.baseId
+    data.contentBloc.sesatheques = appConfig.sesatheques
     if (ressource) {
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource = sjt.stringify(ressource)
@@ -799,6 +800,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
                     if (base) {
                       if (base.substr(-1) === '/') base = base.substr(0, base.length - 1)
                       url = base + url
+                    } else {
+                      log.errorData(`baseId ${enfant.baseId} inconnue dans ${ressource.oid} pour l'item `, enfant)
                     }
                   }
                   enfantsDescribe.push({

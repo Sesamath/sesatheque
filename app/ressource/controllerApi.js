@@ -502,6 +502,15 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
   } /* */
 
   /**
+   * Retourne l'url d'une baseId
+   * @route GET /api/baseId/:id
+   */
+  controller.get('baseId/:id', function (context) {
+    if (config.sesatheques[context.arguments.id]) $json.sendOk(context, {baseUrl: config.sesatheques[context.arguments.id]})
+    else $json.sendError(context, `Sésathèque ${context.arguments.id} inconnue sur ${config.application.baseUrl}`)
+  })
+
+  /**
    * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
    * Retourne {@link reponseRessourceOid}
    * @route GET /api/clone/:oid
@@ -608,7 +617,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               if (ressource.hasOwnProperty(prop)) delete ressource[prop]
             })
             // on impose qq propriétés
-            ressource.origine = 'local'
+            ressource.origine = config.application.baseId
             ressource.dateCreation = new Date()
             ressource.publie = true
             if (ressource.auteurs && ressource.auteurs.length) {

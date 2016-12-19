@@ -29,21 +29,20 @@
  * pour une explication en français)
  */
 'use strict'
-/* global process */
 
 /**
  * Configuration de l'application
  */
-var path = require('path')
-var sjtObj = require('sesajstools/utils/object')
-var sjtUrl = require('sesajstools/http/url')
+const path = require('path')
+const sjtObj = require('sesajstools/utils/object')
+const sjtUrl = require('sesajstools/http/url')
 
 /** La racine du projet */
-var root = path.resolve(__dirname, '..')
-var logDir = process.env.LOGS || root + '/logs'
+const root = path.resolve(__dirname, '..')
+const logDir = process.env.LOGS || root + '/logs'
 
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
-var privateConfPath = [root, '_private']
+const privateConfPath = [root, '_private']
 if (process.env.SESATHEQUE_CONF && /^[^/]+$/.test(process.env.SESATHEQUE_CONF)) {
   // on peut préciser un autre fichier de conf via l'environnement
   // (utile pour faire tourner plusieurs instances de l'appli)
@@ -51,18 +50,18 @@ if (process.env.SESATHEQUE_CONF && /^[^/]+$/.test(process.env.SESATHEQUE_CONF)) 
 } else {
   privateConfPath.push('config')
 }
-var localConfig = require(path.join.apply(this, privateConfPath))
+const localConfig = require(path.join.apply(this, privateConfPath))
 // la conf du composant ressource à part
-var ressourceConfig = require('./ressource/config')
+const ressourceConfig = require('./ressource/config')
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
  * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
  */
-var staging = (process.env.NODE_ENV === 'production') ? 'prod' : 'dev'
+const staging = (process.env.NODE_ENV === 'production') ? 'prod' : 'dev'
 
 /** La config */
-var config = {
+const config = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application: {
     name: 'bibliotheque',
@@ -70,11 +69,14 @@ var config = {
     title: 'Sésathèque',
     // h1 de la page d'accueil
     homeTitle: 'Bienvenue sur cette Sésathèque',
+    // la référence pour valider des baseId, toutes les sesatheques enregistrées chez un registrar
+    // peuvent référencer des items d'une autre du même registrar
+    baseIdRegistrar: 'http://bibliotheque.sesamath.net',
     defaultViewsPath: 'app/views',
     // mis dans _private/config.js car dépendant de l'instance
-    baseId: 'xxxx', // l'id de cette sésathèque
-    baseUrl: 'http(s)://.../',
-    mail: 'user@example.com',
+    baseId: 'notConfigured', // l'id de cette sésathèque
+    baseUrl: 'notConfigured',
+    // mail: 'user@example.com',
     staging: staging
   },
   /* dans _private aussi
@@ -140,8 +142,11 @@ var config = {
     },
     ressource: ressourceConfig
   },
-  // urls absolues des sésathèques utilisées par nos ressources (pour les alias ou les sesalab connectés)
-  // sous la forme nom:baseUrl
+  // urls absolues des sésathèques utilisées par nos ressources (pour les alias, par ex quand
+  // des sesalab connectés à plusieurs sésathèques mettent des ressources de l'une
+  // dans des arbres de l'autre)
+  // sous la forme baseId:baseUrl
+  // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
   sesatheques: {},
   // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences
   // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
@@ -184,8 +189,9 @@ if (localConfig) sjtObj.merge(config, localConfig)
 if (config.application.staging === 'prod' && config.$entities.database.debug) {
   delete config.$entities.database.debug
 }
-// on ajoute toujours un slash de fin à baseUrl
+// on ajoute toujours un slash de fin à baseUrl et baseIdRegistrar
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
+if (config.application.baseIdRegistrar.substr(-1) !== '/') config.application.baseIdRegistrar += '/'
 
 // Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,
 // cf _private.example/config.js
@@ -198,7 +204,7 @@ if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl +=
 if (config.sesalabs && config.sesalabs.length) {
   if (!config.components) config.components = {}
   if (!config.components.sesalabSso) config.components.sesalabSso = {}
-  var confSso = config.components.sesalabSso
+  const confSso = config.components.sesalabSso
   if (confSso.authServers) {
     // on vérifie que ce qui est déjà défini n'est pas du grand n'importe quoi
     confSso.authServers = confSso.authServers.filter(function (server) {
@@ -222,7 +228,7 @@ if (config.sesalabs && config.sesalabs.length) {
     }
     if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
     // ça donne ce server
-    var authServer = {
+    const authServer = {
       name: sesalab.name || sjtUrl.getDomain(sesalab.baseUrl),
       baseUrl: sesalab.baseUrl,
       // les urls sur ce serveur, pour demander un login
@@ -233,7 +239,7 @@ if (config.sesalabs && config.sesalabs.length) {
       errorPage: 'sso/error'
     }
     // on regarde s'il a pas déjà été défini, pour empêcher les doublons
-    var existingIndex
+    let existingIndex
     confSso.authServers.some(function (server, index) {
       if (server.name === authServer.name || server.baseUrl === authServer.baseUrl) {
         existingIndex = index

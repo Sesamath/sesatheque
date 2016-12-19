@@ -51,8 +51,9 @@ try {
    * - boot de l'appli
    */
 
-  var sjt = require('sesajstools')
-  var config = require('./config')
+  const sjt = require('sesajstools')
+  const config = require('./config')
+  const configCheck = require('./configCheck')
   require('an-log').config(config.lassiLogger)
   var appLog = require('an-log')(config.application.name)
 
@@ -164,7 +165,8 @@ try {
     lassi.transports.html.engine.disableWhiteSpaceCompression()
     // on ajoute nos filtres perso pour dust
     try {
-      lassi.transports.html.engine.addFilter('js2', function (value) {
+      // un js dump
+      lassi.transports.html.engine.addFilter('jsd', function (value) {
         return sjt.stringify(value, 2)
       })
       lassi.transports.html.engine.addFilter('nl2br', function (value) {
@@ -191,6 +193,11 @@ try {
   })
 
   require('./sesalab-admin')
+
+  lassi.on('startup', function () {
+    // et on lance la vérif de config
+    configCheck(config)
+  })
 
   // et on lance le boot
   sesatheque.bootstrap()

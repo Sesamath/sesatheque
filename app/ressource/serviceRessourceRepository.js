@@ -74,8 +74,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       }
       // on vérifie que l'on a bien la paire origine et idOrigine
       if (ressource.origine) {
-        // rectif ancienne origine
-        if (ressource.origine === 'local') ressource.origine = myBaseId
         if (ressource.origine === myBaseId) {
           if (!ressource.idOrigine && ressource.oid) ressource.idOrigine = ressource.oid
           // sinon faudra le mettre en afterStore

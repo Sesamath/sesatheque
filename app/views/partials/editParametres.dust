@@ -2,18 +2,20 @@
 <script type="application/javascript">
   try {
     var options = {
-      isDev :{?isDev}{isDev}{:else}false{/isDev},
-      verbose :{?verbose}{verbose}{:else}false{/verbose}
+      isDev: {?isDev}{isDev}{:else}false{/isDev},
+      verbose: {?verbose}{verbose}{:else}false{/verbose},
+      baseId: '{baseId}',
+      sesatheques: {sesatheques|jsd|s}
     };
+    if (typeof stedit === 'undefined') throw new Error("Le chargement a échoué, impossible de charger le module d'édition");
     stedit.init(options, function (error) {
       if (error) throw error;
-      if (typeof stedit === 'undefined') throw new Error("Le chargement a échoué, impossible de charger le module d'édition");
       var ressource = {?ressource}{ressource|s}{:else}null{/ressource};
       if (ressource) stedit.edit(ressource, options);
       else throw new Error("Il manque la ressource à modifier");
     });
   } catch(error) {
-    if (typeof page !== 'undefined' && stpage.addError) stpage.addError(error.toString());
+    if (typeof stpage !== 'undefined' && stpage.addError) stpage.addError(error.toString());
     if (typeof console !== "undefined" && console.error) console.error(error);
   }
 </script>

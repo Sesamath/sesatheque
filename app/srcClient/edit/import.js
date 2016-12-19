@@ -43,7 +43,7 @@ function doImport (url) {
   // on cherche base et id
   var base
   var id
-  var matches = /^(https?:\/\/[a-z0-9\-\._]+(?::[0-9]+)?\/)(.+)/.exec(url)
+  var matches = /^(https?:\/\/[a-z0-9\-._]+(?::[0-9]+)?\/)(.+)/.exec(url)
   // console.log('matches', matches)
   if (matches) {
     base = matches[1]

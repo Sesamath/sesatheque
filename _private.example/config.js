@@ -5,7 +5,9 @@
  */
 module.exports = {
   application: {
-    id: 'xxx', // identifiant de cette sésathèque
+    name: 'nomDeCetteAppli',
+    baseId: 'xxx', // identifiant de cette sésathèque, qui devrait être connu de
+    baseIdRegistrar: '…', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
     baseUrl: 'https://example.com/',
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
@@ -83,13 +85,18 @@ module.exports = {
   apiIpsAllowed: [
     // une éventuelle liste d'ip hors lan autorisées à utiliser les tokens
   ],
-  // urls absolues des sésathèques utilisées par nos ressources (pour les alias ou sesalab)
-  // ces noms doivent être les mêmes que ceux des sesalabs qui nous contactent
+  // urls absolues des sésathèques utilisées par nos ressources
+  // (pour les alias d'une sesatheque dans une autre, mis par ex par un sesalab)
+  // ces noms doivent être les mêmes que ceux mis dans les sesalabs qui nous contactent
+  // si on est baseIdRegistrar on répondra sur /api/baseId/:id pour ces baseId
+  // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
   sesatheques: {
     // sesatheque des ressources présentées à gauche dans un sesalab
-    idSesathequeGlobale: 'https://…/',
+    idSesatheque1: 'https://…/',
     // sesatheque des ressources personnelles des utilisateurs d'un sesalab
-    idSesathequeCommune: 'https://…/'
+    idSesatheque2: 'https://…/'
+    // autre sesatheque dont on peut référencer des items
+    // …
   },
   // pour avoir du sso entre un sesalab et une sesatheque, il faut préciser ici
   sesalabs: [ {

@@ -393,7 +393,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
         // on met l'origine à local si y'en a pas
         if (!ressourcePosted.origine) {
-          ressourcePosted.origine = 'local'
+          ressourcePosted.origine = config.application.baseId
           ressourcePosted.idOrigine = undefined
         }
         $ressourceControl.valideRessourceFromPost(ressourcePosted, false, this)

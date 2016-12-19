@@ -33,9 +33,9 @@
       <ul>Liens vers les enfants :
         {#enfantsDescribe}<li><a href="{url}">{titre}</a></li>{/enfantsDescribe}
       </ul>
-      <p>{enfants.title} : <pre>{enfants.value|js2}</pre></p>
+      <p>{enfants.title} : <pre>{enfants.value|jsd}</pre></p>
     {:else}
-      <p>{parametres.title} : <pre>{parametres.value|js2}</pre></p>
+      <p>{parametres.title} : <pre>{parametres.value|jsd}</pre></p>
     {/enfants}
 
     {?auteurs.value}
