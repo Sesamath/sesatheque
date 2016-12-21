@@ -33,7 +33,6 @@
 /* global module */
 
 var filters = require('sesajstools/utils/filters')
-var sjtObj = require('sesajstools/utils/object')
 
 /**
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
@@ -41,18 +40,7 @@ var sjtObj = require('sesajstools/utils/object')
  * @param {Object} initObj Un objet ayant des propriétés d'une ressource
  */
 function Ressource (initObj) {
-  var values
-  if (initObj) {
-    // clonage du fainéant (on veut que les propriétés sans le prototype)
-    try {
-      values = sjtObj.cloneData(initObj)
-    } catch (e) {
-      if (console && typeof console.error === 'function') console.error(e)
-      values = {}
-    }
-  } else {
-    values = {}
-  }
+  var values = Object.assign({}, initObj)
   /**
    * L'identifiant interne à cette Sésathèque
    * @default undefined
@@ -143,7 +131,7 @@ function Ressource (initObj) {
    * (faudra gérér ultérieurement différents système éducatif, fr_FR pour tout le monde en attendant)
    * @type {Array}
    */
-  this.niveaux = filters.arrayInt(values.niveaux)
+  this.niveaux = filters.arrayString(values.niveaux)
   /**
    * Un id de catégorie correspond à un recoupement de types, par ex [7] pour 'exercice interactif'
    * @type {Array}
@@ -169,21 +157,23 @@ function Ressource (initObj) {
    * @type {relation[]}
    */
   this.relations = filters.array(values.relations)
+    .filter((elt) => Array.isArray(elt) && elt.length === 2)
+    .map((elt) => filters.arrayInt(elt))
   /**
    * Liste d'id d'auteurs
    * @type {Integer[]}
    */
   // pas arrayInt car on peut recevoir du origin/idOrigin que l'on transforme ensuite, voire peut-être des urls un jour
-  this.auteurs = filters.array(values.auteurs)
+  this.auteurs = filters.arrayString(values.auteurs)
   /**
    * Liste d'url pour les auteurs précédents
    */
-  if (values.auteursParents) this.auteursParents = values.auteursParents
+  if (values.auteursParents) this.auteursParents = filters.arrayString(values.auteursParents)
   /**
    * Liste d'id de contributeurs
    * @type {Integer[]}
    */
-  this.contributeurs = filters.arrayInt(values.contributeurs)
+  this.contributeurs = filters.arrayString(values.contributeurs)
   /**
    * Liste de noms de groupes dans lesquels cette ressource est publiée
    * @type {string[]}
@@ -260,6 +250,18 @@ function Ressource (initObj) {
   if (values._errors) {
     this._errors = filters.arrayString(values._errors)
   }
+  // et on ajoute des erreurs si on a viré des trucs
+  Object.getOwnPropertyNames(values).forEach((p) => {
+    if (Array.isArray(this[p])) {
+      // on ne vérifie que ce qui fini en tableau
+      if (Array.isArray(values[p])) {
+        if (this[p].length < values[p].length) this._errors.push(`des éléments de la propriété ${p} étaient invalides et ont été ignorés`)
+      } else if (values[p]) {
+        this._errors.push(`La propriété ${p} était invalide et a été ignorée`)
+        console.error('contenu invalide', values[p])
+      }
+    }
+  }, this)
 }
 
 /**
@@ -268,6 +270,14 @@ function Ressource (initObj) {
  */
 Ressource.prototype.toString = function () {
   return this.titre
+}
+
+/**
+ * Retourne un id (oid ou origine/idOrigine si pas encore d'oid)
+ * @returns {Integer|string}
+ */
+Ressource.prototype.getId = function () {
+  return this.oid || this.origine + '/' + this.idOrigine
 }
 
 module.exports = Ressource

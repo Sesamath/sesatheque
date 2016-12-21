@@ -280,7 +280,9 @@ var ressourceConfig = {
   // les propriétés dont la modif déclenche un upgrade de version
   versionTriggers: ['origine', 'idOrigine', 'parametres', 'enfants', 'auteurs', 'contributeurs'],
 
+  // ATTENTION, pour les types faut être cohérent avec les filtres du constructeur Ressource
   // les types requis (il faut la même liste de propriétés que labels, et des valeurs * dont _.is* existe)
+  // Number sera traité comme entier positif
   typesVar: {
     oid: 'Number',
     origine: 'String',
@@ -309,7 +311,20 @@ var ressourceConfig = {
     indexable: 'Boolean',
     archiveOid: 'Number',
     // facultatifs
-    enfants: 'Object' // en fait un Array, mais pas un array d'id, et comme un Array est aussi un Object...
+    enfants: 'Array'
+  },
+  // pour les typesVar Array, le type de chaque élément
+  typesVarArray: {
+    niveaux: 'String',
+    categories: 'Number',
+    typePedagogiques: 'Number',
+    typeDocumentaires: 'Number',
+    relations: 'Array',
+    auteurs: 'Number',
+    contributeurs: 'Number',
+    groupes: 'Number',
+    groupesAuteurs: 'Number',
+    enfants: 'Object'
   },
 
   /**

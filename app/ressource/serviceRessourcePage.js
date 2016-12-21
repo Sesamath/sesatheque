@@ -148,7 +148,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   function addPersonnes (context, formData, key, values, next) {
     if (!formData.errors) formData.errors = []
-    log.debug('addPersonnes avec ' + key + ' qui vaut ' + values && values.join(','))
+    log.debug('addPersonnes avec ' + key + ' qui vaut ' + (values && values.join(',')))
     // seuls les éditeurs peuvent modifier auteurs et contributeurs,
     if ($accessControl.hasPermission('updateAuteurs', context)) {
       formData[key].choices = []
@@ -466,7 +466,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       formData.errors.push(error.toString())
     }
 
-    // on s'assure que l'on a un objet, sinon on en créé un vide (ou si on nous le réclame avec new)
+    // on s'assure que l'on a un objet, sinon on en créé un vide (ou si on nous le réclame avec la prop new)
     if (!ressource || ressource.new) {
       // on en créé une vide, mais on regarde si on avait un token
       var token = ressource && ressource.token
@@ -497,7 +497,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // required ?
       if (config.required[key]) formData[key].required = true
       if (isUnique) formData[key].unique = true
-
       if (config.typesVar[key] === 'Array' || isUnique) {
         // c'est un tableau ou une valeur unique (donc select ou radios)
         // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
@@ -512,6 +511,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           // c'est une liste d'id (ou de clés connues)
           formData[key].choices = arrayToDust(key, value, isUnique)
           labelSuivant()
+        } else if (key === 'enfants') {
+          formData[key].name = key
+          try {
+            formData[key].value = JSON.stringify(value, undefined, 2)
+          } catch (error) {
+            formData.errors.push('enfants invalides')
+            log.error('erreur lors du stringify des enfants de la ressource ' + ressource.oid)
+            formData[key].value = '[]'
+          }
+          labelSuivant()
         } else if (key === 'groupes') {
           addGroupes(context, formData, value, ressource.groupesAuteurs, labelSuivant)
         } else if (key === 'groupesAuteurs') {
@@ -521,7 +530,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         } else if (key === 'auteurs' || key === 'contributeurs') {
           addPersonnes(context, formData, key, value, labelSuivant)
         } else {
-          log.error(new Error('On tombe sur la clé inatendue ' + key))
+          log.error(new Error('On tombe sur la clé inattendue ' + key))
           labelSuivant()
         }
       } else if (config.typesVar[key] === 'Boolean') {

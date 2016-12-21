@@ -498,10 +498,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         // log.debug('ressource postée', ressourcePostee, 'form', {max: 5000})
         checkToken(context, oid, this)
       }).seq(function () {
+        log.debug('dans post, postée', ressourcePostee.niveaux)
         $ressourceControl.valideRessourceFromPost(ressourcePostee, false, this)
       }).seq(function (ressource) {
         // faut la mémoriser pour comparer avec la bdd
         ressourceNormee = ressource
+        log.debug('dans post, normée', ressourceNormee.niveaux)
         if (_.isEmpty(ressource._errors)) {
           if (!_.isEmpty(ressource._warnings) && ressource.force !== 'forced') {
             printForm(context, null, ressource, titrePage)
@@ -522,6 +524,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           this(error)
         }
       }).seq(function (ressource) {
+        log.debug('dans post, après groupes', ressource.niveaux)
         // on remet les relations, qui sont pas éditables
         ressource.relations = ressourceOriginale.relations
         // faut remettre auteursAdd et contributeursAdd virés à la validation (pas des champs de ressource)
@@ -531,6 +534,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressource) {
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         sjtObj.update(ressourceOriginale, ressource)
+        log.debug('dans post, ap personne', ressourceOriginale.niveaux)
         $ressourceRepository.save(ressourceOriginale, this)
       }).seq(function (ressource) {
         log.debug('ressource enregistrée', ressource)

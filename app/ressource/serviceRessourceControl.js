@@ -33,11 +33,11 @@
 
 var _ = require('lodash')
 var sjt = require('sesajstools')
-var integerify = require('sesajstools/utils/array').integerify
-var tools = require('../tools')
+var sjtFilters = require('sesajstools/utils/filters')
 var rTools = require('../tools/ressource')
 
 var config = require('./config')
+var Ressource = require('../constructors/Ressource')
 
 /**
  * Ajoute les propriétés qui peuvent être déduites (deductions définies dans la configuration)
@@ -77,208 +77,177 @@ function addDeductions (ressource) {
 }
 
 /**
- * Cast une valeur d'une propriété de ressource dans le bon type
- * @private
- * @param ressource
- * @param prop
- */
-function castValue (ressource, prop) {
-  var typeWanted = config.typesVar[prop]
-  var value = ressource[prop]
-  if (typeof value === typeWanted.toLowerCase() || typeWanted === 'Array' && _.isArray(value)) {
-    return log.error('castValue appelé sans cast à faire')
-  }
-  var label = config.labels[prop]
-  var buffer
-  if (typeWanted === 'String') {
-    // on tolère les nombres
-    if (typeof value === 'number') ressource[prop] = value.toString()
-    else rTools.addError(ressource, 'Le champ ' + label + " n'est pas une chaine de caractères")
-  } else if (typeWanted === 'Date') {
-    buffer = tools.toDate(value)
-    if (buffer) ressource[prop] = buffer
-    else rTools.addError(ressource, 'Le champ ' + label + ' vaut ' + value + " qui n'est pas une date valide")
-  } else if (typeWanted === 'Number') {
-    buffer = Number(value)
-    if (sjt.isIntPos(buffer)) ressource[prop] = buffer
-    else rTools.addError(ressource, 'Le champ ' + label + ' vaut ' + value + " qui n'est pas un entier positif")
-  } else if (typeWanted === 'Boolean') {
-    if (value === 'true' || value == 1) ressource[prop] = true // eslint-disable-line eqeqeq
-    else if (value === 'false' || value == 0) ressource[prop] = false // eslint-disable-line eqeqeq
-    else rTools.addError(ressource, 'Le champ ' + label + ' vaut ' + value + " qui n'est pas un booléen")
-  } else if (typeWanted === 'Array') {
-    // on veut une string '[1,2]'
-    if (_.isString(value) && value.substr(0, 1) === '[' && value.substr(-1) === ']') {
-      try {
-        buffer = JSON.parse(value)
-        ressource[prop] = integerify(buffer) // c'était du json valide
-      } catch (e) {
-        rTools.addError(ressource, 'Le champ ' + label + ' vaut ' + value + " qui n'est pas une liste")
-      }
-    } else {
-      rTools.addError(ressource, 'Le champ ' + label + " n'est pas une liste")
-    }
-  } else if (typeWanted === 'Object') {
-    if (_.isString(value)) {
-      try {
-        buffer = JSON.parse(value)
-        ressource[prop] = buffer
-        if (prop === 'enfants') {
-          $ressourceControl.getEnfantsErrors(buffer, ressource.titre).forEach(function (errorMsg) {
-            rTools.addError(ressource, errorMsg)
-          })
-        }
-      } catch (e) {
-        rTools.addError(ressource, 'Le champ ' + label + " n'est pas du json valide : " + e.toString())
-      }
-    } else {
-      // normal qu'il en manque à la création
-      if (ressource.oid) rTools.addError(ressource, 'Le champ ' + label + ' est invalide : ')
-    }
-  } else {
-    var msg = 'Le champ ' + label + " est d'un type non prévu (" + typeWanted + ')'
-    rTools.addError(ressource, msg)
-    log.error(msg)
-  } // fin des cast
-}
-
-/**
- * Vérifie que tous les champs qui doivent être des array le sont et met des tableaux vides sinon
+ * Ajoute des warnings éventuels (arbre sans enfants ou catégorie mise à 'non défini')
  * @private
  * @param {Ressource} ressource
  */
-function normalizeArrays (ressource) {
-  _.each(config.typesVar, function (typeVar, key) {
-    if (typeVar === 'Array' && !_.isArray(ressource[key])) {
-      if (_.isString(ressource[key])) {
-        // on voulait un array et on a une string, on découpe
-        ressource[key] = sjt.splitAndTrim(ressource[key])
-      } else {
-        if (typeof ressource[key] !== 'undefined') {
-          log.error(new Error('la propriété ' + key + ' de la ressource ' + ressource.oid +
-            ' n’était pas un array ni une string (' + typeof ressource[key] + '), init avec array vide'))
-        }
-        ressource[key] = []
-      }
-    }
-  })
+function addWarnings (ressource) {
+  // catégories
+  if (!ressource.categories || ressource.categories.length === 0 || ressource.categories[0] === config.constantes.categories.aucune) {
+    rTools.addWarning(ressource, 'pas de catégorie définie')
+  }
+  // arbre sans enfants (si c'est pas une création, ie avec oid)
+  if (ressource.oid && ressource.type === 'arbre' && _.isEmpty(ressource.enfants)) {
+    rTools.addWarning(ressource, 'arbre sans enfants')
+  }
+  // parsing des éventuels enfants
+  if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.length) {
+    checkEnfants(ressource.enfants, ressource)
+  }
 }
 
 /**
- * Service de validation / controle du contenu d'une ressource
- * @service $ressourceControl
- * @requires EntityRessource
+ * Ajoute à la ressource les erreurs rencontrées lors du parsing des enfants
+ * @private
+ * @param {Array}     enfants
+ * @param {Ressource} ressource
+ * @param {string}    [titre]   Le titre du parent
  */
-var $ressourceControl = {}
+function checkEnfants (enfants, ressource, titre) {
+  if (!titre) titre = ressource.titre
+  if (Array.isArray(enfants)) {
+    enfants.forEach(function (enfant, i) {
+      if (!enfant.titre) rTools.addError(ressource, `L’enfant n° ${i + 1} de « ${titre} » n’a pas de titre`)
+      if (!enfant.type) rTools.addError(ressource, `L’enfant ${enfant.titre} de « ${titre} » n'a pas de type`)
+      if (enfant.type !== 'arbre' && !enfant.ref) {
+        rTools.addError(ressource, `L’enfant ${enfant.titre} de « ${titre} » n'a pas de ref valide`)
+      } else if (enfant.ref < 1 && (typeof enfant.ref !== 'string' || !/^[\w]+\/[\w]+$/.exec(enfant.ref))) {
+        rTools.addError(ressource, `L’enfant ${enfant.titre} de « ${titre} » n'a pas de ref valide`)
+      }
+      if (enfant.enfants) {
+        checkEnfants(enfant.enfants, ressource, enfant.titre)
+      }
+    })
+  } else {
+    rTools.addError(ressource, `enfants de « ${titre} »  invalides (pas une liste)`)
+  }
+}
+
+/**
+ * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
+ * Fait du cast sans râler quand les propriétés de ressource sont 'presque" du bon type
+ * @memberOf $ressourceControl
+ * @param {object} ressource objet qui provient d'un post (toutes les valeurs sont des strings, les boolean sont sous la forme checkbox
+ * @param {boolean} [partial=false] Passer true pour ne faire que les conversion de type
+ *                                sans renvoyer une erreur pour les champs manquants
+ * @param {ressourceCallback} next Callback appelé en synchrone qui recevra les arguments (error, ressource)
+ *                        ressource pourra avoir _errors ou _warnings (cast éventuels effectués)
+ */
+function valide (data, partial, next) {
+  log.debug('ressource dans valide', data, 'form', {max: 2000})
+  log.debug('début valide', data.niveaux, 'avirer', {max: 2000})
+  if (!next) {
+    next = partial
+    partial = false
+  }
+  if (!next) throw new Error('pas de callback fournie')
+  if (_.isEmpty(data)) return next(new Error('Ressource vide'))
+  // parsing des propriétés qui pourraient être envoyées en json
+  _.each(data, function (value, prop) {
+    if (typeof value === 'string' && (config.typesVar[prop] === 'Array' || config.typesVar[prop] === 'Object')) {
+      try {
+        data[prop] = JSON.parse(value)
+      } catch (error) {
+        rTools.addError(data, `Le contenu de ${prop} était invalide`)
+        delete data[prop] // le constructeur initialisera
+      }
+    }
+  })
+  let ressource
+  if (partial) {
+    validePartial(data)
+    ressource = data
+  } else {
+    // le constructeur fait office de validateur,
+    ressource = new Ressource(data)
+    // vérif des required
+    _.each(config.required, function (required, prop) {
+      if (required && _.isEmpty(ressource[prop])) {
+        rTools.addError(ressource, `Le champ ${config.labels[prop]} est obligatoire`)
+        log.errorData(ressource.getId() + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(ressource[prop]))
+      }
+    })
+  }
+  addDeductions(ressource)
+  addWarnings(ressource)
+  log.debug('fin valide', ressource.niveaux)
+
+  next(null, ressource)
+}
+
+/**
+ * Vérifie que toutes les propriétés qui existent sont du bon type (cast sinon, avec addError sur les tableaux)
+ * @private
+ * @param {object} data
+ */
+function validePartial (data) {
+  const retour = {}
+  _.each(data, function (value, prop) {
+    switch (config.typesVar[prop]) {
+      case undefined: rTools.addError(retour, `Le champ ${prop} est inconnu et sera ignoré`); break
+      case 'Number': retour[prop] = sjtFilters.int(value); break
+      case 'String': retour[prop] = sjtFilters.string(value); break
+      case 'Date': retour[prop] = sjtFilters.date(value); break
+      case 'Boolean': retour[prop] = sjtFilters.boolean(value); break
+
+      case 'Array':
+        // éventuel parsing
+        if (typeof value === 'string' && value.substr(0, 1) === '[' && value.substr(-1) === ']') {
+          try {
+            value = JSON.parse(value)
+          } catch (e) {
+            rTools.addError(retour, `Le champ ${config.labels[ prop ]} vaut ${value} qui n'est pas une liste correctement formatée`)
+          }
+        }
+        // on doit avoir un array
+        if (Array.isArray(value)) {
+          // on regarde le contenu
+          switch (config.typesVarArray[prop]) {
+            case 'Number': retour[prop] = sjtFilters.arrayInt(value); break
+            case 'String': retour[prop] = sjtFilters.arrayString(value); break
+            case 'Array':
+              // normalement relations est le seul dans ce cas
+              if (prop !== 'relations') throw new Error(`${prop} non gérée par validePartial`)
+              retour[prop] = value.filter((elt) => Array.isArray(elt))
+                .map((elt) => sjtFilters.arrayInt(elt))
+                .filter((elt) => elt.length === 2)
+              if (retour[prop].length < value.length) {
+                rTools.addWarning(retour, `${prop} contenait un élément invalide (pas une relation) qui a été ignoré`)
+              }
+              break
+            case 'Object':
+              retour[prop] = value.filter((elt) => typeof elt === 'object')
+              if (retour[prop].length < value.length) {
+                rTools.addWarning(retour, `${prop} contenait un élément invalide qui a été ignoré`)
+              }
+              break
+            default:
+              throw new Error(`${prop} déclaré en config comme array mais typesVarArray non déclaré ou non géré`)
+          }
+        } else {
+          rTools.addError(retour, `Le champ ${config.labels[prop]} vaut ${value} qui n'est pas une liste`)
+        }
+        break
+
+      case 'Object':
+        if (typeof value === 'string') {
+          try {
+            value = JSON.parse(value)
+          } catch (e) { /* idem erreur juste dessous */ }
+        }
+        if (typeof value !== 'object') {
+          rTools.addError(retour, `Le champ ${config.labels[prop]} vaut ${value} n'est pas un objet correctement formaté`)
+        }
+        break
+
+      default:
+        throw new Error(`Champ ${prop} déclaré en config mais de type non géré`)
+    }
+  })
+  return retour
+}
 
 module.exports = function (EntityRessource) {
-  /**
-   * Ajoute des warnings éventuels (arbre sans enfants ou catégorie mise à 'non défini')
-   * @private
-   * @param ressource
-   */
-  function addWarnings (ressource) {
-    // on ajoute un warning pour les enfants
-    // log.debug('ressource dans addWarnings', ressource, 'form', {max: 2000})
-    // on désactive ça car à la création c'est normal, on verra plus tard
-    /* if (ressource.type === 'arbre' && !ressource.new && (!ressource.enfants || !ressource.enfants.length)) {
-      rTools.addWarning(ressource, 'arbre sans enfants')
-    } */
-    // la catégorie non définie
-    if (!ressource.categories || ressource.categories[0] === config.constantes.categories.aucune) {
-      rTools.addWarning(ressource, 'pas de catégorie définie')
-    }
-  }
-
-  /**
-   * Retourne la liste des erreurs rencontrées lors du parsing des enfants
-   * @memberOf $ressourceControl
-   * @param enfants
-   * @param titreParent Pour rendre les messages d'erreurs plus précis
-   * @return {Array}
-   */
-  $ressourceControl.getEnfantsErrors = function (enfants, titreParent) {
-    var errors = []
-    titreParent = titreParent || 'la racine'
-    if (_.isArray(enfants)) {
-      enfants.forEach(function (enfant, i) {
-        if (!enfant.titre) errors.push("L'enfant d'index " + i + ' de « ' + titreParent + " » n'a pas de titre")
-        if (!enfant.type) errors.push("L'enfant d'index " + i + " n'a pas de type")
-        if (enfant.type !== 'arbre' && !enfant.ref) {
-          errors.push("L'enfant d'index ' + i + ' de ' +titreParent +' n'a pas de ref valide")
-        } else if (enfant.ref < 1 && (typeof enfant.ref !== 'string' || !/^[\w]+\/[\w]+$/.exec(enfant.ref))) {
-          errors.push("L'enfant d'index ' + i + ' de ' +titreParent +' n'a pas de ref valide")
-        }
-        if (enfant.enfants && enfant.enfants.length) {
-          var newErrors = $ressourceControl.getEnfantsErrors(enfant.enfants, enfant.titre)
-          if (newErrors.length) Array.prototype.push.apply(errors, newErrors)
-        }
-      })
-    } else {
-      errors.push("Enfants doit être un tableau d'Alias")
-    }
-
-    return errors
-  }
-
-  /**
-   * Vérifie que les champs obligatoires existent et sont non vides, et que les autres sont du type attendu
-   * Fait du cast sans râler quand les propriétés de ressource sont 'presque" du bon type
-   * @memberOf $ressourceControl
-   * @param {object} ressource objet qui provient d'un post (toutes les valeurs sont des strings, les boolean sont sous la forme checkbox
-   * @param {boolean} [partial=false] Passer true pour ne faire que les conversion de type
-   *                                sans renvoyer une erreur pour les champs manquants
-   * @param {Function} next Callback appelé en synchrone qui recevra les arguments (error, ressource)
-   *                        ressource pourra avoir _errors ou _warnings (cast éventuels effectués)
-   */
-  $ressourceControl.valide = function (ressource, partial, next) {
-    log.debug('ressource dans valide', ressource, 'form', {max: 2000})
-    log.debug('relations', ressource.relations, 'avirer', {max: 2000})
-    if (!next) {
-      next = partial
-      partial = false
-    }
-    var strict = !partial
-    if (!next) throw new Error('pas de callback fournie')
-    if (_.isEmpty(ressource)) return next(new Error('Ressource vide'))
-    // normalisation basique
-    normalizeArrays(ressource)
-    addDeductions(ressource)
-    // vérif présence et type, on boucle sur typesVar
-    _.each(config.typesVar, function (typeVar, prop) {
-      var label = config.labels[prop]
-      var value = ressource[prop]
-
-      // propriétés obligatoires
-      if (strict && config.required[prop]) {
-        // un checkbox false est [false]
-        if (!value || sjt.isArrayEmpty(value)) {
-          rTools.addError(ressource, 'Le champ ' + label + ' est obligatoire ')
-          log.errorData(ressource.oid + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(value))
-        }
-      }
-
-      // vérif des types et cast éventuel
-      if (typeof value !== 'undefined') {
-        if (!_['is' + typeVar](value)) {
-          // pas le bon type, on tente du cast
-          castValue(ressource, prop)
-        } else if (typeVar === 'Number') {
-          // c'est bien un number mais on vérifie quand même entier positif
-          if (parseInt(value, 10) !== value) rTools.addError(ressource, 'Le champ ' + label + ' ne contient pas un entier')
-          if (value < 0) rTools.addError(ressource, 'Le champ ' + label + ' ne contient pas un entier positif')
-        } else if (typeVar === 'Array') {
-          // c'est déjà un array, on passe les strings d'entiers en entiers
-          ressource[prop] = integerify(value)
-        }
-      }
-    }) // fin each
-
-    addWarnings(ressource)
-
-    next(null, ressource)
-  }
-
   /**
    * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
    * Ajoute des choses dans ressource._warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
@@ -288,7 +257,7 @@ module.exports = function (EntityRessource) {
    * @param {function} next Si appelé sans error, la ressource est valide,
    *                        sinon y'a une error et des warnings|errors ajouté à la ressource initiale qui est renvoyée modifiée
    */
-  $ressourceControl.valideRessourceFromPost = function (data, partial, next) {
+  function valideRessourceFromPost (data, partial, next) {
     if (_.isEmpty(data)) return next(new Error('Ressource vide'))
     // log.debug('data reçues en post', data, 'html', {max:500})
     if (data.ressource) {
@@ -301,7 +270,7 @@ module.exports = function (EntityRessource) {
     }
 
     // on peut tenter une validation
-    $ressourceControl.valide(data, partial, function (error, ressource) {
+    valide(data, partial, function (error, ressource) {
       if (error) {
         // en cas de pb de validation on renvoie aussi la ressource à l'origine du pb, éventuellement un peu nettoyée
         next(error, ressource)
@@ -315,5 +284,13 @@ module.exports = function (EntityRessource) {
     })
   }
 
-  return $ressourceControl
+  /**
+   * Service de validation / controle du contenu d'une ressource
+   * @service $ressourceControl
+   * @requires EntityRessource
+   */
+  return {
+    valide,
+    valideRessourceFromPost
+  }
 }
