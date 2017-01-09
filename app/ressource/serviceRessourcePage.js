@@ -759,7 +759,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       $ressourcePage.printError(context, error)
     } else {
       log.error(error)
-      context.text(error.toString())
+      context.plain(error.toString())
     }
   }
 

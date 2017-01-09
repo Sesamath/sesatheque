@@ -235,7 +235,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $ressourceRepository.load(oid, function (error, ressource) {
       if (error) {
         log.error(error)
-        context.text(error.toString())
+        context.plain(error.toString())
       } else if (ressource && ressource.type === 'url') {
         var url = ressource && ressource.parametres && ressource.parametres.adresse
         if (url && url.substr(0, 7) === 'http://') {
@@ -260,17 +260,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 $cache.set('urlProxy' + oid, page, 600)
                 sendRawHtml(page.body, page.contentType)
               } else {
-                context.text('Impossible de récupérer la page ' + url)
+                context.plain('Impossible de récupérer la page ' + url)
               }
             })
           }
         } else {
           var msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
           log.error(msg)
-          context.text(msg)
+          context.plain(msg)
         }
       } else {
-        context.text('Il n’y a pas de ressource ' + oid + ' de type page externe')
+        context.plain('Il n’y a pas de ressource ' + oid + ' de type page externe')
       }
     })
   })
