@@ -270,6 +270,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
           // l'idOrigine n'est pas obligatoire ($ressourceRepository.save créera une clé si besoin
           next(null, ressourcePostee)
         } else {
+          log.debug('ressource postée invalide', ressourcePostee)
           next(new Error('Il faut fournir oid ou au moins origine'))
         }
       }).seq(function (ressourceBdd) {
