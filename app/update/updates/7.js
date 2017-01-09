@@ -69,20 +69,36 @@ module.exports = {
       EntityRessource.match('relations').sort('oid').grab(limit, offset, options, function (error, ressources) {
         if (error) return next(error)
         // log.debug('ressources ' + ressources.map((r) => r.oid).join(' '))
+        var currentSubOffset = 0
+        var current
         flow(ressources).seqEach(function (ressource) {
-          // log.debug('in flow parsing ' + ressource.oid)
+          currentSubOffset++
+          current = ressource.oid
+          if (!!ressource.origine !== !!ressource.idOrigine) {
+            // y'a un pb on a un seul des deux :-/
+            // le save va planter (il est maintenant plus chatouilleux)
+            console.error('ressource avec seulement origine ou idOrigine', ressource)
+            return this()
+          }
           if (ressource.relations.length > 1 && cleanRelations(ressource)) $ressourceRepository.save(ressource, this)
           else if (ressource.relations.length > 0 && ressource.relations.find((r) => typeof r[1] === 'string' && r[1].indexOf('/') !== -1)) $ressourceRepository.save(ressource, this)
           else this()
         }).seq(function () {
           if (ressources.length === limit) {
             offset += limit
-            // on laisse refroidir un peu le disque
+            // on laisse refroidir un peu le disque de la bdd,
+            // mais pas aussi longtemps que le fût du canon car on a pas que ça à faire
             setTimeout(grab, 100)
           } else {
             this()
           }
-        }).done(next)
+        }).seq(next).catch(function (error) {
+          log.error(error)
+          console.log(`plantage sur la ressource ${current}, on continue quand même`)
+          // mais on continue
+          offset += currentSubOffset
+          grab()
+        })
       })
     }
     // init
