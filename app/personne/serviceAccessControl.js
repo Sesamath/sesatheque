@@ -226,7 +226,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     var config = $settings.get('components.personne')
     _.each(personne.roles, function (hasRole, role) {
       // on ajoute les permissions définies pour ce role en config
-      if (hasRole && config.roles[role]) sjtObj.merge(permissions, config.roles[role])
+      if (hasRole && config.roles[role]) {
+        // faut pas faire de merge, on pourrait écraser avec false
+        // une permission déjà accordée par un rôle précédent
+        _.each(config.roles[role], function (hasPerm, perm) {
+          if (hasPerm) permissions[perm] = true
+        })
+      }
     })
 
     return permissions
