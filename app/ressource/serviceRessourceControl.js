@@ -33,7 +33,6 @@
 
 var _ = require('lodash')
 var sjt = require('sesajstools')
-var sjtFilters = require('sesajstools/utils/filters')
 var rTools = require('../tools/ressource')
 
 var config = require('./config')
@@ -128,18 +127,11 @@ function checkEnfants (enfants, ressource, titre) {
  * Fait du cast sans râler quand les propriétés de ressource sont 'presque" du bon type
  * @memberOf $ressourceControl
  * @param {object} ressource objet qui provient d'un post (toutes les valeurs sont des strings, les boolean sont sous la forme checkbox
- * @param {boolean} [partial=false] Passer true pour ne faire que les conversion de type
- *                                sans renvoyer une erreur pour les champs manquants
  * @param {ressourceCallback} next Callback appelé en synchrone qui recevra les arguments (error, ressource)
  *                        ressource pourra avoir _errors ou _warnings (cast éventuels effectués)
  */
-function valide (data, partial, next) {
+function valide (data, next) {
   log.debug('ressource dans valide', data, 'form', {max: 2000})
-  log.debug('début valide', data.niveaux, 'avirer', {max: 2000})
-  if (!next) {
-    next = partial
-    partial = false
-  }
   if (!next) throw new Error('pas de callback fournie')
   if (_.isEmpty(data)) return next(new Error('Ressource vide'))
   // parsing des propriétés qui pourraient être envoyées en json
@@ -153,98 +145,19 @@ function valide (data, partial, next) {
       }
     }
   })
-  let ressource
-  if (partial) {
-    validePartial(data)
-    ressource = data
-  } else {
-    // le constructeur fait office de validateur,
-    ressource = new Ressource(data)
-    // vérif des required
-    _.each(config.required, function (required, prop) {
-      if (required && _.isEmpty(ressource[prop])) {
-        rTools.addError(ressource, `Le champ ${config.labels[prop]} est obligatoire`)
-        log.errorData(ressource.getId() + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(ressource[prop]))
-      }
-    })
-  }
-  addDeductions(ressource)
-  addWarnings(ressource)
-  log.debug('fin valide', ressource.niveaux)
-
-  next(null, ressource)
-}
-
-/**
- * Vérifie que toutes les propriétés qui existent sont du bon type (cast sinon, avec addError sur les tableaux)
- * @private
- * @param {object} data
- */
-function validePartial (data) {
-  const retour = {}
-  _.each(data, function (value, prop) {
-    switch (config.typesVar[prop]) {
-      case undefined: rTools.addError(retour, `Le champ ${prop} est inconnu et sera ignoré`); break
-      case 'Number': retour[prop] = sjtFilters.int(value); break
-      case 'String': retour[prop] = sjtFilters.string(value); break
-      case 'Date': retour[prop] = sjtFilters.date(value); break
-      case 'Boolean': retour[prop] = sjtFilters.boolean(value); break
-
-      case 'Array':
-        // éventuel parsing
-        if (typeof value === 'string' && value.substr(0, 1) === '[' && value.substr(-1) === ']') {
-          try {
-            value = JSON.parse(value)
-          } catch (e) {
-            rTools.addError(retour, `Le champ ${config.labels[ prop ]} vaut ${value} qui n'est pas une liste correctement formatée`)
-          }
-        }
-        // on doit avoir un array
-        if (Array.isArray(value)) {
-          // on regarde le contenu
-          switch (config.typesVarArray[prop]) {
-            case 'Number': retour[prop] = sjtFilters.arrayInt(value); break
-            case 'String': retour[prop] = sjtFilters.arrayString(value); break
-            case 'Array':
-              // normalement relations est le seul dans ce cas
-              if (prop !== 'relations') throw new Error(`${prop} non gérée par validePartial`)
-              retour[prop] = value.filter((elt) => Array.isArray(elt))
-                .map((elt) => sjtFilters.arrayInt(elt))
-                .filter((elt) => elt.length === 2)
-              if (retour[prop].length < value.length) {
-                rTools.addWarning(retour, `${prop} contenait un élément invalide (pas une relation) qui a été ignoré`)
-              }
-              break
-            case 'Object':
-              retour[prop] = value.filter((elt) => typeof elt === 'object')
-              if (retour[prop].length < value.length) {
-                rTools.addWarning(retour, `${prop} contenait un élément invalide qui a été ignoré`)
-              }
-              break
-            default:
-              throw new Error(`${prop} déclaré en config comme array mais typesVarArray non déclaré ou non géré`)
-          }
-        } else {
-          rTools.addError(retour, `Le champ ${config.labels[prop]} vaut ${value} qui n'est pas une liste`)
-        }
-        break
-
-      case 'Object':
-        if (typeof value === 'string') {
-          try {
-            value = JSON.parse(value)
-          } catch (e) { /* idem erreur juste dessous */ }
-        }
-        if (typeof value !== 'object') {
-          rTools.addError(retour, `Le champ ${config.labels[prop]} vaut ${value} n'est pas un objet correctement formaté`)
-        }
-        break
-
-      default:
-        throw new Error(`Champ ${prop} déclaré en config mais de type non géré`)
+  // le constructeur fait office de validateur,
+  const ressource = new Ressource(data)
+  // vérif des required
+  _.each(config.required, function (required, prop) {
+    if (required && _.isEmpty(ressource[prop])) {
+      rTools.addError(ressource, `Le champ ${config.labels[prop]} est obligatoire`)
+      log.errorData(ressource.getId() + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(ressource[prop]))
     }
   })
-  return retour
+  addDeductions(ressource)
+  addWarnings(ressource)
+
+  next(null, ressource)
 }
 
 module.exports = function (EntityRessource) {
@@ -257,7 +170,7 @@ module.exports = function (EntityRessource) {
    * @param {function} next Si appelé sans error, la ressource est valide,
    *                        sinon y'a une error et des warnings|errors ajouté à la ressource initiale qui est renvoyée modifiée
    */
-  function valideRessourceFromPost (data, partial, next) {
+  function valideRessourceFromPost (data, next) {
     if (_.isEmpty(data)) return next(new Error('Ressource vide'))
     // log.debug('data reçues en post', data, 'html', {max:500})
     if (data.ressource) {
@@ -270,13 +183,10 @@ module.exports = function (EntityRessource) {
     }
 
     // on peut tenter une validation
-    valide(data, partial, function (error, ressource) {
+    valide(data, function (error, ressource) {
       if (error) {
         // en cas de pb de validation on renvoie aussi la ressource à l'origine du pb, éventuellement un peu nettoyée
         next(error, ressource)
-      } else if (partial) {
-        // si partiel, faut pas retourner un objet ressource complet mais seulement ce que l'on a construit à partir des datas
-        next(null, ressource)
       } else {
         // mais sinon on renvoie une vraie entité Ressource
         next(null, EntityRessource.create(ressource))

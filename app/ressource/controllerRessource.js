@@ -396,7 +396,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           ressourcePosted.origine = config.application.baseId
           ressourcePosted.idOrigine = undefined
         }
-        $ressourceControl.valideRessourceFromPost(ressourcePosted, false, this)
+        $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
       }).seq(function (ressource) {
         ressourcePosted = ressource
         if (!_.isEmpty(ressource._errors)) printForm(context, null, ressource, titrePage)
@@ -499,7 +499,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         checkToken(context, oid, this)
       }).seq(function () {
         log.debug('dans post, postée', ressourcePostee.niveaux)
-        $ressourceControl.valideRessourceFromPost(ressourcePostee, false, this)
+        $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
       }).seq(function (ressource) {
         // faut la mémoriser pour comparer avec la bdd
         ressourceNormee = ressource

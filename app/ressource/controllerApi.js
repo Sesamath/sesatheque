@@ -286,14 +286,14 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
         var tt = ressourcePostee.type
         if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
-        // on valide le contenu
-        // partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
+        // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
         var partial = !!context.get.partial
         if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
           partial = (ressourcePostee.oid > 0 || (ressourcePostee.origine && ressourcePostee.idOrigine))
         }
+        if (partial) ressourcePostee = Object.assign({}, ressourceBdd, ressourcePostee)
         ressourceOriginale = ressourceBdd
-        $ressourceControl.valideRessourceFromPost(ressourcePostee, partial, this)
+        $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
       }).seq(function (ressourceNew) {
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
         $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
