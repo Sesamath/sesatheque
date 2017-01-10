@@ -60,7 +60,7 @@
     "morgan": "1.7.0",
     "request": "2.75.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.0",
-    "sesajstools": "git://src.sesamath.net/sesajstools#1.0.3",
+    "sesajstools": "git://src.sesamath.net/sesajstools#1.0.5",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.0",
     "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.0.48"
   },
@@ -89,7 +89,8 @@
     "standard": "^6.0.8",
     "url-loader": "^0.5.7",
     "webpack": "^1.12.2",
-    "xml2js": "^0.4.4"
+    "xml2js": "^0.4.4",
+    "zombie": "^5.0.5"
   },
   "eslintConfig": {
     "extends": [
