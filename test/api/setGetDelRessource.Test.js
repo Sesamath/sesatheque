@@ -93,7 +93,7 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
     resume: 'Un résumé bidon sur\ndeux lignes',
     description: 'Une description bidon sur\ndeux lignes',
     commentaires: 'Un commentaire bidon sur\ndeux lignes',
-    niveaux: [10, 6],
+    niveaux: ['10', '6'],
     categories: [1, 2],
     // typePedagogiques
     // typeDocumentaires
@@ -141,6 +141,7 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
         assert.ok(!error)
         assert.ok(!ressource.error)
         for (var key in ressCloned) {
+          // console.log(`pour ${key}`, ressCloned[key], ressource[key])
           if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
         }
         // logInfo('la ressource récupérée', ressource)

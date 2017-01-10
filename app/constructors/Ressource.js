@@ -131,7 +131,7 @@ function Ressource (initObj) {
    * (faudra gérér ultérieurement différents système éducatif, fr_FR pour tout le monde en attendant)
    * @type {Array}
    */
-  this.niveaux = filters.arrayString(values.niveaux)
+  this.niveaux = filters.arrayString(values.niveaux, false)
   /**
    * Un id de catégorie correspond à un recoupement de types, par ex [7] pour 'exercice interactif'
    * @type {Array}
@@ -256,6 +256,7 @@ function Ressource (initObj) {
       // on ne vérifie que ce qui fini en tableau
       if (Array.isArray(values[p])) {
         if (this[p].length < values[p].length) this._errors.push(`des éléments de la propriété ${p} étaient invalides et ont été ignorés`)
+        // console.log(`pour ${p}`, values[p], 'donne', this[p])
       } else if (values[p]) {
         this._errors.push(`La propriété ${p} était invalide et a été ignorée`)
         console.error('contenu invalide', values[p])
