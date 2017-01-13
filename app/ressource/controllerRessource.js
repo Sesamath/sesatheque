@@ -790,7 +790,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
     })
   }
-  search.timeout = 3000
+  // avec mysql ça peut être vraiment très lent… (3s pour le count et 3s pour remonter les data)
+  search.timeout = 10000
+
   /**
    * Affiche le formulaire de recherche (s'il n'y a pas de critères) ou la liste de résultat
    * @route GET /ressource/recherche

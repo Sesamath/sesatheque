@@ -577,9 +577,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         query.count(this)
       }).seq(function (nbTot) {
         nbTotal = nbTot
-        query.grab(nb, start, this)
+        // log.debug('trouvé ' + nbTot + ' résultats')
+        if (nbTot) query.grab(nb, start, this)
+        else this(null, [])
       }).seq(function (ressources) {
-        cacheAndNext(null, ressources, this)
+        if (ressources.length) cacheAndNext(null, ressources, this)
+        else this(null, [])
       }).seq(function (ressources) {
         next(null, ressources, nbTotal)
       }).catch(next)
