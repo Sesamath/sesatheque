@@ -454,7 +454,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Context}   context
    * @param {Error}     error
    * @param {Ressource} ressource Une ressource qui peut contenir des erreurs (si elle vient d'un post)
-   * @param {function}  next appelée avec formData (data pour la vue dust du form, avec le token)
+   * @param {function}  next appelée avec (error, formData) (data pour la vue dust du form, avec le token)
+   *                         error toujours null mis pour suivre les conventions de callback)
    */
   function getFormViewData (context, error, ressource, next) {
     var formData = {
@@ -640,12 +641,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (!formData.errors.length) delete formData.errors
       // log.debug('auteurs pour le form', formData.auteurs, 'htmlform', {max: 50000, indent: 2})
       // log.debug('contributeurs pour le form', formData.contributeurs, 'htmlform', {max: 50000, indent: 2})
-      next(formData)
+      next(null, formData)
     }).catch(function (error) {
       log.error('plantage dans getFormViewData', error)
       if (!formData.errors) formData.errors = []
       formData.errors.push(error.toString())
-      next(formData)
+      next(null, formData)
     })
   }
 
@@ -900,7 +901,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // on met la ressource en contexte
     if (context.layout === 'page' && ressource) context.ressource = ressource
     // les datas pour le form
-    getFormViewData(context, error, ressource, function (formData) {
+    getFormViewData(context, error, ressource, function (error, formData) {
+      if (error) return $ressourcePage.printError(context, error)
       sjtObj.merge(data.contentBloc, formData)
       // et d'éventuels overrides
       if (options) sjtObj.merge(data, options)
@@ -938,7 +940,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // on ajoute un flag pour getFormViewData (oui c'est crade)
     fakeRessource.search = true
     // log.debug("ressource d'après get', fakeRessource)
-    getFormViewData(context, null, fakeRessource, function (formData) {
+    getFormViewData(context, null, fakeRessource, function (error, formData) {
+      if (error) return $ressourcePage.printError(context, error)
       sjtObj.complete(data.contentBloc, formData)
       log.debug('formSearch démarre avec', data.contentBloc)
       // on vire ou modifie ce qui nous intéresse pour la recherche
