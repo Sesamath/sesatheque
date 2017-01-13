@@ -286,7 +286,13 @@ log.getElapsed = function (start) {
  * @param filter
  */
 log.error = function (message, objectToDump, filter) {
-  if (message || objectToDump) out(message, objectToDump, filter, errorOutputStream, {max: 2000})
+  if (typeof message === 'string' || message instanceof Error) {
+    out(message, objectToDump, filter, errorOutputStream, {max: 2000})
+  } else {
+    // bizarre, on génère une vraie erreur avec sa trace
+    out(new Error('log.error appelé sans message ni erreur'), message, filter, errorOutputStream, {max: 2000})
+    if (objectToDump) out('l’objet passé initialement', objectToDump, filter, errorOutputStream, {max: 2000})
+  }
 }
 
 /**
