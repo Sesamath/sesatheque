@@ -354,30 +354,30 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       // rien à faire
       next(null, ressource)
     } else {
-      var msg
+      var errorMsg
       if ($accessControl.isAuthenticated(context)) {
         // on regarde donc ce user pour cette ressource
         switch (permission) {
           // sinon on délègue suivant la permission
           case 'create':
-            msg = getCreateDeniedMessage(context)
+            errorMsg = getCreateDeniedMessage(context)
             break
           case 'delete':
-            msg = getDeleteDeniedMessage(context, ressource, next)
+            errorMsg = getDeleteDeniedMessage(context, ressource, next)
             break
           case 'read':
-            msg = getReadDeniedMessage(context, ressource, next)
+            errorMsg = getReadDeniedMessage(context, ressource, next)
             break
           case 'update':
-            msg = getUpdateDeniedMessage(context, ressource, next)
+            errorMsg = getUpdateDeniedMessage(context, ressource, next)
             break
           default:
-            msg = 'Permission ' + permission + ' inconnue, refusée par défaut'
+            errorMsg = 'Permission ' + permission + ' inconnue, refusée par défaut'
         }
       } else {
-        msg = 'Authentification requise'
+        errorMsg = 'Authentification requise'
       }
-      next(msg, ressource)
+      next(errorMsg, ressource)
     }
   }
 
