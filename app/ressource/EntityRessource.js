@@ -29,16 +29,13 @@
  * pour une explication en français)
  */
 'use strict'
+const tools = require('../tools')
+const Ressource = require('../constructors/Ressource')
+const config = require('../config')
+// idem config.component.ressource, mais le require permet une meilleure autocompletion
+const configRessource = require('./config')
 
 module.exports = function (EntityRessource) {
-  const merge = require('sesajstools/utils/object').merge
-
-  const tools = require('../tools')
-  const Ressource = require('../constructors/Ressource')
-  const config = require('../config')
-  // idem config.component.ressource, mais le require permet une meilleure autocompletion
-  const configRessource = require('./config')
-
   /**
    * Notre entité ressource, cf [Entity](lassi/Entity.html)
    * @entity EntityRessource
@@ -47,11 +44,23 @@ module.exports = function (EntityRessource) {
    * @extends Ressource
    */
   EntityRessource.construct(function (initObj) {
-    const entity = this
     // on récupère un objet Ressource correctement typé et initialisé
     const ressource = new Ressource(initObj)
-    // que l'on merge à notre objet Entity
-    merge(entity, ressource)
+    for (let p in ressource) {
+      if (ressource.hasOwnProperty(p)) {
+        Object.defineProperty(this, p, Object.getOwnPropertyDescriptor(ressource, p))
+
+      // pour propager les méthodes du prototype, probablement pas la bonne méthode
+      // EntityRessource.prototype[p] = Ressource.prototype[p]
+      // on regarde le type, et on écrase pas de méthodes qui existeraient déjà
+      // sauf que this.prototype et  EntityRessource.prototype sont undefined
+      // } else if (typeof Ressource.prototype[p] === 'function' && typeof EntityRessource[p] === 'undefined') {
+      //   this.prototype[p] = function () {
+      //     Ressource.prototype[p].apply(this, [...arguments])
+      //   }
+      }
+      // et on ignore les propriétés du prototype qui ne sont pas des méthodes
+    }
 
     // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
     // plus pratique ici que dans le constructeur qui ne peut faire de require

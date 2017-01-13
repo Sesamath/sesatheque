@@ -189,8 +189,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           data.$metas.title = 'Résultats de la recherche'
           log.debug('liste avec les options', options)
           log.debug('qui remonte', ressources)
-          if (error) data.contentBloc.error = error.toString()
-          else {
+          if (error) {
+            data.contentBloc.error = error.toString()
+          } else {
             if (ressources.length === options.nb) {
               crit.start = options.start + options.nb
               data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
@@ -210,7 +211,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
     }
   }
-  search.timeout = 3000
+  // avec mysql ça peut être vraiment très lent… (3s pour le count et 3s pour remonter les data)
+  search.timeout = 10000
+
   /**
    * Formulaire de recherche et affichage des résultats
    * @route GET /public/recherche

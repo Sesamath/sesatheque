@@ -251,18 +251,23 @@ function Ressource (initObj) {
     this._errors = filters.arrayString(values._errors)
   }
   // et on ajoute des erreurs si on a viré des trucs
-  Object.getOwnPropertyNames(values).forEach((p) => {
+  Object.getOwnPropertyNames(values).forEach(p => {
     if (Array.isArray(this[p])) {
       // on ne vérifie que ce qui fini en tableau
       if (Array.isArray(values[p])) {
-        if (this[p].length < values[p].length) this._errors.push(`des éléments de la propriété ${p} étaient invalides et ont été ignorés`)
-        // console.log(`pour ${p}`, values[p], 'donne', this[p])
+        if (this[p].length < values[p].length) {
+          this._errors.push(`des éléments de la propriété ${p} étaient invalides et ont été ignorés`)
+          if (typeof log === 'function' && log.debug) {
+            log.debug(`pour ${p} on a initialement`, values[p])
+            log.debug('qui donne', this[p])
+          }
+        }
       } else if (values[p]) {
         this._errors.push(`La propriété ${p} était invalide et a été ignorée`)
         console.error('contenu invalide', values[p])
       }
     }
-  }, this)
+  }, this) // pas utile de préciser le this de forEach avec une fct fléchée, au cas où elle serait plus fléchée…
 }
 
 /**
