@@ -780,7 +780,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       }
       beforeStore(ressource, this)
     }).seq(function (ressource) {
-      log.debug('on va enregistrer ' + ressource.origine + '/' + ressource.idOrigine)
+      log.debug('on va enregistrer ' + ressource.origine + '/' + ressource.idOrigine, ressource, 'avirer', {max: 10000})
       ressource.store(this)
     }).seq(function (ressource) {
       // mise en cache (pas possible en afterStore car le cache dépend de l'entité), purge varnish et passage au suivant

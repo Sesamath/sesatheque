@@ -106,7 +106,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
     // cast en string
     id += ''
     // on découpe sur le premier slash avec deux morceaux non vides
-    var match = id.match(/^([^\/]+)\/(.+)$/)
+    var match = id.match(/^([^/]+)\/(.+)$/)
     if (match && match.length === 3) {
       $personneRepository.loadByOrigin(match[1], match[2], next)
     } else if (id) {

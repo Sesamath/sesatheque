@@ -94,7 +94,7 @@ module.exports = function (EntityRessource) {
     .defineIndex('idOrigine', 'string')
     .defineIndex('type', 'string')
     .defineIndex('titre', 'string')
-    .defineIndex('niveaux', 'integer')
+    .defineIndex('niveaux', 'string')
     .defineIndex('categories', 'integer')
     .defineIndex('typePedagogiques', 'integer')
     .defineIndex('typeDocumentaires', 'integer')
@@ -111,6 +111,7 @@ module.exports = function (EntityRessource) {
     // (pour mettre à jour titre & résumé par ex).
     .defineIndex('enfants', 'string', function () {
       if (this.type !== 'arbre') return
+      // on veut toutes les refs récursivement
       function addRefsEnfants (enfants) {
         enfants.forEach((enfant) => {
           if (enfant.ref) refsEnfants.push(enfant.ref)
@@ -124,7 +125,7 @@ module.exports = function (EntityRessource) {
       return refsEnfants
     })
     .defineIndex('auteurs', 'string')
-    .defineIndex('contributeurs', 'integer')
+    .defineIndex('contributeurs', 'string')
     .defineIndex('groupes', 'string')
     .defineIndex('groupesAuteurs', 'string')
     .defineIndex('langue', 'string')

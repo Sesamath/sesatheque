@@ -136,35 +136,42 @@ function Ressource (initObj) {
    * Un id de catégorie correspond à un recoupement de types, par ex [7] pour 'exercice interactif'
    * @type {Array}
    */
-  this.categories = filters.arrayInt(values.categories)
+  this.categories = filters.arrayInt(values.categories, false)
   /**
    * Type pédagogique (5.2 - scolomfr-voc-010) : cours, exercice...
    * C'est un champ conditionné par la catégorie, mais à priori seulement, l'utilisateur peut modifier / enrichir
    * @see {@link http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=62}
    * @type {Array}
    */
-  this.typePedagogiques = filters.arrayInt(values.typePedagogiques)
+  this.typePedagogiques = filters.arrayInt(values.typePedagogiques, false)
   /**
    * type documentaire (1.9 - scolomfr-voc-004) : image, ressource interactive, son, texte
    * Idem, conditionné par la catégorie mais à priori seulement
    * @see {@link http://www.lom-fr.fr/scolomfr/la-norme/manuel-technique.html?tx_scolomfr_pi1[detailElt]=49}
    * @type {Array}
    */
-  this.typeDocumentaires = filters.arrayInt(values.typeDocumentaires)
+  this.typeDocumentaires = filters.arrayInt(values.typeDocumentaires, false)
   /**
    * Liste des ressources liées, une liaison étant un array [idLiaison, idRessourceLiée]
    * idRessourceLiée peut être un oid ou une string origine/idOrigine
    * @type {relation[]}
    */
-  this.relations = filters.array(values.relations)
-    .filter((elt) => Array.isArray(elt) && elt.length === 2)
-    .map((elt) => filters.arrayInt(elt))
+  this.relations = []
+  if (Array.isArray(values.relations) && values.relations.length) {
+    values.relations.forEach(rel => {
+      if (Array.isArray(rel) && rel.length === 2) {
+        const typeRel = filters.int(rel[0])
+        const ressId = filters.string(rel[1])
+        if (typeRel && ressId) this.relations.push([typeRel, ressId])
+      }
+    }, this)
+  }
   /**
    * Liste d'id d'auteurs
    * @type {Integer[]}
    */
   // pas arrayInt car on peut recevoir du origin/idOrigin que l'on transforme ensuite, voire peut-être des urls un jour
-  this.auteurs = filters.arrayString(values.auteurs)
+  this.auteurs = filters.arrayString(values.auteurs, false)
   /**
    * Liste d'url pour les auteurs précédents
    */
@@ -173,17 +180,17 @@ function Ressource (initObj) {
    * Liste d'id de contributeurs
    * @type {Integer[]}
    */
-  this.contributeurs = filters.arrayString(values.contributeurs)
+  this.contributeurs = filters.arrayString(values.contributeurs, false)
   /**
    * Liste de noms de groupes dans lesquels cette ressource est publiée
    * @type {string[]}
    */
-  this.groupes = filters.arrayString(values.groupes)
+  this.groupes = filters.arrayString(values.groupes, false)
   /**
    * Liste de noms de groupes dont les membres peuvent modifier cette ressource
    * @type {string[]}
    */
-  this.groupesAuteurs = filters.arrayString(values.groupesAuteurs)
+  this.groupesAuteurs = filters.arrayString(values.groupesAuteurs, false)
   /**
    * code langue ISO 639-2
    * @see {@link http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2}
