@@ -147,7 +147,7 @@ tools.sanitizeHashKey = function (source) {
  * @returns {void|*|{value}|string|XML}
  */
 tools.sanitizeStrict = function (source) {
-  return source.replace(/[^a-zA-Z0-9_\-]/, '')
+  return source.replace(/[^-a-zA-Z0-9_]/, '')
 }
 
 /**
@@ -191,7 +191,7 @@ tools.stripTags = function (source) {
  */
 tools.idListToArray = function idListToArray (list) {
   var retour = []
-  if (typeof list === 'string') retour = list.match(/([A-Za-z0-9_\-]+)/g)
+  if (typeof list === 'string') retour = list.match(/([-A-Za-z0-9_]+)/g)
   else log.error(new TypeError('faut me donner un type string'))
 
   return retour
