@@ -113,6 +113,11 @@ function getBase (ressource) {
   }
 }
 
+/**
+ * Retourne la baseId d'une ressource, si base est connue (undefined sinon)
+ * @param {string} base l'url de base cherchée
+ * @returns {string|undefined} baseId si connue
+ */
 function getBaseId (base) {
   for (var id in sesatheques) {
     if (sesatheques[id] === base) return id
@@ -127,6 +132,11 @@ function getBaseId (base) {
 function getJstNode (ressource, parentBaseId) {
   var node
   if (ressource) {
+    if (!parentBaseId && ressource.baseId) {
+      parentBaseId = ressource.baseId
+      // et on l'ajoute avec l'url / si on la connait pas
+      if (!sesatheques[parentBaseId]) sesatheques[parentBaseId] = '/'
+    }
     node = {
       text: ressource.titre,
       a_attr: getAttr(ressource, parentBaseId),

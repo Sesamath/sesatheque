@@ -50,6 +50,7 @@ module.exports = function display (ressource, options, next) {
     var $ = window.jQuery
     try {
       log('arbre.display avec', ressource)
+      if (options) log('et les options', options)
       if (typeof window.jQuery === 'undefined') throw new Error("jQuery n'a pas été chargé")
       /* jshint jquery:true */
       var container = options.container
@@ -177,6 +178,8 @@ module.exports = function display (ressource, options, next) {
         // l'arbre
         var treeId = dom.getNewId()
         dom.addElement(caseTree, 'div', { id: treeId })
+        // on s'ajoute comme sesatheque au cas ou jstreeConverter nous connait pas
+        if (ressource.baseId && ressource.baseUrl) jstreeConverter.addSesatheques({[ressource.baseId]: ressource.baseUrl})
         // l'élément root, pas encore un array
         var rootElt = jstreeConverter.toJstree(ressource)
         rootElt.state = { opened: true }
@@ -184,7 +187,7 @@ module.exports = function display (ressource, options, next) {
         var jstData = {
           'core': {
             'data': function (node, next) {
-              // log('fct data', node)
+              log('fct data', node)
               if (node.id === '#') {
                 next(rootElt)
               } else {
@@ -230,6 +233,10 @@ module.exports = function display (ressource, options, next) {
             var v = $searchInput.val()
             $tree.jstree(true).search(v)
           }, 250)
+        })
+
+        $tree.on('open_node.jstree', function (e, data) {
+          log('open_node', e, data)
         })
 
         // pour l'aperçu, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte

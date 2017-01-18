@@ -211,6 +211,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     data.contentBloc.baseId = appConfig.application.baseId
     data.contentBloc.sesatheques = appConfig.sesatheques
     if (ressource) {
+      // on ajoute notre base
+      ressource.baseId = appConfig.application.baseId
+      ressource.baseUrl = appConfig.application.baseUrl
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource = sjt.stringify(ressource)
     }
@@ -792,7 +795,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       } else {
         // et la ressource (ou erreur)
         data.contentBloc = getViewData(error, ressource, view)
-        // pour display faut ajouter les variables js (preview l'utilise aussi, seul le layout change entre preview et display)
+        // pour display faut ajouter les variables js (preview utilise aussi la vue display, seul le layout change)
         if (view === 'display') {
           addJsVars(data, ressource)
           data.contentBloc.isFormateur = $accessControl.hasRole('acces_correction', context)
