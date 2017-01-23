@@ -70,7 +70,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function checkAndAffiche (context, error, ressource, view, options) {
     if (error) $ressourcePage.printError(context, "Problème d'accès à la base de données", 500)
     else if (ressource && ressource.restriction === 0) $ressourcePage.prepareAndSend(context, error, ressource, view, options)
-    else $ressourcePage.printError(context, "La ressource n'existe pas ou n'est pas publique", 404)
+    else $ressourcePage.printError(context, 'La ressource n’existe pas (ou n’est pas publique et publiée)', 404)
   }
 
   /**
