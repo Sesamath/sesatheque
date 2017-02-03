@@ -533,7 +533,9 @@ exports.publish = function(taffyData, opts, tutorials) {
             title: title,
             header: tutorial.title,
             content: tutorial.parse(),
-            children: tutorial.children
+            children: tutorial.children,
+            // thanks to Anon http://stackoverflow.com/a/26717198
+            filename: filename
         };
 
         var tutorialPath = path.join(outdir, filename),
