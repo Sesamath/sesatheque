@@ -60,36 +60,43 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
    * @returns {string[]} Les erreurs éventuelles, ou false si y'a pas eu d'erreur mais que l'on a rien modifié (la relation y était déjà)
    */
   $ressourceConverter.addRelations = function (ressource, relations) {
-    var errors = []
-    var isModif = false
+    let errors = []
+    let isModif = false
     if (_.isArray(relations)) {
-      relations.forEach(function (relation) {
-        if (relation && relation.length === 2) {
-          var idRelation = relation[0]
-          if (relation[1] === ressource.oid || relation[1] === (ressource.origine + '/' + ressource.idOrigine)) {
+      relations.forEach(([relId, relTarget, ...bug]) => {
+        if (bug.length) {
+          errors.push('une relation doit être un tableau à deux éléments (idRelation, idRessource, ce dernier peut être un oid ou une chaine origine/idOrigine')
+        } else {
+          if (
+            relTarget === ressource.oid ||
+            relTarget === ressource.rid ||
+            relTarget === (ressource.origine + '/' + ressource.idOrigine)
+          ) {
             errors.push('Impossible de lier une ressource à elle-même')
-          } else if (config.listes.relations[idRelation]) {
+          } else if (config.listes.relations[relId]) {
             // on regarde si cette relation n'y est pas déjà...
-            var exists = false
-            _.each(ressource.relations, function (relationExistante) {
-              if (relationExistante[0] === relation[0] && relationExistante[1] === relation[1]) {
+            let exists = false
+            // _.each plutôt que forEach car ça s'arrête au return false' +
+            _.each(ressource.relations, ([exRelId, exRelTarget]) => {
+              if (exRelId === relId && exRelTarget === relTarget) {
                 exists = true
                 return false // pas la peine de continuer
               }
             })
             if (!exists) {
-              ressource.relations.push(relation)
+              ressource.relations.push([relId, relTarget])
               isModif = true
             }
           } else {
-            errors.push(idRelation + " n'est pas un identifiant de relation valide")
+            errors.push(`${relId} n’est pas un identifiant de relation valide`)
           }
-        } else {
-          errors.push('une relation doit être un tableau à deux éléments (idRelation, idRessource, ce dernier peut être un oid ou une chaine origine/idOrigine')
         }
       })
-    } else errors.push('relations incorrectes')
+    } else {
+      errors.push('relations incorrectes')
+    }
 
+    // si y'a ni erreur ni modifs on return false pour dire qu'il n'y a rien à changer
     if (!errors.length && !isModif) errors = false
 
     return errors

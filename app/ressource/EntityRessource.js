@@ -34,6 +34,7 @@ const Ressource = require('../constructors/Ressource')
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
+const myBaseId = config.application.baseId
 
 module.exports = function (EntityRessource) {
   /**
@@ -104,7 +105,7 @@ module.exports = function (EntityRessource) {
     // (pour gérer les relations avec des oid externes)
     .defineIndex('relations', 'string', function () {
       // on retourne pour chaque relation l'item lié, tant pis pour la nature de la relation
-      return this.relations.map((relation) => relation[1])
+      return this.relations.map(relation => relation[1])
     })
     // pour les arbres, on indexe tous les enfants, c'est lourd en écriture d'index
     // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
@@ -112,17 +113,30 @@ module.exports = function (EntityRessource) {
     .defineIndex('enfants', 'string', function () {
       if (this.type !== 'arbre') return
       // on veut toutes les refs récursivement
-      function addRefsEnfants (enfants) {
-        enfants.forEach((enfant) => {
-          if (enfant.ref) refsEnfants.push(enfant.ref)
-          else if (enfant.oid) refsEnfants.push(enfant.oid)
-          else if (enfant.enfants && enfant.enfants.length) addRefsEnfants(enfant.enfants)
+      function addRidsEnfants (enfants) {
+        enfants.forEach(enfant => {
+          if (enfant.rid) {
+            pushRid(enfant.rid)
+          } else if (enfant.baseId) {
+            if (enfant.oid) pushRid(enfant.baseId + '/' + enfant.oid)
+            else if (enfant.ref) pushRid(enfant.baseId + '/' + enfant.ref)
+          } else if (enfant.oid) {
+            pushRid(myBaseId + '/' + enfant.oid)
+          }
+          if (enfant.enfants && enfant.enfants.length) addRidsEnfants(enfant.enfants)
         })
       }
-      const refsEnfants = []
-      if (this.enfants && this.enfants.length) addRefsEnfants(this.enfants)
+      const pushRid = (rid) => {
+        if (!alreadyAdded[rid]) {
+          alreadyAdded[rid] = true
+          ridsEnfants.push(rid)
+        }
+      }
+      const ridsEnfants = []
+      const alreadyAdded = {}
+      if (this.enfants && this.enfants.length) addRidsEnfants(this.enfants)
 
-      return refsEnfants
+      return ridsEnfants
     })
     .defineIndex('auteurs', 'string')
     .defineIndex('contributeurs', 'string')
@@ -139,10 +153,20 @@ module.exports = function (EntityRessource) {
   // pour des questions de cycle d'injection de dépendances
 
   // met en idOrigine l'oid de la ressource si origine locale et que ça n'y était pas encore
+  // idem pour rid
   EntityRessource.afterStore(function (next) {
-    if (this.origine === config.application.baseId && !this.idOrigine) {
+    let needToStore = false
+    // on ajoute notre id en idOrigine si on est l'origine
+    if (this.origine === myBaseId && !this.idOrigine) {
       this.idOrigine = this.oid
-      // et faut resauver…
+      needToStore = true
+    }
+    // on complète rid si besoin
+    if (!this.rid) {
+      this.rid = myBaseId + '/' + this.oid
+      needToStore = true
+    }
+    if (needToStore) {
       this.store(next)
     } else {
       next()

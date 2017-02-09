@@ -9,10 +9,11 @@ C'est nécessaire aussi pour référencer sur une sésathèque des ressources d'
 
 Les alias étaient stockés comme entitées séparées, mais ça complique finalement plus qu'autre chose.
 
-Une ressource sera considérée comme alias si elle a oid ET ref
-- oid (dans la sésathèque de l'alias)
-- ref (l'oid de la ressource d'origine dans sa sesatheque)
-- baseId désigne alors la sesathèque d'origine
+Donc un alias devient une ressource
+- avec une propriété aliasOf contenant l'uuid de la source
+- qui n'est pas modifiable (sauf pour répliquer la source)
+- qui est effaçable par le proprio
 
-Dans ce cas, le display sera lancé sur la sésathèque d'origine, et l'alias n'est pas éditable (pour éditer faut cloner).
+Une ressource sera considérée comme alias si elle a une propriété aliasOf, dans ce cas, le display sera lancé sur la sésathèque d'origine.
+
 

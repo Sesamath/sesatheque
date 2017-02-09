@@ -31,16 +31,23 @@
 
 'use strict'
 
-var _ = require('lodash')
-var flow = require('an-flow')
-var elementtree = require('elementtree')
-var request = require('request')
-var uuid = require('an-uuid')
+const flow = require('an-flow')
+const uuid = require('an-uuid')
+const elementtree = require('elementtree')
+const _ = require('lodash')
+const request = require('request')
+const sesatheques = require('sesatheque-client/src/sesatheques.js')
+const {getBaseIdFromId} = sesatheques
+const config = require('./config')
+const appConfig = require('../config')
 
-var config = require('./config')
-var appConfig = require('../config')
+const j3pGraphe2json = require('../../tasks/modules/j3pGraphe2json')
 
-var j3pGraphe2json = require('../../tasks/modules/j3pGraphe2json')
+const myBaseId = appConfig.application.baseId
+
+// et des petites fonctions utiles
+const prependMyBaseId = (oid) => myBaseId + '/' + oid
+const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 
 /**
  * Service d'accès aux ressources, utilisé par les différents contrôleurs
@@ -51,11 +58,11 @@ var j3pGraphe2json = require('../../tasks/modules/j3pGraphe2json')
  * @requires $cacheRessource
  * @requires $cache
  */
-var $ressourceRepository = {}
+const $ressourceRepository = {}
 
 module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
-  var limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
-  var listeNbDefault = config.limites.listeNbDefault || 10
+  const limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
+  const listeNbDefault = config.limites.listeNbDefault || 10
 
   /**
    * Fait un peu de nettoyage avant d'enregistrer en base de données
@@ -67,22 +74,32 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     if (ressource) {
       // pour les messages d'erreur
       const id = ressource.oid || (ressource.origine && ressource.origine + ressource.idOrigine) || ressource.titre
-      const myBaseId = appConfig.application.baseId
+
       // bizarre, parfois errors est un object, on cherche à savoir d'où ça vient
       if (ressource._errors && !Array.isArray(ressource._errors)) {
         return next(new Error(`ressource._errors n'est pas un array ${typeof ressource._errors}`), ressource._errors)
       }
-      // on vérifie que l'on a bien la paire origine et idOrigine
+      // check origine et idOrigine
       if (ressource.origine) {
         if (ressource.origine === myBaseId) {
           if (!ressource.idOrigine && ressource.oid) ressource.idOrigine = ressource.oid
           // sinon faudra le mettre en afterStore
         } else if (!ressource.idOrigine) {
-          return next(new Error('propriété idOrigine obligatoire'))
+          return next(new Error('origine sans idOrigine'))
         }
       } else {
-        // on pourrait mettre une origine locale ici, mais on préfère laisser le contrôleur le faire
+        // on pourrait mettre une origine myBaseId ici, mais c'est le boulot du contrôleur
         return next(new Error('propriété origine obligatoire'))
+      }
+      // check rid
+      if (ressource.rid) {
+        if (getBaseIdFromId(ressource.rid) !== myBaseId) throw new Error('rid invalide (baseId incorrecte)')
+        else if (ressource.oid) ressource.rid = myBaseId + '/' + ressource.oid
+      }
+      // check aliasOf
+      if (ressource.aliasOf) {
+        // peu importe la base, on veut juste le check
+        getBaseIdFromId(ressource.aliasOf)
       }
       // on vire un éventuel token
       if (ressource.token) delete ressource.token
@@ -107,58 +124,79 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       } else {
         next(null, ressource)
       }
-      // vérif alias
-      if (ressource.ref && !ressource.baseId) {
-        if (ressource.ref === ressource.oid) delete ressource.ref
-        else next(new Error('Alias sans baseId (pour désigner la sésathèque d’origine)'))
-      }
     } else {
       next(new Error("beforeStore n'a pas reçu de ressource"))
     }
   }
 
   /**
-   * Nettoie les relations
+   * Nettoie les relations (helper de beforeStore)
    * @private
    * @param {Array} relations
    * @param {string|number} id identifiant de la ressource pour l'ajouter aux messages d'erreur
-   * @param next
+   * @param {function} next
    */
   function checkRelations (relations, id, next) {
-    // on gère l'unicité avec un objet Map, en prenant une string qui concatene
-    // les deux éléments de la relation comme clé
-    const map = new Map()
-    const cleanRelations = relations.filter((relation) => Array.isArray(relation) && relation.length === 2)
+    const cleanRelations = relations
+      .filter(relation => Array.isArray(relation) && relation.length === 2 && config.listes.relations[relation[0]])
+      .map(relation => [Number(relation[0]), String(relation[1])])
     if (cleanRelations.length < relations.length) log.errorData(`Il y avait une relation invalide dans ${id}`, relations)
+    // le format est bon (typeRel connu), reste à voir si on a des cibles sous la forme origine/idOrigine
+    // et ajouter éventuellement baseId pour avoir un rid valide
     if (cleanRelations.length) {
       flow(cleanRelations).parEach(function (relation) {
         const nextRelation = this
-        // on regarde si on a des cibles sous la forme origine/idOrigine
-        if (typeof relation[ 1 ] === 'string' && relation[ 1 ].indexOf('/') !== -1) {
-          const [origine, idOrigine] = relation[ 1 ].split('/')
-          $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-            if (error) {
-              log.error(error)
-              nextRelation(null, relation)
-            } else if (ressource) {
-              nextRelation(null, [ relation[ 0 ], ressource.oid ])
-            } else {
-              log.errorData(`La ressource ${id} a une relation vers ${relation[ 1 ]} qui n’existe pas`)
-              // on la laisse, pour les cas où 2 ressources sont mutuellement liées et insérées en suivant
-              nextRelation(null, relation)
-            }
-          })
+        const [relId, relTarget] = relation
+        const pos = relTarget.indexOf('/')
+        if (pos === -1) {
+          // on suppose que c'est un oid
+          nextRelation(null, [relId, prependMyBaseId(relTarget)])
         } else {
-          nextRelation(null, relation)
+          // au moins un slash
+          const debut = relTarget.substr(0, pos)
+          const fin = relTarget.substr(pos + 1)
+
+          // si c'est chez nous on vérifie
+          if (debut === myBaseId) {
+            $ressourceRepository.load(fin, function (error, ressource) {
+              if (error) return nextRelation(error)
+              if (ressource) {
+                nextRelation(null, [relId, getRealRid(ressource)])
+              } else {
+                log.errorData(`${fin} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
+                nextRelation()
+              }
+            })
+
+          // ailleurs, on fait confiance et une tâche en cli vérifiera de tps en tps
+          } else if (sesatheques.exists(debut)) {
+            nextRelation(null, relation)
+
+          // debut devrait être une origine, on vérifie que la ressource existe
+          } else {
+            $ressourceRepository.loadByOrigin(debut, fin, function (error, ressource) {
+              if (error) {
+                log.errorData(`${relTarget} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
+                nextRelation()
+              } else {
+                nextRelation(null, [relId, getRealRid(ressource)])
+              }
+            })
+          }
         }
       }).seq(function (relations) {
-        relations.forEach((relation) => map.set('' + relation[ 0 ] + relation[ 1 ], relation))
-        if (map.size < relations.length) {
-          log.errorData('Il y avait des relations en double (ou invalides) dans ' + id)
-          next(null, Array.from(map.values()))
-        } else {
-          next(null, relations)
-        }
+        // reste à virer les éventuels undefined et les doublons
+        // pour les doublons, on utilise un accumulateur avec des clés plutôt qu'un map
+        // (test sur booléen plus pertinent que set puis Array.from)
+        const acc = {}
+        const checkedRelations = relations.filter(([typeRel, targetRid]) => {
+          const key = typeRel + targetRid
+          const isOk = typeRel && !acc[key]
+          if (isOk) acc[key] = true
+          return isOk
+        })
+        if (checkedRelations.length < relations.length) log.errorData('Il y avait des relations en double (ou invalides) dans ' + id)
+        next(null, checkedRelations)
       }).catch(next)
     } else {
       next(null, [])
@@ -172,14 +210,14 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {Ressource} ressource
    */
   function majArbres (ressource) {
-    var refOrig = ressource.origine + '/' + ressource.idOrigine
+    const refOrig = ressource.origine + '/' + ressource.idOrigine
     // cherche un enfant et le modifie si besoin, retourne true si on a fait une modif
     function findChild (arbre, ref) {
-      var modif
+      let modif
       // avec _.each on pourrait sortir dès qu'on a trouvé, mais un arbre pourrait avoir
       // deux fois le même enfant, on les parse tous
       arbre.enfants.forEach(function (enfant) {
-        var mod
+        let mod
         if (enfant.ref === ref) {
           mod = majChild(enfant)
         } else if (enfant.enfants) {
@@ -192,7 +230,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
     // regarde s'il faut mettre à jour l'enfant et retourne true si c'est le cas
     function majChild (child) {
-      var modif = false
+      let modif = false
       // on passe la ref sur l'oid si c'est pas le cas
       if (child.ref === refOrig) {
         child.ref = ressource.oid
@@ -228,7 +266,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @returns {{}}
    */
   function purgeVarnish (ressource) {
-    var base = appConfig.application.baseUrl
+    const base = appConfig.application.baseUrl
     // on ne purge que les ressources publiques (les autres ne sont pas en cache)
     if (appConfig.varnish && ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
       [
@@ -295,7 +333,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
      * @param next
      */
     function compare (ressource, ressourceBdd, next) {
-      var needIncrement = !!ressource.versionNeedIncrement
+      let needIncrement = !!ressource.versionNeedIncrement
       // on regarde si nos champs qui déclenchent un changement de version on changé
       if (!needIncrement && ressourceBdd.oid) {
         config.versionTriggers.forEach(function (prop) {
@@ -398,8 +436,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param ressource
    */
   function convertXmlEc2 (ressource) {
-    var config = elementtree.parse(ressource.parametres.xml)
-    var params = {}
+    const config = elementtree.parse(ressource.parametres.xml)
+    const params = {}
     /*
      { _root:
      { _id: 0,
@@ -444,9 +482,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   function convertXmlJ3p (ressource) {
     if (ressource.parametres && ressource.parametres.xml) {
-      var string = j3pGraphe2json(ressource.parametres.xml)
+      const string = j3pGraphe2json(ressource.parametres.xml)
       try {
-        var graphe = JSON.parse(string)
+        const graphe = JSON.parse(string)
         ressource.parametres = {
           g: graphe
         }
@@ -524,8 +562,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       log.debug('getListe avec visibilite : ' + visibilite, options, next)
 
       // avant de construire la query on fait un minimum de vérifications
-      var start, nb
-      var optionsSafe = {
+      let start, nb
+      const optionsSafe = {
         filters: []
       }
       // filtres
@@ -554,7 +592,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       // le format est géré par le controleur
 
       // si on est toujours là on peut construire la requete
-      var query = EntityRessource
+      let query = EntityRessource
       optionsSafe.filters.forEach(function (filter) {
         // log.debug('getListe filter ' + filter.index)
         if (filter.values && filter.values.length) {
@@ -562,8 +600,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
             query = query.match(filter.index).in(filter.values)
           } else {
             // une seule valeur, on regarde si on veut du like
-            var value = filter.values[ 0 ]
-            var action = (typeof value === 'string' && (value.indexOf('%') > -1 || value.indexOf('_') > -1)) ? 'like' : 'equals'
+            const value = filter.values[ 0 ]
+            const action = (typeof value === 'string' && (value.indexOf('%') > -1 || value.indexOf('_') > -1)) ? 'like' : 'equals'
             query = query.match(filter.index)[ action ](filter.values[ 0 ])
           }
         } else {
@@ -577,11 +615,11 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       } else if (visibilite === 'correction') {
         query = query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
       } else if (visibilite.indexOf('/') > 0) {
-        var fragments = visibilite.split('/', 2)
-        if (fragments[ 0 ] === 'auteur') {
-          query = query.match('auteurs').equals(fragments[ 1 ])
-        } else if (fragments[ 0 ] === 'groupe') {
-          query = query.match('groupes').equals(fragments[ 1 ])
+        const [type, target] = visibilite.split('/', 2)
+        if (type === 'auteur') {
+          query = query.match('auteurs').equals(target)
+        } else if (type === 'groupe') {
+          query = query.match('groupes').equals(target)
         } else {
           throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
         }
@@ -628,12 +666,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   $ressourceRepository.load = function load (oid, next) {
     if (_.isString(oid) && oid.indexOf('/') > 0) {
-      var p = oid.split('/')
-      if (p.length === 2) {
-        if (p[ 0 ] === 'cle') $ressourceRepository.loadByCle(p[ 1 ], next)
-        else $ressourceRepository.loadByOrigin(p[ 0 ], p[ 1 ], next)
-      } else {
+      const [origin, idOrigin, bug] = oid.split('/')
+      if (bug) {
         next(new Error('identifiant invalide : ' + oid))
+      } else {
+        if (origin === 'cle') $ressourceRepository.loadByCle(idOrigin, next)
+        else $ressourceRepository.loadByOrigin(origin, idOrigin, next)
       }
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
@@ -765,7 +803,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {function} next
    */
   $ressourceRepository.saveDeferred = function (oid, next) {
-    var token = uuid()
+    const token = uuid()
     // on met 10h en cache, vu le peu de data c'est pas un souci
     $cache.set('defer_' + token, {oid: oid, action: 'saveRessource'}, 36000, function (error) {
       if (error) next(error)
@@ -834,7 +872,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   $ressourceRepository.saveNewAlias = function saveNewAlias (ressource, next) {
     if (!ressource.oid) return next(new Error('Impossible de sauver un alias d’une ressource qui n’est pas encore sauvegardée'))
-    var alias = EntityRessource.create(toAlias(ressource))
+    const alias = EntityRessource.create(toAlias(ressource))
 
     flow().seq(function () {
       alias.store(this)

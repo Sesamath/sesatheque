@@ -32,34 +32,70 @@
 'use strict'
 /* global module */
 
-var filters = require('sesajstools/utils/filters')
-
+const filters = require('sesajstools/utils/filters')
+const {getBaseIdFromId} = require('sesatheque-client/src/sesatheques.js')
+function filterUserList (list) {
+  if (list && Array.isArray(list) && list.length) {
+    return filters.arrayString(list).filter(uid => {
+      getBaseIdFromId(uid, false)
+    })
+  }
+  return []
+}
 /**
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
  * @constructor
  * @param {Object} initObj Un objet ayant des propriétés d'une ressource
  */
-function Ressource (initObj) {
-  var values = Object.assign({}, initObj)
+function Ressource (initObj, myBaseId) {
   /**
-   * L'identifiant interne à cette Sésathèque
-   * @default undefined
-   * @type {Integer}
+   * @private
+   * @type {Ressource}
    */
-  this.oid = filters.int(values.oid) || undefined // on préfère l'absence de propriété à 0
-  // les alias ont une ref avec la baseId qui donne la source (l'oid est celui de l'alias)
+  var values = Object.assign({}, initObj)
+
+  // on a déjà l'oid
+  if (values.oid) {
+    /**
+     * L'identifiant interne à cette Sésathèque
+     * @type {string}
+     */
+    this.oid = values.oid
+    if (values.rid) {
+      /**
+       * Identifiant unique de ressource (baseId/oid pour usage inter Sesathèques)
+       * @type {string}
+       */
+      this.rid = values.rid
+    } else if (myBaseId) {
+      this.rid = myBaseId + '/' + values.oid
+    } else if (values.baseId) {
+      this.rid = values.baseId + '/' + values.oid
+    } else {
+      throw new Error('Impossible d’instancier une Ressource avec oid sans rid ni baseId')
+    }
+  } else if (values.rid) {
+    this.rid = values.rid
+    // et on en déduit l'oid si on peut
+    if (myBaseId && values.rid.indexOf(myBaseId + '/') === 0) {
+      this.oid = values.rid.substr(myBaseId.length + 1)
+    }
+  }
+
+  if (values.aliasOf) {
+    /**
+     * Pointe vers la ressource réelle (si ça existe on est un alias)
+     * @default undefined
+     * @type {string}
+     */
+    this.aliasOf = values.aliasOf
+  }
+  // pour le cast Ref => Ressource de l'ancien format ref
   if (values.ref) {
+    // à l'ancien format on avait ref et baseId, mais ref pouvait être origine/idOrigine, ou cle/token
+    // le nouveau format est le rid avec baseId/oid
     if (!values.baseId) throw new Error('Une ressource ne peut pas avoir de propriété ref sans propriété baseId')
-    /**
-     * La référence à une autre ressource
-     * @type {string}
-     */
-    this.ref = values.ref
-    /**
-     * L'id de la sésathèque qui référence cette ressource d'origine
-     * @type {string}
-     */
-    this.baseId = values.baseId
+    this.aliasOf = values.baseId + '/' + values.ref
   }
   /**
    * Une clé permettant de lire la ressource (si elle est publiée) en outrepassant les droits
@@ -122,7 +158,7 @@ function Ressource (initObj) {
         if (Array.isArray(enfants)) this.enfants = enfants
         else throw new Error('enfants invalides')
       } catch (error) {
-        if (console && console.error) console.error(error)
+        console.error(error)
       }
     }
   } else {
@@ -136,7 +172,7 @@ function Ressource (initObj) {
       try {
         this.parametres = JSON.parse(values.parametres)
       } catch (error) {
-        if (console && console.error) console.error(error)
+        console.error(error)
       }
     }
   }
@@ -165,36 +201,36 @@ function Ressource (initObj) {
    * @type {Array}
    */
   this.typeDocumentaires = filters.arrayInt(values.typeDocumentaires, false)
-  /**
-   * Liste des ressources liées, une liaison étant un array [idLiaison, idRessourceLiée]
-   * idRessourceLiée peut être un oid ou une string origine/idOrigine
-   * @type {relation[]}
-   */
-  this.relations = []
-  if (Array.isArray(values.relations) && values.relations.length) {
-    values.relations.forEach(rel => {
-      if (Array.isArray(rel) && rel.length === 2) {
-        const typeRel = filters.int(rel[0])
-        const ressId = filters.string(rel[1])
-        if (typeRel && ressId) this.relations.push([typeRel, ressId])
-      }
-    }, this)
+
+  if (values.relations && Array.isArray(values.relations) && values.relations.length) {
+    /**
+     * Liste des ressources liées, une liaison étant un array [idLiaison, idRessourceLiée]
+     * idRessourceLiée peut être un oid ou une string origine/idOrigine
+     * @type {relation[]}
+     */
+    this.relations = values.relations
+      .filter(rel => Array.isArray(rel) && rel.length === 2)
+      .map(([relId, relTarget]) => [filters.int(relId), filters.string(relTarget)])
+      .filter(([relId, relTarget]) => relId && relTarget)
+  } else {
+    this.relations = []
   }
   /**
-   * Liste d'id d'auteurs
+   * Liste de uid d'auteurs
    * @type {Integer[]}
    */
-  // pas arrayInt car on peut recevoir du origin/idOrigin que l'on transforme ensuite, voire peut-être des urls un jour
-  this.auteurs = filters.arrayString(values.auteurs, false)
+  this.auteurs = filterUserList(values.auteurs)
   /**
    * Liste d'url pour les auteurs précédents
    */
-  if (values.auteursParents) this.auteursParents = filters.arrayString(values.auteursParents)
+  if (values.auteursParents) {
+    this.auteursParents = filterUserList(values.auteursParents)
+  }
   /**
    * Liste d'id de contributeurs
    * @type {Integer[]}
    */
-  this.contributeurs = filters.arrayString(values.contributeurs, false)
+  this.contributeurs = filterUserList(values.contributeurs)
   /**
    * Liste de noms de groupes dans lesquels cette ressource est publiée
    * @type {string[]}
@@ -247,9 +283,9 @@ function Ressource (initObj) {
   /**
    * L'oid de l'archive correspondant à la version précédente
    * @default undefined
-   * @type {Integer}
+   * @type {string}
    */
-  this.archiveOid = filters.int(values.archiveOid)
+  this.archiveOid = filters.string(values.archiveOid)
   /**
    * Une liste d'avertissements éventuels (incohérences, données manquantes, etc.)
    * Pratique d'avoir un truc pour faire du push dedans sans vérifier qu'il existe
@@ -274,21 +310,27 @@ function Ressource (initObj) {
   // et on ajoute des erreurs si on a viré des trucs
   Object.getOwnPropertyNames(values).forEach(p => {
     if (Array.isArray(this[p])) {
-      // on ne vérifie que ce qui fini en tableau
+      // pour les tableaux on regarde si on a toujours autant d'éléments
       if (Array.isArray(values[p])) {
         if (this[p].length < values[p].length) {
           this._errors.push(`des éléments de la propriété ${p} étaient invalides et ont été ignorés`)
           if (typeof log === 'function' && log.debug) {
             log.debug(`pour ${p} on a initialement`, values[p])
             log.debug('qui donne', this[p])
+          } else {
+            console.error(`${p} valait`, values[p], 'et est devenu', this[p])
           }
         }
       } else if (values[p]) {
-        this._errors.push(`La propriété ${p} était invalide et a été ignorée`)
+        // on voulait un array mais on nous a filé autre chose
+        this._errors.push(`La propriété ${p} n’était pas un tableau, elle a été ignorée`)
         console.error('contenu invalide', values[p])
       }
+    } else if (p.substr(0, 1) !== '$') {
+      this._warnings.push(`La propriété ${p} n’existe pas dans une ressource, elle a été ignorée`)
+      console.error(`propriété ${p} ignorée`, values[p])
     }
-  }, this) // pas utile de préciser le this de forEach avec une fct fléchée, au cas où elle serait plus fléchée…
+  }, this) // pas utile de préciser le this de forEach avec une fct fléchée, au cas qqun virerait la flèche…
 }
 
 /**
@@ -297,14 +339,6 @@ function Ressource (initObj) {
  */
 Ressource.prototype.toString = function () {
   return this.titre
-}
-
-/**
- * Retourne un id (oid ou origine/idOrigine si pas encore d'oid)
- * @returns {Integer|string}
- */
-Ressource.prototype.getId = function () {
-  return this.oid || this.origine + '/' + this.idOrigine
 }
 
 module.exports = Ressource
