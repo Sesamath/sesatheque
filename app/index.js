@@ -28,10 +28,18 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
+/**
+ * Fichier principal de l'application (à passer en argument de node), avec
+ * - chargement lassi
+ * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
+ * - ajout d'éventuels composants en prérequi|postrequis définis dans la conf
+ * - ajout de middleware sur le rail (CORS, Expire & co)
+ * - boot de l'appli
+ */
 
-// pour passer en es6, en gardant la possibilité d'utiliser pm2 en cluster, il faudra mettre ce code dans un start.js
+// pour utiliser babel avant node en gardant la possibilité d'utiliser pm2 en cluster,
+// il faudra mettre ce code dans un start.js
 // et ne laisser dans ce fichier que ces requires
 // cf http://stackoverflow.com/questions/35436266/how-can-i-use-babel-6-with-pm2-1-0
 // et https://babeljs.io/docs/usage/require/ qui indique qu'il faut ajouter babel-polyfill
@@ -41,61 +49,18 @@
 // require('babel-polyfill')
 // require('./start')
 
-try {
-  /**
-   * Fichier principal de l'application (à passer en argument de node), avec
-   * - chargement lassi
-   * - déclaration d'un composant pour l'application avec nos autres composants en prérequis
-   * - ajout d'éventuels composants en prérequi|postrequis définis dans la conf
-   * - ajout de middleware sur le rail (CORS, Expire & co)
-   * - boot de l'appli
-   */
+const anLog = require('an-log')
+const boot = require('./boot')
+const sjt = require('sesajstools')
+const config = require('./config')
 
-  const sjt = require('sesajstools')
-  const config = require('./config')
-  const configCheck = require('./configCheck')
-  require('an-log').config(config.lassiLogger)
-  var appLog = require('an-log')(config.application.name)
-
-  // appel du module lassi qui met en global une variable lassi
-  require('lassi')(__dirname)
-  // sesalab-admin sera appelé après mise en global de l'appli
-
-  /* attention, ici global.lassi existe mais pas toujours lassi !!!
-   if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
-   else console.log('lassi existe dès le départ')
-   for (var i = 10; i < 1000; i +=100) {
-   setTimeout(function () {
-   if (typeof lassi === 'undefined') console.log("lassi n'existe pas encore")
-   }, i)
-   }
-   /* */
-  global.isProd = ((lassi.settings.application.staging === 'prod'))
-
-  // nos loggers
+function beforeBootsrap (lassi, mainComponent, allComponents) {
+  // notre fct de log en global
   global.log = require('./tools/log.js')
-  appLog("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
-
-  // Si on veut passer un préfixe à sesalabSso, ou si d'autres components veulent la config
-  // avant que lassi n'affecte ça et que $settings ne soit dispo, faut le mettre en global dès maintenant
-  global.app = {settings: config}
+  const appLog = anLog(config.application.name)
 
   /**
-   * Gestion des traces
-   * Attention, le module long-stack-traces m'a déjà joué des tours avec une erreur qui plante node (reproductible, sur une 404)
-   *   Uncaught Error: Can't set headers after they are sent.
-   *   ...
-   *   /sesamath/dev/projets_git/sesatheque/node_modules/long-stack-traces/lib/long-stack-traces.js:80
-   *      throw ''; // TODO: throw the original error, or undefined?
-   * le désactiver a réglé le problème
-   *
-   * Pour augmenter les traces, mieux vaut passer à node ces options
-   * --stack_trace_limit=100 --stack-size=2048
-   */
-  /* if (!isProd) /* * / require('long-stack-traces') /* */
-
-  /**
-   * On ajoutera nos middleware après session lorsque lassi mettra les siens
+   * On ajoutera nos middleware après session
    * @param {Object} rail le rail express
    * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
    */
@@ -104,45 +69,8 @@ try {
     if (name === 'session') require('./addMiddlewares')(rail)
   })
 
-  // les déclarations de nos components
-  require('./main')
-  require('./personne')
-  require('./ressource')
-  require('./update')
-  require('./auth')
-  var dependancies = ['main', 'personne', 'ressource', 'update', 'auth']
-
-  // des modules sup à charger
-  if (config.extraModules) {
-    config.extraModules.forEach(function (module) {
-      appLog('ajout du module supplémentaire ' + module)
-      require(module)
-    })
-  }
-  if (config.extraDependenciesFirst) {
-    config.extraDependenciesFirst.forEach(function (dependency) {
-      appLog('ajout en premier de la dépendance supplémentaire ' + dependency)
-      dependancies.unshift(dependency)
-    })
-  }
-  if (config.extraDependenciesLast) {
-    config.extraDependenciesLast.forEach(function (dependency) {
-      appLog('ajout en dernier de la dépendance supplémentaire ' + dependency)
-      dependancies.push(dependency)
-    })
-  }
-  // Notre appli qui sera mise en global (pour que chacun puisse y ajouter ses controleurs ou services)
-  // console.log('au boot', dependancies)
-  var sesatheque = lassi.component('sesatheque', dependancies)
-
-  // pour sesalab-admin et sesalab-sso
-  // utile aussi pour des modules npm qui voudrait ajouter des services sans définir de composants pour autant
-  // avec app.service('$newService', function () {…})
-  // ou app.controller('path', function () {this.get('path', function (context) {…} })
-  global.app = sesatheque
-
   // une fois les composants chargés on ajoutera memcache et nos listeners
-  sesatheque.config(function ($cache, $settings, $accessControl, $routes, $flashMessages, $auth, $page) {
+  mainComponent.config(function ($cache, $settings, $accessControl, $routes, $flashMessages, $auth, $page) {
     // on ajoute memcache si précisé dans les settings
     var memcache = $settings.get('memcache', null)
     if (memcache) {
@@ -180,8 +108,8 @@ try {
     lassi.on('beforeTransport', require('./beforeTransport')($accessControl, $routes, $flashMessages))
 
     // si $sesalabSsoClient existe, faut l'ajouter en client d'authentification
-    // maintenant que nos services sont dispos, on lui donne ceux dont il aura besoin
-    if (dependancies.indexOf('sesalab-sso') !== -1) {
+    // maintenant que les services sont dispos, on lui passe ceux dont il aura besoin
+    if (allComponents.indexOf('sesalab-sso') !== -1) {
       var $sesalabSsoClient = lassi.service('$sesalabSsoClient')
       var authServerName = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].name || 'Sesalab'
       require('./auth/authClientSesalabSso')(authServerName, $sesalabSsoClient, $auth, $accessControl, $page)
@@ -193,14 +121,11 @@ try {
   })
 
   require('./sesalab-admin')
+}
 
-  lassi.on('startup', function () {
-    // et on lance la vérif de config
-    configCheck(config)
-  })
-
-  // et on lance le boot
-  sesatheque.bootstrap()
+try {
+  anLog.config(config.lassiLogger)
+  boot(beforeBootsrap)
 } catch (error) {
   console.error(error)
 }

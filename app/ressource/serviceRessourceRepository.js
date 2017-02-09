@@ -107,6 +107,11 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       } else {
         next(null, ressource)
       }
+      // vérif alias
+      if (ressource.ref && !ressource.baseId) {
+        if (ressource.ref === ressource.oid) delete ressource.ref
+        else next(new Error('Alias sans baseId (pour désigner la sésathèque d’origine)'))
+      }
     } else {
       next(new Error("beforeStore n'a pas reçu de ressource"))
     }
@@ -247,6 +252,28 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           log.debug('purge ' + url + ' ' + (response && response.statusCode))
         })
       })
+    }
+  }
+
+  /**
+   * Renvoie un Alias à une ressource (le controleur devra ajouter le userOid)
+   * @memberOf $ressourceConverter
+   * @param {Ressource} ressource
+   * @return {object}
+   */
+  function toAlias (ressource) {
+    if (!ressource.oid) throw new Error('Impossible de convertir en alias une ressource sans oid')
+    // c'est déjà un alias ?
+    if (ressource.ref) return ressource
+    // on vérifie quand même ça
+    if (ressource.baseId && ressource.baseId !== config.application.baseId) log.errorData('ressource sans ref avec baseId externe', ressource)
+    return {
+      ref: ressource.oid,
+      baseId: config.application.baseId,
+      titre: ressource.titre,
+      type: ressource.type,
+      resume: ressource.resume,
+      description: ressource.description
     }
   }
 
@@ -792,6 +819,33 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         if (next) next(null, ressource)
       } else {
         this(new Error("Après un write la ressource n'a toujours pas d'oid"))
+      }
+    }).catch(function (error) {
+      log.error(error)
+      if (next) next(error)
+    })
+  }
+
+  /**
+   * Enregistre un alias de la ressource passée en argument
+   * @memberOf $ressourceRepository
+   * @param {EntityRessource}   ressource
+   * @param {ressourceCallback} [next]    appelée avec une EntityRessource (l'alias)
+   */
+  $ressourceRepository.saveNewAlias = function saveNewAlias (ressource, next) {
+    if (!ressource.oid) return next(new Error('Impossible de sauver un alias d’une ressource qui n’est pas encore sauvegardée'))
+    var alias = EntityRessource.create(toAlias(ressource))
+
+    flow().seq(function () {
+      alias.store(this)
+    }).seq(function (ressource) {
+      // mise en cache (pas possible en afterStore car le cache dépend de l'entité), purge varnish et passage au suivant
+      if (ressource.oid) {
+        $cacheRessource.set(ressource)
+        log.debug('write ' + ressource.oid + ' ok')
+        if (next) next(null, ressource)
+      } else {
+        this(new Error("Après un write l’alias n'a toujours pas d'oid"))
       }
     }).catch(function (error) {
       log.error(error)

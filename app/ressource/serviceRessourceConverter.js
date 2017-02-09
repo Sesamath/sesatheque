@@ -43,16 +43,10 @@ var $ressourceConverter = {}
 
 var _ = require('lodash')
 var flow = require('an-flow')
-// var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
-var appConfig = require('../config')
-// var tools = require('../tools')
-var Alias = require('../constructors/Alias')
 var Ref = require('../constructors/Ref')
-var jstreeConverter = require('../srcClient/display/jstreeConverter')
-var defaultBase = appConfig.application.baseUrl
 
 var sTools = require('sesajstools')
 
@@ -233,16 +227,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
   }
 
   /**
-   * Renvoie un Alias à une ressource (le controleur devra ajouter le userOid)
-   * @memberOf $ressourceConverter
-   * @param ressource
-   * @return {Alias}
-   */
-  $ressourceConverter.toAlias = function (ressource) {
-    return new Alias(ressource)
-  }
-
-  /**
    * Renvoie une Ref à une ressource, avec enfants éventuels
    * (si ce qui sort contient oid ET ref, c'était un alias)
    * @memberOf $ressourceConverter
@@ -251,57 +235,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
    */
   $ressourceConverter.toRef = function (ressource) {
     return new Ref(ressource)
-  }
-
-  /**
-   * Retourne un tableau children au format jstree
-   * @memberOf $ressourceConverter
-   * @param ressource
-   * @return {Array} Le tableau des enfants
-   */
-  $ressourceConverter.getJstreeChildren = function (ressource) {
-    var children = []
-    if (ressource.type === 'arbre' && ressource.enfants) {
-      ressource.enfants.forEach(function (enfant) {
-        var child
-        if (enfant.type === 'arbre') {
-          child = $ressourceConverter.toJstree(enfant)
-        } else {
-          child = jstreeConverter.getJstNode(enfant, defaultBase)
-        }
-        children.push(child)
-      })
-    }
-
-    return children
-  }
-
-  /**
-   * Transforme un ressource de la bibli en node pour jstree
-   * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
-   * @memberOf $ressourceConverter
-   * @param {Ressource|Alias} ressource Une ressource ou une référence à une ressource
-   * @returns {Object}
-   */
-  $ressourceConverter.toJstree = function (ressource) {
-    var node = jstreeConverter.getJstNode(ressource, defaultBase)
-    if (ressource.type === 'arbre') {
-      if (ressource.enfants && ressource.enfants.length) {
-        node.children = $ressourceConverter.getJstreeChildren(ressource)
-      } else {
-        // url pour récupérer les enfants
-        var url
-        if (ressource.oid) url = '/api/jstree?id=' + ressource.oid
-        else if (ressource.ref) url = '/api/jstree?id=' + ressource.ref
-        else if (ressource.origine && ressource.idOrigine) url = '/api/jstree?id=' + ressource.origine + '/' + ressource.idOrigine
-        if (url) {
-          node.children = true
-          node.data = {url: url + '&children=1'}
-        }
-      }
-    }
-
-    return node
   }
 
   return $ressourceConverter

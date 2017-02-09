@@ -80,6 +80,13 @@ module.exports = function (controller) {
     context.html(data)
   })
 
+  controller.get('testcount', function (context) {
+    console.log('debug test')
+    lassi.service('EntityRessource').match().count({debug: true}, function (error, nb) {
+      context.json({error, nb})
+    })
+  })
+
   // renvoie en json ce que l'on reçoit en post
   controller.post('ping', function (context) {
     context.json(context.post)

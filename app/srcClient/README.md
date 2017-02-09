@@ -94,10 +94,21 @@ module.exports = display
 ```
 
 Pour passer une fonction de sauvegarde à une ressource chargée en iframe, il faut appeler l'url avec un paramètre 
-resultCallbackUrl qui sera appelée en ajax (post) avec un objet Résultat.
+* resultCallbackUrl : url qui sera appelée en ajax (post) avec un objet Résultat.
 Cette url devra répondre
 {"ok":true} ou {"success":true} ou bien {"ok":false, "error":"Un message d'erreur"}
 
-Attention à passer l'url de rappel à encodeURIComponent si elle contient des "&"
+Attention à passer l'url de rappel à travers encodeURIComponent si elle contient des "&"
+
+* resultatMessageAction : nom de l'action à passer dans l'objet qui sera envoyé en sendMessage. Si cette action contient `::`, la deuxième partie est le nom de la propriété qui contient le résultat.
+
+Ex, avec resultatMessageAction=saveResultat, la ressource en iframe fera un sendMessage avec l'objet
+```
+{ nom
+```
 
 Le résultat est au format du constructeur {@link Resultat}
+
+Pour que la ressource puisse charger son dernier résultat, il faut lui passer un 
+lastResultUrl, url que la ressource appelera en ajax pour récupérer le dernier résultat si elle le gère.
+

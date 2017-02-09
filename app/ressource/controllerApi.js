@@ -37,6 +37,7 @@ var flow = require('an-flow')
 var sjt = require('sesajstools')
 var sjtObj = require('sesajstools/utils/object')
 var config = require('../config')
+var myBaseId = config.application.baseId
 var configRessource = require('./config')
 var Alias = require('../constructors/Alias')
 
@@ -47,6 +48,15 @@ var Alias = require('../constructors/Alias')
  * @Controller controllerApi
  */
 module.exports = function (controller, EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
+  /**
+   * Ajoute notre baseId si c'est absent d'item
+   * @param {Ressource|Ref} item
+   */
+  function completeBaseId (item) {
+    if (!item.baseId) item.baseId = myBaseId
+    return item
+  }
+
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
@@ -170,6 +180,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         EntityAlias.match('userOid').equals(oid).grab(this)
       }).seq(function (aliases) {
         if (aliases.length) addRefs(aliases, 'D')
+        refs.forEach(ref => completeBaseId(ref))
         $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
       }).catch(function (error) {
         $json.sendError(context, error)
@@ -393,8 +404,9 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         // on regarde le format reçu en get ou post
         var format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
-          if (format === 'full') liste.push(ressource)
-          else liste.push($ressourceConverter.toRef(ressource))
+          var item = (format === 'full') ? ressource : $ressourceConverter.toRef(ressource)
+          completeBaseId(item)
+          liste.push(item)
         })
       }
       $json.sendOk(context, {liste: liste})
@@ -424,6 +436,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         // full, on ajoute la base
         if (!ressource.base) ressource.base = config.application.baseUrl
       }
+      completeBaseId(ressource)
       $json.send(context, null, ressource)
     } else {
       $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
@@ -844,10 +857,12 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
         if (error) {
           sendJsonJstreeArray(context, error)
         } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
+          // on ajoute baseId s'il n'y est pas
+          if (!ressource.baseId) ressource.baseId = config.application.baseId
           var jstData
           if (onlyChildren) {
             if (ressource.type === 'arbre') {
-              jstData = $ressourceConverter.getJstreeChildren(ressource)
+              jstData = stJstree.getJstreeChildren(ressource)
               // log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
               // log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
               sendJsonJstreeArray(context, null, jstData)
@@ -855,7 +870,7 @@ module.exports = function (controller, EntityAlias, $ressourceRepository, $resso
               sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
             }
           } else {
-            jstData = $ressourceConverter.toJstree(ressource)
+            jstData = stJstree.toJstree(ressource)
             sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
           }
         } else {

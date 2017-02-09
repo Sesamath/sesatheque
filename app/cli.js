@@ -1,0 +1,65 @@
+/**
+ * This file is part of Sesatheque.
+ *   Copyright 2014-2015, Association Sésamath
+ *
+ * Sesatheque is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License version 3
+ * as published by the Free Software Foundation.
+ *
+ * Sesatheque is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Sesatheque (LICENCE.txt).
+ * @see http://www.gnu.org/licenses/agpl.txt
+ *
+ *
+ * Ce fichier fait partie de l'application Sésathèque, créée par l'association Sésamath.
+ *
+ * Sésathèque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
+ * les termes de la GNU Affero General Public License version 3 telle que publiée par la
+ * Free Software Foundation.
+ * Sésathèque est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
+ * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
+ * Consultez la GNU Affero General Public License pour plus de détails.
+ * Vous devez avoir reçu une copie de la GNU General Public License en même temps que Sésathèque
+ * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
+ * pour une explication en français)
+ */
+
+'use strict'
+
+const glob = require('glob')
+const anLog = require('an-log')
+const anLogLevels = require('an-log/source/lib/levels.js')
+const boot = require('./boot')
+const config = require('./config')
+
+function beforeBootsrap (lassi, mainComponent, allComponents) {
+  // on ajoute toutes les tasks AVANT le bootstrap
+  glob.sync(`${__dirname}/cli/*.js`).concat(glob.sync(`${__dirname}/tasks/**/index.js`)).forEach(function (module) {
+    console.log('ajout du module', module)
+    require(module)
+  })
+}
+
+// une fct qui fait rien (on veut pas des logs de démarrage)
+const appLog = () => undefined
+
+try {
+  anLog.config({
+    [config.application.name]: {
+      logLevel: anLogLevels.ERROR
+    },
+    $auth: {logLevel: anLogLevels.ERROR}
+  })
+  boot(beforeBootsrap, {cli: true})
+  lassi.service('$entities-cli').commands().count('EntityRessource', function () {
+    console.log('retour count')
+  })
+  lassi.service('$cli').run()
+} catch (error) {
+  console.error(error)
+}

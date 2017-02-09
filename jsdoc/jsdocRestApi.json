@@ -3,7 +3,7 @@
     "allowUnknownTags": true
   },
   "source": {
-    "include": [ "./app", "API.md"],
+    "include": [ "./app", "doc_src/API.md"],
     "includePattern": ".+/controllerApi.*\\.(js)$"
   },
   "plugins": [

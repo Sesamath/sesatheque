@@ -40,7 +40,7 @@ var moment = require('moment')
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
 var appConfig = require('../config')
-var sesatheques = require('sesatheque-client/sesatheques.js')
+var sesatheques = require('sesatheque-client/dist/sesatheques.js')
 
 module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) {
   /**
@@ -809,10 +809,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
                 if (enfant.ref) {
                   var url = $routes.getAbs('describe', enfant.ref)
                   if (enfant.baseId) {
-                    var base = sesatheques.getBase(enfant.baseId)
+                    var base = sesatheques.getBase(enfant.baseId, false)
                     if (base) {
-                      if (base.substr(-1) === '/') base = base.substr(0, base.length - 1)
-                      url = base + url
+                      url = base + url.substr(1) // base termine par un slash, url démarre par un slash
                     } else {
                       log.errorData(`baseId ${enfant.baseId} inconnue dans ${ressource.oid} pour l'item `, enfant)
                     }

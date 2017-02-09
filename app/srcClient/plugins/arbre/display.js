@@ -36,6 +36,7 @@ var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
 var jstreeConverter = require('../../display/jstreeConverter')
+var stcJstree = require('sesatheque-client/dist/jstree.js')
 
 /**
  * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles
@@ -46,7 +47,8 @@ var jstreeConverter = require('../../display/jstreeConverter')
  */
 module.exports = function display (ressource, options, next) {
   var error
-  page.loadAsync('jquery', function () {
+  require.ensure(['jquery', 'jstree'], function (require) {
+    const stJstree = require('sesatheque-jstree')
     var $ = window.jQuery
     try {
       log('arbre.display avec', ressource)
@@ -180,38 +182,14 @@ module.exports = function display (ressource, options, next) {
         dom.addElement(caseTree, 'div', { id: treeId })
         // on s'ajoute comme sesatheque au cas ou jstreeConverter nous connait pas
         if (ressource.baseId && ressource.baseUrl) jstreeConverter.addSesatheques({[ressource.baseId]: ressource.baseUrl})
-        // l'élément root, pas encore un array
-        var rootElt = jstreeConverter.toJstree(ressource)
-        rootElt.state = { opened: true }
 
         var jstData = {
           'core': {
-            'data': function (node, next) {
-              log('fct data', node)
-              if (node.id === '#') {
-                next(rootElt)
-              } else {
-                // faut faire l'appel ajax nous même car jstree peut pas mixer json initial + ajax ensuite
-                // @see http://git.net/jstree/msg12107.html
-                $.ajax({
-                  url: node.data.url,
-                  timeout: options.timeout || 10000,
-                  dataType: 'json',
-                  xhrFields: {
-                    withCredentials: true
-                  }
-                }).success(next).error(function (jqXHR, textStatus, error) {
-                  next(["Erreur lors de l'appel ajax pour récupérer les éléments"])
-                  page.addError(error)
-                })
-              }
-            }
+            'data': stcJstree.getDataCallback(ressource, undefined, {errorCallback: page.addError})
           },
           plugins: ['search']
         }
-
         var $tree = $('#' + treeId)
-        // log('$tree', $tree)
         $tree.jstree(jstData)
 
         /* Pour récupérer un élément sous sa forme jstree, c'est (id est l'id jstree, sans #)
@@ -243,10 +221,11 @@ module.exports = function display (ressource, options, next) {
         // on écoute donc l'événement select sur le jstree
         $tree.on('select_node.jstree', function (e, data) {
           var jstNode = data.node.original
-          log("on veut l'aperçu du node", jstNode)
+          log("on veut l'aperçu du node", jstNode, data)
           if (jstNode && jstNode.a_attr) {
             if (jstNode.a_attr[ 'data-type' ] === 'arbre') {
               // on fait du toggle
+              log('toggle sur l’arbre ' + jstNode.text)
               if ($tree.jstree('is_open', data.node)) $tree.jstree('close_node', data.node)
               else $tree.jstree('open_node', data.node)
             } else {

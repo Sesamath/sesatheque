@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.65",
+  "version": "0.0.66",
   "engines": {
     "node": ">4.4.0"
   },
@@ -13,11 +13,12 @@
   "scripts": {
     "start": "node app/index.js",
     "test": "./scripts/run_tests -a",
-    "test:watch": "npm test -- --watch",
+    "test-watch": "npm test -- --watch",
     "build": "webpack",
     "build-dev": "webpack --debug --verbose",
     "build-watch": "webpack --debug --verbose -w",
     "deploy-dev": "pm2 _private/pm2Deploy.json5 dev",
+    "doc": "./scripts/doc -a",
     "lint": "standard --verbose | snazzy",
     "maj": "git pull && npm install && npm run build",
     "startClient": "hjs-dev-server",
@@ -33,21 +34,6 @@
     ],
     "plugins": []
   },
-  "standard": {
-    "globals": [
-      "describe",
-      "it",
-      "isProd",
-      "lassi",
-      "log"
-    ],
-    "ignore": [
-      "node_modules/*",
-      "app/*/public/*",
-      "app/sesalab-admin",
-      "jsdoc/*"
-    ]
-  },
   "dependencies": {
     "an-flow": "^2.0.1",
     "an-log": "^3.0.4",
@@ -62,6 +48,7 @@
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.0",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.7",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.0",
+    "sesatheque-jstree": "git://src.sesamath.net/sesatheque-client#1.0.1",
     "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.0.48"
   },
   "devDependencies": {
@@ -76,7 +63,7 @@
     "eslint": "^3.8.1",
     "file-loader": "0.8.5",
     "ink-docstrap": "^1.1.4",
-    "jsdoc": "^3.4.0",
+    "jsdoc": "^3.4.3",
     "knex": "^0.7.6",
     "less": "^2.7.1",
     "less-plugin-clean-css": "^1.5.0",

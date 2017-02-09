@@ -47,6 +47,20 @@ function Ressource (initObj) {
    * @type {Integer}
    */
   this.oid = filters.int(values.oid) || undefined // on préfère l'absence de propriété à 0
+  // les alias ont une ref avec la baseId qui donne la source (l'oid est celui de l'alias)
+  if (values.ref) {
+    if (!values.baseId) throw new Error('Une ressource ne peut pas avoir de propriété ref sans propriété baseId')
+    /**
+     * La référence à une autre ressource
+     * @type {string}
+     */
+    this.ref = values.ref
+    /**
+     * L'id de la sésathèque qui référence cette ressource d'origine
+     * @type {string}
+     */
+    this.baseId = values.baseId
+  }
   /**
    * Une clé permettant de lire la ressource (si elle est publiée) en outrepassant les droits
    * @default undefined

@@ -30,39 +30,30 @@
  */
 'use strict'
 
+/**
+ * Fichier à virer dès que tout le monde utilisera le module sesatheque-jstree
+ * @obsolete
+ */
+
 var log = require('sesajstools/utils/log')
 
 /**
- * La liste des sesatheques
+ * La gestion des sesatheques
  * @private
  * @type {Object}
  */
-var sesatheques = require('sesatheque-client/sesatheques.js')
-
-/**
- * Ajoute des sésathèques à la liste connue, pour les baseId des éléments externes de l'arbre
- * @param {object} newSesatheques Un objet avec les sésathèques à ajouter {baseId:baseUrl,…}
- */
-function addSesatheques (newSesatheques) {
-  if (typeof newSesatheques === 'object') {
-    for (var baseId in newSesatheques) {
-      if (newSesatheques.hasOwnProperty(baseId) && newSesatheques[baseId].substr(0, 4) === 'http') {
-        sesatheques[baseId] = newSesatheques[baseId]
-        if (sesatheques[baseId].substr(-1) !== '/') sesatheques[baseId] += '/'
-      }
-    }
-  }
-}
+var sesatheques = require('sesatheque-client/dist/sesatheques.js')
 
 /**
  * Retourne les datas qui nous intéressent à mettre sur le tag a
- * (pour a_attr : data-ref, data-type, href et alt)
+ * (propriété a_attr du node, avec href, alt, data-(ref|type|baseid|dataurl)
  * @private
  * @return {Object}
  */
 function getAttr (ressource, parentBaseId) {
   var attr = {}
-  var base = getBase(ressource) || '/'
+  var base = getBase(ressource, parentBaseId)
+  var baseId = getBaseId(ressource, parentBaseId)
   // ref
   var ref = ressource.id || ressource.ref || ressource.oid
   if (!ref && ressource.origine && ressource.idOrigine) ref = ressource.origine + '/' + ressource.idOrigine
@@ -83,14 +74,9 @@ function getAttr (ressource, parentBaseId) {
     displayUrl = base + 'public/voir/cle/' + ressource.cle
     dataUrl = base + 'api/public/cle/' + ressource.cle
   }
-  if (displayUrl) {
-    attr.href = displayUrl
-    attr['data-displayurl'] = displayUrl
-  }
+  if (displayUrl) attr.href = displayUrl
   if (dataUrl) attr['data-dataurl'] = dataUrl
-  if (ressource.baseId) attr['data-baseid'] = ressource.baseId
-  else if (ressource.base) attr['data-baseid'] = getBaseId(ressource.base)
-  else if (parentBaseId) attr['data-baseid'] = parentBaseId
+  if (baseId) attr['data-baseid'] = baseId
   if (ressource.type) attr['data-type'] = ressource.type
   if (ressource.resume) attr.alt = ressource.resume
 
@@ -100,51 +86,55 @@ function getAttr (ressource, parentBaseId) {
 /**
  * Retourne la base d'une ressource si elle est fixée et connue (undefined sinon, à interpréter comme /)
  * @private
- * @param ressource
- * @returns {*}
+ * @param {Ressource|Ref} ressource
+ * @param {string} parentBaseId
+ * @returns {string} baseUrl ("/" si baseId pas trouvée ou inconnue)
  */
-function getBase (ressource) {
-  if (ressource && ressource.baseId) {
-    if (sesatheques[ressource.baseId]) {
-      return sesatheques[ressource.baseId]
-    } else {
-      log.error('base ' + ressource.baseId + ' inconnue')
-    }
+function getBase (ressource, parentBaseId) {
+  let baseUrl
+  try {
+    if (ressource && ressource.baseId) baseUrl = sesatheques.getBaseUrl(ressource.baseId)
+    else if (parentBaseId) baseUrl = sesatheques.getBaseUrl(parentBaseId)
+  } catch (error) {
+    console.error(error)
   }
+  // on connait pas on retourne /
+  if (!baseUrl) baseUrl = '/'
+  return baseUrl
 }
 
 /**
- * Retourne la baseId d'une ressource, si base est connue (undefined sinon)
- * @param {string} base l'url de base cherchée
+ * Retourne la baseId d'une ressource si elle est connue (undefined sinon)
+ * @param {Ressource|Ref} ressource
+ * @param {string} parentBaseId
  * @returns {string|undefined} baseId si connue
  */
-function getBaseId (base) {
-  for (var id in sesatheques) {
-    if (sesatheques[id] === base) return id
+function getBaseId (ressource, parentBaseId) {
+  try {
+    if (ressource && ressource.baseId) return sesatheques.getBaseUrl(ressource.baseId)
+    if (parentBaseId) return sesatheques.getBaseUrl(parentBaseId)
+  } catch (error) {
+    console.error(error)
   }
 }
 
 /**
  * Retourne un node jstree (propriétés text, icon et a_attr qui porte nos data)
+ * SANS les enfants (utiliser toJstree pour les avoir)
  * @see http://www.jstree.com/docs/json/ pour le format
  * @param {Ressource} ressource
+ * @param {string} parentBaseId
  */
 function getJstNode (ressource, parentBaseId) {
-  var node
   if (ressource) {
-    if (!parentBaseId && ressource.baseId) {
-      parentBaseId = ressource.baseId
-      // et on l'ajoute avec l'url / si on la connait pas
-      if (!sesatheques[parentBaseId]) sesatheques[parentBaseId] = '/'
-    }
-    node = {
+    return {
       text: ressource.titre,
       a_attr: getAttr(ressource, parentBaseId),
       icon: ressource.type + 'JstNode'
     }
-  } else throw new Error('getJstNode appelé sans ressource')
-
-  return node
+  } else {
+    throw new Error('getJstNode appelé sans ressource')
+  }
 }
 
 /**
@@ -189,9 +179,9 @@ function getEnfants (nodeId, jstree) {
 function getJstreeChildren (ressource, parentBaseId) {
   var children = []
   if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.forEach) {
+    if (ressource.baseId) parentBaseId = ressource.baseId
     ressource.enfants.forEach(function (enfant) {
       var child
-      if (ressource.baseId) parentBaseId = ressource.baseId
       if (enfant.type === 'arbre') {
         child = toJstree(enfant, parentBaseId)
       } else {
@@ -200,6 +190,7 @@ function getJstreeChildren (ressource, parentBaseId) {
       children.push(child)
     })
   }
+  if (children.length === 0) children = true
 
   return children
 }
@@ -208,6 +199,7 @@ function getJstreeChildren (ressource, parentBaseId) {
  * Transforme un ressource de la bibli en node pour jstree
  * (il faudra le mettre dans un tableau, à un seul élément si c'est un arbre)
  * @param {Ressource|Alias} ressource Une ressource ou une référence à une ressource
+ * @param {string}          [parentBaseId]
  * @returns {Object}
  */
 function toJstree (ressource, parentBaseId) {
@@ -216,7 +208,7 @@ function toJstree (ressource, parentBaseId) {
     if (ressource.enfants && ressource.enfants.length) {
       node.children = getJstreeChildren(ressource, parentBaseId)
     } else {
-      node.children = []
+      node.children = true
     }
   }
 
@@ -263,7 +255,6 @@ function toRef (node, jstree) {
  * @service display/jstreeConverter
  */
 var jstreeConverter = {
-  addSesatheques: addSesatheques,
   getJstNode: getJstNode,
   getEnfants: getEnfants,
   getJstreeChildren: getJstreeChildren,

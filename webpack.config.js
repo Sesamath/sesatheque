@@ -69,11 +69,6 @@ var conf = {
         query: {
           presets: ['es2015', 'stage-2']
         }
-      },
-      // et sesajstools
-      {
-        test: /sesajstools\/.*\.js/,
-        loader: 'babel'
       }
     ]
   },

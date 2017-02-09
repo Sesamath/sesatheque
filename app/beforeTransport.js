@@ -293,7 +293,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       var flashData = $flashMessage.getAndPurge(context)
       if (flashData) _.merge(data, flashData)
       // s'il n'y est pas, on met le titre en data pour que le layout l'affiche aussi (l'appelant peut en mettre 2 ≠)
-      if (data.$metas.title && !data.titre) {
+      if (data.$metas && data.$metas.title && !data.titre) {
         data.titre = data.$metas.title
       }
     }

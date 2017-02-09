@@ -31,8 +31,9 @@
 
 'use strict'
 
+// la route /debug est gérée par app/main/controllerDebug.js
 /**
- * Controleur de la route /debug/ (existe seulement si on est pas en prod)
+ * Controleur de la route /debug/ressource (existe seulement si on est pas en prod)
  * @Controller controlleurDebug
  * @requires {@link $ressourceRepository}
  */

@@ -79,3 +79,8 @@ et pour se simplifier la vie on utilise `@service` dans ces cas là.
 
 Il faut utiliser `@memberOf leNomDuModuleDéclaréCommeService` sur chaque méthode exportée par le module 
 pour la voir apparaître correctement dans la doc, pas trouvé de moyen de contournement.
+
+Tutos
+-----
+
+{@tutorial editors}
