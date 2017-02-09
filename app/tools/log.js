@@ -144,12 +144,19 @@ function out (message, objectToDump, filter, stream, options) {
       }
     }
     if (objectToDump) {
-      if (objectToDump instanceof Error) message += '\n' + objectToDump.stack + '\n'
-      else {
+      if (objectToDump instanceof Error) {
+        message += '\n' + objectToDump.stack + '\n'
+      } else if (typeof objectToDump === 'function') {
+        message += '\n' + objectToDump.toString() + '\n'
+      } else {
         var dump = sjt.stringify(objectToDump, options.indent)
-        var max = options && options.max || 200
-        if (dump.length > max) dump = dump.substr(0, max) + '…'
-        message += '\n' + dump + '\n'
+        if (dump) {
+          var max = options && options.max || 200
+          if (dump.length > max) dump = dump.substr(0, max) + '…'
+          message += '\n' + dump + '\n'
+        } else {
+          console.error('pb dans log, objectToDump existe mais donne undefined', objectToDump)
+        }
       }
     }
     message = getPrefix() + message

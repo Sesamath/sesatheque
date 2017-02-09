@@ -57,7 +57,7 @@ module.exports = function (EntityAlias) {
     .defineIndex('base', 'string')
     .defineIndex('baseName', 'string')
     .defineIndex('baseIdOriginal', 'string')
-    .defineIndex('userOid', 'integer')
+    .defineIndex('userOid', 'string')
 
   EntityAlias.beforeStore(function (next) {
     if (!this.userOid) {

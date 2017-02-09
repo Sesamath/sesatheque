@@ -28,36 +28,38 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
-var merge = require('sesajstools/utils/object').merge
+const flow = require('an-flow')
 
-module.exports = function (EntityArchive) {
-  /**
-   * Idem {@link EntityRessource}, avec dateArchivage en plus et moins d'index
-   * @entity EntityArchive
-   * @extends Ressource
-   * @extends Entity
-   */
-  EntityArchive.construct = function (ressource) {
-    if (!ressource) {
-      log.error("Création d'une entité archive sans ressource fourmie")
-      return
+const name = 'réindexation de EntityArchive, EntityAlias, EntityGroupe où les oid externes passent en string'
+const description = ''
+
+module.exports = {
+  name: name,
+  description: description,
+  run: function run (next) {
+    // pas très propre d'inclure du cli, mais quand même nettement plus pratique que de tout réécrire ici
+    let $entitiesCli
+    try {
+      $entitiesCli = require('lassi/source/services/entities-cli.js')
+      if (typeof $entitiesCli !== 'function') {
+        log.error('pas de $entitiesCli', $entitiesCli)
+        throw new Error('require trouve pas sans throw, bizarre')
+      }
+    } catch (error) {
+      log.error(error)
+      return next(new Error('Impossible de récupérer $entitiesCli'))
     }
-    // on garde tout
-    merge(this, ressource)
-    // sauf l'oid
-    delete this.oid
-    // et on ajoute la date d'archivage
-    this.dateArchivage = new Date()
-  }
-
-  EntityArchive.table = 'archive'
-
-  EntityArchive
-    .defineIndex('origine', 'string')
-    .defineIndex('idOrigine', 'string')
-    .defineIndex('version', 'integer')
-    .defineIndex('archiveOid', 'string')
+    const reindexAll = $entitiesCli().commands().reindexAll
+    flow().seq(function () {
+      reindexAll('EntityArchive', this)
+    }).seq(function () {
+      reindexAll('EntityAlias', this)
+    }).seq(function () {
+      reindexAll('EntityGroupe', this)
+    }).seq(function () {
+      next()
+    }).catch(next)
+  } // run
 }
