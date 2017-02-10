@@ -309,6 +309,8 @@ function Ressource (initObj, myBaseId) {
   }
   // et on ajoute des erreurs si on a viré des trucs
   Object.getOwnPropertyNames(values).forEach(p => {
+    // this est bien l'objet courant car c'est une fct fléchée
+    // mais on assure le coup en le passant en 2e param de forEach
     if (Array.isArray(this[p])) {
       // pour les tableaux on regarde si on a toujours autant d'éléments
       if (Array.isArray(values[p])) {
@@ -326,11 +328,14 @@ function Ressource (initObj, myBaseId) {
         this._errors.push(`La propriété ${p} n’était pas un tableau, elle a été ignorée`)
         console.error('contenu invalide', values[p])
       }
-    } else if (p.substr(0, 1) !== '$') {
+
+    // sinon c'est scalaire ou objet
+    } else if (!this.hasOwnProperty(p) && p.substr(0, 1) !== '$') {
       this._warnings.push(`La propriété ${p} n’existe pas dans une ressource, elle a été ignorée`)
-      console.error(`propriété ${p} ignorée`, values[p])
+      if (typeof log !== 'undefined') log.errorData(`propriété ${p} ignorée dans`, values)
+      else console.error(`propriété ${p} ignorée`, values[p])
     }
-  }, this) // pas utile de préciser le this de forEach avec une fct fléchée, au cas qqun virerait la flèche…
+  }, this) // au cas où qqun virerait la fct flèchée…
 }
 
 /**

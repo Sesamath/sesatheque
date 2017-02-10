@@ -31,8 +31,9 @@
 'use strict'
 
 const flow = require('an-flow')
+const applog = require('an-log')(lassi.settings.application.name)
 
-const name = 'réindexation de EntityArchive, EntityAlias, EntityGroupe où les oid externes passent en string'
+const name = 'réindexation de EntityArchive, EntityGroupe où les oid externes passent en string'
 const description = ''
 
 module.exports = {
@@ -40,6 +41,7 @@ module.exports = {
   description: description,
   run: function run (next) {
     // pas très propre d'inclure du cli, mais quand même nettement plus pratique que de tout réécrire ici
+    applog('update 10', name)
     let $entitiesCli
     try {
       $entitiesCli = require('lassi/source/services/entities-cli.js')
@@ -54,8 +56,6 @@ module.exports = {
     const reindexAll = $entitiesCli().commands().reindexAll
     flow().seq(function () {
       reindexAll('EntityArchive', this)
-    }).seq(function () {
-      reindexAll('EntityAlias', this)
     }).seq(function () {
       reindexAll('EntityGroupe', this)
     }).seq(function () {

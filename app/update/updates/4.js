@@ -32,6 +32,7 @@
 'use strict'
 
 var flow = require('an-flow')
+const applog = require('an-log')(lassi.settings.application.name)
 var replace = require('sesajstools/utils/object').replace
 var Ref = require('../../constructors/Ref')
 var config = require('../../config')
@@ -53,7 +54,7 @@ function cleanArbre (arbre, next) {
   function saveAndNext () {
     $ressourceRepository.save(arbre, next)
   }
-  console.log('traitement arbre ' + arbre.oid)
+  applog('update 4', 'traitement arbre ' + arbre.oid)
   // traitement de la base
   cleanBase(arbre)
   // fin base, on passe aux enfants
@@ -198,7 +199,7 @@ module.exports = {
   run: function run (next) {
     // récupère limit arbres et les traite
     function grab () {
-      console.log('traitement des arbres de ' + offset + ' à ' + (offset + limit))
+      applog('update 4', 'traitement des arbres de ' + offset + ' à ' + (offset + limit))
       EntityRessource.match('type').equals('arbre').sort('oid').grab(limit, offset, function (error, arbres) {
         if (error) return next(error)
         flow(arbres).seqEach(function (arbre) {

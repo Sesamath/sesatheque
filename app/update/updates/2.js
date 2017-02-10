@@ -32,7 +32,7 @@
 'use strict'
 
 var flow = require('an-flow')
-var applog = require('an-log')(lassi.settings.application.name)
+const applog = require('an-log')(lassi.settings.application.name)
 
 var name = 'recherche et remplacement d’enfants référencés par origine/idOrigine'
 var description = 'Cherche tous les enfants référencés par origine/idOrigine, essaie de trouver leur oid où l’origine correcte'

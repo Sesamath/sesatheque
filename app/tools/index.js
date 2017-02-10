@@ -130,14 +130,14 @@ tools.linkQs = function (path, texte, args) {
 }
 
 /**
- * Remplace les espaces par des underscores et vire les caractères de contrôle d'une chaine
+ * Remplace les espaces par des underscores et vire les caractères de contrôle d'une chaine (\n compris)
  * @see http://unicode-table.com/en/
  * @memberOf tools
  * @param {string} source La chaîne à nettoyer
  * @returns {string} La chaîne nettoyée
  */
 tools.sanitizeHashKey = function (source) {
-  return source.replace(' ', '_').replace(/[\x00-\x20\x7F-\xA0]/, '') // eslint-disable-line no-control-regex
+  return source.replace(/ /g, '_').replace(/[\x00-\x20\x7F-\xA0]/, '') // eslint-disable-line no-control-regex
 }
 
 /**

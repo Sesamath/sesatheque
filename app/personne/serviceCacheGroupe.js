@@ -31,17 +31,22 @@
 
 'use strict'
 
-var tools = require('../tools')
+// var crypto = require('crypto')
+var flow = require('an-flow')
 var _ = require('lodash')
+var tools = require('../tools')
 
 /**
- * Retourne la clé de cache d'un groupe
+ * Retourne la clé de cache d'un groupe (memcache est pénible, tools.sanitizeHashKey suffit pas)
  * @private
  * @param {string|Groupe} groupe
  * @returns {string}
  */
 function getKey (groupe) {
   var key
+  // si on tombait un jour sur une clé sortie de sanitizeHashKey qui plaisait pas à memcache,
+  // utiliser un md5 du nom avec
+  // key = crypto.createHash('md5').update(data).digest('hex')
   if (_.isString(groupe)) key = 'groupe_' + tools.sanitizeHashKey(groupe)
   else if (groupe && groupe.nom) key = 'groupe_' + tools.sanitizeHashKey(groupe.nom)
   return key
@@ -77,7 +82,18 @@ module.exports = function ($cache, $settings) {
    */
   $cacheGroupe.set = function (groupe, next) {
     if (groupe && groupe.nom) {
-      $cache.set(getKey(groupe), groupe, ttl, next)
+      // ça plante sur certains noms, try/catch sert à rien car async
+      const key = getKey(groupe)
+      flow().seq(function () {
+        $cache.set(key, groupe, ttl, this)
+      }).seq(function () {
+        next()
+      }).catch(function (error) {
+        log.error('le $cache.set a planté', error)
+        // pb de clé, tant pis, ça sera pas en cache (pas de risque d'avoir une ancienne
+        // version foireuse car c'est la la clé qui plante)
+        next()
+      })
     } else {
       var error = new Error('Groupe invalide')
       log.error(error, groupe)

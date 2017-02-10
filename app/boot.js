@@ -33,6 +33,8 @@
 const anLog = require('an-log')
 const config = require('./config')
 const configCheck = require('./configCheck')
+const sesatheques = require('sesatheque-client/src/sesatheques.js')
+
 
 module.exports = function boot (beforeBootstrapCb, options) {
   const logger = anLog(config.application.name)
@@ -59,6 +61,17 @@ module.exports = function boot (beforeBootstrapCb, options) {
    * Pour augmenter les traces, mieux vaut passer à node ces options
    * --stack_trace_limit=100 --stack-size=2048
    */
+
+  // on s'ajoute à la liste si on n'y est pas
+  const myBaseId = config.application.baseId
+  if (!sesatheques.exists(myBaseId)) sesatheques.add(myBaseId, config.application.baseUrl)
+  if (config.sesatheques) {
+    console.log('sesatheques ', config.sesatheques)
+    Object.keys(config.sesatheques).forEach(k => {
+      console.log('check ' + k)
+      if (!sesatheques.exists(k)) sesatheques.add(k, config.sesatheques[k])
+    })
+  }
 
   // les déclarations de nos components
   require('./main')

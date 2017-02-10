@@ -46,7 +46,7 @@ module.exports = function (EntityRessource) {
    */
   EntityRessource.construct(function (initObj) {
     // on récupère un objet Ressource correctement typé et initialisé
-    const ressource = new Ressource(initObj)
+    const ressource = new Ressource(initObj, myBaseId)
     for (let p in ressource) {
       if (ressource.hasOwnProperty(p)) {
         Object.defineProperty(this, p, Object.getOwnPropertyDescriptor(ressource, p))

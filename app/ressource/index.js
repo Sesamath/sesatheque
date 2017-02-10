@@ -88,8 +88,8 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function (EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
-  require('./controllerApi')(this, EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json)
+ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
+  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json)
 })
 
 // import calculatice

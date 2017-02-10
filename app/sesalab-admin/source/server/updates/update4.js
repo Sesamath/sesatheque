@@ -31,40 +31,12 @@
 
 /*global log*/
 'use strict'
-var flow = require('an-flow')
 
-module.exports = function(job) {
-  var EntityAlias = lassi.service('EntityAlias')
-  flow().seq(function () {
-    EntityAlias.match('oid').count(this)
-  }).seq(function (nbRess) {
-    var tours = job.init(nbRess, 50)
-    flow(tours).seqEach(function (tour) {
-      var nextTour = this
-      log('On démarre à ' + tour[0])
-      flow().seq(function () {
-        EntityAlias.match('oid').grab(tour[1], tour[0], this)
-      }).seq(function (aliases) {
-        flow(aliases).seqEach(function (alias) {
-          job.tick()
-          if (alias.base) {
-            if (alias.base.substr(-1) === '/') {
-              this()
-            } else {
-              alias.base += '/'
-              alias.store(this)
-            }
-          } else {
-            // pas de base, on signale
-            log.errorData("l'alias " +alias.oid +" n'a pas de base", alias)
-            this()
-          }
-        }).seq(function () {
-          nextTour()
-        }).catch(job.done)
-      }).catch(job.done)
-    }).seq(function () {
-      job.done('')
-    }).catch(job.done)
-  }).catch(job.done)
+module.exports = {
+  name: 'nettoyage des alias (obsolète)',
+  description: '',
+  run: function run (next) {
+    // plus d'actualité car plus d'alias en février 2017
+    next()
+  } // run
 }

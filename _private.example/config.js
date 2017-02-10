@@ -98,7 +98,10 @@ module.exports = {
     // autre sesatheque dont on peut référencer des items
     // …
   },
-  // pour avoir du sso entre un sesalab et une sesatheque, il faut préciser ici
+  // les sesalab qui nous causent (et propagent ici une authentification)
+  // Attention, toutes les sésathèques qu'ils utilisent doivent être listées dans le module
+  // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
+  // sur ces autres sésathèques
   sesalabs: [ {
     name: 'un nom pour ce sesalab',
     baseUrl: 'https://sesalab.example.com/'

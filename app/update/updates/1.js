@@ -32,7 +32,7 @@
 'use strict'
 
 var flow = require('an-flow')
-var applog = require('an-log')(lassi.settings.application.name)
+const applog = require('an-log')(lassi.settings.application.name)
 
 var name = 'ajout résumés aux arbres'
 var description = 'ajoute les résumés et commentaires dans tous les arbres'

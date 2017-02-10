@@ -32,6 +32,7 @@
 'use strict'
 
 var flow = require('an-flow')
+const applog = require('an-log')(lassi.settings.application.name)
 var request = require('request')
 var stringify = require('sesajstools').stringify
 var Ressource = require('../../constructors/Ressource')
@@ -147,7 +148,7 @@ module.exports = {
   description: description,
   run: function run (next) {
     function grab () {
-      console.log('traitement des pages externes de ' + offset + ' à ' + (offset + limit))
+      applog('update 5', 'traitement des pages externes de ' + offset + ' à ' + (offset + limit))
       EntityRessource.match('type').equals('url').sort('oid').grab(limit, offset, function (error, ressources) {
         if (error) return next(error)
         flow(ressources).seqEach(function (ressource) {

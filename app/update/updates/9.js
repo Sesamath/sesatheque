@@ -38,8 +38,7 @@ var description = ''
 var limit = 100
 
 var EntityRessource = lassi.service('EntityRessource')
-var config = require('../../config')
-var applog = require('an-log')(config.application.name)
+const applog = require('an-log')(lassi.settings.application.name)
 
 // pour voir le nb de ressources par origine
 // SELECT _string as origine, count(*) as nb  FROM ressource_index WHERE name = 'origine' group by _string
@@ -49,7 +48,7 @@ module.exports = {
   description: description,
   run: function run (next) {
     function grab () {
-      applog('update', name, offset, 'à', offset + limit - 1)
+      applog('update 9', name, offset, 'à', offset + limit - 1)
       EntityRessource.match('origine').equals('labomepPERSOS').sort('oid').grab(limit, offset, function (error, ressources) {
         if (error) return next(error)
         // log.debug('ressources ' + ressources.map((r) => r.oid).join(' '))

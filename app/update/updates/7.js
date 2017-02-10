@@ -28,77 +28,42 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
 var flow = require('an-flow')
 
-var name = 'correction des relations en double'
+var name = 'remplacement de l’origine local par le baseId de la sésathèque courante'
 var description = ''
 
 var limit = 100
 
 var EntityRessource = lassi.service('EntityRessource')
-var $ressourceRepository = lassi.service('$ressourceRepository')
-var config = require('../../config')
-var applog = require('an-log')(config.application.name)
+const applog = require('an-log')(lassi.settings.application.name)
 
-function cleanRelations (ressource) {
-  // on dédoublonne avec un map dont les clés sont la concaténation predicat-cible
-  var relations = new Map()
-  ressource.relations.forEach(function (relation) {
-    if (Array.isArray(relation) && relation.length === 2) relations.set('' + relation[0] + relation[1], relation)
-  })
-  // on ne parse le Map que s'il y avait des doublons
-  if (relations.size < ressource.relations.length) {
-    ressource.relations = Array.from(relations.values())
-    log.debug(ressource.oid + ' cleaned')
-    return true
-  }
-  return false
-}
+// pour voir le nb de ressources par origine
+// SELECT _string as origine, count(*) as nb  FROM ressource_index WHERE name = 'origine' group by _string
 
 module.exports = {
   name: name,
   description: description,
   run: function run (next) {
     function grab () {
-      applog('update', name, offset, 'à', offset + limit)
-      // ce truc étant multiple, on récupère 3× la même ressource si elle a 3 relations
-      var options = {distinct: true}
-      EntityRessource.match('relations').sort('oid').grab(limit, offset, options, function (error, ressources) {
+      applog('update 7', name, offset, 'à', offset + limit)
+      EntityRessource.match('origine').equals('local').sort('oid').grab(limit, offset, function (error, ressources) {
         if (error) return next(error)
         // log.debug('ressources ' + ressources.map((r) => r.oid).join(' '))
-        var currentSubOffset = 0
-        var current
         flow(ressources).seqEach(function (ressource) {
-          currentSubOffset++
-          current = ressource.oid
-          if (!!ressource.origine !== !!ressource.idOrigine) {
-            // y'a un pb on a un seul des deux :-/
-            // le save va planter (il est maintenant plus chatouilleux)
-            console.error('ressource avec seulement origine ou idOrigine', ressource)
-            return this()
-          }
-          if (ressource.relations.length > 1 && cleanRelations(ressource)) $ressourceRepository.save(ressource, this)
-          else if (ressource.relations.length > 0 && ressource.relations.find((r) => typeof r[1] === 'string' && r[1].indexOf('/') !== -1)) $ressourceRepository.save(ressource, this)
-          else this()
+          ressource.origine = lassi.settings.application.baseId
+          ressource.idOrigine = ressource.oid
+          ressource.store(this)
         }).seq(function () {
           if (ressources.length === limit) {
             offset += limit
-            // on laisse refroidir un peu le disque de la bdd,
-            // mais pas aussi longtemps que le fût du canon car on a pas que ça à faire
-            setTimeout(grab, 100)
+            setTimeout(grab, 0)
           } else {
             this()
           }
-        }).seq(next).catch(function (error) {
-          log.error(error)
-          console.log(`plantage sur la ressource ${current}, on continue quand même`)
-          // mais on continue
-          offset += currentSubOffset
-          grab()
-        })
+        }).done(next)
       })
     }
     // init

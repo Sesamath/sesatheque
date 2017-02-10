@@ -297,7 +297,7 @@ log.error = function (message, objectToDump, filter) {
     out(message, objectToDump, filter, errorOutputStream, {max: 2000})
   } else {
     // bizarre, on génère une vraie erreur avec sa trace
-    out(new Error('log.error appelé sans message ni erreur'), message, filter, errorOutputStream, {max: 2000})
+    out(new Error(`log.error appelé sans message ni erreur, avec un type ${typeof message} :`), message, filter, errorOutputStream, {max: 2000})
     if (objectToDump) out('l’objet passé initialement', objectToDump, filter, errorOutputStream, {max: 2000})
   }
 }

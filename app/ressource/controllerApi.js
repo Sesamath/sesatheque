@@ -47,7 +47,7 @@ var Alias = require('../constructors/Alias')
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
  */
-module.exports = function (controller, EntityAlias, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
   /**
    * Ajoute notre baseId si c'est absent d'item
    * @param {Ressource|Ref} item

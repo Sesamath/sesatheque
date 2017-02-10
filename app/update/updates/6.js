@@ -32,6 +32,7 @@
 'use strict'
 
 var flow = require('an-flow')
+const applog = require('an-log')(lassi.settings.application.name)
 
 var name = 'correction des origine erronée mep_coll en coll_doc'
 var description = ''
@@ -46,7 +47,7 @@ module.exports = {
   description: description,
   run: function run (next) {
     function grab () {
-      console.log('traitement des origine mep_coll de ' + offset + ' à ' + (offset + limit))
+      applog('update 6', 'traitement des origine mep_coll de ' + offset + ' à ' + (offset + limit))
       EntityRessource.match('origine').equals('mep_coll').sort('oid').grab(limit, offset, function (error, ressources) {
         if (error) return next(error)
         flow(ressources).seqEach(function (ressource) {

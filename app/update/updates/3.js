@@ -31,46 +31,14 @@
 
 'use strict'
 
-var flow = require('an-flow')
-
 var name = 'check de tous les alias pour normalisation'
 var description = 'on vire toute url absolue pour ne garder que des baseId'
-
-var limit = 100
 
 module.exports = {
   name: name,
   description: description,
   run: function run (next) {
-    function grab () {
-      EntityAlias.match('oid').greaterThan(0).grab(limit, offset, function (error, aliases) {
-        if (error) return next(error)
-        flow(aliases).seqEach(function (alias) {
-          if (alias.base) {
-            if (alias.base.indexOf('bibliotheque') !== -1) {
-              alias.baseIdOriginal = 'sesabibli'
-            } else if (alias.base.indexOf('commun') !== -1) {
-              alias.baseIdOriginal = 'sesacommun'
-            }
-            delete alias.base
-          } else if (!alias.baseIdOriginal) {
-            log.error('alias de base inconnue ' + alias.base)
-            alias.baseIdOriginal = 'unknown'
-          }
-          log.debug('nouvel alias', alias)
-          alias.store(this)
-        }).seq(function () {
-          if (aliases.length === limit) {
-            offset += limit
-            grab()
-          } else {
-            this()
-          }
-        }).done(next)
-      })
-    }
-    var EntityAlias = lassi.service('EntityAlias')
-    var offset = 0
-    grab()
+    // plus d'actualité car plus d'alias en février 2017
+    next()
   } // run
 }
