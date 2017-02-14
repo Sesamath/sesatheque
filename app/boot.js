@@ -66,9 +66,7 @@ module.exports = function boot (beforeBootstrapCb, options) {
   const myBaseId = config.application.baseId
   if (!sesatheques.exists(myBaseId)) sesatheques.add(myBaseId, config.application.baseUrl)
   if (config.sesatheques) {
-    console.log('sesatheques ', config.sesatheques)
     Object.keys(config.sesatheques).forEach(k => {
-      console.log('check ' + k)
       if (!sesatheques.exists(k)) sesatheques.add(k, config.sesatheques[k])
     })
   }
