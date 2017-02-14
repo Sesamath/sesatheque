@@ -63,6 +63,7 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
 
   // conf de l'appli
   var config = require('../../app/config')
+  var myBaseId = config.application.baseId
   // token
   var apiToken = config.apiTokens[0]
   if (process.argv.indexOf('--token') > -1) {
@@ -106,6 +107,9 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
     // indexable, restriction, dateCreation, dateMiseAJour, version, archiveOid
   }
 
+  // pour les relations, ça doit convertir l'oid en baseId/oid
+  var relationsTransformed =  [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
+
   describe('api set, get & del', function () {
     var ressCloned = clone(ressTest)
 
@@ -137,14 +141,15 @@ if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
         url: urlBibli + '/em/5000',
         json: true
       }
+      ressCloned.relations = relationsTransformed
       request.get(options, function (error, response, ressource) {
+        // console.log('la ressource récupérée', ressource)
         assert.ok(!error)
         assert.ok(!ressource.error)
         for (var key in ressCloned) {
           // console.log(`pour ${key}`, ressCloned[key], ressource[key])
           if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
         }
-        // logInfo('la ressource récupérée', ressource)
         done()
       })
     })
