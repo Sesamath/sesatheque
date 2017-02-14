@@ -187,7 +187,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           placeholder: 'oid de la personne'
         }
         next()
-        this()
       }).catch(function (error) {
         next(error)
       })
