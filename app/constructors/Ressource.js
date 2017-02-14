@@ -34,6 +34,12 @@
 
 const filters = require('sesajstools/utils/filters')
 const {getBaseIdFromId} = require('sesatheque-client/src/sesatheques.js')
+/**
+ * Filtre une liste de personne en vérifiant que c'est bien de la forme baseId/xxx avec baseId connue
+ * (les vire si c'est pas le cas)
+ * @param {string[]} list
+ * @return {Array} la liste filtrée
+ */
 function filterUserList (list) {
   if (list && Array.isArray(list) && list.length) {
     return filters.arrayString(list).filter(uid => {
@@ -67,10 +73,10 @@ function Ressource (initObj, myBaseId) {
        * @type {string}
        */
       this.rid = values.rid
-    } else if (myBaseId) {
-      this.rid = myBaseId + '/' + values.oid
     } else if (values.baseId) {
       this.rid = values.baseId + '/' + values.oid
+    } else if (myBaseId) {
+      this.rid = myBaseId + '/' + values.oid
     } else {
       throw new Error('Impossible d’instancier une Ressource avec oid sans rid ni baseId')
     }

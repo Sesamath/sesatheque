@@ -30,62 +30,102 @@
  */
 'use strict'
 
+function filterString (value) {
+  return typeof value === 'string' ? value : ''
+}
+
 /**
  * Définition d'une référence à une ressource, que l'on peut rencontrer dans les feuilles d'un arbre
- * Cela devient un alias sans oid (pas une entité)
- * @param {Object} [initObj={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte un Alias
+ * Ce n'est pas une entité
+ * @param {Object} [values={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte un Alias
+ * @param {string} [baseId] Une base par défaut
+ * @throws {Error} Si on passe des enfants sur un type non arbre
  * @constructor
  */
-function Ref (initObj) {
-  if (typeof initObj !== 'object') initObj = {}
-  var ref = initObj.ref || parseInt(initObj.oid, 10) || undefined
-  if (!ref && initObj.origine && initObj.idOrigine) ref = initObj.origine + '/' + initObj.idOrigine
-  /**
-   * L'oid de la ressource que l'on référence
-   * @property ref
-   * @type {Integer|string}
-   */
-  if (ref) this.ref = ref
+function Ref (values, baseId) {
+  // @todo virer ref et baseId quand l'update 12 sera passé et que plus personne (j3p) ne les utilisera
+  if (typeof values !== 'object') values = {}
+  var ref = values.ref || values.oid || (values.origine && values.idOrigine && values.origine + '/' + values.idOrigine)
+  if (ref) {
+    /**
+     * L'oid de la ressource que l'on référence, remplacé par aliasOf
+     * @deprecated
+     * @type {Integer|string}
+     */
+    this.ref = ref
+  }
+  if (values.baseId) {
+    /**
+     * L'id de la sesathèque concernée (présent maintenant dans aliasOf)
+     * @deprecated
+     * @type {string}
+     */
+    this.baseId = values.baseId
+  }
+
+  if (values.aliasOf) {
+    /**
+     * La ressource référencée (baseId/oid)
+     * @type {string}
+     */
+    this.aliasOf = values.aliasOf
+  } else if (values.rid) {
+    this.aliasOf = values.rid
+  } else if (ref) {
+    if (values.baseId) this.aliasOf = values.baseId + '/' + ref
+    else if (baseId) this.aliasOf = baseId + '/' + ref
+    else throw new Error(`Impossible de convertir la ref ${ref} sans baseId`)
+  }
+
   /**
    * Titre
    * @type {string}
    */
-  this.titre = (initObj.titre && typeof initObj.titre === 'string') ? initObj.titre : 'Sans titre'
+  this.titre = filterString(values.titre)
   /**
    * Résumé (pour l'élève)
    * @type {string}
    */
-  this.resume = (initObj.resume && typeof initObj.resume === 'string') ? initObj.resume : ''
+  this.resume = filterString(values.resume)
   /**
    * Commentaires (pour le formateur)
    * @type {string}
    */
-  this.commentaires = (initObj.commentaires && typeof initObj.commentaires === 'string') ? initObj.commentaires : ''
+  this.commentaires = filterString(values.commentaires)
   /**
    * Le type qui permet de savoir à quel type de contenu s'attendre, ou quel picto afficher
    * @type {string}
    */
-  if (initObj.type) this.type = initObj.type
+  this.type = filterString(values.type)
   /**
    * Un ou des id de catégorie(s) éventuel (pour un picto)
    * @type {Array}
    */
-  if (Array.isArray(initObj.categories)) this.categories = initObj.categories
+  if (Array.isArray(values.categories)) this.categories = values.categories
   /**
    * True si public (sinon il faut être authentifié pour lire la ressource)
    * @type {boolean}
    */
-  this.public = (initObj.public || initObj.restriction === 0)
-  /**
-   * Éventuelle clé de lecture, pour que des élèves puissent lire
-   * la ressource non publique si leur prof la leur affecte
-   */
-  if (!this.public && initObj.cle) this.cle = initObj.cle
-  /**
-   * L'id de la sesathèque concernée
-   * @type {string}
-   */
-  if (initObj.baseId) this.baseId = initObj.baseId
+  this.public = Boolean(values.public || values.restriction === 0)
+  if (!this.public && values.cle) {
+    /**
+     * Éventuelle clé de lecture, pour que des élèves puissent lire
+     * la ressource non publique si leur prof la leur affecte
+     * @type {string}
+     */
+    this.cle = values.cle
+  }
+  if (values.enfants) {
+    if (this.type === 'arbre') {
+      /**
+       * Liste éventuelle d'enfants
+       * @type {Ref[]}
+       */
+      this.enfants = values.enfants
+    } else if (values.enfants.length) {
+      throw new Error(`Seul le type arbre peut avoir des enfants (pb sur ${this.titre})`)
+    }
+  }
 }
 
 /**
