@@ -31,6 +31,7 @@
 'use strict'
 const tools = require('../tools')
 const Ressource = require('../constructors/Ressource')
+const sesatheques = require('sesatheque-client/src/sesatheques.js')
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
@@ -90,6 +91,10 @@ module.exports = function (EntityRessource) {
   // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
 
   EntityRessource
+    .defineIndex('rid', 'string')
+    .defineIndex('baseId', 'string', function () {
+      return sesatheques.getBaseIdFromId(this.rid)
+    })
     .defineIndex('cle', 'string')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
