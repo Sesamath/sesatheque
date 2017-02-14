@@ -77,7 +77,7 @@ module.exports = function ($cache, $settings) {
   /**
    * Met un groupe en cache
    * @param {Groupe} groupe
-   * @param {errorCallback} next
+   * @param {errorCallback} [next]
    * @memberOf $cacheGroupe
    */
   $cacheGroupe.set = function (groupe, next) {
@@ -87,12 +87,12 @@ module.exports = function ($cache, $settings) {
       flow().seq(function () {
         $cache.set(key, groupe, ttl, this)
       }).seq(function () {
-        next()
+        if (next) next()
       }).catch(function (error) {
-        log.error('le $cache.set a planté', error)
+        log.error('le $cache.set a planté avec la clé ' + key, error)
         // pb de clé, tant pis, ça sera pas en cache (pas de risque d'avoir une ancienne
         // version foireuse car c'est la la clé qui plante)
-        next()
+        if (next) next()
       })
     } else {
       var error = new Error('Groupe invalide')
