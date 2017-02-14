@@ -127,7 +127,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
     $cache.get(getKey(oid), function (error, ressource) {
       if (error) log.error(error)
       if (ressource) {
-        $cache.delete(getKey(ressource.idOrigine, ressource.origine), log.error)
+        $cache.delete(getKey(ressource.idOrigine, ressource.origine), error => { if (error) log.error(error) })
       }
       $cache.delete(getKey(oid), next)
     })
