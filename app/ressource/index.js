@@ -36,6 +36,7 @@ var path = require('path')
 // Composant de gestion des ressources
 var ressourceComponent = lassi.component('ressource')
 
+// @todo à virer dès que l'update 11 sera passé partout
 ressourceComponent.entity('EntityAlias', function () {
   require('./EntityAlias')(this)
 })
