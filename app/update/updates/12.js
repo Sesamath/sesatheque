@@ -45,42 +45,42 @@ const description = ''
 const limit = 100
 
 /**
- * Nettoie les enfants de ref (si c'est un arbre avec enfants)
- * @param {Ressource|Ref} ref
- * @param {function}      next callback appelée avec (error, ref)
+ * Retourne la liste d'enfants mis au nouveau format
+ * @param enfants
  */
-function cleanEnfants (ref, next) {
-  if (ref.enfants) {
-    if (ref.enfants.length) {
-      // y'a des enfants
-      if (ref.type === 'arbre') {
-        flow(ref.enfants).seqEach(function (enfant) {
-          const nextEnfant = this
-          const refEnfant = new Ref(enfant, myBaseId)
-          if (refEnfant.baseId) delete refEnfant.baseId
-          if (refEnfant.ref) delete refEnfant.ref
-          if (refEnfant.enfants && refEnfant.enfants.length) {
-            cleanEnfants(refEnfant, nextEnfant)
-          } else {
-            nextEnfant(null, refEnfant)
-          }
-        }).seq(function (enfants) {
-          ref.enfants = enfants
-          next(null, ref)
-        }).catch(next)
+function cleanEnfants (enfants) {
+  return enfants.map(enfant => {
+    const refEnfant = new Ref(enfant, myBaseId)
+    if (refEnfant.baseId) delete refEnfant.baseId
+    if (refEnfant.ref) delete refEnfant.ref
+    if (refEnfant.enfants && refEnfant.enfants.length) {
+      if (refEnfant.type === 'arbre') {
+        refEnfant.enfants = cleanEnfants(refEnfant.enfants)
       } else {
-        log.error('enfants sur autre chose qu’un arbre', ref)
-        next(new Error('Seul les arbres peuvent avoir des enfants'))
+        log.errorData('enfants sur autre chose qu’un arbre', refEnfant)
+        delete refEnfant.enfants
       }
-    } else {
-      // on vire des enfants vides sur autre chose qu'un arbre
-      if (ref.type !== 'arbre') delete ref.enfants
-      next(null, ref)
     }
+    return refEnfant
+  })
+}
+
+/**
+ * Nettoie les enfants de l'arbre
+ * @param {Ressource} arbre
+ */
+function cleanArbre (arbre) {
+  if (arbre.enfants) {
+    if (arbre.enfants.length) arbre.enfants = cleanEnfants(arbre.enfants)
   } else {
-    // pas d'enfants à traiter
-    next(null, ref)
+    log.errorData('arbre sans propriété enfants', arbre)
+    arbre.enfants = []
   }
+  if (arbre.parametres) {
+    log.errorData('arbre avec parametres', arbre)
+    delete arbre.parametres
+  }
+  return arbre
 }
 
 module.exports = {
@@ -99,22 +99,12 @@ module.exports = {
 
       // on itère
       }).seqEach(function (ressource) {
-        const nextRessource = this
-        // en cas d'erreur, on veut la choper ici pour avoir les infos dans le log
-        cleanEnfants(ressource, function (error, cleanRessource) {
-          if (error) {
-            log.error('pb dans la conversion des enfants de', ressource)
-            log.error(error)
-            nextRessource(null, ressource)
-          } else {
-            nextRessource(null, cleanRessource)
-          }
-        })
-
-      // 2e itération pour sauver
-      }).seqEach(function (ressource) {
-        if (ressource.oid === 35580) log.error('la ressource 35580 avant store', ressource)
-        // on passe pas par le repository pour éviter de tout mettre en cache, mais on vire du cache…
+        if (ressource.type === 'arbre') {
+          ressource = cleanArbre(ressource)
+        } else if (ressource.enfants) {
+          if (ressource.enfants.length) log.errorData('enfants sur autre chose qu’un arbre', ressource)
+          delete ressource.enfants
+        }
         $cacheRessource.delete(ressource.oid)
         ressource.store(this)
 
