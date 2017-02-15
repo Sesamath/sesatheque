@@ -80,4 +80,14 @@ describe('Ref', () => {
     expect(keys).to.deep.equal(keysOrig, 'liste de propriétés')
     keys.forEach(k => expect(ref[k]).to.deep.equal(refOrig[k], `propriété ${k}`))
   })
+
+  it('lance une exception si on file un oid sans baseId', () => {
+    const refOrig = {
+      oid: 42,
+      titre: 'foo bar',
+      type: 'ato'
+    }
+    const init = () => new Ref(refOrig)
+    expect(init).to.throw(Error, /Impossible de convertir la ref/)
+  })
 })
