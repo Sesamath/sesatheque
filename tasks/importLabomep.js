@@ -383,7 +383,7 @@ function modifyUrl (ressource, next) {
             ressource.parametres = {adresse: p.adresse}
             // ne sachant pas trop on met rien...
             // (0 pour que l'api accepte l'import, il faudra compléter à la prochaine édition)
-            ressource.categorie = 0
+            ressource.categories = [0]
             // un cas particulier sur toutes ces diapos qui devraient exister par ailleurs
             if (p.adresse.indexOf('http://mep-outils.sesamath.net/manuel_numerique/diapo.php?atome=') === 0) {
               var test = /diapo.php\?atome=([0-9]+)/.exec(result.adresse)
