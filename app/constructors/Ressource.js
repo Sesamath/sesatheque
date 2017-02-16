@@ -168,19 +168,24 @@ function Ressource (initObj, myBaseId) {
       }
     }
   } else {
-    /**
-     * Contenu qui dépend du type (toutes les infos spécifique à ce type)
-     * @type {Object}
-     */
-    this.parametres = (values.parametres instanceof Object) ? values.parametres : {}
-    // on accepte une chaîne json
-    if (values.parametres && typeof values.parametres === 'string') {
-      try {
-        this.parametres = JSON.parse(values.parametres)
-      } catch (error) {
-        console.error(error)
+    if (values.parametres) {
+      if (values.parametres instanceof Object) {
+        /**
+         * Contenu qui dépend du type (toutes les infos spécifique à ce type)
+         * @type {Object}
+         */
+        this.parametres = values.parametres
+      } else if (typeof values.parametres === 'string') {
+      // on accepte une chaîne json
+        try {
+          const parametres = JSON.parse(values.parametres)
+          if (typeof parametres === 'object') this.parametres = parametres
+        } catch (error) {
+          console.error(error)
+        }
       }
     }
+    if (!this.parametres) this.parametres = {}
   }
   /**
    * Niveaux scolaire de la ressource

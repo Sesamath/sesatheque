@@ -105,13 +105,22 @@ function addWarnings (ressource) {
 function checkEnfants (enfants, ressource, titre) {
   if (!titre) titre = ressource.titre
   if (Array.isArray(enfants)) {
+    const reCheckAliasOf = /^[-\w]+\/[-\w]+$/
     enfants.forEach(function (enfant, i) {
       if (!enfant.titre) rTools.addError(ressource, `L’enfant n° ${i + 1} de « ${titre} » n’a pas de titre`)
-      if (!enfant.type) rTools.addError(ressource, `L’enfant ${enfant.titre} de « ${titre} » n'a pas de type`)
-      if (enfant.type !== 'arbre' && !enfant.ref) {
-        rTools.addError(ressource, `L’enfant ${enfant.titre} de « ${titre} » n'a pas de ref valide`)
-      } else if (enfant.ref < 1 && (typeof enfant.ref !== 'string' || !/^[\w]+\/[\w]+$/.exec(enfant.ref))) {
-        rTools.addError(ressource, `L’enfant ${enfant.titre} de « ${titre} » n'a pas de ref valide`)
+      const errPrefix = `L’enfant ${enfant.titre} de « ${titre} »`
+      if (!enfant.type) rTools.addError(ressource, `${errPrefix} n'a pas de type`)
+      if (enfant.aliasOf) {
+        if (typeof enfant.aliasOf !== 'string' || !reCheckAliasOf.test(enfant.aliasOf)) {
+          rTools.addError(ressource, `${errPrefix} n’a pas un alias valide`)
+        }
+      } else {
+        if (enfant.type === 'arbre') {
+          // aliasOf pas obligatoire mais faut des enfants
+          if (!enfant.enfants) rTools.addError(ressource, `${errPrefix} n'a ni enfants ni alias`)
+        } else {
+          rTools.addError(ressource, `${errPrefix} n'a pas d’alias`)
+        }
       }
       if (enfant.enfants) {
         checkEnfants(enfant.enfants, ressource, enfant.titre)

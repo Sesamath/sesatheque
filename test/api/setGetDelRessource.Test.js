@@ -37,7 +37,19 @@
  */
 
 'use strict'
-/* global describe,it */
+/* eslint-env mocha */
+
+import {expect} from 'chai'
+import request from 'request'
+
+import fakeRessource from '../helpers/fakeRessource'
+
+const clone = require('sesajstools/utils/object').clone
+// conf de l'appli
+import config from '../../app/config'
+const myBaseId = config.application.baseId
+// token
+let apiToken = config.apiTokens[0]
 
 /**
  * Affiche les options possibles
@@ -53,137 +65,138 @@ function usage () {
 }
 
 // aide
-if (process.argv.indexOf('--help') > -1 || process.argv.indexOf('-h') > -1) {
+if (process.argv.indexOf('--help') !== -1 || process.argv.indexOf('-h') !== -1) {
   usage()
-} else {
-  var assert = require('assert')
-  var _ = require('lodash')
-  var clone = require('sesajstools/utils/object').clone
-  var request = require('request')
+}
 
-  // conf de l'appli
-  var config = require('../../app/config')
-  var myBaseId = config.application.baseId
-  // token
-  var apiToken = config.apiTokens[0]
-  if (process.argv.indexOf('--token') > -1) {
-    apiToken = process.argv[process.argv.indexOf('--token')]
-  }
+if (process.argv.indexOf('--token') !== -1) {
+  apiToken = process.argv[process.argv.indexOf('--token')]
+}
+
 // url bibli
-  var urlBibli = 'http://'
-  if (process.argv.indexOf('--prod') > -1) {
-    urlBibli += 'bibliotheque.sesamath.net'
-  } else if (process.argv.indexOf('--dev') > -1) {
-    urlBibli += 'bibliotheque.devsesamath.net'
-  } else {
-    urlBibli += config.$server && config.$server.hostname || 'localhost'
-    urlBibli += ':'
-    urlBibli += config.$server && config.$server.port || '3000'
-  }
-  urlBibli += '/api/ressource'
+let urlBibli = 'http://'
+if (process.argv.indexOf('--prod') !== -1) {
+  urlBibli += 'bibliotheque.sesamath.net'
+} else if (process.argv.indexOf('--dev') !== -1) {
+  urlBibli += 'bibliotheque.devsesamath.net'
+} else {
+  urlBibli += config.$server && config.$server.hostname || 'localhost'
+  urlBibli += ':'
+  urlBibli += config.$server && config.$server.port || '3000'
+}
+urlBibli += '/api/ressource'
 
-  // var isDebug = (process.argv.indexOf('--debug') > -1)
+// var isDebug = (process.argv.indexOf('--debug') > -1)
 
-  var oid
-  /** {Ressource} Ressource de test */
-  var ressTest = {
-    origine: 'em',
-    idOrigine: '5000', // celle là est pas près d'exister
-    titre: "Ressource pour tester l'api",
-    type: 'em',
-    resume: 'Un résumé bidon sur\ndeux lignes',
-    description: 'Une description bidon sur\ndeux lignes',
-    commentaires: 'Un commentaire bidon sur\ndeux lignes',
-    niveaux: ['10', '6'],
-    categories: [1, 2],
-    // typePedagogiques
-    // typeDocumentaires
-    relations: [[1, 1], [14, 2]],
-    parametres: {foo: 'bar'}, // ajouter des vrais params pour tester le display
-    publie: false
-    // auteurs
-    // contributeurs
-    // langue
-    // indexable, restriction, dateCreation, dateMiseAJour, version, archiveOid
-  }
+/** {string} l'oid mis par l'appli à l'enregistrement du post */
+let oid
+/** {Ressource} Ressource de test à poster */
+const ressource = fakeRessource({nooid: true, norid: true, origine: myBaseId, noidOrigine: true, relations: [[1, 1], [14, 2]]})
 
-  // pour les relations, ça doit convertir l'oid en baseId/oid
-  var relationsTransformed =  [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
+/** {Ressource} Ressource attendue en retour */
+const ressExpected = clone(ressource)
+ressExpected.relations = [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
+// pour le test via origine/idOrigine
+let bundleId
 
-  describe('api set, get & del', function () {
-    var ressCloned = clone(ressTest)
+const errAbort = new Error('pas la peine de tester ça tant que ça plante avant')
 
-    it("set retourne l'oid de la ressource stockée", function (doneSet) {
-      var options = {
-        url: urlBibli,
-        headers: {
-          'X-ApiToken': apiToken
-        },
-        json: true,
-        body: ressTest
-      }
-      // logInfo('on va poster vers ' + urlBibli)
-      request.post(options, function (error, response, body) {
-        // logInfo('retour du post pour set', body)
-        assert.ok(!error)
-        assert.ok(!body.error)
-        assert.ok(body.oid)
-        oid = body.oid // string
-        assert.deepEqual(body, {oid: oid})
-        // si ce test est passé on a l'oid que l'on ajoute pour les tests suivants
-        ressCloned.oid = oid
-        doneSet()
-      })
-    })
-
-    it('récupère la ressource em/5000 envoyée précédemment', function (done) {
-      var options = {
-        url: urlBibli + '/em/5000',
-        json: true
-      }
-      ressCloned.relations = relationsTransformed
-      request.get(options, function (error, response, ressource) {
-        // console.log('la ressource récupérée', ressource)
-        assert.ok(!error)
-        assert.ok(!ressource.error)
-        for (var key in ressCloned) {
-          // console.log(`pour ${key}`, ressCloned[key], ressource[key])
-          if (ressCloned.hasOwnProperty(key)) assert.ok(_.isEqual(ressCloned[key], ressource[key]))
-        }
-        done()
-      })
-    })
-
-    it('prend un 403 si on veut effacer sans token', function (done) {
-      var options = {
-        url: urlBibli + '/' + oid,
-        json: true
-      }
-      request.del(options, function (error, response, ressource) {
-        assert.ok(!error)
-        assert.ok(ressource.error)
-        assert.equal(403, response.statusCode)
-        done()
-      })
-    })
-
-    it("vire la ressource que l'on vient d'enregistrer", function (done) {
-      var options = {
-        url: urlBibli + '/' + oid,
-        headers: {
-          'X-ApiToken': apiToken
-        },
-        json: true
-      }
-      request.del(options, function (error, response, body) {
-        assert.ok(!error)
-        if (body.error) console.error('DEL ' + options.url + " renvoie l'erreur : " + body.error)
-        assert.ok(!body.error)
-        if (body.deleted != oid) console.error('DEL ' + options.url + ' retourne\n', body) // eslint-disable-line eqeqeq
-        assert.equal(oid, body.deleted)
-        // faut filer plus d'infos en cas de pb
-        done()
-      })
+describe('api set, get & del', function () {
+  it("set retourne l'oid de la ressource stockée", function (done) {
+    // on la poste sans oid ni rid
+    delete ressource.oid
+    delete ressource.rid
+    const options = {
+      url: urlBibli,
+      headers: {
+        'X-ApiToken': apiToken
+      },
+      json: true,
+      body: ressource
+    }
+    // logInfo('on va poster vers ' + urlBibli)
+    request.post(options, function (error, response, body) {
+      // console.log('retour du post pour set', body)
+      // console.log('\npost\n', ressource)
+      if (error) return done(error)
+      if (!body) return done(new Error(`pas de body dans le post vers ${urlBibli}`))
+      if (body.error) return done(new Error(body.error))
+      expect(body.oid).to.be.ok
+      oid = body.oid // string
+      bundleId = myBaseId + '/' + oid
+      expect(body).to.deep.equal({oid: oid}, 'pb sur le body retourné')
+      // si ce test est passé on a l'oid que l'on ajoute pour les tests suivants
+      ressExpected.oid = oid
+      ressExpected.rid = bundleId
+      ressExpected.idOrigine = '' + oid
+      done()
     })
   })
-}
+
+  it('récupère la ressource envoyée précédemment via oid', function (done) {
+    if (!oid) return done(errAbort)
+    var options = {
+      url: urlBibli + '/' + oid,
+      json: true
+    }
+    request.get(options, function (error, response, ressRecup) {
+      // console.log('\n\nla ressource récupérée\n', ressRecup)
+      expect(error).to.not.be.ok
+      expect(ressRecup.error).to.not.be.ok
+      Object.keys(ressExpected).forEach(k => {
+        expect(ressRecup[k]).to.deep.equal(ressExpected[k], `propriété ${k}`)
+      })
+      done()
+    })
+  })
+
+  it('récupère la ressource envoyée précédemment via origine/idOrigine', function (done) {
+    if (!oid) return done(errAbort)
+    var options = {
+      url: urlBibli + '/' + bundleId,
+      json: true
+    }
+    request.get(options, function (error, response, ressRecup) {
+      // console.log('la ressource récupérée', ressRecup)
+      expect(error).to.not.be.ok
+      expect(ressRecup.error).to.not.be.ok
+      Object.keys(ressExpected).forEach(k => {
+        expect(ressRecup[k]).to.deep.equal(ressExpected[k], `propriété ${k}`)
+      })
+      done()
+    })
+  })
+
+  it('prend un 403 si on veut effacer sans token', function (done) {
+    if (!oid) return done(errAbort)
+    var options = {
+      url: urlBibli + '/' + oid,
+      json: true
+    }
+    request.del(options, function (error, response, body) {
+      // console.log('body récupéré', body)
+      expect(error).to.not.be.ok
+      expect(body.error).to.be.ok
+      expect(response.statusCode).to.equal(403)
+      done()
+    })
+  })
+
+  it("vire la ressource que l'on vient d'enregistrer", function (done) {
+    if (!oid) return done(errAbort)
+    var options = {
+      url: urlBibli + '/' + oid,
+      headers: {
+        'X-ApiToken': apiToken
+      },
+      json: true
+    }
+    request.del(options, function (error, response, body) {
+      // console.log('body récupéré', body)
+      expect(error).to.not.be.ok
+      expect(body.error).to.not.be.ok
+      expect('' + body.deleted).to.equal('' + oid)
+      done()
+    })
+  })
+})

@@ -41,38 +41,27 @@ module.exports = function (EntityRessource) {
   /**
    * Notre entité ressource, cf [Entity](lassi/Entity.html)
    * @entity EntityRessource
-   * @param {Object} initObj Un objet ayant des propriétés d'une ressource
+   * @param {Object} values Un objet ayant des propriétés d'une ressource
    * @extends Entity
    * @extends Ressource
    */
-  EntityRessource.construct(function (initObj) {
-    // on récupère un objet Ressource correctement typé et initialisé
-    const ressource = new Ressource(initObj, myBaseId)
-    for (let p in ressource) {
-      if (ressource.hasOwnProperty(p)) {
-        Object.defineProperty(this, p, Object.getOwnPropertyDescriptor(ressource, p))
+  EntityRessource.construct(function (values) {
+    // on initialise avec les propriétés d'un objet Ressource correctement typé et initialisé
+    Object.assign(this, new Ressource(values, myBaseId))
 
-      // pour propager les méthodes du prototype, probablement pas la bonne méthode
-      // EntityRessource.prototype[p] = Ressource.prototype[p]
-      // on regarde le type, et on écrase pas de méthodes qui existeraient déjà
-      // sauf que this.prototype et  EntityRessource.prototype sont undefined
-      // } else if (typeof Ressource.prototype[p] === 'function' && typeof EntityRessource[p] === 'undefined') {
-      //   this.prototype[p] = function () {
-      //     Ressource.prototype[p].apply(this, [...arguments])
-      //   }
-      }
-      // et on ignore les propriétés du prototype qui ne sont pas des méthodes
-    }
+    // mais après on ne peut plus ajouter de propriété dans afterStore, pas trouvé pourquoi…
+    // => TypeError: Cannot assign to read only property 'rid' of object '#<Entity>'
+    if (!this.rid) Object.defineProperty(this, 'rid', {writable: true, enumerable: true, configurable: false})
 
     // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
     // plus pratique ici que dans le constructeur qui ne peut faire de require
-    if (initObj) {
-      if (initObj.dateCreation && !(initObj.dateCreation instanceof Date)) initObj.dateCreation = tools.toDate(initObj.dateCreation)
-      if (initObj.dateMiseAJour && !(initObj.dateMiseAJour instanceof Date)) initObj.dateMiseAJour = tools.toDate(initObj.dateMiseAJour)
+    if (values) {
+      if (values.dateCreation && !(values.dateCreation instanceof Date)) values.dateCreation = tools.toDate(values.dateCreation)
+      if (values.dateMiseAJour && !(values.dateMiseAJour instanceof Date)) values.dateMiseAJour = tools.toDate(values.dateMiseAJour)
     }
 
     // ajoute les éventuelles propriétés supplémentaire de notre objet initial
-    // _.each(initObj, function (value, key) {
+    // _.each(values, function (value, key) {
     //  if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug('la propriété ' +key +' a été ignorée dans le constructeur de Ressource')
     // })
 
@@ -83,17 +72,20 @@ module.exports = function (EntityRessource) {
     } else {
       this.langue = configRessource.langueDefaut
     }
+    log.error('fin construct avec prop rid', Object.getOwnPropertyDescriptor(this, 'rid'))
   })
 
   // on veut pas d'une table entity_ressource
   EntityRessource.table = 'ressource'
 
-  // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
+  // on laisse tomber beforeStore ici car il dépend de cette entity, c'est le repository qui gère
+  // afterStore est plus bas
 
   EntityRessource
     .defineIndex('rid', 'string')
     .defineIndex('baseId', 'string', function () {
-      return sesatheques.getBaseIdFromId(this.rid)
+      log.error('defineIndex avec prop rid', Object.getOwnPropertyDescriptor(this, 'rid'))
+      if (this.rid) return sesatheques.getBaseIdFromId(this.rid)
     })
     .defineIndex('cle', 'string')
     .defineIndex('origine', 'string')
@@ -160,6 +152,7 @@ module.exports = function (EntityRessource) {
   // met en idOrigine l'oid de la ressource si origine locale et que ça n'y était pas encore
   // idem pour rid
   EntityRessource.afterStore(function (next) {
+    log.error('afterStore avec prop rid', Object.getOwnPropertyDescriptor(this, 'rid'))
     let needToStore = false
     // on ajoute notre id en idOrigine si on est l'origine
     if (this.origine === myBaseId && !this.idOrigine) {

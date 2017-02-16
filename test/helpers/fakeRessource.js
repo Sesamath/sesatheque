@@ -31,62 +31,102 @@
 'use strict'
 
 import faker from 'faker/locale/fr'
-
+import fakeRef from './fakeRef'
 import config from '../../app/config'
 import ressourceConfig from '../../app/ressource/config'
 const myBaseId = config.application.baseId
 
 /**
- * Retourne une ressource avec du contenu aléatoire
+ * Retourne une ressource avec du contenu aléatoire (avec publié, restriction à 0 et sans auteurs ni contributeur si on les impose pas)
+ * @param {object} options ajouter des propriétés imposées, noOid, noRid, noOrigin, noIdOrigin
  * @return {Ressource}
  */
-function getOne () {
+function getFakeRessource (options) {
+  if (typeof options !== 'object') options = {}
   /**
    * Un plain object avec les valeurs d'une ressource
    * @type {Ressource}
    */
-  const fakeRessource = {
-    oid: faker.random.uuid(),
-    type: faker.random.arrayElement(['arbre', 'ato', 'em', 'j3p', 'url']),
-    titre: faker.lorem.words(),
-    origine: faker.lorem.word(),
-    idOrigine: faker.lorem.word(),
-    resume: faker.lorem.sentence(),
-    description: faker.lorem.paragraphs(2, '\n'),
-    commentaires: faker.lorem.paragraphs(2, '\n'),
-    niveaux: faker.random.arrayElement(ressourceConfig.listesOrdonnees.niveaux),
-    restriction: faker.random.arrayElement([0, 0, 0, 0, 1, 2])
-  }
-  fakeRessource.rid = myBaseId + '/' + fakeRessource.oid
-  // niveaux
-  const niv1 = faker.random.arrayElement(ressourceConfig.listesOrdonnees.niveaux)
-  let niv2 = niv1
-  while (niv2 === niv1) niv2 = faker.random.arrayElement(ressourceConfig.listesOrdonnees.niveaux)
-  fakeRessource.niveaux = [niv1, niv2]
-  // catégories
-  const cat1 = faker.random.objectElement(ressourceConfig.constantes.categories, 'key')
-  let cat2 = cat1
-  while (cat2 === cat1) cat2 = faker.random.objectElement(ressourceConfig.constantes.categories, 'key')
-  fakeRessource.categories = [cat1, cat2]
+  const fakeRessource = {}
+  if (!options.nooid) fakeRessource.oid = options.oid || faker.random.uuid()
+  if (!options.norid) fakeRessource.rid = options.rid || myBaseId + '/' + fakeRessource.oid
+  if (!options.notype) fakeRessource.type = options.type || faker.random.arrayElement(['arbre', 'ato', 'em', 'j3p', 'url'])
+  if (!options.noorigine) fakeRessource.origine = options.origine || faker.lorem.word()
+  if (!options.noidOrigine) fakeRessource.idOrigine = options.idOrigine || faker.lorem.word()
+  if (!options.notitre) fakeRessource.titre = options.titre || faker.lorem.words()
+  if (!options.noresume) fakeRessource.resume = options.resume || faker.lorem.sentence()
+  if (!options.nodescription) fakeRessource.description = options.description || faker.lorem.paragraphs(2, '\n')
+  if (!options.nocommentaires) fakeRessource.commentaires = options.commentaires || faker.lorem.paragraphs(2, '\n')
+  if (!options.nopublie) fakeRessource.publie = options.publie || true
+  if (!options.norestriction) fakeRessource.restriction = options.restriction || 0
+  if (!options.nolangue) fakeRessource.langue = options.langue || 'fra'
 
-  // on ajoute des enfants pour les arbres
+  // niveaux
+  if (options.niveaux) {
+    fakeRessource.niveaux = options.niveaux
+  } else if (!options.noniveaux) {
+    const niv1 = faker.random.arrayElement(ressourceConfig.listesOrdonnees.niveaux)
+    let niv2 = niv1
+    while (niv2 === niv1) niv2 = faker.random.arrayElement(ressourceConfig.listesOrdonnees.niveaux)
+    fakeRessource.niveaux = [niv1, niv2]
+  }
+  // catégories
+  if (options.categories) {
+    fakeRessource.categories = options.categories
+  } else if (!options.nocategories) {
+    // Object.keys(ressourceConfig.listes.categories) renvoie {string[]} et on veut du number
+    const cat1 = faker.random.objectElement(ressourceConfig.constantes.categories)
+    let cat2 = cat1
+    while (cat2 === cat1) cat2 = faker.random.objectElement(ressourceConfig.constantes.categories)
+    fakeRessource.categories = [ cat1, cat2 ]
+  }
+  // on ajoute des enfants pour les arbres et des parametres pour les autres
   if (fakeRessource.type === 'arbre') {
-    fakeRessource.enfants = []
-    for (let i = 0; i < faker.random.number(6); i++) {
-      fakeRessource.enfants.push(getOne())
+    if (options.enfants) {
+      fakeRessource.enfants = options.enfants
+    } else {
+      fakeRessource.enfants = []
+      for (let i = 0; i < faker.random.number(6); i++) {
+        fakeRessource.enfants.push(fakeRef())
+      }
     }
   } else {
-    fakeRessource.parametres = {
-      boolean: faker.random.boolean(),
-      date: faker.date.past(),
-      number: faker.random.number(),
-      string: faker.lorem.sentence(),
-      uuid: faker.random.uuid(),
-      word: faker.random.word()
+    if (options.parametres) {
+      fakeRessource.parametres = options.parametres
+    } else if (!options.noparametres) {
+      fakeRessource.parametres = {
+        boolean: faker.random.boolean(),
+        date: faker.date.past().toString(), // avec le passage par http ça deviendra une string
+        number: faker.random.number(),
+        string: faker.lorem.sentence(),
+        uuid: faker.random.uuid(),
+        word: faker.random.word()
+      }
     }
   }
+
+  // les autres propriétés peuvent être passées en options, mais on ne les met pas par défaut
+  ;[
+    'aliasOf',
+    'cle',
+    'typePedagogiques',
+    'typeDocumentaires',
+    'relations',
+    'auteurs',
+    'auteursParents',
+    'contributeurs',
+    'groupes',
+    'groupesAuteurs',
+    'dateCreation',
+    'dateMiseAJour',
+    'version',
+    'indexable',
+    'archiveOid',
+    '_warnings',
+    '_errors'
+  ].forEach(p => { if (options[p]) fakeRessource[p] = options[p] })
 
   return fakeRessource
 }
 
-export default getOne
+export default getFakeRessource
