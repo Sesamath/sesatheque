@@ -209,15 +209,15 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
   $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
     // log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
     // log.debug('les nouveaux auteurs (parmi les anciens)', ressourceNew.auteurs)
-    // log.debug('et les auteurs à ajouter', ressourceNew.auteursAdd)
+    // log.debug('et les auteurs à ajouter', ressourceNew._auteursAdd)
     var currentUserOid = $accessControl.getCurrentUserOid(context)
     // les cas où on a rien à faire
     if (
         ressourceOriginale &&
         _.isEqual(ressourceNew.auteurs, ressourceOriginale.auteurs) &&
         _.isEqual(ressourceNew.contributeurs, ressourceOriginale.contributeurs) &&
-        !ressourceNew.auteursAdd &&
-        !ressourceNew.contributeursAdd
+        !ressourceNew._auteursAdd &&
+        !ressourceNew._contributeursAdd
     ) {
       // y'avait une ressource et on a rien changé
       next(null, ressourceNew)
@@ -235,9 +235,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       // en ajoutant les supplémentaires
       var tmp
       // aj auteurs sup
-      if (ressourceNew.auteursAdd) {
-        tmp = ressourceNew.auteursAdd.split(',')
-        delete ressourceNew.auteursAdd
+      if (ressourceNew._auteursAdd) {
+        tmp = ressourceNew._auteursAdd.split(',')
+        delete ressourceNew._auteursAdd
         tmp.forEach(function (id) {
           id = Number(id) // vire d'éventuels espaces
           if (id && !sjt.isInArray(auteurs, id)) {
@@ -254,9 +254,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         return true
       })
       // aj contributeurs sup
-      if (ressourceNew.contributeursAdd) {
-        tmp = ressourceNew.contributeursAdd.split(',')
-        delete ressourceNew.contributeursAdd
+      if (ressourceNew._contributeursAdd) {
+        tmp = ressourceNew._contributeursAdd.split(',')
+        delete ressourceNew._contributeursAdd
         tmp.forEach(function (id) {
           id = Number(id)
           if (id && !sjt.isInArray(contributeurs, id) && !sjt.isInArray(auteurs, id)) contributeurs.push(id)

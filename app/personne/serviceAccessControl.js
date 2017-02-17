@@ -388,10 +388,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.getCurrentUserOid = function (context) {
-    var oid
-    if (context.session.user && context.session.user.oid) oid = context.session.user.oid
+    if (context.session.user) return context.session.user.oid
+  }
 
-    return oid
+  /**
+   * Retourne le pid du user courant ou undefined
+   * @param {Context} context
+   * @returns {Integer} L'oid
+   * @memberOf $accessControl
+   */
+  $accessControl.getCurrentUserPid = function (context) {
+    if (context.session.user) return context.session.user.pid
   }
 
   /**
@@ -401,10 +408,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.getCurrentUser = function (context) {
-    var personne
-    if (context.session.user && context.session.user.oid) personne = context.session.user
-
-    return personne
+    if (context.session.user && context.session.user.oid) return context.session.user
   }
 
   /**
@@ -607,8 +611,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {boolean|undefined}
    */
   $accessControl.isAuteur = function (context, ressource) {
-    var userOid = $accessControl.getCurrentUserOid(context)
-    return (ressource && ressource.auteurs && ressource.auteurs.indexOf(userOid) > -1)
+    const pid = $accessControl.getCurrentUserPid(context)
+    return (ressource && ressource.auteurs && ressource.auteurs.indexOf(pid) > -1)
   }
 
   /**

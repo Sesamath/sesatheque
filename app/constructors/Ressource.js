@@ -36,15 +36,18 @@ const filters = require('sesajstools/utils/filters')
 const {getBaseIdFromId} = require('sesatheque-client/src/sesatheques.js')
 /**
  * Filtre une liste de personne en vérifiant que c'est bien de la forme baseId/xxx avec baseId connue
- * (les vire si c'est pas le cas)
+ * si c'est pas le cas et que defaultBaseId est fournie on l'ajoute
  * @param {string[]} list
+ * @param {string} [defaultBaseId] Une baseId à ajouter éventuellement
  * @return {Array} la liste filtrée
  */
-function filterUserList (list) {
+function filterUserList (list, defaultBaseId) {
   if (list && Array.isArray(list) && list.length) {
-    return filters.arrayString(list).filter(uid => {
-      getBaseIdFromId(uid, false)
-    })
+    return filters.arrayString(list).map(uid => {
+      const pos = uid.indexOf('/')
+      if (pos === -1 && defaultBaseId) uid = defaultBaseId + '/' + uid
+      if (getBaseIdFromId(uid, false)) return uid
+    }).filter(uid => uid) // vire les éventuels undefined mis par le map
   }
   return []
 }
@@ -230,18 +233,18 @@ function Ressource (initObj, myBaseId) {
    * Liste de uid d'auteurs
    * @type {Integer[]}
    */
-  this.auteurs = filterUserList(values.auteurs)
+  this.auteurs = filterUserList(values.auteurs, myBaseId)
   /**
    * Liste d'url pour les auteurs précédents
    */
   if (values.auteursParents) {
-    this.auteursParents = filterUserList(values.auteursParents)
+    this.auteursParents = filterUserList(values.auteursParents, myBaseId)
   }
   /**
    * Liste d'id de contributeurs
    * @type {Integer[]}
    */
-  this.contributeurs = filterUserList(values.contributeurs)
+  this.contributeurs = filterUserList(values.contributeurs, myBaseId)
   /**
    * Liste de noms de groupes dans lesquels cette ressource est publiée
    * @type {string[]}
@@ -322,6 +325,10 @@ function Ressource (initObj, myBaseId) {
   Object.getOwnPropertyNames(values).forEach(p => {
     // this est bien l'objet courant car c'est une fct fléchée
     // mais on assure le coup en le passant en 2e param de forEach
+
+    // on ignore les propriétés ajoutées par un form pour du contexte et _*
+    if (p === 'new' || p === 'token' || p.substr(0, 1) === '_') return
+
     if (Array.isArray(this[p])) {
       // pour les tableaux on regarde si on a toujours autant d'éléments
       if (Array.isArray(values[p])) {
@@ -341,7 +348,7 @@ function Ressource (initObj, myBaseId) {
       }
 
     // sinon c'est scalaire ou objet
-    } else if (!this.hasOwnProperty(p) && p.substr(0, 1) !== '$') {
+    } else if (!this.hasOwnProperty(p)) {
       this._warnings.push(`La propriété ${p} n’existe pas dans une ressource, elle a été ignorée`)
       if (typeof log !== 'undefined') log.errorData(`propriété ${p} ignorée dans`, values)
       else console.error(`propriété ${p} ignorée`, values[p])

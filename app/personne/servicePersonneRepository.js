@@ -31,16 +31,17 @@
 
 'use strict'
 
-var _ = require('lodash')
-var flow = require('an-flow')
-var merge = require('sesajstools/utils/object').merge
+const _ = require('lodash')
+const flow = require('an-flow')
+const merge = require('sesajstools/utils/object').merge
+const myBaseId = lassi.settings.application.baseId
 
 module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
   /**
    * Service d'accès aux personnes, utilisé par les différents contrôleurs
    * @service $personneRepository
    */
-  var $personneRepository = {}
+  const $personneRepository = {}
 
   /**
    * Ajoute un groupe à la personne (en le créant s'il n'existait pas),
@@ -51,7 +52,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @memberOf $personneRepository
    */
   $personneRepository.addGroupe = function (personne, groupeNom, next) {
-    var uid = personne.oid
+    const uid = personne.oid
     if (!uid) return next(new Error('Impossible d’ajouter un groupe à une personne sans oid'))
     if (_.include(personne.groupesMembre, groupeNom)) {
       return next(null, {nom: groupeNom})
@@ -72,7 +73,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
         this(null, groupe)
       } else {
         // on le crée
-        var newGroupe = {
+        const newGroupe = {
           nom: groupeNom,
           gestionnaires: [uid]
         }
@@ -106,9 +107,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
     // cast en string
     id += ''
     // on découpe sur le premier slash avec deux morceaux non vides
-    var match = id.match(/^([^/]+)\/(.+)$/)
+    const match = id.match(/^([^/]+)\/(.+)$/)
     if (match && match.length === 3) {
-      $personneRepository.loadByOrigin(match[1], match[2], next)
+      if (match[1] === myBaseId) return $personneRepository.load(match[2], next)
+      else $personneRepository.loadByOrigin(match[1], match[2], next)
     } else if (id) {
       $cachePersonne.get(id, function (error, personneCached) {
         if (error) log.error(error)
@@ -130,6 +132,38 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
       })
     } else {
       next(new Error('id manquant, impossible de charger une personne.'))
+    }
+  }
+
+  /**
+   * Récupère une personne (en cache ou en bdd)
+   * @param {string}           origine   Nom du authClient qui a authentifié cette personne
+   * @param {string}           idOrigine Id de la personne dans son système d'authentification
+   * @param {personneCallback} next      Renvoie toujours une EntityPersonne
+   * @memberOf $personneRepository
+   */
+  $personneRepository.loadByPid = function (pid, next) {
+    log.debug('loadByPid personne ' + pid)
+    if (origine && idOrigine) {
+      $cachePersonne.getByOrigine(origine, idOrigine, function (error, personneCached) {
+        if (error) log.error(error)
+        if (personneCached) {
+          next(null, EntityPersonne.create(personneCached))
+        } else {
+          EntityPersonne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
+            // log.debug('personne load remonte ', personne)
+            if (error) next(error)
+            else if (personne) {
+              $cachePersonne.set(personne)
+              next(null, personne)
+            } else {
+              next(null, undefined)
+            }
+          })
+        }
+      })
+    } else {
+      next(new Error('origine ou idOrigine manquant, impossible de chercher en base de données.'))
     }
   }
 
@@ -172,10 +206,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @memberOf $personneRepository
    */
   $personneRepository.removeGroup = function (groupName, next) {
-    var offset = 0
-    var nb = 100
+    let offset = 0
+    const nb = 100
     flow().seq(function recup () {
-      var nextStep = this
+      const nextStep = this
       // log.debug('removeGroup membres de ' + groupName)
       EntityPersonne.match('groupesMembre').equals(groupName).grab(nb, offset, function (error, personnes) {
         // log.debug('on trouve ' + personnes.length + ' membres')
@@ -186,7 +220,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
           // si on est là personne.groupesMembre contient forcément groupName
           personne.groupesMembre = personne.groupesMembre.filter(function (elt) { return elt !== groupName })
           // mais on peut avoir une anomalie et que groupName ne soit pas dans groupesSuivis, on check
-          var index = personne.groupesSuivis && personne.groupesSuivis.indexOf(groupName)
+          const index = personne.groupesSuivis && personne.groupesSuivis.indexOf(groupName)
           if (index) {
             personne.groupesSuivis = personne.groupesSuivis.filter(function (elt, i) { return index !== i })
           } else {
@@ -260,8 +294,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
   $personneRepository.updateOrCreate = function (personne, next) {
     // log.debug("$personneRepository.updateOrCreate", personne, {max:2000})
     function checkUpdate (personne, personneNew, next) {
-      var needUpdate = false
-      for (var prop in personneNew) {
+      let needUpdate = false
+      for (let prop in personneNew) {
         if (personneNew.hasOwnProperty(prop) && !_.isEqual(personne[prop], personneNew[prop])) {
           needUpdate = true
           // pour groupesMembre on fusionne, histoire de pas écraser les groupes locaux

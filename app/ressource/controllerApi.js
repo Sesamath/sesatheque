@@ -257,7 +257,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
     var ressourcePostee = context.post
-    var groupesSup = ressourcePostee.hasOwnProperty('groupesSup') ? ressourcePostee.groupesSup : ''
+    var groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
     var ressourceOriginale
 
     if (context.perf) {

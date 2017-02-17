@@ -39,7 +39,7 @@ const myBaseId = config.application.baseId
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
 const updatePrefix = 'update ' + updateNum
 
-const name = 'conversion des ressources (ajout rid) et ref (dans les arbres)'
+const name = 'conversion des ressources (ajout rid, pid pour les auteurs) et ref (dans les arbres)'
 const description = ''
 
 const limit = 100
@@ -83,6 +83,16 @@ function cleanArbre (arbre) {
   return arbre
 }
 
+/**
+ * Change auteurs, contributeurs et auteursParent pour remplacer oid par pid
+ * @param {Ressource} ressource
+ */
+function cleanAuteurs (ressource) {
+  ['auteurs', 'contributeurs', 'auteursParents'].forEach(p => {
+    if (ressource[p] && ressource[p].length) ressource[p] = ressource[p].map(id => String(id).indexOf('/') === -1 ? myBaseId + '/' + id : id)
+  })
+}
+
 module.exports = {
   name: name,
   description: description,
@@ -105,6 +115,7 @@ module.exports = {
           if (ressource.enfants.length) log.errorData('enfants sur autre chose qu’un arbre', ressource)
           delete ressource.enfants
         }
+        cleanAuteurs(ressource)
         $cacheRessource.delete(ressource.oid)
         ressource.store(this)
 

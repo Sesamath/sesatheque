@@ -40,10 +40,15 @@ function Personne (initObj) {
   if (!initObj) initObj = {}
   /**
    * L'identifiant de la personne dans la sesatheque
-   * @type {Integer}
+   * @type {string}
    * @default undefined
    */
   this.oid = initObj.oid || undefined
+  /**
+   * L'identifiant unique baseId/oid
+   * @type {string}
+   */
+  this.pid = initObj.pid || undefined
   /**
    * Source de l'authentification (nom du authClient)
    * @type {string}

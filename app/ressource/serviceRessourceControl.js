@@ -31,12 +31,14 @@
 
 'use strict'
 
-var _ = require('lodash')
-var sjt = require('sesajstools')
-var rTools = require('../tools/ressource')
+const _ = require('lodash')
+const sjt = require('sesajstools')
+const rTools = require('../tools/ressource')
 
-var config = require('./config')
-var Ressource = require('../constructors/Ressource')
+const config = require('./config')
+const appConfig = require('../config')
+const myBaseId = appConfig.application.baseId
+const Ressource = require('../constructors/Ressource')
 
 /**
  * Ajoute les propriétés qui peuvent être déduites (deductions définies dans la configuration)
@@ -155,7 +157,9 @@ function valide (data, next) {
     }
   })
   // le constructeur fait office de validateur,
-  const ressource = new Ressource(data)
+  log.debug('auteurs avant constructeur', data.auteurs)
+  const ressource = new Ressource(data, myBaseId)
+  log.debug('auteurs après constructeur', ressource.auteurs)
   // vérif des required
   _.each(config.required, function (required, prop) {
     if (required && _.isEmpty(ressource[prop])) {

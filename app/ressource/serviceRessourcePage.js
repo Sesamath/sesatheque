@@ -38,7 +38,7 @@ var flow = require('an-flow')
 var moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
-var config = require('./config')
+var ressConfig = require('./config')
 var appConfig = require('../config')
 var sesatheques = require('sesatheque-client/dist/sesatheques.js')
 
@@ -125,7 +125,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       }
       // wrapper.dust gère le .new sur n'importe quel champ
       formData.groupes.new = {
-        name: 'groupesSup',
+        name: '_groupesSup',
         id: 'groupesSup',
         label: "Nouveau(x) groupe(s) à créer et ajouter à cette ressource (à séparer par des virgules s'il y en a plusieurs)",
         placeholder: 'nom du groupe'
@@ -181,9 +181,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         })
       }).seq(function () {
         formData[key].new = {
-          name: key + 'Add',
+          name: '_' + key + 'Add',
           id: key + 'Add',
-          label: 'Nouvelle personne à ajouter aux ' + config.labels[key],
+          label: 'Nouvelle personne à ajouter aux ' + ressConfig.labels[key],
           placeholder: 'oid de la personne'
         }
         next()
@@ -261,13 +261,13 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var choices = []
     if (selectedValues && !_.isArray(selectedValues)) {
       log.error(new Error('La propriété ' + key + " de la ressource n'est pas un tableau"))
-    } else if (config.listesOrdonnees[key]) {
-      _.each(config.listesOrdonnees[key], function (cbValue) {
-        addChoice(config.listes[key][cbValue], cbValue)
+    } else if (ressConfig.listesOrdonnees[key]) {
+      _.each(ressConfig.listesOrdonnees[key], function (cbValue) {
+        addChoice(ressConfig.listes[key][cbValue], cbValue)
       })
-    } else if (config.listes[key]) {
+    } else if (ressConfig.listes[key]) {
       // dans l'ordre où ça vient
-      _.each(config.listes[key], function (label, cbValue) {
+      _.each(ressConfig.listes[key], function (label, cbValue) {
         addChoice(label, cbValue)
       })
       // log.debug('renvoie ', choices)
@@ -328,7 +328,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               log.error(error)
             } else if (ressourceLiee) {
               ressource._relations.push({
-                predicat: config.listes.relations[relation[0]],
+                predicat: ressConfig.listes.relations[relation[0]],
                 lien: $routes.getTagA('describe', ressourceLiee),
                 oid: ressourceLiee.oid,
                 type: ressourceLiee.type
@@ -423,7 +423,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {Ressource} ressource
    */
   function getLabels (ressource) {
-    var labels = sjtObj.clone(config.labels)
+    var labels = sjtObj.clone(ressConfig.labels)
     // avec pour les arbres la propriété parametres remplacée par enfants
     if (ressource && ressource.type === 'arbre') {
       delete labels.parametres
@@ -489,7 +489,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       var key = labelItem[0]
       var label = labelItem[1]
       var value = ressource[key]
-      var isUnique = config.uniques[key]
+      var isUnique = ressConfig.uniques[key]
       var labelSuivant = this
 
       // pour tout le monde
@@ -498,19 +498,19 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         label: label
       }
       // required ?
-      if (config.required[key]) formData[key].required = true
+      if (ressConfig.required[key]) formData[key].required = true
       if (isUnique) formData[key].unique = true
-      if (config.typesVar[key] === 'Array' || isUnique) {
+      if (ressConfig.typesVar[key] === 'Array' || isUnique) {
         // c'est un tableau ou une valeur unique (donc select ou radios)
         // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
-        // et la liste des possibles dans config.liste[prop]
+        // et la liste des possibles dans ressConfig.liste[prop]
         if (isUnique) {
           value = [value] // arrayToDust veut un array
           // faut ça sur le select et pas ses choices
           formData[key].name = key
         }
         // les Array ne sont pas tous des tableaux d'ids connus, faut différencier
-        if (config.listes[key]) {
+        if (ressConfig.listes[key]) {
           // c'est une liste d'id (ou de clés connues)
           formData[key].choices = arrayToDust(key, value, isUnique)
           labelSuivant()
@@ -536,7 +536,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           log.error(new Error('On tombe sur la clé inattendue ' + key))
           labelSuivant()
         }
-      } else if (config.typesVar[key] === 'Boolean') {
+      } else if (ressConfig.typesVar[key] === 'Boolean') {
         // checkbox tout seul (pas de label dans les choices, c'est le parent qui le porte)
         formData[key].choices = [{name: key, value: [true]}]
         if (value) formData[key].choices[0].selected = true
@@ -546,7 +546,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         // on formate en strings (date formatée ou objet en json)
         formData[key].name = key
         if (_.isDate(value)) {
-          value = moment(value).format(config.formats.jour)
+          value = moment(value).format(ressConfig.formats.jour)
         } else if (_.isObject(value)) { // comprend ArrayOfObjects car un Array est aussi object
           try {
             value = JSON.stringify(value, undefined, 2)
@@ -594,11 +594,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             // faut restreindre type
             var ttChoices = []
             formData.type.choices.forEach(function (choice) {
-              if (config.typePerso[choice.value]) ttChoices.push(choice)
+              if (ressConfig.typePerso[choice.value]) ttChoices.push(choice)
             })
             formData.type.choices = ttChoices
             // et imposer l'origine locale
-            formData.origine.value = config.application.baseId
+            formData.origine.value = appConfig.application.baseId
             formData.origine.hidden = true
             formData.idOrigine.hidden = true
             // publié par défaut
@@ -629,7 +629,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         formData.warnings = ressource._warnings
         formData.force = {
           id: 'force',
-          label: config.labels.force,
+          label: ressConfig.labels.force,
           choices: [{
             label: "Cocher cette case pour forcer l'enregistrement malgré les avertissements",
             name: 'force',
@@ -674,9 +674,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           title: label
         }
         // on traite chaque type de contenu, Array|Date|le reste
-        if (config.typesVar[key] === 'Array') {
+        if (ressConfig.typesVar[key] === 'Array') {
           if (key === 'relations') {
-            // on veut pas passer dans le if config.listes[key]
+            // on veut pas passer dans le if ressConfig.listes[key]
             if (ressource._relations) viewData.relations.value = ressource._relations
           } else if (key === 'groupesAuteurs') {
             if (value.length && view === 'describe') {
@@ -688,11 +688,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
                 })
               }
             }
-          } else if (config.listes[key]) {
+          } else if (ressConfig.listes[key]) {
             // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
             buffer = []
             _.each(value, function (id) {
-              if (config.listes[key][id]) buffer.push(config.listes[key][id])
+              if (ressConfig.listes[key][id]) buffer.push(ressConfig.listes[key][id])
               else log.error('La ressource ' + ressource.oid + ' a une valeur ' + id + ' pour la propriété ' + key + " qui n'est pas dans la liste prédéfinie dans la configuration")
             })
             viewData[key].value = buffer.join(', ')
@@ -701,8 +701,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             // (auteurs & co ou des propriétés supplémentaires)
             viewData[key].value = ressource['_' + key] || value
           }
-        } else if (config.typesVar[key] === 'Date') {
-          viewData[key].value = value ? moment(value).format(config.formats.jour) : value
+        } else if (ressConfig.typesVar[key] === 'Date') {
+          viewData[key].value = value ? moment(value).format(ressConfig.formats.jour) : value
         } else {
           // Object ou string ou number ou boolean, on laisse tel quel
           viewData[key].value = value
@@ -782,7 +782,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
      * @param error
      */
     function termine (error) {
-      if (view === 'display' && context.layout === 'page' && !error && ressource && config.typeIframe[ressource.type]) {
+      if (view === 'display' && context.layout === 'page' && !error && ressource && ressConfig.typeIframe[ressource.type]) {
         // simplement une iframe
         data.contentBloc = {
           $view: 'iframe',

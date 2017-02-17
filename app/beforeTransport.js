@@ -130,6 +130,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     var links = []
     var canCreate = $accessControl.hasPermission('create', context)
     var myOid = $accessControl.getCurrentUserOid(context) || ''
+    var myPid = $accessControl.getCurrentUserPid(context) || ''
     // lien ajout
     links.push({
       id: 'buttonAdd',
@@ -148,7 +149,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     // un lien mes ressources
     links.push({
       id: 'buttonMyRessources',
-      href: $routes.getAbs('search', null, context) + '?auteurs=' + myOid,
+      href: $routes.getAbs('search', null, context) + '?auteurs=' + myPid,
       value: 'Mes ressources',
       icon: 'bookmark-o',
       hidden: !canCreate

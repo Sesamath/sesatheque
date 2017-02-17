@@ -36,7 +36,6 @@ var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
 var jstreeConverter = require('../../display/jstreeConverter')
-var stcJstree = require('sesatheque-client/dist/jstree.js')
 
 /**
  * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles
@@ -47,7 +46,7 @@ var stcJstree = require('sesatheque-client/dist/jstree.js')
  */
 module.exports = function display (ressource, options, next) {
   var error
-  require.ensure(['jquery', 'jstree'], function (require) {
+  require.ensure(['sesatheque-jstree'], function (require) {
     const stJstree = require('sesatheque-jstree')
     var $ = window.jQuery
     try {
@@ -185,7 +184,7 @@ module.exports = function display (ressource, options, next) {
 
         var jstData = {
           'core': {
-            'data': stcJstree.getDataCallback(ressource, undefined, {errorCallback: page.addError})
+            'data': stJstree.getDataCallback(ressource, undefined, {errorCallback: page.addError})
           },
           plugins: ['search']
         }

@@ -72,7 +72,6 @@ module.exports = function (EntityRessource) {
     } else {
       this.langue = configRessource.langueDefaut
     }
-    log.error('fin construct avec prop rid', Object.getOwnPropertyDescriptor(this, 'rid'))
   })
 
   // on veut pas d'une table entity_ressource
@@ -84,7 +83,6 @@ module.exports = function (EntityRessource) {
   EntityRessource
     .defineIndex('rid', 'string')
     .defineIndex('baseId', 'string', function () {
-      log.error('defineIndex avec prop rid', Object.getOwnPropertyDescriptor(this, 'rid'))
       if (this.rid) return sesatheques.getBaseIdFromId(this.rid)
     })
     .defineIndex('cle', 'string')
@@ -152,7 +150,6 @@ module.exports = function (EntityRessource) {
   // met en idOrigine l'oid de la ressource si origine locale et que ça n'y était pas encore
   // idem pour rid
   EntityRessource.afterStore(function (next) {
-    log.error('afterStore avec prop rid', Object.getOwnPropertyDescriptor(this, 'rid'))
     let needToStore = false
     // on ajoute notre id en idOrigine si on est l'origine
     if (this.origine === myBaseId && !this.idOrigine) {

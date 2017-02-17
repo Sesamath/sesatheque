@@ -31,8 +31,10 @@
 
 'use strict'
 
-var Personne = require('../constructors/Personne')
-var sjtObj = require('sesajstools/utils/object')
+const Personne = require('../constructors/Personne')
+const sjtObj = require('sesajstools/utils/object')
+const config = require('../config')
+const myBaseId = config.application.baseId
 
 /**
  * Entity pour un user
@@ -50,19 +52,30 @@ module.exports = function (EntityPersonne, $cachePersonne) {
     if (this.hasOwnProperty('lastCheck')) delete this.lastCheck
     // recalculé d'après les roles à chaque load
     if (this.hasOwnProperty('permissions')) delete this.permissions
+    // phase transitoire pour les users sans pid, pour éviter un 2e store dans le afterStore
+    if (this.oid && !this.pid) this.pid = myBaseId + '/' + this.oid
     next()
   }
 
   EntityPersonne.afterStore(function (next) {
-    // on met en cache, attention à mettre la session à jour si besoin (pas de contexte ici)
-    $cachePersonne.set(this, function (error) {
-      if (error) log.error(error)
-    })
-    // et on passe au suivant sans se préoccuper du retour de mise en cache
-    next()
+    function cacheAndNext (error, personne) {
+      // on met en cache, attention à mettre la session à jour si besoin (pas de contexte ici)
+      $cachePersonne.set(personne, function (error) {
+        if (error) log.error(error)
+      })
+      // et on passe au suivant sans se préoccuper du retour de mise en cache
+      next(error)
+    }
+    if (this.pid) {
+      cacheAndNext(null, this)
+    } else {
+      this.pid = myBaseId + '/' + this.oid
+      this.store(cacheAndNext)
+    }
   })
 
   EntityPersonne
+      .defineIndex('pid', 'string')
       .defineIndex('origine', 'string')
       .defineIndex('idOrigine', 'string')
       .defineIndex('nom', 'string')

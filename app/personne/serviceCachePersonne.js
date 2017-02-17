@@ -88,7 +88,7 @@ module.exports = function ($cache, $settings) {
    */
   $cachePersonne.delete = function (oid, next) {
     // on efface pas l'oid par origine, le get par origine renverra undefined quand même
-    $cache.delete('personne_', oid, next)
+    $cache.delete('personne_' + oid, next)
   }
 
   return $cachePersonne

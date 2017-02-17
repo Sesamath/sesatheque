@@ -47,6 +47,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
+  var myBaseId = appConfig.application.baseId
   var request = require('request')
 
   /**
@@ -391,9 +392,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function () {
         // on fixe la date de màj avant validation
         if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
-        // on met l'origine à local si y'en a pas
+        // on met l'origine à la baseId locale si y'en a pas
         if (!ressourcePosted.origine) {
-          ressourcePosted.origine = config.application.baseId
+          ressourcePosted.origine = appConfig.application.baseId
           ressourcePosted.idOrigine = undefined
         }
         $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
@@ -404,7 +405,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         else this(null, ressource)
       }).seq(function (ressource) {
         // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
-        ressource.auteurs = [$accessControl.getCurrentUserOid(context)]
+        ressource.auteurs = [myBaseId + '/' + $accessControl.getCurrentUserOid(context)]
         $ressourceRepository.save(ressource, function (error, ressourceSaved) {
           if (error) {
             // on veut gérér les erreurs ici, signe d'un bug dans notre code
@@ -413,7 +414,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           } else if (!_.isEmpty(ressourceSaved._errors)) {
             printForm(context, error, ressourceSaved, 'Ajouter une ressource')
           } else {
-            log.debug("Après le save on récupère l'oid ' + ressource.oid + ', on lance le redirect")
+            log.debug(`Après le save on récupère l’oid ${ressource.oid}, on lance le redirect`)
             var url = $routes.getAbs('edit', ressourceSaved.oid, context)
             if (context.layout === 'iframe') {
               url += '?layout=iframe'
@@ -489,7 +490,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var oid = context.arguments.oid
     var ressourcePostee = context.post
     // les propriétés qui ne sont pas des champs de ressource
-    var groupesSup = ressourcePostee.hasOwnProperty('groupesSup') ? ressourcePostee.groupesSup : ''
+    var groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
     var ressourceNormee
     var ressourceOriginale
 
@@ -524,9 +525,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressource) {
         // on remet les relations, qui sont pas éditables
         ressource.relations = ressourceOriginale.relations
-        // faut remettre auteursAdd et contributeursAdd virés à la validation (pas des champs de ressource)
-        if (ressourcePostee.auteursAdd) ressource.auteursAdd = ressourcePostee.auteursAdd
-        if (ressourcePostee.contributeursAdd) ressource.contributeursAdd = ressourcePostee.contributeursAdd
+        // faut remettre _auteursAdd et _contributeursAdd virés à la validation (pas des champs de ressource)
+        if (ressourcePostee._auteursAdd) ressource._auteursAdd = ressourcePostee._auteursAdd
+        if (ressourcePostee._contributeursAdd) ressource._contributeursAdd = ressourcePostee._contributeursAdd
         $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
       }).seq(function (ressource) {
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
