@@ -44,12 +44,12 @@
     "memcached": "^2.1.0",
     "moment": "2.15.1",
     "morgan": "1.7.0",
-    "request": "2.75.0",
+    "request": "^2.75.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.0",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.7",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.0",
-    "sesatheque-jstree": "git://src.sesamath.net/sesatheque-client#1.0.1",
-    "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.0.48"
+    "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.1.1",
+    "sesatheque-jstree": "git://src.sesamath.net/sesatheque-client#1.1.1"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
@@ -74,6 +74,7 @@
     "sinon-chai": "^2.8.0",
     "snazzy": "^5.0.0",
     "standard": "^6.0.8",
+    "supertest": "^3.0.0",
     "url-loader": "^0.5.7",
     "webpack": "^1.12.2",
     "xml2js": "^0.4.4",

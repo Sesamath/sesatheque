@@ -28,5 +28,46 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+
+/**
+ * Test qui lance l'appli sur un autre port avec une config de test (d'après la conf _private/test.js)
+ * S'il y a de nouveaux updates depuis le dernier lancement avec cette conf, relancer l'appli avec
+ *    env SESATHEQUE_CONF=test node --stack_trace_limit=100 --stack-size=2048 app/index.js
+ * avant de relancer les tests (pour appliquer les updates sur la base de test)
+ */
+
 'use strict'
-require('./app')()
+/* eslint-env mocha */
+
+const app = require('../app/app')
+const config = require('../app/config')
+const anLog = require('an-log')
+
+/**
+ * @see https://github.com/visionmedia/supertest
+ * @see https://visionmedia.github.io/superagent/
+ */
+const supertest = require('supertest')
+// un objet global avec lassi et notre agent initialisé, à passer aux tests
+const globTest = {}
+
+describe('test de l’application lassi', function () {
+  before(function beforeBoot (done) {
+    // les 2s par défaut suffisent pas pour le boot
+    this.timeout(5000)
+    // on re-configure an-log pour qu'il mette tout en fichier
+    anLog.config(config.lassiLogger)
+    // boot
+    app(function afterBootCallback () {
+      // console.log('app started')
+      anLog.config(config.lassiLogger)
+      globTest.lassi = lassi
+      globTest.client = supertest(lassi.express)
+      done()
+    })
+  })
+
+  require('./app/static.Test')(globTest)
+  require('./app/404.Test')(globTest)
+  require('./app/ressource/controllerApi.Test')(globTest)
+})

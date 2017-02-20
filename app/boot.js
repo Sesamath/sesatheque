@@ -35,7 +35,6 @@ const config = require('./config')
 const configCheck = require('./configCheck')
 const sesatheques = require('sesatheque-client/src/sesatheques.js')
 
-
 module.exports = function boot (beforeBootstrapCb, options) {
   const logger = anLog(config.application.name)
   if (!options) options = {}
@@ -44,10 +43,10 @@ module.exports = function boot (beforeBootstrapCb, options) {
   require('lassi')(options)
   // sesalab-admin sera appelé après mise en global de l'appli
 
-  global.isProd = !options.cli && lassi.settings.application.staging === 'prod'
+  global.isProd = !options.cli && config.application.staging === 'prod'
 
   // nos loggers
-  logger("Démarrage de l'application avec l'environnement " + lassi.settings.application.staging)
+  logger("Démarrage de l'application avec l'environnement " + config.application.staging)
 
   // Si on veut passer un préfixe à sesalabSso, ou si d'autres components veulent la config
   // avant que lassi n'affecte ça et que $settings ne soit dispo, faut le mettre en global dès maintenant
@@ -109,13 +108,14 @@ module.exports = function boot (beforeBootstrapCb, options) {
   global.app = sesatheque
 
   beforeBootstrapCb(lassi, sesatheque, dependancies)
-
   // si le beforeBootstrapCb n'a pas ajouté de logger en global, on en met un inoffensif ici
   if (!global.log) global.log = () => undefined
 
   // vérif de config au démarrage
   lassi.on('startup', function () {
+    // console.log('evt startup')
     configCheck(config)
+    if (options.afterBootCallback) options.afterBootCallback()
   })
 
   // et on lance le boot

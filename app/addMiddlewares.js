@@ -49,6 +49,8 @@ var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les
  * @param {Object} rail le rail express
  */
 module.exports = function afterRailSession (rail) {
+  // ajout d'express en global sur lassi
+  lassi.express = rail
   /**
    * Ajout du CORS (et timestamp dans res.locals.start)
    */

@@ -37,6 +37,12 @@ const path = require('path')
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
 
+/**
+ * L'environnement d'execution est récupéré par NODE_ENV
+ * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
+ */
+const staging = (process.env.NODE_ENV === 'production') ? 'prod' : (process.argv[1].indexOf('mocha') !== -1) ? 'test' : 'dev'
+
 /** La racine du projet */
 const root = path.resolve(__dirname, '..')
 const logDir = process.env.LOGS || root + '/logs'
@@ -47,18 +53,14 @@ if (process.env.SESATHEQUE_CONF && /^[^/]+$/.test(process.env.SESATHEQUE_CONF)) 
   // on peut préciser un autre fichier de conf via l'environnement
   // (utile pour faire tourner plusieurs instances de l'appli)
   privateConfPath.push(process.env.SESATHEQUE_CONF)
+} else if (staging === 'test') {
+  privateConfPath.push('test')
 } else {
   privateConfPath.push('config')
 }
 const localConfig = require(path.join.apply(this, privateConfPath))
 // la conf du composant ressource à part
 const ressourceConfig = require('./ressource/config')
-
-/**
- * L'environnement d'execution est récupéré par NODE_ENV
- * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
- */
-const staging = (process.env.NODE_ENV === 'production') ? 'prod' : 'dev'
 
 /** La config */
 const config = {

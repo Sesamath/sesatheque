@@ -28,5 +28,24 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+
+/**
+ * Ce test crée une ressource puis la supprime
+ * l'appeler directement en lui passant --prod ou --dev pour tester la bibliotheque de prod ou dev
+ * ou --token pour lui passer un token
+ *
+ */
+
 'use strict'
-require('./app')()
+/* eslint-env mocha */
+// import {expect} from 'chai'
+
+module.exports = function test404 (globTest) {
+  describe('contenus statiques', function () {
+    it('la page d’accueil existe', function () {
+      return globTest.client
+        .get('/')
+        .expect(200)
+    })
+  })
+}
