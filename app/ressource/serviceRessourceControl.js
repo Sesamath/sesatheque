@@ -157,9 +157,12 @@ function valide (data, next) {
     }
   })
   // le constructeur fait office de validateur,
-  log.debug('auteurs avant constructeur', data.auteurs)
+  // log.debug('auteurs avant constructeur', data.auteurs)
   const ressource = new Ressource(data, myBaseId)
-  log.debug('auteurs après constructeur', ressource.auteurs)
+  // log.debug('auteurs après constructeur', ressource.auteurs)
+
+  // on ajoute les déductions avant car des trucs obligatoires peuvent être déduits du type
+  addDeductions(ressource)
   // vérif des required
   _.each(config.required, function (required, prop) {
     if (required && _.isEmpty(ressource[prop])) {
@@ -167,7 +170,6 @@ function valide (data, next) {
       log.errorData(ressource.rid + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(ressource[prop]))
     }
   })
-  addDeductions(ressource)
   addWarnings(ressource)
 
   next(null, ressource)

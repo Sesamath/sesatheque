@@ -91,7 +91,7 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
     }
 
     // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
-    // if (!isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
+    // if (!global.isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
     lassi.transports.html.engine.disableWhiteSpaceCompression()
     // on ajoute nos filtres perso pour dust
     try {

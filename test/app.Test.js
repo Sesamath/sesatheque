@@ -63,7 +63,8 @@ describe('test de l’application lassi', function () {
       anLog.config(config.lassiLogger)
       globTest.lassi = lassi
       globTest.client = supertest(lassi.express)
-      done()
+      // pour que le an-log de lassi finisse son bavardage en console
+      setTimeout(done, 0)
     })
   })
 

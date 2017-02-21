@@ -78,7 +78,7 @@ mainComponent.service('$json', function () {
 /**
  * En dev on ajoute des routes de debug
  */
-if (!isProd) {
+if (!global.isProd) {
   mainComponent.controller(function () {
     this.serve('doc', path.resolve(__dirname, '../../documentation'))
   })

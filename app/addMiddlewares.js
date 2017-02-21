@@ -182,7 +182,7 @@ module.exports = function afterRailSession (rail) {
   /**
    * En dev, ajout des requetes http en console et dans le log de debug
    */
-  if (!isProd) {
+  if (!global.isProd) {
     applog('adding middleware', 'ajout access log en console (car on est pas en prod)')
     rail.use('/', function (req, res, next) {
       // les requetes non statiques en console et debug

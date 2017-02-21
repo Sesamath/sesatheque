@@ -89,8 +89,8 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json)
+ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource) {
+  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource)
 })
 
 // import calculatice
@@ -99,7 +99,7 @@ ressourceComponent.controller('importEc', function ($ressourceRepository, $resso
 })
 
 // En dev on ajoute des routes de debug
-if (!isProd) {
+if (!global.isProd) {
   ressourceComponent.controller('debug/ressource', function ($ressourceRepository, EntityRessource) {
     require('./controllerDebug')(this, $ressourceRepository, EntityRessource)
   })

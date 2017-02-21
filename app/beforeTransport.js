@@ -366,7 +366,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
     } // context.layout
 
     // on envoie toutes les réponses dans le log de debug
-    if (!isProd) debug(context, data)
+    if (!global.isProd) debug(context, data)
   }
 
   return beforeTransport

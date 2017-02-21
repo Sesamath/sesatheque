@@ -142,38 +142,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @param {personneCallback} next      Renvoie toujours une EntityPersonne
    * @memberOf $personneRepository
    */
-  $personneRepository.loadByPid = function (pid, next) {
-    log.debug('loadByPid personne ' + pid)
-    if (origine && idOrigine) {
-      $cachePersonne.getByOrigine(origine, idOrigine, function (error, personneCached) {
-        if (error) log.error(error)
-        if (personneCached) {
-          next(null, EntityPersonne.create(personneCached))
-        } else {
-          EntityPersonne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
-            // log.debug('personne load remonte ', personne)
-            if (error) next(error)
-            else if (personne) {
-              $cachePersonne.set(personne)
-              next(null, personne)
-            } else {
-              next(null, undefined)
-            }
-          })
-        }
-      })
-    } else {
-      next(new Error('origine ou idOrigine manquant, impossible de chercher en base de données.'))
-    }
-  }
-
-  /**
-   * Récupère une personne (en cache ou en bdd)
-   * @param {string}           origine   Nom du authClient qui a authentifié cette personne
-   * @param {string}           idOrigine Id de la personne dans son système d'authentification
-   * @param {personneCallback} next      Renvoie toujours une EntityPersonne
-   * @memberOf $personneRepository
-   */
   $personneRepository.loadByOrigin = function (origine, idOrigine, next) {
     log.debug('loadByOrigin personne ' + origine + '/' + idOrigine)
     if (origine && idOrigine) {

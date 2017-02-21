@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * This file is part of Sesatheque.
  *   Copyright 2014-2015, Association Sésamath
@@ -45,9 +46,6 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
   })
 }
 
-// une fct qui fait rien (on veut pas des logs de démarrage)
-const appLog = () => undefined
-
 try {
   anLog.config({
     [config.application.name]: {
@@ -56,9 +54,6 @@ try {
     $auth: {logLevel: anLogLevels.ERROR}
   })
   boot(beforeBootsrap, {cli: true})
-  lassi.service('$entities-cli').commands().count('EntityRessource', function () {
-    console.log('retour count')
-  })
   lassi.service('$cli').run()
 } catch (error) {
   console.error(error)
