@@ -71,6 +71,40 @@ module.exports = function ($cache, $settings, EntityRessource) {
 
   /**
    * Envoie une ressource du cache à next
+   * @param {string}         aliasOf
+   * @param {SimpleCallback} next
+   * @memberOf $cacheRessource
+   */
+  $cacheRessource.getByAlias = function (aliasOf, next) {
+    $cache.get(getKey(aliasOf, 'aliasOf'), function (error, oid) {
+      if (error) return next(error)
+      $cache.get(getKey(oid), function (error, ressourceCached) {
+        if (error) log.error(error)
+        if (ressourceCached) return next(null, EntityRessource.create(ressourceCached))
+        next()
+      })
+    })
+  }
+
+  /**
+   * Envoie une ressource du cache à next
+   * @param {string}         cle
+   * @param {SimpleCallback} next
+   * @memberOf $cacheRessource
+   */
+  $cacheRessource.getByCle = function (cle, next) {
+    $cache.get(getKey(cle, 'cle'), function (error, oid) {
+      if (error) return next(error)
+      $cache.get(getKey(oid), function (error, ressourceCached) {
+        if (error) log.error(error)
+        if (ressourceCached) return next(null, EntityRessource.create(ressourceCached))
+        next()
+      })
+    })
+  }
+
+  /**
+   * Envoie une ressource du cache à next
    * @param {string}         origine
    * @param {string}         idOrigine
    * @param {SimpleCallback} next
@@ -108,6 +142,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
       // next appelé seulement sur le set principal (le dernier)
       if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl)
       if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl)
+      if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl)
       $cache.set(getKey(ressource.oid), ressource, ttl, next)
     } else {
       log.error(new Error('cacheSet sur une ressource sans oid'))

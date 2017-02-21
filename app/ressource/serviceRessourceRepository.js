@@ -341,7 +341,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           // on utilise https://lodash.com/docs#isEqual
           if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
             // debug
-            if (!isProd) {
+            if (!global.isProd) {
               log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
                 '\navant : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressourceBdd[prop]) +
                 '\naprès : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressource[prop]))
@@ -419,13 +419,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }
 
     try {
-      if (error) {
-        next(error)
-      } else {
-        if (_.isArray(ressources)) ressources.forEach(processOne)
-        else if (ressources) processOne(ressources)
-        next(null, ressources)
-      }
+      if (error) return next(error)
+      if (_.isArray(ressources)) ressources.forEach(processOne)
+      else if (ressources) processOne(ressources)
+      next(null, ressources)
     } catch (error) {
       next(error)
     }
@@ -688,6 +685,28 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
+   * Récupère une ressource d'après son aliasOf et la passe à next
+   * @memberOf $ressourceRepository
+   * @param {string}            aliasOf
+   * @param {ressourceCallback} next      appelée avec une EntityRessource
+   */
+  $ressourceRepository.loadByAlias = function loadByAlias (aliasOf, next) {
+    if (aliasOf) {
+      $cacheRessource.getByAlias(aliasOf, function (error, ressourceCached) {
+        if (error) log.error(error)
+        if (ressourceCached) return next(null, ressourceCached)
+        EntityRessource
+          .match('aliasOf').equals(aliasOf)
+          .grabOne(function (error, ressource) {
+            cacheAndNext(error, ressource, next)
+          })
+      })
+    } else {
+      return next(new Error('aliasOf manquant, impossible de charger la ressource'))
+    }
+  } // loadByAlias
+
+  /**
    * Récupère une ressource d'après sa cle et la passe à next
    * @memberOf $ressourceRepository
    * @param {string}            cle
@@ -710,7 +729,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     } else {
       return next(new Error('Clé manquante, impossible de charger la ressource'))
     }
-  } // loadByOrigin
+  } // loadByCle
 
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next

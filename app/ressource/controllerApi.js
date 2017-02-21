@@ -36,10 +36,11 @@ var request = require('request')
 var flow = require('an-flow')
 var sjt = require('sesajstools')
 var sjtObj = require('sesajstools/utils/object')
+var stJstree = require('sesatheque-jstree')
 var config = require('../config')
 var myBaseId = config.application.baseId
 var configRessource = require('./config')
-var Alias = require('../constructors/Alias')
+var Ref = require('../constructors/Ref')
 
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
@@ -47,7 +48,7 @@ var Alias = require('../constructors/Alias')
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource) {
   /**
    * Ajoute notre baseId si c'est absent d'item
    * @param {Ressource|Ref} item
@@ -143,7 +144,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     /**
      * Ajoute des refs (en vérifiant qu'elles sont valides) à nos deux listes globales refs et sequenceModeles
      * @private
-     * @param {Ressource[]|Alias[]} ressources La liste des ressources|aliases à ajouter après vérif de leur intégrité
+     * @param {Ressource[]} ressources La liste des ressources|aliases à ajouter après vérif de leur intégrité
      * @param {string}              droits     Les droits sur ces ressources (lettres WD pour Write & Delete)
      */
     function addRefs (ressources, droits) {
@@ -152,7 +153,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (ressource.parametres) sequenceModeles.push(ressource.parametres)
           else log.errorData('sequenceModele sans parametres', ressource)
         } else {
-          var alias = new Alias(ressource)
+          var alias = new Ref(ressource)
           if (alias.ref && alias.titre && alias.type && (alias.public || alias.cle)) {
             if (droits) alias.$droits = droits
             refs.push(alias)
@@ -177,9 +178,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $ressourceRepository.getListe('all', {filters: [{index: 'contributeurs', values: [oid]}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'W')
-        EntityAlias.match('userOid').equals(oid).grab(this)
-      }).seq(function (aliases) {
-        if (aliases.length) addRefs(aliases, 'D')
         refs.forEach(ref => completeBaseId(ref))
         $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
       }).catch(function (error) {
@@ -534,12 +532,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var userOid = $accessControl.getCurrentUserOid(context)
     if (userOid) {
       $ressourceRepository.load(oid, function (error, ressource) {
-        if (error) {
-          $json.send(context, error)
-        } else if (ressource) {
+        if (error) return $json.send(context, error)
+        if (ressource) {
           if ($accessControl.hasReadPermission(context, ressource)) {
             if (configRessource.editable[ressource.type]) {
-              // on clone
+              // editable on duplique
               delete ressource.oid
               delete ressource.idOrigine
               ressource.origine = config.application.baseId
@@ -555,20 +552,22 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
               })
             } else {
-              // on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource
-              EntityAlias.match('alias').equals(ressource.oid).match('base').equals(config.application.baseUrl).grabOne(function (error, alias) {
-                if (error) {
-                  $json.sendError(context, error.toString())
-                } else if (alias) {
-                  $json.sendOk(context, {oid: alias.oid})
-                } else {
-                  alias = EntityAlias.create(new Alias(ressource))
-                  alias.userOid = userOid
-                  alias.store(function (error, alias) {
-                    if (error) $json.sendError(context, error)
-                    else $json.sendOk(context, {oid: alias.oid})
-                  })
-                }
+              // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource
+              $ressourceRepository.loadByAlias(myBaseId + '/' + oid, function (error, alias) {
+                if (error) return $json.sendError(context, error.toString())
+                if (alias) return $json.sendOk(context, {oid: alias.oid})
+                // faut le créer
+                const data = {}
+                ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => { data[p] = ressource[p] })
+                data.aliasOf = myBaseId + '/' + ressource.oid
+                data.auteursParents = ressource.auteurs
+                data.auteurs = [myBaseId + '/' + userOid]
+                alias = EntityRessource.create(data)
+                alias.store(function (error, ressAlias) {
+                  if (error) return $json.sendError(context, error)
+                  if (ressAlias) return $json.sendOk(context, {oid: ressAlias.oid})
+                  $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
+                })
               })
             }
           } else {
@@ -587,7 +586,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant en auteur
    * (sinon il pourra pas la supprimer), avec publié et privé
    * Retourne {@link reponseRessourceOid}
-   * @route GET /api/externalClone/:oid?base=url
+   * @route GET /api/externalClone/:oid?baseId=url
    */
   controller.get('externalClone/:oid', function (context) {
     /**
@@ -603,8 +602,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var oid = context.arguments.oid
     var baseId = context.get.baseId
     try {
-      if (!baseId) throw new Error('Il faut préciser une base pour la ressource à cloner')
-      if (!oid) throw new Error('Paramètre manquant')
+      if (!baseId) throw new Error('Il faut préciser une baseId pour la ressource à cloner')
+      if (!oid) throw new Error('Paramètre oid manquant')
       var base = config.sesatheques[baseId]
       if (!base) throw new Error('Sésathèque ' + baseId + ' inconnue')
       // on normalise avec slash de fin
@@ -621,9 +620,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         timeout: 3000
       }
       request(options, function (error, response, ressource) {
-        if (error) {
-          $json.send(context, error)
-        } else if (response.statusCode === 200 && ressource) {
+        if (error) return $json.send(context, error)
+        if (response.statusCode === 200 && ressource) {
           log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
           if (configRessource.editable[ressource.type]) {
             // on vire ce que l'on ne veut plus
@@ -634,38 +632,41 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             ressource.origine = config.application.baseId
             ressource.dateCreation = new Date()
             ressource.publie = true
-            if (ressource.auteurs && ressource.auteurs.length) {
-              if (!ressource.auteursParents) ressource.auteursParents = []
-              ressource.auteurs.forEach(function (auteur) {
-                ressource.auteursParents.push(base + 'auteur/' + auteur)
-              })
+            if (!ressource.aliasOf) {
+              ressource.aliasOf = baseId + '/' + oid
+              if (ressource.auteurs && ressource.auteurs.length) {
+                if (!ressource.auteursParents) ressource.auteursParents = []
+                ressource.auteurs.forEach(function (auteur) {
+                  ressource.auteursParents.push(base + 'auteur/' + auteur)
+                })
+              }
             }
-            ressource.auteurs = [userOid]
+            ressource.auteurs = [ userOid ]
             ressource.restriction = configRessource.constantes.restriction.prive
             if (!ressource.relations) ressource.relations = []
             ressource.relations.push([configRessource.constantes.relations.estVersionDe, base + ':' + oid])
             $ressourceRepository.save(ressource, function (error, ressource) {
               if (error) $json.send(context, error)
-              else if (ressource && ressource.oid) sendItem(new Alias(ressource))
+              else if (ressource && ressource.oid) sendItem(new Ref(ressource))
               else $json.sendError(context, new Error("L'enregistrement de la ressource a échoué"))
             })
           } else {
-            // pas éditable, on en fait un alias, on regarde si on l'avait pas déjà
-            EntityAlias.match('ref').equals(ressource.oid).match('baseId').equals(baseId).grabOne(function (error, alias) {
-              if (error) {
-                $json.send(context, error)
-              } else if (alias) {
-                sendItem(alias)
-              } else {
-                // faut le créer
-                alias = EntityAlias.create(ressource)
-                alias.userOid = userOid
-                alias.baseId = baseId
-                alias.store(function (error, alias) {
-                  if (error) $json.sendError(context, error)
-                  else sendItem(alias)
-                })
-              }
+            // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource
+            $ressourceRepository.loadByAlias(baseId + '/' + oid, function (error, alias) {
+              if (error) return $json.sendError(context, error.toString())
+              if (alias) return $json.sendOk(context, {oid: alias.oid})
+              // faut le créer
+              const data = {}
+                ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => { data[p] = ressource[p] })
+              data.aliasOf = myBaseId + '/' + ressource.oid
+              data.auteursParents = ressource.auteurs
+              data.auteurs = [myBaseId + '/' + userOid]
+              alias = EntityRessource.create(data)
+              alias.store(function (error, ressAlias) {
+                if (error) return $json.sendError(context, error)
+                if (ressAlias) return $json.sendOk(context, {oid: ressAlias.oid})
+                $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
+              })
             })
           }
         } else {
@@ -1086,28 +1087,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Delete alias par oid, retourne {@link reponseDeleted}
    * @route DEL /api/ressource/:oid
    * @param {Integer} oid
+   * @deprecated
    */
   controller.delete('alias/:oid', function (context) {
-    if ($accessControl.isAuthenticated(context)) {
-      EntityAlias.match('oid').equals(context.arguments.oid).grabOne(function (error, alias) {
-        if (error) {
-          $json.sendError(context, error)
-        } else if (alias) {
-          if (alias.userOid && alias.userOid === $accessControl.getCurrentUserOid(context)) {
-            alias.delete(function (error) {
-              if (error) $json.sendError(context, error)
-              else $json.sendOk(context)
-            })
-          } else {
-            $json.sendError(context, "Vous n'êtes pas propriétaire de cet alias, impossible de le supprimer")
-          }
-        } else {
-          $json.sendError(context, "Cet alias n'existe pas ici")
-        }
-      })
-    } else {
-      $json.denied(context, 'droits insuffisant pour effacer cette ressource')
-    }
+    $json.sendError(context, new Error('Cette méthode ne doit plus être utilisée'))
   })
   controller.options('alias/:oid', optionsDeleteOk)
 
