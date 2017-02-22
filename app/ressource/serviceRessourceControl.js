@@ -84,8 +84,11 @@ function addDeductions (ressource) {
  */
 function addWarnings (ressource) {
   // catégories
-  if (!ressource.categories || ressource.categories.length === 0 || ressource.categories[0] === config.constantes.categories.aucune) {
-    rTools.addWarning(ressource, 'pas de catégorie définie')
+  if (!ressource.categories || ressource.categories.length === 0) {
+    rTools.addError(ressource, 'la propriété categories est obligatoire')
+  }
+  if (ressource.categories[0] === config.constantes.categories.aucune) {
+    rTools.addWarning(ressource, 'il faudra choisir une catégorie')
   }
   // arbre sans enfants (si c'est pas une création, ie avec oid)
   if (ressource.oid && ressource.type === 'arbre' && _.isEmpty(ressource.enfants)) {
