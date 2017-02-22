@@ -74,10 +74,15 @@ function getFakeRessource (options) {
   if (options.categories) {
     fakeRessource.categories = options.categories
   } else if (!options.nocategories) {
-    // Object.keys(ressourceConfig.listes.categories) renvoie {string[]} et on veut du number
-    const cat1 = faker.random.objectElement(ressourceConfig.constantes.categories)
+    // on ajoute deux catégories au pif
+    // Object.keys(ressourceConfig.listes.categories) renvoie {string[]} et on veut du number,
+    // faut aller dans constantes.categories
+    const catList = Object.assign({}, ressourceConfig.constantes.categories)
+    // on veut pas attribuer "aucune"
+    delete catList.aucune
+    const cat1 = faker.random.objectElement(catList)
     let cat2 = cat1
-    while (cat2 === cat1) cat2 = faker.random.objectElement(ressourceConfig.constantes.categories)
+    while (cat2 === cat1) cat2 = faker.random.objectElement(catList)
     fakeRessource.categories = [ cat1, cat2 ]
   }
   // on ajoute des enfants pour les arbres et des parametres pour les autres
