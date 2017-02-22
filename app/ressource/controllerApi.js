@@ -36,7 +36,6 @@ var request = require('request')
 var flow = require('an-flow')
 var sjt = require('sesajstools')
 var sjtObj = require('sesajstools/utils/object')
-var stJstree = require('sesatheque-jstree')
 var config = require('../config')
 var myBaseId = config.application.baseId
 var configRessource = require('./config')
@@ -851,6 +850,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} [children] Passer 1 pour ne récupérer que les enfants
    */
   controller.get('jstree', function (context) {
+    const {getJstreeChildren, toJstree} = require('sesatheque-jstree/src/convert.js')
+
     var ref = context.get.ref || context.get.id
     var onlyChildren = !!context.get.children
     if (ref) {
@@ -863,7 +864,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           var jstData
           if (onlyChildren) {
             if (ressource.type === 'arbre') {
-              jstData = stJstree.getJstreeChildren(ressource)
+              jstData = getJstreeChildren(ressource)
               // log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
               // log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
               sendJsonJstreeArray(context, null, jstData)
@@ -871,7 +872,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
             }
           } else {
-            jstData = stJstree.toJstree(ressource)
+            jstData = toJstree(ressource)
             sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
           }
         } else {
