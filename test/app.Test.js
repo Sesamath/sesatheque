@@ -63,6 +63,7 @@ describe('test de l’application lassi', function () {
       anLog.config(config.lassiLogger)
       globTest.lassi = lassi
       globTest.client = supertest(lassi.express)
+      globTest.config = lassi.settings
       // pour que le an-log de lassi finisse son bavardage en console
       setTimeout(done, 0)
     })
@@ -71,4 +72,5 @@ describe('test de l’application lassi', function () {
   require('./app/static.Test')(globTest)
   require('./app/404.Test')(globTest)
   require('./app/ressource/controllerApi.Test')(globTest)
+  require('./app/sesatheque-client/sesatheques.Test')(globTest)
 })

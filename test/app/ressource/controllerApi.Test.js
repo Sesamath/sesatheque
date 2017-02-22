@@ -64,7 +64,13 @@ module.exports = function apiSetGetDelRessource (globTest) {
       // on peut ajouter ce qui nous manquait
       apiToken = globTest.lassi.settings.apiTokens[0]
       const myBaseId = globTest.lassi.settings.application.baseId
-      ressource = fakeRessource({nooid: true, norid: true, origine: myBaseId, noidOrigine: true, relations: [[1, 1], [14, 2]]})
+      ressource = fakeRessource({
+        nooid: true,
+        norid: true,
+        origine: myBaseId,
+        noidOrigine: true,
+        relations: [[1, 1], [14, 2]]
+      })
       ressExpected = clone(ressource)
       ressExpected.relations = [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
       // on la poste sans oid ni rid

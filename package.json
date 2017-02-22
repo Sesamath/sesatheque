@@ -52,7 +52,7 @@
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.8",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.2",
     "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.1.1",
-    "sesatheque-jstree": "git://src.sesamath.net/sesatheque-jstree#1.0.2"
+    "sesatheque-jstree": "git://src.sesamath.net/sesatheque-jstree#1.0.3"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
