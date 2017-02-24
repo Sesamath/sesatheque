@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.0.67",
+  "version": "0.0.68",
   "engines": {
     "node": ">4.4.0"
   },
@@ -42,6 +42,8 @@
     "an-log": "git://src.sesamath.net/an-log#3.0.9",
     "an-uuid": "git://src.sesamath.net/an-uuid#1.0.4",
     "elementtree": "0.1.6",
+    "jquery": "^3.1.1",
+    "jstree": "^3.3.3",
     "lassi": "git://src.sesamath.net/lassi#2.0.17",
     "lodash": "4.16.4",
     "memcached": "^2.1.0",
@@ -51,8 +53,7 @@
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.0",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.8",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.2",
-    "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.1.1",
-    "sesatheque-jstree": "git://src.sesamath.net/sesatheque-jstree#1.0.3"
+    "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.1.2"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
@@ -63,12 +64,14 @@
     "babel-preset-stage-2": "^6.17.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "css-loader": "0.26.1",
     "eslint": "^3.8.1",
     "eslint-config-standard": "^6.2.1",
     "eslint-plugin-promise": "^3.4.2",
     "eslint-plugin-standard": "^2.0.1",
+    "extract-text-webpack-plugin": "1.0.1",
     "faker": "^3.1.0",
-    "file-loader": "0.8.5",
+    "file-loader": "^0.10.0",
     "ink-docstrap": "^1.1.4",
     "jsdoc": "^3.4.3",
     "knex": "^0.7.6",
@@ -78,9 +81,10 @@
     "mysql": "^2.6.0",
     "sinon": "^1.17.6",
     "sinon-chai": "^2.8.0",
+    "style-loader": "^0.13.1",
     "supertest": "^3.0.0",
-    "url-loader": "^0.5.7",
-    "webpack": "^1.12.2",
+    "url-loader": "0.5.7",
+    "webpack": "1.14.0",
     "xml2js": "^0.4.4",
     "zombie": "^5.0.5"
   },

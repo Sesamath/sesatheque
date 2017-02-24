@@ -15,8 +15,13 @@ Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
 
-// var path = require('path');
+// passer --debug pour ne pas avoir de minification
+var isProd = process.argv.indexOf('--debug') === -1
 var webpack = require('webpack')
+var ExtractTextPlugin = require('extract-text-webpack-plugin')
+var extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
+var extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?minimize' : 'css-loader')
+
 var appConfig = require('./app/config')
 var baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
@@ -58,18 +63,19 @@ var conf = {
   }, */
   module: {
     loaders: [
-      {
-        test: /app\/srcClient\/.*\.js/,
-        loader: 'babel'
-      },
+      {test: /app\/srcClient\/.*\.js/, loader: 'babel'},
       // idem pour editgraphe chargé par srcClient/plugins/j3p/edit.js ou showParcours ci-dessus
-      {
-        test: /sesaeditgraphe\/src\/embed\/.*\.js/,
-        loader: 'babel',
-        query: {
-          presets: ['es2015', 'stage-2']
-        }
-      }
+      {test: /sesaeditgraphe\/src\/embed\/.*\.js/, loader: 'babel', query: {presets: ['es2015', 'stage-2']}},
+      // idem pour sesatheque-client
+      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel', query: {presets: ['es2015', 'stage-2']}},
+      // le statique
+      {test: /(src|node_modules)\/.*\.css/, loader: extractCssLoader},
+      {test: /\.otf(\?\S*)?$/, loader: 'url-loader?limit=10000'},
+      {test: /\.eot(\?\S*)?$/, loader: 'url-loader?limit=10000'},
+      {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
+      {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
+      {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'},
+      {test: /\.(jpe?g|png|gif)$/, loader: 'url-loader?limit=10000'}
     ]
   },
   plugins: [
@@ -80,7 +86,8 @@ var conf = {
       name: 'page',
       minChunks: 2,
       chunks: ['page', 'display', 'edit']
-    }) /* */
+    }),
+    extractCss
   ],
   stats: {
     // Nice colored output
@@ -89,24 +96,7 @@ var conf = {
   // Create Sourcemaps for the bundle
 } /* */
 
-// passer --debug pour ne pas avoir de minification
-var isDev = process.argv.indexOf('--debug') > -1
-var isHjs = process.argv.length > 1 && process.argv[1].indexOf('hjs-dev-server') > -1
-if (isHjs) {
-  // pas trop la peine de s'énerver, visiblement hjs-webpack est prévu pour une single page app
-  // de toute façon faudrait modifier l'appli pour que ce soit elle qui lance hjs-webpack et utilise ses urls
-  // on verra plus tard…
-  conf.devServer = {
-    // sans lui préciser ça il répond Listening at http://undefined:undefined
-    hostname: 'localhost',
-    port: 3000,
-    // sans ça il plante dès le départ
-    https: process.argv.indexOf('--https') !== -1
-    // mais ça suffit pas, ça plante qq secondes après le démarrage
-  }
-  isDev = true
-}
-if (!isDev) {
+if (isProd) {
   conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
 }
 

@@ -40,7 +40,7 @@ var moment = require('moment')
 // car on a l'autocomplétion sur les noms de propriété
 var ressConfig = require('./config')
 var appConfig = require('../config')
-var sesatheques = require('sesatheque-client/dist/sesatheques.js')
+var sesatheques = require('sesatheque-client/src/sesatheques.js')
 
 module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) {
   /**

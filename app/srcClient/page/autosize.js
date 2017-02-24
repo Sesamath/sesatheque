@@ -31,70 +31,72 @@
 
 'use strict'
 
-var log = require('sesajstools/utils/log')
-// on peut pas requérir page car il nous inclu, on appellera autosize
-// via page.autosize qui charge jquery avant de nous appeler
-var $
-
-var $blocsH
-var $blocsW
-var $target
-var offsetHeight = 0
-var offsetWidth = 0
-var minHeight = 400
-var minWidth = 400
-
-/**
- * Modifie la taille de l'élément pour lui donner tout l'espace restant de container
- * @private
- * @param {function} cb Callback éventuelle
- */
-function resize (cb) {
-  var occupe = offsetHeight
-  var tailleDispo
-  // hauteur
-  if ($blocsH) $blocsH.forEach(function ($bloc) { occupe += $bloc.outerHeight(true) })
-  tailleDispo = Math.floor(window.innerHeight - occupe)
-  if (tailleDispo < minHeight) tailleDispo = minHeight
-  log('resize height à ' + tailleDispo)
-  $target.css('height', tailleDispo + 'px')
-
-  // largeur
-  occupe = offsetWidth
-  if ($blocsW) $blocsW.forEach(function ($bloc) { occupe += $bloc.outerWidth(true) })
-  tailleDispo = Math.floor(window.innerWidth - occupe)
-  if (tailleDispo < minWidth) tailleDispo = minWidth
-  log('resize width à ' + tailleDispo)
-  $target.css('width', tailleDispo + 'px')
-  if (cb) cb()
-}
+const log = require('sesajstools/utils/log')
 
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
-  function callResize () {
-    resize(options.callback)
-  }
-  $ = window.jQuery
-  if (!options) options = {}
-  $target = $('#' + targetId)
-  if (hBlocIds && hBlocIds.length) {
-    $blocsH = []
-    hBlocIds.forEach(function (id) {
-      var $bloc = $('#' + id)
-      if ($bloc) $blocsH.push($bloc)
-    })
-  }
-  if (wBlocIds && wBlocIds.length) {
-    $blocsW = []
-    wBlocIds.forEach(function (id) {
-      var $bloc = $('#' + id)
-      if ($bloc) $blocsW.push($bloc)
-    })
-  }
-  if (options.minHeight) minHeight = options.minHeight
-  if (options.minWidth) minWidth = options.minWidth
-  if (options.offsetHeight) offsetHeight = options.offsetHeight
-  if (options.offsetWidth) offsetWidth = options.offsetWidth
-  callResize()
-  // et à chaque changement de la taille de la fenêtre
-  $(window).resize(callResize)
+  require.ensure(['jquery'], function () {
+    /**
+     * Modifie la taille de l'élément pour lui donner tout l'espace restant de container
+     * @private
+     * @param {function} cb Callback éventuelle
+     */
+    function resize (cb) {
+      var occupe = offsetHeight
+      var tailleDispo
+      // hauteur
+      if ($blocsH) $blocsH.forEach(function ($bloc) { occupe += $bloc.outerHeight(true) })
+      tailleDispo = Math.floor(window.innerHeight - occupe)
+      if (tailleDispo < minHeight) tailleDispo = minHeight
+      log('resize height à ' + tailleDispo)
+      $target.css('height', tailleDispo + 'px')
+
+      // largeur
+      occupe = offsetWidth
+      if ($blocsW) $blocsW.forEach(function ($bloc) { occupe += $bloc.outerWidth(true) })
+      tailleDispo = Math.floor(window.innerWidth - occupe)
+      if (tailleDispo < minWidth) tailleDispo = minWidth
+      log('resize width à ' + tailleDispo)
+      $target.css('width', tailleDispo + 'px')
+      if (cb) cb()
+    }
+
+    function callResize () {
+      resize(options.callback)
+    }
+
+    const $ = require('jquery')
+    // on peut pas requérir page car il nous inclu, on appellera autosize via page.autosize
+
+    var $blocsH
+    var $blocsW
+    var $target
+    var offsetHeight = 0
+    var offsetWidth = 0
+    var minHeight = 400
+    var minWidth = 400
+
+    if (!options) options = {}
+    $target = $('#' + targetId)
+    if (hBlocIds && hBlocIds.length) {
+      $blocsH = []
+      hBlocIds.forEach(function (id) {
+        var $bloc = $('#' + id)
+        if ($bloc) $blocsH.push($bloc)
+      })
+    }
+    if (wBlocIds && wBlocIds.length) {
+      $blocsW = []
+      wBlocIds.forEach(function (id) {
+        var $bloc = $('#' + id)
+        if ($bloc) $blocsW.push($bloc)
+      })
+    }
+    if (options.minHeight) minHeight = options.minHeight
+    if (options.minWidth) minWidth = options.minWidth
+    if (options.offsetHeight) offsetHeight = options.offsetHeight
+    if (options.offsetWidth) offsetWidth = options.offsetWidth
+    callResize()
+    // et à chaque changement de la taille de la fenêtre
+    $(window).resize(callResize)
+  })
 }

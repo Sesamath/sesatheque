@@ -324,8 +324,8 @@ try {
    * @param {errorCallback}  [next]
    */
   multiEditor.init = function (textarea, config, next) {
-    page.loadAsync('jquery', function () {
-      $ = window.jQuery
+    require.ensure(['jquery'], function () {
+      const $ = require('jquery')
       $(function () {
         log('multiEditor.init avec la config', config)
         if (typeof next !== 'function') next = errorCallbackDefault

@@ -83,7 +83,7 @@ module.exports = function (EntityRessource) {
   EntityRessource
     .defineIndex('rid', 'string')
     .defineIndex('baseId', 'string', function () {
-      if (this.rid) return sesatheques.getBaseIdFromId(this.rid)
+      if (this.rid) return sesatheques.getBaseIdFromRid(this.rid)
     })
     .defineIndex('cle', 'string')
     .defineIndex('origine', 'string')

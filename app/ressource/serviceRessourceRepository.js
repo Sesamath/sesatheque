@@ -37,7 +37,7 @@ const elementtree = require('elementtree')
 const _ = require('lodash')
 const request = require('request')
 const sesatheques = require('sesatheque-client/src/sesatheques.js')
-const {getBaseIdFromId} = sesatheques
+const {getBaseIdFromRid} = sesatheques
 const config = require('./config')
 const appConfig = require('../config')
 
@@ -93,13 +93,13 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       }
       // check rid
       if (ressource.rid) {
-        if (getBaseIdFromId(ressource.rid) !== myBaseId) throw new Error('rid invalide (baseId incorrecte)')
+        if (getBaseIdFromRid(ressource.rid) !== myBaseId) throw new Error('rid invalide (baseId incorrecte)')
         else if (ressource.oid) ressource.rid = myBaseId + '/' + ressource.oid
       }
       // check aliasOf
       if (ressource.aliasOf) {
         // peu importe la base, on veut juste le check
-        getBaseIdFromId(ressource.aliasOf)
+        getBaseIdFromRid(ressource.aliasOf)
       }
       // on vire un éventuel token
       if (ressource.token) delete ressource.token

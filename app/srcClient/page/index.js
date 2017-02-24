@@ -76,6 +76,7 @@ var base = '/'
  */
 function addError (error, delay) {
   // on log toujours en console
+  if (!error) return log.error(new Error('page.addError appelé sans erreur à afficher'))
   log.error(error)
   var errorsContainer = wd.getElementById('errors') || wd.getElementById('error') || wd.getElementById('warnings')
   var errorMsg = (error instanceof Error) ? error.toString() : error
@@ -225,9 +226,7 @@ function loadAsync (moduleNames, callback) {
  * @param {object} [options]    Options avec les éventuelles propriétés : minHeight, minWidth, offsetHeight, offsetWidth, callback
  */
 function doAutoSize (targetId, hBlocIds, wBlocIds, options) {
-  loadAsync(['jquery'], function () {
-    autosize(targetId, hBlocIds, wBlocIds, options)
-  })
+  autosize(targetId, hBlocIds, wBlocIds, options)
 }
 
 /**

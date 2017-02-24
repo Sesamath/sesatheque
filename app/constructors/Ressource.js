@@ -33,7 +33,7 @@
 /* global module */
 
 const filters = require('sesajstools/utils/filters')
-const {getBaseIdFromId} = require('sesatheque-client/src/sesatheques.js')
+const {getBaseIdFromRid} = require('sesatheque-client/src/sesatheques.js')
 /**
  * Filtre une liste de personne en vérifiant que c'est bien de la forme baseId/xxx avec baseId connue
  * si c'est pas le cas et que defaultBaseId est fournie on l'ajoute
@@ -46,7 +46,7 @@ function filterUserList (list, defaultBaseId) {
     return filters.arrayString(list).map(uid => {
       const pos = uid.indexOf('/')
       if (pos === -1 && defaultBaseId) uid = defaultBaseId + '/' + uid
-      if (getBaseIdFromId(uid, false)) return uid
+      if (getBaseIdFromRid(uid, false)) return uid
     }).filter(uid => uid) // vire les éventuels undefined mis par le map
   }
   return []

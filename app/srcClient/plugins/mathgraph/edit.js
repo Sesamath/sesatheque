@@ -37,151 +37,149 @@ var log = require('sesajstools/utils/log')
 var page = require('../../page/index')
 var formEditor = require('../../edit/formEditor')
 
-/* jshint jquery:true */
-
-function addApplet (isFullSize) {
-  if (isFullSize) {
-    width = Math.max(appletContainer.offsetWidth || 0, width)
-    // faut limiter, dixit Yves
-    if (width > 1024) width = 1024
-    if (width < 300) width = 300
-    height = Math.max(height, Math.round(width * 0.75))
-    if (height > 2 * width) height = 2 * width
-    if (height > 1024) height = 1024
-    if (height < 200) height = 200
-  }
-  var appletName = 'mtgApplet'
-  // faut d'abord créer un élément html complet avant de le mettre dans le dom,
-  // sinon il peut lancer le jar avant d'avoir tous les params
-  var applet = dom.getElement(
-    'applet',
-    {
-      id: appletName,
-      // name: appletName +'name',
-      code: 'mathgraph32.MtgFrame.class',
-      archive: 'https://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
-      // archive: 'http://www.mathgraph32.org/ftp/ExercicesEnLigne/MathGraph32Applet.jar',
-      width: width,
-      height: height,
-      style: 'border:#000 solid 1px;'
-    },
-    {label: 'Figure mathgraph'}
-  )
-  for (var allow in allowDef) {
-    if (allowDef.hasOwnProperty(allow)) {
-      dom.addElement(applet, 'param', {name: 'allow' + allow, value: (allowProf.indexOf(allow) > -1) ? 'true' : 'false'})
-    }
-  }
-  dom.addElement(applet, 'param', {name: 'initialFigure', value: 'orthonormalFrame'})
-  dom.addElement(applet, 'param', {name: 'language', value: 'true'})
-  var level = (levelProf === 0) ? levelEleve : levelProf
-  dom.addElement(applet, 'param', {name: 'level', value: level})
-  dom.addElement(applet, 'param', {name: 'figureData', value: $figureData.val()})
-
-  dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
-  dom.addElement(applet, 'a', {href: 'https://www.java.com'}, 'java.com')
-  dom.addText(applet, ' pour installer java.')
-  // on peut la mettre dans le dom
-  dom.empty(appletContainer)
-  appletContainer.appendChild(applet)
-}
-
-function hideApplet () {
-  try {
-    var newFigure = document.mtgApplet.getScript()
-    log('on récupère ' + newFigure)
-    // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
-    setTimeout(function () {
-      $figureData.val(newFigure)
-      $appletContainer.hide()
-      $dataContainer.show()
-      submitHandler = onSubmitTrue
-    }, 0)
-  } catch (error) {
-    log.error(error)
-    page.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste")
-  }
-}
-
-function showApplet () {
-  // on rafraîchi nos valeurs d'après le form
-  width = parseInt($width.val(), 10) || 600
-  height = parseInt($height.val(), 10) || Math.round(width * 0.75)
-  var isFullSize = !!$isFullSize.val()
-  addApplet(isFullSize)
-  $dataContainer.hide()
-  $appletContainer.show()
-  // et on récupèrera sa figure à la validation
-  log('submitHandler = onSubmitGetMgData')
-  submitHandler = onSubmitGetMgData
-}
-
-function onSubmitGetMgData () {
-  log("submit avec figure à récupérer dans l'applet")
-  var retour = false
-  try {
-    var newFigure = document.mtgApplet.getScript()
-    log('on récupère ' + newFigure)
-    // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
-    $figureData.val(newFigure)
-    setTimeout(function () {
-      submitHandler = onSubmitTrue
-      log('On va soumettre avec le textarea', $figureData.val())
-      $form.submit()
-    }, 0)
-  } catch (error) {
-    log.error(error)
-    page.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste")
-    submitHandler = onSubmitTrue
-  }
-
-  return retour
-}
-
-function onSubmitTrue () {
-  log('submit sans récupération')
-  return true
-}
-
-// var globales à notre module (initialisées par init et utilisées par nos fcts)
-var allowProf
-var levelEleve
-var levelProf
-var figureBase64Ini
-var width
-var height
-var $width
-var $height
-var appletContainer
-var $appletContainer
-var $figureData
-var $isFullSize
-var $dataContainer
-var $form
-// les fonctionnalités dispo
-var allowDef = {
-  MenuBar: 'Barre de menu',
-  LeftToolbar: "Barre d'outils de gauche",
-  TopToolbar: "Barre d'outils du haut",
-  RightToolbar: "Barre d'outils de droite",
-  IndicationArea: "Zone d'information du bas",
-  ToolsChoice: 'Choix des outils',
-  FileMenu: 'Menu Fichier',
-  OptionsMenu: 'Menu Options'
-}
-// le submitHandler, à true par défaut
-// on ne peut appeler $form.submit() qu'une fois puisqu'on lui passe un écouteur,
-// c'est cet écouteur que l'on va modifier si besoin
-var submitHandler = onSubmitTrue
-
 /**
  * Edite une ressource mathgraph
  * @service plugins/mathgraph/edit
  * @param {Ressource} ressource
  */
 module.exports = function mathgraphEdit (ressource) {
-  page.loadAsync(['jquery'], function () {
-    var $ = window.jQuery
+  require.ensure(['jquery'], function () {
+    const $ = require('jquery')
+    function addApplet (isFullSize) {
+      if (isFullSize) {
+        width = Math.max(appletContainer.offsetWidth || 0, width)
+        // faut limiter, dixit Yves
+        if (width > 1024) width = 1024
+        if (width < 300) width = 300
+        height = Math.max(height, Math.round(width * 0.75))
+        if (height > 2 * width) height = 2 * width
+        if (height > 1024) height = 1024
+        if (height < 200) height = 200
+      }
+      var appletName = 'mtgApplet'
+      // faut d'abord créer un élément html complet avant de le mettre dans le dom,
+      // sinon il peut lancer le jar avant d'avoir tous les params
+      var applet = dom.getElement(
+        'applet',
+        {
+          id: appletName,
+          // name: appletName +'name',
+          code: 'mathgraph32.MtgFrame.class',
+          archive: 'https://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
+          // archive: 'http://www.mathgraph32.org/ftp/ExercicesEnLigne/MathGraph32Applet.jar',
+          width: width,
+          height: height,
+          style: 'border:#000 solid 1px;'
+        },
+        {label: 'Figure mathgraph'}
+      )
+      for (var allow in allowDef) {
+        if (allowDef.hasOwnProperty(allow)) {
+          dom.addElement(applet, 'param', {name: 'allow' + allow, value: (allowProf.indexOf(allow) > -1) ? 'true' : 'false'})
+        }
+      }
+      dom.addElement(applet, 'param', {name: 'initialFigure', value: 'orthonormalFrame'})
+      dom.addElement(applet, 'param', {name: 'language', value: 'true'})
+      var level = (levelProf === 0) ? levelEleve : levelProf
+      dom.addElement(applet, 'param', {name: 'level', value: level})
+      dom.addElement(applet, 'param', {name: 'figureData', value: $figureData.val()})
+
+      dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
+      dom.addElement(applet, 'a', {href: 'https://www.java.com'}, 'java.com')
+      dom.addText(applet, ' pour installer java.')
+      // on peut la mettre dans le dom
+      dom.empty(appletContainer)
+      appletContainer.appendChild(applet)
+    }
+
+    function hideApplet () {
+      try {
+        var newFigure = document.mtgApplet.getScript()
+        log('on récupère ' + newFigure)
+        // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
+        setTimeout(function () {
+          $figureData.val(newFigure)
+          $appletContainer.hide()
+          $dataContainer.show()
+          submitHandler = onSubmitTrue
+        }, 0)
+      } catch (error) {
+        log.error(error)
+        page.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste")
+      }
+    }
+
+    function showApplet () {
+      // on rafraîchi nos valeurs d'après le form
+      width = parseInt($width.val(), 10) || 600
+      height = parseInt($height.val(), 10) || Math.round(width * 0.75)
+      var isFullSize = !!$isFullSize.val()
+      addApplet(isFullSize)
+      $dataContainer.hide()
+      $appletContainer.show()
+      // et on récupèrera sa figure à la validation
+      log('submitHandler = onSubmitGetMgData')
+      submitHandler = onSubmitGetMgData
+    }
+
+    function onSubmitGetMgData () {
+      log("submit avec figure à récupérer dans l'applet")
+      var retour = false
+      try {
+        var newFigure = document.mtgApplet.getScript()
+        log('on récupère ' + newFigure)
+        // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
+        $figureData.val(newFigure)
+        setTimeout(function () {
+          submitHandler = onSubmitTrue
+          log('On va soumettre avec le textarea', $figureData.val())
+          $form.submit()
+        }, 0)
+      } catch (error) {
+        log.error(error)
+        page.addError("Impossible de récupérer la figure de l'applet java, enregistrer de nouveau pour sauvegarder le reste")
+        submitHandler = onSubmitTrue
+      }
+
+      return retour
+    }
+
+    function onSubmitTrue () {
+      log('submit sans récupération')
+      return true
+    }
+
+    // var globales à notre module (initialisées par init et utilisées par nos fcts)
+    var allowProf
+    var levelEleve
+    var levelProf
+    var figureBase64Ini
+    var width
+    var height
+    var $width
+    var $height
+    var appletContainer
+    var $appletContainer
+    var $figureData
+    var $isFullSize
+    var $dataContainer
+    var $form
+    // les fonctionnalités dispo
+    var allowDef = {
+      MenuBar: 'Barre de menu',
+      LeftToolbar: "Barre d'outils de gauche",
+      TopToolbar: "Barre d'outils du haut",
+      RightToolbar: "Barre d'outils de droite",
+      IndicationArea: "Zone d'information du bas",
+      ToolsChoice: 'Choix des outils',
+      FileMenu: 'Menu Fichier',
+      OptionsMenu: 'Menu Options'
+    }
+    // le submitHandler, à true par défaut
+    // on ne peut appeler $form.submit() qu'une fois puisqu'on lui passe un écouteur,
+    // c'est cet écouteur que l'on va modifier si besoin
+    var submitHandler = onSubmitTrue
+
     try {
       if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
       var parametres = ressource.parametres

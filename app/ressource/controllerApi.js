@@ -54,7 +54,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function completeBaseId (item) {
     if (!item.baseId) item.baseId = myBaseId
-    return item
   }
 
   /**
@@ -424,17 +423,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
       var format = context.get.format
       if (format === 'alias' || format === 'ref') {
-        ressource = $ressourceConverter.toRef(ressource)
+        const ref = $ressourceConverter.toRef(ressource)
         // au format ref on ajoute les droits
-        ressource.$droits = 'R'
-        if ($accessControl.hasPermission('update', context, ressource)) ressource.$droits += 'W'
-        if ($accessControl.hasPermission('delete', context, ressource)) ressource.$droits += 'D'
+        ref.$droits = 'R'
+        if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
+        if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
+        completeBaseId(ref)
+        log.debug('sendRessource api avec la ref de baseId', ref.baseId, 'avirer', {max: 5000})
+        $json.send(context, null, ref)
       } else {
-        // full, on ajoute la base
-        if (!ressource.base) ressource.base = config.application.baseUrl
+        completeBaseId(ressource)
+        $json.send(context, null, ressource)
       }
-      completeBaseId(ressource)
-      $json.send(context, null, ressource)
     } else {
       $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
     }
@@ -850,7 +850,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} [children] Passer 1 pour ne récupérer que les enfants
    */
   controller.get('jstree', function (context) {
-    const {getJstreeChildren, toJstree} = require('sesatheque-jstree/src/convert.js')
+    const {getJstreeChildren, toJstree} = require('sesatheque-client/src/jstree/convert.js')
 
     var ref = context.get.ref || context.get.id
     var onlyChildren = !!context.get.children

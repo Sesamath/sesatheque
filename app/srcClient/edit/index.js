@@ -39,8 +39,9 @@ var page = require('../page/index')
 
 function init (options, next) {
   page.init(options)
-  page.loadAsync('jquery', function () {
-    var $ = window.jQuery
+
+  require.ensure(['jquery'], function () {
+    const $ = require('jquery')
     /* jshint jquery:true */
 
     // Modifie le nom paramètres|enfants suivant le type (arbre ou pas)

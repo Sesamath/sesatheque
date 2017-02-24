@@ -40,138 +40,6 @@ var embedEditGraphe = require('sesaeditgraphe/src/embed').default
 var page = require('../../page/index')
 
 /**
- * Ajoute le listener sur submit pour remplir le textarea avec les params d'éditgraphe
- */
-function addSubmitHandler () {
-  // au submit on veut récupérer le contenu d'éditgraphe
-  $('#formRessource').submit(function () {
-    log('submit demandé')
-    // si on a mis le flag la dernière fois on sort direct pour validation du form
-    if (isSubmitForced) return true
-    // si on est mode texte on cherche pas plus loin
-    if (isTextMode()) return true
-    // sinon on essaie de récupérer les paramètres
-    try {
-      var parametres = getEgParams()
-      if (parametres && parametres.g) {
-        try {
-          var paramString = JSON.stringify(parametres, null, 2)
-          log('on met dans le textarea', paramString)
-          $textarea.val(paramString)
-          log('après modif le textarea contient', $textarea.val())
-          log('après modif le textarea', $textarea)
-          return true
-        } catch (error) {
-          log.error(error)
-          throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe valide, valider de nouveau enregistrera l’ancien graphe')
-        }
-      } else {
-        throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe, valider de nouveau enregistrera l’ancien graphe')
-      }
-    } catch (error) {
-      page.addError(error)
-      // on passe à true pour pouvoir valider au prochain submit, histoire de pas bloquer
-      // la modif des autres champs de la ressource
-      isSubmitForced = true
-    }
-    return false
-  })
-}
-
-/**
- *
- * @param {Element} toggleLink
- * @param {Element} container
- * @param {Ressource} ressource
- */
-function addToggleHandler (toggleLink, container, ressource) {
-  function toggleHandler () {
-    log('hashchange detected')
-    var params
-    if (isTextMode()) {
-      try {
-        if (isEditgrapheLoaded) {
-          log('on va appeler getEgParams')
-          params = getEgParams()
-          log('getEgParams renvoie', params)
-          var strParams = JSON.stringify(params, null, 2)
-          $textarea.val(strParams)
-        } // else rien à faire, on veut du texte et on a jamais chargé editgraphe
-        $editgraphe.hide()
-        $textarea.show()
-        dom.empty(toggleLink)
-        dom.addText(toggleLink, graphMode)
-        toggleLink.href = '#graphic'
-      } catch (error) {
-        log.error(error)
-        page.addError('L’éditeur de graphe a renvoyé des paramètres invalides', params)
-      }
-    } else {
-      try {
-        params = JSON.parse($textarea.val())
-        ressource.parametres = params
-        loadGraphic(container, ressource)
-        $textarea.hide()
-        $editgraphe.show()
-        dom.empty(toggleLink)
-        dom.addText(toggleLink, textMode)
-        toggleLink.href = '#text'
-      } catch (error) {
-        log.error(error)
-        page.addError('Paramètres invalides (pb json)', params)
-      }
-    }
-  }
-  window.addEventListener('hashchange', toggleHandler)
-  toggleHandler()
-}
-
-/**
- * Retourne true si on est en mode texte
- * @returns {boolean}
- */
-function isTextMode () {
-  return window.location.hash === '#text'
-}
-
-/**
- * Ajoute editgraphe dans le container
- * @param {Element}   container
- * @param {Ressource} ressource
- */
-function loadGraphic (container, ressource) {
-  dom.empty(container)
-  embedEditGraphe(container, ressource, function (error, getRessourceParametres) {
-    log('retour de embedEditGraphe avec', error, getRessourceParametres, typeof getRessourceParametres)
-    if (error) {
-      page.addError(error)
-    } else if (getRessourceParametres) {
-      if (!isEditgrapheLoaded) {
-        isEditgrapheLoaded = true
-        addSubmitHandler()
-      }
-      getEgParams = getRessourceParametres
-      $editgraphe.scrollTop(0)
-    } else {
-      page.addError(new Error('Le chargement de l’éditeur de graphe n’a pas renvoyé de moyen de récupérer le graphe construit'))
-    }
-  })
-} // loadGraphic
-
-var wd = window.document
-var $
-var isSubmitForced = false      // pour forcer le submit au coup suivant en cas d'erreur de récupération de graphe sur le 1er
-var isEditgrapheLoaded = false
-var $editgraphe
-var $textarea
-var getEgParams = function () {
-  log.error('L’éditeur de graphe n’a pas encore été chargé')
-}
-// nos libellés de bouton
-var graphMode = 'Passer en mode graphique'
-var textMode = 'Passer en mode texte'
-
-/**
  * Édite une ressource j3p
  * Donne la ressource à j3p:/editgraphes/lanceur_graphique.html?callback=initEditJ3p en iframe
  * (en passant par du postMessage pour communiquer avec l'iframe)
@@ -182,8 +50,140 @@ var textMode = 'Passer en mode texte'
  * @param options
  */
 module.exports = function edit (ressource, options) {
-  page.loadAsync(['jquery'], function () {
-    $ = window.jQuery
+  require.ensure(['jquery'], function () {
+    const $ = require('jquery')
+
+    /**
+     * Ajoute le listener sur submit pour remplir le textarea avec les params d'éditgraphe
+     */
+    function addSubmitHandler () {
+      // au submit on veut récupérer le contenu d'éditgraphe
+      $('#formRessource').submit(function () {
+        log('submit demandé')
+        // si on a mis le flag la dernière fois on sort direct pour validation du form
+        if (isSubmitForced) return true
+        // si on est mode texte on cherche pas plus loin
+        if (isTextMode()) return true
+        // sinon on essaie de récupérer les paramètres
+        try {
+          var parametres = getEgParams()
+          if (parametres && parametres.g) {
+            try {
+              var paramString = JSON.stringify(parametres, null, 2)
+              log('on met dans le textarea', paramString)
+              $textarea.val(paramString)
+              log('après modif le textarea contient', $textarea.val())
+              log('après modif le textarea', $textarea)
+              return true
+            } catch (error) {
+              log.error(error)
+              throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe valide, valider de nouveau enregistrera l’ancien graphe')
+            }
+          } else {
+            throw new Error('L’éditeur de graphe n’a pas renvoyé de graphe, valider de nouveau enregistrera l’ancien graphe')
+          }
+        } catch (error) {
+          page.addError(error)
+          // on passe à true pour pouvoir valider au prochain submit, histoire de pas bloquer
+          // la modif des autres champs de la ressource
+          isSubmitForced = true
+        }
+        return false
+      })
+    }
+
+    /**
+     *
+     * @param {Element} toggleLink
+     * @param {Element} container
+     * @param {Ressource} ressource
+     */
+    function addToggleHandler (toggleLink, container, ressource) {
+      function toggleHandler () {
+        log('hashchange detected')
+        var params
+        if (isTextMode()) {
+          try {
+            if (isEditgrapheLoaded) {
+              log('on va appeler getEgParams')
+              params = getEgParams()
+              log('getEgParams renvoie', params)
+              var strParams = JSON.stringify(params, null, 2)
+              $textarea.val(strParams)
+            } // else rien à faire, on veut du texte et on a jamais chargé editgraphe
+            $editgraphe.hide()
+            $textarea.show()
+            dom.empty(toggleLink)
+            dom.addText(toggleLink, graphMode)
+            toggleLink.href = '#graphic'
+          } catch (error) {
+            log.error(error)
+            page.addError('L’éditeur de graphe a renvoyé des paramètres invalides', params)
+          }
+        } else {
+          try {
+            params = JSON.parse($textarea.val())
+            ressource.parametres = params
+            loadGraphic(container, ressource)
+            $textarea.hide()
+            $editgraphe.show()
+            dom.empty(toggleLink)
+            dom.addText(toggleLink, textMode)
+            toggleLink.href = '#text'
+          } catch (error) {
+            log.error(error)
+            page.addError('Paramètres invalides (pb json)', params)
+          }
+        }
+      }
+      window.addEventListener('hashchange', toggleHandler)
+      toggleHandler()
+    }
+
+    /**
+     * Retourne true si on est en mode texte
+     * @returns {boolean}
+     */
+    function isTextMode () {
+      return window.location.hash === '#text'
+    }
+
+    /**
+     * Ajoute editgraphe dans le container
+     * @param {Element}   container
+     * @param {Ressource} ressource
+     */
+    function loadGraphic (container, ressource) {
+      dom.empty(container)
+      embedEditGraphe(container, ressource, function (error, getRessourceParametres) {
+        log('retour de embedEditGraphe avec', error, getRessourceParametres, typeof getRessourceParametres)
+        if (error) {
+          page.addError(error)
+        } else if (getRessourceParametres) {
+          if (!isEditgrapheLoaded) {
+            isEditgrapheLoaded = true
+            addSubmitHandler()
+          }
+          getEgParams = getRessourceParametres
+          $editgraphe.scrollTop(0)
+        } else {
+          page.addError(new Error('Le chargement de l’éditeur de graphe n’a pas renvoyé de moyen de récupérer le graphe construit'))
+        }
+      })
+    } // loadGraphic
+
+    var wd = window.document
+    var isSubmitForced = false      // pour forcer le submit au coup suivant en cas d'erreur de récupération de graphe sur le 1er
+    var isEditgrapheLoaded = false
+    var $editgraphe
+    var $textarea
+    var getEgParams = function () {
+      log.error('L’éditeur de graphe n’a pas encore été chargé')
+    }
+    // nos libellés de bouton
+    var graphMode = 'Passer en mode graphique'
+    var textMode = 'Passer en mode texte'
+
     try {
       if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
       var textarea = wd.getElementById('parametres')

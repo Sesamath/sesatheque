@@ -31,40 +31,38 @@
 'use strict'
 
 var dom = require('sesajstools/dom')
-
 var page = require('../../page/index')
 var formEditor = require('../../edit/formEditor')
-
-/* jshint jquery:true */
-var $
-var $parametresUrl
-var $xmlElt
-
-function importXml () {
-  var url = $parametresUrl.val()
-  if (url && url.substr(0, 4) === 'http') {
-    $.ajax({
-      url: url,
-      dataType: 'text', // sinon jQuery le converti en objet, idiot puisqu'on veut la string
-      success: function (data) {
-        $xmlElt.val(data)
-      }
-    }).fail(function () {
-      page.addError('La récupération du script iep sur ' + url + ' a échoué')
-    })
-  } else {
-    page.addError('Il faut préciser une url absolue (http…)')
-  }
-}
 
 /**
  * Édite les paramètres d'une ressource iep
  * @service plugins/iep/edit
  */
 module.exports = function edit (ressource) {
-  try {
-    page.loadAsync(['jquery'], function () {
-      $ = window.jQuery
+  function importXml () {
+    var url = $parametresUrl.val()
+    if (url && url.substr(0, 4) === 'http') {
+      $.ajax({
+        url: url,
+        dataType: 'text', // sinon jQuery le converti en objet, idiot puisqu'on veut la string
+        success: function (data) {
+          $xmlElt.val(data)
+        }
+      }).fail(function () {
+        page.addError('La récupération du script iep sur ' + url + ' a échoué')
+      })
+    } else {
+      page.addError('Il faut préciser une url absolue (http…)')
+    }
+  }
+
+  var $
+  var $parametresUrl
+  var $xmlElt
+
+  require.ensure(['jquery'], function () {
+    try {
+      $ = require('jquery')
       if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
       var parametres = ressource.parametres
       var groupParametres = window.document.getElementById('groupParametres')
@@ -118,8 +116,8 @@ module.exports = function edit (ressource) {
 
         return retour
       })
-    })
-  } catch (error) {
-    page.addError(error)
-  }
+    } catch (error) {
+      page.addError(error)
+    }
+  })
 }

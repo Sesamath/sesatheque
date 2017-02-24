@@ -31,13 +31,15 @@
 
 'use strict'
 
-const dom = require('sesajstools/dom')
-const log = require('sesajstools/utils/log')
-const sjtUrl = require('sesajstools/http/url')
-const clientFactory = require('sesatheque-client')
+import dom from 'sesajstools/dom'
+import sjtUrl from 'sesajstools/http/url'
+import log from 'sesajstools/utils/log'
 
-const page = require('../../page/index')
-const jstreeConverter = require('../../display/jstreeConverter')
+// @todo Reste à ajouter un options.eachEnfant pour modifier à la volée les enfants sur l'arbre de destination et empêcher le chargement des arbres en aliasOf (sinon ça les intègre d'office), en ajoutant sur ces éléments un menu de clic droit "incorporer tout le contenu ici"
+
+// @todo ajouter l'aperçu
+
+// @todo régler le pb des css (actuellement avec un dom.addCss de la css construite par webpack, faut fusionner avec les autres)
 
 /**
  * Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
@@ -46,531 +48,521 @@ const jstreeConverter = require('../../display/jstreeConverter')
  * @param options
  */
 module.exports = function edit (arbre, options) {
-  try {
-    page.loadAsync(['jquery', 'jstree'], function () {
-      // nos fcts internes
-      function addApercu (items, node) {
-        const ref = node.a_attr && node.a_attr['data-ref']
-        // Apercu sur tous les éléments dont on a une ref
-        if (ref) {
-          let url = node.a_attr['data-displayUri']
-          if (!url) url = '/ressource/voir/' + ref
-          items.apercu = {
-            label: 'Aperçu',
-            action: function () {
-              iframeApercu.src = url
-            }
+  if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
+  if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
+
+  // jquery est déjà chargé par le edit.js, mais il est local à chaque module
+  require.ensure(['jquery', 'jstree', 'sesatheque-client/src/fetch', 'sesatheque-client/src/jstree'], function () {
+    // nos fcts internes
+    /**
+     * Ajoute le lien aperçu aux links
+     * @param {object} links l'objet contextmenu.items de jstree
+     * @param node
+     */
+    function addLinkApercu (links, node) {
+      const url = node.a_attr && node.a_attr['data-displayurl']
+      // Apercu sur tous les éléments dont on a une ref
+      if (url) {
+        links.apercu = {
+          label: 'Aperçu',
+          action: function () {
+            iframeApercu.src = url
           }
         }
       }
+    }
 
-      function addError (errorMessage) {
-        $loadError.text(errorMessage)
-        if (!$loadError.hasClass('error')) $loadError.addClass('error')
-        setTimeout(
-          function () {
-            $loadError.empty()
-          },
-          5000
-        )
+    /**
+     * Affiche un message d'erreur sur la page mais près de l'arbre en cours d'édition
+     * @private
+     * @param {string} errorMessage
+     * @param {number} [delay] Si fourni efface le message après ce nb de s ou ms (si <1000 on * par 1000)
+     */
+    function addTreeError (errorMessage, delay) {
+      $treeError.text(errorMessage)
+      if (!$treeError.hasClass('error')) $treeError.addClass('error')
+      if (delay) {
+        if (delay < 1000) delay *= 1000 // on nous a passé des s
+        setTimeout(() => $treeError.empty(), delay)
       }
+    }
 
-      function addLoadSrc () {
-        dom.addElement(container, 'span', null, 'arbre source à charger ')
-        inputRef = dom.addElement(container, 'input', {id: 'loadRef', type: 'text'})
-        $inputRef = $(inputRef)
-        // enter doit pas valider le form mais charger la ref
-        $inputRef.keypress(function (event) {
-          if (event.keyCode === 13) {
-            loadSrc()
-            event.preventDefault() // pour empêcher le submit
-          }
-        })
-        // lien de chargement
-        loadLink = dom.addElement(container, 'a', {href: '#'}, ' afficher')
-        $(loadLink).click(loadSrc)
-        // un div pour les erreurs
-        const loadError = dom.addElement(container, 'p')
-        $loadError = $(loadError)
-      }
-
-      /**
-       * Crée un json de la liste des enfants de l'arbre destination et le met dans le textarea
-       * @private
-       */
-      function dstTreeToTextarea () {
-        const jstree = $jstree.reference($dstTree)
-        let enfants
-        log('dstTreeToTextarea avec', jstree)
-        try {
-          // on veut pas les enfants de # (un seul, l'arbre complet), mais ceux de notre arbre, 1er (et seul) enfant de root
-          const nodeId = jstree._model.data['#'].children[0]
-          enfants = jstreeConverter.getEnfants(nodeId, jstree)
-        } catch (error) {
-          log.error(error)
+    /**
+     * Ajoute le div pour l'arbre source et la gestion de son chargement
+     * @private
+     */
+    function addLoadSrc () {
+      dom.addElement(container, 'span', null, 'arbre source à charger ')
+      inputRef = dom.addElement(container, 'input', {id: 'loadRef', type: 'text'})
+      $inputRef = $(inputRef)
+      // enter doit pas valider le form mais charger la ref
+      $inputRef.keypress(function (event) {
+        if (event.keyCode === 13) {
+          loadSrc()
+          event.preventDefault() // pour empêcher le submit
         }
+      })
+      // lien de chargement
+      loadLink = dom.addElement(container, 'a', {href: '#'}, ' afficher')
+      $(loadLink).click(loadSrc)
+      // un div pour les erreurs
+      const treeError = dom.addElement(container, 'p')
+      $treeError = $(treeError)
+    }
+
+    /**
+     * Crée un json de la liste des enfants de l'arbre destination et le met dans le textarea
+     * @private
+     */
+    function dstTreeToTextarea () {
+      let enfants
+      let enfantsStr = ''
+      try {
+        const inst = $dstTree.jstree(true)
+        enfants = getEnfants(inst)
         log('On récupère les enfants', enfants)
-        let enfantsStr = ''
-        try {
-          enfantsStr = JSON.stringify(enfants, null, 2)
-        } catch (error) {
-          log.error('Le parsing json a planté', error, enfants)
+        // on a les enfants de la racine, il ne doit y en avoir qu'un
+        if (enfants.length !== 1) {
+          return addTreeError('Il ne doit y avoir qu’une racine')
         }
-        if ($textarea) {
-          $textarea.val(enfantsStr)
+        if (enfants[0].enfants && enfants[0].enfants.length) enfantsStr = JSON.stringify(enfants[0].enfants, null, 2)
+        else enfantsStr = '[]'
+      } catch (error) {
+        log.error('Le parsing json a planté', error, enfants)
+        return addTreeError('Erreur interne, impossible de récupérer les enfants')
+      }
+      $textarea.val(enfantsStr)
+    }
+
+    /**
+     * Charge initialise le dom et les liens pour changer de mode
+     * @private
+     * @param options
+     */
+    function initDom (options) {
+      // Ajout css, si on a pas tant pis pour le css mais ça va être moche
+      const vendorsBaseUrl = options.vendorsBaseUrl || '/vendor'
+      const base = options.base || '/'
+      dom.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css')
+      dom.addCss(base + 'styles/ressources.css')
+      // nos éléments html
+      container = window.document.getElementById('display')
+      $container = $(container)
+      const blocTexte = window.document.getElementById('groupEnfants') // le textarea et son titre
+      // faut ajouter nos eléments en first child
+      // ancre
+      dom.addElementFirstChild(blocTexte, 'a', {name: 'enfants'})
+      // lien et comportement pour repasser en graphique
+      const linkShowGraphic = dom.addElementFirstChild(blocTexte, 'a', {
+        href: '#enfants',
+        style: {float: 'left'}
+      }, 'passer en mode graphique')
+      $linkShowGraphic = $(linkShowGraphic)
+      $linkShowGraphic.click(showGraphic)
+
+      // lien et comportement pour passer en mode texte
+      const linkShowTxt = dom.addElementFirstChild(blocTexte, 'a', {
+        href: '#enfants',
+        style: {float: 'left'}
+      }, 'passer en mode texte')
+      $linkShowTxt = $(linkShowTxt)
+      $linkShowTxt.click(showTxt)
+      // dom.addElement(blocTexte, 'br')
+      // dom.addElement(blocTexte, 'a', {href:'?editor=texte'}, 'passer en mode texte sans sauvegarder')
+    }
+
+    /**
+     * Initialise les éléments de dom pour le mode graphique
+     * @private
+     */
+    function initDomGraphic () {
+      addLoadSrc()
+      // la recherche
+      const searchContainer = dom.addElement(container, 'div', {class: 'search'})
+      dom.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ')
+      searchInput = dom.addElement(searchContainer, 'input', {type: 'text'})
+
+      srcGroup = dom.addElement(container, 'div', {id: 'srcGroup'})
+      dom.addElement(srcGroup, 'span', null, 'arbre source')
+      divSrcTree = dom.addElement(srcGroup, 'div')
+
+      const dstGroup = dom.addElement(container, 'div', {id: 'dstGroup'})
+      dom.addElement(dstGroup, 'strong', null, 'arbre à modifier')
+      dom.addElement(dstGroup, 'em', {style: {'font-size': '0.8em'}}, ' (clic droit pour enlever des éléments ou ajouter des dossiers)')
+      divDstTree = dom.addElement(dstGroup, 'div')
+      $dstTree = $(divDstTree)
+      console.log('$dstTree keys', Object.keys($dstTree))
+
+      dom.addElement(container, 'p', {style: 'clear:both;'}, "Aperçu d'un élément")
+      iframeApercu = dom.addElement(container, 'iframe', {id: 'apercu'})
+    }
+
+    /**
+     * Charge l'arbre destination
+     * @private
+     * @param arbre
+     */
+    function loadDst (arbre) {
+      // nos cb au clic droit
+
+      // ajoute une ressource
+      function actionAdd (data) {
+        const id = window.prompt('Id de la ressource (oid ou origine/idOrigine)\nPréfixe “sesabibli/” ou “sesacommun/” possible pour préciser la sesathèque à utiliser')
+        if (id) {
+          addNode($dstTree, id, data.reference, function (error, newNode) {
+            if (error) addTreeError(error)
+          })
+        }
+      }
+
+      // Cb sur clic droit ajouter un dossier
+      function actionAddFolder (data) {
+        // la cb appellée avec le node créé
+        function createCb (newNode) {
+          // ici inst.edit existe bien, mais si c'est le 1er enfant d'un arbre vide
+          // log('dans createCb', newNode, inst)
+          inst.edit(
+            newNode,
+            'titre',
+            function (newNode, status) {
+              if (status) isDstModified = true
+              log('après modif', inst)
+            }
+          )
+        }
+        // en 3.3 ce truc marche plus
+        // const inst = $.jstree.reference(data.reference)
+        // on fait plutôt
+        const inst = $dstTree.jstree(true)
+        log('instance', inst)
+        const parentNode = inst.get_node(data.reference)
+        log('node parent', parentNode)
+        const newNode = {
+          icon: 'arbreJstNode',
+          a_attr: {'data-type': 'arbre'}
+        }
+        inst.create_node(parentNode, newNode, 'last', createCb)
+      }
+
+      // retirer un item de l'arbre
+      function actionDelete (data) {
+        const inst = $dstTree.jstree(true)
+        const node = inst.get_node(data.reference)
+        if (inst.is_selected(node)) inst.delete_node(inst.get_selected())
+        else inst.delete_node(node)
+        isDstModified = true
+      }
+
+      // Aller éditer la ressource
+      function actionEdit (data) {
+        // on a un bind sur le node
+        const inst = $dstTree.jstree(true)
+        const node = inst.get_node(data.reference)
+        if (isDstModified) {
+          addTreeError("Enfants de l'arbre modifiés mais non sauvegardé (recharger la page pour annuler les modifications)")
         } else {
-          page.addError('zone de texte enfants non trouvée')
+          const aliasOf = node.a_attr['data-aliasof']
+          if (aliasOf) {
+            const slashPos = aliasOf.indexOf('/')
+            if (slashPos) {
+              const id = aliasOf.substr(slashPos + 1)
+              if (id) {
+                window.location = '/ressource/modifier/' + id
+                return
+              }
+            }
+          }
+          addTreeError('Impossible de trouver l’url de modification de cet élément')
         }
       }
 
-      /**
-       * Charge initialise le dom et les liens pour changer de mode
-       * @private
-       * @param options
-       */
-      function initDom (options) {
-        // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-        const vendorsBaseUrl = options.vendorsBaseUrl || '/vendor'
-        const base = options.base || '/'
-        dom.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css')
-        dom.addCss(base + 'styles/ressources.css')
-        // nos éléments html
-        container = window.document.getElementById('display')
-        $container = $(container)
-        const blocTexte = window.document.getElementById('groupEnfants') // le textarea et son titre
-        // faut ajouter nos eléments en first child
-        // ancre
-        dom.addElementFirstChild(blocTexte, 'a', {name: 'enfants'})
-        // lien et comportement pour repasser en graphique
-        const linkShowGraphic = dom.addElementFirstChild(blocTexte, 'a', {
-          href: '#enfants',
-          style: {float: 'left'}
-        }, 'passer en mode graphique')
-        $linkShowGraphic = $(linkShowGraphic)
-        $linkShowGraphic.click(showGraphic)
-
-        // lien et comportement pour passer en mode texte
-        const linkShowTxt = dom.addElementFirstChild(blocTexte, 'a', {
-          href: '#enfants',
-          style: {float: 'left'}
-        }, 'passer en mode texte')
-        $linkShowTxt = $(linkShowTxt)
-        $linkShowTxt.click(showTxt)
-        // dom.addElement(blocTexte, 'br')
-        // dom.addElement(blocTexte, 'a', {href:'?editor=texte'}, 'passer en mode texte sans sauvegarder')
+      // Renommer un dossier
+      function actionRename (data) {
+        const inst = $dstTree.jstree(true)
+        const node = inst.get_node(data.reference)
+        inst.edit(node)
+        isDstModified = true
       }
 
+      const jstOptions = {
+        check_callback: function (action, node, parent) {
+          log('check_callback avec', arguments)
+          // on accepte le drop seulement dans des arbres (dossiers)
+          if (action === 'copy_node') return (parent.id !== '#' && parent.a_attr && parent.a_attr['data-type'] === 'arbre')
+          // tout le reste est autorisé
+          else return true
+        },
+        plugins: ['dnd', 'contextmenu'],
+        contextmenu: {
+          select_node: false
+        },
+        dnd: {
+          inside_pos: 'last'
+        },
+        listeners: {
+          'select_node.jstree': function (e, data) {
+            const jstNode = data.node.original
+            log('clic sur', jstNode)
+            if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
+              // on fait du toggle
+              if ($dstTree.jstree('is_open', data.node)) $dstTree.jstree('close_node', data.node)
+              else $dstTree.jstree('open_node', data.node)
+            }
+          }
+        }
+      } // jstOptions
+
+      // clic droit au select, cf $jstree.defaults.contextmenu sur
+      // https://github.com/vakata/jstree/blob/master/src/jstree.contextmenu.js#L58
       /**
-       * Initialise les éléments de dom pour le mode graphique
+       * La liste de nos éléments de menu
+       * @see http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
+       * @private
+       * @param node Le node, avec les propriétés a_attr, icon, text
+       * @param cb à rappeler avec les items du menu contextuel pour ce node
        */
-      function initDomGraphic () {
-        addLoadSrc()
-        // la recherche
-        const searchContainer = dom.addElement(container, 'div', {class: 'search'})
-        dom.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ')
-        searchInput = dom.addElement(searchContainer, 'input', {type: 'text'})
-
-        srcGroup = dom.addElement(container, 'div', {id: 'srcGroup'})
-        dom.addElement(srcGroup, 'span', null, 'arbre source')
-        divSrcTree = dom.addElement(srcGroup, 'div')
-        $srcTree = $(divSrcTree)
-
-        const dstGroup = dom.addElement(container, 'div', {id: 'dstGroup'})
-        dom.addElement(dstGroup, 'strong', null, 'arbre à modifier')
-        dom.addElement(dstGroup, 'em', {style: {'font-size': '0.8em'}}, ' (clic droit pour enlever des éléments ou ajouter des dossiers)')
-        divDstTree = dom.addElement(dstGroup, 'div')
-        $dstTree = $(divDstTree)
-
-        dom.addElement(container, 'p', {style: 'clear:both;'}, "Aperçu d'un élément")
-        iframeApercu = dom.addElement(container, 'iframe', {id: 'apercu'})
+      jstOptions.contextmenu.items = function (node, cb) {
+        // on met une fct car le résultat dépend de l'item sur lequel on fait un clic droit
+        const items = {}
+        const isRacine = (node.parent === '#')
+        const isArbreSansRef = node.a_attr['data-type'] === 'arbre' && !node.a_attr['data-aliasof']
+        const isArbreRef = node.a_attr['data-type'] === 'arbre' && node.a_attr['data-aliasof']
+        // on peut supprimer n'importe quel item sauf la racine
+        if (!isRacine) {
+          items.remove = {
+            label: 'Supprimer',
+            action: actionDelete,
+            shortcut: 46, // suppr, cf http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+            shortcut_label: 'suppr'
+          }
+        }
+        // On peut créer dans la racine ou les éléments arbre qui ne sont pas une ref vers un autre arbre (sinon faut aller éditer l'original)
+        if (isRacine || isArbreSansRef) {
+          items.create = {
+            label: 'Ajouter un dossier',
+            action: actionAddFolder
+          }
+          // idem pour les ressources
+          items.add = {
+            label: 'Ajouter une ressource',
+            action: actionAdd
+          }
+        }
+        // on peut renommer les arbres sans ref
+        if (isArbreSansRef) {
+          items.rename = {
+            label: 'Renommer',
+            action: actionRename
+          }
+        }
+        // un raccourci pour aller éditer une ref
+        if (isArbreRef && !isRacine) {
+          items.editRef = {
+            label: 'Éditer',
+            action: actionEdit
+          }
+        }
+        addLinkApercu(items, node)
+        log('clic droit sur', node)
+        cb(items)
       }
 
-      /**
-       * Charge l'arbre destination
-       * @private
-       * @param arbre
-       */
-      function loadDst (arbre) {
-        const rootElt = jstreeConverter.toJstree(arbre)
-        log('après conversion on va charger', rootElt)
-        rootElt.state = {opened: true}
-        modifIco(rootElt)
-        const jstData = {
-          core: {
-            // https://www.jstree.com/api/#/?f=$.jstree.defaults.core.check_callback
-            check_callback: function (action, node, parent) {
-              log('check_callback avec', arguments)
-              // on accepte le drop seulement dans des arbres (dossiers)
-              if (action === 'copy_node') return (parent.id !== '#' && parent.a_attr && parent.a_attr['data-type'] === 'arbre')
-              // tout le reste est autorisé
-              else return true
-            },
-            data: rootElt
-          },
-          plugins: ['dnd', 'contextmenu'],
-          contextmenu: {
-            select_node: false,
-            // cf $jstree.defaults.contextmenu sur
-            // https://github.com/vakata/jstree/blob/master/src/jstree.contextmenu.js#L58
-            /**
-             * La liste de nos éléments de menu
-             * @see http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
-             * @private
-             * @param node Le node, avec les propriétés a_attr, icon, text
-             * @param cb à rappeler avec les items du menu contextuel pour ce node
-             */
-            items: function (node, cb) {
-              // on met une fct car le résultat dépend de l'item sur lequel on fait un clic droit
-              const items = {}
-              const isRacine = (node.parent === '#')
-              const isArbreSansRef = node.a_attr['data-type'] === 'arbre' && !node.a_attr['data-ref']
-              const isArbreRef = node.a_attr['data-type'] === 'arbre' && node.a_attr['data-ref']
-              // on peut supprimer n'importe quel item sauf la racine
-              if (!isRacine) {
-                items.remove = {
-                  label: 'Supprimer',
-                  action: function (data) {
-                    const inst = $jstree.reference(data.reference)
-                    const node = inst.get_node(data.reference)
-                    if (inst.is_selected(node)) inst.delete_node(inst.get_selected())
-                    else inst.delete_node(node)
-                    isDstModified = true
-                  },
-                  shortcut: 46, // suppr, cf http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-                  shortcut_label: 'suppr'
-                }
-              }
-              // On peut créer dans la racine ou les éléments arbre qui ne sont pas une ref vers un autre arbre (sinon faut aller éditer l'original)
-              if (isRacine || isArbreSansRef) {
-                items.create = {
-                  label: 'Ajouter un dossier',
-                  action: function (data) {
-                    // la cb appellé avec le node créé
-                    function createCb (newNode) {
-                      // ici inst.edit existe bien, mais si c'est le 1er enfant d'un arbre vide
-                      // log('dans createCb', newNode, inst)
-                      inst.edit(
-                        newNode,
-                        'titre',
-                        function (newNode, status) {
-                          if (status) isDstModified = true
-                          log('après modif', inst)
-                        }
-                      )
-                    }
-                    const inst = $jstree.reference(data.reference)
-                    log('avant modif on a ' + inst._cnt + ' childs')
-                    const parentNode = inst.get_node(data.reference)
-                    const newNode = {
-                      icon: 'arbreJstNode',
-                      a_attr: {'data-type': 'arbre'}
-                    }
-                    inst.create_node(parentNode, newNode, 'last', createCb)
-                  }
-                }
-                // idem pour les ressources
-                items.add = {
-                  label: 'Ajouter une ressource',
-                  action: function (data) {
-                    function addCb (newNode) {
-                      log('node créé', newNode)
-                    }
-                    const id = window.prompt('Id de la ressource (oid ou origine/idOrigine)\nPréfixe “sesabibli:” ou “sesacommun:” possible')
-                    if (id) {
-                      const inst = $jstree.reference(data.reference)
-                      const parentNode = inst.get_node(data.reference)
-                      // on tente de charger la ressource demandée
-                      client.getItem(baseId, id, function (error, item) {
-                        if (error) return addError(error)
-                        if (!item) return addError(new Error('Aucune ressource ' + id))
-                        log('item récupéré', item)
-                        const tt = item.type
-                        const attr = {
-                          'data-type': tt,
-                          'data-ref': item.id || item.oid || id
-                        }
-                        if (item.$displayUri) attr[ 'data-displayUri' ] = item.$displayUri
-                        const newNode = {
-                          text: item.titre,
-                          icon: tt + 'JstNode',
-                          a_attr: attr
-                        }
-                        modifIcoChild(newNode)
-                        inst.create_node(parentNode, newNode, 'last', addCb)
-                      })
-                    }
-                  }
-                }
-              }
-              // on peut renommer les arbres sans ref
-              if (isArbreSansRef) {
-                items.rename = {
-                  label: 'Renommer',
-                  action: function (data) {
-                    const inst = $jstree.reference(data.reference)
-                    const node = inst.get_node(data.reference)
-                    inst.edit(node)
-                    isDstModified = true
-                  }
-                }
-              }
-              // un raccourci pour aller éditer une ref
-              if (isArbreRef) {
-                items.editRef = {
-                  label: 'Éditer',
-                  action: function () {
-                    if (isDstModified) page.addError("Enfants de l'arbre modifiés mais non sauvegardé (recharger la page pour annuler les modifications avant d'éditer un arbre enfant)")
-                    else window.location = '/ressource/modifier/' + node.a_attr['data-ref']
-                  }
-                }
-              }
-              addApercu(items, node)
-              log('clic droit sur', node)
-              cb(items)
-            }
-          }, // contextmenu
-          dnd: {
-            inside_pos: 'last'
-          }
-        }
+      $dstTree = build(divDstTree, arbre, jstOptions)
+    } // loadDst
 
-        $dstTree.jstree('destroy')
-        $dstTree.jstree(jstData)
-        // const jstree = $jstree.reference($dstTree)
-        // log('fct qui renvoie les items par défaut', jstree.settings.contextmenu.items.toString())
-
-        // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
-        // on écoute donc l'événement select sur le jstree
-        $dstTree.on('select_node.jstree', function (e, data) {
-          const jstNode = data.node.original
-          log('clic sur', jstNode)
-          if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
-            // on fait du toggle
-            if ($dstTree.jstree('is_open', data.node)) $dstTree.jstree('close_node', data.node)
-            else $dstTree.jstree('open_node', data.node)
-          }
-        })
-      } // loadDst
-
-      /**
-       * Charge l'arbre source
-       * @private
-       * @return {boolean}
-       */
-      function loadSrc () {
-        function showSrc (error, ressource) {
-          if (error) {
-            page.addError('Erreur au chargement de ' + ref + ' : ' + error.toString(), 5)
-          } else if (ressource && ressource.type === 'arbre') {
-            log('arbre', ressource)
-            // on charge
-            const rootElt = jstreeConverter.toJstree(ressource)
-            rootElt.state = {opened: true}
-            modifIco(rootElt)
-            log('On a récupéré un arbre, devenu', rootElt)
-            const jstData = {
-              core: {
-                check_callback: false,
-                data: rootElt
-              },
-              plugins: ['contextmenu', 'dnd', 'search'],
-              contextmenu: {
-                items: function (node, cb) {
-                  // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
-                  const items = {}
-                  addApercu(items, node)
-                  // ajout du 'charger ici'
-                  const ref = node.a_attr && node.a_attr['data-ref']
-                  if (ref && node.a_attr['data-type'] === 'arbre') {
-                    items.replace = {
-                      label: 'Charger ici',
-                      action: function () {
-                        log('Charger en source ' + ref)
-                        $inputRef.val(ref)
-                        loadSrc()
-                      }
-                    }
-                  }
-                  log('clic droit dans la source sur', node)
-                  cb(items)
-                }
-              },
-              dnd: {always_copy: true}
-            }
-            // si on ne détruit pas un éventuel jstree existant il refuse d'en charger un autre
-            const srcTreeRef = $jstree.reference($srcTree)
-            if (srcTreeRef) srcTreeRef.destroy()
-            $srcTree.jstree(jstData)
-            // log("après chargement de l'arbre source on a", $jstree.reference($srcTree))
-
-            // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node car jstree les intercepte
-            // on écoute donc l'événement select sur le jstree
-            $srcTree.on('select_node.jstree', function (e, data) {
-              const jstNode = data.node.original
-              log('clic sur', jstNode)
-              if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
-                // on fait du toggle
-                if ($srcTree.jstree('is_open', data.node)) $srcTree.jstree('close_node', data.node)
-                else $srcTree.jstree('open_node', data.node)
-              }
-            })
-
-            // pour la recherche, on remet le comportement de la modif de l'input sur l'arbre
-            let timer
-            const $searchInput = $(searchInput)
-            $searchInput.keyup(function () {
-              // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
-              // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
-              if (timer) {
-                clearTimeout(timer)
-              }
-              timer = setTimeout(function () {
-                const v = $searchInput.val()
-                $srcTree.jstree(true).search(v)
-              }, 250)
-            })
-          } else {
-            addError('La ressource ' + ref + " n'existe pas ou n'est pas un arbre")
-            log("Ressource chargée qui n'est pas un arbre", ressource)
-          }
-        }
-
-        let ref = $inputRef.val()
-        let localBaseId = baseId
-        log('On va charger en source ' + ref)
-        if (ref) {
-          if (ref.indexOf(':') !== -1) {
-            const chunks = ref.split(':')
-            if (chunks.length === 2) {
-              localBaseId = chunks[0]
-              ref = chunks[1]
-              log('baseId fixé à ' + localBaseId)
-            }
-          }
-          client.getRessource(localBaseId, ref, showSrc)
+    /**
+     * Charge l'arbre source d'après le contenu de $inputRef
+     * @private
+     * @return {boolean}
+     */
+    function loadSrc () {
+      const ref = $inputRef.val()
+      log('On va charger en source ' + ref)
+      if (ref) {
+        const slashPos = ref.indexOf('/')
+        if (slashPos === -1) {
+          fetchPublicRef(baseId, ref, showSrc)
         } else {
-          log('appel de load sans ref')
+          const debut = ref.substr(0, slashPos)
+          if (exists(debut)) fetchPublicRef(debut, ref.substr(slashPos + 1), showSrc)
+          else fetchPublicRef(baseId, ref, showSrc)
         }
-        return false // sinon il submit le form !
-      } // loadSrc
-
-      /**
-       * Remplace l'icone sur un child
-       * @param child
-       */
-      function modifIcoChild (child) {
-        if (child.a_attr && child.a_attr['data-type'] === 'arbre' && child.a_attr['data-ref']) {
-          // on change l'icone
-          child.icon = 'arbreJstNodeRef'
-          // on vire ça pour pas avoir le triangle qui laisse supposer que ça se déplie
-          child.children = []
-        }
-      }
-
-      /**
-       * Remplace récursivement les icones classique des dossiers par une icone 'ref' quand c'est une ref
-       * (qui ne montre pas ses enfants)
-       * @private
-       * @param jstNode
-       */
-      function modifIco (jstNode) {
-        // console.log('modifIco', jstNode)
-        if (jstNode.children && jstNode.children.length && jstNode.children.forEach) jstNode.children.forEach(modifIco)
-        else modifIcoChild(jstNode)
-      }
-
-      /**
-       * Récupère l'arbre jstree et complète le champ enfants avec
-       * @private
-       */
-      function saveDst () {
-        if (!isTextMode) {
-          dstTreeToTextarea()
-        }
-
-        return true
-      }
-
-      /**
-       * Passe en mode texte
-       * @private
-       */
-      function showTxt () {
-        $linkShowTxt.hide()
-        $container.hide()
-        dstTreeToTextarea()
-        $textarea.show()
-        $linkShowGraphic.show()
-        isTextMode = true
-      }
-
-      /**
-       * passe en mode graphique
-       * @private
-       */
-      function showGraphic () {
-        if (!$dstTree) initDomGraphic()
-        try {
-          dstTree.enfants = JSON.parse($textarea.val())
-        } catch (error) {
-          page.addError('json enfants invalide')
-          log.error(error)
-        }
-        $linkShowGraphic.hide()
-        $textarea.hide()
-        log('On va charger en dst', dstTree)
-        loadDst(dstTree)
-        $container.show()
-        $linkShowTxt.show()
-        isTextMode = false
-      }
-
-      // ###########
-      // MAIN
-      // ###########
-      if (typeof window.jQuery === 'undefined') throw new Error('Problème de chargement jQuery')
-      const $ = window.jQuery
-      /* jshint jquery:true */
-      if (typeof jstreeConverter === 'undefined') throw new Error('Problème de chargement des dépendances')
-
-      // les containers (variables locales au module), qui seront affectés par initDom()
-      let iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree
-      // quasi les mêmes jquerifiée
-      let $container, $inputRef, $loadError, $srcTree, $dstTree, $saveButton, $textarea, $linkShowTxt, $linkShowGraphic
-      let isTextMode = true
-      let isDstModified = false
-      // le textarea enfants
-      $textarea = $('#enfants')
-      if (!$textarea) throw new Error('Champ de sauvegarde des enfants non trouvé dans le formulaire')
-      const $jstree = $.jstree // globale pour $.jstree que l'on perd dans les callbacks
-      $saveButton = $('#saveButton')
-      if (!$saveButton) throw new Error('Bouton de sauvegarde non trouvé dans la page')
-
-      const editor = sjtUrl.getParameter('editor') || 'graphic'
-      if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
-      const baseId = options.baseId
-      if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
-      const client = clientFactory(options.sesatheques)
-      jstreeConverter.addSesatheques(options.sesatheques)
-
-      initDom(options)
-      dstTree = arbre
-      if (editor === 'graphic') {
-        initDomGraphic()
-        log("edit de l'arbre", arbre)
-        log('$dstTree', $dstTree)
-
-        // on charge l'arbre à éditer
-        loadDst(arbre)
-        showGraphic()
       } else {
-        $linkShowTxt.hide()
-        $textarea.val(JSON.stringify(arbre.enfants, null, 2))
+        log('appel de load sans ref')
       }
-      // comportement au save
-      $saveButton.click(saveDst)
-    })
-  } catch (error) {
-    page.addError(error)
-  }
+    } // loadSrc
+
+    /**
+     * Récupère l'arbre jstree et complète le champ enfants avec
+     * @private
+     */
+    function saveDst () {
+      if (!isTextMode) {
+        dstTreeToTextarea()
+      }
+
+      return true
+    }
+
+    /**
+     * Affiche l'arbre en src
+     * @param error
+     * @param {Ref} arbre
+     * @return {*}
+     */
+    function showSrc (error, arbre) {
+      const ref = $inputRef.val()
+      if (error) return addTreeError('Erreur au chargement de ' + ref + ' : ' + error.toString(), 5)
+      if (!arbre) return addTreeError(`L’arbre ${ref} n’existe pas`)
+      if (arbre.type !== 'arbre') return addTreeError(`La ressource ${ref} n’est pas un arbre`)
+      // on peut y aller
+      log('arbre source', arbre)
+      const jstOptions = {
+        plugins: ['contextmenu', 'dnd', 'search'],
+        contextmenu: {
+          items: function (node, cb) {
+            // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
+            const links = {}
+            addLinkApercu(links, node)
+            // ajout du 'charger ici'
+            const aliasOf = node.a_attr && node.a_attr['data-aliasof']
+            if (aliasOf && node.a_attr['data-type'] === 'arbre') {
+              links.replace = {
+                label: 'Charger ici',
+                action: function () {
+                  log('Charger en source ' + aliasOf)
+                  $inputRef.val(aliasOf)
+                  loadSrc()
+                }
+              }
+            }
+            log('clic droit dans la source sur', node)
+            cb(links)
+          },
+          // on veut pas qu'un clic droit sélectionne le node
+          // cf https://www.jstree.com/api/#/?f=$.jstree.defaults.contextmenu.select_node
+          select_node: false
+        },
+        dnd: {always_copy: true},
+        listeners: {
+          // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node
+          // car jstree les intercepte, on écoute donc l'événement select_node
+          // cf https://www.jstree.com/api/#/?f=select_node.jstree
+          'select_node.jstree': function (e, data) {
+            const jstNode = data.node.original
+            log('clic sur', jstNode)
+            if (jstNode && jstNode.a_attr && jstNode.a_attr[ 'data-type' ] === 'arbre') {
+              // on fait du toggle
+              if ($srcTree.jstree('is_open', data.node)) $srcTree.jstree('close_node', data.node)
+              else $srcTree.jstree('open_node', data.node)
+            }
+          }
+        }
+      }
+      $srcTree = build(divSrcTree, arbre, jstOptions)
+
+      // pour la recherche, on remet le comportement de la modif de l'input sur l'arbre
+      let timer
+      const $searchInput = $(searchInput)
+      $searchInput.keyup(function () {
+        // on est appelé à chaque fois qu'une touche est relachée dans cette zone de saisie
+        // on lancera la recherche dans 1/4s si y'a pas eu d'autre touche
+        if (timer) {
+          clearTimeout(timer)
+        }
+        timer = setTimeout(function () {
+          const v = $searchInput.val()
+          $srcTree.jstree(true).search(v)
+        }, 250)
+      })
+    } // showSrc
+
+    /**
+     * Passe en mode texte
+     * @private
+     */
+    function showTxt () {
+      $linkShowTxt.hide()
+      $container.hide()
+      dstTreeToTextarea()
+      $textarea.show()
+      $linkShowGraphic.show()
+      isTextMode = true
+    }
+
+    /**
+     * passe en mode graphique
+     * @private
+     */
+    function showGraphic () {
+      if (!$dstTree) initDomGraphic()
+      try {
+        dstTree.enfants = JSON.parse($textarea.val())
+      } catch (error) {
+        addTreeError('json enfants invalide')
+        log.error(error)
+      }
+      $linkShowGraphic.hide()
+      $textarea.hide()
+      log('On va charger en dst', dstTree)
+      loadDst(dstTree)
+      $container.show()
+      $linkShowTxt.show()
+      isTextMode = false
+    }
+
+    // ###########
+    // MAIN
+    // ###########
+    // on laisse l'appli appelante charger son jquery si elle a une version de prédilection
+    // et son jstree (qui devra être compatible avec notre code…)
+    const $ = require('jquery')
+    // attention, window.jQuery n'existe pas, ou avec une autre version
+    if (!$) throw new Error('Problème de chargement jQuery')
+    require('jstree')
+    if (!$.jstree) throw new Error('Problème de chargement jstree')
+
+    const {addNode, build, getEnfants} = require('sesatheque-client/src/jstree')
+    const {addSesatheques, exists, fetchPublicRef} = require('sesatheque-client/src/fetch')
+    /* jshint jquery:true */
+
+    addSesatheques(options.sesatheques)
+
+    // on est compilé par webpack en edit.js, et les css requis seront dans un edit.css
+    // @todo merger ça avec une compilation des autres css par webpack aussi
+    // dom.addCss(options.base + 'edit.css')
+
+    // les containers (variables locales au module), qui seront affectés par initDom()
+    let iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree
+    // quasi les mêmes jquerifiée
+    let $container, $inputRef, $treeError, $srcTree, $dstTree, $saveButton, $textarea, $linkShowTxt, $linkShowGraphic
+    let isTextMode = true
+    let isDstModified = false
+    // le textarea enfants
+    $textarea = $('#enfants')
+    if (!$textarea) throw new Error('Champ de sauvegarde des enfants non trouvé dans le formulaire')
+    // var globale pour $.jstree qui n'existe plus dans les callbacks
+    $saveButton = $('#saveButton')
+    if (!$saveButton) throw new Error('Bouton de sauvegarde non trouvé dans la page')
+
+    const editor = sjtUrl.getParameter('editor') || 'graphic'
+    const baseId = options.baseId
+
+    initDom(options)
+    dstTree = arbre
+    if (editor === 'graphic') {
+      initDomGraphic()
+      log("edit de l'arbre", arbre)
+      log('$dstTree', $dstTree)
+
+      // on charge l'arbre à éditer
+      loadDst(arbre)
+      showGraphic()
+    } else {
+      $linkShowTxt.hide()
+      $textarea.val(JSON.stringify(arbre.enfants, null, 2))
+    }
+    // comportement au save
+    $saveButton.click(saveDst)
+  }) // require.ensure
 }

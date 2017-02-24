@@ -30,7 +30,7 @@
  */
 
 'use strict'
-var commonConfig = require('sesatheque-client/config')
+var commonConfig = require('sesatheque-client/src/config')
 /**
  * Nos listes de types & co, qui changent rarement
  */
