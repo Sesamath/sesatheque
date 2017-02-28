@@ -39,7 +39,7 @@
  *
  * @controller controllerRessource
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) {
   var _ = require('lodash')
   var tools = require('../tools')
   var sjt = require('sesajstools')
@@ -434,19 +434,46 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/modifier/:oid
    */
   controller.get($routes.get('edit', ':oid'), function (context) {
+    function logAndSendError (error) {
+      log.error(error)
+      $ressourcePage.printError(context, error)
+    }
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
     // pas la peine de la charger si on est pas authentifié
     if ($accessControl.isAuthenticated(context)) {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
-        if (error) {
-          log.error(error)
-          $ressourcePage.printError(context, "Probleme d'accès à la base de données")
-        } else if (ressource) {
+        if (error) return logAndSendError(error)
+
+        if (ressource) {
           if ($accessControl.hasPermission('update', context, ressource)) {
             addToken(context, ressource)
-            $ressourcePage.printForm(context, error, ressource)
+            if (ressource.aliasOf) {
+              // faut récupérer l'ensemble des datas de l'original pour transformer l'alias et en faire un ressource copiée
+              $ressourceFetch.fetchOriginal(ressource.aliasOf, function (error, ressourceOriginale) {
+                if (error) return logAndSendError(error)
+                if (!ressourceOriginale) return logAndSendError('Impossible de récupérer la ressource de cet alias')
+                // on peut dissocier
+                delete ressource.aliasOf
+                // màj
+                ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
+                ressource.auteursParents = (ressourceOriginale.auteursParents || []).concat(ressourceOriginale.auteurs || [])
+                if (ressourceOriginale.type === 'arbre') ressource.enfants = ressourceOriginale.enfants
+                ressource.parametres = ressourceOriginale.parametres || {}
+                // sauvegarde de qq infos de l'original
+                ressource.parametres.original = {
+                  rid: ressourceOriginale.rid,
+                  origine: ressourceOriginale.origine,
+                  idOrigine: ressourceOriginale.idOrigine,
+                  version: ressourceOriginale.version
+                }
+                // @todo mettre auteursParent et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
+                $ressourcePage.printForm(context, error, ressource)
+              })
+            } else {
+              $ressourcePage.printForm(context, error, ressource)
+            }
           } else {
             // la ressource existe mais on donne pas l'info si on a pas les droits
             denied404(context, oid)

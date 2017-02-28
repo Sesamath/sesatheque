@@ -38,8 +38,10 @@ module.exports = function (EntityAlias) {
 
   /**
    * Notre entité Alias cf [Entity](lassi/Entity.html)
-   * Utilisé uniquement par l'api externalClone, qui en crée pour les ressources non modifiables
+   * Était utilisé uniquement par l'api externalClone, qui en crée pour les ressources non modifiables
    * et l'api liste/perso qui les récupère pour les filer à sesalab
+   * À virer dès que l'update 11 (qui est le dernier à l'utiliser) sera passé sur toutes les bases
+   * @deprecated
    * @entity EntityAlias
    * @param {Object} initObj Un alias construit avant (Entity mergera après ce construct toutes les propriétés de initObj)
    * @extends Entity

@@ -61,6 +61,10 @@ ressourceComponent.service('$ressourceRepository', function (EntityRessource, En
   return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes)
 })
 
+ressourceComponent.service('$ressourceFetch', function ($ressourceRepository) {
+  return require('./serviceRessourceFetch')($ressourceRepository)
+})
+
 ressourceComponent.service('$ressourceControl', function (EntityRessource) {
   return require('./serviceRessourceControl')(EntityRessource)
 })
@@ -79,8 +83,8 @@ ressourceComponent.controller(function () {
 })
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) { // jshint ignore:line
-  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, EntityRessource) // jshint ignore:line
+ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) { // jshint ignore:line
+  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) // jshint ignore:line
 })
 
 // un controleur html pour des pages publiques sans session
@@ -89,8 +93,8 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource)
+ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, $ressourceFetch) {
+  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, $ressourceFetch)
 })
 
 // import calculatice

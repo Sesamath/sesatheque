@@ -33,7 +33,8 @@
 const anLog = require('an-log')
 const config = require('./config')
 const configCheck = require('./configCheck')
-const sesatheques = require('sesatheque-client/src/sesatheques.js')
+const sesatheques = require('sesatheque-client/src/sesatheques')
+const {exists, addSesatheque} = sesatheques
 
 module.exports = function boot (beforeBootstrapCb, options) {
   const logger = anLog(config.application.name)
@@ -63,13 +64,13 @@ module.exports = function boot (beforeBootstrapCb, options) {
 
   // on s'ajoute à la liste si on n'y est pas
   const myBaseId = config.application.baseId
-  if (!sesatheques.exists(myBaseId)) sesatheques.add(myBaseId, config.application.baseUrl)
+  if (!exists(myBaseId)) addSesatheque(myBaseId, config.application.baseUrl)
   if (config.sesatheques) {
-    Object.keys(config.sesatheques).forEach((k) => {
-      if (!sesatheques.exists(k)) sesatheques.add(k, config.sesatheques[k])
-    })
+    if (Array.isArray(config.sesatheques)) config.sesatheques.forEach((s) => addSesatheque(s.baseId, s.baseUrl))
+    else logger.error('config.sesatheques non-conforme (doit être un tableau de {baseId, baseUrl})')
+  } else {
+    logger('pas d’autre sesatheque connue mise en configuration')
   }
-
   // les déclarations de nos components
   require('./main')
   require('./personne')

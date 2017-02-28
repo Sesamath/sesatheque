@@ -84,7 +84,7 @@ function cleanArbre (arbre) {
 }
 
 /**
- * Change auteurs, contributeurs et auteursParent pour remplacer oid par pid
+ * Change auteurs, contributeurs et auteursParents pour remplacer oid par pid
  * @param {Ressource} ressource
  */
 function cleanAuteurs (ressource) {

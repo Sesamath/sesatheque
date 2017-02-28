@@ -47,7 +47,7 @@ var Ref = require('../constructors/Ref')
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, $ressourceFetch) {
   /**
    * Ajoute notre baseId si c'est absent d'item
    * @param {Ressource|Ref} item
@@ -584,93 +584,51 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant en auteur
    * (sinon il pourra pas la supprimer), avec publié et privé
-   * Retourne {@link reponseRessourceOid}
-   * @route GET /api/externalClone/:oid?baseId=url
+   * Retourne {@link Ref}
+   * Utiliser la méthode sesatheque-client:cloneItem
+   * @route GET /api/externalClone/:baseId/:oid
    */
-  controller.get('externalClone/:oid', function (context) {
+  controller.get('externalClone/:baseId/:oid', function (context) {
     /**
      * Ajoute $droits et envoie
      * @private
      * @param item
      */
     function sendItem (item) {
-      item.$droits = 'WD'
+      item.$droits = 'D'
+      // modif autorisée sur les ressources éditables seulement (qui deviendront à l'édition des ressources dérivées)
+      if (configRessource.editable[item.type]) item.$droits += 'W'
       $json.send(context, null, item)
     }
 
-    var oid = context.arguments.oid
-    var baseId = context.get.baseId
+    const oid = context.arguments.oid
+    const baseIdOrigine = context.arguments.baseId
     try {
-      if (!baseId) throw new Error('Il faut préciser une baseId pour la ressource à cloner')
-      if (!oid) throw new Error('Paramètre oid manquant')
-      var base = config.sesatheques[baseId]
-      if (!base) throw new Error('Sésathèque ' + baseId + ' inconnue')
-      // on normalise avec slash de fin
-      if (base.substr(-1) !== '/') base += '/'
-      if (base === config.application.baseUrl) throw new Error('La source est déjà sur cette sésathèque, clonage externe inutile')
+      var baseUrl = config.sesatheques[baseIdOrigine]
+      if (!baseUrl) throw new Error('Sésathèque ' + baseIdOrigine + ' inconnue')
       var userOid = $accessControl.getCurrentUserOid(context)
       if (!userOid) throw new Error('Vous devez être authentifié pour créer une ressource')
       // on peut aller chercher la ressource
-      var url = base + 'api/ressource/' + oid
-      var options = {
-        uri: url,
-        gzip: true,
-        json: true,
-        timeout: 3000
-      }
-      request(options, function (error, response, ressource) {
-        if (error) return $json.send(context, error)
-        if (response.statusCode === 200 && ressource) {
-          log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
-          if (configRessource.editable[ressource.type]) {
-            // on vire ce que l'on ne veut plus
-            ['oid', 'idOrigine', 'version', 'archiveOid'].forEach(function (prop) {
-              if (ressource.hasOwnProperty(prop)) delete ressource[prop]
-            })
-            // on impose qq propriétés
-            ressource.origine = config.application.baseId
-            ressource.dateCreation = new Date()
-            ressource.publie = true
-            if (!ressource.aliasOf) {
-              ressource.aliasOf = baseId + '/' + oid
-              if (ressource.auteurs && ressource.auteurs.length) {
-                if (!ressource.auteursParents) ressource.auteursParents = []
-                ressource.auteurs.forEach(function (auteur) {
-                  ressource.auteursParents.push(base + 'auteur/' + auteur)
-                })
-              }
-            }
-            ressource.auteurs = [ userOid ]
-            ressource.restriction = configRessource.constantes.restriction.prive
-            if (!ressource.relations) ressource.relations = []
-            ressource.relations.push([configRessource.constantes.relations.estVersionDe, base + ':' + oid])
-            $ressourceRepository.save(ressource, function (error, ressource) {
-              if (error) $json.send(context, error)
-              else if (ressource && ressource.oid) sendItem(new Ref(ressource))
-              else $json.sendError(context, new Error("L'enregistrement de la ressource a échoué"))
-            })
-          } else {
-            // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource
-            $ressourceRepository.loadByAlias(baseId + '/' + oid, function (error, alias) {
-              if (error) return $json.sendError(context, error.toString())
-              if (alias) return $json.sendOk(context, {oid: alias.oid})
-              // faut le créer
-              const data = {}
-                ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => { data[p] = ressource[p] })
-              data.aliasOf = myBaseId + '/' + ressource.oid
-              data.auteursParents = ressource.auteurs
-              data.auteurs = [myBaseId + '/' + userOid]
-              alias = EntityRessource.create(data)
-              alias.store(function (error, ressAlias) {
-                if (error) return $json.sendError(context, error)
-                if (ressAlias) return $json.sendOk(context, {oid: ressAlias.oid})
-                $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
-              })
-            })
-          }
-        } else {
-          $json.notFound(context, 'La ressource ' + oid + " n'existe pas sur la sesatheque " + base)
-        }
+      $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, function (error, ressource) {
+        log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
+        if (error) return $json.sendError(context, error.toString())
+        // on passe par Ref pour ne garder que l'essentiel
+        const aliasData = new Ref(ressource)
+        // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
+        aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
+        aliasData.auteurs = [myBaseId + '/' + userOid]
+        aliasData.origine = config.application.baseId
+        aliasData.dateCreation = new Date()
+        aliasData.publie = true
+        aliasData.restriction = configRessource.constantes.restriction.prive
+        // ajouter la relation
+        aliasData.relations = ressource.relations = []
+        aliasData.relations.push([configRessource.constantes.relations.estVersionDe, aliasData.aliasOf])
+        EntityRessource.create(aliasData).store(function (error, ressAlias) {
+          if (error) return $json.sendError(context, error)
+          if (ressAlias) return sendItem(new Ref(ressAlias))
+          $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
+        })
       })
     } catch (error) {
       $json.sendError(context, error.toString())
@@ -1034,7 +992,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Si le titre et la catégorie sont manquants, ou que l'on passe ?merge=1 à l'url, ça merge avec la ressource
    * existante que l'on update, sinon on écrase (ou on créé si elle n'existait pas)
    *
-   * Retourne {@link reponseRessourceOid} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
+   * Retourne {@link reponseRessourceOid} ou {@link Ref} si on le réclame avec ?format=ref
    * @route POST /api/ressource
    * @param {object} Les propriétés de la ressource
    */
@@ -1048,7 +1006,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
-   * Au format {@link reponseRessource} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
+   * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
    * @Route GET /api/ressource/:oid
    * @param {Integer} oid
    */
@@ -1061,7 +1019,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
-   * Au format {@link reponseRessource} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
+   * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
    * @route GET /api/ressource/:origine/:idOrigine
    * @param {string} :origine
    * @param {string} :idOrigine
@@ -1085,17 +1043,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.options('ressource/:oid', optionsDeleteOk)
 
   /**
-   * Delete alias par oid, retourne {@link reponseDeleted}
-   * @route DEL /api/ressource/:oid
-   * @param {Integer} oid
-   * @deprecated
-   */
-  controller.delete('alias/:oid', function (context) {
-    $json.sendError(context, new Error('Cette méthode ne doit plus être utilisée'))
-  })
-  controller.options('alias/:oid', optionsDeleteOk)
-
-  /**
    * Delete par id d'origine, retourne {@link reponseDeleted}
    * @route DEL /api/ressource/:origine/:idOrigine
    * @param {string} :origine
@@ -1109,7 +1056,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
-   * Retourne {@link reponseRessourceOid} ou {@link reponseRessourceAlias} si on le réclame avec ?format=alias
+   * Retourne {@link reponseRessourceOid} ou {@link Ref} si on le réclame avec ?format=ref
    * @param {Integer} [oid]
    * @param {string} [origine]
    * @param {string} [idOrigine]
@@ -1166,19 +1113,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
  * @property {string}   [error]    Message d'erreur éventuel
  * @property {string[]} [warnings] Avertissements éventuels sur la ressource (incohérences ne justifiant pas une erreur et le rejet de l'enregistrement)
  * @property {Integer}  oid
- */
-/**
- * La réponse à une demande de ressource au format alias Cf {@link $ressourceConverter.toRef}
- * @typedef reponseRessourceAlias
- * @type {Object}
- * @property {boolean}   success
- * @property {string}    [error]
- * @property {Integer}   ref
- * @property {string}    titre
- * @property {Integer[]} categories
- * @property {string}    type
- * @property {boolean}   public
- * @property {string}    base
  */
 
 /**

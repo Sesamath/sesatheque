@@ -147,7 +147,7 @@ const config = {
   // urls absolues des sésathèques utilisées par nos ressources (pour les alias, par ex quand
   // des sesalab connectés à plusieurs sésathèques mettent des ressources de l'une
   // dans des arbres de l'autre)
-  // sous la forme baseId:baseUrl
+  // sous la forme baseId:baseUrl, ou nomQcq{id: baseId, baseUrl:laBaseHttpAbsolue, apiToken: leToken}
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
   sesatheques: {},
   // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences

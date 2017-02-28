@@ -85,19 +85,22 @@ module.exports = {
   apiIpsAllowed: [
     // une éventuelle liste d'ip hors lan autorisées à utiliser les tokens
   ],
+
   // urls absolues des sésathèques utilisées par nos ressources
   // (pour les alias d'une sesatheque dans une autre, mis par ex par un sesalab)
-  // ces noms doivent être les mêmes que ceux mis dans les sesalabs qui nous contactent
+  // les baseId doivent être les mêmes que ceux mis dans les sesalabs qui nous contactent,
+  // et identiques à ceux de sesatheque-client/src/sesatheques.js s'ils y sont
   // si on est baseIdRegistrar on répondra sur /api/baseId/:id pour ces baseId
-  // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
-  sesatheques: {
-    // sesatheque des ressources présentées à gauche dans un sesalab
-    idSesatheque1: 'https://…/',
-    // sesatheque des ressources personnelles des utilisateurs d'un sesalab
-    idSesatheque2: 'https://…/'
-    // autre sesatheque dont on peut référencer des items
-    // …
-  },
+  // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle est toujours ajoutée à la liste au boot
+  sesatheques: [
+    {
+      baseId: 'nomUnique', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
+      baseUrl: 'http…/',
+      apiTokens: 'un token qu’elle autorise' // pour cloner ses ressources privées ici
+    }, {
+      // …
+    }
+  ],
   // les sesalab qui nous causent (et propagent ici une authentification)
   // Attention, toutes les sésathèques qu'ils utilisent doivent être listées dans le module
   // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
