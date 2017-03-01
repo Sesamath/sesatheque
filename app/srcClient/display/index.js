@@ -43,6 +43,7 @@ var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var sjt = require('sesajstools')
 var sjtUrl = require('sesajstools/http/url')
+const sesatheques = require('sesatheque-client/src/sesatheques')
 
 var page = require('../page/index')
 var Resultat = require('../../constructors/Resultat')
@@ -273,13 +274,20 @@ function feedback (retour) {
  */
 function display (ressource, options, next) {
   // console.log('options avant page.init', options)
-  page.init(options, function (error) {
-    if (error) {
-      next(error)
-    } else {
-      divFeedback = wd.getElementById('pictoFeedback')
-      load(ressource, options, next)
+
+  // on accepte des baseId dans options.base
+  if (typeof options.base === 'string' && options.base.substr(0, 4) !== 'http') {
+    try {
+      options.base = sesatheques.getBaseUrl(options.base)
+    } catch (error) {
+      return next(error)
     }
+  }
+
+  page.init(options, function (error) {
+    if (error) return next(error)
+    divFeedback = wd.getElementById('pictoFeedback')
+    load(ressource, options, next)
   })
 }
 
@@ -300,8 +308,10 @@ if (typeof window !== 'undefined') {
  * @typedef displayOptions
  * @type {Object}
  * @property {string}           [base=/]                Le préfixe de chemin vers la racine de la sésathèque.
- *                                                        Il faut passer un chemin http://… complet si ce module est utilisé
- *                                                        sur un autre domaine que la sésathèque
+ *                                                        Si ce module est utilisé sur un autre domaine que la sésathèque
+ *                                                        il faut passer une baseId connue de sesatheque-client
+ *                                                        ou un chemin http://… complet
+ *
  * @property {Element}          [container]             L'élément html qui servira de conteneur au plugin pour afficher sa ressource, créé si non fourni
  * @property {Element}          [errorsContainer]       L'élément html pour afficher des erreurs éventuelles, créé si non fourni
  * @property {boolean}          [verbose=false]         Passer true pour ajouter des log en console
