@@ -1,12 +1,6 @@
 /**
- * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git
- *
- * Dans un fichier js (et pas json) pour pouvoir mettre des commentaires
- *
- * Ce fichier devrait pouvoir être copié tel quel dans _private et fonctionner avec docker-compose.yml
- *
- * Pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
- * prendre plutôt configGlobal.js (à renommer en config.js) et commun.js
+ * Config de sesathequeGlobal pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
+ * Fichier à copier dans _private/config.js
  */
 module.exports = {
   application: {
@@ -34,18 +28,6 @@ module.exports = {
       debug: false // mysql2 distingue pas, et c'est très verbeux de mettre à true
       // debug: ['ComQueryPacket', 'ErrorPacket'] // Cf node_modules/mysql/lib/protocol/packets/ pour la liste
     }
-    /* pour pgsql on avait dans les anciens lassi
-    database: {
-     client    : 'pg',
-     connection: {
-       host    : 'xxx',
-       port    : '5432',
-       user    : 'xxx',
-       password: 'xxx',
-       database: 'xxx'
-       }
-     }
-     /* */
   },
   $server: {
     hostname: 'localhost',
@@ -97,8 +79,9 @@ module.exports = {
   sesatheques: [
     {
       baseId: 'localhost3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
-      baseUrl: 'http://localhost:3003/'
-      // apiTokens: un token qu’elle utiliserait pour cloner ses ressources privées ici
+      baseUrl: 'http://localhost:3003/',
+      // un token à utiliser pour son api
+      apiTokens: 'VRYm7GT1h8L7&BJE§Uul!dWX/CCqmSZEpad'
     }
     // on pourrait en mettre d'autres…
   ],

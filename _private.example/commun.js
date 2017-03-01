@@ -1,19 +1,13 @@
 /**
- * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git
- *
- * Dans un fichier js (et pas json) pour pouvoir mettre des commentaires
- *
- * Ce fichier devrait pouvoir être copié tel quel dans _private et fonctionner avec docker-compose.yml
- *
- * Pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
- * prendre plutôt configGlobal.js (à renommer en config.js) et commun.js
+ * Config de sesathequeGlobal pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
+ * Fichier à copier dans _private/config.js
  */
 module.exports = {
   application: {
-    name: 'sesatheque', // utilisé en préfixe des message de log et dans qq message
-    baseId: 'localhost3001', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
-    baseIdRegistrar: 'localhost3001', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
-    baseUrl: 'https://localhost:3001/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
+    name: 'sesathequePrivate', // utilisé en préfixe des message de log et dans qq message
+    baseId: 'localhost3003', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
+    baseIdRegistrar: 'localhost3003', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
+    baseUrl: 'https://localhost:3003/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
   },
@@ -21,9 +15,9 @@ module.exports = {
     database: {
       host: 'localhost',
       port: '3306',
-      user: 'sesatheque',
-      password: 'sesatheque',
-      database: 'sesatheque',
+      user: 'stcommun',
+      password: 'stcommun',
+      database: 'stcommun',
       connectTimeout: 1000,
       trace: true, // true par défaut, mettre false en prod ?
       // cf https://github.com/felixge/node-mysql/#pool-options
@@ -34,22 +28,10 @@ module.exports = {
       debug: false // mysql2 distingue pas, et c'est très verbeux de mettre à true
       // debug: ['ComQueryPacket', 'ErrorPacket'] // Cf node_modules/mysql/lib/protocol/packets/ pour la liste
     }
-    /* pour pgsql on avait dans les anciens lassi
-    database: {
-     client    : 'pg',
-     connection: {
-       host    : 'xxx',
-       port    : '5432',
-       user    : 'xxx',
-       password: 'xxx',
-       database: 'xxx'
-       }
-     }
-     /* */
   },
   $server: {
     hostname: 'localhost',
-    port: 3001
+    port: 3003
   },
   $rail: {
     cookie: {
@@ -57,16 +39,6 @@ module.exports = {
     },
     session: {
       secret: 'ap68!&nVGq§ot' // en mettre un autre dans _private/config !
-    }
-  },
-  /* pour modifier le comportement par défaut on peut préciser ici qq overrides,
-  cf app/config.js pour les valeurs par défaut
-  par ex pour empêcher un formateur de créer des groupes ou des ressources ici */
-  components: {
-    personne: {
-      roles: {
-        formateur: {create: false, createGroupe: false}
-      }
     }
   },
   logs: {
@@ -82,7 +54,9 @@ module.exports = {
   // et en dernier
   extraDependenciesLast: ['sesalab-sso'],
   apiTokens: [
-    // mettre ici d'éventuels tokens utilisables pour poster sur l'api (sans session préalable)
+    // mettre ici d'éventuels tokens utilisables pour poster sur notre api (sans session préalable)
+    // ici celui de sesathequeGlobal
+    'VRYm7GT1h8L7&BJE§Uul!dWX/CCqmSZEpad'
   ],
   apiIpsAllowed: [
     // une éventuelle liste d'ip hors lan autorisées à utiliser les tokens
@@ -96,9 +70,9 @@ module.exports = {
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle est toujours ajoutée à la liste au boot
   sesatheques: [
     {
-      baseId: 'localhost3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
-      baseUrl: 'http://localhost:3003/'
-      // apiTokens: un token qu’elle utiliserait pour cloner ses ressources privées ici
+      baseId: 'localhost3001', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
+      baseUrl: 'http://localhost:3001/'
+      // apiTokens: un token à utiliser pour son api
     }
     // on pourrait en mettre d'autres…
   ],
