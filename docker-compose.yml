@@ -1,0 +1,30 @@
+version: '2'
+services:
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sesatheque
+      MYSQL_USER: sesatheque
+      MYSQL_PASSWORD: sesatheque
+
+  app:
+    build: ./docker/node
+    ports:
+      - 3001:3001
+    volumes:
+      - .:/app
+    links:
+      - mysql
+      - memcache
+    command: npm run start:dev
+
+  memcache:
+    image: memcached
+
+  phpmyadmin:
+    image: nazarpc/phpmyadmin
+    ports:
+      - 3042:80
+    links:
+      - mysql
