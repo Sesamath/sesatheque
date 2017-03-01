@@ -149,7 +149,7 @@ const config = {
   // dans des arbres de l'autre)
   // sous la forme baseId:baseUrl, ou nomQcq{id: baseId, baseUrl:laBaseHttpAbsolue, apiToken: leToken}
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
-  sesatheques: {},
+  sesatheques: [],
   // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences
   // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
   sesalabs: [],
