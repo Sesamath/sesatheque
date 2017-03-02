@@ -20,6 +20,8 @@
     "lint": "eslint app",
     "maj": "git pull && npm install && npm run build",
     "start": "node app/index.js",
+    "start:commun": "env SESATHEQUE_CONF=commun node app/index.js",
+    "start:both": "npm start & npm run start:commun",
     "start:dev": "node_modules/nodemon/bin/nodemon.js -e js --legacy-watch --watch app --watch _private app/index.js",
     "start:devcommun": "env SESATHEQUE_CONF=commun node_modules/nodemon/bin/nodemon.js -e js --legacy-watch --watch app --watch _private app/index.js",
     "startClient": "hjs-dev-server",
