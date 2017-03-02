@@ -48,11 +48,11 @@ module.exports = function display (ressource, options, next) {
   require.ensure(['jquery', 'jstree', 'sesatheque-client/src/jstree'], function (require) {
     const stJstree = require('sesatheque-client/src/jstree')
     const $ = require('jquery')
+    require('jstree')
     let error
     try {
       log('arbre.display avec', ressource)
       if (options) log('et les options', options)
-      if (typeof window.jQuery === 'undefined') throw new Error("jQuery n'a pas été chargé")
       /* jshint jquery:true */
       var container = options.container
       if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
