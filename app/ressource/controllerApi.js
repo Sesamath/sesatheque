@@ -969,6 +969,27 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
+   * Retourne le rid d'une ressource (même privée, juste pour avoir la correspondance
+   * origine/idOrigine => rid ou vérifier que l'id existe)
+   * @route GET /api/public/getRid?id=xxx
+   */
+  controller.get('public/getRid', function (context) {
+    let id = context.get.id
+    if (id) {
+      const slashPos = id.indexOf('/')
+      const debut = id.substr(0, slashPos)
+      if (debut === myBaseId) id = id.substr(slashPos + 1)
+      $ressourceRepository.load(id, function (error, ressource) {
+        if (error) $json.sendError(context, error.toString())
+        else if (ressource) $json.sendOk(context, {rid: ressource.rid})
+        else $json.sendOk(context, {rid: null, error: 'pas de ressource ' + id})
+      })
+    } else {
+      $json.sendError(context, 'id manquant')
+    }
+  })
+
+  /**
    * Denied (rerouting interne ressource => public si on a ni session ni token)
    * @internal
    * @route DEL /api/public/:origine/:idOrigine

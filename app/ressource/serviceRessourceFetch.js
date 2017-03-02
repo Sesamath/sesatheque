@@ -33,7 +33,7 @@
 
 const request = require('request')
 const sesatheques = require('sesatheque-client/src/sesatheques.js')
-const {getBaseUrl, getRidComponents} = sesatheques
+const {exists, getBaseUrl, getComponents, getRidComponents} = sesatheques
 
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId
@@ -54,7 +54,7 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
    * Renvoie une ressource récupérée ailleurs (sans son oid pour éviter les accidents)
    * @memberOf $ressourceFetch
    * @param {string} rid
-   * @param {ressourceCallback} next
+   * @param {ressourceCallback} next (renvoie une EntityRessource si c'est local et ses propriétés sinon)
    */
   function fetch (rid, next) {
     try {
@@ -87,10 +87,45 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
   }
 
   /**
+   * Passe un rid à next
+   * @param mixedId un oid ou baseId/oid ou baseId/origine/idOrigine ou origine/idOrigine
+   * @param next appelé avec (error, rid)
+   */
+  function fetchRid (mixedId, next) {
+    function send (error, ressource) {
+      if (error) next(error)
+      else if (ressource) next(null, ressource.rid)
+      else next(new Error(`aucune ressource ${mixedId}`))
+    }
+    let [baseId, id] = getComponents(mixedId)
+    if (baseId === myBaseId) {
+      $ressourceRepository.load(id, send)
+    } else if (exists(baseId)) {
+      // faut appeler son /api/getRid?id=xxx
+      const baseUrl = getBaseUrl(baseId)
+      var options = {
+        uri: baseUrl + 'api/public/getRid?id=' + id,
+        json: true,
+        timeout: 3000
+      }
+      request(options, function (error, response, data) {
+        if (error) return next(error)
+        if (response.statusCode === 200 && data && data.rid) return next(null, data.rid)
+        if (data && data.error) return next(new Error(data.error))
+        error = new Error(`${options.uri} ne retourne rien de compréhensible`)
+        log.error(error, data)
+        next(error)
+      })
+    } else {
+      $ressourceRepository.load(mixedId, send)
+    }
+  }
+
+  /**
    * Renvoie une ressource originale récupérée ailleurs (sans son oid pour éviter les accidents),
    * fait une 2e requête si aliasOf est lui-même un alias mais passe une erreur si la 2e est encore un alias
    * @memberOf $ressourceFetch
-   * @param {string} rid
+   * @param {string} aliasOf
    * @param {ressourceCallback} next
    */
   function fetchOriginal (aliasOf, next) {
@@ -115,6 +150,7 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
 
   return {
     fetch,
-    fetchOriginal
+    fetchOriginal,
+    fetchRid
   }
 }
