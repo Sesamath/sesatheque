@@ -545,9 +545,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @memberOf $ressourceRepository
    * @param {string}   visibilite peut valoir public | correction | all | auteur/id | groupe/nom
    * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
-   *                                filters : un tableau d'objets {index:'indexAFiltrer', values:valeur},
-   *                                          où valeur peut être undefined ou un tableau de valeurs
-   *                                          (si non précisé filtrera sur les ressources ayant cet index)
+   *                                filters : un tableau d'objets {index:'indexAFiltrer', values:valeurs},
+   *                                          où valeurs peut être un tableau de valeurs ou
+   *                                          [undefined] (ça filtrera sur les ressources ayant cet index)
    *                                orderBy : L'index sur lequel trier
    *                                order   : asc ou desc
    *                                start   : L'indice de la 1re valeur à remonter
