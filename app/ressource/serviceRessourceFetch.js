@@ -31,7 +31,6 @@
 
 'use strict'
 
-const _ = require('lodash')
 const request = require('request')
 const sesatheques = require('sesatheque-client/src/sesatheques.js')
 const {getBaseUrl, getRidComponents} = sesatheques
@@ -46,6 +45,11 @@ const myBaseId = appConfig.application.baseId
  */
 
 module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
+  const tokens = {}
+  appConfig.sesatheques.forEach((s) => {
+    if (s.baseId && s.apiToken) tokens[s.baseId] = s.apiToken
+  })
+
   /**
    * Renvoie une ressource récupérée ailleurs (sans son oid pour éviter les accidents)
    * @memberOf $ressourceFetch
@@ -63,16 +67,9 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
         json: true,
         timeout: 3000
       }
-      let apiToken
-      _.each(appConfig.sesatheques, (s) => {
-        if (appConfig.sesatheques[s].apiToken) {
-          apiToken = appConfig.sesatheques[s].apiToken
-          return false
-        }
-      })
-      if (apiToken) {
+      if (tokens[baseId]) {
         options.uri = baseUrl + 'api/ressource/' + oid
-        options.headers = {'X-ApiToken': apiToken}
+        options.headers = {'X-ApiToken': tokens[baseId]}
       }
       request(options, function (error, response, ressource) {
         if (error) return next(error)
