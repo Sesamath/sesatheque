@@ -33,7 +33,6 @@
 const flow = require('an-flow')
 const applog = require('an-log')(lassi.settings.application.name)
 const config = require('../../config')
-const Ref = require('../../constructors/Ref')
 
 const myBaseId = config.application.baseId
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
