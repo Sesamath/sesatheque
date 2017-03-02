@@ -1,3 +1,5 @@
+var path = require('path')
+
 /**
  * Config de sesathequeGlobal pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
  * Fichier à copier dans _private/config.js
@@ -42,9 +44,10 @@ module.exports = {
     }
   },
   logs: {
+    dir: path.join(__dirname, '../logs_commun'),
     debugExclusions: ['cache'],
     perf: 'perf.log'
-  }, /* */
+  },
   memcache: {host: '127.0.0.1', port: 11211},
   // noCache:true,
   // les modules à précharger avant bootstrap

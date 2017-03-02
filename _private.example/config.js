@@ -1,3 +1,5 @@
+var path = require('path')
+
 /**
  * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git
  *
@@ -69,10 +71,12 @@ module.exports = {
       }
     }
   },
+  // les logs
   logs: {
+    dir: path.join(__dirname, '../logs_commun'),
     debugExclusions: ['cache'],
     perf: 'perf.log'
-  }, /* */
+  },
   memcache: {host: '127.0.0.1', port: 11211},
   // noCache:true,
   // les modules à précharger avant bootstrap
