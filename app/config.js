@@ -73,7 +73,7 @@ const config = {
     homeTitle: 'Bienvenue sur cette Sésathèque',
     // la référence pour valider des baseId, toutes les sesatheques enregistrées chez un registrar
     // peuvent référencer des items d'une autre du même registrar
-    baseIdRegistrar: 'http://bibliotheque.sesamath.net',
+    baseIdRegistrar: 'sesabibli',
     defaultViewsPath: 'app/views',
     // mis dans _private/config.js car dépendant de l'instance
     baseId: 'notConfigured', // l'id de cette sésathèque
@@ -193,7 +193,6 @@ if (config.application.staging === 'prod' && config.$entities.database.debug) {
 }
 // on ajoute toujours un slash de fin à baseUrl et baseIdRegistrar
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
-if (config.application.baseIdRegistrar.substr(-1) !== '/') config.application.baseIdRegistrar += '/'
 
 // Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,
 // cf _private.example/config.js

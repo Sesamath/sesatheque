@@ -34,6 +34,7 @@
  * Configuration de l'application
  */
 const request = require('request')
+const sesatheques = require('sesatheque-client/src/sesatheques')
 
 module.exports = function configCheck (config) {
   const appLog = require('an-log')(config.application.name)
@@ -46,9 +47,9 @@ module.exports = function configCheck (config) {
     if (!config.application[p]) throw new Error(`config.application.${p} est obligatoire`)
   })
   if (!config.sesatheques) throw new Error(`config.sesatheques est obligatoire`)
-  const url = config.application.baseIdRegistrar + 'api/baseId/' + config.application.baseId
   const baseId = config.application.baseId
   const baseUrl = config.application.baseUrl
+  const url = sesatheques.getBaseUrl(config.application.baseIdRegistrar) + 'api/baseId/' + baseId
   // on ajoute notre baseId à la liste des sesatheques si ce n'est pas encore le cas
   if (!config.sesatheques[baseId]) config.sesatheques[baseId] = baseUrl
   // on vérifie que baseIdRegistrar connait notre baseId, sinon on le signale
