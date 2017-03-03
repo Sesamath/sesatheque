@@ -32,6 +32,14 @@
 'use strict'
 
 module.exports = function ($cache, $settings) {
+  /**
+   * Une callback qui ne fait rien sinon logguer une éventuelle erreur
+   * @private
+   */
+  function dummy (error) {
+    if (error) log.error(error)
+  }
+
   var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
 
   /**
@@ -76,7 +84,7 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cachePersonne
    */
   $cachePersonne.set = function (personne, next) {
-    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl)
+    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl, dummy)
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }
 

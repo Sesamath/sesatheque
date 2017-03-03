@@ -31,6 +31,7 @@
 
 'use strict'
 const anLog = require('an-log')
+const log = require('./tools/log.js')
 const config = require('./config')
 const configCheck = require('./configCheck')
 const sesatheques = require('sesatheque-client/src/sesatheques')
@@ -106,9 +107,10 @@ module.exports = function boot (beforeBootstrapCb, options) {
   // ou app.controller('path', function () {this.get('path', function (context) {…} })
   global.app = sesatheque
 
+  // notre fct de log en global
+  global.log = log
+
   beforeBootstrapCb(lassi, sesatheque, dependancies)
-  // si le beforeBootstrapCb n'a pas ajouté de logger en global, on en met un inoffensif ici
-  if (!global.log) global.log = () => undefined
 
   // vérif de config au démarrage
   lassi.on('startup', function () {
