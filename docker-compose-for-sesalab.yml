@@ -1,6 +1,6 @@
 version: '2'
 services:
-  mysqlGlobal:
+  mysql-global:
     image: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -8,7 +8,7 @@ services:
       MYSQL_USER: sesatheque
       MYSQL_PASSWORD: sesatheque
 
-  mysqlPrivate:
+  mysql-private:
     image: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -16,34 +16,27 @@ services:
       MYSQL_USER: stcommun
       MYSQL_PASSWORD: stcommun
 
-  appGlobal:
+  app-global:
     build: ./docker/node
     ports:
       - 3001:3001
     volumes:
       - .:/app
     links:
-      - mysqlGlobal
+      - mysql-global
       - memcache
     command: npm run start:dev
 
-  appPrivate:
+  app-private:
     build: ./docker/node
     ports:
       - 3003:3003
     volumes:
       - .:/app
     links:
-      - mysqlGlobal
+      - mysql-private
       - memcache
     command: npm run start:devcommun
 
   memcache:
     image: memcached
-
-  phpmyadmin:
-    image: nazarpc/phpmyadmin
-    ports:
-      - 3042:80
-    links:
-      - mysql

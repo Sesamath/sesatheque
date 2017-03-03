@@ -31,3 +31,49 @@ Ensuite
     
 Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et `./scripts`, en ajoutant par ex
 `PATH="$PATH:./node_modules/.bin:./scripts"` à votre ~/.bashrc
+
+
+Installation rapide avec Docker, pour sesalab
+============
+- git clone `git@src.sesamath.net:sesatheque && cd sesatheque`
+
+- `mkdir app/logs`
+
+- `cp _private.exemple-docker-sesamath/ _.private`
+
+- editer `/etc/hosts` et ajouter les deux lignes 
+
+```
+127.0.0.1       bibliotheque.local
+127.0.0.1       commun.local 
+```
+
+- récupérer votre adresse réseau en faisant `ifconfig`, en général de la forme `192.168.1.x` (cela permettra au container sesatheque de communiquer directement avec le container sesalab)
+
+- dans *sesamath* `_private/config.js` 
+   - utiliser l'adresse réseau pour le baseUrl de l'application, ex: `baseUrl: 'http://192.168.1.187:3002'``
+   - définir les bibliothèques locales :
+
+```
+    sesatheques : [
+      {baseId: 'biblilocal3001', baseUrl: 'http://bibliotheque.local:3001/'},
+      {baseId: 'communlocal3003', baseUrl: 'http://commun.local:3003/'}
+    ],
+```
+
+- dans *sesatheque* `_private/commun.js` et  `_private/config.js`  définir la baseUrl de sesalab avec l'adresse réseau, ex: `baseUrl: 'http://192.168.1.187:3002/'``
+
+- pour importer les bases MySQL il peut être utile d'exposer les containers MySQL sur le localhost en ajoutant un paramètre de ce type sur `mysql-private` et `mysql-global` dans docker-compose-for-sesalab.yml, ex:
+
+``` 
+mysql-global:
+    image: mysql
+    ports:
+      - 12345:3306
+```
+
+- démarrer le docker sesatheque (et sesalab par ailleurs)
+
+```
+docker-compose -f docker-compose-for-sesalab.yml up
+```
