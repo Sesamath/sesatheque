@@ -121,8 +121,6 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
     appLog("FIN config de l'application " + $settings.get('application.name', 'inconnue') +
       ' en mode ' + $settings.get('application.staging', 'inconnu'))
   })
-
-  require('./sesalab-admin')
 }
 
 module.exports = function app (afterBootCallback) {

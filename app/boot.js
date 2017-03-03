@@ -42,7 +42,6 @@ module.exports = function boot (beforeBootstrapCb, options) {
   options.root = __dirname
   // appel du module lassi qui met en global une variable lassi
   require('lassi')(options)
-  // sesalab-admin sera appelé après mise en global de l'appli
 
   global.isProd = !options.cli && config.application.staging === 'prod'
 
@@ -102,8 +101,7 @@ module.exports = function boot (beforeBootstrapCb, options) {
   // console.log('au boot', dependancies)
   var sesatheque = lassi.component('sesatheque', dependancies)
 
-  // pour sesalab-admin et sesalab-sso
-  // utile aussi pour des modules npm qui voudrait ajouter des services sans définir de composants pour autant
+  // utile pour des modules npm qui voudrait ajouter des services sans définir de composants pour autant
   // avec app.service('$newService', function () {…})
   // ou app.controller('path', function () {this.get('path', function (context) {…} })
   global.app = sesatheque
