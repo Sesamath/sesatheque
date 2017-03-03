@@ -48,53 +48,56 @@ updateComponent.service('$update-cli', function () {
   return require('./serviceUpdateCli')
 })
 
-lassi.on('startup', function () {
-  // si on est en mode cluster avec pm2, on ne se lance que sur la 1re instance (0)
-  if (process.env.NODE_APP_INSTANCE && process.env.NODE_APP_INSTANCE > 0) {
-    applog('update', 'instance n° ' + process.env.NODE_APP_INSTANCE + ', abandon pour laisser l’instance 0 faire le job')
-    return
-  }
-  var EntityUpdate = lassi.service('EntityUpdate')
-  // on cherche le dernier update appliqué
-  EntityUpdate.match('num').sort('num', 'desc').grabOne(function (error, update) {
-    function done (error) {
-      if (error) {
-        log.error(error)
-        applog('updates', 'Une erreur est survenue dans l’update', dbVersion, ', cf le log d’erreurs', config.logs.error)
-      } else {
-        applog('updates', 'plus d’update à faire, base en version', dbVersion)
-      }
+if (!lassi.options.cli) {
+  lassi.on('startup', function () {
+    // si on est en mode cluster avec pm2, on ne se lance que sur la 1re instance (0)
+    if (process.env.NODE_APP_INSTANCE && process.env.NODE_APP_INSTANCE > 0) {
+      applog('update', 'instance n° ' + process.env.NODE_APP_INSTANCE + ', abandon pour laisser l’instance 0 faire le job')
+      return
     }
-    function nextUpdate (error) {
-      if (error) return done(error)
-      var update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
-      var lock = path.join(__dirname, '../../_private/updates.lock')
-      try {
-        fs.accessSync(lock, fs.R_OK)
-        return applog('updates', lock + ' présent, on ignore les updates automatiques, base en version ' + dbVersion)
-      } catch (error) {
-        // lock n'existe pas, on met ça pour rappeler qu'il pourrait exister
-        applog('updates', lock + ' non présent, on étudie un éventuel update à lancer')
+    var EntityUpdate = lassi.service('EntityUpdate')
+    // on cherche le dernier update appliqué
+    EntityUpdate.match('num').sort('num', 'desc').grabOne(function (error, update) {
+      function done (error) {
+        if (error) {
+          log.error(error)
+          applog('updates', 'Une erreur est survenue dans l’update', dbVersion, ', cf le log d’erreurs', config.logs.error)
+        } else {
+          applog('updates', 'plus d’update à faire, base en version', dbVersion)
+        }
       }
-      fs.access(update, fs.R_OK, function (error) {
-        if (error) return done() // plus d'updates à passer, c'est pas une erreur
-        dbVersion++
-        applog('updates', 'lancement update n° ' + dbVersion)
-        var currentUpdate = require(update)
-        currentUpdate.run(function (error) {
-          if (error) return done(error)
-          EntityUpdate.create({
-            name: currentUpdate.name,
-            description: currentUpdate.description,
-            num: dbVersion
-          }).store(nextUpdate)
-          applog('updates', 'update n° ' + dbVersion + ' OK, base en version ' + dbVersion)
+
+      function nextUpdate (error) {
+        if (error) return done(error)
+        var update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
+        var lock = path.join(__dirname, '../../_private/updates.lock')
+        try {
+          fs.accessSync(lock, fs.R_OK)
+          return applog('updates', lock + ' présent, on ignore les updates automatiques, base en version ' + dbVersion)
+        } catch (error) {
+          // lock n'existe pas, on met ça pour rappeler qu'il pourrait exister
+          applog('updates', lock + ' non présent, on étudie un éventuel update à lancer')
+        }
+        fs.access(update, fs.R_OK, function (error) {
+          if (error) return done() // plus d'updates à passer, c'est pas une erreur
+          dbVersion++
+          applog('updates', 'lancement update n° ' + dbVersion)
+          var currentUpdate = require(update)
+          currentUpdate.run(function (error) {
+            if (error) return done(error)
+            EntityUpdate.create({
+              name: currentUpdate.name,
+              description: currentUpdate.description,
+              num: dbVersion
+            }).store(nextUpdate)
+            applog('updates', 'update n° ' + dbVersion + ' OK, base en version ' + dbVersion)
+          })
         })
-      })
-    }
-    if (error) return done(error)
-    var dbVersion = update && update.num || 0
-    nextUpdate()
+      }
+
+      if (error) return done(error)
+      var dbVersion = update && update.num || 0
+      nextUpdate()
+    })
   })
-})
-/* */
+}

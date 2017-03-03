@@ -13,9 +13,15 @@ var path = require('path')
 module.exports = {
   application: {
     name: 'sesatheque', // utilisé en préfixe des message de log et dans qq message
-    baseId: 'localhost3001', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
-    baseIdRegistrar: 'localhost3001', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
-    baseUrl: 'https://localhost:3001/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
+    // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client,
+    // utilisé pour les rid des ressources créées ici
+    baseId: 'localhost3001',
+    // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
+    baseIdRegistrar: 'localhost3001',
+    // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici (ça permet de vérifier)
+    // sert aussi pour les urls des composants statiques, ou pour construire des urls qu'on passe à l'extérieur
+    // (sso par ex)
+    baseUrl: 'https://localhost:3001/',
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
   },
@@ -49,10 +55,15 @@ module.exports = {
      }
      /* */
   },
+
+  // ça c'est pour node qui va lancer l'appli
   $server: {
     hostname: 'localhost',
+    // on peut indiquer un autre port ici que celui de baseUrl, cli.js en mettra un autre par exemple
     port: 3001
   },
+
+  // options pour les middleware
   $rail: {
     cookie: {
       key: 'asNTr!l7Dqtsg' // en mettre un autre dans _private/config !
@@ -61,6 +72,7 @@ module.exports = {
       secret: 'ap68!&nVGq§ot' // en mettre un autre dans _private/config !
     }
   },
+
   /* pour modifier le comportement par défaut on peut préciser ici qq overrides,
   cf app/config.js pour les valeurs par défaut
   par ex pour empêcher un formateur de créer des groupes ou des ressources ici */
@@ -71,6 +83,7 @@ module.exports = {
       }
     }
   },
+
   // les logs
   logs: {
     dir: path.join(__dirname, '../logs_commun'),
@@ -86,10 +99,10 @@ module.exports = {
   // et en dernier
   extraDependenciesLast: ['sesalab-sso'],
   apiTokens: [
-    // mettre ici d'éventuels tokens utilisables pour poster sur l'api (sans session préalable)
+    // mettre ici d'éventuels tokens utilisables par une autre appli pour poster sur notre api
   ],
   apiIpsAllowed: [
-    // une éventuelle liste d'ip hors lan autorisées à utiliser les tokens
+    // une éventuelle liste d'ip hors lan autorisées à utiliser un token
   ],
 
   // urls absolues des sésathèques utilisées par nos ressources
@@ -102,25 +115,21 @@ module.exports = {
     {
       baseId: 'localhost3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
       baseUrl: 'http://localhost:3003/'
-      // apiTokens: un token qu’elle utiliserait pour cloner ses ressources privées ici
+      // apiTokens: un token qu’elle utiliserait pour ajouter des ressources ici
+      // (à priori des alias vers les siennes)
     }
     // on pourrait en mettre d'autres…
   ],
-  // les sesalab qui nous causent (et propagent ici une authentification)
-  // Attention, toutes les sésathèques qu'ils utilisent doivent être listées dans le module
+  // les sesalab qui nous causent (et propagent ici une authentification via sesalab-sso)
+  // Attention, toutes les sésathèques que ces sesalab utilisent doivent être listées dans le module
   // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
-  // sur ces autres sésathèques
+  // vers ces autres sésathèques
   sesalabs: [ {
     name: 'mon sesalab local',
     baseUrl: 'https://localhost:3002/'
-  }],
-  admin: {
-    // user1:'password1',
-    // user2:'password2'
-  }
-  // pour sesalabSso, config.js l'ajoute tout seul si on a mis des sesalabs
+  }]
 }
 
-// pour installer sesasso-bibli, c'est
+// pour ajouter le SSO Sésamath, il faut installer sesasso-bibli avec
+// (il faut avoir les droits sur ce dépôt qui n'est pas public)
 // npm install git+ssh://git@src.sesamath.net:npm-sesasso-bibli
-// ça mettra le bon nom de module (sesasso-bibli) et installera la dépendance à sesasso

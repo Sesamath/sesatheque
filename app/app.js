@@ -53,6 +53,7 @@ const anLog = require('an-log')
 const boot = require('./boot')
 const sjt = require('sesajstools')
 const config = require('./config')
+const configCheck = require('./configCheck')
 
 function beforeBootsrap (lassi, mainComponent, allComponents) {
   // lassi est gonflant à ignorer la conf des logs qu'on veut lui filer…
@@ -125,9 +126,16 @@ module.exports = function app (afterBootCallback) {
   try {
     anLog.config(config.lassiLogger)
     anLog(config.application.name)('Starting…')
-    boot(beforeBootsrap, {afterBootCallback})
+    const options = {
+      afterBootCallback: function afterBootCb () {
+        // vérif de config au démarrage
+        configCheck(config)
+        anLog(config.application.name)('Started')
+        if (afterBootCallback) afterBootCallback()
+      }
+    }
+    boot(beforeBootsrap, options)
   } catch (error) {
     anLog(config.application.name).error(error)
   }
 }
-

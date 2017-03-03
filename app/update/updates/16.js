@@ -40,7 +40,7 @@ const updateNum = __filename.substring(__dirname.length + 1, __filename.length -
 const updatePrefix = 'update ' + updateNum
 const updateLog = (message) => applog(updatePrefix, message)
 
-const name = 'passe en public tous les arbres enfants de labomep_all et labomep_{profil}'
+const name = 'passe en public tous les arbres enfants de labomep_all'
 const description = ''
 
 module.exports = {
@@ -59,11 +59,10 @@ module.exports = {
       const todoThen = new Set()
       nb++
 
-      if (verbose) applog(`traitement ${arbre.titre}`)
       let hasChanged = cleanItem(arbre)
       // les enfants
       if (arbre.enfants && arbre.enfants.length) {
-        hasChanged = cleanEnfantsSync(arbre.enfants, todoThen)
+        hasChanged = cleanEnfantsSync(arbre.enfants, todoThen) || hasChanged
       } else {
         log.errorData(`arbre ${arbre.oid} sans enfants`)
       }
@@ -76,7 +75,7 @@ module.exports = {
           next(null, todoThen)
         })
       } else {
-        if (arbre.oid) updateLog(`pas de modifications pour ${arbre.oid} (${arbre.titre})`)
+        // if (arbre.oid) updateLog(`pas de modifications pour ${arbre.oid} (${arbre.titre})`)
         next(null, todoThen)
       }
     }
@@ -88,7 +87,8 @@ module.exports = {
      * @return {boolean} true si un enfant a changé
      */
     function cleanEnfantsSync (enfants, todoThen) {
-      return enfants.reduce((hasChanged, enfant) => {
+      let hasChanged = false
+      enfants.forEach(function (enfant) {
         // clean de cet enfant
         hasChanged = cleanItem(enfant) || hasChanged
         // on profite de l'itération pour compléter todoThen
@@ -97,8 +97,8 @@ module.exports = {
           // parsing de ses enfants
           else if (enfant.enfants && enfant.enfants.length) hasChanged = cleanEnfantsSync(enfant.enfants, todoThen) || hasChanged
         }
-        return hasChanged
       })
+      return hasChanged
     }
 
     function cleanItem (item) {
@@ -139,9 +139,9 @@ module.exports = {
       $ressourceRepository.load(oid, function (error, arbre) {
         if (error) return next(error)
         if (arbre && arbre.oid) {
-          cleanArbre(arbre, function (error, oidsToAdd) {
+          cleanArbre(arbre, function (error, ridsToAdd) {
             if (error) return next(error)
-            if (oidsToAdd.size) oidsToAdd.forEach((rid) => todoThen.add(rid))
+            if (ridsToAdd.size) ridsToAdd.forEach((rid) => todoThen.add(rid))
             todoThen.delete(arbre.rid)
             next(null, todoThen)
           })
@@ -156,6 +156,7 @@ module.exports = {
     /**
      * Purge les oids de todoThen (se rappelle s'il en reste à la fin)
      * @param {Set} todoThen
+     * @param {errorCallback} next
      */
     function purge (todoThen, next) {
       log(`purge de ${[...todoThen].join(' ')}`)
@@ -185,6 +186,8 @@ module.exports = {
         }).catch(function (error) {
           next(error)
         })
+      } else {
+        next()
       }
     }
 
@@ -192,7 +195,6 @@ module.exports = {
     const $cacheRessource = lassi.service('$cacheRessource')
     const $ressourceRepository = lassi.service('$ressourceRepository')
     let nb = 0
-    let verbose = false
 
     updateLog(name)
     flow().seq(function () {

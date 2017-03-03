@@ -33,7 +33,6 @@
 const anLog = require('an-log')
 const log = require('./tools/log.js')
 const config = require('./config')
-const configCheck = require('./configCheck')
 const sesatheques = require('sesatheque-client/src/sesatheques')
 const {exists, addSesatheque} = sesatheques
 
@@ -112,10 +111,7 @@ module.exports = function boot (beforeBootstrapCb, options) {
 
   beforeBootstrapCb(lassi, sesatheque, dependancies)
 
-  // vérif de config au démarrage
   lassi.on('startup', function () {
-    // console.log('evt startup')
-    configCheck(config)
     if (options.afterBootCallback) options.afterBootCallback()
   })
 

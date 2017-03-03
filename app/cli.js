@@ -53,7 +53,7 @@ try {
     },
     $auth: {logLevel: anLogLevels.ERROR}
   })
-  boot(beforeBootsrap, {cli: true})
+  boot(beforeBootsrap, {cli: true}) // cli: true évite de lancer le serveur http
   lassi.service('$cli').run()
 } catch (error) {
   console.error(error)

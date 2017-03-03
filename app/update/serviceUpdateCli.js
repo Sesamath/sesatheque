@@ -71,6 +71,7 @@ function applyUpdate (updateNum, done) {
     unlockAndQuit(error)
   }
 }
+
 applyUpdate.help = function applyUpdateHelp () {
   console.log('La commande applyUpdate demande 1 argument, le n° de l’update à lancer.')
   console.log('Ça laissera intact le n° de version de la base)')
@@ -84,24 +85,23 @@ function listUpdates (done) {
   if (typeof done !== 'function') throw new Error('Erreur interne, pas de callback de commande')
   const updateDir = path.join(__dirname, 'updates')
   if (!fs.existsSync(updateDir)) return done(new Error(`${updateDir} n’existe pas`))
-  console.log('dir', updateDir)
   try {
     fs.readdir(updateDir, function (error, files) {
-      // pourquoi on est jamais appelé ?
-      console.log('files', files, error)
       if (error) return done(error)
       files.forEach((file) => {
-        console.log('file', file)
         if (file.substr(-3) !== '.js') return
-        const update = require(file)
-        console.log(file, update.nom, update.description)
+        const update = require(path.join(updateDir, file))
+        if (!update || !update.name || !update.run) console.log(`${file} est dans ${updateDir} mais ce n’est pas un update`, update)
+        else console.log(`${file}\t${update.name} ${update.description ? '\n' + update.description + '\n' : ''}`)
       })
+      console.log('fin listUpdates')
+      done()
     })
-    console.log('readdir a rendu la main sans planter')
   } catch (error) {
-    console.error(error)
+    done(error)
   }
 }
+
 listUpdates.help = function listUpdatesHelp () {
   console.log('La commande listUpdates ne prend pas d’arguments, elle liste les updates disponibles')
 }
