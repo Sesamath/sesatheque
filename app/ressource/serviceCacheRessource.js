@@ -34,7 +34,13 @@
 module.exports = function ($cache, $settings, EntityRessource) {
   var ttl = $settings.get('components.ressource.cacheTTL', 3600)
 
-  function dummy () {}
+  /**
+   * Une callback qui ne fait rien sinon logguer une éventuelle erreur
+   * @private
+   */
+  function dummy (error) {
+    if (error) log.error(error)
+  }
 
   function getKey (id, origine) {
     var prefixRessource = 'ressource_'
@@ -140,9 +146,9 @@ module.exports = function ($cache, $settings, EntityRessource) {
     log.debug('cache set ressource ' + ressource.oid, null, 'cache')
     if (ressource.oid) {
       // next appelé seulement sur le set principal (le dernier)
-      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl)
-      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl)
-      if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl)
+      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, dummy)
+      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, dummy)
+      if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl, dummy)
       $cache.set(getKey(ressource.oid), ressource, ttl, next)
     } else {
       log.error(new Error('cacheSet sur une ressource sans oid'))

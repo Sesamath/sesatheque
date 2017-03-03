@@ -39,6 +39,14 @@
  * @controller controllerPublic
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache) {
+  /**
+   * Une callback qui ne fait rien sinon logguer une éventuelle erreur
+   * @private
+   */
+  function dummyCb (error) {
+    if (error) log.error(error)
+  }
+
   var _ = require('lodash')
   var request = require('request')
   var tools = require('../tools')
@@ -260,7 +268,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   body: body,
                   contentType: response.headers['content-type'] || 'text/html'
                 }
-                $cache.set('urlProxy' + oid, page, 600)
+                $cache.set('urlProxy' + oid, page, 600, dummyCb)
                 sendRawHtml(page.body, page.contentType)
               } else {
                 context.plain('Impossible de récupérer la page ' + url)

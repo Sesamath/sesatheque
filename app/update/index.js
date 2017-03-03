@@ -44,6 +44,10 @@ updateComponent.entity('EntityUpdate', function () {
   require('./EntityUpdate')(this)
 })
 
+updateComponent.service('$update-cli', function () {
+  return require('./serviceUpdateCli')
+})
+
 lassi.on('startup', function () {
   // si on est en mode cluster avec pm2, on ne se lance que sur la 1re instance (0)
   if (process.env.NODE_APP_INSTANCE && process.env.NODE_APP_INSTANCE > 0) {

@@ -50,66 +50,55 @@ module.exports = {
     /**
      * Nettoie les enfants d'un arbre de leur aliasOf invalide d'après les infos de ridToClean
      * @param {Ressource} arbre
+     * @param {function} next appellé avec (error, todoThen), todoThen est un Set de rid à charger et nettoyer
      */
     function cleanArbre (arbre, next) {
-      // enregistre si besoin et passe au suivant
-      function finish () {
-        if (hasChanged && arbre.store) {
-          updateLog(`enregistrement des modifications de ${arbre.oid} (${arbre.titre})`)
-          arbre.store(next)
-          $cacheRessource.delete(arbre.oid)
-        } else {
-          if (arbre.oid) updateLog(`pas de modifications pour ${arbre.oid} (${arbre.titre})`)
-          next(null, arbre)
-        }
-      }
+      if (!arbre.oid || !arbre.store) throw new Error('cleanArbre ne traite que des entity')
+      if (arbre.type !== 'arbre') throw new Error('cleanArbre ne traite que des arbres')
 
-      if (arbre.oid === 50032) {
-        updateLog(`On saute le traitement de ${arbre.titre} (${arbre.oid})`)
-        return next(null, arbre)
-      }
+      const todoThen = new Set()
+      nb++
+
       if (verbose) applog(`traitement ${arbre.titre}`)
       let hasChanged = cleanItem(arbre)
-      nb++
       // les enfants
       if (arbre.enfants && arbre.enfants.length) {
-        flow(arbre.enfants).seqEach(function (enfant) {
-          if (arbre.oid === 50032) verbose = true
-          if (enfant.type === 'arbre') {
-            cleanArbre(enfant, this)
-          } else {
-            hasChanged = cleanItem(enfant) || hasChanged
-            this()
-          }
-        }).seq(function () {
-          if (verbose) updateLog(`fin des enfants de ${arbre.oid || arbre.titre}`)
-          finish()
-        }).catch(next)
-
-      // on est une ref à un autre arbre
-      } else if (arbre.aliasOf) {
-        // faut le charger pour le nettoyer
-        const [baseId, oid] = getRidComponents(arbre.aliasOf)
-        if (baseId !== myBaseId) {
-          log.errorData(`arbre ${arbre.oid || arbre.titre} alias d’un item ailleurs ${arbre.aliasOf}`)
-          return finish()
-        }
-        $ressourceRepository.load(oid, function (error, original) {
-          if (verbose) updateLog('loading ' + oid)
-          if (error) return next(error)
-          if (original.aliasOf) log.errorData(`arbre ${arbre.oid || arbre.titre} alias d’un item ${arbre.aliasOf} lui-même alias ${original.aliasOf}`)
-          if (original.type !== 'arbre') {
-            log.errorData(`arbre ${arbre.oid || arbre.titre} alias d’un item ${arbre.aliasOf} qui n’est pas un arbre`)
-            return finish()
-          }
-          cleanArbre(original, finish)
-        })
-
-      // un item arbre sans enfants ni aliasOf, pas très normal…
+        hasChanged = cleanEnfantsSync(arbre.enfants, todoThen)
       } else {
-        log.errorData(`arbre ${arbre.oid || arbre.titre} sans enfants ni aliasOf`)
-        finish()
+        log.errorData(`arbre ${arbre.oid} sans enfants`)
       }
+
+      if (hasChanged) {
+        updateLog(`enregistrement des modifications de ${arbre.rid} (${arbre.titre})`)
+        arbre.store(function (error, arbre) {
+          if (error) return next(error)
+          $cacheRessource.delete(arbre.oid)
+          next(null, todoThen)
+        })
+      } else {
+        if (arbre.oid) updateLog(`pas de modifications pour ${arbre.oid} (${arbre.titre})`)
+        next(null, todoThen)
+      }
+    }
+
+    /**
+     * Nettoie tous les enfants présent dans l'arbre et ajoute les alias à todoThen
+     * @param {Array} enfants
+     * @param {Set} todoThen Sera complété avec d'éventuels aliasOf
+     * @return {boolean} true si un enfant a changé
+     */
+    function cleanEnfantsSync (enfants, todoThen) {
+      return enfants.reduce((hasChanged, enfant) => {
+        // clean de cet enfant
+        hasChanged = cleanItem(enfant) || hasChanged
+        // on profite de l'itération pour compléter todoThen
+        if (enfant.type === 'arbre') {
+          if (enfant.aliasOf) todoThen.add(enfant.aliasOf)
+          // parsing de ses enfants
+          else if (enfant.enfants && enfant.enfants.length) hasChanged = cleanEnfantsSync(enfant.enfants, todoThen) || hasChanged
+        }
+        return hasChanged
+      })
     }
 
     function cleanItem (item) {
@@ -134,6 +123,71 @@ module.exports = {
       return hasChanged
     }
 
+    /**
+     * Charge un arbre et le nettoie
+     * @param {string} rid
+     * @param {Set} todoThen le set après avoir enlevé rid mais ajouté ses enfants éventuels
+     * @param next
+     */
+    function loadAndClean (rid, todoThen, next) {
+      const [baseId, oid] = getRidComponents(rid)
+      if (baseId !== myBaseId) {
+        log(`rid externe skipped ${rid}`)
+        todoThen.delete(rid)
+        return next(null, todoThen)
+      }
+      $ressourceRepository.load(oid, function (error, arbre) {
+        if (error) return next(error)
+        if (arbre && arbre.oid) {
+          cleanArbre(arbre, function (error, oidsToAdd) {
+            if (error) return next(error)
+            if (oidsToAdd.size) oidsToAdd.forEach((rid) => todoThen.add(rid))
+            todoThen.delete(arbre.rid)
+            next(null, todoThen)
+          })
+        } else {
+          log.errorData(`l’arbre ${oid} n’existe pas`)
+          todoThen.delete(rid)
+          next()
+        }
+      })
+    }
+
+    /**
+     * Purge les oids de todoThen (se rappelle s'il en reste à la fin)
+     * @param {Set} todoThen
+     */
+    function purge (todoThen, next) {
+      log(`purge de ${[...todoThen].join(' ')}`)
+      if (todoThen.size) {
+        flow([...todoThen]).seqEach(function (rid) {
+          const nextOid = this
+          // on reset la call stack
+          process.nextTick(function () {
+            try {
+              loadAndClean(rid, todoThen, nextOid)
+            } catch (error) {
+              nextOid(error)
+            }
+          }, 0)
+        }).seq(function () {
+          if (todoThen.size) {
+            process.nextTick(function () {
+              try {
+                purge(todoThen, next)
+              } catch (error) {
+                next(error)
+              }
+            })
+          } else {
+            next()
+          }
+        }).catch(function (error) {
+          next(error)
+        })
+      }
+    }
+
     // init
     const $cacheRessource = lassi.service('$cacheRessource')
     const $ressourceRepository = lassi.service('$ressourceRepository')
@@ -145,26 +199,11 @@ module.exports = {
       // $ressourceRepository.getListe('all', {filters: [{index: 'origine', values: ['sesamath']}]}, this)
       $ressourceRepository.loadByOrigin('sesamath', 'labomep_all', this)
     }).seq(function (all) {
-      const nextStep = this
-      if (all.restriction !== 0) {
-        all.restriction = 0
-        all.store(function (error, ress) {
-          if (error) return nextStep(error)
-          nextStep(null, ress.enfants)
-        })
-      } else {
-        this(null, all.enfants)
-      }
-    }).seqEach(function (masterChild) {
-      if (masterChild.type === 'arbre') {
-        updateLog(`traitement de ${masterChild.titre} (${masterChild.aliasOf})`)
-        cleanArbre(masterChild, this)
-      } else {
-        log.errorData(`un fils de labomep_all n’est pas un arbre`, masterChild)
-        this()
-      }
+      cleanArbre(all, this)
+    }).seq(function (todoThen) {
+      purge(todoThen, this)
     }).seq(function () {
-      updateLog(`traitement des ${nb} arbres terminé`)
+      updateLog(`traitement de ${nb} arbres terminé`)
       done()
     }).catch(done)
   } // run
