@@ -30,14 +30,22 @@
  */
 'use strict'
 
-var fs = require('fs')
-var path = require('path')
+const fs = require('fs')
+const path = require('path')
 
-var config = require('../config')
+const config = require('../config')
 
-var homeContent = fs.readFileSync(path.join(__dirname, '../../_private/home.inc.html'))
-if (homeContent) homeContent = homeContent.toString()
-else homeContent = 'Ce site est encore un prototype expérimental.'
+let homeContent
+const homeContentFile = path.join(__dirname, '../../_private/home.inc.html')
+if (fs.existsSync(homeContentFile)) {
+  homeContent = fs.readFileSync(homeContentFile)
+  if (homeContent) {
+    homeContent = homeContent.toString()
+  } else {
+    log.error(`${homeContentFile} existe mais sans contenu`)
+  }
+}
+if (!homeContent) homeContent = 'Ce site est encore un prototype expérimental.'
 
 /**
  * Controleur du composant main pour les routes "statiques"
