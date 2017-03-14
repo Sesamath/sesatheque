@@ -50,10 +50,16 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    * @param {errorCallback} next
    */
   function checkGroupe (context, ressource, groupeNom, options, next) {
-    var shouldBeNew = options && options.shouldBeNew || false
-    var isGroupeAuteur = options && options.isGroupeAuteur || false
-    var whiteList = options && options.whiteList || []
-    if (!_.isArray(ressource.groupes)) ressource.groupes = []
+    if (!ressource) throw new Error('pas de ressource')
+    if (!groupeNom) throw new Error('pas de nom de groupe')
+    if (arguments.length === 4) {
+      next = options
+      options = {}
+    }
+    var shouldBeNew = options.shouldBeNew || false
+    var isGroupeAuteur = options.isGroupeAuteur || false
+    var whiteList = options.whiteList || []
+    if (!Array.isArray(ressource.groupes)) ressource.groupes = []
     $groupeRepository.load(groupeNom, function (error, groupe) {
       if (error) return next(error)
       if (groupe) {
@@ -185,7 +191,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       // et que l'utilisateur peut ajouter ou qu'il y était déjà
       flow(groupesVoulus).seqEach(function (groupeNom) {
         // log.debug('affectation du groupe ' + groupeNom)
-        checkGroupe(context, ressourceNew, groupeNom, {whiteList: ressourceOriginale.groupes}, this)
+        const options = {}
+        if (ressourceOriginale && ressourceOriginale.groupes) options.whiteList = ressourceOriginale.groupes
+        checkGroupe(context, ressourceNew, groupeNom, options, this)
       }).done(this)
       // @todo faudrait vérifier que l'on a pas viré de groupe auxquel on appartient pas, et si c'était le cas cloner ?
     }).seq(function () {

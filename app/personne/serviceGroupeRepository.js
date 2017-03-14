@@ -149,9 +149,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
       $ressourceRepository.getListe('groupe/' + groupName, {}, this)
     }).seqEach(function (ressource) {
       // log.debug('suppression de groupe, avec la ressource', ressource)
-      ressource.groupes = ressource.groupes.filter(function (groupeNom) {
-        return groupeNom !== groupName
-      })
+      ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== groupName)
       $ressourceRepository.save(ressource, this)
     }).seq(function () {
       // log.debug('suppression de groupe, personnes')

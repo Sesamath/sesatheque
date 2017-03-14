@@ -165,6 +165,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string|undefined} Le message d'interdiction éventuel (undefined sinon)
    */
   function getReadDeniedMessage (context, ressource) {
+    if (!context) throw new Error('pas de contexte')
+    if (!ressource) throw new Error('pas de ressource')
     // nos ips ont le droit de tout lire via l'api
     if (hasAllRights(context)) return
 
