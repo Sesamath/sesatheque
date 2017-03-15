@@ -216,7 +216,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
    */
   $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
     // log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
-    // log.debug('les nouveaux auteurs (parmi les anciens)', ressourceNew.auteurs)
+    // log.debug('les nouveaux auteurs', ressourceNew.auteurs)
     // log.debug('et les auteurs à ajouter', ressourceNew._auteursAdd)
     var currentUserOid = $accessControl.getCurrentUserOid(context)
     // les cas où on a rien à faire

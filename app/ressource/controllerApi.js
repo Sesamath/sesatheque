@@ -253,6 +253,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
     var ressourcePostee = context.post
+    var currentUserOid = $accessControl.getCurrentUserOid(context)
     var groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
     var ressourceOriginale
 
@@ -305,6 +306,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
         $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
       }).seq(function (ressourceNew) {
+        // on ajoute le user courant pour serie et sequenceModele,
+        // pas encore pour tout par crainte d'effets de bords…
+        if (currentUserOid && ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele') {
+          ressourceNew.auteurs = [myBaseId + '/' + currentUserOid]
+        }
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
         if (ressourceOriginale) sjtObj.update(ressourceOriginale, ressourceNew)

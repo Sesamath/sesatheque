@@ -43,9 +43,15 @@ const {getBaseIdFromRid} = require('sesatheque-client/src/sesatheques.js')
  */
 function filterUserList (list, defaultBaseId) {
   if (list && Array.isArray(list) && list.length) {
-    return filters.arrayString(list).map(uid => {
-      const pos = uid.indexOf('/')
-      if (pos === -1 && defaultBaseId) uid = defaultBaseId + '/' + uid
+    // on a encore des int…
+    // return filters.arrayString(list).map(uid => {
+    return list.map(uid => {
+      if (typeof uid === 'number') {
+        uid = defaultBaseId + '/' + uid
+      } else {
+        const pos = uid.indexOf('/')
+        if (pos === -1 && defaultBaseId) uid = defaultBaseId + '/' + uid
+      }
       if (getBaseIdFromRid(uid, false)) return uid
     }).filter(uid => uid) // vire les éventuels undefined mis par le map
   }
@@ -272,6 +278,11 @@ function Ressource (initObj, myBaseId) {
    * @type {Integer}
    */
   this.restriction = filters.int(values.restriction)
+  if (values.hasOwnProperty('public') && !values.hasOwnProperty('restriction')) {
+    if (values.public) this.restriction = 0
+    else if (values.groupes && values.groupes.length) this.restriction = 2
+    else this.restriction = 3
+  }
   /**
    * Date de création
    * @type {Date}
@@ -326,8 +337,12 @@ function Ressource (initObj, myBaseId) {
     // this est bien l'objet courant car c'est une fct fléchée
     // mais on assure le coup en le passant en 2e param de forEach
 
-    // on ignore les propriétés ajoutées par un form pour du contexte et _*
+    // on ignore public traité et mis dans restriction
+    if (p === 'public') return
+    // on ignore les propriétés ajoutées par un form pour du contexte
     if (p === 'new' || p === 'token' || p.substr(0, 1) === '_') return
+    // et celles qui commencent par _ ou $
+    if (/^(_|\$)/.test(p)) return
 
     if (Array.isArray(this[p])) {
       // pour les tableaux on regarde si on a toujours autant d'éléments
