@@ -165,7 +165,7 @@ module.exports = function afterRailSession (rail) {
         stream: logAccessWriteStream
       }
       // en dev on ajoute les var postées
-      if (config.application.staging === 'dev') {
+      if (!global.isProd) {
         morgan.token('post', function (req) {
           return (_.isEmpty(req.body)) ? '' : sjt.stringify(req.body)
         })

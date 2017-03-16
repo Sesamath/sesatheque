@@ -2,7 +2,7 @@ var path = require('path')
 
 /**
  * Config de sesathequeGlobal pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
- * Fichier à copier dans _private/config.js
+ * Fichier à copier dans _private/commun.js
  */
 module.exports = {
   application: {
@@ -11,6 +11,9 @@ module.exports = {
     baseIdRegistrar: 'localhost3003', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
     baseUrl: 'http://commun.local:3003/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
     mail: 'me@example.com',
+    // pour que cette sesathèque ait ses propres js (webpack les compile en mettant baseUrl
+    // en dur dedans pour le chargement async), il faut un override ici
+    webpackOutput: 'publicCommun',
     staging: 'dev' // prod ou dev
   },
   $entities: {

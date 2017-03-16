@@ -8,7 +8,7 @@ var path = require('path')
  * Ce fichier devrait pouvoir être copié tel quel dans _private et fonctionner avec docker-compose.yml
  *
  * Pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
- * prendre plutôt configGlobal.js (à renommer en config.js) et commun.js
+ * prendre les js de _private.exemple-docker-sesamath
  */
 module.exports = {
   application: {

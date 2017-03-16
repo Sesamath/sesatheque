@@ -25,6 +25,7 @@ var extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?m
 var appConfig = require('./app/config')
 var baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
+var webpackOutput = 'app/ressource/' + (appConfig.application.webpackOutput || 'public') + '/'
 
 // la conf identique dev/prod
 var conf = {
@@ -44,7 +45,7 @@ var conf = {
     showParcours: 'sesaeditgraphe/src/embed/sp.js'
   },
   output: {
-    path: 'app/ressource/public/',
+    path: webpackOutput,
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].bundle.js',

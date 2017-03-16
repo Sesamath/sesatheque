@@ -1,5 +1,5 @@
 /**
- * Config de sesathequeGlobal pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
+ * Config de sesathequePrivate pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
  * Fichier à copier dans _private/config.js
  */
 module.exports = {

@@ -32,6 +32,7 @@
 'use strict'
 
 var path = require('path')
+var appConfig = require('../config')
 
 // Composant de gestion des ressources
 var ressourceComponent = lassi.component('ressource')
@@ -77,7 +78,12 @@ ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressour
   return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) // jshint ignore:line
 })
 
-// nos ressources statiques
+// nos ressources statiques, si override en config des js webpack ils passent avant
+if (appConfig.application.staging === 'dev' && appConfig.application.webpackOutput) {
+  ressourceComponent.controller(function () {
+    this.serve(path.join(__dirname, appConfig.application.webpackOutput))
+  })
+}
 ressourceComponent.controller(function () {
   this.serve(path.join(__dirname, 'public'))
 })

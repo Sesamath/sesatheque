@@ -11,4 +11,7 @@ app/ressource/public/*.bundle.js
 # webpack construit ses fichiers avec 32 caractères, mais on a pas le droit au regex façon
 # app/ressource/public/[a-f0-9]{32}.*
 app/ressource/public/????????????????????????????????.*
+# pour la compil wepback de commun en override
+app/ressource/publicCommun
+# les éventuels dumps qui traînent à la racine
 *.sql
