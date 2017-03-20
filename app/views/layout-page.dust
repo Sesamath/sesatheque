@@ -40,6 +40,7 @@
   </ul>
   <p class="fr">
     Propulsé par <a href="#" onclick="alert('Le site http://sesatheque.sesamath.net va venir')">Sésathèque</a>
+    {?version}{version}{/version}
   </p>
 </footer>
 
