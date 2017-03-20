@@ -193,7 +193,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else {
       formData[key].name = key
       formData[key].hidden = true
-      formData[key].value = values.join(',')
+      formData[key].value = JSON.stringify(values)
       next()
     }
   }

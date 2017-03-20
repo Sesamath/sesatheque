@@ -149,6 +149,7 @@ function valide (data, next) {
   if (!next) throw new Error('pas de callback fournie')
   if (_.isEmpty(data)) return next(new Error('Ressource vide'))
   // parsing des propriétés qui pourraient être envoyées en json
+  // par ex les propriétés qui étaient hidden
   _.each(data, function (value, prop) {
     if (typeof value === 'string' && (config.typesVar[prop] === 'Array' || config.typesVar[prop] === 'Object')) {
       try {
