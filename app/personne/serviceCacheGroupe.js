@@ -52,6 +52,15 @@ function getKey (groupe) {
   return key
 }
 
+/**
+ * Une callback qui ne fait rien sinon logguer une éventuelle erreur
+ * @param {Error} [error]
+ * @private
+ */
+function logIfError (error) {
+  if (error) log.error(error)
+}
+
 module.exports = function ($cache, $settings) {
   var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
 
@@ -80,7 +89,7 @@ module.exports = function ($cache, $settings) {
    * @param {errorCallback} [next]
    * @memberOf $cacheGroupe
    */
-  $cacheGroupe.set = function (groupe, next) {
+  $cacheGroupe.set = function (groupe, next = logIfError) {
     if (groupe && groupe.nom) {
       // ça plante sur certains noms, try/catch sert à rien car async
       const key = getKey(groupe)
@@ -104,13 +113,19 @@ module.exports = function ($cache, $settings) {
   /**
    * Efface un groupe du cache
    * @param {string|Groupe} groupe (l'objet ou son nom)
-   * @param {errorCallback} next
+   * @param {errorCallback} [next]
    * @memberOf $cacheGroupe
    */
-  $cacheGroupe.delete = function (groupe, next) {
+  $cacheGroupe.delete = function (groupe, next = logIfError) {
     var key = getKey(groupe)
     if (key) $cache.delete(key, next)
     else next(new Error('groupe invalide'))
+  }
+
+  // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
+  if ($settings.get('noCache', false)) {
+    log('$cacheRessource désactivé')
+    $cacheGroupe.get = function (oid, next) { next() }
   }
 
   return $cacheGroupe

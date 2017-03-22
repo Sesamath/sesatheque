@@ -36,7 +36,7 @@ module.exports = function ($cache, $settings) {
    * Une callback qui ne fait rien sinon logguer une éventuelle erreur
    * @private
    */
-  function dummy (error) {
+  function logIfError (error) {
     if (error) log.error(error)
   }
 
@@ -80,23 +80,30 @@ module.exports = function ($cache, $settings) {
   /**
    * Met un objet personne en cache
    * @param {Personne}      personne
-   * @param {errorCallback} next
+   * @param {errorCallback} [next]
    * @memberOf $cachePersonne
    */
-  $cachePersonne.set = function (personne, next) {
-    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl, dummy)
+  $cachePersonne.set = function (personne, next = logIfError) {
+    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl, logIfError)
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }
 
   /**
    * Efface un objet personne du cache
    * @param {Integer}       oid
-   * @param {errorCallback} next
+   * @param {errorCallback} [next]
    * @memberOf $cachePersonne
    */
-  $cachePersonne.delete = function (oid, next) {
+  $cachePersonne.delete = function (oid, next = logIfError) {
     // on efface pas l'oid par origine, le get par origine renverra undefined quand même
     $cache.delete('personne_' + oid, next)
+  }
+
+  // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
+  if ($settings.get('noCache', false)) {
+    log('$cacheRessource désactivé')
+    $cachePersonne.get = function (oid, next) { next() }
+    $cachePersonne.getByOrigine = function (origine, idOrigine, next) { next() }
   }
 
   return $cachePersonne
