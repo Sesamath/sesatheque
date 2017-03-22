@@ -41,6 +41,8 @@ var myBaseId = config.application.baseId
 var configRessource = require('./config')
 var Ref = require('../constructors/Ref')
 
+const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
+
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
@@ -510,8 +512,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /api/baseId/:id
    */
   controller.get('baseId/:id', function (context) {
-    if (config.sesatheques[context.arguments.id]) $json.sendOk(context, {baseUrl: config.sesatheques[context.arguments.id]})
-    else $json.sendError(context, `Sésathèque ${context.arguments.id} inconnue sur ${config.application.baseUrl}`)
+    const baseId = context.arguments.id
+    const baseUrl = getBaseUrl(baseId, false)
+    if (baseUrl) $json.sendOk(context, {baseUrl})
+    else $json.sendError(context, `Sésathèque ${baseId} inconnue sur ${config.application.baseUrl}`)
   })
 
   /**
