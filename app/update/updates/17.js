@@ -33,6 +33,7 @@
 const flow = require('an-flow')
 const applog = require('an-log')(lassi.settings.application.name)
 const config = require('../../config')
+const myBaseId = config.application.baseId
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
 const updatePrefix = 'update ' + updateNum
@@ -79,6 +80,7 @@ module.exports = {
         if (personne.origine && personne.idOrigine) {
           const pid = personne.origine + '/' + personne.idOrigine
           pidsByOid[personne.oid] = pid
+          pidsTranslated[myBaseId + '/' + personne.oid] = pid
           if (personne.pid === pid) {
             checkDoublon()
           } else {
@@ -135,17 +137,19 @@ module.exports = {
         if (!ressource.auteurs.length) updateLogErr(`La ressource ${ressource.oid} n'a plus d'auteurs`)
 
         // auteursParents
-        ressource.auteursParents = ressource.auteursParents.map(pid => {
-          const newPid = cleanPid(pid)
-          if (newPid === pid) return pid
-          needSave = true
-          if (newPid) return newPid
-          // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
-          log.errorData(`impossible de trouver le bon pid pour l’auteur parent ${pid} de la ressource ${ressource.oid}`)
-          if (!ressource.warnings) ressource.warnings = []
-          ressource.warnings.push(`L’auteur parent ${pid} n’existe plus`)
-          updateLogErr(`L’auteur parent ${pid} mentionné dans la ressource ${ressource.oid} n’existe plus`)
-        }).filter(pid => pid)
+        if (ressource.auteursParents && ressource.auteursParents.length) {
+          ressource.auteursParents = ressource.auteursParents.map(pid => {
+            const newPid = cleanPid(pid)
+            if (newPid === pid) return pid
+            needSave = true
+            if (newPid) return newPid
+            // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
+            log.errorData(`impossible de trouver le bon pid pour l’auteur parent ${pid} de la ressource ${ressource.oid}`)
+            if (!ressource.warnings) ressource.warnings = []
+            ressource.warnings.push(`L’auteur parent ${pid} n’existe plus`)
+            updateLogErr(`L’auteur parent ${pid} mentionné dans la ressource ${ressource.oid} n’existe plus`)
+          }).filter(pid => pid)
+        }
 
         // contributeurs
         if (ressource.contributeurs && ressource.contributeurs.length) {
