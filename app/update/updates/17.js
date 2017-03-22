@@ -185,7 +185,7 @@ module.exports = {
     function grabGroupes (next) {
       let currentTotal
       flow().seq(function () {
-        EntityGroupe.match('gestionnaires').sort('oid').grab(limit, offset, this)
+        EntityGroupe.match().grab(limit, offset, this)
 
         // on note le total
       }).seq(function (groupes) {
@@ -195,18 +195,24 @@ module.exports = {
         // on itère
       }).seqEach(function (groupe) {
         let needSave = false
-        groupe.gestionnaires = groupe.gestionnaires.map(pid => {
-          const newPid = cleanPid(pid)
-          if (newPid === pid) return pid
-          needSave = true
-          if (newPid) return newPid
-          // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
-          log.errorData(`impossible de trouver le bon pid pour l’auteur ${pid} du groupe ${groupe.nom}`)
-          updateLog(`impossible de trouver le bon pid pour l’auteur ${pid} du groupe ${groupe.nom}`)
-        }).filter(pid => pid)
-        if (!groupe.gestionnaires.length) {
-          log.errorData(`Le groupe “${groupe.nom}” n’a plus de gestionnaire`, groupe)
-          updateLogErr(`Le groupe “${groupe.nom}” n’a plus de gestionnaire`)
+        if (!groupe.gestionnaires) groupe.gestionnaires = []
+        if (groupe.gestionnaires.length) {
+          groupe.gestionnaires = groupe.gestionnaires.map(pid => {
+            const newPid = cleanPid(pid)
+            if (newPid === pid) return pid
+            needSave = true
+            if (newPid) return newPid
+            // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
+            log.errorData(`impossible de trouver le bon pid pour l’auteur ${pid} du groupe ${groupe.nom}`)
+            updateLog(`impossible de trouver le bon pid pour l’auteur ${pid} du groupe ${groupe.nom}`)
+          }).filter(pid => pid)
+          if (!groupe.gestionnaires.length) {
+            log.errorData(`Le groupe “${groupe.nom}” n’a plus de gestionnaire`, groupe)
+            updateLogErr(`Le groupe “${groupe.nom}” n’a plus de gestionnaire`)
+          }
+        } else {
+          log.errorData(`Le groupe “${groupe.nom}” n’a pas de gestionnaire`)
+          updateLogErr(`Le groupe “${groupe.nom}” n’a pas de gestionnaire`)
         }
         if (needSave) groupe.store(this)
         else this()
