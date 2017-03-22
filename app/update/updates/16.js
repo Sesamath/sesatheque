@@ -53,6 +53,7 @@ module.exports = {
      * @param {function} next appellé avec (error, todoThen), todoThen est un Set de rid à charger et nettoyer
      */
     function cleanArbre (arbre, next) {
+      if (!arbre) throw new Error('cleanArbre appelé sans arbre')
       if (!arbre.oid || !arbre.store) throw new Error('cleanArbre ne traite que des entity')
       if (arbre.type !== 'arbre') throw new Error('cleanArbre ne traite que des arbres')
 
@@ -200,8 +201,14 @@ module.exports = {
     flow().seq(function () {
       // $ressourceRepository.getListe('all', {filters: [{index: 'origine', values: ['sesamath']}]}, this)
       $ressourceRepository.loadByOrigin('sesamath', 'labomep_all', this)
-    }).seq(function (all) {
-      cleanArbre(all, this)
+    }).seq(function (labomepAll) {
+      // on est pas forcément sur une sesatheque avec cet arbre
+      if (labomepAll) {
+        cleanArbre(labomepAll, this)
+      } else {
+        updateLog(`pas d’arbre labomep_all sur cette sésathèque, rien à faire`)
+        done()
+      }
     }).seq(function (todoThen) {
       purge(todoThen, this)
     }).seq(function () {
