@@ -49,6 +49,11 @@ function Personne (initObj) {
    * @type {string}
    */
   this.pid = initObj.pid || undefined
+  if (initObj.origine && initObj.idOrigine) {
+    this.pid = initObj.origine + '/' + initObj.idOrigine
+    // @todo activer ce warning quand l'update 17 sera passé partout
+    // if (initObj.pid && initObj.pid !== this.pid) console.trace(`valeurs incohérentes avec pid=${initObj.pid} et origine/idOrigine ${this.pid}`)
+  }
   /**
    * Source de l'authentification (nom du authClient)
    * @type {string}
@@ -66,7 +71,7 @@ function Personne (initObj) {
    * @type {Date}
    * @default undefined
    */
-  this.lastCheck = initObj.lastCheck || undefined
+  this._lastCheck = initObj._lastCheck || undefined
   /**
    * Prénom
    * @type {string}

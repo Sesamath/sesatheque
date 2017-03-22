@@ -218,7 +218,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     // log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
     // log.debug('les nouveaux auteurs', ressourceNew.auteurs)
     // log.debug('et les auteurs à ajouter', ressourceNew._auteursAdd)
-    var currentUserOid = $accessControl.getCurrentUserOid(context)
+    const pid = $accessControl.getCurrentUserPid(context)
     // les cas où on a rien à faire
     if (
         ressourceOriginale &&
@@ -232,42 +232,33 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     } else if ($accessControl.hasPermission('updateAuteurs', context, ressourceOriginale)) {
       // on a tous les droits sur les auteurs et qqchose a changé
 
-      // on mémorise ce que l'on veut mettre (case à cocher, parmi les précédents)
-      var oids = []
-      var auteurs = ressourceNew.auteurs.filter(function (id) {
-        id = Number(id)
-        if (sjt.isInArray(oids, id)) return false
-        oids.push(id)
-        return true
+      // les pids que l'on veut mettre (case à cocher, parmi les précédents)
+      const auteurs = []
+      ressourceNew.auteurs.forEach((pid) => {
+        if (!sjt.isInArray(auteurs, pid)) auteurs.push(pid)
       })
-      // en ajoutant les supplémentaires
-      var tmp
       // aj auteurs sup
       if (ressourceNew._auteursAdd) {
-        tmp = ressourceNew._auteursAdd.split(',')
+        const tmp = ressourceNew._auteursAdd.split(',')
         delete ressourceNew._auteursAdd
-        tmp.forEach(function (id) {
-          id = Number(id) // vire d'éventuels espaces
-          if (id && !sjt.isInArray(auteurs, id)) {
-            auteurs.push(id)
+        tmp.forEach(function (pid) {
+          pid = pid.trim() // vire d'éventuels espaces
+          if (pid && !sjt.isInArray(auteurs, pid)) {
+            auteurs.push(pid)
           }
         })
       }
       // idem contributeurs
-      oids = auteurs
-      var contributeurs = ressourceNew.contributeurs.filter(function (id) {
-        id = Number(id)
-        if (sjt.isInArray(oids, id)) return false
-        oids.push(id)
-        return true
+      const contributeurs = []
+      ressourceNew.contributeurs.forEach((pid) => {
+        if (!sjt.isInArray(auteurs, pid) && !sjt.isInArray(contributeurs, pid)) contributeurs.push(pid)
       })
       // aj contributeurs sup
       if (ressourceNew._contributeursAdd) {
-        tmp = ressourceNew._contributeursAdd.split(',')
+        const tmp = ressourceNew._contributeursAdd.split(',')
         delete ressourceNew._contributeursAdd
-        tmp.forEach(function (id) {
-          id = Number(id)
-          if (id && !sjt.isInArray(contributeurs, id) && !sjt.isInArray(auteurs, id)) contributeurs.push(id)
+        tmp.forEach(function (pid) {
+          if (pid && !sjt.isInArray(contributeurs, pid) && !sjt.isInArray(auteurs, pid)) contributeurs.push(pid)
         })
       }
 
@@ -278,15 +269,15 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       flow().seq(function () {
         // auteurs voulus
         var nextStep = this
-        flow(auteurs).seqEach(function (oid) {
+        flow(auteurs).seqEach(function (pid) {
           var nextAuteur = this
-          $personneRepository.load(oid, function (error, personne) {
+          $personneRepository.load(pid, function (error, personne) {
             if (error) {
               rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
-              ressourceNew.auteurs.push(personne.oid)
+              ressourceNew.auteurs.push(personne.pid)
             } else {
-              rTools.addWarning(ressourceNew, 'L’auteur d’identifiant ' + oid + ' n’existe pas')
+              rTools.addWarning(ressourceNew, 'L’auteur d’identifiant ' + pid + ' n’existe pas')
             }
             nextAuteur()
           })
@@ -295,22 +286,22 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         // contributeurs voulus
         var nextStep = this
         // flow contributeurs demandés
-        flow(contributeurs).seqEach(function (oid) {
+        flow(contributeurs).seqEach(function (pid) {
           var nextContributeur = this
-          $personneRepository.load(oid, function (error, personne) {
+          $personneRepository.load(pid, function (error, personne) {
             if (error) {
               rTools.addError(ressourceNew, error.toString())
             } else if (personne) {
-              ressourceNew.contributeurs.push(personne.oid)
+              ressourceNew.contributeurs.push(personne.pid)
             } else {
-              rTools.addWarning(ressourceNew, 'Le contributeur d’identifiant ' + oid + ' n’existe pas')
+              rTools.addWarning(ressourceNew, 'Le contributeur d’identifiant ' + pid + ' n’existe pas')
             }
             nextContributeur()
           })
         }).done(nextStep)
       }).seq(function () {
         // terminé, mais si y'a pas d'auteurs on met au moins le user courant
-        if (_.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(currentUserOid)
+        if (_.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(pid)
         next(null, ressourceNew)
       }).catch(next)
     } else {
@@ -323,14 +314,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
       // le mettre en auteur ?
       if (ressourceNew.auteurs.length) {
         // y'a des auteurs
-        if (ressourceNew.auteurs.indexOf(currentUserOid) === -1 && ressourceNew.contributeurs.indexOf(currentUserOid) === -1
+        if (ressourceNew.auteurs.indexOf(pid) === -1 && ressourceNew.contributeurs.indexOf(pid) === -1
         ) {
           // et il est pas mentionné, on le met en contributeur
-          ressourceNew.contributeurs.push(currentUserOid)
+          ressourceNew.contributeurs.push(pid)
         }
       } else {
         // si y'a pas d'auteurs on l'y ajoute
-        ressourceNew.auteurs = [currentUserOid]
+        ressourceNew.auteurs = [pid]
         // mais si y'a une ressource originale c'est pas normal
         if (ressourceOriginale) log.error(new Error('Il y avait une ressource sans auteurs ' + ressourceOriginale.oid))
       }

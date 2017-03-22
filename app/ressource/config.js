@@ -320,10 +320,10 @@ var ressourceConfig = {
     typePedagogiques: 'Number',
     typeDocumentaires: 'Number',
     relations: 'Array',
-    auteurs: 'Number',
-    contributeurs: 'Number',
-    groupes: 'Number',
-    groupesAuteurs: 'Number',
+    auteurs: 'String',
+    contributeurs: 'String',
+    groupes: 'String',
+    groupesAuteurs: 'String',
     enfants: 'Object'
   },
 

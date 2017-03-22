@@ -98,7 +98,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
 
   /**
    * Récupère une personne (en cache ou en bdd)
-   * @param {string}           id   Oid ou origine/idOrigine
+   * @param {string}           id   Oid ou pid
    * @param {personneCallback} next Renvoie toujours une EntityPersonne
    * @memberOf $personneRepository
    */

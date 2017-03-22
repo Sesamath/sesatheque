@@ -339,9 +339,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               delete ressource.oid
               delete ressource.idOrigine
               ressource.origine = config.application.baseId
-              var userOid = $accessControl.getCurrentUserOid(context)
+              var pid = $accessControl.getCurrentUserPid(context)
               if (!ressource.contributeurs) ressource.contributeurs = []
-              if (userOid && ressource.contributeurs.indexOf(userOid) === -1) ressource.contributeurs.push(userOid)
+              if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
               $ressourceRepository.save(ressource, function (error, ressource) {
                 if (error) {
                   $ressourcePage.printError(context, error)
@@ -375,58 +375,62 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.post($routes.get('create'), function (context) {
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'create'
-    var ressourcePosted = context.post
-    var titrePage = 'Ajouter une ressource'
+    const ressourcePosted = context.post
+    const titrePage = 'Ajouter une ressource'
+    const pid = $accessControl.getCurrentUserPid(context)
 
     if (context.post.oid) {
-      $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
-    } else {
-      flow().seq(function () {
-        checkToken(context, 0, this)
-      }).seq(function () {
-        var next = this
-        $accessControl.checkPermission('create', context, ressourcePosted, function (errorMsg) {
-          if (errorMsg) denied(context, errorMsg)
-          else next()
-        })
-      }).seq(function () {
-        // on fixe la date de màj avant validation
-        if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
-        // on met l'origine à la baseId locale si y'en a pas
-        if (!ressourcePosted.origine) {
-          ressourcePosted.origine = appConfig.application.baseId
-          ressourcePosted.idOrigine = undefined
-        }
-        $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
-      }).seq(function (ressource) {
-        ressourcePosted = ressource
-        if (!_.isEmpty(ressource._errors)) printForm(context, null, ressource, titrePage)
-        else if (!_.isEmpty(ressource._warnings) && !context.post.force) printForm(context, null, ressource, titrePage)
-        else this(null, ressource)
-      }).seq(function (ressource) {
-        // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
-        ressource.auteurs = [myBaseId + '/' + $accessControl.getCurrentUserOid(context)]
-        $ressourceRepository.save(ressource, function (error, ressourceSaved) {
-          if (error) {
-            // on veut gérér les erreurs ici, signe d'un bug dans notre code
-            log.error(new Error('on a une erreur au save mais pas au valide précédent'))
-            printForm(context, error, ressource, 'Ajouter une ressource')
-          } else if (!_.isEmpty(ressourceSaved._errors)) {
-            printForm(context, error, ressourceSaved, 'Ajouter une ressource')
-          } else {
-            log.debug(`Après le save on récupère l’oid ${ressource.oid}, on lance le redirect`)
-            var url = $routes.getAbs('edit', ressourceSaved.oid, context)
-            if (context.layout === 'iframe') {
-              url += '?layout=iframe'
-              if (context.get.closerId) url += '&closerId=' + context.get.closerId
-            }
-            context.redirect(url)
-          }
-        }) // write
-      }).catch(function (error) {
-        printForm(context, error, ressourcePosted, titrePage)
-      })
+      return $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
     }
+    if (!pid) {
+      return denied(context)
+    }
+
+    // on peut y aller
+    flow().seq(function () {
+      checkToken(context, 0, this)
+    }).seq(function () {
+      var next = this
+      $accessControl.checkPermission('create', context, ressourcePosted, function (errorMsg) {
+        if (errorMsg) denied(context, errorMsg)
+        else next()
+      })
+    }).seq(function () {
+      // on fixe la date de màj avant validation
+      if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
+      // on met l'origine à la baseId locale si y'en a pas
+      if (!ressourcePosted.origine) {
+        ressourcePosted.origine = appConfig.application.baseId
+        ressourcePosted.idOrigine = undefined
+      }
+      $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
+    }).seq(function (ressource) {
+      if (!_.isEmpty(ressource._errors)) printForm(context, null, ressource, titrePage)
+      else if (!_.isEmpty(ressource._warnings) && !context.post.force) printForm(context, null, ressource, titrePage)
+      else this(null, ressource)
+    }).seq(function (ressource) {
+      // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
+      ressource.auteurs = [pid]
+      $ressourceRepository.save(ressource, function (error, ressourceSaved) {
+        if (error) {
+          // on veut gérér les erreurs ici, signe d'un bug dans notre code
+          log.error(new Error('on a une erreur au save mais pas au valide précédent'))
+          printForm(context, error, ressource, 'Ajouter une ressource')
+        } else if (!_.isEmpty(ressourceSaved._errors)) {
+          printForm(context, error, ressourceSaved, 'Ajouter une ressource')
+        } else {
+          log.debug(`Après le save on récupère l’oid ${ressource.oid}, on lance le redirect`)
+          var url = $routes.getAbs('edit', ressourceSaved.oid, context)
+          if (context.layout === 'iframe') {
+            url += '?layout=iframe'
+            if (context.get.closerId) url += '&closerId=' + context.get.closerId
+          }
+          context.redirect(url)
+        }
+      }) // write
+    }).catch(function (error) {
+      printForm(context, error, ressourcePosted, titrePage)
+    })
   })
 
   /**
@@ -759,11 +763,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           options.nb = parseInt(crit.nb, 10) || 25
           options.orderBy = crit.orderBy || 'oid'
           var visibilite = 'public'
-          var userOid = $accessControl.getCurrentUserOid(context)
+          var pid = $accessControl.getCurrentUserPid(context)
           // avec une exception pour l'admin qui peut passer ?all=1
           if (context.get.all && $accessControl.hasAllRights(context)) visibilite = 'all'
-          // qqun qui veut voir ses ressources
-          else if (context.get.auteurs && context.get.auteurs == userOid) visibilite = 'auteur/' + userOid // eslint-disable-line eqeqeq
+          // qqun qui veut voir ses propres ressources
+          else if (context.get.auteurs && context.get.auteurs === pid) visibilite = 'auteur/' + pid
           $ressourceRepository.getListe(visibilite, options, function (error, ressources, nbTotal) {
             var data = $ressourcePage.getDefaultData('liste')
             data.$metas.title = 'Résultats de la recherche'

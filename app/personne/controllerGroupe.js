@@ -140,7 +140,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   function modAskConfirm (context, nom, gestionnairesNames) {
     // on demande confirmation (en mettant en session tout le groupe modifié d'après la demande)
     var formPosted = context.post
-    var uid = $accessControl.getCurrentUserOid(context)
+    var pid = $accessControl.getCurrentUserPid(context)
     var fields = []
     var groupe
     flow().seq(function () {
@@ -180,7 +180,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
 
       // ne plus être gestionnaire
       if (formPosted.quit === 'true') {
-        var i = groupe.gestionnaires.indexOf(uid)
+        var i = groupe.gestionnaires.indexOf(pid)
         if (i > -1) {
           if (groupe.gestionnaires.length > 1) {
             groupe.gestionnaires.splice(i, 1)
@@ -428,8 +428,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     try {
       // premiers contrôles qui renverront denied
-      var uid = $accessControl.getCurrentUserOid(context)
-      if (!uid) throw new Error('Il faut être authentifié pour créer un groupe')
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (!pid) throw new Error('Il faut être authentifié pour créer un groupe')
       if (!$accessControl.hasGenericPermission('createGroupe', context)) throw new Error('Droits insuffisants pour créer un groupe')
       /**
        * @private
@@ -446,7 +446,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         if (groupeBdd) this('Le groupe « ' + nom + ' » existe déjà')
         else this()
       }).seq(function () {
-        groupe.gestionnaires = [ uid ]
+        groupe.gestionnaires = [pid]
         $groupeRepository.save(groupe, this)
       }).seq(function (groupeSaved) {
         if (groupeSaved) {
@@ -510,8 +510,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @route GET /groupe/modifier/:nom
    */
   controller.get('modifier/:nom', function (context) {
-    var uid = $accessControl.getCurrentUserOid(context)
-    if (uid) {
+    var pid = $accessControl.getCurrentUserPid(context)
+    if (pid) {
       var nom = context.arguments.nom
       var deniedMsg = 'Le groupe « ' + nom + " » n'existe pas ou vous n'en êtes pas gestionnaire"
 
@@ -521,7 +521,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         // on regarde si on est gestionnaire
         if (groupeBdd) {
           if (groupeBdd.nom !== nom) this(new Error('Erreur interne, le nom du groupe récupéré en base de donnée ne correspond pas (' + nom + '≠' + groupeBdd.nom + ')')) // jshint:ignore line
-          else if (_.includes(groupeBdd.gestionnaires, uid)) this(null, groupeBdd)
+          else if (_.includes(groupeBdd.gestionnaires, pid)) this(null, groupeBdd)
           else this(deniedMsg)
         } else {
           this(deniedMsg)
@@ -583,8 +583,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   controller.post('modifier/:nom', function (context) {
     try {
-      var uid = $accessControl.getCurrentUserOid(context)
-      if (!uid) throw new Error('Il faut être authentifié pour modifier un groupe')
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (!pid) throw new Error('Il faut être authentifié pour modifier un groupe')
       var nom = context.arguments.nom
       var formPosted = context.post
       if (formPosted.modOk) {

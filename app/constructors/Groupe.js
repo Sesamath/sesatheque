@@ -70,8 +70,8 @@ function Groupe (initObj) {
    */
   this.public = !!initObj.public
   /**
-   * liste d'oid de ceux qui peuvent gérer le groupe (le créateur et ceux à qui il a délégué la gestion)
-   * @type {Integer[]}
+   * liste de pid de ceux qui peuvent gérer le groupe (le créateur et ceux à qui il a délégué la gestion)
+   * @type {string[]}
    */
   this.gestionnaires = initObj.gestionnaires || []
   /**

@@ -611,21 +611,25 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         query = query.match('restriction').equals(config.constantes.restriction.aucune)
       } else if (visibilite === 'correction') {
         query = query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
-      } else if (visibilite.indexOf('/') > 0) {
-        const [type, target] = visibilite.split('/', 2)
-        if (type === 'auteur') {
-          query = query.match('auteurs').equals(target)
-        } else if (type === 'groupe') {
-          query = query.match('groupes').equals(target)
-        } else {
-          throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
-        }
       } else if (visibilite === 'all') {
         log.debug('recherche sur tout')
       } else {
-        // on a pas mis de restriction, c'est pas normal, on met public
-        query = query.match('restriction').equals(config.constantes.restriction.aucune)
-        log.error(new Error('Appel de getListe avec visibilite ' + visibilite))
+        const slashPos = visibilite.indexOf('/')
+        if (slashPos > 0) {
+          const type = visibilite.substr(0, slashPos)
+          const target = visibilite.substr(slashPos + 1)
+          if (type === 'auteur') {
+            query = query.match('auteurs').equals(target)
+          } else if (type === 'groupe') {
+            query = query.match('groupes').equals(target)
+          } else {
+            throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
+          }
+        } else {
+          // on a pas mis de restriction connue, c'est pas normal, on met public
+          query = query.match('restriction').equals(config.constantes.restriction.aucune)
+          log.error(new Error('Appel de getListe avec visibilite ' + visibilite))
+        }
       }
 
       // orderBy

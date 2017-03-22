@@ -45,8 +45,8 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {groupeListCallback} next
    */
   function loadMyGroupesManaged (context, next) {
-    var myId = $accessControl.getCurrentUserOid(context)
-    if (myId) $groupeRepository.getListManagedBy(myId, next)
+    var myPid = $accessControl.getCurrentUserPid(context)
+    if (myPid) $groupeRepository.getListManagedBy(myPid, next)
     else next()
   }
 
@@ -74,10 +74,10 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @returns {boolean}
    */
   function isManaged (context, groupe) {
-    var myUid = $accessControl.getCurrentUserOid(context)
+    var myPid = $accessControl.getCurrentUserPid(context)
     var retour = false
     if (groupe && groupe.gestionnaires) {
-      retour = _.includes(groupe.gestionnaires, myUid)
+      retour = _.includes(groupe.gestionnaires, myPid)
     }
     return retour
   }

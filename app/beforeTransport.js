@@ -92,7 +92,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           selected: (context.tab === 'edit'),
           hidden: !$accessControl.hasPermission('update', context, ressource)
         })
-        // log.debug('sur la ressource ' + ressource.oid + 'on a les droits update ' + $accessControl.hasPermission('update', context, ressource) + ' avec le user ' + $accessControl.getCurrentUserOid(context) + ' et les auteurs', ressource.auteurs)
         links.push({
           id: 'buttonDuplicate',
           href: $routes.getAbs('create') + '?clone=' + oid,
@@ -129,7 +128,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
   function addNavigation (context, data) {
     var links = []
     var canCreate = $accessControl.hasPermission('create', context)
-    var myOid = $accessControl.getCurrentUserOid(context) || ''
     var myPid = $accessControl.getCurrentUserPid(context) || ''
     // lien ajout
     links.push({
@@ -160,7 +158,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       href: '/groupe/perso',
       value: 'Mes groupes',
       icon: 'group',
-      hidden: !myOid
+      hidden: !myPid
     })
     // on peut tout ajouter
     data.navigation = {
@@ -272,7 +270,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           case 401:
           case 403:
             // $accessControl pas dispo ici
-            if (context.session && context.session.user && context.session.user.oid) msg = 'Droits insuffisants'
+            if (context.session && context.session.user && context.session.user.pid) msg = 'Droits insuffisants'
             else msg = 'Authentification requise'
             break
           default:

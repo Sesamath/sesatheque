@@ -157,17 +157,17 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       //  formData.errors = []
       // }
       var i = 0
-      flow(values).seqEach(function (value) {
+      flow(values).seqEach(function (pid) {
         var suivant = this
-        $personneRepository.load(value, function (error, personne) {
-          // log.debug('formData dans cb load personne ' + value, formData, 'form', {max: 5000})
+        $personneRepository.load(pid, function (error, personne) {
+          // log.debug('formData dans cb load personne ' + pid, formData, 'form', {max: 5000})
           // log.debug('formData.errors dans cb load personne', formData.errors)
           if (error) {
-            log.error('error load personne ' + value, error)
+            log.error('error load personne ' + pid, error)
             formData.errors.push(error.toString())
           } else if (personne) {
             formData[key].choices.push({
-              value: value,
+              value: pid,
               label: personne.prenom + ' ' + personne.nom,
               id: key + i,
               name: key + '[' + i + ']',
@@ -175,7 +175,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             })
             i++
           } else {
-            formData.errors.push("Aucune personne d'identifiant " + value)
+            formData.errors.push("Aucune personne d'identifiant " + pid)
           }
           suivant()
         })
@@ -359,12 +359,12 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         nextComplement()
       } else {
         var fluxAuteurs = flow(ressource.auteurs)
-        fluxAuteurs.seqEach(function (auteurId) {
+        fluxAuteurs.seqEach(function (pid) {
           var nextAuteur = this
-          $personneRepository.load(auteurId, function (error, personne) {
+          $personneRepository.load(pid, function (error, personne) {
             if (error) log.error(error)
             else if (personne) ressource._auteurs.push({nom: personne.prenom + ' ' + personne.nom})
-            else ressource._auteurs.push({nom: 'auteur ' + auteurId + ' inconnu'})
+            else ressource._auteurs.push({nom: 'auteur ' + pid + ' inconnu'})
             nextAuteur()
           })
         })
@@ -680,14 +680,15 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             if (ressource._relations) viewData.relations.value = ressource._relations
           } else if (key === 'groupesAuteurs') {
             if (value.length && view === 'describe') {
-              if (!viewData.auteurs || !viewData.auteurs.value) {
-                log.error(new Error('Pas de champ auteurs'))
-              } else {
+              // en describe on ajoute les groupes d'auteurs dans le champ auteurs
+              if (viewData.auteurs && viewData.auteurs.value) {
                 _.each(value, function (groupeNom) {
-                  viewData.auteurs.value.push({nom: 'Tous les membres du groupe ' + groupeNom})
+                  viewData.auteurs.value.push({ nom: 'Tous les membres du groupe ' + groupeNom })
                 })
+              } else {
+                log.error(new Error('Pas de champ auteurs'))
               }
-            }
+            } // les autres vues n'ont pas besoin de groupesAuteurs
           } else if (ressConfig.listes[key]) {
             // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
             buffer = []

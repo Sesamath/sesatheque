@@ -106,8 +106,9 @@ module.exports = function refreshAuth () {
           dom.setStyles(document.getElementById('buttonAdd'), {display: 'inline-block'})
           // bouton mes ressources
           var buttonMyRessources = document.getElementById('buttonMyRessources')
-          if (buttonMyRessources && response.oid) {
-            buttonMyRessources.href += response.oid
+          if (buttonMyRessources && response.pid) {
+            // faut ajouter le pid s'il n'y était pas déjà
+            if (buttonMyRessources.href.substr(-8) === 'auteurs=') buttonMyRessources.href += response.pid
             dom.setStyles(buttonMyRessources, {display: 'inline-block'})
           }
         }

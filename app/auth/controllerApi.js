@@ -53,7 +53,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
       permissions: ''
     }
     if (isLogged) {
-      auth.oid = $accessControl.getCurrentUserOid(context)
+      auth.pid = $accessControl.getCurrentUserPid(context)
       auth.authBloc = $auth.getAuthBloc(context)
       if ($accessControl.hasPermission('create', context)) auth.permissions += 'C'
     }

@@ -85,7 +85,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
             nom: nom,
             ouvert: false,
             public: true,
-            gestionnaires: [$accessControl.getCurrentUserOid(context)]
+            gestionnaires: [$accessControl.getCurrentUserPid(context)]
           })
           groupe.store(function (error, groupeBdd) {
             if (error) {
@@ -150,10 +150,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    */
   controller.get('admin', function (context) {
     var groupesAdmin = []
-    var uid = $accessControl.getCurrentUserOid(context)
-    if (uid) {
+    var pid = $accessControl.getCurrentUserPid(context)
+    if (pid) {
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(uid, this)
+        $groupeRepository.getListManagedBy(pid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {
@@ -178,10 +178,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
   controller.get('membre', function (context) {
     var groupesMembre = []
     var done = {}
-    var uid = $accessControl.getCurrentUserOid(context)
-    if (uid) {
+    var pid = $accessControl.getCurrentUserPid(context)
+    if (pid) {
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(uid, this)
+        $groupeRepository.getListManagedBy(pid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {
@@ -213,10 +213,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
   controller.get('suivis', function (context) {
     var groupesSuivis = []
     var done = {}
-    var uid = $accessControl.getCurrentUserOid(context)
-    if (uid) {
+    var pid = $accessControl.getCurrentUserPid(context)
+    if (pid) {
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(uid, this)
+        $groupeRepository.getListManagedBy(pid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {

@@ -33,10 +33,11 @@
 /* global module */
 
 const filters = require('sesajstools/utils/filters')
-const {getBaseIdFromRid} = require('sesatheque-client/src/sesatheques.js')
+
 /**
  * Filtre une liste de personne en vérifiant que c'est bien de la forme baseId/xxx avec baseId connue
  * si c'est pas le cas et que defaultBaseId est fournie on l'ajoute
+ * @todo virer defaultBaseId quand l'update 17 aura été déployé partout (il a besoin de cet ancien fonctionnement pendant qu'il tourne pour rectifier les pids)
  * @param {string[]} list
  * @param {string} [defaultBaseId] Une baseId à ajouter éventuellement
  * @return {Array} la liste filtrée
@@ -44,16 +45,22 @@ const {getBaseIdFromRid} = require('sesatheque-client/src/sesatheques.js')
 function filterUserList (list, defaultBaseId) {
   if (list && Array.isArray(list) && list.length) {
     // on a encore des int…
-    // return filters.arrayString(list).map(uid => {
-    return list.map(uid => {
-      if (typeof uid === 'number') {
-        uid = defaultBaseId + '/' + uid
-      } else {
-        const pos = uid.indexOf('/')
-        if (pos === -1 && defaultBaseId) uid = defaultBaseId + '/' + uid
+    // return filters.arrayString(list).map(pid => {
+    return list.map(pid => {
+      if (!pid) {
+        // l'apellant nous passe n'importe quoi…
+        console.error('liste de personnes invalide : ' + list.join(', '))
+        return
       }
-      if (getBaseIdFromRid(uid, false)) return uid
-    }).filter(uid => uid) // vire les éventuels undefined mis par le map
+      if (typeof pid === 'number') {
+        pid = defaultBaseId + '/' + pid
+      } else {
+        const pos = pid.indexOf('/')
+        if (pos === -1 && defaultBaseId) pid = defaultBaseId + '/' + pid
+        // @todo else ajouter ici un checkAuthSource pour vérifier que l'origine est connue comme source d'authentification
+      }
+      return pid
+    }).filter(pid => pid) // vire les éventuels undefined mis par le map
   }
   return []
 }
@@ -236,19 +243,20 @@ function Ressource (initObj, myBaseId) {
     this.relations = []
   }
   /**
-   * Liste de uid d'auteurs
-   * @type {Integer[]}
+   * Liste d'auteurs
+   * @type {string[]}
    */
   this.auteurs = filterUserList(values.auteurs, myBaseId)
   /**
-   * Liste d'url pour les auteurs précédents
+   * Liste d'url pour les auteurs précédents (lors d'un fork)
+   * @type {string[]}
    */
   if (values.auteursParents) {
     this.auteursParents = filterUserList(values.auteursParents, myBaseId)
   }
   /**
-   * Liste d'id de contributeurs
-   * @type {Integer[]}
+   * Liste de contributeurs
+   * @type {string[]}
    */
   this.contributeurs = filterUserList(values.contributeurs, myBaseId)
   /**

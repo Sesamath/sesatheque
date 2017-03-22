@@ -384,16 +384,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Retourne l'oid du user courant ou undefined
-   * @param {Context} context
-   * @returns {Integer} L'oid
-   * @memberOf $accessControl
-   */
-  $accessControl.getCurrentUserOid = function (context) {
-    if (context.session.user) return context.session.user.oid
-  }
-
-  /**
    * Retourne le pid du user courant ou undefined
    * @param {Context} context
    * @returns {Integer} L'oid
@@ -410,7 +400,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.getCurrentUser = function (context) {
-    if (context.session.user && context.session.user.oid) return context.session.user
+    if (context.session.user && context.session.user.pid) return context.session.user
   }
 
   /**
@@ -624,8 +614,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {boolean|undefined}
    */
   $accessControl.isContributeur = function (context, ressource) {
-    var userOid = $accessControl.getCurrentUserOid(context)
-    return (ressource && ressource.contributeurs && ressource.contributeurs.indexOf(userOid) > -1)
+    const pid = $accessControl.getCurrentUserPid(context)
+    return (ressource && ressource.contributeurs && ressource.contributeurs.indexOf(pid) > -1)
   }
 
   /**
@@ -692,7 +682,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       } else if (!error) {
         context.session.user = {
           oid: 0,
-          lastCheck: new Date()
+          _lastCheck: new Date()
         }
       }
       next(error, personne)
@@ -720,7 +710,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       } else if (!error) {
         context.session.user = {
           oid: 0,
-          lastCheck: new Date()
+          _lastCheck: new Date()
         }
       }
       next(error, personne)
@@ -787,8 +777,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.refreshCurrentUser = function (context, next) {
     if (!$accessControl.isAuthenticated(context)) return next(new Error('refreshCurrentUser appelé sans session'))
-    var oid = $accessControl.getCurrentUserOid(context)
-    $personneRepository.load(oid, function (error, user) {
+    var pid = $accessControl.getCurrentUserPid(context)
+    $personneRepository.load(pid, function (error, user) {
       if (error) {
         next(error)
       } else if (user) {

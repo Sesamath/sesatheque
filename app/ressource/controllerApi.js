@@ -49,14 +49,6 @@ var Ref = require('../constructors/Ref')
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, $ressourceFetch) {
   /**
-   * Ajoute notre baseId si c'est absent d'item
-   * @param {Ressource|Ref} item
-   */
-  function completeBaseId (item) {
-    if (!item.baseId) item.baseId = myBaseId
-  }
-
-  /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
    * @param {Context} context
@@ -142,7 +134,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     /**
      * Ajoute des refs (en vérifiant qu'elles sont valides) à nos deux listes globales refs et sequenceModeles
      * @private
-     * @param {Ressource[]} ressources La liste des ressources|aliases à ajouter après vérif de leur intégrité
+     * @param {Ressource[]} ressources La liste des ressources à ajouter après vérif de leur intégrité
      * @param {string}              droits     Les droits sur ces ressources (lettres WD pour Write & Delete)
      */
     function addRefs (ressources, droits) {
@@ -151,10 +143,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (ressource.parametres) sequenceModeles.push(ressource.parametres)
           else log.errorData('sequenceModele sans parametres', ressource)
         } else {
-          var alias = new Ref(ressource)
-          if (alias.ref && alias.titre && alias.type && (alias.public || alias.cle)) {
-            if (droits) alias.$droits = droits
-            refs.push(alias)
+          const ref = new Ref(ressource)
+          if (ref.aliasOf && ref.titre && ref.type && (ref.public || ref.cle)) {
+            if (droits) ref.$droits = droits
+            refs.push(ref)
           } else {
             log.errorData('ressource pas utilisable pour sesalab', ressource)
           }
@@ -163,20 +155,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
 
     context.timeout = 3000
-    var oid = $accessControl.getCurrentUserOid(context)
+    var pid = $accessControl.getCurrentUserPid(context)
     // liste des ressources perso
     var refs = []
     // liste des sequenceModeles perso
     var sequenceModeles = []
-    if (oid) {
+    if (pid) {
       flow().seq(function () {
-        $ressourceRepository.getListe('all', {filters: [{index: 'auteurs', values: [oid]}]}, this)
+        $ressourceRepository.getListe('all', {filters: [{index: 'auteurs', values: [pid]}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'WD')
-        $ressourceRepository.getListe('all', {filters: [{index: 'contributeurs', values: [oid]}]}, this)
+        $ressourceRepository.getListe('all', {filters: [{index: 'contributeurs', values: [pid]}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'W')
-        refs.forEach(ref => completeBaseId(ref))
         $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
       }).catch(function (error) {
         $json.sendError(context, error)
@@ -253,7 +244,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
      log.error(new Error('une trace pour ' +reqHttp)) */
     var ressourcePostee = context.post
-    var currentUserOid = $accessControl.getCurrentUserOid(context)
+    var pid = $accessControl.getCurrentUserPid(context)
     var groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
     var ressourceOriginale
 
@@ -308,8 +299,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressourceNew) {
         // on ajoute le user courant pour serie et sequenceModele,
         // pas encore pour tout par crainte d'effets de bords…
-        if (currentUserOid && ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele') {
-          ressourceNew.auteurs = [myBaseId + '/' + currentUserOid]
+        if (pid && ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele') {
+          ressourceNew.auteurs = [pid]
         }
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
@@ -407,7 +398,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         var format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
           var item = (format === 'full') ? ressource : $ressourceConverter.toRef(ressource)
-          completeBaseId(item)
           liste.push(item)
         })
       }
@@ -434,11 +424,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         ref.$droits = 'R'
         if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
         if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
-        completeBaseId(ref)
-        log.debug('sendRessource api avec la ref de baseId', ref.baseId, 'avirer', {max: 5000})
         $json.send(context, null, ref)
       } else {
-        completeBaseId(ressource)
         $json.send(context, null, ressource)
       }
     } else {
@@ -534,8 +521,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.get('clone/:oid', function (context) {
     var oid = context.arguments.oid
-    var userOid = $accessControl.getCurrentUserOid(context)
-    if (userOid) {
+    var pid = $accessControl.getCurrentUserPid(context)
+    if (pid) {
       $ressourceRepository.load(oid, function (error, ressource) {
         if (error) return $json.send(context, error)
         if (ressource) {
@@ -546,7 +533,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               delete ressource.idOrigine
               ressource.origine = config.application.baseId
               // faut mettre le user en auteur sinon il aura pas le droit de supprimer
-              if (ressource.auteurs.indexOf(userOid) < 0) ressource.auteurs.push(userOid)
+              if (ressource.auteurs.indexOf(pid) < 0) ressource.auteurs.push(pid)
               ressource.publie = true
               ressource.restriction = configRessource.constantes.restriction.prive
               if (!ressource.relations) ressource.relations = []
@@ -566,7 +553,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => { data[p] = ressource[p] })
                 data.aliasOf = myBaseId + '/' + ressource.oid
                 data.auteursParents = ressource.auteurs
-                data.auteurs = [myBaseId + '/' + userOid]
+                data.auteurs = [pid]
                 alias = EntityRessource.create(data)
                 alias.store(function (error, ressAlias) {
                   if (error) return $json.sendError(context, error)
@@ -612,8 +599,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     try {
       var baseUrl = config.sesatheques[baseIdOrigine]
       if (!baseUrl) throw new Error('Sésathèque ' + baseIdOrigine + ' inconnue')
-      var userOid = $accessControl.getCurrentUserOid(context)
-      if (!userOid) throw new Error('Vous devez être authentifié pour créer une ressource')
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (!pid) throw new Error('Vous devez être authentifié pour créer une ressource')
       // on peut aller chercher la ressource
       $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, function (error, ressource) {
         log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
@@ -622,7 +609,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         const aliasData = new Ref(ressource)
         // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
         aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
-        aliasData.auteurs = [myBaseId + '/' + userOid]
+        aliasData.auteurs = [pid]
         aliasData.origine = config.application.baseId
         aliasData.dateCreation = new Date()
         aliasData.publie = true
