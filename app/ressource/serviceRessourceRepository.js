@@ -738,29 +738,35 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   /**
    * Récupère une ressource d'après son idOrigine et la passe à next
    * @memberOf $ressourceRepository
-   * @param {string}            origine
+   * @param {string}            origine (ou "cle" avec idOrigine qui est la clé, ou la baseId courante avec idOrigine qui est l'oid)
    * @param {string}            idOrigine
    * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
   $ressourceRepository.loadByOrigin = function loadByOrigin (origine, idOrigine, next) {
     if (origine && idOrigine) {
+      // on est appelé par les controleurs sur les urls xxx/:origine/:idOrigine
+      // mais le client de l'api peut passer un rid ou une clé,
+      // on le gère ici plutôt que de mettre des if dans chaque contrôleur
       if (origine === 'cle') {
-        $ressourceRepository.loadByCle(idOrigine, next)
-      } else {
-        $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
-          if (error) log.error(error)
-          if (ressourceCached) {
-            next(null, EntityRessource.create(ressourceCached))
-          } else {
-            EntityRessource
-              .match('origine').equals(origine)
-              .match('idOrigine').equals(idOrigine)
-              .grabOne(function (error, ressource) {
-                cacheAndNext(error, ressource, next)
-              })
-          }
-        })
+        return $ressourceRepository.loadByCle(idOrigine, next)
       }
+      if (origine === myBaseId) {
+        return $ressourceRepository.load(idOrigine, next)
+      }
+      // c'est un vraie origine
+      $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
+        if (error) log.error(error)
+        if (ressourceCached) {
+          next(null, EntityRessource.create(ressourceCached))
+        } else {
+          EntityRessource
+            .match('origine').equals(origine)
+            .match('idOrigine').equals(idOrigine)
+            .grabOne(function (error, ressource) {
+              cacheAndNext(error, ressource, next)
+            })
+        }
+      })
     } else {
       return next(new Error('Origine ou idOrigine manquant, impossible de charger la ressource'))
     }
