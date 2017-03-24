@@ -939,7 +939,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.get('public/:oid', function (context) {
     var oid = context.arguments.oid
-    if (oid !== 'by' && oid !== 'getRid') {
+    if (oid === 'getRid') {
+      // c'est pas pour nous
+      context.next()
+    } else {
       $ressourceRepository.loadPublic(oid, function (error, ressource) {
         if (error) $json.send(context, error)
         else if (ressource) sendRessource(context, null, ressource)
