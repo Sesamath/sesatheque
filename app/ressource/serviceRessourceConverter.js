@@ -213,27 +213,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
   }
 
   /**
-   * Transforme la ressource de type arbre en arbre (les parametres de la ressource où on ajoute titre et id)
-   * @memberOf $ressourceConverter
-   * @returns {Arbre|undefined} l'arbre (ou undefined si la ressource n'était pas de type arbre)
-   */
-  $ressourceConverter.toArbre = function (ressource) {
-    var arbre
-    if (ressource.type === 'arbre') {
-      var clone = _.clone(ressource)
-      arbre = {
-        oid: clone.oid,
-        titre: clone.titre,
-        type: 'arbre',
-        attributes: clone.parametres.attributes || {},
-        enfants: clone.enfants || []
-      }
-    }
-
-    return arbre
-  }
-
-  /**
    * Renvoie une Ref à une ressource, avec enfants éventuels
    * (si ce qui sort contient oid ET ref, c'était un alias)
    * @memberOf $ressourceConverter
