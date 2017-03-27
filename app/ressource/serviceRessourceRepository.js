@@ -210,18 +210,18 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {Ressource} ressource
    */
   function majArbres (ressource) {
-    const refOrig = ressource.origine + '/' + ressource.idOrigine
+    const ridOrig = ressource.rid
     // cherche un enfant et le modifie si besoin, retourne true si on a fait une modif
-    function findChild (arbre, ref) {
+    function findChild (arbre, rid) {
       let modif
       // avec _.each on pourrait sortir dès qu'on a trouvé, mais un arbre pourrait avoir
       // deux fois le même enfant, on les parse tous
       arbre.enfants.forEach(function (enfant) {
         let mod
-        if (enfant.ref === ref) {
+        if (enfant.aliasOf === rid) {
           mod = majChild(enfant)
         } else if (enfant.enfants) {
-          mod = findChild(enfant, ref)
+          mod = findChild(enfant, rid)
         }
         if (!modif && mod) modif = true
       })
@@ -231,12 +231,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     // regarde s'il faut mettre à jour l'enfant et retourne true si c'est le cas
     function majChild (child) {
       let modif = false
-      // on passe la ref sur l'oid si c'est pas le cas
-      if (child.ref === refOrig) {
-        child.ref = ressource.oid
-        modif = true
-      }
-      if (child.ref === ressource.oid) {
+      if (child.rid === ressource.rid) {
         if (child.titre !== ressource.titre || child.resume !== ressource.resume || child.description !== ressource.description) {
           modif = true
           child.titre = ressource.titre
@@ -246,16 +241,17 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       } else {
         log.error(new Error('majChild appelée avec des paramètres incohérents sur la ressource ' + ressource.oid), child)
       }
+
       return modif
     }
 
-    // on cherche les enfants d'après l'oid de la ressource
+    // on cherche les enfants d'après le rid de la ressource
     flow().seq(function () {
-      EntityRessource.match('enfants').equals(ressource.oid).grab(this)
+      EntityRessource.match('enfants').equals(ressource.rid).grab(this)
     }).seqEach(function (arbre) {
       // ici arbre vient direct de la base, on zappe notre beforeStore
       // pour éviter la mise en cache et la modif de dateMiseAJour
-      if (findChild(arbre, ressource.oid)) arbre.store((error) => log.error(error))
+      if (findChild(arbre, ressource.rid)) arbre.store((error) => log.error(error))
     }).catch(log.error)
   }
 
@@ -302,11 +298,11 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   function toAlias (ressource) {
     if (!ressource.oid) throw new Error('Impossible de convertir en alias une ressource sans oid')
     // c'est déjà un alias ?
-    if (ressource.ref) return ressource
+    if (ressource.aliasOf) return ressource
     // on vérifie quand même ça
     if (ressource.baseId && ressource.baseId !== config.application.baseId) log.errorData('ressource sans ref avec baseId externe', ressource)
     return {
-      ref: ressource.oid,
+      aliasOf: ressource.oid,
       baseId: config.application.baseId,
       titre: ressource.titre,
       type: ressource.type,

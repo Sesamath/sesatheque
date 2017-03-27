@@ -179,8 +179,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
               log.debug('on traite l’enfant ' + enfant.titre + ' et on a récupéré ', ressource)
               updateEnfant(enfantIndex, ressource, finEach)
             })
-          } else if (enfant.ref) {
-            $ressourceRepository.load(enfant.ref, function (error, ressource) {
+          } else if (enfant.aliasOf) {
+            $ressourceRepository.load(enfant.aliasOf, function (error, ressource) {
               if (error) log.error(error)
               updateEnfant(enfantIndex, ressource, finEach)
             })

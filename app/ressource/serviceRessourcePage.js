@@ -806,21 +806,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
               var enfantsDescribe = []
               ressource.enfants.forEach(function (enfant) {
-                if (enfant.ref) {
-                  var url = $routes.getAbs('describe', enfant.ref)
-                  if (enfant.baseId) {
-                    var base = sesatheques.getBase(enfant.baseId, false)
-                    if (base) {
-                      url = base + url.substr(1) // base termine par un slash, url démarre par un slash
-                    } else {
-                      log.errorData(`baseId ${enfant.baseId} inconnue dans ${ressource.oid} pour l'item `, enfant)
-                    }
-                  }
+                try {
+                  const [ baseId, id ] = sesatheques.getRidComponents(enfant.aliasOf)
+                  const url = sesatheques.getBaseUrl(baseId) + $routes.getAbs('describe', id)
                   enfantsDescribe.push({
-                    oid: enfant.ref,
+                    oid: id,
                     titre: enfant.titre,
                     url: url
                   })
+                } catch (error) {
+                  log.errorData(`enfant de ${ressource.oid} avec un rid non conforme`, enfant)
                 }
               })
               data.contentBloc.enfantsDescribe = enfantsDescribe

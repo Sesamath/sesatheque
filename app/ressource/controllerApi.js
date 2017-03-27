@@ -54,12 +54,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
    * @param {Context} context
-   * @param id
+   * @param rid
    */
-  function deleteAndSend (context, id) {
-    log.debug('dans cb api deleteRessource ' + id)
+  function deleteAndSend (context, rid) {
+    log.debug('dans cb api deleteRessource ' + rid)
     // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
-    $ressourceRepository.load(id, function (error, ressource) {
+    $ressourceRepository.load(rid, function (error, ressource) {
       if (error) {
         $json.send(context, error)
       } else if (ressource) {
@@ -70,14 +70,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             $ressourceRepository.delete(ressource, function (error) {
               if (error) $json.send(context, error)
               // else $json.send(context, null, {error:"message d'erreur bidon"})
-              else $json.sendOk(context, {deleted: id})
+              else $json.sendOk(context, {deleted: rid})
             })
           }
         })
       } else {
-        log.debug('La ressource ' + id + " n'existait pas, on a rien effacé")
+        log.debug(`La ressource ${rid} n’existait pas, on a rien effacé`)
         // pas de ressource, on vérifie qu'il avait certains droits
-        $json.send(context, new Error("Aucune ressource d'identifiant " + id))
+        $json.send(context, new Error(`Aucune ressource d'identifiant ${rid}`))
       }
     })
   }
@@ -418,20 +418,24 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     log.debug('sendRessource api avec', ressource, 'avirer', {max: 5000})
     if (error) {
       $json.send(context, error)
-    } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
-      var format = context.get.format
-      if (format === 'alias' || format === 'ref') {
-        const ref = $ressourceConverter.toRef(ressource)
-        // au format ref on ajoute les droits
-        ref.$droits = 'R'
-        if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
-        if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
-        $json.send(context, null, ref)
+    } else if (ressource) {
+      if ($accessControl.hasReadPermission(context, ressource)) {
+        var format = context.get.format
+        if (format === 'alias' || format === 'ref') {
+          const ref = $ressourceConverter.toRef(ressource)
+          // au format ref on ajoute les droits
+          ref.$droits = 'R'
+          if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
+          if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
+          $json.send(context, null, ref)
+        } else {
+          $json.send(context, null, ressource)
+        }
       } else {
-        $json.send(context, null, ressource)
+        $json.denied(context)
       }
     } else {
-      $json.notFound(context, 'Ressource inexistante ou droits insuffisants pour y accéder.')
+      $json.notFound(context, 'Cette ressource n’existe pas.')
     }
   }
 
@@ -792,7 +796,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @Route POST /api/notifyError
    */
   controller.post('notifyError', function (context) {
-    if (context.post.ref) log.errorData('notifyError', context.post)
+    if (context.post.rid) log.errorData('notifyError', context.post)
     else log.error('notifyError', context.post)
     $json.sendOk(context)
   })
@@ -807,10 +811,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get('jstree', function (context) {
     const {getJstreeChildren, toJstree} = require('sesatheque-client/src/jstree/convert.js')
 
-    var ref = context.get.ref || context.get.id
+    var id = context.get.rid || context.get.id || context.get.ref
     var onlyChildren = !!context.get.children
-    if (ref) {
-      $ressourceRepository.load(ref, function (error, ressource) {
+    if (id) {
+      $ressourceRepository.load(id, function (error, ressource) {
         if (error) {
           sendJsonJstreeArray(context, error)
         } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
@@ -831,7 +835,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
           }
         } else {
-          sendJsonJstreeArray(context, 'la ressource ' + ref + " n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
+          sendJsonJstreeArray(context, 'la ressource ' + id + " n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
         }
       })
     } else {
@@ -1070,8 +1074,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} :idOrigine
    */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
-    var ref = context.arguments.origine + '/' + context.arguments.idOrigine
-    deleteAndSend(context, ref)
+    const rid = context.arguments.origine + '/' + context.arguments.idOrigine
+    deleteAndSend(context, rid)
   })
   controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
 

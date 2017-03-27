@@ -376,19 +376,19 @@ module.exports = function edit (arbre, options) {
      * @return {boolean}
      */
     function loadSrc () {
-      const ref = $inputRef.val()
-      log('On va charger en source ' + ref)
-      if (ref) {
-        const slashPos = ref.indexOf('/')
+      const rid = $inputRef.val()
+      log('On va charger en source ' + rid)
+      if (rid) {
+        const slashPos = rid.indexOf('/')
         if (slashPos === -1) {
-          fetchPublicRef(baseId, ref, showSrc)
+          fetchPublicRef(baseId, rid, showSrc)
         } else {
-          const debut = ref.substr(0, slashPos)
-          if (exists(debut)) fetchPublicRef(debut, ref.substr(slashPos + 1), showSrc)
-          else fetchPublicRef(baseId, ref, showSrc)
+          const debut = rid.substr(0, slashPos)
+          if (exists(debut)) fetchPublicRef(debut, rid.substr(slashPos + 1), showSrc)
+          else fetchPublicRef(baseId, rid, showSrc)
         }
       } else {
-        log('appel de load sans ref')
+        log('appel de load sans rid')
       }
     } // loadSrc
 
@@ -411,10 +411,10 @@ module.exports = function edit (arbre, options) {
      * @return {*}
      */
     function showSrc (error, arbre) {
-      const ref = $inputRef.val()
-      if (error) return addTreeError('Erreur au chargement de ' + ref + ' : ' + error.toString(), 5)
-      if (!arbre) return addTreeError(`L’arbre ${ref} n’existe pas`)
-      if (arbre.type !== 'arbre') return addTreeError(`La ressource ${ref} n’est pas un arbre`)
+      const rid = $inputRef.val()
+      if (error) return addTreeError('Erreur au chargement de ' + rid + ' : ' + error.toString(), 5)
+      if (!arbre) return addTreeError(`L’arbre ${rid} n’existe pas`)
+      if (arbre.type !== 'arbre') return addTreeError(`La ressource ${rid} n’est pas un arbre`)
       // on peut y aller
       log('arbre source', arbre)
       const jstOptions = {

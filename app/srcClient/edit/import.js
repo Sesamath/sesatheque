@@ -72,7 +72,7 @@ function doImport (url) {
     // console.log('retour externalClone', error, data)
     if (error) page.addError(error)
     else if (data && data.error) page.addError(data.error)
-    else if (data && data.ref) window.location = '/ressource/modifier/' + data.ref
+    else if (data && data.aliasOf) window.location = '/ressource/modifier/' + data.aliasOf
     else page.addError('L’import a échoué, vérifier l’url fournie')
   })
 }
