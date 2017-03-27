@@ -42,6 +42,7 @@
 const app = require('../app/app')
 const config = require('../app/config')
 const anLog = require('an-log')
+const sesatheques = require('sesatheque-client/src/sesatheques')
 
 /**
  * @see https://github.com/visionmedia/supertest
@@ -53,8 +54,10 @@ const globTest = {}
 
 describe('test de l’application lassi', function () {
   before(function beforeBoot (done) {
+    // on enregistre notre sesatheque de test
+    sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
     // les 2s par défaut suffisent pas pour le boot
-    this.timeout(5000)
+    this.timeout(8000)
     // on re-configure an-log pour qu'il mette tout en fichier
     anLog.config(config.lassiLogger)
     // boot
