@@ -20,7 +20,7 @@
     "deploy-dev": "pm2 _private/pm2Deploy.json5 dev",
     "cli": "echo 'lancer app/cli.js'",
     "doc": "./scripts/doc -a",
-    "lint": "eslint app",
+    "lint": "eslint --ignore-path .gitignore app",
     "maj": "git pull && npm install && npm run build",
     "start": "node app/index.js",
     "start:commun": "env SESATHEQUE_CONF=commun node app/index.js",
