@@ -50,8 +50,7 @@ var page = require('../../page/index')
  * @param options
  */
 module.exports = function edit (ressource, options) {
-  require.ensure(['jquery'], function () {
-    const $ = require('jquery')
+  require.ensure(['jquery'], function (require) {
 
     /**
      * Ajoute le listener sur submit pour remplir le textarea avec les params d'éditgraphe
@@ -172,6 +171,7 @@ module.exports = function edit (ressource, options) {
       })
     } // loadGraphic
 
+    const $ = require('jquery')
     var wd = window.document
     var isSubmitForced = false      // pour forcer le submit au coup suivant en cas d'erreur de récupération de graphe sur le 1er
     var isEditgrapheLoaded = false

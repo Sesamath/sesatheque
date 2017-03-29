@@ -46,8 +46,8 @@ import page from '../../page/index'
  */
 module.exports = function display (ressource, options, next) {
   require.ensure(['jquery', 'jstree', 'sesatheque-client/src/jstree'], function (require) {
-    const stJstree = require('sesatheque-client/src/jstree')
     const $ = require('jquery')
+    const stJstree = require('sesatheque-client/src/jstree')
     require('jstree')
     let error
     try {
@@ -183,9 +183,9 @@ module.exports = function display (ressource, options, next) {
 
       var jstData = {
         'core': {
-          'data': stJstree.getDataCallback(ressource, undefined, {errorCallback: page.addError})
+          'data': stJstree.getDataCallback(ressource, undefined, { errorCallback: page.addError })
         },
-        plugins: ['search']
+        plugins: [ 'search' ]
       }
       var $tree = $('#' + treeId)
       $tree.jstree(jstData)

@@ -34,69 +34,98 @@
 const log = require('sesajstools/utils/log')
 
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
-  require.ensure(['jquery'], function () {
+  require.ensure(['jquery'], function (require) {
+    function getTotalHeight ($blocs) {
+      return $blocs.reduce((height, $bloc) => {
+        const h = $bloc.outerHeight(true)
+        if (h > 0) return height + h
+        return height
+      }, 0)
+    }
+
+    function getTotalWidth ($blocs) {
+      return $blocs.reduce((width, $bloc) => {
+        const w = Number($bloc.outerWidth(true))
+        if (w > 0) width += w
+        return width
+      }, 0)
+    }
+
     /**
      * Modifie la taille de l'élément pour lui donner tout l'espace restant de container
      * @private
      * @param {function} cb Callback éventuelle
      */
-    function resize (cb) {
+    function resize () {
       var occupe = offsetHeight
+      // log(`innerHeight : ${window.innerHeight} et occupé ${occupe}`)
       var tailleDispo
       // hauteur
-      if ($blocsH) $blocsH.forEach(function ($bloc) { occupe += $bloc.outerHeight(true) })
-      tailleDispo = Math.floor(window.innerHeight - occupe)
-      if (tailleDispo < minHeight) tailleDispo = minHeight
-      log('resize height à ' + tailleDispo)
-      $target.css('height', tailleDispo + 'px')
+      if ($blocsH) {
+        occupe += getTotalHeight($blocsH)
+      }
+      tailleDispo = Math.max(Math.floor(window.innerHeight - occupe), minHeight)
+      if ($bigHeightBlocs && tailleDispo > 2 * minHeight) {
+        // on retire aussi les blocs de bigHeightBlocs
+        occupe = getTotalHeight($bigHeightBlocs)
+        // log(`on a une grande hauteur ${tailleDispo} > 2 × ${minHeight}, on retire aussi ${options.bigHeightBlocs.join(', ')} => ${occupe}`)
+        if (occupe < minHeight) tailleDispo -= occupe
+      }
+      // log(`resize height de ${targetId} à ${tailleDispo}`)
+      $target.height(tailleDispo)
 
       // largeur
       occupe = offsetWidth
-      if ($blocsW) $blocsW.forEach(function ($bloc) { occupe += $bloc.outerWidth(true) })
-      tailleDispo = Math.floor(window.innerWidth - occupe)
-      if (tailleDispo < minWidth) tailleDispo = minWidth
-      log('resize width à ' + tailleDispo)
-      $target.css('width', tailleDispo + 'px')
-      if (cb) cb()
+      if ($blocsW) {
+        occupe += getTotalWidth($blocsW)
+      }
+      tailleDispo = Math.max(Math.floor(window.innerWidth - occupe), minWidth)
+      if ($bigWidthBlocs && tailleDispo > 2 * minWidth) {
+        occupe = getTotalWidth($bigWidthBlocs)
+        if (occupe < minWidth) tailleDispo -= occupe
+      }
+      // log(`resize width de ${targetId} à ${tailleDispo}`)
+      $target.width(tailleDispo)
+      if (options.callback) options.callback()
     }
 
-    function callResize () {
-      resize(options.callback)
+    function jquerize (ids) {
+      const $blocs = []
+      ids.forEach(id => {
+        const $bloc = $('#' + id)
+        if ($bloc && $bloc.length) $blocs.push($bloc)
+      })
+      return $blocs
     }
 
     const $ = require('jquery')
-    // on peut pas requérir page car il nous inclu, on appellera autosize via page.autosize
-
-    var $blocsH
-    var $blocsW
-    var $target
-    var offsetHeight = 0
-    var offsetWidth = 0
-    var minHeight = 400
-    var minWidth = 400
-
     if (!options) options = {}
+    var $blocsH
+    var $bigHeightBlocs
+    var $blocsW
+    var $bigWidthBlocs
+    var $target
+    var offsetHeight = options.offsetHeight || 50
+    var offsetWidth = options.offsetWidth || 50
+    var minHeight = options.minHeight || 400
+    var minWidth = options.minWidth || 400
+
     $target = $('#' + targetId)
     if (hBlocIds && hBlocIds.length) {
-      $blocsH = []
-      hBlocIds.forEach(function (id) {
-        var $bloc = $('#' + id)
-        if ($bloc) $blocsH.push($bloc)
-      })
+      $blocsH = jquerize(hBlocIds)
+      // log(`pour ${targetId} on a reçu les ids de block ${hBlocIds.join(', ')}`)
+    }
+    if (options.bigHeightBlocs) {
+      $bigHeightBlocs = jquerize(options.bigHeightBlocs)
     }
     if (wBlocIds && wBlocIds.length) {
-      $blocsW = []
-      wBlocIds.forEach(function (id) {
-        var $bloc = $('#' + id)
-        if ($bloc) $blocsW.push($bloc)
-      })
+      $blocsW = jquerize(wBlocIds)
     }
-    if (options.minHeight) minHeight = options.minHeight
-    if (options.minWidth) minWidth = options.minWidth
-    if (options.offsetHeight) offsetHeight = options.offsetHeight
-    if (options.offsetWidth) offsetWidth = options.offsetWidth
-    callResize()
+    if (options.bigWidthBlocs) {
+      $bigWidthBlocs = jquerize(options.bigWidthBlocs)
+    }
+    resize()
     // et à chaque changement de la taille de la fenêtre
-    $(window).resize(callResize)
+    $(window).resize(resize)
   })
 }

@@ -48,7 +48,7 @@ var multiEditor = require('../../editors/multiEditor')
  * @param options
  */
 module.exports = function edit (ressource, options) {
-  require.ensure(['jquery'], function () {
+  require.ensure(['jquery'], function (require) {
     /**
      * Vérifie que l'adresse est correctement formatée et n'est pas un domaine interdit, ajoute éventuellement http://
      */
@@ -216,9 +216,9 @@ module.exports = function edit (ressource, options) {
     /**
      * MAIN
      */
+    const $ = require('jquery')
     var iframeApercu, linkAdresseElt, $adresse, $adresseAlert, $apercu
     var exclus = [ 'euler.ac-versailles.fr' ]
-    const $ = require('jquery')
 
     try {
       // les containers (variables locales au module), qui seront affectés par initDom()

@@ -37,7 +37,6 @@ var page = require('../../page/index')
 var swf = require('../../display/swf')
 
 var $
-/* jshint jquery:true */
 
 /**
  * Ajoute l'iframe (ou un div si c'est un swf directement)
@@ -49,9 +48,14 @@ function addPage (url, params, next) {
   var divIframe = dom.addElement(container, 'div', {id: divIframeId})
   var divIframeSrcId = 'urlSrc'
   dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + params.adresse)
+  const autosizeBlocs = [divIframeSrcId]
+  const autosizeOptions = {offsetHeight: 0, offsetWidth: 40, bigHeightBlocs: ['header', 'footer']}
+  // actions contient titre, mais il n'est pas là en layout iframe
+  if (window.document.getElementById('actions')) autosizeBlocs.push('actions')
+  else autosizeBlocs.push('titre')
   // toujours autosize sur le conteneur
-  page.autosize(divIframeId, [divIframeSrcId], null, {offsetHeight: 20, offsetWidth: 40})
-  // url sera ajouté après l'appel de pageLoaded, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
+  page.autosize(divIframeId, autosizeBlocs, null, autosizeOptions)
+  // url sera ajouté après l'appel de afterLoading, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
   var args = {id: 'pageContent'}
 
   // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
@@ -85,7 +89,7 @@ function addPage (url, params, next) {
           next()
         })
       }
-      if (!options.height || !options.width) page.autosize(swfId, [divIframeSrcId])
+      if (!options.height || !options.width) page.autosize(swfId, [divIframeSrcId, 'titre'])
     })
     /* */
   } else if (/^[^?]+.(png|jpe?g|gif)(\?.*)?$/.test(url)) {
@@ -94,25 +98,46 @@ function addPage (url, params, next) {
     if (params.largeur > 100) args.width = params.largeur
     log("c'est une image, pas d'iframe mais un tag img", args, params)
     var img = dom.addElement(divIframe, 'img', args)
-    pageLoaded(img, next)
+    afterLoading(img, next)
     img.src = url
   } else {
-    // c'est bien une iframe, le texte sera écrasé à son chargement
-    var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
+    // c'est bien une iframe, on regarde si on peut la charger
+    if (window.location.protocol === 'https:' && !/^https:/.test(url)) {
+      const p = dom.addElement(divIframe, 'p', {}, 'La page externe demandée ne peut être incorporée ici car elle n’est pas en https. Vous pouvez ')
+      dom.addElement(p, 'a', {href: url, target: '_blank'}, 'l’ouvrir dans un nouvel onglet')
+      dom.addText(p, '.')
+    } else {
+      // on peut mettre une iframe, le texte sera écrasé à son chargement
+      var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
         ' votre navigateur ne supporte probablement pas les iframes')
-    // url source (non cliquable) en footer
-    page.autosize(args.id, ['errors', 'warnings', 'titre', 'entete', 'urlSrc'], [], {minHeight: 300, minWidth: 300})
-    pageLoaded(iframe, next)
-    iframe.src = url
+      // url source (non cliquable) en footer
+      const iframeAutosizeOptions = {
+        ...autosizeOptions,
+        minHeight: 300,
+        minWidth: 300,
+        offsetHeight: 80,
+        offsetWidth: 60
+      }
+      page.autosize(args.id, autosizeBlocs, [], iframeAutosizeOptions)
+      afterLoading(iframe, next)
+      iframe.src = url
+    }
   }
 }
 
-function pageLoaded (elt, next) {
+/**
+ * Appelle next quand elt sera chargé (evt load)
+ * @param {HTMLElement} elt
+ * @param {simpleCallback} next
+ */
+function afterLoading (elt, next) {
+  function loadListener () {
+    isLoaded = true
+    elt.removeEventListener('load', loadListener)
+    next()
+  }
   if (elt && elt.addEventListener) {
-    elt.addEventListener('load', function () {
-      isLoaded = true
-      next()
-    })
+    elt.addEventListener('load', loadListener)
   } else {
     // pas de addEventListener, on la considère déjà chargée
     isLoaded = true
@@ -153,8 +178,8 @@ var isLoaded
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
 module.exports = function display (ressource, options, next) {
-  page.loadAsync('jquery', function () {
-    $ = window.jQuery
+  require.ensure(['jquery'], function (require) {
+    $ = require('jquery')
     try {
       // les params minimaux
       if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.adresse) throw new Error('Ressource incomplète');
@@ -174,9 +199,10 @@ module.exports = function display (ressource, options, next) {
       if (!/^https?:\/\//.test(url)) throw new Error('Url invalide : ' + url)
       // si c'est pas du https on passe par notre proxy maison, en filant l'id de la ressource,
       // pour éviter de servir de proxy à n'importe quoi
-      if (!/^https:\/\//.test(url)) {
-        url = '/public/urlProxy/' + ressource.oid
-      }
+      // if (!/^https:\/\//.test(url)) url = '/public/urlProxy/' + ressource.oid
+      // on abandonne le proxy, ingérable avec les liens relatifs dans la page récupérée
+      // à la place on passe par un lien vers un nouvel onglet si on est en https et que l'on veut ouvrir du http
+
       // init
       dom.addCss(options.pluginBase + 'url.css')
 

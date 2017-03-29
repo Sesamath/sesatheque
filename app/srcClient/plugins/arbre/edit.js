@@ -50,9 +50,8 @@ import log from 'sesajstools/utils/log'
 module.exports = function edit (arbre, options) {
   if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
   if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
-
   // jquery est déjà chargé par le edit.js, mais il est local à chaque module
-  require.ensure(['jquery', 'jstree', 'sesatheque-client/src/fetch', 'sesatheque-client/src/jstree'], function () {
+  require.ensure(['jquery', 'jstree', 'sesatheque-client/src/fetch', 'sesatheque-client/src/jstree' ], function (require) {
     // nos fcts internes
     /**
      * Ajoute le lien aperçu aux links
@@ -60,7 +59,7 @@ module.exports = function edit (arbre, options) {
      * @param node
      */
     function addLinkApercu (links, node) {
-      const url = node.a_attr && node.a_attr['data-displayurl']
+      const url = node.a_attr && node.a_attr[ 'data-displayurl' ]
       // Apercu sur tous les éléments dont on a une ref
       if (url) {
         links.apercu = {
@@ -93,7 +92,7 @@ module.exports = function edit (arbre, options) {
      */
     function addLoadSrc () {
       dom.addElement(container, 'span', null, 'arbre source à charger ')
-      inputRef = dom.addElement(container, 'input', {id: 'loadRef', type: 'text'})
+      inputRef = dom.addElement(container, 'input', { id: 'loadRef', type: 'text' })
       $inputRef = $(inputRef)
       // enter doit pas valider le form mais charger la ref
       $inputRef.keypress(function (event) {
@@ -103,7 +102,7 @@ module.exports = function edit (arbre, options) {
         }
       })
       // lien de chargement
-      loadLink = dom.addElement(container, 'a', {href: '#'}, ' afficher')
+      loadLink = dom.addElement(container, 'a', { href: '#' }, ' afficher')
       $(loadLink).click(loadSrc)
       // un div pour les erreurs
       const treeError = dom.addElement(container, 'p')
@@ -125,7 +124,7 @@ module.exports = function edit (arbre, options) {
         if (enfants.length !== 1) {
           return addTreeError('Il ne doit y avoir qu’une racine')
         }
-        if (enfants[0].enfants && enfants[0].enfants.length) enfantsStr = JSON.stringify(enfants[0].enfants, null, 2)
+        if (enfants[ 0 ].enfants && enfants[ 0 ].enfants.length) enfantsStr = JSON.stringify(enfants[ 0 ].enfants, null, 2)
         else enfantsStr = '[]'
       } catch (error) {
         log.error('Le parsing json a planté', error, enfants)
@@ -142,20 +141,18 @@ module.exports = function edit (arbre, options) {
     function initDom (options) {
       // Ajout css, si on a pas tant pis pour le css mais ça va être moche
       const vendorsBaseUrl = options.vendorsBaseUrl || '/vendor'
-      const base = options.base || '/'
       dom.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css')
-      dom.addCss(base + 'styles/ressources.css')
       // nos éléments html
       container = window.document.getElementById('display')
       $container = $(container)
       const blocTexte = window.document.getElementById('groupEnfants') // le textarea et son titre
       // faut ajouter nos eléments en first child
       // ancre
-      dom.addElementFirstChild(blocTexte, 'a', {name: 'enfants'})
+      dom.addElementFirstChild(blocTexte, 'a', { name: 'enfants' })
       // lien et comportement pour repasser en graphique
       const linkShowGraphic = dom.addElementFirstChild(blocTexte, 'a', {
         href: '#enfants',
-        style: {float: 'left'}
+        style: { float: 'left' }
       }, 'passer en mode graphique')
       $linkShowGraphic = $(linkShowGraphic)
       $linkShowGraphic.click(showGraphic)
@@ -163,7 +160,7 @@ module.exports = function edit (arbre, options) {
       // lien et comportement pour passer en mode texte
       const linkShowTxt = dom.addElementFirstChild(blocTexte, 'a', {
         href: '#enfants',
-        style: {float: 'left'}
+        style: { float: 'left' }
       }, 'passer en mode texte')
       $linkShowTxt = $(linkShowTxt)
       $linkShowTxt.click(showTxt)
@@ -178,23 +175,23 @@ module.exports = function edit (arbre, options) {
     function initDomGraphic () {
       addLoadSrc()
       // la recherche
-      const searchContainer = dom.addElement(container, 'div', {class: 'search'})
+      const searchContainer = dom.addElement(container, 'div', { class: 'search' })
       dom.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ')
-      searchInput = dom.addElement(searchContainer, 'input', {type: 'text'})
+      searchInput = dom.addElement(searchContainer, 'input', { type: 'text' })
 
-      srcGroup = dom.addElement(container, 'div', {id: 'srcGroup'})
+      srcGroup = dom.addElement(container, 'div', { id: 'srcGroup' })
       dom.addElement(srcGroup, 'span', null, 'arbre source')
       divSrcTree = dom.addElement(srcGroup, 'div')
 
-      const dstGroup = dom.addElement(container, 'div', {id: 'dstGroup'})
+      const dstGroup = dom.addElement(container, 'div', { id: 'dstGroup' })
       dom.addElement(dstGroup, 'strong', null, 'arbre à modifier')
-      dom.addElement(dstGroup, 'em', {style: {'font-size': '0.8em'}}, ' (clic droit pour enlever des éléments ou ajouter des dossiers)')
+      dom.addElement(dstGroup, 'em', { style: { 'font-size': '0.8em' } }, ' (clic droit pour enlever des éléments ou ajouter des dossiers)')
       divDstTree = dom.addElement(dstGroup, 'div')
       $dstTree = $(divDstTree)
       console.log('$dstTree keys', Object.keys($dstTree))
 
-      dom.addElement(container, 'p', {style: 'clear:both;'}, "Aperçu d'un élément")
-      iframeApercu = dom.addElement(container, 'iframe', {id: 'apercu'})
+      dom.addElement(container, 'p', { style: 'clear:both;' }, "Aperçu d'un élément")
+      iframeApercu = dom.addElement(container, 'iframe', { id: 'apercu' })
     }
 
     /**
@@ -230,6 +227,7 @@ module.exports = function edit (arbre, options) {
             }
           )
         }
+
         // en 3.3 ce truc marche plus
         // const inst = $.jstree.reference(data.reference)
         // on fait plutôt
@@ -239,7 +237,7 @@ module.exports = function edit (arbre, options) {
         log('node parent', parentNode)
         const newNode = {
           icon: 'arbreJstNode',
-          a_attr: {'data-type': 'arbre'}
+          a_attr: { 'data-type': 'arbre' }
         }
         inst.create_node(parentNode, newNode, 'last', createCb)
       }
@@ -261,7 +259,7 @@ module.exports = function edit (arbre, options) {
         if (isDstModified) {
           addTreeError("Enfants de l'arbre modifiés mais non sauvegardé (recharger la page pour annuler les modifications)")
         } else {
-          const aliasOf = node.a_attr['data-aliasof']
+          const aliasOf = node.a_attr[ 'data-aliasof' ]
           if (aliasOf) {
             const slashPos = aliasOf.indexOf('/')
             if (slashPos) {
@@ -284,15 +282,17 @@ module.exports = function edit (arbre, options) {
         isDstModified = true
       }
 
+      // Main de loadDst
+
       const jstOptions = {
         check_callback: function (action, node, parent) {
           log('check_callback avec', arguments)
           // on accepte le drop seulement dans des arbres (dossiers)
-          if (action === 'copy_node') return (parent.id !== '#' && parent.a_attr && parent.a_attr['data-type'] === 'arbre')
+          if (action === 'copy_node') return (parent.id !== '#' && parent.a_attr && parent.a_attr[ 'data-type' ] === 'arbre')
           // tout le reste est autorisé
           else return true
         },
-        plugins: ['dnd', 'contextmenu'],
+        plugins: [ 'dnd', 'contextmenu' ],
         contextmenu: {
           select_node: false
         },
@@ -303,7 +303,7 @@ module.exports = function edit (arbre, options) {
           'select_node.jstree': function (e, data) {
             const jstNode = data.node.original
             log('clic sur', jstNode)
-            if (jstNode && jstNode.a_attr && jstNode.a_attr['data-type'] === 'arbre') {
+            if (jstNode && jstNode.a_attr && jstNode.a_attr[ 'data-type' ] === 'arbre') {
               // on fait du toggle
               if ($dstTree.jstree('is_open', data.node)) $dstTree.jstree('close_node', data.node)
               else $dstTree.jstree('open_node', data.node)
@@ -325,8 +325,8 @@ module.exports = function edit (arbre, options) {
         // on met une fct car le résultat dépend de l'item sur lequel on fait un clic droit
         const items = {}
         const isRacine = (node.parent === '#')
-        const isArbreSansRef = node.a_attr['data-type'] === 'arbre' && !node.a_attr['data-aliasof']
-        const isArbreRef = node.a_attr['data-type'] === 'arbre' && node.a_attr['data-aliasof']
+        const isArbreSansRef = node.a_attr[ 'data-type' ] === 'arbre' && !node.a_attr[ 'data-aliasof' ]
+        const isArbreRef = node.a_attr[ 'data-type' ] === 'arbre' && node.a_attr[ 'data-aliasof' ]
         // on peut supprimer n'importe quel item sauf la racine
         if (!isRacine) {
           items.remove = {
@@ -418,15 +418,15 @@ module.exports = function edit (arbre, options) {
       // on peut y aller
       log('arbre source', arbre)
       const jstOptions = {
-        plugins: ['contextmenu', 'dnd', 'search'],
+        plugins: [ 'contextmenu', 'dnd', 'search' ],
         contextmenu: {
           items: function (node, cb) {
             // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
             const links = {}
             addLinkApercu(links, node)
             // ajout du 'charger ici'
-            const aliasOf = node.a_attr && node.a_attr['data-aliasof']
-            if (aliasOf && node.a_attr['data-type'] === 'arbre') {
+            const aliasOf = node.a_attr && node.a_attr[ 'data-aliasof' ]
+            if (aliasOf && node.a_attr[ 'data-type' ] === 'arbre') {
               links.replace = {
                 label: 'Charger ici',
                 action: function () {
@@ -443,7 +443,7 @@ module.exports = function edit (arbre, options) {
           // cf https://www.jstree.com/api/#/?f=$.jstree.defaults.contextmenu.select_node
           select_node: false
         },
-        dnd: {always_copy: true},
+        dnd: { always_copy: true },
         listeners: {
           // pour ouvrir / fermer, on peut pas écouter les clic sur a.jstree-anchor ni li.jstree-node
           // car jstree les intercepte, on écoute donc l'événement select_node
@@ -514,16 +514,12 @@ module.exports = function edit (arbre, options) {
     // ###########
     // MAIN
     // ###########
-    // on laisse l'appli appelante charger son jquery si elle a une version de prédilection
-    // et son jstree (qui devra être compatible avec notre code…)
     const $ = require('jquery')
-    // attention, window.jQuery n'existe pas, ou avec une autre version
-    if (!$) throw new Error('Problème de chargement jQuery')
     require('jstree')
     if (!$.jstree) throw new Error('Problème de chargement jstree')
 
-    const {addNode, build, getEnfants} = require('sesatheque-client/src/jstree')
-    const {addSesatheques, exists, fetchPublicRef} = require('sesatheque-client/src/fetch')
+    const { addNode, build, getEnfants } = require('sesatheque-client/src/jstree')
+    const { addSesatheques, exists, fetchPublicRef } = require('sesatheque-client/src/fetch')
     /* jshint jquery:true */
 
     addSesatheques(options.sesatheques)

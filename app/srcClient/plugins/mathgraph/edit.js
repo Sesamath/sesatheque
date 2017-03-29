@@ -43,8 +43,8 @@ var formEditor = require('../../edit/formEditor')
  * @param {Ressource} ressource
  */
 module.exports = function mathgraphEdit (ressource) {
-  require.ensure(['jquery'], function () {
-    const $ = require('jquery')
+  require.ensure(['jquery'], function (require) {
+
     function addApplet (isFullSize) {
       if (isFullSize) {
         width = Math.max(appletContainer.offsetWidth || 0, width)
@@ -148,6 +148,7 @@ module.exports = function mathgraphEdit (ressource) {
       return true
     }
 
+    const $ = require('jquery')
     // var globales à notre module (initialisées par init et utilisées par nos fcts)
     var allowProf
     var levelEleve

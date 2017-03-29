@@ -324,7 +324,7 @@ try {
    * @param {errorCallback}  [next]
    */
   multiEditor.init = function (textarea, config, next) {
-    require.ensure(['jquery'], function () {
+    require.ensure(['jquery'], function (require) {
       const $ = require('jquery')
       $(function () {
         log('multiEditor.init avec la config', config)

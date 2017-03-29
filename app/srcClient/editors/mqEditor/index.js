@@ -162,7 +162,7 @@ try {
    */
   mqEditor.init = function (textarea, config, options, next) {
     try {
-      require.ensure(['jquery'], function () {
+      require.ensure(['jquery'], function (require) {
         const $ = require('jquery')
         $(function () {
           if (!textarea) throw new Error('Il faut fournir un div ou un textarea pour mathquill')

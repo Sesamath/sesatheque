@@ -43,9 +43,7 @@ var display = require('./display')
  * @param options
  */
 module.exports = function edit (ressource, options) {
-  require.ensure(['jquery'], function () {
-    const $ = require('jquery')
-
+  require.ensure(['jquery'], function (require) {
     function addSelect (ressource, options) {
       var select = dom.getElement('select')
       dom.addElement(select, 'option', {id: 'selectFichier', value: 0}, "Choisir un type d'exercice")
@@ -169,6 +167,7 @@ module.exports = function edit (ressource, options) {
       'viaduc'
     ]
 
+    const $ = require('jquery')
     if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
     var textarea = window.document.getElementById('parametres')
     if (!textarea) throw new Error('Pas de textarea #parametres trouvé dans cette page')

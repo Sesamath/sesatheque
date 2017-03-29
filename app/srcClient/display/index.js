@@ -72,9 +72,6 @@ function load (ressource, options, next) {
   log('display avec la ressource', ressource)
   log('et les options après page.init', options)
 
-  // ajoute de la css commune à toutes les ressources ici
-  dom.addCss(options.base + 'styles/ressourceDisplay.css')
-
   // le display du plugin
   var pluginName = ressource.type
   var pluginDisplay = require('../plugins/' + pluginName + '/display')
