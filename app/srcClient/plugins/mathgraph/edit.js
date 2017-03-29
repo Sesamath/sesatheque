@@ -56,23 +56,19 @@ module.exports = function mathgraphEdit (ressource) {
         if (height > 1024) height = 1024
         if (height < 200) height = 200
       }
-      var appletName = 'mtgApplet'
+      var appletId = 'mtgApplet'
       // faut d'abord créer un élément html complet avant de le mettre dans le dom,
       // sinon il peut lancer le jar avant d'avoir tous les params
-      var applet = dom.getElement(
-        'applet',
-        {
-          id: appletName,
-          // name: appletName +'name',
-          code: 'mathgraph32.MtgFrame.class',
-          archive: 'https://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
-          // archive: 'http://www.mathgraph32.org/ftp/ExercicesEnLigne/MathGraph32Applet.jar',
-          width: width,
-          height: height,
-          style: 'border:#000 solid 1px;'
-        },
-        {label: 'Figure mathgraph'}
-      )
+      var appletArgs = {
+        id: appletId,
+        code: 'mathgraph32.MtgFrame.class',
+        archive: 'https://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
+        // archive: 'http://www.mathgraph32.org/ftp/ExercicesEnLigne/MathGraph32Applet.jar',
+        width: width,
+        height: height,
+        style: 'border:#000 solid 1px;'
+      }
+      var applet = dom.getElement('applet', appletArgs)
       for (var allow in allowDef) {
         if (allowDef.hasOwnProperty(allow)) {
           dom.addElement(applet, 'param', {name: 'allow' + allow, value: (allowProf.indexOf(allow) > -1) ? 'true' : 'false'})
@@ -89,6 +85,9 @@ module.exports = function mathgraphEdit (ressource) {
       dom.addText(applet, ' pour installer java.')
       // on peut la mettre dans le dom
       dom.empty(appletContainer)
+      // le label
+      dom.addElement(appletContainer, 'label', {for: appletId}, 'Figure mathgraph')
+      // et l'applet
       appletContainer.appendChild(applet)
     }
 
