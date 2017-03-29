@@ -40,6 +40,11 @@
 #formRessource .input-group div, #formRessource .input-group label {font-weight: bold; width: 100%; text-align: center; float: none; }
 /* #form-oid, #form-type {width: 5em;} fait passer le titre à droite.... */
 
+#formRessource #srcGroup, #formRessource #dstGroup {
+  float: left;
+  width: 47%;
+}
+
 #formRessource #submit {width: 10rem; margin: 0 auto;}
 #formRessource .control-group .rmq {
   display: block;
@@ -52,4 +57,8 @@
  */
 #formRessource ul.jstree-children {
   margin: 0;
+}
+
+#formRessource input:read-only {
+  background-color: #bbb;
 }

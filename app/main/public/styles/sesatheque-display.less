@@ -1,5 +1,7 @@
 /**
- * règles css pour page et iframe, attention à vérifier que les variables utilisées sont bien importées par iframe.less
+ * règles css pour page et iframe,
+ * attention à vérifier que les variables utilisées ici sont bien importées par page.less et iframe.less
+ * (elles devraient toutes être dans _00-config-sesatheque)
  */
 
 /* les pictos des ressources faut mettre du !important pour que ce ne soit pas écrasé par les css jstree */
@@ -27,3 +29,90 @@
 .tepJstNode {background: url("/plugins/tep/tep.gif") no-repeat !important;}
 .testdJstNode {background: url("/plugins/testd/testd.gif") no-repeat !important;}
 .urlJstNode { background: url("/plugins/url/url.gif") no-repeat !important;}
+
+#display #apercu {
+  width: 100%;
+  min-height: 500px;
+  resize: both;
+  overflow: auto;
+  border: 1px solid black
+}
+
+/*
+des restes de ressources.css
+html, body {padding: 0; margin: 0;height: 100%;}
+/* faut du 100% de haut sur chaque parent de display (pourquoi ?) * /
+#body, #body .row, #content, #display {height: 100%;}
+*/
+
+#display {margin: 0 auto; padding: 0;}
+#titre {
+  font-size: 1.4em;
+  text-align:center;
+  font-family: Verdana, sans-serif;
+  width: 86%;
+  margin:auto; /* centrage décalé de qq pixel à gauche à cause du feedback mais tant pis, plus simple comme ça */
+  min-height:28px;
+}
+#pictoFeedback  {width: 16px; height: 16px; float:right; margin: 6px 8% 0 0;}
+.feedbackOk { background-image: url("/medias/saveOk.png"); visibility: visible; }
+.feedbackKo { background-image: url("/medias/saveKo.png"); visibility: visible; }
+.feedbackOff { background-image: none; visibility: hidden; }
+
+/* le layout-iframe n'inclue pas ce qui est défini dans les sesatheque-* hors display mais il a besoin de ça */
+/**
+ * Couleurs
+ */
+.debug {
+  border: 1px #ff0000 solid;
+  margin: 1em;
+  padding: 0.5em;
+}
+
+/* Couleurs */
+.avert {
+  background-color: @base-background;
+  margin: 1rem;
+  padding: 1rem;
+  border: thin solid;
+  &::before { /* merci http://stackoverflow.com/a/11919684 */
+    margin-right: 1rem;
+    font-family: FontAwesome;
+    font-weight: normal;
+    font-style: normal;
+    display: inline-block;
+  }
+}
+#errors {
+  margin: 0;
+  padding: 0;
+  color: @error-color;
+  background-color: @base-background;
+  text-align: center;
+  font-size: 1.2em;
+  font-family: Verdana, sans-serif;
+}
+.error {
+  .avert();
+  color: @error-color;
+  border-color: @error-color;
+  &::before { /* merci http://stackoverflow.com/a/11919684 */
+    content: "\f071";
+  }
+}
+.warning {
+  .avert();
+  color: @warning-color;
+  border-color: @warning-color;
+  &::before {
+    content: '\f12a';
+  }
+}
+.info {
+  .avert();
+  color: @info-color;
+  border-color: @info-color;
+  &::before {
+    content: '\f05a';
+  }
+}
