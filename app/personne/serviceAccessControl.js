@@ -785,7 +785,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         context.session.user = user
         next(null, user)
       } else {
-        error = new Error('L’utilisateur ' + oid + ' a été supprimé depuis l’ouverture de la session')
+        error = new Error('L’utilisateur ' + pid + ' a été supprimé depuis l’ouverture de la session')
         log.error(error)
         next(error)
       }

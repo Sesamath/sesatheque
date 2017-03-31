@@ -53,7 +53,7 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
   /**
    * Renvoie une ressource récupérée ailleurs (sans son oid pour éviter les accidents)
    * @memberOf $ressourceFetch
-   * @param {string} rid
+   * @param {string} rid (une string baseId/origine/idOrigine marche aussi)
    * @param {ressourceCallback} next (renvoie une EntityRessource si c'est local et ses propriétés sinon)
    */
   function fetch (rid, next) {

@@ -33,8 +33,8 @@
 const flow = require('an-flow')
 const applog = require('an-log')(lassi.settings.application.name)
 const sesatheques = require('sesatheque-client/src/sesatheques')
-// const config = require('../../config')
-// const myBaseId = config.application.baseId
+const config = require('../../config')
+const myBaseId = config.application.baseId
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
 const updatePrefix = 'update ' + updateNum
@@ -52,7 +52,7 @@ module.exports = {
   run: function run (done) {
     // fcts internes
 
-    function grab (next) {
+    function grabSequenceModeles (next) {
       let currentTotal
       flow().seq(function () {
         EntityRessource.match('type').equals('sequenceModele').sort('oid').grab(limit, offset, this)
@@ -63,63 +63,166 @@ module.exports = {
         this(null, ressources)
 
         // on itère
-      }).seqEach(function (ressource) {
-        const sousSequences = ressource.parametres && ressource.parametres.sousSequences
+      }).seqEach(function (seqMod) {
+        const nextSeqMod = this
+        const sousSequences = seqMod.parametres && seqMod.parametres.sousSequences
         if (sousSequences && sousSequences.length) {
-          ressource.parametres.sousSequences = ressource.parametres.sousSequences.map(ssseq => {
-            if (ssseq.serie) {
-              ssseq.serie = ssseq.serie.map(exo => {
-                if (exo.rid) return cleanItem(exo)
-                exo.rid = getRid(exo)
-                return cleanItem(exo)
+          const ssSeqCleaned = []
+          flow(seqMod.parametres.sousSequences).seqEach(function (ssSeq) {
+            const nextSsSeq = this
+            if (ssSeq.serie && ssSeq.serie.length) {
+              cleanExos(ssSeq.serie, function (error, exos) {
+                if (error) return nextSsSeq(error)
+                ssSeq.serie = exos
+                ssSeqCleaned.push(ssSeq)
+                nextSsSeq()
               })
+            } else {
+              ssSeqCleaned.push(ssSeq)
+              nextSsSeq()
             }
-          })
-          ressource.store(this)
+          }).seq(function () {
+            seqMod.parametres.sousSequences = ssSeqCleaned
+            $ressourceRepository.save(seqMod, nextSeqMod)
+          }).catch(nextSeqMod)
         } else {
-          this()
+          nextSeqMod()
         }
 
         // log + suivants ou fin
-      }).seq(function (ressourcesModifiees) {
-        ressourcesModifiees.forEach((ressource) => $cacheRessource.delete(ressource.oid))
+      }).seq(function () {
         updateLog(`parsing de ${offset} à ${offset + currentTotal - 1} sur ${nbRessources}`)
         if (currentTotal === limit) {
           offset += limit
-          process.nextTick(grab, next)
+          process.nextTick(grabSequenceModeles, next)
         } else {
           next()
         }
       }).catch(next)
     }
 
-    function getRid (item) {
+    function grabSeries (next) {
+      let currentTotal
+      flow().seq(function () {
+        EntityRessource.match('type').equals('serie').sort('oid').grab(limit, offset, this)
+
+        // on note le total
+      }).seq(function (ressources) {
+        currentTotal = ressources.length
+        this(null, ressources)
+
+        // on itère
+      }).seqEach(function (serie) {
+        const nextSerie = this
+        cleanExos(serie.parametres, function (error, exos) {
+          if (error) return nextSerie(error)
+          serie.parametres = exos
+          $ressourceRepository.save(serie, nextSerie)
+        })
+
+        // log + suivants ou fin
+      }).seq(function () {
+        updateLog(`parsing de ${offset} à ${offset + currentTotal - 1} sur ${nbRessources}`)
+        if (currentTotal === limit) {
+          offset += limit
+          process.nextTick(grabSeries, next)
+        } else {
+          next()
+        }
+      }).catch(next)
+    }
+
+    function cleanExos (exos, next) {
+      const exosCleaned = []
+      if (Array.isArray(exos) && exos.length) {
+        flow(exos).seqEach(function (exo) {
+          if (exo.rid) exosCleaned.push(cleanItem(exo))
+          const nextExo = this
+          getRid(exo, function (error, rid) {
+            if (error) return next(error)
+            if (rid) {
+              exo.rid = rid
+              exosCleaned.push(cleanItem(exo))
+            }
+            nextExo()
+          })
+        }).seq(function () {
+          exos = exosCleaned
+          next(null, exosCleaned)
+        }).catch(next)
+      } else {
+        next(null, exosCleaned)
+      }
+    }
+
+    /**
+     * passera un rid ou rien (si pas trouvé) à next
+     * @param item
+     * @param next
+     */
+    function getRid (item, next) {
       if (item.rid) return item.rid
+      if (item.aliasOf) return item.aliasOf
+      // on cherche
       if (item.baseId && item.id) {
         const rid = item.baseId + '/' + item.id
-        delete item.baseId
-        delete item.id
-        return rid
+        next(null, rid)
+      } else if (item.id && (item.displayUrl || item.base)) {
+        const rid = sesatheques.getBaseIdFromUrlQcq(item.displayUrl || item.base) + '/' + item.id
+        next(null, rid)
+      } else if (item.ref && (item.displayUrl || item.base)) {
+        const baseId = sesatheques.getBaseIdFromUrlQcq(item.displayUrl || item.base)
+        if (item.ref.indexOf('/') === -1) {
+          const rid = baseId + '/' + item.ref
+          next(null, rid)
+        }
+        fetchAndCheckRid(baseId, item.ref, item.titre, next)
+      } else if (item.ref) {
+        // on a pas de base, on teste les 2 mais faut la bonne paire
+        const baseIds = [myBaseId]
+        // et on ajoute celles déclarées en conf
+        config.sesatheques.forEach(s => { baseIds.push(s.baseId) })
+        let found = false
+        flow(baseIds).seqEach(function (baseId) {
+          const nextSesatheque = this
+          if (found) return nextSesatheque()
+          fetchAndCheckRid(baseId, item.ref, item.titre, function (error, rid) {
+            if (error) return next(error)
+            if (rid) {
+              found = rid
+            }
+            nextSesatheque()
+          })
+        }).seq(function () {
+          next(null, found)
+        }).catch(next)
+      } else {
+        next()
       }
-      if (item.id && item.displayUrl) {
-        const rid = sesatheques.getBaseIdFromUrlQcq() + '/' + item.id
-        delete item.baseId
-        delete item.id
-        return rid
-      }
-      return console.error(new Error('impossible de retrouver un rid pour cet item'), item)
+    }
+
+    function fetchAndCheckRid (baseId, mixId, titre, next) {
+      $ressourceFetch.fetch(baseId + '/' + mixId, function (error, ressource) {
+        // une erreur peut être une 404
+        if (!error && ressource && ressource.rid && ressource.titre === titre) return next(null, ressource.rid)
+        next() // sans rien => n'existe plus
+      })
     }
 
     function cleanItem (item) {
+      // on vire toutes les propriétés obsolètes qui ont pu exister à un moment donné
       if (item.id) delete item.id
+      if (item.aliasOf) delete item.ref
       if (item.baseId) delete item.baseId
+      if (item.base) delete item.base
       if (item.baseUrl) delete item.baseUrl
       return item
     }
 
     // init
     const EntityRessource = lassi.service('EntityRessource')
-    const $cacheRessource = lassi.service('$cacheRessource')
+    const $ressourceRepository = lassi.service('$ressourceRepository')
+    const $ressourceFetch = lassi.service('$ressourceFetch')
     let offset = 0
     let nbRessources = 0
 
@@ -130,7 +233,16 @@ module.exports = {
     }).seq(function (total) {
       updateLog(`${total} sequenceModele à traiter`)
       nbRessources = total
-      grab(this)
+      if (total) grabSequenceModeles(this)
+      else this()
+    }).seq(function () {
+      // idem pour les series
+      EntityRessource.match('type').equals('serie').sort('oid').count(this)
+    }).seq(function (total) {
+      updateLog(`${total} series à traiter`)
+      nbRessources = total
+      if (total) grabSeries(this)
+      else this()
     }).seq(function () {
       updateLog('fin')
       done()
