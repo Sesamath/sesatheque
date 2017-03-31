@@ -58,17 +58,18 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
    */
   function fetch (rid, next) {
     try {
-      const [baseId, oid] = getRidComponents(rid)
-      if (baseId === myBaseId) return $ressourceRepository.load(oid, next)
+      const [baseId, id] = getComponents(rid)
+      if (baseId === myBaseId) return $ressourceRepository.load(id, next)
+      if (!exists(baseId)) throw new Error(`rid ${rid} invalide ou correspondant à une sesathèque inconnue`)
       const baseUrl = getBaseUrl(baseId)
       var options = {
-        uri: baseUrl + 'api/public/' + oid,
+        uri: baseUrl + 'api/public/' + id,
         gzip: true,
         json: true,
         timeout: 3000
       }
       if (tokens[baseId]) {
-        options.uri = baseUrl + 'api/ressource/' + oid
+        options.uri = baseUrl + 'api/ressource/' + id
         options.headers = {'X-ApiToken': tokens[baseId]}
       }
       request(options, function (error, response, ressource) {
@@ -97,7 +98,7 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
       else if (ressource) next(null, ressource.rid)
       else next(new Error(`aucune ressource ${mixedId}`))
     }
-    let [baseId, id] = getComponents(mixedId)
+    const [baseId, id] = getComponents(mixedId)
     if (baseId === myBaseId) {
       $ressourceRepository.load(id, send)
     } else if (exists(baseId)) {

@@ -39,7 +39,7 @@ const myBaseId = config.application.baseId
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
 const updatePrefix = 'update ' + updateNum
 const updateLog = (message) => applog(updatePrefix, message)
-// const updateLogErr = (message) => applog.error(updatePrefix, message)
+const updateLogErr = (message) => applog.error(updatePrefix, message)
 
 const name = 'normalisation du contenu des sequenceModele'
 const description = ''
@@ -70,9 +70,15 @@ module.exports = {
           const ssSeqCleaned = []
           flow(seqMod.parametres.sousSequences).seqEach(function (ssSeq) {
             const nextSsSeq = this
+            if (ssSeq.eleves) delete ssSeq.eleves
             if (ssSeq.serie && ssSeq.serie.length) {
               cleanExos(ssSeq.serie, function (error, exos) {
                 if (error) return nextSsSeq(error)
+                if (ssSeq.serie.length && ssSeq.serie.length !== exos.length) {
+                  updateLogErr(`on a perdu des exos dans la sous-sequence ${ssSeq.nom}, cf error.log`)
+                  log.error(`la ssSeq ${ssSeq.nom} contenait les exos`, ssSeq.serie)
+                  log.error(`et après nettoyage il reste`, exos)
+                }
                 ssSeq.serie = exos
                 ssSeqCleaned.push(ssSeq)
                 nextSsSeq()
@@ -116,6 +122,11 @@ module.exports = {
         const nextSerie = this
         cleanExos(serie.parametres, function (error, exos) {
           if (error) return nextSerie(error)
+          if (serie.parametres.length && serie.parametres.length !== exos.length) {
+            updateLogErr(`on a perdu des exos dans la serie ${serie.titre}, cf error.log`)
+            log.error(`la série ${serie.titre} contenait les exos`, serie.parametres)
+            log.error(`et après nettoyage il reste`, exos)
+          }
           serie.parametres = exos
           $ressourceRepository.save(serie, nextSerie)
         })
@@ -132,22 +143,32 @@ module.exports = {
       }).catch(next)
     }
 
+    /**
+     * Nettoie une liste d'exo en mettant un bon rid à chacun
+     * @param {SesathequeItem[]} exos
+     * @param next
+     */
     function cleanExos (exos, next) {
       const exosCleaned = []
       if (Array.isArray(exos) && exos.length) {
         flow(exos).seqEach(function (exo) {
-          if (exo.rid) exosCleaned.push(cleanItem(exo))
           const nextExo = this
-          getRid(exo, function (error, rid) {
-            if (error) return next(error)
-            if (rid) {
-              exo.rid = rid
-              exosCleaned.push(cleanItem(exo))
-            }
-            nextExo()
-          })
+          if (exo.type === 'error') {
+            // on y touche pas
+            exosCleaned.push(cleanItem(exo))
+          } else {
+            getRid(exo, function (error, rid) {
+              if (error) return next(error)
+              if (rid) {
+                exo.rid = rid
+                exosCleaned.push(cleanItem(exo))
+              } else {
+                exosCleaned.push({type: 'error', titre: `Cette ressource n’existe plus (${exo.type} ${exo.ref || exo.id || ''}, ${exo.titre})`})
+              }
+              nextExo()
+            })
+          }
         }).seq(function () {
-          exos = exosCleaned
           next(null, exosCleaned)
         }).catch(next)
       } else {
@@ -161,8 +182,21 @@ module.exports = {
      * @param next
      */
     function getRid (item, next) {
-      if (item.rid) return item.rid
-      if (item.aliasOf) return item.aliasOf
+      if (item.rid || item.aliasOf) {
+        const rid = item.rid || item.aliasOf
+        // on vérifie qu'il est valide
+        try {
+          sesatheques.getRidComponents(rid, false)
+          return next(null, rid)
+        } catch (error) {
+          updateLogErr(`on a eu un item avec un rid foireux ${item.rid}`)
+          const [baseId, id] = sesatheques.getComponents(item.rid)
+          if (sesatheques.exists(baseId)) return fetchAndCheckRid(baseId, id, next)
+          // sinon on met ça en ref et on laisse faire le reste
+          item.ref = item.rid
+          delete item.rid
+        }
+      }
       // on cherche
       if (item.baseId && item.id) {
         const rid = item.baseId + '/' + item.id
@@ -173,10 +207,10 @@ module.exports = {
       } else if (item.ref && (item.displayUrl || item.base)) {
         const baseId = sesatheques.getBaseIdFromUrlQcq(item.displayUrl || item.base)
         if (item.ref.indexOf('/') === -1) {
-          const rid = baseId + '/' + item.ref
-          next(null, rid)
+          next(null, baseId + '/' + item.ref)
+        } else {
+          fetchAndCheckRid(baseId, item.ref, item.titre, next)
         }
-        fetchAndCheckRid(baseId, item.ref, item.titre, next)
       } else if (item.ref) {
         // on a pas de base, on teste les 2 mais faut la bonne paire
         const baseIds = [myBaseId]
@@ -188,9 +222,7 @@ module.exports = {
           if (found) return nextSesatheque()
           fetchAndCheckRid(baseId, item.ref, item.titre, function (error, rid) {
             if (error) return next(error)
-            if (rid) {
-              found = rid
-            }
+            if (rid) found = rid
             nextSesatheque()
           })
         }).seq(function () {
