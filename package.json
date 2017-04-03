@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.9.15",
+  "version": "0.9.16",
   "engines": {
     "node": ">4.4.0"
   },
@@ -58,7 +58,7 @@
     "moment": "2.15.1",
     "morgan": "1.7.0",
     "request": "^2.75.0",
-    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.0",
+    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.1",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.9",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.3",
     "sesatheque-client": "git://src.sesamath.net/sesatheque-client#1.2.5"
