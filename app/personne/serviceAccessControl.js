@@ -71,7 +71,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   function getCreateDeniedMessage (context, ressource) {
     var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user.permissions.create) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
+    if (!user || !user.permissions) msg = 'Vous devez être authentifié pour créer une ressource'
+    else if (!user.permissions.create) msg = 'Vous n’avez pas de droits suffisants pour créer une ressource'
     else if (!configRessource.typePerso[ressource.type]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
 
     return msg
