@@ -463,7 +463,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 // màj
                 ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
                 ressource.auteursParents = (ressourceOriginale.auteursParents || []).concat(ressourceOriginale.auteurs || [])
-                if (ressourceOriginale.type === 'arbre') ressource.enfants = ressourceOriginale.enfants
+                if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) ressource.enfants = ressourceOriginale.enfants
                 ressource.parametres = ressourceOriginale.parametres || {}
                 // sauvegarde de qq infos de l'original
                 ressource.parametres.original = {

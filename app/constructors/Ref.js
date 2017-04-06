@@ -116,15 +116,11 @@ function Ref (values, baseId) {
     this.cle = values.cle
   }
   if (values.enfants) {
-    if (this.type === 'arbre') {
-      /**
-       * Liste éventuelle d'enfants
-       * @type {Ref[]}
-       */
-      this.enfants = values.enfants
-    } else if (values.enfants.length) {
-      throw new Error(`Seul le type arbre peut avoir des enfants (pb sur ${this.titre})`)
-    }
+    /**
+     * Liste éventuelle d'enfants
+     * @type {Ref[]}
+     */
+    this.enfants = values.enfants
   }
 }
 

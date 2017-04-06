@@ -106,7 +106,6 @@ module.exports = function (EntityRessource) {
     // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
     // (pour mettre à jour titre & résumé par ex).
     .defineIndex('enfants', 'string', function () {
-      if (this.type !== 'arbre') return
       // on veut toutes les refs récursivement
       function addRidsEnfants (enfants) {
         enfants.forEach(enfant => {

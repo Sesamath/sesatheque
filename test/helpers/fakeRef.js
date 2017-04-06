@@ -47,8 +47,8 @@ function getOne () {
   }
   if (!fakeRef.public) fakeRef.cle = faker.random.uuid()
 
-  // on ajoute des enfants pour les arbres
-  if (fakeRef.type === 'arbre') {
+  // on ajoute des enfants pour les arbres et les series
+  if (fakeRef.type === 'arbre' || fakeRef.type === 'serie') {
     fakeRef.enfants = []
     for (let i = 0; i < faker.random.number(6); i++) {
       fakeRef.enfants.push(getOne())

@@ -91,11 +91,12 @@ function addWarnings (ressource) {
     rTools.addWarning(ressource, 'il faudra choisir une catégorie')
   }
   // arbre sans enfants (si c'est pas une création, ie avec oid)
-  if (ressource.oid && ressource.type === 'arbre' && _.isEmpty(ressource.enfants)) {
-    rTools.addWarning(ressource, 'arbre sans enfants')
+  if (ressource.oid && _.isEmpty(ressource.enfants)) {
+    if (ressource.type === 'arbre') rTools.addWarning(ressource, 'arbre sans enfants')
+    else if (ressource.type === 'serie') rTools.addWarning(ressource, 'série vide')
   }
   // parsing des éventuels enfants
-  if (ressource.type === 'arbre' && ressource.enfants && ressource.enfants.length) {
+  if (ressource.enfants && ressource.enfants.length) {
     checkEnfants(ressource.enfants, ressource)
   }
 }

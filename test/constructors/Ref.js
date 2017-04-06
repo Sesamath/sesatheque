@@ -46,7 +46,7 @@ describe('Ref', () => {
     expect(ref.resume).to.equal(ressource.resume, 'Pb resume')
     expect(ref.commentaires).to.equal(ressource.commentaires, 'Pb commentaires')
     expect(ref.aliasOf).to.equal(ressource.rid, 'Pb rid => aliasOf')
-    if (ressource.type === 'arbre') {
+    if (ressource.type === 'arbre' || ressource.type === 'serie') {
       expect(ref.enfants).to.deep.equal(ressource.enfants, 'Pb enfants')
     }
   })

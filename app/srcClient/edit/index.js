@@ -43,6 +43,7 @@ function init (options, next) {
     const $ = require('jquery')
 
     // Modifie le nom paramètres|enfants suivant le type (arbre ou pas)
+    // @todo changer ça quand on éditera des séries qui ont enfants ET parametres
     function onTypeChange () {
       var $label = $groupParametres.filter('label')
       var $textarea = $groupParametres.filter('textarea')

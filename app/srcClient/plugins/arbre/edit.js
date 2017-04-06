@@ -524,10 +524,6 @@ module.exports = function edit (arbre, options) {
 
     addSesatheques(options.sesatheques)
 
-    // on est compilé par webpack en edit.js, et les css requis seront dans un edit.css
-    // @todo merger ça avec une compilation des autres css par webpack aussi
-    // dom.addCss(options.base + 'edit.css')
-
     // les containers (variables locales au module), qui seront affectés par initDom()
     let iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree
     // quasi les mêmes jquerifiée

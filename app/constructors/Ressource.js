@@ -167,7 +167,7 @@ function Ressource (initObj, myBaseId) {
    * @type {string}
    */
   this.commentaires = filters.string(values.commentaires)
-  if (this.type === 'arbre') {
+  if (values.enfants) {
     /**
      * Les enfants de l'arbre (à la place de la propriété parametres si type vaut 'arbre')
      * @type {Object}
@@ -183,26 +183,25 @@ function Ressource (initObj, myBaseId) {
         console.error(error)
       }
     }
-  } else {
-    if (values.parametres) {
-      if (values.parametres instanceof Object) {
-        /**
-         * Contenu qui dépend du type (toutes les infos spécifique à ce type)
-         * @type {Object}
-         */
-        this.parametres = values.parametres
-      } else if (typeof values.parametres === 'string') {
-      // on accepte une chaîne json
-        try {
-          const parametres = JSON.parse(values.parametres)
-          if (typeof parametres === 'object') this.parametres = parametres
-        } catch (error) {
-          console.error(error)
-        }
+  }
+  if (values.parametres) {
+    if (values.parametres instanceof Object) {
+      /**
+       * Contenu qui dépend du type (toutes les infos spécifique à ce type)
+       * @type {Object}
+       */
+      this.parametres = values.parametres
+    } else if (typeof values.parametres === 'string') {
+    // on accepte une chaîne json
+      try {
+        const parametres = JSON.parse(values.parametres)
+        if (typeof parametres === 'object') this.parametres = parametres
+      } catch (error) {
+        console.error(error)
       }
     }
-    if (!this.parametres) this.parametres = {}
   }
+  if (!this.parametres) this.parametres = {}
   /**
    * Niveaux scolaire de la ressource
    * (faudra gérér ultérieurement différents système éducatif, fr_FR pour tout le monde en attendant)

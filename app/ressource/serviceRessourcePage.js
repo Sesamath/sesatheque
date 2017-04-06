@@ -427,7 +427,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // avec pour les arbres la propriété parametres remplacée par enfants
     if (ressource && ressource.type === 'arbre') {
       delete labels.parametres
-    } else {
+    } else if (ressource && ressource.type !== 'serie') {
+      // les série ont parametres et enfants, les autres pas d'enfants
       delete labels.enfants
     }
 

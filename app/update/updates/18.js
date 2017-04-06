@@ -233,10 +233,21 @@ module.exports = {
       }
     }
 
+    /**
+     * Passe un rid à next (si on en trouve un)
+     * @param baseId
+     * @param mixId
+     * @param [titre]
+     * @param next
+     */
     function fetchAndCheckRid (baseId, mixId, titre, next) {
+      if (arguments.length === 3) {
+        next = titre
+        titre = null
+      }
       $ressourceFetch.fetch(baseId + '/' + mixId, function (error, ressource) {
         // une erreur peut être une 404
-        if (!error && ressource && ressource.rid && ressource.titre === titre) return next(null, ressource.rid)
+        if (!error && ressource && ressource.rid && (titre === null || ressource.titre === titre)) return next(null, ressource.rid)
         next() // sans rien => n'existe plus
       })
     }
