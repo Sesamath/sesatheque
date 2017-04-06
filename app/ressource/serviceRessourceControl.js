@@ -114,18 +114,19 @@ function checkEnfants (enfants, ressource, titre) {
     const reCheckAliasOf = /^[-\w]+\/[-\w]+$/
     enfants.forEach(function (enfant, i) {
       if (!enfant.titre) rTools.addError(ressource, `L’enfant n° ${i + 1} de « ${titre} » n’a pas de titre`)
-      const errPrefix = `L’enfant ${enfant.titre} de « ${titre} »`
+      const errPrefix = `L’enfant « ${enfant.titre} » de « ${titre} »`
       if (!enfant.type) rTools.addError(ressource, `${errPrefix} n'a pas de type`)
+      if (enfant.type === 'error') return
       if (enfant.aliasOf) {
         if (typeof enfant.aliasOf !== 'string' || !reCheckAliasOf.test(enfant.aliasOf)) {
-          rTools.addError(ressource, `${errPrefix} n’a pas un alias valide`)
+          rTools.addError(ressource, `${errPrefix} n’a pas un aliasOf valide`)
         }
       } else {
         if (enfant.type === 'arbre') {
           // aliasOf pas obligatoire mais faut des enfants
-          if (!enfant.enfants) rTools.addError(ressource, `${errPrefix} n'a ni enfants ni alias`)
+          if (!enfant.enfants) rTools.addError(ressource, `${errPrefix} est un arbre sans enfants ni aliasOf`)
         } else {
-          rTools.addError(ressource, `${errPrefix} n'a pas d’alias`)
+          rTools.addError(ressource, `${errPrefix} n'a pas d’aliasOf`)
         }
       }
       if (enfant.enfants) {
