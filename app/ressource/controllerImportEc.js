@@ -38,6 +38,8 @@ var config = require('./config')
 var arbreCateg = config.constantes.categories.liste
 var sjtObj = require('sesajstools/utils/object')
 
+var Ref = require('../constructors/Ref')
+
 var xmls = ['cp', 'ce1', 'ce2', 'cm1', 'cm2', '6eme']
 
 /**
@@ -202,7 +204,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (child.tag === 'exercice') {
         save(getEcRessource(child), function (error, ressource) {
           if (error) log.error(error)
-          else enfants.push($ressourceConverter.toRef(ressource))
+          else enfants.push(new Ref(ressource))
           nextChild()
         })
       } else if (child._children.length) {
@@ -287,7 +289,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function saveAndSendReponse (context, ressource) {
     save(ressource, function (error, ressource) {
-      $json.send(context, error, $ressourceConverter.toRef(ressource))
+      $json.send(context, error, new Ref(ressource))
     })
   }
 
@@ -318,7 +320,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   if (error) {
                     nextXml(error)
                   } else {
-                    arbreAll.enfants.push($ressourceConverter.toRef(arbre))
+                    arbreAll.enfants.push(new Ref(arbre))
                     nextXml()
                   }
                 })

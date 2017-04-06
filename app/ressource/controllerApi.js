@@ -399,7 +399,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         // on regarde le format reçu en get ou post
         var format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
-          var item = (format === 'full') ? ressource : $ressourceConverter.toRef(ressource)
+          var item = (format === 'full') ? ressource : new Ref(ressource)
           liste.push(item)
         })
       }
@@ -408,7 +408,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (alias ou normalized)
+   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (avec ref ça ajoute les droits)
    * @private
    * @param {Context} context
    * @param error
@@ -421,9 +421,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     } else if (ressource) {
       if ($accessControl.hasReadPermission(context, ressource)) {
         var format = context.get.format
-        if (format === 'alias' || format === 'ref') {
-          const ref = $ressourceConverter.toRef(ressource)
-          // au format ref on ajoute les droits
+        if (format === 'ref') {
+          const ref = new Ref(ressource)
+          // avec ajout des droits
           ref.$droits = 'R'
           if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
           if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'

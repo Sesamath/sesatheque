@@ -212,16 +212,5 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     }
   }
 
-  /**
-   * Renvoie une Ref à une ressource, avec enfants éventuels
-   * (si ce qui sort contient oid ET ref, c'était un alias)
-   * @memberOf $ressourceConverter
-   * @param {Ressource} ressource
-   * @return {Ref} avec enfants éventuels
-   */
-  $ressourceConverter.toRef = function (ressource) {
-    return new Ref(ressource)
-  }
-
   return $ressourceConverter
 }
