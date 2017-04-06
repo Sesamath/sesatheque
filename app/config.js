@@ -166,7 +166,7 @@ const config = {
     dir: logDir,
     access: 'access.log',
     error: 'error.log',
-    errorData: 'errorData.log',
+    dataError: 'data.error.log',
     debug: 'debug.log',
     // perf      : 'perf.log', log les perfs si présent
     // sql       : 'sql.log', log les requetes sql si présent

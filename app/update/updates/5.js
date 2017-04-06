@@ -77,7 +77,7 @@ function modifIep (ressource, next) {
         } else {
           // on en sait rien, on met le xml en idOrigine et on le signale
           ressourceIep.idOrigine = path
-          log.errorData('impossible de retrouver le coll_doc_id de', ressourceIep)
+          log.dataError('impossible de retrouver le coll_doc_id de', ressourceIep)
         }
       }
       // on la sauve
@@ -93,7 +93,7 @@ function modifIep (ressource, next) {
     }).done(next)
   }
   function logAndNext (msg) {
-    log.errorData(msg, ressource)
+    log.dataError(msg, ressource)
     next()
   }
   var base = 'https://ressources.sesamath.net'
@@ -167,7 +167,7 @@ module.exports = {
             }
             isIep = ressource.parametres.adresse.indexOf('voir_iep') !== -1
           } catch (error) {
-            log.errorData('ressource url sans adresse', ressource)
+            log.dataError('ressource url sans adresse', ressource)
             return this()
           }
           if (isIep) modifIep(ressource, this)

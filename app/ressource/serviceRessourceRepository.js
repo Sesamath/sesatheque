@@ -140,7 +140,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     const cleanRelations = relations
       .filter(relation => Array.isArray(relation) && relation.length === 2 && config.listes.relations[relation[0]])
       .map(relation => [Number(relation[0]), String(relation[1])])
-    if (cleanRelations.length < relations.length) log.errorData(`Il y avait une relation invalide dans ${id}`, relations)
+    if (cleanRelations.length < relations.length) log.dataError(`Il y avait une relation invalide dans ${id}`, relations)
     // le format est bon (typeRel connu), reste à voir si on a des cibles sous la forme origine/idOrigine
     // et ajouter éventuellement baseId pour avoir un rid valide
     if (cleanRelations.length) {
@@ -163,7 +163,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
               if (ressource) {
                 nextRelation(null, [relId, getRealRid(ressource)])
               } else {
-                log.errorData(`${fin} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
+                log.dataError(`${fin} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
                 nextRelation()
               }
             })
@@ -176,7 +176,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           } else {
             $ressourceRepository.loadByOrigin(debut, fin, function (error, ressource) {
               if (error) {
-                log.errorData(`${relTarget} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
+                log.dataError(`${relTarget} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
                 nextRelation()
               } else {
                 nextRelation(null, [relId, getRealRid(ressource)])
@@ -195,7 +195,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           if (isOk) acc[key] = true
           return isOk
         })
-        if (checkedRelations.length < relations.length) log.errorData('Il y avait des relations en double (ou invalides) dans ' + id)
+        if (checkedRelations.length < relations.length) log.dataError('Il y avait des relations en double (ou invalides) dans ' + id)
         next(null, checkedRelations)
       }).catch(next)
     } else {
@@ -300,7 +300,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     // c'est déjà un alias ?
     if (ressource.aliasOf) return ressource
     // on vérifie quand même ça
-    if (ressource.baseId && ressource.baseId !== config.application.baseId) log.errorData('ressource sans ref avec baseId externe', ressource)
+    if (ressource.baseId && ressource.baseId !== config.application.baseId) log.dataError('ressource sans ref avec baseId externe', ressource)
     return {
       aliasOf: ressource.oid,
       baseId: config.application.baseId,
@@ -539,7 +539,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   /**
    * Récupère un liste de ressource d'après critères
    * @memberOf $ressourceRepository
-   * @param {string}   visibilite peut valoir public | correction | all | auteur/id | groupe/nom
+   * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
    * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
    *                                filters : un tableau d'objets {index:'indexAFiltrer', values:valeurs},
    *                                          où valeurs peut être un tableau de valeurs ou

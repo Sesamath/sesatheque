@@ -143,14 +143,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       ressources.forEach(function (ressource) {
         if (ressource.type === 'sequenceModele') {
           if (ressource.parametres) sequenceModeles.push(ressource.parametres)
-          else log.errorData('sequenceModele sans parametres', ressource)
+          else log.dataError('sequenceModele sans parametres', ressource)
         } else {
           const ref = new Ref(ressource)
           if (ref.aliasOf && ref.titre && ref.type && (ref.public || ref.cle)) {
             if (droits) ref.$droits = droits
             refs.push(ref)
           } else {
-            log.errorData('ressource pas utilisable pour sesalab', ressource)
+            log.dataError('ressource pas utilisable pour sesalab', ressource)
           }
         }
       })
@@ -611,25 +611,29 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (!pid) throw new Error('Vous devez être authentifié pour créer une ressource')
       // on peut aller chercher la ressource
       $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, function (error, ressource) {
-        log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
-        if (error) return $json.sendError(context, error.toString())
-        // on passe par Ref pour ne garder que l'essentiel
-        const aliasData = new Ref(ressource)
-        // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
-        aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
-        aliasData.auteurs = [pid]
-        aliasData.origine = config.application.baseId
-        aliasData.dateCreation = new Date()
-        aliasData.publie = true
-        aliasData.restriction = configRessource.constantes.restriction.prive
-        // ajouter la relation
-        aliasData.relations = ressource.relations = []
-        aliasData.relations.push([configRessource.constantes.relations.estVersionDe, aliasData.aliasOf])
-        EntityRessource.create(aliasData).store(function (error, ressAlias) {
-          if (error) return $json.sendError(context, error)
-          if (ressAlias) return sendItem(new Ref(ressAlias))
-          $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
-        })
+        try {
+          log.debug('externalClone a récupéré la ressource', ressource, 'clone', { max: 5000, indent: 2 })
+          if (error) return $json.sendError(context, error.toString())
+          // on passe par Ref pour filtrer ce qu'on garde (seulement ce que ref utilise pour un alias)
+          const aliasData = new Ref(ressource)
+          // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
+          aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
+          aliasData.auteurs = [ pid ]
+          aliasData.origine = config.application.baseId
+          aliasData.dateCreation = new Date()
+          aliasData.publie = true
+          aliasData.restriction = configRessource.constantes.restriction.prive
+          // ajouter la relation
+          aliasData.relations = ressource.relations = []
+          aliasData.relations.push([ configRessource.constantes.relations.estVersionDe, aliasData.aliasOf ])
+          EntityRessource.create(aliasData).store(function (error, ressAlias) {
+            if (error) return $json.sendError(context, error)
+            if (ressAlias) return sendItem(new Ref(ressAlias))
+            $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
+          })
+        } catch (error) {
+          $json.sendError(context, error.toString())
+        }
       })
     } catch (error) {
       $json.sendError(context, error.toString())
@@ -796,7 +800,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @Route POST /api/notifyError
    */
   controller.post('notifyError', function (context) {
-    if (context.post.rid) log.errorData('notifyError', context.post)
+    if (context.post.rid) log.dataError('notifyError', context.post)
     else log.error('notifyError', context.post)
     $json.sendOk(context)
   })

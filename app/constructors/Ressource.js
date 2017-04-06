@@ -111,9 +111,8 @@ function Ressource (initObj, myBaseId) {
      * @type {string}
      */
     this.aliasOf = values.aliasOf
-  }
-  // pour le cast Ref => Ressource de l'ancien format ref
-  if (values.ref) {
+  } else if (values.ref) {
+    // pour le cast Ref => Ressource de l'ancien format ref
     // à l'ancien format on avait ref et baseId, mais ref pouvait être origine/idOrigine, ou cle/token
     // le nouveau format est le rid avec baseId/oid
     if (!values.baseId) throw new Error('Une ressource ne peut pas avoir de propriété ref sans propriété baseId')
@@ -344,7 +343,7 @@ function Ressource (initObj, myBaseId) {
     // this est bien l'objet courant car c'est une fct fléchée
     // mais on assure le coup en le passant en 2e param de forEach
 
-    // on ignore public traité et mis dans restriction
+    // on ignore public traité et mis dans restriction, et aliasOf
     if (p === 'public') return
     // on ignore les propriétés ajoutées par un form pour du contexte
     if (p === 'new' || p === 'token' || p.substr(0, 1) === '_') return
@@ -371,8 +370,10 @@ function Ressource (initObj, myBaseId) {
 
     // sinon c'est scalaire ou objet
     } else if (!this.hasOwnProperty(p)) {
+      // falsy ignorés, c'est normal
+      if (!values[p]) return
       this._warnings.push(`La propriété ${p} n’existe pas dans une ressource, elle a été ignorée`)
-      if (typeof log !== 'undefined') log.errorData(`propriété ${p} ignorée dans`, values)
+      if (typeof log !== 'undefined') log.dataError(`propriété ${p} ignorée dans`, values)
       else console.error(`propriété ${p} ignorée`, values[p])
     }
   }, this) // au cas où qqun virerait la fct flèchée…

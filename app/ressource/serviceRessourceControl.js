@@ -172,7 +172,7 @@ function valide (data, next) {
   _.each(config.required, function (required, prop) {
     if (required && _.isEmpty(ressource[prop])) {
       rTools.addError(ressource, `Le champ ${config.labels[prop]} est obligatoire`)
-      log.errorData(ressource.rid + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(ressource[prop]))
+      log.dataError(ressource.rid + ' a une valeur requise manquante : ' + prop + ' => ' + sjt.stringify(ressource[prop]))
     }
   })
   addWarnings(ressource)

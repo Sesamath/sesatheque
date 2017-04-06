@@ -48,7 +48,7 @@ function enhanceChildren (arbre, next) {
     if (ref) {
       // s'il a une ref il devrait pas avoir d'enfants
       if (enfant.enfants) {
-        log.errorData('L’enfant ' + ref + ' de l’arbre ' + (arbre.oid || arbre.ref) + ' avait des enfants, on les vire')
+        log.dataError('L’enfant ' + ref + ' de l’arbre ' + (arbre.oid || arbre.ref) + ' avait des enfants, on les vire')
         delete enfant.enfants
         if (!modif) modif = true
       }
@@ -63,7 +63,7 @@ function enhanceChildren (arbre, next) {
             if (!modif) modif = true
           }
         } else if (!error) {
-          log.errorData('Impossible de trouver l’enfant ' + ref + ' de l’arbre ' + (arbre.oid || arbre.ref || arbre.titre))
+          log.dataError('Impossible de trouver l’enfant ' + ref + ' de l’arbre ' + (arbre.oid || arbre.ref || arbre.titre))
         }
         nextEnfant(error)
       })
@@ -73,13 +73,13 @@ function enhanceChildren (arbre, next) {
         nextEnfant()
       })
     } else {
-      log.errorData('arbre ' + (arbre.oid || arbre.ref || arbre.titre) + ' avec un enfant sans ref ni enfants', enfant)
+      log.dataError('arbre ' + (arbre.oid || arbre.ref || arbre.titre) + ' avec un enfant sans ref ni enfants', enfant)
       nextEnfant()
     }
   }).seq(function () {
     next(modif)
   }).catch(function (error) {
-    log.errorData('erreur ' + error.toString() + ' avec un enfant de l’arbre', arbre)
+    log.dataError('erreur ' + error.toString() + ' avec un enfant de l’arbre', arbre)
     next(false)
   })
 }

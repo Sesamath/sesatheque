@@ -71,7 +71,7 @@ module.exports = {
           const baseId = alias.baseIdOriginal || alias.baseId || myBaseId
           if (baseId === myBaseId) {
             // en février 2017 c'est louche…
-            log.errorData('alias bizarre qui référence une ressource sur cette sésathèque', alias)
+            log.dataError('alias bizarre qui référence une ressource sur cette sésathèque', alias)
           }
           const ressource = {
             aliasOf: baseId + '/' + alias.ref
@@ -83,7 +83,7 @@ module.exports = {
           log.error('on va enregistrer ' + ressource.titre)
           EntityRessource.create(ressource).store(this)
         } else {
-          log.errorData(`alias ${alias.oid} sans ref`, alias)
+          log.dataError(`alias ${alias.oid} sans ref`, alias)
           this()
         }
 

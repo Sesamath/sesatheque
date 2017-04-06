@@ -68,11 +68,11 @@ function cleanArbre (arbre, next) {
         saveAndNext()
       }).catch(next)
     } else {
-      log.errorData('arbre ' + arbre.oid + ' avait des enfants mais tous undefined')
+      log.dataError('arbre ' + arbre.oid + ' avait des enfants mais tous undefined')
       saveAndNext()
     }
   } else {
-    log.errorData('arbre ' + arbre.oid + ' sans enfants')
+    log.dataError('arbre ' + arbre.oid + ' sans enfants')
     saveAndNext()
   }
 }
@@ -91,13 +91,13 @@ function cleanEnfant (enfant, arbreOid, nextEnfant) {
         cleanEnfant(enfant2, arbreOid, this)
       }).done(nextEnfant)
     } else {
-      log.errorData('enfants tous undefined dans l’arbre ' + arbreOid, enfant)
+      log.dataError('enfants tous undefined dans l’arbre ' + arbreOid, enfant)
       nextEnfant()
     }
   }
 
   function set404AndNext () {
-    log.errorData('enfant ' + enfant.ref + ' de l’arbre ' + arbreOid + ' introuvable', enfant)
+    log.dataError('enfant ' + enfant.ref + ' de l’arbre ' + arbreOid + ' introuvable', enfant)
     enfant = {
       titre: 'Erreur, ressource "' + enfant.titre + ' introuvable, ref ' + enfant.ref,
       type: 'error',
@@ -151,7 +151,7 @@ function cleanEnfant (enfant, arbreOid, nextEnfant) {
       }
       // s'il a une ref il ne doit pas avoir d'enfants
       if (enfant.type === 'arbre' && enfant.enfants) {
-        if (enfant.enfants.length) log.errorData(enfant.titre + ', ref ' + enfant.ref + ' de l’arbre ' + arbreOid + ' avait ' + enfant.enfants.length + ' enfant(s)')
+        if (enfant.enfants.length) log.dataError(enfant.titre + ', ref ' + enfant.ref + ' de l’arbre ' + arbreOid + ' avait ' + enfant.enfants.length + ' enfant(s)')
         delete enfant.enfants
       }
       nextEnfant()
@@ -173,7 +173,7 @@ function cleanBase (arbre) {
     if (arbre.baseId && config.sesatheques && config.sesatheques[arbre.baseId] === arbre.base) {
       delete arbre.base
     } else if (arbre.baseId) {
-      log.errorData('arbre ' + arbre.oid + ' avec baseId inconnue ' + arbre.baseId + ' et base ' + arbre.base)
+      log.dataError('arbre ' + arbre.oid + ' avec baseId inconnue ' + arbre.baseId + ' et base ' + arbre.base)
     } else {
       if (arbre.base === config.application.baseUrl) {
         delete arbre.base
@@ -184,7 +184,7 @@ function cleanBase (arbre) {
             delete arbre.base
           }
         }
-        if (arbre.base) log.errorData('arbre ' + arbre.oid + ' avec base inconnue ' + arbre.base)
+        if (arbre.base) log.dataError('arbre ' + arbre.oid + ' avec base inconnue ' + arbre.base)
       }
     }
   } else if (arbre.hasOwnProperty('base')) {

@@ -189,7 +189,7 @@ module.exports = {
           sesatheques.getRidComponents(rid, false)
           return next(null, rid)
         } catch (error) {
-          updateLogErr(`on a eu un item avec un rid foireux ${item.rid}`)
+          updateLogErr(`on a eu un item avec un rid foireux ${item.rid}, que l’on va essayer de rectifier`)
           const [baseId, id] = sesatheques.getComponents(item.rid)
           if (sesatheques.exists(baseId)) return fetchAndCheckRid(baseId, id, next)
           // sinon on met ça en ref et on laisse faire le reste

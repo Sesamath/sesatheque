@@ -91,7 +91,7 @@ var debugOutputStream
 /** un log d'erreur actif en prod */
 var errorOutputStream = getLogStream(config.logs.error, true)
 /** un log spécifique pour les erreurs liées à des datas incohérentes */
-var errorDataOutputStream = getLogStream(config.logs.errorData, true)
+var errorDataOutputStream = getLogStream(config.logs.dataError, true)
 /** un log pour mesure de performances */
 var perfOutputStream
 
@@ -303,14 +303,14 @@ log.error = function (message, objectToDump, filter) {
 }
 
 /**
- * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données (config.logs.errorData)
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données (config.logs.dataError)
  * @memberOf log
  * @param message
  * @param objectToDump
  * @param filter
  */
-log.errorData = function (message, objectToDump, filter) {
-  // pour les errorData, on met un max élevé s'il est pas précisé
+log.dataError = function (message, objectToDump, filter) {
+  // pour les dataError, on met un max élevé s'il est pas précisé
   if (!filter) filter = {}
   if (!filter.max) filter.max = 50000
   out(message, objectToDump, filter, errorDataOutputStream, {max: 2000})

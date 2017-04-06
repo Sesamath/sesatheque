@@ -57,7 +57,7 @@ function cleanEnfants (enfants) {
       if (refEnfant.type === 'arbre') {
         refEnfant.enfants = cleanEnfants(refEnfant.enfants)
       } else {
-        log.errorData('enfants sur autre chose qu’un arbre', refEnfant)
+        log.dataError('enfants sur autre chose qu’un arbre', refEnfant)
         delete refEnfant.enfants
       }
     }
@@ -73,11 +73,11 @@ function cleanArbre (arbre) {
   if (arbre.enfants) {
     if (arbre.enfants.length) arbre.enfants = cleanEnfants(arbre.enfants)
   } else {
-    log.errorData('arbre sans propriété enfants', arbre)
+    log.dataError('arbre sans propriété enfants', arbre)
     arbre.enfants = []
   }
   if (arbre.parametres) {
-    log.errorData('arbre avec parametres', arbre)
+    log.dataError('arbre avec parametres', arbre)
     delete arbre.parametres
   }
   return arbre
@@ -112,7 +112,7 @@ module.exports = {
         if (ressource.type === 'arbre') {
           ressource = cleanArbre(ressource)
         } else if (ressource.enfants) {
-          if (ressource.enfants.length) log.errorData('enfants sur autre chose qu’un arbre', ressource)
+          if (ressource.enfants.length) log.dataError('enfants sur autre chose qu’un arbre', ressource)
           delete ressource.enfants
         }
         cleanAuteurs(ressource)

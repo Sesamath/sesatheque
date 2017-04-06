@@ -65,7 +65,7 @@ module.exports = {
       if (arbre.enfants && arbre.enfants.length) {
         hasChanged = cleanEnfantsSync(arbre.enfants, todoThen) || hasChanged
       } else {
-        log.errorData(`arbre ${arbre.oid} sans enfants`)
+        log.dataError(`arbre ${arbre.oid} sans enfants`)
       }
 
       if (hasChanged) {
@@ -119,7 +119,7 @@ module.exports = {
           }
         }
       } else if (item.hasOwnProperty('public') && !item.public) {
-        log.errorData('item privé dans un arbre sesamath', item)
+        log.dataError('item privé dans un arbre sesamath', item)
       }
       return hasChanged
     }
@@ -147,7 +147,7 @@ module.exports = {
             next(null, todoThen)
           })
         } else {
-          log.errorData(`l’arbre ${oid} n’existe pas`)
+          log.dataError(`l’arbre ${oid} n’existe pas`)
           todoThen.delete(rid)
           next()
         }

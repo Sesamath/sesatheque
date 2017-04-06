@@ -97,7 +97,7 @@ module.exports = {
           if (goodRid) {
             e.aliasOf = goodRid
           } else {
-            log.errorData(`Impossible de trouver le rid correspondant à ${e.aliasOf}`)
+            log.dataError(`Impossible de trouver le rid correspondant à ${e.aliasOf}`)
             dropAliasOf(e)
           }
         }
@@ -178,7 +178,7 @@ module.exports = {
         function logErr (error) {
           const msg = `impossible de trouver l’original de ${rid} (parent ${ridToClean.get(rid).parent})`
           updateLogErr(msg)
-          log.errorData(msg, error)
+          log.dataError(msg, error)
           ridToClean.set(rid, null)
           nextRid()
         }

@@ -93,7 +93,7 @@ module.exports = {
           }
         } else {
           if (personne.pid && personne.pid.indexOf('/') !== -1) pidsByOid[personne.oid] = personne.pid
-          log.errorData('personne sans origine/idOrigine', personne)
+          log.dataError('personne sans origine/idOrigine', personne)
           updateLogErr(`personne ${personne.oid} sans origine/idOrigine avec pid ${personne.pid}`)
           checkDoublon()
         }
@@ -128,7 +128,7 @@ module.exports = {
           needSave = true
           if (newPid) return newPid
           // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
-          log.errorData(`impossible de trouver le bon pid pour l’auteur ${pid} de la ressource ${ressource.oid}`)
+          log.dataError(`impossible de trouver le bon pid pour l’auteur ${pid} de la ressource ${ressource.oid}`)
           if (!ressource.warnings) ressource.warnings = []
           ressource.warnings.push(`L’auteur ${pid} n’existe plus`)
           updateLogErr(`L’auteur ${pid} mentionné dans la ressource ${ressource.oid} n’existe plus`)
@@ -144,7 +144,7 @@ module.exports = {
             needSave = true
             if (newPid) return newPid
             // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
-            log.errorData(`impossible de trouver le bon pid pour l’auteur parent ${pid} de la ressource ${ressource.oid}`)
+            log.dataError(`impossible de trouver le bon pid pour l’auteur parent ${pid} de la ressource ${ressource.oid}`)
             if (!ressource.warnings) ressource.warnings = []
             ressource.warnings.push(`L’auteur parent ${pid} n’existe plus`)
             updateLogErr(`L’auteur parent ${pid} mentionné dans la ressource ${ressource.oid} n’existe plus`)
@@ -159,7 +159,7 @@ module.exports = {
             needSave = true
             if (newPid) return newPid
             // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
-            log.errorData(`impossible de trouver le bon pid pour le contributeur ${pid} de la ressource ${ressource.oid}`)
+            log.dataError(`impossible de trouver le bon pid pour le contributeur ${pid} de la ressource ${ressource.oid}`)
             if (!ressource.warnings) ressource.warnings = []
             ressource.warnings.push(`Le contributeur ${pid} n’existe plus`)
             updateLogErr(`Le contributeur ${pid} mentionné dans la ressource ${ressource.oid} n’existe plus`)
@@ -203,15 +203,15 @@ module.exports = {
             needSave = true
             if (newPid) return newPid
             // si on est toujours là, on a pas trouvé le bon pid, ennuyeux…
-            log.errorData(`impossible de trouver le bon pid pour l’auteur ${pid} du groupe ${groupe.nom}`)
+            log.dataError(`impossible de trouver le bon pid pour l’auteur ${pid} du groupe ${groupe.nom}`)
             updateLog(`impossible de trouver le bon pid pour l’auteur ${pid} du groupe ${groupe.nom}`)
           }).filter(pid => pid)
           if (!groupe.gestionnaires.length) {
-            log.errorData(`Le groupe “${groupe.nom}” n’a plus de gestionnaire`, groupe)
+            log.dataError(`Le groupe “${groupe.nom}” n’a plus de gestionnaire`, groupe)
             updateLogErr(`Le groupe “${groupe.nom}” n’a plus de gestionnaire`)
           }
         } else {
-          log.errorData(`Le groupe “${groupe.nom}” n’a pas de gestionnaire`)
+          log.dataError(`Le groupe “${groupe.nom}” n’a pas de gestionnaire`)
           updateLogErr(`Le groupe “${groupe.nom}” n’a pas de gestionnaire`)
         }
         if (needSave) groupe.store(this)

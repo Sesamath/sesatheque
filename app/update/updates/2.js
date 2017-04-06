@@ -78,13 +78,13 @@ function findChildByOrig (arbre, next) {
                 enfant = newEnfant
                 modif = true
               } else {
-                log.errorData('arbre ' + refArbre + ' avait un orphelin ' + enfant.ref + ', on a pas trouvé ' + newRef + ' non plus')
+                log.dataError('arbre ' + refArbre + ' avait un orphelin ' + enfant.ref + ', on a pas trouvé ' + newRef + ' non plus')
               }
               nextEnfant(error)
             })
           } else {
             // on sait pas où chercher
-            log.errorData('arbre ' + refArbre + ' a un orphelin ' + enfant.ref)
+            log.dataError('arbre ' + refArbre + ' a un orphelin ' + enfant.ref)
             nextEnfant()
           }
         }).catch(log.error)
@@ -97,7 +97,7 @@ function findChildByOrig (arbre, next) {
         nextEnfant()
       })
     } else {
-      log.errorData('arbre ' + refArbre + ' avec enfant sans ref ni enfants', enfant)
+      log.dataError('arbre ' + refArbre + ' avec enfant sans ref ni enfants', enfant)
     }
   }).seq(function () {
     next(modif)

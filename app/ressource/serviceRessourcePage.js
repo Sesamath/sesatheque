@@ -334,7 +334,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
                 type: ressourceLiee.type
               })
             } else {
-              log.errorData('la ressource ' + ressource.oid + ' est liée à ' + relation[1] + ' qui n’existe pas')
+              log.dataError('la ressource ' + ressource.oid + ' est liée à ' + relation[1] + ' qui n’existe pas')
             }
             nextRelation()
           })
@@ -816,7 +816,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
                     url: url
                   })
                 } catch (error) {
-                  log.errorData(`enfant de ${ressource.oid} avec un rid non conforme`, enfant)
+                  log.dataError(`enfant de ${ressource.oid} avec un rid non conforme`, enfant)
                 }
               })
               data.contentBloc.enfantsDescribe = enfantsDescribe

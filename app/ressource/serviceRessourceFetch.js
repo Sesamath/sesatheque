@@ -33,7 +33,7 @@
 
 const request = require('request')
 const sesatheques = require('sesatheque-client/src/sesatheques.js')
-const {exists, getBaseUrl, getComponents, getRidComponents} = sesatheques
+const {exists, getBaseUrl, getComponents} = sesatheques
 
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId
@@ -134,7 +134,7 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
       if (error) return next(error)
       if (ressource && ressource.aliasOf) {
         // si c'est un alias on recommence, mais une seule fois (trop risqué de mettre du récursif ici)
-        log.errorData(`alias d’alias (${aliasOf} => ${ressource.aliasOf})`)
+        log.dataError(`alias d’alias (${aliasOf} => ${ressource.aliasOf})`)
         fetch(ressource.aliasOf, function (error, ress2) {
           if (error) return next(error)
           if (ress2 && ress2.aliasOf) return next(new Error(`Trop d’alias imbriqués (${aliasOf} => ${ressource.aliasOf} => ${ress2.aliasOf})`))

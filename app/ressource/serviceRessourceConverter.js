@@ -160,7 +160,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
           parent.enfants[enfantIndex] = newEnfant
         } else {
           // sinon on laisse en l'état mais on logue
-          log.errorData('On a pas trouvé la ressource ' + enfant.idOrigine + ' ' + enfant.id)
+          log.dataError('On a pas trouvé la ressource ' + enfant.idOrigine + ' ' + enfant.id)
           parent.enfants[enfantIndex].titre += ' (non trouvé)'
         }
         populateEnfants(parent.enfants[enfantIndex], next)
