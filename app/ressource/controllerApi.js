@@ -41,7 +41,7 @@ var myBaseId = config.application.baseId
 var configRessource = require('./config')
 var Ref = require('../constructors/Ref')
 
-const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
 
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
@@ -262,17 +262,27 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if ($accessControl.isAuthenticated(context) || $accessControl.hasAllRights(context)) {
       flow().seq(function () {
         var next = this
+        // si y'à un rid sans oid on traduit
+        if (ressourcePostee.rid) {
+          const [baseId, oid] = getRidComponents(ressourcePostee.rid)
+          if (baseId !== myBaseId) return next(new Error(`Cette ressource doit être enregistrée sur ${baseId} et non ici`))
+          if (ressourcePostee.oid && ressourcePostee.oid !== oid) return next(new Error(`oid ${ressourcePostee.oid} et rid ${ressourcePostee.rid} incohérents`))
+          ressourcePostee.oid = oid
+        }
         // faut la charger, ne serait-ce que pour savoir si elle existe
         if (ressourcePostee.oid) { // par oid
           $ressourceRepository.load(ressourcePostee.oid, next)
         } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
           $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
-        } else if (ressourcePostee.origine) {
-          // l'idOrigine n'est pas obligatoire ($ressourceRepository.save créera une clé si besoin
-          next(null, ressourcePostee)
         } else {
-          log.debug('ressource postée invalide', ressourcePostee)
-          next(new Error('Il faut fournir oid ou au moins origine'))
+          if (!ressourcePostee.origine) ressourcePostee.origine = myBaseId
+          // l'idOrigine n'est pas obligatoire si c'est une création ici ($ressourceRepository.save créera une clé si besoin
+          if (ressourcePostee.origine !== myBaseId && !ressourcePostee.idOrigine) {
+            log.debug('ressource postée invalide', ressourcePostee)
+            next(new Error('Il faut fournir oid ou au moins origine'))
+          } else {
+            next()
+          }
         }
       }).seq(function (ressourceBdd) {
         if (log.perf) log.perf(context.response, 'loaded')
