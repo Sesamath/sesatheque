@@ -32,6 +32,11 @@
 
 'use strict'
 
+/**
+ * Pour appeler le cli avec une autre config que celle par défaut, passer par l'environnement :
+ * `env SESATHEQUE_CONF=xxx app/cli.js …` pour utiliser la config _private/xxx.js
+ */
+
 const glob = require('glob')
 const anLog = require('an-log')
 const anLogLevels = require('an-log/source/lib/levels.js')

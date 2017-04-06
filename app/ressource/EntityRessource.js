@@ -82,10 +82,11 @@ module.exports = function (EntityRessource) {
 
   EntityRessource
     .defineIndex('rid', 'string')
+    // baseId n'est pas une propriété de Ressource mais ça nous intéresse de connaître la provenance
     .defineIndex('baseId', 'string', function () {
       if (this.rid) return sesatheques.getBaseIdFromRid(this.rid)
     })
-    .defineIndex('cle', 'string')
+    .defineIndex('aliasOf', 'string')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')
     .defineIndex('type', 'string')

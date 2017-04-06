@@ -472,7 +472,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   idOrigine: ressourceOriginale.idOrigine,
                   version: ressourceOriginale.version
                 }
-                // @todo mettre auteursParent et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
+                // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
                 $ressourcePage.printForm(context, error, ressource)
               })
             } else {

@@ -594,7 +594,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           } else {
             // une seule valeur, on regarde si on veut du like
             const value = filter.values[ 0 ]
-            const action = (typeof value === 'string' && (value.indexOf('%') > -1 || value.indexOf('_') > -1)) ? 'like' : 'equals'
+            const action = (typeof value === 'string' && (value.indexOf('%') !== -1 || value.indexOf('_') !== -1)) ? 'like' : 'equals'
             query = query.match(filter.index)[ action ](filter.values[ 0 ])
           }
         } else {
