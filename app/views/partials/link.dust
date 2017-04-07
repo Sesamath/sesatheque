@@ -7,7 +7,7 @@
     {#attributes} {name}="{value}"{/attributes}
 >
   {?icon}
-    <i class="fa fa-{icon}"></i> <span>{value}</span>
+    <i class="fa fa-{icon}"></i> <span{?iconTextClass} class="{iconTextClass}"{/iconTextClass}>{value}</span>
   {:else}
     {?iconStack}{! cf Stacked Icons sur http://fortawesome.github.io/Font-Awesome/examples/ !}
       <span class="fa-stack fa-lg {parent}">

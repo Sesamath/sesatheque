@@ -35,9 +35,10 @@
  * jsdoc tient absolument à mettre listeners dans un namespace controllerRessource mettre un tag class ou module (avec ou sans kind) ne change rien
  */
 
-var _ = require('lodash')
-// var tools = require('./tools')
-var path = require('path')
+const _ = require('lodash')
+const path = require('path')
+const config = require('./config')
+const myBaseId = config.application.baseId
 
 /**
  * Listener beforeTransport, qui finalise les datas pour les vues
@@ -66,18 +67,25 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           href: $routes.getAbs('describe', ressource, context),
           value: 'Description',
           icon: 'file-text-o', // material icons description
+          iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'describe')
         })
+
         links.push({
           href: $routes.getAbs('preview', ressource, context),
           value: 'Aperçu',
           icon: 'eye-slash', // ma pageview
+          iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'preview')
         })
+        // si c'est un alias on ajoute du target _blank aussi sur le preview
+        if (ressource.aliasOf && ressource.aliasOf.indexOf(myBaseId + '/') !== 0) links[links.length - 1].attributes = [{name: 'target', value: '_blank'}]
+
         links.push({
           href: $routes.getAbs('display', ressource, context),
           value: 'Voir',
           icon: 'eye', // material icons open_in_new était pas terrible
+          iconTextClass: 'gt-medium-only',
           attributes: [
             {name: 'target', value: '_blank'}
           ]
@@ -89,6 +97,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           href: $routes.getAbs('edit', oid, context),
           value: 'Modifier',
           icon: 'edit', // mode_edit pour material icons
+          iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'edit'),
           hidden: !$accessControl.hasPermission('update', context, ressource)
         })
@@ -97,6 +106,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
           icon: 'copy', // ma call_split
+          iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1),
           hidden: !$accessControl.hasPermission('create', context)
         })
@@ -105,6 +115,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           href: $routes.getAbs('delete', oid, context),
           value: 'Supprimer',
           icon: 'trash', // ma delete
+          iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'delete'),
           hidden: !$accessControl.hasPermission('delete', context, ressource)
         })
@@ -112,9 +123,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         log.error(new Error('On a une ressource dans beforeTransport::addActions sans les droits pour la lire'))
       }
 
-      data.actions = {
-        links: links
-      }
+      data.actions = {links}
       // le js est ajouté par addNavigation
     }
   } // addActions

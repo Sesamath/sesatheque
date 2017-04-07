@@ -31,9 +31,10 @@
 
 'use strict'
 
-var configRessource = require('./config')
-var routes = configRessource.constantes.routes
-// var restriction = configRessource.constantes.restriction
+const {getBaseUrl, getComponents} = require('sesatheque-client/src/sesatheques')
+const appConfig = require('../config')
+const myBaseId = appConfig.application.baseId
+const routes = appConfig.components.ressource.constantes.routes
 
 module.exports = function ($accessControl) {
   /**
@@ -71,15 +72,28 @@ module.exports = function ($accessControl) {
     var route
     var id
     var isPublic = true
-    if (ressource) {
-      if (typeof ressource === 'object') id = ressource.oid || ressource.aliasOf || (ressource.origine && ressource.idOrigine && ressource.origine + '/' + ressource.idOrigine)
-      else id = ressource
-      if (ressource.restriction || $accessControl.isAuthenticated(context)) isPublic = false
-    } else if ($accessControl.isAuthenticated(context)) {
-      isPublic = false
-    }
     if (routes.hasOwnProperty(action)) {
       route = '/'
+      if (ressource) {
+        if (typeof ressource === 'object') {
+          id = ressource.oid
+          // les cas où la route n'est pas chez nous
+          if (ressource.aliasOf && (action === 'display' || action === 'preview')) {
+            // c'est un alias, display et preview sont ailleurs
+            const [baseId, oid] = getComponents(ressource.aliasOf)
+            if (baseId !== myBaseId) {
+              route = getBaseUrl(baseId)
+              id = oid
+            }
+          }
+        } else {
+          id = ressource
+        }
+        if (!id) throw new Error('ressource invalide')
+        if (ressource.restriction || $accessControl.isAuthenticated(context)) isPublic = false
+      } else if ($accessControl.isAuthenticated(context)) {
+        isPublic = false
+      }
       if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
       // ce qui concerne l'édition est toujours sur /ressource
       if (['create', 'delete', 'edit'].indexOf(action) > -1) route += 'ressource/'

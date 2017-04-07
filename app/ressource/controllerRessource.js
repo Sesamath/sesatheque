@@ -229,6 +229,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/decrire/:oid
    */
   controller.get($routes.get('describe', ':oid'), function (context) {
+    context.layout = 'page'
+    context.tab = 'describe'
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     redirectPublicOrContinue(context, function () {
       var oid = context.arguments.oid

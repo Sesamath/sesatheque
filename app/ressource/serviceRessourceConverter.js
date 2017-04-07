@@ -46,7 +46,6 @@ var flow = require('an-flow')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
-var Ref = require('../constructors/Ref')
 
 var sTools = require('sesajstools')
 
@@ -63,8 +62,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     let errors = []
     let isModif = false
     if (_.isArray(relations)) {
-      relations.forEach(([relId, relTarget, ...bug]) => {
-        if (bug.length) {
+      relations.forEach(function (relId, relTarget) {
+        if (arguments.length > 2) {
           errors.push('une relation doit être un tableau à deux éléments (idRelation, idRessource, ce dernier peut être un oid ou une chaine origine/idOrigine')
         } else {
           if (
