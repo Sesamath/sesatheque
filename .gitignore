@@ -3,7 +3,7 @@ npm-debug.log
 .idea
 _private
 logs/*
-logs_commun/*
+logsCommun/*
 documentation/*
 *.pid
 *.map
