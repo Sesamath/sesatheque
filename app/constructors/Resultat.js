@@ -120,9 +120,10 @@ function Resultat (original) {
    * @default null
    * @type {number}
    */
-  this.score = values.score
-  if (this.score < 0) this.score = null
-  if (this.score > 1) this.score = null
+  this.score = Number(values.score)
+  if (Number.isNaN(this.score)) this.score = 0
+  if (this.score < 0) this.score = 0
+  if (this.score > 1) this.score = 1
 
   /**
    * Le résultat sous une forme qualitative (rrvb pour mep, phrase d'état pour j3p, etc.)
