@@ -5,14 +5,16 @@
   <link rel="stylesheet" href="/styles/iframe.css">
   {head|s}
 </head>
-<body>
+<body class="iframe">
+<div id="main" role="document">
   {?error}<p class="error">{error}</p>{/error}
   {errors|s}
   {warnings|s}
   {flashBloc|s}
   {blocsFirst|s}
   {contentBloc|s}
-  {#blocs}{>partial /}{/blocs}
+  {blocs|s}
   {jsBloc|s}
+</div>
 </body>
 </html>

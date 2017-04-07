@@ -86,8 +86,7 @@ module.exports = function () {
       data.$metas.title = titre
     }
     if (context) {
-      if (context.get.layout === 'iframe') context.layout = 'iframe'
-      else context.layout = 'page'
+      context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
       // data.$layout est fixé dans beforeTransport
     }
     if (typeof contentBloc === 'string') {
