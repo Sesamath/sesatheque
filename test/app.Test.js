@@ -39,6 +39,9 @@
 'use strict'
 /* eslint-env mocha */
 
+// Ce jeu de test de l'appli est lancé avec les paramètres de _private/test.js
+// (c'est app/config.js qui détecte mocha et utilise ce fichier)
+
 const app = require('../app/app')
 const config = require('../app/config')
 const anLog = require('an-log')

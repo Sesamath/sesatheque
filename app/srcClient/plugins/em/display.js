@@ -186,7 +186,7 @@ module.exports = function display (ressource, options, next) {
     swf.load(container, swfUrl, swfOptions, function (error) {
       if (!error) log('chargement du swf ok')
       container.removeChild(loadingElt)
-      if (next) next()
+      if (next) next(error)
     })
   } catch (error) {
     if (next) next(error)

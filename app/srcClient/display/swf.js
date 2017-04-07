@@ -33,7 +33,8 @@
 var log = require('sesajstools/utils/log')
 
 var page = require('../page/index')
-
+// https://mep-col.devsesamath.net/dev/swf/exo42.swf
+// https://mep-col.devsesamath.net/dev/swf/exo42.swf
 /**
  * Charge un swf dans l'élément container
  * @param {Element}        container L'élément html dans lequel on ajoutera
@@ -54,8 +55,7 @@ function load (container, swfHref, options, next) {
         log('Lancement de ' + swfHref + ' réussi')
         next()
       } else {
-        var errorMsg = "Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, impossible d'afficher cette ressource."
-        page.addError(errorMsg)
+        var errorMsg = "Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, ou bien le fichier swf est introuvable, mais impossible d'afficher cette ressource."
         next(new Error(errorMsg))
       }
     } else {
@@ -96,6 +96,7 @@ function load (container, swfHref, options, next) {
   //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
   page.loadAsync('swfobject', function () {
     try {
+      // console.log('on va charger ' + swfHref)
       window.swfobject.embedSWF(swfHref, divId, largeur, hauteur, flashversion, null, flashvars, swfParams, swfAttributes, callbackFn)
     } catch (error) {
       page.addError(error)
