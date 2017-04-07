@@ -115,15 +115,17 @@ function Resultat (original) {
    */
   this.contenu = values.contenu
 
-  /**
-   * Le score numérique, entre 0 et 1
-   * @default null
-   * @type {number}
-   */
-  this.score = Number(values.score)
-  if (Number.isNaN(this.score)) this.score = 0
-  if (this.score < 0) this.score = 0
-  if (this.score > 1) this.score = 1
+  if (values.score) {
+    /**
+     * Le score numérique, entre 0 et 1
+     * @default undefined
+     * @type {number|undefined}
+     */
+    this.score = Number(values.score)
+    if (Number.isNaN(this.score)) throw new TypeError('score invalide (pas un nombre)')
+    if (this.score < 0) throw new TypeError('score invalide (négatif)')
+    if (this.score > 1) throw new TypeError('score invalide (> 1)')
+  }
 
   /**
    * Le résultat sous une forme qualitative (rrvb pour mep, phrase d'état pour j3p, etc.)
