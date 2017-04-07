@@ -125,6 +125,9 @@ function Resultat (original) {
     if (Number.isNaN(this.score)) throw new TypeError('score invalide (pas un nombre)')
     if (this.score < 0) throw new TypeError('score invalide (négatif)')
     if (this.score > 1) throw new TypeError('score invalide (> 1)')
+  } else {
+    // pour garantir le hasOwnProperty, au cas où
+    this.score = undefined
   }
 
   /**
