@@ -22,7 +22,12 @@ function purge_varnish() {
   local file
   local url
   # faut l'interpréteur js car l'url peut être construite en js
-  local baseUrl=$(node -e "var c = require('./' + '$CONFIG'); console.log(c.application.baseUrl)")
+  # ici exceptionnellement ça nous arrange sans le slash de fin
+  local baseUrl=$(node -e "
+    const c = require('./' + '$CONFIG')
+    const url = c.application.baseUrl
+    if (url.substr(-1) === '/') url = url.substr(0, url.length -1)
+    console.log(url)")
   local findOpt=''
   [ -f $LAST_FILE ] && findOpt="-newer $LAST_FILE"
   if [ -z "$baseUrl" ]
