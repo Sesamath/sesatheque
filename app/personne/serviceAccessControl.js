@@ -219,29 +219,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Calcule et renvoie les permissions d'une personne en fonction de ses rôles
-   * @private
-   * @param {Personne} personne
-   * @returns {Object} avec les permissions en propriété (valeur true|false|undefined)
-   */
-  function getPermissions (personne) {
-    var permissions = {}
-    var config = $settings.get('components.personne')
-    _.each(personne.roles, function (hasRole, role) {
-      // on ajoute les permissions définies pour ce role en config
-      if (hasRole && config.roles[role]) {
-        // faut pas faire de merge, on pourrait écraser avec false
-        // une permission déjà accordée par un rôle précédent
-        _.each(config.roles[role], function (hasPerm, perm) {
-          if (hasPerm) permissions[perm] = true
-        })
-      }
-    })
-
-    return permissions
-  }
-
-  /**
    * Helper de checkAccess pour la permission del|update (faut un user authentifié)
    * @private
    * @param {Context}   context
@@ -678,7 +655,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.login = function (context, personne, next) {
     function setSession (error, personne) {
       if (personne) {
-        personne.permissions = getPermissions(personne)
+        $personneRepository.setPermissions(personne)
         context.session.user = personne
       } else if (!error) {
         context.session.user = {
@@ -706,7 +683,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       log.debug('setSession error', error)
       log.debug('setSession personne', personne)
       if (personne) {
-        personne.permissions = getPermissions(personne)
+        $personneRepository.setPermissions(personne)
         context.session.user = personne
       } else if (!error) {
         context.session.user = {

@@ -54,6 +54,7 @@ module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessCont
       if (error) {
         next(error)
       } else if (personne) {
+        console.log('après login les permissions', personne.permissions)
         // on ajoute la source de l'authentification en session
         context.session.authOrigine = authServerName
         next()

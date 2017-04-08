@@ -678,6 +678,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   controller.get('perso', function (context) {
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
+    console.log('user en session', context.session.user.permissions)
     var blocList = []
     flow().seq(function () {
       if ($accessControl.isAuthenticated(context)) this()

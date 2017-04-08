@@ -35,8 +35,9 @@ const _ = require('lodash')
 const flow = require('an-flow')
 const merge = require('sesajstools/utils/object').merge
 const myBaseId = lassi.settings.application.baseId
+const configRoles = lassi.settings.components.personne.roles
 
-module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
+module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository, $accessControl) {
   /**
    * Service d'accès aux personnes, utilisé par les différents contrôleurs
    * @service $personneRepository
@@ -122,6 +123,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
             if (error) {
               next(error)
             } else if (personne) {
+              $personneRepository.setPermissions(personne)
               $cachePersonne.set(personne)
               next(null, personne)
             } else {
@@ -154,6 +156,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
             // log.debug('personne load remonte ', personne)
             if (error) next(error)
             else if (personne) {
+              $personneRepository.setPermissions(personne)
               $cachePersonne.set(personne)
               next(null, personne)
             } else {
@@ -251,6 +254,30 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
       // on passe à next sans attendre le résultat de la mise en cache
       next(error, personne)
     })
+  }
+
+
+  /**
+   * Calcule et affecte les permissions d'une personne en fonction de ses rôles
+   * et des permissions données à chaque rôle en configuration
+   * @param {Personne} personne
+   * @returns {Object} avec les permissions en propriété (valeur true|false|undefined)
+   * @memberOf $personneRepository
+   */
+  $personneRepository.setPermissions = function (personne) {
+    var permissions = {}
+    _.each(personne.roles, function (hasRole, role) {
+      // on ajoute les permissions définies pour ce role en config
+      if (hasRole && configRoles[role]) {
+        // faut pas faire de merge, on pourrait écraser avec false
+        // une permission déjà accordée par un rôle précédent
+        _.each(configRoles[role], function (hasPerm, perm) {
+          if (hasPerm) permissions[perm] = true
+        })
+      }
+    })
+    personne.permissions = permissions
+    console.log('perm après set', personne.permissions)
   }
 
   /**
