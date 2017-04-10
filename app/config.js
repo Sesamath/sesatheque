@@ -34,8 +34,28 @@
  * Configuration de l'application
  */
 const path = require('path')
+// const anLog = require('an-log')
+
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
+const {reBaseUrl} = require('sesatheque-client/src/sesatheques')
+
+/**
+ * Retourne les éléments de list avec une baseUrl valide
+ * (à laquelle on a éventuellement ajouté le slash de fin)
+ * @param {Array} list
+ * @return {Array} Liste dont tous les éléments ont une baseUrl valide
+ */
+function filterOnBaseUrl (list) {
+  return list.map((item) => {
+    if (item && typeof item.baseUrl === 'string') {
+      // on ajoute un éventuel / de fin (c'est pas immutable, mais ici on s'en fout vraiment)
+      if (item.baseUrl.substr(-1) !== '/') item.baseUrl += '/'
+      if (reBaseUrl.test(item.baseUrl)) return item
+    }
+    console.error('item sans baseUrl valide', item)
+  }).filter((item) => item)
+}
 
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
@@ -144,7 +164,7 @@ const config = {
     },
     ressource: ressourceConfig
   },
-  // urls absolues des sésathèques utilisées par nos ressources (pour les alias, par ex quand
+  // urls absolues des sésathèques que l'on accepte de référencer (pour les alias, par ex quand
   // des sesalab connectés à plusieurs sésathèques mettent des ressources de l'une
   // dans des arbres de l'autre)
   // sous la forme baseId:baseUrl, ou nomQcq{id: baseId, baseUrl:laBaseHttpAbsolue, apiToken: leToken}
@@ -187,6 +207,10 @@ const config = {
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
 if (localConfig) sjtObj.merge(config, localConfig)
 
+/**
+ * À partir le là on a la conf locale, on vérifie et normalise un peu (autant signaler une erreur dès le boot)
+ */
+
 // on enlève le debug mysql en prod
 if (config.application.staging === 'prod' && config.$entities.database.debug) {
   delete config.$entities.database.debug
@@ -194,41 +218,35 @@ if (config.application.staging === 'prod' && config.$entities.database.debug) {
 // on ajoute toujours un slash de fin à baseUrl et baseIdRegistrar
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
 
-// Pour ajouter des composants spécifiques à une installation, pour gérer l'authentification par exemple,
-// cf _private.example/config.js
+// idem pour les sesatheques, mais on ajoute un objet byId, plus simple à tester
+config.sesathequesById = {}
+if (Array.isArray(config.sesatheques) && config.sesatheques.length) {
+  config.sesatheques = filterOnBaseUrl(config.sesatheques)
+  config.sesatheques.forEach(s => { config.sesathequesById[s.baseId] = s.baseUrl })
+} else {
+  config.sesatheques = []
+}
 
 /**
  * On passe à la conf de sesalabSso, déduite du reste si on a mis des sesalabs
  * (dans ce cas on est obligatoirement client sso de ces sesalab,
  * ce qui n'empêcherait pas d'être client sso d'autres sesatheques qui implémenteraient un $sesalabSsoServer)
  */
-if (config.sesalabs && config.sesalabs.length) {
-  if (!config.components) config.components = {}
+if (Array.isArray(config.sesalabs) && config.sesalabs.length) config.sesalabs = filterOnBaseUrl(config.sesalabs)
+else config.sesalabs = []
+// pour valider du CORS
+config.sesalabsByOrigin = {}
+config.sesalabs.forEach(s => {
+  const origin = s.baseUrl.substr(0, s.baseUrl.length - 1)
+  config.sesalabsByOrigin[origin] = true
+})
+if (!config.components) config.components = {}
+if (config.sesalabs.length) {
   if (!config.components.sesalabSso) config.components.sesalabSso = {}
   const confSso = config.components.sesalabSso
-  if (confSso.authServers) {
-    // on vérifie que ce qui est déjà défini n'est pas du grand n'importe quoi
-    confSso.authServers = confSso.authServers.filter(function (server) {
-      if (server && server.baseUrl) return true
-      console.error('faut pas mettre n’importe quoi en authServers, baseUrl est obligatoire', server)
-    })
-  } else {
-    confSso.authServers = []
-  }
+  confSso.authServers = Array.isArray(confSso.authServers && confSso.authServers.length) ? filterOnBaseUrl(confSso.authServers) : []
   // et on ajoute un authServer pour chaque sesalab
-  config.sesalabs.forEach(function (sesalab, index) {
-    // pour accepter une liste de baseUrl
-    if (typeof sesalab === 'string') {
-      sesalab = {baseUrl: sesalab}
-      // on rectifie la conf
-      config.sesalabs[index] = sesalab
-    }
-    // si c'est mal formaté on râle et on passe au suivant
-    if (!sesalab || !sesalab.baseUrl || typeof sesalab.baseUrl !== 'string') {
-      return console.error('Configuration de sesalabs non conforme', sesalab)
-    }
-    if (sesalab.baseUrl.substr(-1) !== '/') sesalab.baseUrl += '/'
-    // ça donne ce server
+  config.sesalabs.forEach(function (sesalab) {
     const authServer = {
       name: sesalab.name || sjtUrl.getDomain(sesalab.baseUrl),
       baseUrl: sesalab.baseUrl,

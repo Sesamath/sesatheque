@@ -62,7 +62,21 @@ module.exports = function display (ressource, options, next) {
         loader.init({urlBaseJ3p: urlBaseJ3p, log: log})
         var j3pOptions = {}
         if (options.resultatCallback) {
-          j3pOptions.resultatCallback = options.resultatCallback
+          // faut un wrapper pour compiler un score pour le graphe
+          // ce serait mieux dans j3p…
+          j3pOptions.resultatCallback = function (resultat) {
+            if (resultat.fin && resultat.score === undefined) {
+              // faudrait un score (en cas de condition sur le minimum de réussite),
+              // on regarde si on peut le calculer
+              if (resultat.contenu && resultat.contenu.scores && resultat.contenu.scores.length) {
+                const nb = resultat.contenu.scores.length
+                const total = resultat.contenu.scores.reduce((total, score) => total + Number(score), 0)
+                if (Number.isNaN(total)) page.addError('Un score d’un nœud est invalide')
+                else resultat.score = total / nb
+              }
+            }
+            options.resultatCallback(resultat)
+          }
         }
         if (options.lastResultat) {
           j3pOptions.lastResultat = options.lastResultat
@@ -95,18 +109,19 @@ module.exports = function display (ressource, options, next) {
 
     var lastResultUrl = sjtUrl.getParameter('lastResultUrl')
     if (lastResultUrl) {
-      log('on va chercher un lastResultat sur ' + lastResultUrl)
-      xhr.get(lastResultUrl, {responseType: 'json'}, function (error, lastResultat) {
+      // log('on va chercher un lastResultat sur ' + lastResultUrl)
+      xhr.get(lastResultUrl, {responseType: 'json'}, function (error, data) {
         if (error) {
-          page.addError('Impossible de récupérer le dernier résultat')
           log.error(error)
-        } else if (lastResultat) {
-          if (lastResultat.success) {
-            if (lastResultat.resultat) options.lastResultat = lastResultat.resultat
+          page.addError('Impossible de récupérer le dernier résultat')
+        } else if (data) {
+          if (data.success) {
+            if (data.resultat) options.lastResultat = data.resultat
           } else {
-            log.error("l'appel de lastResultat a échoué", lastResultat)
+            log.error("l'appel de lastResultat a échoué", data)
           }
         }
+        // mais quoi qu'il arrive on charge
         load()
       })
     } else {

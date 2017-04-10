@@ -614,8 +614,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     const oid = context.arguments.oid
     const baseIdOrigine = context.arguments.baseId
     try {
-      var baseUrl = config.sesatheques[baseIdOrigine]
-      if (!baseUrl) throw new Error('Sésathèque ' + baseIdOrigine + ' inconnue')
+      const baseUrl = getBaseUrl(baseIdOrigine)
+      // si on est là c'est une baseId connue de sesatheque-client,
+      // mais ça suffit pas pour qu'on la référence
+      if (!config.sesathequesById[baseIdOrigine]) throw new Error(`Sésathèque ${baseIdOrigine} connue (${baseUrl}) mais pas déclarée comme source possible de cette sésathèque`)
       var pid = $accessControl.getCurrentUserPid(context)
       if (!pid) throw new Error('Vous devez être authentifié pour créer une ressource')
       // on peut aller chercher la ressource
@@ -662,7 +664,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var timeout = 5000
     if (token && origine) {
       if (origine.substr(-1) !== '/') origine += '/'
-      if ($accessControl.isSesalab(origine)) {
+      if (config.sesalabsByOrigin[origine]) {
         var postOptions = {
           url: origine + 'api/utilisateur/check-token',
           json: true,
@@ -796,7 +798,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $json.sendOk(context)
         })
       } else {
-        $json.send(context, new Error('deferPost appelé pour faire suivre à ' + resultat.defer + " qui n'est pas dans les sesalab autorisés"))
+        $json.send(context, new Error('deferPost appelé pour faire suivre à ' + resultat.deferUrl + " qui n'est pas dans les sesalab autorisés"))
       }
     } else {
       $json.send(context, new Error('Il faut poster une url via deferUrl'))
@@ -810,7 +812,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.post('notifyError', function (context) {
     if (context.post.rid) log.dataError('notifyError', context.post)
-    else log.error('notifyError', context.post)
+    else if (context.post.error) log.error('notifyError', context.post)
+    else log.error('notifyError sans error avec la requête', context.request)
     $json.sendOk(context)
   })
 

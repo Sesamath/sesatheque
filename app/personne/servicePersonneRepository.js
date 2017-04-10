@@ -277,7 +277,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
       }
     })
     personne.permissions = permissions
-    console.log('perm après set', personne.permissions)
   }
 
   /**

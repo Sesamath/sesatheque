@@ -124,12 +124,16 @@ module.exports = {
   // Attention, toutes les sésathèques que ces sesalab utilisent doivent être listées dans le module
   // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
   // vers ces autres sésathèques
-  sesalabs: [ {
-    name: 'mon sesalab local',
-    baseUrl: 'https://localhost:3002/'
-  }]
+  sesalabs: [
+    {
+      name: 'mon sesalab local',  // pour d'éventuels affichage d'erreurs sur la page
+      baseId: 'labomepLocal3002', // pas encore pris en compte
+      baseUrl: 'https://localhost:3002/'
+    }
+    // il pourrait y en avoir plusieurs
+  ]
 }
 
 // pour ajouter le SSO Sésamath, il faut installer sesasso-bibli avec
-// (il faut avoir les droits sur ce dépôt qui n'est pas public)
 // npm install git+ssh://git@src.sesamath.net:npm-sesasso-bibli
+// (il faut avoir les droits sur ce dépôt qui n'est pas public)

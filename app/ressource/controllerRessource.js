@@ -156,6 +156,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Iframe de connexion pour loguer un user d'un sesalab localement, appelle sendMessage avec {action:'connexion',success:{boolean}[,error:msgErreur]}
    * Dupliqué dans app/connexion, qu'il remplace vu que pas mal de navigateurs déconnent pour affecter le cookie en xhr
+   * @todo Remettre son usage en route via sesatheque-client:getPerso, qui pourrait proposer d'ouvrir un nouvel onglet pour reconnecter
    * @Route GET /ressource/connexion
    * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
    * @param {string} token   Le token de sesalab qui servira à récupérer le user
@@ -185,7 +186,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     if (token && origine) {
       if (origine.substr(-1) !== '/') origine += '/'
-      if ($accessControl.isSesalab(origine)) {
+      if (appConfig.sesalabsByOrigin[origine]) {
         var postOptions = {
           url: origine + 'api/utilisateur/check-token',
           json: true,

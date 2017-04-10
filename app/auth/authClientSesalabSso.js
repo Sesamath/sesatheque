@@ -32,7 +32,17 @@
 var baseUrl = require('../config').application.baseUrl
 
 // module js pour enregistrer un authClient auprès du service $auth,
-// on est requis par l'appli au configure (src/index.js) qui nous passe les services dont on a besoin
+/**
+ * Enregistre un authClient auprès du service $auth
+ * Requis par l'appli au configure (src/index.js), qui passe les services utiles
+ * (mais on est pas un service lassi, juste un module js classique)
+ *
+ * @param authServerName
+ * @param $sesalabSsoClient
+ * @param $auth
+ * @param $accessControl
+ * @param $page
+ */
 module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessControl, $page) {
   /**
    * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée chez nous

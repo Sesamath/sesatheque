@@ -424,15 +424,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Renvoie true si origine est listé dans les sesalabs en config
-   * @param origine
-   * @returns {boolean}
-   */
-  $accessControl.isSesalab = function (origine) {
-    return config.sesalabs && config.sesalabs.length && config.sesalabs.some((sesalab) => sesalab.baseUrl === origine)
-  }
-
-  /**
    * Retourne la liste de ressources fournie expurgée de celles que l'on a pas le droit de voir
    * @param {Context} context
    * @param {Ressource[]} ressources Liste de ressources
