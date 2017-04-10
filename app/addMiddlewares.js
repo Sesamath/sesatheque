@@ -96,6 +96,8 @@ module.exports = function afterRailSession (rail) {
 
         // sans cela sur l'options du preflight firefox refuse de faire le post (ça répond 'pas de connexion réseau' car xhr.status vaut 0)
         if (req.method === 'OPTIONS' && req.headers['access-control-request-headers']) {
+          // ici, on pourrait filtrer pour n'autoriser que certains header, mais on autorise le navigateur
+          // à nous envoyer ce qu'il veut comme header, au pire on les ignore…
           res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
         } /* */
       } else if (origin.substr(0, 7) === 'file://') {

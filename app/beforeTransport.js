@@ -209,9 +209,6 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param data
    */
   function errorHandler (context, data) {
-    // apparemment y'a des cas où ça boucle…
-    if (context.errorHandled) return log.error(new Error('2e passage dans errorHandler'))
-    context.errorHandled = true
     var reqHttp = getReqHttp(context)
     var isJson = getIsJson(context)
     var isHtml = getIsHtml(context)
@@ -364,6 +361,19 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
    * @param {Object} data
    */
   function beforeTransport (context, data) {
+    log.debug('beforeTransport sur ' + getReqHttp(context))
+    // au cas où deux controleurs veuillent envoyer une réponse, on coupe le 2e tout de suite
+    // (pas la peine d'appeler le transport qui dira que la réponse est déjà partie)
+    if (context.isSent) return log.error(new Error('2e passage dans beforeTransport'))
+    context.isSent = true
+
+    // pour options on fait rien, le middleware CORS gère ça
+    if (context.request.method === 'OPTIONS') {
+      context.status = 200
+      return
+    }
+
+    // gestion d'erreur
     errorHandler(context, data)
 
     // sur les pages html on ajoute les menus

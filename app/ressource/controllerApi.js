@@ -213,17 +213,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Répond sur certaines requetes OPTIONS
-   * @private
-   * @param {Context} context
-   */
-  function optionsOk (context) {
-    log.debug('headers de la requete options', context.request.headers, 'xhr', {max: 5000, indent: 2})
-    // on laisse le middleware CORS faire son boulot
-    context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
-  }
-
-  /**
    * Répond ok pour les options delete
    * @private
    * @param {Context} context
@@ -522,6 +511,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   } /* */
 
   /**
+   * Passe au suivant pour toutes les requetes OPTIONS (traitées par le middleware cors)
+   * @route OPTIONS /api/*
+   */
+  controller.options('*', function (context) {
+    log.debug('headers de la requete options', context.request.headers, 'xhr', {max: 5000, indent: 2})
+    // on laisse le middleware CORS faire son boulot
+    context.next() // ne pas renvoyer de chaîne vide sinon 404
+  })
+
+  /**
    * Retourne l'url d'une baseId
    * @route GET /api/baseId/:id
    */
@@ -814,7 +813,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     else log.error('notifyError', context.post)
     $json.sendOk(context)
   })
-  controller.options('notifyError', optionsOk)
 
   /**
    * Récupère un arbre au format jstree (cf le plugin arbre pour un exemple d'utilisation)
@@ -876,7 +874,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Access-Control-Allow-Methods', 'POST, OPTIONS'
    * @route OPTIONS /api/liste/all
    */
-  controller.options('liste/all', optionsOk)
 
   /**
    * Récupère la liste des ressources d'un groupe
@@ -887,7 +884,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var nom = context.arguments.nom
     grabListe(context, 'groupe/' + nom)
   })
-  controller.options('liste/groupe/:nom', optionsOk)
 
   /**
    * Cherche parmi les ressources du user courant (qui doit être connecté avant)
@@ -907,7 +903,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route OPTIONS /api/liste/perso
    * @param {requeteListe}
    */
-  controller.options('liste/perso', optionsOk)
 
   /**
    * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
@@ -926,7 +921,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    *   Access-Control-Allow-Methods:POST OPTIONS
    * @route OPTIONS /api/liste/prof
    */
-  controller.options('liste/prof', optionsOk)
 
   /**
    * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
@@ -947,7 +941,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    *   Access-Control-Allow-Methods: POST OPTIONS
    * @route OPTIONS /api/liste/public
    */
-  controller.options('liste/public', optionsOk)
 
   /**
    * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|normalized)
@@ -1041,7 +1034,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    *   Access-Control-Allow-Methods:POST OPTIONS
    * @route OPTIONS /api/ressource
    */
-  controller.options('ressource', optionsOk)
 
   /**
    * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
@@ -1109,7 +1101,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    *   Access-Control-Allow-Methods:POST OPTIONS
    * @route OPTIONS /api/ressource/addRelations
    */
-  controller.options('ressource/addRelations', optionsOk)
 }
 
 /**
