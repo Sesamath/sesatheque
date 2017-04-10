@@ -25,7 +25,7 @@ function purge_varnish() {
   # ici exceptionnellement ça nous arrange sans le slash de fin
   local baseUrl=$(node -e "
     const c = require('./' + '$CONFIG')
-    const url = c.application.baseUrl
+    let url = c.application.baseUrl
     if (url.substr(-1) === '/') url = url.substr(0, url.length -1)
     console.log(url)")
   local findOpt=''
