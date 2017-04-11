@@ -157,19 +157,40 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
 
     context.timeout = 3000
-    var pid = $accessControl.getCurrentUserPid(context)
-    // liste des ressources perso
-    var refs = []
-    // liste des sequenceModeles perso
-    var sequenceModeles = []
+    const pid = $accessControl.getCurrentUserPid(context)
+    /**
+     * Liste des ressources perso
+     * @type {Ref[]}
+     */
+    const refs = []
+    /**
+     * liste des sequenceModeles perso
+     * @type {object[]} la liste des objets sequenceModele filés par sésalab (stockés ici dans les parametres de la ressource)
+     */
+    const sequenceModeles = []
+    // on veut remonter le max autorisé par la conf…
+    const nb = configRessource.limites.listeMax
     if (pid) {
       flow().seq(function () {
-        $ressourceRepository.getListe('all', {filters: [{index: 'auteurs', values: [pid]}]}, this)
+        $ressourceRepository.getListe('all', {filters: [{index: 'auteurs', values: [pid]}], nb}, this)
       }).seq(function (ressources) {
-        if (ressources.length) addRefs(ressources, 'WD')
-        $ressourceRepository.getListe('all', {filters: [{index: 'contributeurs', values: [pid]}]}, this)
+        if (ressources.length) {
+          addRefs(ressources, 'WD')
+          if (ressources.length === nb) {
+            log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb}, auteur)`)
+            refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources dont l’auteur est ${pid})`}))
+          }
+        }
+        $ressourceRepository.getListe('all', {filters: [{index: 'contributeurs', values: [pid]}], nb}, this)
       }).seq(function (ressources) {
-        if (ressources.length) addRefs(ressources, 'W')
+        if (ressources.length) {
+          addRefs(ressources, 'W')
+          if (ressources.length === nb) {
+            // @todo gérer un "ajouter nb ressources", ou un filtre…
+            log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb}, contributeur)`)
+            refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources avec ${pid} en contributeur)`}))
+          }
+        }
         $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
       }).catch(function (error) {
         $json.sendError(context, error)

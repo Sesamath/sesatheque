@@ -61,7 +61,7 @@ const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 const $ressourceRepository = {}
 
 module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
-  const limitMax = config.limites.maxSql || 100 // on appliquera toujours un limit inférieur à cette valeur
+  const listeMax = config.limites.listeMax || 100 // on appliquera toujours un limit inférieur à cette valeur
   const listeNbDefault = config.limites.listeNbDefault || 10
 
   /**
@@ -578,9 +578,9 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       if (options.order === 'desc') optionsSafe.order = 'desc'
       start = parseInt(options.start, 10) || 0
       nb = parseInt(options.nb, 10) || listeNbDefault
-      if (nb > limitMax) {
-        log.error(new Error('nb de résultats demandés supérieur à la limite max ' + nb + '>' + limitMax))
-        nb = limitMax
+      if (nb > listeMax) {
+        log.error(new Error('nb de résultats demandés supérieur à la limite max ' + nb + '>' + listeMax))
+        nb = listeMax
       }
       // le format est géré par le controleur
 
