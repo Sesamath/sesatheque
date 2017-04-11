@@ -29,9 +29,12 @@
  * pour une explication en français)
  */
 'use strict'
+const uuid = require('an-uuid')
+
 const tools = require('../tools')
 const Ressource = require('../constructors/Ressource')
-const sesatheques = require('sesatheque-client/src/sesatheques.js')
+const {getBaseIdFromRid} = require('sesatheque-client/src/sesatheques.js')
+
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
@@ -84,7 +87,7 @@ module.exports = function (EntityRessource) {
     .defineIndex('rid', 'string')
     // baseId n'est pas une propriété de Ressource mais ça nous intéresse de connaître la provenance
     .defineIndex('baseId', 'string', function () {
-      if (this.rid) return sesatheques.getBaseIdFromRid(this.rid)
+      if (this.rid) return getBaseIdFromRid(this.rid)
     })
     .defineIndex('aliasOf', 'string')
     .defineIndex('origine', 'string')
@@ -144,8 +147,60 @@ module.exports = function (EntityRessource) {
     .defineIndex('dateCreation', 'date')
     .defineIndex('dateMiseAJour', 'date')
 
-  // beforeStore est dans $ressourceRepository, historiquement,
-  // pour des questions de cycle d'injection de dépendances
+  // beforeStore était dans $ressourceRepository, pour des questions de cycle d'injection de dépendances
+  // on le ramène ici pour vérifier l'intégrité "interne" de l'entity, en laissant là-bas un beforeSave
+  // pour vérifier l'intégrité des relations
+
+  EntityRessource.beforeStore(function (next) {
+    // pour les messages d'erreur
+    const id = this.oid ||
+        this.rid ||
+        (this.origine && this.idOrigine && `${this.origine}/${this.idOrigine}`) ||
+        this.titre
+
+    // check origine et idOrigine
+    if (this.origine) {
+      if (this.origine === myBaseId) {
+        if (!this.idOrigine && this.oid) this.idOrigine = this.oid
+        // sinon faudra le mettre en afterStore
+      } else if (!this.idOrigine) {
+        return next(new Error('origine sans idOrigine'))
+      }
+    } else {
+      // on pourrait mettre une origine myBaseId ici, mais c'est le boulot du contrôleur
+      return next(new Error('propriété origine obligatoire'))
+    }
+
+    // check rid
+    if (this.rid) {
+      const baseId = getBaseIdFromRid(this.rid)
+      if (baseId !== myBaseId) return next(new Error('rid invalide (baseId incorrecte)'))
+    } else if (this.oid) {
+      this.rid = myBaseId + '/' + this.oid
+    }
+    // check aliasOf
+    if (this.aliasOf) {
+      // peu importe la base, on veut juste un check
+      getBaseIdFromRid(this.aliasOf)
+    }
+    // on vire un éventuel token
+    if (this.token) delete this.token
+    // on génère la clé si elle manque
+    if (this.restriction && !this.cle) {
+      this.cle = uuid()
+    }
+    // date de mise à jour
+    this.dateMiseAJour = new Date()
+    // cohérence de la restriction
+    if (this.restriction === configRessource.constantes.restriction.groupe && (!this.groupes || !this.groupes.length)) {
+      log.dataError(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
+      this.restriction = configRessource.constantes.restriction.prive
+    }
+    // check des relations dans beforeSave mais pas ici (pour permettre des batch qui sauvent
+    // des paires liées par ex, la 1re a pas encore sa relation en base)
+
+    next(null, this)
+  })
 
   // met en idOrigine l'oid de la ressource si origine locale et que ça n'y était pas encore
   // idem pour rid

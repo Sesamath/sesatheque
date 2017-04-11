@@ -146,28 +146,33 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           else log.dataError('sequenceModele sans parametres', ressource)
         } else {
           const ref = new Ref(ressource)
-          if (ref.aliasOf && ref.titre && ref.type && (ref.public || ref.cle)) {
+          const isReadable = ref.public || ref.cle
+          if (ref.aliasOf && ref.titre && ref.type && isReadable) {
             if (droits) ref.$droits = droits
             refs.push(ref)
+          } else if (!isReadable) {
+            log.dataError('ressource privée sans clé, pas utilisable pour sesalab', ressource)
           } else {
-            log.dataError('ressource pas utilisable pour sesalab', ressource)
+            log.dataError('ressource incomplète, pas utilisable pour sesalab', ressource)
           }
         }
       })
     }
 
     context.timeout = 3000
-    var pid = $accessControl.getCurrentUserPid(context)
+    const pid = $accessControl.getCurrentUserPid(context)
     // liste des ressources perso
-    var refs = []
+    const refs = []
     // liste des sequenceModeles perso
-    var sequenceModeles = []
+    const sequenceModeles = []
     if (pid) {
+      // la visibilité, c'est pour cet auteur,
+      const visibility = 'auteur/' + pid
       flow().seq(function () {
-        $ressourceRepository.getListe('all', {filters: [{index: 'auteurs', values: [pid]}]}, this)
+        $ressourceRepository.getListe(visibility, {filters: [{index: 'auteurs', values: [pid]}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'WD')
-        $ressourceRepository.getListe('all', {filters: [{index: 'contributeurs', values: [pid]}]}, this)
+        $ressourceRepository.getListe(visibility, {filters: [{index: 'contributeurs', values: [pid]}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'W')
         $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
@@ -599,56 +604,45 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /api/externalClone/:baseId/:oid
    */
   controller.get('externalClone/:baseId/:oid', function (context) {
-    /**
-     * Ajoute $droits et envoie
-     * @private
-     * @param item
-     */
-    function sendItem (item) {
-      item.$droits = 'D'
-      // modif autorisée sur les ressources éditables seulement (qui deviendront à l'édition des ressources dérivées)
-      if (configRessource.editable[item.type]) item.$droits += 'W'
-      $json.send(context, null, item)
-    }
-
     const oid = context.arguments.oid
     const baseIdOrigine = context.arguments.baseId
-    try {
+    const pid = $accessControl.getCurrentUserPid(context)
+    flow().seq(function () {
+      if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
       const baseUrl = getBaseUrl(baseIdOrigine)
       // si on est là c'est une baseId connue de sesatheque-client,
       // mais ça suffit pas pour qu'on la référence
-      if (!config.sesathequesById[baseIdOrigine]) throw new Error(`Sésathèque ${baseIdOrigine} connue (${baseUrl}) mais pas déclarée comme source possible de cette sésathèque`)
-      var pid = $accessControl.getCurrentUserPid(context)
-      if (!pid) throw new Error('Vous devez être authentifié pour créer une ressource')
+      if (!config.sesathequesById[baseIdOrigine]) return this(new Error(`Sésathèque ${baseIdOrigine} connue (${baseUrl}) mais pas déclarée comme source possible de cette sésathèque`))
       // on peut aller chercher la ressource
-      $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, function (error, ressource) {
-        try {
-          log.debug('externalClone a récupéré la ressource', ressource, 'clone', { max: 5000, indent: 2 })
-          if (error) return $json.sendError(context, error.toString())
-          // on passe par Ref pour filtrer ce qu'on garde (seulement ce que ref utilise pour un alias)
-          const aliasData = new Ref(ressource)
-          // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
-          aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
-          aliasData.auteurs = [ pid ]
-          aliasData.origine = config.application.baseId
-          aliasData.dateCreation = new Date()
-          aliasData.publie = true
-          aliasData.restriction = configRessource.constantes.restriction.prive
-          // ajouter la relation
-          aliasData.relations = ressource.relations = []
-          aliasData.relations.push([ configRessource.constantes.relations.estVersionDe, aliasData.aliasOf ])
-          EntityRessource.create(aliasData).store(function (error, ressAlias) {
-            if (error) return $json.sendError(context, error)
-            if (ressAlias) return sendItem(new Ref(ressAlias))
-            $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
-          })
-        } catch (error) {
-          $json.sendError(context, error.toString())
-        }
-      })
-    } catch (error) {
+      $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, this)
+    }).seq(function (ressource) {
+      log.debug('externalClone a récupéré la ressource', ressource, 'clone', { max: 5000, indent: 2 })
+      // on passe par Ref pour filtrer ce qu'on garde (seulement ce que ref utilise pour un alias)
+      const aliasData = new Ref(ressource)
+      // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
+      aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
+      aliasData.auteurs = [ pid ]
+      aliasData.origine = config.application.baseId
+      aliasData.dateCreation = new Date()
+      aliasData.publie = true
+      aliasData.restriction = configRessource.constantes.restriction.prive
+      // ajouter la relation
+      aliasData.relations = ressource.relations = []
+      aliasData.relations.push([ configRessource.constantes.relations.assocA, aliasData.aliasOf ])
+      // pas besoin de $ressourceRepository.save ici
+      EntityRessource.create(aliasData).store(this)
+    }).seq(function (ressAlias) {
+      const refAlias = new Ref(ressAlias)
+      if (!refAlias.cle) log.dataError('alias privé sans clé', ressAlias)
+      // le user courant peut toujours effacer l'alias
+      refAlias.$droits = 'D'
+      // modif autorisée sur les ressources éditables seulement
+      // (qui deviendront à l'édition des ressources dérivées et plus des alias)
+      if (configRessource.editable[refAlias.type]) refAlias.$droits += 'W'
+      $json.send(context, null, refAlias)
+    }).catch(function (error) {
       $json.sendError(context, error.toString())
-    }
+    })
   })
 
   /**

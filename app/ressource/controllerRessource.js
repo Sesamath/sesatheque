@@ -774,8 +774,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           $ressourceRepository.getListe(visibilite, options, function (error, ressources, nbTotal) {
             var data = $ressourcePage.getDefaultData('liste')
             data.$metas.title = 'Résultats de la recherche'
-            log.debug('liste avec les options', options)
-            log.debug('qui remonte', ressources)
             if (error) {
               log.error(error)
               data.contentBloc.error = error.toString()

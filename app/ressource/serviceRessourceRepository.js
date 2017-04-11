@@ -36,8 +36,7 @@ const uuid = require('an-uuid')
 const elementtree = require('elementtree')
 const _ = require('lodash')
 const request = require('request')
-const sesatheques = require('sesatheque-client/src/sesatheques.js')
-const {getBaseIdFromRid} = sesatheques
+const {exists} = require('sesatheque-client/src/sesatheques.js')
 const config = require('./config')
 const appConfig = require('../config')
 
@@ -65,82 +64,17 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   const listeNbDefault = config.limites.listeNbDefault || 10
 
   /**
-   * Fait un peu de nettoyage avant d'enregistrer en base de données
+   * Nettoie les relations (helper de save, en complément de beforeStore)
    * @private
-   * @param ressource
-   * @param next
-   */
-  function beforeStore (ressource, next) {
-    if (ressource) {
-      // pour les messages d'erreur
-      const id = ressource.oid || (ressource.origine && ressource.origine + ressource.idOrigine) || ressource.titre
-
-      // bizarre, parfois errors est un object, on cherche à savoir d'où ça vient
-      if (ressource._errors && !Array.isArray(ressource._errors)) {
-        return next(new Error(`ressource._errors n'est pas un array ${typeof ressource._errors}`), ressource._errors)
-      }
-      // check origine et idOrigine
-      if (ressource.origine) {
-        if (ressource.origine === myBaseId) {
-          if (!ressource.idOrigine && ressource.oid) ressource.idOrigine = ressource.oid
-          // sinon faudra le mettre en afterStore
-        } else if (!ressource.idOrigine) {
-          return next(new Error('origine sans idOrigine'))
-        }
-      } else {
-        // on pourrait mettre une origine myBaseId ici, mais c'est le boulot du contrôleur
-        return next(new Error('propriété origine obligatoire'))
-      }
-      // check rid
-      if (ressource.rid) {
-        if (getBaseIdFromRid(ressource.rid) !== myBaseId) throw new Error('rid invalide (baseId incorrecte)')
-        else if (ressource.oid) ressource.rid = myBaseId + '/' + ressource.oid
-      }
-      // check aliasOf
-      if (ressource.aliasOf) {
-        // peu importe la base, on veut juste le check
-        getBaseIdFromRid(ressource.aliasOf)
-      }
-      // on vire un éventuel token
-      if (ressource.token) delete ressource.token
-      // on génère la clé si elle manque
-      if (ressource.restriction && !ressource.cle) {
-        ressource.cle = uuid()
-      }
-      // date de mise à jour
-      ressource.dateMiseAJour = new Date()
-      // cohérence de la restriction
-      if (ressource.restriction === config.constantes.restriction.groupe && _.isEmpty(ressource.groupes)) {
-        log.error(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
-        ressource.restriction = config.constantes.restriction.prive
-      }
-      // check des relations
-      if (ressource.relations && ressource.relations.length) {
-        checkRelations(ressource.relations, id, function (error, relations) {
-          if (error) return next(error)
-          ressource.relations = relations
-          next(null, ressource)
-        })
-      } else {
-        next(null, ressource)
-      }
-    } else {
-      next(new Error("beforeStore n'a pas reçu de ressource"))
-    }
-  }
-
-  /**
-   * Nettoie les relations (helper de beforeStore)
-   * @private
-   * @param {Array} relations
-   * @param {string|number} id identifiant de la ressource pour l'ajouter aux messages d'erreur
+   * @param {Ressource} ressource
    * @param {function} next
    */
-  function checkRelations (relations, id, next) {
-    const cleanRelations = relations
+  function beforeSave (ressource, next) {
+    const id = ressource.oid || ressource.rid || ressource.titre
+    const cleanRelations = ressource.relations
       .filter(relation => Array.isArray(relation) && relation.length === 2 && config.listes.relations[relation[0]])
       .map(relation => [Number(relation[0]), String(relation[1])])
-    if (cleanRelations.length < relations.length) log.dataError(`Il y avait une relation invalide dans ${id}`, relations)
+
     // le format est bon (typeRel connu), reste à voir si on a des cibles sous la forme origine/idOrigine
     // et ajouter éventuellement baseId pour avoir un rid valide
     if (cleanRelations.length) {
@@ -169,7 +103,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
             })
 
           // ailleurs, on fait confiance et une tâche en cli vérifiera de tps en tps
-          } else if (sesatheques.exists(debut)) {
+          } else if (exists(debut)) {
             nextRelation(null, relation)
 
           // debut devrait être une origine, on vérifie que la ressource existe
@@ -195,11 +129,18 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           if (isOk) acc[key] = true
           return isOk
         })
-        if (checkedRelations.length < relations.length) log.dataError('Il y avait des relations en double (ou invalides) dans ' + id)
-        next(null, checkedRelations)
+        const perte = ressource.relations.length - checkedRelations.length
+        const s = perte > 1 ? 's' : ''
+        if (perte) {
+          log.dataError(`Il y avait ${perte} relation${s} en double (ou invalide${s}) dans ${id}`, relations)
+          ressource.relations = checkedRelations
+        }
+
+        next(null, ressource)
       }).catch(next)
     } else {
-      next(null, [])
+      ressource.relations = []
+      next(null, ressource)
     }
   }
 
@@ -210,7 +151,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {Ressource} ressource
    */
   function majArbres (ressource) {
-    const ridOrig = ressource.rid
     // cherche un enfant et le modifie si besoin, retourne true si on a fait une modif
     function findChild (arbre, rid) {
       let modif
@@ -286,28 +226,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           log.debug('purge ' + url + ' ' + (response && response.statusCode))
         })
       })
-    }
-  }
-
-  /**
-   * Renvoie un Alias à une ressource (le controleur devra ajouter le userOid)
-   * @memberOf $ressourceConverter
-   * @param {Ressource} ressource
-   * @return {object}
-   */
-  function toAlias (ressource) {
-    if (!ressource.oid) throw new Error('Impossible de convertir en alias une ressource sans oid')
-    // c'est déjà un alias ?
-    if (ressource.aliasOf) return ressource
-    // on vérifie quand même ça
-    if (ressource.baseId && ressource.baseId !== config.application.baseId) log.dataError('ressource sans ref avec baseId externe', ressource)
-    return {
-      aliasOf: ressource.oid,
-      baseId: config.application.baseId,
-      titre: ressource.titre,
-      type: ressource.type,
-      resume: ressource.resume,
-      description: ressource.description
     }
   }
 
@@ -552,7 +470,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   $ressourceRepository.getListe = function getListe (visibilite, options, next) {
     try {
-      log.debug('getListe avec visibilite : ' + visibilite, options, next)
+      log.debug(`getListe avec visibility=${visibilite} et les options`, options)
 
       // avant de construire la query on fait un minimum de vérifications
       let start, nb
@@ -582,6 +500,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         log.error(new Error('nb de résultats demandés supérieur à la limite max ' + nb + '>' + limitMax))
         nb = limitMax
       }
+      log.debug(`getListe démarre ${start} avec max ${nb} et les options valides`, optionsSafe)
       // le format est géré par le controleur
 
       // si on est toujours là on peut construire la requete
@@ -646,6 +565,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         if (ressources.length) cacheAndNext(null, ressources, this)
         else this(null, [])
       }).seq(function (ressources) {
+        log.debug('getListe remonte', ressources)
         next(null, ressources, nbTotal)
       }).catch(next)
     } catch (error) {
@@ -850,7 +770,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
-   * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin)
+   * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin),
+   * met à jour le cache (interne + varnish) et toutes les relations (passe en revue tous les éventuels
+   * arbres qui référencent cette ressource)
+   *
+   * ATTENTION, c'est la seule méthode qui garanti l'intégrité du cache, entityRessource.store()
+   * utilisé directement peut être plus efficace pour du batch, mais faut y réfléchir à deux fois !
    * @memberOf $ressourceRepository
    * @param {EntityRessource}   ressource
    * @param {ressourceCallback} [next]    appelée avec une EntityRessource
@@ -868,22 +793,23 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         convertXmlJ3p(ressource)
         log.debug('ressource j3p après conversion avant write', ressource)
       }
-      beforeStore(ressource, this)
-    }).seq(function (ressource) {
       log.debug('on va enregistrer ' + ressource.origine + '/' + ressource.idOrigine, ressource, 'avirer', {max: 10000})
+      beforeSave(ressource, this)
+    }).seq(function (ressource) {
       ressource.store(this)
     }).seq(function (ressource) {
-      // mise en cache (pas possible en afterStore car le cache dépend de l'entité), purge varnish et passage au suivant
-      if (ressource.oid) {
-        $cacheRessource.set(ressource)
-        purgeVarnish(ressource)
-        majArbres(ressource)
-        log.debug('write ' + ressource.oid + ' ok')
-        if (next) next(null, ressource)
-      } else {
-        this(new Error("Après un write la ressource n'a toujours pas d'oid"))
-      }
+      if (!ressource.oid) throw new Error('Après un write la ressource n’a pas d’oid')
+      // mise en cache, purge varnish et passage au suivant
+      // gestion du cache pas possible en afterStore car le cache dépend de l'entité.
+      // C'est aussi plus logique que $ressourceRepository gère cache + intégrité croisée des données,
+      // et le gestionnaire d'entité seulement l'intégrité interne des données d'une entité
+      $cacheRessource.set(ressource)
+      purgeVarnish(ressource)
+      majArbres(ressource)
+      log.debug('write ' + ressource.oid + ' ok')
+      if (next) next(null, ressource)
     }).catch(function (error) {
+      // on log toujours ici
       log.error(error)
       if (next) next(error)
     })
