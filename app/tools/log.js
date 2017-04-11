@@ -116,54 +116,55 @@ function getPrefix () {
 /**
  * Formate le message et l'envoie dans un log ou en console (si stream est null)
  * @private
- * @param {string|object} message
- * @param {Object}        [objectToDump] Un objet éventuel (qui sera rendu en json avec indentation de n si options.indent=n)
- * @param {string}        filter         Un nom de filtre pour exclusion éventuelle
- * @param {writeStream}   stream         stream vers le fichier de log
- * @param {Object}        [options]      Passer une propriété
- *                                          indent pour indenter objectToDump du nombre d'espaces demandés,
- *                                          max pour modifier la limite de la sortie (200 par défaut)
+ * @param {string|Error} message
+ * @param {Object}       [objectToDump] Un objet éventuel (qui sera rendu en json avec indentation de n si options.indent=n)
+ * @param {string}       filter         Un nom de filtre pour exclusion éventuelle
+ * @param {writeStream}  stream         stream vers le fichier de log
+ * @param {Object}       [options]      Passer une propriété
+ *                                        indent pour indenter objectToDump du nombre d'espaces demandés,
+ *                                        max pour modifier la limite de la sortie (200 par défaut)
  */
 function out (message, objectToDump, filter, stream, options) {
   if (!options) options = {}
   if (!filter || !exclusions[filter]) {
+    let msg // le message qu'on enverra en console
     // si erreur on veut toute la pile, qui contient aussi message.toString() en 1er
     if (message instanceof Error) {
-      message = message.stack + '\n'
-    } else if (message && typeof message !== 'string') {
-      var msg = message.toString()
-      if (msg.indexOf('[object') === 0) {
-        // y'a eu un pb avant l'appel de cette fct, on génère une erreur pour récupérer la pile d'appel
-        try {
-          throw new Error('erreur inconnue passé à log')
-        } catch (error) {
-          message = error.stack
-        }
-      } else {
-        message = msg
+      if (message.logged) return // déjà traité précédemment
+      message.logged = true
+      msg = message.stack + '\n'
+    } else if (typeof message === 'string') {
+      msg = message
+    } else {
+      // y'a eu un pb avant l'appel de cette fct, on génère une erreur pour récupérer la pile d'appel
+      try {
+        throw new Error('erreur inconnue passé à log')
+      } catch (error) {
+        msg = error.stack + '\n'
       }
     }
     if (objectToDump) {
       if (objectToDump instanceof Error) {
-        message += '\n' + objectToDump.stack + '\n'
+        msg += '\n' + objectToDump.stack + '\n'
       } else if (typeof objectToDump === 'function') {
-        message += '\n' + objectToDump.toString() + '\n'
+        msg += '\n' + objectToDump.toString() + '\n'
       } else {
         var dump = sjt.stringify(objectToDump, options.indent)
         if (dump) {
           var max = options && options.max || 200
           if (dump.length > max) dump = dump.substr(0, max) + '…'
-          message += '\n' + dump + '\n'
+          msg += '\n' + dump + '\n'
         } else {
           console.error('pb dans log, objectToDump existe mais donne undefined', objectToDump)
         }
       }
     }
-    message = getPrefix() + message
-    if (stream) stream.write(message + '\n')
-    else console.log(message)
+    msg = getPrefix() + msg
+    if (stream) stream.write(msg + '\n')
+    else console.log(msg)
   }
 }
+
 // log
 if (env === 'prod') {
   global.log = function () { } // jshint ignore:line
