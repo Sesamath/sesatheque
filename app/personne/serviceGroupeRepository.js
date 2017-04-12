@@ -141,31 +141,32 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
       log.error(error)
       return next(error)
     }
+    const nom = groupName.toLowerCase()
     // on ne peut pas le mettre en dépendance du controleur, car il est déclaré après nous
     var $ressourceRepository = lassi.service('$ressourceRepository')
     var $personneRepository = lassi.service('$personneRepository')
     // on efface d'abord le groupe des ressources
     flow().seq(function () {
       // log.debug('début suppression du groupe ' + groupName)
-      $ressourceRepository.getListe('groupe/' + groupName, {}, this)
+      $ressourceRepository.getListe('groupe/' + nom, {}, this)
     }).seqEach(function (ressource) {
       // log.debug('suppression de groupe, avec la ressource', ressource)
-      ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== groupName)
+      ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== nom)
       $ressourceRepository.save(ressource, this)
     }).seq(function () {
       // log.debug('suppression de groupe, personnes')
-      $personneRepository.removeGroup(groupName, this)
+      $personneRepository.removeGroup(nom, this)
     }).seq(function () {
       // log.debug('suppression de groupe, groupe')
       // on peut effacer le groupe, au cas où y'en aurait plusieurs du même nom on les cherche tous
-      EntityGroupe.match('nom').equals(groupName).grab(function (error, groups) {
+      EntityGroupe.match('nom').equals(nom).grab(function (error, groups) {
         if (error) return next(error)
         if (groups.length === 0) {
-          var error2 = new Error('Il y a aucun groupe ' + groupName)
+          var error2 = new Error('Il y a aucun groupe ' + nom)
           log.error(error2)
           return next(error2)
         }
-        if (groups.length > 1) log.error(new Error('Il y a ' + groups.length + ' groupes ' + groupName))
+        if (groups.length > 1) log.error(new Error('Il y a ' + groups.length + ' groupes ' + nom))
         flow(groups).seqEach(function (group) {
           var nextGroup = this
           group.delete(function (error) {
@@ -175,7 +176,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
         }).seq(function () {
           // afterStore n'est pas appelé sur un delete, faut gérer le cache
           // mais lui on est sûr qu'il est en un seul exemplaire car il utilise le nom comme clé
-          $cacheGroupe.delete(groupName, function (error) {
+          $cacheGroupe.delete(nom, function (error) {
             if (error) log.error(error)
             // on fait pas suivre l'erreur car y'en a pas eu à la suppression en bdd
             next()
