@@ -73,7 +73,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
       log.perf(context.response, msg)
     }
     if ($accessControl.hasGenericPermission('createGroupe', context)) {
-      var nom = context.arguments.nom
+      var nom = context.arguments.nom.toLowerCase()
       $groupeRepository.load(nom, function (error, groupeBdd) {
         if (error) {
           $json.sendError(context, new Error('Erreur interne (impossible de vérifier l’existence préalable du groupe)'))
@@ -111,7 +111,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    * @route GET /api/groupe/ignorer/:nom
    */
   controller.get('ignorer/:nom', function (context) {
-    var nom = context.arguments.nom
+    var nom = context.arguments.nom.toLowerCase()
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
@@ -130,7 +130,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    * @route GET /groupe/quitter/:nom
    */
   controller.get('quitter/:nom', function (context) {
-    var nom = context.arguments.nom
+    var nom = context.arguments.nom.toLowerCase()
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
