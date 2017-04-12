@@ -45,6 +45,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
   EntityGroupe.table = 'groupe'
 
   EntityGroupe.beforeStore(function (next) {
+    this.nom = this.nom.toLowerCase()
     if (!this.creationDate) this.creationDate = new Date()
     next()
   })

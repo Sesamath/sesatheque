@@ -51,7 +51,8 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
   })
 
   /**
-   * Renvoie une ressource récupérée ailleurs (sans son oid pour éviter les accidents)
+   * Renvoie une ressource récupérée ailleurs ou ici
+   * (Avec oid, attention à ne pas la sauvegarder localement si elle vient d'ailleurs !)
    * @memberOf $ressourceFetch
    * @param {string} rid (une string baseId/origine/idOrigine marche aussi)
    * @param {ressourceCallback} next (renvoie une EntityRessource si c'est local et ses propriétés sinon)
@@ -123,8 +124,8 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
   }
 
   /**
-   * Renvoie une ressource originale récupérée ailleurs (sans son oid pour éviter les accidents),
-   * fait une 2e requête si aliasOf est lui-même un alias mais passe une erreur si la 2e est encore un alias
+   * Renvoie une ressource originale récupérée ici ou ailleurs.
+   * Fait une 2e requête si aliasOf est lui-même un alias mais passe une erreur si la 2e est encore un alias
    * @memberOf $ressourceFetch
    * @param {string} aliasOf
    * @param {ressourceCallback} next

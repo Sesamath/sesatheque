@@ -47,13 +47,14 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
    * @memberOf $groupeRepository
    */
   $groupeRepository.load = function (groupeNom, next) {
-    $cacheGroupe.get(groupeNom, function (error, groupe) {
+    const nom = groupeNom.toLowerCase()
+    $cacheGroupe.get(nom, function (error, groupe) {
       if (error) log.error(error)
       if (groupe) {
         next(null, groupe)
       } else {
         // pas en cache, on va chercher en bdd
-        EntityGroupe.match('nom').equals(groupeNom).grabOne(function (error, groupe) {
+        EntityGroupe.match('nom').equals(nom).grabOne(function (error, groupe) {
           if (error) {
             next(error)
           } else if (groupe) {

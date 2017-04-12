@@ -178,8 +178,6 @@ module.exports = function display (ressource, options, next) {
       // l'arbre
       var treeId = dom.getNewId()
       dom.addElement(caseTree, 'div', { id: treeId })
-      // on ajoute la sesatheque si elle est inconnue
-      if (ressource.baseId && ressource.baseUrl && !stExists(ressource.baseId)) addSesatheque(ressource.baseId, ressource.baseUrl)
 
       var jstData = {
         'core': {

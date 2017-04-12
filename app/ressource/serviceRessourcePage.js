@@ -31,18 +31,18 @@
 
 'use strict'
 
-var _ = require('lodash')
-var sjt = require('sesajstools')
-var sjtObj = require('sesajstools/utils/object')
-var flow = require('an-flow')
-var moment = require('moment')
+const _ = require('lodash')
+const sjt = require('sesajstools')
+const sjtObj = require('sesajstools/utils/object')
+const flow = require('an-flow')
+const moment = require('moment')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
-var ressConfig = require('./config')
-var appConfig = require('../config')
-var sesatheques = require('sesatheque-client/src/sesatheques.js')
+const ressConfig = require('./config')
+const appConfig = require('../config')
+const {getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques.js')
 
-module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) {
+module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) {
   /**
    * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
    * @service $ressourcePage
@@ -210,9 +210,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     data.contentBloc.baseId = appConfig.application.baseId
     data.contentBloc.sesatheques = appConfig.sesatheques
     if (ressource) {
-      // on ajoute notre base
-      ressource.baseId = appConfig.application.baseId
-      ressource.baseUrl = appConfig.application.baseUrl
       // une string pour que dust le mette dans le source
       data.contentBloc.ressource = sjt.stringify(ressource)
     }
@@ -320,31 +317,27 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         nextComplement()
       } else {
         log.debug('faut ajouter des titres de relations', ressource.relations)
-        var fluxRelations = flow(ressource.relations)
-        fluxRelations.seqEach(function (relation) {
-          var nextRelation = this
-          $ressourceRepository.load(relation[1], function (error, ressourceLiee) {
+        flow(ressource.relations).seqEach(function ([relationId, relationTarget]) {
+          const nextRelation = this
+          $ressourceFetch.fetch(relationTarget, function (error, ressourceLiee) {
             if (error) {
               log.error(error)
             } else if (ressourceLiee) {
               ressource._relations.push({
-                predicat: ressConfig.listes.relations[relation[0]],
+                predicat: ressConfig.listes.relations[relationId],
                 lien: $routes.getTagA('describe', ressourceLiee),
-                oid: ressourceLiee.oid,
+                rid: ressourceLiee.rid,
                 type: ressourceLiee.type
               })
             } else {
-              log.dataError('la ressource ' + ressource.oid + ' est liée à ' + relation[1] + ' qui n’existe pas')
+              log.dataError(`la ressource ${ressource.oid} est liée à ${relationTarget} qui n’existe pas`)
             }
             nextRelation()
           })
-        })
-        // on a tout chargé
-        fluxRelations.seq(function () {
-          log.debug('on a ajouté les titres des relations', ressource._relations)
+        }).seq(function () {
+          // log.debug('on a ajouté les titres des relations', ressource._relations)
           nextComplement()
-        })
-        fluxRelations.catch(function (e) {
+        }).catch(function (e) {
           log.error(e)
           nextComplement()
         })
@@ -531,7 +524,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           // rien, déjà traité avec les groupes
           log.debug('groupes dans getFormViewData', formData.groupes, 'form', {max: 1000})
           labelSuivant()
-        } else if (key === 'auteurs' || key === 'contributeurs') {
+        } else if (key === 'auteurs' || key === 'contributeurs' || key === 'auteursParents') {
           addPersonnes(context, formData, key, value, labelSuivant)
         } else {
           log.error(new Error('On tombe sur la clé inattendue ' + key))
@@ -808,8 +801,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               var enfantsDescribe = []
               ressource.enfants.forEach(function (enfant) {
                 try {
-                  const [ baseId, id ] = sesatheques.getRidComponents(enfant.aliasOf)
-                  const url = sesatheques.getBaseUrl(baseId) + $routes.getAbs('describe', id)
+                  const [ baseId, id ] = getRidComponents(enfant.aliasOf)
+                  const url = getBaseUrl(baseId) + $routes.getAbs('describe', id)
                   enfantsDescribe.push({
                     oid: id,
                     titre: enfant.titre,

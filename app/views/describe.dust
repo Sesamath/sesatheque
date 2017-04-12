@@ -52,7 +52,7 @@
 
     {?relations.value}
         <ul>{relations.title}
-            {#relations.value}<li>{predicat} {lien|s} ({oid})</li>{/relations.value}
+            {#relations.value}<li>{predicat} {lien|s} ({rid})</li>{/relations.value}
         </ul>
     {/relations.value}
 

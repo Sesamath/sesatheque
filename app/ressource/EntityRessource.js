@@ -33,7 +33,7 @@ const uuid = require('an-uuid')
 
 const tools = require('../tools')
 const Ressource = require('../constructors/Ressource')
-const {getBaseIdFromRid} = require('sesatheque-client/src/sesatheques.js')
+const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques.js')
 
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
@@ -152,54 +152,80 @@ module.exports = function (EntityRessource) {
   // pour vérifier l'intégrité des relations
 
   EntityRessource.beforeStore(function (next) {
-    // pour les messages d'erreur
-    const id = this.oid ||
+    try {
+      // pour les messages d'erreur
+      const id = this.oid ||
         this.rid ||
         (this.origine && this.idOrigine && `${this.origine}/${this.idOrigine}`) ||
         this.titre
 
-    // check origine et idOrigine
-    if (this.origine) {
-      if (this.origine === myBaseId) {
-        if (!this.idOrigine && this.oid) this.idOrigine = this.oid
-        // sinon faudra le mettre en afterStore
-      } else if (!this.idOrigine) {
-        return next(new Error('origine sans idOrigine'))
+      // check origine et idOrigine
+      if (this.origine) {
+        if (this.origine === myBaseId) {
+          // on vérifie la cohérence oid = idOrigine
+          if (this.idOrigine && this.oid) {
+            if (this.oid !== this.idOrigine) {
+              throw new Error(`Resssource incohérente (oid ${this.oid} avec origine ${this.origine} et idOrigine ${this.idOrigine})`)
+            }
+            // sinon tout est normal
+          } else if (this.oid) {
+            this.idOrigine = this.oid
+          } else if (this.idOrigine) {
+            this.oid = this.idOrigine
+          }
+          // sinon ni l'un ni l'autre, faudra le mettre en afterStore
+        } else if (this.idOrigine) {
+          // on vérifie qu'on essaie pas d'enregistrer localement une ressource qui viendrait d'ailleurs
+          if (this.oid && this.idOrigine === this.oid) throw new Error(`Cette ressource ${this.origine}/${this.idOrigine}) devrait être enregistrée sur ${this.origine}`)
+        } else {
+          return next(new Error('origine sans idOrigine'))
+        }
+      } else {
+        // on pourrait mettre d'office une origine myBaseId ici, mais c'est le boulot du contrôleur
+        // ça pourrait masquer une vraie erreur d'aiguillage
+        return next(new Error('propriété origine obligatoire'))
       }
-    } else {
-      // on pourrait mettre une origine myBaseId ici, mais c'est le boulot du contrôleur
-      return next(new Error('propriété origine obligatoire'))
-    }
 
-    // check rid
-    if (this.rid) {
-      const baseId = getBaseIdFromRid(this.rid)
-      if (baseId !== myBaseId) return next(new Error('rid invalide (baseId incorrecte)'))
-    } else if (this.oid) {
-      this.rid = myBaseId + '/' + this.oid
-    }
-    // check aliasOf
-    if (this.aliasOf) {
-      // peu importe la base, on veut juste un check
-      getBaseIdFromRid(this.aliasOf)
-    }
-    // on vire un éventuel token
-    if (this.token) delete this.token
-    // on génère la clé si elle manque
-    if (this.restriction && !this.cle) {
-      this.cle = uuid()
-    }
-    // date de mise à jour
-    this.dateMiseAJour = new Date()
-    // cohérence de la restriction
-    if (this.restriction === configRessource.constantes.restriction.groupe && (!this.groupes || !this.groupes.length)) {
-      log.dataError(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
-      this.restriction = configRessource.constantes.restriction.prive
-    }
-    // check des relations dans beforeSave mais pas ici (pour permettre des batch qui sauvent
-    // des paires liées par ex, la 1re a pas encore sa relation en base)
+      // check rid
+      if (this.rid) {
+        const [baseId, oid] = getRidComponents(this.rid)
+        if (baseId === myBaseId) {
+          if (!this.oid) this.oid = oid
+          else if (this.oid != oid) throw new Error('oid et rid incohérents') // eslint-disable-line eqeqeq
+          if (this.origine && this.origine !== myBaseId) throw new Error('rid et origine incohérents')
+          if (!this.origine) this.origine = myBaseId
+        } else {
+          throw new Error(`Cette ressource doit être enregistrée sur ${baseId}`)
+        }
+      } else if (this.oid) {
+        this.rid = myBaseId + '/' + this.oid
+      }
+      // check aliasOf
+      if (this.aliasOf) {
+        // peu importe la base, on veut juste un check
+        getBaseIdFromRid(this.aliasOf)
+      }
+      // on vire un éventuel token
+      if (this.token) delete this.token
+      // on génère la clé si elle manque
+      if (this.restriction && !this.cle) {
+        this.cle = uuid()
+      }
+      // date de mise à jour
+      this.dateMiseAJour = new Date()
+      // cohérence de la restriction
+      if (this.restriction === configRessource.constantes.restriction.groupe && (!this.groupes || !this.groupes.length)) {
+        log.dataError(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
+        this.restriction = configRessource.constantes.restriction.prive
+      }
+      // check des relations dans beforeSave mais pas ici (pour permettre des batch qui sauvent
+      // des paires liées par ex, la 1re a pas encore sa relation en base)
 
-    next(null, this)
+      next(null, this)
+    } catch (error) {
+      log.dataError(error, this)
+      next(error)
+    }
   })
 
   // met en idOrigine l'oid de la ressource si origine locale et que ça n'y était pas encore

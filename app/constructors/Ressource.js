@@ -261,12 +261,12 @@ function Ressource (initObj, myBaseId) {
    * Liste de noms de groupes dans lesquels cette ressource est publiée
    * @type {string[]}
    */
-  this.groupes = filters.arrayString(values.groupes, false)
+  this.groupes = filters.arrayString(values.groupes, false).map(nom => nom.toLowerCase())
   /**
    * Liste de noms de groupes dont les membres peuvent modifier cette ressource
    * @type {string[]}
    */
-  this.groupesAuteurs = filters.arrayString(values.groupesAuteurs, false)
+  this.groupesAuteurs = filters.arrayString(values.groupesAuteurs, false).map(nom => nom.toLowerCase())
   /**
    * code langue ISO 639-2
    * @see {@link http://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2}
@@ -274,7 +274,8 @@ function Ressource (initObj, myBaseId) {
    */
   this.langue = filters.string(values.langue) || 'fra'
   /**
-   * Vrai si la ressource est publiée (les non-publiées sont visibles par leur auteur et ceux ayant les droits ad hoc)
+   * Vrai si la ressource est publiée (les non-publiées sont visibles par leur auteur
+   * et ceux ayant les droits en écriture dessus)
    * false par défaut
    * @type {boolean}
    */

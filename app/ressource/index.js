@@ -74,8 +74,8 @@ ressourceComponent.service('$ressourceConverter', function (EntityRessource, $re
   return require('./serviceRessourceConverter')(EntityRessource, $ressourceRepository, $routes, $accessControl)
 })
 
-ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) { // jshint ignore:line
-  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) // jshint ignore:line
+ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) { // jshint ignore:line
+  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) // jshint ignore:line
 })
 
 // nos ressources statiques, si override en config des js webpack ils passent avant
