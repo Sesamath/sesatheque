@@ -75,8 +75,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         value: nom
       }
     })
-    var allGroupes = groupes
-    sjtObj.merge(allGroupes, groupesAuteurs)
+    var allGroupes = groupes || []
+    if (groupesAuteurs && groupesAuteurs.length) sjtObj.merge(allGroupes, groupesAuteurs)
     // faut cocher ce qui doit l'être et ajouter éventuellement les groupes déjà présents
     // mais dont on est pas membre (donc publication non modifiable)
     // on boucle sur les groupes voulus

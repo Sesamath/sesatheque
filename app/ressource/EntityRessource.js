@@ -164,8 +164,8 @@ module.exports = function (EntityRessource) {
         if (this.origine === myBaseId) {
           // on vérifie la cohérence oid = idOrigine
           if (this.idOrigine && this.oid) {
-            if (this.oid !== this.idOrigine) {
-              throw new Error(`Resssource incohérente (oid ${this.oid} avec origine ${this.origine} et idOrigine ${this.idOrigine})`)
+            if (this.oid != this.idOrigine) { // eslint-disable-line eqeqeq
+              throw new Error(`Ressource incohérente (oid ${this.oid} avec origine ${this.origine} et idOrigine ${this.idOrigine})`)
             }
             // sinon tout est normal
           } else if (this.oid) {
