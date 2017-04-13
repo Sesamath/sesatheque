@@ -180,7 +180,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $json.sendError(context, error)
       })
     } else {
-      $json.denied(context, "Il faut s'authentifier avant pour récupérer ses ressources personnelles")
+      $json.denied(context, 'Ressources personnelles inaccessibles (session expirée sur la Sésathèque), veuillez vous déconnecter et reconnecter')
     }
   }
 
