@@ -53,7 +53,7 @@ module.exports = function ($accessControl) {
   $routes.get = function (action) {
     var route = routes[action]
     for (var i = 1; i < arguments.length; i++) {
-      if (arguments[i]) if (route) route += '/' + arguments[i]
+      if (arguments[i]) route += (route ? '/' : '') + arguments[i]
     }
 
     return route
@@ -69,29 +69,35 @@ module.exports = function ($accessControl) {
    * @returns {string} La route absolue
    */
   $routes.getAbs = function (action, ressource, context) {
-    var route
-    var id
-    var isPublic = true
+    let route
     if (routes.hasOwnProperty(action)) {
       route = '/'
+      let id
+      let isPublic = true
       if (ressource) {
-        if (typeof ressource === 'object') {
-          id = ressource.oid
-          // les cas où la route n'est pas chez nous
-          if (ressource.aliasOf && (action === 'display' || action === 'preview')) {
-            // c'est un alias, display et preview sont ailleurs
-            const [baseId, oid] = getComponents(ressource.aliasOf)
-            if (baseId !== myBaseId) {
-              route = getBaseUrl(baseId)
-              id = oid
-            }
-          }
+        let rid
+        if (typeof ressource === 'string' && ressource.indexOf('/') !== -1) {
+          rid = ressource
+        } else if (typeof ressource === 'object') {
+          // si c'est un alias, on veut la destination seulement pour afficher la ressource,
+          // (c'est l'alias qu'on veut décrire ou modifier)
+          if (ressource.aliasOf && (action === 'display' || action === 'preview')) rid = ressource.aliasOf
+          else rid = ressource.rid
         } else {
           id = ressource
         }
-        if (!id) throw new Error('ressource invalide')
+        if (rid) {
+          const [baseId, oid] = getComponents(rid)
+          if (baseId !== myBaseId) route = getBaseUrl(baseId)
+          id = oid
+        }
+        if (!id) {
+          log.dataError('ressource invalide', ressource)
+          // on plante pas pour ça mais on arrête là
+          return route
+        }
         if (ressource.restriction || $accessControl.isAuthenticated(context)) isPublic = false
-      } else if ($accessControl.isAuthenticated(context)) {
+      } else if (context && $accessControl.isAuthenticated(context)) {
         isPublic = false
       }
       if (action === 'api') route += 'api/' // pour l'api faut ajouter un préfixe
@@ -119,6 +125,7 @@ module.exports = function ($accessControl) {
   $routes.getTagA = function (actionName, ressource, label) {
     var html
     var route = $routes.getAbs(actionName, ressource)
+    log.debug(`ress ${ressource.oid} donne la route ${actionName} ${route}`)
     if (route) {
       html = '<a href="' + route + '">'
       html += label || ressource.titre || 'sans titre'

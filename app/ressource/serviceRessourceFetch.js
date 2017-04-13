@@ -77,8 +77,6 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
         if (error) return next(error)
         if (response.statusCode === 200 && ressource) {
           if (ressource.error) return next(new Error(ressource.error))
-          // sinon on vire oid avant de passer au suivant
-          delete ressource.oid
           return next(null, ressource)
         }
         next(new Error(`Aucune ressource ${rid}`))

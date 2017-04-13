@@ -821,8 +821,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               url: $routes.getAbs('history', ressource.oid)
             }
           }
+          // ajout du lien pour le json
+          data.contentBloc.dataUrl = $routes.getAbs('api', ressource)
         }
-        // pour les boutons d'actions ajoutés dans beforeTransport on ajoute la ressource à context
+        // pour les boutons d'actions (ajoutés dans beforeTransport) on ajoute la ressource au context
         if (context.layout === 'page' && ressource) context.ressource = ressource
         // le titre s'il n'est pas fourni en options
         if (!options || !options.$metas || !options.$metas.title) {
@@ -857,7 +859,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } else {
       $ressourcePage.printError(context, "Cette ressource n'existe pas ou vous n'avez pas les droits suffisants pour y accéder", 404)
     }
-  }
+  } // prepareAndSend
 
   /**
    * Affiche un message d'erreur

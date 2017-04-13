@@ -14,8 +14,9 @@
         {:else}Public{/restriction.value}</span>
     <p>
     oid : {oid} ({origine.value}{?idOrigine}/{idOrigine.value}{/idOrigine},
-    {type.title} {type.value},{~s}
-    {version.title} {version.value})<br />
+      {type.title} {type.value},{~s}
+      {version.title} {version.value}
+      {?dataUrl}, <a href="{dataUrl}" target="_blank">json</a>{/dataUrl})<br />
     {dateCreation.title} : {dateCreation.value}<br />
     {dateMiseAJour.title} : {dateMiseAJour.value}<br />
     {langue.title} : {langue.value}<br />
@@ -34,8 +35,6 @@
         {#enfantsDescribe}<li><a href="{url}">{titre}</a></li>{/enfantsDescribe}
       </ul>
       <p>{enfants.title} : <pre>{enfants.value|jsd}</pre></p>
-    {:else}
-      <p>{parametres.title} : <pre>{parametres.value|jsd}</pre></p>
     {/enfants}
 
     {?auteurs.value}
