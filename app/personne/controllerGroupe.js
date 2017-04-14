@@ -369,15 +369,21 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       $ressourceRepository.getListe('groupe/' + nom, {}, this)
     }).seq(function (ressources) {
       if (ressources && ressources.length) {
-        groupe.ressources = ressources.map(function (ressource) {
-          return {
+        var $ressourceConverter = lassi.service('$ressourceConverter')
+        // faut passer addUrlsToList d'abord car il a besoin de la ressource complète
+        // donc ensuite dans le map filtrer sur les propriétés url* (on sait pas à l'avance lesquelles)
+        groupe.ressources = $ressourceConverter.addUrlsToList(groupe.ressources).map((ressource) => {
+          // seulement ce qui intéresse la vue du groupe, mais est-ce bien une optimisation ?
+          const ressData = {
             oid: ressource.oid,
             titre: ressource.titre
           }
+          Object.keys(ressource).forEach(prop => {
+            if (/^url/.test(prop)) ressData[prop] = prop
+          })
+          return ressData
         })
         // et on ajoute les liens
-        var $ressourceConverter = lassi.service('$ressourceConverter')
-        $ressourceConverter.addUrlsToList(groupe.ressources)
       }
       this()
     }).seq(function () {

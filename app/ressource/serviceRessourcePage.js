@@ -83,32 +83,36 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     flow(allGroupes).seqEach(function (groupeNom) {
       var suivant = this
       $groupeRepository.load(groupeNom, function (error, groupe) {
-        if (error) {
-          log.error(error)
-          formData.errors.push(error.toString())
-        } else if (groupe) {
-          var myIndex = myGroupes.indexOf(groupe.nom)
-          var isInGroupe = (sjt.isInArray(groupes, groupe.nom))
-          var isInGroupeAuteur = (sjt.isInArray(groupesAuteurs, groupe.nom))
-          if (myIndex === -1) {
-            // groupe existant sur cette ressource mais on en est pas membre (donc readonly)
-            choices.push({
-              value: groupeNom,
-              label: groupe.nom,
-              isOpen: groupe.open,
-              readonly: true,
-              selected: isInGroupe,
-              gaSelected: isInGroupeAuteur
-            })
+        try {
+          if (error) {
+            log.error(error)
+            formData.errors.push(error.toString())
+          } else if (groupe) {
+            var myIndex = myGroupes.indexOf(groupe.nom)
+            var isInGroupe = (sjt.isInArray(groupes, groupe.nom))
+            var isInGroupeAuteur = groupesAuteurs && sjt.isInArray(groupesAuteurs, groupe.nom)
+            if (myIndex === -1) {
+              // groupe existant sur cette ressource mais on en est pas membre (donc readonly)
+              choices.push({
+                value: groupeNom,
+                label: groupe.nom,
+                isOpen: groupe.open,
+                readonly: true,
+                selected: isInGroupe,
+                gaSelected: isInGroupeAuteur
+              })
+            } else {
+              // on est membre, c'est modifiable
+              choices[ myIndex ].selected = isInGroupe
+              choices[ myIndex ].gaSelected = isInGroupeAuteur
+            }
           } else {
-            // on est membre, c'est modifiable
-            choices[ myIndex ].selected = isInGroupe
-            choices[ myIndex ].gaSelected = isInGroupeAuteur
+            formData.errors.push('Le groupe ' + groupeNom + " n'existe pas")
           }
-        } else {
-          formData.errors.push('Le groupe ' + groupeNom + " n'existe pas")
+          suivant()
+        } catch (error) {
+          suivant(error)
         }
-        suivant()
       })
     }).seq(function () {
       formData.groupes = {

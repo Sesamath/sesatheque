@@ -65,7 +65,7 @@ module.exports = function ($accessControl) {
    * @memberOf $routes
    * @param {string}           action (display|describe|preview)
    * @param {Ressource|number} [ressource] ou oid de ressource
-   * @param {Context}          [context]
+   * @param {Context}          [context] pour vérifier que l'on est authentifié
    * @returns {string} La route absolue
    */
   $routes.getAbs = function (action, ressource, context) {
@@ -109,7 +109,7 @@ module.exports = function ($accessControl) {
     } else {
       log.error(new Error('appel de $routes.getAbs avec une action non gérée : ' + action))
     }
-    // log('getAbs ' +action +' va retourner " +route)
+    log.debug(`getAbs ${action} va retourner ${route}`)
 
     return route
   }
@@ -125,7 +125,6 @@ module.exports = function ($accessControl) {
   $routes.getTagA = function (actionName, ressource, label) {
     var html
     var route = $routes.getAbs(actionName, ressource)
-    log.debug(`ress ${ressource.oid} donne la route ${actionName} ${route}`)
     if (route) {
       html = '<a href="' + route + '">'
       html += label || ressource.titre || 'sans titre'

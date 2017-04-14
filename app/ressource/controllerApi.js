@@ -276,73 +276,72 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
 
     log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max: 10000})
-
-    if ($accessControl.isAuthenticated(context) || $accessControl.hasAllRights(context)) {
-      flow().seq(function () {
-        var next = this
-        // si y'à un rid sans oid on traduit
-        if (ressourcePostee.rid) {
-          const [baseId, oid] = getRidComponents(ressourcePostee.rid)
-          if (baseId !== myBaseId) return next(new Error(`Cette ressource doit être enregistrée sur ${baseId} et non ici`))
-          if (ressourcePostee.oid && ressourcePostee.oid !== oid) return next(new Error(`oid ${ressourcePostee.oid} et rid ${ressourcePostee.rid} incohérents`))
-          ressourcePostee.oid = oid
-        }
-        // faut la charger, ne serait-ce que pour savoir si elle existe
-        if (ressourcePostee.oid) { // par oid
-          $ressourceRepository.load(ressourcePostee.oid, next)
-        } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
-          $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
-        } else {
-          if (!ressourcePostee.origine) ressourcePostee.origine = myBaseId
-          // l'idOrigine n'est pas obligatoire si c'est une création ici ($ressourceRepository.save créera une clé si besoin
-          if (ressourcePostee.origine !== myBaseId && !ressourcePostee.idOrigine) {
-            log.debug('ressource postée invalide', ressourcePostee)
-            next(new Error('Il faut fournir oid ou au moins origine'))
-          } else {
-            next()
-          }
-        }
-      }).seq(function (ressourceBdd) {
-        if (log.perf) log.perf(context.response, 'loaded')
-        if (ressourceBdd && ressourceBdd.oid) {
-          if ($accessControl.hasPermission('update', context, ressourceBdd)) this(null, ressourceBdd)
-          else $json.denied(context, "Vous n'avez pas les droits suffisants pour modifier cette ressource")
-        } else {
-          if ($accessControl.hasPermission('create', context, ressourcePostee)) this(null, null)
-          else $json.denied(context, "Vous n'avez pas les droits suffisants pour créer cette ressource")
-        }
-      }).seq(function (ressourceBdd) {
-        // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
-        var tt = ressourcePostee.type
-        if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
-        // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
-        var partial = !!context.get.partial
-        if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
-          partial = (ressourcePostee.oid > 0 || (ressourcePostee.origine && ressourcePostee.idOrigine))
-        }
-        if (partial) ressourcePostee = Object.assign({}, ressourceBdd, ressourcePostee)
-        ressourceOriginale = ressourceBdd
-        $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
-      }).seq(function (ressourceNew) {
-        // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
-        $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
-      }).seq(function (ressourceNew) {
-        // on ajoute le user courant pour serie et sequenceModele,
-        // pas encore pour tout par crainte d'effets de bords…
-        if (pid && ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele') {
-          ressourceNew.auteurs = [pid]
-        }
-        $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
-      }).seq(function (ressourceNew) {
-        if (ressourceOriginale) sjtObj.update(ressourceOriginale, ressourceNew)
-        else ressourceOriginale = ressourceNew
-        writeAndOut(context, ressourceOriginale)
-      }).catch(function (error) {
-        $json.send(context, error)
-      })
-    } else {
-      $json.denied(context, 'Vous devez être authentifié pour ajouter une ressource')
+    // faut au moins être authentifié
+    if (!$accessControl.isAuthenticated(context) && !$accessControl.hasAllRights(context)) {
+      return $json.denied(context, 'Vous devez être authentifié pour ajouter une ressource')
     }
+    // si y'a pas qqchose pour identifier une ressource existante, faut avoir les droits de création
+
+    flow().seq(function () {
+      var next = this
+      // si y'à un rid sans oid on traduit
+      if (ressourcePostee.rid) {
+        const [baseId, oid] = getRidComponents(ressourcePostee.rid)
+        if (baseId !== myBaseId) return next(new Error(`Cette ressource doit être enregistrée sur ${baseId} et non ici`))
+        if (ressourcePostee.oid && ressourcePostee.oid !== oid) return next(new Error(`oid ${ressourcePostee.oid} et rid ${ressourcePostee.rid} incohérents`))
+        ressourcePostee.oid = oid
+      }
+      // faut la charger, ne serait-ce que pour savoir si elle existe
+      if (ressourcePostee.oid) { // par oid
+        $ressourceRepository.load(ressourcePostee.oid, next)
+      } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
+        $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
+      } else {
+        if (!ressourcePostee.origine) ressourcePostee.origine = myBaseId
+        // l'idOrigine n'est pas obligatoire si c'est une création ici ($ressourceRepository.save créera une clé si besoin
+        if (ressourcePostee.origine !== myBaseId && !ressourcePostee.idOrigine) {
+          log.debug('ressource postée invalide', ressourcePostee)
+          next(new Error('Il faut fournir oid ou au moins origine'))
+        } else {
+          next()
+        }
+      }
+    }).seq(function (ressourceBdd) {
+      if (log.perf) log.perf(context.response, 'loaded')
+      const errMsg = ressourceBdd
+        ? $accessControl.getDeniedMessage('update', context, ressourceBdd)
+        : $accessControl.getDeniedMessage('create', context, ressourcePostee)
+      if (errMsg) $json.denied(context, errMsg)
+      else this(null, ressourceBdd)
+    }).seq(function (ressourceBdd) {
+      // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
+      var tt = ressourcePostee.type
+      if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
+      // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
+      var partial = !!context.get.partial
+      if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
+        partial = (ressourcePostee.oid > 0 || (ressourcePostee.origine && ressourcePostee.idOrigine))
+      }
+      if (partial) ressourcePostee = Object.assign({}, ressourceBdd, ressourcePostee)
+      ressourceOriginale = ressourceBdd
+      $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
+    }).seq(function (ressourceNew) {
+      // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
+      $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
+    }).seq(function (ressourceNew) {
+      // on ajoute le user courant pour serie et sequenceModele,
+      // pas encore pour tout par crainte d'effets de bords…
+      if (pid && ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele') {
+        ressourceNew.auteurs = [pid]
+      }
+      $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
+    }).seq(function (ressourceNew) {
+      if (ressourceOriginale) sjtObj.update(ressourceOriginale, ressourceNew)
+      else ressourceOriginale = ressourceNew
+      writeAndOut(context, ressourceOriginale)
+    }).catch(function (error) {
+      $json.send(context, error)
+    })
   }
 
   /**
@@ -902,8 +901,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /api/liste/groupe/:nom
    */
   controller.get('liste/groupe/:nom', function (context) {
-    var nom = context.arguments.nom
-    grabListe(context, 'groupe/' + nom)
+    $ressourceRepository.getListe('groupe/' + context.arguments.nom, null, function (error, ressources) {
+      sendListe(context, error, ressources)
+    })
   })
 
   /**

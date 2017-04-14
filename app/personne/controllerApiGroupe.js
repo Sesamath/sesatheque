@@ -73,7 +73,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
       log.perf(context.response, msg)
     }
     if ($accessControl.hasGenericPermission('createGroupe', context)) {
-      var nom = context.arguments.nom.toLowerCase()
+      const nom = context.arguments.nom.toLowerCase()
       $groupeRepository.load(nom, function (error, groupeBdd) {
         if (error) {
           $json.sendError(context, new Error('Erreur interne (impossible de vérifier l’existence préalable du groupe)'))

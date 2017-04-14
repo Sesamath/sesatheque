@@ -470,6 +470,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   $ressourceRepository.getListe = function getListe (visibilite, options, next) {
     try {
+      if (!options) options = {}
       log.debug(`getListe avec visibility=${visibilite} et les options`, options)
 
       // avant de construire la query on fait un minimum de vérifications

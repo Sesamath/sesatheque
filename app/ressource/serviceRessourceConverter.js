@@ -109,16 +109,17 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
    * @returns {Array} ressources
    */
   $ressourceConverter.addUrlsToList = function (ressources, context) {
-    if (ressources && ressources.length) {
-      ressources.forEach(function (ressource) {
-        ressource.urlDescribe = $routes.getAbs('describe', ressource)
-        ressource.urlPreview = $routes.getAbs('preview', ressource)
-        ressource.urlDisplay = $routes.getAbs('display', ressource)
-        if (context && $accessControl.hasPermission('update', context, ressource)) ressource.urlEdit = $routes.getAbs('edit', ressource)
-      })
-    }
-
-    return ressources
+    if (!ressources) return []
+    if (!ressources.length) return []
+    return ressources.map((ressource) => {
+      ressource.urlDescribe = $routes.getAbs('describe', ressource)
+      ressource.urlPreview = $routes.getAbs('preview', ressource)
+      ressource.urlDisplay = $routes.getAbs('display', ressource)
+      if (context && $accessControl.hasPermission('update', context, ressource)) {
+        ressource.urlEdit = $routes.getAbs('edit', ressource)
+      }
+      return ressource
+    })
   }
 
   // noinspection FunctionWithMoreThanThreeNegationsJS

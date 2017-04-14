@@ -208,7 +208,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
             }
             if (ressources.length) data.contentBloc.pagination = '(' + (options.start + 1) + ' à ' + (options.start + 1 + ressources.length) + ')'
-            data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources)
+            data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources) // inutile de passer le context si on est pas authentifié
           }
           context.html(data)
         })

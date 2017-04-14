@@ -193,7 +193,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
           case restriction.groupe:
             if ($accessControl.isAuteur(context, ressource)) return
             if ($accessControl.isContributeur(context, ressource)) return
-            if (ressource.groupes && !_.empty(_.intersection(ressource.groupes, user.groupesMembre))) return
+            if (ressource.groupes && !_.isEempty(_.intersection(ressource.groupes, user.groupesMembre))) return
             msg = 'Ressource restreinte'
             break
 
@@ -319,7 +319,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param permission
    * @param {Context}       context
    * @param {Ressource}     ressource
-   * @param {errorCallback} next (appelé avec un message d'erreur et pas une erreur)
+   * @param {errorCallback} next appelé avec (error, ressource) où error est une string (ou rien)
    * @memberOf $accessControl
    */
   $accessControl.checkPermission = function (permission, context, ressource, next) {
@@ -408,6 +408,36 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
+   * Retourne une chaîne vide si l'utilisateur courant a la permission demandée sur cette ressource
+   * ou le message de rejet
+   * @param {string} permission create|read|update|delete
+   * @param {Context}   context
+   * @param {Ressource} [ressource]
+   * @returns {boolean}
+   * @memberOf $accessControl
+   */
+  $accessControl.getDeniedMessage = function (permission, context, ressource) {
+    if (hasGenericPermission(permission, context)) return ''
+    if (hasAllRights(context)) return ''
+    switch (permission) {
+      /* eslint-disable no-multi-spaces */
+      case 'correction'    : return getCorrectionDeniedMessage(context)
+      case 'create'        : return getCreateDeniedMessage(context, ressource)
+      case 'createAll'     : return getCreateAllDeniedMessage(context)
+      case 'delete'        : return getDeleteDeniedMessage(context, ressource)
+      case 'deleteVersion' : return getDeleteVersionDeniedMessage(context, ressource)
+      case 'index'         : return getIndexDeniedMessage(context)
+      case 'publish'       : return getPublishDeniedMessage(context)
+      case 'read'          : return getReadDeniedMessage(context)
+      case 'update'        : return getUpdateDeniedMessage(context, ressource)
+      case 'updateAuteurs' : return getUpdateAuteursDeniedMessage(context, ressource)
+      case 'updateGroupes' : return getUpdateGroupesDeniedMessage(context, ressource)
+      default: return false
+      /* eslint-enable */
+    }
+  }
+
+  /**
    * Retourne la valeur du token en session et le supprime (donc faut choisir entre getToken et checkToken)
    * @param {Context} context
    * @param {string} token
@@ -435,6 +465,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (ressources && ressources.length) {
       ressources.forEach(function (ressource) {
         if ($accessControl.hasReadPermission(context, ressource)) liste.push(ressource)
+        else log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
       })
     }
 
@@ -518,22 +549,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (permission === 'read') return $accessControl.hasReadPermission(context, ressource)
 
     if ($accessControl.isAuthenticated(context)) {
-      switch (permission) {
-        /* eslint-disable no-multi-spaces */
-        case 'correction'    : return !getCorrectionDeniedMessage(context)
-        case 'create'        : return !getCreateDeniedMessage(context, ressource)
-        case 'createAll'     : return !getCreateAllDeniedMessage(context)
-        case 'delete'        : return !getDeleteDeniedMessage(context, ressource)
-        case 'deleteVersion' : return !getDeleteVersionDeniedMessage(context, ressource)
-        case 'index'         : return !getIndexDeniedMessage(context)
-        case 'publish'       : return !getPublishDeniedMessage(context)
-        case 'read'          : return !getReadDeniedMessage(context)
-        case 'update'        : return !getUpdateDeniedMessage(context, ressource)
-        case 'updateAuteurs' : return !getUpdateAuteursDeniedMessage(context, ressource)
-        case 'updateGroupes' : return !getUpdateGroupesDeniedMessage(context, ressource)
-        default: return false
-        /* eslint-enable */
-      }
+      return !$accessControl.getDeniedMessage(permission, context, ressource)
     } else {
       return false
     }

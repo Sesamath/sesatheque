@@ -190,10 +190,16 @@ module.exports = function (EntityRessource) {
       if (this.rid) {
         const [baseId, oid] = getRidComponents(this.rid)
         if (baseId === myBaseId) {
+          // check oid
           if (!this.oid) this.oid = oid
-          else if (this.oid != oid) throw new Error('oid et rid incohérents') // eslint-disable-line eqeqeq
-          if (this.origine && this.origine !== myBaseId) throw new Error('rid et origine incohérents')
+          else if (this.oid != oid) throw new Error(`oid ${this.oid} et rid ${this.rid} incohérents`) // eslint-disable-line eqeqeq
+          // si y'a pas d'origine on en met une
           if (!this.origine) this.origine = myBaseId
+          // si on est l'origine on fixe idOrigine s'il n'y est pas
+          if (this.origine === myBaseId) {
+            if (!this.idOrigine) this.idOrigine = this.oid
+            if (this.idOrigine != this.oid) throw new Error(`idOrigine ${this.idOrigine} et rid ${this.rid} incohérents`) // eslint-disable-line eqeqeq
+          }
         } else {
           throw new Error(`Cette ressource doit être enregistrée sur ${baseId}`)
         }
