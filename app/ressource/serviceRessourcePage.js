@@ -151,8 +151,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * @param {errorCallback} next
    */
   function addPersonnes (context, formData, key, values, next) {
-    if (!formData.errors) formData.errors = []
     log.debug('addPersonnes avec ' + key + ' qui vaut ' + (values && values.join(',')))
+    if (!values) values = []
+    if (!Array.isArray(values)) return next(new TypeError(`La valeur de ${key} n’est pas un array`))
+    if (!formData.errors) formData.errors = []
     // seuls les éditeurs peuvent modifier auteurs et contributeurs,
     if ($accessControl.hasPermission('updateAuteurs', context)) {
       formData[key].choices = []
