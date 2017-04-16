@@ -39,9 +39,6 @@ var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
 
-var $
-/* jshint jquery:true */
-
 /**
  * Retourne une seule fonction qui affectera les comportements de l'interface avec la gestion des étapes pour les ressources url
  * @service plugins/url/displayUi
@@ -51,8 +48,8 @@ var $
  */
 module.exports = function (ressource, options, next) {
   require.ensure(['jquery'], function (require) {
-    $ = require('jquery')
-
+    const $ = require('jquery')
+    // @todo utiliser require pour jquery-ui aussi
     page.loadAsync(['jqueryUiDialog'], function () {
       // faut attendre que tout soit fini de charger et que jQuery ai fini de manipuler le dom
       $(function () {

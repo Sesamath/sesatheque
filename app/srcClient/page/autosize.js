@@ -31,7 +31,7 @@
 
 'use strict'
 
-const log = require('sesajstools/utils/log')
+// const log = require('sesajstools/utils/log')
 
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
   require.ensure(['jquery'], function (require) {

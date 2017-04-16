@@ -267,7 +267,7 @@ export default function init (textarea, config, options, next) {
   log('init jsonMulti avec config et options', config, options)
   try {
     require.ensure(['jquery'], function (require) {
-      const $ = require('jquery')
+      $ = require('jquery')
       $(function () {
         if (!textarea) throw new Error('Il faut fournir un textarea pour jsonMulti')
         if (textarea.nodeName !== 'TEXTAREA') throw new Error('Il faut fournir un textarea pour jsonMulti')
