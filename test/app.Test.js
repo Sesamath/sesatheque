@@ -79,5 +79,6 @@ describe('L’application sesatheque', function () {
     describe('sesatheques', require('./app/sesatheque-client/sesatheques.Test'))
     describe('controller api ressource', require('./app/ressource/controllerApi.Test'))
     describe('EntityPersonne', require('./app/personne/EntityPersonne.Test'))
+    describe('EntityGroupe', require('./app/personne/EntityGroupe.Test'))
   })
 })

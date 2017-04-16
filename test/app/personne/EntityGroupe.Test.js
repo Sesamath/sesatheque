@@ -43,74 +43,67 @@ import {expect} from 'chai'
 
 // const clone = require('sesajstools/utils/object').clone
 
-module.exports = function describeEntityPersonne () {
+module.exports = function describeEntityGroupe () {
   // une erreur toute prête
   // const errAbort = new Error('pas la peine de tester ça tant que ça plante avant')
 
-  const EntityPersonne = lassi.service('EntityPersonne')
-  const personneData = {
-    // pas d'oid pour le moment
-    // ni pid
-    origine: 'origAuth',
-    idOrigine: 'idAtOrigAuth',
-    prenom: 'foo',
-    nom: 'bar',
-    email: 'foo@bar.baz',
-    roles: {'formateur': true},
-    permissions: {'foo': true, 'bar': true}
+  const EntityGroupe = lassi.service('EntityGroupe')
+  const groupeData = {
+    nom: 'Groupe ACCENTUÉ',
+    description: 'Un groupe ouvert de test.\nAvec un peu de bla bla.',
+    ouvert: true,
+    public: true,
+    gestionnaires: []
   }
+  const nomLower = groupeData.nom.toLowerCase()
   /**
    * L'entité créée
-   * @type {EntityPersonne}
+   * @type {EntityGroupe}
    */
-  let personne
+  let groupe
 
-  const checkPersonne = (personne) => {
-    const configRoles = lassi.settings.components.personne.roles
-    expect(personne.origine).to.equal(personneData.origine)
-    expect(personne.idOrigine).to.equal(personneData.idOrigine)
-    expect(personne.prenom).to.equal(personneData.prenom)
-    expect(personne.nom).to.equal(personneData.nom)
-    expect(personne.email).to.equal(personneData.email)
-    expect(personne.roles).to.deep.equal(personneData.roles)
-    // les permissions d'un rôle sont fixée par la config, ça écrase tout ce qu'on peut passer au constructeur
-    expect(personne.permissions).not.to.have.property('foo')
-    expect(personne.permissions).not.to.have.property('bar')
-    expect(personne.permissions).to.deep.equal(configRoles.formateur)
+  const checkGroupe = (groupe) => {
+    expect(groupe.nom).to.equal(nomLower)
+    ;['description', 'ouvert', 'public'].forEach(p => {
+      expect(groupe[p]).to.equal(groupeData[p])
+    })
+    expect(groupe.gestionnaires).to.deep.equal(groupeData.gestionnaires)
   }
 
   const grab = (next) => {
-    EntityPersonne
-      .match('origine').equals(personneData.origine)
-      .match('idOrigine').equals(personneData.idOrigine)
+    EntityGroupe
+      .match('nom').equals(nomLower)
       .grab(next)
   }
 
-  it('Create avec permissions set Ok', function () {
-    personne = EntityPersonne.create(personneData)
-    checkPersonne(personne)
+  it('create', function () {
+    groupe = EntityGroupe.create(groupeData)
+    checkGroupe(groupe)
   })
-  it('store ok', function (done) {
-    personne.store(function (error, personne) {
+
+  it('store', function (done) {
+    groupe.store(function (error, groupe) {
       expect(error).to.be.falsy
-      checkPersonne(personne)
+      checkGroupe(groupe)
       done()
     })
   })
-  it('Grab ok', function (done) {
-    grab(function (error, personnes) {
+
+  it('grab', function (done) {
+    grab(function (error, groupes) {
       expect(error).to.be.falsy
-      expect(personnes.length).to.equals(1)
-      checkPersonne(personnes[0])
+      expect(groupes.length).to.equals(1)
+      checkGroupe(groupes[0])
       done()
     })
   })
-  it('Delete ok', function (done) {
-    personne.delete(function (error) {
+
+  it('delete', function (done) {
+    groupe.delete(function (error) {
       expect(error).to.be.falsy
-      grab(function (error, personnes) {
+      grab(function (error, groupes) {
         expect(error).to.be.falsy
-        expect(personnes).to.have.length(0)
+        expect(groupes).to.have.length(0)
         done()
       })
     })
