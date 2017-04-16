@@ -443,13 +443,15 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
        */
       var groupe = context.post
       if (!groupe.nom) throw new Error('Données invalides')
+      // le toLowerCase() sera fait par $groupeRepository, pas à nous controller de gérer cette logique métier
+      // mais faut faire attention à mettre à jour cette variable après passage des ≠ services
       var nom = groupe.nom
       var groupeBdd
       // on peut continuer, faut vérifier qu'il n'existe pas
       flow().seq(function () {
         $groupeRepository.load(nom, this)
       }).seq(function (groupeBdd) {
-        if (groupeBdd) this('Le groupe « ' + nom + ' » existe déjà')
+        if (groupeBdd) this('Le groupe « ' + groupeBdd.nom + ' » existe déjà')
         else this()
       }).seq(function () {
         groupe.gestionnaires = [pid]
@@ -457,6 +459,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       }).seq(function (groupeSaved) {
         if (groupeSaved) {
           groupeBdd = groupeSaved
+          nom = groupeBdd.nom
           h.joinGroup(context, nom, this)
         } else {
           this(new Error("Erreur à l'enregistrement du groupe " + nom))
@@ -684,7 +687,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   controller.get('perso', function (context) {
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-    console.log('user en session', context.session.user.permissions)
+    // console.log('user en session sur le GET /groupe/perso', context.session.user.permissions)
     var blocList = []
     flow().seq(function () {
       if ($accessControl.isAuthenticated(context)) this()
