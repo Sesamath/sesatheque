@@ -42,20 +42,19 @@
 // Ce jeu de test de l'appli est lancé avec les paramètres de _private/test.js
 // (c'est app/config.js qui détecte mocha et utilise ce fichier)
 
-const app = require('../app/app')
-const config = require('../app/config')
-const anLog = require('an-log')
-const sesatheques = require('sesatheque-client/src/sesatheques')
-
+import app from '../app/app'
+import config from '../app/config'
+import anLog from 'an-log'
+import sesatheques from 'sesatheque-client/src/sesatheques'
 /**
  * @see https://github.com/visionmedia/supertest
  * @see https://visionmedia.github.io/superagent/
  */
-const supertest = require('supertest')
-// un objet global avec lassi et notre agent initialisé, à passer aux tests
-const globTest = {}
+import supertest from 'supertest'
 
-describe('test de l’application lassi', function () {
+describe('L’application sesatheque', function () {
+  // le code dans le before sera exécuté avant tout autre it des describe
+  // qui sont dans nos modules requis ensuite
   before(function beforeBoot (done) {
     // on enregistre notre sesatheque de test
     sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
@@ -67,16 +66,18 @@ describe('test de l’application lassi', function () {
     app(function afterBootCallback () {
       // console.log('app started')
       anLog.config(config.lassiLogger)
-      globTest.lassi = lassi
-      globTest.client = supertest(lassi.express)
-      globTest.config = lassi.settings
-      // pour que le an-log de lassi finisse son bavardage en console
-      setTimeout(done, 0)
+      // le client pour tester notre appli express
+      global.stClient = supertest(lassi.express)
+      done()
     })
   })
 
-  require('./app/static.Test')(globTest)
-  require('./app/404.Test')(globTest)
-  require('./app/ressource/controllerApi.Test')(globTest)
-  require('./app/sesatheque-client/sesatheques.Test')(globTest)
+  it('doit passer tous les tests suivants', function () {
+    this.timeout(30000)
+    describe('contenus statiques', require('./app/static.Test'))
+    describe('api get 404', require('./app/404.Test'))
+    describe('sesatheques', require('./app/sesatheque-client/sesatheques.Test'))
+    describe('controller api ressource', require('./app/ressource/controllerApi.Test'))
+    describe('EntityPersonne', require('./app/personne/EntityPersonne.Test'))
+  })
 })

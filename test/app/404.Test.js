@@ -38,35 +38,34 @@
 
 'use strict'
 /* eslint-env mocha */
+/* global stClient */
 import {expect} from 'chai'
 
-module.exports = function test404 (globTest) {
-  describe('api get 404', function () {
-    const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
-    paths.forEach(path => {
-      it(`prend un 404 sur ${path}`, function () {
-        // on retourne une promesse plutôt qu'utiliser done
-        return globTest.client
-          .get(path)
-          .expect(404, 'not found ' + path)
-          .expect('Content-Type', /text\/plain/)
-      })
+module.exports = function describe404 () {
+  const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
+  paths.forEach(path => {
+    it(`prend un 404 sur ${path}`, function () {
+      // on retourne une promesse plutôt qu'utiliser done
+      return stClient
+        .get(path)
+        .expect(404, 'not found ' + path)
+        .expect('Content-Type', /text\/plain/)
     })
-    paths.forEach(path => {
-      it(`prend un 404 sur /api${path}`, function () {
-        // on retourne une promesse plutôt qu'utiliser done
-        return globTest.client
-          .get('/api' + path)
-          .expect(404)
-          .expect('Content-Type', /application\/json/)
-          .then(res => {
-            expect(res.body.success).not.to.be.ok
-            expect(res.body.error).to.be.ok
-            if (/ressource/.test(path)) expect(res.body.error).to.contain('Cette ressource n’existe pas.')
-            else if (/public/.test(path)) expect(res.body.error).to.contain("n'existe pas ou n'est pas publique")
-            else expect(res.body.error).to.contain("Cette page ou ce fichier n'existe pas")
-          })
-      })
-    })
+  })
+  paths.forEach(path => {
+    it(`prend un 404 sur /api${path}`, function () {
+      // on retourne une promesse plutôt qu'utiliser done
+      return stClient
+        .get('/api' + path)
+        .expect(404)
+        .expect('Content-Type', /application\/json/)
+        .then(res => {
+          expect(res.body.success).not.to.be.ok
+          expect(res.body.error).to.be.ok
+          if (/ressource/.test(path)) expect(res.body.error).to.contain('Cette ressource n’existe pas.')
+          else if (/public/.test(path)) expect(res.body.error).to.contain("n'existe pas ou n'est pas publique")
+          else expect(res.body.error).to.contain("Cette page ou ce fichier n'existe pas")
+        })
+    }) // it
   })
 }

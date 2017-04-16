@@ -38,13 +38,15 @@
 
 'use strict'
 /* eslint-env mocha */
-
+/* global stClient */
 import {expect} from 'chai'
+
 import fakeRessource from '../../helpers/fakeRessource'
 
 const clone = require('sesajstools/utils/object').clone
+const {stringify} = require('sesajstools')
 
-module.exports = function apiSetGetDelRessource (globTest) {
+module.exports = function describeControllerApi () {
   /** {string} l'oid mis par l'appli à l'enregistrement du post */
   let oid
   /** {Ressource} Ressource de test à poster */
@@ -58,131 +60,135 @@ module.exports = function apiSetGetDelRessource (globTest) {
   // une erreur toute prête
   const errAbort = new Error('pas la peine de tester ça tant que ça plante avant')
 
-  describe('controller api ressource', function () {
-    it('POST enregistre une ressource et retourne son oid', function () {
-      // globTest est initialisé (il ne le serait pas dans un before de ce describe),
-      // on peut ajouter ce qui nous manquait
-      apiToken = globTest.lassi.settings.apiTokens[0]
-      const myBaseId = globTest.lassi.settings.application.baseId
-      ressource = fakeRessource({
-        nooid: true,
-        norid: true,
-        origine: myBaseId,
-        noidOrigine: true,
-        relations: [[1, 1], [14, 2]]
+  it('POST enregistre une ressource et retourne son oid', function () {
+    // on peut ajouter ce qui nous manquait
+    apiToken = lassi.settings.apiTokens[0]
+    const myBaseId = lassi.settings.application.baseId
+    ressource = fakeRessource({
+      nooid: true,
+      norid: true,
+      origine: myBaseId,
+      noidOrigine: true,
+      // relations: [[1, 1], [14, 2]]
+      relations: [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
+    })
+    ressExpected = clone(ressource)
+    // ressExpected.relations = [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
+    // on la poste sans oid ni rid
+    delete ressource.oid
+    delete ressource.rid
+
+    // ce test
+    return stClient
+      .post('/api/ressource')
+      .set('Content-Type', 'application/json')
+      .set('X-ApiToken', apiToken)
+      .send(ressource)
+      .expect(200)
+      .then(res => {
+        // console.log('res', res)
+        expect(res.body).to.be.ok
+        expect(res.body.error).to.be.not.ok
+        expect(res.body.errors).to.be.not.ok
+        expect(res.body.oid).to.be.ok
+        oid = res.body.oid // string
+        bundleId = myBaseId + '/' + oid
+        expect(res.body).to.deep.equal({ oid: oid }, 'pb sur le body retourné')
+        // si ce test est passé on a l'oid que l'on ajoute pour les tests suivants
+        ressExpected.oid = oid
+        ressExpected.rid = bundleId
+        ressExpected.idOrigine = '' + oid
       })
-      ressExpected = clone(ressource)
-      ressExpected.relations = [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
-      // on la poste sans oid ni rid
-      delete ressource.oid
-      delete ressource.rid
+  })
 
-      // ce test
-      return globTest.client
-        .post('/api/ressource')
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiToken)
-        .send(ressource)
-        .expect(200)
-        .then(res => {
-          // console.log('res', res)
-          expect(res.body).to.be.ok
-          expect(res.body.error).to.be.not.ok
-          expect(res.body.errors).to.be.not.ok
-          expect(res.body.oid).to.be.ok
-          oid = res.body.oid // string
-          bundleId = myBaseId + '/' + oid
-          expect(res.body).to.deep.equal({ oid: oid }, 'pb sur le body retourné')
-          // si ce test est passé on a l'oid que l'on ajoute pour les tests suivants
-          ressExpected.oid = oid
-          ressExpected.rid = bundleId
-          ressExpected.idOrigine = '' + oid
+  it('GET /api/ressource/:oid récupère la ressource envoyée précédemment', function (done) {
+    if (!oid) return done(errAbort)
+    stClient
+      .get(`/api/ressource/${oid}`)
+      .expect(200)
+      .expect('Content-type', /application\/json/)
+      .end((err, res) => {
+        if (err) return done(err)
+        const ress = res.body
+        expect(ress).to.be.ok
+        expect(ress.error).to.be.not.ok
+        expect(ress.errors).to.be.not.ok
+        Object.keys(ressExpected).forEach(k => {
+          if (k === 'relations') console.log('relations', ress.relations, ressExpected.relations)
+          expect(ress[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k} vaut ${stringify(ress[k])} et pas ${stringify(ressExpected[k])}`)
         })
-    })
+        done()
+      })
+  })
 
-    it('GET /api/ressource/:oid récupère la ressource envoyée précédemment', function (done) {
-      if (!oid) return done(errAbort)
-      globTest.client
-        .get(`/api/ressource/${oid}`)
-        .expect(200)
-        .expect('Content-type', /application\/json/)
-        .end((err, res) => {
-          if (err) return done(err)
-          expect(res.body).to.be.ok
-          expect(res.body.error).to.be.not.ok
-          expect(res.body.errors).to.be.not.ok
-          Object.keys(ressExpected).forEach(k => {
-            expect(res.body[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k}`)
-          })
-          done()
+  it('GET /api/public/:oid récupère la ressource envoyée précédemment', function (done) {
+    if (!oid) return done(errAbort)
+    stClient
+      .get(`/api/public/${oid}`)
+      .expect(200)
+      .expect('Content-type', /application\/json/)
+      .end((err, res) => {
+        if (err) return done(err)
+        const ress = res.body
+        expect(ress).to.be.ok
+        expect(ress.error).to.be.not.ok
+        expect(ress.errors).to.be.not.ok
+        Object.keys(ressExpected).forEach(k => {
+          expect(ress[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k}`)
         })
-    })
+        done()
+      })
+  })
 
-    it('GET /api/public/:oid récupère la ressource envoyée précédemment', function (done) {
-      if (!oid) return done(errAbort)
-      globTest.client
-        .get(`/api/public/${oid}`)
-        .expect(200)
-        .expect('Content-type', /application\/json/)
-        .end((err, res) => {
-          if (err) return done(err)
-          expect(res.body).to.be.ok
-          expect(res.body.error).to.be.not.ok
-          expect(res.body.errors).to.be.not.ok
-          Object.keys(ressExpected).forEach(k => {
-            expect(res.body[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k}`)
-          })
-          done()
+  it('GET /api/ressource/:origine/:idOrigine récupère la ressource envoyée précédemment', function (done) {
+    if (!oid) return done(errAbort)
+    stClient
+      .get(`/api/ressource/${bundleId}`)
+      .expect(200)
+      .expect('Content-type', /application\/json/)
+      .end((err, res) => {
+        if (err) return done(err)
+        const ress = res.body
+        expect(ress).to.be.ok
+        expect(ress.error).to.be.not.ok
+        expect(ress.errors).to.be.not.ok
+        Object.keys(ressExpected).forEach(k => {
+          expect(ress[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k}`)
         })
-    })
+        done()
+      })
+  })
 
-    it('GET /api/ressource/:origine/:idOrigine récupère la ressource envoyée précédemment', function (done) {
-      if (!oid) return done(errAbort)
-      globTest.client
-        .get(`/api/ressource/${bundleId}`)
-        .expect(200)
-        .expect('Content-type', /application\/json/)
-        .end((err, res) => {
-          if (err) return done(err)
-          expect(res.body).to.be.ok
-          expect(res.body.error).to.be.not.ok
-          expect(res.body.errors).to.be.not.ok
-          Object.keys(ressExpected).forEach(k => {
-            expect(res.body[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k}`)
-          })
-          done()
-        })
-    })
+  it('DELETE prend un 403 si on veut effacer sans token', function (done) {
+    if (!oid) return done(errAbort)
+    stClient
+      .delete(`/api/ressource/${bundleId}`)
+      .expect(403)
+      .expect('Content-type', /application\/json/)
+      .end((err, res) => {
+        if (err) return done(err)
+        const ress = res.body
+        expect(ress).to.be.ok
+        expect(ress.error).to.be.ok
+        done()
+      })
+  })
 
-    it('DELETE prend un 403 si on veut effacer sans token', function (done) {
-      if (!oid) return done(errAbort)
-      globTest.client
-        .delete(`/api/ressource/${bundleId}`)
-        .expect(403)
-        .expect('Content-type', /application\/json/)
-        .end((err, res) => {
-          if (err) return done(err)
-          expect(res.body).to.be.ok
-          expect(res.body.error).to.be.ok
-          done()
-        })
-    })
-
-    it("DELETE vire la ressource que l'on vient d'enregistrer", function (done) {
-      if (!oid) return done(errAbort)
-      const apiToken = globTest.lassi.settings.apiTokens[0]
-      globTest.client
-        .delete(`/api/ressource/${bundleId}`)
-        .set('X-ApiToken', apiToken)
-        .expect(200)
-        .expect('Content-type', /application\/json/)
-        .end((err, res) => {
-          if (err) return done(err)
-          expect(res.body).to.be.ok
-          expect(res.body.error).to.be.not.ok
-          expect('' + res.body.deleted).to.equal('' + bundleId)
-          done()
-        })
-    })
+  it("DELETE vire la ressource que l'on vient d'enregistrer", function (done) {
+    if (!oid) return done(errAbort)
+    const apiToken = lassi.settings.apiTokens[0]
+    stClient
+      .delete(`/api/ressource/${bundleId}`)
+      .set('X-ApiToken', apiToken)
+      .expect(200)
+      .expect('Content-type', /application\/json/)
+      .end((err, res) => {
+        if (err) return done(err)
+        const ress = res.body
+        expect(ress).to.be.ok
+        expect(ress.error).to.be.not.ok
+        expect('' + ress.deleted).to.equal('' + bundleId)
+        done()
+      })
   })
 }

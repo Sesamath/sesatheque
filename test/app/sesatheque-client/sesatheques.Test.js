@@ -52,83 +52,81 @@ const expected = {
   sesacommundev: 'http://commun.devsesamath.net/'
 }
 
-module.exports = function testSesatheques (globTest) {
-  describe('sesatheques', function () {
-    let consoleErrorSpy
-    beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
-    afterEach(() => console.error.restore())
-    const baseId = 'stbidon1'
-    const baseUrl = 'http://localhost/'
-    const baseUrl2 = 'http://localhost:1234/'
-    const baseId3 = 'stbidon3'
-    let baseUrl3 = 'http://localhost:3'
+module.exports = function describeSesatheques () {
+  let consoleErrorSpy
+  beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
+  afterEach(() => console.error.restore())
+  const baseId = 'stbidon1'
+  const baseUrl = 'http://localhost/'
+  const baseUrl2 = 'http://localhost:1234/'
+  const baseId3 = 'stbidon3'
+  let baseUrl3 = 'http://localhost:3'
 
-    it('les 4 sesatheques dev & prod existent avec les urls attendues', function (done) {
-      Object.keys(expected).forEach((baseId) => {
-        expect(exists(baseId)).to.be.true
-        expect(getBaseUrl(baseId)).to.equal(expected[baseId])
-        expect(getBaseId(expected[baseId])).to.equal(baseId)
-      })
-      expect(consoleErrorSpy).to.not.have.been.called
-      done()
-    })
-
-    it('get de notre sesathèque de test mise au boot', function (done) {
-      const {baseId, baseUrl} = globTest.config.application
+  it('les 4 sesatheques dev & prod existent avec les urls attendues', function (done) {
+    Object.keys(expected).forEach((baseId) => {
       expect(exists(baseId)).to.be.true
-      expect(getBaseUrl(baseId)).to.equal(baseUrl)
-      expect(getBaseId(baseUrl)).to.equal(baseId)
-      expect(consoleErrorSpy).to.not.have.been.called
-      done()
+      expect(getBaseUrl(baseId)).to.equal(expected[baseId])
+      expect(getBaseId(expected[baseId])).to.equal(baseId)
     })
+    expect(consoleErrorSpy).to.not.have.been.called
+    done()
+  })
 
-    it('addSesatheque puis get', function (done) {
-      expect(addSesatheque(baseId, baseUrl)).to.be.true
-      expect(consoleErrorSpy).to.not.have.been.called
-      expect(exists(baseId)).to.be.true
-      expect(getBaseUrl(baseId)).to.equal(baseUrl)
-      expect(getBaseId(baseUrl)).to.equal(baseId)
-      done()
-    })
-    it('2e add identique renvoie false sans râler', function (done) {
-      // on recommence, ça doit renvoyer false
-      expect(addSesatheque(baseId, baseUrl)).to.be.false
-      expect(consoleErrorSpy).to.not.have.been.called
-      expect(exists(baseId)).to.be.true
-      expect(getBaseUrl(baseId)).to.equal(baseUrl)
-      expect(getBaseId(baseUrl)).to.equal(baseId)
-      done()
-    })
-    it('add avec même baseId mais baseUrl ≠ => throw une erreur', function (done) {
-      // on recommence avec baseUrl ≠, ça doit nous jeter
-      const addThrow = () => addSesatheque(baseId, baseUrl2)
-      const reMsg = /déjà définie avec une autre base/
-      expect(addThrow).to.throw(Error, reMsg)
-      done()
-    })
-    it('add avec nouvelle baseId mais baseUrl existante => throw une erreur', function (done) {
-      const addThrow = () => addSesatheque(baseId3, baseUrl)
-      const reMsg = /était déjà enregistré avec/
-      expect(addThrow).to.throw(Error, reMsg)
-      done()
-    })
-    it('nouvel add sans slash de fin dans baseUrl, ça l’ȧjoute en le disant', function (done) {
-      // on recommence sans le slash de fin
-      expect(addSesatheque(baseId3, baseUrl3)).to.be.true
-      expect(consoleErrorSpy).to.have.been.calledWithMatch(/doit avoir un slash de fin/)
-      baseUrl3 += '/'
-      expect(getBaseUrl(baseId3)).to.equal(baseUrl3)
-      expect(getBaseId(baseUrl3)).to.equal(baseId3)
-      done()
-    })
+  it('get de notre sesathèque de test mise au boot', function (done) {
+    const {baseId, baseUrl} = lassi.settings.application
+    expect(exists(baseId)).to.be.true
+    expect(getBaseUrl(baseId)).to.equal(baseUrl)
+    expect(getBaseId(baseUrl)).to.equal(baseId)
+    expect(consoleErrorSpy).to.not.have.been.called
+    done()
+  })
 
-    it('getBaseId throw Error ou console.error si baseUrl inconnue', function (done) {
-      const getBaseIdThrow = () => getBaseId('foo')
-      const reMsg = /pas l’url d’une sesathèque connue/
-      expect(getBaseIdThrow).to.throw(Error, reMsg)
-      getBaseId('foo', false)
-      expect(consoleErrorSpy).to.have.been.calledWithMatch(reMsg)
-      done()
-    })
+  it('addSesatheque puis get', function (done) {
+    expect(addSesatheque(baseId, baseUrl)).to.be.true
+    expect(consoleErrorSpy).to.not.have.been.called
+    expect(exists(baseId)).to.be.true
+    expect(getBaseUrl(baseId)).to.equal(baseUrl)
+    expect(getBaseId(baseUrl)).to.equal(baseId)
+    done()
+  })
+  it('2e add identique renvoie false sans râler', function (done) {
+    // on recommence, ça doit renvoyer false
+    expect(addSesatheque(baseId, baseUrl)).to.be.false
+    expect(consoleErrorSpy).to.not.have.been.called
+    expect(exists(baseId)).to.be.true
+    expect(getBaseUrl(baseId)).to.equal(baseUrl)
+    expect(getBaseId(baseUrl)).to.equal(baseId)
+    done()
+  })
+  it('add avec même baseId mais baseUrl ≠ => throw une erreur', function (done) {
+    // on recommence avec baseUrl ≠, ça doit nous jeter
+    const addThrow = () => addSesatheque(baseId, baseUrl2)
+    const reMsg = /déjà définie avec une autre base/
+    expect(addThrow).to.throw(Error, reMsg)
+    done()
+  })
+  it('add avec nouvelle baseId mais baseUrl existante => throw une erreur', function (done) {
+    const addThrow = () => addSesatheque(baseId3, baseUrl)
+    const reMsg = /était déjà enregistré avec/
+    expect(addThrow).to.throw(Error, reMsg)
+    done()
+  })
+  it('nouvel add sans slash de fin dans baseUrl, ça l’ȧjoute en le disant', function (done) {
+    // on recommence sans le slash de fin
+    expect(addSesatheque(baseId3, baseUrl3)).to.be.true
+    expect(consoleErrorSpy).to.have.been.calledWithMatch(/doit avoir un slash de fin/)
+    baseUrl3 += '/'
+    expect(getBaseUrl(baseId3)).to.equal(baseUrl3)
+    expect(getBaseId(baseUrl3)).to.equal(baseId3)
+    done()
+  })
+
+  it('getBaseId throw Error ou console.error si baseUrl inconnue', function (done) {
+    const getBaseIdThrow = () => getBaseId('foo')
+    const reMsg = /pas l’url d’une sesathèque connue/
+    expect(getBaseIdThrow).to.throw(Error, reMsg)
+    getBaseId('foo', false)
+    expect(consoleErrorSpy).to.have.been.calledWithMatch(reMsg)
+    done()
   })
 }

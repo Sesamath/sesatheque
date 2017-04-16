@@ -39,13 +39,11 @@
 'use strict'
 /* eslint-env mocha */
 // import {expect} from 'chai'
-
-module.exports = function test404 (globTest) {
-  describe('contenus statiques', function () {
-    it('la page d’accueil existe', function () {
-      return globTest.client
-        .get('/')
-        .expect(200)
-    })
+/* global stClient */
+module.exports = function describeStatic () {
+  it('la page d’accueil existe', function () {
+    return stClient
+      .get('/')
+      .expect(200)
   })
 }
