@@ -661,15 +661,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.login = function (context, personne, next) {
     function setSession (error, personne) {
-      if (personne) {
-        $personneRepository.setPermissions(personne)
-        context.session.user = personne
-      } else if (!error) {
-        context.session.user = {
-          oid: 0,
-          _lastCheck: new Date()
-        }
-      }
+      // met en session le user ou un objet oid:0 pour mettre en session le fait qu'on est pas authentifié
+      if (personne) context.session.user = personne
+      else if (!error) context.session.user = {oid: 0, _lastCheck: new Date()}
       next(error, personne)
     }
 
@@ -689,15 +683,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     function setSession (error, personne) {
       log.debug('setSession error', error)
       log.debug('setSession personne', personne)
-      if (personne) {
-        $personneRepository.setPermissions(personne)
-        context.session.user = personne
-      } else if (!error) {
-        context.session.user = {
-          oid: 0,
-          _lastCheck: new Date()
-        }
-      }
+      if (personne) context.session.user = personne
+      else if (!error) context.session.user = {oid: 0, _lastCheck: new Date()}
       next(error, personne)
     }
 

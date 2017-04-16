@@ -37,17 +37,49 @@ const sjtObj = require('sesajstools/utils/object')
 /**
  * Entity pour un user
  * @entity EntityPersonne
+ * @typedef EntityPersonne
  * @extends Entity
  * @extends Personne
  */
 module.exports = function (EntityPersonne, $cachePersonne) {
-  EntityPersonne.construct(Personne)
+  const configRoles = lassi.settings.components.personne.roles
+  /**
+   * Calcule et affecte les permissions d'une personne en fonction de ses rôles
+   * et des permissions données à chaque rôle en configuration
+   * @param {Object} roles La liste des rôles avec {role1: true}
+   * @returns {Object} avec les permissions en propriété (valeur true|false|undefined)
+   */
+  function getPermissions (roles) {
+    var permissions = {}
+    Object.keys(roles).forEach(role => {
+      const hasRole = roles[role]
+      // on ajoute les permissions définies pour ce role en config
+      if (hasRole && configRoles[role]) {
+        // faut pas faire de merge, on pourrait écraser avec false
+        // une permission déjà accordée par un rôle précédent
+        Object.keys(configRoles[role]).forEach(permission => {
+          const hasPerm = configRoles[role][permission]
+          if (hasPerm) permissions[permission] = true
+        })
+      }
+    })
+    return permissions
+  }
+
+  EntityPersonne.construct(function (values) {
+    // on impose les permissions d'après les rôles définis en config
+    if (values.roles) values.permissions = getPermissions(values.roles)
+    Personne.call(this, values)
+  })
 
   EntityPersonne.table = 'personne'
 
   EntityPersonne.beforeStore = function (next) {
-    // recalculé d'après les roles à chaque load
-    if (this.hasOwnProperty('permissions')) delete this.permissions
+    // recalculé d'après les roles à chaque create/load (dans le constructeur),
+    // mais on le fait aussi ici pour le garantir avant persistance (pas grave) mais surtout mise en cache
+    // le faire 2 fois garanti d'avoir un db ok (avec la conf au moment de la sauvegarde)
+    // ET des permissions ok au runtime (au cas où la conf change)
+    if (this.roles) this.permissions = getPermissions(this.roles)
     // @todo ajouter ici un checkAuthSource
     if (!this.pid && this.origine && this.idOrigine) this.pid = this.origine + '/' + this.idOrigine
     if (!this.pid) throw new Error('personne sans pid, impossible à sauvegarder')
