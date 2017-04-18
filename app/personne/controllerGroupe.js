@@ -368,7 +368,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
             titre: ressource.titre
           }
           Object.keys(ressource).forEach(prop => {
-            if (/^url/.test(prop)) ressData[prop] = prop
+            if (/^url/.test(prop)) ressData[prop] = ressource[prop]
           })
           return ressData
         })
