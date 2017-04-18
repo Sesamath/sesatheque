@@ -135,5 +135,5 @@ module.exports = {
 }
 
 // pour ajouter le SSO Sésamath, il faut installer sesasso-bibli avec
-// npm install git+ssh://git@src.sesamath.net:npm-sesasso-bibli
+// npm install git+ssh://git@src.sesamath.net:sesasso-bibli
 // (il faut avoir les droits sur ce dépôt qui n'est pas public)
