@@ -89,18 +89,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   }
 
   /**
-   * Retourne true si on est dans ce groupe
-   * @private
-   * @param context
-   * @param {string|Groupe} groupe Le groupe ou son nom
-   * @returns {boolean}
-   */
-  function isMine (context, groupe) {
-    var nom = getNom(groupe)
-    return nom ? _.includes($accessControl.getCurrentUserGroupes(context), nom) : false
-  }
-
-  /**
    * Retourne une liste de gestionnaires
    * @private
    * @param {string|string[]} ids Liste d'id de personnes (array ou string avec séparateur qcq)
@@ -333,7 +321,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         // les actions, modif
         if (isManaged) addUrlModif(groupe)
         // membre
-        if (isMine(context, groupe)) addUrlQuit(groupe)
+        if ($accessControl.isGroupeMembre(context, groupe)) addUrlQuit(groupe)
         else if (isManaged || groupe.ouvert) addUrlJoin(groupe)
         // follower
         if (h.isFollowed(context, groupe)) addUrlIgnore(groupe)
@@ -356,14 +344,15 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
-      groupe = grp
-      var msg = 'Le groupe ' + nom + " n'existe pas ou n'est pas public"
-      if (grp) {
-        if (grp.public || isMine(context, nom)) this()
-        else this(msg)
-      } else {
-        this(msg)
+      if (!grp) return this(`Le groupe ${nom} n’existe pas`)
+      if (!grp.nom) {
+        log.error(new Error('groupe sans nom en base de donnée'), grp)
+        return this(`Erreur interne, données incohérentes pour le groupe ${nom}`)
       }
+      groupe = grp
+      nom = grp.nom
+      if (grp.public || $accessControl.isGroupeSuivi(context, nom) || $accessControl.isGroupeMembre(context, nom)) this()
+      else this(`Le groupe ${grp.nom} n'est pas public (et vous n'êtes ni membre ni abonné)`)
     }).seq(function () {
       var $ressourceRepository = lassi.service('$ressourceRepository')
       $ressourceRepository.getListe('groupe/' + nom, {}, this)
@@ -372,7 +361,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         var $ressourceConverter = lassi.service('$ressourceConverter')
         // faut passer addUrlsToList d'abord car il a besoin de la ressource complète
         // donc ensuite dans le map filtrer sur les propriétés url* (on sait pas à l'avance lesquelles)
-        groupe.ressources = $ressourceConverter.addUrlsToList(groupe.ressources).map((ressource) => {
+        groupe.ressources = $ressourceConverter.addUrlsToList(ressources).map((ressource) => {
           // seulement ce qui intéresse la vue du groupe, mais est-ce bien une optimisation ?
           const ressData = {
             oid: ressource.oid,
@@ -383,7 +372,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           })
           return ressData
         })
-        // et on ajoute les liens
+        log.debug(``)
       }
       this()
     }).seq(function () {
@@ -634,7 +623,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           groupes.forEach(function (groupe) {
             var item = { nom: groupe.nom, description: groupe.description }
             if (h.isManaged(context, groupe)) addUrlModif(item)
-            else if (isMine(context, groupe.nom)) addUrlQuit(item)
+            else if ($accessControl.isGroupeMembre(context, groupe.nom)) addUrlQuit(item)
             else addUrlJoin(item)
             if (h.isFollowed(context, groupe.nom)) addUrlIgnore(item)
             else addUrlFollow(item)
@@ -666,7 +655,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           groupes.forEach(function (groupe) {
             var item = { nom: groupe.nom, description: groupe.description }
             if (h.isManaged(context, groupe)) addUrlModif(item)
-            else if (isMine(context, groupe.nom)) addUrlQuit(item)
+            else if ($accessControl.isGroupeMembre(context, groupe.nom)) addUrlQuit(item)
             else addUrlJoin(item)
             if (h.isFollowed(context, groupe.nom)) addUrlIgnore(item)
             else addUrlFollow(item)
@@ -715,7 +704,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       // log.debug('groupes dont je suis gestionnaire', groupesManaged)
 
       // groupes dont on est membre
-      var groupesMembre = $accessControl.getCurrentUserGroupes(context)
+      var groupesMembre = $accessControl.getCurrentUserGroupesMembre(context)
       var itemsMembre = []
       groupesMembre.forEach(function (nom) {
         var groupe = {
@@ -747,7 +736,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         addUrlDescribe(groupe)
         var isManaged = groupesManaged.some(function (groupeManaged) { return groupeManaged.nom === nom })
         if (isManaged) addUrlModif(nom)
-        else if (!isMine(context, nom)) addUrlIgnore(groupe)
+        else if (!$accessControl.isGroupeMembre(context, nom)) addUrlIgnore(groupe)
         itemsSuivis.push(groupe)
       })
       // log.debug('groupes suivis', itemsSuivis)
@@ -781,7 +770,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     }).seq(function (grp) {
       var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou n'est pas ouvert"
       if (grp) {
-        if (isMine(context, nom)) this('Vous êtes déjà membre du groupe ' + nom)
+        if ($accessControl.isGroupeMembre(context, nom)) this('Vous êtes déjà membre du groupe ' + nom)
         else if (grp.ouvert) this()
         else this(deniedMsg)
       } else {
@@ -802,7 +791,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   controller.get('quitter/:nom', function (context) {
     var nom = context.arguments.nom
-    if (isMine(context, nom)) {
+    if ($accessControl.isGroupeMembre(context, nom)) {
       h.quitGroup(context, nom, function (error) {
         if (error) goToPersoOrError(context, error, true)
         else goToPersoOrError(context, 'Vous avez quitté le groupe ' + nom)

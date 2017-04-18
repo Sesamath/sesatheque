@@ -4,6 +4,7 @@ npm-debug.log
 _private
 logs/*
 logsCommun/*
+logsTest/*
 documentation/*
 *.pid
 *.map

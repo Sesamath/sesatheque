@@ -51,17 +51,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
    */
 
   /**
-   * Retourne true si on est dans ce groupe
-   * @private
-   * @param context
-   * @param {string|Groupe} groupe Le groupe ou son nom
-   * @returns {boolean}
-   */
-  function isMine (context, groupe) {
-    return groupe.nom ? _.includes($accessControl.getCurrentUserGroupes(context), groupe.nom) : false
-  }
-
-  /**
    * Create un groupe
    * @route GET /api/groupe/add/:nom
    */
@@ -135,7 +124,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
       var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou vous n'en faite pas partie"
-      if (grp && isMine(context, nom)) h.quitGroup(context, nom, this)
+      if (grp && $accessControl.isGroupeMembre(context, nom)) h.quitGroup(context, nom, this)
       else this(deniedMsg)
     }).seq(function () {
       $json.send(context, 'Vous avez quitté le groupe ' + nom)
@@ -189,7 +178,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
             done[ groupe.nom ] = true
           })
         }
-        $accessControl.getCurrentUserGroupes(context).forEach(function (groupeName) {
+        $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
           if (!done[ groupeName ]) {
             groupesMembre.push({ name: groupeName, member: true })
             done[ groupeName ] = true
@@ -224,7 +213,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
             done[ groupe.nom ] = true
           })
         }
-        $accessControl.getCurrentUserGroupes(context).forEach(function (groupeName) {
+        $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
           if (!done[ groupeName ]) {
             groupesSuivis.push({ name: groupeName, member: true })
             done[ groupeName ] = true

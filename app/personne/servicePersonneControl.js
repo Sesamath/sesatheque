@@ -66,7 +66,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         if (_.includes(whiteList, groupe.nom)) {
           if (isGroupeAuteur) ressource.groupesAuteurs.push(groupe.nom)
           else ressource.groupes.push(groupe.nom)
-        } else if ($accessControl.isInGroupe(context, groupe.nom)) {
+        } else if ($accessControl.isGroupeMembre(context, groupe.nom)) {
           if (isGroupeAuteur) {
             // il faut en plus les droits updateAuteurs
             if ($accessControl.hasPermission('updateAuteurs', context, ressource)) ressource.groupesAuteurs.push(groupe.nom)

@@ -109,7 +109,7 @@ module.exports = function ($accessControl) {
     } else {
       log.error(new Error('appel de $routes.getAbs avec une action non gérée : ' + action))
     }
-    log.debug(`getAbs ${action} va retourner ${route}`)
+    // log.debug(`getAbs ${action} va retourner ${route}`)
 
     return route
   }

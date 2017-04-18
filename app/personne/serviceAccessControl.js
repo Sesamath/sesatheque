@@ -170,49 +170,46 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (!ressource) throw new Error('pas de ressource')
     // nos ips ont le droit de tout lire via l'api
     if (hasAllRights(context)) return
-
-    var msg
+    let msg
     if (ressource.publie) {
       var restriction = $settings.get('components.ressource.constantes.restriction')
       if (ressource.restriction === restriction.aucune) return
-      else if (!$accessControl.isAuthenticated(context)) msg = 'Vous devez être authentifié pour consulter cette ressource'
-      else {
-        var user = $accessControl.getCurrentUser(context)
-        switch (ressource.restriction) {
-          // public
-          case restriction.aucune:
-            return
+      if (!$accessControl.isAuthenticated(context)) return 'Vous devez être authentifié pour consulter cette ressource'
+      var user = $accessControl.getCurrentUser(context)
+      switch (ressource.restriction) {
+        // public
+        case restriction.aucune:
+          return
 
-          // correction
-          case restriction.correction:
-            if (hasGenericPermission('correction', context)) return
-            else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
-            break
+        // correction
+        case restriction.correction:
+          if (hasGenericPermission('correction', context)) return
+          else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
+          break
 
-          // réservée au groupe
-          case restriction.groupe:
-            if ($accessControl.isAuteur(context, ressource)) return
-            if ($accessControl.isContributeur(context, ressource)) return
-            if (ressource.groupes && !_.isEempty(_.intersection(ressource.groupes, user.groupesMembre))) return
-            msg = 'Ressource restreinte'
-            break
+        // réservée au groupe
+        case restriction.groupe:
+          if ($accessControl.isAuteur(context, ressource)) return
+          if ($accessControl.isContributeur(context, ressource)) return
+          if (ressource.groupes && !_.isEmpty(_.intersection(ressource.groupes, user.groupesMembre))) return
+          msg = 'Ressource restreinte'
+          break
 
-          // privée
-          case restriction.prive:
-            if ($accessControl.isAuteur(context, ressource)) return
-            if ($accessControl.isContributeur(context, ressource)) return
-            msg = 'Ressource privée'
-            break
+        // privée
+        case restriction.prive:
+          if ($accessControl.isAuteur(context, ressource)) return
+          if ($accessControl.isContributeur(context, ressource)) return
+          msg = 'Ressource privée'
+          break
 
-          default:
-            msg = 'Restriction non gérée'
-        }
+        default:
+          msg = 'Restriction non gérée'
       }
     } else {
       // pas publié, faut avoir les droits d'édition pour la voir
       msg = getUpdateDeniedMessage(context, ressource)
       // mais avec un message adapté
-      if (msg) msg = 'Ressource non publiée'
+      if (msg) msg = 'Ressource non publiée (il faut le droit d’édition pour la voir)'
     }
 
     return msg
@@ -387,7 +384,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @return {string[]} La liste des noms des groupes dont on est membre
    * @memberOf $accessControl
    */
-  $accessControl.getCurrentUserGroupes = function (context) {
+  $accessControl.getCurrentUserGroupesMembre = function (context) {
     var groupes = []
     if (context.session.user && context.session.user.groupesMembre) groupes = context.session.user.groupesMembre
 
@@ -604,14 +601,33 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Retourne true si l'utilisateur est membre du groupe
-   * @param {Context} context
-   * @param {string}  groupeNom
+   * Retourne true si on est membre du groupe
+   * @private
+   * @param context
+   * @param {string} groupeNom Le nom du groupe
    * @returns {boolean}
    */
-  $accessControl.isInGroupe = function (context, groupeNom) {
-    var user = $accessControl.getCurrentUser(context)
-    return (user.groupesMembre.indexOf(groupeNom) > -1)
+  $accessControl.isGroupeMembre = function (context, groupeNom) {
+    const nom = groupeNom.toLowerCase()
+    return context.session.user &&
+      context.session.user.groupesMembre &&
+      context.session.user.groupesMembre.length &&
+      context.session.user.groupesMembre.find(n => n === nom)
+  }
+
+  /**
+   * Retourne true si on suit ce groupe
+   * @private
+   * @param context
+   * @param {string|Groupe} groupe Le groupe ou son nom
+   * @returns {boolean}
+   */
+  $accessControl.isGroupeSuivi = function (context, groupeNom) {
+    const nom = groupeNom.toLowerCase()
+    return context.session.user &&
+      context.session.user.groupesSuivis &&
+      context.session.user.groupesSuivis.length &&
+      context.session.user.groupesSuivis.find(n => n === nom)
   }
 
   /**

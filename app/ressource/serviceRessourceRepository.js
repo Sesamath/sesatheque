@@ -537,7 +537,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
           if (type === 'auteur') {
             query = query.match('auteurs').equals(target)
           } else if (type === 'groupe') {
-            query = query.match('groupes').equals(target)
+            query = query.match('groupes').equals(target.toLowerCase())
           } else {
             throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
           }
