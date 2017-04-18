@@ -321,7 +321,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         // les actions, modif
         if (isManaged) addUrlModif(groupe)
         // membre
-        if ($accessControl.isGroupeMembre(context, groupe)) addUrlQuit(groupe)
+        if ($accessControl.isGroupeMembre(context, groupe.nom)) addUrlQuit(groupe)
         else if (isManaged || groupe.ouvert) addUrlJoin(groupe)
         // follower
         if (h.isFollowed(context, groupe)) addUrlIgnore(groupe)
