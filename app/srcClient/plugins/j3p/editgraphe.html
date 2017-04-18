@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur de graphe j3p</title>
+</head>
+<body>
+<div id="root"></div>
+<script type="application/javascript">
+  // une fct en global que notre parent appellera
+  function load (cssPath, jsPath, ressource, loadCb) {
+    // quand le js sera chargé
+    function onLoad () {
+      script.removeEventListener('load', onLoad)
+      j3p_editGraphe.default(document.getElementById("root"), ressource, loadCb)
+    }
+    // console.log('load de l’iframe appelé avec', cssPath, jsPath, ressource)
+    var head = window.document.getElementsByTagName('head')[0]
+    // css
+    var link = window.document.createElement('link')
+    link.rel = 'stylesheet'
+    link.type = 'text/css'
+    link.href = cssPath
+    head.appendChild(link)
+    var script = window.document.createElement('script')
+    script.type = 'text/javascript'
+    document.body.appendChild(script)
+    script.addEventListener('load', onLoad)
+    script.src = jsPath
+  }
+</script>
+</body>
+</html>

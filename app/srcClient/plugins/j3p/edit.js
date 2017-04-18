@@ -35,7 +35,6 @@
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var sjtUrl = require('sesajstools/http/url')
-var embedEditGraphe = require('sesaeditgraphe/src/embed').default
 
 var page = require('../../page/index')
 
@@ -153,12 +152,21 @@ module.exports = function edit (ressource, options) {
      * @param {Ressource} ressource
      */
     function loadGraphic (container, ressource) {
-      dom.empty(container)
-      embedEditGraphe(container, ressource, function (error, getRessourceParametres) {
-        log('retour de embedEditGraphe avec', error, getRessourceParametres, typeof getRessourceParametres)
-        if (error) {
-          page.addError(error)
-        } else if (getRessourceParametres) {
+      // listener sur le chargement de l'iframe
+      function onLoadIframe () {
+        // si on est en local avec hjs-webpack, un css avec require basique ne contient rien
+        // (removed by extract-text-webpack-plugin), d'où le file d'un css déjà compilé par webpack.static
+        var cssPath = require('file!sesaeditgraphe/dist/editGraphe.css')
+        // pour le js on veut aussi une url (qui sera chargée dans le dom de l'iframe), pas un module js
+        var jsPath = require('file!sesaeditgraphe/dist/editGraphe')
+        iframe.contentWindow.load(cssPath, jsPath, ressource, loadCb)
+        iframe.removeEventListener('load', onLoadIframe)
+      }
+      // callback de la fct load de l'iframe
+      function loadCb (error, getRessourceParametres) {
+        log(`retour du chargement editGraphe avec ${typeof getRessourceParametres}`, getRessourceParametres)
+        if (error) return page.addError(error)
+        if (getRessourceParametres) {
           if (!isEditgrapheLoaded) {
             isEditgrapheLoaded = true
             addSubmitHandler()
@@ -168,7 +176,24 @@ module.exports = function edit (ressource, options) {
         } else {
           page.addError(new Error('Le chargement de l’éditeur de graphe n’a pas renvoyé de moyen de récupérer le graphe construit'))
         }
-      })
+      }
+
+      dom.empty(container)
+      var size = dom.getSize()
+      var height = size.height
+      if (!height) height = Math.max(Math.round((elt.offsetWidth || 0) * 3 / 4), 500)
+      var width = size.width
+      if (!width) width = '100%'
+      var iframeAttrs = {
+        id: 'segIframe',
+        width: width,
+        height: height,
+        allowfullscreen: true,
+        style: { border: 'none' }
+      }
+      const iframe = dom.addElement(container, 'iframe', iframeAttrs)
+      iframe.addEventListener('load', onLoadIframe)
+      iframe.src = require('file!./editgraphe.html')
     } // loadGraphic
 
     const $ = require('jquery')
