@@ -42,9 +42,9 @@ var conf = {
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/index.js',
     import: './app/srcClient/edit/import.js',
-    editGraphe: 'sesaeditgraphe/src/editGraphe.js',
+    editGraphe: 'sesaeditgraphe/dist/editGraphe.js',
     // lui est appelé par sesatheque-client:src/resultatFormatters.js:j3p.getHtmlFullReponse
-    showParcours: 'sesaeditgraphe/src/showParcours.js'
+    showParcours: 'sesaeditgraphe/dist/showParcours.js'
   },
   output: {
     path: webpackOutput,
