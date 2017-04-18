@@ -672,7 +672,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             }
           })
         } else {
-          $ressourcePage.printError(context, 'La ressource ' + oid + " n'existe pas ou vous n'avez pas les droits suffisants pour la supprimer")
+          $ressourcePage.printError(context, `La ressource ${oid} n’existe pas`)
         }
       })
     } else {

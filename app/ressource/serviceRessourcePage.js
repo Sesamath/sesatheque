@@ -863,7 +863,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         termine()
       }
     } else {
-      $ressourcePage.printError(context, "Cette ressource n'existe pas ou vous n'avez pas les droits suffisants pour y accéder", 404)
+      $ressourcePage.printError(context, 'Cette ressource n’existe pas', 404)
     }
   } // prepareAndSend
 
