@@ -14,7 +14,7 @@
     function onLoad () {
       script.removeEventListener('load', onLoad)
       var root = document.getElementById('root')
-      if (typeof steditGraphe !== 'undefined') steditGraphe.default(root, ressource, loadCb)
+      if (typeof steditGraphe === 'function') steditGraphe(root, ressource, loadCb)
       else root.innerText = 'Problème de chargement d’editgraphe'
     }
     // console.log('load de l’iframe appelé avec', cssPath, jsPath, ressource)
