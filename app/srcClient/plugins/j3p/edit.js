@@ -148,18 +148,15 @@ module.exports = function edit (ressource, options) {
 
     /**
      * Ajoute editgraphe dans le container
+     * ATTENTION, il faut que webpack compile le js qui sera appelé par l'iframe (editgraphe.html)
+     * idem pour showParcours que sesatheque-client appelle depuis sesalab
      * @param {Element}   container
      * @param {Ressource} ressource
      */
     function loadGraphic (container, ressource) {
       // listener sur le chargement de l'iframe
       function onLoadIframe () {
-        // si on est en local avec hjs-webpack, un css avec require basique ne contient rien
-        // (removed by extract-text-webpack-plugin), d'où le file d'un css déjà compilé par webpack.static
-        var cssPath = require('file!sesaeditgraphe/dist/editGraphe.css')
-        // pour le js on veut aussi une url (qui sera chargée dans le dom de l'iframe), pas un module js
-        var jsPath = require('file!sesaeditgraphe/dist/editGraphe')
-        iframe.contentWindow.load(cssPath, jsPath, ressource, loadCb)
+        iframe.contentWindow.load(ressource, loadCb)
         iframe.removeEventListener('load', onLoadIframe)
       }
       // callback de la fct load de l'iframe

@@ -9,6 +9,8 @@ documentation/*
 *.pid
 *.map
 app/ressource/public/*.bundle.js
+# les css, tous construits par webpack ou less
+app/ressource/public/*.css
 # webpack construit ses fichiers avec 32 caractères, mais on a pas le droit au regex façon
 # app/ressource/public/[a-f0-9]{32}.*
 app/ressource/public/????????????????????????????????.*

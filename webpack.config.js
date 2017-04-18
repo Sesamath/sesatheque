@@ -42,7 +42,9 @@ var conf = {
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/index.js',
     import: './app/srcClient/edit/import.js',
-    showParcours: 'sesaeditgraphe/src/embed/sp.js'
+    editGraphe: 'sesaeditgraphe/src/editGraphe.js',
+    // lui est appelé par sesatheque-client:src/resultatFormatters.js:j3p.getHtmlFullReponse
+    showParcours: 'sesaeditgraphe/src/showParcours.js'
   },
   output: {
     path: webpackOutput,
@@ -65,10 +67,10 @@ var conf = {
   module: {
     loaders: [
       {test: /app\/srcClient\/.*\.js/, loader: 'babel'},
-      // idem pour editgraphe chargé par srcClient/plugins/j3p/edit.js ou showParcours ci-dessus
-      {test: /sesaeditgraphe\/src\/embed\/.*\.js/, loader: 'babel', query: {presets: ['es2015', 'stage-2']}},
+      // editgraphe passe par babel
+      {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel'},
       // idem pour sesatheque-client
-      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel', query: {presets: ['es2015', 'stage-2']}},
+      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
       {test: /(src|node_modules)\/.*\.css/, loader: extractCssLoader},
       {test: /\.otf(\?\S*)?$/, loader: 'url-loader?limit=10000'},
