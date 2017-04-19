@@ -49,31 +49,37 @@ module.exports = function configCheck (config) {
   if (!config.sesatheques) throw new Error(`config.sesatheques est obligatoire`)
   const baseId = config.application.baseId
   const baseUrl = config.application.baseUrl
-  const url = sesatheques.getBaseUrl(config.application.baseIdRegistrar) + 'api/baseId/' + baseId
   // on ajoute notre baseId à la liste des sesatheques si ce n'est pas encore le cas
-  if (!config.sesatheques[baseId]) config.sesatheques[baseId] = baseUrl
+  if (!config.sesatheques.find(s => s.baseId === baseId)) {
+    config.sesatheques.push({baseId, baseUrl})
+    config.sesathequesById[baseId] = baseUrl
+  }
   // on vérifie que baseIdRegistrar connait notre baseId, sinon on le signale
-  const registrar = config.application.baseIdRegistrar
+  const baseUrlRegistrar = sesatheques.getBaseUrl(config.application.baseIdRegistrar) + 'api/baseId/' + baseId
+  const baseIdRegistrar = config.application.baseIdRegistrar
   const reqOptions = {
-    uri: url,
+    uri: baseUrlRegistrar,
     json: true,
     timeout: 3000
   }
   request(reqOptions, function (error, response, body) {
     if (error) {
-      if (error.code === 'ETIMEDOUT') console.error(`${url} n’a pas répondu après 3s, pas de réseau ?`)
+      if (error.code === 'ETIMEDOUT') console.error(`${baseUrlRegistrar} n’a pas répondu après 3s, pas de réseau ?`)
       else console.error(error)
-    } else if (response.statusCode === 200 && body) {
-      if (body.error) {
-        console.error(`Erreur lors de la vérification de ${url}`, body.error)
-      } else if (body.baseUrl) {
-        if (body.baseUrl === config.application.baseUrl) appLog(`baseId correcte sur ${registrar}`)
-        else console.error(`${registrar} connait ${baseId} mais avec l'url ${body.baseUrl} au lieu de ${baseUrl}`)
+      return
+    }
+    if (response.statusCode === 200 && body) {
+      if (body.error) return console.error(`Erreur lors de la vérification de ${baseUrlRegistrar}`, body.error)
+      if (body.baseUrl) {
+        if (body.baseUrl === config.application.baseUrl) appLog(`baseId correcte sur ${baseIdRegistrar}`)
+        else console.error(`${baseIdRegistrar} connait ${baseId} mais avec l'url ${body.baseUrl} au lieu de ${baseUrl}`)
+        console.log('sesatheques', config.sesatheques)
+        console.log('donne', config.sesathequesById)
       } else {
-        console.error(`${url} ne donne pas de réponse conforme`, body)
+        console.error(`${baseUrlRegistrar} ne donne pas de réponse conforme`, body)
       }
     } else {
-      console.error(`${url} ne donne pas de réponse conforme (code ${response.statusCode})`, body)
+      console.error(`${baseUrlRegistrar} ne donne pas de réponse conforme (code ${response.statusCode})`, body)
     }
   })
 }

@@ -215,7 +215,7 @@ if (localConfig) sjtObj.merge(config, localConfig)
 if (config.application.staging === 'prod' && config.$entities.database.debug) {
   delete config.$entities.database.debug
 }
-// on ajoute toujours un slash de fin à baseUrl et baseIdRegistrar
+// on ajoute toujours un slash de fin à baseUrl
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
 
 // idem pour les sesatheques, mais on ajoute un objet byId, plus simple à tester
