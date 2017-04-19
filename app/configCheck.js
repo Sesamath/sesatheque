@@ -73,8 +73,8 @@ module.exports = function configCheck (config) {
       if (body.baseUrl) {
         if (body.baseUrl === config.application.baseUrl) appLog(`baseId correcte sur ${baseIdRegistrar}`)
         else console.error(`${baseIdRegistrar} connait ${baseId} mais avec l'url ${body.baseUrl} au lieu de ${baseUrl}`)
-        console.log('sesatheques', config.sesatheques)
-        console.log('donne', config.sesathequesById)
+        // console.log('sesatheques', config.sesatheques)
+        // console.log('donne', config.sesathequesById)
       } else {
         console.error(`${baseUrlRegistrar} ne donne pas de réponse conforme`, body)
       }
