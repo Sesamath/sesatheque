@@ -69,6 +69,18 @@ function Ref (values, baseId) {
      * @type {string}
      */
     this.aliasOf = values.aliasOf
+    if (values.rid) {
+      // c'est une ressource avec son rid, alias d'une autre (aliasOf),
+      // on note le rid de l'alias
+      /**
+       * Rid de la Ressource "alias" qui a servi à construire cette Ref
+       * Utile pour le normalize de sesatheque-client qui construit les urls
+       * (distinguer les urls d'affichage qui pointent vers l'original
+       * et celles de modif qui pointent sur l'alias)
+       * @type {string}
+       */
+      this.aliasRid = values.rid
+    }
   } else if (values.rid) {
     this.aliasOf = values.rid
   } else if (ref) {

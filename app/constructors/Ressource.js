@@ -68,6 +68,7 @@ function filterUserList (list, defaultBaseId) {
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
  * @constructor
  * @param {Object} initObj Un objet ayant des propriétés d'une ressource
+ * @param {string} myBaseId @deprecated
  */
 function Ressource (initObj, myBaseId) {
   /**
@@ -111,6 +112,11 @@ function Ressource (initObj, myBaseId) {
      * @type {string}
      */
     this.aliasOf = values.aliasOf
+    // si on nous passe une Ref qui provient d'un alias, on a aussi le rid de l'alias
+    if (values.aliasRid) {
+      if (!this.rid) this.rid = values.aliasRid
+      else if (this.rid !== values.aliasRid) throw new Error(`aliasRid (${values.aliasRid}) et rid ${this.rid} incompatibles`)
+    }
   } else if (values.ref) {
     // pour le cast Ref => Ressource de l'ancien format ref
     // à l'ancien format on avait ref et baseId, mais ref pouvait être origine/idOrigine, ou cle/token

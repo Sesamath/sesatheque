@@ -457,7 +457,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if ($accessControl.hasPermission('update', context, ressource)) {
             addToken(context, ressource)
             if (ressource.aliasOf) {
-              // faut récupérer l'ensemble des datas de l'original pour transformer l'alias et en faire un ressource copiée
+              // faut récupérer l'ensemble des datas de l'original pour transformer l'alias
+              // et en faire un ressource copiée
               $ressourceFetch.fetchOriginal(ressource.aliasOf, function (error, ressourceOriginale) {
                 if (error) return logAndSendError(error)
                 if (!ressourceOriginale) return logAndSendError('Impossible de récupérer la ressource de cet alias')

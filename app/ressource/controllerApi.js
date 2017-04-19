@@ -146,11 +146,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           else log.dataError('sequenceModele sans parametres', ressource)
         } else {
           const ref = new Ref(ressource)
-          // si ressource est un alias, faut ajouter un rid sur l'item qu'on retourne,
-          // pour que sesatheque-client puisse distinguer l'alias de l'original
-          if (ressource.aliasOf) {
-            ref.rid = ressource.rid
-          }
           const isReadable = ref.public || ref.cle
           if (ref.aliasOf && ref.titre && ref.type && isReadable) {
             if (droits) ref.$droits = droits
