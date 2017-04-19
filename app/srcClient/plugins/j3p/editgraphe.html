@@ -14,8 +14,8 @@
     function onLoad () {
       script.removeEventListener('load', onLoad)
       var root = document.getElementById('root')
-      if (typeof steditGraphe === 'function') steditGraphe(root, ressource, loadCb)
-      else root.innerText = 'Problème de chargement d’editgraphe'
+      if (typeof j3p_editGraphe !== 'undefined') j3p_editGraphe.default(root, ressource, loadCb)
+      else root.innerText = 'Problème de chargement d’editgraphe ' + typeof j3p_editGraphe
     }
     // console.log('load de l’iframe appelé avec', cssPath, jsPath, ressource)
     var head = window.document.getElementsByTagName('head')[0]
@@ -23,7 +23,7 @@
     script.type = 'application/javascript'
     document.body.appendChild(script)
     script.addEventListener('load', onLoad)
-    script.src = '/editGraphe.bundle.js'
+    script.src = '/editGraphe.js'
   }
 </script>
 </body>

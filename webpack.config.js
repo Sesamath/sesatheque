@@ -19,6 +19,7 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 var isProd = process.argv.indexOf('--debug') === -1
 var webpack = require('webpack')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
+var CopyWebpackPlugin = require('copy-webpack-plugin')
 var extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
 var extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?minimize' : 'css-loader')
 
@@ -42,9 +43,7 @@ var conf = {
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/index.js',
     import: './app/srcClient/edit/import.js',
-    editGraphe: 'sesaeditgraphe/dist/editGraphe.js',
-    // lui est appelé par sesatheque-client:src/resultatFormatters.js:j3p.getHtmlFullReponse
-    showParcours: 'sesaeditgraphe/dist/showParcours.js'
+    // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
     path: webpackOutput,
@@ -90,6 +89,7 @@ var conf = {
       minChunks: 2,
       chunks: ['page', 'display', 'edit']
     }),
+    new CopyWebpackPlugin([{from: './node_modules/sesaeditgraphe/dist'}]),
     extractCss
   ],
   stats: {

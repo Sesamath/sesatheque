@@ -50,7 +50,6 @@ var page = require('../../page/index')
  */
 module.exports = function edit (ressource, options) {
   require.ensure(['jquery'], function (require) {
-
     /**
      * Ajoute le listener sur submit pour remplir le textarea avec les params d'éditgraphe
      */

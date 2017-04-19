@@ -72,6 +72,7 @@
     "babel-preset-stage-2": "^6.17.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "copy-webpack-plugin": "^4.0.1",
     "css-loader": "0.26.1",
     "eslint": "^3.8.1",
     "eslint-config-standard": "^6.2.1",
