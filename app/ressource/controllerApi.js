@@ -177,14 +177,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // la visibilité, c'est pour cet auteur,
       const visibility = 'auteur/' + pid
       flow().seq(function () {
-        $ressourceRepository.getListe(visibility, {filters: [{index: 'auteurs', values: [pid]}]}, this)
+        $ressourceRepository.getListe(visibility, {filters: [{index: 'auteurs', values: [pid]}], nb}, this)
       }).seq(function (ressources) {
         if (ressources.length) addRefs(ressources, 'WD')
         if (ressources.length === nb) {
           log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb}, auteur)`)
           refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources dont l’auteur est ${pid})`}))
         }
-        $ressourceRepository.getListe(visibility, {filters: [{index: 'contributeurs', values: [pid]}]}, this)
+        $ressourceRepository.getListe(visibility, {filters: [{index: 'contributeurs', values: [pid], nb}]}, this)
       }).seq(function (ressources) {
         if (ressources.length) {
           addRefs(ressources, 'W')
