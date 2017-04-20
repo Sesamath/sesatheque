@@ -47,7 +47,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
-  var myBaseId = appConfig.application.baseId
+  // var myBaseId = appConfig.application.baseId
   var request = require('request')
 
   /**
@@ -107,6 +107,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var message = 'La ressource ' + id + " n'existe pas ou droits insuffisants"
     $ressourcePage.printError(context, message, 404)
   }
+
+  /**
+   * Affiche le message existe pas avec un 404
+   * @private
+   * @param {Context} context
+   * @param {string} [id=] Identifiant de la ressource (ou son titre), pour le mettre dans le message
+   */
+  function print404 (context, id) {
+    $ressourcePage.printError(context, `La ressource ${id} n’existe pas`, 404)
+  }
+
 
   /**
    * Affiche un form en ajoutant un token à la ressource
@@ -447,53 +458,71 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
+    const myPid = $accessControl.getCurrentUserPid(context)
     // pas la peine de la charger si on est pas authentifié
-    if ($accessControl.isAuthenticated(context)) {
-      var oid = context.arguments.oid
-      $ressourceRepository.load(oid, function (error, ressource) {
-        if (error) return logAndSendError(error)
+    if (!myPid) return denied(context)
+    const oid = context.arguments.oid
+    let ressource // la ressource qu'on va envoyer au form
+    flow().seq(function () {
+      $ressourceRepository.load(oid, this)
+    }).seq(function (ressourceBdd) {
+      if (!ressourceBdd) return print404(context, oid)
+      ressource = ressourceBdd
+      const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
+      if (deniedMsg) return denied(deniedMsg)
+      // on peut afficher le form
+      addToken(context, ressource)
+      // cas "normal" (pas un alias), on envoie
+      if (!ressource.aliasOf) return $ressourcePage.printForm(context, null, ressource)
 
-        if (ressource) {
-          if ($accessControl.hasPermission('update', context, ressource)) {
-            addToken(context, ressource)
-            if (ressource.aliasOf) {
-              // faut récupérer l'ensemble des datas de l'original pour transformer l'alias
-              // et en faire un ressource copiée
-              $ressourceFetch.fetchOriginal(ressource.aliasOf, function (error, ressourceOriginale) {
-                if (error) return logAndSendError(error)
-                if (!ressourceOriginale) return logAndSendError('Impossible de récupérer la ressource de cet alias')
-                // on peut dissocier
-                delete ressource.aliasOf
-                // màj
-                ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
-                ressource.auteursParents = (ressourceOriginale.auteursParents || []).concat(ressourceOriginale.auteurs || [])
-                if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) ressource.enfants = ressourceOriginale.enfants
-                ressource.parametres = ressourceOriginale.parametres || {}
-                // sauvegarde de qq infos de l'original
-                ressource.parametres.original = {
-                  rid: ressourceOriginale.rid,
-                  origine: ressourceOriginale.origine,
-                  idOrigine: ressourceOriginale.idOrigine,
-                  version: ressourceOriginale.version
-                }
-                // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
-                $ressourcePage.printForm(context, error, ressource)
-              })
-            } else {
-              $ressourcePage.printForm(context, error, ressource)
-            }
-          } else {
-            // la ressource existe mais on donne pas l'info si on a pas les droits
-            denied404(context, oid)
-          }
-        } else {
-          // la ressource n'existe pas mais on donne pas l'info
-          denied404(context, oid)
-        }
-      })
-    } else {
-      denied(context)
-    }
+      // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
+      // en faire une vraie ressource (un fork de l'original)
+      $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
+    }).seq(function (ressourceOriginale) {
+      if (!ressourceOriginale) {
+        // ce cas devrait être exclu, juste une assurance
+        log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
+        return logAndSendError('L’original a été supprimé, impossible de modifier cet alias')
+      }
+      // on peut forker (chaîne vide plutôt que delete de la propriété
+      // pour que le merge plus tard ne remette pas l'ancienne valeur)
+      ressource.aliasOf = ''
+      // màj
+      // prop où on écrase simplement
+      ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
+      // auteursParents on passe par un Set pour dedup
+      const auteursParents = new Set()
+      if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
+      if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
+      else log.dataError('ressource sans auteurs')
+      ressource.auteursParents = Array.from(auteursParents)
+      // enfants
+      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) ressource.enfants = ressourceOriginale.enfants
+      // parametres
+      ressource.parametres = ressourceOriginale.parametres || {}
+      // sauvegarde de qq infos de l'original dans la copie
+      ressource.parametres.original = {
+        rid: ressourceOriginale.rid,
+        origine: ressourceOriginale.origine,
+        idOrigine: ressourceOriginale.idOrigine,
+        version: ressourceOriginale.version
+      }
+      // relations
+      if (!ressource.relations) ressource.relations = []
+      ressource.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
+      // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
+      // si on est pas l'auteur de l'alias (bizarre), on s'ajoute en contributeur
+      if (!ressource.auteurs) {
+        ressource.auteurs = []
+        log.dataError('ressource sans auteur', ressource)
+        ressource.auteurs.push(myPid)
+      }
+      if (ressource.auteurs.indexOf(myPid) === -1) {
+        if (!ressource.contributeurs) ressource.contributeurs = []
+        if (ressource.contributeurs.indexOf(myPid) === -1) ressource.contributeurs.push(myPid)
+      }
+      $ressourcePage.printForm(context, null, ressource)
+    }).catch(logAndSendError)
   })
 
   /**
@@ -566,7 +595,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
       }).seq(function (ressource) {
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
-        sjtObj.update(ressourceOriginale, ressource)
+        Object.assign(ressourceOriginale, ressource)
         log.debug('ressource avant enregistrement', ressourceOriginale, 'avirer', {max: 10000})
         $ressourceRepository.save(ressourceOriginale, this)
       }).seq(function (ressource) {
