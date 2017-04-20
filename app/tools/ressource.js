@@ -31,24 +31,24 @@
 'use strict'
 
 /**
- * Ajoute un warning à la ressource (en créant le tableau _warnings s'il n'existait pas)
+ * Ajoute un warning à la ressource (en créant le tableau $warnings s'il n'existait pas)
  * @param {Ressource} ressource
  * @param {string} warning
  */
 function addWarning (ressource, warning) {
-  if (!ressource._warnings) ressource._warnings = []
-  ressource._warnings.push(warning)
+  if (!ressource.$warnings) ressource.$warnings = []
+  ressource.$warnings.push(warning)
 }
 
 /**
- * Ajoute une erreur à la ressource (en créant le tableau _errors s'il n'existait pas)
+ * Ajoute une erreur à la ressource (en créant le tableau $errors s'il n'existait pas)
  * @param {Ressource} ressource
  * @param {string} error
  */
 function addError (ressource, error) {
-  if (!ressource._errors) ressource._errors = []
-  if (typeof error === 'string') ressource._errors.push(error)
-  else ressource._errors.push(error.toString())
+  if (!ressource.$errors) ressource.$errors = []
+  if (typeof error === 'string') ressource.$errors.push(error)
+  else ressource.$errors.push(error.toString())
 }
 
 module.exports = {

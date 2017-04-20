@@ -144,7 +144,7 @@ function checkEnfants (enfants, ressource, titre) {
  * @memberOf $ressourceControl
  * @param {object} ressource objet qui provient d'un post (toutes les valeurs sont des strings, les boolean sont sous la forme checkbox
  * @param {ressourceCallback} next Callback appelé en synchrone qui recevra les arguments (error, ressource)
- *                        ressource pourra avoir _errors ou _warnings (cast éventuels effectués)
+ *                        ressource pourra avoir $errors ou $warnings (cast éventuels effectués)
  */
 function valide (data, next) {
   log.debug('ressource dans valide', data, 'form', {max: 2000})
@@ -184,7 +184,7 @@ function valide (data, next) {
 module.exports = function (EntityRessource) {
   /**
    * Converti le post reçu en ressource avec cast sur les propriétés et formatage de date
-   * Ajoute des choses dans ressource._warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
+   * Ajoute des choses dans ressource.$warnings ou ressources.errors si besoin (et laisse inchangé les valeurs dans ce cas)
    * @memberOf $ressourceControl
    * @param {Object} data Le post
    * @param {boolean} [partial=false] Passer true pour ne pas générer d'erreur sur des champs requis manquants

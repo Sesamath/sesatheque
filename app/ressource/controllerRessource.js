@@ -129,8 +129,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function printForm (context, error, ressource, titre) {
     if (error) log.error('une erreur au post update', error)
-    if (ressource._errors) log.debug('errors au post update', ressource._errors)
-    if (ressource._warnings) log.debug('warnings au post update avec force=' + (context.post && context.post.force), ressource._warnings)
+    if (ressource.$errors) log.debug('errors au post update', ressource.$errors)
+    if (ressource.$warnings) log.debug('warnings au post update avec force=' + (context.post && context.post.force), ressource.$warnings)
     addToken(context, ressource)
     var options
     if (titre) options = {$metas: {title: 'Ajouter une ressource'}}
@@ -419,8 +419,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
       $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
     }).seq(function (ressource) {
-      if (!_.isEmpty(ressource._errors)) printForm(context, null, ressource, titrePage)
-      else if (!_.isEmpty(ressource._warnings) && !context.post.force) printForm(context, null, ressource, titrePage)
+      if (!_.isEmpty(ressource.$errors)) printForm(context, null, ressource, titrePage)
+      else if (!_.isEmpty(ressource.$warnings) && !context.post.force) printForm(context, null, ressource, titrePage)
       else this(null, ressource)
     }).seq(function (ressource) {
       // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
@@ -430,7 +430,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           // on veut gérér les erreurs ici, signe d'un bug dans notre code
           log.error(new Error('on a une erreur au save mais pas au valide précédent'))
           printForm(context, error, ressource, 'Ajouter une ressource')
-        } else if (!_.isEmpty(ressourceSaved._errors)) {
+        } else if (!_.isEmpty(ressourceSaved.$errors)) {
           printForm(context, error, ressourceSaved, 'Ajouter une ressource')
         } else {
           log.debug(`Après le save on récupère l’oid ${ressource.oid}, on lance le redirect`)
@@ -567,8 +567,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressource) {
         // faut la mémoriser pour comparer avec la bdd
         ressourceNormee = ressource
-        if (_.isEmpty(ressource._errors)) {
-          if (!_.isEmpty(ressource._warnings) && ressource.force !== 'forced') {
+        if (_.isEmpty(ressource.$errors)) {
+          if (!_.isEmpty(ressource.$warnings) && ressource.force !== 'forced') {
             printForm(context, null, ressource, titrePage)
           } else {
             // faut charger l'ancienne pour vérifier groupes et personnes

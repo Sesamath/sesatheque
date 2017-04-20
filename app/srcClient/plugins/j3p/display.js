@@ -73,6 +73,8 @@ module.exports = function display (ressource, options, next) {
                 const total = resultat.contenu.scores.reduce((total, score) => total + Number(score), 0)
                 if (Number.isNaN(total)) page.addError('Un score d’un nœud est invalide')
                 else resultat.score = total / nb
+              } else {
+                console.error('j3p renvoie un résultat avec fin mais sans score', resultat)
               }
             }
             options.resultatCallback(resultat)

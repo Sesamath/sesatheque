@@ -461,7 +461,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   function getFormViewData (context, error, ressource, next) {
     var formData = {
-      errors: ressource && ressource._errors || []
+      errors: ressource && ressource.$errors || []
     }
 
     if (error) {
@@ -625,8 +625,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       }
 
       // un checkbox pour forcer malgré les warnings si y'en a (mais qu'il n'y a pas d'erreurs)
-      if (ressource._warnings && ressource._warnings.length && !formData.errors.length) {
-        formData.warnings = ressource._warnings
+      if (ressource.$warnings && ressource.$warnings.length && !formData.errors.length) {
+        formData.warnings = ressource.$warnings
         formData.force = {
           id: 'force',
           label: ressConfig.labels.force,
@@ -713,8 +713,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // on ajoute oid
       if (ressource.oid) viewData.oid = ressource.oid
       // warnings et errors éventuels
-      if (ressource._warnings && ressource._warnings.length) viewData.warnings = ressource._warnings
-      if (ressource._errors && ressource._errors.length) viewData.errors = ressource._errors
+      if (ressource.$warnings && ressource.$warnings.length) viewData.warnings = ressource.$warnings
+      if (ressource.$errors && ressource.$errors.length) viewData.errors = ressource.$errors
     } else {
       // pas d'erreur mais pas de ressource non plus
       $page.addError('Aucune ressource transmise pour affichage', viewData)

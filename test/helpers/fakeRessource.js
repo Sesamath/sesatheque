@@ -127,8 +127,8 @@ function getFakeRessource (options) {
     'version',
     'indexable',
     'archiveOid',
-    '_warnings',
-    '_errors'
+    '$warnings',
+    '$errors'
   ].forEach(p => { if (options[p]) fakeRessource[p] = options[p] })
 
   return fakeRessource

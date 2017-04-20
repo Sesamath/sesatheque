@@ -331,9 +331,9 @@ function Ressource (initObj, myBaseId) {
    * @default {[]}
    * @type {string[]}
    */
-  this._warnings = []
-  if (values._warnings) {
-    this._warnings = filters.arrayString(values._warnings)
+  this.$warnings = []
+  if (values.$warnings) {
+    this.$warnings = filters.arrayString(values.$warnings)
   }
   /**
    * Une liste d'erreurs éventuelles (incohérences, données manquantes, etc.)
@@ -341,27 +341,29 @@ function Ressource (initObj, myBaseId) {
    * @default {[]}
    * @type {string[]}
    */
-  this._errors = []
-  if (values._errors) {
-    this._errors = filters.arrayString(values._errors)
+  this.$errors = []
+  if (values.$errors) {
+    this.$errors = filters.arrayString(values.$errors)
   }
   // et on ajoute des erreurs si on a viré des trucs
   Object.getOwnPropertyNames(values).forEach(p => {
     // this est bien l'objet courant car c'est une fct fléchée
     // mais on assure le coup en le passant en 2e param de forEach
 
+    // à virer quand la prod aura été upgradée
+    if (p === 'ref') return
     // on ignore public traité et mis dans restriction, et aliasOf
     if (p === 'public') return
     // on ignore les propriétés ajoutées par un form pour du contexte
     if (p === 'new' || p === 'token' || p.substr(0, 1) === '_') return
-    // et celles qui commencent par _ ou $
-    if (/^(_|\$)/.test(p)) return
+    // et celles qui commencent par $
+    if (p.substr(0, 1) === '$') return
 
     if (Array.isArray(this[p])) {
       // pour les tableaux on regarde si on a toujours autant d'éléments
       if (Array.isArray(values[p])) {
         if (this[p].length < values[p].length) {
-          this._errors.push(`des éléments de la propriété ${p} étaient invalides et ont été ignorés`)
+          this.$errors.push(`des éléments de la propriété ${p} étaient invalides et ont été ignorés`)
           if (typeof log === 'function' && log.debug) {
             log.debug(`pour ${p} on a initialement`, values[p])
             log.debug('qui donne', this[p])
@@ -371,7 +373,7 @@ function Ressource (initObj, myBaseId) {
         }
       } else if (values[p]) {
         // on voulait un array mais on nous a filé autre chose
-        this._errors.push(`La propriété ${p} n’était pas un tableau, elle a été ignorée`)
+        this.$errors.push(`La propriété ${p} n’était pas un tableau, elle a été ignorée`)
         console.error('contenu invalide', values[p])
       }
 
@@ -379,7 +381,7 @@ function Ressource (initObj, myBaseId) {
     } else if (!this.hasOwnProperty(p)) {
       // falsy ignorés, c'est normal
       if (!values[p]) return
-      this._warnings.push(`La propriété ${p} n’existe pas dans une ressource, elle a été ignorée`)
+      this.$warnings.push(`La propriété ${p} n’existe pas dans une ressource, elle a été ignorée`)
       if (typeof log !== 'undefined') log.dataError(`propriété ${p} ignorée dans`, values)
       else console.error(`propriété ${p} ignorée`, values[p])
     }

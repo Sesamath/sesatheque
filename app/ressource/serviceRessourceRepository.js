@@ -401,8 +401,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
         }
       } catch (error) {
         log.error('plantage dans la conversion du xml de la ressource j3p')
-        if (!ressource._errors) ressource._errors = []
-        ressource._errors.push('la propriété xml des parametres ne contient pas de graphe valide')
+        if (!ressource.$errors) ressource.$errors = []
+        ressource.$errors.push('la propriété xml des parametres ne contient pas de graphe valide')
       }
     }
   }

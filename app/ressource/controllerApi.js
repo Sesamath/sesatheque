@@ -469,7 +469,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressource
    */
   function writeAndOut (context, ressource) {
-    if (_.isEmpty(ressource._errors)) {
+    if (_.isEmpty(ressource.$errors)) {
       $ressourceRepository.save(ressource, function (error, ressource) {
         log.debug('dans cb api writeAndOut après $ressourceRepository.save', ressource, 'repository', {max: 500})
         if (error) {
@@ -482,15 +482,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           } else {
             // on ne renvoie que l'oid et des warnings éventuels
             var data = {oid: ressource.oid}
-            if (!_.isEmpty(ressource._warnings)) {
-              data.warnings = ressource._warnings
+            if (!_.isEmpty(ressource.$warnings)) {
+              data.warnings = ressource.$warnings
             }
             $json.send(context, null, data)
           }
         }
       })
     } else {
-      $json.send(context, ressource._errors)
+      $json.send(context, ressource.$errors)
     }
   }
 
@@ -635,7 +635,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, this)
     }).seq(function (ressource) {
       log.debug('externalClone a récupéré la ressource', ressource, 'clone', { max: 5000, indent: 2 })
-      // on passe par Ref pour filtrer ce qu'on garde (seulement ce que ref utilise pour un alias)
+      // on passe par Ref pour filtrer ce qu'on garde (pour un alias, seulement ce que ref utilise)
       const aliasData = new Ref(ressource)
       // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
       aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
@@ -643,15 +643,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       aliasData.origine = config.application.baseId
       aliasData.dateCreation = new Date()
       aliasData.publie = true
-      aliasData.restriction = configRessource.constantes.restriction.prive
-      // ajouter la relation
-      aliasData.relations = ressource.relations = []
-      aliasData.relations.push([ configRessource.constantes.relations.assocA, aliasData.aliasOf ])
-      // pas besoin de $ressourceRepository.save ici
-      EntityRessource.create(aliasData).store(this)
+      // si la ressource était publique on le laisse sur l'alias (pour la lecture),
+      // pour l'écriture ça changera rien
+      if (ressource.restriction === configRessource.constantes.restriction.aucune) aliasData.restriction = configRessource.constantes.restriction.aucune
+      else aliasData.restriction = configRessource.constantes.restriction.prive
+      // la relation ne sera ajoutée que lors de l'édition de cette ressource, inutile pour un alias
+      // mais on conserve l'ancienne
+      if (ressource.relations && ressource.relations.length) aliasData.relations = ressource.relations
+      $ressourceRepository.save(aliasData, this)
     }).seq(function (ressAlias) {
       const refAlias = new Ref(ressAlias)
-      if (!refAlias.cle) log.dataError('alias privé sans clé', ressAlias)
       // le user courant peut toujours effacer l'alias
       refAlias.$droits = 'D'
       // modif autorisée sur les ressources éditables seulement
