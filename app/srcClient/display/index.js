@@ -270,7 +270,9 @@ function feedback (retour) {
  * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
  */
 function display (ressource, options, next) {
-  // console.log('options avant page.init', options)
+  const debugMode = sjtUrl.getParameter('debug')
+  if (debugMode === 'all' || debugMode === 'display') log.enable()
+  // log('options avant page.init', options)
 
   // on accepte des baseId dans options.base
   if (typeof options.base === 'string' && options.base.substr(0, 4) !== 'http') {

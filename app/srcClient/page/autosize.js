@@ -31,9 +31,24 @@
 
 'use strict'
 
-// const log = require('sesajstools/utils/log')
+const log = require('sesajstools/utils/log')
 
+/**
+ * Resize targetId pour qu'il occupe tout l'espace dispo sur la page.
+ * Si la taille dispo est supérieur à 2× le minimum requis, on prend affiche header & footer,
+ * sinon y'aura du scroll pour les voir (et laisser ce qu'il y a entre eux en pleine page)
+ * @param {string|HTMLElement} targetId l'id du bloc à resizer ou directement le bloc
+ * @param {Array} hBlocIds liste d'id de blocs qui doivent être visibles sur la page (on retire leur hauteur de l'espace dispo pour calculer ce qui doit rester à targetId
+ * @param {Array} wBlocIds
+ * @param {object} options
+ * @param {simpleCallback} [options.callback] rappelée sans argument après resize
+ * @param {number} [options.offsetHeight=50]
+ * @param {number} [options.offsetWidth=50]
+ * @param {number} [options.minHeight=400]
+ * @param {number} [options.minWidth=400]
+ */
 module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
+  log(`autosize de ${targetId}`)
   require.ensure(['jquery'], function (require) {
     function getTotalHeight ($blocs) {
       return $blocs.reduce((height, $bloc) => {
@@ -110,20 +125,22 @@ module.exports = function autosize (targetId, hBlocIds, wBlocIds, options) {
     var minHeight = options.minHeight || 400
     var minWidth = options.minWidth || 400
 
-    $target = $('#' + targetId)
-    if (hBlocIds && hBlocIds.length) {
-      $blocsH = jquerize(hBlocIds)
-      // log(`pour ${targetId} on a reçu les ids de block ${hBlocIds.join(', ')}`)
-    }
-    if (options.bigHeightBlocs) {
-      $bigHeightBlocs = jquerize(options.bigHeightBlocs)
-    }
-    if (wBlocIds && wBlocIds.length) {
-      $blocsW = jquerize(wBlocIds)
-    }
-    if (options.bigWidthBlocs) {
-      $bigWidthBlocs = jquerize(options.bigWidthBlocs)
-    }
+    $target = typeof targetId === 'string' ? $('#' + targetId) : $(targetId)
+    // blocs dont on doit considérer la hauteur
+    if (!hBlocIds) hBlocIds = []
+    // actions contient titre, mais il n'est pas là en layout iframe
+    if (window.document.getElementById('actions')) hBlocIds.push('actions')
+    else hBlocIds.push('titre')
+    $blocsH = jquerize(hBlocIds)
+    // les blocs en hauteur à prendre en compte seulement sur les grands écrans (>2×minimum)
+    const bigHeightBlocs = new Set()
+    bigHeightBlocs.add('header')
+    bigHeightBlocs.add('footer')
+    if (options.bigHeightBlocs && options.bigHeightBlocs.length) options.bigHeightBlocs.forEach(id => bigHeightBlocs.add(id))
+    $bigHeightBlocs = jquerize(Array.from(bigHeightBlocs))
+    // idem en largeur
+    if (options.bigWidthBlocs && options.bigWidthBlocs.length) $bigWidthBlocs = jquerize(options.bigWidthBlocs)
+    if (wBlocIds && wBlocIds.length) $blocsW = jquerize(wBlocIds)
     resize()
     // et à chaque changement de la taille de la fenêtre
     $(window).resize(resize)

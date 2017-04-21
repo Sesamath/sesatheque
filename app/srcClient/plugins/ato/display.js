@@ -61,7 +61,8 @@ module.exports = function display (ressource, options, next) {
         if (isLoaded) {
           options.resultatCallback({
             ressType: 'ato',
-            ressOid: ressource.oid,
+            rid: ressource.rid,
+            fin: true,
             score: 1
           })
         }
@@ -76,11 +77,14 @@ module.exports = function display (ressource, options, next) {
 
     // On réinitialise le conteneur
     dom.empty(container)
+    page.autosize(container, null, null, {offsetHeight: 0, offsetWidth: 40})
 
     var url = 'https://mep-outils.sesamath.net/manuel_numerique/diapo.php?env=ressource&atome=' + ressource.idOrigine
-    var iframe = dom.addElement(container, 'iframe', {src: url, style: 'width:100%;height:100%'})
+    var iframe = dom.addElement(container, 'iframe', {style: {overflow: 'auto'}})
+    page.autosize(iframe, null, null, {offsetHeight: 40, offsetWidth: 50})
     if (iframe.addEventListener) iframe.addEventListener('load', loaded)
     else loaded()
+    iframe.src = url
   } catch (error) {
     if (next) next(error)
     else page.addError(error)

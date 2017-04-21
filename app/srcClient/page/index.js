@@ -43,8 +43,6 @@ var refreshAuth = require('./refreshAuth')
 var w = window
 var wd = w.document
 
-let jQuery
-
 /**
  * En attendant la gestion du load async avec es6, on utilise le bon vieux head.js,
  * on garde ici un mapping vers les modules tiers que l'on utilise

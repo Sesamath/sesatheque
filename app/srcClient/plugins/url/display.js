@@ -30,11 +30,10 @@
  */
 'use strict'
 
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
-
-var page = require('../../page/index')
-var swf = require('../../display/swf')
+const dom = require('sesajstools/dom')
+const log = require('sesajstools/utils/log')
+const page = require('../../page/index')
+const swf = require('../../display/swf')
 
 var $
 
@@ -49,10 +48,7 @@ function addPage (url, params, next) {
   var divIframeSrcId = 'urlSrc'
   dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + params.adresse)
   const autosizeBlocs = [divIframeSrcId]
-  const autosizeOptions = {offsetHeight: 0, offsetWidth: 40, bigHeightBlocs: ['header', 'footer']}
-  // actions contient titre, mais il n'est pas là en layout iframe
-  if (window.document.getElementById('actions')) autosizeBlocs.push('actions')
-  else autosizeBlocs.push('titre')
+  const autosizeOptions = {offsetHeight: 0, offsetWidth: 40}
   // toujours autosize sur le conteneur
   page.autosize(divIframeId, autosizeBlocs, null, autosizeOptions)
   // url sera ajouté après l'appel de afterLoading, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)

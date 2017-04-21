@@ -791,7 +791,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         }
         if (!data.jsBloc) data.jsBloc = {$view: 'js'}
         if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ''
-        data.jsBloc.jsCode += 'stpage.autosize("main", ["header", "footer"], null, {minHeight:500, minWidth:600});'
+        data.jsBloc.jsCode += 'stpage.autosize("main", null, null, {minHeight:500, minWidth:600});'
       } else {
         // et la ressource (ou erreur)
         data.contentBloc = getViewData(error, ressource, view)
