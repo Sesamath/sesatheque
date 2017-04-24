@@ -142,8 +142,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     function addRefs (ressources, droits) {
       ressources.forEach(function (ressource) {
         if (ressource.type === 'sequenceModele') {
-          if (ressource.parametres) sequenceModeles.push(ressource.parametres)
-          else log.dataError('sequenceModele sans parametres', ressource)
+          if (ressource.parametres) {
+            const sequenceModele = ressource.parametres
+            // on écrase ça qui a pu changer sur la ressource depuis l'enregistrement
+            sequenceModele.public = !ressource.restriction
+            sequenceModele.groupes = ressource.groupes || []
+            sequenceModeles.push(sequenceModele)
+          } else {
+            log.dataError('sequenceModele sans parametres', ressource)
+          }
         } else {
           const ref = new Ref(ressource)
           const isReadable = ref.public || ref.cle
