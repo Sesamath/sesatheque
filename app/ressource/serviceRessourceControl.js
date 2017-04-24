@@ -83,10 +83,7 @@ function addDeductions (ressource) {
  * @param {Ressource} ressource
  */
 function addWarnings (ressource) {
-  // catégories
-  if (!ressource.categories || ressource.categories.length === 0) {
-    rTools.addError(ressource, 'la propriété categories est obligatoire')
-  }
+  // catégorie aucune
   if (ressource.categories[0] === config.constantes.categories.aucune) {
     rTools.addWarning(ressource, 'il faudra choisir une catégorie')
   }
