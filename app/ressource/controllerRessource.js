@@ -884,33 +884,34 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 var url = appConfig.application.baseUrl + 'api/action/mathgraph/' + token
                 var dateSuffix = Math.floor((new Date()).getTime() / 1000)
                 var options = {attachment: 'figure_mathgraph_' + ressource.oid + '-' + dateSuffix + '.jnlp'}
-                var content = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-                  '<jnlp spec="1.0+" codebase="https://www.mathgraph32.org/jaws" >\n' +
-                  '  <information>\n' +
-                  '    <title>MathGraph32</title>\n' +
-                  '    <vendor>Association Sesamath</vendor>\n' +
-                  '    <homepage href="https://mathgraph32.org/"/>\n' +
-                  '    <icon href="logoMathGraph.png"/>\n' +
-                  '    <icon href="SplashScreen.png" kind="splash"/>\n' +
-                  '    <offline-allowed/>\n' +
-                  '  </information>\n' +
-                  '  <security>\n' +
-                  '    <all-permissions/>\n' +
-                  '  </security>\n' +
-                  '  <resources>\n' +
-                  '    <j2se version="1.7+"/>  \n' +
-                  '    <jar href="MathGraph32.jar" main="true" version ="5.2.0"/>\n' +
-                  '    <property name="jnlp.versionEnabled" value="true"/>\n' +
-                  '  </resources> \n' +
-                  '  <application-desc name="MathGraph32" main-class="mathgraph32.Main" width="800" height="600">\n' +
-                  '    <argument>online</argument>\n' +
-                  '    <argument>' + url + '</argument>\n'
-                if (ressource.parametres && ressource.parametres.figure) {
-                  content += '    <argument>' + (ressource.parametres.figure || '') + '</argument>\n'
-                }
-                content += '  </application-desc>\n' +
-                  '  <update check="background"/>\n' +
-                  '</jnlp>\n'
+                // const figureUnite = 'TWF0aEdyYXBoSmF2YTEuMAAAABA+TMzNAANmcmH###8BAP8BAAAAAAAAAAAHrwAABPUAAAAAAAAAAAAAAAEAAAAI#####wAAAAEACkNDYWxjQ29uc3QA#####wACcGkAFjMuMTQxNTkyNjUzNTg5NzkzMjM4NDb#####AAAAAQAKQ0NvbnN0YW50ZUAJIftURC0Y#####wAAAAEACkNQb2ludEJhc2UA#####wAAAAAAEwABVQDAMYAAAAAAAEAcAAAAAAAABQAAQEefPnz58+hAR58+fPnz6P####8AAAABABRDRHJvaXRlRGlyZWN0aW9uRml4ZQD#####AQAAAAAWAAABAAEAAAABAT#wAAAAAAAA#####wAAAAEAD0NQb2ludExpZURyb2l0ZQD#####AAAAAAATAAFWAEAVAAAAAAAAQBwAAAAAAAAFAAFAV58+fPnz6AAAAAL#####AAAAAQAIQ1NlZ21lbnQA#####wAAAAAAAAAAAQABAAAAAQAAAAP#####AAAAAQAHQ01pbGlldQD#####AQAAAAAWAAABBQAAAAABAAAAA#####8AAAACAAxDQ29tbWVudGFpcmUA#####wAAAAAAAAAAAAAAAABAGAAAAAAAAAAAAAUTAAAAAAABAAAAAAABMf####8AAAABAAlDTG9uZ3VldXIA#####wAAAAEAAAADAAAAB###########'
+                const figureVide = 'TWF0aEdyYXBoSmF2YTEuMAAAABA+TMzNAANmcmH###8BAP8BAAAAAAAAAAAHrwAABPUAAAAAAAAAAAAAAAEAAAAB#####wAAAAEACkNDYWxjQ29uc3QA#####wACcGkAFjMuMTQxNTkyNjUzNTg5NzkzMjM4NDb#####AAAAAQAKQ0NvbnN0YW50ZUAJIftURC0Y################'
+                const figure = ressource.parametres && ressource.parametres.figure || figureVide
+                var content = `<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase="https://www.mathgraph32.org/jaws" >
+  <information>
+    <title>MathGraph32</title>
+    <vendor>Association Sesamath</vendor>
+    <homepage href="https://mathgraph32.org/"/>
+    <icon href="logoMathGraph.png"/>
+    <icon href="SplashScreen.png" kind="splash"/>
+    <offline-allowed/>
+  </information>
+  <security>
+    <all-permissions/>
+  </security>
+  <resources>
+    <j2se version="1.7+"/>  
+    <jar href="MathGraph32.jar" main="true" version ="5.2.0"/>
+    <property name="jnlp.versionEnabled" value="true"/>
+  </resources> 
+  <application-desc name="MathGraph32" main-class="mathgraph32.Main" width="800" height="600">
+    <argument>online</argument>
+    <argument>${url}</argument>
+    <argument>${figure}</argument>
+  </application-desc>
+  <update check="background"/>
+</jnlp>`
                 context.raw(content, options)
               }
             })
