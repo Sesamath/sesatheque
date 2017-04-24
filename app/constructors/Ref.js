@@ -119,13 +119,26 @@ function Ref (values, baseId) {
    * @type {boolean}
    */
   this.public = Boolean(values.public || values.restriction === 0)
-  if (!this.public && values.cle) {
-    /**
-     * Éventuelle clé de lecture, pour que des élèves puissent lire
-     * la ressource non publique si leur prof la leur affecte
-     * @type {string}
-     */
-    this.cle = values.cle
+  if (!this.public) {
+    if (values.cle) {
+      /**
+       * Éventuelle clé de lecture, pour que des élèves puissent lire
+       * la ressource non publique si leur prof la leur affecte
+       * @type {string}
+       */
+      this.cle = values.cle
+    }
+    // pour le partage, on transmet si on nous l'indique, sinon on précise pas
+    if (values.hasOwnProperty('partage')) {
+      /**
+       * true si la ressource privée est partagée avec un ou des groupes
+       * @type {boolean}
+       * @default undefined
+       */
+      this.partage = values.partage
+    }
+    if (values.groupes && values.groupes.length) this.partage = true
+    else if (values.groupesAuteurs && values.groupesAuteurs.length) this.partage = true
   }
   if (values.enfants) {
     /**
