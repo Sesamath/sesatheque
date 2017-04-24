@@ -899,7 +899,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   '  </security>\n' +
                   '  <resources>\n' +
                   '    <j2se version="1.7+"/>  \n' +
-                  '    <jar href="MathGraph32.jar" main="true" version ="5.0.0"/>\n' +
+                  '    <jar href="MathGraph32.jar" main="true" version ="5.2.0"/>\n' +
                   '    <property name="jnlp.versionEnabled" value="true"/>\n' +
                   '  </resources> \n' +
                   '  <application-desc name="MathGraph32" main-class="mathgraph32.Main" width="800" height="600">\n' +
