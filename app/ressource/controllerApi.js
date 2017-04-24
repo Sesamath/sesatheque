@@ -104,9 +104,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function getListeAll (context) {
     context.timeout = 3000
-    // si on lance la requete faut filtrer d'après les droits avec $accessControl.getListeLisible,
-    // donc il récupèrera pas forcément nb résultats :-/
-    // franchement pas terrible, donc on laisse tomber et on vérifie les droits all avant de lancer la requete
+    // on vérifie les droits all avant de lancer la requete,
+    // ce serait idiot de remonter des milliers de résultats tous privés
+    // (et ça compliquerait bcp la pagination)
     if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
     else $json.denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
   }
@@ -423,12 +423,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     if (error) $json.send(context, error)
     else {
       var liste = []
-      ressources = $accessControl.getListeLisible(context, ressources)
       if (ressources && ressources.length) {
         // on regarde le format reçu en get ou post
-        var format = context.post.format || context.get.format
+        const format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
+          if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
           var item = (format === 'full') ? ressource : new Ref(ressource)
+          item.droits = ''
+          if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
+          if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
           liste.push(item)
         })
       }

@@ -43,7 +43,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var _ = require('lodash')
   var tools = require('../tools')
   var sjt = require('sesajstools')
-  var sjtObj = require('sesajstools/utils/object')
+  // var sjtObj = require('sesajstools/utils/object')
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
@@ -811,7 +811,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               var nbInit = ressources.length
               // on filtre d'après les droits en lecture
               // @todo ajouter le filtrage dans la requete de recherche...
-              ressources = $accessControl.getListeLisible(context, ressources)
+              ressources = ressources.filter(ressource => $accessControl.hasReadPermission(context, ressource))
               if (ressources.length < nbInit) {
                 log.error((nbInit - ressources.length) + ' ressources de la liste ont été filtrées par les droits avec ' + context.request.originalUrl)
               }

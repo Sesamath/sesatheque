@@ -451,25 +451,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   }
 
   /**
-   * Retourne la liste de ressources fournie expurgée de celles que l'on a pas le droit de voir
-   * @param {Context} context
-   * @param {Ressource[]} ressources Liste de ressources
-   * @return {Ressource[]} Liste de ressources sur lesquelles on a les droits de lecture
-   * @memberOf $accessControl
-   */
-  $accessControl.getListeLisible = function (context, ressources) {
-    var liste = []
-    if (ressources && ressources.length) {
-      ressources.forEach(function (ressource) {
-        if ($accessControl.hasReadPermission(context, ressource)) liste.push(ressource)
-        else log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
-      })
-    }
-
-    return liste
-  }
-
-  /**
    * Renvoie true si c'est du json (api) appelé par une ip locale
    * @see http://expressjs.com/guide/behind-proxies.html
    * @see http://expressjs.com/api.html#req.ip
