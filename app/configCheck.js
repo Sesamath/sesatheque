@@ -34,7 +34,7 @@
  * Configuration de l'application
  */
 const request = require('request')
-const sesatheques = require('sesatheque-client/src/sesatheques')
+const sesatheques = require('sesatheque-client/dist/sesatheques')
 
 module.exports = function configCheck (config) {
   const appLog = require('an-log')(config.application.name)

@@ -43,7 +43,7 @@ var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var sjt = require('sesajstools')
 var sjtUrl = require('sesajstools/http/url')
-const sesatheques = require('sesatheque-client/src/sesatheques')
+const sesatheques = require('sesatheque-client/dist/sesatheques')
 
 var page = require('../page/index')
 var Resultat = require('../../constructors/Resultat')

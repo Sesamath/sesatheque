@@ -41,7 +41,7 @@ var myBaseId = config.application.baseId
 var configRessource = require('./config')
 var Ref = require('../constructors/Ref')
 
-const {getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
+const {getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
@@ -847,7 +847,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} [children] Passer 1 pour ne récupérer que les enfants
    */
   controller.get('jstree', function (context) {
-    const {getJstreeChildren, toJstree} = require('sesatheque-client/src/jstree/convert.js')
+    const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
     var id = context.get.rid || context.get.id || context.get.ref
     var onlyChildren = !!context.get.children

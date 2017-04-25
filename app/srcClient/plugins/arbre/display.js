@@ -33,7 +33,7 @@
 
 import dom from 'sesajstools/dom'
 import log from 'sesajstools/utils/log'
-import {addSesatheque, exists as stExists} from 'sesatheque-client/src/sesatheques'
+import {addSesatheque, exists as stExists} from 'sesatheque-client/dist/sesatheques'
 
 import page from '../../page/index'
 
@@ -45,9 +45,9 @@ import page from '../../page/index'
  * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
  */
 module.exports = function display (ressource, options, next) {
-  require.ensure(['jquery', 'jstree', 'sesatheque-client/src/jstree'], function (require) {
+  require.ensure(['jquery', 'jstree', 'sesatheque-client/dist/jstree'], function (require) {
     const $ = require('jquery')
-    const stJstree = require('sesatheque-client/src/jstree')
+    const stJstree = require('sesatheque-client/dist/jstree')
     require('jstree')
     let error
     try {

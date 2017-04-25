@@ -33,7 +33,7 @@
 const anLog = require('an-log')
 const log = require('./tools/log.js')
 const config = require('./config')
-const sesatheques = require('sesatheque-client/src/sesatheques')
+const sesatheques = require('sesatheque-client/dist/sesatheques')
 const {exists, addSesatheque} = sesatheques
 
 module.exports = function boot (beforeBootstrapCb, options) {

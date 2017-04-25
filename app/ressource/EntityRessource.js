@@ -33,7 +33,7 @@ const uuid = require('an-uuid')
 
 const tools = require('../tools')
 const Ressource = require('../constructors/Ressource')
-const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques.js')
+const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion

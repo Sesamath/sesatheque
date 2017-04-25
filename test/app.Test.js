@@ -45,7 +45,7 @@
 import app from '../app/app'
 import config from '../app/config'
 import anLog from 'an-log'
-import sesatheques from 'sesatheque-client/src/sesatheques'
+import sesatheques from 'sesatheque-client/dist/sesatheques'
 /**
  * @see https://github.com/visionmedia/supertest
  * @see https://visionmedia.github.io/superagent/

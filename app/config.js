@@ -38,7 +38,7 @@ const path = require('path')
 
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
-const {reBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {reBaseUrl} = require('sesatheque-client/dist/sesatheques')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide

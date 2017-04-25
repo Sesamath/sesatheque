@@ -51,7 +51,7 @@ module.exports = function edit (arbre, options) {
   if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
   if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
   // jquery est déjà chargé par le edit.js, mais il est local à chaque module
-  require.ensure(['jquery', 'jstree', 'sesatheque-client/src/fetch', 'sesatheque-client/src/jstree'], function (require) {
+  require.ensure(['jquery', 'jstree', 'sesatheque-client/dist/fetch', 'sesatheque-client/dist/jstree'], function (require) {
     // nos fcts internes
     /**
      * Ajoute le lien aperçu aux links
@@ -518,8 +518,8 @@ module.exports = function edit (arbre, options) {
     require('jstree')
     if (!$.jstree) throw new Error('Problème de chargement jstree')
 
-    const { addNode, build, getEnfants } = require('sesatheque-client/src/jstree')
-    const { addSesatheques, exists, fetchPublicRef } = require('sesatheque-client/src/fetch')
+    const { addNode, build, getEnfants } = require('sesatheque-client/dist/jstree')
+    const { addSesatheques, exists, fetchPublicRef } = require('sesatheque-client/dist/fetch')
     /* jshint jquery:true */
 
     addSesatheques(options.sesatheques)

@@ -33,7 +33,7 @@
 const flow = require('an-flow')
 const applog = require('an-log')(lassi.settings.application.name)
 const config = require('../../config')
-const {exists, getBaseIdFromRid, getComponents} = require('sesatheque-client/src/sesatheques')
+const {exists, getBaseIdFromRid, getComponents} = require('sesatheque-client/dist/sesatheques')
 
 const myBaseId = config.application.baseId
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)

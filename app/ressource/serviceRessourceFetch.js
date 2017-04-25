@@ -32,7 +32,7 @@
 'use strict'
 
 const request = require('request')
-const sesatheques = require('sesatheque-client/src/sesatheques.js')
+const sesatheques = require('sesatheque-client/dist/sesatheques')
 const {exists, getBaseUrl, getComponents} = sesatheques
 
 const appConfig = require('../config')

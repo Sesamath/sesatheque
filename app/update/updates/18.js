@@ -32,7 +32,7 @@
 
 const flow = require('an-flow')
 const applog = require('an-log')(lassi.settings.application.name)
-const sesatheques = require('sesatheque-client/src/sesatheques')
+const sesatheques = require('sesatheque-client/dist/sesatheques')
 const config = require('../../config')
 const myBaseId = config.application.baseId
 

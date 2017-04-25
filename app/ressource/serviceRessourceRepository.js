@@ -36,7 +36,7 @@ const uuid = require('an-uuid')
 const elementtree = require('elementtree')
 const _ = require('lodash')
 const request = require('request')
-const {exists} = require('sesatheque-client/src/sesatheques.js')
+const {exists} = require('sesatheque-client/dist/sesatheques')
 const config = require('./config')
 const appConfig = require('../config')
 
