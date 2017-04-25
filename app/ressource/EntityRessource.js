@@ -89,6 +89,7 @@ module.exports = function (EntityRessource) {
     .defineIndex('baseId', 'string', function () {
       if (this.rid) return getBaseIdFromRid(this.rid)
     })
+    .defineIndex('cle', 'string') // pour loadByCle
     .defineIndex('aliasOf', 'string')
     .defineIndex('origine', 'string')
     .defineIndex('idOrigine', 'string')

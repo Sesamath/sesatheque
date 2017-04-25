@@ -260,8 +260,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.layout = 'page'
     context.tab = 'describe'
     redirectPublicOrContinue(context, function () {
-      var origine = context.arguments.origine
-      var idOrigine = context.arguments.idOrigine
+      const origine = context.arguments.origine
+      const idOrigine = context.arguments.idOrigine
+      // ça gère le cas cle/xxx
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         send(context, error, ressource, 'describe')
       })
