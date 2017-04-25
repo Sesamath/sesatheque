@@ -6,3 +6,5 @@ _private
 logs
 .bin
 tasks
+documentation
+./test/
