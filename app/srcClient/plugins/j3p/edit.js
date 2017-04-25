@@ -177,7 +177,8 @@ module.exports = function edit (ressource, options) {
       dom.empty(container)
       var size = dom.getSize()
       var height = size.height
-      if (!height) height = Math.max(Math.round((elt.offsetWidth || 0) * 3 / 4), 500)
+      // hauteur = 3/4 de la largeur par défaut
+      if (!height) height = Math.max(Math.round((container.offsetWidth || 0) * 3 / 4), 500)
       var width = size.width
       if (!width) width = '100%'
       var iframeAttrs = {
