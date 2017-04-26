@@ -169,29 +169,30 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (!context) throw new Error('pas de contexte')
     if (!ressource) throw new Error('pas de ressource')
     // nos ips ont le droit de tout lire via l'api
-    if (hasAllRights(context)) return
+    if (hasAllRights(context)) return ''
     let msg
     if (ressource.publie) {
       var restriction = $settings.get('components.ressource.constantes.restriction')
-      if (ressource.restriction === restriction.aucune) return
+      if (ressource.restriction === restriction.aucune) return ''
       if (!$accessControl.isAuthenticated(context)) return 'Vous devez être authentifié pour consulter cette ressource'
       var user = $accessControl.getCurrentUser(context)
       switch (ressource.restriction) {
         // public
         case restriction.aucune:
-          return
+          return ''
 
         // correction
         case restriction.correction:
-          if (hasGenericPermission('correction', context)) return
-          else msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
+          if (hasGenericPermission('correction', context)) return ''
+          msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
           break
 
         // réservée au groupe
         case restriction.groupe:
-          if ($accessControl.isAuteur(context, ressource)) return
-          if ($accessControl.isContributeur(context, ressource)) return
-          if (ressource.groupes && !_.isEmpty(_.intersection(ressource.groupes, user.groupesMembre))) return
+          if ($accessControl.isAuteur(context, ressource)) return ''
+          if ($accessControl.isContributeur(context, ressource)) return ''
+          if ($accessControl.isInGroupes(context, ressource)) return ''
+          if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
           msg = 'Ressource restreinte'
           break
 
@@ -199,6 +200,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         case restriction.prive:
           if ($accessControl.isAuteur(context, ressource)) return
           if ($accessControl.isContributeur(context, ressource)) return
+          if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
           msg = 'Ressource privée'
           break
 
@@ -224,9 +226,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   function getUpdateDeniedMessage (context, ressource) {
     if ($accessControl.isAuteur(context, ressource)) return ''
-    else if ($accessControl.isContributeur(context, ressource)) return ''
+    if ($accessControl.isContributeur(context, ressource)) return ''
+    if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
     // pour le moment tout le reste est interdit
-    else return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
+    return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
   }
 
   /**
@@ -237,9 +240,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getUpdateAuteursDeniedMessage (context, ressource) {
-    var msg
-    if (!$accessControl.isAuteur(context, ressource)) msg = "Vous ne pouvez pas modifier les auteurs ou contributeur si vous n'êtes pas auteur de la ressource"
-    return msg
+    if ($accessControl.isAuteur(context, ressource)) return ''
+    if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
+    return 'Vous ne pouvez pas modifier les auteurs ou contributeur si vous n’êtes pas auteur de la ressource'
   }
 
   /**
@@ -609,6 +612,32 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       context.session.user.groupesSuivis &&
       context.session.user.groupesSuivis.length &&
       context.session.user.groupesSuivis.find(n => n === nom)
+  }
+
+  /**
+   * Retourne true si l'utilisateur courant est membre d'un des groupes de la ressource
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   * @returns {boolean}
+   */
+  $accessControl.isInGroupes = function (context, ressource) {
+    if (ressource && ressource.groupes && ressource.groupes.length) {
+      return ressource.groupes.find(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
+    }
+    return false
+  }
+
+  /**
+   * Retourne true si l'utilisateur courant est membre d'un des groupes auteurs de la ressource
+   * @param {Context}   context
+   * @param {Ressource} ressource
+   * @returns {boolean}
+   */
+  $accessControl.isInGroupesAuteurs = function (context, ressource) {
+    if (ressource && ressource.groupesAuteurs && ressource.groupesAuteurs.length) {
+      return ressource.groupesAuteurs.find(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
+    }
+    return false
   }
 
   /**
