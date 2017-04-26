@@ -21,7 +21,7 @@
       <ul>
         Gestionnaire(s) : 
         <span class="remarque">Les gestionnaires peuvent modifier les propriétés du groupe et y ajouter des membres</span>
-        {#gestionnairesNames}<li>{.}</li>{/gestionnairesNames}
+        {#gestionnaires}<li>{name} <span class="remarque">{pid}</span></li>{/gestionnaires}
       </ul>
     </li>
     <li>

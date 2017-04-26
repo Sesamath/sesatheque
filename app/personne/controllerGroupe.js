@@ -314,23 +314,20 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   function printGroupe (context, groupe) {
     loadGestionnaires(groupe.gestionnaires, true, function (error, gestionnairesNames) {
-      if (error) {
-        $page.printError(context, error)
-      } else {
-        var isManaged = h.isManaged(context, groupe)
-        // les actions, modif
-        if (isManaged) addUrlModif(groupe)
-        // membre
-        if ($accessControl.isGroupeMembre(context, groupe.nom)) addUrlQuit(groupe)
-        else if (isManaged || groupe.ouvert) addUrlJoin(groupe)
-        // follower
-        if (h.isFollowed(context, groupe)) addUrlIgnore(groupe)
-        else if (isManaged || groupe.public) addUrlFollow(groupe)
-        var contentBloc = groupe
-        contentBloc.$view = 'displayGroupe'
-        contentBloc.gestionnairesNames = gestionnairesNames.join(', ')
-        $page.print(context, 'Description du groupe', contentBloc)
-      }
+      if (error) return $page.printError(context, error)
+      var isManaged = h.isManaged(context, groupe)
+      // les actions, modif
+      if (isManaged) addUrlModif(groupe)
+      // membre
+      if ($accessControl.isGroupeMembre(context, groupe.nom)) addUrlQuit(groupe)
+      else if (isManaged || groupe.ouvert) addUrlJoin(groupe)
+      // follower
+      if (h.isFollowed(context, groupe)) addUrlIgnore(groupe)
+      else if (isManaged || groupe.public) addUrlFollow(groupe)
+      var contentBloc = groupe
+      contentBloc.$view = 'displayGroupe'
+      contentBloc.gestionnaires = gestionnairesNames.map((name, index) => ({name, pid: groupe.gestionnaires[index]}))
+      $page.print(context, 'Description du groupe', contentBloc)
     })
   }
 
@@ -372,7 +369,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           })
           return ressData
         })
-        log.debug(``)
       }
       this()
     }).seq(function () {
