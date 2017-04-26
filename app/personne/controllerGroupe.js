@@ -622,6 +622,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         if (groupes && groupes.length) {
           groupes.forEach(function (groupe) {
             var item = { nom: groupe.nom, description: groupe.description }
+            // toujours le lien vers la description du groupe
+            addUrlDescribe(item)
             if (h.isManaged(context, groupe)) addUrlModif(item)
             else if ($accessControl.isGroupeMembre(context, groupe.nom)) addUrlQuit(item)
             else addUrlJoin(item)
@@ -654,6 +656,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         if (groupes && groupes.length) {
           groupes.forEach(function (groupe) {
             var item = { nom: groupe.nom, description: groupe.description }
+            // toujours le lien vers la description du groupe
+            addUrlDescribe(item)
             if (h.isManaged(context, groupe)) addUrlModif(item)
             else if ($accessControl.isGroupeMembre(context, groupe.nom)) addUrlQuit(item)
             else addUrlJoin(item)
