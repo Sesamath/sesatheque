@@ -326,7 +326,9 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       else if (isManaged || groupe.public) addUrlFollow(groupe)
       var contentBloc = groupe
       contentBloc.$view = 'displayGroupe'
-      contentBloc.gestionnaires = gestionnairesNames.map((name, index) => ({name, pid: groupe.gestionnaires[index]}))
+      // contentBloc.gestionnaires = gestionnairesNames.map((name, index) => ({name, pid: groupe.gestionnaires[index]}))
+      // on affiche pas le pid pour le moment
+      contentBloc.gestionnaires = gestionnairesNames.map((name) => ({name}))
       $page.print(context, 'Description du groupe', contentBloc)
     })
   }
