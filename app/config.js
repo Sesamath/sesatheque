@@ -193,19 +193,24 @@ const config = {
     // ajouter les exclusions voulues parmi ['cache', 'resssourceRepository', 'personneRepository', 'accessControl']
     debugExclusions: []
   },
-  // pour an-log, si on veut récupérer les logs sql
-  lassiLogger: {
-    '$entities': {
-      logLevel: 'debug',
-      renderer: {name: 'fileRenderer', target: logDir + '/entities.log'}
-    }
-  },
   varnish: false // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
 }
 
 // on ajoute nos params locaux (accès à la base et port,
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
 if (localConfig) sjtObj.merge(config, localConfig)
+
+// si lassiLogger n'a pas été défini on l'ajoute maintenant,
+// mais en utilisant logs.dir après override de _private
+if (!config.lassiLogger) {
+  // pour an-log, si on veut récupérer les logs sql
+  config.lassiLogger = {
+    '$entities': {
+      logLevel: config.application.staging === 'prod' ? 'warning' : 'debug',
+      renderer: {name: 'fileRenderer', target: config.logs.dir + '/entities.log'}
+    }
+  }
+}
 
 /**
  * À partir le là on a la conf locale, on vérifie et normalise un peu (autant signaler une erreur dès le boot)
