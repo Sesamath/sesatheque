@@ -663,62 +663,58 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   function getViewData (error, ressource, view) {
     var viewData = {}
     var buffer
-    if (error) {
-      $page.addError(error, viewData)
-    } else if (ressource) {
-      // on boucle sur les propriétés que l'on veut afficher
-      var labels = getLabels(ressource)
-      _.each(labels, function (label, key) {
-        var value = ressource[key]
-        viewData[key] = {
-          title: label
-        }
-        // on traite chaque type de contenu, Array|Date|le reste
-        if (ressConfig.typesVar[key] === 'Array') {
-          if (key === 'relations') {
-            // on veut pas passer dans le if ressConfig.listes[key]
-            if (ressource._relations) viewData.relations.value = ressource._relations
-          } else if (key === 'groupesAuteurs') {
-            if (value.length && view === 'describe') {
-              // en describe on ajoute les groupes d'auteurs dans le champ auteurs
-              if (viewData.auteurs && viewData.auteurs.value) {
-                _.each(value, function (groupeNom) {
-                  viewData.auteurs.value.push({ nom: 'Tous les membres du groupe ' + groupeNom })
-                })
-              } else {
-                log.error(new Error('Pas de champ auteurs'))
-              }
-            } // les autres vues n'ont pas besoin de groupesAuteurs
-          } else if (ressConfig.listes[key]) {
-            // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
-            buffer = []
-            _.each(value, function (id) {
-              if (ressConfig.listes[key][id]) buffer.push(ressConfig.listes[key][id])
-              else log.error('La ressource ' + ressource.oid + ' a une valeur ' + id + ' pour la propriété ' + key + " qui n'est pas dans la liste prédéfinie dans la configuration")
-            })
-            viewData[key].value = buffer.join(', ')
-          } else {
-            // un tableau qui n'est pas une liste d'ids on regarde si on a la propriété préfixée par _ ou on laisse tel quel
-            // (auteurs & co ou des propriétés supplémentaires)
-            viewData[key].value = ressource['_' + key] || value
-          }
-        } else if (ressConfig.typesVar[key] === 'Date') {
-          viewData[key].value = value ? moment(value).format(ressConfig.formats.jour) : value
+    if (error) return $page.addError(error, viewData)
+    if (!ressource) return $page.addError(new Error('Aucune ressource transmise pour affichage'))
+    // on boucle sur les propriétés que l'on veut afficher
+    var labels = getLabels(ressource)
+    _.each(labels, function (label, key) {
+      var value = ressource[key]
+      viewData[key] = {
+        title: label
+      }
+      // on traite chaque type de contenu, Array|Date|le reste
+      if (ressConfig.typesVar[key] === 'Array') {
+        if (key === 'relations') {
+          // on veut pas passer dans le if ressConfig.listes[key]
+          if (ressource._relations) viewData.relations.value = ressource._relations
+        } else if (key === 'groupesAuteurs') {
+          if (value.length && view === 'describe') {
+            // en describe on ajoute les groupes d'auteurs dans le champ auteurs
+            if (viewData.auteurs && viewData.auteurs.value) {
+              _.each(value, function (groupeNom) {
+                viewData.auteurs.value.push({ nom: 'Tous les membres du groupe ' + groupeNom })
+              })
+            } else {
+              log.error(new Error('Pas de champ auteurs'))
+            }
+          } // les autres vues n'ont pas besoin de groupesAuteurs
+        } else if (ressConfig.listes[key]) {
+          // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
+          buffer = []
+          _.each(value, function (id) {
+            if (ressConfig.listes[key][id]) buffer.push(ressConfig.listes[key][id])
+            else log.error('La ressource ' + ressource.oid + ' a une valeur ' + id + ' pour la propriété ' + key + " qui n'est pas dans la liste prédéfinie dans la configuration")
+          })
+          viewData[key].value = buffer.join(', ')
         } else {
-          // Object ou string ou number ou boolean, on laisse tel quel
-          viewData[key].value = value
+          // un tableau qui n'est pas une liste d'ids on regarde si on a la propriété préfixée par _ ou on laisse tel quel
+          // (auteurs & co ou des propriétés supplémentaires)
+          viewData[key].value = ressource['_' + key] || value
         }
-      }) // fin each propriété
+      } else if (ressConfig.typesVar[key] === 'Date') {
+        viewData[key].value = value ? moment(value).format(ressConfig.formats.jour) : value
+      } else {
+        // Object ou string ou number ou boolean, on laisse tel quel
+        viewData[key].value = value
+        if (key === 'aliasOf' && view === 'describe' && value) viewData.aliasOf.url = $routes.getAbs('describe', value)
+      }
+    }) // fin each propriété
 
-      // on ajoute oid
-      if (ressource.oid) viewData.oid = ressource.oid
-      // warnings et errors éventuels
-      if (ressource.$warnings && ressource.$warnings.length) viewData.warnings = ressource.$warnings
-      if (ressource.$errors && ressource.$errors.length) viewData.errors = ressource.$errors
-    } else {
-      // pas d'erreur mais pas de ressource non plus
-      $page.addError('Aucune ressource transmise pour affichage', viewData)
-    }
+    // on ajoute oid
+    if (ressource.oid) viewData.oid = ressource.oid
+    // warnings et errors éventuels
+    if (ressource.$warnings && ressource.$warnings.length) viewData.warnings = ressource.$warnings
+    if (ressource.$errors && ressource.$errors.length) viewData.errors = ressource.$errors
     if (view) viewData.$view = view
 
     return viewData

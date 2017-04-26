@@ -74,7 +74,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         links.push({
           href: $routes.getAbs('preview', ressource, context),
           value: 'Aperçu',
-          icon: 'eye-slash', // ma pageview
+          icon: 'eye-slash', // material icons pageview
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'preview')
         })
@@ -96,7 +96,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           id: 'buttonEdit',
           href: $routes.getAbs('edit', oid, context),
           value: 'Modifier',
-          icon: 'edit', // mode_edit pour material icons
+          icon: 'edit', // material icons mode_edit
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'edit'),
           hidden: !$accessControl.hasPermission('update', context, ressource)
@@ -105,7 +105,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           id: 'buttonDuplicate',
           href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
-          icon: 'copy', // ma call_split
+          icon: 'copy', // material icons call_split
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1),
           hidden: !$accessControl.hasPermission('create', context)
@@ -114,7 +114,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           id: 'buttonDelete',
           href: $routes.getAbs('delete', oid, context),
           value: 'Supprimer',
-          icon: 'trash', // ma delete
+          icon: 'trash', // material icons delete
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'delete'),
           hidden: !$accessControl.hasPermission('delete', context, ressource)

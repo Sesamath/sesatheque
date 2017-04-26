@@ -12,11 +12,12 @@
             {@eq key=restriction.value value=3} auteur{:else} {restriction.value} inconnue{/eq}
         {/eq}
         {:else}Public{/restriction.value}</span>
-    <p>
+    <br />
     oid : {oid} ({origine.value}{?idOrigine}/{idOrigine.value}{/idOrigine},
       {type.title} {type.value},{~s}
       {version.title} {version.value}
       {?dataUrl}, <a href="{dataUrl}" target="_blank">json</a>{/dataUrl})<br />
+    {?aliasOf}{?aliasOf.url}<strong>Alias de</strong> <a href="{aliasOf.url}" target="_blank">{aliasOf.value}</a><br />{/aliasOf.url}{/aliasOf}
     {dateCreation.title} : {dateCreation.value}<br />
     {dateMiseAJour.title} : {dateMiseAJour.value}<br />
     {langue.title} : {langue.value}<br />
