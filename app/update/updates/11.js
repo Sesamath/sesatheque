@@ -32,7 +32,9 @@
 
 const flow = require('an-flow')
 const applog = require('an-log')(lassi.settings.application.name)
+const uuid = require('an-uuid')
 const config = require('../../config')
+
 const myBaseId = config.application.baseId
 
 const name = 'conversion des EntityAlias en EntityRessource'
@@ -68,12 +70,18 @@ module.exports = {
       // on itère
       }).seqEach(function (alias) {
         if (alias.ref) {
-          const baseId = alias.baseIdOriginal || alias.baseId || myBaseId
+          let baseId = alias.baseIdOriginal || alias.baseId || myBaseId
           if (baseId === myBaseId) {
             // en février 2017 c'est louche…
             log.dataError('alias bizarre qui référence une ressource sur cette sésathèque', alias)
           }
+          if (baseId === 'unknown') {
+            // des vieux restes bizarres
+            log.dataError('alias bizarre avec baseId unknown (on impose sesabibli)', alias)
+            baseId = 'sesabibli'
+          }
           const ressource = {
+            origine: myBaseId, // idOrigine sera mis à l'afterStore d'après l'oid
             aliasOf: baseId + '/' + alias.ref
           }
           // on copie ces propriétés
