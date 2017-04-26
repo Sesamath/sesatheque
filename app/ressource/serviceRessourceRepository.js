@@ -205,7 +205,8 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     const base = appConfig.application.baseUrl
     // on ne purge que les ressources publiques (les autres ne sont pas en cache)
     if (appConfig.varnish && ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
-      [
+      log.debug(`purge varnish de ${ressource.oid}`)
+      ;[
         $routes.getAbs('api', ressource),
         $routes.getAbs('display', ressource),
         $routes.getAbs('describe', ressource),

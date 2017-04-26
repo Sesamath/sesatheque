@@ -80,7 +80,6 @@ module.exports = {
           ;['titre', 'type', 'resume', 'description', 'commentaires', 'categories', 'public', 'cle'].forEach(k => {
             ressource[k] = alias[k]
           })
-          log.error('on va enregistrer ' + ressource.titre)
           EntityRessource.create(ressource).store(this)
         } else {
           log.dataError(`alias ${alias.oid} sans ref`, alias)

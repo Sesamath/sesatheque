@@ -746,47 +746,37 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.post('action/mathgraph/:token', function (context) {
     function sendError (error) {
+      // si on passe une string, c'est juste une info pour le client mg32 desktop
+      if (typeof error === 'string') return context.plain(`Erreur : ${error}`)
       if (error.stack) log.error(error)
       context.status = 500
       context.plain('Erreur : ' + error.toString())
     }
     $ressourceRepository.getDeferred(context.arguments.token, function (error, data) {
-      if (error) {
-        sendError(error)
-      } else if (data) {
-        if (data.action === 'saveRessource' && data.oid) {
-          $ressourceRepository.load(data.oid, function (error, ressource) {
-            if (error) {
-              sendError(error)
-            } else if (ressource) {
-              // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
-              if (ressource.type === 'mathgraph') {
-                if (context.post.base64) {
-                  log.debug('la ressource ' + data.oid + ' avait la figure ' + ressource.parametres.figure + ' que l’on remplace par ' + context.post.base64)
-                  ressource.parametres.figure = context.post.base64
-                  $ressourceRepository.save(ressource, function (error, ressource) {
-                    if (error) sendError(error)
-                    else if (ressource) context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
-                    else sendError(new Error('Le save de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
-                  })
-                } else {
-                  context.plain('Erreur : impossible de trouver une figure dans les données envoyées')
-                }
-              } else {
-                sendError('Cette ressource n’est pas de type mathgraph (' + ressource.type + ')')
-              }
-            } else {
-              context.status = 404
-              context.plain('La ressource d’identifiant ' + data.oid + ' n’existe pas (ou plus)')
-            }
-          })
-        } else {
-          sendError(new Error('jeton valide mais données impossibles à traiter'))
-        }
-      } else {
+      if (error) return sendError(error)
+      if (!data) {
         context.status = 404
-        context.plain('jeton invalide ou périmé')
+        return sendError('jeton invalide ou périmé')
       }
+      if (data.action !== 'saveRessource' || !data.oid) return sendError(new Error('jeton valide mais données impossibles à traiter'))
+      // on peut traiter
+      $ressourceRepository.load(data.oid, function (error, ressource) {
+        if (error) return sendError(error)
+        if (!ressource) {
+          context.status = 404
+          return sendError(`la ressource d’identifiant ${data.oid} n’existe pas (ou plus)`)
+        }
+        if (ressource.type !== 'mathgraph') return sendError(`cette ressource n’est pas de type mathgraph (${ressource.type})`)
+        if (!context.post.base64) return sendError('impossible de trouver une figure dans les données envoyées')
+        // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
+        log.debug(`la ressource ${data.oid} avait la figure\n${ressource.parametres.figure}\nque l’on remplace par\n${context.post.base64}`)
+        ressource.parametres.figure = context.post.base64
+        $ressourceRepository.save(ressource, function (error, ressource) {
+          if (error) sendError(error)
+          else if (ressource) context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
+          else sendError(new Error('Le save de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
+        })
+      })
     })
   })
 
