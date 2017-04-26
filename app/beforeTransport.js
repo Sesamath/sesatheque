@@ -93,7 +93,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         // pour tous les suivants, on met les liens mais on les cache si on a pas les droits,
         // c'est le js qui les affichera si on est dans /public/ donc sans session
         links.push({
-          id: 'buttonEdit',
+          idLi: 'buttonEdit',
           href: $routes.getAbs('edit', oid, context),
           value: 'Modifier',
           icon: 'edit', // material icons mode_edit
@@ -102,7 +102,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           hidden: !$accessControl.hasPermission('update', context, ressource)
         })
         links.push({
-          id: 'buttonDuplicate',
+          idLi: 'buttonDuplicate',
           href: $routes.getAbs('create') + '?clone=' + oid,
           value: 'Dupliquer',
           icon: 'copy', // material icons call_split
@@ -111,7 +111,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           hidden: !$accessControl.hasPermission('create', context)
         })
         links.push({
-          id: 'buttonDelete',
+          idLi: 'buttonDelete',
           href: $routes.getAbs('delete', oid, context),
           value: 'Supprimer',
           icon: 'trash', // material icons delete
