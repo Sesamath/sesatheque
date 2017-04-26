@@ -47,7 +47,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
   EntityGroupe.beforeStore(function (next) {
     this.nom = this.nom.toLowerCase()
     if (!this.creationDate) this.creationDate = new Date()
-    if (!this.gestionnaires || !this.gestionnaires.length) throw new Error('Impossible de sauvegarder un groupe sans gestionnaires')
+    if (!this.gestionnaires || !this.gestionnaires.length) throw new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`)
     next()
   })
 
