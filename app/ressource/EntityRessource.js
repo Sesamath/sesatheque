@@ -179,12 +179,12 @@ module.exports = function (EntityRessource) {
           // on vérifie qu'on essaie pas d'enregistrer localement une ressource qui viendrait d'ailleurs
           if (this.oid && this.idOrigine === this.oid) throw new Error(`Cette ressource ${this.origine}/${this.idOrigine}) devrait être enregistrée sur ${this.origine}`)
         } else {
-          return next(new Error('origine sans idOrigine'))
+          return next(new Error(`origine sans idOrigine (${this.oid ? this.oid : 'creation'})`))
         }
       } else {
         // on pourrait mettre d'office une origine myBaseId ici, mais c'est le boulot du contrôleur
         // ça pourrait masquer une vraie erreur d'aiguillage
-        return next(new Error('propriété origine obligatoire'))
+        return next(new Error(`propriété origine obligatoire (${this.oid ? this.oid : 'creation'})`))
       }
 
       // check rid
