@@ -544,7 +544,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Traitement du formulaire d'édition, réaffiche le formulaire en cas d'erreur ou sauvegarde et redirige vers la description
+   * Traitement du formulaire d'édition, réaffiche le formulaire en cas d'erreur
+   * ou sauvegarde et redirige vers la description
    * @route POST /ressource/modifier/:oid
    */
   controller.post($routes.get('edit', ':oid'), function (context) {
@@ -561,7 +562,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     if ($accessControl.isAuthenticated(context)) {
       flow().seq(function () {
-        // log.debug('ressource postée', ressourcePostee, 'form', {max: 5000})
+        // vérifier le token évite de vérifier de nouveau les droits
         checkToken(context, oid, this)
       }).seq(function () {
         $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
@@ -597,6 +598,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressource) {
         // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
         Object.assign(ressourceOriginale, ressource)
+        // si on modifie un alias, ça fork automatiquement
+        if (ressourceOriginale.aliasOf) delete ressourceOriginale.aliasOf
         log.debug('ressource avant enregistrement', ressourceOriginale, 'avirer', {max: 10000})
         $ressourceRepository.save(ressourceOriginale, this)
       }).seq(function (ressource) {
