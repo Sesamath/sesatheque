@@ -56,7 +56,7 @@ module.exports = {
      /* */
   },
 
-  // ça c'est pour node qui va lancer l'appli
+  // ça c'est pour node qui va lancer l'appli, utilisé par lassi
   $server: {
     hostname: 'localhost',
     // on peut indiquer un autre port ici que celui de baseUrl, cli.js en mettra un autre par exemple
@@ -86,7 +86,8 @@ module.exports = {
 
   // les logs
   logs: {
-    dir: path.join(__dirname, '../logs_commun'),
+    dir: path.join(__dirname, '../logs'),
+    // le module log utilise des channels, on peut en exclure ici
     debugExclusions: ['cache'],
     perf: 'perf.log'
   },
@@ -115,8 +116,8 @@ module.exports = {
     {
       baseId: 'localhost3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
       baseUrl: 'http://localhost:3003/'
-      // apiTokens: un token qu’elle utiliserait pour ajouter des ressources ici
-      // (à priori des alias vers les siennes)
+      // apiToken: un token qu’elle utiliserait pour lire des ressources restreintes ici
+      // (à priori pour créér des alias chez elle)
     }
     // on pourrait en mettre d'autres…
   ],

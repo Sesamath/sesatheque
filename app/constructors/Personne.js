@@ -45,27 +45,10 @@ function Personne (initObj) {
    */
   this.oid = initObj.oid || undefined
   /**
-   * L'identifiant unique baseId/oid
+   * L'identifiant unique authBaseId/oid, où authBaseId est le nom du authClient
    * @type {string}
    */
   this.pid = initObj.pid || undefined
-  if (initObj.origine && initObj.idOrigine) {
-    this.pid = initObj.origine + '/' + initObj.idOrigine
-    // @todo activer ce warning quand l'update 17 sera passé partout
-    // if (initObj.pid && initObj.pid !== this.pid) console.trace(`valeurs incohérentes avec pid=${initObj.pid} et origine/idOrigine ${this.pid}`)
-  }
-  /**
-   * Source de l'authentification (nom du authClient)
-   * @type {string}
-   * @default null
-   */
-  this.origine = initObj.origine || null
-  /**
-   * Id de la source d'authentification
-   * @type {string}
-   * @default null
-   */
-  this.idOrigine = initObj.idOrigine || null
   /**
    * Date de dernière vérification sur le serveur sso (mis au login, inexistant sinon), non stocké
    * @type {Date}

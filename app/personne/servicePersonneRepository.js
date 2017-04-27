@@ -106,60 +106,20 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
     log.debug('load personne ' + id)
     // cast en string
     id += ''
-    // on découpe sur le premier slash avec deux morceaux non vides
-    const match = id.match(/^([^/]+)\/(.+)$/)
-    if (match && match.length === 3) {
-      if (match[1] === myBaseId) return $personneRepository.load(match[2], next)
-      else $personneRepository.loadByOrigin(match[1], match[2], next)
-    } else if (id) {
-      $cachePersonne.get(id, function (error, personneCached) {
-        if (error) log.error(error)
-        if (personneCached) {
-          next(null, EntityPersonne.create(personneCached))
-        } else {
-          EntityPersonne.match('oid').equals(id).grabOne(function (error, personne) {
-            // log.debug('personne load remonte ', personne)
-            if (error) return next(error)
-            if (!personne) return next()
-            // y'a qqun
-            $cachePersonne.set(personne)
-            next(null, personne)
-          })
-        }
-      })
-    } else {
-      next(new Error('id manquant, impossible de charger une personne.'))
-    }
-  }
-
-  /**
-   * Récupère une personne (en cache ou en bdd)
-   * @param {string}           origine   Nom du authClient qui a authentifié cette personne
-   * @param {string}           idOrigine Id de la personne dans son système d'authentification
-   * @param {personneCallback} next      Renvoie toujours une EntityPersonne
-   * @memberOf $personneRepository
-   */
-  $personneRepository.loadByOrigin = function (origine, idOrigine, next) {
-    log.debug('loadByOrigin personne ' + origine + '/' + idOrigine)
-    if (origine && idOrigine) {
-      $cachePersonne.getByOrigine(origine, idOrigine, function (error, personneCached) {
-        if (error) log.error(error)
-        if (personneCached) {
-          next(null, EntityPersonne.create(personneCached))
-        } else {
-          EntityPersonne.match('origine').equals(origine).match('idOrigine').equals(idOrigine).grabOne(function (error, personne) {
-            // log.debug('personne load remonte ', personne)
-            if (error) return next(error)
-            if (!personne) return next()
-            $cachePersonne.set(personne)
-            // on retourne avant le résultat de la mise en cache (pas grave si il plante)
-            next(null, personne)
-          })
-        }
-      })
-    } else {
-      next(new Error('origine ou idOrigine manquant, impossible de chercher en base de données.'))
-    }
+    flow().seq(function () {
+      $cachePersonne.get(id, this)
+    }).seq(function (personneCached) {
+      if (personneCached) return next(null, EntityPersonne.create(personneCached))
+      this()
+    }).seq(function () {
+      // on va chercher en bdd
+      const key = (id.substr('/') !== -1) ? 'oid' : 'pid'
+      EntityPersonne.match(key).equals(id).grabOne(this)
+    }).seq(function (personne) {
+      if (!personne) return next()
+      $cachePersonne.set(personne)
+      next(null, personne)
+    }).catch(next)
   }
 
   /**
@@ -273,17 +233,18 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
     }
 
     function modify (error, personneBdd) {
-      if (error) {
-        next(error)
-      } else if (personneBdd) {
-        checkUpdate(personneBdd, personne, next)
-      } else {
-        EntityPersonne.create(personne).store(next)
-      }
+      if (error) next(error)
+      else if (personneBdd) checkUpdate(personneBdd, personne, next)
+      else EntityPersonne.create(personne).store(next)
     }
 
-    if (personne.oid) $personneRepository.load(personne.oid, modify)
-    else if (personne.origine && personne.idOrigine) $personneRepository.loadByOrigin(personne.origine, personne.idOrigine, modify)
+    let id = personne.oid || personne.pid
+    // pour continuer à être compatible avec l'ancien format
+    if (!id && personne.origine && personne.idOrigine) {
+      log.error(new Error('on a passé à updateOrCreate une personne avec origine & idOrigine, on voudrait un pid'), personne)
+      id = personne.origine + '/' + personne.idOrigine
+    }
+    if (id) $personneRepository.load(id, modify)
     else next(new Error('Il manque un identifiant pour mettre à jour ou créer les données de cet utilisateur'))
   }
 

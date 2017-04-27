@@ -81,7 +81,6 @@ module.exports = function (EntityPersonne, $cachePersonne) {
     // ET des permissions ok au runtime (au cas où la conf change)
     if (this.roles) this.permissions = getPermissions(this.roles)
     // @todo ajouter ici un checkAuthSource
-    if (!this.pid && this.origine && this.idOrigine) this.pid = this.origine + '/' + this.idOrigine
     if (!this.pid) throw new Error('personne sans pid, impossible à sauvegarder')
     next()
   }
@@ -97,8 +96,6 @@ module.exports = function (EntityPersonne, $cachePersonne) {
 
   EntityPersonne
       .defineIndex('pid', 'string')
-      .defineIndex('origine', 'string')
-      .defineIndex('idOrigine', 'string')
       .defineIndex('nom', 'string')
       .defineIndex('email', 'string')
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir

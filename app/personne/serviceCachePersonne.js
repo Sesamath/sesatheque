@@ -50,31 +50,12 @@ module.exports = function ($cache, $settings) {
 
   /**
    * Récupère une personne du cache d'après son oid
-   * @param {Integer}          oid
+   * @param {string}          id pid ou oid
    * @param {personneCallback} next
    * @memberOf $cachePersonne
    */
-  $cachePersonne.get = function (oid, next) {
-    $cache.get('personne_' + oid, next)
-  }
-
-  /**
-   * Récupère une personne du cache d'après son origine
-   * @param {string}           origine
-   * @param {string}           idOrigine
-   * @param {personneCallback} next
-   * @memberOf $cachePersonne
-   */
-  $cachePersonne.getByOrigine = function (origine, idOrigine, next) {
-    if (origine && idOrigine) {
-      $cache.get('personne_' + origine + '/' + idOrigine, function (error, oid) {
-        if (error) next(error)
-        else if (oid) $cachePersonne.get(oid, next)
-        else next(null, undefined)
-      })
-    } else {
-      next(new Error('origine ou idOrigine manquant'))
-    }
+  $cachePersonne.get = function (id, next) {
+    $cache.get('personne_' + id, next)
   }
 
   /**
@@ -84,7 +65,9 @@ module.exports = function ($cache, $settings) {
    * @memberOf $cachePersonne
    */
   $cachePersonne.set = function (personne, next = logIfError) {
-    $cache.set('personne_' + personne.origine + '/' + personne.idOrigine, personne.oid, ttl, logIfError)
+    // by pid
+    $cache.set('personne_' + personne.pid, ttl, logIfError)
+    // by oid
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }
 

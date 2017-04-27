@@ -171,8 +171,11 @@ const config = {
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
   sesatheques: [],
   // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences
+  // sous la forme {nom, baseId, baseUrl}
   // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
   sesalabs: [],
+  // une liste d'autres serveurs d'authentification externes, {nom, baseId, baseUrl}
+  authServers: [],
   // une liste de login / pass admin
   admin: {
     // foo:'passDeFoo'
@@ -247,6 +250,8 @@ config.sesalabs.forEach(s => {
 })
 if (!config.components) config.components = {}
 if (config.sesalabs.length) {
+  // s'il y a des sesalab, il faut une config du component sesalabSso
+  // on la crée d'après les infos des sesalabs
   if (!config.components.sesalabSso) config.components.sesalabSso = {}
   const confSso = config.components.sesalabSso
   confSso.authServers = Array.isArray(confSso.authServers && confSso.authServers.length) ? filterOnBaseUrl(confSso.authServers) : []
