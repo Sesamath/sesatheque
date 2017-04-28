@@ -338,46 +338,41 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.tab = 'create'
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
-      if (errorMsg) {
-        var user = $accessControl.getCurrentUser(context)
-        log.debug('permissions insuffisantes pour ajouter', user.permissions)
-        denied(context, errorMsg)
+      if (errorMsg) return denied(context, errorMsg)
+      var clonedOid = context.get.clone
+      if (clonedOid) {
+        // cas particulier du clonage
+        $ressourceRepository.load(clonedOid, function (error, ressource) {
+          if (error) {
+            $ressourcePage.printError(context, error)
+          } else if (ressource) {
+            $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
+            delete ressource.oid
+            delete ressource.idOrigine
+            ressource.origine = config.application.baseId
+            var pid = $accessControl.getCurrentUserPid(context)
+            if (!ressource.contributeurs) ressource.contributeurs = []
+            if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
+            $ressourceRepository.save(ressource, function (error, ressource) {
+              if (error) {
+                $ressourcePage.printError(context, error)
+              } else if (ressource && ressource.oid) {
+                var url = $routes.getAbs('edit', ressource.oid, context)
+                if (context.layout === 'iframe') url += '?layout=iframe'
+                context.redirect(url)
+              } else {
+                $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
+              }
+            })
+          } else {
+            $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
+          }
+        })
       } else {
-        var clonedOid = context.get.clone
-        if (clonedOid) {
-          // cas particulier du clonage
-          $ressourceRepository.load(clonedOid, function (error, ressource) {
-            if (error) {
-              $ressourcePage.printError(context, error)
-            } else if (ressource) {
-              $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
-              delete ressource.oid
-              delete ressource.idOrigine
-              ressource.origine = config.application.baseId
-              var pid = $accessControl.getCurrentUserPid(context)
-              if (!ressource.contributeurs) ressource.contributeurs = []
-              if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
-              $ressourceRepository.save(ressource, function (error, ressource) {
-                if (error) {
-                  $ressourcePage.printError(context, error)
-                } else if (ressource && ressource.oid) {
-                  var url = $routes.getAbs('edit', ressource.oid, context)
-                  if (context.layout === 'iframe') url += '?layout=iframe'
-                  context.redirect(url)
-                } else {
-                  $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
-                }
-              })
-            } else {
-              $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
-            }
-          })
-        } else {
-          // creation simple
-          var fake = {new: true, publie: true}
-          addToken(context, fake)
-          $ressourcePage.printForm(context, null, fake, options)
-        }
+        // creation simple
+        var fake = {new: true, publie: true}
+        addToken(context, fake)
+        $ressourcePage.printForm(context, null, fake, options)
       }
     })
   })
