@@ -352,9 +352,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           delete ressource.dateMiseAJour
           ressource.dateCreation = new Date()
           ressource.origine = myBaseId
-          var pid = $accessControl.getCurrentUserPid(context)
-          if (!ressource.contributeurs) ressource.contributeurs = []
-          if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
+          // on laisse les auteurs intacts et ajoute le user courant en contributeur,
+          // sauf si on clone un alias, car dans ce cas il se retrouvera auteur de la ressource
+          // issue de l'original lors de l'édition
+          if (!ressource.aliasOf) {
+            var pid = $accessControl.getCurrentUserPid(context)
+            if (!ressource.contributeurs) ressource.contributeurs = []
+            if (ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
+          }
           $ressourceRepository.save(ressource, function (error, ressource) {
             if (error) return $ressourcePage.printError(context, error)
             if (!ressource || !ressource.oid) return $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
@@ -384,12 +389,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     const titrePage = 'Ajouter une ressource'
     const pid = $accessControl.getCurrentUserPid(context)
 
-    if (context.post.oid) {
-      return $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
-    }
-    if (!pid) {
-      return denied(context)
-    }
+    if (context.post.oid) return $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
+    if (!pid) return denied(context)
 
     // on peut y aller
     flow().seq(function () {
@@ -416,9 +417,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }).seq(function (ressource) {
       // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
       ressource.auteurs = [pid]
+      // on veut gérér les erreurs ici, signe d'un bug dans notre code, donc pas d'appel au seq suivant
       $ressourceRepository.save(ressource, function (error, ressourceSaved) {
         if (error) {
-          // on veut gérér les erreurs ici, signe d'un bug dans notre code
           log.error(new Error('on a une erreur au save mais pas au valide précédent'))
           printForm(context, error, ressource, 'Ajouter une ressource')
         } else if (!_.isEmpty(ressourceSaved.$errors)) {
