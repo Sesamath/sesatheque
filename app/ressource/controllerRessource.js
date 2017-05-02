@@ -47,7 +47,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
-  // var myBaseId = appConfig.application.baseId
+  var myBaseId = appConfig.application.baseId
   var request = require('request')
 
   /**
@@ -343,30 +343,25 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (clonedOid) {
         // cas particulier du clonage
         $ressourceRepository.load(clonedOid, function (error, ressource) {
-          if (error) {
-            $ressourcePage.printError(context, error)
-          } else if (ressource) {
-            $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
-            delete ressource.oid
-            delete ressource.idOrigine
-            ressource.origine = config.application.baseId
-            var pid = $accessControl.getCurrentUserPid(context)
-            if (!ressource.contributeurs) ressource.contributeurs = []
-            if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
-            $ressourceRepository.save(ressource, function (error, ressource) {
-              if (error) {
-                $ressourcePage.printError(context, error)
-              } else if (ressource && ressource.oid) {
-                var url = $routes.getAbs('edit', ressource.oid, context)
-                if (context.layout === 'iframe') url += '?layout=iframe'
-                context.redirect(url)
-              } else {
-                $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
-              }
-            })
-          } else {
-            $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
-          }
+          if (error) return $ressourcePage.printError(context, error)
+          if (!ressource) return $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
+          $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
+          delete ressource.oid
+          delete ressource.rid
+          delete ressource.idOrigine
+          delete ressource.dateMiseAJour
+          ressource.dateCreation = new Date()
+          ressource.origine = myBaseId
+          var pid = $accessControl.getCurrentUserPid(context)
+          if (!ressource.contributeurs) ressource.contributeurs = []
+          if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
+          $ressourceRepository.save(ressource, function (error, ressource) {
+            if (error) return $ressourcePage.printError(context, error)
+            if (!ressource || !ressource.oid) return $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
+            var url = $routes.getAbs('edit', ressource.oid, context)
+            if (context.layout === 'iframe') url += '?layout=iframe'
+            context.redirect(url)
+          })
         })
       } else {
         // creation simple
@@ -410,7 +405,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
       // on met l'origine à la baseId locale si y'en a pas
       if (!ressourcePosted.origine) {
-        ressourcePosted.origine = appConfig.application.baseId
+        ressourcePosted.origine = myBaseId
         ressourcePosted.idOrigine = undefined
       }
       $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
