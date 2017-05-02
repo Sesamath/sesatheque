@@ -4,7 +4,7 @@
     {?spacer}
       <li class="tab-spacer"></li>
     {:else}
-      <li {?idLi}id="{idLi}"{/idLi} {?selected}class="selected"{/selected} {?hidden}style="display: none;"{/hidden}>
+      <li {?idLi}id="{idLi}"{/idLi} {?selected}class="selected"{/selected} {?hiddenLi}style="display: none;"{/hiddenLi}>
         {?html}
           {html|s}
         {:else}
