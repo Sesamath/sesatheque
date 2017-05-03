@@ -150,7 +150,10 @@ function valide (data, next) {
   // parsing des propriétés qui pourraient être envoyées en json
   // par ex les propriétés qui étaient hidden
   _.each(data, function (value, prop) {
-    if (typeof value === 'string' && (config.typesVar[prop] === 'Array' || config.typesVar[prop] === 'Object')) {
+    // on parse les string si on attendait Array ou Object
+    if (typeof value === 'string' &&
+      (config.typesVar[prop] === 'Array' || config.typesVar[prop] === 'Object')
+    ) {
       try {
         data[prop] = JSON.parse(value)
       } catch (error) {

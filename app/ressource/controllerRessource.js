@@ -47,7 +47,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
-  // var myBaseId = appConfig.application.baseId
+  var myBaseId = appConfig.application.baseId
   var request = require('request')
 
   /**
@@ -338,46 +338,41 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.tab = 'create'
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
-      if (errorMsg) {
-        var user = $accessControl.getCurrentUser(context)
-        log.debug('permissions insuffisantes pour ajouter', user.permissions)
-        denied(context, errorMsg)
-      } else {
-        var clonedOid = context.get.clone
-        if (clonedOid) {
-          // cas particulier du clonage
-          $ressourceRepository.load(clonedOid, function (error, ressource) {
-            if (error) {
-              $ressourcePage.printError(context, error)
-            } else if (ressource) {
-              $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
-              delete ressource.oid
-              delete ressource.idOrigine
-              ressource.origine = config.application.baseId
-              var pid = $accessControl.getCurrentUserPid(context)
-              if (!ressource.contributeurs) ressource.contributeurs = []
-              if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
-              $ressourceRepository.save(ressource, function (error, ressource) {
-                if (error) {
-                  $ressourcePage.printError(context, error)
-                } else if (ressource && ressource.oid) {
-                  var url = $routes.getAbs('edit', ressource.oid, context)
-                  if (context.layout === 'iframe') url += '?layout=iframe'
-                  context.redirect(url)
-                } else {
-                  $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
-                }
-              })
-            } else {
-              $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
-            }
+      if (errorMsg) return denied(context, errorMsg)
+      var clonedOid = context.get.clone
+      if (clonedOid) {
+        // cas particulier du clonage
+        $ressourceRepository.load(clonedOid, function (error, ressource) {
+          if (error) return $ressourcePage.printError(context, error)
+          if (!ressource) return $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
+          $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
+          delete ressource.oid
+          delete ressource.rid
+          delete ressource.idOrigine
+          delete ressource.dateMiseAJour
+          ressource.dateCreation = new Date()
+          ressource.origine = myBaseId
+          // on laisse les auteurs intacts et ajoute le user courant en contributeur,
+          // sauf si on clone un alias, car dans ce cas il se retrouvera auteur de la ressource
+          // issue de l'original lors de l'édition
+          if (!ressource.aliasOf) {
+            var pid = $accessControl.getCurrentUserPid(context)
+            if (!ressource.contributeurs) ressource.contributeurs = []
+            if (ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
+          }
+          $ressourceRepository.save(ressource, function (error, ressource) {
+            if (error) return $ressourcePage.printError(context, error)
+            if (!ressource || !ressource.oid) return $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
+            var url = $routes.getAbs('edit', ressource.oid, context)
+            if (context.layout === 'iframe') url += '?layout=iframe'
+            context.redirect(url)
           })
-        } else {
-          // creation simple
-          var fake = {new: true, publie: true}
-          addToken(context, fake)
-          $ressourcePage.printForm(context, null, fake, options)
-        }
+        })
+      } else {
+        // creation simple
+        var fake = {new: true, publie: true}
+        addToken(context, fake)
+        $ressourcePage.printForm(context, null, fake, options)
       }
     })
   })
@@ -394,12 +389,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     const titrePage = 'Ajouter une ressource'
     const pid = $accessControl.getCurrentUserPid(context)
 
-    if (context.post.oid) {
-      return $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
-    }
-    if (!pid) {
-      return denied(context)
-    }
+    if (context.post.oid) return $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
+    if (!pid) return denied(context)
 
     // on peut y aller
     flow().seq(function () {
@@ -415,7 +406,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
       // on met l'origine à la baseId locale si y'en a pas
       if (!ressourcePosted.origine) {
-        ressourcePosted.origine = appConfig.application.baseId
+        ressourcePosted.origine = myBaseId
         ressourcePosted.idOrigine = undefined
       }
       $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
@@ -426,9 +417,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }).seq(function (ressource) {
       // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
       ressource.auteurs = [pid]
+      // on veut gérér les erreurs ici, signe d'un bug dans notre code, donc pas d'appel au seq suivant
       $ressourceRepository.save(ressource, function (error, ressourceSaved) {
         if (error) {
-          // on veut gérér les erreurs ici, signe d'un bug dans notre code
           log.error(new Error('on a une erreur au save mais pas au valide précédent'))
           printForm(context, error, ressource, 'Ajouter une ressource')
         } else if (!_.isEmpty(ressourceSaved.$errors)) {

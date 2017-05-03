@@ -204,6 +204,7 @@ tools.idListToArray = function idListToArray (list) {
  * @returns {Date} L'objet Date ou undefined si la conversion a échoué (value invalide)
  */
 tools.toDate = function (value) {
+  if (value instanceof Date) return value
   var buffer
   if (value > 0) {
     // c'est un timestamp

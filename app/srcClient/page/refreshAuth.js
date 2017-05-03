@@ -96,9 +96,9 @@ module.exports = function refreshAuth () {
         }
         // on passe aux boutons d'action si on est sur une ressource
         if (response.permissions && document.getElementById('actions')) {
-          if (response.permissions.indexOf('C') > -1) dom.setStyles(document.getElementById('buttonDuplicate'), {display: 'block'})
-          if (response.permissions.indexOf('D') > -1) dom.setStyles(document.getElementById('buttonDelete'), {display: 'block'})
-          if (response.permissions.indexOf('W') > -1) dom.setStyles(document.getElementById('buttonEdit'), {display: 'block'})
+          if (response.permissions.indexOf('C') !== -1) dom.setStyles(document.getElementById('buttonDuplicate'), {display: 'block'})
+          if (response.permissions.indexOf('D') !== -1) dom.setStyles(document.getElementById('buttonDelete'), {display: 'block'})
+          if (response.permissions.indexOf('W') !== -1) dom.setStyles(document.getElementById('buttonEdit'), {display: 'block'})
         }
         // et la navigation du header
         if (response.permissions.indexOf('C') !== -1) {

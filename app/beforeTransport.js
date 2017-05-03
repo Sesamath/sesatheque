@@ -99,7 +99,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           icon: 'edit', // material icons mode_edit
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'edit'),
-          hidden: !$accessControl.hasPermission('update', context, ressource)
+          hiddenLi: !$accessControl.hasPermission('update', context, ressource)
         })
         links.push({
           idLi: 'buttonDuplicate',
@@ -108,7 +108,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           icon: 'copy', // material icons call_split
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1),
-          hidden: !$accessControl.hasPermission('create', context)
+          hiddenLi: !$accessControl.hasPermission('create', context)
         })
         links.push({
           idLi: 'buttonDelete',
@@ -117,7 +117,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           icon: 'trash', // material icons delete
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'delete'),
-          hidden: !$accessControl.hasPermission('delete', context, ressource)
+          hiddenLi: !$accessControl.hasPermission('delete', context, ressource)
         })
       } else {
         log.error(new Error('On a une ressource dans beforeTransport::addActions sans les droits pour la lire'))
