@@ -92,6 +92,10 @@ function load (container, swfHref, options, next) {
   hauteur = options.hauteur || 400
   flashversion = options.flashversion || '8'
 
+  // apparemment ça marche plus avec chrome depuis avril 2017
+  // regarder http://help.adobe.com/en_US/as3/dev/WS4B441C24-BAE3-4110-91FD-A4E5EEFB2467.html
+  // et https://helpx.adobe.com/flash/kb/flash-object-embed-tag-attributes.html
+
   // swfobject.embedSWF (swfUrl, htmlId, largeur, hauteur, version_requise,
   //    expressInstallSwfurl, flashvars, params, attributes, callbackFn)
   page.loadAsync('swfobject', function () {
