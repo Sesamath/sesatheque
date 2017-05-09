@@ -218,6 +218,8 @@ module.exports = function (EntityRessource) {
       if (this.restriction && !this.cle) {
         this.cle = uuid()
       }
+      // date de création
+      if (!this.dateCreation) this.dateCreation = new Date()
       // date de mise à jour
       this.dateMiseAJour = new Date()
       // cohérence de la restriction

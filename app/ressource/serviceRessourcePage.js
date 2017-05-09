@@ -563,8 +563,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // on a passé tous les labels, faut ajouter nos cas particulier
       formData.version.readonly = true
 
-      // si modif
       if (ressource && ressource.oid) {
+        // c'est une modif
         formData.oid = {
           name: 'oid',
           value: ressource.oid,
@@ -580,11 +580,18 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         }
         // origine & idOrigine en lecture seule pour modif mais pas création
         formData.origine.readonly = true
+        // idOrigine pas obligatoire, si on l'a pas mis à l'insert on peut plus l'ajouter
         if (formData.idOrigine) formData.idOrigine.readonly = true
-        else delete formData.idOrigine // idOrigine pas obligatoire, si on l'a pas mis à l'insert on peut plus l'ajouter
+        else delete formData.idOrigine
+        // aliasOf en readOnly
+        if (formData.aliasOf) {
+          if (formData.aliasOf.value) formData.aliasOf.readonly = true
+          else delete formData.aliasOf
+        }
         // le js d'édition est ajouté dans la vue dust si besoin, init (formEdit.js) est mis par getDefaultData
         formData.$view = 'formEdit'
       } else {
+        // c'est une création
         if (ressource.search) {
           // getDefaultData a initialisé $view, on vire juste cette propriété désormais inutile
           delete ressource.search
@@ -990,7 +997,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
         }
       }
       // on ajoute une remarque
-      fd.titre.rmq = 'Vous pouvez utiliser le caractère % comme joker, par exemple "%Pytagore%" pour trouver toutes les ressources dont le titre contient le mot "Pythagore" (il n’y a pas de distinction minuscule/majuscule)'
+      fd.titre.rmq = 'Vous pouvez utiliser le caractère % comme joker, par exemple "%Pythagore%" pour trouver toutes les ressources dont le titre contient le mot "Pythagore" (il n’y a pas de distinction minuscule/majuscule)'
       // log.debug('search form data', fd)
 
       // titre de la page

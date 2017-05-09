@@ -175,7 +175,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       var restriction = $settings.get('components.ressource.constantes.restriction')
       if (ressource.restriction === restriction.aucune) return ''
       if (!$accessControl.isAuthenticated(context)) return 'Vous devez être authentifié pour consulter cette ressource'
-      var user = $accessControl.getCurrentUser(context)
       switch (ressource.restriction) {
         // public
         case restriction.aucune:
@@ -225,6 +224,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getUpdateDeniedMessage (context, ressource) {
+    if (ressource.aliasOf && !configRessource.editable[ressource.type]) return `Les alias de type ${ressource.type} ne sont pas modifiables`
     if ($accessControl.isAuteur(context, ressource)) return ''
     if ($accessControl.isContributeur(context, ressource)) return ''
     if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
@@ -240,6 +240,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getUpdateAuteursDeniedMessage (context, ressource) {
+    if (ressource.aliasOf) throw new Error('Modifier les groupes qui peuvent modifier un alias n’a pas de sens')
     if ($accessControl.isAuteur(context, ressource)) return ''
     if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
     return 'Vous ne pouvez pas modifier les auteurs ou contributeur si vous n’êtes pas auteur de la ressource'
@@ -253,6 +254,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getUpdateGroupesDeniedMessage (context, ressource) {
+    if (ressource.aliasOf) throw new Error('Modifier les groupes d’un alias n’a pas de sens')
     // pour le moment idem update
     return getUpdateDeniedMessage(context, ressource)
   }

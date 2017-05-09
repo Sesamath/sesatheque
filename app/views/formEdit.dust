@@ -29,6 +29,7 @@
 
     <div class="form-group">
       {>wrapper widget="text" o=oid /}
+      {?aliasOf}{>wrapper widget="text" o=aliasOf /}{/aliasOf}
       {>wrapper widget="text" o=origine /}
       {?idOrigine}{>wrapper widget="text" o=idOrigine /}{/idOrigine}
     </div>

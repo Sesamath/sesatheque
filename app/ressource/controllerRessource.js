@@ -47,7 +47,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   var flow = require('an-flow')
   var config = require('./config')
   var appConfig = require('../config')
-  // var myBaseId = appConfig.application.baseId
+  var myBaseId = appConfig.application.baseId
   var request = require('request')
 
   /**
@@ -109,6 +109,59 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Helper de GET /ressource/modifier/:oid quand on veut éditer un alias
+   * @param context
+   * @param ressource
+   */
+  function forkAlias (context, ressource) {
+    const myPid = $accessControl.getCurrentUserPid(context)
+    flow().seq(function () {
+      if (!ressource.aliasOf) throw new Error('Impossible de dupliquer un alias qui n’en est pas un')
+      if (config.editable[ressource.type]) throw new Error('Ce type de ressource n’est pas modifiable')
+      // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
+      // en faire une vraie ressource (un fork de l'original)
+      $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
+    }).seq(function (ressourceOriginale) {
+      if (!ressourceOriginale) {
+        // ce cas devrait être exclu, juste une assurance
+        log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
+        return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
+      }
+      // on peut forker on repart d'une ressource vide
+      ressource = {}
+      // prop où on écrase simplement
+      ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
+      // auteursParents on passe par un Set pour dedup
+      const auteursParents = new Set()
+      if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
+      if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
+      else log.dataError('ressource sans auteurs')
+      ressource.auteursParents = Array.from(auteursParents)
+      // enfants
+      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) ressource.enfants = ressourceOriginale.enfants
+      // parametres
+      ressource.parametres = ressourceOriginale.parametres || {}
+      // sauvegarde de qq infos de l'original dans la copie
+      ressource.parametres.original = {
+        rid: ressourceOriginale.rid,
+        origine: ressourceOriginale.origine,
+        idOrigine: ressourceOriginale.idOrigine,
+        version: ressourceOriginale.version
+      }
+      // relations
+      ressource.relations = ressourceOriginale.relations || []
+      ressource.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
+      // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
+      ressource.auteurs = [myPid]
+      $ressourceRepository.save(ressource, this)
+    }).seq(function (ressourceSaved) {
+      context.redirect($routes.getAbs('edit', ressourceSaved.oid))
+    }).catch(function (error) {
+      log.error(error)
+      $ressourcePage.printError(context, error)
+    })
+  }
+  /**
    * Affiche le message existe pas avec un 404
    * @private
    * @param {Context} context
@@ -117,7 +170,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   function print404 (context, id) {
     $ressourcePage.printError(context, `La ressource ${id} n’existe pas`, 404)
   }
-
 
   /**
    * Affiche un form en ajoutant un token à la ressource
@@ -338,46 +390,41 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     context.tab = 'create'
     $accessControl.checkPermission('create', context, null, function (errorMsg) {
       var options = {$metas: {title: 'Ajouter une ressource'}}
-      if (errorMsg) {
-        var user = $accessControl.getCurrentUser(context)
-        log.debug('permissions insuffisantes pour ajouter', user.permissions)
-        denied(context, errorMsg)
-      } else {
-        var clonedOid = context.get.clone
-        if (clonedOid) {
-          // cas particulier du clonage
-          $ressourceRepository.load(clonedOid, function (error, ressource) {
-            if (error) {
-              $ressourcePage.printError(context, error)
-            } else if (ressource) {
-              $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
-              delete ressource.oid
-              delete ressource.idOrigine
-              ressource.origine = config.application.baseId
-              var pid = $accessControl.getCurrentUserPid(context)
-              if (!ressource.contributeurs) ressource.contributeurs = []
-              if (pid && ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
-              $ressourceRepository.save(ressource, function (error, ressource) {
-                if (error) {
-                  $ressourcePage.printError(context, error)
-                } else if (ressource && ressource.oid) {
-                  var url = $routes.getAbs('edit', ressource.oid, context)
-                  if (context.layout === 'iframe') url += '?layout=iframe'
-                  context.redirect(url)
-                } else {
-                  $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
-                }
-              })
-            } else {
-              $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
-            }
+      if (errorMsg) return denied(context, errorMsg)
+      var clonedOid = context.get.clone
+      if (clonedOid) {
+        // cas particulier du clonage
+        $ressourceRepository.load(clonedOid, function (error, ressource) {
+          if (error) return $ressourcePage.printError(context, error)
+          if (!ressource) return $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
+          $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.oid])
+          delete ressource.oid
+          delete ressource.rid
+          delete ressource.idOrigine
+          delete ressource.dateMiseAJour
+          ressource.dateCreation = new Date()
+          ressource.origine = myBaseId
+          // on laisse les auteurs intacts et ajoute le user courant en contributeur,
+          // sauf si on clone un alias, car dans ce cas il se retrouvera auteur de la ressource
+          // issue de l'original lors de l'édition
+          if (!ressource.aliasOf) {
+            var pid = $accessControl.getCurrentUserPid(context)
+            if (!ressource.contributeurs) ressource.contributeurs = []
+            if (ressource.contributeurs.indexOf(pid) === -1) ressource.contributeurs.push(pid)
+          }
+          $ressourceRepository.save(ressource, function (error, ressource) {
+            if (error) return $ressourcePage.printError(context, error)
+            if (!ressource || !ressource.oid) return $ressourcePage.printError(context, new Error("L'enregistrement d'une copie de la ressource ' +clonedOid +' a échoué"))
+            var url = $routes.getAbs('edit', ressource.oid, context)
+            if (context.layout === 'iframe') url += '?layout=iframe'
+            context.redirect(url)
           })
-        } else {
-          // creation simple
-          var fake = {new: true, publie: true}
-          addToken(context, fake)
-          $ressourcePage.printForm(context, null, fake, options)
-        }
+        })
+      } else {
+        // creation simple
+        var fake = {new: true, publie: true}
+        addToken(context, fake)
+        $ressourcePage.printForm(context, null, fake, options)
       }
     })
   })
@@ -394,12 +441,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     const titrePage = 'Ajouter une ressource'
     const pid = $accessControl.getCurrentUserPid(context)
 
-    if (context.post.oid) {
-      return $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
-    }
-    if (!pid) {
-      return denied(context)
-    }
+    if (context.post.oid) return $ressourcePage.printError(context, "Impossible d'ajouter une ressource existante")
+    if (!pid) return denied(context)
 
     // on peut y aller
     flow().seq(function () {
@@ -415,7 +458,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (!ressourcePosted.dateMiseAJour) ressourcePosted.dateMiseAJour = new Date()
       // on met l'origine à la baseId locale si y'en a pas
       if (!ressourcePosted.origine) {
-        ressourcePosted.origine = appConfig.application.baseId
+        ressourcePosted.origine = myBaseId
         ressourcePosted.idOrigine = undefined
       }
       $ressourceControl.valideRessourceFromPost(ressourcePosted, this)
@@ -426,9 +469,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }).seq(function (ressource) {
       // on est sur l'ajout, pas encore de groupes ni d'auteurs ajoutés
       ressource.auteurs = [pid]
+      // on veut gérér les erreurs ici, signe d'un bug dans notre code, donc pas d'appel au seq suivant
       $ressourceRepository.save(ressource, function (error, ressourceSaved) {
         if (error) {
-          // on veut gérér les erreurs ici, signe d'un bug dans notre code
           log.error(new Error('on a une erreur au save mais pas au valide précédent'))
           printForm(context, error, ressource, 'Ajouter une ressource')
         } else if (!_.isEmpty(ressourceSaved.$errors)) {
@@ -453,10 +496,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /ressource/modifier/:oid
    */
   controller.get($routes.get('edit', ':oid'), function (context) {
-    function logAndSendError (error) {
-      log.error(error)
-      $ressourcePage.printError(context, error)
-    }
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
     context.tab = 'edit'
     const myPid = $accessControl.getCurrentUserPid(context)
@@ -471,59 +510,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       ressource = ressourceBdd
       const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
       if (deniedMsg) return denied(deniedMsg)
+      // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
+      if (ressource.aliasOf) return forkAlias(context, ressource)
       // on peut afficher le form
       addToken(context, ressource)
-      // cas "normal" (pas un alias), on envoie
-      if (!ressource.aliasOf) return $ressourcePage.printForm(context, null, ressource)
-
-      // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
-      // en faire une vraie ressource (un fork de l'original)
-      $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
-    }).seq(function (ressourceOriginale) {
-      if (!ressourceOriginale) {
-        // ce cas devrait être exclu, juste une assurance
-        log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
-        return logAndSendError('L’original a été supprimé, impossible de modifier cet alias')
-      }
-      // on peut forker (chaîne vide plutôt que delete de la propriété
-      // pour que le merge plus tard ne remette pas l'ancienne valeur)
-      ressource.aliasOf = ''
-      // màj
-      // prop où on écrase simplement
-      ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
-      // auteursParents on passe par un Set pour dedup
-      const auteursParents = new Set()
-      if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
-      if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
-      else log.dataError('ressource sans auteurs')
-      ressource.auteursParents = Array.from(auteursParents)
-      // enfants
-      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) ressource.enfants = ressourceOriginale.enfants
-      // parametres
-      ressource.parametres = ressourceOriginale.parametres || {}
-      // sauvegarde de qq infos de l'original dans la copie
-      ressource.parametres.original = {
-        rid: ressourceOriginale.rid,
-        origine: ressourceOriginale.origine,
-        idOrigine: ressourceOriginale.idOrigine,
-        version: ressourceOriginale.version
-      }
-      // relations
-      if (!ressource.relations) ressource.relations = []
-      ressource.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
-      // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
-      // si on est pas l'auteur de l'alias (bizarre), on s'ajoute en contributeur
-      if (!ressource.auteurs) {
-        ressource.auteurs = []
-        log.dataError('ressource sans auteur', ressource)
-        ressource.auteurs.push(myPid)
-      }
-      if (ressource.auteurs.indexOf(myPid) === -1) {
-        if (!ressource.contributeurs) ressource.contributeurs = []
-        if (ressource.contributeurs.indexOf(myPid) === -1) ressource.contributeurs.push(myPid)
-      }
       $ressourcePage.printForm(context, null, ressource)
-    }).catch(logAndSendError)
+    }).catch(function (error) {
+      log.error(error)
+      $ressourcePage.printError(context, error)
+    })
   })
 
   /**
@@ -544,7 +539,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Traitement du formulaire d'édition, réaffiche le formulaire en cas d'erreur ou sauvegarde et redirige vers la description
+   * Traitement du formulaire d'édition, réaffiche le formulaire en cas d'erreur
+   * ou sauvegarde et redirige vers la description
    * @route POST /ressource/modifier/:oid
    */
   controller.post($routes.get('edit', ':oid'), function (context) {
@@ -561,7 +557,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
     if ($accessControl.isAuthenticated(context)) {
       flow().seq(function () {
-        // log.debug('ressource postée', ressourcePostee, 'form', {max: 5000})
+        // vérifier le token évite de vérifier de nouveau les droits
         checkToken(context, oid, this)
       }).seq(function () {
         $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
@@ -581,6 +577,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }).seq(function (ressourceBdd) {
         if (ressourceBdd) {
           ressourceOriginale = ressourceBdd
+          // si on modifie un alias, ça fork automatiquement
+          if (ressourceOriginale.aliasOf) delete ressourceOriginale.aliasOf
           $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
         } else {
           var error = new Error('La ressource ' + oid + " n'existe pas ou plus")
