@@ -41,7 +41,7 @@ var myBaseId = config.application.baseId
 var configRessource = require('./config')
 var Ref = require('../constructors/Ref')
 
-const {getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
+const {getBaseId, getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
@@ -551,6 +551,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     log.debug('headers de la requete options', context.request.headers, 'xhr', {max: 5000, indent: 2})
     // on laisse le middleware CORS faire son boulot
     context.next() // ne pas renvoyer de chaîne vide sinon 404
+  })
+
+  /**
+   * Retourne la baseId d'une baseUrl (sesatheque ou sesalab)
+   * @route GET /api/baseId?baseUrl=xxx
+   */
+  controller.get('baseId', function (context) {
+    const baseUrl = context.get.baseUrl
+    if (!baseUrl) return $json.sendError(context, 'baseUrl manquante')
+    // on cherche d'abord dans les sesalabs
+    const sesalab = config.sesalabs.find(sesalab => sesalab.baseUrl === baseUrl)
+    if (sesalab) {
+      if (sesalab.baseId) return $json.sendOk(context, {baseId: sesalab.baseId, type: 'sesalab'})
+      log.error('pb de sesalab en configuration sans baseId', sesalab)
+      return $json.sendError(context, 'Problème de configuration de la Sésathèque')
+    }
+    // c'est pas un sesalab, on cherche une sésathèque
+    const baseId = getBaseId(baseUrl, null)
+    if (baseId) return $json.sendOk(context, {baseId, type: 'sesatheque'})
+    $json.sendError(context, `baseUrl ${baseUrl} inconnue`)
   })
 
   /**
