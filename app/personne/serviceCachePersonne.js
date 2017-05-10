@@ -49,7 +49,7 @@ module.exports = function ($cache, $settings) {
   var $cachePersonne = {}
 
   /**
-   * Récupère une personne du cache d'après son oid
+   * Récupère une personne du cache d'après son id (oid ou pid)
    * @param {string}          id pid ou oid
    * @param {personneCallback} next
    * @memberOf $cachePersonne
@@ -66,7 +66,7 @@ module.exports = function ($cache, $settings) {
    */
   $cachePersonne.set = function (personne, next = logIfError) {
     // by pid
-    $cache.set('personne_' + personne.pid, ttl, logIfError)
+    $cache.set('personne_' + personne.pid, personne, ttl, logIfError)
     // by oid
     $cache.set('personne_' + personne.oid, personne, ttl, next)
   }

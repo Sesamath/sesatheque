@@ -60,7 +60,6 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
 
   EntityGroupe
     .defineIndex('nom', 'string')
-    .defineIndex('pid', 'string')
     .defineIndex('ouvert', 'boolean')
     .defineIndex('public', 'boolean')
     .defineIndex('gestionnaires', 'string')

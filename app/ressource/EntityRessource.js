@@ -137,7 +137,16 @@ module.exports = function (EntityRessource) {
 
       return ridsEnfants
     })
+    // un index de pids qui regroupe auteurs, auteursParents et contributeurs
+    .defineIndex('iPids', 'string', function () {
+      const pids = new Set()
+      if (this.auteurs && this.auteurs.length) this.auteurs.forEach(pid => pids.add(pid))
+      if (this.auteursParents && this.auteursParents.length) this.auteursParents.forEach(pid => pids.add(pid))
+      if (this.contributeurs && this.contributeurs.length) this.contributeurs.forEach(pid => pids.add(pid))
+      return Array.from(pids)
+    })
     .defineIndex('auteurs', 'string')
+    .defineIndex('auteursParents', 'string')
     .defineIndex('contributeurs', 'string')
     .defineIndex('groupes', 'string')
     .defineIndex('groupesAuteurs', 'string')
@@ -202,7 +211,7 @@ module.exports = function (EntityRessource) {
             if (this.idOrigine != this.oid) throw new Error(`idOrigine ${this.idOrigine} et rid ${this.rid} incohérents`) // eslint-disable-line eqeqeq
           }
         } else {
-          throw new Error(`Cette ressource doit être enregistrée sur ${baseId}`)
+          throw new Error(`Cette ressource ${this.oid || this.rid} doit être enregistrée sur ${baseId}`)
         }
       } else if (this.oid) {
         this.rid = myBaseId + '/' + this.oid
