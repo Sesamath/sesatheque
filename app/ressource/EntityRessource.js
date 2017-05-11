@@ -160,6 +160,8 @@ module.exports = function (EntityRessource) {
         (this.origine && this.idOrigine && `${this.origine}/${this.idOrigine}`) ||
         this.titre
 
+      // check type
+      if (!this.type) throw new Error('Ressource sans type, impossible à sauvegarder')
       // check origine et idOrigine
       if (this.origine) {
         if (this.origine === myBaseId) {

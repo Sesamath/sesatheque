@@ -133,7 +133,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         auteurs: [myPid]
       }
       // prop où on écrase simplement
-      ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
+      ;['titre', 'type', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
       // auteursParents on passe par un Set pour dedup
       const auteursParents = new Set()
       if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
