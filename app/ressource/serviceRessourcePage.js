@@ -626,10 +626,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (ressource.cle) {
         formData.cle = {
           name: 'cle',
-          value: ressource.cle,
-          hidden: true
+          value: ressource.cle
         }
       }
+      // toujours hidden
+      if (formData.cle) formData.cle.hidden = true
 
       // un checkbox pour forcer malgré les warnings si y'en a (mais qu'il n'y a pas d'erreurs)
       if (ressource.$warnings && ressource.$warnings.length && !formData.errors.length) {
