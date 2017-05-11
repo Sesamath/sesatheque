@@ -128,7 +128,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
       }
       // on peut forker on repart d'une ressource vide
-      ressource = {}
+      ressource = {
+        origine: myBaseId,
+        auteurs: [myPid]
+      }
       // prop où on écrase simplement
       ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
       // auteursParents on passe par un Set pour dedup
@@ -152,10 +155,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       ressource.relations = ressourceOriginale.relations || []
       ressource.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
       // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
-      ressource.auteurs = [myPid]
       $ressourceRepository.save(ressource, this)
     }).seq(function (ressourceSaved) {
-      context.redirect($routes.getAbs('edit', ressourceSaved.oid))
+      let route = $routes.getAbs('edit', ressourceSaved.oid)
+      if (context.get.layout === 'iframe') route = $routes.addParam(route, 'layout', 'iframe')
+      if (context.get.closerId) route = $routes.addParam(route, 'closerId', context.get.closerId)
+      context.redirect(route)
     }).catch(function (error) {
       log.error(error)
       $ressourcePage.printError(context, error)
@@ -512,7 +517,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (deniedMsg) return denied(deniedMsg)
       // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
       if (ressource.aliasOf) return forkAlias(context, ressource)
-      // on peut afficher le form
+      // sinon on peut afficher le form
       addToken(context, ressource)
       $ressourcePage.printForm(context, null, ressource)
     }).catch(function (error) {
