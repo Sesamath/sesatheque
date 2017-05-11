@@ -117,7 +117,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     const myPid = $accessControl.getCurrentUserPid(context)
     flow().seq(function () {
       if (!ressource.aliasOf) throw new Error('Impossible de dupliquer un alias qui n’en est pas un')
-      if (config.editable[ressource.type]) throw new Error('Ce type de ressource n’est pas modifiable')
+      if (!config.editable[ressource.type]) throw new Error(`Le type de ressource ${ressource.type} n’est pas modifiable`)
       // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
       // en faire une vraie ressource (un fork de l'original)
       $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
