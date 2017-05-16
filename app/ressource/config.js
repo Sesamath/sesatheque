@@ -255,7 +255,7 @@ var ressourceConfig = {
     titre: 'Titre',
     resume: 'Résumé',
     description: 'Description',
-    commentaires: 'Commentaires',
+    commentaires: 'Commentaires (réservés au formateur)',
     parametres: 'Paramètres',
     niveaux: 'Niveau',
     categories: 'Catégories',
