@@ -688,7 +688,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // modif autorisée sur les ressources éditables seulement
       // (qui deviendront à l'édition des ressources dérivées et plus des alias)
       if (configRessource.editable[refAlias.type]) refAlias.$droits += 'W'
-      $json.send(context, null, refAlias)
+      // le context.json de lassi filtre les propriétés $ au 1er niveau, on ajoute un niveau (ici la propriété clone)…
+      $json.send(context, null, {clone: refAlias})
     }).catch(function (error) {
       $json.sendError(context, error.toString())
     })

@@ -127,35 +127,38 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
         return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
       }
-      // on peut forker on repart d'une ressource vide
-      ressource = {
+      // on peut forker en partant sur la base de l'alias
+      const fork = {
+        oid: ressource.oid,
+        rid: ressource.rid,
         origine: myBaseId,
+        idOrigine: ressource.oid,
         auteurs: [myPid]
       }
       // prop où on écrase simplement
-      ;['titre', 'type', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
+      ;['titre', 'type', 'resume', 'commentaire'].forEach((p) => { fork[p] = ressourceOriginale[p] })
       // auteursParents on passe par un Set pour dedup
       const auteursParents = new Set()
       if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
       if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
       else log.dataError('ressource sans auteurs')
-      ressource.auteursParents = Array.from(auteursParents)
+      fork.auteursParents = Array.from(auteursParents)
       // enfants
-      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) ressource.enfants = ressourceOriginale.enfants
+      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) fork.enfants = ressourceOriginale.enfants
       // parametres
-      ressource.parametres = ressourceOriginale.parametres || {}
+      fork.parametres = ressourceOriginale.parametres || {}
       // sauvegarde de qq infos de l'original dans la copie
-      ressource.parametres.original = {
+      fork.parametres.original = {
         rid: ressourceOriginale.rid,
         origine: ressourceOriginale.origine,
         idOrigine: ressourceOriginale.idOrigine,
         version: ressourceOriginale.version
       }
       // relations
-      ressource.relations = ressourceOriginale.relations || []
-      ressource.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
+      fork.relations = ressourceOriginale.relations || []
+      fork.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
       // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
-      $ressourceRepository.save(ressource, this)
+      $ressourceRepository.save(fork, this)
     }).seq(function (ressourceSaved) {
       let route = $routes.getAbs('edit', ressourceSaved.oid)
       if (context.get.layout === 'iframe') route = $routes.addParam(route, 'layout', 'iframe')
