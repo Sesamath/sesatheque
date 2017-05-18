@@ -95,10 +95,15 @@ function Ref (values, baseId) {
    */
   this.titre = filterString(values.titre)
   /**
-   * Résumé (pour l'élève)
+   * Résumé (pour tous)
    * @type {string}
    */
   this.resume = filterString(values.resume)
+  /**
+   * Description (pour tous)
+   * @type {string}
+   */
+  this.description = filterString(values.description)
   /**
    * Commentaires (pour le formateur)
    * @type {string}

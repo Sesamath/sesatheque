@@ -45,9 +45,35 @@ const config = require('./config')
 
 function beforeBootsrap (lassi, mainComponent, allComponents) {
   // on ajoute toutes les tasks AVANT le bootstrap
-  glob.sync(`${__dirname}/cli/*.js`).concat(glob.sync(`${__dirname}/tasks/**/index.js`)).forEach(function (module) {
-    console.log('ajout du module', module)
-    require(module)
+  const commands = {}
+  let nbCommands = 0
+  glob.sync(`${__dirname}/cli/*.js`).concat(glob.sync(`${__dirname}/tasks/**/index.js`)).forEach(function (fichier) {
+    // chaque module peut déclarer un service lassi *-cli et ne rien exporter, ou exporter
+    // un objet dont chaque propriété sera une fonction avec une méthode help,
+    // cette fonction deviendra alors une commande du nom de la propriété (les autres propriétés seront ignorées)
+    // console.log('ajout du module', fichier)
+    const module = require(fichier)
+    const names = Object.keys(module)
+    names.forEach((name) => {
+      const fn = module[name]
+      if (typeof fn === 'function' && typeof fn.help === 'function') {
+        // console.log('ajout de la commande ', name)
+        commands[name] = fn
+        nbCommands++
+      }
+    })
+    if (nbCommands) {
+      // console.log('aj service $sesatheque-cli')
+      mainComponent.service('$sesatheque-cli', function () {
+        // un service est une fct, et un service *-cli doit retourner une fct
+        // qui doit retourner un objet avec une propriété commands qui doit être un fct
+        // qui doit retourner un objet dont chaque propriété est une commande…
+        // C'est lassi qui l'a dit…
+        return function () {
+          return {commands: () => commands}
+        }
+      })
+    }
   })
 }
 

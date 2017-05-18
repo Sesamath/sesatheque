@@ -272,12 +272,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
 
       if (needIncrement) {
         $ressourceRepository.archive(ressourceBdd, function (error, archive) {
-          if (error) next(error)
-          else {
-            ressource.version++
-            ressource.archiveOid = archive.oid
-            next(null, ressource)
-          }
+          if (error) return next(error)
+          ressource.version++
+          ressource.archiveOid = archive.oid
+          next(null, ressource)
         })
       } else {
         next(null, ressource)
