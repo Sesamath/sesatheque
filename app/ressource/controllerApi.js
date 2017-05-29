@@ -174,8 +174,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
      */
     const refs = []
     /**
-     * liste des sequenceModeles perso
-     * @type {object[]} la liste des objets sequenceModele filés par sésalab (stockés ici dans les parametres de la ressource)
+     * La liste des objets sequenceModele (perso) filés par sésalab (stockés ici dans les parametres de la ressource)
+     * @type {object[]}
      */
     const sequenceModeles = []
     // on veut remonter le max autorisé par la conf…

@@ -33,7 +33,7 @@ const flow = require('an-flow')
 const taskLog = require('an-log')('refreshArbres')
 
 function logErrorInDataAndTask (message, obj) {
-  taskLog.error(message, obj)
+  taskLog.error.apply(this, arguments)
   log.dataError(message, obj)
 }
 
@@ -164,10 +164,6 @@ refreshArbres.help = function refreshArbresHelp () {
   taskLog('La commande refreshArbres ne prend pas d’arguments, elle lance le rafraîchissement des données de tous les arbres')
 }
 
-/**
- * Service de gestion des updates via cli
- * @service $update-cli
- */
 module.exports = {
   refreshArbres
 }
