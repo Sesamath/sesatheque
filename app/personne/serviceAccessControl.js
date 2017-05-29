@@ -31,7 +31,7 @@
 
 'use strict'
 var dns = require('dns')
-var _ = require('lodash')
+// var _ = require('lodash')
 var sjtObj = require('sesajstools/utils/object')
 
 var config = require('../config')
@@ -53,12 +53,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getCorrectionDeniedMessage (context, ressource) {
-    var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user.permissions.create) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.typePerso[ressource.type]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
-
-    return msg
+    if (!user || !user.permissions) return 'Vous devez être authentifié pour visualiser une correction'
+    if (!user.permissions.correction) return "Vous n'avez pas de droits suffisants pour visualiser cette correction"
+    return ''
   }
 
   /**
@@ -69,13 +67,12 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string} Le message d'interdiction éventuel (undefined sinon)
    */
   function getCreateDeniedMessage (context, ressource) {
-    var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user || !user.permissions) msg = 'Vous devez être authentifié pour créer une ressource'
-    else if (!user.permissions.create) msg = 'Vous n’avez pas de droits suffisants pour créer une ressource'
-    else if (!configRessource.typePerso[ressource.type]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
-
-    return msg
+    if (!user || !user.permissions) return 'Vous devez être authentifié pour créer une ressource'
+    if (!user.permissions.create) return 'Vous n’avez pas de droits suffisants pour créer une ressource'
+    if (user.permissions.createAll) return ''
+    if (configRessource.typePerso[ressource.type]) return ''
+    return "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
   }
 
   /**

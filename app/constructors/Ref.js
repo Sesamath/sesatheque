@@ -123,7 +123,7 @@ function Ref (values, baseId) {
    * True si public (sinon il faut être authentifié pour lire la ressource)
    * @type {boolean}
    */
-  this.public = Boolean(values.public || values.restriction === 0)
+  this.public = Boolean(values.public || !values.restriction)
   if (!this.public) {
     if (values.cle) {
       /**

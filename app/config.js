@@ -146,6 +146,21 @@ const config = {
     },
     // Permissions (cumulatives) pour chacun des rôles
     personne: {
+      /**
+       * Les permissions possibles sont
+       * create: créer une ressource
+       * createAll: créer tout type de ressources (même celles non éditables)
+       * read: lire une ressource (dépend de la ressource)
+       * update: mettre une ressource
+       * updateAuteurs: mettre à jour les auteurs
+       * updateGroupes: mettre à jour les groupes d'une ressource
+       * delete: effacer une ressource
+       * deleteVersion: effacer une version
+       * index: modifier le flag indexable ou les propriétés niveau / categorie / typeDocumentaire / typePedagogique
+       * publish: modifier le flag publie
+       * correction: accéder aux corrextions
+       * createGroupe: créer un groupe
+       */
       roles: {
         // les droits sont dans l'absolu, mais il peut y avoir des modifications liées au contexte
         // (on a toujours le droit de modifier un contenu dont on serait le seul auteur,

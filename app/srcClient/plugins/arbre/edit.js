@@ -124,7 +124,7 @@ module.exports = function edit (arbre, options) {
         if (enfants.length !== 1) {
           return addTreeError('Il ne doit y avoir qu’une racine')
         }
-        if (enfants[ 0 ].enfants && enfants[ 0 ].enfants.length) enfantsStr = JSON.stringify(enfants[ 0 ].enfants, null, 2)
+        if (enfants[0].enfants && enfants[0].enfants.length) enfantsStr = JSON.stringify(enfants[0].enfants, null, 2)
         else enfantsStr = '[]'
       } catch (error) {
         log.error('Le parsing json a planté', error, enfants)

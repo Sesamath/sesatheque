@@ -10,7 +10,7 @@ C'est nécessaire aussi pour référencer sur une sésathèque des ressources d'
 Les alias étaient stockés comme entitées séparées, mais ça complique finalement plus qu'autre chose.
 
 Donc un alias devient une ressource
-- avec une propriété aliasOf contenant l'uuid de la source
+- avec une propriété aliasOf contenant le rid de la source
 - qui n'est pas modifiable (sauf pour répliquer la source)
 - qui est effaçable par le proprio
 
