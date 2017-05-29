@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.9.55",
+  "version": "0.9.56",
   "engines": {
     "node": ">4.4.0"
   },
