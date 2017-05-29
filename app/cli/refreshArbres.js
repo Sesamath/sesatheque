@@ -32,18 +32,25 @@
 const flow = require('an-flow')
 const taskLog = require('an-log')('refreshArbres')
 
+function logErrorInDataAndTask (message, obj) {
+  taskLog.error(message, obj)
+  log.dataError(message, obj)
+}
+
 /**
  * Rafraichit les datas de tous les arbres
  * @param {errorCallback} done
  */
 function refreshArbres (done) {
   function grab (next) {
-    let nb
+    let nb = 0
     flow().seq(function () {
       taskLog(`traitement des arbres de ${offset} à ${offset + limit}`)
-      EntityRessource.match('type').equals('arbre').sort('oid').grab(this)
+      EntityRessource.match('type').equals('arbre').sort('oid').grab(limit, offset, this)
     }).seqEach(function (arbre) {
       const nextArbre = this
+      currentOid = arbre.oid
+      currentTitre = arbre.titre
       nb++
       if (arbre.enfants && arbre.enfants.length) {
         process.nextTick(function () {
@@ -58,12 +65,12 @@ function refreshArbres (done) {
           })
         })
       } else {
-        taskLog.error(`arbre ${arbre.oid} sans enfants`)
+        logErrorInDataAndTask(`arbre ${arbre.oid} sans enfants (${arbre.titre})`)
         nextArbre()
       }
     }).seq(function () {
       if (nb === limit) {
-        return next() // debug
+        // return next() // debug
         offset += limit
         grab(next)
       } else {
@@ -77,29 +84,35 @@ function refreshArbres (done) {
       flow(item.enfants).seqEach(function (enfant) {
         const nextEnfant = this
         if (!enfant.aliasOf) {
-          if (item.type && item.type !== 'error' && item.type !== 'arbre') taskLog.error('item sans aliasOf', item)
+          if (item.type && item.type !== 'error' && item.type !== 'arbre') logErrorInDataAndTask(`item sans aliasOf dans l’arbre ${currentOid} (${currentTitre})`, item)
           return nextEnfant(null, enfant)
         }
         nbRessources++
         process.nextTick(function () {
           $ressourceFetch.fetchOriginal(enfant.aliasOf, function (error, ressource) {
-            if (error) return nextEnfant(error)
-            if (!ressource) {
-              taskLog.error(`la ressource ${enfant.aliasOf} n’existe plus`)
-              needSave = true
-              enfant.titre = `Cette ressource n’existe plus (${enfant.titre})`
-              enfant.type = 'error'
-              return nextEnfant(enfant)
+            if (error) {
+              // si c'est une 404 on veut continuer
+              if (/Aucune ressource/.test(error.message)) {
+                logErrorInDataAndTask(`la ressource ${enfant.aliasOf} n’existe plus dans l’arbre ${currentOid} (${currentTitre})`)
+                needSave = true
+                enfant.titre = `Cette ressource n’existe plus (${enfant.titre})`
+                enfant.type = 'error'
+                nextEnfant(null, enfant)
+              } else {
+                nextEnfant(error)
+              }
+              // on arrête là
+              return
             }
-            ;
-            ['titre', 'resume', 'description', 'commentaires'].forEach(p => {
+            // on a une ressource
+            ;['titre', 'resume', 'description', 'commentaires'].forEach(p => {
               if (enfant[p] !== ressource[p]) {
                 needSave = true
                 enfant[p] = ressource[p]
               }
             })
             if (enfant.type === 'arbre' && enfant.enfants && enfant.enfants.length) {
-              taskLog.error(`item arbre avec aliasOf ${enfant.aliasOf} et enfants, on vire les enfants pour rendre le chargement dynamique`)
+              logErrorInDataAndTask(`item arbre avec aliasOf ${enfant.aliasOf} et enfants, on vire les enfants pour rendre le chargement dynamique, dans l’arbre ${currentOid} (${currentTitre})`)
               needSave = true
               delete enfant.enfants
             }
@@ -126,11 +139,12 @@ function refreshArbres (done) {
   }
 
   if (typeof done !== 'function') throw new Error('Erreur interne, pas de callback de commande')
-  let offset = 10
-  let limit = 5
+  let offset = 0
+  let limit = 10
   let nbArbres = 0
   let nbArbresModif = 0
   let nbRessources = 0
+  let currentOid, currentTitre
   const EntityRessource = lassi.service('EntityRessource')
   const $ressourceRepository = lassi.service('$ressourceRepository')
   const $ressourceFetch = lassi.service('$ressourceFetch')
@@ -142,6 +156,7 @@ function refreshArbres (done) {
     grab(this)
   }).seq(function () {
     taskLog(`fin du rafraichissement de ${nbArbres} arbres (contenant ${nbRessources} ressources), dont ${nbArbresModif} modifiés`)
+    done()
   }).catch(done)
 }
 
@@ -154,5 +169,5 @@ refreshArbres.help = function refreshArbresHelp () {
  * @service $update-cli
  */
 module.exports = {
-  refreshArbres,
+  refreshArbres
 }
