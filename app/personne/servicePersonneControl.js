@@ -300,8 +300,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
           })
         }).done(nextStep)
       }).seq(function () {
-        // terminé, mais si y'a pas d'auteurs on met au moins le user courant
-        if (_.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(pid)
+        // terminé, mais si y'a pas d'auteurs on met au moins le user courant, si y'en a un
+        if (pid && _.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(pid)
         next(null, ressourceNew)
       }).catch(next)
     } else {
