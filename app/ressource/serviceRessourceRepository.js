@@ -36,7 +36,10 @@ const uuid = require('an-uuid')
 const elementtree = require('elementtree')
 const _ = require('lodash')
 const request = require('request')
-const {exists} = require('sesatheque-client/dist/sesatheques')
+const {exists, getBaseIdFromRid, getBaseUrl} = require('sesatheque-client/dist/sesatheques')
+const Ref = require('../constructors/Ref')
+const {getRidEnfants} = require('../tools/ressource')
+
 const config = require('./config')
 const appConfig = require('../config')
 
@@ -59,9 +62,18 @@ const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
  */
 const $ressourceRepository = {}
 
-module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
+module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
   const listeMax = config.limites.listeMax || 100 // on appliquera toujours un limit inférieur à cette valeur
   const listeNbDefault = config.limites.listeNbDefault || 10
+
+  function beforeSave (ressource, next) {
+    flow().seq(function () {
+      checkRelations(ressource, this)
+    }).seq(function () {
+      if (ressource.enfants && ressource.enfants.length) dropEnfantsAliased(ressource)
+      this(null, ressource)
+    }).done(next)
+  }
 
   /**
    * Nettoie les relations (helper de save, en complément de beforeStore)
@@ -69,10 +81,12 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    * @param {Ressource} ressource
    * @param {function} next
    */
-  function beforeSave (ressource, next) {
+  function checkRelations (ressource, next) {
     const id = ressource.oid || ressource.rid || ressource.titre
     const cleanRelations = ressource.relations
+      // on veut un tableau de 2 éléments dont le 1er est une relation connue
       .filter(relation => Array.isArray(relation) && relation.length === 2 && config.listes.relations[relation[0]])
+      // cast des 2 éléments
       .map(relation => [Number(relation[0]), String(relation[1])])
 
     // le format est bon (typeRel connu), reste à voir si on a des cibles sous la forme origine/idOrigine
@@ -145,53 +159,39 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
-   * Met à jour titre/résumé/description de cette ressource dans tous les arbres la contiennent,
-   * en tâche de fond
-   * @private
+   * Modifie ressource en virant récursivement les enfants de tout item qui serait un alias
+   * (pour garder l'aspect dynamique)
    * @param {Ressource} ressource
+   * @returns {Ressource} la ressource modifiée (pas toujours utile d'utiliser ce retour car la ressource passée en argument a été modifiée)
    */
-  function majArbres (ressource) {
-    // cherche un enfant et le modifie si besoin, retourne true si on a fait une modif
-    function findChild (arbre, rid) {
-      let modif
-      // avec _.each on pourrait sortir dès qu'on a trouvé, mais un arbre pourrait avoir
-      // deux fois le même enfant, on les parse tous
-      arbre.enfants.forEach(function (enfant) {
-        let mod
-        if (enfant.aliasOf === rid) {
-          mod = majChild(enfant)
-        } else if (enfant.enfants) {
-          mod = findChild(enfant, rid)
-        }
-        if (!modif && mod) modif = true
-      })
-      return modif
+  function dropEnfantsAliased (ressource) {
+    if (ressource.enfants) {
+      if (ressource.aliasOf) delete ressource.enfants
+      else if (ressource.enfants.length) ressource.enfants = ressource.enfants.map(dropEnfantsAliased)
     }
+    return ressource
+  }
 
-    // regarde s'il faut mettre à jour l'enfant et retourne true si c'est le cas
-    function majChild (child) {
-      let modif = false
-      if (child.rid === ressource.rid) {
-        if (child.titre !== ressource.titre || child.resume !== ressource.resume || child.description !== ressource.description) {
-          modif = true
-          child.titre = ressource.titre
-          child.resume = ressource.resume
-          child.description = ressource.description
-        }
-      } else {
-        log.error(new Error('majChild appelée avec des paramètres incohérents sur la ressource ' + ressource.oid), child)
-      }
-
-      return modif
-    }
-
-    // on cherche les enfants d'après le rid de la ressource
+  /**
+   * Met à jour cette ressource dans tous les arbres des autres sesathèques qui la contiennent,
+   * @private
+   * @param {Ref} ref
+   */
+  function updateParentsExternes (ref) {
+    // et on met à jour sur les autres sesathèques qui pourraient avoir mis cet enfant dans un arbre
+    const stCalled = new Set()
+    const rid = ref.aliasOf
     flow().seq(function () {
-      EntityRessource.match('enfants').equals(ressource.rid).grab(this)
-    }).seqEach(function (arbre) {
-      // ici arbre vient direct de la base, on zappe notre beforeStore
-      // pour éviter la mise en cache et la modif de dateMiseAJour
-      if (findChild(arbre, ressource.rid)) arbre.store((error) => log.error(error))
+      EntityExternalRef.match('rid').equals(rid).grab(this)
+    }).seqEach(function (extRef) {
+      const {baseId} = extRef
+      if (stCalled.has(baseId)) {
+        log.error(new Error(`EntityExternalRef ${extRef.oid} en double pour ${baseId} et ${rid}, on la supprime`))
+        extRef.delete(this)
+        return
+      }
+      stCalled.add(baseId)
+      $ressourceRemote.externalUpdate(baseId, ref, this)
     }).catch(log.error)
   }
 
@@ -231,57 +231,17 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   }
 
   /**
-   * Incrémente le n° de version si la ressource a une propriété versionNeedIncrement
-   * ou si une des propriétés listées dans config.versionTriggers a changée de valeur
-   * Affecte la propriété oid si la ressource existait mais qu'on ne l'avait pas chargée depuis le cache ou la bdd
-   * Ajoute l'idOrigine si inexistant avec origine local
+   * Charge l'ancienne version encore en base pour
+   * - incrémenter le n° de version si la ressource a une propriété versionNeedIncrement
+   *   ou si une des propriétés listées dans config.versionTriggers a changée de valeur
+   * - affecter la propriété oid si la ressource existait en base mais qu'on avait pas l'oid (seulement rid ou idOrigine)
+   * - lancer en tâche de fond, si besoin (car modif à répercuter), l'update des arbres qui utilisent
+   *   cette ressource, ici et sur toutes les sésathèques qui référence cette ressource via un ExternalRef
    * @private
    * @param {EntityRessource} ressource
    * @param {Function} next
    */
-  function updateVersion (ressource, next) {
-    /**
-     * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version
-     * @private
-     * @param ressource
-     * @param ressourceBdd
-     * @param next
-     */
-    function compare (ressource, ressourceBdd, next) {
-      let needIncrement = !!ressource.versionNeedIncrement
-      // on regarde si nos champs qui déclenchent un changement de version on changé
-      if (!needIncrement && ressourceBdd.oid) {
-        config.versionTriggers.forEach(function (prop) {
-          // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
-          // on utilise https://lodash.com/docs#isEqual
-          if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
-            // debug
-            if (!global.isProd) {
-              log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
-                '\navant : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressourceBdd[prop]) +
-                '\naprès : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressource[prop]))
-            }
-            needIncrement = true
-            return false // pas la peine de continuer le forEach, cf https://lodash.com/docs#forEach
-          }
-        })
-      }
-      // on recopie l'oid (pour écrasement éventuel de l'ancienne ressource)
-      ressource.oid = ressourceBdd.oid
-      ressource.version = ressourceBdd.version
-
-      if (needIncrement) {
-        $ressourceRepository.archive(ressourceBdd, function (error, archive) {
-          if (error) return next(error)
-          ressource.version++
-          ressource.archiveOid = archive.oid
-          next(null, ressource)
-        })
-      } else {
-        next(null, ressource)
-      }
-    } // compare
-
+  function checkAgainstPrevious (ressource, next) {
     if (ressource.oid) {
       // pas le cas au create ou sur un update via l'api
       // ira seulement en cache dans la plupart des cas, et de toute façon faut récupérer
@@ -289,7 +249,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
         if (error) next(error)
         else if (ressourceBdd) compare(ressource, ressourceBdd, next)
-        else next(new Error("updateVersion a reçu une ressource qui n'existait pas (oid=" + ressource.oid + ')'))
+        else next(new Error(`checkAgainstPrevious a reçu une ressource avec oid ${ressource.oid} qui n’existe pas`))
       })
     } else if (ressource.idOrigine) {
       $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
@@ -301,6 +261,95 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       next(null, ressource)
     }
   }
+
+  /**
+   * Enregistre ou supprime des listeners pour nos enfants externes
+   * @param {Ressource} ressource
+   * @param {Ressource} ressourceBdd
+   */
+  function checkRegisterListener (ressource, ressourceBdd) {
+    if (ressource.enfants && ressource.enfants.length || (ressourceBdd.enfants && ressourceBdd.enfants)) {
+      // faut la liste des rid externes qui ont changés
+      const oldRids = getRidEnfants(ressourceBdd)
+      const newRids = getRidEnfants(ressource)
+      const externalRidsAdded = newRids.filter(rid => !oldRids.includes(rid) && getBaseIdFromRid(rid) !== myBaseId)
+      // on pourrait facilement trouver les rids qui ont été virés, mais on peut pas faire de unregister
+      // sans vérifier que personne d'autre ne les utilise, on laisse tomber et ça sera viré au 1er update
+      // si personne s'en sert
+      appConfig.sesatheques.forEach(sesatheque => {
+        const rids = externalRidsAdded.filter(rid => getBaseIdFromRid(rid) === sesatheque.baseId)
+        if (rids.length) $ressourceRemote.register(rids, error => { if (error) log.error(error) })
+      })
+    }
+  }
+
+  /**
+   * Met à jour si besoin nos ressources parentes d'une ref interne,
+   * et lance la mise à jour des parents externes
+   * @param ressource
+   * @param ressourceBdd
+   */
+  function checkUpdateParent (ressource, ressourceBdd) {
+    if (
+      ressource.titre !== ressourceBdd.titre ||
+      ressource.resume !== ressourceBdd.resume ||
+      ressource.description !== ressourceBdd.description ||
+      ressource.commentaires !== ressourceBdd.commentaires ||
+      (ressource.publie && !ressource.restriction) !== (ressourceBdd.publie && !ressourceBdd.restriction)
+    ) {
+      // on lance tout ça en // en tâche de fond
+      const ref = new Ref(ressource)
+      $ressourceRepository.updateParent(ref)
+      updateParentsExternes(ref)
+    }
+  }
+
+  /**
+   * Compare la ressource à la ressource qui existait pour savoir s'il faut incrémenter la version,
+   * mettre à jour les arbres qui la contienne ou enregistrer un listener si on a des enfants externes
+   * @private
+   * @param ressource
+   * @param ressourceBdd
+   * @param next
+   */
+  function compare (ressource, ressourceBdd, next) {
+    let needIncrement = !!ressource.versionNeedIncrement
+    // on regarde si nos champs qui déclenchent un changement de version on changé
+    if (!needIncrement && ressourceBdd.oid) {
+      config.versionTriggers.forEach(function (prop) {
+        // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
+        // on utilise https://lodash.com/docs#isEqual
+        if (!_.isEqual(ressource[prop], ressourceBdd[prop])) {
+          // debug
+          if (!global.isProd) {
+            log.debug('La modif du champ ' + prop + ' entraîne un incrément de version de ' + ressourceBdd.oid +
+            '\navant : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressourceBdd[prop]) +
+            '\naprès : ' + (ressourceBdd[prop] === undefined) ? 'undefined' : JSON.stringify(ressource[prop]))
+          }
+          needIncrement = true
+          return false // pas la peine de continuer le forEach, cf https://lodash.com/docs#forEach
+        }
+      })
+    }
+    // on recopie l'oid (pour écrasement éventuel de l'ancienne ressource)
+    ressource.oid = ressourceBdd.oid
+    ressource.version = ressourceBdd.version
+
+    if (needIncrement) {
+      $ressourceRepository.archive(ressourceBdd, function (error, archive) {
+        if (error) return next(error)
+        ressource.version++
+        ressource.archiveOid = archive.oid
+        next(null, ressource)
+      })
+    } else {
+      next(null, ressource)
+    }
+    // on passe à la propagation éventuelle sur les arbres qui nous contiennent
+    checkUpdateParent(ressource, ressourceBdd)
+    // et au register / unregister sur les modifications d'enfants externes
+    checkRegisterListener(ressource, ressourceBdd)
+  } // compare
 
   /**
    * Créé les objets date à partir des Strings, met en cache et fait suivre
@@ -332,7 +381,10 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
     }
 
     try {
-      if (error) return next(error)
+      if (error) {
+        log.error(error)
+        return next(new Error('Problème d’accès à la base de données'))
+      }
       if (_.isArray(ressources)) ressources.forEach(processOne)
       else if (ressources) processOne(ressources)
       next(null, ressources)
@@ -418,7 +470,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
    */
   $ressourceRepository.archive = function archive (ressource, next) {
     try {
-      if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n'existe pas encore")
+      if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n’existe pas encore")
       EntityArchive.create(ressource).store(function (error, ressource) {
         if (ressource && !error) $cacheRessource.set(ressource)
         next(error, ressource)
@@ -575,7 +627,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   } // getListe
 
   /**
-   * Récupère une ressource et la passe à next (seulement une erreur si elle n'existe pas)
+   * Récupère une ressource et la passe à next (seulement une erreur si elle n’existe pas)
    * @memberOf $ressourceRepository
    * @param {number|String}     oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
    * @param {ressourceCallback} next appelée avec une EntityRessource
@@ -689,30 +741,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
   } // loadByOrigin
 
   /**
-   * Récupère une ressource publique et la passe à next (seulement une erreur si elle n'existe pas)
-   * @memberOf $ressourceRepository
-   * @param {number|String}      oid  L'identifiant de la ressource
-   * @param {ressourceCallback}  next avec une EntityRessource
-   * @returns {undefined}
-   */
-  $ressourceRepository.loadPublic = function loadPublic (oid, next) {
-    $cacheRessource.get(oid, function (error, ressourceCached) {
-      if (error) log.error(error)
-      if (ressourceCached) {
-        if (ressourceCached.restriction === config.constantes.restriction.aucune) next(null, EntityRessource.create(ressourceCached))
-        else next(null, null)
-      } else {
-        EntityRessource
-          .match('oid').equals(oid)
-          .match('restriction').equals(config.constantes.restriction.aucune)
-          .grabOne(function (error, ressource) {
-            cacheAndNext(error, ressource, next)
-          })
-      }
-    })
-  }
-
-  /**
    * Récupère une ressource d'après son idOrigine et la passe à next
    * @memberOf $ressourceRepository
    * @param {string}            origine
@@ -785,7 +813,7 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       ressource = EntityRessource.create(ressource)
     }
     flow().seq(function () {
-      updateVersion(ressource, this)
+      checkAgainstPrevious(ressource, this)
     }).seq(function (ressource) {
       if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {
         convertXmlEc2(ressource)
@@ -805,7 +833,6 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       // et le gestionnaire d'entité seulement l'intégrité interne des données d'une entité
       $cacheRessource.set(ressource)
       purgeVarnish(ressource)
-      majArbres(ressource)
       log.debug('write ' + ressource.oid + ' ok')
       if (next) next(null, ressource)
     }).catch(function (error) {
@@ -813,6 +840,65 @@ module.exports = function (EntityRessource, EntityArchive, $ressourceControl, $c
       log.error(error)
       if (next) next(error)
     })
+  }
+
+  /**
+   * Met à jour les arbres ou séries stockés ici qui ont ref comme enfant
+   * @param {Ref} ref
+   * @param {function} next appelée avec (error, nbArbres)
+   */
+  $ressourceRepository.updateParent = function updateParent (ref, next) {
+    // cherche un enfant et le modifie si besoin, retourne true si on a fait une modif
+    function findChild (arbre) {
+      let modif = false
+      if (arbre.enfants && arbre.enfants.length) {
+        // avec Array.some on pourrait sortir dès qu'on a trouvé, mais un arbre pourrait avoir
+        // deux fois le même enfant, on les parse tous
+        arbre.enfants.forEach(function (enfant) {
+          let mod = false
+          if (enfant.aliasOf === rid) mod = majChild(enfant)
+          else if (enfant.enfants && enfant.enfants.length) mod = findChild(enfant)
+          if (mod) modif = true
+        })
+      }
+      return modif
+    }
+
+    // regarde s'il faut mettre à jour l'enfant et retourne true si c'est le cas
+    function majChild (child) {
+      let modif = false
+      if (child.aliasOf === ref.aliasOf) {
+        if (
+          child.titre !== ref.titre ||
+          child.resume !== ref.resume ||
+          child.description !== ref.description ||
+          child.commentaires !== ref.commentaires ||
+          child.public !== (ref.publie && !ref.restriction)
+        ) {
+          modif = true
+          Object.assign(child, ref)
+          // on veut pas les enfants car on a une vraie ref
+          if (child.enfants) delete child.enfants
+        }
+      } else {
+        log.error(new Error(`majChild appelée avec des paramètres incohérents sur ${ref.aliasOf}`), child)
+      }
+      return modif
+    }
+
+    // on cherche les enfants d'après le rid de la ressource
+    const rid = ref.aliasOf
+    let nbArbres = 0
+    flow().seq(function () {
+      // on cherche nos arbres contenant cet enfant
+      EntityRessource.match('enfants').equals(rid).grab(this)
+    }).seqEach(function (arbre) {
+      nbArbres++
+      if (findChild(arbre, rid)) $ressourceRepository.save(arbre, this)
+      else log.dataError(`majArbres appelé suite à un update de ${rid}, trouvé l’arbre ${arbre.oid} mais il n’y a pas eu de modification à répercuter`)
+    }).seq(function () {
+      if (next) next(null, nbArbres)
+    }).catch(next || log.error)
   }
 
   return $ressourceRepository

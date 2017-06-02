@@ -32,11 +32,14 @@
 'use strict'
 
 const request = require('request')
-const sesatheques = require('sesatheque-client/dist/sesatheques')
-const {exists, getBaseUrl, getComponents} = sesatheques
+const {exists, getBaseUrl, getComponents} = require('sesatheque-client/dist/sesatheques')
 
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId
+const tokens = {}
+appConfig.sesatheques.forEach(({baseId, apiToken}) => {
+  if (baseId && apiToken) tokens[baseId] = apiToken
+})
 
 /**
  * Service d'accès aux ressources d'autres sesatheques
@@ -44,11 +47,7 @@ const myBaseId = appConfig.application.baseId
  * @requires $ressourceRepository
  */
 
-module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
-  const tokens = {}
-  appConfig.sesatheques.forEach((s) => {
-    if (s.baseId && s.apiToken) tokens[s.baseId] = s.apiToken
-  })
+module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
 
   /**
    * Renvoie une ressource récupérée ailleurs ou ici
@@ -157,6 +156,6 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
   return {
     fetch,
     fetchOriginal,
-    fetchRid
+    fetchRid,
   }
 }

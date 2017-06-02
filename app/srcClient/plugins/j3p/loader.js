@@ -37,7 +37,7 @@ var urlBaseJ3p
 /** raccourci vers window */
 var w = window
 // Des variables globales que j3p utilise, on les défini si elles ne le sont pas déjà
-/* La commande console n'existe pas sous IE */
+/* La commande console n’existe pas sous IE */
 if (typeof w.console === 'undefined') w.console = {}
 if (!w.console.log) w.console.log = function () {}
 if (!w.console.info) w.console.info = function () {}

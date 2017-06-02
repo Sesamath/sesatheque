@@ -104,7 +104,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
-      var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou vous n'en faite pas partie"
+      var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
       if (grp && h.isFollowed(context, nom)) h.ignoreGroup(context, nom, this)
       else this(deniedMsg)
     }).seq(function () {
@@ -123,7 +123,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
-      var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou vous n'en faite pas partie"
+      var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
       if (grp && $accessControl.isGroupeMembre(context, nom)) h.quitGroup(context, nom, this)
       else this(deniedMsg)
     }).seq(function () {

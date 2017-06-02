@@ -115,7 +115,7 @@ module.exports = {
     {
       baseId: 'localhost3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
       baseUrl: 'http://localhost:3003/'
-      // apiTokens: un token qu’elle utiliserait pour ajouter des ressources ici
+      // apiToken: un token qu’elle utiliserait pour ajouter des ressources ici
       // (à priori des alias vers les siennes)
     }
     // on pourrait en mettre d'autres…

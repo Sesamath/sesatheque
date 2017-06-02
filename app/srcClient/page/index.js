@@ -96,7 +96,7 @@ function addError (error, delay) {
       }, delay * 1000)
     }
   } else {
-    log.error(new Error("errorsContainer n'existe pas, impossible d'afficher une erreur dedans " + errorMsg))
+    log.error(new Error("errorsContainer n’existe pas, impossible d'afficher une erreur dedans " + errorMsg))
   }
 }
 

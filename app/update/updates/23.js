@@ -30,48 +30,28 @@
  */
 'use strict'
 
-var flow = require('an-flow')
-
-var name = 'passe publie à true pour toutes les ressources d’origine labomepPERSOS'
-var description = ''
-
-var limit = 100
-
-var EntityRessource = lassi.service('EntityRessource')
+const flow = require('an-flow')
 const applog = require('an-log')(lassi.settings.application.name)
 
-// pour voir le nb de ressources par origine
-// SELECT _string as origine, count(*) as nb  FROM ressource_index WHERE name = 'origine' group by _string
+const name = 'réindexation de EntityRessource, mise à jour de tous les arbres'
+const description = ''
 
 module.exports = {
   name: name,
   description: description,
   run: function run (next) {
-    function grab () {
-      applog('update 9', name, offset, 'à', offset + limit - 1)
-      EntityRessource.match('origine').equals('labomepPERSOS').sort('oid').grab(limit, offset, function (error, ressources) {
-        if (error) return next(error)
-        // log.debug('ressources ' + ressources.map((r) => r.oid).join(' '))
-        flow(ressources).seqEach(function (ressource) {
-          if (!ressource.publie) {
-            ressource.publie = true
-            ressource.store(this)
-          } else {
-            this()
-          }
-        }).seq(function () {
-          if (ressources.length === limit) {
-            offset += limit
-            setTimeout(grab, 0)
-          } else {
-            this()
-          }
-        }).done(next)
-      })
-    }
-    // init
-    var offset = 0
-    // go
-    grab()
+    // on utilise le cli de lassi
+    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    // reindexAll est une commande de entities-cli
+    const reindexAll = $entitiesCli().commands().reindexAll
+    // mais $sesatheque-cli n’existe pas si on est pas en cli, on le charge directement
+    const refreshArbres = require('../../cli/refreshArbres').refreshArbres
+    flow().seq(function () {
+      reindexAll('EntityRessource', this)
+    }).seq(function () {
+      refreshArbres(this)
+    }).seq(function () {
+      next()
+    }).catch(next)
   } // run
 }

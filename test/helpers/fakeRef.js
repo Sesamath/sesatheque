@@ -42,6 +42,7 @@ function getOne () {
     type: faker.random.arrayElement(['arbre', 'ato', 'em', 'j3p', 'url']),
     titre: faker.lorem.words(),
     resume: faker.lorem.sentence(),
+    description: faker.lorem.paragraphs(),
     commentaires: faker.lorem.paragraphs(),
     public: faker.random.arrayElement([true, true, true, false])
   }

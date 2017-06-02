@@ -130,6 +130,11 @@ function getFakeRessource (options) {
     '$warnings',
     '$errors'
   ].forEach(p => { if (options[p]) fakeRessource[p] = options[p] })
+  // mais si y'a un aliasOf faut virer les enfants et les paramètres
+  if (fakeRessource.aliasOf) {
+    if (fakeRessource.enfants) delete fakeRessource.enfants
+    if (fakeRessource.parametres) delete fakeRessource.parametres
+  }
 
   return fakeRessource
 }

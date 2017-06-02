@@ -38,7 +38,7 @@ const path = require('path')
 
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
-const {reBaseUrl} = require('sesatheque-client/dist/sesatheques')
+const {addSesatheque, reBaseUrl} = require('sesatheque-client/dist/sesatheques')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -238,11 +238,19 @@ if (config.application.staging === 'prod' && config.$entities.database.debug) {
 // on ajoute toujours un slash de fin à baseUrl
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
 
+// on ajoute notre sesatheque (si le client la connait déjà ça renvoie false mais ne gêne pas)
+addSesatheque(config.application.baseId, config.application.baseUrl)
+
 // idem pour les sesatheques, mais on ajoute un objet byId, plus simple à tester
 config.sesathequesById = {}
 if (Array.isArray(config.sesatheques) && config.sesatheques.length) {
+  // check baseUrl valides
   config.sesatheques = filterOnBaseUrl(config.sesatheques)
-  config.sesatheques.forEach(s => { config.sesathequesById[s.baseId] = s.baseUrl })
+  config.sesatheques.forEach(s => {
+    const {baseId, baseUrl} = s
+    addSesatheque(baseId, baseUrl)
+    config.sesathequesById[baseId] = s
+  })
 } else {
   config.sesatheques = []
 }

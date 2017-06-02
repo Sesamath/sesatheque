@@ -38,7 +38,7 @@
  * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
  * @controller controllerPublic
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl) {
   /**
    * Une callback qui ne fait rien sinon logguer une éventuelle erreur
    * @private
@@ -61,8 +61,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function affiche (context, view, options) {
     var oid = context.arguments.oid
-    $ressourceRepository.loadPublic(oid, function (error, ressource) {
-      $ressourcePage.prepareAndSend(context, error, ressource, view, options)
+    $ressourceRepository.load(oid, function (error, ressource) {
+      if (error) return $ressourcePage.printError(context, error, 500)
+      if (!$accessControl.isPublic(ressource)) return $ressourcePage.prepareAndSend(context, `La ressource ${ressource.oid} n’est pas publique`, undefined, view, options)
+      $ressourcePage.prepareAndSend(context, null, ressource, view, options)
     })
   }
 
@@ -76,9 +78,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param options
    */
   function checkAndAffiche (context, error, ressource, view, options) {
-    if (error) $ressourcePage.printError(context, "Problème d'accès à la base de données", 500)
-    else if (ressource && ressource.restriction === 0) $ressourcePage.prepareAndSend(context, error, ressource, view, options)
-    else $ressourcePage.printError(context, 'La ressource n’existe pas (ou n’est pas publique et publiée)', 404)
+    if (error) return $ressourcePage.printError(context, error)
+    if ($accessControl.isPublic(ressource)) return $ressourcePage.prepareAndSend(context, null, ressource, view, options)
+    $ressourcePage.printError(context, 'La ressource n’est pas publique', 403)
   }
 
   /**

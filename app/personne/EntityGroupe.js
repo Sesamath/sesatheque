@@ -40,14 +40,16 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
    * @extends Entity
    * @extends Groupe
    */
-  EntityGroupe.construct(Groupe)
+  EntityGroupe.construct(function (values) {
+    Object.assign(this, new Groupe(values))
+  })
 
   EntityGroupe.table = 'groupe'
 
   EntityGroupe.beforeStore(function (next) {
     this.nom = this.nom.toLowerCase()
     if (!this.creationDate) this.creationDate = new Date()
-    if (!this.gestionnaires || !this.gestionnaires.length) throw new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`)
+    if (!this.gestionnaires || !this.gestionnaires.length) return next(new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`))
     next()
   })
 

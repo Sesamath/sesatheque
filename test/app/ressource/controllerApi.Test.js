@@ -69,8 +69,8 @@ module.exports = function describeControllerApi () {
       norid: true,
       origine: myBaseId,
       noidOrigine: true,
-      // relations: [[1, 1], [14, 2]]
-      relations: [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
+      // on met une baseId connue, mais pas la notre sinon l'api va virer ces users qui n'existent pas
+      relations: [[1, 'sesabibli/1'], [14, 'sesabibli/2']]
     })
     ressExpected = clone(ressource)
     // ressExpected.relations = [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
@@ -86,7 +86,7 @@ module.exports = function describeControllerApi () {
       .send(ressource)
       .expect(200)
       .then(res => {
-        // console.log('res', res)
+        // console.log('res', res.body)
         expect(res.body).to.be.ok
         expect(res.body.error).to.be.not.ok
         expect(res.body.errors).to.be.not.ok
@@ -114,7 +114,6 @@ module.exports = function describeControllerApi () {
         expect(ress.error).to.be.not.ok
         expect(ress.errors).to.be.not.ok
         Object.keys(ressExpected).forEach(k => {
-          if (k === 'relations') console.log('relations', ress.relations, ressExpected.relations)
           expect(ress[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k} vaut ${stringify(ress[k])} et pas ${stringify(ressExpected[k])}`)
         })
         done()

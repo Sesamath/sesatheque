@@ -294,6 +294,8 @@ log.getElapsed = function (start) {
  * @param filter
  */
 log.error = function (message, objectToDump, filter) {
+  // on peut être utilisé comme callback
+  if (arguments.length === 0) return
   if (typeof message === 'string' || message instanceof Error) {
     out(message, objectToDump, filter, errorOutputStream, {max: 2000})
   } else {

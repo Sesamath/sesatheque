@@ -434,7 +434,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       // mais faut faire attention à mettre à jour cette variable après passage des ≠ services
       var nom = groupe.nom
       var groupeBdd
-      // on peut continuer, faut vérifier qu'il n'existe pas
+      // on peut continuer, faut vérifier qu'il n’existe pas
       flow().seq(function () {
         $groupeRepository.load(nom, this)
       }).seq(function (groupeBdd) {
@@ -509,7 +509,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     var pid = $accessControl.getCurrentUserPid(context)
     if (pid) {
       var nom = context.arguments.nom
-      var deniedMsg = 'Le groupe « ' + nom + " » n'existe pas ou vous n'en êtes pas gestionnaire"
+      var deniedMsg = 'Le groupe « ' + nom + " » n’existe pas ou vous n'en êtes pas gestionnaire"
 
       flow().seq(function () {
         $groupeRepository.load(nom, this)
@@ -770,7 +770,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
-      var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou n'est pas ouvert"
+      var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou n'est pas ouvert"
       if (grp) {
         if ($accessControl.isGroupeMembre(context, nom)) this('Vous êtes déjà membre du groupe ' + nom)
         else if (grp.ouvert) this()
@@ -812,7 +812,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     flow().seq(function () {
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
-      var deniedMsg = 'Le groupe ' + nom + " n'existe pas ou n'est pas public"
+      var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou n'est pas public"
       if (grp) {
         if (h.isFollowed(context, nom)) this('Vous suivez déjà les publications du groupe ' + nom)
         else if (grp.public) this()
@@ -882,7 +882,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           $groupeRepository.load(nom, this)
         }).seq(function (grp) {
           if (grp && h.isManaged(context, grp)) this(null, grp)
-          else this('Le groupe ' + nom + " n'existe pas ou vous n'en êtes pas gestionnaire")
+          else this('Le groupe ' + nom + " n’existe pas ou vous n'en êtes pas gestionnaire")
         }).seq(function (grp) {
           var token = sjt.getToken()
           context.session.delGroup = { groupe: grp, token: token }

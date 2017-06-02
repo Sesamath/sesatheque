@@ -37,9 +37,8 @@ var appConfig = require('../config')
 // Composant de gestion des ressources
 var ressourceComponent = lassi.component('ressource')
 
-// @todo à virer dès que l'update 11 sera passé partout
-ressourceComponent.entity('EntityAlias', function () {
-  require('./EntityAlias')(this)
+ressourceComponent.entity('EntityExternalRef', function () {
+  require('./EntityExternalRef')(this)
 })
 
 ressourceComponent.entity('EntityArchive', function () {
@@ -54,12 +53,16 @@ ressourceComponent.service('$cacheRessource', function ($cache, $settings, Entit
   return require('./serviceCacheRessource')($cache, $settings, EntityRessource)
 })
 
+ressourceComponent.service('$ressourceRemote', function () {
+  return require('./serviceRessourceRemote')()
+})
+
 ressourceComponent.service('$routes', function ($accessControl) {
   return require('./serviceRoutes')($accessControl)
 })
 
-ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes) {
-  return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, $ressourceControl, $cacheRessource, $cache, $routes)
+ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
+  return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json)
 })
 
 ressourceComponent.service('$ressourceFetch', function ($ressourceRepository) {
@@ -94,13 +97,13 @@ ressourceComponent.controller('ressource', function ($ressourceRepository, $ress
 })
 
 // un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache) {
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache)
+ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl) {
+  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl)
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, $ressourceFetch) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, $ressourceFetch)
+ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
+  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote)
 })
 
 // import calculatice

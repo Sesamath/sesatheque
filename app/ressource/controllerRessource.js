@@ -60,7 +60,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var token = sjt.getToken()
     if (!context.session.tokens) context.session.tokens = {}
     log.debug('avant ajout du token on a en session', context.session.tokens)
-    context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n'existe pas
+    context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n’existe pas
     ressource.token = token
     log.debug('on a ajouté le token ' + token + " en session avec l'oid " + ressource.oid, context.session.tokens)
   }
@@ -104,7 +104,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} [id=] Identifiant de la ressource (ou son titre), pour le mettre dans le message
    */
   function denied404 (context, id) {
-    var message = 'La ressource ' + id + " n'existe pas ou droits insuffisants"
+    var message = 'La ressource ' + id + " n’existe pas ou droits insuffisants"
     $ressourcePage.printError(context, message, 404)
   }
 
@@ -589,7 +589,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (ressourceOriginale.aliasOf) delete ressourceOriginale.aliasOf
           $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
         } else {
-          var error = new Error('La ressource ' + oid + " n'existe pas ou plus")
+          var error = new Error('La ressource ' + oid + " n’existe pas ou plus")
           log.error(error)
           this(error)
         }
@@ -753,7 +753,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $ressourcePage.printError(context, 'Erreur interne dans la vérification des droits')
             }
           } else {
-            log.error(new Error('Token OK mais la ressource ' + oid + " n'existe pas ou plus !"))
+            log.error(new Error('Token OK mais la ressource ' + oid + " n’existe pas ou plus !"))
             $ressourcePage.printError(context, 'Erreur interne, ressource introuvable, probablement déjà effacée')
           }
         })

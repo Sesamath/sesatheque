@@ -75,7 +75,7 @@ if (!lassi.options.cli) {
           fs.accessSync(lock, fs.R_OK)
           return applog('updates', lock + ' présent, on ignore les updates automatiques, base en version ' + dbVersion)
         } catch (error) {
-          // lock n'existe pas, on met ça pour rappeler qu'il pourrait exister
+          // lock n’existe pas, on met ça pour rappeler qu'il pourrait exister
           applog('updates', lock + ' non présent, on étudie un éventuel update à lancer')
         }
         fs.access(update, fs.R_OK, function (error) {
@@ -96,7 +96,7 @@ if (!lassi.options.cli) {
       }
 
       if (error) return done(error)
-      var dbVersion = update && update.num || 0
+      var dbVersion = update && update.num || 11
       nextUpdate()
     })
   })

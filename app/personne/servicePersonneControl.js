@@ -95,7 +95,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         })
       } else {
         // il est nouveau et c'est pas normal
-        rTools.addWarning(ressource, 'Le groupe ' + groupeNom + " n'existe pas (ou plus)")
+        rTools.addWarning(ressource, 'Le groupe ' + groupeNom + " n’existe pas (ou plus)")
         next()
       }
     })
