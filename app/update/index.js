@@ -81,7 +81,7 @@ if (!lassi.options.cli) {
         fs.access(update, fs.R_OK, function (error) {
           if (error) return done() // plus d'updates à passer, c'est pas une erreur
           dbVersion++
-          applog('updates', 'lancement update n° ' + dbVersion)
+          applog('updates', `lancement update n° ${dbVersion} : ${currentUpdate.name}`)
           var currentUpdate = require(update)
           currentUpdate.run(function (error) {
             if (error) return done(error)
