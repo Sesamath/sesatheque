@@ -163,7 +163,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       }
       if (ids404 && ids404.length) {
         var pl = ids404.length > 1 ? 's' : ''
-        $flashMessages.add(context, 'Le' + pl + ' gestionnaire' + pl + " d'identifiant" + pl + ' ' + ids404.join(', ') + " n'existe" + (pl ? 'nt' : '') + ' pas')
+        $flashMessages.add(context, `Le${pl} gestionnaire${pl} d'identifiant${pl} ${ids404.join(', ')} n’existe${(pl ? 'nt' : '')} pas`)
       }
 
       // ne plus être gestionnaire
