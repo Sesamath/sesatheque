@@ -44,6 +44,19 @@ module.exports = function ($accessControl) {
   var $routes = {}
 
   /**
+   * Retourne url complétée avec du (?|&)key=value (encode value au passage)
+   * @param {string} url
+   * @param {string} key
+   * @param {string|number} value
+   * @return {string}
+   */
+  $routes.addParam = function addParam (url, key, value) {
+    url += (url.indexOf('?') === -1) ? '?' : '&'
+    url += key + '=' + encodeURIComponent(value)
+    return url
+  }
+
+  /**
    * Retourne la route (sans préfixe de controleur ni slash de début) d'une action
    * Les arguments supplémentaires sont concaténé avec /
    * @memberOf $routes

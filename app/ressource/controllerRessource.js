@@ -60,7 +60,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var token = sjt.getToken()
     if (!context.session.tokens) context.session.tokens = {}
     log.debug('avant ajout du token on a en session', context.session.tokens)
-    context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n'existe pas
+    context.session.tokens[token] = ressource.oid || 0 // sinon avec undefined la property n’existe pas
     ressource.token = token
     log.debug('on a ajouté le token ' + token + " en session avec l'oid " + ressource.oid, context.session.tokens)
   }
@@ -104,7 +104,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} [id=] Identifiant de la ressource (ou son titre), pour le mettre dans le message
    */
   function denied404 (context, id) {
-    var message = 'La ressource ' + id + " n'existe pas ou droits insuffisants"
+    var message = 'La ressource ' + id + " n’existe pas ou droits insuffisants"
     $ressourcePage.printError(context, message, 404)
   }
 
@@ -117,7 +117,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     const myPid = $accessControl.getCurrentUserPid(context)
     flow().seq(function () {
       if (!ressource.aliasOf) throw new Error('Impossible de dupliquer un alias qui n’en est pas un')
-      if (config.editable[ressource.type]) throw new Error('Ce type de ressource n’est pas modifiable')
+      if (!config.editable[ressource.type]) throw new Error(`Le type de ressource ${ressource.type} n’est pas modifiable`)
       // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
       // en faire une vraie ressource (un fork de l'original)
       $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
@@ -127,35 +127,43 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
         return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
       }
-      // on peut forker on repart d'une ressource vide
-      ressource = {}
+      // on peut forker en partant sur la base de l'alias
+      const fork = {
+        oid: ressource.oid,
+        rid: ressource.rid,
+        origine: myBaseId,
+        idOrigine: ressource.oid,
+        auteurs: [myPid]
+      }
       // prop où on écrase simplement
-      ;['titre', 'resume', 'commentaire'].forEach((p) => { ressource[p] = ressourceOriginale[p] })
+      ;['titre', 'type', 'resume', 'commentaire'].forEach((p) => { fork[p] = ressourceOriginale[p] })
       // auteursParents on passe par un Set pour dedup
       const auteursParents = new Set()
       if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
       if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
       else log.dataError('ressource sans auteurs')
-      ressource.auteursParents = Array.from(auteursParents)
+      fork.auteursParents = Array.from(auteursParents)
       // enfants
-      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) ressource.enfants = ressourceOriginale.enfants
+      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) fork.enfants = ressourceOriginale.enfants
       // parametres
-      ressource.parametres = ressourceOriginale.parametres || {}
+      fork.parametres = ressourceOriginale.parametres || {}
       // sauvegarde de qq infos de l'original dans la copie
-      ressource.parametres.original = {
+      fork.parametres.original = {
         rid: ressourceOriginale.rid,
         origine: ressourceOriginale.origine,
         idOrigine: ressourceOriginale.idOrigine,
         version: ressourceOriginale.version
       }
       // relations
-      ressource.relations = ressourceOriginale.relations || []
-      ressource.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
+      fork.relations = ressourceOriginale.relations || []
+      fork.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
       // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
-      ressource.auteurs = [myPid]
-      $ressourceRepository.save(ressource, this)
+      $ressourceRepository.save(fork, this)
     }).seq(function (ressourceSaved) {
-      context.redirect($routes.getAbs('edit', ressourceSaved.oid))
+      let route = $routes.getAbs('edit', ressourceSaved.oid)
+      if (context.get.layout === 'iframe') route = $routes.addParam(route, 'layout', 'iframe')
+      if (context.get.closerId) route = $routes.addParam(route, 'closerId', context.get.closerId)
+      context.redirect(route)
     }).catch(function (error) {
       log.error(error)
       $ressourcePage.printError(context, error)
@@ -512,7 +520,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (deniedMsg) return denied(deniedMsg)
       // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
       if (ressource.aliasOf) return forkAlias(context, ressource)
-      // on peut afficher le form
+      // sinon on peut afficher le form
       addToken(context, ressource)
       $ressourcePage.printForm(context, null, ressource)
     }).catch(function (error) {
@@ -581,7 +589,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (ressourceOriginale.aliasOf) delete ressourceOriginale.aliasOf
           $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
         } else {
-          var error = new Error('La ressource ' + oid + " n'existe pas ou plus")
+          var error = new Error('La ressource ' + oid + " n’existe pas ou plus")
           log.error(error)
           this(error)
         }
@@ -745,7 +753,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $ressourcePage.printError(context, 'Erreur interne dans la vérification des droits')
             }
           } else {
-            log.error(new Error('Token OK mais la ressource ' + oid + " n'existe pas ou plus !"))
+            log.error(new Error('Token OK mais la ressource ' + oid + " n’existe pas ou plus !"))
             $ressourcePage.printError(context, 'Erreur interne, ressource introuvable, probablement déjà effacée')
           }
         })

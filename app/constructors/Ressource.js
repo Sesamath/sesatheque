@@ -43,27 +43,35 @@ const filters = require('sesajstools/utils/filters')
  * @return {Array} la liste filtrée
  */
 function filterUserList (list, defaultBaseId) {
-  if (list && Array.isArray(list) && list.length) {
-    // on a encore des int…
-    // return filters.arrayString(list).map(pid => {
-    return list.map(pid => {
-      if (!pid) {
-        // l'apellant nous passe n'importe quoi…
-        console.error('liste de personnes invalide : ' + list.join(', '))
-        return
-      }
-      if (typeof pid === 'number') {
-        pid = defaultBaseId + '/' + pid
-      } else {
-        const pos = pid.indexOf('/')
-        if (pos === -1 && defaultBaseId) pid = defaultBaseId + '/' + pid
-        // @todo else ajouter ici un checkAuthSource pour vérifier que l'origine est connue comme source d'authentification
-      }
-      return pid
-    }).filter(pid => pid) // vire les éventuels undefined mis par le map
+  if (!list) return []
+  if (!Array.isArray(list)) {
+    console.error(new Error('liste de pids invalide (pas un array)'), list)
+    return []
   }
-  return []
+  if (!list.length) return []
+  // c'est un array non vide
+  // avec mocha (p'tet aussi autrement), on peut avoir du [null], on essaie de trouver où
+  const listCleaned = list.filter(pid => pid)
+  if (listCleaned.length < list.length) console.error(new Error('liste de pid avec des null ou undefined'),'\nla liste fournie => ', list)
+
+  return listCleaned.map(pid => {
+    // on a encore des int…
+    if (typeof pid === 'number') {
+      console.error(new Error(`pid numérique invalide : ${pid}`))
+      // pour le moment on corrige encore
+      // @todo virer cette rustine
+      return defaultBaseId + '/' + pid
+    }
+    const pos = pid.indexOf('/')
+    if (pos === -1) {
+      console.error(new Error(`pid invalide : ${pid}`))
+      if (defaultBaseId) return defaultBaseId + '/' + pid
+      return null
+    }
+    return pid
+  }).filter(pid => pid) // vire les éventuels null mis par le map
 }
+
 /**
  * Constructeur de l'objet Ressource (utilisé par l'entity Ressource coté serveur ou les plugins coté client)
  * @constructor

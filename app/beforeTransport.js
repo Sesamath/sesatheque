@@ -271,7 +271,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         var msg
         switch (context.status) {
           case 404:
-            msg = "Cette page ou ce fichier n'existe pas"
+            msg = "Cette page ou ce fichier n’existe pas"
             break
           case 401:
           case 403:

@@ -34,7 +34,7 @@ const uuid = require('an-uuid')
 const tools = require('../tools')
 const Ressource = require('../constructors/Ressource')
 const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/dist/sesatheques')
-
+const {getRidEnfants} = require('../tools/ressource')
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
@@ -54,7 +54,7 @@ module.exports = function (EntityRessource) {
 
     // mais après on ne peut plus ajouter de propriété dans afterStore, pas trouvé pourquoi…
     // => TypeError: Cannot assign to read only property 'rid' of object '#<Entity>'
-    if (!this.rid) Object.defineProperty(this, 'rid', {writable: true, enumerable: true, configurable: false})
+    if (!this.hasOwnProperty('rid')) Object.defineProperty(this, 'rid', {writable: true, enumerable: true, configurable: false})
 
     // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
     // plus pratique ici que dans le constructeur qui ne peut faire de require
@@ -79,9 +79,6 @@ module.exports = function (EntityRessource) {
 
   // on veut pas d'une table entity_ressource
   EntityRessource.table = 'ressource'
-
-  // on laisse tomber beforeStore ici car il dépend de cette entity, c'est le repository qui gère
-  // afterStore est plus bas
 
   EntityRessource
     .defineIndex('rid', 'string')
@@ -110,41 +107,7 @@ module.exports = function (EntityRessource) {
     // pour les arbres, on indexe tous les enfants, c'est lourd en écriture d'index
     // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
     // (pour mettre à jour titre & résumé par ex).
-    .defineIndex('enfants', 'string', function () {
-      // on veut toutes les refs récursivement
-      function addRidsEnfants (enfants) {
-        enfants.forEach(enfant => {
-          if (enfant.rid) {
-            pushRid(enfant.rid)
-          } else if (enfant.baseId) {
-            if (enfant.oid) pushRid(enfant.baseId + '/' + enfant.oid)
-            else if (enfant.ref) pushRid(enfant.baseId + '/' + enfant.ref)
-          } else if (enfant.oid) {
-            pushRid(myBaseId + '/' + enfant.oid)
-          }
-          if (enfant.enfants && enfant.enfants.length) addRidsEnfants(enfant.enfants)
-        })
-      }
-      const pushRid = (rid) => {
-        if (!alreadyAdded[rid]) {
-          alreadyAdded[rid] = true
-          ridsEnfants.push(rid)
-        }
-      }
-      const ridsEnfants = []
-      const alreadyAdded = {}
-      if (this.enfants && this.enfants.length) addRidsEnfants(this.enfants)
-
-      return ridsEnfants
-    })
-    // un index de pids qui regroupe auteurs, auteursParents et contributeurs
-    .defineIndex('iPids', 'string', function () {
-      const pids = new Set()
-      if (this.auteurs && this.auteurs.length) this.auteurs.forEach(pid => pids.add(pid))
-      if (this.auteursParents && this.auteursParents.length) this.auteursParents.forEach(pid => pids.add(pid))
-      if (this.contributeurs && this.contributeurs.length) this.contributeurs.forEach(pid => pids.add(pid))
-      return Array.from(pids)
-    })
+    .defineIndex('enfants', 'string', function () { return getRidEnfants(this) })
     .defineIndex('auteurs', 'string')
     .defineIndex('auteursParents', 'string')
     .defineIndex('contributeurs', 'string')
@@ -169,6 +132,8 @@ module.exports = function (EntityRessource) {
         (this.origine && this.idOrigine && `${this.origine}/${this.idOrigine}`) ||
         this.titre
 
+      // check type
+      if (!this.type) throw new Error('Ressource sans type, impossible à sauvegarder')
       // check origine et idOrigine
       if (this.origine) {
         if (this.origine === myBaseId) {
@@ -190,7 +155,7 @@ module.exports = function (EntityRessource) {
         } else {
           return next(new Error(`origine sans idOrigine (${this.oid ? this.oid : 'creation'})`))
         }
-      } else {
+      } else if (this.type !== 'error') {
         // on pourrait mettre d'office une origine myBaseId ici, mais c'est le boulot du contrôleur
         // ça pourrait masquer une vraie erreur d'aiguillage
         return next(new Error(`propriété origine obligatoire (${this.oid ? this.oid : 'creation'})`))

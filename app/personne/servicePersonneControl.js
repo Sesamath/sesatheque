@@ -95,7 +95,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
         })
       } else {
         // il est nouveau et c'est pas normal
-        rTools.addWarning(ressource, 'Le groupe ' + groupeNom + " n'existe pas (ou plus)")
+        rTools.addWarning(ressource, 'Le groupe ' + groupeNom + " n’existe pas (ou plus)")
         next()
       }
     })
@@ -300,8 +300,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
           })
         }).done(nextStep)
       }).seq(function () {
-        // terminé, mais si y'a pas d'auteurs on met au moins le user courant
-        if (_.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(pid)
+        // terminé, mais si y'a pas d'auteurs on met au moins le user courant, si y'en a un
+        if (pid && _.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(pid)
         next(null, ressourceNew)
       }).catch(next)
     } else {

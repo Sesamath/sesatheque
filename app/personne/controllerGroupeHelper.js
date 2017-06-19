@@ -147,7 +147,7 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
     var me = $accessControl.getCurrentUser(context)
     var prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
     if (me) {
-      var deniedMsg = "Vous n'étiez pas dans ce groupe ou il n'existe pas"
+      var deniedMsg = "Vous n'étiez pas dans ce groupe ou il n’existe pas"
       if (me[prop] && me[prop].length) {
         var newGroupes = me[prop].filter(function (groupeNom) { return groupeNom !== nom })
         if (newGroupes.length === me[prop].length) {

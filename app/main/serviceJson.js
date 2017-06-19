@@ -31,6 +31,9 @@
 
 'use strict'
 
+const request = require('request')
+const defaultTimeout = 5000
+
 /**
  * Équivalent de context.denied en json
  * @param {Context} context
@@ -51,6 +54,27 @@ function notFound (context, msg) {
   if (!msg) msg = 'Contenu inexistant'
   context.status = 404
   sendError(context, msg)
+}
+
+/**
+ * Wrapper de request.post, pour envoyer des data en json et récupérer du json
+ * @param url
+ * @param data
+ * @param next
+ */
+function post (url, data, next) {
+  const postOptions = {
+    url: url,
+    json: true,
+    content_type: 'charset=UTF-8',
+    timeout: defaultTimeout,
+    form: data
+  }
+  request.post(postOptions, function (error, response, body) {
+    if (error) return next(error)
+    if (body && body.error) return next(new Error(body.error))
+    next(null, body)
+  })
 }
 
 /**
@@ -98,6 +122,7 @@ function sendError (context, error) {
 function sendOk (context, data) {
   if (!data) data = {}
   data.success = true
+  log.debug('sendOk va renvoyer', data, 'api')
   context.json(data)
 }
 
@@ -107,10 +132,11 @@ function sendOk (context, data) {
 */
 module.exports = function () {
   return {
-    denied: denied,
-    notFound: notFound,
-    send: send,
-    sendError: sendError,
-    sendOk: sendOk
+    denied,
+    notFound,
+    post,
+    send,
+    sendError,
+    sendOk
   }
 }

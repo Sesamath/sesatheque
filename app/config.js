@@ -38,7 +38,7 @@ const path = require('path')
 
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
-const {reBaseUrl} = require('sesatheque-client/dist/sesatheques')
+const {addSesatheque, reBaseUrl} = require('sesatheque-client/dist/sesatheques')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -146,6 +146,21 @@ const config = {
     },
     // Permissions (cumulatives) pour chacun des rôles
     personne: {
+      /**
+       * Les permissions possibles sont
+       * create: créer une ressource
+       * createAll: créer tout type de ressources (même celles non éditables)
+       * read: lire une ressource (dépend de la ressource)
+       * update: mettre une ressource
+       * updateAuteurs: mettre à jour les auteurs
+       * updateGroupes: mettre à jour les groupes d'une ressource
+       * delete: effacer une ressource
+       * deleteVersion: effacer une version
+       * index: modifier le flag indexable ou les propriétés niveau / categorie / typeDocumentaire / typePedagogique
+       * publish: modifier le flag publie
+       * correction: accéder aux corrextions
+       * createGroupe: créer un groupe
+       */
       roles: {
         // les droits sont dans l'absolu, mais il peut y avoir des modifications liées au contexte
         // (on a toujours le droit de modifier un contenu dont on serait le seul auteur,
@@ -226,11 +241,19 @@ if (config.application.staging === 'prod' && config.$entities.database.debug) {
 // on ajoute toujours un slash de fin à baseUrl
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
 
+// on ajoute notre sesatheque (si le client la connait déjà ça renvoie false mais ne gêne pas)
+addSesatheque(config.application.baseId, config.application.baseUrl)
+
 // idem pour les sesatheques, mais on ajoute un objet byId, plus simple à tester
 config.sesathequesById = {}
 if (Array.isArray(config.sesatheques) && config.sesatheques.length) {
+  // check baseUrl valides
   config.sesatheques = filterOnBaseUrl(config.sesatheques)
-  config.sesatheques.forEach(s => { config.sesathequesById[s.baseId] = s.baseUrl })
+  config.sesatheques.forEach(s => {
+    const {baseId, baseUrl} = s
+    addSesatheque(baseId, baseUrl)
+    config.sesathequesById[baseId] = s
+  })
 } else {
   config.sesatheques = []
 }

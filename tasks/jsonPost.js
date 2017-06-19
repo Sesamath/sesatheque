@@ -75,7 +75,7 @@ switch (argv[0]) {
 }
 if (argv.length < 2) usage(1)
 var jsonFile = path.join(__dirname, argv[1])
-if (!fs.existsSync(jsonFile)) usage(1, jsonFile + " n'existe pas")
+if (!fs.existsSync(jsonFile)) usage(1, jsonFile + " n’existe pas")
 
 var url = urlBibli + uri
 log('post de ' + jsonFile + ' vers ' + url)

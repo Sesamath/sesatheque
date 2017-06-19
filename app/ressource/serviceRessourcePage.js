@@ -107,7 +107,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               choices[ myIndex ].gaSelected = isInGroupeAuteur
             }
           } else {
-            formData.errors.push('Le groupe ' + groupeNom + " n'existe pas")
+            formData.errors.push('Le groupe ' + groupeNom + " n’existe pas")
           }
           suivant()
         } catch (error) {
@@ -626,10 +626,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (ressource.cle) {
         formData.cle = {
           name: 'cle',
-          value: ressource.cle,
-          hidden: true
+          value: ressource.cle
         }
       }
+      // toujours hidden
+      if (formData.cle) formData.cle.hidden = true
 
       // un checkbox pour forcer malgré les warnings si y'en a (mais qu'il n'y a pas d'erreurs)
       if (ressource.$warnings && ressource.$warnings.length && !formData.errors.length) {
@@ -809,6 +810,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
               var enfantsDescribe = []
               ressource.enfants.forEach(function (enfant) {
+                // ça peut être un dossier seul
+                if (!enfant.aliasOf) return enfantsDescribe.push({titre: enfant.titre})
+                // sinon on veut le lien
                 try {
                   const [ baseId, id ] = getRidComponents(enfant.aliasOf)
                   const url = getBaseUrl(baseId) + $routes.getAbs('describe', id)
@@ -852,9 +856,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     } // termine
 
     if (error) {
-      log.error(error)
-      // on est appelé avec ce qui sort d'un load
-      $ressourcePage.printError(context, "Problème d'accès à la base de données", 500)
+      $ressourcePage.printError(context, error)
     } else if (ressource) {
       log.debug('prepareAndSend pour la vue ' + view + ' avec la ressource', ressource, 'dust', {max: 1000})
       var data = $ressourcePage.getDefaultData(view)

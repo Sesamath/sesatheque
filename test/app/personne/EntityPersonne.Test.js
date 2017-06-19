@@ -92,6 +92,7 @@ module.exports = function describeEntityPersonne () {
   })
   it('store ok', function (done) {
     personne.store(function (error, personne) {
+      if (error) console.error(error)
       expect(error).to.be.falsy
       checkPersonne(personne)
       done()
@@ -99,6 +100,7 @@ module.exports = function describeEntityPersonne () {
   })
   it('Grab ok', function (done) {
     grab(function (error, personnes) {
+      if (error) console.error(error)
       expect(error).to.be.falsy
       expect(personnes.length).to.equals(1)
       checkPersonne(personnes[0])
@@ -107,8 +109,10 @@ module.exports = function describeEntityPersonne () {
   })
   it('Delete ok', function (done) {
     personne.delete(function (error) {
+      if (error) console.error(error)
       expect(error).to.be.falsy
       grab(function (error, personnes) {
+        if (error) console.error(error)
         expect(error).to.be.falsy
         expect(personnes).to.have.length(0)
         done()

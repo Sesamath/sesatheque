@@ -31,12 +31,12 @@
 
 'use strict'
 const anLog = require('an-log')
-const log = require('./tools/log.js')
 const config = require('./config')
 const sesatheques = require('sesatheque-client/dist/sesatheques')
 const {exists, addSesatheque} = sesatheques
 
 module.exports = function boot (beforeBootstrapCb, options) {
+  const log = require('./tools/log.js')
   const logger = anLog(config.application.name)
   if (!options) options = {}
   options.root = __dirname
@@ -65,7 +65,7 @@ module.exports = function boot (beforeBootstrapCb, options) {
   const myBaseId = config.application.baseId
   if (!exists(myBaseId)) addSesatheque(myBaseId, config.application.baseUrl)
   if (config.sesatheques) {
-    if (Array.isArray(config.sesatheques)) config.sesatheques.forEach((s) => addSesatheque(s.baseId, s.baseUrl))
+    if (Array.isArray(config.sesatheques)) config.sesatheques.forEach(({baseId, baseUrl}) => addSesatheque(baseId, baseUrl))
     else logger.error('config.sesatheques non-conforme (doit être un tableau de {baseId, baseUrl})')
   } else {
     logger('pas d’autre sesatheque connue mise en configuration')

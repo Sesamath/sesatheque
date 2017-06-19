@@ -113,7 +113,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
       this()
     }).seq(function () {
       // on va chercher en bdd
-      const key = (id.substr('/') !== -1) ? 'oid' : 'pid'
+      const key = (id.substr('/') === -1) ? 'oid' : 'pid'
       EntityPersonne.match(key).equals(id).grabOne(this)
     }).seq(function (personne) {
       if (!personne) return next()
@@ -240,6 +240,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
 
     let id = personne.oid || personne.pid
     // pour continuer à être compatible avec l'ancien format
+    // @todo virer ça dès que l'update 24 aura été appliqué partout
     if (!id && personne.origine && personne.idOrigine) {
       log.error(new Error('on a passé à updateOrCreate une personne avec origine & idOrigine, on voudrait un pid'), personne)
       id = personne.origine + '/' + personne.idOrigine

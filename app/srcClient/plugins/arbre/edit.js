@@ -124,7 +124,7 @@ module.exports = function edit (arbre, options) {
         if (enfants.length !== 1) {
           return addTreeError('Il ne doit y avoir qu’une racine')
         }
-        if (enfants[ 0 ].enfants && enfants[ 0 ].enfants.length) enfantsStr = JSON.stringify(enfants[ 0 ].enfants, null, 2)
+        if (enfants[0].enfants && enfants[0].enfants.length) enfantsStr = JSON.stringify(enfants[0].enfants, null, 2)
         else enfantsStr = '[]'
       } catch (error) {
         log.error('Le parsing json a planté', error, enfants)
@@ -496,19 +496,25 @@ module.exports = function edit (arbre, options) {
      */
     function showGraphic () {
       if (!$dstTree) initDomGraphic()
+      const enfantsStr = $textarea.val()
+      console.log(`#${enfantsStr}#`)
       try {
-        dstTree.enfants = JSON.parse($textarea.val())
+        if (enfantsStr) {
+          dstTree.enfants = JSON.parse($textarea.val())
+        } else {
+          dstTree.enfants = []
+        }
+        $linkShowGraphic.hide()
+        $textarea.hide()
+        log('On va charger en dst', dstTree)
+        loadDst(dstTree)
+        $container.show()
+        $linkShowTxt.show()
+        isTextMode = false
       } catch (error) {
-        addTreeError('json enfants invalide')
+        addTreeError('json enfants invalide : \n' + enfantsStr)
         log.error(error)
       }
-      $linkShowGraphic.hide()
-      $textarea.hide()
-      log('On va charger en dst', dstTree)
-      loadDst(dstTree)
-      $container.show()
-      $linkShowTxt.show()
-      isTextMode = false
     }
 
     // ###########

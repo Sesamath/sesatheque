@@ -48,7 +48,7 @@ function checkArbre (arbre, next) {
             if (ressource.oid === ref) log(ref + ' OK')
             else if (ref === ressource.origine + '/' + ressource.idOrigine === ref) log(ref + ' OK (combinée')
           } else {
-            logError('KO ' + ref + " n'existe pas (était dans l'arbre " + idArbre + ') ' + sjt.stringify(ressource))
+            logError('KO ' + ref + " n’existe pas (était dans l'arbre " + idArbre + ') ' + sjt.stringify(ressource))
           }
           nextEnfant()
         })

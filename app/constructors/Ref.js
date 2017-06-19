@@ -37,7 +37,7 @@ function filterString (value) {
 /**
  * Définition d'une référence à une ressource, que l'on peut rencontrer dans les feuilles d'un arbre
  * Ce n'est pas une entité
- * @param {Object} [values={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte un Alias
+ * @param {Object} [values={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte une Ressource
  * @param {string} [baseId] Une base par défaut
  * @throws {Error} Si on passe des enfants sur un type non arbre
  * @constructor
@@ -95,10 +95,15 @@ function Ref (values, baseId) {
    */
   this.titre = filterString(values.titre)
   /**
-   * Résumé (pour l'élève)
+   * Résumé (pour tous)
    * @type {string}
    */
   this.resume = filterString(values.resume)
+  /**
+   * Description (pour tous)
+   * @type {string}
+   */
+  this.description = filterString(values.description)
   /**
    * Commentaires (pour le formateur)
    * @type {string}
@@ -114,11 +119,17 @@ function Ref (values, baseId) {
    * @type {Array}
    */
   if (Array.isArray(values.categories)) this.categories = values.categories
-  /**
-   * True si public (sinon il faut être authentifié pour lire la ressource)
-   * @type {boolean}
-   */
-  this.public = Boolean(values.public || values.restriction === 0)
+  if (values.hasOwnProperty('public')) {
+    /**
+     * True si public (sinon il faut être authentifié pour lire la ressource)
+     * @type {boolean}
+     */
+    this.public = Boolean(values.public)
+  } else if (values.hasOwnProperty('restriction')) {
+    this.public = !values.restriction && (!values.hasOwnProperty('publie') || Boolean(values.publie))
+  } else {
+    this.public = true
+  }
   if (!this.public) {
     if (values.cle) {
       /**

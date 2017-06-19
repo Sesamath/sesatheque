@@ -54,6 +54,7 @@ describe('Ref', () => {
   it('Laisse inchangé une ref', () => {
     const refOrig = fakeRef()
     const ref = new Ref(refOrig)
+    // console.log('la ref\n', refOrig, '\nest devenue\n', ref)
     // on vire les trucs obsolètes
     if (ref.ref) delete ref.ref
     // malgré des objets qui semblent vraiment égaux, ce truc passe pas

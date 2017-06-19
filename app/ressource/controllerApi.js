@@ -41,7 +41,7 @@ var myBaseId = config.application.baseId
 var configRessource = require('./config')
 var Ref = require('../constructors/Ref')
 
-const {getBaseId, getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
+const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
@@ -49,7 +49,7 @@ const {getBaseId, getBaseUrl, getRidComponents} = require('sesatheque-client/dis
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, $ressourceFetch) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
@@ -174,8 +174,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
      */
     const refs = []
     /**
-     * liste des sequenceModeles perso
-     * @type {object[]} la liste des objets sequenceModele filés par sésalab (stockés ici dans les parametres de la ressource)
+     * La liste des objets sequenceModele (perso) filés par sésalab (stockés ici dans les parametres de la ressource)
+     * @type {object[]}
      */
     const sequenceModeles = []
     // on veut remonter le max autorisé par la conf…
@@ -377,10 +377,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               // ni l'un ni l'autre, faut sauvegarder
               else writeAndOut(context, ressource)
             } else {
-              $json.denied(context, "Vous n'avez pas les droits suffisants pour modifier cette ressource")
+              $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
             }
           } else {
-            $json.notFound(context, 'La ressource ' + ref + " n'existe pas")
+            $json.notFound(context, `La ressource ${ref} n’existe pas`)
           }
         })
       } else {
@@ -388,6 +388,118 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
     } else {
       $json.send(context, new Error('relations manquantes'))
+    }
+  }
+
+  /**
+   * Register ou unregister une EntityExternalRef
+   * @private
+   * @param context
+   */
+  function postRessourceRegisterListener (context) {
+    log.debug('registerListener avec', context.post)
+    if (!$accessControl.hasAllRights(context)) return $json.denied(context)
+    const {action, baseId, rids} = context.post
+    if (!action) return $json.sendError(context, 'action manquante')
+    if (!baseId) return $json.sendError(context, 'baseId manquante')
+    if (!rids || !rids.length) return $json.sendError(context, 'rids manquant')
+
+    // ajouter un listener (pour prévenir baseId que rid a changé)
+    if (action === 'add') {
+      const warnings = []
+      // on regarde si on l'a pas déjà
+      flow(rids).seqEach(function (rid) {
+        const nextRid = this
+        // on vérifie que ça nous concerne
+        const ownerBaseId = getBaseIdFromRid(rid)
+        if (ownerBaseId !== myBaseId) {
+          warnings.push(`Impossible de s’enregistrer sur ${myBaseId} pour une ressource qui est gérée par ${ownerBaseId} (pour ${rid})`)
+          nextRid()
+        }
+        EntityExternalRef
+          .match('baseId').equals(baseId)
+          .match('rid').equals(rid)
+          .grabOne(function (error, externalRef) {
+            if (error) return nextRid(error)
+            if (externalRef) {
+              warnings.push(`${rid} avait déjà un listener pour ${baseId} sur ${myBaseId}`)
+              return nextRid()
+            }
+            // faut la créer
+            EntityExternalRef.create({baseId, rid}).store(nextRid)
+          })
+      }).seq(function () {
+        $json.sendOk(context, warnings.length ? {warnings} : {})
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+
+    // retirer un listener (car baseId ne référence plus rid)
+    } else if (action === 'remove') {
+      const warnings = []
+      let i = 0 // pour savoir à quel rid correspond le tableau externalRefs
+      flow(rids).seqEach(function (rid) {
+        log.debug('remove listener pour ' + rid)
+        EntityExternalRef
+          .match('baseId').equals(baseId)
+          .match('rid').equals(rid)
+          .grab(this)
+        // seqEach car chaque rid fait un grab qui remonte un tableau de externalRefs
+      }).seqEach(function (externalRefs) {
+        log.debug(`remove ${rids[i]} remonte les extRefs`, externalRefs)
+        if (externalRefs.length) {
+          if (externalRefs.length > 1) {
+            const msg = `Il y avait ${externalRefs.length - 1} doublon(s) exernalRef pour ${baseId} sur ${externalRefs[0].rid} (tous supprimés)`
+            log.dataError(msg)
+            warnings.push(msg)
+          }
+          externalRefs.forEach(er => er.delete(log.error))
+        } else {
+          warnings.push(`Aucun listener pour le rid ${rids[i]}`)
+        }
+        i++
+        this()
+      }).seq(function () {
+        $json.sendOk(context, warnings.length ? {warnings} : {})
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+    } else {
+      $json.sendError(context, `action ${context.post.action} inconnue (add|remove)`)
+    }
+  }
+
+  /**
+   * Demande d'update des arbres contenant une Ref
+   * @param context
+   * @returns {*}
+   */
+  function postRessourceExternalUpdate (context) {
+    log.debug('externalUpdate avec', context.post)
+    if (!$accessControl.hasAllRights(context)) return $json.denied(context)
+    try {
+      if (!context.post.ref) return $json.sendError(context, 'ref manquante')
+      const ref = new Ref(context.post.ref)
+      if (!ref.aliasOf) return $json.sendError(context, 'aliasOf manquant')
+      if (!ref.titre) return $json.sendError(context, 'titre manquant')
+      if (!ref.type) return $json.sendError(context, 'type manquant')
+      $ressourceRepository.updateParent(ref, function (error, nbArbres) {
+        if (error) {
+          log.error(error)
+          $json.sendError(context, error)
+        } else {
+          $json.sendOk(context)
+        }
+        // si aucun arbre n'a été mis à jour, c'est qu'on est enregistré pour cette ref sur sa sesatheque
+        // mais qu'on ne l'utilise plus, faut virer le listener pour éviter que ça ne se reproduise.
+        if (nbArbres === 0) {
+          log.dataError(`On nous a averti d’une modif de ${ref.aliasOf} mais plus aucune ressource ici ne la référence, on vire le listener`)
+          $ressourceRemote.unregister([ref.aliasOf], log.error)
+        }
+      })
+    } catch (error) {
+      log.error(error)
+      $json.sendError(context, error)
     }
   }
 
@@ -633,10 +745,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               })
             }
           } else {
-            $json.denied(context, "Vous n'avez pas les droits suffisant pour lire la ressource " + oid)
+            $json.denied(context, `Vous n’avez pas les droits suffisant pour lire la ressource ${oid}`)
           }
         } else {
-          $json.notFound(context, 'La ressource ' + oid + " n'existe pas")
+          $json.notFound(context, `La ressource ${oid} n’existe pas`)
         }
       })
     } else {
@@ -688,7 +800,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // modif autorisée sur les ressources éditables seulement
       // (qui deviendront à l'édition des ressources dérivées et plus des alias)
       if (configRessource.editable[refAlias.type]) refAlias.$droits += 'W'
-      $json.send(context, null, refAlias)
+      // le context.json de lassi filtre les propriétés $ au 1er niveau, on ajoute un niveau (ici la propriété clone)…
+      $json.send(context, null, {clone: refAlias})
     }).catch(function (error) {
       $json.sendError(context, error.toString())
     })
@@ -883,7 +996,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
           }
         } else {
-          sendJsonJstreeArray(context, 'la ressource ' + id + " n'existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
+          sendJsonJstreeArray(context, 'la ressource ' + id + " n’existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
         }
       })
     } else {
@@ -991,10 +1104,11 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // c'est pas pour nous
       context.next()
     } else {
-      $ressourceRepository.loadPublic(oid, function (error, ressource) {
-        if (error) $json.send(context, error)
-        else if (ressource) sendRessource(context, null, ressource)
-        else $json.notFound(context, 'La ressource ' + oid + " n'existe pas ou n'est pas publique")
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (error) return $json.send(context, error)
+        if (!ressource) return $json.notFound(context, `La ressource ${oid} n’existe pas`)
+        if ($accessControl.isPublic(ressource)) return sendRessource(context, null, ressource)
+        $json.denied(context, `La ressource ${oid} n’est pas publique`)
       })
     }
   })
@@ -1012,7 +1126,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       if (error) $json.send(context, error)
       else if (ressource && ressource.restriction === 0) sendRessource(context, null, ressource)
-      else $json.notFound(context, 'La ressource ' + origine + '/' + idOrigine + " n'existe pas ou n'est pas publique")
+      else if (ressource) $json.denied(context, `La ressource ${origine}/${idOrigine} n’est pas publique`)
+      else $json.notFound(context, `La ressource ${origine}/${idOrigine} n’existe pas`)
     })
   })
 
@@ -1138,6 +1253,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    *   Access-Control-Allow-Methods:POST OPTIONS
    * @route OPTIONS /api/ressource/addRelations
    */
+
+  /**
+   * Permet à une autre sésathèque d'ajouter un listener ici pour être prévenu sur une modif d'une de nos ressource
+   * @route POST /api/ressource/registerListener
+   */
+  controller.post('ressource/registerListener', postRessourceRegisterListener)
+
+  /**
+   * Pour poster une Ref afin de mettre à jour tous les éventuels arbres qui l'utilisent
+   * @route POST /api/ressource/externalUpdate
+   */
+  controller.post('ressource/externalUpdate', postRessourceExternalUpdate)
 }
 
 /**
@@ -1155,7 +1282,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
  * @type {Object}
  * @property {boolean}                     success
  * @property {string}                      [error] Message d'erreur éventuel
- * @property {Alias[]|Compact[]|Ressource[]} liste   Une liste d'Alias si aucun format n'a été précisé
+ * @property {Ref[]|Ressource[]} liste   Une liste de Ref (ou de Ressource si on le demande)
  */
 
 /**
@@ -1193,7 +1320,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
  * @property {Integer}            [start]   offset
  * @property {Integer}            [nb]      Nombre de résultats voulus (Cf settings.ressource.limites.listeNbDefault, à priori 25),
  *                                          sera ramené à settings.ressource.limites.maxSql si supérieur (à priori 500)
- * @property {string}             [format]  alias|full par défaut on remonte les ressource au format {@link Alias}
+ * @property {string}             [format]  ref|full par défaut on remonte les ressource au format {@link Ref}
  */
 
 /**

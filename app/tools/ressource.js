@@ -31,16 +31,6 @@
 'use strict'
 
 /**
- * Ajoute un warning à la ressource (en créant le tableau $warnings s'il n'existait pas)
- * @param {Ressource} ressource
- * @param {string} warning
- */
-function addWarning (ressource, warning) {
-  if (!ressource.$warnings) ressource.$warnings = []
-  ressource.$warnings.push(warning)
-}
-
-/**
  * Ajoute une erreur à la ressource (en créant le tableau $errors s'il n'existait pas)
  * @param {Ressource} ressource
  * @param {string} error
@@ -51,7 +41,40 @@ function addError (ressource, error) {
   else ressource.$errors.push(error.toString())
 }
 
+/**
+ * Ajoute un warning à la ressource (en créant le tableau $warnings s'il n'existait pas)
+ * @param {Ressource} ressource
+ * @param {string} warning
+ */
+function addWarning (ressource, warning) {
+  if (!ressource.$warnings) ressource.$warnings = []
+  ressource.$warnings.push(warning)
+}
+
+/**
+ * Retourne les rid de tous les enfants
+ * @param arbre
+ * @returns {Array}
+ */
+function getRidEnfants (ressource) {
+  // on veut toutes les refs récursivement
+  function addRids (enfants) {
+    enfants.forEach(enfant => {
+      if (enfant.aliasOf) rids.add(enfant.aliasOf)
+      if (enfant.enfants && enfant.enfants.length) addRids(enfant.enfants)
+    })
+  }
+  if (!ressource) throw new Error('getRidEnfants appelé sans ressource')
+  if (!ressource.enfants || !ressource.enfants.length) return []
+  // on peut chercher
+  const rids = new Set()
+  addRids(ressource.enfants)
+
+  return Array.from(rids)
+}
+
 module.exports = {
-  addError: addError,
-  addWarning: addWarning
+  addError,
+  addWarning,
+  getRidEnfants
 }

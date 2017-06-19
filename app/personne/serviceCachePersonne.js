@@ -86,7 +86,6 @@ module.exports = function ($cache, $settings) {
   if ($settings.get('noCache', false)) {
     log('$cacheRessource désactivé')
     $cachePersonne.get = function (oid, next) { next() }
-    $cachePersonne.getByOrigine = function (origine, idOrigine, next) { next() }
   }
 
   return $cachePersonne

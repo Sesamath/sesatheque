@@ -35,6 +35,7 @@ module.exports = function (controller) {
   var sjt = require('sesajstools')
   // var _ = require('lodash')
   var $cache = lassi.service('$cache')
+  var request = require('request')
 
   function getDefaultData () {
     return {
@@ -138,6 +139,25 @@ module.exports = function (controller) {
     $cache.delete(key, function (error) {
       if (error) context.json({error: error.toString()})
       else context.json({success: true, message: 'clé ' + key + ' effacée'})
+    })
+  })
+  controller.get('extUp', function (context) {
+    // pour poster sur bibli
+    var options = {
+      uri: `http://bibliotheque.local:3001/api/ressource/externalUpdate`,
+      headers: {'X-ApiToken': 'cniC6cyMOZB2p73P9kPTa.puCxKabwDeIu/zF8BFxeEQY22PE'},
+      gzip: true,
+      json: true,
+      body: {ref: {type: 'j3p', aliasOf: 'communlocal3003/3017', titre: 'Calculs', description: 'Exemple de consigne'}},
+      timeout: 3000
+    }
+    request.post(options, function (error, response, result) {
+      if (error) return context.json({error: error.toString()})
+      if (response.statusCode === 200 && result && result.success) return context.json({success: true})
+      if (result && result.error) return context.json({error: result.error})
+      // si on est toujours là y'a un pb…
+      log.error(new Error(`réponse inattendue sur ${options.uri}, status ${response.statusCode}`), result)
+      context.json({error: `réponse invalide`})
     })
   })
 }

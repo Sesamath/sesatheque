@@ -32,11 +32,14 @@
 'use strict'
 
 const request = require('request')
-const sesatheques = require('sesatheque-client/dist/sesatheques')
-const {exists, getBaseUrl, getComponents} = sesatheques
+const {exists, getBaseUrl, getComponents} = require('sesatheque-client/dist/sesatheques')
 
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId
+const tokens = {}
+appConfig.sesatheques.forEach(({baseId, apiToken}) => {
+  if (baseId && apiToken) tokens[baseId] = apiToken
+})
 
 /**
  * Service d'accès aux ressources d'autres sesatheques
@@ -44,15 +47,12 @@ const myBaseId = appConfig.application.baseId
  * @requires $ressourceRepository
  */
 
-module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
-  const tokens = {}
-  appConfig.sesatheques.forEach((s) => {
-    if (s.baseId && s.apiToken) tokens[s.baseId] = s.apiToken
-  })
+module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
 
   /**
    * Renvoie une ressource récupérée ailleurs ou ici
    * (Avec oid, attention à ne pas la sauvegarder localement si elle vient d'ailleurs !)
+   * Renvoie toujours une ressource ou une erreur (`Aucune ressource xxx` si 404)
    * @memberOf $ressourceFetch
    * @param {string} rid (une string baseId/origine/idOrigine marche aussi)
    * @param {ressourceCallback} next (renvoie une EntityRessource si c'est local et ses propriétés sinon)
@@ -60,8 +60,16 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
   function fetch (rid, next) {
     try {
       const [baseId, id] = getComponents(rid)
-      if (baseId === myBaseId) return $ressourceRepository.load(id, next)
-      if (!exists(baseId)) throw new Error(`rid ${rid} invalide ou correspondant à une sesathèque inconnue`)
+      if (baseId === myBaseId) {
+        return $ressourceRepository.load(id, function (error, ressource) {
+          if (error) next(error)
+          else if (ressource) next(null, ressource)
+          else next(new Error(`Aucune ressource ${rid}`))
+        })
+      }
+      // pas chez nous
+      if (!exists(baseId)) return next(new Error(`rid ${rid} invalide ou correspondant à une sesathèque inconnue`))
+      // on peut aller chercher ça
       const baseUrl = getBaseUrl(baseId)
       var options = {
         uri: baseUrl + 'api/public/' + id,
@@ -131,26 +139,23 @@ module.exports = function serviceRessourceFetchFactory ($ressourceRepository) {
   function fetchOriginal (aliasOf, next) {
     fetch(aliasOf, function (error, ressource) {
       if (error) return next(error)
-      if (ressource && ressource.aliasOf) {
+      if (ressource.aliasOf) {
         // si c'est un alias on recommence, mais une seule fois (trop risqué de mettre du récursif ici)
         log.dataError(`alias d’alias (${aliasOf} => ${ressource.aliasOf})`)
         fetch(ressource.aliasOf, function (error, ress2) {
           if (error) return next(error)
-          if (ress2 && ress2.aliasOf) return next(new Error(`Trop d’alias imbriqués (${aliasOf} => ${ressource.aliasOf} => ${ress2.aliasOf})`))
-          if (ress2) return next(null, ress2)
-          next(new Error(`Alias ${aliasOf} pointe sur ${ressource.aliasOf} qui n’existe pas`))
+          // on a toujours une erreur ou une ressource
+          if (ress2.aliasOf) return next(new Error(`Trop d’alias imbriqués (${aliasOf} => ${ressource.aliasOf} => ${ress2.aliasOf})`))
+          next(null, ress2)
         })
-      } else if (ressource) {
-        next(null, ressource)
-      } else {
-        next(new Error(`Aucune ressource ${aliasOf}`))
       }
+      next(null, ressource)
     })
   }
 
   return {
     fetch,
     fetchOriginal,
-    fetchRid
+    fetchRid,
   }
 }

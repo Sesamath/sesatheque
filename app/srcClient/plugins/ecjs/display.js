@@ -76,7 +76,7 @@ module.exports = function display (ressource, options, next) {
         var prop, i
         for (i = 0; i < glob.length; i++) {
           prop = glob[ i ]
-          if (typeof window[ prop ] === 'undefined') throw new Error('Problème de chargement, ' + prop + " n'existe pas")
+          if (typeof window[ prop ] === 'undefined') throw new Error('Problème de chargement, ' + prop + " n’existe pas")
         }
 
         /* global CLC, $ */

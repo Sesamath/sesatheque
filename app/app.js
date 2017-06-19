@@ -56,7 +56,6 @@ const config = require('./config')
 const configCheck = require('./configCheck')
 
 function beforeBootsrap (lassi, mainComponent, allComponents) {
-  // lassi est gonflant à ignorer la conf des logs qu'on veut lui filer…
   anLog.config(config.lassiLogger)
   const appLog = anLog(config.application.name)
 

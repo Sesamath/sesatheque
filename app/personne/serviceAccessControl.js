@@ -31,7 +31,7 @@
 
 'use strict'
 var dns = require('dns')
-var _ = require('lodash')
+// var _ = require('lodash')
 var sjtObj = require('sesajstools/utils/object')
 
 var config = require('../config')
@@ -50,15 +50,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
-   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getCorrectionDeniedMessage (context, ressource) {
-    var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user.permissions.create) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-    else if (!configRessource.typePerso[ressource.type]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
-
-    return msg
+    if (!user || !user.permissions) return 'Vous devez être authentifié pour visualiser une correction'
+    if (!user.permissions.correction) return "Vous n'avez pas de droits suffisants pour visualiser cette correction"
+    return ''
   }
 
   /**
@@ -66,30 +64,27 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
-   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getCreateDeniedMessage (context, ressource) {
-    var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user || !user.permissions) msg = 'Vous devez être authentifié pour créer une ressource'
-    else if (!user.permissions.create) msg = 'Vous n’avez pas de droits suffisants pour créer une ressource'
-    else if (!configRessource.typePerso[ressource.type]) msg = "Vous n'avez pas de droits suffisants pour créer une ressource de type " + ressource.type
-
-    return msg
+    if (!user || !user.permissions) return 'Vous devez être authentifié pour créer une ressource'
+    if (!user.permissions.create) return 'Vous n’avez pas de droits suffisants pour créer une ressource'
+    if (user.permissions.createAll) return ''
+    if (configRessource.typePerso[ressource.type]) return ''
+    return `Vous n'avez pas de droits suffisants pour créer une ressource de type ${ressource.type}`
   }
 
   /**
    * Helper de checkAccess pour la permission createAll
    * @private
    * @param {Context}   context
-   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getCreateAllDeniedMessage (context) {
-    var msg
     var user = $accessControl.getCurrentUser(context)
-    if (!user.permissions.createAll) msg = "Vous n'avez pas de droits suffisants pour créer une ressource"
-
-    return msg
+    if (!user.permissions.createAll) return 'Vous n’avez pas de droits suffisants pour créer une ressource'
+    return ''
   }
 
   /**
@@ -97,30 +92,21 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
-   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getDeleteDeniedMessage (context, ressource) {
-    var msg
     if ($accessControl.isAuteur(context, ressource)) {
       // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
       // (sinon d'autres peuvent s'en servir)
-      if (ressource.auteurs.length > 1) {
-        msg = "Vous êtes auteur de cette ressource mais n'êtes pas le seul, vous ne pouvez pas la supprimer"
-      } else if (ressource.contributeurs.length) {
-        msg = "Vous êtes l'auteur de cette ressource mais il y a d'autres contributeurs, vous ne pouvez plus la supprimer"
-      }
+      if (ressource.auteurs.length > 1) return 'Vous êtes auteur de cette ressource mais n’êtes pas le seul, vous ne pouvez pas la supprimer'
+      if (ressource.contributeurs.length) return 'Vous êtes l’auteur de cette ressource mais il y a d’autres contributeurs, vous ne pouvez plus la supprimer'
       // @todo que fait-on pour les ressources publiques ? Difficile de savoir si qqun l'utilise...
       // else if (ressource.restriction != 2) msg = "Vous êtes l'auteur de cette ressource' +
       //    ' mais elle est partagée avec d'autres, vous ne pouvez plus la supprimer'
     } else {
-      msg = "Vous n'avez pas de droits suffisants pour supprimer cette ressource"
+      return 'Vous n’avez pas de droits suffisants pour supprimer cette ressource'
     }
-    if (msg) {
-      log.debug("dans getDeleteDeniedMessage on a le message d'erreur " + msg + ' avec ' +
-        (ressource.auteurs && ressource.auteurs.length) + ' auteurs :', ressource.auteurs)
-    }
-
-    return msg
+    return ''
   }
 
   function getDeleteVersionDeniedMessage (context, ressource) {
@@ -163,14 +149,13 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
-   * @returns {string|undefined} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string|undefined} Le message d'interdiction éventuel (string vide sinon)
    */
   function getReadDeniedMessage (context, ressource) {
     if (!context) throw new Error('pas de contexte')
     if (!ressource) throw new Error('pas de ressource')
     // nos ips ont le droit de tout lire via l'api
     if (hasAllRights(context)) return ''
-    let msg
     if (ressource.publie) {
       var restriction = $settings.get('components.ressource.constantes.restriction')
       if (ressource.restriction === restriction.aucune) return ''
@@ -183,8 +168,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         // correction
         case restriction.correction:
           if (hasGenericPermission('correction', context)) return ''
-          msg = "Vous n'avez pas de droits suffisants pour consulter cette ressource"
-          break
+          return 'Vous n’avez pas de droits suffisants pour consulter cette ressource'
 
         // réservée au groupe
         case restriction.groupe:
@@ -192,28 +176,25 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
           if ($accessControl.isContributeur(context, ressource)) return ''
           if ($accessControl.isInGroupes(context, ressource)) return ''
           if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
-          msg = 'Ressource restreinte'
-          break
+          return 'Ressource restreinte'
 
         // privée
         case restriction.prive:
           if ($accessControl.isAuteur(context, ressource)) return
           if ($accessControl.isContributeur(context, ressource)) return
           if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
-          msg = 'Ressource privée'
-          break
+          return 'Ressource privée'
 
         default:
-          msg = 'Restriction non gérée'
+          return 'Restriction non gérée'
       }
     } else {
       // pas publié, faut avoir les droits d'édition pour la voir
-      msg = getUpdateDeniedMessage(context, ressource)
       // mais avec un message adapté
-      if (msg) msg = 'Ressource non publiée (il faut le droit d’édition pour la voir)'
+      if (getUpdateDeniedMessage(context, ressource)) return 'Ressource non publiée (il faut le droit d’édition pour la voir)'
     }
 
-    return msg
+    return ''
   }
 
   /**
@@ -221,15 +202,16 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
-   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getUpdateDeniedMessage (context, ressource) {
+    if (hasAllRights(context)) return
     if (ressource.aliasOf && !configRessource.editable[ressource.type]) return `Les alias de type ${ressource.type} ne sont pas modifiables`
     if ($accessControl.isAuteur(context, ressource)) return ''
     if ($accessControl.isContributeur(context, ressource)) return ''
     if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
     // pour le moment tout le reste est interdit
-    return "Vous n'avez pas de droits suffisants pour modifier cette ressource"
+    return 'Vous n’avez pas de droits suffisants pour modifier cette ressource'
   }
 
   /**
@@ -237,7 +219,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
-   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getUpdateAuteursDeniedMessage (context, ressource) {
     if (ressource.aliasOf) throw new Error('Modifier les groupes qui peuvent modifier un alias n’a pas de sens')
@@ -251,7 +233,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @private
    * @param {Context}   context
    * @param {Ressource} ressource
-   * @returns {string} Le message d'interdiction éventuel (undefined sinon)
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getUpdateGroupesDeniedMessage (context, ressource) {
     if (ressource.aliasOf) throw new Error('Modifier les groupes d’un alias n’a pas de sens')
@@ -285,7 +267,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.addToken = function addToken (context, token, value) {
     var retour = $accessControl.isAuthenticated(context)
     if (retour) {
-      if (!value) value = true // avec undefined la property n'existe pas, mettre false n'a pas de sens, true parce qu'on veut juste vérifier sa présence
+      if (!value) value = true // avec undefined la property n’existe pas, mettre false n'a pas de sens, true parce qu'on veut juste vérifier sa présence
       if (!token) token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
       if (!context.session.tokens) context.session.tokens = {}
       context.session.tokens[token] = value
@@ -321,7 +303,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param permission
    * @param {Context}       context
    * @param {Ressource}     ressource
-   * @param {errorCallback} next appelé avec (error, ressource) où error est une string (ou rien)
+   * @param {errorCallback} next appelé avec (error, ressource) où error est une string si y'a un pb de droit (rien sinon)
    * @memberOf $accessControl
    */
   $accessControl.checkPermission = function (permission, context, ressource, next) {
@@ -415,7 +397,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @param {string} permission create|read|update|delete
    * @param {Context}   context
    * @param {Ressource} [ressource]
-   * @returns {boolean}
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    * @memberOf $accessControl
    */
   $accessControl.getDeniedMessage = function (permission, context, ressource) {
@@ -434,8 +416,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       case 'update'        : return getUpdateDeniedMessage(context, ressource)
       case 'updateAuteurs' : return getUpdateAuteursDeniedMessage(context, ressource)
       case 'updateGroupes' : return getUpdateGroupesDeniedMessage(context, ressource)
-      default: return false
       /* eslint-enable */
+      default: return `permission ${permission} non gérée`
     }
   }
 
@@ -469,13 +451,15 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
       if ($settings.get('apiTokens', []).indexOf(token) !== -1) {
-        // log.debug('token api ok')
+        log.debug('token api ok')
         // token ok donc retour ok si le client a une ip connue
         var ip = getClientIp(context)
         if (config.apiIpsAllowed && config.apiIpsAllowed.indexOf(ip) !== -1) return true
         // ou est local
         if ($accessControl.isLanClient(context)) return true
         log.error('token ok depuis une ip non autorisée ' + ip)
+      } else {
+        log.error(`token ${token} non autorisé`)
       }
     }
 
@@ -651,6 +635,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     var ipClient = getClientIp(context)
     // log.debug("isLanClient analyse l'ip " + ipClient)
     return isOnLan(ipClient)
+  }
+
+  /**
+   * Retourne true si la ressource est publique
+   * @param {Ressource|Ref} ressource
+   * @returns {boolean}
+   */
+  $accessControl.isPublic = function isPublic (ressource) {
+    if (ressource.public) return true
+    if (ressource.publie && !ressource.restriction) return true
+    return false
   }
 
   /**

@@ -77,7 +77,7 @@ function cleanArbre (arbre) {
     arbre.enfants = []
   }
   if (arbre.parametres) {
-    log.dataError('arbre avec parametres', arbre)
+    log.dataError('on a un arbre avec des parametres', arbre)
     delete arbre.parametres
   }
   return arbre

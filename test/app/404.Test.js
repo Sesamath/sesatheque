@@ -62,9 +62,7 @@ module.exports = function describe404 () {
         .then(res => {
           expect(res.body.success).not.to.be.ok
           expect(res.body.error).to.be.ok
-          if (/ressource/.test(path)) expect(res.body.error).to.contain('Cette ressource n’existe pas.')
-          else if (/public/.test(path)) expect(res.body.error).to.contain("n'existe pas ou n'est pas publique")
-          else expect(res.body.error).to.contain("Cette page ou ce fichier n'existe pas")
+          expect(res.body.error).to.contain('n’existe pas')
         })
     }) // it
   })

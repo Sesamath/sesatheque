@@ -53,7 +53,7 @@ module.exports = function describeEntityGroupe () {
     description: 'Un groupe ouvert de test.\nAvec un peu de bla bla.',
     ouvert: true,
     public: true,
-    gestionnaires: []
+    gestionnaires: ['sesabibli/1'] // il en faut un
   }
   const nomLower = groupeData.nom.toLowerCase()
   /**
@@ -83,6 +83,8 @@ module.exports = function describeEntityGroupe () {
 
   it('store', function (done) {
     groupe.store(function (error, groupe) {
+      // mocha n'affiche pas les erreurs si on le demande pas !
+      if (error) console.error(error)
       expect(error).to.be.falsy
       checkGroupe(groupe)
       done()
@@ -91,6 +93,7 @@ module.exports = function describeEntityGroupe () {
 
   it('grab', function (done) {
     grab(function (error, groupes) {
+      if (error) console.error(error)
       expect(error).to.be.falsy
       expect(groupes.length).to.equals(1)
       checkGroupe(groupes[0])
@@ -100,6 +103,7 @@ module.exports = function describeEntityGroupe () {
 
   it('delete', function (done) {
     groupe.delete(function (error) {
+      if (error) console.error(error)
       expect(error).to.be.falsy
       grab(function (error, groupes) {
         expect(error).to.be.falsy
