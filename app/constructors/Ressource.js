@@ -37,12 +37,10 @@ const filters = require('sesajstools/utils/filters')
 /**
  * Filtre une liste de personne en vérifiant que c'est bien de la forme baseId/xxx avec baseId connue
  * si c'est pas le cas et que defaultBaseId est fournie on l'ajoute
- * @todo virer defaultBaseId quand l'update 17 aura été déployé partout (il a besoin de cet ancien fonctionnement pendant qu'il tourne pour rectifier les pids)
  * @param {string[]} list
- * @param {string} [defaultBaseId] Une baseId à ajouter éventuellement
- * @return {Array} la liste filtrée
+ * @return {Array} la liste filtrée (toujours un array, éventuellement vide si list était vide ou undefined)
  */
-function filterUserList (list, defaultBaseId) {
+function filterUserList (list) {
   if (!list) return []
   if (!Array.isArray(list)) {
     console.error(new Error('liste de pids invalide (pas un array)'), list)
@@ -52,20 +50,17 @@ function filterUserList (list, defaultBaseId) {
   // c'est un array non vide
   // avec mocha (p'tet aussi autrement), on peut avoir du [null], on essaie de trouver où
   const listCleaned = list.filter(pid => pid)
-  if (listCleaned.length < list.length) console.error(new Error('liste de pid avec des null ou undefined'),'\nla liste fournie => ', list)
+  if (listCleaned.length < list.length) console.error(new Error('liste de pid avec des null ou undefined'), '\nla liste fournie => ', list)
 
   return listCleaned.map(pid => {
     // on a encore des int…
-    if (typeof pid === 'number') {
-      console.error(new Error(`pid numérique invalide : ${pid}`))
-      // pour le moment on corrige encore
-      // @todo virer cette rustine
-      return defaultBaseId + '/' + pid
+    if (typeof pid !== 'string') {
+      console.error(new Error(`pid de type invalide : ${typeof pid} (${pid})`))
+      return null
     }
     const pos = pid.indexOf('/')
     if (pos === -1) {
       console.error(new Error(`pid invalide : ${pid}`))
-      if (defaultBaseId) return defaultBaseId + '/' + pid
       return null
     }
     return pid
@@ -263,9 +258,7 @@ function Ressource (initObj, myBaseId) {
    * Liste d'url pour les auteurs précédents (lors d'un fork)
    * @type {string[]}
    */
-  if (values.auteursParents) {
-    this.auteursParents = filterUserList(values.auteursParents, myBaseId)
-  }
+  this.auteursParents = filterUserList(values.auteursParents, myBaseId)
   /**
    * Liste de contributeurs
    * @type {string[]}

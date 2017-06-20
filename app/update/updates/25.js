@@ -194,14 +194,13 @@ module.exports = {
     // pas besoin de gérer ici le cache pour les personnes et les groupes, c'est dans le afterStore de leur entity
     let offset = 0
     let nbPersonnes = 0
-    let nbRessources = 0
+    // pour le reindex, on utilise le cli de lassi
+    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    // reindexAll est une commande de entities-cli
+    const reindexAll = $entitiesCli().commands().reindexAll
 
-    updateLog(name)
     flow().seq(function () {
-      // reindex des ressources pour ajouter auteursParents, on utilise le cli de lassi
-      const $entitiesCli = require('lassi/source/services/entities-cli.js')
-      // reindexAll est une commande de entities-cli
-      const reindexAll = $entitiesCli().commands().reindexAll
+      updateLog('réindexation de toutes les ressources pour ajouter auteursParents (peut être long)')
       reindexAll('EntityRessource', this)
     }).seq(function () {
       // on compte les personnes
@@ -216,7 +215,12 @@ module.exports = {
     }).seq(function (total) {
       grabGroupes(this)
     }).seq(function () {
-      updateLog('fin')
+      updateLog('réindexation des personnes')
+      reindexAll('EntityPersonne', this)
+    }).seq(function () {
+      updateLog('réindexation des groupes')
+      reindexAll('EntityGroupe', this)
+    }).seq(function () {
       done()
     }).catch(done)
   } // run

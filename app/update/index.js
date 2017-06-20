@@ -61,7 +61,7 @@ if (!lassi.options.cli) {
       function done (error) {
         if (error) {
           log.error(error)
-          applog('updates', 'Une erreur est survenue dans l’update', dbVersion, ', cf le log d’erreurs', config.logs.error)
+          applog('updates', `Une erreur est survenue dans l’update ${dbVersion}, cf les logs ${config.logs.dir}/${config.logs.error} et ${config.logs.dir}/${config.logs.dataError}`)
         } else {
           applog('updates', 'plus d’update à faire, base en version', dbVersion)
         }
@@ -73,10 +73,10 @@ if (!lassi.options.cli) {
         const lock = path.join(__dirname, '../../_private/updates.lock')
         try {
           fs.accessSync(lock, fs.R_OK)
-          return applog('updates', lock + ' présent, on ignore les updates automatiques, base en version ' + dbVersion)
+          return applog('updates', `${lock} présent, on ignore les updates automatiques, base en version ${dbVersion}`)
         } catch (error) {
           // lock n’existe pas, on met ça pour rappeler qu'il pourrait exister
-          applog('updates', lock + ' non présent, on étudie un éventuel update à lancer')
+          applog('updates', `${lock} non présent, on étudie un éventuel update à lancer`)
         }
         fs.access(update, fs.R_OK, function (error) {
           if (error) return done() // plus d'updates à passer, c'est pas une erreur
@@ -84,13 +84,14 @@ if (!lassi.options.cli) {
           const currentUpdate = require(update)
           applog('updates', `lancement update n° ${dbVersion} : ${currentUpdate.name}`)
           currentUpdate.run(function (error) {
+            applog('updates', `fin update n° ${dbVersion}`)
             if (error) return done(error)
             EntityUpdate.create({
               name: currentUpdate.name,
               description: currentUpdate.description,
               num: dbVersion
             }).store(nextUpdate)
-            applog('updates', 'update n° ' + dbVersion + ' OK, base en version ' + dbVersion)
+            applog('updates', `update n° ${dbVersion} OK, base en version ${dbVersion}`)
           })
         })
       }

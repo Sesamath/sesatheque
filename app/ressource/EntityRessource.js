@@ -111,6 +111,9 @@ module.exports = function (EntityRessource) {
     .defineIndex('auteurs', 'string')
     .defineIndex('auteursParents', 'string')
     .defineIndex('contributeurs', 'string')
+    .defineIndex('iPids', 'string', function () {
+      return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
+    })
     .defineIndex('groupes', 'string')
     .defineIndex('groupesAuteurs', 'string')
     .defineIndex('langue', 'string')
