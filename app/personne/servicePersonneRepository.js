@@ -103,9 +103,12 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    * @memberOf $personneRepository
    */
   $personneRepository.load = function (id, next) {
-    log.debug('load personne ' + id)
-    // cast en string
-    id += ''
+    if (typeof id === 'number') id += ''
+    if (typeof id !== 'string') {
+      const error = new Error('id invalide')
+      log.error(error, id)
+      return next(error)
+    }
     flow().seq(function () {
       $cachePersonne.get(id, this)
     }).seq(function (personneCached) {
@@ -131,66 +134,19 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
   $personneRepository.removeGroup = function (groupName, next) {
     let offset = 0
     const nb = 100
-    flow().seq(function recup () {
-      const nextStep = this
-      // log.debug('removeGroup membres de ' + groupName)
-      EntityPersonne.match('groupesMembre').equals(groupName).grab(nb, offset, function (error, personnes) {
-        // log.debug('on trouve ' + personnes.length + ' membres')
-        if (error) throw error
-
-        flow(personnes).seqEach(function (personne) {
-          // log.debug('membre ' + personne.nom)
-          // si on est là personne.groupesMembre contient forcément groupName
-          personne.groupesMembre = personne.groupesMembre.filter(function (elt) { return elt !== groupName })
-          // mais on peut avoir une anomalie et que groupName ne soit pas dans groupesSuivis, on check
-          const index = personne.groupesSuivis && personne.groupesSuivis.indexOf(groupName)
-          if (index) {
-            personne.groupesSuivis = personne.groupesSuivis.filter(function (elt, i) { return index !== i })
-          } else {
-            log.error('La personne ' + personne.oid + ' avait le groupe ' + groupName + ' dans groupesMembre mais pas dans groupesSuivis')
-          }
-          // log.debug('avant store', personne.groupesMembre)
-          // log.debug('avant store', personne.groupesSuivis)
-          personne.store(this)
-        }).seq(function () {
-          // log.debug('fin personne pour membre')
-          if (personnes.length < nb) {
-            offset = 0
-            nextStep()
-          } else {
-            offset += nb
-            recup()
-          }
-        }).catch(function (error) {
-          throw error
-        })
-        // fin du flow personnes
-      })
-    }).seq(function recup () {
-      // log.debug('removeGroup suivi de ' + groupName)
-      EntityPersonne.match('groupesSuivis').equals(groupName).grab(nb, offset, function (error, personnes) {
-        // log.debug('on trouve les followers', personnes)
-        if (error) throw error
-        flow(personnes).seqEach(function (personne) {
-          // log.debug('personne pour suivi', personne.nom)
-          personne.groupesSuivis = personne.groupesSuivis.filter(function (elt) { return elt !== groupName })
-          // log.debug('avant store', personne.groupesSuivis)
-          personne.store(this)
-        }).seq(function () {
-          if (personnes.length < nb) {
-            next()
-          } else {
-            offset += nb
-            recup()
-          }
-        }).catch(function (error) {
-          throw error
-        })
-      })
-    }).catch(function (error) {
-      log.error(error)
-      next(error)
-    })
+    flow().seq(function () {
+      EntityPersonne.match('groupesMembre').equals(groupName).grab(nb, offset, this)
+    }).seqEach(function (personne) {
+      personne.groupesMembre = personne.groupesMembre.filter(grp => grp !== groupName)
+      personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
+      $personneRepository.save(personne, this)
+    }).seq(function () {
+      // reste ceux qui suivaient sans être membre
+      EntityPersonne.match('groupesSuivis').equals(groupName).grab(nb, offset, this)
+    }).seqEach(function (personne) {
+      personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
+      $personneRepository.save(personne, this)
+    }).done(next)
   }
 
   /**

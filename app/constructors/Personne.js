@@ -90,13 +90,13 @@ function Personne (initObj) {
    * @type {string[]}
    * @default undefined
    */
-  this.groupesMembre = initObj.groupesMembre
+  this.groupesMembre = initObj.groupesMembre || []
   /**
    * groupes dont on suit les publications sans en être membre
    * @type {string[]}
    * @default undefined
    */
-  this.groupesSuivis = initObj.groupesSuivis
+  this.groupesSuivis = initObj.groupesSuivis || []
   /**
    * D'autres propriétés regroupées dans cet objet, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
    * @type {Object}

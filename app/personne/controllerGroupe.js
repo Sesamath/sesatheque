@@ -32,7 +32,6 @@
 'use strict'
 
 var _ = require('lodash')
-var tools = require('../tools')
 var sjt = require('sesajstools')
 var sjtObj = require('sesajstools/utils/object')
 var flow = require('an-flow')
@@ -73,48 +72,41 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
   }
 
   /**
-   * Retourne le nom du groupe (helper des fcts qui prennent un argument groupe|groupeNom)
-   * @private
-   * @param {string|Groupe} groupe Le groupe ou son nom
-   * @returns {string} undefined si groupe n'est ni une string ni un objet avec une propriété nom
-   */
-  function getNom (groupe) {
-    var nom
-    if (groupe) {
-      if (groupe.nom) nom = groupe.nom
-      else if (typeof groupe === 'string') nom = groupe
-    }
-    if (!nom) log.error('getNom appelé avec un paramètre incorrect', groupe)
-    return nom
-  }
-
-  /**
    * Retourne une liste de gestionnaires
    * @private
-   * @param {string|string[]} ids Liste d'id de personnes (array ou string avec séparateur qcq)
-   * @param {boolean} [nameOnly=false] passer true pour récupérer un array de string 'prénom nom'
-   * @param next callback appelée avec ({Error}, {Personne[]|string[]}, string[]), le dernier étant les ids en errur
+   * @param {string|string[]} pids Liste de pid (array ou string avec séparateur virgule ou ; ou espace)
+   * @param next callback appelée avec ({Error}, {Personne[]}, string[]), le dernier étant les pids en erreur
    */
-  function loadGestionnaires (ids, nameOnly, next) {
-    ids = (typeof ids === 'string') ? tools.idListToArray(ids) : ids
-    flow(ids).seqEach(function (id) {
-      $personneRepository.load(id, this)
-    }).seq(function (personnes) {
-      var gests = []
-      var ids404 = []
-      // log.debug('loadGestionnaires transforme ' +ids.join(','), personnes, null, {max:19999})
-      personnes.forEach(function (gest, i) {
-        if (gest && gest.oid) { // si le load ne renvoie rien on récupère un tableau vide !
-          if (nameOnly) gests.push(gest.prenom + ' ' + gest.nom)
-          else gests.push(gest)
-        } else {
-          ids404.push(ids[ i ])
-        }
-      })
-      next(null, gests, ids404)
+  function loadGestionnaires (pids, next) {
+    if (!Array.isArray(pids)) return next(new Error('pids n’est pas un tableau'))
+    const gestionnaires = []
+    const pids404 = []
+    let i = 0
+    flow(pids).seqEach(function (pid) {
+      $personneRepository.load(pid, this)
+    }).seqEach(function (personne) {
+      if (personne && personne.oid) gestionnaires.push(personne)
+      else pids404.push(pids[i])
+      i++
+      this()
+    }).seq(function () {
+      next(null, gestionnaires, pids404)
     }).catch(function (error) {
       log.error(error)
       next(error)
+    })
+  }
+
+  /**
+   * Retourne une liste de gestionnaires (prénom nom)
+   * @private
+   * @param {string[]} pids Liste de pid (array ou string avec séparateur virgule ou ; ou espace)
+   * @param next callback appelée avec ({Error}, {string[]}, string[]), le dernier étant les pids en erreur
+   */
+  function loadGestionnairesNames (pids, next) {
+    loadGestionnaires(pids, function (error, gestionnaires, pids404) {
+      const names = gestionnaires.map(g => `${g.prenom} ${g.nom}`)
+      next(error, names, pids404)
     })
   }
 
@@ -127,49 +119,60 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   function modAskConfirm (context, nom, gestionnairesNames) {
     // on demande confirmation (en mettant en session tout le groupe modifié d'après la demande)
-    var formPosted = context.post
-    var pid = $accessControl.getCurrentUserPid(context)
-    var fields = []
-    var groupe
+    const formPosted = context.post
+    const pid = $accessControl.getCurrentUserPid(context)
+    const fields = []
+    let groupe
+    // chargement du groupe existant
     flow().seq(function () {
       $groupeRepository.load(nom, this)
+
+    // update avec le post
     }).seq(function (grp) {
       groupe = grp
       // on màj l'objet pour le mettre en session via le token et l'enregistrer après confirmation
       groupe.description = formPosted.description
       groupe.ouvert = (formPosted.ouvert === 'true')
       groupe.public = (formPosted.public === 'true')
-      if (formPosted.newGestionnaires) loadGestionnaires(formPosted.newGestionnaires, false, this)
-      else this()
-    }).seq(function (newGestionnaires, ids404) {
+      if (formPosted.newGestionnaires) {
+        const newPids = formPosted.newGestionnaires.split(/[\s;,:|]+/).filter(pid => typeof pid === 'string' && pid.indexOf('/') !== -1)
+        if (newPids.length) loadGestionnaires(newPids, this)
+        else this()
+      } else {
+        this()
+      }
+
+    // modif des gestionnaires (ajout des nouveaux ou ne plus être gestionnaire)
+    }).seq(function (newGestionnaires, pids404) {
       // nouveaux gestionnaires
       if (newGestionnaires && newGestionnaires.length) {
-        var itemsNewG = []
+        const itemsNewG = []
         newGestionnaires.forEach(function (personne) {
-          if (_.includes(groupe.gestionnaires, personne.oid)) {
-            $flashMessages.add(context, personne.prenom + ' ' + personne.nom + " était déjà gestionnaire et n'a pas été ajouté")
+          if (_.includes(groupe.gestionnaires, personne.pid)) {
+            $flashMessages.add(context, `${personne.prenom} ${personne.nom} était déjà gestionnaire et n’a pas été ajouté`)
           } else {
-            groupe.gestionnaires.push(personne.oid)
-            var ng = personne.prenom + ' ' + personne.nom
+            groupe.gestionnaires.push(personne.pid)
+            const ng = personne.prenom + ' ' + personne.nom
             gestionnairesNames.push(ng)
             itemsNewG.push(ng)
           }
         })
-        // log.debug('new gest', itemsNewG)
         fields.push({
           widget: 'info',
           value: 'Gestionnaires à ajouter (qui deviendront non révocables après validation) : ' + itemsNewG.join(', ') // jshint:ignore line (espace insécable)
         })
       }
-      if (ids404 && ids404.length) {
-        var pl = ids404.length > 1 ? 's' : ''
-        $flashMessages.add(context, `Le${pl} gestionnaire${pl} d'identifiant${pl} ${ids404.join(', ')} n’existe${(pl ? 'nt' : '')} pas`)
+
+      // pids foireux
+      if (pids404.length) {
+        const pl = pids404.length > 1 ? 's' : ''
+        $flashMessages.add(context, `Le${pl} gestionnaire${pl} d'identifiant${pl} ${pids404.join(', ')} n’existe${(pl ? 'nt' : '')} pas`)
       }
 
       // ne plus être gestionnaire
       if (formPosted.quit === 'true') {
         var i = groupe.gestionnaires.indexOf(pid)
-        if (i > -1) {
+        if (i !== -1) {
           if (groupe.gestionnaires.length > 1) {
             groupe.gestionnaires.splice(i, 1)
             fields.push({
@@ -196,10 +199,13 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       fields.push({ id: 'validModif', name: 'modOk', value: 'Valider', widget: 'submit' })
       fields.push({ id: 'cancelModif', name: 'modKo', value: 'Annuler', widget: 'submit' })
       // on passe l'affichage du groupe via blocsFirst
-      var moreData = { blocsFirst: groupe }
+      const moreData = {
+        // si on passait groupe ses gestionnaires seraient modifié par l'affectation des name plus loin
+        blocsFirst: Object.assign({}, groupe)
+      }
       // log.debug('groupe à confirmer', groupe)
       moreData.blocsFirst.$view = 'displayGroupe'
-      moreData.blocsFirst.gestionnairesNames = gestionnairesNames
+      moreData.blocsFirst.gestionnaires = gestionnairesNames.map(name => ({name}))
       $form.print(context, null, null, fields, null, 'Valider les modifications du groupe', moreData)
     }).catch(function (error) {
       log.error(error)
@@ -313,8 +319,9 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    * @param groupe
    */
   function printGroupe (context, groupe) {
-    loadGestionnaires(groupe.gestionnaires, true, function (error, gestionnairesNames) {
+    loadGestionnaires(groupe.gestionnaires, function (error, gestionnaires, pids404) {
       if (error) return $page.printError(context, error)
+      if (pids404.length) pids404.forEach(pid => $flashMessages.add(`Le gestionnaire ${pid} n’existe pas`))
       var isManaged = h.isManaged(context, groupe)
       // les actions, modif
       if (isManaged) addUrlModif(groupe)
@@ -326,9 +333,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       else if (isManaged || groupe.public) addUrlFollow(groupe)
       var contentBloc = groupe
       contentBloc.$view = 'displayGroupe'
-      // contentBloc.gestionnaires = gestionnairesNames.map((name, index) => ({name, pid: groupe.gestionnaires[index]}))
-      // on affiche pas le pid pour le moment
-      contentBloc.gestionnaires = gestionnairesNames.map((name) => ({name}))
+      contentBloc.gestionnaires = gestionnaires.map(g => ({name: `${g.prenom} ${g.nom}`, pid: g.pid}))
       $page.print(context, 'Description du groupe', contentBloc)
     })
   }
@@ -341,8 +346,10 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
     var nom = context.arguments.nom
     var groupe
     flow().seq(function () {
+      // chargement du groupe
       $groupeRepository.load(nom, this)
     }).seq(function (grp) {
+      // vérifs de base
       if (!grp) return this(`Le groupe ${nom} n’existe pas`)
       if (!grp.nom) {
         log.error(new Error('groupe sans nom en base de donnée'), grp)
@@ -350,9 +357,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       }
       groupe = grp
       nom = grp.nom
-      if (grp.public || $accessControl.isGroupeSuivi(context, nom) || $accessControl.isGroupeMembre(context, nom)) this()
-      else this(`Le groupe ${grp.nom} n'est pas public (et vous n'êtes ni membre ni abonné)`)
-    }).seq(function () {
+      if (!grp.public && !$accessControl.isGroupeSuivi(context, nom) && !$accessControl.isGroupeMembre(context, nom)) return this(`Le groupe ${grp.nom} n'est pas public (et vous n'êtes ni membre ni abonné)`)
+      // on peut charger les ressources de ce groupe
       var $ressourceRepository = lassi.service('$ressourceRepository')
       $ressourceRepository.getListe('groupe/' + nom, {}, this)
     }).seq(function (ressources) {
@@ -372,8 +378,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           return ressData
         })
       }
-      this()
-    }).seq(function () {
       printGroupe(context, groupe)
     }).catch(function (error) {
       $page.printError(context, error.toString())
@@ -512,6 +516,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       var deniedMsg = 'Le groupe « ' + nom + " » n’existe pas ou vous n'en êtes pas gestionnaire"
 
       flow().seq(function () {
+        // chargement du groupe
         $groupeRepository.load(nom, this)
       }).seq(function (groupeBdd) {
         // on regarde si on est gestionnaire
@@ -523,6 +528,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           this(deniedMsg)
         }
       }).seq(function (groupeBdd) {
+        // on construit les datas pour la vue
         var blocList = []
         var fields = [
           { name: 'ouvert', value: groupeBdd.ouvert, label: 'Ouvert à tous' },
@@ -535,6 +541,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           } // jshint:ignore line
         ]
         flow().seq(function () {
+          // bouton quitter
           if (groupeBdd.gestionnaires.length > 1) {
             fields.push({
               name: 'quit',
@@ -542,13 +549,14 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
               label: 'Me retirer des gestionnaires de ce groupe'
             })
           }
-          loadGestionnaires(groupeBdd.gestionnaires, true, this)
-        }).seq(function (gestionnairesNames) {
+          loadGestionnairesNames(groupeBdd.gestionnaires, this)
+        }).seq(function (gestionnairesNames, pids404) {
+          // gestionnaires disparus
+          if (pids404.length) pids404.forEach(pid => $flashMessages.add(`Le gestionnaire ${pid} n’existe pas`))
           // on va stocker dans tokenValue {nom, gestionnairesNames} pour éviter de retourner chercher la liste
-          var tokenValue = { nom: nom }
-          // on l'ajoute au groupe mis en session
+          var tokenValue = {nom: nom}
           tokenValue.gestionnairesNames = gestionnairesNames
-          // et sur la page
+          // gestionnaires ok
           blocList.push({
             partialView: '../contents',
             liste: {
@@ -591,7 +599,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       } else {
         // on regarde le post pour savoir s'il faut une demande de confirmation
         var tokenValue = $accessControl.getTokenValue(context, formPosted.token)
-        // log.debug('on récupère via le token', tokenValue)
         if (!tokenValue || tokenValue.nom !== nom) throw new Error('Données corrompues')
         if (formPosted.newGestionnaires || formPosted.quit) {
           modAskConfirm(context, nom, tokenValue.gestionnairesNames)
@@ -678,7 +685,6 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   controller.get('perso', function (context) {
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-    // console.log('user en session sur le GET /groupe/perso', context.session.user.permissions)
     var blocList = []
     flow().seq(function () {
       if ($accessControl.isAuthenticated(context)) this()
@@ -706,14 +712,14 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       // log.debug('groupes dont je suis gestionnaire', groupesManaged)
 
       // groupes dont on est membre
-      var groupesMembre = $accessControl.getCurrentUserGroupesMembre(context)
-      var itemsMembre = []
+      const groupesMembre = $accessControl.getCurrentUserGroupesMembre(context)
+      const itemsMembre = []
       groupesMembre.forEach(function (nom) {
         var groupe = {
           nom: nom
         }
         addUrlDescribe(groupe)
-        var isManaged = groupesManaged.some(function (groupeManaged) { return groupeManaged.nom === nom })
+        const isManaged = groupesManaged.some(groupeManaged => groupeManaged.nom === nom)
         if (isManaged) addUrlModif(groupe)
         else addUrlQuit(groupe)
         itemsMembre.push(groupe)

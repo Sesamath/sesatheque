@@ -123,6 +123,7 @@ module.exports = function ($page) {
   $form.print = function print (context, formValues, groupValues, fields, submitValue, pageTitle, moreData) {
     var contentBloc = $form.construct(formValues, groupValues, fields, submitValue)
     contentBloc.$view = 'form'
+    // log.debug('contentBloc du form', contentBloc, 'form', {max: 10000})
     $page.print(context, pageTitle, contentBloc, moreData)
   }
 

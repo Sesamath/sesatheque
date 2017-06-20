@@ -118,6 +118,7 @@ module.exports = function () {
       else moreData = null
     }
     if (moreData) sjtObj.merge(data, moreData)
+    // log.debug('data envoyés à la vue', data, 'form', {max: 10000})
     context.html(data)
   }
 
