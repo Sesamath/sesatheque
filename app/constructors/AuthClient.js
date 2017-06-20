@@ -42,10 +42,10 @@
  */
 function AuthClient () {
   /**
-   * Le nom du service
+   * La baseId du serveur d'authentification
    * @type {string}
    */
-  this.name = undefined
+  this.baseId = undefined
 
   /**
    * Un peu de texte qui sera affiché à l'utilisateur pour lui permettre de choisir son serveur d'authentification si plusieurs sont enregistrés

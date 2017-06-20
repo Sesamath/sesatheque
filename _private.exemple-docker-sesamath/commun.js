@@ -88,6 +88,7 @@ module.exports = {
   // sur ces autres sésathèques
   sesalabs: [ {
     name: 'mon sesalab local',
+    baseId: 'sesalabLocal',
     baseUrl: 'http://remplacer-par-ip-reseau:3002/'
   }],
   admin: {

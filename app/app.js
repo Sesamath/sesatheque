@@ -110,9 +110,10 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
     // si $sesalabSsoClient existe, faut l'ajouter en client d'authentification
     // maintenant que les services sont dispos, on lui passe ceux dont il aura besoin
     if (allComponents.indexOf('sesalab-sso') !== -1) {
-      var $sesalabSsoClient = lassi.service('$sesalabSsoClient')
-      var authServerName = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].name || 'Sesalab'
-      require('./auth/authClientSesalabSso')(authServerName, $sesalabSsoClient, $auth, $accessControl, $page)
+      const authName = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].name || 'Sesalab'
+      const authBaseId = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].baseId
+      if (!authBaseId) throw new Error('sesalab sans baseId en configuration')
+      require('./auth/authClientSesalabSso')(authName, authBaseId)
     }
 
     // log('sesatheque en fin de config', sesatheque)

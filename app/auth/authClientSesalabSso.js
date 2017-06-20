@@ -29,7 +29,8 @@
  * pour une explication en français)
  */
 'use strict'
-var baseUrl = require('../config').application.baseUrl
+
+const myBaseUrl = require('../config').application.baseUrl
 
 // module js pour enregistrer un authClient auprès du service $auth,
 /**
@@ -37,20 +38,22 @@ var baseUrl = require('../config').application.baseUrl
  * Requis par l'appli au configure (src/index.js), qui passe les services utiles
  * (mais on est pas un service lassi, juste un module js classique)
  *
- * @param authServerName
- * @param $sesalabSsoClient
- * @param $auth
- * @param $accessControl
- * @param $page
+ * @param authName Un nom en clair pour le serveur d'authentification
+ * @param authBaseId La baseId du serveur d'authentification
  */
-module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessControl, $page) {
+module.exports = function (authName, authBaseId) {
+  const $sesalabSsoClient = lassi.service('$sesalabSsoClient')
+  const $auth = lassi.service('$auth')
+  const $accessControl = lassi.service('$accessControl')
+  const $page = lassi.service('$page')
+
   /**
    * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée chez nous
    * @param {string} idAuthServer
    * @returns {Link[]} La liste de liens
    */
   function getSsoLinks (idAuthServer) {
-    // pas encore de liens vers mon compte
+    // sur une sesathèque on a pas encore de liens vers mon compte pour une personne authentifiée sur un sesalab
     return []
   }
 
@@ -66,10 +69,10 @@ module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessCont
       } else if (personne) {
         console.log('après login les permissions', personne.permissions)
         // on ajoute la source de l'authentification en session
-        context.session.authOrigine = authServerName
+        context.session.authBaseId = authBaseId
         next()
       } else {
-        next(new Error('L’enregistrement de l’utilisateur sur ' + baseUrl + ' a échoué'))
+        next(new Error('L’enregistrement de l’utilisateur sur ' + myBaseUrl + ' a échoué'))
       }
     })
   })
@@ -83,8 +86,9 @@ module.exports = function (authServerName, $sesalabSsoClient, $auth, $accessCont
 
   // et on enregistre ce client
   $auth.addClient({
-    name: authServerName,
-    description: 'Authentification sur ' + authServerName,
+    name: authName,
+    baseId: authBaseId,
+    description: 'Authentification sur ' + authName,
     getLoginUrl: $sesalabSsoClient.getLoginUrl,
     getLogoutUrl: $sesalabSsoClient.getLogoutUrl,
     getSsoLinks: getSsoLinks,

@@ -690,7 +690,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       next(error, personne)
     }
 
-    if (personne.origine && personne.idOrigine) $personneRepository.updateOrCreate(personne, setSession)
+    if (personne.pid) $personneRepository.updateOrCreate(personne, setSession)
     else setSession() // on enregistre que l'on sait ne pas être authentifié sur le serveur sso
   }
 
@@ -725,11 +725,9 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
         permissions: {}
       }
       if (sesalabUser.externalId && sesalabUser.externalMech) {
-        personne.origine = sesalabUser.externalMech
-        personne.idOrigine = sesalabUser.externalId
+        personne.pid = sesalabUser.externalMech + '/' + sesalabUser.externalId
       } else {
-        personne.origine = domaine
-        personne.idOrigine = sesalabUser.oid
+        personne.pid = domaine + '/' + sesalabUser.oid
       }
       if (sesalabUser.type === 1) personne.roles.formateur = true
       if (personne.origine === 'sesasso') personne.roles.acces_correction = true

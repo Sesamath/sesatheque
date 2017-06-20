@@ -86,7 +86,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
           if (error) {
             $ressourcePage.printError(context, error)
           } else {
-            if (personne && personne.idOrigine) $flashMessages.add(context, 'Authentification réussie', 'info')
+            if (personne && personne.pid) $flashMessages.add(context, 'Authentification réussie', 'info')
             var uri = context.get.redirect || '/'
             context.redirect(uri)
           }

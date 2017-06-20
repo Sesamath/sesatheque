@@ -31,9 +31,9 @@
 
 'use strict'
 
-var _ = require('lodash')
-var sjtUrl = require('sesajstools/http/url')
-var modLog = require('an-log')('$auth')
+const _ = require('lodash')
+const sjtUrl = require('sesajstools/http/url')
+const modLog = require('an-log')('$auth')
 
 module.exports = function ($accessControl, $ressourcePage) {
   /**
@@ -42,9 +42,9 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @param {AuthClient} authClient
    */
   function checkValidClient (authClient) {
-    var msg = "Service d'authentification invalide, il manque "
-    if (typeof authClient.name !== 'string') throw new Error(msg + 'name')
-    if (clients[authClient.name]) throw new Error('Le client ' + authClient.name + ' est déjà enregistré')
+    let msg = 'Service d’authentification invalide, il manque '
+    if (typeof authClient.baseId !== 'string') throw new Error(msg + 'baseId')
+    if (clients[authClient.baseId]) throw new Error(`Le client ${authClient.baseId} est déjà enregistré`)
     if (typeof authClient.description !== 'string') throw new Error(msg + 'description')
     if (typeof authClient.login !== 'function') throw new Error(msg + 'login')
     if (typeof authClient.logout !== 'function') throw new Error(msg + 'logout')
@@ -54,32 +54,27 @@ module.exports = function ($accessControl, $ressourcePage) {
    * Retourne le authClient pour ce contexte, ou une erreur si on l'a pas trouvé
    * @private
    * @param {Context} context
-   * @returns {AuthClient|Error}
+   * @returns {AuthClient}
+   * @throws {Error} si on a pas de authBaseId
    */
   function getClient (context) {
-    var client
-    var origine = getOrigine(context)
-    if (origine instanceof Error) client = origine
-    else client = clients[origine]
-
-    return client
+    const origine = getBaseId(context)
+    return clients[origine]
   }
 
   /**
-   * Retourne l'origine pour ce contexte, ou une erreur si on l'a pas trouvé
+   * Retourne le authBaseId pour ce contexte, ou lance une erreur si on l'a pas trouvé
    * @private
    * @param {Context} context
-   * @returns {string|Error}
+   * @returns {string}
+   * @throws {Error} si on a pas trouvé de authBaseId
    */
-  function getOrigine (context) {
-    var origine = context.session.authOrigine || context.get.origine || context.post.origine || defaultOrigine
-    if (origine) {
-      if (!clients[origine]) origine = new Error("Aucun client d'authentification " + origine + " n'a été enregistré")
-    } else {
-      origine = new Error("Aucun client d'authentification n'a été enregistré")
-    }
+  function getBaseId (context) {
+    const baseId = context.session.authBaseId || context.get.origine || context.post.origine
+    if (!baseId) throw new Error('Aucun client d’authentification n’a été enregistré')
+    if (!clients[baseId]) throw new Error(`Aucun client d’authentification sur ${baseId} n’a été enregistré`)
 
-    return origine
+    return baseId
   }
 
   /**
@@ -87,13 +82,6 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @private
    */
   var clients = {}
-
-  /**
-   * Le client par défaut (l'origine qui sera utilisée si rien n'est précisé dans le contexte)
-   * @private
-   * @type {string}
-   */
-  var defaultOrigine
 
   /**
    * Le controleur en attente de client
@@ -117,14 +105,13 @@ module.exports = function ($accessControl, $ressourcePage) {
     try {
       checkValidClient(authClient)
       if (_.isEmpty(clients)) {
-        defaultOrigine = authClient.name
-        // on peut activer le controleur
+        // faut activer le controleur
         if (deferredInitController) deferredInitController()
       }
-      clients[authClient.name] = authClient
-      modLog('has registered', 'authClient ' + authClient.name)
+      clients[authClient.baseId] = authClient
+      modLog('has registered', `authClient ${authClient.baseId}`)
     } catch (error) {
-      log.error(error)
+      log.error(error, authClient)
     }
   }
 
@@ -146,38 +133,47 @@ module.exports = function ($accessControl, $ressourcePage) {
    * @returns {object}
    */
   $auth.getAuthBloc = function (context) {
-    var authBloc = {}
+    const authBloc = {}
     // si on est sur /connexion ou /deconnexion on revient sur la home, sinon la page courante
-    var urlRetour = context.request.originalUrl.replace(/\/(:?de)?connexion/, '')
+    const urlRetour = context.request.originalUrl.replace(/\/(:?de)?connexion/, '')
     if ($accessControl.isAuthenticated(context)) {
       // menu authentifié
-      authBloc.user = {
-        pid: context.session.user.pid,
-        nom: context.session.user.nom,
-        prenom: context.session.user.prenom
-      }
+      const {pid, nom, prenom} = $accessControl.getCurrentUser(context)
+      authBloc.user = {pid, nom, prenom}
       // éventuels liens spécifiques au sso
       authBloc.ssoLinks = $auth.getSsoLinks(context)
+      let client
+      try {
+        client = getClient(context)
+      } catch (error) {
+        log.error(error)
+      }
       // lien de logout
-      var client = getClient(context)
-      var urlLogout = client.getLogoutUrl && client.getLogoutUrl(context) || '/deconnexion?redirect=' + encodeURIComponent(urlRetour)
       authBloc.logoutLink = {
-        href: urlLogout,
+        href: client && client.getLogoutUrl && client.getLogoutUrl(context) || '/deconnexion?redirect=' + encodeURIComponent(urlRetour),
         icon: 'sign-out',
         value: 'Déconnexion'
       }
     } else {
       // lien(s) de connexion
       var loginLinks = []
-      _.forOwn(clients, function (client) {
-        var url = client.getLoginUrl && client.getLoginUrl(context)
+      Object.keys(clients).forEach(baseId => {
+        const client = clients[baseId]
+        let url = client.getLoginUrl && client.getLoginUrl(context)
         if (url) {
           url = sjtUrl.complete(url, {redirect: urlRetour})
-          loginLinks.push({
+          const link = {
             href: url,
             icon: 'arrow-right',
             value: client.description
-          })
+          }
+          if (!link.value) {
+            log.error(`client ${client.baseId} sans description`, client)
+            link.value = `login sur ${client.baseId}`
+          }
+          loginLinks.push(link)
+        } else {
+          log.error(`client ${client.baseId} sans getLoginUrl`, client)
         }
       })
       if (loginLinks.length > 1) {
@@ -212,10 +208,19 @@ module.exports = function ($accessControl, $ressourcePage) {
   $auth.getSsoLinks = function (context) {
     var links = []
     var personne = $accessControl.getCurrentUser(context)
-    if (personne) {
-      var client = getClient(context)
-      if (client instanceof Error) log.error(client)
-      else if (client.getSsoLinks) links = client.getSsoLinks(personne.idOrigine)
+    if (personne && personne.pid) {
+      try {
+        const client = getClient(context)
+        if (client.getSsoLinks) {
+          const slashPos = personne.pid.indexOf('/')
+          const authBaseId = slashPos > 0 && personne.pid.substr(slashPos + 1)
+          links = client.getSsoLinks(authBaseId)
+        } else {
+          log.error(`client ${client.baseId} sans getSsoLinks`)
+        }
+      } catch (error) {
+        log.error(error)
+      }
     }
 
     return links
