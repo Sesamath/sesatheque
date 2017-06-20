@@ -62,39 +62,6 @@ module.exports = {
   run: function run (done) {
     // fcts internes
 
-    function reindexRessources (next) {
-      let currentTotal
-      flow().seq(function () {
-        EntityRessource.match().grab(limit, offset, this)
-
-        // on note le total
-      }).seq(function (ressources) {
-        currentTotal = ressources.length
-        this(null, ressources)
-        // on itère
-      }).seqEach(function (ressource) {
-        if (!ressource.origine) {
-          if (ressource.aliasOf || ressource.type === 'error') {
-            ressource.origine = myBaseId
-            $ressourceRepository.save(ressource, this)
-          } else {
-            logBoth(`ressource ${ressource.oid} sans origine`, ressource)
-            this()
-          }
-        } else {
-          ressource.reindex(this)
-        }
-      }).seq(function () {
-        updateLog(`réindex des ressources de ${offset} à ${offset + currentTotal - 1} sur ${nbRessources}`)
-        if (currentTotal === limit) {
-          offset += limit
-          process.nextTick(reindexRessources, next)
-        } else {
-          next()
-        }
-      }).catch(next)
-    }
-
     /**
      * 1re passe pour récupérer toutes les personnes, fixer leur pid et mémoriser les modifs
      */
