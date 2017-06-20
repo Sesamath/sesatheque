@@ -31,14 +31,14 @@
 
 'use strict'
 
-var path = require('path')
-var fs = require('fs')
+const path = require('path')
+const fs = require('fs')
 
-var config = require('../config')
-var applog = require('an-log')(config.application.name)
+const config = require('../config')
+const applog = require('an-log')(config.application.name)
 
 // Composant de gestion des updates
-var updateComponent = lassi.component('update')
+const updateComponent = lassi.component('update')
 
 updateComponent.entity('EntityUpdate', function () {
   require('./EntityUpdate')(this)
@@ -55,7 +55,7 @@ if (!lassi.options.cli) {
       applog('update', 'instance n° ' + process.env.NODE_APP_INSTANCE + ', abandon pour laisser l’instance 0 faire le job')
       return
     }
-    var EntityUpdate = lassi.service('EntityUpdate')
+    const EntityUpdate = lassi.service('EntityUpdate')
     // on cherche le dernier update appliqué
     EntityUpdate.match('num').sort('num', 'desc').grabOne(function (error, update) {
       function done (error) {
@@ -69,8 +69,8 @@ if (!lassi.options.cli) {
 
       function nextUpdate (error) {
         if (error) return done(error)
-        var update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
-        var lock = path.join(__dirname, '../../_private/updates.lock')
+        const update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
+        const lock = path.join(__dirname, '../../_private/updates.lock')
         try {
           fs.accessSync(lock, fs.R_OK)
           return applog('updates', lock + ' présent, on ignore les updates automatiques, base en version ' + dbVersion)
@@ -96,7 +96,7 @@ if (!lassi.options.cli) {
       }
 
       if (error) return done(error)
-      var dbVersion = update && update.num || 11
+      let dbVersion = update && update.num || 11
       nextUpdate()
     })
   })
