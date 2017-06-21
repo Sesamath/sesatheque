@@ -684,7 +684,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.login = function (context, personne, next) {
     function setSession (error, personne) {
-      // met en session le user ou un objet oid:0 pour mettre en session le fait qu'on est pas authentifié
+      // met en session le user ou un objet {oid:0} pour mettre en session le fait qu'on est pas authentifié
       if (personne) context.session.user = personne
       else if (!error) context.session.user = {oid: 0, _lastCheck: new Date()}
       next(error, personne)

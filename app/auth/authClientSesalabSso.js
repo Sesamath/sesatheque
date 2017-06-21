@@ -32,9 +32,8 @@
 
 const myBaseUrl = require('../config').application.baseUrl
 
-// module js pour enregistrer un authClient auprès du service $auth,
 /**
- * Enregistre un authClient auprès du service $auth
+ * Enregistre un authClient (de sesalab-sso) auprès du service $auth
  * Requis par l'appli au configure (src/index.js), qui passe les services utiles
  * (mais on est pas un service lassi, juste un module js classique)
  *
@@ -58,16 +57,24 @@ module.exports = function (authName, authBaseId) {
   }
 
   $sesalabSsoClient.setLoginCallback(function (context, user, next) {
-    // on lui file d'office le role formateur, parce que l'on sait que nos serveurs d'authentification ne renvoient
-    // que des formateurs, sinon il faudrait controler d'apres user.origine
-    // (qui est le domaine du serveur d'authentification)
-    if (!user.roles) user.roles = {}
-    user.roles.formateur = true
-    $accessControl.login(context, user, function (error, personne) {
+    if (!user) return next(new Error('login sans user à connecter'))
+    // log.debug('user avant login, reçu du validate', user, 'login', {max: 5000})
+    // on lui file d'office le role formateur, parce que l'on sait que nos serveurs d'authentification
+    // ne renvoient que des formateurs, sinon il faudrait controler d'apres authBaseId
+    const userToLogin = Object.assign({roles: {formateur: true}}, user)
+    // @todo à virer quand tout le monde sera avec la bonne version
+    if (!userToLogin.pid && userToLogin.origine && userToLogin.idOrigine) {
+      console.error('module sesalab-sso obsolete sur le serveur d’authentification, le mettre à jour en version > 1.0.5')
+      userToLogin.pid = userToLogin.origine + '/' + userToLogin.idOrigine
+      delete userToLogin.origine
+      delete userToLogin.idOrigine
+    }
+    $accessControl.login(context, userToLogin, function (error, personne) {
+      // log.debug('user après login', personne, 'login', {max: 5000})
       if (error) {
         next(error)
       } else if (personne) {
-        console.log('après login les permissions', personne.permissions)
+        // console.log('après login les permissions', personne.permissions)
         // on ajoute la source de l'authentification en session
         context.session.authBaseId = authBaseId
         next()
@@ -84,7 +91,7 @@ module.exports = function (authName, authBaseId) {
 
   $sesalabSsoClient.setErrorCallback($page.printError)
 
-  // et on enregistre ce client
+  // et on enregistre ce client (c'est ce addClient qui râlera si authBaseId est pas autorisée via la conf)
   $auth.addClient({
     name: authName,
     baseId: authBaseId,
