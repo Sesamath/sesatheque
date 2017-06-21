@@ -105,7 +105,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
   $personneRepository.load = function (id, next) {
     if (typeof id === 'number') id += ''
     if (typeof id !== 'string') {
-      const error = new Error('id invalide')
+      const error = new Error(`id invalide ${typeof id}`)
       log.error(error, id)
       return next(error)
     }

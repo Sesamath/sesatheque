@@ -49,7 +49,7 @@ const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('ses
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
   /**
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
@@ -109,6 +109,56 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     // (et ça compliquerait bcp la pagination)
     if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
     else $json.denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
+  }
+
+  /**
+   * Traite GET /api/liste/auteurs?pids=pid1,pid2…
+   * @param context
+   */
+  function getListeAuteurs (context) {
+    const pids = context.get.pids && context.get.pids.split(',').filter(pid => pid.indexOf('/') > 0)
+    if (!pids) return $json.sendError(context, 'Argument pids manquant')
+    if (!pids.length) return $json.sendError(context, 'Aucun auteur demandé')
+    const retour = {warnings: []}
+    const args = {
+      filters: [{
+        index: 'auteurs',
+        values: pids
+      }]
+    }
+    let iAuteurs = 0 // pour retrouver le pid d'une personne qu'on a pas trouvé
+    flow(pids).seqEach(function (pid) {
+      // on a pas de loadMulti, tant pis, toujours mieux de passer par ce load qui utilise le cache
+      // plutôt que d'écrire directement ici une requête
+      $personneRepository.load(pid, this)
+    }).seqEach(function (personne) {
+      if (personne) {
+        retour[personne.pid] = {
+          pid: personne.pid,
+          label: `${personne.prenom} ${personne.nom}`,
+          liste: []
+        }
+      } else {
+        retour.warnings.push(`Auteur ${pids[iAuteurs]} inconnu`)
+      }
+      iAuteurs++
+      this()
+    }).seq(function () {
+      $ressourceRepository.getListe('all', args, this)
+    }).seqEach(function (ressource) {
+      log.debug('ressource', {rid: ressource.rid, auteurs: ressource.auteurs})
+      if (!$accessControl.hasReadPermission(context, ressource)) return this()
+      ressource.auteurs.forEach(pid => {
+        if (retour[pid]) retour[pid].liste.push(new Ref(ressource))
+      })
+      this()
+    }).seq(function () {
+      if (!retour.warnings.length) delete retour.warnings
+      $json.sendOk(context, retour)
+    }).catch(function (error) {
+      log.error(error)
+      $json.sendError(context, error)
+    })
   }
 
   /**
@@ -1025,6 +1075,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
 
   /**
+   * Récupère les ressources d'une liste de pids, classée par pid (avec prénom & nom du pid)
+   * Retourne {@link reponseListesByPid}
+   * @route GET /api/liste/all
+   * @param {requeteListe}
+   */
+  controller.get('liste/auteurs', getListeAuteurs)
+
+  /**
    * Récupère la liste des ressources d'un groupe
    * Retourne {@link reponseListe}
    * @route GET /api/liste/groupe/:nom
@@ -1283,6 +1341,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
  * @property {boolean}                     success
  * @property {string}                      [error] Message d'erreur éventuel
  * @property {Ref[]|Ressource[]} liste   Une liste de Ref (ou de Ressource si on le demande)
+ */
+
+/**
+ * Format de la réponse à une demande de liste
+ * @typedef reponseListesByPid
+ * @type {Object}
+ * @property {boolean} success
+ * @property {string}   [error] Message d'erreur éventuel
+ * @property {string[]} [warnings] Éventuelle liste de warnings (auteurs inconnus)
+ * @property {object}   pidXX   Objet contenant les ressources de pidXX
+ * @property {string}   pidXX.pid   rappel de son pid
+ * @property {string}   pidXX.label prénom & nom
+ * @property {Ref[]}    pidXX.liste Ses ressources (lisibles par le demandeur)
  */
 
 /**
