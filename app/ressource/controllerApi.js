@@ -162,22 +162,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Traite GET|POST /api/liste/prof
-   * @private
-   * @param {Context} context
-   */
-  function getListeProf (context) {
-    context.timeout = 3000
-    if ($accessControl.hasGenericPermission('correction', context)) {
-      grabListe(context, 'correction')
-    } else if ($accessControl.isAuthenticated(context)) {
-      $json.denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
-    } else {
-      $json.denied(context, 'Il faut être authentifié pour accéder aux corrigés')
-    }
-  }
-
-  /**
    * Traite GET /api/liste/perso (appelé par sesatheque-client)
    * @private
    * @param {Context} context
@@ -257,6 +241,22 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       })
     } else {
       $json.denied(context, 'Ressources personnelles inaccessibles (session expirée sur la Sésathèque), veuillez vous déconnecter et reconnecter')
+    }
+  }
+
+  /**
+   * Traite GET|POST /api/liste/prof
+   * @private
+   * @param {Context} context
+   */
+  function getListeProf (context) {
+    context.timeout = 3000
+    if ($accessControl.hasGenericPermission('correction', context)) {
+      grabListe(context, 'correction')
+    } else if ($accessControl.isAuthenticated(context)) {
+      $json.denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
+    } else {
+      $json.denied(context, 'Il faut être authentifié pour accéder aux corrigés')
     }
   }
 
@@ -442,6 +442,40 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
+   * Demande d'update des arbres contenant une Ref
+   * @param context
+   * @returns {*}
+   */
+  function postRessourceExternalUpdate (context) {
+    log.debug('externalUpdate avec', context.post)
+    if (!$accessControl.hasAllRights(context)) return $json.denied(context)
+    try {
+      if (!context.post.ref) return $json.sendError(context, 'ref manquante')
+      const ref = new Ref(context.post.ref)
+      if (!ref.aliasOf) return $json.sendError(context, 'aliasOf manquant')
+      if (!ref.titre) return $json.sendError(context, 'titre manquant')
+      if (!ref.type) return $json.sendError(context, 'type manquant')
+      $ressourceRepository.updateParent(ref, function (error, nbArbres) {
+        if (error) {
+          log.error(error)
+          $json.sendError(context, error)
+        } else {
+          $json.sendOk(context)
+        }
+        // si aucun arbre n'a été mis à jour, c'est qu'on est enregistré pour cette ref sur sa sesatheque
+        // mais qu'on ne l'utilise plus, faut virer le listener pour éviter que ça ne se reproduise.
+        if (nbArbres === 0) {
+          log.dataError(`On nous a averti d’une modif de ${ref.aliasOf} mais plus aucune ressource ici ne la référence, on vire le listener`)
+          $ressourceRemote.unregister([ref.aliasOf], log.error)
+        }
+      })
+    } catch (error) {
+      log.error(error)
+      $json.sendError(context, error)
+    }
+  }
+
+  /**
    * Register ou unregister une EntityExternalRef
    * @private
    * @param context
@@ -516,40 +550,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       })
     } else {
       $json.sendError(context, `action ${context.post.action} inconnue (add|remove)`)
-    }
-  }
-
-  /**
-   * Demande d'update des arbres contenant une Ref
-   * @param context
-   * @returns {*}
-   */
-  function postRessourceExternalUpdate (context) {
-    log.debug('externalUpdate avec', context.post)
-    if (!$accessControl.hasAllRights(context)) return $json.denied(context)
-    try {
-      if (!context.post.ref) return $json.sendError(context, 'ref manquante')
-      const ref = new Ref(context.post.ref)
-      if (!ref.aliasOf) return $json.sendError(context, 'aliasOf manquant')
-      if (!ref.titre) return $json.sendError(context, 'titre manquant')
-      if (!ref.type) return $json.sendError(context, 'type manquant')
-      $ressourceRepository.updateParent(ref, function (error, nbArbres) {
-        if (error) {
-          log.error(error)
-          $json.sendError(context, error)
-        } else {
-          $json.sendOk(context)
-        }
-        // si aucun arbre n'a été mis à jour, c'est qu'on est enregistré pour cette ref sur sa sesatheque
-        // mais qu'on ne l'utilise plus, faut virer le listener pour éviter que ça ne se reproduise.
-        if (nbArbres === 0) {
-          log.dataError(`On nous a averti d’une modif de ${ref.aliasOf} mais plus aucune ressource ici ne la référence, on vire le listener`)
-          $ressourceRemote.unregister([ref.aliasOf], log.error)
-        }
-      })
-    } catch (error) {
-      log.error(error)
-      $json.sendError(context, error)
     }
   }
 
@@ -1077,8 +1077,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   /**
    * Récupère les ressources d'une liste de pids, classée par pid (avec prénom & nom du pid)
    * Retourne {@link reponseListesByPid}
-   * @route GET /api/liste/all
-   * @param {requeteListe}
+   * @route GET /api/liste/auteurs
+   * @param {string} pids la liste de pids séparés par des virgules
    */
   controller.get('liste/auteurs', getListeAuteurs)
 
