@@ -36,7 +36,7 @@ const uuid = require('an-uuid')
 const elementtree = require('elementtree')
 const _ = require('lodash')
 const request = require('request')
-const {exists, getBaseIdFromRid, getBaseUrl} = require('sesatheque-client/dist/sesatheques')
+const {exists, getBaseIdFromRid} = require('sesatheque-client/dist/sesatheques')
 const Ref = require('../constructors/Ref')
 const {getRidEnfants} = require('../tools/ressource')
 
@@ -202,9 +202,10 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @returns {{}}
    */
   function purgeVarnish (ressource) {
-    const base = appConfig.application.baseUrl
+    if (!appConfig.varnish) return
+    const myBaseUrl = appConfig.application.baseUrl
     // on ne purge que les ressources publiques (les autres ne sont pas en cache)
-    if (appConfig.varnish && ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
+    if (ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
       log.debug(`purge varnish de ${ressource.oid}`)
       ;[
         $routes.getAbs('api', ressource),
@@ -212,19 +213,20 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         $routes.getAbs('describe', ressource),
         $routes.getAbs('preview', ressource)
       ].forEach(function (url) {
+        log.debug('on va purger ' + url)
         request({
           method: 'PURGE',
-          url: base + url.substr(1) // pour pas avoir de double slash
+          url: myBaseUrl + url.substr(1) // pour pas avoir de double slash
         }, function (error, response) {
-          if (error || !response || response.statusCode !== 200) {
-            if (error) {
-              log.error('purge KO pour ' + url, error)
-            } else {
-              log.error('purge KO (!200) pour ' + url, response)
-              log.error('avec le body', arguments[2])
-            }
-          }
           log.debug('purge ' + url + ' ' + (response && response.statusCode))
+          if (error) {
+            log.error('purge KO pour ' + url, error)
+          } else if (!response || response.statusCode !== 200) {
+            log.error('purge KO (!200) pour ' + url, response)
+            log.error('avec le body', arguments[2])
+          } else {
+            log.debug('purge ' + url + ' ok')
+          }
         })
       })
     }
