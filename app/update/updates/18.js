@@ -31,15 +31,14 @@
 'use strict'
 
 const flow = require('an-flow')
-const applog = require('an-log')(lassi.settings.application.name)
 const sesatheques = require('sesatheque-client/dist/sesatheques')
 const config = require('../../config')
 const myBaseId = config.application.baseId
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
-const updatePrefix = 'update ' + updateNum
-const updateLog = (message) => applog(updatePrefix, message)
-const updateLogErr = (message) => applog.error(updatePrefix, message)
+// an-log ne fait rien ici si on l'appelle avec le même config.application.name que update/index.js !
+const updateLog = require('an-log')(config.application.name + ' update' + updateNum)
+const updateLogErr = updateLog.error
 
 const name = 'normalisation du contenu des sequenceModele'
 const description = ''

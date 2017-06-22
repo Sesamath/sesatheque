@@ -31,10 +31,11 @@
 'use strict'
 
 const flow = require('an-flow')
-const applog = require('an-log')(lassi.settings.application.name)
 
+const config = require('../../config')
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
-const updatePrefix = 'update ' + updateNum
+// an-log ne fait rien ici si on l'appelle avec le même config.application.name que update/index.js !
+const updateLog = require('an-log')(config.application.name + ' update' + updateNum)
 
 const name = 'conversion des personnes (ajout pid)'
 const description = ''
@@ -62,7 +63,7 @@ module.exports = {
 
       // log + suivants ou fin
       }).seq(function () {
-        applog(updatePrefix, 'appliqué de', offset, 'à', offset + currentTotal - 1, 'sur', nbPersonnes)
+        updateLog('appliqué de', offset, 'à', offset + currentTotal - 1, 'sur', nbPersonnes)
         if (currentTotal === limit) {
           offset += limit
           setTimeout(grab, 0)
@@ -80,7 +81,7 @@ module.exports = {
     // on compte et on y va
     EntityPersonne.match().count(function (error, total) {
       if (error) return next(error)
-      applog(updatePrefix, name, 'avec', total, 'personnes à traiter')
+      updateLog(`${total} personnes à traiter`)
       if (total === 0) return next()
       nbPersonnes = total
       grab()

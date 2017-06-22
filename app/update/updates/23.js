@@ -31,7 +31,6 @@
 'use strict'
 
 const flow = require('an-flow')
-const applog = require('an-log')(lassi.settings.application.name)
 
 const name = 'réindexation de EntityRessource, mise à jour de tous les arbres'
 const description = ''

@@ -35,8 +35,7 @@
 const filters = require('sesajstools/utils/filters')
 
 /**
- * Filtre une liste de personne en vérifiant que c'est bien de la forme baseId/xxx avec baseId connue
- * si c'est pas le cas et que defaultBaseId est fournie on l'ajoute
+ * Filtre une liste de personne en vérifiant que c'est bien de la forme baseId/xxx
  * @param {string[]} list
  * @return {Array} la liste filtrée (toujours un array, éventuellement vide si list était vide ou undefined)
  */
@@ -50,16 +49,15 @@ function filterUserList (list) {
   // c'est un array non vide
   // avec mocha (p'tet aussi autrement), on peut avoir du [null], on essaie de trouver où
   const listCleaned = list.filter(pid => pid)
-  if (listCleaned.length < list.length) console.error(new Error('liste de pid avec des null ou undefined'), '\nla liste fournie => ', list)
+  if (listCleaned.length < list.length) console.error(new Error('liste de pid avec des null ou undefined'))
 
   return listCleaned.map(pid => {
-    // on a encore des int…
     if (typeof pid !== 'string') {
       console.error(new Error(`pid de type invalide : ${typeof pid} (${pid})`))
       return null
     }
-    const pos = pid.indexOf('/')
-    if (pos === -1) {
+    const slashPos = pid.indexOf('/')
+    if (slashPos < 1 || slashPos === pid.length) {
       console.error(new Error(`pid invalide : ${pid}`))
       return null
     }

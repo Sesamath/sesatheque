@@ -224,8 +224,6 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
           } else if (!response || response.statusCode !== 200) {
             log.error('purge KO (!200) pour ' + url, response)
             log.error('avec le body', arguments[2])
-          } else {
-            log.debug('purge ' + url + ' ok')
           }
         })
       })
@@ -492,6 +490,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   $ressourceRepository.delete = function repoDelete (ressource, next) {
     if (ressource && ressource.oid) {
       log.debug('La ressource ' + ressource.oid + ' va être effacée')
+      if (!ressource.delete) ressource = EntityRessource.create(ressource)
       ressource.delete(function (error) {
         // on vire du cache de toute façon
         $cacheRessource.delete(ressource.oid)

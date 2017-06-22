@@ -31,14 +31,13 @@
 'use strict'
 
 const flow = require('an-flow')
-const applog = require('an-log')(lassi.settings.application.name)
 const config = require('../../config')
 const myBaseId = config.application.baseId
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
-const updatePrefix = 'update ' + updateNum
-const updateLog = (message) => applog(updatePrefix, message)
-const updateLogErr = (message) => applog.error(updatePrefix, message)
+// an-log ne fait rien ici si on l'appelle avec le même config.application.name que update/index.js !
+const updateLog = require('an-log')(config.application.name + ' update' + updateNum)
+const updateLogErr = updateLog.error
 const logBoth = (message, obj) => {
   updateLogErr(message)
   log.dataError(message, obj)
@@ -55,6 +54,12 @@ const translate = {
   'labomep.devsesamath.net': 'labomepDev',
   'labomep.local': 'labomepLocal'
 }
+const knownBaseIds = new Set()
+knownBaseIds.add('sesasso')
+knownBaseIds.add('labomep')
+knownBaseIds.add('labomepDev')
+knownBaseIds.add('labomepLocal')
+knownBaseIds.add('labomepLocal3002')
 
 module.exports = {
   name: name,
@@ -83,29 +88,35 @@ module.exports = {
           logBoth(`personne ${personne.oid} sans pid`, personne)
           return nextPersonne()
         }
+        if (typeof personne.pid !== 'string') {
+          logBoth(`personne ${personne.oid} avec pid ${typeof personne.pid}`, personne)
+          return nextPersonne()
+        }
+        if (personne.pid.indexOf('/') === -1) {
+          logBoth(`personne ${personne.oid} avec pid invalide ${personne.pid}`, personne)
+          return nextPersonne()
+        }
+        const [domain, oid] = personne.pid.split('/')
         // les pids déjà OK
-        if (/^sesasso\/.+/.test(personne.pid)) return nextPersonne()
-        if (/^labomep\/.+/.test(personne.pid)) return nextPersonne()
-        if (/^labomepDev\/.+/.test(personne.pid)) return nextPersonne()
-        if (/^labomepLocal\/.+/.test(personne.pid)) return nextPersonne()
-        const matches = /^([a-z.]+)\/([a-z0-9]+)$/.exec(personne.pid)
-        if (matches && matches.length > 2) {
-          const [, domain, oid] = matches
-          if (translate[domain]) {
-            nbModifs++
-            const newPid = translate[domain] + '/' + oid
-            if (translated.has(personne.pid)) {
-              logBoth(`personne ${oid} avec pid ${personne.pid} en double (pid déjà rencontré)`)
-            }
-            translated.set(personne.pid, newPid)
-            personne.pid = newPid
-            $personneRepository.save(personne, nextPersonne)
-          } else {
-            logBoth(`personne ${oid} sans pid d’origine connu (${personne.pid})`, personne)
-            nextPersonne()
+        if (knownBaseIds.has(domain)) return nextPersonne()
+        // ceux qu'il faut transformer
+        if (translate[domain]) {
+          nbModifs++
+          const newPid = translate[domain] + '/' + oid
+          if (translated.has(personne.pid)) {
+            logBoth(`personne ${oid} avec pid ${personne.pid} en double (pid déjà rencontré)`)
+            doublons.add(personne.pid)
           }
+          translated.set(personne.pid, newPid)
+          personne.pid = newPid
+          $personneRepository.save(personne, nextPersonne)
+        } else if (domain === myBaseId) {
+          if (oid === personne.oid) orphans.set(oid, personne.pid)
+          else toReplace.set(personne.oid, oid)
+          nextPersonne()
+          // faut aller chercher l'autre
         } else {
-          logBoth(`personne ${personne.oid} avec pid ${personne.pid} non conforme`, personne)
+          logBoth(`personne ${oid} sans pid d’origine connu (${personne.pid})`, personne)
           nextPersonne()
         }
       }).seq(function () {
@@ -183,6 +194,63 @@ module.exports = {
       }).catch(next)
     }
 
+    /**
+     * parcours toReplace pour charger la cible et si c'est un pid valide l'ajouter à translated
+     * (sinon ajouter l'oid source à orphans)
+     * @private
+     * @param next
+     */
+    function replacePids (next) {
+      function moveToOrphan (oid) {
+        orphans.set(oid, `${myBaseId}/${oid}`)
+        toReplace.delete(oid)
+      }
+      // on regarde si y'a pas des destinations déjà connues pour être introuvables
+      toReplace.forEach((oidDst, oidSrc) => {
+        if (orphans.has(oidDst)) moveToOrphan(oidSrc)
+      })
+      const toCheck = Array.from(toReplace.keys())
+      let personneIndex = 0
+      flow(toCheck).seqEach(function (oidSrc) {
+        const oidDst = toReplace[oidSrc]
+        $personneRepository.load(oidDst, this)
+      }).seqEach(function (personne) {
+        const oidSrc = toCheck[personneIndex]
+        personneIndex++
+        const pidSrc = `${myBaseId}/${oidSrc}`
+        if (personne) {
+          // on regarde s'il est lui-même transformé
+          if (translated.has(personne.pid)) {
+            translated.set(pidSrc, translated[personne.pid])
+            toSuppr.add(oidSrc)
+          } else {
+            const [baseId, , other] = personne.pid.split('/')
+            if (other) {
+              updateLogErr(`personne ${personne.oid} avec un pid incorrect ${personne.pid}`)
+              moveToOrphan(oidSrc)
+            } else if (knownBaseIds.has(baseId)) {
+              translated.set(pidSrc, personne.pid)
+              toSuppr.add(oidSrc)
+            } else {
+              moveToOrphan(oidSrc)
+            }
+          }
+        } else {
+          moveToOrphan(oidSrc)
+        }
+        this()
+      }).done(next)
+    }
+
+    function cleanObsolete (next) {
+      flow(Array.from(toSuppr)).seqEach(function (oidToSuppr) {
+        // faudrait vérifier qu'il n'y a plus de ressources avec cet oid
+        // mais faut remonter au pid et faire un paquet de requête, on va rester optimiste
+        // en supposant que grabGroupes a bien fait toutes les translations…
+        $personneRepository.delete(oidToSuppr, this)
+      }).done(next)
+    }
+
     // init
     const EntityGroupe = lassi.service('EntityGroupe')
     const EntityPersonne = lassi.service('EntityPersonne')
@@ -190,7 +258,11 @@ module.exports = {
     const $groupeRepository = lassi.service('$groupeRepository')
     const $personneRepository = lassi.service('$personneRepository')
     const $ressourceRepository = lassi.service('$ressourceRepository')
-    const translated = new Map()
+    const translated = new Map() // pid => pid des remplacements à faire
+    const doublons = new Set() // pids avec plusieurs oids
+    const orphans = new Map() // oid => pid des introuvables
+    const toReplace = new Map() // oid => oid des personnes à substituer
+    const toSuppr = new Set() // oid des personnes à supprimer après translation si ça n'a pas planté
     // pas besoin de gérer ici le cache pour les personnes et les groupes, c'est dans le afterStore de leur entity
     let offset = 0
     let nbPersonnes = 0
@@ -211,9 +283,15 @@ module.exports = {
       offset = 0
       grabPersonnes(this)
     }).seq(function () {
+      if (toReplace.size) replacePids(this)
+      else this()
+    }).seq(function () {
       grabRessources(this)
     }).seq(function (total) {
       grabGroupes(this)
+    }).seq(function () {
+      if (toSuppr.size) cleanObsolete(this)
+      else this()
     }).seq(function () {
       updateLog('réindexation des personnes')
       reindexAll('EntityPersonne', this)
@@ -221,7 +299,17 @@ module.exports = {
       updateLog('réindexation des groupes')
       reindexAll('EntityGroupe', this)
     }).seq(function () {
-      done()
+      if (orphans.size) {
+        updateLog(`${orphans.length} personnes avec pid introuvable :`)
+        orphans.forEach((pid, oid) => updateLog(`${oid} => ${pid}`))
+      } else {
+        updateLog(`pas de pid introuvable`)
+      }
+      if (toSuppr.size) updateLog(`${toSuppr.size} personnes supprimées remplacées par une autre`)
+      else updateLog('pas de suppression')
+      if (doublons.size) updateLog(`pids en doublon : ${Array.from(doublons).join(', ')}`)
+      else updateLog('pas de doublon')
+      setTimeout(done, 1000)
     }).catch(done)
   } // run
 }
