@@ -52,7 +52,8 @@ const translate = {
   'new.labomep.net': 'labomep',
   'labomep.sesamath.net': 'labomep',
   'labomep.devsesamath.net': 'labomepDev',
-  'labomep.local': 'labomepLocal'
+  'labomep.local': 'labomepLocal',
+  'labomep2dev': 'labomepDev' // une erreur mise en conf des bibli de dev à un moment…
 }
 const knownBaseIds = new Set()
 knownBaseIds.add('sesasso')
