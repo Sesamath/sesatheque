@@ -120,8 +120,8 @@ function checkEnfants (enfants, ressource, titre) {
         }
       } else {
         if (enfant.type === 'arbre') {
-          // aliasOf pas obligatoire mais faut des enfants
-          if (!enfant.enfants) rTools.addError(ressource, `${errPrefix} est un arbre sans enfants ni aliasOf`)
+          // aliasOf pas obligatoire mais faudrait des enfants
+          if (!enfant.enfants) rTools.addWarning(ressource, `${errPrefix} est un arbre sans enfants ni aliasOf`)
         } else {
           rTools.addError(ressource, `${errPrefix} n'a pas d’aliasOf`)
         }

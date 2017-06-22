@@ -573,7 +573,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         // faut la mémoriser pour comparer avec la bdd
         ressourceNormee = ressource
         if (_.isEmpty(ressource.$errors)) {
-          if (!_.isEmpty(ressource.$warnings) && ressource.force !== 'forced') {
+          if (!_.isEmpty(ressource.$warnings) && ressourcePostee.force !== 'forced') {
             printForm(context, null, ressource, titrePage)
           } else {
             // faut charger l'ancienne pour vérifier groupes et personnes
@@ -589,7 +589,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (ressourceOriginale.aliasOf) delete ressourceOriginale.aliasOf
           $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
         } else {
-          var error = new Error('La ressource ' + oid + " n’existe pas ou plus")
+          var error = new Error(`La ressource ${oid} n’existe pas ou plus`)
           log.error(error)
           this(error)
         }
