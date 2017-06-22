@@ -78,7 +78,6 @@ module.exports = function display (ressource, options, next) {
 
     // notre base
     if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf = ressource.baseUrl
-    else if (options.verbose) baseMepSwf = 'https://mep-col.devsesamath.net/dev/swf'
     else baseMepSwf = 'https://mep-col.sesamath.net/dev/swf'
     // id du swf
     idSwf = Number(params.swf_id ? params.swf_id : ressource.idOrigine)
