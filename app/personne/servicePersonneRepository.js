@@ -34,7 +34,6 @@
 const _ = require('lodash')
 const flow = require('an-flow')
 const merge = require('sesajstools/utils/object').merge
-const myBaseId = lassi.settings.application.baseId
 
 module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
   /**
@@ -94,6 +93,31 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
     }).catch(function (error) {
       next(error)
     })
+  }
+
+  /**
+   * Supprime une personne, ATTENTION, ne supprime pas cette personne des ressources qui l'auraient comme auteur
+   * @param {string|Personne|EntityPersonne} who
+   * @param next
+   */
+  $personneRepository.delete = function (who, next) {
+    flow().seq(function () {
+      if (typeof who === 'number') who += '' // oid numérique
+      if (typeof who === 'string') return $personneRepository.load(who, this)
+      if (typeof who === 'object') {
+        // on nous passe une personne
+        if (who.delete) return this(null, who)
+        else if (who.oid) return this(EntityPersonne.create(who))
+      }
+      const error = new Error('$personneRepositorydelete appelé avec un argument incorrect')
+      log.error(error, who)
+      this(error)
+    }).seq(function (personne) {
+      personne.delete(this)
+      // on efface le cache en tâche de fond
+      $cachePersonne.delete(personne.oid)
+      $cachePersonne.delete(personne.pid)
+    }).done(next)
   }
 
   /**
