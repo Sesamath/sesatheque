@@ -59,9 +59,15 @@ function Resultat (original) {
   /**
    * L'identifiant de la ressource (dans sa sesatheque d'origine)
    * @default undefined
+   * @deprecated
    * @type {number|string}
    */
   this.ressId = values.ressId
+  /**
+   * Le rid / aliasOf de la ressource
+   * @type {string}
+   */
+  this.rid = values.rid
 
   /**
    * Le type de la ressource (type de la ressource, nom de code du plugin qui la gère et saura afficher le résultat)

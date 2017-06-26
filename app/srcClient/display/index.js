@@ -122,18 +122,20 @@ module.exports = function display (ressource, options, next) {
         log.error(result)
         feedback({success: false, error: result.toString()})
       } else if (result) {
-        const deferSync = result.deferSync
         const resultat = new Resultat(result)
         // pour l'ajax on ajoute ça
-        if (options.urlResultatCallback && deferSync) resultat.deferSync = deferSync
+        if (options.urlResultatCallback && result.deferSync) resultat.deferSync = result.deferSync
         // on impose date et durée
         resultat.date = new Date()
-        // le plugin peut imposer sa mesure
+        // le plugin peut imposer sa mesure, on ne met la durée que s'il ne l'a pas fourni
         if (!resultat.duree && startDate) {
           resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000)
         }
+        // on impose ça d'après la ressource
+        resultat.ressType = ressource.type
+        resultat.rid = ressource.rid
         // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
-        [ 'sesatheque', 'userOrigine', 'userId' ].forEach(function (paramName) {
+        ;['sesatheque', 'userOrigine', 'userId'].forEach(function (paramName) {
           const paramValue = sjtUrl.getParameter(paramName) || options[ paramName ]
           if (paramValue) resultat[ paramName ] = paramValue
         })

@@ -11,6 +11,7 @@
 {:else}
 <div id="errors"></div>
 <div id="pictoFeedback" class="feedbackOff"></div>
+<button id="boutonVu">Vu <img src="/medias/cocheVerte.png" /></button>
 <h1 id="titre">{titre.value}</h1>
 <div id="display">Vous devez avoir un navigateur avec javascript activé pour voir ce contenu.<br />
 Chargement en cours</div>

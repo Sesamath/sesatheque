@@ -98,6 +98,18 @@ function addError (error, delay) {
   }
 }
 
+function addBoutonVu (sendResultat) {
+  try {
+    const boutonVu = wd.getElementById('boutonVu')
+    if (boutonVu) {
+      boutonVu.addEventListener('click', sendResultat)
+      if (boutonVu.style) boutonVu.style.display = 'inline-block'
+    }
+  } catch (e) {
+    /* tant pis */
+  }
+}
+
 /**
  * Cache le #titre (en global pour que les plugins puissent le faire)
  */
@@ -229,7 +241,7 @@ function setBase (newBase) {
  * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
  * @service page
  */
-module.exports = {addError, autosize, hideTitle, init, loadAsync, refreshAuth, setBase}
+module.exports = {addError, addBoutonVu, autosize, hideTitle, init, loadAsync, refreshAuth, setBase}
 
 /* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
 if (typeof window !== 'undefined') {

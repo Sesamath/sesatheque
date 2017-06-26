@@ -52,22 +52,20 @@ module.exports = function display (ressource, options, next) {
     const container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
     const resultat = {
-      ressType: 'am',
-      ressId: ressource.oid,
       score: 1,
       fin: true,
       deferSync: true
     }
+    let isResultatSend = false
     // on enverra le résultat à la fermeture (si y'a eu un chargement, isLoaded sert de flag)
     if (options.resultatCallback && window.addEventListener) {
       window.addEventListener('unload', function () {
-        log('unload am')
         if (options.sesatheque) resultat.sesatheque = options.sesatheque
-        if (isLoaded) options.resultatCallback(resultat)
-        // sinon le swf n'a pas été chargé, on envoie rien
+        if (isLoaded && !isResultatSend) options.resultatCallback(resultat)
+        // sinon le swf n'a pas été chargé (ou on a déjà cliqué sur "vu"), on envoie rien
       })
     }
-    var params = ressource.parametres
+    const params = ressource.parametres
 
     log('start am display avec la ressource', ressource)
     // les params minimaux
@@ -94,12 +92,15 @@ module.exports = function display (ressource, options, next) {
       hauteur: 450
     }
     swf.load(container, swfUrl, swfOpt, function (error) {
-      if (error) {
-        next(error)
-      } else {
-        isLoaded = true
-        next()
+      if (error) return next(error)
+      isLoaded = true
+      if (options.resultatCallback) {
+        page.addBoutonVu(function () {
+          isResultatSend = true
+          options.resultatCallback(resultat)
+        })
       }
+      next()
     })
   } catch (error) {
     if (next) next(error)

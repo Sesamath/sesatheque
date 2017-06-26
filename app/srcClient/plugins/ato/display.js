@@ -48,7 +48,20 @@ var isLoaded
 module.exports = function display (ressource, options, next) {
   function loaded () {
     isLoaded = true
+    if (options.resultatCallback) {
+      page.addBoutonVu(function () {
+        isResultatSend = true
+        options.resultatCallback(resultat)
+      })
+    }
     if (next) next()
+  }
+
+  let isResultatSend = false
+  const resultat = {
+    fin: true,
+    score: 1,
+    deferSync: true
   }
 
   try {
@@ -58,14 +71,7 @@ module.exports = function display (ressource, options, next) {
     // on enverra un résultat seulement à la fermeture
     if (options.resultatCallback && container.addEventListener) {
       container.addEventListener('unload', function () {
-        if (isLoaded) {
-          options.resultatCallback({
-            ressType: 'ato',
-            rid: ressource.rid,
-            fin: true,
-            score: 1
-          })
-        }
+        if (isLoaded && !isResultatSend) options.resultatCallback(resultat)
       })
     }
 
