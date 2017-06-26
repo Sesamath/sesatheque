@@ -38,30 +38,11 @@ function filterString (value) {
  * Définition d'une référence à une ressource, que l'on peut rencontrer dans les feuilles d'un arbre
  * Ce n'est pas une entité
  * @param {Object} [values={}] L'objet qui sert à initialiser un nouvel objet Ref, accepte une Ressource
- * @param {string} [baseId] Une base par défaut
  * @throws {Error} Si on passe des enfants sur un type non arbre
  * @constructor
  */
-function Ref (values, baseId) {
-  // @todo virer ref et baseId quand l'update 12 sera passé et que plus personne (j3p) ne les utilisera
+function Ref (values) {
   if (typeof values !== 'object') values = {}
-  var ref = values.ref || values.oid || (values.origine && values.idOrigine && values.origine + '/' + values.idOrigine)
-  if (ref) {
-    /**
-     * L'oid de la ressource que l'on référence, remplacé par aliasOf
-     * @deprecated
-     * @type {Integer|string}
-     */
-    this.ref = ref
-  }
-  if (values.baseId) {
-    /**
-     * L'id de la sesathèque concernée (présent maintenant dans aliasOf)
-     * @deprecated
-     * @type {string}
-     */
-    this.baseId = values.baseId
-  }
 
   if (values.aliasOf) {
     /**
@@ -83,10 +64,6 @@ function Ref (values, baseId) {
     }
   } else if (values.rid) {
     this.aliasOf = values.rid
-  } else if (ref) {
-    if (values.baseId) this.aliasOf = values.baseId + '/' + ref
-    else if (baseId) this.aliasOf = baseId + '/' + ref
-    else throw new Error(`Impossible de convertir la ref ${ref} sans baseId`)
   }
 
   /**

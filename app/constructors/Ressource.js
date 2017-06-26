@@ -118,12 +118,6 @@ function Ressource (initObj, myBaseId) {
       if (!this.rid) this.rid = values.aliasRid
       else if (this.rid !== values.aliasRid) throw new Error(`aliasRid (${values.aliasRid}) et rid ${this.rid} incompatibles`)
     }
-  } else if (values.ref) {
-    // pour le cast Ref => Ressource de l'ancien format ref
-    // à l'ancien format on avait ref et baseId, mais ref pouvait être origine/idOrigine, ou cle/token
-    // le nouveau format est le rid avec baseId/oid
-    if (!values.baseId) throw new Error('Une ressource ne peut pas avoir de propriété ref sans propriété baseId')
-    this.aliasOf = values.baseId + '/' + values.ref
   }
   /**
    * Une clé permettant de lire la ressource (si elle est publiée) en outrepassant les droits

@@ -55,8 +55,6 @@ describe('Ref', () => {
     const refOrig = fakeRef()
     const ref = new Ref(refOrig)
     // console.log('la ref\n', refOrig, '\nest devenue\n', ref)
-    // on vire les trucs obsolètes
-    if (ref.ref) delete ref.ref
     // malgré des objets qui semblent vraiment égaux, ce truc passe pas
     // expect(ref).to.deep.equal(refOrig)
     // mais en prenant les clés une par une ça passe…
@@ -64,31 +62,5 @@ describe('Ref', () => {
     const keys = Object.keys(ref).sort()
     expect(keys).to.deep.equal(keysOrig, 'liste de propriétés')
     keys.forEach(k => expect(ref[k]).to.deep.equal(refOrig[k], `propriété ${k}`))
-  })
-
-  it('converti une ancienne ref (avec propriété ref) en ajoutant baseId', () => {
-    const refOrig = fakeRef()
-    const oldRef = Object.assign({}, refOrig)
-    const pos = refOrig.aliasOf.indexOf('/')
-    const baseId = refOrig.aliasOf.substr(0, pos)
-    const oid = refOrig.aliasOf.substr(pos + 1)
-    oldRef.ref = oid
-    delete oldRef.aliasOf
-    const ref = new Ref(oldRef, baseId)
-    if (ref.ref) delete ref.ref
-    const keysOrig = Object.keys(refOrig).sort()
-    const keys = Object.keys(ref).sort()
-    expect(keys).to.deep.equal(keysOrig, 'liste de propriétés')
-    keys.forEach(k => expect(ref[k]).to.deep.equal(refOrig[k], `propriété ${k}`))
-  })
-
-  it('lance une exception si on file un oid sans baseId', () => {
-    const refOrig = {
-      oid: 42,
-      titre: 'foo bar',
-      type: 'ato'
-    }
-    const init = () => new Ref(refOrig)
-    expect(init).to.throw(Error, /Impossible de convertir la ref/)
   })
 })

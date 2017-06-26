@@ -388,7 +388,7 @@ function getEnfants (arbreXml, xmlName, next) {
                 enfant.attributes = child.attrib
               }
             } catch (error) {
-              var msg = "L'affectation dans attributes de l'enfant " + (enfant.ref || enfant.idOrigine) + ' a planté'
+              var msg = "L'affectation dans attributes de l'enfant " + (enfant.aliasOf || enfant.idOrigine) + ' a planté'
               log(msg, error)
               log.error(msg, error)
             }

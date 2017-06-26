@@ -412,10 +412,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
     var relations = context.post.relations
     if (relations && relations.length) {
-      var ref = extractId(context)
+      var id = extractId(context)
 
-      if (ref) {
-        $ressourceRepository.load(ref, function (error, ressource) {
+      if (id) {
+        $ressourceRepository.load(id, function (error, ressource) {
           if (error) $json.send(context, error)
           else if (ressource) {
             if ($accessControl.hasPermission('update', context, ressource)) {
@@ -430,7 +430,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
             }
           } else {
-            $json.notFound(context, `La ressource ${ref} n’existe pas`)
+            $json.notFound(context, `La ressource ${id} n’existe pas`)
           }
         })
       } else {
@@ -1022,7 +1022,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get('jstree', function (context) {
     const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
-    var id = context.get.rid || context.get.id || context.get.ref
+    var id = context.get.rid || context.get.aliasOf || context.get.id || context.get.oid
     var onlyChildren = !!context.get.children
     if (id) {
       $ressourceRepository.load(id, function (error, ressource) {

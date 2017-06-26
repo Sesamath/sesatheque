@@ -49,10 +49,7 @@ module.exports = function describeEntityPersonne () {
 
   const EntityPersonne = lassi.service('EntityPersonne')
   const personneData = {
-    // pas d'oid pour le moment
-    // ni pid
-    origine: 'origAuth',
-    idOrigine: 'idAtOrigAuth',
+    pid: 'origAuth/idAtOrigAuth',
     prenom: 'foo',
     nom: 'bar',
     email: 'foo@bar.baz',
@@ -81,8 +78,7 @@ module.exports = function describeEntityPersonne () {
 
   const grab = (next) => {
     EntityPersonne
-      .match('origine').equals(personneData.origine)
-      .match('idOrigine').equals(personneData.idOrigine)
+      .match('pid').equals(personneData.pid)
       .grab(next)
   }
 
