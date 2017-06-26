@@ -31,13 +31,13 @@
 
 'use strict'
 
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
+const dom = require('sesajstools/dom')
+const log = require('sesajstools/utils/log')
 
-var page = require('../../page/index')
-var swf = require('../../display/swf')
+const page = require('../../page/index')
+const swf = require('../../display/swf')
 
-var isLoaded
+let isLoaded
 
 /**
  * Affiche une ressource am (aides mathenpoche : animations flash, sans réponse de l'élève)
@@ -48,21 +48,20 @@ var isLoaded
  */
 module.exports = function display (ressource, options, next) {
   try {
-    var baseSwf, swfUrl, swfOpt
-    var container = options.container
+    let baseSwf, swfUrl, swfOpt
+    const container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
-
+    const resultat = {
+      ressType: 'am',
+      ressId: ressource.oid,
+      score: 1,
+      fin: true,
+      deferSync: true
+    }
     // on enverra le résultat à la fermeture (si y'a eu un chargement, isLoaded sert de flag)
     if (options.resultatCallback && window.addEventListener) {
       window.addEventListener('unload', function () {
         log('unload am')
-        var resultat = {
-          ressType: 'am',
-          ressId: ressource.oid,
-          score: 1,
-          fin: true,
-          deferSync: true
-        }
         if (options.sesatheque) resultat.sesatheque = options.sesatheque
         if (isLoaded) options.resultatCallback(resultat)
         // sinon le swf n'a pas été chargé, on envoie rien

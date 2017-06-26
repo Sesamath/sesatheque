@@ -31,23 +31,21 @@
 
 'use strict'
 
-// @todo mettre les conteneurs (titre et feedback) et les fcts qui les utilisent dans la fct init pour être local à l'invocation mais pas au module
+const dom = require('sesajstools/dom')
+const log = require('sesajstools/utils/log')
+const sjtUrl = require('sesajstools/http/url')
 
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
-var sjtUrl = require('sesajstools/http/url')
+const autosize = require('./autosize')
+const refreshAuth = require('./refreshAuth')
 
-var autosize = require('./autosize')
-var refreshAuth = require('./refreshAuth')
-
-var w = window
-var wd = w.document
+const w = window
+const wd = w.document
 
 /**
  * En attendant la gestion du load async avec es6, on utilise le bon vieux head.js,
  * on garde ici un mapping vers les modules tiers que l'on utilise
  */
-var externalModules = {
+const externalModules = {
   ckeditor: 'vendor/ckeditor/ckeditor.js',
   ckeditorJquery: 'vendor/ckeditor/adapters/jquery.js',
   head: 'vendor/headjs/dist/1.0.0/head.load.min.js',
@@ -66,7 +64,7 @@ var externalModules = {
   swfobject: 'vendor/swfobject/swfobject.2.3.min.js'
 }
 
-var base = '/'
+let base = '/'
 
 /**
  * Ajoute un texte d'erreur dans errorsContainer (#errors ou #error ou #warnings) ET dans console.error (si ça existe)
@@ -78,8 +76,8 @@ function addError (error, delay) {
   // on log toujours en console
   if (!error) return log.error(new Error('page.addError appelé sans erreur à afficher'))
   log.error(error)
-  var errorsContainer = wd.getElementById('errors') || wd.getElementById('error') || wd.getElementById('warnings')
-  var errorMsg = (error instanceof Error) ? error.toString() : error
+  const errorsContainer = wd.getElementById('errors') || wd.getElementById('error') || wd.getElementById('warnings')
+  let errorMsg = (error instanceof Error) ? error.toString() : error
   if (/^TypeError:/.test(errorMsg)) {
     // on envoie qqchose de plus compréhensible
     errorMsg = 'Une erreur est survenue (voir la console pour les détails)'
@@ -87,7 +85,7 @@ function addError (error, delay) {
   if (errorsContainer) {
     // on ajoute un peu de margin à ce div s'il n'en a pas
     if (errorsContainer.style && !errorsContainer.style.margin) errorsContainer.style.margin = '0.2em'
-    var errorBlock = dom.addElement(errorsContainer, 'p', {'class': 'error'}, errorMsg)
+    const errorBlock = dom.addElement(errorsContainer, 'p', {'class': 'error'}, errorMsg)
     // si on a jQuery sous la main on scroll, sinon tant pis
     if (window.jQuery) window.jQuery(errorsContainer).scrollTop(0)
     if (delay) {
@@ -105,10 +103,10 @@ function addError (error, delay) {
  */
 function hideTitle () {
   try {
-    var titre = wd.getElementById('titre')
+    const titre = wd.getElementById('titre')
     if (titre && titre.style) titre.style.display = 'none'
     log(titre ? 'titre masqué' : 'demande de masquage mais titre non trouvé')
-    var picto = wd.getElementById('pictoFeedback')
+    const picto = wd.getElementById('pictoFeedback')
     if (picto && picto.style) picto.style.display = 'none'
     log(picto ? 'picto feedback masqué' : 'demande de masquage mais picto feedback non trouvé')
   } catch (e) {
@@ -127,7 +125,7 @@ function init (options, next) {
   if (options.base) setBase(options.base)
   else options.base = base
   // (des)active la fct de log si on le demande, l'url est prioritaire sur options
-  var verbose = sjtUrl.getParameter('verbose') || options.verbose
+  let verbose = sjtUrl.getParameter('verbose') || options.verbose
   if (verbose === '0' || verbose === 'false') verbose = false
   if (verbose) log.enable()
   else log.disable()
@@ -137,12 +135,12 @@ function init (options, next) {
    * Le conteneur html pour afficher la ressource, passé en options ou pris dans le dom si #display
    * @type {Element}
    */
-  var container = options.container || wd.getElementById('display')
+  let container = options.container || wd.getElementById('display')
   /**
    * Le conteneur html pour afficher d'éventuelles erreurs, passé en options ou pris dans le dom si #errors
    * @type {Element}
    */
-  var errorsContainer = options.errorsContainer || wd.getElementById('errors')
+  let errorsContainer = options.errorsContainer || wd.getElementById('errors')
   if (!errorsContainer) errorsContainer = dom.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'errors'})
   if (!container) container = dom.addElement(wd.getElementsByTagName('body')[0], 'div', {id: 'display'})
   // et on ajoute ces deux éléments aux options
@@ -150,7 +148,7 @@ function init (options, next) {
   options.errorsContainer = errorsContainer
 
   // on regarde si d'autres options ont été passé en GET
-  var paramGet
+  let paramGet
   ;['resultatMessageAction', 'urlResultatCallback', 'userOrigine', 'userId'].forEach(function (param) {
     paramGet = sjtUrl.getParameter(param)
     if (!options[param] && paramGet) options[param] = paramGet
@@ -169,10 +167,10 @@ function init (options, next) {
  */
 function loadAsync (moduleNames, callback) {
   function headLoad (paths, cb) {
-    var loader = w.head.load || w.head.js // les anciennes versions de head utilisaient head.js avec la même signature
+    const loader = w.head.load || w.head.js // les anciennes versions de head utilisaient head.js avec la même signature
     if (loader) {
-      var body = wd.getElementsByTagName('body')[0]
-      var waitingElt = dom.addElement(body, 'div', {className: 'waiting'}, 'chargement en cours…')
+      const body = wd.getElementsByTagName('body')[0]
+      const waitingElt = dom.addElement(body, 'div', {className: 'waiting'}, 'chargement en cours…')
       loader(paths, function () {
         body.removeChild(waitingElt)
         cb()
@@ -197,11 +195,11 @@ function loadAsync (moduleNames, callback) {
 
   // on passe par head qui gèrera au passage l'unicité de l'appel
   headReady(function () {
-    var paths = []
-    var errors = []
+    const paths = []
+    const errors = []
     moduleNames.forEach(function (moduleName) {
       if (moduleName !== 'head') {
-        var path = externalModules[ moduleName ]
+        let path = externalModules[ moduleName ]
         if (path) path = base + path
         else if (/^https?:\/\//.test(moduleName)) path = moduleName
         if (path) paths.push(path)
@@ -246,6 +244,7 @@ if (typeof window !== 'undefined') {
  * @property {string}  [base=/]          Le préfixe de chemin vers la racine de la sésathèque.
  *                                         Il faut passer un chemin http://… complet si ce module est utilisé sur un autre domaine que la sésathèque
  * @property {Element} [container]       L'élément html qui servira de conteneur au plugin pour afficher sa ressource, créé si non fourni
+ * @property {boolean} [showTitle=true]  Passer false pour ne pas afficher le titre
  * @property {Element} [errorsContainer] L'élément html pour afficher des erreurs éventuelles, créé si non fourni
  * @property {boolean} [verbose=false]   Passer true pour ajouter des log en console
  */
@@ -256,4 +255,3 @@ if (typeof window !== 'undefined') {
  * @type {Object}
  * @see https://developer.mozilla.org/fr/docs/Web/API/Element
  */
-

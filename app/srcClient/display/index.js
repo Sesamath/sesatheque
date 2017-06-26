@@ -37,140 +37,23 @@
  */
 'use strict'
 
-// @todo mettre les conteneurs (titre et feedback) et les fcts qui les utilisent dans la fct init pour être local à l'invocation mais pas au module
-
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
-var sjt = require('sesajstools')
-var sjtUrl = require('sesajstools/http/url')
+const dom = require('sesajstools/dom')
+const log = require('sesajstools/utils/log')
+const sjt = require('sesajstools')
+const sjtUrl = require('sesajstools/http/url')
 const sesatheques = require('sesatheque-client/dist/sesatheques')
 
-var page = require('../page/index')
-var Resultat = require('../../constructors/Resultat')
+const page = require('../page/index')
+const Resultat = require('../../constructors/Resultat')
 
-var wd = window.document
+const wd = window.document
 
 /**
  * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
  * @private
  * @type {number}
  */
-var ajaxTimeout = 10000
-/**
- * La date de début d'affichage
- */
-var startDate
-
-/**
- * Fait le chargement proprement dit après page.init
- * @private
- * @param ressource
- * @param options
- * @param next
- */
-function load (ressource, options, next) {
-  log('display avec la ressource', ressource)
-  log('et les options après page.init', options)
-
-  // le display du plugin
-  var pluginName = ressource.type
-  var pluginDisplay = require('../plugins/' + pluginName + '/display')
-  if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
-
-  try {
-    log('plugin ' + pluginName + ' chargé')
-    if (options.container) dom.empty(options.container)
-    else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
-    if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
-    // On vire le titre si on nous le demande via les options ou un param dans l'url
-    if (
-      (options.hasOwnProperty('showTitle') && !options.showTitle) ||
-      /\?.*showTitle=0/.test(wd.URL) ||
-      /\/apercevoir\//.test(wd.URL) ||
-      /\?(.+&)?layout=iframe/.test(wd.URL)
-    ) {
-      page.hideTitle()
-    }
-
-    // on regarde s'il faut ajouter une fct de sauvegarde des résultats
-    addResultatCallback(options)
-
-    options.pluginBase = options.base + 'plugins/' + pluginName + '/'
-    // on peut afficher
-    pluginDisplay(ressource, options, function (error) {
-      startDate = new Date()
-      if (error) {
-        log("le display a terminé mais renvoyé l'erreur", error)
-        page.addError(error)
-      } else {
-        log('le display a terminé sans erreur')
-      }
-      if (next) next(error)
-    })
-  } catch (err) {
-    page.addError(err.toString())
-  }
-} // load
-
-/**
- * Ajoute une méthode resultatCallback aux options si besoin
- * @private
- * @param {Object}   options        L'objet sur lequel on ajoutera la methode resultatCallback
- */
-function addResultatCallback (options) {
-  // de toute façon on s'intercale pour formater le résultat
-  function formatResult (result, next) {
-    if (result && result instanceof Error) {
-      log.error(result)
-      feedback({success: false, error: result.toString()})
-    } else if (result) {
-      var deferSync = result.deferSync
-      var resultat = new Resultat(result)
-      // pour l'ajax on ajoute ça
-      if (options.urlResultatCallback && deferSync) resultat.deferSync = deferSync
-      // on impose date et durée
-      resultat.date = new Date()
-      // le plugin peut imposer sa mesure
-      if (!resultat.duree && startDate) {
-        resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000)
-      }
-      // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
-      [ 'sesatheque', 'userOrigine', 'userId' ].forEach(function (paramName) {
-        var paramValue = sjtUrl.getParameter(paramName) || options[ paramName ]
-        if (paramValue) resultat[ paramName ] = paramValue
-      })
-      log('display envoie à la callback de résultat', resultat)
-      next(resultat, feedback)
-    } else {
-      log.error(new Error('callback de résultat appelée sans erreur ni résultat'))
-    }
-  }
-
-  // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
-  // on prend en callback par ordre de priorité resultatCallback, urlResultatCallback, resultatMessageAction+
-  if (options.resultatCallback && sjt.isFunction(options.resultatCallback)) {
-    // fct de callback
-    var next = options.resultatCallback
-    options.resultatCallback = function resultatCallbackWrapper (result) {
-      formatResult(result, next)
-    }
-  } else if (options.urlResultatCallback && sjt.isUrlAbsolute(options.urlResultatCallback)) {
-    // callback ajax
-    options.resultatCallback = function resultatCallbackWrapper (result) {
-      var deferSync = !!result.deferSync
-      formatResult(result, function (resultat, next) {
-        sendAjax(options.urlResultatCallback, resultat, deferSync, next)
-      })
-    }
-  } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
-    // callback message
-    options.resultatCallback = function resultatCallbackWrapper (result) {
-      formatResult(result, function (resultat) {
-        sendMessage(options, resultat)
-      })
-    }
-  }
-} // addResultatCallback
+const ajaxTimeout = 10000
 
 /**
  * poste le resultat en ajax vers url puis appellera next avec (error, retour)
@@ -184,9 +67,9 @@ function addResultatCallback (options) {
  * @param {feedbackCallback} next
  */
 function sendAjax (url, resultat, deferSync, next) {
-  var xhr = require('sesajstools/http/xhr')
+  const xhr = require('sesajstools/http/xhr')
   if (!next && typeof deferSync === 'function') next = deferSync
-  var xhrOptions = {
+  const xhrOptions = {
     timeout: ajaxTimeout
   }
   if (deferSync === true) {
@@ -204,59 +87,16 @@ function sendAjax (url, resultat, deferSync, next) {
  * c'est le parent qui affichera le feedback
  */
 function sendMessage (options, resultat) {
-  var chunks = options.resultatMessageAction.split('::')
-  var action = options.resultatMessageAction
+  const chunks = options.resultatMessageAction.split('::')
+  const action = options.resultatMessageAction
   // le nom de la propriété attendue par celui qui écoute
-  var resultatProp = chunks[1] || 'resultat'
-  var message = {
+  const resultatProp = chunks[1] || 'resultat'
+  const message = {
     action: action
   }
   message[resultatProp] = resultat
   // on envoie
   window.top.postMessage(message, '*')
-}
-
-// Éteint le feedback */
-function feedbackOff () {
-  if (divFeedback) divFeedback.className = 'feedbackOff'
-}
-
-// Allume le feedback OK pour 4s
-function feedbackOk () {
-  if (divFeedback) {
-    divFeedback.className = 'feedbackOk'
-    setTimeout(feedbackOff, 4000)
-  }
-}
-
-// Allume le feedback KO pour 4s
-function feedbackKo () {
-  if (divFeedback) {
-    divFeedback.className = 'feedbackKo'
-    setTimeout(feedbackOff, 4000)
-  }
-}
-
-/**
- * Gère l'affichage du feedback puis appelle next(retour)
- * @private
- * @type feedbackCallback
- * @param {retour} retour Le retour de l'envoi du résultat
- */
-function feedback (retour) {
-  log('feedback', retour)
-  if (retour && retour.error) {
-    feedbackKo()
-    page.addError(retour.error)
-  } else if (retour && (retour.ok && retour.ok === true) || (retour.success && retour.success === true)) {
-    feedbackOk()
-  } else if (retour && (retour.hasOwnProperty('ok') || retour.hasOwnProperty('success'))) {
-    feedbackKo()
-    page.addError("Une erreur est survenue dans l'enregistrement du résultat")
-  } else {
-    // else on en sait rien on fait rien
-    log.error(new Error('feedback appellé sans argument intelligible'), retour)
-  }
 }
 
 /**
@@ -269,8 +109,166 @@ function feedback (retour) {
  * @param {initOptions}   [options] Les options éventuelles (passer base si ce js est chargé sur un autre domaine)
  * @param {errorCallback} [next]    Fct appelée à la fin du chargement avec une erreur ou undefined
  */
-function display (ressource, options, next) {
+module.exports = function display (ressource, options, next) {
+  /**
+   * Ajoute une méthode resultatCallback aux options si besoin
+   * @private
+   * @param {Object}   options        L'objet sur lequel on ajoutera la methode resultatCallback
+   */
+  function addResultatCallback (options) {
+    // de toute façon on s'intercale pour formater le résultat
+    function formatResult (result, next) {
+      if (result && result instanceof Error) {
+        log.error(result)
+        feedback({success: false, error: result.toString()})
+      } else if (result) {
+        const deferSync = result.deferSync
+        const resultat = new Resultat(result)
+        // pour l'ajax on ajoute ça
+        if (options.urlResultatCallback && deferSync) resultat.deferSync = deferSync
+        // on impose date et durée
+        resultat.date = new Date()
+        // le plugin peut imposer sa mesure
+        if (!resultat.duree && startDate) {
+          resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000)
+        }
+        // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
+        [ 'sesatheque', 'userOrigine', 'userId' ].forEach(function (paramName) {
+          const paramValue = sjtUrl.getParameter(paramName) || options[ paramName ]
+          if (paramValue) resultat[ paramName ] = paramValue
+        })
+        log('display envoie à la callback de résultat', resultat)
+        next(resultat, feedback)
+      } else {
+        log.error(new Error('callback de résultat appelée sans erreur ni résultat'))
+      }
+    }
+
+    // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
+    // on prend en callback par ordre de priorité resultatCallback, urlResultatCallback, resultatMessageAction+
+    if (options.resultatCallback && sjt.isFunction(options.resultatCallback)) {
+      // fct de callback
+      const next = options.resultatCallback
+      options.resultatCallback = function resultatCallbackWrapper (result) {
+        formatResult(result, next)
+      }
+    } else if (options.urlResultatCallback && sjt.isUrlAbsolute(options.urlResultatCallback)) {
+      // callback ajax
+      options.resultatCallback = function resultatCallbackWrapper (result) {
+        const deferSync = !!result.deferSync
+        formatResult(result, function (resultat, next) {
+          sendAjax(options.urlResultatCallback, resultat, deferSync, next)
+        })
+      }
+    } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
+      // callback message
+      options.resultatCallback = function resultatCallbackWrapper (result) {
+        formatResult(result, function (resultat) {
+          sendMessage(options, resultat)
+        })
+      }
+    }
+  } // addResultatCallback
+
+  /**
+   * Gère l'affichage du feedback puis appelle next(retour)
+   * @private
+   * @type feedbackCallback
+   * @param {retour} retour Le retour de l'envoi du résultat
+   */
+  function feedback (retour) {
+    log('feedback', retour)
+    if (retour && retour.error) {
+      feedbackKo()
+      page.addError(retour.error)
+    } else if (retour && (retour.ok && retour.ok === true) || (retour.success && retour.success === true)) {
+      feedbackOk()
+    } else if (retour && (retour.hasOwnProperty('ok') || retour.hasOwnProperty('success'))) {
+      feedbackKo()
+      page.addError("Une erreur est survenue dans l'enregistrement du résultat")
+    } else {
+      // else on en sait rien on fait rien
+      log.error(new Error('feedback appellé sans argument intelligible'), retour)
+    }
+  }
+  // Éteint le feedback */
+  function feedbackOff () {
+    if (divFeedback) divFeedback.className = 'feedbackOff'
+  }
+  // Allume le feedback OK pour 4s
+  function feedbackOk () {
+    if (divFeedback) {
+      divFeedback.className = 'feedbackOk'
+      setTimeout(feedbackOff, 4000)
+    }
+  }
+  // Allume le feedback KO pour 4s
+  function feedbackKo () {
+    if (divFeedback) {
+      divFeedback.className = 'feedbackKo'
+      setTimeout(feedbackOff, 4000)
+    }
+  }
+
+  /**
+   * Fait le chargement proprement dit après page.init
+   * @private
+   * @param ressource
+   * @param options
+   * @param next
+   */
+  function load (ressource, options, next) {
+    log('display avec la ressource', ressource)
+    log('et les options après page.init', options)
+
+    // le display du plugin
+    const pluginName = ressource.type
+    const pluginDisplay = require('../plugins/' + pluginName + '/display')
+    if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
+
+    try {
+      log('plugin ' + pluginName + ' chargé')
+      if (options.container) dom.empty(options.container)
+      else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
+      if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
+      // On vire le titre si on nous le demande via les options ou un param dans l'url
+      if (
+        (options.hasOwnProperty('showTitle') && !options.showTitle) ||
+        /\?.*showTitle=0/.test(wd.URL) ||
+        /\/apercevoir\//.test(wd.URL) ||
+        /\?(.+&)?layout=iframe/.test(wd.URL)
+      ) {
+        page.hideTitle()
+      }
+
+      // on regarde s'il faut ajouter une fct de sauvegarde des résultats
+      addResultatCallback(options)
+
+      options.pluginBase = options.base + 'plugins/' + pluginName + '/'
+      // on peut afficher
+      pluginDisplay(ressource, options, function (error) {
+        startDate = new Date()
+        if (error) {
+          log("le display a terminé mais renvoyé l'erreur", error)
+          page.addError(error)
+        } else {
+          log('le display a terminé sans erreur')
+        }
+        if (next) next(error)
+      })
+    } catch (err) {
+      page.addError(err.toString())
+    }
+  } // load
+
   const debugMode = sjtUrl.getParameter('debug')
+  // Le conteneur du picto enregistrement
+  let divFeedback
+  /**
+   * La date de début d'affichage
+   */
+  let startDate
+
   if (debugMode === 'all' || debugMode === 'display') log.enable()
   // log('options avant page.init', options)
 
@@ -289,11 +287,6 @@ function display (ressource, options, next) {
     load(ressource, options, next)
   })
 }
-
-// Le conteneur du picto enregistrement
-var divFeedback
-
-module.exports = display
 
 /* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
 if (typeof window !== 'undefined') {
