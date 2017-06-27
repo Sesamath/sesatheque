@@ -628,7 +628,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   } // getListe
 
   /**
-   * Récupère une ressource et la passe à next (seulement une erreur si elle n’existe pas)
+   * Récupère une ressource et la passe à next (ressource undefined si elle n’existe pas)
    * @memberOf $ressourceRepository
    * @param {number|String}     oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
    * @param {ressourceCallback} next appelée avec une EntityRessource
@@ -637,12 +637,9 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   $ressourceRepository.load = function load (oid, next) {
     if (_.isString(oid) && oid.indexOf('/') > 0) {
       const [origin, idOrigin, bug] = oid.split('/')
-      if (bug) {
-        next(new Error('identifiant invalide : ' + oid))
-      } else {
-        if (origin === 'cle') $ressourceRepository.loadByCle(idOrigin, next)
-        else $ressourceRepository.loadByOrigin(origin, idOrigin, next)
-      }
+      if (bug) return next(new Error('identifiant invalide : ' + oid))
+      if (origin === 'cle') $ressourceRepository.loadByCle(idOrigin, next)
+      else $ressourceRepository.loadByOrigin(origin, idOrigin, next)
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
         if (error) log.error(error)
@@ -705,7 +702,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   } // loadByCle
 
   /**
-   * Récupère une ressource d'après son idOrigine et la passe à next
+   * Récupère une ressource d'après son idOrigine (ou son rid, dans ce cas origine est notre baseId) et la passe à next
    * @memberOf $ressourceRepository
    * @param {string}            origine (ou "cle" avec idOrigine qui est la clé, ou la baseId courante avec idOrigine qui est l'oid)
    * @param {string}            idOrigine

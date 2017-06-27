@@ -54,7 +54,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
    * @param {Context} context
-   * @param rid
+   * @param rid ou oid ou origine/idOrigine
    */
   function deleteAndSend (context, rid) {
     log.debug('dans cb api deleteRessource ' + rid)
@@ -175,27 +175,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
      */
     function addRefs (ressources, droits) {
       ressources.forEach(function (ressource) {
-        if (ressource.type === 'sequenceModele') {
-          if (ressource.parametres) {
-            const sequenceModele = ressource.parametres
-            // on écrase ça qui a pu changer sur la ressource depuis l'enregistrement
-            sequenceModele.public = !ressource.restriction
-            sequenceModele.groupes = ressource.groupes || []
-            sequenceModeles.push(sequenceModele)
-          } else {
-            log.dataError('sequenceModele sans parametres', ressource)
+        const ref = new Ref(ressource)
+        const isReadable = ref.public || ref.cle
+        if (ref.aliasOf && ref.titre && ref.type && isReadable) {
+          if (droits) ref.$droits = droits
+          if (ressource.type === 'sequenceModele') {
+            // on rajoute les parametres
+            ref.parametres = ressource.parametres
           }
+          refs.push(ref)
+        } else if (!isReadable) {
+          log.dataError('ressource privée sans clé, pas utilisable pour sesalab', ressource)
         } else {
-          const ref = new Ref(ressource)
-          const isReadable = ref.public || ref.cle
-          if (ref.aliasOf && ref.titre && ref.type && isReadable) {
-            if (droits) ref.$droits = droits
-            refs.push(ref)
-          } else if (!isReadable) {
-            log.dataError('ressource privée sans clé, pas utilisable pour sesalab', ressource)
-          } else {
-            log.dataError('ressource incomplète, pas utilisable pour sesalab', ressource)
-          }
+          log.dataError('ressource incomplète, pas utilisable pour sesalab', ressource)
         }
       })
     }
@@ -207,11 +199,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
      * @type {Ref[]}
      */
     const refs = []
-    /**
-     * La liste des objets sequenceModele (perso) filés par sésalab (stockés ici dans les parametres de la ressource)
-     * @type {object[]}
-     */
-    const sequenceModeles = []
     // on veut remonter le max autorisé par la conf…
     const nb = configRessource.limites.listeMax
     if (pid) {
@@ -235,7 +222,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources avec ${pid} en contributeur)`}))
           }
         }
-        $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
+        $json.sendOk(context, {liste: refs})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -591,7 +578,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         ressources.forEach(function (ressource) {
           if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
           var item = (format === 'full') ? ressource : new Ref(ressource)
-          item.droits = ''
+          item.$droits = ''
           if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
           if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
           liste.push(item)
@@ -1284,10 +1271,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.options('ressource/:oid', optionsDeleteOk)
 
   /**
-   * Delete par id d'origine, retourne {@link reponseDeleted}
+   * Delete par id d'origine ou par rid, retourne {@link reponseDeleted}
    * @route DEL /api/ressource/:origine/:idOrigine
-   * @param {string} :origine
-   * @param {string} :idOrigine
+   * @param {string} :origine ou baseId si c'était un rid
+   * @param {string} :idOrigine ou oid si c'était un rid
    */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     const rid = context.arguments.origine + '/' + context.arguments.idOrigine
