@@ -47,8 +47,8 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
      * @type {Context}
      * @private
      */
-    var isLogged = $accessControl.isAuthenticated(context)
-    var auth = {
+    const isLogged = $accessControl.isAuthenticated(context)
+    const auth = {
       isLogged: isLogged,
       permissions: ''
     }
@@ -59,9 +59,8 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
     }
     if (isLogged && context.get.ressourceId) {
       $ressourceRepository.load(context.get.ressourceId, function (error, ressource) {
-        if (error) {
-          log.error(error)
-        } else if (ressource) {
+        if (error) return log.error(error)
+        if (ressource) {
           if ($accessControl.hasPermission('delete', context, ressource)) auth.permissions += 'D'
           if ($accessControl.hasPermission('update', context, ressource)) auth.permissions += 'W'
         }
@@ -69,6 +68,19 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
       })
     } else {
       context.json(auth)
+    }
+  })
+  /**
+   * retourne isLogged & roles
+   * @route /api/auth/getRoles
+   */
+  controller.get('api/auth/getRoles', function (context) {
+    const currentUser = $accessControl.getCurrentUser(context)
+    const isLogged = !!currentUser
+    const roles = currentUser && currentUser.roles || []
+    return {
+      isLogged,
+      roles
     }
   })
 }
