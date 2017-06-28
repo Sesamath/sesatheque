@@ -28,6 +28,8 @@ Chargement en cours</div>
         isDev :{?isDev}{isDev}{:else}false{/isDev},
         verbose :{?verbose}{verbose}{:else}false{/verbose},
       };
+      if (window.location.hash === '#formateur') options.isFormateur = true
+      console.log('hash', window.location.hash)
       stdisplay({ressource|s}, options);
     } catch(error) {
       document.getElementById('errors').innerHTML = error.toString();
