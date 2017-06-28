@@ -222,7 +222,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources avec ${pid} en contributeur)`}))
           }
         }
-        $json.sendOk(context, {liste: refs})
+        $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -699,7 +699,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.options('*', function (context) {
     log.debug('headers de la requete options', context.request.headers, 'xhr', {max: 5000, indent: 2})
     // on laisse le middleware CORS faire son boulot
-    context.next() // ne pas renvoyer de chaîne vide sinon 404
+    context.next()
   })
 
   /**
