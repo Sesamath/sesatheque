@@ -55,8 +55,27 @@ function load (container, swfHref, options, next) {
         log('Lancement de ' + swfHref + ' réussi')
         next()
       } else {
+        const dom = require('sesajstools/dom')
+        dom.empty(htmlElt)
+        // on affiche l'erreur…
         var errorMsg = "Javascript fonctionne mais votre navigateur ne supporte pas les éléments Adobe Flash, ou bien le fichier swf est introuvable, mais impossible d'afficher cette ressource."
         next(new Error(errorMsg))
+        // et un moyen de forcer le chargement
+        const link = dom.getElement('a', {}, 'forcer l’inclusion du fichier flash dans la page')
+        link.addEventListener('click', function () {
+          dom.addElement(htmlElt, 'embed', {
+            type: 'application/x-shockwave-flash',
+            width: largeur + 'px',
+            height: hauteur + 'px',
+            src: swfHref,
+            wmode: 'window',
+            pluginspage: 'https://get.adobe.com/flashplayer/',
+            menu: 'false',
+            allowScriptAccess: 'true'
+          })
+        })
+        htmlElt.appendChild(wd.createTextNode('Si vous avez flash installé et activé, vous pouvez '))
+        htmlElt.appendChild(link)
       }
     } else {
       log('callback de chargement appelée sans argument')
