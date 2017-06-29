@@ -168,7 +168,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function getListePerso (context) {
     /**
-     * Ajoute des refs (en vérifiant qu'elles sont valides) à nos deux listes globales refs et sequenceModeles
+     * Ajoute des refs (en vérifiant qu'elles sont valides) à la liste
      * @private
      * @param {Ressource[]} ressources La liste des ressources à ajouter après vérif de leur intégrité
      * @param {string}              droits     Les droits sur ces ressources (lettres WD pour Write & Delete)
@@ -222,7 +222,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources avec ${pid} en contributeur)`}))
           }
         }
-        $json.sendOk(context, {liste: refs, sequenceModeles: sequenceModeles})
+        $json.sendOk(context, {liste: refs})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
