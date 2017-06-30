@@ -10,8 +10,9 @@
 'use strict'
 
 const fs = require('fs')
+const path = require('path')
 // paths
-const root = fs.realpathSync(__dirname + '/..')
+const root = fs.realpathSync(path.join(__dirname, '/..'))
 const packageJsonPath = root + '/package.json'
 const tmpPackageJsonPath = root + '/package.real.json'
 // here is our local file with file:local/path dependencies
