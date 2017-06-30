@@ -1,41 +1,19 @@
 /**
- * This file is part of SesaXXX.
- *   Copyright 2014-2015, Association Sésamath
- *
- * SesaXXX is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License version 3
- * as published by the Free Software Foundation.
- *
- * SesaXXX is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with SesaReactComponent (LICENCE.txt).
- * @see http://www.gnu.org/licenses/agpl.txt
- *
- *
- * Ce fichier fait partie de SesaReactComponent, créée par l'association Sésamath.
- *
- * SesaXXX est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
- * les termes de la GNU Affero General Public License version 3 telle que publiée par la
- * Free Software Foundation.
- * SesaXXX est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE,
- * sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
- * Consultez la GNU Affero General Public License pour plus de détails.
- * Vous devez avoir reçu une copie de la GNU General Public License en même temps que SesaQcm
- * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
- * pour une explication en français)
+ * @licence CC-by-sa
+ * @author Daniel Caillibaud <daniel.caillibaud@sesamath.net>
+ * @description Attempt to having a `npm install` link compliant, but still doesn't work with npm5
+ * @see https://github.com/npm/npm/issues/10343
  */
 'use strict'
 
 const fs = require('fs')
 // paths
-const packageJsonPath = '../package.json'
-const tmpPackageJsonPath = '../package.real.json'
-const extraPackageJsonPath = '../package.local-extras.json'
-
+const root = fs.realpathSync(__dirname + '/..')
+const packageJsonPath = root + '/package.json'
+const tmpPackageJsonPath = root + '/package.real.json'
+// here is our local file with file:local/path dependencies
+const extraPackageJsonPath = root + '/package.local-extras.json'
+// loggers
 const log = data => console.log(data && data.toString ? data.toString() : data)
 const logError = data => console.error(data && data.toString ? data.toString() : data)
 
@@ -52,54 +30,50 @@ function cleanFiles () {
   return false
 }
 
-let exitCode = 0
+function replaceProp (prop, src, dst) {
+  const srcValues = src[prop]
+  // if plain object (thanks to lodash)
+  if (!!srcValues && typeof srcValues === 'object' && Object.prototype.toString.call(srcValues) === '[object Object]') {
+    if (!dst[prop]) dst[prop] = {}
+    Object.keys(src[prop]).forEach(subProp => replaceProp(subProp, src[prop], dst[prop]))
+  } else {
+    // scalar or array or whatever
+    dst[prop] = src[prop]
+  }
+}
 
 try {
-  const todo = process.argv.length === 3 && process.argv[2]
-  if (todo !== 'pre' && todo !== 'post') {
-    logError(`${__filename} doit être appelé avec l'argument pre ou post, à priori seulement via les scripts npm preinstall et postinstall`)
-    process.exit()
-  }
   // nothing to do if no extras
   if (!fs.existsSync(extraPackageJsonPath)) process.exit()
 
-  // quite simple in postinstall
-  if (todo === 'post') {
-    cleanFiles()
-    process.exit()
-  }
-
-  // ça marche pas via preinstall ou postinstall car npm ne relit pas le package.json après le hook preinstall
-
   // ensure clean start
-  if (cleanFiles()) {
-    console.error(`${tmpPackageJsonPath} exists at starting, cleaned`)
-  }
+  if (cleanFiles()) logError(`${tmpPackageJsonPath} exists at starting, cleaned`)
+
   // reading contents
   const packageJson = require(packageJsonPath)
   const overrides = require(extraPackageJsonPath)
-
+  // backup original
   fs.renameSync(packageJsonPath, tmpPackageJsonPath)
-  // local package.json
-  Object.keys(overrides.dependencies).forEach(module => {
-    packageJson.dependencies[module] = overrides.dependencies[module]
-  })
-  fs.writeFileSync(packageJsonPath, packageJson)
+  // replacement
+  Object.keys(overrides).forEach(prop => replaceProp(prop, overrides, packageJson))
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n')
+  process.exit(0)
+
   // npm install
-  /*
   const {spawn} = require('child_process')
   const npm = spawn('npm', ['install'])
   npm.on('error', logError)
+  // @todo dynamic output of npm isn't rendered (I guess it delete output before buffer is sent with event)
   npm.stdout.on('data', log)
   npm.stderr.on('data', logError)
-  npm.on('close', npmExitCode => {
-    if (npmExitCode === 0) log('OK, npm install ended')
+  npm.on('close', exitCode => {
+    if (exitCode === 0) log('OK, npm install ended')
     else logError('npm install KO (errors above)')
     cleanFiles()
-    exitCode = npmExitCode
+    process.exit(exitCode)
   })
-  */
 } catch (error) {
   console.error(error)
   cleanFiles()
 }
+
