@@ -21,6 +21,7 @@
     "deploy:dev": "pm2 _private/pm2Deploy.json5 dev",
     "cli": "echo 'lancer app/cli.js'",
     "doc": "./scripts/doc -a",
+    "localInstall": "node scripts/npmi.js",
     "lint": "eslint --ignore-path .gitignore app",
     "maj": "git pull && npm install && npm run build",
     "start": "node app/index.js",

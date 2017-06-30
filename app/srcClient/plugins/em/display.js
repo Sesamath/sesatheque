@@ -42,6 +42,7 @@ var isLoaded, lastResult
 
 /**
  * afficher les ressource em (exercices mathenpoche, en flash)
+ * Cf mep-col:/dev/html/lib/html_exov1.htm et mep-col:/dev/html/lib/html_exov2.htm
  * @service plugins/em/display
  * @param {Ressource}      ressource  L'objet ressource
  * @param {displayOptions} options    Les options après init
@@ -119,6 +120,7 @@ module.exports = function display (ressource, options, next) {
       if (params.aide_formateur) flashvars.isBoutonAide = params.aide_formateur
       else flashvars.isBoutonAide = 'o'
     }
+    // config vers un xml devenu inutile
     // 0 ressources publiques en 2013-11, mais qq unes dans MEPS pas publiées
     if (params.nb_wnk) flashvars.mep_nb_wnk = params.nb_wnk
 

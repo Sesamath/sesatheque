@@ -126,28 +126,22 @@ try {
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n')
 
   // npm install
-  log('launching npm install')
-  const {exec} = require('child_process')
-  exec('npm install', (error, stdout, stderr) => {
-    if (error) logError(error)
-    log(stdout)
-    if (stderr) logError(stderr)
-    log('cleaning temporary package.json and adding links if needed')
-    cleanFiles()
-    addLinks(overrides)
-    log(`${__filename} ended`)
+  log('\nlaunching npm install')
+  const {spawn} = require('child_process')
+  const npm = spawn('npm', ['install'], {stdio: ['inherit', 'inherit', 'inherit']})
+  npm.on('error', error => {
+    logError(error)
+    process.exit(1)
   })
-  /* npm.on('error', logError)
-  // @todo dynamic output of npm isn't rendered (I guess it delete output before buffer is sent with event)
-  npm.stdout.on('data', log)
-  npm.stderr.on('data', logError)
   npm.on('close', exitCode => {
     if (exitCode !== 0) {
       logError('npm install KO (errors above)')
       process.exit(exitCode)
     }
-    log('OK, npm install ended')
-  }) */
+    log('\nnpm install ok, cleaning temporary package.json and adding links if needed')
+    cleanFiles()
+    addLinks(overrides)
+  })
 } catch (error) {
   console.error(error)
   cleanFiles()
