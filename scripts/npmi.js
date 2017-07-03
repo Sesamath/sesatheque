@@ -1,3 +1,4 @@
+#!/usr/bin/node
 /**
  * @licence CC-by-sa
  * @author Daniel Caillibaud <daniel.caillibaud@sesamath.net>
@@ -11,16 +12,58 @@
 
 const fs = require('fs')
 const path = require('path')
+const util = require('util')
+
 // paths
 const root = fs.realpathSync(path.join(__dirname, '/..'))
+const modulesDir = root + '/node_modules'
 const packageJsonPath = root + '/package.json'
 const tmpPackageJsonPath = root + '/package.real.json'
+
 // here is our local file with file:local/path dependencies
-const extraPackageJsonPath = root + '/package.local-extras.json'
+let extraPackageJsonPath = root + '/package.local-extras.json'
 const linkPrefix = 'file:'
 // loggers
 const log = data => console.log(data && data.toString ? data.toString() : data)
-const logError = data => console.error(data && data.toString ? data.toString() : data)
+const logError = data => console.error(data)
+// lstat as promise
+const pstat = util.promisify(fs.lstat)
+
+/**
+ * Pour récupérer les modules déjà liés
+ * @return {Promise} qui résoud avec un array de Stats (les symlinks)
+ */
+async function fetchLinkedModules () {
+  const files = fs.readdirSync(modulesDir)
+  const statPromises = files.map(file => pstat(modulesDir + '/' + file))
+  return await Promise.all(statPromises).then(stats => stats.map((stat, i) => stat.isSymbolicLink() && files[i]).filter(path => path))
+}
+
+/**
+ * Log error message and exit
+ * @param message
+ * @param exitCode
+ */
+function abort (message, exitCode = 1) {
+  logError(message)
+  process.exit(exitCode)
+}
+
+/**
+ * init params (and run generateExtra or continue)
+ * @return {Promise}
+ */
+async function init () {
+  // other local-extras path
+  const pos = process.argv.indexOf('-e')
+  if (pos > 0) {
+    if (process.argv.length > pos + 1) extraPackageJsonPath = process.argv[pos + 1]
+    else abort('-e option need path (of extra-local overrides file) as next argument')
+  }
+  if (process.argv.indexOf('-g') > 0) return generateExtra()
+  // nothing to do if no extras
+  if (!fs.existsSync(extraPackageJsonPath)) abort(`${extraPackageJsonPath} doesn’t exists, aborting (you can launch normal "npm i" or générate one with -g`)
+}
 
 /**
  * Ensure having "normal" package.json in its place
@@ -110,10 +153,37 @@ function addLinks (packageJson) {
   })
 }
 
-try {
-  // nothing to do if no extras
-  if (!fs.existsSync(extraPackageJsonPath)) process.exit()
+/**
+ * Generate package.local-extras.json (or add existing links in it)
+ */
+async function generateExtra () {
+  if (process.version.split('.')[0] < 8) abort(`generating or upgrading ${extraPackageJsonPath} need node >= 8.x`)
+  let overrides
+  if (fs.existsSync(extraPackageJsonPath)) {
+    overrides = require(extraPackageJsonPath)
+    if (!overrides.dependencies) overrides.dependencies = {}
+  }
+  // watching for existing links
+  const symlinks = await fetchLinkedModules() // without modulesDir
+  symlinks.forEach(symlink => {
+    const absoluteTarget = fs.realpathSync(modulesDir + '/' + symlink)
+    const relativeTarget = path.relative(root, absoluteTarget)
+    const target = relativeTarget.indexOf('../../') === -1 ? relativeTarget : absoluteTarget
+    overrides.dependencies[symlink] = `file:${target}`
+  })
+  const content = JSON.stringify(overrides, null, 2)
+  fs.writeFileSync(extraPackageJsonPath, content + '\n')
+  log(`symlinks added in ${extraPackageJsonPath} :`)
+  log(content)
+  process.exit()
+}
 
+function beforeExit (error) {
+  logError(error)
+  cleanFiles()
+}
+
+function main () {
   // ensure clean start
   if (cleanFiles()) logError(`${tmpPackageJsonPath} exists at starting, cleaned`)
 
@@ -130,21 +200,13 @@ try {
   log('\nlaunching npm install')
   const {spawn} = require('child_process')
   const npm = spawn('npm', ['install'], {stdio: ['inherit', 'inherit', 'inherit']})
-  npm.on('error', error => {
-    logError(error)
-    process.exit(1)
-  })
+  npm.on('error', abort)
   npm.on('close', exitCode => {
-    if (exitCode !== 0) {
-      logError('npm install KO (errors above)')
-      process.exit(exitCode)
-    }
+    if (exitCode !== 0) abort('npm install KO (errors above)', exitCode)
     log('\nnpm install ok, cleaning temporary package.json and adding links if needed')
     cleanFiles()
     addLinks(overrides)
   })
-} catch (error) {
-  console.error(error)
-  cleanFiles()
 }
 
+init().then(main, beforeExit)
