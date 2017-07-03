@@ -14,14 +14,13 @@ const fs = require('fs')
 const path = require('path')
 const util = require('util')
 
-// paths
-const root = fs.realpathSync(path.join(__dirname, '/..'))
-const modulesDir = root + '/node_modules'
-const packageJsonPath = root + '/package.json'
-const tmpPackageJsonPath = root + '/package.real.json'
-
-// here is our local file with file:local/path dependencies
-let extraPackageJsonPath = root + '/package.local-extras.json'
+// paths, set by init
+let root
+let modulesDir
+let packageJsonPath
+let tmpPackageJsonPath
+// local overrides
+let extraPackageJsonPath
 const linkPrefix = 'file:'
 // loggers
 const log = data => console.log(data && data.toString ? data.toString() : data)
@@ -34,6 +33,7 @@ const pstat = util.promisify(fs.lstat)
  * @return {Promise} qui résoud avec un array de Stats (les symlinks)
  */
 async function fetchLinkedModules () {
+  if (!fs.existsSync(modulesDir)) return []
   const files = fs.readdirSync(modulesDir)
   const statPromises = files.map(file => pstat(modulesDir + '/' + file))
   return await Promise.all(statPromises).then(stats => stats.map((stat, i) => stat.isSymbolicLink() && files[i]).filter(path => path))
@@ -54,11 +54,20 @@ function abort (message, exitCode = 1) {
  * @return {Promise}
  */
 async function init () {
+  const here = process.cwd()
+  if (!fs.existsSync(here + '/package.json')) abort('no package.json here, aborting')
+  root = here
+  modulesDir = root + '/node_modules'
+  packageJsonPath = root + '/package.json'
+  tmpPackageJsonPath = root + '/package.real.json'
+
   // other local-extras path
   const pos = process.argv.indexOf('-e')
   if (pos > 0) {
     if (process.argv.length > pos + 1) extraPackageJsonPath = process.argv[pos + 1]
     else abort('-e option need path (of extra-local overrides file) as next argument')
+  } else {
+    extraPackageJsonPath = root + '/package.local-extras.json'
   }
   if (process.argv.indexOf('-g') > 0) return generateExtra()
   // nothing to do if no extras
@@ -107,10 +116,12 @@ function replaceProp (prop, src, dst) {
  */
 function removeDir (path) {
   fs.readdirSync(path).forEach(file => {
+    file = path + '/' + file
     const stat = fs.statSync(file)
     if (stat.isDirectory()) removeDir(file)
     else fs.unlinkSync(file)
   })
+  fs.rmdirSync(path)
 }
 
 /**
@@ -125,10 +136,9 @@ function addLinks (packageJson) {
     })
   }
 
-  log(`linking module as ${extraPackageJsonPath} says`)
-  Object.keys(packageJson.dependencies).forEach(module => {
+  function linkModule (module) {
     const prefix = 'file:'
-    const value = packageJson.dependencies[module]
+    const value = deps[module]
     if (value.indexOf(prefix) === 0) {
       const modulePath = `${root}/node_modules/${module}`
       const valuePath = value.substring(linkPrefix.length)
@@ -150,7 +160,12 @@ function addLinks (packageJson) {
         link(moduleSrc, modulePath)
       }
     }
-  })
+  }
+
+  const deps = Object.assign({}, packageJson.dependencies, packageJson.devDependencies)
+  log(`linking modules as ${extraPackageJsonPath} says`)
+  if (!fs.existsSync(modulesDir)) fs.mkdirSync(modulesDir, 0o755)
+  Object.keys(deps).forEach(linkModule)
 }
 
 /**
@@ -158,11 +173,8 @@ function addLinks (packageJson) {
  */
 async function generateExtra () {
   if (process.version.split('.')[0] < 8) abort(`generating or upgrading ${extraPackageJsonPath} need node >= 8.x`)
-  let overrides
-  if (fs.existsSync(extraPackageJsonPath)) {
-    overrides = require(extraPackageJsonPath)
-    if (!overrides.dependencies) overrides.dependencies = {}
-  }
+  const overrides = fs.existsSync(extraPackageJsonPath) ? require(extraPackageJsonPath) : {}
+  if (!overrides.dependencies) overrides.dependencies = {}
   // watching for existing links
   const symlinks = await fetchLinkedModules() // without modulesDir
   symlinks.forEach(symlink => {
