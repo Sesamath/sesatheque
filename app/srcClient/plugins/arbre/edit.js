@@ -50,6 +50,7 @@ import log from 'sesajstools/utils/log'
 module.exports = function edit (arbre, options) {
   if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
   if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
+  const myBaseId = options.baseId
   // jquery est déjà chargé par le edit.js, mais il est local à chaque module
   require.ensure(['jquery', 'jstree', 'sesatheque-client/dist/fetch', 'sesatheque-client/dist/jstree'], function (require) {
     // nos fcts internes
@@ -204,8 +205,9 @@ module.exports = function edit (arbre, options) {
 
       // ajoute une ressource
       function actionAdd (data) {
-        const id = window.prompt('Id de la ressource (oid ou origine/idOrigine)\nPréfixe “sesabibli/” ou “sesacommun/” possible pour préciser la sesathèque à utiliser')
+        let id = window.prompt('Id de la ressource (oid ou origine/idOrigine)\nPréfixe “sesabibli/” ou “sesacommun/” possible pour préciser la sesathèque à utiliser')
         if (id) {
+          if (id.indexOf('/') === -1) id = myBaseId + '/' + id
           addNode($dstTree, id, data.reference, function (error, newNode) {
             if (error) addTreeError(error)
           })
@@ -381,11 +383,11 @@ module.exports = function edit (arbre, options) {
       if (rid) {
         const slashPos = rid.indexOf('/')
         if (slashPos === -1) {
-          fetchPublicRef(baseId, rid, showSrc)
+          fetchPublicRef(myBaseId, rid, showSrc)
         } else {
           const debut = rid.substr(0, slashPos)
           if (exists(debut)) fetchPublicRef(debut, rid.substr(slashPos + 1), showSrc)
-          else fetchPublicRef(baseId, rid, showSrc)
+          else fetchPublicRef(myBaseId, rid, showSrc)
         }
       } else {
         log('appel de load sans rid')
