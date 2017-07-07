@@ -345,10 +345,10 @@ function Ressource (initObj, myBaseId) {
 
     // à virer quand la prod aura été upgradée
     if (p === 'ref') return
-    // on ignore public traité et mis dans restriction, et aliasOf
+    // on ignore public, déjà traité et mis dans restriction
     if (p === 'public') return
     // on ignore les propriétés ajoutées par un form pour du contexte
-    if (p === 'new' || p === 'token' || p.substr(0, 1) === '_') return
+    if (p === 'new' || p === 'token' || p === 'force' || p.substr(0, 1) === '_') return
     // et celles qui commencent par $
     if (p.substr(0, 1) === '$') return
 
