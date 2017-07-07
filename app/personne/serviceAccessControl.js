@@ -205,8 +205,10 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @returns {string} Le message d'interdiction éventuel (string vide sinon)
    */
   function getUpdateDeniedMessage (context, ressource) {
-    if (hasAllRights(context)) return
+    // même avec tous les droits, on ne peut pas éditer un alias
+    // (ça le forkerait, faut pas le faire pour les types non éditables)
     if (ressource.aliasOf && !configRessource.editable[ressource.type]) return `Les alias de type ${ressource.type} ne sont pas modifiables`
+    if (hasAllRights(context)) return
     if ($accessControl.isAuteur(context, ressource)) return ''
     if ($accessControl.isContributeur(context, ressource)) return ''
     if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
@@ -308,12 +310,12 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.checkPermission = function (permission, context, ressource, next) {
     if (
-        // pas la peine de continuer si c'est pour voir une ressource publique
-        permission === 'read' && ressource.restriction === 0 ||
-        // ni si c'est l'api appelée par un de nos serveurs ou qqun ayant tous les droits
-        hasAllRights(context) ||
-        // ni si l'utilisateur a les droits génériques
-        hasGenericPermission(permission, context)
+      // pas la peine de continuer si c'est pour voir une ressource publique
+      permission === 'read' && ressource.restriction === 0 ||
+      // ni si c'est l'api appelée par un de nos serveurs ou qqun ayant tous les droits
+      hasAllRights(context) ||
+      // ni si l'utilisateur a les droits génériques
+      hasGenericPermission(permission, context)
     ) {
       // rien à faire
       next(null, ressource)
@@ -401,8 +403,11 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.getDeniedMessage = function (permission, context, ressource) {
-    if (hasGenericPermission(permission, context)) return ''
-    if (hasAllRights(context)) return ''
+    // bypass sauf pour update d'alias
+    if (permission !== 'update' || !ressource.aliasOf) {
+      if (hasGenericPermission(permission, context)) return ''
+      if (hasAllRights(context)) return ''
+    }
     switch (permission) {
       /* eslint-disable no-multi-spaces */
       case 'correction'    : return getCorrectionDeniedMessage(context)
@@ -508,6 +513,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.hasPermission = function (permission, context, ressource) {
+    // cas particulier sur l'update d'un alias, faut pas de bypass
+    if (permission === 'update' && ressource.aliasOf && $accessControl.isAuthenticated(context)) return !$accessControl.getDeniedMessage(permission, context, ressource)
     if (hasGenericPermission(permission, context)) return true
     if (hasAllRights(context)) return true
     if (!ressource) return false
@@ -515,11 +522,8 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     // read n'a pas forcément besoin de session, ça dépend de la ressource
     if (permission === 'read') return $accessControl.hasReadPermission(context, ressource)
 
-    if ($accessControl.isAuthenticated(context)) {
-      return !$accessControl.getDeniedMessage(permission, context, ressource)
-    } else {
-      return false
-    }
+    if ($accessControl.isAuthenticated(context)) return !$accessControl.getDeniedMessage(permission, context, ressource)
+    return false
   }
 
   /**

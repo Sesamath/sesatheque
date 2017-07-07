@@ -167,38 +167,13 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Context} context
    */
   function getListePerso (context) {
-    /**
-     * Ajoute des refs (en vérifiant qu'elles sont valides) à la liste
-     * @private
-     * @param {Ressource[]} ressources La liste des ressources à ajouter après vérif de leur intégrité
-     * @param {string}              droits     Les droits sur ces ressources (lettres WD pour Write & Delete)
-     */
-    function addRefs (ressources, droits) {
-      ressources.forEach(function (ressource) {
-        const ref = new Ref(ressource)
-        const isReadable = ref.public || ref.cle
-        if (ref.aliasOf && ref.titre && ref.type && isReadable) {
-          if (droits) ref.$droits = droits
-          if (ressource.type === 'sequenceModele') {
-            // on rajoute les parametres
-            ref.parametres = ressource.parametres
-          }
-          refs.push(ref)
-        } else if (!isReadable) {
-          log.dataError('ressource privée sans clé, pas utilisable pour sesalab', ressource)
-        } else {
-          log.dataError('ressource incomplète, pas utilisable pour sesalab', ressource)
-        }
-      })
-    }
-
     context.timeout = 3000
     const pid = $accessControl.getCurrentUserPid(context)
     /**
      * Liste des ressources perso
-     * @type {Ref[]}
+     * @type {Ressources[]}
      */
-    const refs = []
+    let mesRessources = []
     // on veut remonter le max autorisé par la conf…
     const nb = configRessource.limites.listeMax
     if (pid) {
@@ -207,22 +182,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       flow().seq(function () {
         $ressourceRepository.getListe(visibility, {filters: [{index: 'auteurs', values: [pid]}], nb}, this)
       }).seq(function (ressources) {
-        if (ressources.length) addRefs(ressources, 'WD')
+        if (ressources.length) mesRessources = ressources
         if (ressources.length === nb) {
           log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb}, auteur)`)
-          refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources dont l’auteur est ${pid})`}))
+          mesRessources.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources dont l’auteur est ${pid})`}))
+          // on est déjà au taquet
+          this(null, [])
+        } else {
+          $ressourceRepository.getListe(visibility, {filters: [{index: 'contributeurs', values: [pid], nb}]}, this)
         }
-        $ressourceRepository.getListe(visibility, {filters: [{index: 'contributeurs', values: [pid], nb}]}, this)
       }).seq(function (ressources) {
-        if (ressources.length) {
-          addRefs(ressources, 'W')
-          if (ressources.length === nb) {
-            // @todo gérer un "ajouter nb ressources", ou un filtre…
-            log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb}, contributeur)`)
-            refs.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources avec ${pid} en contributeur)`}))
-          }
+        if (ressources.length) mesRessources.concat(ressources)
+        this()
+      }).seq(function () {
+        if (mesRessources.length >= nb) {
+          // @todo gérer un "ajouter nb ressources", ou un filtre…
+          log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb})`)
+          mesRessources = mesRessources.slice(0, nb)
+          mesRessources.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources avec ${pid} en auteur ou contributeur)`}))
         }
-        $json.sendOk(context, {liste: refs})
+        sendListe(context, null, mesRessources)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -569,23 +548,25 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param ressources
    */
   function sendListe (context, error, ressources) {
-    if (error) $json.send(context, error)
-    else {
-      var liste = []
-      if (ressources && ressources.length) {
-        // on regarde le format reçu en get ou post
-        const format = context.post.format || context.get.format
-        ressources.forEach(function (ressource) {
-          if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
-          var item = (format === 'full') ? ressource : new Ref(ressource)
-          item.$droits = ''
-          if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
-          if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
-          liste.push(item)
-        })
-      }
-      $json.sendOk(context, {liste: liste})
+    if (error) return $json.send(context, error)
+    var liste = []
+    if (ressources && ressources.length) {
+      // on regarde le format reçu en get ou post
+      const format = context.post.format || context.get.format
+      ressources.forEach(function (ressource) {
+        if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
+        var item = (format === 'full') ? ressource : new Ref(ressource)
+        if (ressource.type === 'sequenceModele' && format !== 'full') {
+          // on rajoute les parametres pour les sequenceModele
+          item.parametres = ressource.parametres
+        }
+        item.$droits = ''
+        if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
+        if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
+        liste.push(item)
+      })
     }
+    $json.sendOk(context, {liste: liste})
   }
 
   /**

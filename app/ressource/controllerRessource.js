@@ -104,7 +104,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {string} [id=] Identifiant de la ressource (ou son titre), pour le mettre dans le message
    */
   function denied404 (context, id) {
-    var message = 'La ressource ' + id + " n’existe pas ou droits insuffisants"
+    var message = `La ressource ${id} n’existe pas ou droits insuffisants`
     $ressourcePage.printError(context, message, 404)
   }
 
