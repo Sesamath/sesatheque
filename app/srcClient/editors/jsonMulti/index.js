@@ -263,7 +263,7 @@ var editors = {
  * @param {displayOptions} [options] Options (pas utilisé pour le moment, pour rester homogène avec multiEditor)
  * @param {errorCallback}  [next]
  */
-export default function init (textarea, config, options, next) {
+module.exports = function init (textarea, config, options, next) {
   log('init jsonMulti avec config et options', config, options)
   try {
     require.ensure(['jquery'], function (require) {

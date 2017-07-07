@@ -36,7 +36,7 @@ async function fetchLinkedModules () {
   if (!fs.existsSync(modulesDir)) return []
   const files = fs.readdirSync(modulesDir)
   const statPromises = files.map(file => pstat(modulesDir + '/' + file))
-  return await Promise.all(statPromises).then(stats => stats.map((stat, i) => stat.isSymbolicLink() && files[i]).filter(path => path))
+  return Promise.all(statPromises).then(stats => stats.map((stat, i) => stat.isSymbolicLink() && files[i]).filter(path => path))
 }
 
 /**

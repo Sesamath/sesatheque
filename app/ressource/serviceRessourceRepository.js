@@ -206,14 +206,13 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     const myBaseUrl = appConfig.application.baseUrl
     // on ne purge que les ressources publiques (les autres ne sont pas en cache)
     if (ressource.publie && ressource.restriction === config.constantes.restriction.aucune) {
-      log.debug(`purge varnish de ${ressource.oid}`)
+      // log.debug(`purge varnish de ${ressource.oid} en utilisant ${myBaseUrl}`)
       ;[
         $routes.getAbs('api', ressource),
         $routes.getAbs('display', ressource),
         $routes.getAbs('describe', ressource),
         $routes.getAbs('preview', ressource)
       ].forEach(function (url) {
-        log.debug('on va purger ' + url)
         request({
           method: 'PURGE',
           url: myBaseUrl + url.substr(1) // pour pas avoir de double slash
@@ -268,7 +267,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {Ressource} ressourceBdd
    */
   function checkRegisterListener (ressource, ressourceBdd) {
-    if (ressource.enfants && ressource.enfants.length || (ressourceBdd.enfants && ressourceBdd.enfants)) {
+    if ((ressource.enfants && ressource.enfants.length) || (ressourceBdd.enfants && ressourceBdd.enfants)) {
       // faut la liste des rid externes qui ont changés
       const oldRids = getRidEnfants(ressourceBdd)
       const newRids = getRidEnfants(ressource)
@@ -290,6 +289,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param ressourceBdd
    */
   function checkUpdateParent (ressource, ressourceBdd) {
+    // log.debug('checkUpdateParent')
     if (
       ressource.titre !== ressourceBdd.titre ||
       ressource.resume !== ressourceBdd.resume ||
@@ -299,6 +299,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     ) {
       // on lance tout ça en // en tâche de fond
       const ref = new Ref(ressource)
+      // log.debug('faut lancer une màj des parents')
       $ressourceRepository.updateParent(ref)
       updateParentsExternes(ref)
     }
@@ -313,6 +314,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param next
    */
   function compare (ressource, ressourceBdd, next) {
+    // log.debug('compare')
     let needIncrement = !!ressource.versionNeedIncrement
     // on regarde si nos champs qui déclenchent un changement de version on changé
     if (!needIncrement && ressourceBdd.oid) {
@@ -891,6 +893,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       // on cherche nos arbres contenant cet enfant
       EntityRessource.match('enfants').equals(rid).grab(this)
     }).seqEach(function (arbre) {
+      // log.debug(`updateParent a trouvé ${rid} dans l'arbre parent ${arbre.oid}`)
       nbArbres++
       if (findChild(arbre, rid)) $ressourceRepository.save(arbre, this)
       else log.dataError(`majArbres appelé suite à un update de ${rid}, trouvé l’arbre ${arbre.oid} mais il n’y a pas eu de modification à répercuter`)

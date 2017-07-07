@@ -31,7 +31,7 @@
 
 /**
  * Ce test crée une ressource puis la supprime, options possibles :
- * l'appeler directement en lui passant --prod ou --dev pour tester la bibliotheque de prod ou dev,
+ * l'appeler directement en lui passant --prod ou --dev pour tester la sésathèque de prod ou dev,
  * (sinon c'est la bibli locale)
  * ou --token pour lui passer un token
  */
