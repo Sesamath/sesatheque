@@ -190,7 +190,7 @@ module.exports = function edit (ressource, options) {
       }
       const iframe = dom.addElement(container, 'iframe', iframeAttrs)
       iframe.addEventListener('load', onLoadIframe)
-      iframe.src = require('file!./editgraphe.html')
+      iframe.src = require('./editgraphe.html')
     } // loadGraphic
 
     const $ = require('jquery')
