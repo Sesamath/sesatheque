@@ -3,7 +3,7 @@
 {:else}
   <ul class="liste">
     {#ressources}
-    <li>{oid} : {titre}
+    <li><img src="/plugins/{type}/{type}.gif">{oid} : {titre}
       <span class="links">
         (
         <a href="{urlDescribe}">description</a>,
