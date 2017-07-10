@@ -52,6 +52,7 @@ module.exports = function (EntityUpdate) {
     this.date = initObj.date || new Date()
   })
 
+  // TODO: Non valorisé par lassi#mongo, à enlever après migration ?
   EntityUpdate.table = 'updates'
 
   // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère

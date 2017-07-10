@@ -78,6 +78,7 @@ module.exports = function (EntityRessource) {
   })
 
   // on veut pas d'une table entity_ressource
+  // TODO: Non valorisé par lassi#mongo, à enlever après migration ?
   EntityRessource.table = 'ressource'
 
   EntityRessource
@@ -154,7 +155,8 @@ module.exports = function (EntityRessource) {
           // sinon ni l'un ni l'autre, faudra le mettre en afterStore
         } else if (this.idOrigine) {
           // on vérifie qu'on essaie pas d'enregistrer localement une ressource qui viendrait d'ailleurs
-          if (this.oid && this.idOrigine === this.oid) throw new Error(`Cette ressource ${this.origine}/${this.idOrigine}) devrait être enregistrée sur ${this.origine}`)
+          // TODO (Daniel) : j'ai commenté temporairement car sur mon dump toutes mes origines sont différentes de mes oid ?
+          // if (this.oid && this.idOrigine === this.oid) throw new Error(`Cette ressource ${this.origine}/${this.idOrigine}) devrait être enregistrée sur ${this.origine}`)
         } else {
           return next(new Error(`origine sans idOrigine (${this.oid ? this.oid : 'creation'})`))
         }

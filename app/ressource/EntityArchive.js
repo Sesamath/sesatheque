@@ -53,6 +53,7 @@ module.exports = function (EntityArchive) {
     this.dateArchivage = new Date()
   }
 
+  // TODO: Non valorisé par lassi#mongo, à enlever après migration ?
   EntityArchive.table = 'archive'
 
   EntityArchive

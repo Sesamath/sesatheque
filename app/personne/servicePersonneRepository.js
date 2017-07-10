@@ -157,16 +157,16 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
    */
   $personneRepository.removeGroup = function (groupName, next) {
     let offset = 0
-    const nb = 100
+    const limit = 100
     flow().seq(function () {
-      EntityPersonne.match('groupesMembre').equals(groupName).grab(nb, offset, this)
+      EntityPersonne.match('groupesMembre').equals(groupName).grab({limit, offset}, this)
     }).seqEach(function (personne) {
       personne.groupesMembre = personne.groupesMembre.filter(grp => grp !== groupName)
       personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
       $personneRepository.save(personne, this)
     }).seq(function () {
       // reste ceux qui suivaient sans être membre
-      EntityPersonne.match('groupesSuivis').equals(groupName).grab(nb, offset, this)
+      EntityPersonne.match('groupesSuivis').equals(groupName).grab({limit, offset}, this)
     }).seqEach(function (personne) {
       personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
       $personneRepository.save(personne, this)

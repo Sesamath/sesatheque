@@ -61,6 +61,7 @@ module.exports = function (EntityExternalRef) {
     this.rid = data.rid
   })
 
+  // TODO: Non valorisé par lassi#mongo, à enlever après migration ?
   EntityExternalRef.table = 'externalRef'
 
   EntityExternalRef

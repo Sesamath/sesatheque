@@ -614,7 +614,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       }).seq(function (nbTot) {
         nbTotal = nbTot
         // log.debug('trouvé ' + nbTot + ' résultats')
-        if (nbTot) query.grab(nb, start, this)
+        if (nbTot) query.grab({limit: nb, offset: start}, this)
         else this(null, [])
       }).seq(function (ressources) {
         if (ressources.length) cacheAndNext(null, ressources, this)

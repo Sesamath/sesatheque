@@ -1,5 +1,10 @@
 version: '2'
 services:
+  mongo-global:
+    image: mongo
+    ports:
+      - 3312:27017
+
   mysql-global:
     image: mysql
     environment:
@@ -7,6 +12,11 @@ services:
       MYSQL_DATABASE: sesatheque
       MYSQL_USER: sesatheque
       MYSQL_PASSWORD: sesatheque
+
+  mongo-private:
+    image: mongo
+    ports:
+      - 3313:27017
 
   mysql-private:
     image: mysql
@@ -24,6 +34,7 @@ services:
       - .:/app
     links:
       - mysql-global
+      - mongo-global
       - memcache
     command: npm run start:dev
 
@@ -35,6 +46,7 @@ services:
       - .:/app
     links:
       - mysql-private
+      - mongo-private
       - memcache
     command: npm run start:devcommun
 

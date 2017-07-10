@@ -97,7 +97,10 @@ if (!lassi.options.cli) {
       }
 
       if (error) return done(error)
-      let dbVersion = update && update.num || 11
+      // Migration Mongo : la base mongo part avec une table d'updates vide, on commence
+      // avec la 26 au minimum pour ne pas réappliquer les updates déja passées sur l'ancienne base MySQL.
+      let dbVersion = update && update.num || 0
+      dbVersion = Math.max(25, dbVersion)
       nextUpdate()
     })
   })

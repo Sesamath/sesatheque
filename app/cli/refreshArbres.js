@@ -46,8 +46,8 @@ function refreshArbres (oid, done) {
   function grab (next) {
     let nb = 0
     flow().seq(function () {
-      taskLog(`traitement des arbres de ${offset} à ${offset + limit} sur ${nbArbres  }`)
-      EntityRessource.match('type').equals('arbre').sort('oid').grab(limit, offset, this)
+      taskLog(`traitement des arbres de ${offset} à ${offset + limit} sur ${nbArbres}`)
+      EntityRessource.match('type').equals('arbre').sort('oid').grab({limit, offset}, this)
     }).seqEach(function (arbre) {
       nb++
       refreshOne(arbre, this)

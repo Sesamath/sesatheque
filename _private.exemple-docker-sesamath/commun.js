@@ -16,13 +16,19 @@ module.exports = {
     webpackOutput: 'publicCommun',
     staging: 'dev' // prod ou dev
   },
+  // TODO: ce setting sert uniquement pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
+  databaseMysql: {
+    host: 'mysql-private',
+    port: '3306',
+    user: 'stcommun',
+    password: 'stcommun',
+    database: 'stcommun'
+  },
   $entities: {
     database: {
-      host: 'mysql-private',
-      port: '3306',
-      user: 'stcommun',
-      password: 'stcommun',
-      database: 'stcommun',
+      host: 'mongo-private',
+      port: '27017',
+      name: 'stcommun',
       connectTimeout: 1000,
       trace: true, // true par défaut, mettre false en prod ?
       // cf https://github.com/felixge/node-mysql/#pool-options

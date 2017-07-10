@@ -11,13 +11,19 @@ module.exports = {
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
   },
+  // TODO: ce setting sert uniquement pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
+  databaseMysql: {
+    host: 'mysql-global',
+    port: '3306',
+    user: 'sesatheque',
+    password: 'sesatheque',
+    database: 'sesatheque'
+  },
   $entities: {
     database: {
-      host: 'mysql-global',
-      port: '3306',
-      user: 'sesatheque',
-      password: 'sesatheque',
-      database: 'sesatheque',
+      host: 'mongo-global',
+      port: '27017',
+      name: 'sesatheque',
       connectTimeout: 1000,
       trace: true, // true par défaut, mettre false en prod ?
       // cf https://github.com/felixge/node-mysql/#pool-options

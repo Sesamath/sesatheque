@@ -53,7 +53,7 @@
     "elementtree": "0.1.6",
     "jquery": "3.2.1",
     "jstree": "3.3.4",
-    "lassi": "git://src.sesamath.net/lassi#2.0.18",
+    "lassi": "Sesamath/lassi#mongodb",
     "lodash": "4.16.4",
     "memcached": "2.2.2",
     "moment": "2.15.1",

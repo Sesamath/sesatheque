@@ -44,6 +44,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
     Object.assign(this, new Groupe(values))
   })
 
+  // TODO: Non valorisé par lassi#mongo, à enlever après migration ?
   EntityGroupe.table = 'groupe'
 
   EntityGroupe.beforeStore(function (next) {
