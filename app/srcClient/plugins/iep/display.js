@@ -66,6 +66,8 @@ module.exports = function display (ressource, options, next) {
       var styleButton = 'position:absolute;z-index:99;text-align:center;padding:0;width:1.8em;height:1.8em;left:0.1em;-moz-padding:-2px;'
       buttonZoomIn.setAttribute('style', styleButton + 'top:0.1em')
       buttonZoomOut.setAttribute('style', styleButton + 'top:2em')
+      // idem pour le bouton vu, mais ce code change rien
+      // if (boutonVu) dom.setStyles(boutonVu, {'z-index': 99})
     }
     // log('on va afficher le xml : ' +xml)
     // faut mettre du https partout si on est en https
@@ -115,6 +117,8 @@ module.exports = function display (ressource, options, next) {
     else if (error) page.addError(error)
   }
 
+  let boutonVu
+
   try {
     log('start iep display avec la ressource', ressource)
     var container = options.container
@@ -138,7 +142,7 @@ module.exports = function display (ressource, options, next) {
         })
       }
       // au clic sur bouton vu
-      const boutonVu = page.addBoutonVu(function () {
+      boutonVu = page.addBoutonVu(function () {
         isResultatSend = true
         options.resultatCallback(resultat)
       })
