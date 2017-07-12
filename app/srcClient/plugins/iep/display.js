@@ -123,16 +123,24 @@ module.exports = function display (ressource, options, next) {
     if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error('Paramètres manquants')
     if (!ressource.parametres.url && !ressource.parametres.xml) throw new Error('Pas de script instrumenpoche en paramètre')
 
-    // on enverra un résultat seulement à la fermeture
-    if (options.resultatCallback && container.addEventListener) {
-      container.addEventListener('unload', function () {
-        if (isLoaded) {
-          options.resultatCallback({
-            ressType: 'iep',
-            ressOid: ressource.oid,
-            score: 1
-          })
-        }
+    // envoi du résultat
+    if (options.resultatCallback) {
+      const resultat = {
+        fin: true,
+        score: 1,
+        deferSync: true
+      }
+      let isResultatSend = false
+      // à la fermeture si le navigateur le gère
+      if (container.addEventListener) {
+        container.addEventListener('unload', function () {
+          if (isLoaded && !isResultatSend) options.resultatCallback(resultat)
+        })
+      }
+      // au clic sur bouton vu
+      page.addBoutonVu(function () {
+        isResultatSend = true
+        options.resultatCallback(resultat)
       })
     }
     var xml = ressource.parametres.xml

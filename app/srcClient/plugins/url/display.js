@@ -149,9 +149,7 @@ function afterLoading (elt, next) {
  */
 function sendResultat (reponse, deferSync, next) {
   var resultat = {
-    score: 1,
-    ressId: ressId,
-    ressType: 'url'
+    score: 1
   }
   if (deferSync) {
     resultat.fin = true
@@ -207,13 +205,15 @@ module.exports = function display (ressource, options, next) {
       var isBasic = !hasConsigne && !hasReponse
       // ni question ni réponse
       if (isBasic) {
-        addPage(url, params, next)
-        if (resultatCallback) {
-          // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
-          $('body').on('unload', function () {
-            if (isLoaded) sendResultat(null, true)
-          })
-        } // sinon rien à faire
+        addPage(url, params, function () {
+          if (resultatCallback) {
+            // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
+            $('body').on('unload', function () {
+              if (isLoaded) sendResultat(null, true)
+            })
+          } // sinon rien à faire
+          next()
+        })
       } else {
         /**
          * Ajout des comportements pour la gestion des panneaux Consigne et Réponse avec jQueryUi
@@ -231,6 +231,7 @@ module.exports = function display (ressource, options, next) {
               }
             }
 
+            let isResultatSent = false
             var hasCkeditor = (params.answer_editor && params.answer_editor.indexOf('ckeditor') === 0)
             var hasMqEditor = (params.answer_editor === 'mqEditor')
             var editorName
@@ -286,7 +287,6 @@ module.exports = function display (ressource, options, next) {
                 editor(form, params.mqEditorConfig, options)
               }
               if (resultatCallback) {
-                var isResultatSent = false
                 dom.addElement(form, 'br')
                 var boutonReponse = dom.addElement(form, 'button', { id: 'envoi' }, 'Enregistrer cette réponse')
                 // on ajoute l'envoi de la réponse sur le bouton et à la fermeture
@@ -308,6 +308,11 @@ module.exports = function display (ressource, options, next) {
                   $('#loading').empty()
                   next()
                 })
+              })
+            } else if (resultatCallback) {
+              // pas de réponse demandée, on ajoute le bouton vu
+              page.addBoutonVu(function () {
+                sendReponse(null, true)
               })
             }
           }) // require.ensure
