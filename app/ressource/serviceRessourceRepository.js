@@ -378,7 +378,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         convertXmlJ3p(ressource)
       }
       if (ressource.type === 'arbre') delete ressource.parametres
-      else if (ressource.type !== 'serie') delete ressource.enfants
+      else if (ressource.hasOwnProperty('enfants')) delete ressource.enfants
       $cacheRessource.set(ressource)
     }
 
