@@ -802,7 +802,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       aliasData.auteurs = [ pid ]
       aliasData.origine = config.application.baseId
       aliasData.dateCreation = new Date()
-      aliasData.publie = true
+      // important sinon une ressource non restreinte mais pas publiée se retrouverait publique,
+      // et à la consultation (de l'original) ça plante
+      aliasData.publie = ressource.publie
       // si la ressource était publique on le laisse sur l'alias (pour la lecture),
       // pour l'écriture ça changera rien
       if (ressource.restriction === configRessource.constantes.restriction.aucune) aliasData.restriction = configRessource.constantes.restriction.aucune
