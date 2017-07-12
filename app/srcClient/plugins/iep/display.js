@@ -138,10 +138,15 @@ module.exports = function display (ressource, options, next) {
         })
       }
       // au clic sur bouton vu
-      page.addBoutonVu(function () {
+      const boutonVu = page.addBoutonVu(function () {
         isResultatSend = true
         options.resultatCallback(resultat)
       })
+      // pas réussi à pouvoir cliquer sur ce @#! bouton sans décaler le reste (z-index suffit pas…)
+      const titre = window.document.getElementById('titre')
+      if (titre && titre.style === 'none') {
+        dom.addElementAfter(boutonVu, 'hr', {style: 'visibility: hidden; clear: both'})
+      }
     }
     var xml = ressource.parametres.xml
     var url = ressource.parametres.url

@@ -35,135 +35,6 @@ const log = require('sesajstools/utils/log')
 const page = require('../../page/index')
 const swf = require('../../display/swf')
 
-var $
-
-/**
- * Ajoute l'iframe (ou un div si c'est un swf directement)
- * @private
- */
-function addPage (url, params, next) {
-  log('addPage avec les params', params)
-  var divIframeId = 'page'
-  var divIframe = dom.addElement(container, 'div', {id: divIframeId})
-  var divIframeSrcId = 'urlSrc'
-  dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + params.adresse)
-  const autosizeBlocs = [divIframeSrcId]
-  const autosizeOptions = {offsetHeight: 0, offsetWidth: 40}
-  // toujours autosize sur le conteneur
-  page.autosize(divIframeId, autosizeBlocs, null, autosizeOptions)
-  // url sera ajouté après l'appel de afterLoading, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
-  var args = {id: 'pageContent'}
-
-  // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
-  // ff aime pas et sort une erreur js Error: Permission denied to access property 'toString'
-  // chrome râle aussi parce que c'est pas un document
-  if (/^[^?]+.swf(\?.*)?$/.test(url)) { // faut pas prendre les truc.php?toto=truc.swf
-    log("C'est un swf, on ajoute un div et pas une iframe")
-    var swfId = 'swf' + (new Date()).getTime()
-    var options = {id: swfId}
-    if (params.hauteur) {
-      args.height = params.hauteur
-      options.hauteur = params.hauteur
-    }
-    if (params.largeur) {
-      args.width = params.largeur
-      options.largeur = params.largeur
-    }
-    var swfContainer = dom.addElement(divIframe, 'div', args)
-    log('On charge ' + url + ' dans #page avec', options)
-    // ne pas passer directement next en cb sinon il sera appelé avec un argument, qui sera interprété comme une erreur
-    swf.load(swfContainer, url, options, function () {
-      // on est appelé quand swfobject a mis l'object dans le dom, mais le swf est pas forcément chargé
-      // on regarde la hauteur pour savoir si c'est fait
-      var $swfId = $('#' + swfId)
-      if ($swfId.innerHeight() > 10) {
-        isLoaded = true
-        next()
-      } else {
-        $swfId.on('load', function () {
-          isLoaded = true
-          next()
-        })
-      }
-      if (!options.height || !options.width) page.autosize(swfId, [divIframeSrcId, 'titre'])
-    })
-    /* */
-  } else if (/^[^?]+.(png|jpe?g|gif)(\?.*)?$/.test(url)) {
-    // c'est un tag img
-    if (params.hauteur > 100) args.height = params.hauteur
-    if (params.largeur > 100) args.width = params.largeur
-    log("c'est une image, pas d'iframe mais un tag img", args, params)
-    var img = dom.addElement(divIframe, 'img', args)
-    afterLoading(img, next)
-    img.src = url
-  } else {
-    // c'est bien une iframe, on regarde si on peut la charger
-    if (window.location.protocol === 'https:' && !/^https:/.test(url)) {
-      const p = dom.addElement(divIframe, 'p', {}, 'La page externe demandée ne peut être incorporée ici car elle n’est pas en https. Vous pouvez ')
-      dom.addElement(p, 'a', {href: url, target: '_blank'}, 'l’ouvrir dans un nouvel onglet')
-      dom.addText(p, '.')
-    } else {
-      // on peut mettre une iframe, le texte sera écrasé à son chargement
-      var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
-        ' votre navigateur ne supporte probablement pas les iframes')
-      // url source (non cliquable) en footer
-      const iframeAutosizeOptions = {
-        ...autosizeOptions,
-        minHeight: 300,
-        minWidth: 300,
-        offsetHeight: 80,
-        offsetWidth: 60
-      }
-      page.autosize(args.id, autosizeBlocs, [], iframeAutosizeOptions)
-      afterLoading(iframe, next)
-      iframe.src = url
-    }
-  }
-}
-
-/**
- * Appelle next quand elt sera chargé (evt load)
- * @param {HTMLElement} elt
- * @param {simpleCallback} next
- */
-function afterLoading (elt, next) {
-  function loadListener () {
-    isLoaded = true
-    elt.removeEventListener('load', loadListener)
-    next()
-  }
-  if (elt && elt.addEventListener) {
-    elt.addEventListener('load', loadListener)
-  } else {
-    // pas de addEventListener, on la considère déjà chargée
-    isLoaded = true
-    next()
-  }
-}
-
-/**
- * Envoie le résultat à resultatCallback
- * @param {string}   reponse
- * @param {boolean}  deferSync
- * @param {function} next
- */
-function sendResultat (reponse, deferSync, next) {
-  var resultat = {
-    score: 1
-  }
-  if (deferSync) {
-    resultat.fin = true
-    resultat.deferSync = true
-  }
-  if (reponse) resultat.reponse = reponse
-  resultatCallback(resultat, next)
-}
-
-var container
-var ressId
-var resultatCallback
-var isLoaded
-
 /**
  * Affiche les ressources de type url (page externe) en créant une iframe dans le container (ou un div si l'url est un swf)
  * @service plugins/url/display
@@ -172,6 +43,155 @@ var isLoaded
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
 module.exports = function display (ressource, options, next) {
+  /**
+   * Ajoute le bouton vu et le listener sur unload quand il n'y a pas de réponse demandée
+   */
+  function addDefaultResultat () {
+    if (!options.resultatCallback) return
+    // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
+    $('body').on('unload', function () {
+      if (isLoaded && !isResultatSent) sendResultat(null, true)
+    })
+    // le bouton vu
+    page.addBoutonVu(function () {
+      sendResultat(null, true)
+    })
+  }
+  /**
+   * Ajoute l'iframe (ou un div si c'est un swf directement)
+   * @private
+   */
+  function addPage (url, params, next) {
+    log('addPage avec les params', params)
+    var divIframeId = 'page'
+    var divIframe = dom.addElement(container, 'div', {id: divIframeId})
+    var divIframeSrcId = 'urlSrc'
+    dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + params.adresse)
+    const autosizeBlocs = [divIframeSrcId]
+    const autosizeOptions = {offsetHeight: 0, offsetWidth: 40}
+    // toujours autosize sur le conteneur
+    page.autosize(divIframeId, autosizeBlocs, null, autosizeOptions)
+    // url sera ajouté après l'appel de afterLoading, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
+    var args = {id: 'pageContent'}
+
+    // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
+    // ff aime pas et sort une erreur js Error: Permission denied to access property 'toString'
+    // chrome râle aussi parce que c'est pas un document
+    if (/^[^?]+.swf(\?.*)?$/.test(url)) { // faut pas prendre les truc.php?toto=truc.swf
+      log("C'est un swf, on ajoute un div et pas une iframe")
+      var swfId = 'swf' + (new Date()).getTime()
+      var options = {id: swfId}
+      if (params.hauteur) {
+        args.height = params.hauteur
+        options.hauteur = params.hauteur
+      }
+      if (params.largeur) {
+        args.width = params.largeur
+        options.largeur = params.largeur
+      }
+      var swfContainer = dom.addElement(divIframe, 'div', args)
+      log('On charge ' + url + ' dans #page avec', options)
+      // ne pas passer directement next en cb sinon il sera appelé avec un argument, qui sera interprété comme une erreur
+      swf.load(swfContainer, url, options, function () {
+        // on est appelé quand swfobject a mis l'object dans le dom, mais le swf est pas forcément chargé
+        // on regarde la hauteur pour savoir si c'est fait
+        var $swfId = $('#' + swfId)
+        if ($swfId.innerHeight() > 10) {
+          isLoaded = true
+          next()
+        } else {
+          $swfId.on('load', function () {
+            isLoaded = true
+            next()
+          })
+        }
+        if (!options.height || !options.width) page.autosize(swfId, [divIframeSrcId, 'titre'])
+      })
+      /* */
+    } else if (/^[^?]+.(png|jpe?g|gif)(\?.*)?$/.test(url)) {
+      // c'est un tag img
+      if (params.hauteur > 100) args.height = params.hauteur
+      if (params.largeur > 100) args.width = params.largeur
+      log("c'est une image, pas d'iframe mais un tag img", args, params)
+      var img = dom.addElement(divIframe, 'img', args)
+      afterLoading(img, next)
+      img.src = url
+    } else {
+      // c'est bien une iframe, on regarde si on peut la charger
+      if (window.location.protocol === 'https:' && !/^https:/.test(url)) {
+        const p = dom.addElement(divIframe, 'p', {}, 'La page externe demandée ne peut être incorporée ici car elle n’est pas en https. Vous pouvez ')
+        dom.addElement(p, 'a', {href: url, target: '_blank'}, 'l’ouvrir dans un nouvel onglet')
+        dom.addText(p, '.')
+      } else {
+        // on peut mettre une iframe, le texte sera écrasé à son chargement
+        var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
+          ' votre navigateur ne supporte probablement pas les iframes')
+        // url source (non cliquable) en footer
+        const iframeAutosizeOptions = {
+          ...autosizeOptions,
+          minHeight: 300,
+          minWidth: 300,
+          offsetHeight: 80,
+          offsetWidth: 60
+        }
+        page.autosize(args.id, autosizeBlocs, [], iframeAutosizeOptions)
+        afterLoading(iframe, next)
+        iframe.src = url
+      }
+    }
+  }
+
+  /**
+   * Appelle next quand elt sera chargé (evt load)
+   * @param {HTMLElement} elt
+   * @param {simpleCallback} next
+   */
+  function afterLoading (elt, next) {
+    function loadListener () {
+      isLoaded = true
+      elt.removeEventListener('load', loadListener)
+      next()
+    }
+    if (elt && elt.addEventListener) {
+      elt.addEventListener('load', loadListener)
+    } else {
+      // pas de addEventListener, on la considère déjà chargée
+      isLoaded = true
+      next()
+    }
+  }
+
+  /**
+   * Envoie le résultat à resultatCallback
+   * @param {string}   reponse
+   * @param {boolean}  deferSync
+   * @param {function} next
+   */
+  function sendResultat (reponse, deferSync, next) {
+    if (!resultatCallback) {
+      log.error(new Error('sendResultat appelé sans callback disponible'))
+      return
+    }
+    const resultat = {
+      score: 1
+    }
+    if (deferSync) {
+      resultat.fin = true
+      resultat.deferSync = true
+    }
+    if (reponse) resultat.reponse = reponse
+    isResultatSent = true
+    resultatCallback(resultat, next)
+  }
+
+  // globales à cet affichage, afféctées au fur et à mesure
+  let $
+  let container
+  let resultatCallback
+  let isLoaded
+  // pour éviter de reposter au unload si on a cliqué sur le bouton vu avant
+  let isResultatSent = false
+
   require.ensure(['jquery'], function (require) {
     $ = require('jquery')
     try {
@@ -184,7 +204,6 @@ module.exports = function display (ressource, options, next) {
       // init de nos var globales
       container = options.container
       if (typeof options.resultatCallback === 'function') resultatCallback = options.resultatCallback
-      ressId = ressource.oid
 
       // raccourcis
       var params = ressource.parametres
@@ -206,12 +225,7 @@ module.exports = function display (ressource, options, next) {
       // ni question ni réponse
       if (isBasic) {
         addPage(url, params, function () {
-          if (resultatCallback) {
-            // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
-            $('body').on('unload', function () {
-              if (isLoaded) sendResultat(null, true)
-            })
-          } // sinon rien à faire
+          if (resultatCallback) addDefaultResultat()
           next()
         })
       } else {
@@ -252,6 +266,7 @@ module.exports = function display (ressource, options, next) {
               if (params.consigne) $(divConsigne).html(params.consigne)
               else log.error('Pas de consigne alors que question_option vaut ' + params.question_option)
             }
+            console.log(`url avec hasReponse ${hasReponse} et cb ${resultatCallback ? 'oui' : 'non'} `)
             if (hasReponse) {
               var form = dom.addElement(divReponse, 'form', { action: '' })
               var textarea = dom.addElement(form, 'textarea', { id: 'answer', cols: '50', rows: '10' })
@@ -310,10 +325,7 @@ module.exports = function display (ressource, options, next) {
                 })
               })
             } else if (resultatCallback) {
-              // pas de réponse demandée, on ajoute le bouton vu
-              page.addBoutonVu(function () {
-                sendReponse(null, true)
-              })
+              addBoutonVu()
             }
           }) // require.ensure
         }) // page.loadAsync
