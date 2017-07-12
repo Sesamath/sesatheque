@@ -132,7 +132,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // plutôt que d'écrire directement ici une requête
       $personneRepository.load(pid, this)
     }).seqEach(function (personne) {
-      if (personne) {
+      if (personne && personne.pid) {
         retour[personne.pid] = {
           pid: personne.pid,
           label: `${personne.prenom} ${personne.nom}`,
@@ -140,6 +140,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         }
       } else {
         retour.warnings.push(`Auteur ${pids[iAuteurs]} inconnu`)
+        if (personne) log.dataError('personne sans pid', personne)
       }
       iAuteurs++
       this()
