@@ -43,9 +43,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
   }
 
   function getKey (id, origine) {
-    var prefixRessource = 'ressource_'
-    var prefixRessByOrigine = 'ressourceIdByOrigine_'
-    return origine ? prefixRessByOrigine + origine + '_' + id : prefixRessource + id
+    return (origine ? 'ressourceIdByOrigine_' + origine : 'ressource') + '_' + id
   }
 
   /**
