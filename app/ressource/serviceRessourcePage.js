@@ -460,7 +460,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    */
   function getFormViewData (context, error, ressource, next) {
     var formData = {
-      errors: ressource && ressource.$errors || []
+      errors: (ressource && ressource.$errors) || []
     }
 
     if (error) {
@@ -596,7 +596,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           delete ressource.search
         } else {
           formData.$view = 'formCreate'
-          if (!$accessControl.hasPermission('createAll', context)) {
+          if ($accessControl.hasPermission('createAll', context)) {
+            // on ajoute une remarque sur origine et idOrigine
+            formData.origine.rmq = 'Laissez vide si vous ne savez pas'
+            formData.idOrigine.rmq = 'Laissez vide si vous n’avez pas indiqué d’origine (obligatoire sinon, mettre alors l’id d’origine de cette ressource)'
+          } else {
             // faut restreindre type
             var ttChoices = []
             formData.type.choices.forEach(function (choice) {
