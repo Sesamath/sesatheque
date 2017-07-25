@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "0.9.80",
+  "version": "0.9.81",
   "engines": {
     "node": ">4.4.0"
   },
@@ -65,6 +65,7 @@
     "sesatheque-client": "git://github.com/Sesamath/sesatheque-client.git#1.2.25"
   },
   "devDependencies": {
+    "amdefine": "^1.0.1",
     "babel-cli": "6.24.1",
     "babel-core": "6.25.0",
     "babel-eslint": "7.2.3",
