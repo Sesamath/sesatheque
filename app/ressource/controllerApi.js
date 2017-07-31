@@ -738,20 +738,23 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               ressource.publie = true
               ressource.restriction = configRessource.constantes.restriction.prive
               if (!ressource.relations) ressource.relations = []
-              ressource.relations.push([configRessource.constantes.relations.estVersionDe, oid])
+              ressource.relations.push([configRessource.constantes.relations.estVersionDe, ressource.rid])
+              delete ressource.rid
               $ressourceRepository.save(ressource, function (error, ressource) {
                 if (error) $json.send(context, error)
                 else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
                 else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
               })
             } else {
-              // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource
-              $ressourceRepository.loadByAlias(myBaseId + '/' + oid, function (error, alias) {
+              // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource et ce user
+              $ressourceRepository.loadByAlias(myBaseId + '/' + oid, pid, function (error, alias) {
                 if (error) return $json.sendError(context, error.toString())
                 if (alias) return $json.sendOk(context, {oid: alias.oid})
                 // faut le créer
                 const data = {}
-                ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => { data[p] = ressource[p] })
+                ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => {
+                  data[p] = ressource[p]
+                })
                 data.aliasOf = myBaseId + '/' + ressource.oid
                 data.auteursParents = ressource.auteurs
                 data.auteurs = [pid]

@@ -88,7 +88,7 @@
  * @typedef relation
  * @type {Integer[]}
  * @property {Integer} 0 Id du type de liaison (cf app/ressource/config:listes.relations)
- * @property {Integer} 1 Id de la ressource liée
+ * @property {Integer} 1 rid de la ressource liée
  */
 
 /**

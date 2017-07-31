@@ -75,23 +75,6 @@ module.exports = function ($cache, $settings, EntityRessource) {
 
   /**
    * Envoie une ressource du cache à next
-   * @param {string}         aliasOf
-   * @param {SimpleCallback} next
-   * @memberOf $cacheRessource
-   */
-  $cacheRessource.getByAlias = function (aliasOf, next) {
-    $cache.get(getKey(aliasOf, 'aliasOf'), function (error, oid) {
-      if (error) return next(error)
-      $cache.get(getKey(oid), function (error, ressourceCached) {
-        if (error) log.error(error)
-        if (ressourceCached) return next(null, EntityRessource.create(ressourceCached))
-        next()
-      })
-    })
-  }
-
-  /**
-   * Envoie une ressource du cache à next
    * @param {string}         cle
    * @param {SimpleCallback} next
    * @memberOf $cacheRessource

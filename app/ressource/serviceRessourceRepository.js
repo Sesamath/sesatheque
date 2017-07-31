@@ -657,25 +657,17 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   }
 
   /**
-   * Récupère une ressource d'après son aliasOf et la passe à next
+   * Récupère une ressource d'un auteur d'après son aliasOf et la passe à next
    * @memberOf $ressourceRepository
    * @param {string}            aliasOf
-   * @param {ressourceCallback} next      appelée avec une EntityRessource
+   * @param {string}            rid
+   * @param {ressourcesCallback} next  appelée avec une EntityRessource
    */
-  $ressourceRepository.loadByAlias = function loadByAlias (aliasOf, next) {
-    if (aliasOf) {
-      $cacheRessource.getByAlias(aliasOf, function (error, ressourceCached) {
-        if (error) log.error(error)
-        if (ressourceCached) return next(null, ressourceCached)
-        EntityRessource
-          .match('aliasOf').equals(aliasOf)
-          .grabOne(function (error, ressource) {
-            cacheAndNext(error, ressource, next)
-          })
-      })
-    } else {
-      return next(new Error('aliasOf manquant, impossible de charger la ressource'))
-    }
+  $ressourceRepository.loadByAlias = function loadByAlias (aliasOf, pid, next) {
+    EntityRessource
+      .match('aliasOf').equals(aliasOf)
+      .match('auteurs').equals(pid)
+      .grabOne(next)
   } // loadByAlias
 
   /**
