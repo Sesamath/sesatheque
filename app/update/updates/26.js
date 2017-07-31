@@ -31,12 +31,21 @@
 'use strict'
 
 const flow = require('an-flow')
-const settings = require('../../config')
+const config = require('../../config')
 const mysql = require('mysql')
 const _ = require('lodash')
 
 const name = 'Migration MySQL vers MongoDb'
 const description = ''
+
+const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
+// an-log ne fait rien ici si on l'appelle avec le même config.application.name que update/index.js !
+const updateLog = require('an-log')(config.application.name + ' update' + updateNum)
+const updateLogErr = updateLog.error
+const logBoth = (message, obj) => {
+  updateLogErr(message)
+  log.dataError(message, obj)
+}
 
 module.exports = {
   name: name,
@@ -53,72 +62,13 @@ module.exports = {
       })
     }
 
-    if (!settings.databaseMysql) {
-      return done(
-        new Error(`"databaseMysql" doit être paramétré dans la _private/config.js et doit indiquer les paramètres de  l'ancienne base MySQL pour la migration`)
-      )
-    }
-
-    var connection = mysql.createConnection(settings.databaseMysql)
-
     /**
-     * Initialisation de la connection mysql
+     * Convertit en string les oids d'un objet pour un chemin donné
+     * Note: si le chemin contient la chaîne '[]', on itère sur tous les éléments du tableau
+     * de l'attribut précédant '[]' pour modifier la suite du chemin (inutile si c'est le dernier)
+     * @param {Object} object
+     * @param {string} path
      */
-    connection.connect()
-
-    /**
-     * Récupératon du service $entities
-     */
-    var $entities = lassi.service('$entities')
-
-    /**
-     * Initialisation des stats.
-     */
-    var stats = {
-      nbDefinitions: 0,
-      nbEntities: 0
-    }
-
-    /*
-     * Attributs (valeur ou tableau) à convertir en String
-     */
-    var convertIntToString = {
-      // TODO: lister les champs contenant des oid entiers à caster en string
-      //       ci-dessous un exemple issu de Sesalab
-      // Groupe: [
-      //   'utilisateurs',
-      //   'structure',
-      //   'owner'
-      // ],
-      // Utilisateur: [
-      //   'structures',
-      //   'groupes',
-      //   'validators.account.validatedBy',
-      //   'groupeFolders.folders[].groupes'
-      //   // TODO: 'ressourcesFolders', 'sequenceFolders' ?
-      // ],
-      // Sequence: [
-      //   'owner',
-      //   'sousSequences[].eleves[].oid',
-      //   'lastChange.modifier.oid'
-      // ],
-      // Seance: [
-      //   'eleve',
-      //   'sequence'
-      // ],
-      // Score: [
-      //   'sequence',
-      //   'participants'
-      // ],
-      // Structure: [],
-      // PendingValidation: [
-      //   'source',
-      //   'target'
-      // ]
-    }
-
-    // convertOidValues permet de convertir les oids d'un objet pour un chemin donné
-    // Note: si le chemin contient la chaîne '[]', on itère sur tous les éléments du tableau de l'attribut précédant '[]'.
     function convertOidValues (object, path) {
       var subPaths = path.split('[].')
 
@@ -127,9 +77,7 @@ module.exports = {
       var value = _.get(object, firstSubPath)
 
       // Si pas de valeur à ce chemin, rien de plus à faire
-      if (!value) {
-        return
-      }
+      if (!value) return
 
       if (subPaths.length > 0) {
         // Si il faut chercher plus loin, on itère sur les éléments que l'on a trouvé
@@ -139,15 +87,15 @@ module.exports = {
         // Normalement on a une valeur array à ce chemin (vu qu'il finissait par '[]'), mais autant vérifier
         if (_.isArray(value)) {
           _.forEach(value, (v) => convertOidValues(v, remainingPath))
+        } else {
+          updateLogErr(`on s’attendait à un array pour ${firstSubPath}`, value)
         }
       } else {
-        // Sinon on convertir la valeur
+        // pas de tableau sur lequel faire une récursion, on convertit la valeur en string
         var convertedValue
         if (_.isArray(value)) {
           convertedValue = _.map(value, (v) => _.isInteger(v) ? v.toString() : v)
-        }
-
-        if (_.isInteger(value)) {
+        } else if (_.isInteger(value)) {
           convertedValue = value.toString()
         }
 
@@ -157,68 +105,84 @@ module.exports = {
       }
     }
 
-    function convertEntityOidsToStrings (definitionName, entity) {
-      // quelque soit l'entité, on convertir l'oid en string
-      entity.oid = entity.oid.toString()
-
-      if (convertIntToString[definitionName]) {
-        _.forEach(convertIntToString[definitionName], (attributePath) => {
-          convertOidValues(entity, attributePath)
-        })
-      }
-    }
-
-    // Récupération des définitions d'entité.
-    var definitions = _.values($entities.definitions())
-
-    // Itération sur les définitions
-    flow(definitions)
-    .seqEach(function (definition) {
-      // Récupération de l'entity par son nom en tant que service Lassi
-      var Entity = lassi.service(definition.name)
-
-      // Calcul de la table associée à la définition. Seules les données nous
-      // intéressent car les indexes seront de toute façon regénérés
-      var table = definition.table || toUnderscore(definition.name)
-
-      flow()
-
-      // Lecture des data
-      .seq(function () {
-        connection.query('select * from ' + table, this)
-      })
-
-      // Conversion du row en entity
-      .seqEach(function (row) {
-        var entityIdentifier = definition.name + '#' + row.oid
-        console.log('Migration de ' + entityIdentifier)
-
+    /**
+     * Migre une table d'entités, par paquets de ${limit}
+     */
+    function migrate (Entity, name, table, next) {
+      let currentTotal = 0
+      flow().seq(function () {
+        connection.query(`SELECT data FROM ${table} ORDER BY oid LIMIT ${offset}, ${limit}`, this)
+      }).seqEach(function (row) {
+        currentTotal++
         // Je ne sais pas comment le cas d'une entity sans data s'est produit
         // mais dans le doute on ajoute un garde-fou et un warning
         if (!row.data) {
-          console.log('WARNING - ' + entityIdentifier + ' ne contient pas de data')
+          updateLogErr(table + ' avec une ligne sans data')
           return this()
         }
-
         // Construction de l'entité
-        var entity = JSON.parse(row.data.toString())
-        entity.oid = row.oid // dans le cadre de la migration les ids sont conservés
-                              // mais les prochains ids seront des hash MongoDb
-        convertEntityOidsToStrings(definition.name, entity)
-        var lassiEntity = Entity.create(entity)
+        const entityData = JSON.parse(row.data.toString())
+        // oid toujours en string, on les conserve pour les existants (et les prochains seront des hash MongoDb
+        entityData.oid = String(row.oid)
+        if (convertIntToString[name]) {
+          _.forEach(convertIntToString[name], (attributePath) => {
+            convertOidValues(entityData, attributePath)
+          })
+        }
+        // création de l'entité et stockage
+        Entity.create(entityData).store(this)
+      }).seq(function () {
+        updateLog(`parsing des entity ${name} de ${offset} à ${offset + currentTotal - 1} sur ${nbTotal}`)
+        if (currentTotal === limit) {
+          offset += limit
+          process.nextTick(migrate, Entity, name, table, next)
+        } else {
+          next()
+        }
+      }).catch(next)
+    }
 
-        // Stockage (et donc indexation)
-        lassiEntity.store(this)
+    /*
+     * Attributs (valeur ou tableau) à convertir en String
+     */
+    const convertIntToString = {
+      // nos entity ne référencent jamais d'oid (seulement des pid ou des rid, déjà des strings), sauf
+      EntityArchive: [
+        'archiveOid'
+      ]
+    }
+
+    if (!config.databaseMysql) return done(new Error('"databaseMysql" doit être paramétré dans _private/config.js et doit indiquer les paramètres de l’ancienne base MySQL pour la migration'))
+    const connection = mysql.createConnection(config.databaseMysql)
+    // Initialisation de la connection mysql
+    connection.connect()
+    // Récupératon du service $entities
+    const $entities = lassi.service('$entities')
+    // Récupération des définitions d'entité.
+    const definitions = _.values($entities.definitions())
+    // variables globales à run utilisées dans migrate
+    const limit = 100
+    let offset = 0
+    let nbTotal
+    // Itération sur les définitions
+    flow(definitions).seqEach(function (definition) {
+      const name = definition.name
+      // Récupération de l'entity par son nom en tant que service Lassi
+      const Entity = lassi.service(name)
+      // Calcul de la table associée à la définition. Seules les données nous
+      // intéressent car les indexes seront de toute façon regénérés
+      const table = definition.table || toUnderscore(definition.name)
+      const nextEntity = this
+      connection.query(`SELECT count(*) AS nb FROM ${table}`, function ({nb}) {
+        if (nb) {
+          nbTotal = nb
+          updateLog(`${nbTotal} entity ${name}`)
+          migrate(Entity, name, table, nextEntity)
+        } else {
+          logBoth(`Aucune entité ${name}`)
+          nextEntity()
+        }
       })
-      .done(this)
-    })
-    .done(function (error) {
-      if (error) {
-        // TODO: pourquoi job.done ne donne pas d'info sur l'erreur ?
-        console.error('Erreur dans la migration : ', error)
-      }
-      console.log(stats)
-      done(error)
-    })
+    }).done(done)
   }
 }
