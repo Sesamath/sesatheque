@@ -12,11 +12,11 @@ var path = require('path')
  */
 module.exports = {
   application: {
-    name: 'sesatheque', // utilisé en préfixe des message de log et dans qq message
-    // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client,
-    // utilisé pour les rid des ressources créées ici
+    // utilisé en préfixe des message de log et dans qq messages
+    name: 'sesatheque',
+    // identifiant de cette sésathèque, utilisé pour les rid des ressources créées ici
     baseId: 'localhost3001',
-    // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
+    // sesatheque de référence pour les baseId avec lesquels on partage des ressources
     baseIdRegistrar: 'localhost3001',
     // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici (ça permet de vérifier)
     // sert aussi pour les urls des composants statiques, ou pour construire des urls qu'on passe à l'extérieur
@@ -27,23 +27,29 @@ module.exports = {
   },
   // @todo : à virer, ce setting ne sert que pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
   databaseMysql: {
-    host: 'localhost',
+    // à préciser
+    host: 'xxx',
     port: '3306',
-    user: 'sesatheque',
-    password: 'sesatheque',
-    database: 'sesatheque'
+    user: 'xxx',
+    password: 'xxx',
+    database: 'xxx',
     connectTimeout: 1000,
     connectionLimit: 50,
-    waitForConnections: true, // avec true, si les 50 sont occupées on met en queue jusqu'à queueLimit
+    // avec true, si les N connectionLimit sont occupées, on met en queue jusqu'à queueLimit
+    waitForConnections: true,
     acquireTimeout: 1000,
     queueLimit: 100,
-    debug: false // mysql2 distingue pas, et c'est très verbeux de mettre à true
+    // mysql2 distingue pas, et c'est très verbeux de mettre à true
+    debug: false
   },
   $entities: {
+    // connexion mongoDb, à préciser
     database: {
       host: 'localhost',
       port: '27017',
-      name: 'sesatheque'
+      name: 'bibliotheque',
+      user: 'bibliotheque',
+      password: 'xxx'
     }
   },
 
@@ -54,19 +60,21 @@ module.exports = {
     port: 3001
   },
 
-  // options pour les middleware
+  // options pour les middlewares
   $rail: {
     cookie: {
-      key: 'asNTr!l7Dqtsg' // en mettre un autre dans _private/config !
+      // à préciser avec une chaîne aléatoire complexe
+      key: 'xxx' // en mettre un autre dans _private/config !
     },
     session: {
-      secret: 'ap68!&nVGq§ot' // en mettre un autre dans _private/config !
+      // à préciser avec une chaîne aléatoire complexe
+      secret: 'xxx' // en mettre un autre dans _private/config !
     }
   },
 
   /* pour modifier le comportement par défaut on peut préciser ici qq overrides,
   cf app/config.js pour les valeurs par défaut
-  par ex pour empêcher un formateur de créer des groupes ou des ressources ici */
+  par ex pour empêcher un formateur de créer des groupes ou des ressources ici on peut mettre ça */
   components: {
     personne: {
       roles: {
@@ -108,7 +116,7 @@ module.exports = {
       baseId: 'localhost3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
       baseUrl: 'http://localhost:3003/'
       // apiToken: un token à utiliser par cette sesathèque pour lire des ressources restreintes chez elle
-      // (à priori pour créér des alias vers ces ressources)
+      // (à priori pour créer des alias vers ces ressources)
       // ce token devra être mis dans sa conf dans la liste des apiTokens
     }
     // on pourrait en mettre d'autres…
