@@ -32,7 +32,7 @@
 
 const flow = require('an-flow')
 const config = require('../../config')
-const mysql = require('mysql')
+const mysql = require('mysql2')
 const _ = require('lodash')
 
 const name = 'Migration MySQL vers MongoDb'
@@ -111,7 +111,8 @@ module.exports = {
     function migrate (Entity, name, table, next) {
       let currentTotal = 0
       flow().seq(function () {
-        connection.query(`SELECT data FROM ${table} ORDER BY oid LIMIT ${offset}, ${limit}`, this)
+        // à priori, oid devrait être dans data, mais on a déjà trouvé des datas en base avec oid undefined…
+        connection.query(`SELECT oid, data FROM ${table} ORDER BY oid LIMIT ${offset}, ${limit}`, this)
       }).seqEach(function (row) {
         currentTotal++
         // Je ne sais pas comment le cas d'une entity sans data s'est produit
@@ -124,6 +125,11 @@ module.exports = {
         const entityData = JSON.parse(row.data.toString())
         // oid toujours en string, on les conserve pour les existants (et les prochains seront des hash MongoDb
         entityData.oid = String(row.oid)
+        // on s'assure quand même de ça
+        if (entityData.oid === 'undefined') {
+          logBoth('entité sans oid', row)
+          return done(new Error('entité sans oid'))
+        }
         if (convertIntToString[name]) {
           _.forEach(convertIntToString[name], (attributePath) => {
             convertOidValues(entityData, attributePath)
@@ -132,11 +138,12 @@ module.exports = {
         // création de l'entité et stockage
         Entity.create(entityData).store(this)
       }).seq(function () {
-        updateLog(`parsing des entity ${name} de ${offset} à ${offset + currentTotal - 1} sur ${nbTotal}`)
         if (currentTotal === limit) {
+          updateLog(`migration OK des entity ${name} de ${offset} à ${offset + currentTotal - 1} sur ${nbTotal}`)
           offset += limit
           process.nextTick(migrate, Entity, name, table, next)
         } else {
+          updateLog(`migration OK des ${nbTotal} entity ${name}`)
           next()
         }
       }).catch(next)
@@ -153,9 +160,9 @@ module.exports = {
     }
 
     if (!config.databaseMysql) return done(new Error('"databaseMysql" doit être paramétré dans _private/config.js et doit indiquer les paramètres de l’ancienne base MySQL pour la migration'))
-    const connection = mysql.createConnection(config.databaseMysql)
     // Initialisation de la connection mysql
-    connection.connect()
+    const connection = mysql.createConnection(config.databaseMysql)
+    if (!connection) return done(new Error('config.databaseMysql ne permet pas de se connecter à mysql'))
     // Récupératon du service $entities
     const $entities = lassi.service('$entities')
     // Récupération des définitions d'entité.
@@ -173,10 +180,13 @@ module.exports = {
       // intéressent car les indexes seront de toute façon regénérés
       const table = definition.table || toUnderscore(definition.name)
       const nextEntity = this
-      connection.query(`SELECT count(*) AS nb FROM ${table}`, function ({nb}) {
-        if (nb) {
-          nbTotal = nb
+      if (!table) return nextEntity(new Error(`L'entité ${name} n’a pas de table`))
+      connection.query(`SELECT count(*) AS nb FROM ${table}`, function (error, results) {
+        if (error) return nextEntity(error)
+        if (results[0] && results[0].nb) {
+          nbTotal = results[0].nb
           updateLog(`${nbTotal} entity ${name}`)
+          offset = 0
           migrate(Entity, name, table, nextEntity)
         } else {
           logBoth(`Aucune entité ${name}`)
