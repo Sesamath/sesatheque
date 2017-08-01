@@ -43,6 +43,7 @@ var $ressourceConverter = {}
 
 var _ = require('lodash')
 var flow = require('an-flow')
+const {exists} = require('sesatheque-client/dist/sesatheques')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
@@ -62,32 +63,32 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     let errors = []
     let isModif = false
     if (_.isArray(relations)) {
-      relations.forEach(function (relId, relTarget) {
-        if (arguments.length > 2) {
-          errors.push('une relation doit être un tableau à deux éléments (idRelation, idRessource, ce dernier peut être un oid ou une chaine origine/idOrigine')
+      relations.forEach(([relId, relTarget, rest]) => {
+        if (rest) {
+          errors.push('une relation doit être un tableau à deux éléments [typeRelation, ridRessource]')
+        } else if (!config.listes.relations[relId]) {
+          errors.push(`Une relation doit être un tableau à deux éléments [typeRelation, ridRessource], ${relId} n’est pas un type de relation valide`)
+        } else if (typeof relTarget !== 'string' || relTarget.indexOf('/') < 1) {
+          errors.push(`Une relation doit être un tableau à deux éléments [typeRelation, ridRessource], ${relTarget} n’est pas un rid valide`)
+        } else if (relTarget === ressource.rid) {
+          errors.push('Impossible de lier une ressource à elle-même')
+        } else if (relTarget === (ressource.origine + '/' + ressource.idOrigine)) {
+          errors.push(`Une relation doit être un tableau à deux éléments [typeRelation, ridRessource], ${relTarget} n’est pas un rid valide`)
         } else {
-          if (
-            relTarget === ressource.oid ||
-            relTarget === ressource.rid ||
-            relTarget === (ressource.origine + '/' + ressource.idOrigine)
-          ) {
-            errors.push('Impossible de lier une ressource à elle-même')
-          } else if (config.listes.relations[relId]) {
-            // on regarde si cette relation n'y est pas déjà...
-            let exists = false
-            // _.each plutôt que forEach car ça s'arrête au return false' +
-            _.each(ressource.relations, ([exRelId, exRelTarget]) => {
-              if (exRelId === relId && exRelTarget === relTarget) {
-                exists = true
-                return false // pas la peine de continuer
-              }
-            })
-            if (!exists) {
+          // ça semble bon, on regarde si la base est valide
+
+          // et si cette relation n'y est pas déjà...
+          const alreadyHere = ressource.relations.find(([exRelId, exRelTarget]) => exRelId === relId && exRelTarget === relTarget)
+          if (!alreadyHere) {
+            const [baseId, , oups] = relTarget.split('/')
+            if (oups) {
+              errors.push(`Une relation doit être un tableau à deux éléments [typeRelation, ridRessource], ${relTarget} n’est pas un rid valide`)
+            } else if (!exists(baseId)) {
+              errors.push(`Une relation doit être un tableau à deux éléments [typeRelation, ridRessource], ${relTarget} n’est pas un rid valide (baseId inconnue)`)
+            } else {
               ressource.relations.push([relId, relTarget])
               isModif = true
             }
-          } else {
-            errors.push(`${relId} n’est pas un identifiant de relation valide`)
           }
         }
       })
