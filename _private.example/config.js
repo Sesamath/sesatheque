@@ -25,41 +25,26 @@ module.exports = {
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
   },
-  // TODO: ce setting sert uniquement pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
+  // @todo : à virer, ce setting ne sert que pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
   databaseMysql: {
     host: 'localhost',
     port: '3306',
     user: 'sesatheque',
     password: 'sesatheque',
     database: 'sesatheque'
+    connectTimeout: 1000,
+    connectionLimit: 50,
+    waitForConnections: true, // avec true, si les 50 sont occupées on met en queue jusqu'à queueLimit
+    acquireTimeout: 1000,
+    queueLimit: 100,
+    debug: false // mysql2 distingue pas, et c'est très verbeux de mettre à true
   },
   $entities: {
     database: {
       host: 'localhost',
       port: '27017',
-      name: 'sesatheque',
-      connectTimeout: 1000,
-      trace: true, // true par défaut, mettre false en prod ?
-      // cf https://github.com/felixge/node-mysql/#pool-options
-      connectionLimit: 50,
-      waitForConnections: true, // avec true, si les 50 sont occupées on met en queue jusqu'à queueLimit
-      acquireTimeout: 1000,
-      queueLimit: 100,
-      debug: false // mysql2 distingue pas, et c'est très verbeux de mettre à true
-      // debug: ['ComQueryPacket', 'ErrorPacket'] // Cf node_modules/mysql/lib/protocol/packets/ pour la liste
+      name: 'sesatheque'
     }
-    /* pour pgsql on avait dans les anciens lassi
-    database: {
-      client    : 'pg',
-      connection: {
-        host    : 'xxx',
-        port    : '5432',
-        user    : 'xxx',
-        password: 'xxx',
-        database: 'xxx'
-      }
-    }
-  /* */
   },
 
   // ça c'est pour node qui va lancer l'appli, utilisé par lassi

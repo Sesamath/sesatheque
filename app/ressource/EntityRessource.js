@@ -78,7 +78,7 @@ module.exports = function (EntityRessource) {
   })
 
   // on veut pas d'une table entity_ressource
-  // TODO: Non valorisé par lassi#mongo, à enlever après migration ?
+  // @todo inutile avec lassi#mongo, à virer après migration
   EntityRessource.table = 'ressource'
 
   EntityRessource

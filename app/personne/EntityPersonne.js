@@ -72,7 +72,7 @@ module.exports = function (EntityPersonne, $cachePersonne) {
     Personne.call(this, values)
   })
 
-  // TODO: Non valorisé par lassi#mongo, à enlever après migration ?
+  // @todo inutile avec lassi#mongo, à virer après migration
   EntityPersonne.table = 'personne'
 
   EntityPersonne.beforeStore = function (next) {
