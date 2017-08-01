@@ -99,8 +99,8 @@ if (!lassi.options.cli) {
       if (error) return done(error)
       // Migration Mongo : la base mongo part avec une table d'updates vide, on commence
       // avec la 26 au minimum pour ne pas réappliquer les updates déja passées sur l'ancienne base MySQL.
-      let dbVersion = (update && update.num) || 25
-      if (dbVersion < 25) return done(new Error('Cette version de sesathèque doit être lancée sur mongoDb ou une base mysql au moins en version 25'))
+      let dbVersion = (update && update.num) || 26
+      if (dbVersion < 26) return done(new Error('Cette version de sesathèque doit être lancée sur mongoDb ou une base mysql au moins en version 26'))
       nextUpdate()
     })
   })
