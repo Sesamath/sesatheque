@@ -553,7 +553,6 @@ module.exports = function edit (arbre, options) {
     if (!$saveButton) throw new Error('Bouton de sauvegarde non trouvé dans la page')
 
     const editor = sjtUrl.getParameter('editor') || 'graphic'
-    const baseId = options.baseId
 
     initDom(options)
     dstTree = arbre
