@@ -83,7 +83,12 @@ module.exports = function edit (arbre, options) {
       if (!$treeError.hasClass('error')) $treeError.addClass('error')
       if (delay) {
         if (delay < 1000) delay *= 1000 // on nous a passé des s
-        setTimeout(() => $treeError.empty(), delay)
+        setTimeout(
+          () => {
+            $treeError.empty()
+            $treeError.removeClass('error')
+          }, delay
+        )
       }
     }
 
@@ -93,7 +98,7 @@ module.exports = function edit (arbre, options) {
      */
     function addLoadSrc () {
       dom.addElement(container, 'span', null, 'arbre source à charger ')
-      inputRef = dom.addElement(container, 'input', { id: 'loadRef', type: 'text' })
+      inputRef = dom.addElement(container, 'input', {id: 'loadRef', type: 'text', style: {margin: '0 1em'}})
       $inputRef = $(inputRef)
       // enter doit pas valider le form mais charger la ref
       $inputRef.keypress(function (event) {
@@ -104,6 +109,8 @@ module.exports = function edit (arbre, options) {
       })
       // lien de chargement
       loadLink = dom.addElement(container, 'a', { href: '#' }, ' afficher')
+      dom.addElement(container, 'br')
+      dom.addElement(container, 'span', {class: 'rmq', style: {'max-width': '50rem'}}, '(Vous pouvez indiquer un id seul, ou origine/idOrigine, ou un rid de la forme baseId/id pour le charger sur une autre sesatheque)')
       $(loadLink).click(loadSrc)
       // un div pour les erreurs
       const treeError = dom.addElement(container, 'p')
@@ -414,7 +421,7 @@ module.exports = function edit (arbre, options) {
      */
     function showSrc (error, arbre) {
       const rid = $inputRef.val()
-      if (error) return addTreeError('Erreur au chargement de ' + rid + ' : ' + error.toString(), 5)
+      if (error) return addTreeError(`Erreur au chargement de ${rid} : ${error}`)
       if (!arbre) return addTreeError(`L’arbre ${rid} n’existe pas`)
       if (arbre.type !== 'arbre') return addTreeError(`La ressource ${rid} n’est pas un arbre`)
       // on peut y aller
