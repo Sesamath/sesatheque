@@ -80,6 +80,7 @@ if (!lassi.options.cli) {
         }
         fs.access(update, fs.R_OK, function (error) {
           if (error) return done() // plus d'updates à passer, c'est pas une erreur
+          // sinon on applique
           dbVersion++
           const currentUpdate = require(update)
           applog('updates', `lancement update n° ${dbVersion} : ${currentUpdate.name}`)
@@ -97,10 +98,8 @@ if (!lassi.options.cli) {
       }
 
       if (error) return done(error)
-      // Migration Mongo : la base mongo part avec une table d'updates vide, on commence
-      // avec la 26 au minimum pour ne pas réappliquer les updates déja passées sur l'ancienne base MySQL.
-      let dbVersion = (update && update.num) || 26
-      if (dbVersion < 26) return done(new Error('Cette version de sesathèque doit être lancée sur mongoDb ou une base mysql au moins en version 26'))
+      // à partir de la sesatheque 1.0.1 on démarre en db version 27
+      let dbVersion = (update && update.num) || 27
       nextUpdate()
     })
   })

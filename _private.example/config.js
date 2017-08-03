@@ -25,31 +25,20 @@ module.exports = {
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
   },
-  // @todo : à virer, ce setting ne sert que pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
-  databaseMysql: {
-    // à préciser
-    host: 'xxx',
-    port: '3306',
-    user: 'xxx',
-    password: 'xxx',
-    database: 'xxx',
-    connectTimeout: 1000,
-    connectionLimit: 50,
-    // avec true, si les N connectionLimit sont occupées, on met en queue jusqu'à queueLimit
-    waitForConnections: true,
-    acquireTimeout: 1000,
-    queueLimit: 100,
-    // mysql2 distingue pas, et c'est très verbeux de mettre à true
-    debug: false
-  },
+
+  // connexion mongoDb, pour lassi, à préciser
   $entities: {
-    // connexion mongoDb, à préciser
     database: {
       host: 'localhost',
       port: '27017',
       name: 'bibliotheque',
       user: 'bibliotheque',
-      password: 'xxx'
+      password: 'xxx',
+      // cf http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect
+      options: {
+        poolSize: 10,
+        reconnectTries: 1800 // 1/2h avec le reconnectInterval à 1000ms par défaut
+      }
     }
   },
 
@@ -90,19 +79,26 @@ module.exports = {
     debugExclusions: ['cache'],
     perf: 'perf.log'
   },
+
+  // à renseigner si y'a du memcached (conseillé)
   memcache: {host: '127.0.0.1', port: 11211},
+
   // noCache:true,
-  // les modules à précharger avant bootstrap
+  // les modules à précharger avant bootstrap, ici pour fonctionner avec un sesalab
   extraModules: ['sesalab-sso'],
+
   // les dépendances à ajouter au composant principal, en premier
   // extraDependenciesFirst : ['sesasso-bibli'],
   // et en dernier
+  // suivant extraModules
   extraDependenciesLast: ['sesalab-sso'],
+
+  // éventuels tokens utilisables par une autre appli pour poster sur notre api
   apiTokens: [
-    // mettre ici d'éventuels tokens utilisables par une autre appli pour poster sur notre api
   ],
+
+  // éventuelle liste d'ip hors lan autorisées à utiliser un token
   apiIpsAllowed: [
-    // une éventuelle liste d'ip hors lan autorisées à utiliser un token
   ],
 
   // urls absolues des sésathèques utilisées par nos ressources
@@ -121,6 +117,7 @@ module.exports = {
     }
     // on pourrait en mettre d'autres…
   ],
+
   // les sesalab qui nous causent (et propagent ici une authentification via sesalab-sso)
   // Attention, toutes les sésathèques que ces sesalab utilisent doivent être listées dans le module
   // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
