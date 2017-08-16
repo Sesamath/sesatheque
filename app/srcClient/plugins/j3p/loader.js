@@ -242,6 +242,14 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
       piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
       piledappels.push(pathOutils + 'mtg32/mtg32jsmax.js')
     }
+    // Modification par Yves le 21/07/2017 pour pouvoir utiliser la version appli js de MathGraph32
+    if (estDans('mtg32App', that.listedesoutils)) {
+      dom.addCss(pathOutils + 'mtg32/mtgLoader.css')
+      J3PInclude2("MathJax.Hub.Config({tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]}, jax: ['input/TeX','output/SVG'], TeX: {extensions: ['color.js']}, messageStyle: 'none'});", 'text/x-mathjax-config')
+      piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
+      piledappels.push(pathOutils + 'mtg32/mtgLoader.min.js')
+    }
+    // Fin Modif Yves
 
     // maths => mathquill
     if (estDans('maths', that.listedesoutils)) {
