@@ -63,6 +63,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
       if (error) return $ressourcePage.printError(context, error, 500)
+      if (!ressource) return $ressourcePage.printError(context, `La ressource ${ressource.oid} n’existe pas `, 404)
       if (!$accessControl.isPublic(ressource)) return $ressourcePage.prepareAndSend(context, `La ressource ${ressource.oid} n’est pas publique`, undefined, view, options)
       $ressourcePage.prepareAndSend(context, null, ressource, view, options)
     })
@@ -79,6 +80,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function checkAndAffiche (context, error, ressource, view, options) {
     if (error) return $ressourcePage.printError(context, error)
+    if (!ressource) return $ressourcePage.printError(context, `Cette ressource n’existe pas `, 404)
     if ($accessControl.isPublic(ressource)) return $ressourcePage.prepareAndSend(context, null, ressource, view, options)
     $ressourcePage.printError(context, 'La ressource n’est pas publique', 403)
   }
