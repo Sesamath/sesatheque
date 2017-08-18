@@ -32,18 +32,44 @@
 'use strict'
 
 module.exports = function ($cache, $settings, EntityRessource) {
-  var ttl = $settings.get('components.ressource.cacheTTL', 3600)
+  /**
+   * Ne fait rien
+   * @private
+   */
+  function dummy () {}
 
   /**
-   * Une callback qui ne fait rien sinon logguer une éventuelle erreur
+   * retourne la clé de cache
+   * @private
+   * @param {string} id oid ou rid
+   * @param {string} [origine] origine (id est idOrigine) ou 'cle' (id est la clé), ignoré si id est un rid
+   * @return {string}
+   */
+  function getKey (id, origine) {
+    if (id.indexOf('/') !== -1) return `ressource_${id.replace('/', '_')}`
+    if (origine) return `ressource_${origine}_${id}`
+    return `ressource_${myBaseId}_${id}`
+  }
+
+  /**
+   * Une callback qui ne fait rien d'autre que logguer une éventuelle erreur
    * @private
    */
   function logIfError (error) {
     if (error) log.error(error)
   }
 
-  function getKey (id, origine) {
-    return (origine ? 'ressourceIdByOrigine_' + origine : 'ressource') + '_' + id
+  const ttl = $settings.get('components.ressource.cacheTTL', 3600)
+  const myBaseId = $settings.get('application.baseId')
+  if (!myBaseId) throw new Error('application.baseId n’existe pas')
+
+  if ($settings.get('noCache', false)) return {
+    get: dummy,
+    getByCle: dummy,
+    getByOrigine: dummy,
+    set: dummy,
+    delete: dummy,
+    deleteByOrigine: dummy,
   }
 
   /**
@@ -52,7 +78,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
    * @requires $cache
    * @requires $settings
    */
-  var $cacheRessource = {}
+  const $cacheRessource = {}
 
   /**
    * Envoie une ressource du cache à next
@@ -62,14 +88,13 @@ module.exports = function ($cache, $settings, EntityRessource) {
    */
   $cacheRessource.get = function (oid, next) {
     $cache.get(getKey(oid), function (error, ressourceCached) {
-      var ressource
-      if (!error) {
-        if (ressourceCached) {
-          ressource = EntityRessource.create(ressourceCached)
-          // log.debug('ressource ' + oid + ' récupérée en cache')
-        }
+      // on ne bloque pas si le cache est en erreur
+      if (error) {
+        log.error(error)
+        return next()
       }
-      next(null, ressource)
+      if (ressourceCached) return next(null, EntityRessource.create(ressourceCached))
+      next()
     })
   }
 
@@ -81,9 +106,15 @@ module.exports = function ($cache, $settings, EntityRessource) {
    */
   $cacheRessource.getByCle = function (cle, next) {
     $cache.get(getKey(cle, 'cle'), function (error, oid) {
-      if (error) return next(error)
+      if (error) {
+        log.error(error)
+        return next()
+      }
       $cache.get(getKey(oid), function (error, ressourceCached) {
-        if (error) log.error(error)
+        if (error) {
+          log.error(error)
+          return next()
+        }
         if (ressourceCached) return next(null, EntityRessource.create(ressourceCached))
         next()
       })
@@ -100,39 +131,39 @@ module.exports = function ($cache, $settings, EntityRessource) {
   $cacheRessource.getByOrigine = function (origine, idOrigine, next) {
     $cache.get(getKey(idOrigine, origine), function (error, oid) {
       if (error) {
-        next(error)
-      } else {
-        $cache.get(getKey(oid), function (error, ressourceCached) {
-          var ressource
-          if (!error) {
-            if (ressourceCached) {
-              ressource = EntityRessource.create(ressourceCached)
-              // log.debug('ressource ' + origine + '/' + idOrigine + ' récupérée en cache')
-            }
-          }
-          next(null, ressource)
-        })
+        log.error(error)
+        return next()
       }
+      $cache.get(getKey(oid), function (error, ressourceCached) {
+        if (error) {
+          log.error(error)
+          return next()
+        }
+        if (ressourceCached) return next(null, EntityRessource.create(ressourceCached))
+        next()
+      })
     })
   }
 
   /**
    * Met en cache une ressource
    * @param {EntityRessource}      ressource
-   * @param {errorCallback} [next]
+   * @param {errorCallback} [next] en cas d'erreur du cache, elle sera logguée et next appelé avec la ressource reçue
    * @memberOf $cacheRessource
    */
-  $cacheRessource.set = function (ressource, next = logIfError) {
-    log.debug('cache set ressource ' + ressource.oid, null, 'cache')
-    if (ressource.oid) {
-      // next appelé seulement sur le set principal (le dernier)
-      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, logIfError)
-      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, logIfError)
-      if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl, logIfError)
-      $cache.set(getKey(ressource.oid), ressource, ttl, next)
-    } else {
-      log.error(new Error('cacheSet sur une ressource sans oid'))
-    }
+  $cacheRessource.set = function (ressource, next = dummy) {
+    if (!ressource.oid) return next(new Error('cacheSet sur une ressource sans oid'))
+    // next appelé seulement sur le set principal (le dernier)
+    if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, logIfError)
+    if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, logIfError)
+    if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf), ressource.oid, ttl, logIfError)
+    $cache.set(getKey(ressource.oid), ressource, ttl, function (error, ress) {
+      if (error) {
+        log.error(error)
+        return next(null, ressource)
+      }
+      next(null, ress)
+    })
   }
 
   /**
@@ -141,15 +172,18 @@ module.exports = function ($cache, $settings, EntityRessource) {
    * @param {SimpleCallback} [next]
    * @memberOf $cacheRessource
    */
-  $cacheRessource.delete = function (oid, next = logIfError) {
-    log.debug('delete cache ressource ' + oid, null, 'cache')
+  $cacheRessource.delete = function (oid, next = dummy) {
     // faut aller le chercher en cache pour effacer l'entrée par origine
     $cache.get(getKey(oid), function (error, ressource) {
-      if (error) log.error(error)
-      if (ressource) {
-        $cache.delete(getKey(ressource.idOrigine, ressource.origine), error => { if (error) log.error(error) })
+      if (error) {
+        log.error(error)
+        return next()
       }
-      $cache.delete(getKey(oid), next)
+      if (ressource) $cache.delete(getKey(ressource.idOrigine, ressource.origine), logIfError)
+      $cache.delete(getKey(oid), function (error) {
+        if (error) log.error(error)
+        next()
+      })
     })
   }
 
@@ -160,22 +194,19 @@ module.exports = function ($cache, $settings, EntityRessource) {
    * @param {errorCallback} [next]
    * @memberOf $cacheRessource
    */
-  $cacheRessource.deleteByOrigine = function (origine, idOrigine, next = logIfError) {
-    log.debug('delete cache ressource ' + origine + '/' + idOrigine, null, 'cache')
+  $cacheRessource.deleteByOrigine = function (origine, idOrigine, next = dummy) {
     $cacheRessource.getByOrigine(origine, idOrigine, function (error, oid) {
-      if (error) next(error)
-      else if (oid) {
-        $cache.delete(getKey(idOrigine, origine), logIfError)
-        $cacheRessource.delete(oid, next)
-      } else next()
+      if (error) {
+        log.error(error)
+        return next()
+      }
+      if (!oid) return next()
+      $cache.delete(getKey(idOrigine, origine), logIfError)
+      $cache.delete(getKey(oid), function (error) {
+        if (error) log.error(error)
+        next()
+      })
     })
-  }
-
-  // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
-  if ($settings.get('noCache', false)) {
-    log('$cacheRessource désactivé')
-    $cacheRessource.get = function (oid, next) { next() }
-    $cacheRessource.getByOrigine = function (origine, idOrigine, next) { next() }
   }
 
   return $cacheRessource
