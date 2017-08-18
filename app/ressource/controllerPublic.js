@@ -193,7 +193,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
         options.start = parseInt(crit.start, 10) || 0
         options.nb = parseInt(crit.nb, 10) || 25
-        options.orderBy = crit.orderBy || 'oid'
+        options.orderBy = crit.orderBy || 'dateCreation'
         $ressourceRepository.getListe('public', options, function (error, ressources) {
           var data = $ressourcePage.getDefaultData('liste')
           data.$metas.title = 'Résultats de la recherche'

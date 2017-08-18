@@ -547,7 +547,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       }
       // le reste
       if (options.orderBy && !_.isString(options.orderBy)) throw new Error('orderBy invalide')
-      optionsSafe.orderBy = options.orderBy || 'oid'
+      optionsSafe.orderBy = options.orderBy || 'dateCreation'
       if (options.order === 'desc') optionsSafe.order = 'desc'
       start = parseInt(options.start, 10) || 0
       nb = parseInt(options.nb, 10) || listeNbDefault
@@ -648,7 +648,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         if (ressourceCached) {
           next(null, EntityRessource.create(ressourceCached))
         } else {
-          EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
+          EntityRessource.match('_id').equals(oid).grabOne(function (error, ressource) {
             cacheAndNext(error, ressource, next)
           })
         }

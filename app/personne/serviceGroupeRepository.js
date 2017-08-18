@@ -75,7 +75,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
    * @memberOf $groupeRepository
    */
   $groupeRepository.getListManagedBy = function (pid, next) {
-    EntityGroupe.match('gestionnaires').equals(pid).sort('oid').grab(next)
+    EntityGroupe.match('gestionnaires').equals(pid).sort('pid').grab(next)
   }
 
   /**
