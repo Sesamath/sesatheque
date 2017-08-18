@@ -39,18 +39,19 @@ module.exports = function ($cache, $settings, EntityRessource) {
   function dummy () {}
 
   /**
-   * retourne la clé de cache
+   * retourne la clé de cache (ressource_oid cache des ressources, ressourceBy_xxx des oid)
    * @private
-   * @param {string} id oid ou rid
+   * @param {string} id oid ou clé
    * @param {string} [origine] origine (id est idOrigine) ou 'cle' (id est la clé), ignoré si id est un rid
    * @return {string}
    */
   function getKey (id, origine) {
-    if (!id) throw new Error('getKey veut un id')
-    if (typeof id !== 'string') throw new Error('getKey veut un id en string')
-    if (id.indexOf('/') !== -1) return `ressource_${id.replace('/', '_')}`
-    if (origine) return `ressource_${origine}_${id}`
-    return `ressource_${myBaseId}_${id}`
+    if (!id) {
+      log.error(new Error('getKey veut un id'))
+      return 'undefined'
+    }
+    if (origine) return `ressourceBy_${origine}_${id}`
+    return `ressource_${id}`
   }
 
   /**
@@ -62,8 +63,6 @@ module.exports = function ($cache, $settings, EntityRessource) {
   }
 
   const ttl = $settings.get('components.ressource.cacheTTL', 3600)
-  const myBaseId = $settings.get('application.baseId')
-  if (!myBaseId) throw new Error('application.baseId n’existe pas')
 
   if ($settings.get('noCache', false)) return {
     get: dummy,
@@ -112,6 +111,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
         log.error(error)
         return next()
       }
+      if (!oid) return next()
       $cache.get(getKey(oid), function (error, ressourceCached) {
         if (error) {
           log.error(error)
@@ -136,6 +136,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
         log.error(error)
         return next()
       }
+      if (!oid) return next()
       $cache.get(getKey(oid), function (error, ressourceCached) {
         if (error) {
           log.error(error)
@@ -158,7 +159,7 @@ module.exports = function ($cache, $settings, EntityRessource) {
     // next appelé seulement sur le set principal (le dernier)
     if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, logIfError)
     if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, logIfError)
-    if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf), ressource.oid, ttl, logIfError)
+    if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl, logIfError)
     $cache.set(getKey(ressource.oid), ressource, ttl, function (error, ress) {
       if (error) {
         log.error(error)
@@ -181,11 +182,13 @@ module.exports = function ($cache, $settings, EntityRessource) {
         log.error(error)
         return next()
       }
-      if (ressource) $cache.delete(getKey(ressource.idOrigine, ressource.origine), logIfError)
-      $cache.delete(getKey(oid), function (error) {
-        if (error) log.error(error)
-        next()
-      })
+      if (ressource) {
+        $cache.delete(getKey(ressource.idOrigine, ressource.origine), logIfError)
+        $cache.delete(getKey(oid), function (error) {
+          if (error) log.error(error)
+          next()
+        })
+      }
     })
   }
 
