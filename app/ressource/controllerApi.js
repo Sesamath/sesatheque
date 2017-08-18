@@ -747,7 +747,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               })
             } else {
               // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource et ce user
-              $ressourceRepository.loadByAlias(myBaseId + '/' + oid, pid, function (error, alias) {
+              $ressourceRepository.loadByAliasAndPid(myBaseId + '/' + oid, pid, function (error, alias) {
                 if (error) return $json.sendError(context, error.toString())
                 if (alias) return $json.sendOk(context, {oid: alias.oid})
                 // faut le créer

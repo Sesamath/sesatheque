@@ -644,14 +644,11 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       else $ressourceRepository.loadByOrigin(origin, idOrigin, next)
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
-        if (error) log.error(error)
-        if (ressourceCached) {
-          next(null, EntityRessource.create(ressourceCached))
-        } else {
-          EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
-            cacheAndNext(error, ressource, next)
-          })
-        }
+        if (error) return next(error)
+        if (ressourceCached) return next(null, ressourceCached)
+        EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
+          cacheAndNext(error, ressource, next)
+        })
       })
     }
   }
@@ -663,12 +660,12 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {string}            rid
    * @param {ressourcesCallback} next  appelée avec une EntityRessource
    */
-  $ressourceRepository.loadByAlias = function loadByAlias (aliasOf, pid, next) {
+  $ressourceRepository.loadByAliasAndPid = function loadByAliasAndPid (aliasOf, pid, next) {
     EntityRessource
       .match('aliasOf').equals(aliasOf)
       .match('auteurs').equals(pid)
       .grabOne(next)
-  } // loadByAlias
+  } // loadByAliasAndPid
 
   /**
    * Récupère une ressource d'après sa cle et la passe à next
@@ -677,22 +674,16 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
   $ressourceRepository.loadByCle = function loadByCle (cle, next) {
-    if (cle) {
-      $cacheRessource.getByOrigine('cle', cle, function (error, ressourceCached) {
-        if (error) log.error(error)
-        if (ressourceCached) {
-          next(null, EntityRessource.create(ressourceCached))
-        } else {
-          EntityRessource
-            .match('cle').equals(cle)
-            .grabOne(function (error, ressource) {
-              cacheAndNext(error, ressource, next)
-            })
-        }
-      })
-    } else {
-      return next(new Error('Clé manquante, impossible de charger la ressource'))
-    }
+    if (!cle) return next(new Error('Clé manquante, impossible de charger la ressource'))
+    $cacheRessource.getByOrigine('cle', cle, function (error, ressourceCached) {
+      if (error) return next(error)
+      if (ressourceCached) return next(null, ressourceCached)
+      EntityRessource
+        .match('cle').equals(cle)
+        .grabOne(function (error, ressource) {
+          cacheAndNext(error, ressource, next)
+        })
+    })
   } // loadByCle
 
   /**
@@ -715,52 +706,19 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       }
       // c'est un vraie origine
       $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
-        if (error) log.error(error)
-        if (ressourceCached) {
-          next(null, EntityRessource.create(ressourceCached))
-        } else {
-          EntityRessource
-            .match('origine').equals(origine)
-            .match('idOrigine').equals(idOrigine)
-            .grabOne(function (error, ressource) {
-              cacheAndNext(error, ressource, next)
-            })
-        }
+        if (error) return next(error)
+        if (ressourceCached) return next(null, ressourceCached)
+        EntityRessource
+          .match('origine').equals(origine)
+          .match('idOrigine').equals(idOrigine)
+          .grabOne(function (error, ressource) {
+            cacheAndNext(error, ressource, next)
+          })
       })
     } else {
       return next(new Error('Origine ou idOrigine manquant, impossible de charger la ressource'))
     }
   } // loadByOrigin
-
-  /**
-   * Récupère une ressource d'après son idOrigine et la passe à next
-   * @memberOf $ressourceRepository
-   * @param {string}            origine
-   * @param {string}            idOrigine
-   * @param {ressourceCallback} next      Appelée avec une EntityRessource
-   */
-  $ressourceRepository.loadPublicByOrigin = function loadPublicByOrigin (origine, idOrigine, next) {
-    if (!origine || !idOrigine) {
-      log.error('origine ou idOrigine manquant dans loadByOrigin')
-      return next()
-    }
-
-    $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
-      if (error) log.error(error)
-      if (ressourceCached) {
-        if (ressourceCached.restriction === config.constantes.restriction.aucune) next(null, EntityRessource.create(ressourceCached))
-        else next(null, null)
-      } else {
-        EntityRessource
-          .match('origine').equals(origine)
-          .match('idOrigine').equals(idOrigine)
-          .match('restriction').equals(config.constantes.restriction.aucune)
-          .grabOne(function (error, ressource) {
-            cacheAndNext(error, ressource, next)
-          })
-      }
-    })
-  }
 
   /**
    * Met en cache la ressource et le user pour modification ultérieure

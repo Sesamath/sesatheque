@@ -82,9 +82,9 @@ module.exports = function ($cache, $settings, EntityRessource) {
   const $cacheRessource = {}
 
   /**
-   * Envoie une ressource du cache à next
+   * Envoie une ressource du cache (format Entity) à next
    * @param {Number}         oid   Id de la ressource
-   * @param {SimpleCallback} next Callback
+   * @param {RessourceCallback} next Callback
    * @memberOf $cacheRessource
    */
   $cacheRessource.get = function (oid, next) {
@@ -100,9 +100,9 @@ module.exports = function ($cache, $settings, EntityRessource) {
   }
 
   /**
-   * Envoie une ressource du cache à next
+   * Envoie une ressource du cache (format Entity) à next
    * @param {string}         cle
-   * @param {SimpleCallback} next
+   * @param {RessourceCallback} next
    * @memberOf $cacheRessource
    */
   $cacheRessource.getByCle = function (cle, next) {
@@ -124,10 +124,10 @@ module.exports = function ($cache, $settings, EntityRessource) {
   }
 
   /**
-   * Envoie une ressource du cache à next
+   * Envoie une ressource du cache (format Entity) à next
    * @param {string}         origine
    * @param {string}         idOrigine
-   * @param {SimpleCallback} next
+   * @param {RessourceCallback} next
    * @memberOf $cacheRessource
    */
   $cacheRessource.getByOrigine = function (origine, idOrigine, next) {
@@ -162,7 +162,8 @@ module.exports = function ($cache, $settings, EntityRessource) {
     if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl, logIfError)
     $cache.set(getKey(ressource.oid), ressource, ttl, function (error, ress) {
       if (error) {
-        log.error(error)
+        if (error.message && /^The length of the value is greater/.test(error.message)) log.dataError(`ressource ${ressource.oid} trop grosse pour le cache (${error.message})`)
+        else log.error(error)
         return next(null, ressource)
       }
       next(null, ress)

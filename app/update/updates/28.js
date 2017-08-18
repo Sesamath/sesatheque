@@ -34,6 +34,7 @@ const flow = require('an-flow')
 const {getRidComponents} = require('sesatheque-client/dist/sesatheques')
 
 const config = require('../../config')
+const Ref = require('../../constructors/Ref')
 const myBaseId = config.application.baseId
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
@@ -56,6 +57,8 @@ module.exports = {
       if (!arbre) throw new Error('cleanArbre appelé sans arbre')
       if (!arbre.oid || !arbre.store) throw new Error('cleanArbre ne traite que des entity')
       if (arbre.type !== 'arbre') throw new Error('cleanArbre ne traite que des arbres')
+      currentArbre = arbre.oid
+      currentArbreHasInvalidAliases = false
 
       const todoThen = new Set()
       nb++
@@ -63,24 +66,62 @@ module.exports = {
       if (! nb % 50) updateLog(`traitement du ${nb}e arbre`)
 
       let hasChanged = cleanItem(arbre)
-      // les enfants
-      if (arbre.enfants && arbre.enfants.length) {
+      flow().seq(function () {
+        // traitement sync
+        if (!arbre.enfants || !arbre.enfants.length) {
+          log.dataError(`arbre ${arbre.oid} sans enfants`)
+          return this()
+        }
         hasChanged = cleanEnfantsSync(arbre.enfants, todoThen) || hasChanged
-      } else {
-        log.dataError(`arbre ${arbre.oid} sans enfants`)
-      }
-
-      if (hasChanged) {
-        updateLog(`enregistrement des modifications de ${arbre.rid} (${arbre.titre})`)
-        arbre.store(function (error, arbre) {
-          if (error) return next(error)
-          $cacheRessource.delete(arbre.oid)
+        hasChanged = dedupEnfants(arbre) || hasChanged
+        // pour les alias invalides c'est async
+        const nextStep = this
+        if (currentArbreHasInvalidAliases) {
+          // log.dataError(`on tente de résoudre ${currentArbre}`) // debug
+          resolveAlias(arbre, hasChanged, function (error, cleanedArbre, hasReallyChanged) {
+            if (error) return nextStep(error)
+            if (hasReallyChanged) {
+              arbre = cleanedArbre
+              hasChanged = true
+            }
+            nextStep()
+          })
+        } else {
+          nextStep()
+        }
+      }).seq(function () {
+        if (hasChanged) {
+          updateLog(`enregistrement des modifications de ${arbre.rid} (${arbre.titre})`)
+          $ressourceRepository.save(arbre, function (error, arbre) {
+            if (error) return next(error)
+            next(null, todoThen)
+          })
+        } else {
+          // if (arbre.oid) updateLog(`pas de modifications pour ${arbre.oid} (${arbre.titre})`)
           next(null, todoThen)
-        })
-      } else {
-        // if (arbre.oid) updateLog(`pas de modifications pour ${arbre.oid} (${arbre.titre})`)
-        next(null, todoThen)
-      }
+        }
+      }).catch(next)
+    }
+
+    /**
+     * vire les enfants en double récursivement (sync)
+     * @param arbre
+     * @return {boolean} true si on a modifié arbre
+     */
+    function dedupEnfants (arbre) {
+      let hasChanged = false
+      const enfantsStr = new Set()
+      const enfantsDedup = arbre.enfants.filter(enfant => {
+        const str = JSON.stringify(enfant)
+        if (enfantsStr.has(str)) return false
+        enfantsStr.add(str)
+        if (enfant.enfants && enfant.enfants.length) hasChanged = dedupEnfants(enfant) || hasChanged
+        return true
+      })
+      if (enfantsDedup.length === arbre.enfants.length) return hasChanged
+      log.error(`l’arbre ${arbre.titre} avait des enfants en double`)
+      arbre.enfants = enfantsDedup
+      return true
     }
 
     /**
@@ -91,39 +132,69 @@ module.exports = {
      */
     function cleanEnfantsSync (enfants, todoThen) {
       let hasChanged = false
+      // on a parfois des enfants en double, on passe par du json pour comparer
       enfants.forEach(function (enfant) {
         // clean de cet enfant
         hasChanged = cleanItem(enfant) || hasChanged
         // on profite de l'itération pour compléter todoThen
         if (enfant.type === 'arbre') {
-          if (enfant.aliasOf) todoThen.add(enfant.aliasOf)
+          if (enfant.aliasOf) {
+            todoThen.add(enfant.aliasOf)
+            if (enfant.enfants && enfant.enfants.length) {
+              // alias + enfant, pas normal,
+              log.dataError(`arbre avec un enfant ayant aliasOf ${enfant.aliasOf} et ${enfant.enfants.length} enfants (virés pour lazy loading)`)
+              // on vire les enfants
+              enfant.enfants = []
+              hasChanged = true
+            }
+          } else if (enfant.enfants && enfant.enfants.length) {
+            hasChanged = cleanEnfantsSync(enfant.enfants, todoThen) || hasChanged
+          }
           // parsing de ses enfants
-          else if (enfant.enfants && enfant.enfants.length) hasChanged = cleanEnfantsSync(enfant.enfants, todoThen) || hasChanged
         }
       })
       return hasChanged
     }
 
+    /**
+     * passe si besoin restriction à 0, public à true, publie à true
+     * @private
+     * @param item
+     * @return {boolean} true si y'a eu une modif
+     */
     function cleanItem (item) {
       let hasChanged = false
       if (item.hasOwnProperty('restriction')) {
         if (item.restriction) {
-          log.dataError('item restreint dans un arbre sesamath', item)
+          log.dataError(`item restreint dans l’arbre ${currentArbre}`, item)
           hasChanged = true
           item.restriction = 0
         }
       } else if (item.hasOwnProperty('public')) {
         if (!item.public) {
-          log.dataError('item privé dans un arbre sesamath', item)
+          log.dataError(`item privé dans l’arbre ${currentArbre}`, item)
           hasChanged = true
           item.public = true
         }
       }
       if (item.hasOwnProperty('publie') && !item.publie) {
-        log.dataError('item privé dans un arbre sesamath', item)
+        log.dataError(`item privé dans l’arbre ${currentArbre}`, item)
         hasChanged = true
         item.publie = true
       }
+      if (item.aliasOf) {
+        ridToClean.add(item.aliasOf)
+      } else if (item.type === 'error') {
+        log.dataError(`item error dans l’arbre ${currentArbre}`, item)
+        if (/alias invalide/.test(item.titre)) {
+          // on le marque pour résolution ultérieure
+          // log.dataError(`faudra tenter de résoudre ${currentArbre}`) // debug
+          currentArbreHasInvalidAliases = true
+        }
+      } else if (item.type !== 'arbre') {
+        log.dataError(`item non arbre sans aliasOf dans l’arbre ${currentArbre}`, item)
+      }
+
       return hasChanged
     }
 
@@ -145,13 +216,40 @@ module.exports = {
         if (arbre && arbre.oid) {
           cleanArbre(arbre, function (error, ridsToAdd) {
             if (error) return next(error)
-            if (ridsToAdd.size) ridsToAdd.forEach((rid) => todoThen.add(rid))
+            if (ridsToAdd.size) ridsToAdd.forEach(rid => todoThen.add(rid))
             todoThen.delete(arbre.rid)
-            next(null, todoThen)
+            next()
           })
         } else {
           log.dataError(`l’arbre ${oid} n’existe pas`)
           todoThen.delete(rid)
+          next()
+        }
+      })
+    }
+
+    function loadAndClean2 (rid, next) {
+      const [baseId, oid] = getRidComponents(rid)
+      if (baseId !== myBaseId) {
+        log(`rid externe skipped ${rid}`)
+        return next()
+      }
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (error) return next(error)
+        let hasChanged = false
+        if (ressource.restriction) {
+          log.dataError(`ressource ${ressource.oid} privée (dans un arbre sesamath)`)
+          ressource.restriction = 0
+          hasChanged = true
+        }
+        if (!ressource.publie) {
+          log.dataError(`ressource ${ressource.oid} non publiée (dans un arbre sesamath)`)
+          ressource.publie = true
+          hasChanged = true
+        }
+       if (hasChanged) {
+          $ressourceRepository.save(ressource, next)
+        } else {
           next()
         }
       })
@@ -163,7 +261,7 @@ module.exports = {
      * @param {errorCallback} next
      */
     function purge (todoThen, next) {
-      log(`purge de ${[...todoThen].join(' ')}`)
+      // log(`purge de ${[...todoThen].join(' ')}`)
       if (todoThen.size) {
         flow([...todoThen]).seqEach(function (rid) {
           const nextOid = this
@@ -195,9 +293,73 @@ module.exports = {
       }
     }
 
+    /**
+     * Cherche les alias en erreur dans l'arbre pour tenter de les résoudre
+     * @param arbre
+     * @param hasChanged
+     * @param next appelé avec (error, arbre, hasChanged)
+     */
+    function resolveAlias (arbre, hasChanged, next) {
+      let aliasResolved = false
+      flow(arbre.enfants).seqEach(function (enfant) {
+        const nextEnfant = this
+        if (enfant.type === 'error' && /alias invalide/.test(enfant.titre) && enfant.parametres && enfant.parametres.original && enfant.parametres.original.aliasOf) {
+          const badAlias = enfant.parametres.original.aliasOf
+          // log.dataError(`trouvé bad alias ${badAlias} dans ${currentArbre}`) // debug
+          if (badAlias.indexOf(myBaseId + '/') === 0) {
+            const alias = badAlias.substr(myBaseId.length + 1)
+            // log.dataError(`on cherche l’alias ${alias} dans ${currentArbre}`) // debug
+            $ressourceRepository.load(alias, function (error, ressource) {
+              if (error) return nextEnfant(error)
+              if (ressource) {
+                updateLog(`Erreur corrigée, enfant ${enfant.titre} remplacé par ${ressource.titre}`)
+                aliasResolved = true
+                hasChanged = true
+                enfant = new Ref(ressource)
+              } else {
+                log.dataError(`Toujours pas trouvé l’alias ${alias} (en erreur avec ${badAlias} dans ${currentArbre})`)
+              }
+              if (enfant.enfants && enfant.enfants.length) {
+                resolveAlias(enfant, false, function (error, newArbre, hasChanged2) {
+                  if (error) return nextEnfant(error)
+                  if (hasChanged2) {
+                    aliasResolved = true
+                    hasChanged = true
+                    enfant = newArbre
+                  }
+                  nextEnfant(null, enfant)
+                })
+              } else {
+                nextEnfant(null, enfant)
+              }
+            })
+          } else {
+            log.dataError(`mauvais alias ${badAlias} non résolu dans l’arbre ${currentArbre}`)
+            nextEnfant()
+          }
+        } else {
+          nextEnfant()
+        }
+      }).seq(function (enfants) {
+        if (aliasResolved) {
+          arbre.enfants = enfants
+          hasChanged = true
+        }
+        next(null, arbre, hasChanged)
+      }).catch(next)
+    }
+
     // init
     const $cacheRessource = lassi.service('$cacheRessource')
     const $ressourceRepository = lassi.service('$ressourceRepository')
+    // les rid à passer à loadAndClean2
+    const ridToClean = new Set()
+    // des rid d'arbre contenant des aliasInvalides
+    // une globale pour l'oid de l'arbre courant
+    let currentArbre
+    // une autre pour savoir s'il faut chercher des alias invalides
+    let currentArbreHasInvalidAliases
+
     let nb = 0
 
     updateLog(name)
@@ -215,7 +377,15 @@ module.exports = {
     }).seq(function (todoThen) {
       purge(todoThen, this)
     }).seq(function () {
-      updateLog(`traitement de ${nb} arbres terminé`)
+      updateLog(`traitement de ${nb} arbres terminé, on passe aux ressources qu’ils contenaient`)
+      nb = 0
+      this(null, [...ridToClean])
+    }).seqEach(function (rid) {
+      nb++
+      if (nb % 100 === 0) updateLog(`traitement de la ${nb}e ressource`)
+      loadAndClean2(rid, this)
+    }).seq(function () {
+      updateLog(`traitement de ${nb} ressources terminé`)
       done()
     }).catch(done)
   } // run
