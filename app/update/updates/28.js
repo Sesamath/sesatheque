@@ -59,6 +59,8 @@ module.exports = {
 
       const todoThen = new Set()
       nb++
+      // on informe de l'avancement
+      if (! nb % 50) updateLog(`traitement du ${nb}e arbre`)
 
       let hasChanged = cleanItem(arbre)
       // les enfants
