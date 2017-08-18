@@ -648,7 +648,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         if (ressourceCached) {
           next(null, EntityRessource.create(ressourceCached))
         } else {
-          EntityRessource.match('_id').equals(oid).grabOne(function (error, ressource) {
+          EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
             cacheAndNext(error, ressource, next)
           })
         }

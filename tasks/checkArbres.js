@@ -79,7 +79,7 @@ function getPaquet (start, next) {
     filters: [
       {index: 'type', values: ['arbre']}
     ],
-    orderBy: '_id',
+    orderBy: 'dateCreation',
     start: start,
     nb: nb
   }

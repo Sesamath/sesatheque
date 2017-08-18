@@ -140,7 +140,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $cachePersonne, $groupe
       this()
     }).seq(function () {
       // on va chercher en bdd
-      const key = (id.substr('/') === -1) ? '_id' : 'pid'
+      const key = (id.substr('/') === -1) ? 'oid' : 'pid'
       EntityPersonne.match(key).equals(id).grabOne(this)
     }).seq(function (personne) {
       if (!personne) return next()

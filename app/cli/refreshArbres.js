@@ -236,7 +236,7 @@ function refreshArbres (oid, done) {
   const $ressourceFetch = lassi.service('$ressourceFetch')
   if (oid) {
     flow().seq(function () {
-      EntityRessource.match('_id').equals(oid).grabOne(this)
+      EntityRessource.match('oid').equals(oid).grabOne(this)
     }).seq(function (arbre) {
       if (!arbre) {
         taskLog(`L’arbre ${oid} n’existe pas`)
