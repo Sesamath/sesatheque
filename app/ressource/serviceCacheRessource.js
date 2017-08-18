@@ -46,6 +46,8 @@ module.exports = function ($cache, $settings, EntityRessource) {
    * @return {string}
    */
   function getKey (id, origine) {
+    if (!id) throw new Error('getKey veut un id')
+    if (typeof id !== 'string') throw new Error('getKey veut un id en string')
     if (id.indexOf('/') !== -1) return `ressource_${id.replace('/', '_')}`
     if (origine) return `ressource_${origine}_${id}`
     return `ressource_${myBaseId}_${id}`
