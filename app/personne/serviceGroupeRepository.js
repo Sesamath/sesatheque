@@ -69,7 +69,7 @@ module.exports = function (EntityGroupe, $cacheGroupe) {
   }
 
   /**
-   * Récupère une liste de groupes dont l'oid est gestionnaire
+   * Récupère une liste de groupes dont le pid fourni est gestionnaire
    * @param {string} pid
    * @param {groupeListCallback} next
    * @memberOf $groupeRepository

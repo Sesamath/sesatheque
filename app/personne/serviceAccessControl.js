@@ -549,7 +549,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * @memberOf $accessControl
    */
   $accessControl.isAuthenticated = function (context) {
-    return !!(context && context.session && context.session.user && context.session.user.oid > 0) // id=-1 avec une ip locale et un token
+    return !!(context && context.session && context.session.user && context.session.user.oid && context.session.user.oid !== -1) // id=-1 avec une ip locale et un token
   }
 
   /**
@@ -560,7 +560,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.isAuteur = function (context, ressource) {
     const pid = $accessControl.getCurrentUserPid(context)
-    return (ressource && ressource.auteurs && ressource.auteurs.indexOf(pid) > -1)
+    return (ressource && ressource.auteurs && ressource.auteurs.indexOf(pid) !== -1)
   }
 
   /**
@@ -571,7 +571,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    */
   $accessControl.isContributeur = function (context, ressource) {
     const pid = $accessControl.getCurrentUserPid(context)
-    return (ressource && ressource.contributeurs && ressource.contributeurs.indexOf(pid) > -1)
+    return (ressource && ressource.contributeurs && ressource.contributeurs.indexOf(pid) !== -1)
   }
 
   /**
@@ -702,21 +702,21 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
    * Connecte un user sesalab (regarde s'il existe et s'il faut le mettre à jour et le met en session)
    * @param {Context} context
    * @param {object}  sesalabUser Le user sesalab à son format
-   * @param {string}  domaine     Le domaine du sesalab concerné
+   * @param {string}  baseId      La baseId du sesalab concerné
    * @param {personneCallback}  next
    * @memberOf $accessControl
    */
-  $accessControl.loginFromSesalab = function (context, sesalabUser, domaine, next) {
+  $accessControl.loginFromSesalab = function (context, sesalabUser, baseId, next) {
     function setSession (error, personne) {
       log.debug('setSession error', error)
       log.debug('setSession personne', personne)
-      if (personne) context.session.user = personne
-      else if (!error) context.session.user = {oid: 0, _lastCheck: new Date()}
-      next(error, personne)
+      if (error) return next(error)
+      context.session.user = personne || {oid: 0, _lastCheck: new Date()}
+      next(null, personne)
     }
 
-    log.debug('loginFromSesalab avec le domaine ' + domaine + ' et le user', sesalabUser, 'sesasso', {max: 10000})
-    if (domaine && sesalabUser.oid) {
+    log.debug('loginFromSesalab avec baseId ' + baseId + ' et le user', sesalabUser, 'sesasso', {max: 10000})
+    if (baseId && sesalabUser.oid) {
       /**
        * @private
        * @type {Personne}
@@ -731,14 +731,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
       if (sesalabUser.externalId && sesalabUser.externalMech) {
         personne.pid = sesalabUser.externalMech + '/' + sesalabUser.externalId
       } else {
-        personne.pid = domaine + '/' + sesalabUser.oid
+        personne.pid = baseId + '/' + sesalabUser.oid
       }
       if (sesalabUser.type === 1) personne.roles.formateur = true
       if (personne.origine === 'sesasso') personne.roles.acces_correction = true
       // on attend le vrai client sso pour gérer les groupes
       $personneRepository.updateOrCreate(personne, setSession)
     } else {
-      next(new Error('Impossible de connecter un utilisateur sesalab sans son domaine et oid (manquant dans la réponse de sesalab)'))
+      next(new Error('Impossible de connecter un utilisateur sesalab sans baseId et oid (manquant dans la réponse de sesalab)'))
     }
   }
 

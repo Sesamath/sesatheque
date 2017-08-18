@@ -339,7 +339,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
       var partial = !!context.get.partial
       if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
-        partial = (ressourcePostee.oid > 0 || (ressourcePostee.origine && ressourcePostee.idOrigine))
+        partial = (ressourcePostee.oid || (ressourcePostee.origine && ressourcePostee.idOrigine))
       }
       if (partial) ressourcePostee = Object.assign({}, ressourceBdd, ressourcePostee)
       ressourceOriginale = ressourceBdd
@@ -349,8 +349,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
     }).seq(function (ressourceNew) {
       // on ajoute le user courant pour serie et sequenceModele,
-      // pas encore pour tout par crainte d'effets de bords…
-      if (pid && ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele') {
+      // pas encore pour tous les types par crainte d'effets de bords pas prévus…
+      if (pid && (ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele')) {
         ressourceNew.auteurs = [pid]
       }
       $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)

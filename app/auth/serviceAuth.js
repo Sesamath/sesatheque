@@ -130,11 +130,12 @@ module.exports = function ($accessControl, $ressourcePage) {
    * Retourne les infos pour le bloc d'authentification
    * @memberOf $auth
    * @param {Context} context
-   * @returns {object}
+   * @returns {object} authBloc, avec les propriétés user, ssoLinks, loginLink, loginLinks, logoutLink
    */
   $auth.getAuthBloc = function (context) {
     const authBloc = {}
-    // si on est sur /connexion ou /deconnexion on revient sur la home, sinon la page courante
+    // si on est sur /connexion ou /deconnexion faudra revenir sur la home après (dé)connexion,
+    // sinon la page courante
     const urlRetour = context.request.originalUrl.replace(/\/(:?de)?connexion/, '')
     if ($accessControl.isAuthenticated(context)) {
       // menu authentifié
