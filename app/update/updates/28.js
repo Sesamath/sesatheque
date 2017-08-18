@@ -236,6 +236,10 @@ module.exports = {
       }
       $ressourceRepository.load(oid, function (error, ressource) {
         if (error) return next(error)
+        if (!ressource) {
+          log.dataError(`La ressource ${oid} n’existe pas`)
+          return next()
+        }
         let hasChanged = false
         if (ressource.restriction) {
           log.dataError(`ressource ${ressource.oid} privée (dans un arbre sesamath)`)
