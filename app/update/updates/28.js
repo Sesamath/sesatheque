@@ -104,22 +104,23 @@ module.exports = {
 
     function cleanItem (item) {
       let hasChanged = false
-      // par sécurité on ne change que l'aspect public des arbres
-      // (au cas où un corrigé se serait glissé dans un arbre sesamath)
-      if (item.type === 'arbre') {
-        if (item.hasOwnProperty('restriction')) {
-          if (item.restriction) {
-            hasChanged = true
-            item.restriction = 0
-          }
-        } else if (item.hasOwnProperty('public')) {
-          if (!item.public) {
-            hasChanged = true
-            item.public = true
-          }
+      if (item.hasOwnProperty('restriction')) {
+        if (item.restriction) {
+          log.dataError('item restreint dans un arbre sesamath', item)
+          hasChanged = true
+          item.restriction = 0
         }
-      } else if (item.hasOwnProperty('public') && !item.public) {
+      } else if (item.hasOwnProperty('public')) {
+        if (!item.public) {
+          log.dataError('item privé dans un arbre sesamath', item)
+          hasChanged = true
+          item.public = true
+        }
+      }
+      if (item.hasOwnProperty('publie') && !item.publie) {
         log.dataError('item privé dans un arbre sesamath', item)
+        hasChanged = true
+        item.publie = true
       }
       return hasChanged
     }
