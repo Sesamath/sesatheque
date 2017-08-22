@@ -509,6 +509,30 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   }
 
   /**
+   * Supprime 'doucement' une ressource
+   * @memberOf $ressourceRepository
+   * @param {EntityRessource} ressource
+   * @param {errorCallback}   next
+   * @returns {undefined}
+   */
+  $ressourceRepository.softDelete = function repoSoftDelete (ressource, next) {
+    if (ressource && ressource.oid) {
+      log.debug('La ressource ' + ressource.oid + ' va être soft deleted')
+      if (!ressource.softDelete) ressource = EntityRessource.create(ressource)
+      ressource.softDelete(function (error) {
+        if (error) {
+          next(error)
+        } else {
+          log.debug('La ressource ' + ressource.oid + ' (' + ressource.oid + ') a été soft deleted')
+          next()
+        }
+      })
+    } else {
+      next(new Error('softDelete appelé sans ressource'))
+    }
+  }
+
+  /**
    * Récupère un liste de ressource d'après critères
    * @memberOf $ressourceRepository
    * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
@@ -556,6 +580,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         nb = listeMax
       }
       log.debug(`getListe démarre ${start} avec max ${nb} et les options valides`, optionsSafe)
+      optionsSafe.deletedOnly = !!options.deletedOnly
       // le format est géré par le controleur
 
       // si on est toujours là on peut construire la requete
@@ -606,6 +631,10 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       if (optionsSafe.orderBy) {
         if (optionsSafe.order === 'desc') query = query.sort(optionsSafe.orderBy, 'desc')
         else query = query.sort(optionsSafe.orderBy)
+      }
+      // deletedOnly
+      if (optionsSafe.deletedOnly) {
+        query = query.onlyDeleted()
       }
       let nbTotal = 0
       flow().seq(function () {

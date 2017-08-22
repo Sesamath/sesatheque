@@ -51,13 +51,13 @@ const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('ses
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
   /**
-   * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
+   * Supprime 'doucement' une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
    * @param {Context} context
    * @param rid ou oid ou origine/idOrigine
    */
-  function deleteAndSend (context, rid) {
-    log.debug('dans cb api deleteRessource ' + rid)
+  function softDeleteAndSend (context, rid) {
+    log.debug('dans cb api softDeleteRessource ' + rid)
     // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
     $ressourceRepository.load(rid, function (error, ressource) {
       if (error) {
@@ -67,9 +67,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (errorMessage) {
             $json.denied(context, errorMessage)
           } else {
-            $ressourceRepository.delete(ressource, function (error) {
+            $ressourceRepository.softDelete(ressource, function (error) {
               if (error) $json.send(context, error)
-              // else $json.send(context, null, {error:"message d'erreur bidon"})
               else $json.sendOk(context, {deleted: rid})
             })
           }
@@ -169,6 +168,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function getListePerso (context) {
     context.timeout = 3000
+    let deletedOnly = context.request.query.deleted;
     const pid = $accessControl.getCurrentUserPid(context)
     /**
      * Liste des ressources perso
@@ -181,7 +181,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       // la visibilité, c'est pour cet auteur,
       const visibility = 'auteur/' + pid
       flow().seq(function () {
-        $ressourceRepository.getListe(visibility, {filters: [{index: 'auteurs', values: [pid]}], nb}, this)
+        let options = {filters: [{index: 'auteurs', values: [pid]}], nb};
+        if (deletedOnly) options.deletedOnly = true;
+        $ressourceRepository.getListe(visibility, options, this)
       }).seq(function (ressources) {
         if (ressources.length) mesRessources = ressources
         if (ressources.length === nb) {
@@ -190,7 +192,9 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           // on est déjà au taquet
           this(null, [])
         } else {
-          $ressourceRepository.getListe(visibility, {filters: [{index: 'contributeurs', values: [pid], nb}]}, this)
+          let options = {filters: [{index: 'contributeurs', values: [pid], nb}]};
+          if (deletedOnly) options.deletedOnly = true;
+          $ressourceRepository.getListe(visibility, options, this)
         }
       }).seq(function (ressources) {
         if (ressources.length) mesRessources.concat(ressources)
@@ -1253,7 +1257,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @param {Integer} oid
    */
   controller.delete('ressource/:oid', function (context) {
-    deleteAndSend(context, context.arguments.oid)
+    softDeleteAndSend(context, context.arguments.oid)
   })
   controller.options('ressource/:oid', optionsDeleteOk)
 
@@ -1265,7 +1269,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     const rid = context.arguments.origine + '/' + context.arguments.idOrigine
-    deleteAndSend(context, rid)
+    softDeleteAndSend(context, rid)
   })
   controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
 
