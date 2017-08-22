@@ -51,13 +51,13 @@ const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('ses
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
   /**
-   * Supprime 'doucement' une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
+   * Efface ou supprime 'doucement' une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
    * @private
    * @param {Context} context
    * @param rid ou oid ou origine/idOrigine
    */
-  function softDeleteAndSend (context, rid) {
-    log.debug('dans cb api softDeleteRessource ' + rid)
+  function deleteAndSend (context, rid) {
+    log.debug('dans cb api deleteRessource ' + rid)
     // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
     $ressourceRepository.load(rid, function (error, ressource) {
       if (error) {
@@ -67,10 +67,17 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (errorMessage) {
             $json.denied(context, errorMessage)
           } else {
-            $ressourceRepository.softDelete(ressource, function (error) {
-              if (error) $json.send(context, error)
-              else $json.sendOk(context, {deleted: rid})
-            })
+            if (context.request.query.hardDeleted) {
+              $ressourceRepository.delete(ressource, function (error) {
+                if (error) $json.send(context, error)
+                else $json.sendOk(context, {deleted: rid})
+              })
+            } else {
+              $ressourceRepository.softDelete(ressource, function (error) {
+                if (error) $json.send(context, error)
+                else $json.sendOk(context, {deleted: rid})
+              })
+            }
           }
         })
       } else {
@@ -1224,7 +1231,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
 
   /**
-   * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+   * Retourne la ressource d'après son oid (si on a les droits de lecture dessus), accepte ?format=(alias|normalized)
    * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
    * @Route GET /api/ressource/:oid
    * @param {Integer} oid
@@ -1237,7 +1244,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
-   * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+   * Retourne la ressource d'après son id d'origine (si on a les droits de lecture dessus), accepte ?format=(alias|normalized)
    * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
    * @route GET /api/ressource/:origine/:idOrigine
    * @param {string} :origine
@@ -1252,12 +1259,42 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   })
 
   /**
+   * Restaure la ressource d'après son oid (si on a les droits de lecture dessus)
+   * Au format {@link reponseRessource}
+   * @Route PUT /api/restore/ressource/:oid
+   * @param {Integer} oid
+   */
+  controller.put('restore/ressource/:oid', function (context) {
+    var oid = context.arguments.oid
+    EntityRessource
+      .match('oid').equals(oid)
+      .onlyDeleted() // La séquence récupérée a été soft deleted
+      .grabOne(function (error, ressource) {
+        cacheAndNext(error, ressource, function () {
+          log.debug('restore ressource api avec', ressource, 'avirer', {max: 5000})
+          if (error) {
+            $json.send(context, error)
+          } else if (ressource) {
+            if ($accessControl.hasReadPermission(context, ressource)) {
+              ressource.restore(function (restoredRessource) {
+                $json.send(context, null, restoredRessource)
+              })
+            } else {
+              $json.denied(context)
+            }
+          } else {
+            $json.notFound(context, 'Cette ressource n’existe pas.')
+          }
+        })
+      })
+
+  /**
    * Delete ressource par oid, retourne {@link reponseDeleted}
    * @route DEL /api/ressource/:oid
    * @param {Integer} oid
    */
   controller.delete('ressource/:oid', function (context) {
-    softDeleteAndSend(context, context.arguments.oid)
+    deleteAndSend(context, context.arguments.oid)
   })
   controller.options('ressource/:oid', optionsDeleteOk)
 
@@ -1269,7 +1306,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     const rid = context.arguments.origine + '/' + context.arguments.idOrigine
-    softDeleteAndSend(context, rid)
+    deleteAndSend(context, rid)
   })
   controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
 

@@ -738,7 +738,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             data.contentBloc.error = "Impossible d'accéder à la ressource " + ressource.titre + ' (' + oid + ')'
           } else if (ressource) {
             if ($accessControl.hasPermission('delete', context, ressource)) {
-              $ressourceRepository.delete(ressource, function (error) {
+              $ressourceRepository.softDelete(ressource, function (error) {
                 if (error) {
                   log.error(error)
                   data.contentBloc.error = 'Erreur lors de la suppression de la ressource ' + ressource.titre + ' (' + oid + ')'

@@ -633,9 +633,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         else query = query.sort(optionsSafe.orderBy)
       }
       // deletedOnly
-      if (optionsSafe.deletedOnly) {
-        query = query.onlyDeleted()
-      }
+      if (optionsSafe.deletedOnly) query = query.onlyDeleted()
       let nbTotal = 0
       flow().seq(function () {
         // le nb total de résultats
