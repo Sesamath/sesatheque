@@ -753,7 +753,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
               $ressourcePage.printError(context, 'Erreur interne dans la vérification des droits')
             }
           } else {
-            log.error(new Error('Token OK mais la ressource ' + oid + " n’existe pas ou plus !"))
+            log.error(new Error('Token OK mais la ressource ' + oid + ' n’existe pas ou plus !'))
             $ressourcePage.printError(context, 'Erreur interne, ressource introuvable, probablement déjà effacée')
           }
         })
@@ -893,7 +893,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                 var options = {attachment: 'figure_mathgraph_' + ressource.oid + '-' + dateSuffix + '.jnlp'}
                 // const figureUnite = 'TWF0aEdyYXBoSmF2YTEuMAAAABA+TMzNAANmcmH###8BAP8BAAAAAAAAAAAHrwAABPUAAAAAAAAAAAAAAAEAAAAI#####wAAAAEACkNDYWxjQ29uc3QA#####wACcGkAFjMuMTQxNTkyNjUzNTg5NzkzMjM4NDb#####AAAAAQAKQ0NvbnN0YW50ZUAJIftURC0Y#####wAAAAEACkNQb2ludEJhc2UA#####wAAAAAAEwABVQDAMYAAAAAAAEAcAAAAAAAABQAAQEefPnz58+hAR58+fPnz6P####8AAAABABRDRHJvaXRlRGlyZWN0aW9uRml4ZQD#####AQAAAAAWAAABAAEAAAABAT#wAAAAAAAA#####wAAAAEAD0NQb2ludExpZURyb2l0ZQD#####AAAAAAATAAFWAEAVAAAAAAAAQBwAAAAAAAAFAAFAV58+fPnz6AAAAAL#####AAAAAQAIQ1NlZ21lbnQA#####wAAAAAAAAAAAQABAAAAAQAAAAP#####AAAAAQAHQ01pbGlldQD#####AQAAAAAWAAABBQAAAAABAAAAA#####8AAAACAAxDQ29tbWVudGFpcmUA#####wAAAAAAAAAAAAAAAABAGAAAAAAAAAAAAAUTAAAAAAABAAAAAAABMf####8AAAABAAlDTG9uZ3VldXIA#####wAAAAEAAAADAAAAB###########'
                 const figureVide = 'TWF0aEdyYXBoSmF2YTEuMAAAABA+TMzNAANmcmH###8BAP8BAAAAAAAAAAAHrwAABPUAAAAAAAAAAAAAAAEAAAAB#####wAAAAEACkNDYWxjQ29uc3QA#####wACcGkAFjMuMTQxNTkyNjUzNTg5NzkzMjM4NDb#####AAAAAQAKQ0NvbnN0YW50ZUAJIftURC0Y################'
-                const figure = ressource.parametres && ressource.parametres.figure || figureVide
+                const figure = (ressource.parametres && ressource.parametres.figure) || figureVide
                 var content = `<?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+" codebase="https://www.mathgraph32.org/jaws" >
   <information>
