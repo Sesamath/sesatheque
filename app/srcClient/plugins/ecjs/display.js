@@ -52,8 +52,6 @@ module.exports = function display (ressource, options, next) {
     // => security restrictions on reading canvas pixel data with local or cross-domain images)
     // on contourne avec le domaine local, et on redirige /replication_calculatice via le frontal web (varnish)
     var ecjsBase = sjtUrl.getParameter('ecjsBase') || options.ecjsBase || window.location.protocol + '//' + window.location.host + '/replication_calculatice/javascript'
-http://bibliotheque.sesamath.net/ressource/rechercher?oid=&origine=&idOrigine=&titre=&type=ecjs&publie=&langue=
-http://bibliotheque.sesamath.net/public/rechercher?oid=&origine=&idOrigine=&titre=&type=ecjs&publie=&langue=
 
     // d'après {ecjsBase}/api/clc-api.main.js
     // celui-là détruit notre style et semble ne rien apporter dans les exos
