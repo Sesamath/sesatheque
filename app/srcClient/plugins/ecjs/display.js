@@ -35,6 +35,8 @@ var log = require('sesajstools/utils/log')
 var sjtUrl = require('sesajstools/http/url')
 
 var page = require('../../page/index')
+var config = require('../../../config')
+var myBaseUrl = config.application.baseUrl
 
 /**
  * Affiche les ressources ecjs (exercices calculatice en javascript)
@@ -48,7 +50,10 @@ module.exports = function display (ressource, options, next) {
   function displayEcjs () {
     /* global head */
     // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
-    var ecjsBase = sjtUrl.getParameter('ecjsBase') || options.ecjsBase || 'https://ressources.sesamath.net/replication_calculatice/javascript'
+    // pb, les exercices avec canvas ne fonctionnent pas (pb de CORS sur les getImageData
+    // => security restrictions on reading canvas pixel data with local or cross-domain images)
+    // on contourne avec le domaine local, et on redirige /replication_calculatice via le frontal web (varnish)
+    var ecjsBase = sjtUrl.getParameter('ecjsBase') || options.ecjsBase || myBaseUrl + 'replication_calculatice/javascript'
 
     // d'après {ecjsBase}/api/clc-api.main.js
     // celui-là détruit notre style et semble ne rien apporter dans les exos
