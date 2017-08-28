@@ -45,7 +45,6 @@ module.exports = {
     const reindexAll = $entitiesCli().commands().reindexAll
     flow().seq(function () {
       reindexAll('EntityArchive', this)
-    }).seq(function () {
     }).done(next)
   } // run
 }
