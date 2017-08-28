@@ -57,8 +57,7 @@ module.exports = function (EntityArchive) {
   EntityArchive.table = 'archive'
 
   EntityArchive
-    .defineIndex('origine', 'string')
-    .defineIndex('idOrigine', 'string')
+    .defineIndex('rid', 'string')
     .defineIndex('version', 'integer')
     .defineIndex('archiveOid', 'string')
 }
