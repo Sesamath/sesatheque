@@ -33,6 +33,7 @@
 
 var path = require('path')
 var appConfig = require('../config')
+const maxAge = appConfig.application.staticMaxAge || '7d'
 
 // Composant de gestion des ressources
 var ressourceComponent = lassi.component('ressource')
@@ -84,11 +85,11 @@ ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressour
 // nos ressources statiques, si override en config des js webpack ils passent avant
 if (appConfig.application.staging === 'dev' && appConfig.application.webpackOutput) {
   ressourceComponent.controller(function () {
-    this.serve(path.join(__dirname, appConfig.application.webpackOutput))
+    this.serve('/', {maxAge, fsPath: path.join(__dirname, appConfig.application.webpackOutput)})
   })
 }
 ressourceComponent.controller(function () {
-  this.serve(path.join(__dirname, 'public'))
+  this.serve('/', {maxAge, fsPath: path.join(__dirname, 'public')})
 })
 
 // les pages html de consultation / modification

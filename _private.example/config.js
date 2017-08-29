@@ -28,7 +28,9 @@ module.exports = {
     // pour les envois de notification (du système)
     mail: '', // OBLIGATOIRE
     // utilisé par le SSO (sesasso-bibli et sesalab-sso), prod|dev
-    staging: 'dev' // OBLIGATOIRE
+    staging: 'dev', // OBLIGATOIRE
+    // délai de conservation en cache, peut être élevé car on change l'url à chaque publication de version
+    staticMaxAge: '7d'
   },
 
   // connexion mongoDb, pour lassi, à préciser
