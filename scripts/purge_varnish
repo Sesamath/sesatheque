@@ -35,11 +35,14 @@ function purge_varnish() {
     echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
   else
     # on est dans app
+    version=$(sed -nre 's/.*"version"[ \t]*:[ \t]*"([0-9\.]+)".*/\1/p' ../package.json)
     find */public -type f $findOpt | while read file
     do
-      url=$baseUrl${file#*public} # on démarre au / qui suit build
+      url=$baseUrl${file#*public} # on démarre au / qui suit public
       echo -n "$url : "
       curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
+      echo -n " ?$version : "
+      curl -s -X PURGE $url?$version |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
       echo
     done
   fi

@@ -195,7 +195,8 @@ module.exports = function edit (ressource, options) {
 
     const $ = require('jquery')
     var wd = window.document
-    var isSubmitForced = false      // pour forcer le submit au coup suivant en cas d'erreur de récupération de graphe sur le 1er
+    // pour forcer le submit au coup suivant en cas d'erreur de récupération de graphe sur le 1er
+    var isSubmitForced = false
     var isEditgrapheLoaded = false
     var $editgraphe
     var $textarea

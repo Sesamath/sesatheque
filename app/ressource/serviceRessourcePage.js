@@ -36,6 +36,7 @@ const sjt = require('sesajstools')
 const sjtObj = require('sesajstools/utils/object')
 const flow = require('an-flow')
 const moment = require('moment')
+const version = require('../../package.json').version
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
 const ressConfig = require('./config')
@@ -741,10 +742,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var data = $page.getDefaultData()
     // css ajouté par le listener à la fin, suivant la valeur de context.layout,
     // on ajoute ici les js suivant la vue
-    data.$metas.js = ['/page.bundle.js']
+    data.$metas.js = [`/page.bundle.js?${version}`]
     if (viewName === 'display' || viewName === 'preview' || viewName === 'formEdit') {
-      data.$metas.js.push('/display.bundle.js')
-      if (viewName === 'formEdit') data.$metas.js.push('/edit.bundle.js')
+      data.$metas.js.push(`/display.bundle.js?${version}`)
+      if (viewName === 'formEdit') data.$metas.js.push(`/edit.bundle.js?${version}`)
     }
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view: viewName}

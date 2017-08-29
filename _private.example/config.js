@@ -1,11 +1,14 @@
 var path = require('path')
 
 /**
- * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git
+ * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git,
+ * dans un fichier js (et pas json) pour pouvoir mettre des commentaires
  *
- * Dans un fichier js (et pas json) pour pouvoir mettre des commentaires
+ * Il contient toutes les clés utilisées ou utilisables, certaines sont initialisées ici
+ * avec leur valeur par défaut. Les clés obligatoires sont mentionnées
  *
  * Ce fichier devrait pouvoir être copié tel quel dans _private et fonctionner avec docker-compose.yml
+ * (après avoir complété les champs obligatoires)
  *
  * Pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
  * prendre les js de _private.exemple-docker-sesamath
@@ -13,17 +16,21 @@ var path = require('path')
 module.exports = {
   application: {
     // utilisé en préfixe des message de log et dans qq messages
-    name: 'sesatheque',
+    name: 'sesatheque', // OBLIGATOIRE
     // identifiant de cette sésathèque, utilisé pour les rid des ressources créées ici
-    baseId: 'localhost3001',
+    baseId: 'localhost3001', // OBLIGATOIRE
     // sesatheque de référence pour les baseId avec lesquels on partage des ressources
-    baseIdRegistrar: 'localhost3001',
+    baseIdRegistrar: 'localhost3001', // OBLIGATOIRE
     // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici (ça permet de vérifier)
     // sert aussi pour les urls des composants statiques, ou pour construire des urls qu'on passe à l'extérieur
     // (sso par ex)
-    baseUrl: 'https://localhost:3001/',
-    mail: 'me@example.com',
-    staging: 'dev' // prod ou dev
+    baseUrl: 'https://localhost:3001/', // OBLIGATOIRE
+    // pour les envois de notification (du système)
+    mail: '', // OBLIGATOIRE
+    // utilisé par le SSO (sesasso-bibli et sesalab-sso), prod|dev
+    staging: 'dev', // OBLIGATOIRE
+    // délai de conservation en cache, peut être élevé car on change l'url à chaque publication de version
+    staticMaxAge: '7d'
   },
 
   // connexion mongoDb, pour lassi, à préciser
@@ -31,9 +38,9 @@ module.exports = {
     database: {
       host: 'localhost',
       port: '27017',
-      name: 'bibliotheque',
-      user: 'bibliotheque',
-      password: 'xxx',
+      name: 'sesatheque',
+      user: '',
+      password: '',
       // cf http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect
       options: {
         poolSize: 10,
@@ -45,7 +52,8 @@ module.exports = {
   // ça c'est pour node qui va lancer l'appli, utilisé par lassi
   $server: {
     hostname: 'localhost',
-    // on peut indiquer un autre port ici que celui de baseUrl, cli.js en mettra un autre par exemple
+    // port d'écoute de nodeJs, on peut indiquer ici un autre port ici que celui de baseUrl
+    // (si y'a un proxy, ou par ex pour cli.js qui en mettra un autre)
     port: 3001
   },
 
@@ -53,11 +61,11 @@ module.exports = {
   $rail: {
     cookie: {
       // à préciser avec une chaîne aléatoire complexe
-      key: 'xxx' // en mettre un autre dans _private/config !
+      key: '' // OBLIGATOIRE
     },
     session: {
       // à préciser avec une chaîne aléatoire complexe
-      secret: 'xxx' // en mettre un autre dans _private/config !
+      secret: '' // OBLIGATOIRE
     }
   },
 
