@@ -96,15 +96,15 @@ module.exports = function (EntityPersonne, $cachePersonne) {
   })
 
   EntityPersonne
-      .defineIndex('pid', 'string')
-      .defineIndex('nom', 'string')
-      .defineIndex('email', 'string')
-      // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
-      // une callback qui renvoie la valeur (ou un tableau de valeurs)
-      .defineIndex('roles', 'string', function () {
-        log.debug('roles de ' + this.oid, sjtObj.truePropertiesList(this.roles))
-        return sjtObj.truePropertiesList(this.roles)
-      })
-      .defineIndex('groupesMembre', 'string')
-      .defineIndex('groupesSuivis', 'string')
+    .defineIndex('pid', 'string')
+    .defineIndex('nom', 'string')
+    .defineIndex('email', 'string')
+    // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
+    // une callback qui renvoie la valeur (ou un tableau de valeurs)
+    .defineIndex('roles', 'string', function () {
+      log.debug('roles de ' + this.oid, sjtObj.truePropertiesList(this.roles))
+      return sjtObj.truePropertiesList(this.roles)
+    })
+    .defineIndex('groupesMembre', 'string')
+    .defineIndex('groupesSuivis', 'string')
 }

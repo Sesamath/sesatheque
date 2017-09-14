@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "engines": {
     "node": ">6"
   },
@@ -53,15 +53,15 @@
     "elementtree": "0.1.6",
     "jquery": "3.2.1",
     "jstree": "3.3.4",
-    "lassi": "Sesamath/lassi#2.1.11",
+    "lassi": "Sesamath/lassi#2.1.15",
     "lodash": "4.16.4",
     "memcached": "2.2.2",
     "moment": "2.15.1",
     "morgan": "1.7.0",
     "mysql2": "^1.3.6",
     "request": "2.81.0",
-    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.20",
-    "sesajstools": "git://src.sesamath.net/sesajstools#1.0.11",
+    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.21",
+    "sesajstools": "git://src.sesamath.net/sesajstools#1.0.14",
     "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.5",
     "sesatheque-client": "git://github.com/Sesamath/sesatheque-client.git#1.2.27"
   },
