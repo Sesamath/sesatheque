@@ -41,19 +41,19 @@ var path = require('path')
  */
 var mainComponent = lassi.component('main')
 
-  /**
-   * On ajoute un dust.helper à l'initialisation du framework
-   * Cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
-   *
-   * context contient les propriétés stack,global,blocks,templateName,
-   *     on peut récupérer les paramètres passés à la vue avec context.get('param')
-   * bodies contient block
-   * params liste les attributs passé au helper avec {@helper attrName1=...}
-   * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
-   * this.application.templateEngines.dust existe plus /
-  this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
-    return chunk.write('<pre class='debug'>' + JSON.stringify(params, null, 2) + '</pre>');
-  }); /**/
+/**
+ * On ajoute un dust.helper à l'initialisation du framework
+ * Cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
+ *
+ * context contient les propriétés stack,global,blocks,templateName,
+ *     on peut récupérer les paramètres passés à la vue avec context.get('param')
+ * bodies contient block
+ * params liste les attributs passé au helper avec {@helper attrName1=...}
+ * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
+ * this.application.templateEngines.dust existe plus /
+this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
+  return chunk.write('<pre class='debug'>' + JSON.stringify(params, null, 2) + '</pre>');
+}); /**/
 
 mainComponent.controller(function () {
   require('./controllerMain')(this)
@@ -75,13 +75,14 @@ mainComponent.service('$json', function () {
   return require('./serviceJson')()
 })
 
+// pour la doc
+mainComponent.controller(function () {
+  this.serve('doc', path.resolve(__dirname, '../../documentation'))
+})
 /**
  * En dev on ajoute des routes de debug
  */
 if (!global.isProd) {
-  mainComponent.controller(function () {
-    this.serve('doc', path.resolve(__dirname, '../../documentation'))
-  })
   mainComponent.controller('debug', function () {
     require('./controllerDebug')(this)
   })
