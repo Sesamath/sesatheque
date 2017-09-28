@@ -62,8 +62,8 @@
     "request": "2.81.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.21",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.14",
-    "sesalab-sso": "git://src.sesamath.net/sesalab-sso#1.0.8",
-    "sesatheque-client": "git://github.com/Sesamath/sesatheque-client.git#1.2.28"
+    "sesalab-sso": "Sesamath/sesalab-sso#1.0.11",
+    "sesatheque-client": "Sesamath/sesatheque-client#1.2.29"
   },
   "devDependencies": {
     "amdefine": "^1.0.1",
