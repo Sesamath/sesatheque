@@ -71,22 +71,10 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
 
   // une fois les composants chargés on ajoutera memcache et nos listeners
   mainComponent.config(function ($cache, $settings, $accessControl, $routes, $flashMessages, $auth, $page) {
-    // on ajoute memcache si précisé dans les settings
-    var memcache = $settings.get('memcache', null)
-    if (memcache) {
-      if (typeof memcache !== 'object' || !memcache.host || !memcache.port) {
-        throw new Error('Il faut indiquer pour memcache un objet {host:xxx,port:nn}. ' +
-          " L'application sesatheque ne peut pas tourner avec un cluster memcache" +
-          ' car elle utilise memcache comme stockage commun aux différents workers nodejs')
-      }
-      if (!memcache.prefix) log.error('Pas de propriété prefix pour memcache en configuration (préfixe de clé)')
-      // le slot permet de préciser que cet engine ne gère que les clés qui commence par cette chaîne, '' prend donc tout
-      $cache.addEngine('', 'memcache', memcache)
-      appLog('Memcache ajouté avec ' + memcache.host + ':' + memcache.port)
-    } else if (process.env.NODE_UNIQUE_ID) {
-      // @see https://nodejs.org/api/cluster.html#cluster_cluster_ismaster
-      throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
-    }
+    // on ajoute redis
+    var redisSettings = $settings.get('redis', {})
+    if (!redisSettings.db) log.error('propriété redis.db non précisée en config, risque de collision si une autre appli utilise redis')
+    $cache.addEngine('', 'redis', redisSettings)
 
     // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
     // if (!global.isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
