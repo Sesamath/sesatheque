@@ -56,7 +56,7 @@
     "lassi": "Sesamath/lassi#2.1.21",
     "lodash": "4.16.4",
     "memcached": "2.2.2",
-    "moment": "2.15.1",
+    "moment": "2.15.2",
     "morgan": "1.9.0",
     "request": "2.81.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.21",
