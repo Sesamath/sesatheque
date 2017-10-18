@@ -51,11 +51,11 @@ module.exports = function display (ressource, options, next) {
 
     log('start ec2 display avec la ressource', ressource)
     // les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
+    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.fichier) {
       throw new Error('Paramètres manquants')
     }
     // le swf
-    swfUrl = ec2Base + '/' + ressource.parametres.swf
+    swfUrl = ec2Base + '/' + ressource.parametres.fichier
     // les fcts exportées pour le swf
     var optionsChargement = ressource.parametres.json || 'defaut'
     window.charger_options = function () {
