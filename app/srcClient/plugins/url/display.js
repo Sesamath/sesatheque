@@ -253,8 +253,8 @@ module.exports = function display (ressource, options, next) {
             else if (hasMqEditor) editorName = 'mqEditor'
             var editor
             if (editorName) editor = require('../../editors/' + editorName)
-            var urlUi = require('./displayUi')
-            // on ajoute tous nos div même si tous ne serviront pas (car urlUi les cherche dans la page)
+            var displayUi = require('./displayUi')
+            // on ajoute tous nos div même si tous ne serviront pas (car displayUi les cherche dans la page)
             var entete = dom.addElement(container, 'div', { id: 'entete' })
             dom.addElement(entete, 'div', { id: 'lienConsigne' }, 'Consigne')
             dom.addElement(entete, 'div', { id: 'lienReponse' }, 'Réponse')
@@ -319,13 +319,16 @@ module.exports = function display (ressource, options, next) {
                   "Aucun enregistrement ne sera effectué (car aucune destination n'a été fournie pour l'envoyer, normal en visualisation seule)")
               }
               addPage(url, params, function () {
-                urlUi(ressource, options, function () {
+                displayUi(ressource, options, function () {
                   $('#loading').empty()
                   next()
                 })
               })
             } else if (resultatCallback) {
-              addBoutonVu()
+              // pas de réponse demandée, on ajoute le bouton vu
+              page.addBoutonVu(function () {
+                sendReponse(null, true)
+              })
             }
           }) // require.ensure
         }) // page.loadAsync
