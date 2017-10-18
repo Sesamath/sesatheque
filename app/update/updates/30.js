@@ -74,7 +74,9 @@ module.exports = {
       if (ressource.parametres && ressource.parametres.swf) {
         nbModifs++
         ressource.parametres.fichier = ressource.parametres.swf
-        delete ressource.parametres.swf
+        // on n'efface pas ce paramètre car ça distingue peut-être une autre façon de fonctionner
+        // c'était swf pour ec1 ?
+        // delete ressource.parametres.swf
         ressource.store(next)
         // en tâche de fond
         $cacheRessource.delete(ressource.oid)
