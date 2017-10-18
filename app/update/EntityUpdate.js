@@ -52,9 +52,6 @@ module.exports = function (EntityUpdate) {
     this.date = initObj.date || new Date()
   })
 
-  // @todo inutile avec lassi#mongo, à virer après migration
-  EntityUpdate.table = 'updates'
-
   // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
   EntityUpdate
     .defineIndex('num', 'integer')

@@ -225,7 +225,7 @@ if (!config.lassiLogger) {
   config.lassiLogger = {
     '$entities': {
       logLevel: config.application.staging === 'prod' ? 'warning' : 'debug',
-      renderer: {name: 'fileRenderer', target: config.logs.dir + '/entities.log'}
+      renderer: {name: 'file', target: config.logs.dir + '/entities.log'}
     }
   }
 }
