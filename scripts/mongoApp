@@ -1,0 +1,74 @@
+#!/bin/bash
+
+usage() {
+  echo "$0 [file]"
+  echo 'Ouvre un shell mongo ou exécute un script mongo'
+  echo 'Options :'
+  echo '  -c <collection> : indique une collection (pour -i ou -x)'
+  echo '  -e <string> : évalue <string> dans le scope du script (ex `-e "var foo = 42"` pour avoir la variable foo dans le script)'
+  echo '                À utiliser avant -f'
+  echo '  -h : affiche cette aide'
+  echo '  -i <fichier import> : lance mongoimport sur ce fichier (-c obligatoires)'
+  echo '  -s <fichier> : exécute le script mongo contenu dans <fichier>'
+  echo '  -x <fichier export> : lance mongoexport vers ce fichier (-c obligatoires)'
+  echo
+  echo 'exemple d’export vers des fichiers ~/tmp/bibliotheque.YYYY-MM-JJ.export :'
+  echo "echo 'show collections'|$0 -q | while read c; do $0 -x ~/tmp/bibliotheque.$c.$(date +%F).export"
+  echo
+  echo 'exemple d’import, avec des fichiers ~/tmp/bibliotheque.YYYY-MM-JJ.export :'
+  echo 'for f in ~/tmp/bibliotheque.*.export; do b=$(basename $f); c=${b#bibliotheque.*}; coll=${c%.*.*}; echo $coll; ./scripts/mongoApp -i $f -c $coll ;done'
+  exit $1
+}
+
+jsCode=''
+file=''
+collection=''
+isImport=No
+isExport=No
+isQuiet=No
+
+# check des options
+while getopts "c:d:e:f:hi:qx:" OPTION
+do
+  case $OPTION in
+    c) collection=$OPTARG;;
+    e) jsCode="$OPTARG";;
+    f) file="$OPTARG";;
+    h) usage 0;;
+    i) file="$OPTARG"; isImport=Yes ;;
+    q) isQuiet=Yes;;
+    x) file="$OPTARG"; isExport=Yes ;;
+  esac
+done
+
+rootDir=$(dirname $0)/..
+conf="$rootDir/_private/config.js"
+#args="$(node -e "const c = require('$rootDir/_private/config.js').\$entities.database; console.log(\`--host \${c.host} --port \${c.port} -u '\${c.user}' -p '\${c.password}' \${c.name}\`)")"
+read -r host port user pass db <<< $(node -e "const c = require('$conf').\$entities.database; console.log(\`\${c.host} \${c.port} '\${c.user}' '\${c.password}' \${c.name}\`)")
+
+# check des variables
+[ -z "$host" ] && echo "pas trouvé host dans $conf">&2 && usage 1
+[ -z "$port" ] && echo "pas trouvé port dans $conf">&2 && usage 1
+[ -z "$user" ] && echo "pas trouvé user dans $conf">&2 && usage 1
+[ -z "$pass" ] && echo "pas trouvé pass dans $conf">&2 && usage 1
+[ -z "$db" ] && echo "pas trouvé db dans $conf">&2 && usage 1
+args="--host $host --port $port -u "$user" -p "$pass""
+[ "$isQuiet" == 'Yes' ] && args="$args --quiet"
+if [ "$isImport" == "Yes" ]; then
+  [ -z "$file" ] && echo "Il faut indiquer un fichier à importer">&2 && usage 1
+  [ ! -f "$file" ] && echo "$file n'existe pas">&2 && usage 1
+  [ -z "$collection" ] && echo "Il faut indiquer une collection d'import">&2 && usage 1
+  eval mongoimport --upsert $args --db $db --collection $collection --file  $file
+
+elif [ "$isExport" == "Yes" ]; then
+  [ -z "$file" ] && echo "Il faut indiquer un fichier pour l'export">&2 && usage 1
+  [ ! -f "$file" ] && echo "$file n'existe pas">&2 && usage 1
+  [ -z "$collection" ] && echo "Il faut indiquer une collection à exporter">&2 && usage 1
+  eval mongoexport $args --db $db --collection $collection > $file
+
+elif [ -n "$jsCode" ]; then
+  eval mongo --eval "$jsCode" $args $db $file
+
+else
+  eval mongo $args $db $file
+fi
