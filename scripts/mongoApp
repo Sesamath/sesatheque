@@ -4,7 +4,7 @@ usage() {
   echo "$0 [file]"
   echo 'Ouvre un shell mongo ou exécute un script mongo'
   echo 'Options :'
-  echo '  -c <collection> : indique une collection (pour -i ou -x)'
+  echo '  -c <collection> : indique une collection (pour -i ou -x, si le nom du fichier ne l’indique pas)'
   echo '  -e <string> : évalue <string> dans le scope du script (ex `-e "var foo = 42"` pour avoir la variable foo dans le script)'
   echo '                À utiliser avant -f'
   echo '  -h : affiche cette aide'
@@ -16,7 +16,7 @@ usage() {
   echo "echo 'show collections'|$0 -q | while read c; do $0 -x ~/tmp/bibliotheque.$c.$(date +%F).export"
   echo
   echo 'exemple d’import, avec des fichiers ~/tmp/bibliotheque.YYYY-MM-JJ.export :'
-  echo 'for f in ~/tmp/bibliotheque.*.export; do b=$(basename $f); c=${b#bibliotheque.*}; coll=${c%.*.*}; echo $coll; ./scripts/mongoApp -i $f -c $coll ;done'
+  echo 'for f in ~/tmp/bibliotheque.*.export; do ./scripts/mongoApp -i $f ;done'
   exit $1
 }
 
@@ -59,8 +59,11 @@ args="--host $host --port $port -u "$user" -p "$pass""
 if [ "$isImport" == "Yes" ]; then
   [ -z "$file" ] && echo "Il faut indiquer un fichier à importer">&2 && usage 1
   [ ! -f "$file" ] && echo "$file n'existe pas">&2 && usage 1
-  [ -z "$collection" ] && echo "Il faut indiquer une collection d'import">&2 && usage 1
-  eval mongoimport --upsert $args --db $db --collection $collection --file  $file
+  if [ -z "$collection" ]; then
+    eval mongoimport --upsert $args --db $db --file  $file
+  else
+    eval mongoimport --upsert $args --db $db --file  $file --collection $collection
+  fi
 
 elif [ "$isExport" == "Yes" ]; then
   [ -z "$file" ] && echo "Il faut indiquer un fichier pour l'export">&2 && usage 1
