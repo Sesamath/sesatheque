@@ -44,7 +44,9 @@ done
 rootDir=$(dirname $0)/..
 conf="$rootDir/_private/config.js"
 #args="$(node -e "const c = require('$rootDir/_private/config.js').\$entities.database; console.log(\`--host \${c.host} --port \${c.port} -u '\${c.user}' -p '\${c.password}' \${c.name}\`)")"
-read -r host port user pass db <<< $(node -e "const c = require('$conf').\$entities.database; console.log(\`\${c.host} \${c.port} '\${c.user}' '\${c.password}' \${c.name}\`)")
+
+# pass en dernier car il peut contenir des espaces
+read -r host port db user pass <<< $(node -e "const c = require('$conf').\$entities.database; console.log(\`\${c.host} \${c.port} \${c.name}\ \${c.user} '\${c.password}'\`)")
 
 # check des variables
 [ -z "$host" ] && echo "pas trouvé host dans $conf">&2 && usage 1
