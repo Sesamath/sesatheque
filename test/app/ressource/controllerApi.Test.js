@@ -40,10 +40,9 @@
 /* eslint-env mocha */
 /* global stClient */
 import {expect} from 'chai'
-
 import fakeRessource from '../../helpers/fakeRessource'
 
-const clone = require('sesajstools/utils/object').clone
+const {clone} = require('sesajstools/utils/object')
 const {stringify} = require('sesajstools')
 
 module.exports = function describeControllerApi () {

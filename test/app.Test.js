@@ -44,15 +44,18 @@
 
 import app from '../app/app'
 import config from '../app/config'
+// import flow from 'an-flow'
 import anLog from 'an-log'
 import sesatheques from 'sesatheque-client/dist/sesatheques'
+import {populate, purge} from './app/populate'
 /**
  * @see https://github.com/visionmedia/supertest
  * @see https://visionmedia.github.io/superagent/
  */
 import supertest from 'supertest'
 
-// en cas de pb, pour voir la sortie de l'appli node aller dans
+// les logs de l'appli sont dans le dossier configuré dans _private/test.js
+// possibilité de modifier le logLevel là-bas
 anLog.config(config.lassiLogger)
 
 describe('L’application sesatheque', function () {
@@ -83,5 +86,10 @@ describe('L’application sesatheque', function () {
     describe('controller api ressource', require('./app/ressource/controllerApi.Test'))
     describe('EntityPersonne', require('./app/personne/EntityPersonne.Test'))
     describe('EntityGroupe', require('./app/personne/EntityGroupe.Test'))
+    describe('Tests avec des datas aléatoires (mais cohérentes)', function (done) {
+      it('Génère les entities en base', populate)
+      it('')
+      it('Purge toutes les entities en base', purge)
+    })
   })
 })
