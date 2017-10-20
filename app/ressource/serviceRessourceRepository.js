@@ -114,7 +114,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
 
           // si c'est chez nous on vérifie
           if (debut === myBaseId) {
-            $ressourceRepository.load(fin, function (error, ressource) {
+            load(fin, function (error, ressource) {
               if (error) return nextRelation(error)
               if (ressource) {
                 nextRelation(null, [relId, getRealRid(ressource)])
@@ -130,7 +130,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
 
           // debut devrait être une origine, on vérifie que la ressource existe
           } else {
-            $ressourceRepository.loadByOrigin(debut, fin, function (error, ressource) {
+            loadByOrigin(debut, fin, function (error, ressource) {
               if (error) {
                 log.dataError(`${relTarget} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
                 nextRelation()
@@ -329,13 +329,13 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       // pas le cas au create ou sur un update via l'api
       // ira seulement en cache dans la plupart des cas, et de toute façon faut récupérer
       // le n° de version actuel et l'oid éventuel
-      $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
+      load(ressource.oid, function (error, ressourceBdd) {
         if (error) next(error)
         else if (ressourceBdd) compare(ressource, ressourceBdd, next)
         else next(new Error(`checkAgainstPrevious a reçu une ressource avec oid ${ressource.oid} qui n’existe pas`))
       })
     } else if (ressource.idOrigine) {
-      $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
+      loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
         if (error) next(error)
         else if (ressourceBdd) compare(ressource, ressourceBdd, next)
         else next(null, ressource)
@@ -384,7 +384,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       // on lance tout ça en // en tâche de fond
       const ref = new Ref(ressource)
       // log.debug('faut lancer une màj des parents')
-      $ressourceRepository.updateParent(ref)
+      updateParent(ref)
       updateParentsExternes(ref)
     }
   }
@@ -422,7 +422,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     ressource.version = ressourceBdd.version
 
     if (needIncrement) {
-      $ressourceRepository.archive(ressourceBdd, function (error, archive) {
+      archive(ressourceBdd, function (error, archive) {
         if (error) return next(error)
         ressource.version++
         ressource.archiveOid = archive.oid
@@ -519,7 +519,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       })
       ressource.parametres = params
       // on enregistre la ressource modifiée en async
-      $ressourceRepository.save(ressource)
+      save(ressource)
     }
     log.debug('convertXmlEc2', params)
   }
@@ -705,8 +705,8 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     if (_.isString(oid) && oid.indexOf('/') > 0) {
       const [origin, idOrigin, bug] = oid.split('/')
       if (bug) return next(new Error('identifiant invalide : ' + oid))
-      if (origin === 'cle') $ressourceRepository.loadByCle(idOrigin, next)
-      else $ressourceRepository.loadByOrigin(origin, idOrigin, next)
+      if (origin === 'cle') loadByCle(idOrigin, next)
+      else loadByOrigin(origin, idOrigin, next)
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
         if (error) return next(error)
@@ -764,10 +764,10 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       // mais le client de l'api peut passer un rid ou une clé,
       // on le gère ici plutôt que de mettre des if dans chaque contrôleur
       if (origine === 'cle') {
-        return $ressourceRepository.loadByCle(idOrigine, next)
+        return loadByCle(idOrigine, next)
       }
       if (origine === myBaseId) {
-        return $ressourceRepository.load(idOrigine, next)
+        return load(idOrigine, next)
       }
       // c'est un vraie origine
       $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
@@ -910,7 +910,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     }).seqEach(function (arbre) {
       // log.debug(`updateParent a trouvé ${rid} dans l'arbre parent ${arbre.oid}`)
       nbArbres++
-      if (findChild(arbre, rid)) $ressourceRepository.save(arbre, this)
+      if (findChild(arbre, rid)) save(arbre, this)
       else log.dataError(`majArbres appelé suite à un update de ${rid}, trouvé l’arbre ${arbre.oid} mais il n’y a pas eu de modification à répercuter`)
     }).seq(function () {
       if (next) next(null, nbArbres)

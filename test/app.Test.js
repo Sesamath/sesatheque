@@ -52,6 +52,7 @@ import sesatheques from 'sesatheque-client/dist/sesatheques'
  */
 import supertest from 'supertest'
 
+// en cas de pb, pour voir la sortie de l'appli node aller dans
 anLog.config(config.lassiLogger)
 
 describe('L’application sesatheque', function () {
