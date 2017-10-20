@@ -40,7 +40,7 @@ const config = require('./config')
  * Une callback qui ne fait rien sinon logguer une éventuelle erreur
  * @private
  */
-function dummyCb (error) {
+function logIfError (error) {
   if (error) log.error(error)
 }
 
@@ -271,7 +271,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
                   body: body,
                   contentType: response.headers['content-type'] || 'text/html'
                 }
-                $cache.set('urlProxy' + oid, page, 600, dummyCb)
+                $cache.set('urlProxy' + oid, page, 600, logIfError)
                 sendRawHtml(page.body, page.contentType)
               } else {
                 context.plain('Impossible de récupérer la page ' + url)

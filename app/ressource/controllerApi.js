@@ -191,9 +191,8 @@ module.exports = function controllersFactory (component) {
         // faut d'abord compter les premières
         const options = {
           filters: [{index: 'auteurs', values: [pid]}],
-          count: true
         }
-        $ressourceRepository.getListe(visibility, options, this)
+        $ressourceRepository.getListeCount(visibility, options, this)
       }).seq(function (nb) {
         nbOwnRessources = nb
         if (skip >= nbOwnRessources) return this(null, [])
@@ -207,6 +206,7 @@ module.exports = function controllersFactory (component) {
         $ressourceRepository.getListe(visibility, options, this)
       }).seq(function (ressources) {
         if (ressources.length) mesRessources = ressources
+        // si on est déjà au max on arrête là
         if (ressources.length === limit) return this(null, [])
         // on va aussi chercher les contributeurs
         const options = {
