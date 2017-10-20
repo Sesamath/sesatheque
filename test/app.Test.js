@@ -52,6 +52,8 @@ import sesatheques from 'sesatheque-client/dist/sesatheques'
  */
 import supertest from 'supertest'
 
+anLog.config(config.lassiLogger)
+
 describe('L’application sesatheque', function () {
   // le code dans le before sera exécuté avant tout autre it des describe
   // qui sont dans nos modules requis ensuite

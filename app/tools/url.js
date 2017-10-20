@@ -29,35 +29,133 @@
  * pour une explication en français)
  */
 'use strict'
-// @see https://nodejs.org/dist/latest-v8.x/docs/api/url.html
-const {URL} = require('url')
+// on pourrait se débrouiller avec https://nodejs.org/dist/latest-v8.x/docs/api/url.html
+// mais c'est plus simple avec
 // @see https://nodejs.org/dist/latest-v8.x/docs/api/querystring.html
+// (et on préfère son comportement sur les params multiples)
 const querystring = require('querystring')
+
+// fonctions privées
+
+/**
+ * throw ou console.error suivant isStrict et retourne value
+ * @private
+ * @param {string} errorMessage
+ * @param {boolean|object} isStrict
+ * @param {boolean} [isStrict.strict]
+ * @param {string} [value='']
+ * @return {string} value
+ * @throws {Error} si isStrict
+ */
+function errorHandler (errorMessage, isStrict, value = '') {
+  if (typeof isStrict === 'object') {
+    isStrict = isStrict.hasOwnProperty('strict') ? !!isStrict.strict : true
+  }
+  if (isStrict) throw new Error(errorMessage)
+  console.error(new Error(errorMessage))
+  return value
+}
+
+// fonctions exportées
+
+/**
+ * Retourne un paramètre d'une url
+ * @param {string} url
+ * @param {string} name
+ * @param {object} [options]
+ * @param {boolean} [options.strict=true] Passer false pour ne pas planter sur des erreurs d'arguments
+ * @return {string|string[]|undefined} Si une seule valeur retourne une string, sinon un Array
+ */
+function getParam (url, name, options) {
+  if (!url) return errorHandler('Pas d’url fournie', options)
+  if (typeof url !== 'string') return errorHandler('Url fournie invalide', options)
+  const [, qs] = split(url)
+  const params = querystring.parse(qs) // renvoie toujours un object
+  return params[name]
+}
+
+/**
+ * Retourne tous les paramètres sous forme d'objet
+ * @param {string} url absolue ou relative
+ * @param {object} [options]
+ * @param {boolean} [options.strict=true] Passer false pour ne pas planter sur des erreurs d'arguments
+ * @return {object}
+ */
+function getAllParams (url, options) {
+  if (!url) return errorHandler('Pas d’url fournie', options)
+  if (typeof url !== 'string') return errorHandler('Url fournie invalide', options)
+  const [, qs] = split(url)
+  return querystring.parse(qs)
+}
+
+/**
+ * Réuni les morceaux d'une url
+ * @param {urlParts} parts
+ * @return {string}
+ */
+function join (parts) {
+  let url = parts[0]
+  if (parts[1]) url += `?${parts[1]}`
+  if (parts[2]) url += `#${parts[2]}`
+  return url
+}
+
+/**
+ * Découpe l'url en 3 morceaux
+ * @param {string} url
+ * @return {urlParts}
+ */
+function split (url) {
+  if (!url || typeof url !== 'string') return ['', '', '']
+  let base, qs
+  let [start, anchor] = url.split('#') // si y'a plusieurs # on ignore la fin
+  if (start) [base, qs] = start.split('?') // idem
+  if (!base) base = ''
+  if (!qs) qs = ''
+  if (!anchor) anchor = ''
+  return [base, qs, anchor]
+}
 
 /**
  * Retourne url modifiée pour lui ajouter / mettre à jour des arguments en queryString
  * @param {string} url
  * @param {object} args
  * @param {object} [options]
- * @param {boolean} [options.replace] Pour remplacer la querySting avec args (sinon update)
+ * @param {boolean} [options.replace=false] Pour remplacer la querySting avec args (et pas update)
+ * @param {boolean} [options.strict=true] Passer false pour ne pas planter sur des erreurs d'arguments
  * @return {string}
  */
 function update (url, args, options) {
-  if (!args) return url
-  if (typeof args !== 'object') throw new TypeError('url.update veut un objet en 2e argument')
   if (typeof options !== 'object') options = {}
+  const isStrict = options.hasOwnProperty('strict') ? options.strict : true
+  // checks
+  if (!url) return errorHandler('Pas d’url fournie', isStrict)
+  if (typeof url !== 'string') return errorHandler('Url fournie invalide', isStrict)
+  if (!args) return url
+  if (typeof args !== 'object') return errorHandler('url.update veut un objet en 2e argument', isStrict, url)
+  // args ok mais rien à faire
   if (!Object.keys(args).length) return url
-  const urlObj = new URL(url)
-  if (options.replace) {
-    urlObj.search = '?' + querystring.stringify(args)
-  } else {
-    const search = (urlObj.search && urlObj.search.substr(1)) || ''
-    const qs = querystring.parse(search)
-    urlObj.search = '?' + querystring.stringify(Object.assign(qs, args))
-  }
-  return urlObj.href
+  // faut analyser
+  const [base, qs, anchor] = split(url)
+  if (options.replace || !qs) return join([base, querystring.stringify(args), anchor])
+  // faut un merge
+  const oldParams = querystring.parse(qs)
+  const allParams = Object.assign(oldParams, args)
+  return join([base, querystring.stringify(allParams), anchor])
 }
 
 module.exports = {
+  getParam,
+  getAllParams,
+  join,
+  split,
   update
 }
+
+/**
+ * 3 morceaux d'une url
+ * @typedef {string[]} urlParts
+ * @property {string} urlParts[0] base
+ * @property {string} urlParts[1] queryString
+ * @property {string} urlParts[2] anchor
+ */

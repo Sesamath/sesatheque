@@ -115,7 +115,7 @@ module.exports = function () {
    */
   $page.print = function (context, titre, contentBloc, moreData) {
     const data = $page.getDefaultData(context, titre, contentBloc)
-    if (_.isArray(moreData)) {
+    if (Array.isArray(moreData)) {
       if (moreData.length) moreData = { blocs: { blocList: moreData } }
       else moreData = null
     }

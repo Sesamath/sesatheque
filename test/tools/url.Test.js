@@ -36,7 +36,9 @@
 var assert = require('assert')
 var url = require('../../app/tools/url')
 
-describe('url', function () {
+// @todo tester toutes les méthodes de url
+
+describe('tools.url', function () {
   it('update', function () {
     const {update} = url
     let urlWithoutAnchor = 'https://user:pass@sub.domain.tld:123/path/foo/bar/url.html'

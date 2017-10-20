@@ -31,6 +31,19 @@
 
 'use strict'
 
+const _ = require('lodash')
+const request = require('request')
+const {ensure, linkQs} = require('../tools')
+const config = require('./config')
+
+/**
+ * Une callback qui ne fait rien sinon logguer une éventuelle erreur
+ * @private
+ */
+function dummyCb (error) {
+  if (error) log.error(error)
+}
+
 /**
  * Le controleur html des routes /public/ (pages sans authentification)
  * qui traite aussi les /ressource/ si on est pas authentifié
@@ -39,18 +52,6 @@
  * @controller controllerPublic
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl) {
-  /**
-   * Une callback qui ne fait rien sinon logguer une éventuelle erreur
-   * @private
-   */
-  function dummyCb (error) {
-    if (error) log.error(error)
-  }
-
-  var _ = require('lodash')
-  var request = require('request')
-  var tools = require('../tools')
-  var config = require('./config')
 
   /**
    * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
@@ -181,7 +182,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
           filter = {
             index: prop,
-            values: _.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
+            values: Array.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
           }
           filters.push(filter)
         }
@@ -193,8 +194,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           filters: filters
         }
         // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
-        options.start = parseInt(crit.start, 10) || 0
-        options.nb = parseInt(crit.nb, 10) || 25
+        options.skip = ensure(crit.skip, 'integer', 0)
+        options.limit = ensure(crit.limit, 'integer', 25)
         options.orderBy = crit.orderBy || 'dateCreation'
         $ressourceRepository.getListe('public', options, function (error, ressources) {
           var data = $ressourcePage.getDefaultData('liste')
@@ -202,16 +203,16 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           if (error) {
             data.contentBloc.error = error.toString()
           } else {
-            if (ressources.length === options.nb) {
-              crit.start = options.start + options.nb
-              data.contentBloc.linkPageNext = tools.linkQs($routes.get('search'), 'Résultats suivants', crit)
+            if (ressources.length === options.limit) {
+              crit.skip = options.skip + options.limit
+              data.contentBloc.linkPageNext = linkQs($routes.get('search'), 'Résultats suivants', crit)
             }
-            if (options.start) {
-              crit.start = options.start - options.nb
-              if (crit.start < 0) crit.start = 0
-              data.contentBloc.linkPagePrev = tools.linkQs($routes.get('search'), 'Résultats précédents', crit)
+            if (options.skip) {
+              crit.skip = options.skip - options.limit
+              if (crit.skip < 0) crit.skip = 0
+              data.contentBloc.linkPagePrev = linkQs($routes.get('search'), 'Résultats précédents', crit)
             }
-            if (ressources.length) data.contentBloc.pagination = '(' + (options.start + 1) + ' à ' + (options.start + 1 + ressources.length) + ')'
+            if (ressources.length) data.contentBloc.pagination = '(' + (options.skip + 1) + ' à ' + (options.skip + 1 + ressources.length) + ')'
             data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources) // inutile de passer le context si on est pas authentifié
           }
           context.html(data)

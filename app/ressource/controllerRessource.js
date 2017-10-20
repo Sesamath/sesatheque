@@ -31,7 +31,15 @@
  */
 
 'use strict'
-
+const _ = require('lodash')
+const {ensure, linkQs} = require('../tools')
+const sjt = require('sesajstools')
+// const sjtObj = require('sesajstools/utils/object')
+const flow = require('an-flow')
+const config = require('./config')
+const appConfig = require('../config')
+const myBaseId = appConfig.application.baseId
+const request = require('request')
 /**
  * Controleur /ressource/ pour les utilisateurs authentifiés.
  *
@@ -40,16 +48,6 @@
  * @controller controllerRessource
  */
 module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) {
-  var _ = require('lodash')
-  var tools = require('../tools')
-  var sjt = require('sesajstools')
-  // var sjtObj = require('sesajstools/utils/object')
-  var flow = require('an-flow')
-  var config = require('./config')
-  var appConfig = require('../config')
-  var myBaseId = appConfig.application.baseId
-  var request = require('request')
-
   /**
    * Crée un formToken et l'ajoute à la ressource et en session
    * @private
@@ -731,14 +729,14 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         contentBloc: {$view: 'delete'}
       }
       checkToken(context, oid, function () {
-        // lassi demande de charger la ressource pour l'effacer, mais on vient de la mettre en cache
+        // faut charger la ressource pour vérifier les droits, c'est pas cher on vient de la mettre en cache
         $ressourceRepository.load(oid, function (error, ressource) {
           if (error) {
             log.error(error)
             data.contentBloc.error = "Impossible d'accéder à la ressource " + ressource.titre + ' (' + oid + ')'
           } else if (ressource) {
             if ($accessControl.hasPermission('delete', context, ressource)) {
-              $ressourceRepository.delete(ressource, function (error) {
+              $ressourceRepository.remove(ressource.oid, function (error) {
                 if (error) {
                   log.error(error)
                   data.contentBloc.error = 'Erreur lors de la suppression de la ressource ' + ressource.titre + ' (' + oid + ')'
@@ -770,95 +768,95 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    */
   function search (context) {
     context.layout = 'page'
-    redirectPublicOrContinue(context, function () {
-      if (_.isEmpty(context.get) || context.get.modify) {
-        // form de recherche
-        $ressourcePage.printSearchForm(context)
-      } else {
-        // résultats
-        log.debug('search reçoit', context.get)
-        // faut passer en revue les critères
-        var filters = []
-        var crit = context.get
-        var filter
+    const crit = context.get
+    let nbTotal = 0
+    let visibilite = 'public'
+    const options = {}
+    const data = $ressourcePage.getDefaultData('liste')
 
-        // les filtres, parmi les propriétés défini en conf
-        for (var prop in crit) {
-          if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
-            filter = {
-              index: prop,
-              values: _.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
-            }
-            filters.push(filter)
+    flow().seq(function () {
+      redirectPublicOrContinue(context, this)
+    }).seq(function () {
+      // form de recherche
+      if (_.isEmpty(context.get) || context.get.modify) return $ressourcePage.printSearchForm(context)
+      // résultats
+      log.debug('search reçoit', context.get)
+      // faut passer en revue les critères
+      const filters = []
+      let filter, prop
+      // les filtres, parmi les propriétés défini en conf
+      for (prop in crit) {
+        if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
+          filter = {
+            index: prop,
+            values: Array.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
           }
-        }
-        log.debug('traduits en filters', filters)
-        // @todo ajouter des critères de tri
-        if (filters.length) {
-          var options = {
-            filters: filters
-          }
-          // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
-          options.start = parseInt(crit.start, 10) || 0
-          options.nb = parseInt(crit.nb, 10) || 25
-          options.orderBy = crit.orderBy || 'dateCreation'
-          var visibilite = 'public'
-          var pid = $accessControl.getCurrentUserPid(context)
-          // avec une exception pour l'admin qui peut passer ?all=1
-          if (context.get.all && $accessControl.hasAllRights(context)) visibilite = 'all'
-          // qqun qui veut voir ses propres ressources
-          else if (context.get.auteurs && context.get.auteurs === pid) visibilite = 'auteur/' + pid
-          $ressourceRepository.getListe(visibilite, options, function (error, ressources, nbTotal) {
-            var data = $ressourcePage.getDefaultData('liste')
-            data.$metas.title = 'Résultats de la recherche'
-            if (error) {
-              log.error(error)
-              data.contentBloc.error = error.toString()
-            } else {
-              var nbInit = ressources.length
-              // on filtre d'après les droits en lecture
-              // @todo ajouter le filtrage dans la requete de recherche...
-              ressources = ressources.filter(ressource => $accessControl.hasReadPermission(context, ressource))
-              if (ressources.length < nbInit) {
-                log.error((nbInit - ressources.length) + ' ressources de la liste ont été filtrées par les droits avec ' + context.request.originalUrl)
-              }
-              // les actions (en float right, dust sait pas boucler en partant de la fin, faudrait écrire un helper, on empile de droite à gauche)
-              data.actions = {
-                links: []
-              }
-              // lien suivant (si on est au max)
-              if (ressources.length === options.nb) {
-                crit.start = options.start + options.nb
-                data.actions.links.push({html: tools.linkQs($routes.get('search'), 'Résultats suivants', crit)})
-              }
-              // 'titre' avec le nb de ressources
-              var html = nbTotal + ' ressource'
-              if (ressources.length) {
-                var last = Math.min(options.start + options.nb, options.start + ressources.length)
-                html += 's (' + (options.start + 1) + ' à ' + last + ')'
-              }
-              data.actions.links.push({html: html, selected: true})
-              // liens précédents
-              if (options.start) {
-                // on démarre pas à 0, donc y'a des précédents
-                crit.start = options.start - options.nb
-                if (crit.start < 0) crit.start = 0
-                data.actions.links.push({html: tools.linkQs($routes.get('search'), 'Résultats précédents', crit)})
-              }
-              // un spacer
-              data.actions.links.push({spacer: true})
-              // le lien pour modifier les critères
-              data.actions.links.push({href: context.request.originalUrl + '&modify=1', value: 'Modifier cette recherche'})
-              // et on ajoute des liens sur chaque ressource
-              data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources, context)
-            }
-            log.debug('les datas search', data, null, {max: 20000})
-            context.html(data)
-          })
-        } else {
-          $ressourcePage.printSearchForm(context, ['il faut choisir au moins un critère'])
+          filters.push(filter)
         }
       }
+      log.debug('traduits en filters', filters)
+      // @todo ajouter des critères de tri
+      if (!filters.length) return $ressourcePage.printSearchForm(context, ['il faut choisir au moins un critère'])
+      options.filters = filters
+      // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
+      options.skip = ensure(crit.skip, 'integer', 0)
+      options.limit = ensure(crit.limit, 'integer', 25)
+      options.orderBy = crit.orderBy || 'dateCreation'
+
+      // visibilite
+      var pid = $accessControl.getCurrentUserPid(context)
+      // avec une exception pour l'admin qui peut passer ?all=1
+      if (context.get.all && $accessControl.hasAllRights(context)) visibilite = 'all'
+      // qqun qui veut voir ses propres ressources
+      else if (context.get.auteurs && context.get.auteurs === pid) visibilite = 'auteur/' + pid
+
+      $ressourceRepository.getListeCount(visibilite, options, this)
+    }).seq(function (nb) {
+      nbTotal = nb
+      $ressourceRepository.getListe(visibilite, options, this)
+    }).seq(function (ressources) {
+      data.$metas.title = 'Résultats de la recherche'
+      var nbInit = ressources.length
+      // on filtre d'après les droits en lecture
+      // @todo ajouter le filtrage dans la requete de recherche...
+      ressources = ressources.filter(ressource => $accessControl.hasReadPermission(context, ressource))
+      if (ressources.length < nbInit) {
+        log.error((nbInit - ressources.length) + ' ressources de la liste ont été filtrées par les droits avec ' + context.request.originalUrl)
+      }
+      // les actions (en float right, dust sait pas boucler en partant de la fin, faudrait écrire un helper, on empile de droite à gauche)
+      data.actions = {
+        links: []
+      }
+      // lien suivant (si on est au max)
+      if (ressources.length === options.limit) {
+        crit.skip = options.skip + options.limit
+        data.actions.links.push({html: linkQs($routes.get('search'), 'Résultats suivants', crit)})
+      }
+      // 'titre' avec le nb de ressources
+      var html = nbTotal + ' ressource'
+      if (ressources.length) {
+        var last = Math.min(options.skip + options.limit, options.skip + ressources.length)
+        html += 's (' + (options.skip + 1) + ' à ' + last + ')'
+      }
+      data.actions.links.push({html: html, selected: true})
+      // liens précédents
+      if (options.skip) {
+        // on démarre pas à 0, donc y'a des précédents
+        crit.skip = options.skip - options.limit
+        if (crit.skip < 0) crit.skip = 0
+        data.actions.links.push({html: linkQs($routes.get('search'), 'Résultats précédents', crit)})
+      }
+      // un spacer
+      data.actions.links.push({spacer: true})
+      // le lien pour modifier les critères
+      data.actions.links.push({href: context.request.originalUrl + '&modify=1', value: 'Modifier cette recherche'})
+      // et on ajoute des liens sur chaque ressource
+      data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources, context)
+      log.debug('les datas search', data, null, {max: 20000})
+      context.html(data)
+    }).catch(function (error) {
+      log.error(error)
+      data.contentBloc.error = error.toString()
     })
   }
   // avec mysql ça peut être vraiment très lent… (3s pour le count et 3s pour remonter les data)

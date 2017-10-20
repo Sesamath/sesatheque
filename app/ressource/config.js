@@ -420,8 +420,7 @@ var ressourceConfig = {
     jour: 'DD/MM/YYYY'
   },
   limites: {
-    listeMax: 1000,
-    listeNbDefault: 25
+    listeMax: 1000
   },
   cacheTTL: 3600,
   imports: {

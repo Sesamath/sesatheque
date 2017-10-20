@@ -85,7 +85,7 @@ module.exports = {
         var remainingPath = subPaths.join('[].')
 
         // Normalement on a une valeur array à ce chemin (vu qu'il finissait par '[]'), mais autant vérifier
-        if (_.isArray(value)) {
+        if (Array.isArray(value)) {
           _.forEach(value, (v) => convertOidValues(v, remainingPath))
         } else {
           updateLogErr(`on s’attendait à un array pour ${firstSubPath}`, value)
@@ -93,7 +93,7 @@ module.exports = {
       } else {
         // pas de tableau sur lequel faire une récursion, on convertit la valeur en string
         var convertedValue
-        if (_.isArray(value)) {
+        if (Array.isArray(value)) {
           convertedValue = _.map(value, (v) => _.isInteger(v) ? v.toString() : v)
         } else if (_.isInteger(value)) {
           convertedValue = value.toString()

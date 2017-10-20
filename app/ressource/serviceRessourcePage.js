@@ -263,7 +263,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // log.debug('arrayToDust de ' +key, selectedValues)
     var i = 0
     var choices = []
-    if (selectedValues && !_.isArray(selectedValues)) {
+    if (selectedValues && !Array.isArray(selectedValues)) {
       log.error(new Error('La propriété ' + key + " de la ressource n'est pas un tableau"))
     } else if (ressConfig.listesOrdonnees[key]) {
       _.each(ressConfig.listesOrdonnees[key], function (cbValue) {
@@ -811,7 +811,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           // ajout des enfants pour les arbres
           if (ressource.type === 'arbre') {
             // on ajoute la liste des urls des enfants si on les a
-            if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
+            if (Array.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
               var enfantsDescribe = []
               ressource.enfants.forEach(function (enfant) {
                 // ça peut être un dossier seul
