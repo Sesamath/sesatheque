@@ -206,7 +206,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       filters.push({ index: 'oid' })
     }
 
-    const query = EntityRessource
+    const query = EntityRessource.match() // sans argument ça retourne une EntityQuery vierge
     filters.forEach(function (filter) {
       // log.debug('getListe filter ' + filter.index)
       if (filter.values) {
@@ -223,6 +223,8 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
           default:
             query.match(filter.index).in(filter.values)
         }
+      } else {
+        query.match(filter.index)
       }
     })
 
@@ -635,6 +637,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         next(null, ressources)
       }).catch(next)
     } catch (error) {
+      log.error(error)
       next(error)
     }
   } // getListe
@@ -650,8 +653,13 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
    */
   function getListeCount (visibilite, options, next) {
-    const query = getListeQuery(visibilite, options)
-    query.count(next)
+    try {
+      const query = getListeQuery(visibilite, options)
+      query.count(next)
+    } catch (error) {
+      log.error(error)
+      next(error)
+    }
   }
 
   /**
