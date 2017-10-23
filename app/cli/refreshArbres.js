@@ -231,7 +231,14 @@ function refreshArbres (oid, done) {
   let nbArbresModif = 0
   let nbRessources = 0
   let currentOid, currentTitre
+  console.log('avant lassi.service')
   const EntityRessource = lassi.service('EntityRessource')
+  try {
+    EntityRessource.match()
+  } catch (error) {
+    console.error(error)
+  }
+  console.log('après lassi.service')
   const $ressourceRepository = lassi.service('$ressourceRepository')
   const $ressourceFetch = lassi.service('$ressourceFetch')
   if (oid) {

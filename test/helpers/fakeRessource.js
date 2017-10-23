@@ -49,10 +49,14 @@ function getFakeRessource (options) {
    */
   const fakeRessource = {}
   if (!options.nooid) fakeRessource.oid = options.oid || faker.random.uuid()
-  if (!options.norid) fakeRessource.rid = options.rid || myBaseId + '/' + fakeRessource.oid
+  if (options.rid) {
+    fakeRessource.rid = options.rid
+  } else if (!options.norid && fakeRessource.oid) {
+    fakeRessource.rid = myBaseId + '/' + fakeRessource.oid
+  }
   if (!options.notype) fakeRessource.type = options.type || faker.random.arrayElement(['arbre', 'ato', 'em', 'j3p', 'url'])
   if (!options.noorigine) fakeRessource.origine = options.origine || faker.lorem.word()
-  if (!options.noidOrigine) fakeRessource.idOrigine = options.idOrigine || faker.lorem.word()
+  if (!options.noidOrigine) fakeRessource.idOrigine = options.idOrigine || faker.random.uuid()
   if (!options.notitre) fakeRessource.titre = options.titre || faker.lorem.words()
   if (!options.noresume) fakeRessource.resume = options.resume || faker.lorem.sentence()
   if (!options.nodescription) fakeRessource.description = options.description || faker.lorem.paragraphs(2, '\n')

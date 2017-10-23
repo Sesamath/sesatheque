@@ -46,7 +46,7 @@ import app from '../app/app'
 import config from '../app/config'
 // import flow from 'an-flow'
 import anLog from 'an-log'
-import sesatheques from 'sesatheque-client/dist/sesatheques'
+import sesatheques from 'sesatheque-client/src/sesatheques'
 import {populate, purge} from './app/populate'
 /**
  * @see https://github.com/visionmedia/supertest
@@ -59,8 +59,6 @@ import supertest from 'supertest'
 anLog.config(config.lassiLogger)
 
 describe('L’application sesatheque', function () {
-  // le code dans le before sera exécuté avant tout autre it des describe
-  // qui sont dans nos modules requis ensuite
   before(function beforeBoot (done) {
     // on enregistre notre sesatheque de test
     sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
@@ -73,23 +71,25 @@ describe('L’application sesatheque', function () {
       // console.log('app started')
       anLog.config(config.lassiLogger)
       // le client pour tester notre appli express
-      global.stClient = supertest(lassi.express)
-      done()
+      global.superTestClient = supertest(lassi.express)
+      // on commence par purger tout, au cas où un test précédent aurait laissé trainer des scories
+      purge(done)
     })
   })
+  after(purge)
 
-  it('doit passer tous les tests suivants', function () {
-    this.timeout(30000)
-    describe('contenus statiques', require('./app/static.Test'))
-    describe('api get 404', require('./app/404.Test'))
-    describe('sesatheques', require('./app/sesatheque-client/sesatheques.Test'))
-    describe('controller api ressource', require('./app/ressource/controllerApi.Test'))
-    describe('EntityPersonne', require('./app/personne/EntityPersonne.Test'))
-    describe('EntityGroupe', require('./app/personne/EntityGroupe.Test'))
-    describe('Tests avec des datas aléatoires (mais cohérentes)', function (done) {
-      it('Génère les entities en base', populate)
-      it('')
-      it('Purge toutes les entities en base', purge)
-    })
+  this.timeout(30000)
+  // le code dans le before sera exécuté avant tout autre it des describe
+  // qui sont dans nos modules requis ensuite, mais pas avant les describe eux-même
+  // d'où ce describe englobant qui ne sert qu'à différer les describe qu'il contient (après le retour du before)
+  describe('contenus statiques', require('./app/static.Test'))
+  describe('api get 404', require('./app/404.Test'))
+  describe('sesatheques', require('./app/sesatheque-client/sesatheques'))
+  describe('controller api ressource', require('./app/ressource/controllerApi'))
+  describe('EntityPersonne', require('./app/personne/EntityPersonne'))
+  describe('EntityGroupe', require('./app/personne/EntityGroupe'))
+  describe('Tests avec des datas aléatoires (mais cohérentes)', function (done) {
+    it('Génère les entities en base', populate)
+    describe('sesatheque-client', require('./app/sesatheque-client/client'))
   })
 })

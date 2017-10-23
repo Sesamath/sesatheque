@@ -1162,18 +1162,14 @@ module.exports = function controllersFactory (component) {
      * @param {Integer} :oid
      */
     controller.get('public/:oid', function (context) {
-      var oid = context.arguments.oid
-      if (oid === 'getRid') {
-        // c'est pas pour nous
-        context.next()
-      } else {
-        $ressourceRepository.load(oid, function (error, ressource) {
-          if (error) return $json.send(context, error)
-          if (!ressource) return $json.notFound(context, `La ressource ${oid} n’existe pas`)
-          if ($accessControl.isPublic(ressource)) return sendRessource(context, null, ressource)
-          $json.denied(context, `La ressource ${oid} n’est pas publique`)
-        })
-      }
+      const oid = context.arguments.oid
+      if (oid === 'getRid') return context.next() // c'est pas pour nous
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (error) return $json.send(context, error)
+        if (!ressource) return $json.notFound(context, `La ressource ${oid} n’existe pas`)
+        if ($accessControl.isPublic(ressource)) return sendRessource(context, null, ressource)
+        $json.denied(context, `La ressource ${oid} n’est pas publique`)
+      })
     })
 
     /**

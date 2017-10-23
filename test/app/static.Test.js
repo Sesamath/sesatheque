@@ -39,10 +39,10 @@
 'use strict'
 /* eslint-env mocha */
 // import {expect} from 'chai'
-/* global stClient */
+/* global superTestClient */
 module.exports = function describeStatic () {
   it('la page d’accueil existe', function () {
-    return stClient
+    return superTestClient
       .get('/')
       .expect(200)
   })

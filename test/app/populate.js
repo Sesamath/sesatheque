@@ -45,8 +45,8 @@ import config from '../../app/config'
 
 const myBaseId = config.application.baseId
 // pour nos 1ers tests
-const nbPersonnes = 2
-const nbRessources = 20
+const nbPersonnesDefault = 2
+const nbRessourcesDefault = 20
 
 const personnes = new Map()
 const ressources = new Map()
@@ -59,7 +59,7 @@ const rOids = []
  * @return {Personne}
  */
 export function getRandomPersonne (pidOnly) {
-  if (!personnes.length) throw new Error('Les personnes n’ont pas encore été générées')
+  if (!personnes.size) throw new Error('Les personnes n’ont pas encore été générées')
   const i = Math.floor(Math.random() * pOids.length)
   const oid = pOids[i]
   if (pidOnly) return `${myBaseId}/${oid}`
@@ -72,7 +72,8 @@ export function getRandomPersonne (pidOnly) {
  * @return {Ressource}
  */
 export function getRandomRessource (ridOnly) {
-  if (!ressources.length) throw new Error('Les ressources n’ont pas encore été générées')
+  // console.log(`getRandomRessource avec ${ressources.size}`)
+  if (!ressources.size) throw new Error('Les ressources n’ont pas encore été générées')
   const i = Math.floor(Math.random() * rOids.length)
   const oid = rOids[i]
   if (ridOnly) return `${myBaseId}/${oid}`
@@ -92,40 +93,68 @@ export const getRessources = () => ressources
 
 /**
  * Génère 200 personnes et 2000 ressources avec des données aléatoires mais cohérentes
- * @param done
+ * @param {object} [options]
+ * @param {number} [options.personnes] Nb de personnes à générer
+ * @param {number} [options.ressources] Nb de ressources à générer
+ * @param {simpleCallback} done
  */
-export function populate (done) {
+export function populate (options, done) {
+  // init avec nos valeurs par défaut
+  if (typeof options === 'function') {
+    done = options
+    options = {
+      personnes: nbPersonnesDefault,
+      ressources: nbRessourcesDefault
+    }
+  }
+  if (!options.hasOwnProperty('personnes')) options.personnes = nbPersonnesDefault
+  if (!options.hasOwnProperty('ressources')) options.ressources = nbRessourcesDefault
+  // console.log(`populate ${options.personnes} personnes (${personnes.size}) et ${options.ressources} ressources (${ressources.size})`, options)
+  if (options.personnes <= personnes.size && options.ressources <= ressources.size) return done()
+
   const EntityPersonne = lassi.service('EntityPersonne')
   const EntityRessource = lassi.service('EntityRessource')
   let i
-  flow(new Array(nbPersonnes)).seqEach(function () {
+  // console.log(`start populate`)
+  flow(new Array(options.personnes)).seqEach(function () {
     const nextPersonne = this
     EntityPersonne.create(fakePersonne({nooid: true, nopid: true})).store((error, personne) => {
       if (error) return nextPersonne(error)
       personnes.set(personne.oid, personne)
       pOids.push(personne.oid)
+      nextPersonne()
     })
   }).seq(function () {
-    this(null, new Array(nbRessources))
+    // console.log(`génération de ${personnes.size} personnes`)
+    this(null, new Array(options.ressources))
   }).seqEach(function () {
     const nextRessource = this
+    // par défaut un auteur
     const options = {
       auteurs: [getRandomPersonne(true)],
       nooid: true,
       norid: true
     }
+    // dans 10% des cas un 2e auteur
     if (i % 10 === 1) options.auteurs.push(getRandomPersonne(true))
+    // dans 10% des cas un contributeur
     if (i % 10 === 2) options.contributeurs = [getRandomPersonne(true)]
+    // dans 10% des cas deux contributeurs
     if (i % 10 === 3) options.contributeurs = [getRandomPersonne(true), getRandomPersonne(true)]
+    // dans 10% des cas un 2e auteur et 3 contributeurs
     if (i % 10 === 4) {
       options.auteurs.push(getRandomPersonne(true))
       options.contributeurs = [getRandomPersonne(true), getRandomPersonne(true), getRandomPersonne(true)]
     }
-    EntityRessource.create(fakeRessource(options)).store((error, ressource) => {
+    const ressource = fakeRessource(options)
+    EntityRessource.create(ressource).store((error, ressourceDb) => {
       if (error) return nextRessource(error)
-      ressources.set(ressource.oid, ressource)
+      ressources.set(ressourceDb.oid, ressourceDb)
+      rOids.push(ressourceDb.oid)
+      nextRessource()
     })
   }).seq(function () {
+    // console.log(`génération de ${personnes.size} personnes et ${ressources.size} ressources`)
     done(null, {personnes, ressources})
   }).catch(done)
 }
@@ -137,5 +166,5 @@ export function purge (done) {
     EntityPersonne.match().purge(this)
   }).seq(function () {
     EntityRessource.match().purge(this)
-  }).catch(done)
+  }).done(done)
 }

@@ -40,46 +40,62 @@
 /* eslint-env mocha */
 import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
-import sinon from 'sinon'
-// on se sert dans src
+// import sinon from 'sinon'
+import log from 'sesajstools/utils/log'
+// on se sert dans src pour avoir les bonnes lignes dans les éventuelles erreurs
 import getClient from 'sesatheque-client/src'
-import XMLHttpRequest from 'xmlhttprequest'
+import {XMLHttpRequest} from 'xmlhttprequest'
 
 import config from '../../../app/config'
-import {getRandomRessource} from '../populate'
+import {getRandomRessource, populate} from '../populate'
 
 chai.use(sinonChai)
 
-let stClient
+const sesatheques = [
+  {
+    baseId: config.application.baseId,
+    baseUrl: config.application.baseUrl
+  }
+]
+
+let sesathequeClient
 
 module.exports = function describeClient () {
-  before(function () {
-    // @todo corriger sesatheque-client qui doit pouvoir tourner sous node
-    // faut feinter le client qui veut tourner dans un browser
-    global.window = {
-      location: {} // @todo générer ici un vrai objet location
-    }
-    const sesatheques = [
-      {
-        baseId: config.application.baseId,
-        baseUrl: config.application.baseUrl
-      }
-    ]
-    stClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
+  before(function (done) {
+    log.setLogLevel('error')
+    sesathequeClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
+    populate(done)
   })
-  let consoleErrorSpy
-  beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
-  afterEach(() => console.error.restore())
 
+  // let consoleErrorSpy
+  // beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
+  // afterEach(() => console.error.restore())
+
+  it('retrouve une ressource', function (done) {
+    const expected = getRandomRessource()
+    /* Ce truc marche
+    lassi.service('EntityRessource').match('oid').equals(expected.oid).grabOne((error, ress) => {
+      console.log(`ressource ${expected.oid} récupérée avec ${ress.oid}`)
+    }) /* */
+    // mais pas celui-là :-/
+    superTestClient
+      .get(`/api/public/${expected.oid}`)
+      .expect(200)
+      .expect('Content-type', /application\/json/)
+      .end((err, res) => {
+        expect(res.oid).to.equals(expected.oid)
+        done()
+      })
+  })
   it('getRessource remonte une ressource', function (done) {
     const expected = getRandomRessource()
-    stClient.getRessource(expected.rid, function (error, ressource) {
+    sesathequeClient.getRessource(expected.rid, function (error, ressource) {
       if (error) return done(error)
       Object.keys(expected).forEach(p => {
         if (typeof expected[p] === 'function') return
         expect(expected[p]).to.equals(ressource[p])
       })
-      done
+      done()
     })
   })
 }
