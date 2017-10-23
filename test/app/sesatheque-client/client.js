@@ -47,14 +47,16 @@ import getClient from 'sesatheque-client/src'
 import {XMLHttpRequest} from 'xmlhttprequest'
 
 import config from '../../../app/config'
+import configRessource from '../../../app/ressource/config'
 import {getRandomRessource, populate} from '../populate'
 
 chai.use(sinonChai)
 
+const myBaseUrl = config.application.baseUrl
 const sesatheques = [
   {
     baseId: config.application.baseId,
-    baseUrl: config.application.baseUrl
+    baseUrl: myBaseUrl
   }
 ]
 
@@ -71,30 +73,28 @@ module.exports = function describeClient () {
   // beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
   // afterEach(() => console.error.restore())
 
-  it('retrouve une ressource', function (done) {
-    const expected = getRandomRessource()
-    /* Ce truc marche
-    lassi.service('EntityRessource').match('oid').equals(expected.oid).grabOne((error, ress) => {
-      console.log(`ressource ${expected.oid} récupérée avec ${ress.oid}`)
-    }) /* */
-    // mais pas celui-là :-/
-    superTestClient
-      .get(`/api/public/${expected.oid}`)
-      .expect(200)
-      .expect('Content-type', /application\/json/)
-      .end((err, res) => {
-        expect(res.oid).to.equals(expected.oid)
-        done()
-      })
-  })
   it('getRessource remonte une ressource', function (done) {
     const expected = getRandomRessource()
     sesathequeClient.getRessource(expected.rid, function (error, ressource) {
       if (error) return done(error)
       Object.keys(expected).forEach(p => {
         if (typeof expected[p] === 'function') return
-        expect(expected[p]).to.equals(ressource[p])
+        expect(JSON.stringify(expected[p])).to.equals(JSON.stringify(ressource[p]), `Pb avec ${p}`)
       })
+      done()
+    })
+  })
+
+  it('getItem remonte un item', function (done) {
+    const expected = getRandomRessource()
+    sesathequeClient.getItem(expected.rid, function (error, item) {
+      if (error) return done(error)
+      ;['titre', 'rid', 'resume', 'description', 'commentaires', 'type'].forEach(p => {
+        expect(expected[p]).to.equals(item[p], `Pb avec ${p}`)
+      })
+      expect(item.public).to.be.true
+      expect(JSON.stringify(expected.categories)).to.equals(JSON.stringify(item.categories))
+      expect(item.$displayUrl).to.equals(`${myBaseUrl}public/${configRessource.constantes.routes.display}/${expected.oid}`)
       done()
     })
   })

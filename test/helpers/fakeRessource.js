@@ -85,9 +85,12 @@ function getFakeRessource (options) {
     // on veut pas attribuer "aucune"
     delete catList.aucune
     const cat1 = faker.random.objectElement(catList)
-    let cat2 = cat1
-    while (cat2 === cat1) cat2 = faker.random.objectElement(catList)
-    fakeRessource.categories = [ cat1, cat2 ]
+    fakeRessource.categories = [cat1]
+    while (Math.random() < 0.5 && fakeRessource.categories.length < catList.length) {
+      let cat2 = cat1
+      while (cat2 === cat1) cat2 = faker.random.objectElement(catList)
+      fakeRessource.categories.push(cat2)
+    }
   }
   // on ajoute des enfants pour les arbres et des parametres pour les autres
   if (fakeRessource.type === 'arbre') {
@@ -103,14 +106,7 @@ function getFakeRessource (options) {
     if (options.parametres) {
       fakeRessource.parametres = options.parametres
     } else if (!options.noparametres) {
-      fakeRessource.parametres = {
-        boolean: faker.random.boolean(),
-        date: faker.date.past().toString(), // avec le passage par http ça deviendra une string
-        number: faker.random.number(),
-        string: faker.lorem.sentence(),
-        uuid: faker.random.uuid(),
-        word: faker.random.word()
-      }
+      fakeRessource.parametres = {}
     }
   }
 
