@@ -113,7 +113,7 @@ module.exports = function describeControllerApi () {
         expect(ress.error).to.be.not.ok
         expect(ress.errors).to.be.not.ok
         Object.keys(ressExpected).forEach(k => {
-          expect(ress[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k} vaut ${stringify(ress[k])} et pas ${stringify(ressExpected[k])}`)
+          expect(JSON.stringify(ress[k])).to.equal(JSON.stringify(ressExpected[k]), `propriété ${k} vaut ${stringify(ress[k])} et pas ${stringify(ressExpected[k])}`)
         })
         done()
       })
