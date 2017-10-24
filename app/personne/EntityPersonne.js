@@ -72,9 +72,6 @@ module.exports = function (EntityPersonne, $cachePersonne) {
     Personne.call(this, values)
   })
 
-  // @todo inutile avec lassi#mongo, à virer après migration
-  EntityPersonne.table = 'personne'
-
   EntityPersonne.beforeStore = function (next) {
     // recalculé d'après les roles à chaque create/load (dans le constructeur),
     // mais on le fait aussi ici pour le garantir avant persistance (pas grave) mais surtout mise en cache

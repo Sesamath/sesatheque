@@ -38,12 +38,11 @@
 
 'use strict'
 /* eslint-env mocha */
-/* global stClient */
+/* global superTestClient */
 import {expect} from 'chai'
-
 import fakeRessource from '../../helpers/fakeRessource'
 
-const clone = require('sesajstools/utils/object').clone
+const {clone} = require('sesajstools/utils/object')
 const {stringify} = require('sesajstools')
 
 module.exports = function describeControllerApi () {
@@ -79,7 +78,7 @@ module.exports = function describeControllerApi () {
     delete ressource.rid
 
     // ce test
-    return stClient
+    return superTestClient
       .post('/api/ressource')
       .set('Content-Type', 'application/json')
       .set('X-ApiToken', apiToken)
@@ -103,7 +102,7 @@ module.exports = function describeControllerApi () {
 
   it('GET /api/ressource/:oid récupère la ressource envoyée précédemment', function (done) {
     if (!oid) return done(errAbort)
-    stClient
+    superTestClient
       .get(`/api/ressource/${oid}`)
       .expect(200)
       .expect('Content-type', /application\/json/)
@@ -122,7 +121,7 @@ module.exports = function describeControllerApi () {
 
   it('GET /api/public/:oid récupère la ressource envoyée précédemment', function (done) {
     if (!oid) return done(errAbort)
-    stClient
+    superTestClient
       .get(`/api/public/${oid}`)
       .expect(200)
       .expect('Content-type', /application\/json/)
@@ -141,7 +140,7 @@ module.exports = function describeControllerApi () {
 
   it('GET /api/ressource/:origine/:idOrigine récupère la ressource envoyée précédemment', function (done) {
     if (!oid) return done(errAbort)
-    stClient
+    superTestClient
       .get(`/api/ressource/${bundleId}`)
       .expect(200)
       .expect('Content-type', /application\/json/)
@@ -160,7 +159,7 @@ module.exports = function describeControllerApi () {
 
   it('DELETE prend un 403 si on veut effacer sans token', function (done) {
     if (!oid) return done(errAbort)
-    stClient
+    superTestClient
       .delete(`/api/ressource/${bundleId}`)
       .expect(403)
       .expect('Content-type', /application\/json/)
@@ -176,7 +175,7 @@ module.exports = function describeControllerApi () {
   it("DELETE vire la ressource que l'on vient d'enregistrer", function (done) {
     if (!oid) return done(errAbort)
     const apiToken = lassi.settings.apiTokens[0]
-    stClient
+    superTestClient
       .delete(`/api/ressource/${bundleId}`)
       .set('X-ApiToken', apiToken)
       .expect(200)

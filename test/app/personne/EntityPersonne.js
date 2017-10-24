@@ -47,7 +47,6 @@ module.exports = function describeEntityPersonne () {
   // une erreur toute prête
   // const errAbort = new Error('pas la peine de tester ça tant que ça plante avant')
 
-  const EntityPersonne = lassi.service('EntityPersonne')
   const personneData = {
     pid: 'origAuth/idAtOrigAuth',
     prenom: 'foo',
@@ -56,11 +55,12 @@ module.exports = function describeEntityPersonne () {
     roles: {'formateur': true},
     permissions: {'foo': true, 'bar': true}
   }
+  let personne, EntityPersonne
+
   /**
    * L'entité créée
    * @type {EntityPersonne}
    */
-  let personne
 
   const checkPersonne = (personne) => {
     const configRoles = lassi.settings.components.personne.roles
@@ -81,6 +81,13 @@ module.exports = function describeEntityPersonne () {
       .match('pid').equals(personneData.pid)
       .grab(next)
   }
+
+  // lassi n'est pas dispo dans le describe (le before du describe parent a rendu la main mais pas rappelé sa callback),
+  // mais il l'est dans un before
+  before(done => {
+    EntityPersonne = lassi.service('EntityPersonne')
+    done()
+  })
 
   it('Create avec permissions set Ok', function () {
     personne = EntityPersonne.create(personneData)
