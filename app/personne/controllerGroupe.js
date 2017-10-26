@@ -377,6 +377,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           })
           return ressData
         })
+        // @todo gérer ici une page "ressources suivantes" si on atteint le max
       }
       printGroupe(context, groupe)
     }).catch(function (error) {

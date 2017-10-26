@@ -62,7 +62,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
   $ressourceConverter.addRelations = function (ressource, relations) {
     let errors = []
     let isModif = false
-    if (_.isArray(relations)) {
+    if (Array.isArray(relations)) {
       relations.forEach(([relId, relTarget, rest]) => {
         if (rest) {
           errors.push('une relation doit être un tableau à deux éléments [typeRelation, ridRessource]')

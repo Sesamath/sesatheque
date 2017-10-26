@@ -49,10 +49,14 @@ function getFakeRessource (options) {
    */
   const fakeRessource = {}
   if (!options.nooid) fakeRessource.oid = options.oid || faker.random.uuid()
-  if (!options.norid) fakeRessource.rid = options.rid || myBaseId + '/' + fakeRessource.oid
+  if (options.rid) {
+    fakeRessource.rid = options.rid
+  } else if (!options.norid && fakeRessource.oid) {
+    fakeRessource.rid = myBaseId + '/' + fakeRessource.oid
+  }
   if (!options.notype) fakeRessource.type = options.type || faker.random.arrayElement(['arbre', 'ato', 'em', 'j3p', 'url'])
   if (!options.noorigine) fakeRessource.origine = options.origine || faker.lorem.word()
-  if (!options.noidOrigine) fakeRessource.idOrigine = options.idOrigine || faker.lorem.word()
+  if (!options.noidOrigine) fakeRessource.idOrigine = options.idOrigine || faker.random.uuid()
   if (!options.notitre) fakeRessource.titre = options.titre || faker.lorem.words()
   if (!options.noresume) fakeRessource.resume = options.resume || faker.lorem.sentence()
   if (!options.nodescription) fakeRessource.description = options.description || faker.lorem.paragraphs(2, '\n')
@@ -81,9 +85,12 @@ function getFakeRessource (options) {
     // on veut pas attribuer "aucune"
     delete catList.aucune
     const cat1 = faker.random.objectElement(catList)
-    let cat2 = cat1
-    while (cat2 === cat1) cat2 = faker.random.objectElement(catList)
-    fakeRessource.categories = [ cat1, cat2 ]
+    fakeRessource.categories = [cat1]
+    while (Math.random() < 0.5 && fakeRessource.categories.length < catList.length) {
+      let cat2 = cat1
+      while (cat2 === cat1) cat2 = faker.random.objectElement(catList)
+      fakeRessource.categories.push(cat2)
+    }
   }
   // on ajoute des enfants pour les arbres et des parametres pour les autres
   if (fakeRessource.type === 'arbre') {
@@ -99,14 +106,7 @@ function getFakeRessource (options) {
     if (options.parametres) {
       fakeRessource.parametres = options.parametres
     } else if (!options.noparametres) {
-      fakeRessource.parametres = {
-        boolean: faker.random.boolean(),
-        date: faker.date.past().toString(), // avec le passage par http ça deviendra une string
-        number: faker.random.number(),
-        string: faker.lorem.sentence(),
-        uuid: faker.random.uuid(),
-        word: faker.random.word()
-      }
+      fakeRessource.parametres = {}
     }
   }
 

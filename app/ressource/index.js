@@ -103,9 +103,7 @@ ressourceComponent.controller('public', function ($ressourceRepository, $ressour
 })
 
 // l'api json
-ressourceComponent.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
-  require('./controllerApi')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote)
-})
+require('./controllerApi')(ressourceComponent)
 
 // import calculatice
 ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) { // jshint ignore:line

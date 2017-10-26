@@ -51,11 +51,11 @@ module.exports = function display (ressource, options, next) {
 
     log('start ec2 display avec la ressource', ressource)
     // les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.swf) {
+    if (!ressource.oid || !ressource.titre || !ressource.parametres || !ressource.parametres.fichier) {
       throw new Error('Paramètres manquants')
     }
     // le swf
-    swfUrl = ec2Base + '/' + ressource.parametres.swf
+    swfUrl = ec2Base + '/' + ressource.parametres.fichier
     // les fcts exportées pour le swf
     var optionsChargement = ressource.parametres.json || 'defaut'
     window.charger_options = function () {
@@ -65,6 +65,22 @@ module.exports = function display (ressource, options, next) {
     window.enregistrer_score = function (datasCalculatice) {
       if (options && options.resultatCallback) {
         log('résultats reçus', datasCalculatice)
+        const resultat = {}
+        if (datasCalculatice) {
+          /* eslint-disable camelcase */
+          const {nbre_questions_exo, score_exo, temps_exo} = datasCalculatice
+          if (temps_exo) resultat.duree = Math.round(temps_exo / 1000)
+          if (nbre_questions_exo && score_exo) {
+            resultat.score = score_exo / nbre_questions_exo
+            resultat.reponse = `${score_exo} sur ${nbre_questions_exo}`
+          } else {
+            resultat.reponse = 'l’exercice n’a pas retourné le résultat au format attendu'
+          }
+          /* eslint-enable camelcase */
+        } else {
+          resultat.reponse = 'l’exercice n’a rien retourné'
+          log.error(new Error(resultat.reponse))
+        }
         options.resultatCallback({reponse: datasCalculatice})
       }
     }

@@ -38,6 +38,7 @@ const _ = require('lodash')
 const request = require('request')
 const {exists, getBaseIdFromRid} = require('sesatheque-client/dist/sesatheques')
 const Ref = require('../constructors/Ref')
+const {ensure} = require('../tools')
 const {getRidEnfants} = require('../tools/ressource')
 
 const config = require('./config')
@@ -63,9 +64,16 @@ const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 const $ressourceRepository = {}
 
 module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
-  const listeMax = config.limites.listeMax || 100 // on appliquera toujours un limit inférieur à cette valeur
-  const listeNbDefault = config.limites.listeNbDefault || 10
+  // on applique toujours un limit
+  const listeMax = config.limites.listeMax
+  if (!listeMax) throw new Error('ressource.limites.listeMax manquant en configuration')
 
+  /**
+   * Applique checkRelations et dropEnfantsAliased avant d'appeler next
+   * @private
+   * @param {Ressource} ressource
+   * @param {ressourceCallback} next
+   */
   function beforeSave (ressource, next) {
     flow().seq(function () {
       checkRelations(ressource, this)
@@ -106,7 +114,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
 
           // si c'est chez nous on vérifie
           if (debut === myBaseId) {
-            $ressourceRepository.load(fin, function (error, ressource) {
+            load(fin, function (error, ressource) {
               if (error) return nextRelation(error)
               if (ressource) {
                 nextRelation(null, [relId, getRealRid(ressource)])
@@ -122,7 +130,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
 
           // debut devrait être une origine, on vérifie que la ressource existe
           } else {
-            $ressourceRepository.loadByOrigin(debut, fin, function (error, ressource) {
+            loadByOrigin(debut, fin, function (error, ressource) {
               if (error) {
                 log.dataError(`${relTarget} n’existe pas sur cette sesathèque (mentionné comme relation de ${id}`)
                 nextRelation()
@@ -173,6 +181,83 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   }
 
   /**
+   * Retourne la requête préparée d'après visibilite et options.filters
+   * @private
+   * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
+   * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
+   * @param {getListeFilters} [options.filters] tableau de filtres
+   * @return {EntityQuery}
+   */
+  function getListeQuery (visibilite, options) {
+    // avant de construire la query on fait un minimum de vérifications
+    const filters = []
+    if (options.filters) {
+      if (!Array.isArray(options.filters)) throw new Error('Filtres incorrects')
+      options.filters.forEach(function (filter) {
+        if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant pour un des filtres')
+        if (!Array.isArray(filter.values)) throw new Error(`values invalides (pas un tableau) pour filter ${filter.index}`)
+        // on ne prend que ce que l'on connait, le filtre restriction est ignoré car c'est visibilite qui l'impose éventuellement
+        if (filter.index === 'restriction') log.error(new Error('le filtre restriction doit passer par le paramètre visibilité'))
+        else if (config.labels[ filter.index ]) filters.push(filter)
+        else log.error(new Error(`Index ${filter.index} non déclaré en config`))
+      })
+    } else {
+      // donc pas de filtre, mais faut un argument à match
+      filters.push({ index: 'oid' })
+    }
+
+    const query = EntityRessource.match() // sans argument ça retourne une EntityQuery vierge
+    filters.forEach(function (filter) {
+      // log.debug('getListe filter ' + filter.index)
+      if (filter.values) {
+        switch (filter.values.length) {
+          case 0:
+            query.match(filter.index)
+            break
+          case 1:
+            // une seule valeur, on regarde si on veut du like
+            const value = filter.values[ 0 ]
+            const action = (typeof value === 'string' && (value.indexOf('%') !== -1 || value.indexOf('_') !== -1)) ? 'like' : 'equals'
+            query.match(filter.index)[ action ](filter.values[ 0 ])
+            break
+          default:
+            query.match(filter.index).in(filter.values)
+        }
+      } else {
+        query.match(filter.index)
+      }
+    })
+
+    // restriction d'après la visibilité
+    if (visibilite === 'public') {
+      query.match('restriction').equals(config.constantes.restriction.aucune)
+    } else if (visibilite === 'correction') {
+      query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
+    } else if (visibilite === 'all') {
+      log.debug('recherche sur tout')
+    } else {
+      const slashPos = visibilite.indexOf('/')
+      if (slashPos > 0) {
+        const type = visibilite.substr(0, slashPos)
+        const target = visibilite.substr(slashPos + 1)
+        if (type === 'auteur') {
+          query.match('auteurs').equals(target)
+        } else if (type === 'groupe') {
+          query.match('groupes').equals(target.toLowerCase())
+        } else {
+          throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
+        }
+      } else {
+        // on a pas mis de restriction connue, c'est pas normal, on met public
+        query.match('restriction').equals(config.constantes.restriction.aucune)
+        log.error(new Error('Appel de getListe avec visibilite ' + visibilite))
+      }
+    }
+
+    return query
+  }
+
+  /**
    * Met à jour cette ressource dans tous les arbres des autres sesathèques qui la contiennent,
    * @private
    * @param {Ref} ref
@@ -198,8 +283,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   /**
    * Purge les urls publiques de la ressource sur varnish (si varnish est dans la conf, ne fait rien sinon)
    * (rend la main avant les réponses mais après avoir lancé les requêtes)
-   * @param {Ressource} ressource
-   * @returns {{}}
+   * @param {Ressource|string} ressource ou son oid
    */
   function purgeVarnish (ressource) {
     if (!appConfig.varnish) return
@@ -245,13 +329,13 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       // pas le cas au create ou sur un update via l'api
       // ira seulement en cache dans la plupart des cas, et de toute façon faut récupérer
       // le n° de version actuel et l'oid éventuel
-      $ressourceRepository.load(ressource.oid, function (error, ressourceBdd) {
+      load(ressource.oid, function (error, ressourceBdd) {
         if (error) next(error)
         else if (ressourceBdd) compare(ressource, ressourceBdd, next)
         else next(new Error(`checkAgainstPrevious a reçu une ressource avec oid ${ressource.oid} qui n’existe pas`))
       })
     } else if (ressource.idOrigine) {
-      $ressourceRepository.loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
+      loadByOrigin(ressource.origine, ressource.idOrigine, function (error, ressourceBdd) {
         if (error) next(error)
         else if (ressourceBdd) compare(ressource, ressourceBdd, next)
         else next(null, ressource)
@@ -300,7 +384,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       // on lance tout ça en // en tâche de fond
       const ref = new Ref(ressource)
       // log.debug('faut lancer une màj des parents')
-      $ressourceRepository.updateParent(ref)
+      updateParent(ref)
       updateParentsExternes(ref)
     }
   }
@@ -338,7 +422,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     ressource.version = ressourceBdd.version
 
     if (needIncrement) {
-      $ressourceRepository.archive(ressourceBdd, function (error, archive) {
+      archive(ressourceBdd, function (error, archive) {
         if (error) return next(error)
         ressource.version++
         ressource.archiveOid = archive.oid
@@ -387,7 +471,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         log.error(error)
         return next(new Error('Problème d’accès à la base de données'))
       }
-      if (_.isArray(ressources)) ressources.forEach(processOne)
+      if (Array.isArray(ressources)) ressources.forEach(processOne)
       else if (ressources) processOne(ressources)
       next(null, ressources)
     } catch (error) {
@@ -435,7 +519,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       })
       ressource.parametres = params
       // on enregistre la ressource modifiée en async
-      $ressourceRepository.save(ressource)
+      save(ressource)
     }
     log.debug('convertXmlEc2', params)
   }
@@ -470,7 +554,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {EntityRessource} ressource
    * @param next appelé avec (error, archive)
    */
-  $ressourceRepository.archive = function archive (ressource, next) {
+  function archive (ressource, next) {
     try {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n’existe pas encore")
       EntityArchive.create(ressource).store(function (error, ressource) {
@@ -485,27 +569,24 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   /**
    * Efface une ressource (et ses index)
    * @memberOf $ressourceRepository
-   * @param {EntityRessource} ressource
+   * @param {EntityRessource|string} ressource (ou son oid)
    * @param {errorCallback}   next
    * @returns {undefined}
    */
-  $ressourceRepository.delete = function repoDelete (ressource, next) {
-    if (ressource && ressource.oid) {
-      log.debug('La ressource ' + ressource.oid + ' va être effacée')
-      if (!ressource.delete) ressource = EntityRessource.create(ressource)
-      ressource.delete(function (error) {
-        // on vire du cache de toute façon
-        $cacheRessource.delete(ressource.oid)
-        if (error) {
-          next(error)
-        } else {
-          log.debug('La ressource ' + ressource.oid + ' (' + ressource.oid + ') a été effacée')
-          next()
-        }
-      })
-    } else {
-      next(new Error('delete appelé sans ressource'))
-    }
+  function remove (ressource, next) {
+    const ressourceOid = typeof ressource === 'string' ? ressource : (ressource && ressource.oid)
+    if (!ressourceOid) return next(new Error('remove appelé sans ressource'))
+    log.debug(`La ressource ${ressourceOid} va être effacée`)
+    // on vire du cache de toute façon
+    $cacheRessource.delete(ressourceOid)
+    EntityRessource.match('oid').equals(ressourceOid).purge(function (error, nb) {
+      if (error) return next(error)
+      if (nb > 1) next(new Error(`L’effacement de la ressource ${ressourceOid} a provoqué ${nb} suppressions`))
+      if (nb === 1) log.debug(`La ressource ${ressourceOid} a été effacée`)
+      else log.debug(`La ressource ${ressourceOid} n’existait pas`)
+      purgeVarnish(ressourceOid)
+      next()
+    })
   }
 
   /**
@@ -513,115 +594,47 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @memberOf $ressourceRepository
    * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
    * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
-   *                                filters : un tableau d'objets {index:'indexAFiltrer', values:valeurs},
-   *                                          où valeurs peut être un tableau de valeurs ou
-   *                                          [undefined] (ça filtrera sur les ressources ayant cet index)
-   *                                orderBy : L'index sur lequel trier
-   *                                order   : asc ou desc
-   *                                start   : L'indice de la 1re valeur à remonter
-   *                                nb      : Le nombre de ressources à remonter
-   * @param {Function} next       La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
+   * @param {getListeFilters} [options.filters] Les filtres à appliquer
+   * @param {string}   [options.orderBy] L'index sur lequel trier
+   * @param {string}   [options.order=asc] asc|desc
+   * @param {string}   [options.skip] L'indice de la 1re valeur à remonter
+   * @param {string}   [options.limit=listeMax] Le nombre max de ressources à remonter
+   * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
    */
-  $ressourceRepository.getListe = function getListe (visibilite, options, next) {
+  function getListe (visibilite, options, next) {
     try {
       if (!options) options = {}
       log.debug(`getListe avec visibility=${visibilite} et les options`, options)
-
-      // avant de construire la query on fait un minimum de vérifications
-      let start, nb
-      const optionsSafe = {
-        filters: []
+      const query = getListeQuery(visibilite, options)
+      // order
+      if (typeof (options.orderBy) === 'string') {
+        const order = (options.order === 'desc') ? 'desc' : 'asc'
+        query.sort(options.orderBy, order)
       }
-      // filtres
-      if (options.filters) {
-        if (!_.isArray(options.filters)) throw new Error('Filtres incorrects')
-        options.filters.forEach(function (filter) {
-          if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant')
-          if (!_.isArray(filter.values)) throw new Error('values invalides (pas un tableau) pour filter ' + filter.index)
-          // on ne prend que ce que l'on connait, et on ignore le filtre restriction (c'est visibilite qui l'impose éventuellement)
-          if (config.labels[ filter.index ] && filter.index !== 'restriction') optionsSafe.filters.push(filter)
-        })
+      // limit
+      let limit
+      const wantedLimit = ensure(options.limit, 'integer', listeMax)
+      if (wantedLimit > 0 && wantedLimit <= listeMax) {
+        limit = wantedLimit
       } else {
-        // donc tous, mais faut un argument à match
-        optionsSafe.filters.push({ index: 'idOrigine' })
-      }
-      // le reste
-      if (options.orderBy && !_.isString(options.orderBy)) throw new Error('orderBy invalide')
-      optionsSafe.orderBy = options.orderBy || 'dateCreation'
-      if (options.order === 'desc') optionsSafe.order = 'desc'
-      start = parseInt(options.start, 10) || 0
-      nb = parseInt(options.nb, 10) || listeNbDefault
-      if (nb > listeMax) {
-        log.error(new Error('nb de résultats demandés supérieur à la limite max ' + nb + '>' + listeMax))
-        nb = listeMax
-      }
-      log.debug(`getListe démarre ${start} avec max ${nb} et les options valides`, optionsSafe)
-      // le format est géré par le controleur
-
-      // si on est toujours là on peut construire la requete
-      let query = EntityRessource
-      optionsSafe.filters.forEach(function (filter) {
-        // log.debug('getListe filter ' + filter.index)
-        if (filter.values && filter.values.length) {
-          if (filter.values.length > 1) {
-            query = query.match(filter.index).in(filter.values)
-          } else {
-            // une seule valeur, on regarde si on veut du like
-            const value = filter.values[ 0 ]
-            const action = (typeof value === 'string' && (value.indexOf('%') !== -1 || value.indexOf('_') !== -1)) ? 'like' : 'equals'
-            query = query.match(filter.index)[ action ](filter.values[ 0 ])
-          }
-        } else {
-          query = query.match(filter.index)
+        if (wantedLimit > listeMax) {
+          log.error(new Error(`limite ${options.limit} demandée trop haute, ramenée à ${listeMax}`))
+        } else if (wantedLimit < 1) {
+          log.error(new Error(`limite ${options.limit} invalide, mise à ${listeMax}`))
         }
-      })
-
-      // restriction d'après la visibilité
-      if (visibilite === 'public') {
-        query = query.match('restriction').equals(config.constantes.restriction.aucune)
-      } else if (visibilite === 'correction') {
-        query = query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
-      } else if (visibilite === 'all') {
-        log.debug('recherche sur tout')
-      } else {
-        const slashPos = visibilite.indexOf('/')
-        if (slashPos > 0) {
-          const type = visibilite.substr(0, slashPos)
-          const target = visibilite.substr(slashPos + 1)
-          if (type === 'auteur') {
-            query = query.match('auteurs').equals(target)
-          } else if (type === 'groupe') {
-            query = query.match('groupes').equals(target.toLowerCase())
-          } else {
-            throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
-          }
-        } else {
-          // on a pas mis de restriction connue, c'est pas normal, on met public
-          query = query.match('restriction').equals(config.constantes.restriction.aucune)
-          log.error(new Error('Appel de getListe avec visibilite ' + visibilite))
-        }
+        limit = listeMax
       }
+      const skip = ensure(options.skip, 'integer', 0)
+      log.debug(`getListe démarre ${skip} avec max ${limit} et les options valides`, options)
 
-      // orderBy
-      if (optionsSafe.orderBy) {
-        if (optionsSafe.order === 'desc') query = query.sort(optionsSafe.orderBy, 'desc')
-        else query = query.sort(optionsSafe.orderBy)
-      }
-      let nbTotal = 0
       flow().seq(function () {
-        // le nb total de résultats
-        query.count(this)
-      }).seq(function (nbTot) {
-        nbTotal = nbTot
-        // log.debug('trouvé ' + nbTot + ' résultats')
-        if (nbTot) query.grab({limit: nb, offset: start}, this)
-        else this(null, [])
+        query.grab({limit, skip}, this)
       }).seq(function (ressources) {
         if (ressources.length) cacheAndNext(null, ressources, this)
         else this(null, [])
       }).seq(function (ressources) {
         log.debug('getListe remonte', ressources)
-        next(null, ressources, nbTotal)
+        next(null, ressources)
       }).catch(next)
     } catch (error) {
       log.error(error)
@@ -630,18 +643,70 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   } // getListe
 
   /**
+   * Compte le nb de ressources d'après ces critères
+   * @memberOf $ressourceRepository
+   * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
+   * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
+   * @param {Object[]} [options.filters] tableau d'objets {index:'indexAFiltrer', values:valeurs},
+   *                                       valeurs peut être un tableau de valeurs ou [undefined]
+   *                                       (ça filtrera sur les ressources ayant cet index)
+   * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
+   */
+  function getListeCount (visibilite, options, next) {
+    try {
+      const query = getListeQuery(visibilite, options)
+      query.count(next)
+    } catch (error) {
+      log.error(error)
+      next(error)
+    }
+  }
+
+  /**
+   * Récupère une liste de ressource complète (no limit) d'après critères ATTENTION à ne pas l'utiliser n'importe où !
+   * Il y a quand même une limite, 50 × listeMax
+   * @memberOf $ressourceRepository
+   * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
+   * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
+   * @param {getListeFilters} [options.filters] Les filtres à appliquer
+   * @param {string}   [options.orderBy] L'index sur lequel trier
+   * @param {string}   [options.order=asc] asc|desc
+   * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
+   */
+  function getListeFull (visibilite, options, next) {
+    function fetch () {
+      getListe(visibilite, options, function (error, ressources) {
+        if (error) return next(error)
+        nbCalls++
+        allRessources = allRessources.concat(ressources)
+        if (ressources.length === listeMax && nbCalls < 50) {
+          skip += listeMax
+          fetch()
+        } else {
+          if (nbCalls === 50) log.error(`getListeFull remonte ${nbCalls * listeMax} ressources et il en reste, on arrête là`)
+          next(null, allRessources)
+        }
+      })
+    }
+    let nbCalls = 0
+    let skip = 0
+    let allRessources = []
+    fetch()
+  }
+
+  /**
    * Récupère une ressource et la passe à next (ressource undefined si elle n’existe pas)
    * @memberOf $ressourceRepository
    * @param {number|String}     oid  L'identifiant de la ressource (on accepte oid ou string origine/idOrigine)
    * @param {ressourceCallback} next appelée avec une EntityRessource
    * @returns {undefined}
    */
-  $ressourceRepository.load = function load (oid, next) {
+  function load (oid, next) {
     if (_.isString(oid) && oid.indexOf('/') > 0) {
       const [origin, idOrigin, bug] = oid.split('/')
       if (bug) return next(new Error('identifiant invalide : ' + oid))
-      if (origin === 'cle') $ressourceRepository.loadByCle(idOrigin, next)
-      else $ressourceRepository.loadByOrigin(origin, idOrigin, next)
+      if (origin === 'cle') loadByCle(idOrigin, next)
+      else loadByOrigin(origin, idOrigin, next)
     } else {
       $cacheRessource.get(oid, function (error, ressourceCached) {
         if (error) return next(error)
@@ -660,7 +725,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {string}            rid
    * @param {ressourcesCallback} next  appelée avec une EntityRessource
    */
-  $ressourceRepository.loadByAliasAndPid = function loadByAliasAndPid (aliasOf, pid, next) {
+  function loadByAliasAndPid (aliasOf, pid, next) {
     EntityRessource
       .match('aliasOf').equals(aliasOf)
       .match('auteurs').equals(pid)
@@ -673,7 +738,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {string}            cle
    * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
-  $ressourceRepository.loadByCle = function loadByCle (cle, next) {
+  function loadByCle (cle, next) {
     if (!cle) return next(new Error('Clé manquante, impossible de charger la ressource'))
     $cacheRessource.getByOrigine('cle', cle, function (error, ressourceCached) {
       if (error) return next(error)
@@ -693,16 +758,16 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {string}            idOrigine
    * @param {ressourceCallback} next      appelée avec une EntityRessource
    */
-  $ressourceRepository.loadByOrigin = function loadByOrigin (origine, idOrigine, next) {
+  function loadByOrigin (origine, idOrigine, next) {
     if (origine && idOrigine) {
       // on est appelé par les controleurs sur les urls xxx/:origine/:idOrigine
       // mais le client de l'api peut passer un rid ou une clé,
       // on le gère ici plutôt que de mettre des if dans chaque contrôleur
       if (origine === 'cle') {
-        return $ressourceRepository.loadByCle(idOrigine, next)
+        return loadByCle(idOrigine, next)
       }
       if (origine === myBaseId) {
-        return $ressourceRepository.load(idOrigine, next)
+        return load(idOrigine, next)
       }
       // c'est un vraie origine
       $cacheRessource.getByOrigine(origine, idOrigine, function (error, ressourceCached) {
@@ -725,7 +790,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {number} oid
    * @param {function} next
    */
-  $ressourceRepository.saveDeferred = function (oid, next) {
+  function saveDeferred (oid, next) {
     const token = uuid()
     // on met 10h en cache, vu le peu de data c'est pas un souci
     $cache.set('defer_' + token, {oid: oid, action: 'saveRessource'}, 36000, function (error) {
@@ -739,7 +804,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param token
    * @param next
    */
-  $ressourceRepository.getDeferred = function (token, next) {
+  function getDeferred (token, next) {
     /* $cache.get('defer_' + token, function (error, data) {
       if (!error && data) $cache.delete('defer_' + token, function () {})
       next(error, data)
@@ -758,7 +823,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {EntityRessource}   ressource
    * @param {ressourceCallback} [next]    appelée avec une EntityRessource
    */
-  $ressourceRepository.save = function save (ressource, next) {
+  function save (ressource, next) {
     if (ressource.constructor.name !== 'Entity') {
       ressource = EntityRessource.create(ressource)
     }
@@ -797,7 +862,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {Ref} ref
    * @param {function} next appelée avec (error, nbArbres)
    */
-  $ressourceRepository.updateParent = function updateParent (ref, next) {
+  function updateParent (ref, next) {
     // cherche un enfant et le modifie si besoin, retourne true si on a fait une modif
     function findChild (arbre) {
       let modif = false
@@ -845,12 +910,44 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     }).seqEach(function (arbre) {
       // log.debug(`updateParent a trouvé ${rid} dans l'arbre parent ${arbre.oid}`)
       nbArbres++
-      if (findChild(arbre, rid)) $ressourceRepository.save(arbre, this)
+      if (findChild(arbre, rid)) save(arbre, this)
       else log.dataError(`majArbres appelé suite à un update de ${rid}, trouvé l’arbre ${arbre.oid} mais il n’y a pas eu de modification à répercuter`)
     }).seq(function () {
       if (next) next(null, nbArbres)
     }).catch(next || log.error)
   }
 
-  return $ressourceRepository
+  /**
+   * @service $ressourceRepository
+   */
+  return {
+    archive,
+    getDeferred,
+    getListe,
+    getListeCount,
+    getListeFull,
+    load,
+    loadByAliasAndPid,
+    loadByCle,
+    loadByOrigin,
+    remove,
+    save,
+    saveDeferred,
+    updateParent
+  }
 }
+
+/**
+ * @callback ressourcesCallback
+ * @param {Error} error
+ * @param {Ressource[]} ressources
+ */
+/**
+ * Tableau de filtres
+ * @typedef {getListeFilter[]} getListeFilters
+ */
+/**
+ * Filtre de la forme {index:'indexAFiltrer', values:valeurs},
+ * valeurs peut être un tableau de valeurs ou [undefined] (ça filtrera sur les ressources ayant cet index)
+ * @typedef {{index: string, values: Array}} getListeFilter
+ */

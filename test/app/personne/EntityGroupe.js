@@ -46,8 +46,6 @@ import {expect} from 'chai'
 module.exports = function describeEntityGroupe () {
   // une erreur toute prête
   // const errAbort = new Error('pas la peine de tester ça tant que ça plante avant')
-
-  const EntityGroupe = lassi.service('EntityGroupe')
   const groupeData = {
     nom: 'Groupe ACCENTUÉ',
     description: 'Un groupe ouvert de test.\nAvec un peu de bla bla.',
@@ -60,7 +58,7 @@ module.exports = function describeEntityGroupe () {
    * L'entité créée
    * @type {EntityGroupe}
    */
-  let groupe
+  let groupe, EntityGroupe
 
   const checkGroupe = (groupe) => {
     expect(groupe.nom).to.equal(nomLower)
@@ -75,6 +73,11 @@ module.exports = function describeEntityGroupe () {
       .match('nom').equals(nomLower)
       .grab(next)
   }
+
+  before(done => {
+    EntityGroupe = lassi.service('EntityGroupe')
+    done()
+  })
 
   it('create', function () {
     groupe = EntityGroupe.create(groupeData)

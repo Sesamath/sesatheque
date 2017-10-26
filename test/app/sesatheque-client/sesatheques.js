@@ -48,8 +48,8 @@ chai.use(sinonChai)
 const expected = {
   sesabibli: 'http://bibliotheque.sesamath.net/',
   sesacommun: 'http://commun.sesamath.net/',
-  sesabiblidev: 'http://bibliotheque.devsesamath.net/',
-  sesacommundev: 'http://commun.devsesamath.net/'
+  sesabiblidev: 'https://bibliotheque.devsesamath.net/',
+  sesacommundev: 'https://commun.devsesamath.net/'
 }
 
 module.exports = function describeSesatheques () {

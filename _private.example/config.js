@@ -30,7 +30,12 @@ module.exports = {
     // utilisé par le SSO (sesasso-bibli et sesalab-sso), prod|dev
     staging: 'dev', // OBLIGATOIRE
     // délai de conservation en cache, peut être élevé car on change l'url à chaque publication de version
-    staticMaxAge: '7d'
+    staticMaxAge: '7d',
+    maintenance: {
+      lockFile: '_private/maintenance.lock',
+      message: 'Application en maintenance, merci d’essayer de nouveau dans quelques instants',
+      staticDir: '_private/maintenance'
+    }
   },
 
   // connexion mongoDb, pour lassi, à préciser

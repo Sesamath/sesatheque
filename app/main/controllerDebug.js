@@ -116,12 +116,9 @@ module.exports = function (controller) {
     throw new Error(error)
   })
 
-  // un formulaire de login
-  controller.get('login', function (context) {
-    context.layout = 'page'
-    var data = getDefaultData()
-    data.contentBloc.debug = 'page de login factice'
-    context.html(data)
+  controller.get('qs', function (context) {
+    let txt = `${context.request.originalUrl}\n${JSON.stringify(context.request.query, null, 2)}`
+    context.plain(txt)
   })
 
   // une page pour voir le cache

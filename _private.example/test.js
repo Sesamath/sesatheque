@@ -17,7 +17,7 @@ sesatheques.addSesatheque(baseId, baseUrl)
 const getLoggerConf = suffix => ({
   logLevel: 'debug',
   renderer: {
-    name: 'fileRenderer',
+    name: 'file',
     target: logDir + '/lassi' + suffix + '.log'
   }
 })
