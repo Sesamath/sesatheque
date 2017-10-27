@@ -34,10 +34,11 @@ const anLog = require('an-log')
 const config = require('./config')
 const sesatheques = require('sesatheque-client/dist/sesatheques')
 const {exists, addSesatheque} = sesatheques
+const log = require('./tools/log.js')
+const appName = config.application.name
+const logger = anLog(appName)
 
 module.exports = function boot (beforeBootstrapCb, options) {
-  const log = require('./tools/log.js')
-  const logger = anLog(config.application.name)
   if (!options) options = {}
   options.root = __dirname
   // appel du module lassi qui met en global une variable lassi
@@ -116,5 +117,11 @@ module.exports = function boot (beforeBootstrapCb, options) {
   })
 
   // et on lance le boot
-  sesatheque.bootstrap()
+  lassi.bootstrap(sesatheque, function (error) {
+    if (error) {
+      log.error(error)
+      process.exit()
+    }
+    log('end bootstrap')
+  })
 }
