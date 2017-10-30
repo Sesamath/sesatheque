@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.0.20",
+  "version": "1.1.0",
   "engines": {
     "node": ">6"
   },
@@ -69,7 +69,7 @@
     "elementtree": "0.1.6",
     "jquery": "3.2.1",
     "jstree": "3.3.4",
-    "lassi": "Sesamath/lassi#2.1.23",
+    "lassi": "Sesamath/lassi#2.2.0",
     "lodash": "4.16.4",
     "memcached": "2.2.2",
     "moment": "2.18.1",
