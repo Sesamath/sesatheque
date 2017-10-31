@@ -36,8 +36,6 @@
   },
   "opts"     : {
     "destination": "./documentation/modules/sesalab-sso",
-//    "template"   : "../node_modules/ink-docstrap/template",
-    "template"   : "./node_modules/jaguarjs-jsdoc",
     "recurse"    : true,
     "private"    : false
   }
