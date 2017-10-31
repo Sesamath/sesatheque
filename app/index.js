@@ -115,8 +115,9 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
 
 /**
  * Démarre l'application Sesathèque
- * @param options
- * @param afterBootCallback
+ * @param {object} options
+ * @param {simpleCallback} [afterBootCallback]
+ * @return {Lassi}
  */
 function app (options, afterBootCallback) {
   function afterBootCallbackWrapper () {
@@ -141,7 +142,7 @@ function app (options, afterBootCallback) {
     }
     if (options.settings) bootOptions.settings = options.settings
     if (options.noGlobalLassi) bootOptions.noGlobalLassi = options.noGlobalLassi
-    boot(beforeBootsrap, bootOptions)
+    return boot(beforeBootsrap, bootOptions)
   } catch (error) {
     anLog(config.application.name).error(error)
   }

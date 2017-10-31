@@ -37,7 +37,7 @@
   "opts"     : {
     "destination": "./documentation/modules/sesajstools",
 //    "template"   : "../node_modules/ink-docstrap/template",
-    "template"   : "./jaguarjs-jsdoc",
+    "template"   : "./node_modules/jaguarjs-jsdoc",
     "recurse"    : true,
     "private"    : false
   }

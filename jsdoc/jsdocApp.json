@@ -38,7 +38,7 @@
     "destination": "./documentation",
     "tutorials": "./doc_src",
     "recurse"    : true,
-    "template"   : "./jaguarjs-jsdoc",
+    "template"   : "./node_modules/jaguarjs-jsdoc",
     "private"    : false
   }
 }

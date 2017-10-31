@@ -181,7 +181,7 @@ function parseXml (xmlFile, next) {
     } else {
       var file = path.join(__dirname, 'arbresXml', xmlFile)
       if (!fs.existsSync(file)) {
-        console.log('Abandon, ' + file + " n’existe pas")
+        console.log(`Abandon, ${file} n’existe pas`)
         process.exit()
       }
       var xmlString = fs.readFileSync(file).toString()

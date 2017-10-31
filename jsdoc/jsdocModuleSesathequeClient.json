@@ -37,7 +37,7 @@
   "opts"     : {
     "destination": "./documentation/modules/sesatheque-client",
 //    "template"   : "../node_modules/ink-docstrap/template",
-    "template"   : "./jaguarjs-jsdoc",
+    "template"   : "./node_modules/jaguarjs-jsdoc",
 //    "template": "node_modules/docdash",
     "recurse"    : true,
     "private"    : false

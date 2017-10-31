@@ -1,4 +1,5 @@
-db.EntityRessource.find({type:'ec2'}).sort({dateCreation:1}).forEach(r => {
+/* global db print */
+db.EntityRessource.find({type: 'ec2'}).sort({dateCreation: 1}).forEach(r => {
   let msg
   const data = JSON.parse(r._data)
   if (data.parametres) {

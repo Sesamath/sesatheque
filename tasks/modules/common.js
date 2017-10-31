@@ -355,8 +355,8 @@ common.flushPendingRelations = function (next) {
                   newRelations.push(newRel)
                   nextRelation()
                 } else {
-                  addError(idComb, 'une relation pointait vers ' + idCombLie + " qui n’existe pas")
-                  if (opt.logRelations) log('une relation pointait vers ' + idCombLie + " qui n’existe pas")
+                  addError(idComb, `une relation pointait vers ${idCombLie} qui n’existe pas`)
+                  if (opt.logRelations) log(idComb, `une relation pointait vers ${idCombLie} qui n’existe pas`)
                   nextRelation()
                 }
               })

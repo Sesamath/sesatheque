@@ -33,7 +33,7 @@
   "opts": {
     "destination": "./documentation/restApi",
     "recurse": true,
-    "template" : "./jaguarjs-jsdoc",
+    "template": "./node_modules/jaguarjs-jsdoc",
     "private" : false
   }
 }

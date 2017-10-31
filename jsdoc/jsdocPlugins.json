@@ -38,7 +38,7 @@
   "opts"     : {
     "destination": "./documentation/plugins",
     "recurse"    : true,
-    "template"   : "./jaguarjs-jsdoc",
+    "template"   : "./node_modules/jaguarjs-jsdoc",
     "private"    : false
   }
 }

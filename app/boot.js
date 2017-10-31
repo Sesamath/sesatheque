@@ -127,6 +127,8 @@ function boot (beforeBootstrapCb, options) {
     }
     log('end bootstrap')
   })
+
+  return lassiInstance
 }
 
 module.exports = boot

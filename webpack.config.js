@@ -42,7 +42,7 @@ var conf = {
     page: ['./app/srcClient/page/index.js'],
     display: './app/srcClient/display/index.js',
     edit: './app/srcClient/edit/index.js',
-    import: './app/srcClient/edit/import.js',
+    import: './app/srcClient/edit/import.js'
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
