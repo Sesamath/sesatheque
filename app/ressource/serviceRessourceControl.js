@@ -66,7 +66,7 @@ function addDeductions (ressource) {
             })
           }
           if (noTd) {
-            if (!_.isArray(ressource.typeDocumentaires)) ressource.typeDocumentaires = []
+            if (!Array.isArray(ressource.typeDocumentaires)) ressource.typeDocumentaires = []
             config.categoriesToTypes[categorie].typeDocumentaires.forEach(function (tp) {
               ressource.typeDocumentaires.push(tp)
             })

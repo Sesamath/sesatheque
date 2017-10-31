@@ -38,7 +38,7 @@
 
 'use strict'
 /* eslint-env mocha */
-/* global stClient */
+/* global superTestClient */
 import {expect} from 'chai'
 
 module.exports = function describe404 () {
@@ -46,7 +46,7 @@ module.exports = function describe404 () {
   paths.forEach(path => {
     it(`prend un 404 sur ${path}`, function () {
       // on retourne une promesse plutôt qu'utiliser done
-      return stClient
+      return superTestClient
         .get(path)
         .expect(404, 'not found ' + path)
         .expect('Content-Type', /text\/plain/)
@@ -55,7 +55,7 @@ module.exports = function describe404 () {
   paths.forEach(path => {
     it(`prend un 404 sur /api${path}`, function () {
       // on retourne une promesse plutôt qu'utiliser done
-      return stClient
+      return superTestClient
         .get('/api' + path)
         .expect(404)
         .expect('Content-Type', /application\/json/)

@@ -54,7 +54,11 @@ if (!homeContent) homeContent = 'Ce site est encore un prototype expérimental.'
  */
 module.exports = function (controller) {
   // nos ressources statiques génériques
-  controller.serve(path.join(__dirname, 'public'))
+  const expressOptions = {
+    fsPath: path.join(__dirname, 'public'),
+    maxAge: config.application.staticMaxAge || '7d'
+  }
+  controller.serve('/', expressOptions)
 
   /**
    * La home

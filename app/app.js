@@ -59,38 +59,12 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
   anLog.config(config.lassiLogger)
   const appLog = anLog(config.application.name)
 
-  /**
-   * On ajoutera nos middleware après session
-   * @param {Object} rail le rail express
-   * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
-   */
-  lassi.on('afterRailUse', function (rail, name) {
-    // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
-    if (name === 'session') require('./addMiddlewares')(rail)
-  })
-
   // une fois les composants chargés on ajoutera memcache et nos listeners
-  mainComponent.config(function ($cache, $settings, $accessControl, $routes, $flashMessages, $auth, $page) {
-    // on ajoute memcache si précisé dans les settings
-    var memcache = $settings.get('memcache', null)
-    if (memcache) {
-      if (typeof memcache !== 'object' || !memcache.host || !memcache.port) {
-        throw new Error('Il faut indiquer pour memcache un objet {host:xxx,port:nn}. ' +
-          " L'application sesatheque ne peut pas tourner avec un cluster memcache" +
-          ' car elle utilise memcache comme stockage commun aux différents workers nodejs')
-      }
-      if (!memcache.prefix) log.error('Pas de propriété prefix pour memcache en configuration (préfixe de clé)')
-      // le slot permet de préciser que cet engine ne gère que les clés qui commence par cette chaîne, '' prend donc tout
-      $cache.addEngine('', 'memcache', memcache)
-      appLog('Memcache ajouté avec ' + memcache.host + ':' + memcache.port)
-    } else if (process.env.NODE_UNIQUE_ID) {
-      // @see https://nodejs.org/api/cluster.html#cluster_cluster_ismaster
-      throw new Error("Cluster nodejs sans memcache (memcache prérequis du mode cluster car il sert d'espace partagé entre les workers node)")
-    }
-
+  mainComponent.config(function ($accessControl, $flashMessages, $routes, $settings) {
     // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
     // if (!global.isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
     lassi.transports.html.engine.disableWhiteSpaceCompression()
+
     // on ajoute nos filtres perso pour dust
     try {
       // un js dump
@@ -104,11 +78,21 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
       log.error("impossible d'ajouter nos filtres à dust", error)
     }
 
+    /**
+     * On ajoutera nos middleware après session
+     * @param {Object} rail le rail express
+     * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
+     */
+    lassi.on('afterRailUse', function (rail, name) {
+      // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
+      if (name === 'session') require('./addMiddlewares')(rail)
+    })
+
     // le listener beforeTransport
     lassi.on('beforeTransport', require('./beforeTransport')($accessControl, $routes, $flashMessages))
 
     // si $sesalabSsoClient existe, faut l'ajouter en client d'authentification
-    // maintenant que les services sont dispos, on lui passe ceux dont il aura besoin
+    // on lui passe les infos dont il a besoin
     if (allComponents.indexOf('sesalab-sso') !== -1) {
       const authName = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].name || 'Sesalab'
       const authBaseId = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].baseId

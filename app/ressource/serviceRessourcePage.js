@@ -36,6 +36,7 @@ const sjt = require('sesajstools')
 const sjtObj = require('sesajstools/utils/object')
 const flow = require('an-flow')
 const moment = require('moment')
+const version = require('../../package.json').version
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
 const ressConfig = require('./config')
@@ -262,7 +263,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // log.debug('arrayToDust de ' +key, selectedValues)
     var i = 0
     var choices = []
-    if (selectedValues && !_.isArray(selectedValues)) {
+    if (selectedValues && !Array.isArray(selectedValues)) {
       log.error(new Error('La propriété ' + key + " de la ressource n'est pas un tableau"))
     } else if (ressConfig.listesOrdonnees[key]) {
       _.each(ressConfig.listesOrdonnees[key], function (cbValue) {
@@ -741,10 +742,10 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     var data = $page.getDefaultData()
     // css ajouté par le listener à la fin, suivant la valeur de context.layout,
     // on ajoute ici les js suivant la vue
-    data.$metas.js = ['/page.bundle.js']
+    data.$metas.js = [`/page.bundle.js?${version}`]
     if (viewName === 'display' || viewName === 'preview' || viewName === 'formEdit') {
-      data.$metas.js.push('/display.bundle.js')
-      if (viewName === 'formEdit') data.$metas.js.push('/edit.bundle.js')
+      data.$metas.js.push(`/display.bundle.js?${version}`)
+      if (viewName === 'formEdit') data.$metas.js.push(`/edit.bundle.js?${version}`)
     }
     // les erreurs sont pas dans le bloc contenu
     if (viewName === 'errors') data.errors = {$view: viewName}
@@ -810,7 +811,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           // ajout des enfants pour les arbres
           if (ressource.type === 'arbre') {
             // on ajoute la liste des urls des enfants si on les a
-            if (_.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
+            if (Array.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
               var enfantsDescribe = []
               ressource.enfants.forEach(function (enfant) {
                 // ça peut être un dossier seul

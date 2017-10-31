@@ -30,15 +30,9 @@
  */
 
 'use strict'
-
-var moment = require('moment')
-var util = require('util')
-
-/**
- * Un assemblage de fonctions utilitaires
- * @service tools
- */
-var tools = {}
+/* global log */
+const moment = require('moment')
+const util = require('util')
 
 /**
  * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
@@ -49,7 +43,7 @@ var tools = {}
  * @param label Un label pour le message d'erreur (qui indique ce qui a été recadré)
  * @returns {Integer}
  */
-tools.encadre = function (int, min, max, label) {
+function encadre (int, min, max, label) {
   var value = parseInt(int)
   if (value < min) {
     log.error(label + ' trop petit (' + value + '), on le fixe à ' + min)
@@ -63,13 +57,59 @@ tools.encadre = function (int, min, max, label) {
 }
 
 /**
- * Retourne true si l'url est sur l'api
+ * Garanti que le retour sera du type demandé, mis à defaultValue (lui ne sera pas casté) si falsy
+ * @param {*} value
+ * @param {string} type string|number|integer|boolean
+ * @param {*} defaultValue
+ * @return {*}
+ */
+function ensure (value, type, defaultValue) {
+  const needToCast = typeof value !== type
+  if (needToCast) {
+    switch (type) {
+      case 'string':
+        value = (value && String(value)) || defaultValue || ''
+        break
+      case 'number':
+        value = (value && Number(value)) || defaultValue || 0
+        break
+      case 'integer':
+        value = (value && Math.round(Number(value))) || defaultValue || 0
+        break
+      case 'boolean':
+        value = Boolean(value)
+        break
+      default:
+        console.error(new Error(`type ${type} non géré`))
+    }
+  } else if (!value && defaultValue) {
+    value = defaultValue
+  }
+  return value
+}
+
+/**
+ * Transforme une liste en tableau de mots valides pour des ids ([A-Za-z0-9_\-])
+ * @memberOf tools
+ * @param {string} list
+ * @returns {string[]} la liste des ids récupérés (tous les caractères autres que lettres, chiffres, tiret et underscore ont été virés)
+ */
+function idListToArray (list) {
+  var retour = []
+  if (typeof list === 'string') retour = list.match(/([-A-Za-z0-9_]+)/g)
+  else log.error(new TypeError('faut me donner un type string'))
+
+  return retour
+}
+
+/**
+ * Retourne true si l'url contient /api/
  * @memberOf tools
  * @param url
  * @returns {boolean}
  */
-tools.isApi = function (url) {
-  return /^\/api\//.exec(url)
+function isApi (url) {
+  return /^\/api\//.test(url)
 }
 
 /**
@@ -79,8 +119,8 @@ tools.isApi = function (url) {
  * @param url
  * @returns {boolean}
  */
-tools.isStatic = function (url) {
-  return /\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.exec(url)
+function isStatic (url) {
+  return /\.(js|css|png|ico|jpg|jpeg|gif)(\?.*)?$/.test(url)
 }
 
 /**
@@ -89,18 +129,18 @@ tools.isStatic = function (url) {
  * @param url
  * @returns {boolean}
  */
-tools.isPublic = function (url) {
-  return /\/public\//.exec(url)
+function isPublic (url) {
+  return /\/public\//.test(url)
 }
 /**
  * Génère le code html d'un lien
  * @memberOf tools
  * @param path Le path (absolu ou relatif)
  * @param texte Le texte à afficher
- * @param {string|array} [args] Des arguments à ajouter au path (séparateur slash)
+ * @param {string|Array} [args] Des arguments à ajouter au path (séparateur slash)
  * @returns {string} Le code html du tag a
  */
-tools.link = function (path, texte, args) {
+function link (path, texte, args) {
   if (args) {
     if (Array.isArray(args)) path += args.join('/')
     else path += '/' + args
@@ -117,7 +157,7 @@ tools.link = function (path, texte, args) {
  * @param {Object} [args] Des arguments à ajouter en queryString
  * @returns {string} Le code html du tag a
  */
-tools.linkQs = function (path, texte, args) {
+function linkQs (path, texte, args) {
   if (args) {
     var paires = []
     for (var p in args) {
@@ -136,7 +176,7 @@ tools.linkQs = function (path, texte, args) {
  * @param {string} source La chaîne à nettoyer
  * @returns {string} La chaîne nettoyée
  */
-tools.sanitizeHashKey = function (source) {
+function sanitizeHashKey (source) {
   return source.replace(/ /g, '_').replace(/[\x00-\x20\x7F-\xA0]/, '') // eslint-disable-line no-control-regex
 }
 
@@ -146,7 +186,7 @@ tools.sanitizeHashKey = function (source) {
  * @param source
  * @returns {void|*|{value}|string|XML}
  */
-tools.sanitizeStrict = function (source) {
+function sanitizeStrict (source) {
   return source.replace(/[^-a-zA-Z0-9_]/, '')
 }
 
@@ -158,7 +198,7 @@ tools.sanitizeStrict = function (source) {
  * @param {string|Array} args Les arguments, en liste ou en tableau
  * @returns {string}
  */
-tools.strFormat = function (message, args) {
+function strFormat (message, args) {
   var retour
   if (Array.isArray(args)) {
     // faut ajouter message en 1er argument et le passer à util.format
@@ -179,31 +219,17 @@ tools.strFormat = function (message, args) {
  * @param {string} source
  * @returns {string}
  */
-tools.stripTags = function (source) {
+function stripTags (source) {
   return source.replace(/(<([^>]+)>)/ig, '')
-}
-
-/**
- * Transforme une liste en tableau de mots valides pour des ids ([A-Za-z0-9_\-])
- * @memberOf tools
- * @param {string} list
- * @returns {string[]} la liste des ids récupérés (tous les caractères autres que lettres, chiffres, tiret et underscore ont été virés)
- */
-tools.idListToArray = function idListToArray (list) {
-  var retour = []
-  if (typeof list === 'string') retour = list.match(/([-A-Za-z0-9_]+)/g)
-  else log.error(new TypeError('faut me donner un type string'))
-
-  return retour
 }
 
 /**
  * Converti un timestamp ou un chaine en objet Date
  * @memberOf tools
- * @param {number|string} value Un timestamp (en ms ou s) ou une chaine ('DD/MM/YYYY' ou ISO_8601)
+ * @param {number|string|Date} value Un timestamp (en ms ou s) ou une chaine ('DD/MM/YYYY' ou ISO_8601)
  * @returns {Date} L'objet Date ou undefined si la conversion a échoué (value invalide)
  */
-tools.toDate = function (value) {
+function toDate (value) {
   if (value instanceof Date) return value
   var buffer
   if (value > 0) {
@@ -227,8 +253,27 @@ tools.toDate = function (value) {
  * @param {Date} date
  * @returns {string} Le jour au format DD/MM/YYYY
  */
-tools.toJour = function (date) {
+function toJour (date) {
   return moment(date).format('DD/MM/YYYY')
 }
 
-module.exports = tools
+/**
+ * Un assemblage de fonctions utilitaires
+ * @service tools
+ */
+module.exports = {
+  encadre,
+  ensure,
+  idListToArray,
+  isApi,
+  isStatic,
+  isPublic,
+  link,
+  linkQs,
+  sanitizeHashKey,
+  sanitizeStrict,
+  strFormat,
+  stripTags,
+  toDate,
+  toJour
+}

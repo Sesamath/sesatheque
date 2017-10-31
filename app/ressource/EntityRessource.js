@@ -77,10 +77,6 @@ module.exports = function (EntityRessource) {
     }
   })
 
-  // on veut pas d'une table entity_ressource
-  // @todo inutile avec lassi#mongo, à virer après migration
-  EntityRessource.table = 'ressource'
-
   EntityRessource
     .defineIndex('rid', 'string')
     // baseId n'est pas une propriété de Ressource mais ça nous intéresse de connaître la provenance
@@ -181,7 +177,7 @@ module.exports = function (EntityRessource) {
             if (this.idOrigine != this.oid) throw new Error(`idOrigine ${this.idOrigine} et rid ${this.rid} incohérents`) // eslint-disable-line eqeqeq
           }
         } else {
-          throw new Error(`Cette ressource ${this.oid || this.rid} doit être enregistrée sur ${baseId}`)
+          throw new Error(`Cette ressource ${this.oid || this.rid} doit être enregistrée sur ${baseId} (et non ici ${myBaseId})`)
         }
       } else if (this.oid) {
         this.rid = myBaseId + '/' + this.oid

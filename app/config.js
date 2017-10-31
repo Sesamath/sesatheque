@@ -221,11 +221,11 @@ if (localConfig) sjtObj.merge(config, localConfig)
 // si lassiLogger n'a pas été défini on l'ajoute maintenant,
 // mais en utilisant logs.dir après override de _private
 if (!config.lassiLogger) {
-  // pour an-log, si on veut récupérer les logs sql
+  // pour an-log, si on veut récupérer les logs db
   config.lassiLogger = {
     '$entities': {
       logLevel: config.application.staging === 'prod' ? 'warning' : 'debug',
-      renderer: {name: 'fileRenderer', target: config.logs.dir + '/entities.log'}
+      renderer: {name: 'file', target: config.logs.dir + '/entities.log'}
     }
   }
 }

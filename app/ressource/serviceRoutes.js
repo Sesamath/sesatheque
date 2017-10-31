@@ -77,7 +77,7 @@ module.exports = function ($accessControl) {
    * Les arguments supplémentaires sont concaténé avec /
    * @memberOf $routes
    * @param {string}           action (display|describe|preview)
-   * @param {Ressource|number} [ressource] ou oid de ressource
+   * @param {Ressource|string} [ressource] ressource ou oid ou rid
    * @param {Context}          [context] pour vérifier que l'on est authentifié
    * @returns {string} La route absolue
    */

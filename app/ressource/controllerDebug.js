@@ -86,10 +86,10 @@ module.exports = function (controller, $ressourceRepository, EntityRessource) {
   controller.get('like', function (context) {
     var index = context.get.index
     var value = context.get.value
-    var limit = context.nb || 10
-    var offset = context.start || 0
+    var limit = context.limit || 10
+    var skip = context.skip || 0
     if (index && value) {
-      EntityRessource.match(index).like(value).grab({limit, offset}, function (error, ressources) {
+      EntityRessource.match(index).like(value).grab({limit, skip}, function (error, ressources) {
         if (error) context.json({error: error.toString()})
         else context.json({ressources: ressources})
       })

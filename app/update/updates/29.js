@@ -28,22 +28,23 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
-/**
- * Ce test crée une ressource puis la supprime
- * l'appeler directement en lui passant --prod ou --dev pour tester la sésathèque de prod ou dev
- * ou --token pour lui passer un token
- *
- */
-
 'use strict'
-/* eslint-env mocha */
-// import {expect} from 'chai'
-/* global superTestClient */
-module.exports = function describeStatic () {
-  it('la page d’accueil existe', function () {
-    return superTestClient
-      .get('/')
-      .expect(200)
-  })
+
+const flow = require('an-flow')
+
+const name = 'réindexation de EntityArchive (pour ajout rid)'
+const description = ''
+
+module.exports = {
+  name: name,
+  description: description,
+  run: function run (next) {
+    // on utilise le cli de lassi
+    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    // reindexAll est une commande de entities-cli
+    const reindexAll = $entitiesCli().commands().reindexAll
+    flow().seq(function () {
+      reindexAll('EntityArchive', this)
+    }).done(next)
+  } // run
 }

@@ -30,1189 +30,1197 @@
  */
 
 'use strict'
-
-var _ = require('lodash')
-var request = require('request')
-var flow = require('an-flow')
-var sjt = require('sesajstools')
-var sjtObj = require('sesajstools/utils/object')
-var config = require('../config')
-var myBaseId = config.application.baseId
-var configRessource = require('./config')
-var Ref = require('../constructors/Ref')
-
+const _ = require('lodash')
+const request = require('request')
+const flow = require('an-flow')
+const sjt = require('sesajstools')
+const config = require('../config')
+const configRessource = require('./config')
+const Ref = require('../constructors/Ref')
+const {ensure} = require('../tools')
+const url = require('../tools/url')
+const sjtObj = require('sesajstools/utils/object')
 const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 
+const myBaseId = config.application.baseId
+const myBaseUrl = config.application.baseUrl
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
-  /**
-   * Efface ou supprime 'doucement' une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
-   * @private
-   * @param {Context} context
-   * @param rid ou oid ou origine/idOrigine
-   */
-  function deleteAndSend (context, rid) {
-    log.debug('dans cb api deleteRessource ' + rid)
-    // de toute façon lassi demande de charger la ressource pour l'effacer, on le fait ici pour vérifier les droits
-    $ressourceRepository.load(rid, function (error, ressource) {
-      if (error) {
-        $json.send(context, error)
-      } else if (ressource) {
-        $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
-          if (errorMessage) {
-            $json.denied(context, errorMessage)
-          } else {
-            if (context.request.query.hardDeleted) {
-              $ressourceRepository.delete(ressource, function (error) {
-                if (error) $json.send(context, error)
-                else $json.sendOk(context, {deleted: rid})
-              })
-            } else {
-              $ressourceRepository.softDelete(ressource, function (error) {
-                if (error) $json.send(context, error)
-                else $json.sendOk(context, {deleted: rid})
-              })
-            }
-          }
-        })
-      } else {
-        log.debug(`La ressource ${rid} n’existait pas, on a rien effacé`)
-        // pas de ressource, on vérifie qu'il avait certains droits
-        $json.send(context, new Error(`Aucune ressource d'identifiant ${rid}`))
-      }
-    })
-  }
-
-  /**
-   * Renvoie l'id trouvé dans le post ou le get (en acceptant les propriétés id, oid ou origine&idOrigine, en GET ou POST)
-   * @private
-   * @param {Context} context
-   * @returns {string} oid ou origine/idOrigine ou undefined
-   */
-  function extractId (context) {
-    var id
-    if (context.post.origine && context.post.idOrigine) id = context.post.origine + '/' + context.post.idOrigine
-    else if (context.get.origine && context.get.idOrigine) id = context.get.origine + '/' + context.get.idOrigine
-    else id = context.post.oid || context.post.id || context.get.oid || context.get.id
-
-    return id
-  }
-
-  /**
-   * Traite GET|POST /api/liste/all
-   * @private
-   * @param {Context} context
-   */
-  function getListeAll (context) {
-    context.timeout = 3000
-    // on vérifie les droits all avant de lancer la requete,
-    // ce serait idiot de remonter des milliers de résultats tous privés
-    // (et ça compliquerait bcp la pagination)
-    if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
-    else $json.denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
-  }
-
-  /**
-   * Traite GET /api/liste/auteurs?pids=pid1,pid2…
-   * @param context
-   */
-  function getListeAuteurs (context) {
-    const pids = context.get.pids && context.get.pids.split(',').filter(pid => pid.indexOf('/') > 0)
-    if (!pids) return $json.sendError(context, 'Argument pids manquant')
-    if (!pids.length) return $json.sendError(context, 'Aucun auteur demandé')
-    const retour = {warnings: []}
-    const args = {
-      filters: [{
-        index: 'auteurs',
-        values: pids
-      }]
-    }
-    let iAuteurs = 0 // pour retrouver le pid d'une personne qu'on a pas trouvé
-    flow(pids).seqEach(function (pid) {
-      // on a pas de loadMulti, tant pis, toujours mieux de passer par ce load qui utilise le cache
-      // plutôt que d'écrire directement ici une requête
-      $personneRepository.load(pid, this)
-    }).seqEach(function (personne) {
-      if (personne && personne.pid) {
-        retour[personne.pid] = {
-          pid: personne.pid,
-          label: `${personne.prenom} ${personne.nom}`,
-          liste: []
-        }
-      } else {
-        retour.warnings.push(`Auteur ${pids[iAuteurs]} inconnu`)
-        if (personne) log.dataError('personne sans pid', personne)
-      }
-      iAuteurs++
-      this()
-    }).seq(function () {
-      $ressourceRepository.getListe('all', args, this)
-    }).seqEach(function (ressource) {
-      log.debug('ressource', {rid: ressource.rid, auteurs: ressource.auteurs})
-      if (!$accessControl.hasReadPermission(context, ressource)) return this()
-      ressource.auteurs.forEach(pid => {
-        if (retour[pid]) retour[pid].liste.push(new Ref(ressource))
-      })
-      this()
-    }).seq(function () {
-      if (!retour.warnings.length) delete retour.warnings
-      $json.sendOk(context, retour)
-    }).catch(function (error) {
-      log.error(error)
-      $json.sendError(context, error)
-    })
-  }
-
-  /**
-   * Traite GET /api/liste/perso (appelé par sesatheque-client)
-   * @private
-   * @param {Context} context
-   */
-  function getListePerso (context) {
-    context.timeout = 3000
-    let deletedOnly = context.request.query.deleted;
-    const pid = $accessControl.getCurrentUserPid(context)
+module.exports = function controllersFactory (component) {
+  component.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
     /**
-     * Liste des ressources perso
-     * @type {Ressources[]}
+     * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
+     * @private
+     * @param {Context} context
+     * @param rid ou oid ou origine/idOrigine
      */
-    let mesRessources = []
-    // on veut remonter le max autorisé par la conf…
-    const nb = configRessource.limites.listeMax
-    if (pid) {
+    function deleteAndSend (context, rid) {
+      log.debug('dans cb api deleteRessource ' + rid)
+      // on charge la ressource pour vérifier les droits
+      $ressourceRepository.load(rid, function (error, ressource) {
+        if (error) {
+          $json.send(context, error)
+        } else if (ressource) {
+          $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
+            if (errorMessage) return $json.denied(context, errorMessage)
+            $ressourceRepository.remove(ressource.oid, function (error) {
+              if (error) $json.send(context, error)
+              else $json.sendOk(context, {deleted: rid})
+            })
+          })
+        } else {
+          log.debug(`La ressource ${rid} n’existait pas, on a rien effacé`)
+          // pas de ressource, on vérifie qu'il avait certains droits
+          $json.send(context, new Error(`Aucune ressource d'identifiant ${rid}`))
+        }
+      })
+    }
+
+    /**
+     * Renvoie l'id trouvé dans le post ou le get (en acceptant les propriétés id, oid ou origine&idOrigine, en GET ou POST)
+     * @private
+     * @param {Context} context
+     * @returns {string} oid ou origine/idOrigine ou undefined
+     */
+    function extractId (context) {
+      let id
+      if (context.post.origine && context.post.idOrigine) id = context.post.origine + '/' + context.post.idOrigine
+      else if (context.get.origine && context.get.idOrigine) id = context.get.origine + '/' + context.get.idOrigine
+      else id = context.post.oid || context.post.id || context.get.oid || context.get.id
+
+      return id
+    }
+
+    /**
+     * Traite GET|POST /api/liste/all
+     * @private
+     * @param {Context} context
+     */
+    function getListeAll (context) {
+      context.timeout = 3000
+      // on vérifie les droits all avant de lancer la requete,
+      // ce serait idiot de remonter des milliers de résultats tous privés
+      // (et ça compliquerait bcp la pagination)
+      if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
+      else $json.denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
+    }
+
+    /**
+     * Traite GET /api/liste/auteurs?pids=pid1,pid2…
+     * @param context
+     */
+    function getListeAuteurs (context) {
+      const pids = context.get.pids && context.get.pids.split(',').filter(pid => pid.indexOf('/') > 0)
+      if (!pids) return $json.sendError(context, 'Argument pids manquant')
+      if (!pids.length) return $json.sendError(context, 'Aucun auteur demandé')
+      const retour = {warnings: []}
+      const args = {
+        filters: [{
+          index: 'auteurs',
+          values: pids
+        }]
+      }
+      let iAuteurs = 0 // pour retrouver le pid d'une personne qu'on a pas trouvé
+      let nbRessources = 0 // pour savoir s'il faut du nextUrl
+      flow(pids).seqEach(function (pid) {
+        // on a pas de loadMulti, tant pis, toujours mieux de passer par ce load qui utilise le cache
+        // plutôt que d'écrire directement ici une requête
+        $personneRepository.load(pid, this)
+      }).seqEach(function (personne) {
+        if (personne && personne.pid) {
+          retour[personne.pid] = {
+            pid: personne.pid,
+            label: `${personne.prenom} ${personne.nom}`,
+            liste: []
+          }
+        } else {
+          retour.warnings.push(`Auteur ${pids[iAuteurs]} inconnu`)
+          if (personne) log.dataError('personne sans pid', personne)
+        }
+        iAuteurs++
+        this()
+      }).seq(function () {
+        $ressourceRepository.getListe('all', args, this)
+      }).seqEach(function (ressource) {
+        nbRessources++
+        log.debug('ressource', {rid: ressource.rid, auteurs: ressource.auteurs})
+        if (!$accessControl.hasReadPermission(context, ressource)) return this()
+        ressource.auteurs.forEach(pid => {
+          if (retour[pid]) retour[pid].liste.push(new Ref(ressource))
+        })
+        this()
+      }).seq(function () {
+        if (!retour.warnings.length) delete retour.warnings
+        if (nbRessources === listeMax) {
+          const skip = context.get.skip || 0
+          retour.nextUrl = myBaseUrl + url.update(context.request.originalUrl, {skip})
+        }
+        $json.sendOk(context, retour)
+      }).catch(function (error) {
+        log.error(error)
+        $json.sendError(context, error)
+      })
+    }
+
+    /**
+     * Traite GET /api/liste/perso (appelé par sesatheque-client)
+     * @private
+     * @param {Context} context
+     */
+    function getListePerso (context) {
+      context.timeout = 3000
+      const pid = $accessControl.getCurrentUserPid(context)
+      if (!pid) return $json.denied(context, 'Ressources personnelles inaccessibles (session expirée sur la Sésathèque), veuillez vous déconnecter et reconnecter')
+      const listeMax = configRessource.limites.listeMax
+      const limit = ensure(context.get.limit, 'integer', listeMax)
+      const skip = ensure(context.get.skip, 'integer', 0)
+      /**
+       * Liste des ressources perso
+       * @type {Ressources[]}
+       */
+      let mesRessources = []
       // la visibilité, c'est pour cet auteur,
       const visibility = 'auteur/' + pid
+      let nbOwnRessources = 0
       flow().seq(function () {
-        let options = {filters: [{index: 'auteurs', values: [pid]}], nb};
-        if (deletedOnly) options.deletedOnly = true;
+        // skip est à cheval sur les ressources dont on est l'auteur et celles où on est que contributeur
+        // faut d'abord compter les premières
+        const options = {
+          filters: [{index: 'auteurs', values: [pid]}],
+        }
+        $ressourceRepository.getListeCount(visibility, options, this)
+      }).seq(function (nb) {
+        nbOwnRessources = nb
+        if (skip >= nbOwnRessources) return this(null, [])
+        // sinon on veut des ressources dont on est l'auteur
+        const options = {
+          filters: [{index: 'auteurs', values: [pid]}],
+          limit,
+          skip
+        }
+        // les ressources dont on est l'auteur
         $ressourceRepository.getListe(visibility, options, this)
       }).seq(function (ressources) {
         if (ressources.length) mesRessources = ressources
-        if (ressources.length === nb) {
-          log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb}, auteur)`)
-          mesRessources.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources dont l’auteur est ${pid})`}))
-          // on est déjà au taquet
-          this(null, [])
-        } else {
-          let options = {filters: [{index: 'contributeurs', values: [pid], nb}]};
-          if (deletedOnly) options.deletedOnly = true;
-          $ressourceRepository.getListe(visibility, options, this)
+        // si on est déjà au max on arrête là
+        if (ressources.length === limit) return this(null, [])
+        // on va aussi chercher les contributeurs
+        const options = {
+          filters: [{index: 'contributeurs', values: [pid]}],
+          limit: limit - ressources.length,
+          skip: (skip >= nbOwnRessources) ? skip - nbOwnRessources : 0
         }
+        $ressourceRepository.getListe(visibility, options, this)
       }).seq(function (ressources) {
-        if (ressources.length) mesRessources.concat(ressources)
+        if (ressources.length) mesRessources = mesRessources.concat(ressources)
         this()
       }).seq(function () {
-        if (mesRessources.length >= nb) {
-          // @todo gérer un "ajouter nb ressources", ou un filtre…
-          log.dataError(`Pour pid ${pid} on est arrivé au max du nb de ressources persos (${nb})`)
-          mesRessources = mesRessources.slice(0, nb)
-          mesRessources.push(new Ref({type: 'error', titre: `Maximum atteint pour le nb de ressources personnelles (${nb} ressources avec ${pid} en auteur ou contributeur)`}))
-        }
         sendListe(context, null, mesRessources)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
-    } else {
-      $json.denied(context, 'Ressources personnelles inaccessibles (session expirée sur la Sésathèque), veuillez vous déconnecter et reconnecter')
-    }
-  }
-
-  /**
-   * Traite GET|POST /api/liste/prof
-   * @private
-   * @param {Context} context
-   */
-  function getListeProf (context) {
-    context.timeout = 3000
-    if ($accessControl.hasGenericPermission('correction', context)) {
-      grabListe(context, 'correction')
-    } else if ($accessControl.isAuthenticated(context)) {
-      $json.denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
-    } else {
-      $json.denied(context, 'Il faut être authentifié pour accéder aux corrigés')
-    }
-  }
-
-  /**
-   * Traite GET|POST /api/liste/public
-   * @private
-   * @param context
-   */
-  function getListePublic (context) {
-    grabListe(context, 'public')
-  }
-
-  /**
-   * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
-   * @private
-   * @param {Context} context
-   * @param {string} visibility
-   */
-  function grabListe (context, visibility) {
-    var args
-    if (context.get.json) {
-      args = sjt.parse(context.get.json)
-    } else {
-      args = context.get
-      // en get on a des string, faut parser ce qui devrait être un objet
-      if (args.filters) {
-        args.filters = sjt.parse(args.filters)
-      }
-    }
-    sjtObj.merge(args, context.post)
-    log.debug('grabListe ' + visibility, args)
-    $ressourceRepository.getListe(visibility, args, function (error, ressources) {
-      sendListe(context, error, ressources)
-    })
-  }
-
-  /**
-   * Répond ok pour les options delete
-   * @private
-   * @param {Context} context
-   */
-  function optionsDeleteOk (context) {
-    context.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS')
-    // context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept')
-    // et on laisse le middleware CORS faire son boulot
-    context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
-  }
-
-  // noinspection FunctionWithMoreThanThreeNegationsJS
-  /**
-   * Traite la ressource de POST /api/ressource
-   * @private
-   * @param {Context} context
-   */
-  function postRessource (context) {
-    context.timeout = 5000
-    /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-     log.error(new Error('une trace pour ' +reqHttp)) */
-    var ressourcePostee = context.post
-    var pid = $accessControl.getCurrentUserPid(context)
-    var groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
-    var ressourceOriginale
-
-    if (context.perf) {
-      var msg = 'start-'
-      if (ressourcePostee.origine && ressourcePostee.idOrigine) msg += ressourcePostee.origine + '/' + ressourcePostee.idOrigine
-      else msg += ressourcePostee.oid
-      log.perf(context.response, msg)
     }
 
-    log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max: 10000})
-    // faut au moins être authentifié
-    if (!$accessControl.isAuthenticated(context) && !$accessControl.hasAllRights(context)) {
-      return $json.denied(context, 'Vous devez être authentifié pour ajouter une ressource')
-    }
-    // si y'a pas qqchose pour identifier une ressource existante, faut avoir les droits de création
-
-    flow().seq(function () {
-      var next = this
-      // si y'à un rid sans oid on traduit
-      if (ressourcePostee.rid) {
-        const [baseId, oid] = getRidComponents(ressourcePostee.rid)
-        if (baseId !== myBaseId) return next(new Error(`Cette ressource doit être enregistrée sur ${baseId} et non ici`))
-        if (ressourcePostee.oid && ressourcePostee.oid !== oid) return next(new Error(`oid ${ressourcePostee.oid} et rid ${ressourcePostee.rid} incohérents`))
-        ressourcePostee.oid = oid
-      }
-      // faut la charger, ne serait-ce que pour savoir si elle existe
-      if (ressourcePostee.oid) { // par oid
-        $ressourceRepository.load(ressourcePostee.oid, next)
-      } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
-        $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
+    /**
+     * Traite GET|POST /api/liste/prof
+     * @private
+     * @param {Context} context
+     */
+    function getListeProf (context) {
+      context.timeout = 3000
+      if ($accessControl.hasGenericPermission('correction', context)) {
+        grabListe(context, 'correction')
+      } else if ($accessControl.isAuthenticated(context)) {
+        $json.denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
       } else {
-        if (!ressourcePostee.origine) ressourcePostee.origine = myBaseId
-        // l'idOrigine n'est pas obligatoire si c'est une création ici ($ressourceRepository.save créera une clé si besoin
-        if (ressourcePostee.origine !== myBaseId && !ressourcePostee.idOrigine) {
-          log.debug('ressource postée invalide', ressourcePostee)
-          next(new Error('Il faut fournir oid ou au moins origine'))
-        } else {
-          next()
+        $json.denied(context, 'Il faut être authentifié pour accéder aux corrigés')
+      }
+    }
+
+    /**
+     * Traite GET|POST /api/liste/public
+     * @private
+     * @param context
+     */
+    function getListePublic (context) {
+      grabListe(context, 'public')
+    }
+
+    /**
+     * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
+     * @private
+     * @param {Context} context
+     * @param {string} visibility
+     */
+    function grabListe (context, visibility) {
+      let args
+      if (context.get.json) {
+        args = sjt.parse(context.get.json)
+      } else {
+        args = context.get
+        // en get on a des string, faut parser ce qui devrait être un objet
+        if (args.filters) {
+          args.filters = sjt.parse(args.filters)
         }
       }
-    }).seq(function (ressourceBdd) {
-      if (log.perf) log.perf(context.response, 'loaded')
-      const errMsg = ressourceBdd
-        ? $accessControl.getDeniedMessage('update', context, ressourceBdd)
-        : $accessControl.getDeniedMessage('create', context, ressourcePostee)
-      if (errMsg) $json.denied(context, errMsg)
-      else this(null, ressourceBdd)
-    }).seq(function (ressourceBdd) {
-      // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
-      var tt = ressourcePostee.type
-      if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
-      // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
-      var partial = !!context.get.partial
-      if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
-        partial = (ressourcePostee.oid || (ressourcePostee.origine && ressourcePostee.idOrigine))
-      }
-      if (partial) ressourcePostee = Object.assign({}, ressourceBdd, ressourcePostee)
-      ressourceOriginale = ressourceBdd
-      $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
-    }).seq(function (ressourceNew) {
-      // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
-      $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
-    }).seq(function (ressourceNew) {
-      // on ajoute le user courant pour serie et sequenceModele,
-      // pas encore pour tous les types par crainte d'effets de bords pas prévus…
-      if (pid && (ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele')) {
-        ressourceNew.auteurs = [pid]
-      }
-      $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
-    }).seq(function (ressourceNew) {
-      if (ressourceOriginale) sjtObj.update(ressourceOriginale, ressourceNew)
-      else ressourceOriginale = ressourceNew
-      writeAndOut(context, ressourceOriginale)
-    }).catch(function (error) {
-      $json.send(context, error)
-    })
-  }
-
-  /**
-   * Ajoute des relations à une ressource
-   * @private
-   * @param {Context} context
-   */
-  function postRessourceAddRelations (context) {
-    context.timeout = 5000
-    if (context.perf) {
-      var msg = 'start-'
-      if (context.post.origine && context.post.idOrigine) msg += context.post.origine + '/' + context.post.idOrigine
-      else msg += context.post.oid
-      log.perf(context.response, msg)
+      sjtObj.merge(args, context.post)
+      log.debug('grabListe ' + visibility, args)
+      $ressourceRepository.getListe(visibility, args, function (error, ressources) {
+        sendListe(context, error, ressources)
+      })
     }
-    log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
-    var relations = context.post.relations
-    if (relations && relations.length) {
-      var id = extractId(context)
 
-      if (id) {
-        $ressourceRepository.load(id, function (error, ressource) {
-          if (error) $json.send(context, error)
-          else if (ressource) {
-            if ($accessControl.hasPermission('update', context, ressource)) {
-              var errors = $ressourceConverter.addRelations(ressource, relations)
-              // rien changé
-              if (errors === false) $json.sendOk(context, {oid: ressource.oid})
-              // y'a eu des erreurs lors de l'ajout
-              else if (errors.length) $json.send(context, errors)
-              // ni l'un ni l'autre, faut sauvegarder
-              else writeAndOut(context, ressource)
-            } else {
-              $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
-            }
+    /**
+     * Répond ok pour les options delete
+     * @private
+     * @param {Context} context
+     */
+    function optionsDeleteOk (context) {
+      context.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS')
+      // context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept')
+      // et on laisse le middleware CORS faire son boulot
+      context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
+    }
+
+    // noinspection FunctionWithMoreThanThreeNegationsJS
+    /**
+     * Traite la ressource de POST /api/ressource
+     * @private
+     * @param {Context} context
+     */
+    function postRessource (context) {
+      context.timeout = 5000
+      /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+       log.error(new Error('une trace pour ' +reqHttp)) */
+      var ressourcePostee = context.post
+      var pid = $accessControl.getCurrentUserPid(context)
+      var groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
+      var ressourceOriginale
+
+      if (context.perf) {
+        var msg = 'start-'
+        if (ressourcePostee.origine && ressourcePostee.idOrigine) msg += ressourcePostee.origine + '/' + ressourcePostee.idOrigine
+        else msg += ressourcePostee.oid
+        log.perf(context.response, msg)
+      }
+
+      log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max: 10000})
+      // faut au moins être authentifié
+      if (!$accessControl.isAuthenticated(context) && !$accessControl.hasAllRights(context)) {
+        return $json.denied(context, 'Vous devez être authentifié pour ajouter une ressource')
+      }
+      // si y'a pas qqchose pour identifier une ressource existante, faut avoir les droits de création
+
+      flow().seq(function () {
+        var next = this
+        // si y'à un rid sans oid on traduit
+        if (ressourcePostee.rid) {
+          const [baseId, oid] = getRidComponents(ressourcePostee.rid)
+          if (baseId !== myBaseId) return next(new Error(`Cette ressource doit être enregistrée sur ${baseId} et non ici`))
+          if (ressourcePostee.oid && ressourcePostee.oid !== oid) return next(new Error(`oid ${ressourcePostee.oid} et rid ${ressourcePostee.rid} incohérents`))
+          ressourcePostee.oid = oid
+        }
+        // faut la charger, ne serait-ce que pour savoir si elle existe
+        if (ressourcePostee.oid) { // par oid
+          $ressourceRepository.load(ressourcePostee.oid, next)
+        } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
+          $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
+        } else {
+          if (!ressourcePostee.origine) ressourcePostee.origine = myBaseId
+          // l'idOrigine n'est pas obligatoire si c'est une création ici ($ressourceRepository.save créera une clé si besoin
+          if (ressourcePostee.origine !== myBaseId && !ressourcePostee.idOrigine) {
+            log.debug('ressource postée invalide', ressourcePostee)
+            next(new Error('Il faut fournir oid ou au moins origine'))
           } else {
-            $json.notFound(context, `La ressource ${id} n’existe pas`)
+            next()
+          }
+        }
+      }).seq(function (ressourceBdd) {
+        if (log.perf) log.perf(context.response, 'loaded')
+        const errMsg = ressourceBdd
+          ? $accessControl.getDeniedMessage('update', context, ressourceBdd)
+          : $accessControl.getDeniedMessage('create', context, ressourcePostee)
+        if (errMsg) $json.denied(context, errMsg)
+        else this(null, ressourceBdd)
+      }).seq(function (ressourceBdd) {
+        // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
+        var tt = ressourcePostee.type
+        if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
+        // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
+        var partial = !!context.get.partial
+        if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
+          partial = (ressourcePostee.oid || (ressourcePostee.origine && ressourcePostee.idOrigine))
+        }
+        if (partial) ressourcePostee = Object.assign({}, ressourceBdd, ressourcePostee)
+        ressourceOriginale = ressourceBdd
+        $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
+      }).seq(function (ressourceNew) {
+        // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
+        $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
+      }).seq(function (ressourceNew) {
+        // on ajoute le user courant pour serie et sequenceModele,
+        // pas encore pour tous les types par crainte d'effets de bords pas prévus…
+        if (pid && (ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele')) {
+          ressourceNew.auteurs = [pid]
+        }
+        $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
+      }).seq(function (ressourceNew) {
+        if (ressourceOriginale) sjtObj.update(ressourceOriginale, ressourceNew)
+        else ressourceOriginale = ressourceNew
+        writeAndOut(context, ressourceOriginale)
+      }).catch(function (error) {
+        $json.send(context, error)
+      })
+    }
+
+    /**
+     * Ajoute des relations à une ressource
+     * @private
+     * @param {Context} context
+     */
+    function postRessourceAddRelations (context) {
+      context.timeout = 5000
+      if (context.perf) {
+        var msg = 'start-'
+        if (context.post.origine && context.post.idOrigine) msg += context.post.origine + '/' + context.post.idOrigine
+        else msg += context.post.oid
+        log.perf(context.response, msg)
+      }
+      log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
+      var relations = context.post.relations
+      if (relations && relations.length) {
+        var id = extractId(context)
+
+        if (id) {
+          $ressourceRepository.load(id, function (error, ressource) {
+            if (error) $json.send(context, error)
+            else if (ressource) {
+              if ($accessControl.hasPermission('update', context, ressource)) {
+                var errors = $ressourceConverter.addRelations(ressource, relations)
+                // rien changé
+                if (errors === false) $json.sendOk(context, {oid: ressource.oid})
+                // y'a eu des erreurs lors de l'ajout
+                else if (errors.length) $json.send(context, errors)
+                // ni l'un ni l'autre, faut sauvegarder
+                else writeAndOut(context, ressource)
+              } else {
+                $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
+              }
+            } else {
+              $json.notFound(context, `La ressource ${id} n’existe pas`)
+            }
+          })
+        } else {
+          $json.send(context, new Error("pas d'identifiant de ressource"))
+        }
+      } else {
+        $json.send(context, new Error('relations manquantes'))
+      }
+    }
+
+    /**
+     * Demande d'update des arbres contenant une Ref
+     * @param context
+     * @returns {*}
+     */
+    function postRessourceExternalUpdate (context) {
+      log.debug('externalUpdate avec', context.post)
+      if (!$accessControl.hasAllRights(context)) return $json.denied(context)
+      try {
+        if (!context.post.ref) return $json.sendError(context, 'ref manquante')
+        const ref = new Ref(context.post.ref)
+        if (!ref.aliasOf) return $json.sendError(context, 'aliasOf manquant')
+        if (!ref.titre) return $json.sendError(context, 'titre manquant')
+        if (!ref.type) return $json.sendError(context, 'type manquant')
+        $ressourceRepository.updateParent(ref, function (error, nbArbres) {
+          if (error) {
+            log.error(error)
+            $json.sendError(context, error)
+          } else {
+            $json.sendOk(context)
+          }
+          // si aucun arbre n'a été mis à jour, c'est qu'on est enregistré pour cette ref sur sa sesatheque
+          // mais qu'on ne l'utilise plus, faut virer le listener pour éviter que ça ne se reproduise.
+          if (nbArbres === 0) {
+            log.dataError(`On nous a averti d’une modif de ${ref.aliasOf} mais plus aucune ressource ici ne la référence, on vire le listener`)
+            $ressourceRemote.unregister([ref.aliasOf], log.error)
           }
         })
-      } else {
-        $json.send(context, new Error("pas d'identifiant de ressource"))
+      } catch (error) {
+        log.error(error)
+        $json.sendError(context, error)
       }
-    } else {
-      $json.send(context, new Error('relations manquantes'))
     }
-  }
 
-  /**
-   * Demande d'update des arbres contenant une Ref
-   * @param context
-   * @returns {*}
-   */
-  function postRessourceExternalUpdate (context) {
-    log.debug('externalUpdate avec', context.post)
-    if (!$accessControl.hasAllRights(context)) return $json.denied(context)
-    try {
-      if (!context.post.ref) return $json.sendError(context, 'ref manquante')
-      const ref = new Ref(context.post.ref)
-      if (!ref.aliasOf) return $json.sendError(context, 'aliasOf manquant')
-      if (!ref.titre) return $json.sendError(context, 'titre manquant')
-      if (!ref.type) return $json.sendError(context, 'type manquant')
-      $ressourceRepository.updateParent(ref, function (error, nbArbres) {
-        if (error) {
-          log.error(error)
+    /**
+     * Register ou unregister une EntityExternalRef
+     * @private
+     * @param context
+     */
+    function postRessourceRegisterListener (context) {
+      log.debug('registerListener avec', context.post)
+      if (!$accessControl.hasAllRights(context)) return $json.denied(context)
+      const {action, baseId, rids} = context.post
+      if (!action) return $json.sendError(context, 'action manquante')
+      if (!baseId) return $json.sendError(context, 'baseId manquante')
+      if (!rids || !rids.length) return $json.sendError(context, 'rids manquant')
+
+      // ajouter un listener (pour prévenir baseId que rid a changé)
+      if (action === 'add') {
+        const warnings = []
+        // on regarde si on l'a pas déjà
+        flow(rids).seqEach(function (rid) {
+          const nextRid = this
+          // on vérifie que ça nous concerne
+          const ownerBaseId = getBaseIdFromRid(rid)
+          if (ownerBaseId !== myBaseId) {
+            warnings.push(`Impossible de s’enregistrer sur ${myBaseId} pour une ressource qui est gérée par ${ownerBaseId} (pour ${rid})`)
+            nextRid()
+          }
+          EntityExternalRef
+            .match('baseId').equals(baseId)
+            .match('rid').equals(rid)
+            .grabOne(function (error, externalRef) {
+              if (error) return nextRid(error)
+              if (externalRef) {
+                warnings.push(`${rid} avait déjà un listener pour ${baseId} sur ${myBaseId}`)
+                return nextRid()
+              }
+              // faut la créer
+              EntityExternalRef.create({baseId, rid}).store(nextRid)
+            })
+        }).seq(function () {
+          $json.sendOk(context, warnings.length ? {warnings} : {})
+        }).catch(function (error) {
           $json.sendError(context, error)
-        } else {
-          $json.sendOk(context)
-        }
-        // si aucun arbre n'a été mis à jour, c'est qu'on est enregistré pour cette ref sur sa sesatheque
-        // mais qu'on ne l'utilise plus, faut virer le listener pour éviter que ça ne se reproduise.
-        if (nbArbres === 0) {
-          log.dataError(`On nous a averti d’une modif de ${ref.aliasOf} mais plus aucune ressource ici ne la référence, on vire le listener`)
-          $ressourceRemote.unregister([ref.aliasOf], log.error)
-        }
-      })
-    } catch (error) {
-      log.error(error)
-      $json.sendError(context, error)
-    }
-  }
+        })
 
-  /**
-   * Register ou unregister une EntityExternalRef
-   * @private
-   * @param context
-   */
-  function postRessourceRegisterListener (context) {
-    log.debug('registerListener avec', context.post)
-    if (!$accessControl.hasAllRights(context)) return $json.denied(context)
-    const {action, baseId, rids} = context.post
-    if (!action) return $json.sendError(context, 'action manquante')
-    if (!baseId) return $json.sendError(context, 'baseId manquante')
-    if (!rids || !rids.length) return $json.sendError(context, 'rids manquant')
-
-    // ajouter un listener (pour prévenir baseId que rid a changé)
-    if (action === 'add') {
-      const warnings = []
-      // on regarde si on l'a pas déjà
-      flow(rids).seqEach(function (rid) {
-        const nextRid = this
-        // on vérifie que ça nous concerne
-        const ownerBaseId = getBaseIdFromRid(rid)
-        if (ownerBaseId !== myBaseId) {
-          warnings.push(`Impossible de s’enregistrer sur ${myBaseId} pour une ressource qui est gérée par ${ownerBaseId} (pour ${rid})`)
-          nextRid()
-        }
-        EntityExternalRef
-          .match('baseId').equals(baseId)
-          .match('rid').equals(rid)
-          .grabOne(function (error, externalRef) {
-            if (error) return nextRid(error)
-            if (externalRef) {
-              warnings.push(`${rid} avait déjà un listener pour ${baseId} sur ${myBaseId}`)
-              return nextRid()
+        // retirer un listener (car baseId ne référence plus rid)
+      } else if (action === 'remove') {
+        const warnings = []
+        let i = 0 // pour savoir à quel rid correspond le tableau externalRefs
+        flow(rids).seqEach(function (rid) {
+          log.debug('remove listener pour ' + rid)
+          EntityExternalRef
+            .match('baseId').equals(baseId)
+            .match('rid').equals(rid)
+            .grab(this)
+          // seqEach car chaque rid fait un grab qui remonte un tableau de externalRefs
+        }).seqEach(function (externalRefs) {
+          log.debug(`remove ${rids[i]} remonte les extRefs`, externalRefs)
+          if (externalRefs.length) {
+            if (externalRefs.length > 1) {
+              const msg = `Il y avait ${externalRefs.length - 1} doublon(s) exernalRef pour ${baseId} sur ${externalRefs[0].rid} (tous supprimés)`
+              log.dataError(msg)
+              warnings.push(msg)
             }
-            // faut la créer
-            EntityExternalRef.create({baseId, rid}).store(nextRid)
-          })
-      }).seq(function () {
-        $json.sendOk(context, warnings.length ? {warnings} : {})
-      }).catch(function (error) {
-        $json.sendError(context, error)
-      })
-
-    // retirer un listener (car baseId ne référence plus rid)
-    } else if (action === 'remove') {
-      const warnings = []
-      let i = 0 // pour savoir à quel rid correspond le tableau externalRefs
-      flow(rids).seqEach(function (rid) {
-        log.debug('remove listener pour ' + rid)
-        EntityExternalRef
-          .match('baseId').equals(baseId)
-          .match('rid').equals(rid)
-          .grab(this)
-        // seqEach car chaque rid fait un grab qui remonte un tableau de externalRefs
-      }).seqEach(function (externalRefs) {
-        log.debug(`remove ${rids[i]} remonte les extRefs`, externalRefs)
-        if (externalRefs.length) {
-          if (externalRefs.length > 1) {
-            const msg = `Il y avait ${externalRefs.length - 1} doublon(s) exernalRef pour ${baseId} sur ${externalRefs[0].rid} (tous supprimés)`
-            log.dataError(msg)
-            warnings.push(msg)
+            externalRefs.forEach(er => er.delete(log.error))
+          } else {
+            warnings.push(`Aucun listener pour le rid ${rids[i]}`)
           }
-          externalRefs.forEach(er => er.delete(log.error))
-        } else {
-          warnings.push(`Aucun listener pour le rid ${rids[i]}`)
+          i++
+          this()
+        }).seq(function () {
+          $json.sendOk(context, warnings.length ? {warnings} : {})
+        }).catch(function (error) {
+          $json.sendError(context, error)
+        })
+      } else {
+        $json.sendError(context, `action ${context.post.action} inconnue (add|remove)`)
+      }
+    }
+
+    /**
+     * Retourne un array pour jstree
+     * @private
+     * @param {Context} context
+     * @param error
+     * @param data
+     */
+    function sendJsonJstreeArray (context, error, data) {
+      var errorMsg
+      if (error) {
+        errorMsg = (typeof error === 'string') ? error : error.toString()
+        $json.send(context, null, {arrayOnly: [{text: 'Erreur : ' + errorMsg}]})
+      } else if (!Array.isArray(data)) {
+        log.error(new Error("sendJsonJstreeArray appelé avec autre chose qu'un array"))
+        $json.send(context, null, data)
+      } else {
+        log.debug('sendJson va renvoyer le tableau', data, 'api')
+        $json.send(context, null, {arrayOnly: data})
+      }
+    }
+
+    /**
+     * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
+     * @private
+     * @param {Context} context
+     * @param error
+     * @param ressources
+     */
+    function sendListe (context, error, ressources) {
+      if (error) return $json.send(context, error)
+      const liste = []
+      const reponse = {liste}
+      if (ressources && ressources.length) {
+        // construction de nextUrl
+        if (ressources.length === listeMax) {
+          const skip = context.get.skip || 0
+          reponse.nextUrl = myBaseUrl + url.update(context.request.originalUrl, {skip})
         }
-        i++
-        this()
-      }).seq(function () {
-        $json.sendOk(context, warnings.length ? {warnings} : {})
-      }).catch(function (error) {
-        $json.sendError(context, error)
-      })
-    } else {
-      $json.sendError(context, `action ${context.post.action} inconnue (add|remove)`)
+        // on regarde le format reçu en get ou post
+        const format = context.post.format || context.get.format
+        ressources.forEach(function (ressource) {
+          if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
+          var item = (format === 'full') ? ressource : new Ref(ressource)
+          if (ressource.type === 'sequenceModele' && format !== 'full') {
+            // on rajoute les parametres pour les sequenceModele
+            item.parametres = ressource.parametres
+          }
+          item.$droits = ''
+          if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
+          if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
+          liste.push(item)
+        })
+      }
+      $json.sendOk(context, reponse)
     }
-  }
 
-  /**
-   * Retourne un array pour jstree
-   * @private
-   * @param {Context} context
-   * @param error
-   * @param data
-   */
-  function sendJsonJstreeArray (context, error, data) {
-    var errorMsg
-    if (error) {
-      errorMsg = (typeof error === 'string') ? error : error.toString()
-      $json.send(context, null, {arrayOnly: [{text: 'Erreur : ' + errorMsg}]})
-    } else if (!Array.isArray(data)) {
-      log.error(new Error("sendJsonJstreeArray appelé avec autre chose qu'un array"))
-      $json.send(context, null, data)
-    } else {
-      log.debug('sendJson va renvoyer le tableau', data, 'api')
-      $json.send(context, null, {arrayOnly: data})
-    }
-  }
-
-  /**
-   * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
-   * @private
-   * @param {Context} context
-   * @param error
-   * @param ressources
-   */
-  function sendListe (context, error, ressources) {
-    if (error) return $json.send(context, error)
-    var liste = []
-    if (ressources && ressources.length) {
-      // on regarde le format reçu en get ou post
-      const format = context.post.format || context.get.format
-      ressources.forEach(function (ressource) {
-        if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
-        var item = (format === 'full') ? ressource : new Ref(ressource)
-        if (ressource.type === 'sequenceModele' && format !== 'full') {
-          // on rajoute les parametres pour les sequenceModele
-          item.parametres = ressource.parametres
-        }
-        item.$droits = ''
-        if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
-        if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
-        liste.push(item)
-      })
-    }
-    $json.sendOk(context, {liste: liste})
-  }
-
-  /**
-   * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (avec ref ça ajoute les droits)
-   * @private
-   * @param {Context} context
-   * @param error
-   * @param ressource
-   */
-  function sendRessource (context, error, ressource) {
-    log.debug('sendRessource api avec', ressource, 'avirer', {max: 5000})
-    if (error) {
-      $json.send(context, error)
-    } else if (ressource) {
-      if ($accessControl.hasReadPermission(context, ressource)) {
-        var format = context.get.format
-        if (format === 'ref') {
-          const ref = new Ref(ressource)
-          // avec ajout des droits
-          ref.$droits = 'R'
-          if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
-          if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
-          $json.send(context, null, ref)
+    /**
+     * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (avec ref ça ajoute les droits)
+     * @private
+     * @param {Context} context
+     * @param error
+     * @param ressource
+     */
+    function sendRessource (context, error, ressource) {
+      log.debug('sendRessource api avec', ressource, 'avirer', {max: 5000})
+      if (error) {
+        $json.send(context, error)
+      } else if (ressource) {
+        if ($accessControl.hasReadPermission(context, ressource)) {
+          var format = context.get.format
+          if (format === 'ref') {
+            const ref = new Ref(ressource)
+            // avec ajout des droits
+            ref.$droits = 'R'
+            if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
+            if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
+            $json.send(context, null, ref)
+          } else {
+            $json.send(context, null, ressource)
+          }
         } else {
-          $json.send(context, null, ressource)
+          $json.denied(context)
         }
       } else {
-        $json.denied(context)
+        $json.notFound(context, 'Cette ressource n’existe pas.')
       }
-    } else {
-      $json.notFound(context, 'Cette ressource n’existe pas.')
     }
-  }
 
-  /**
-   * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels
-   * ou le ?format= demandé (alias ou normalized, le reste donnant la ressource complète)
-   * @private
-   * @param {Context} context
-   * @param ressource
-   */
-  function writeAndOut (context, ressource) {
-    if (_.isEmpty(ressource.$errors)) {
-      $ressourceRepository.save(ressource, function (error, ressource) {
-        log.debug('dans cb api writeAndOut après $ressourceRepository.save', ressource, 'repository', {max: 500})
-        if (error) {
-          $json.send(context, error)
-        } else {
-          log.perf(context.response, 'written')
-          if (context.get.format) {
-            // on veut la ressource formatée, sendRessource le gère
-            sendRessource(context, null, ressource)
-          } else {
-            // on ne renvoie que l'oid et des warnings éventuels
-            var data = {oid: ressource.oid}
-            if (!_.isEmpty(ressource.$warnings)) {
-              data.warnings = ressource.$warnings
-            }
-            $json.send(context, null, data)
-          }
-        }
-      })
-    } else {
-      $json.send(context, ressource.$errors)
-    }
-  }
-
-  /**
-   * Met éventuellement à jour un titre bateau si on en a un meilleur (asynchrone, lance la màj en bdd et rend la main)
-   * @param ressource
-   * @param newTitre
-   */ /*
-  function updateTitre(ressource, newTitre) {
-    // on regarde si l'arbre nous apporte un titre que l'on aurait pas
-    if (newTitre) {
-      //noinspection SwitchStatementWithNoDefaultBranchJS
-      switch (ressource.titre) {
-            // titres par défaut mis par importMEPS
-            case 'Exercice mathenpoche':
-            case 'Aide mathenpoche':
-            // titres par défaut mis par importLabomep
-            case 'Message ou question':
-            case 'Figure TracenPoche':
-            case 'Test diagnostique':
-            case 'Opération posée':
-            case 'Exercice avec la calculatrice cassée':
-            case 'Figure GeoGebra':
-            case 'Page externe':
-            case 'Exercice de calcul mental':
-            case 'Animation interactive':
-            case 'QCM interactif':
-            case 'Exercice corrigé':
-            case 'QCM':
-            case 'Animation instrumenpoche':
-            case 'Titre manquant':
-            case 'Parcours interactif':
-            case "Test diagnostique d'algèbre":
-            case 'Exercice Calcul@TICE':
-              // on sauvegarde le nouveau titre
-              log.debug('titre de ' +ressource.oid +' changé : ' +ressource.titre +' => ' +newTitre)
-              ressource.titre = newTitre
-              $ressourceRepository.save(ressource) // pas de next, on laisse comme c'était si ça plante
-          }
-    }
-  } /* */
-
-  /**
-   * Passe au suivant pour toutes les requetes OPTIONS (traitées par le middleware cors)
-   * @route OPTIONS /api/*
-   */
-  controller.options('*', function (context) {
-    log.debug('headers de la requete options', context.request.headers, 'xhr', {max: 5000, indent: 2})
-    // on laisse le middleware CORS faire son boulot
-    context.next()
-  })
-
-  /**
-   * Retourne la baseId d'une baseUrl (sesatheque ou sesalab)
-   * @route GET /api/baseId?baseUrl=xxx
-   */
-  controller.get('baseId', function (context) {
-    const baseUrl = context.get.baseUrl
-    if (!baseUrl) return $json.sendError(context, 'baseUrl manquante')
-    // on cherche d'abord dans les sesalabs
-    const sesalab = config.sesalabs.find(sesalab => sesalab.baseUrl === baseUrl)
-    if (sesalab) {
-      if (sesalab.baseId) return $json.sendOk(context, {baseId: sesalab.baseId, type: 'sesalab'})
-      log.error('pb de sesalab en configuration sans baseId', sesalab)
-      return $json.sendError(context, 'Problème de configuration de la Sésathèque')
-    }
-    // c'est pas un sesalab, on cherche une sésathèque
-    const baseId = getBaseId(baseUrl, null)
-    if (baseId) return $json.sendOk(context, {baseId, type: 'sesatheque'})
-    $json.sendError(context, `baseUrl ${baseUrl} inconnue`)
-  })
-
-  /**
-   * Retourne l'url d'une baseId
-   * @route GET /api/baseId/:id
-   */
-  controller.get('baseId/:id', function (context) {
-    const baseId = context.arguments.id
-    const baseUrl = getBaseUrl(baseId, false)
-    if (baseUrl) $json.sendOk(context, {baseUrl})
-    else $json.sendError(context, `Sésathèque ${baseId} inconnue sur ${config.application.baseUrl}`)
-  })
-
-  /**
-   * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
-   * Retourne {@link reponseRessourceOid}
-   * @route GET /api/clone/:oid
-   */
-  controller.get('clone/:oid', function (context) {
-    var oid = context.arguments.oid
-    var pid = $accessControl.getCurrentUserPid(context)
-    if (pid) {
-      $ressourceRepository.load(oid, function (error, ressource) {
-        if (error) return $json.send(context, error)
-        if (ressource) {
-          if ($accessControl.hasReadPermission(context, ressource)) {
-            if (configRessource.editable[ressource.type]) {
-              // editable on duplique
-              delete ressource.oid
-              delete ressource.idOrigine
-              ressource.origine = config.application.baseId
-              // faut mettre le user en auteur sinon il aura pas le droit de supprimer
-              if (ressource.auteurs.indexOf(pid) < 0) ressource.auteurs.push(pid)
-              ressource.publie = true
-              ressource.restriction = configRessource.constantes.restriction.prive
-              if (!ressource.relations) ressource.relations = []
-              ressource.relations.push([configRessource.constantes.relations.estVersionDe, ressource.rid])
-              delete ressource.rid
-              $ressourceRepository.save(ressource, function (error, ressource) {
-                if (error) $json.send(context, error)
-                else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
-                else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
-              })
-            } else {
-              // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource et ce user
-              $ressourceRepository.loadByAliasAndPid(myBaseId + '/' + oid, pid, function (error, alias) {
-                if (error) return $json.sendError(context, error.toString())
-                if (alias) return $json.sendOk(context, {oid: alias.oid})
-                // faut le créer
-                const data = {}
-                ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => {
-                  data[p] = ressource[p]
-                })
-                data.aliasOf = myBaseId + '/' + ressource.oid
-                data.auteursParents = ressource.auteurs
-                data.auteurs = [pid]
-                alias = EntityRessource.create(data)
-                alias.store(function (error, ressAlias) {
-                  if (error) return $json.sendError(context, error)
-                  if (ressAlias) return $json.sendOk(context, {oid: ressAlias.oid})
-                  $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
-                })
-              })
-            }
-          } else {
-            $json.denied(context, `Vous n’avez pas les droits suffisant pour lire la ressource ${oid}`)
-          }
-        } else {
-          $json.notFound(context, `La ressource ${oid} n’existe pas`)
-        }
-      })
-    } else {
-      $json.denied(context, 'Vous devez être authentifié pour cloner une ressource')
-    }
-  })
-
-  /**
-   * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant en auteur
-   * (sinon il pourra pas la supprimer), avec publié et privé
-   * Retourne {@link Ref}
-   * Utiliser la méthode sesatheque-client:cloneItem
-   * @route GET /api/externalClone/:baseId/:oid
-   */
-  controller.get('externalClone/:baseId/:oid', function (context) {
-    const oid = context.arguments.oid
-    const baseIdOrigine = context.arguments.baseId
-    const pid = $accessControl.getCurrentUserPid(context)
-    flow().seq(function () {
-      if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
-      const baseUrl = getBaseUrl(baseIdOrigine)
-      // si on est là c'est une baseId connue de sesatheque-client,
-      // mais ça suffit pas pour qu'on la référence
-      if (!config.sesathequesById[baseIdOrigine]) return this(new Error(`Sésathèque ${baseIdOrigine} connue (${baseUrl}) mais pas déclarée comme source possible de cette sésathèque`))
-      // on peut aller chercher la ressource
-      $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, this)
-    }).seq(function (ressource) {
-      log.debug('externalClone a récupéré la ressource', ressource, 'clone', { max: 5000, indent: 2 })
-      // on passe par Ref pour filtrer ce qu'on garde (pour un alias, seulement ce que ref utilise)
-      const aliasData = new Ref(ressource)
-      // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
-      aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
-      aliasData.auteurs = [ pid ]
-      aliasData.origine = config.application.baseId
-      aliasData.dateCreation = new Date()
-      // important sinon une ressource non restreinte mais pas publiée se retrouverait publique,
-      // et à la consultation (de l'original) ça plante
-      aliasData.publie = ressource.publie
-      // si la ressource était publique on le laisse sur l'alias (pour la lecture),
-      // pour l'écriture ça changera rien
-      if (ressource.restriction === configRessource.constantes.restriction.aucune) aliasData.restriction = configRessource.constantes.restriction.aucune
-      else aliasData.restriction = configRessource.constantes.restriction.prive
-      // la relation ne sera ajoutée que lors de l'édition de cette ressource, inutile pour un alias
-      // mais on conserve l'ancienne
-      if (ressource.relations && ressource.relations.length) aliasData.relations = ressource.relations
-      $ressourceRepository.save(aliasData, this)
-    }).seq(function (ressAlias) {
-      const refAlias = new Ref(ressAlias)
-      // le user courant peut toujours effacer l'alias
-      refAlias.$droits = 'D'
-      // modif autorisée sur les ressources éditables seulement
-      // (qui deviendront à l'édition des ressources dérivées et plus des alias)
-      if (configRessource.editable[refAlias.type]) refAlias.$droits += 'W'
-      // le context.json de lassi filtre les propriétés $ au 1er niveau, on ajoute un niveau (ici la propriété clone)…
-      $json.send(context, null, {clone: refAlias})
-    }).catch(function (error) {
-      $json.sendError(context, error.toString())
-    })
-  })
-
-  /**
-   * Loggue un user d'un sesalab localement, répond {success:true} ou {success:false, error:"message d'erreur"}
-   * Dupliqué dans app/personne/controllerPersonne.js en html
-   * @Route POST /api/connexion
-   * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
-   * @param {string} token   Le token de sesalab qui servira à récupérer le user
-   */
-  controller.get('connexion', function (context) {
-    var token = context.get.token
-    var origine = context.get.origine
-    var timeout = 5000
-    if (token && origine) {
-      if (origine.substr(-1) !== '/') origine += '/'
-      if (config.sesalabsByOrigin[origine]) {
-        var postOptions = {
-          url: origine + 'api/utilisateur/check-token',
-          json: true,
-          content_type: 'charset=UTF-8',
-          timeout: timeout,
-          form: {
-            token: token
-          }
-        }
-        // on ne garde que le nom de domaine en origine
-        var domaine = /https?:\/\/([a-z.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
-        request.post(postOptions, function (error, response, body) {
+    /**
+     * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels
+     * ou le ?format= demandé (alias ou normalized, le reste donnant la ressource complète)
+     * @private
+     * @param {Context} context
+     * @param ressource
+     */
+    function writeAndOut (context, ressource) {
+      if (_.isEmpty(ressource.$errors)) {
+        $ressourceRepository.save(ressource, function (error, ressource) {
+          log.debug('dans cb api writeAndOut après $ressourceRepository.save', ressource, 'repository', {max: 500})
           if (error) {
             $json.send(context, error)
-          } else if (body.error) {
-            $json.send(context, new Error(body.error))
-          } else if (body.ok && body.utilisateur) {
-            // on peut connecter
-            $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
-              log.debug('dans cb loginFromSesalab on a en session', context.session.user)
-              if (error) $json.send(context, error)
-              else $json.sendOk(context, {random: +new Date()})
-            })
           } else {
-            var msg = 'réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url
-            error = new Error(msg)
-            log.error(error)
-            log.debug(msg, body)
-            $json.send(context, error)
+            log.perf(context.response, 'written')
+            if (context.get.format) {
+              // on veut la ressource formatée, sendRessource le gère
+              sendRessource(context, null, ressource)
+            } else {
+              // on ne renvoie que l'oid et des warnings éventuels
+              var data = {oid: ressource.oid}
+              if (!_.isEmpty(ressource.$warnings)) {
+                data.warnings = ressource.$warnings
+              }
+              $json.send(context, null, data)
+            }
           }
         })
       } else {
-        $json.send(context, new Error('Origine ' + origine + 'non autorisée à se connecter ici'))
+        $json.send(context, ressource.$errors)
       }
-    } else {
-      $json.send(context, new Error('token ou origine manquant'))
     }
-  })
 
-  /**
-   * Déconnecte l'utilisateur courant
-   * @route GET /api/deconnexion
-   */
-  controller.get('deconnexion', function (context) {
-    if ($accessControl.isAuthenticated(context)) {
-      $accessControl.logout(context)
-      $json.sendOk(context)
-    } else {
-      $json.sendOk(context, {warning: 'Utilisateur non connecté'})
-    }
-  })
+    /**
+     * Met éventuellement à jour un titre bateau si on en a un meilleur (asynchrone, lance la màj en bdd et rend la main)
+     * @param ressource
+     * @param newTitre
+     */
+    /*
+     function updateTitre(ressource, newTitre) {
+       // on regarde si l'arbre nous apporte un titre que l'on aurait pas
+       if (newTitre) {
+         //noinspection SwitchStatementWithNoDefaultBranchJS
+         switch (ressource.titre) {
+               // titres par défaut mis par importMEPS
+               case 'Exercice mathenpoche':
+               case 'Aide mathenpoche':
+               // titres par défaut mis par importLabomep
+               case 'Message ou question':
+               case 'Figure TracenPoche':
+               case 'Test diagnostique':
+               case 'Opération posée':
+               case 'Exercice avec la calculatrice cassée':
+               case 'Figure GeoGebra':
+               case 'Page externe':
+               case 'Exercice de calcul mental':
+               case 'Animation interactive':
+               case 'QCM interactif':
+               case 'Exercice corrigé':
+               case 'QCM':
+               case 'Animation instrumenpoche':
+               case 'Titre manquant':
+               case 'Parcours interactif':
+               case "Test diagnostique d'algèbre":
+               case 'Exercice Calcul@TICE':
+                 // on sauvegarde le nouveau titre
+                 log.debug('titre de ' +ressource.oid +' changé : ' +ressource.titre +' => ' +newTitre)
+                 ressource.titre = newTitre
+                 $ressourceRepository.save(ressource) // pas de next, on laisse comme c'était si ça plante
+             }
+       }
+     } /* */
 
-  /**
-   * Une route pour mathgraph qui répond en plain/text
-   * @route POST /api/action/mathgraph/:token
-   */
-  controller.post('action/mathgraph/:token', function (context) {
-    function sendError (error) {
-      // si on passe une string, c'est juste une info pour le client mg32 desktop
-      if (typeof error === 'string') return context.plain(`Erreur : ${error}`)
-      if (error.stack) log.error(error)
-      context.status = 500
-      context.plain('Erreur : ' + error.toString())
-    }
-    $ressourceRepository.getDeferred(context.arguments.token, function (error, data) {
-      if (error) return sendError(error)
-      if (!data) {
-        context.status = 404
-        return sendError('jeton invalide ou périmé')
-      }
-      if (data.action !== 'saveRessource' || !data.oid) return sendError(new Error('jeton valide mais données impossibles à traiter'))
-      // on peut traiter
-      $ressourceRepository.load(data.oid, function (error, ressource) {
-        if (error) return sendError(error)
-        if (!ressource) {
-          context.status = 404
-          return sendError(`la ressource d’identifiant ${data.oid} n’existe pas (ou plus)`)
-        }
-        if (ressource.type !== 'mathgraph') return sendError(`cette ressource n’est pas de type mathgraph (${ressource.type})`)
-        if (!context.post.base64) return sendError('impossible de trouver une figure dans les données envoyées')
-        // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
-        log.debug(`la ressource ${data.oid} avait la figure\n${ressource.parametres.figure}\nque l’on remplace par\n${context.post.base64}`)
-        ressource.parametres.figure = context.post.base64
-        $ressourceRepository.save(ressource, function (error, ressource) {
-          if (error) sendError(error)
-          else if (ressource) context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
-          else sendError(new Error('Le save de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
-        })
-      })
+    const controller = this
+
+    const listeMax = configRessource.limites.listeMax
+    if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
+
+    /**
+     * Passe au suivant pour toutes les requetes OPTIONS (traitées par le middleware cors)
+     * @route OPTIONS /api/*
+     */
+    controller.options('*', function (context) {
+      log.debug('headers de la requete options', context.request.headers, 'xhr', {max: 5000, indent: 2})
+      // on laisse le middleware CORS faire son boulot
+      context.next()
     })
-  })
 
-  /**
-   * Forward un post (au unload on ne peut pas poster en crossdomain, on le fait en synchrone ici qui fera suivre)
-   * @Route POST /api/deferPost
-   */
-  controller.post('deferPost', function (context) {
-    var resultat = context.post
-    log.debug('deferPost appelé avec', resultat)
-    if (typeof resultat.deferUrl === 'string') {
-      var url = resultat.deferUrl
-      delete resultat.deferUrl
-      if (config.sesalabs.some((sesalab) => url.indexOf(sesalab.baseUrl) === 0)) {
-        var postOptions = {
-          url: url,
-          json: true,
-          content_type: 'charset=UTF-8',
-          timeout: 3000,
-          headers: {
-            'Cookie': context.request.cookies
-          },
-          form: context.post
-        }
-        request.post(postOptions, function (error, response, body) {
-          // pas la peine de répondre personne n'écoute
-          log.debug('deferPost, après envoi vers ' + postOptions.url + ' de ', postOptions.form)
-          log.debug("on récupère l'erreur", error)
-          log.debug('on récupère la réponse', response)
-          log.debug('on récupère et le body', body)
-          // mais si on renvoie rien ça donne une erreur 500 en timeout, context.next() donne une 404 car pas de contenu
-          $json.sendOk(context)
-        })
-      } else {
-        $json.send(context, new Error('deferPost appelé pour faire suivre à ' + resultat.deferUrl + " qui n'est pas dans les sesalab autorisés"))
+    /**
+     * Retourne la baseId d'une baseUrl (sesatheque ou sesalab)
+     * @route GET /api/baseId?baseUrl=xxx
+     */
+    controller.get('baseId', function (context) {
+      const baseUrl = context.get.baseUrl
+      if (!baseUrl) return $json.sendError(context, 'baseUrl manquante')
+      // on cherche d'abord dans les sesalabs
+      const sesalab = config.sesalabs.find(sesalab => sesalab.baseUrl === baseUrl)
+      if (sesalab) {
+        if (sesalab.baseId) return $json.sendOk(context, {baseId: sesalab.baseId, type: 'sesalab'})
+        log.error('pb de sesalab en configuration sans baseId', sesalab)
+        return $json.sendError(context, 'Problème de configuration de la Sésathèque')
       }
-    } else {
-      $json.send(context, new Error('Il faut poster une url via deferUrl'))
-    }
-  })
+      // c'est pas un sesalab, on cherche une sésathèque
+      const baseId = getBaseId(baseUrl, null)
+      if (baseId) return $json.sendOk(context, {baseId, type: 'sesatheque'})
+      $json.sendError(context, `baseUrl ${baseUrl} inconnue`)
+    })
 
-  /**
-   * Une url pour envoyer des notifications d'erreur, à priori par un client
-   * qui trouve des incohérences dans ce qu'on lui a envoyé
-   * @Route POST /api/notifyError
-   */
-  controller.post('notifyError', function (context) {
-    if (context.post.rid) log.dataError('notifyError', context.post)
-    else if (context.post.error) log.error('notifyError', context.post)
-    else log.error('notifyError sans error avec la requête', context.request)
-    $json.sendOk(context)
-  })
+    /**
+     * Retourne l'url d'une baseId
+     * @route GET /api/baseId/:id
+     */
+    controller.get('baseId/:id', function (context) {
+      const baseId = context.arguments.id
+      const baseUrl = getBaseUrl(baseId, false)
+      if (baseUrl) $json.sendOk(context, {baseUrl})
+      else $json.sendError(context, `Sésathèque ${baseId} inconnue sur ${config.application.baseUrl}`)
+    })
 
-  /**
-   * Récupère un arbre au format jstree (cf le plugin arbre pour un exemple d'utilisation)
-   * @route GET /api/jstree?ref=xx[&children=1]
-   * @param {string} ref        Un oid ou origine/idOrigine
-   * @param {string} [children] Passer 1 pour ne récupérer que les enfants
-   */
-  controller.get('jstree', function (context) {
-    const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
-
-    var id = context.get.rid || context.get.aliasOf || context.get.id || context.get.oid
-    var onlyChildren = !!context.get.children
-    if (id) {
-      $ressourceRepository.load(id, function (error, ressource) {
-        if (error) {
-          sendJsonJstreeArray(context, error)
-        } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
-          // on ajoute baseId s'il n'y est pas
-          if (!ressource.baseId) ressource.baseId = config.application.baseId
-          var jstData
-          if (onlyChildren) {
-            if (ressource.type === 'arbre') {
-              jstData = getJstreeChildren(ressource)
-              // log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
-              // log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
-              sendJsonJstreeArray(context, null, jstData)
+    /**
+     * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
+     * Retourne {@link reponseRessourceOid}
+     * @route GET /api/clone/:oid
+     */
+    controller.get('clone/:oid', function (context) {
+      var oid = context.arguments.oid
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (pid) {
+        $ressourceRepository.load(oid, function (error, ressource) {
+          if (error) return $json.send(context, error)
+          if (ressource) {
+            if ($accessControl.hasReadPermission(context, ressource)) {
+              if (configRessource.editable[ressource.type]) {
+                // editable on duplique
+                delete ressource.oid
+                delete ressource.idOrigine
+                ressource.origine = config.application.baseId
+                // faut mettre le user en auteur sinon il aura pas le droit de supprimer
+                if (ressource.auteurs.indexOf(pid) < 0) ressource.auteurs.push(pid)
+                ressource.publie = true
+                ressource.restriction = configRessource.constantes.restriction.prive
+                if (!ressource.relations) ressource.relations = []
+                ressource.relations.push([configRessource.constantes.relations.estVersionDe, ressource.rid])
+                delete ressource.rid
+                $ressourceRepository.save(ressource, function (error, ressource) {
+                  if (error) $json.send(context, error)
+                  else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
+                  else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
+                })
+              } else {
+                // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource et ce user
+                $ressourceRepository.loadByAliasAndPid(myBaseId + '/' + oid, pid, function (error, alias) {
+                  if (error) return $json.sendError(context, error.toString())
+                  if (alias) return $json.sendOk(context, {oid: alias.oid})
+                  // faut le créer
+                  const data = {}
+                  ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => {
+                    data[p] = ressource[p]
+                  })
+                  data.aliasOf = myBaseId + '/' + ressource.oid
+                  data.auteursParents = ressource.auteurs
+                  data.auteurs = [pid]
+                  alias = EntityRessource.create(data)
+                  alias.store(function (error, ressAlias) {
+                    if (error) return $json.sendError(context, error)
+                    if (ressAlias) return $json.sendOk(context, {oid: ressAlias.oid})
+                    $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
+                  })
+                })
+              }
             } else {
-              sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
+              $json.denied(context, `Vous n’avez pas les droits suffisant pour lire la ressource ${oid}`)
             }
           } else {
-            jstData = toJstree(ressource)
-            sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
+            $json.notFound(context, `La ressource ${oid} n’existe pas`)
           }
-        } else {
-          sendJsonJstreeArray(context, 'la ressource ' + id + " n’existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
-        }
-      })
-    } else {
-      sendJsonJstreeArray(context, 'il faut fournir un id de ressource')
-    }
-  })
-
-  /**
-   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin.
-   * Retourne {@link reponseListe}
-   * @route GET /api/liste/all
-   * @param {requeteListe}
-   */
-  controller.get('liste/all', getListeAll)
-  /**
-   * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
-   * Retourne {@link reponseListe}
-   * @route POST /api/liste/all
-   * @param {requeteListe}
-   */
-  controller.post('liste/all', getListeAll)
-  /**
-   * Ajoute aux headers cors habituels le header
-   * Access-Control-Allow-Methods', 'POST, OPTIONS'
-   * @route OPTIONS /api/liste/all
-   */
-
-  /**
-   * Récupère les ressources d'une liste de pids, classée par pid (avec prénom & nom du pid)
-   * Retourne {@link reponseListesByPid}
-   * @route GET /api/liste/auteurs
-   * @param {string} pids la liste de pids séparés par des virgules
-   */
-  controller.get('liste/auteurs', getListeAuteurs)
-
-  /**
-   * Récupère la liste des ressources d'un groupe
-   * Retourne {@link reponseListe}
-   * @route GET /api/liste/groupe/:nom
-   */
-  controller.get('liste/groupe/:nom', function (context) {
-    $ressourceRepository.getListe('groupe/' + context.arguments.nom, null, function (error, ressources) {
-      sendListe(context, error, ressources)
+        })
+      } else {
+        $json.denied(context, 'Vous devez être authentifié pour cloner une ressource')
+      }
     })
-  })
 
-  /**
-   * Cherche parmi les ressources du user courant (qui doit être connecté avant)
-   * Retourne {@link reponseListe}
-   * @route GET /api/liste/perso
-   * @param {requeteListe}
-   */
-  controller.get('liste/perso', getListePerso)
-  /**
-   * Cherche parmi les ressources du user courant (qui doit être connecté avant), retourne {@link reponseListe}
-   * @route POST /api/liste/perso
-   * @param {requeteListe}
-   */
-  controller.post('liste/perso', getListePerso)
-  /**
-   * Pour le preflight, ajoute les headers allow… si autorisé
-   * @route OPTIONS /api/liste/perso
-   * @param {requeteListe}
-   */
+    /**
+     * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant en auteur
+     * (sinon il pourra pas la supprimer), avec publié et privé
+     * Retourne {@link Ref}
+     * Utiliser la méthode sesatheque-client:cloneItem
+     * @route GET /api/externalClone/:baseId/:oid
+     */
+    controller.get('externalClone/:baseId/:oid', function (context) {
+      const oid = context.arguments.oid
+      const baseIdOrigine = context.arguments.baseId
+      const pid = $accessControl.getCurrentUserPid(context)
+      flow().seq(function () {
+        if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
+        const baseUrl = getBaseUrl(baseIdOrigine)
+        // si on est là c'est une baseId connue de sesatheque-client,
+        // mais ça suffit pas pour qu'on la référence
+        if (!config.sesathequesById[baseIdOrigine]) return this(new Error(`Sésathèque ${baseIdOrigine} connue (${baseUrl}) mais pas déclarée comme source possible de cette sésathèque`))
+        // on peut aller chercher la ressource
+        $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, this)
+      }).seq(function (ressource) {
+        log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
+        // on passe par Ref pour filtrer ce qu'on garde (pour un alias, seulement ce que ref utilise)
+        const aliasData = new Ref(ressource)
+        // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
+        aliasData.auteursParents = (ressource.auteursParents || []).concat(ressource.auteurs || [])
+        aliasData.auteurs = [pid]
+        aliasData.origine = config.application.baseId
+        aliasData.dateCreation = new Date()
+        // important sinon une ressource non restreinte mais pas publiée se retrouverait publique,
+        // et à la consultation (de l'original) ça plante
+        aliasData.publie = ressource.publie
+        // si la ressource était publique on le laisse sur l'alias (pour la lecture),
+        // pour l'écriture ça changera rien
+        if (ressource.restriction === configRessource.constantes.restriction.aucune) aliasData.restriction = configRessource.constantes.restriction.aucune
+        else aliasData.restriction = configRessource.constantes.restriction.prive
+        // la relation ne sera ajoutée que lors de l'édition de cette ressource, inutile pour un alias
+        // mais on conserve l'ancienne
+        if (ressource.relations && ressource.relations.length) aliasData.relations = ressource.relations
+        $ressourceRepository.save(aliasData, this)
+      }).seq(function (ressAlias) {
+        const refAlias = new Ref(ressAlias)
+        // le user courant peut toujours effacer l'alias
+        refAlias.$droits = 'D'
+        // modif autorisée sur les ressources éditables seulement
+        // (qui deviendront à l'édition des ressources dérivées et plus des alias)
+        if (configRessource.editable[refAlias.type]) refAlias.$droits += 'W'
+        // le context.json de lassi filtre les propriétés $ au 1er niveau, on ajoute un niveau (ici la propriété clone)…
+        $json.send(context, null, {clone: refAlias})
+      }).catch(function (error) {
+        $json.sendError(context, error.toString())
+      })
+    })
 
-  /**
-   * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
-   * @route GET /api/liste/prof
-   * @param {requeteListe}
-   */
-  controller.get('liste/prof', getListeProf)
-  /**
-   * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
-   * @route POST /api/liste/prof
-   * @param {requeteListe}
-   */
-  controller.post('liste/prof', getListeProf)
-  /**
-   * Pour le preflight, ajoute aux headers cors habituels le header
-   *   Access-Control-Allow-Methods:POST OPTIONS
-   * @route OPTIONS /api/liste/prof
-   */
+    /**
+     * Loggue un user d'un sesalab localement, répond {success:true} ou {success:false, error:"message d'erreur"}
+     * Dupliqué dans app/personne/controllerPersonne.js en html
+     * @Route POST /api/connexion
+     * @param {string} origine L'url de la racine du sesalab appelant (qui doit être déclaré dans le config de la sésathèque), avec préfixe http ou https
+     * @param {string} token   Le token de sesalab qui servira à récupérer le user
+     */
+    controller.get('connexion', function (context) {
+      var token = context.get.token
+      var origine = context.get.origine
+      var timeout = 5000
+      if (token && origine) {
+        if (origine.substr(-1) !== '/') origine += '/'
+        if (config.sesalabsByOrigin[origine]) {
+          var postOptions = {
+            url: origine + 'api/utilisateur/check-token',
+            json: true,
+            content_type: 'charset=UTF-8',
+            timeout: timeout,
+            form: {
+              token: token
+            }
+          }
+          // on ne garde que le nom de domaine en origine
+          var domaine = /https?:\/\/([a-z.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
+          request.post(postOptions, function (error, response, body) {
+            if (error) {
+              $json.send(context, error)
+            } else if (body.error) {
+              $json.send(context, new Error(body.error))
+            } else if (body.ok && body.utilisateur) {
+              // on peut connecter
+              $accessControl.loginFromSesalab(context, body.utilisateur, domaine, function (error) {
+                log.debug('dans cb loginFromSesalab on a en session', context.session.user)
+                if (error) $json.send(context, error)
+                else $json.sendOk(context, {random: +new Date()})
+              })
+            } else {
+              var msg = 'réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url
+              error = new Error(msg)
+              log.error(error)
+              log.debug(msg, body)
+              $json.send(context, error)
+            }
+          })
+        } else {
+          $json.send(context, new Error('Origine ' + origine + 'non autorisée à se connecter ici'))
+        }
+      } else {
+        $json.send(context, new Error('token ou origine manquant'))
+      }
+    })
 
-  /**
-   * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
-   * @route GET /api/liste/public
-   * @param {requeteListe}
-   */
-  controller.get('liste/public', getListePublic)
-  /**
-   * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
-   * @route POST /api/liste/public
-   * @param {requeteListe}
-   */
-  controller.post('liste/public', function (context) {
-    grabListe(context, 'public')
-  })
-  /**
-   * Pour le preflight, ajoute aux headers cors habituels le header
-   *   Access-Control-Allow-Methods: POST OPTIONS
-   * @route OPTIONS /api/liste/public
-   */
+    /**
+     * Déconnecte l'utilisateur courant
+     * @route GET /api/deconnexion
+     */
+    controller.get('deconnexion', function (context) {
+      if ($accessControl.isAuthenticated(context)) {
+        $accessControl.logout(context)
+        $json.sendOk(context)
+      } else {
+        $json.sendOk(context, {warning: 'Utilisateur non connecté'})
+      }
+    })
 
-  /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|normalized)
-   * Retourne {@link reponseListe}
-   * @route GET /api/public/:oid
-   * @param {Integer} :oid
-   */
-  controller.get('public/:oid', function (context) {
-    var oid = context.arguments.oid
-    if (oid === 'getRid') {
-      // c'est pas pour nous
-      context.next()
-    } else {
+    /**
+     * Une route pour mathgraph qui répond en plain/text
+     * @route POST /api/action/mathgraph/:token
+     */
+    controller.post('action/mathgraph/:token', function (context) {
+      function sendError (error) {
+        // si on passe une string, c'est juste une info pour le client mg32 desktop
+        if (typeof error === 'string') return context.plain(`Erreur : ${error}`)
+        if (error.stack) log.error(error)
+        context.status = 500
+        context.plain('Erreur : ' + error.toString())
+      }
+
+      $ressourceRepository.getDeferred(context.arguments.token, function (error, data) {
+        if (error) return sendError(error)
+        if (!data) {
+          context.status = 404
+          return sendError('jeton invalide ou périmé')
+        }
+        if (data.action !== 'saveRessource' || !data.oid) return sendError(new Error('jeton valide mais données impossibles à traiter'))
+        // on peut traiter
+        $ressourceRepository.load(data.oid, function (error, ressource) {
+          if (error) return sendError(error)
+          if (!ressource) {
+            context.status = 404
+            return sendError(`la ressource d’identifiant ${data.oid} n’existe pas (ou plus)`)
+          }
+          if (ressource.type !== 'mathgraph') return sendError(`cette ressource n’est pas de type mathgraph (${ressource.type})`)
+          if (!context.post.base64) return sendError('impossible de trouver une figure dans les données envoyées')
+          // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
+          log.debug(`la ressource ${data.oid} avait la figure\n${ressource.parametres.figure}\nque l’on remplace par\n${context.post.base64}`)
+          ressource.parametres.figure = context.post.base64
+          $ressourceRepository.save(ressource, function (error, ressource) {
+            if (error) sendError(error)
+            else if (ressource) context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
+            else sendError(new Error('Le save de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
+          })
+        })
+      })
+    })
+
+    /**
+     * Forward un post (au unload on ne peut pas poster en crossdomain, on le fait en synchrone ici qui fera suivre)
+     * @Route POST /api/deferPost
+     */
+    controller.post('deferPost', function (context) {
+      var resultat = context.post
+      log.debug('deferPost appelé avec', resultat)
+      if (typeof resultat.deferUrl === 'string') {
+        var url = resultat.deferUrl
+        delete resultat.deferUrl
+        if (config.sesalabs.some((sesalab) => url.indexOf(sesalab.baseUrl) === 0)) {
+          var postOptions = {
+            url: url,
+            json: true,
+            content_type: 'charset=UTF-8',
+            timeout: 3000,
+            headers: {
+              'Cookie': context.request.cookies
+            },
+            form: context.post
+          }
+          request.post(postOptions, function (error, response, body) {
+            // pas la peine de répondre personne n'écoute
+            log.debug('deferPost, après envoi vers ' + postOptions.url + ' de ', postOptions.form)
+            log.debug("on récupère l'erreur", error)
+            log.debug('on récupère la réponse', response)
+            log.debug('on récupère et le body', body)
+            // mais si on renvoie rien ça donne une erreur 500 en timeout, context.next() donne une 404 car pas de contenu
+            $json.sendOk(context)
+          })
+        } else {
+          $json.send(context, new Error('deferPost appelé pour faire suivre à ' + resultat.deferUrl + " qui n'est pas dans les sesalab autorisés"))
+        }
+      } else {
+        $json.send(context, new Error('Il faut poster une url via deferUrl'))
+      }
+    })
+
+    /**
+     * Une url pour envoyer des notifications d'erreur, à priori par un client
+     * qui trouve des incohérences dans ce qu'on lui a envoyé
+     * @Route POST /api/notifyError
+     */
+    controller.post('notifyError', function (context) {
+      if (context.post.rid) log.dataError('notifyError', context.post)
+      else if (context.post.error) log.error('notifyError', context.post)
+      else log.error('notifyError sans error avec la requête', context.request)
+      $json.sendOk(context)
+    })
+
+    /**
+     * Récupère un arbre au format jstree (cf le plugin arbre pour un exemple d'utilisation)
+     * @route GET /api/jstree?ref=xx[&children=1]
+     * @param {string} ref        Un oid ou origine/idOrigine
+     * @param {string} [children] Passer 1 pour ne récupérer que les enfants
+     */
+    controller.get('jstree', function (context) {
+      const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
+
+      var id = context.get.rid || context.get.aliasOf || context.get.id || context.get.oid
+      var onlyChildren = !!context.get.children
+      if (id) {
+        $ressourceRepository.load(id, function (error, ressource) {
+          if (error) {
+            sendJsonJstreeArray(context, error)
+          } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
+            // on ajoute baseId s'il n'y est pas
+            if (!ressource.baseId) ressource.baseId = config.application.baseId
+            var jstData
+            if (onlyChildren) {
+              if (ressource.type === 'arbre') {
+                jstData = getJstreeChildren(ressource)
+                // log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
+                // log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
+                sendJsonJstreeArray(context, null, jstData)
+              } else {
+                sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
+              }
+            } else {
+              jstData = toJstree(ressource)
+              sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
+            }
+          } else {
+            sendJsonJstreeArray(context, 'la ressource ' + id + " n’existe pas ou vous n'avez pas suffisamment de droits pour y accéder")
+          }
+        })
+      } else {
+        sendJsonJstreeArray(context, 'il faut fournir un id de ressource')
+      }
+    })
+
+    /**
+     * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin.
+     * Retourne {@link reponseListe}
+     * @route GET /api/liste/all
+     * @param {requeteListe}
+     */
+    controller.get('liste/all', getListeAll)
+    /**
+     * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
+     * Retourne {@link reponseListe}
+     * @route POST /api/liste/all
+     * @param {requeteListe}
+     */
+    controller.post('liste/all', getListeAll)
+    /**
+     * Ajoute aux headers cors habituels le header
+     * Access-Control-Allow-Methods', 'POST, OPTIONS'
+     * @route OPTIONS /api/liste/all
+     */
+
+    /**
+     * Récupère les ressources d'une liste de pids, classée par pid (avec prénom & nom du pid)
+     * Retourne {@link reponseListesByPid}
+     * @route GET /api/liste/auteurs
+     * @param {string} pids la liste de pids séparés par des virgules
+     */
+    controller.get('liste/auteurs', getListeAuteurs)
+
+    /**
+     * Récupère la liste des ressources d'un groupe
+     * Retourne {@link reponseListe}
+     * @route GET /api/liste/groupe/:nom
+     */
+    controller.get('liste/groupe/:nom', function (context) {
+      const options = {
+        limit: context.get.limit,
+        skip: context.get.skip || 0
+      }
+      $ressourceRepository.getListe('groupe/' + context.arguments.nom, options, function (error, ressources) {
+        sendListe(context, error, ressources)
+      })
+    })
+
+    /**
+     * Cherche parmi les ressources du user courant (qui doit être connecté avant)
+     * Retourne {@link reponseListe}
+     * @route GET /api/liste/perso
+     * @param {requeteListe}
+     */
+    controller.get('liste/perso', getListePerso)
+    /**
+     * Cherche parmi les ressources du user courant (qui doit être connecté avant), retourne {@link reponseListe}
+     * @route POST /api/liste/perso
+     * @param {requeteListe}
+     */
+    controller.post('liste/perso', getListePerso)
+    /**
+     * Pour le preflight, ajoute les headers allow… si autorisé
+     * @route OPTIONS /api/liste/perso
+     * @param {requeteListe}
+     */
+
+    /**
+     * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
+     * @route GET /api/liste/prof
+     * @param {requeteListe}
+     */
+    controller.get('liste/prof', getListeProf)
+    /**
+     * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
+     * @route POST /api/liste/prof
+     * @param {requeteListe}
+     */
+    controller.post('liste/prof', getListeProf)
+    /**
+     * Pour le preflight, ajoute aux headers cors habituels le header
+     *   Access-Control-Allow-Methods:POST OPTIONS
+     * @route OPTIONS /api/liste/prof
+     */
+
+    /**
+     * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
+     * @route GET /api/liste/public
+     * @param {requeteListe}
+     */
+    controller.get('liste/public', getListePublic)
+    /**
+     * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
+     * @route POST /api/liste/public
+     * @param {requeteListe}
+     */
+    controller.post('liste/public', function (context) {
+      grabListe(context, 'public')
+    })
+    /**
+     * Pour le preflight, ajoute aux headers cors habituels le header
+     *   Access-Control-Allow-Methods: POST OPTIONS
+     * @route OPTIONS /api/liste/public
+     */
+
+    /**
+     * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|normalized)
+     * Retourne {@link reponseListe}
+     * @route GET /api/public/:oid
+     * @param {Integer} :oid
+     */
+    controller.get('public/:oid', function (context) {
+      const oid = context.arguments.oid
+      if (oid === 'getRid') return context.next() // c'est pas pour nous
       $ressourceRepository.load(oid, function (error, ressource) {
         if (error) return $json.send(context, error)
         if (!ressource) return $json.notFound(context, `La ressource ${oid} n’existe pas`)
         if ($accessControl.isPublic(ressource)) return sendRessource(context, null, ressource)
         $json.denied(context, `La ressource ${oid} n’est pas publique`)
       })
-    }
-  })
-
-  /**
-   * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|normalized)
-   * Retourne {@link reponseRessource}
-   * @route GET /api/public/:origine/:idOrigine
-   * @param {string} :origine
-   * @param {string} :idOrigine
-   */
-  controller.get('public/:origine/:idOrigine', function (context) {
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      if (error) $json.send(context, error)
-      else if (ressource && ressource.restriction === 0) sendRessource(context, null, ressource)
-      else if (ressource) $json.denied(context, `La ressource ${origine}/${idOrigine} n’est pas publique`)
-      else $json.notFound(context, `La ressource ${origine}/${idOrigine} n’existe pas`)
     })
-  })
 
-  /**
-   * Retourne le rid d'une ressource (même privée, juste pour avoir la correspondance
-   * origine/idOrigine => rid ou vérifier que l'id existe)
-   * @route GET /api/public/getRid?id=xxx
-   */
-  controller.get('public/getRid', function (context) {
-    let id = context.get.id
-    if (id) {
-      const slashPos = id.indexOf('/')
-      const debut = id.substr(0, slashPos)
-      if (debut === myBaseId) id = id.substr(slashPos + 1)
-      $ressourceRepository.load(id, function (error, ressource) {
-        if (error) $json.sendError(context, error.toString())
-        else if (ressource) $json.sendOk(context, {rid: ressource.rid})
-        else $json.sendOk(context, {rid: null, error: 'pas de ressource ' + id})
+    /**
+     * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|normalized)
+     * Retourne {@link reponseRessource}
+     * @route GET /api/public/:origine/:idOrigine
+     * @param {string} :origine
+     * @param {string} :idOrigine
+     */
+    controller.get('public/:origine/:idOrigine', function (context) {
+      var origine = context.arguments.origine
+      var idOrigine = context.arguments.idOrigine
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        if (error) $json.send(context, error)
+        else if (ressource && ressource.restriction === 0) sendRessource(context, null, ressource)
+        else if (ressource) $json.denied(context, `La ressource ${origine}/${idOrigine} n’est pas publique`)
+        else $json.notFound(context, `La ressource ${origine}/${idOrigine} n’existe pas`)
       })
-    } else {
-      $json.sendError(context, 'id manquant')
-    }
-  })
+    })
 
-  /**
-   * Denied (rerouting interne ressource => public si on a ni session ni token)
-   * @internal
-   * @route DEL /api/public/:origine/:idOrigine
-   */
-  controller.delete('public/:origine/:idOrigine', function (context) {
-    $json.denied(context, 'droits insuffisant pour effacer cette ressource')
-  })
+    /**
+     * Retourne le rid d'une ressource (même privée, juste pour avoir la correspondance
+     * origine/idOrigine => rid ou vérifier que l'id existe)
+     * @route GET /api/public/getRid?id=xxx
+     */
+    controller.get('public/getRid', function (context) {
+      let id = context.get.id
+      if (id) {
+        const slashPos = id.indexOf('/')
+        const debut = id.substr(0, slashPos)
+        if (debut === myBaseId) id = id.substr(slashPos + 1)
+        $ressourceRepository.load(id, function (error, ressource) {
+          if (error) $json.sendError(context, error.toString())
+          else if (ressource) $json.sendOk(context, {rid: ressource.rid})
+          else $json.sendOk(context, {rid: null, error: 'pas de ressource ' + id})
+        })
+      } else {
+        $json.sendError(context, 'id manquant')
+      }
+    })
 
-  /**
-   * Denied (rerouting interne ressource => public si on a ni session ni token)
-   * @internal
-   * @route DEL /api/public/:oid
-   */
-  controller.delete('public/:oid', function (context) {
-    $json.denied(context, 'droits insuffisant pour effacer cette ressource')
-  })
+    /**
+     * Denied (rerouting interne ressource => public si on a ni session ni token)
+     * @internal
+     * @route DEL /api/public/:origine/:idOrigine
+     */
+    controller.delete('public/:origine/:idOrigine', function (context) {
+      $json.denied(context, 'droits insuffisant pour effacer cette ressource')
+    })
 
+<<<<<<< HEAD
   /**
    * Create / update une ressource
    * Prend un objet ressource, éventuellement incomplète mais oid ou origine/idOrigine sont obligatoires
@@ -1240,9 +1248,18 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var oid = context.arguments.oid
     $ressourceRepository.load(oid, function (error, ressource) {
       sendRessource(context, error, ressource)
+=======
+    /**
+     * Denied (rerouting interne ressource => public si on a ni session ni token)
+     * @internal
+     * @route DEL /api/public/:oid
+     */
+    controller.delete('public/:oid', function (context) {
+      $json.denied(context, 'droits insuffisant pour effacer cette ressource')
+>>>>>>> master
     })
-  })
 
+<<<<<<< HEAD
   /**
    * Retourne la ressource d'après son id d'origine (si on a les droits de lecture dessus), accepte ?format=(alias|normalized)
    * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
@@ -1255,9 +1272,39 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var origine = context.arguments.origine
     $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
       sendRessource(context, error, ressource)
-    })
-  })
+=======
+    /**
+     * Create / update une ressource
+     * Prend un objet ressource, éventuellement incomplète mais oid ou origine/idOrigine sont obligatoires
+     * Si le titre et la catégorie sont manquants, ou que l'on passe ?merge=1 à l'url, ça merge avec la ressource
+     * existante que l'on update, sinon on écrase (ou on créé si elle n'existait pas)
+     *
+     * Retourne {@link reponseRessourceOid} ou {@link Ref} si on le réclame avec ?format=ref
+     * @route POST /api/ressource
+     * @param {object} Les propriétés de la ressource
+     */
+    controller.post('ressource', postRessource)
+    /**
+     * Pour le preflight, ajoute aux headers cors habituels le header
+     *   Access-Control-Allow-Methods:POST OPTIONS
+     * @route OPTIONS /api/ressource
+     */
 
+    /**
+     * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+     * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
+     * @Route GET /api/ressource/:oid
+     * @param {Integer} oid
+     */
+    controller.get('ressource/:oid', function (context) {
+      var oid = context.arguments.oid
+      $ressourceRepository.load(oid, function (error, ressource) {
+        sendRessource(context, error, ressource)
+      })
+>>>>>>> master
+    })
+
+<<<<<<< HEAD
   /**
    * Restaure la ressource d'après son oid (si on a les droits de lecture dessus)
    * Au format {@link reponseRessource}
@@ -1307,37 +1354,74 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.delete('ressource/:origine/:idOrigine', function (context) {
     const rid = context.arguments.origine + '/' + context.arguments.idOrigine
     deleteAndSend(context, rid)
+=======
+    /**
+     * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+     * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
+     * @route GET /api/ressource/:origine/:idOrigine
+     * @param {string} :origine
+     * @param {string} :idOrigine
+     */
+    controller.get('ressource/:origine/:idOrigine', function (context) {
+      var idOrigine = context.arguments.idOrigine
+      var origine = context.arguments.origine
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        sendRessource(context, error, ressource)
+      })
+    })
+
+    /**
+     * Delete ressource par oid, retourne {@link reponseDeleted}
+     * @route DEL /api/ressource/:oid
+     * @param {Integer} oid
+     */
+    controller.delete('ressource/:oid', function (context) {
+      deleteAndSend(context, context.arguments.oid)
+    })
+    controller.options('ressource/:oid', optionsDeleteOk)
+
+    /**
+     * Delete par id d'origine ou par rid, retourne {@link reponseDeleted}
+     * @route DEL /api/ressource/:origine/:idOrigine
+     * @param {string} :origine ou baseId si c'était un rid
+     * @param {string} :idOrigine ou oid si c'était un rid
+     */
+    controller.delete('ressource/:origine/:idOrigine', function (context) {
+      const rid = context.arguments.origine + '/' + context.arguments.idOrigine
+      deleteAndSend(context, rid)
+    })
+    controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
+
+    /**
+     * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
+     * Retourne {@link reponseRessourceOid} ou {@link Ref} si on le réclame avec ?format=ref
+     * @param {Integer} [oid]
+     * @param {string} [origine]
+     * @param {string} [idOrigine]
+     * @param {string} [ref]
+     * @param {Array} relations
+     * @route POST /api/ressource/addRelations
+     */
+    controller.post('ressource/addRelations', postRessourceAddRelations)
+    /**
+     * Pour le preflight, ajoute aux headers cors habituels le header
+     *   Access-Control-Allow-Methods:POST OPTIONS
+     * @route OPTIONS /api/ressource/addRelations
+     */
+
+    /**
+     * Permet à une autre sésathèque d'ajouter un listener ici pour être prévenu sur une modif d'une de nos ressource
+     * @route POST /api/ressource/registerListener
+     */
+    controller.post('ressource/registerListener', postRessourceRegisterListener)
+
+    /**
+     * Pour poster une Ref afin de mettre à jour tous les éventuels arbres qui l'utilisent
+     * @route POST /api/ressource/externalUpdate
+     */
+    controller.post('ressource/externalUpdate', postRessourceExternalUpdate)
+>>>>>>> master
   })
-  controller.options('ressource/:origine/:idOrigine', optionsDeleteOk)
-
-  /**
-   * Ajoute des relations à une ressource (pour identifier la ressource on accepte dans le post oid ou origine+idOrigine ou ref)
-   * Retourne {@link reponseRessourceOid} ou {@link Ref} si on le réclame avec ?format=ref
-   * @param {Integer} [oid]
-   * @param {string} [origine]
-   * @param {string} [idOrigine]
-   * @param {string} [ref]
-   * @param {Array} relations
-   * @route POST /api/ressource/addRelations
-   */
-  controller.post('ressource/addRelations', postRessourceAddRelations)
-  /**
-   * Pour le preflight, ajoute aux headers cors habituels le header
-   *   Access-Control-Allow-Methods:POST OPTIONS
-   * @route OPTIONS /api/ressource/addRelations
-   */
-
-  /**
-   * Permet à une autre sésathèque d'ajouter un listener ici pour être prévenu sur une modif d'une de nos ressource
-   * @route POST /api/ressource/registerListener
-   */
-  controller.post('ressource/registerListener', postRessourceRegisterListener)
-
-  /**
-   * Pour poster une Ref afin de mettre à jour tous les éventuels arbres qui l'utilisent
-   * @route POST /api/ressource/externalUpdate
-   */
-  controller.post('ressource/externalUpdate', postRessourceExternalUpdate)
 }
 
 /**

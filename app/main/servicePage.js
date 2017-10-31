@@ -31,15 +31,16 @@
 
 'use strict'
 
-var _ = require('lodash')
-var sjtObj = require('sesajstools/utils/object')
+const _ = require('lodash')
+const sjtObj = require('sesajstools/utils/object')
+const version = require('../../package.json').version
 
 module.exports = function () {
   /**
    * Service de gestion des pages html
    * @service $page
    */
-  var $page = {}
+  const $page = {}
 
   /**
    * Ajoute une erreur à la liste qui sera envoyée à la vue
@@ -52,7 +53,7 @@ module.exports = function () {
         errorMessages: []
       }
     }
-    var errorMessage = (typeof error === 'string') ? error : error.toString()
+    const errorMessage = (typeof error === 'string') ? error : error.toString()
     data.errors.errorMessages.push(errorMessage)
     log.error(error)
   }
@@ -77,10 +78,11 @@ module.exports = function () {
    * @returns {{$metas: {}}}
    */
   $page.getDefaultData = function getDefaultData (context, titre, contentBloc) {
-    var data = {
+    const data = {
       $metas: {
-        js: ['/page.bundle.js']
-      }
+        js: [`/page.bundle.js?${version}`]
+      },
+      version
     }
     if (titre) {
       data.$metas.title = titre
@@ -112,8 +114,8 @@ module.exports = function () {
    *                                    sinon sera fusionné avec data avant context.html(data) (par ex pour des ajouts de $metas)
    */
   $page.print = function (context, titre, contentBloc, moreData) {
-    var data = $page.getDefaultData(context, titre, contentBloc)
-    if (_.isArray(moreData)) {
+    const data = $page.getDefaultData(context, titre, contentBloc)
+    if (Array.isArray(moreData)) {
       if (moreData.length) moreData = { blocs: { blocList: moreData } }
       else moreData = null
     }
@@ -130,7 +132,7 @@ module.exports = function () {
    * @param {number}       [status=200]
    */
   $page.printError = function (context, error, status) {
-    var data = $page.getDefaultData(context)
+    const data = $page.getDefaultData(context)
     $page.addError(error, data)
     context.status = status || 200
     context.html(data)
@@ -144,8 +146,8 @@ module.exports = function () {
    * @param {string}          titre
    */
   $page.printMessage = function (context, message, titre) {
-    var data = $page.getDefaultData(context, titre)
-    var contents = Array.isArray(message) ? message : [message]
+    const data = $page.getDefaultData(context, titre)
+    const contents = Array.isArray(message) ? message : [message]
     data.contentBloc = {
       $view: 'contents',
       contents: contents

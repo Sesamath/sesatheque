@@ -133,14 +133,14 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
 
     if (!ressourceNew.groupes) ressourceNew.groupes = []
     if (!ressourceNew.groupesAuteurs) ressourceNew.groupesAuteurs = []
-    if (!_.isArray(ressourceNew.groupes)) {
+    if (!Array.isArray(ressourceNew.groupes)) {
       // on vide et on signale l'erreur sans aller plus loin
       log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
       rTools.addError(ressourceNew, 'Groupes invalides')
       ressourceNew.groupes = []
       return next(null, ressourceNew)
     }
-    if (!_.isArray(ressourceNew.groupesAuteurs)) {
+    if (!Array.isArray(ressourceNew.groupesAuteurs)) {
       log.error(new Error("groupesAuteurs n'était pas un array"), ressourceNew.groupesAuteurs)
       rTools.addError(ressourceNew, 'Groupes auteurs invalides')
       ressourceNew.groupesAuteurs = []

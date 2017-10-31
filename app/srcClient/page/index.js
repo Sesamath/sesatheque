@@ -98,6 +98,11 @@ function addError (error, delay) {
   }
 }
 
+/**
+ * Affiche le bouton vu, ajoute son comportement au clic et le retourne
+ * @param sendResultat
+ * @return {Element} undefined si #boutonVu n'existait pas dans la page
+ */
 function addBoutonVu (sendResultat) {
   try {
     const boutonVu = wd.getElementById('boutonVu')
