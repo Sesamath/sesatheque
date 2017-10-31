@@ -29,4 +29,4 @@
  * pour une explication en français)
  */
 'use strict'
-require('./app')()
+require('./index')()
