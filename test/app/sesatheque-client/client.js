@@ -79,6 +79,7 @@ module.exports = function describeClient () {
       if (error) return done(error)
       Object.keys(expected).forEach(p => {
         if (typeof expected[p] === 'function') return
+        if (p.substr(0, 1) === '$') return
         expect(JSON.stringify(expected[p])).to.equals(JSON.stringify(ressource[p]), `Pb avec ${p}`)
       })
       done()
@@ -88,8 +89,8 @@ module.exports = function describeClient () {
   it('getItem remonte un item', function (done) {
     const expected = getRandomRessource()
     sesathequeClient.getItem(expected.rid, function (error, item) {
-      if (error) return done(error)
-      ;['titre', 'rid', 'resume', 'description', 'commentaires', 'type'].forEach(p => {
+      if (error) return done(error);
+      ['titre', 'rid', 'resume', 'description', 'commentaires', 'type'].forEach(p => {
         expect(expected[p]).to.equals(item[p], `Pb avec ${p}`)
       })
       expect(item.public).to.be.true
