@@ -41,7 +41,6 @@
  */
 var $ressourceConverter = {}
 
-var _ = require('lodash')
 var flow = require('an-flow')
 const {exists} = require('sesatheque-client/dist/sesatheques')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet

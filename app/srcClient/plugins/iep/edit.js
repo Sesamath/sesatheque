@@ -40,7 +40,6 @@ var formEditor = require('../../edit/formEditor')
  */
 module.exports = function edit (ressource) {
   require.ensure(['jquery'], function (require) {
-
     function importXml () {
       var url = $parametresUrl.val()
       if (url && url.substr(0, 4) === 'http') {

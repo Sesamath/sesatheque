@@ -108,7 +108,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
               choices[ myIndex ].gaSelected = isInGroupeAuteur
             }
           } else {
-            formData.errors.push('Le groupe ' + groupeNom + " n’existe pas")
+            formData.errors.push(`Le groupe ${groupeNom} n’existe pas`)
           }
           suivant()
         } catch (error) {

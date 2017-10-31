@@ -48,7 +48,6 @@ appConfig.sesatheques.forEach(({baseId, apiToken}) => {
  */
 
 module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
-
   /**
    * Renvoie une ressource récupérée ailleurs ou ici
    * (Avec oid, attention à ne pas la sauvegarder localement si elle vient d'ailleurs !)
@@ -156,6 +155,6 @@ module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
   return {
     fetch,
     fetchOriginal,
-    fetchRid,
+    fetchRid
   }
 }

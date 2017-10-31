@@ -31,7 +31,6 @@
 
 'use strict'
 
-const _ = require('lodash')
 const sjtObj = require('sesajstools/utils/object')
 const version = require('../../package.json').version
 

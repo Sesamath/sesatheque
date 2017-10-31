@@ -63,7 +63,7 @@ module.exports = {
       const todoThen = new Set()
       nb++
       // on informe de l'avancement
-      if (! nb % 50) updateLog(`traitement du ${nb}e arbre`)
+      if (!(nb % 50)) updateLog(`traitement du ${nb}e arbre`)
 
       let hasChanged = cleanItem(arbre)
       flow().seq(function () {
@@ -251,7 +251,7 @@ module.exports = {
           ressource.publie = true
           hasChanged = true
         }
-       if (hasChanged) {
+        if (hasChanged) {
           $ressourceRepository.save(ressource, next)
         } else {
           next()
@@ -354,7 +354,6 @@ module.exports = {
     }
 
     // init
-    const $cacheRessource = lassi.service('$cacheRessource')
     const $ressourceRepository = lassi.service('$ressourceRepository')
     // les rid à passer à loadAndClean2
     const ridToClean = new Set()
@@ -375,7 +374,7 @@ module.exports = {
       if (labomepAll) {
         cleanArbre(labomepAll, this)
       } else {
-        updateLog(`pas d’arbre labomep_all sur cette sésathèque, rien à faire`)
+        updateLog('pas d’arbre labomep_all sur cette sésathèque, rien à faire')
         done()
       }
     }).seq(function (todoThen) {

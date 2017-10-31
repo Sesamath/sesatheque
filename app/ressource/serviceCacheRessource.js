@@ -64,13 +64,15 @@ module.exports = function ($cache, $settings, EntityRessource) {
 
   const ttl = $settings.get('components.ressource.cacheTTL', 3600)
 
-  if ($settings.get('noCache', false)) return {
-    get: dummy,
-    getByCle: dummy,
-    getByOrigine: dummy,
-    set: dummy,
-    delete: dummy,
-    deleteByOrigine: dummy,
+  if ($settings.get('noCache', false)) {
+    return {
+      get: dummy,
+      getByCle: dummy,
+      getByOrigine: dummy,
+      set: dummy,
+      delete: dummy,
+      deleteByOrigine: dummy
+    }
   }
 
   /**

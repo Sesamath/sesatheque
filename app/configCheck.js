@@ -46,7 +46,7 @@ module.exports = function configCheck (config) {
   ;[ 'baseId', 'baseIdRegistrar', 'baseUrl' ].forEach((p) => {
     if (!config.application[p]) throw new Error(`config.application.${p} est obligatoire`)
   })
-  if (!config.sesatheques) throw new Error(`config.sesatheques est obligatoire`)
+  if (!config.sesatheques) throw new Error('config.sesatheques est obligatoire')
   const baseId = config.application.baseId
   const baseUrl = config.application.baseUrl
   // on ajoute notre baseId à la liste des sesatheques si ce n'est pas encore le cas

@@ -194,7 +194,7 @@ function refreshArbres (oid, done) {
 
     // cas inconnu, on laisse en le signalant
     } else {
-      logErrorInDataAndTask(new Error(`enfant sans aliasOf, ni error ni arbre`), ref)
+      logErrorInDataAndTask(new Error('enfant sans aliasOf, ni error ni arbre'), ref)
       next(null, ref, hasChanged)
     }
   }

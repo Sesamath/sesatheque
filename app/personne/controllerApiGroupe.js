@@ -31,8 +31,7 @@
 
 'use strict'
 
-var _ = require('lodash')
-var flow = require('an-flow')
+const flow = require('an-flow')
 
 /**
  * Répond sur certaines requetes OPTIONS
@@ -44,7 +43,7 @@ function optionsOk (context) {
 }
 
 module.exports = function (controller, EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
-  var h = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
+  const h = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
   /**
    * Controleur de la route /api/groupe/
    * @Controller controllerApiGroupe

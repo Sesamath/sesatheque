@@ -124,5 +124,9 @@
       "lassi": true,
       "log": true
     }
-  }
+  },
+  "eslintIgnore": [
+    "app/main/public",
+    "app/ressource/public"
+  ]
 }

@@ -190,7 +190,7 @@ module.exports = function controllersFactory (component) {
         // skip est à cheval sur les ressources dont on est l'auteur et celles où on est que contributeur
         // faut d'abord compter les premières
         const options = {
-          filters: [{index: 'auteurs', values: [pid]}],
+          filters: [{index: 'auteurs', values: [pid]}]
         }
         $ressourceRepository.getListeCount(visibility, options, this)
       }).seq(function (nb) {

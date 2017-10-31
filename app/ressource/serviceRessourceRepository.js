@@ -52,17 +52,6 @@ const myBaseId = appConfig.application.baseId
 const prependMyBaseId = (oid) => myBaseId + '/' + oid
 const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 
-/**
- * Service d'accès aux ressources, utilisé par les différents contrôleurs
- * @service $ressourceRepository
- * @requires EntityRessource
- * @requires EntityArchive
- * @requires $ressourceControl
- * @requires $cacheRessource
- * @requires $cache
- */
-const $ressourceRepository = {}
-
 module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
   // on applique toujours un limit
   const listeMax = config.limites.listeMax
@@ -918,7 +907,13 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   }
 
   /**
+   * Service d'accès aux ressources, utilisé par les différents contrôleurs
    * @service $ressourceRepository
+   * @requires EntityRessource
+   * @requires EntityArchive
+   * @requires $ressourceControl
+   * @requires $cacheRessource
+   * @requires $cache
    */
   return {
     archive,

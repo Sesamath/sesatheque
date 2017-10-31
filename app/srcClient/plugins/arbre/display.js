@@ -33,7 +33,6 @@
 
 import dom from 'sesajstools/dom'
 import log from 'sesajstools/utils/log'
-import {addSesatheque, exists as stExists} from 'sesatheque-client/dist/sesatheques'
 
 import page from '../../page/index'
 

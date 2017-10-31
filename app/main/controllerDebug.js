@@ -141,7 +141,7 @@ module.exports = function (controller) {
   controller.get('extUp', function (context) {
     // pour poster sur bibli
     var options = {
-      uri: `http://bibliotheque.local:3001/api/ressource/externalUpdate`,
+      uri: 'http://bibliotheque.local:3001/api/ressource/externalUpdate',
       headers: {'X-ApiToken': 'cniC6cyMOZB2p73P9kPTa.puCxKabwDeIu/zF8BFxeEQY22PE'},
       gzip: true,
       json: true,
@@ -154,7 +154,7 @@ module.exports = function (controller) {
       if (result && result.error) return context.json({error: result.error})
       // si on est toujours là y'a un pb…
       log.error(new Error(`réponse inattendue sur ${options.uri}, status ${response.statusCode}`), result)
-      context.json({error: `réponse invalide`})
+      context.json({error: 'réponse invalide'})
     })
   })
 }
