@@ -596,21 +596,18 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {errorCallback}   next
    * @returns {undefined}
    */
-  $ressourceRepository.softDelete = function repoSoftDelete (ressource, next) {
-    if (ressource && ressource.oid) {
-      log.debug('La ressource ' + ressource.oid + ' va être soft deleted')
-      if (!ressource.softDelete) ressource = EntityRessource.create(ressource)
-      ressource.softDelete(function (error) {
-        if (error) {
-          next(error)
-        } else {
-          log.debug('La ressource ' + ressource.oid + ' (' + ressource.oid + ') a été soft deleted')
-          next()
-        }
-      })
-    } else {
-      next(new Error('softDelete appelé sans ressource'))
-    }
+  function softDelete (ressource, next) {
+    if (!ressource || !ressource.oid) return next(new Error('softDelete appelé sans ressource effaçable'))
+    const {oid} = ressource
+    log.debug(`La ressource ${oid} va être soft deleted`)
+    if (!ressource.softDelete) ressource = EntityRessource.create(ressource)
+    if (ressource.isDeleted()) return next(new Error(`Ressource ${oid} déjà softDeleted`))
+    ressource.softDelete(function (error) {
+      if (error) return next(error)
+      $cacheRessource.delete(oid)
+      purgeVarnish(oid)
+      next()
+    })
   }
 
   /**
@@ -619,14 +616,15 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
    * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
    * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
    * @param {getListeFilters} [options.filters] Les filtres à appliquer
+   * @param {string}   [options.limit=listeMax] Le nombre max de ressources à remonter
+   * @param {boolean}  [options.onlyDeleted=false] Passer true pour lister les ressources softDeleted
    * @param {string}   [options.orderBy] L'index sur lequel trier
    * @param {string}   [options.order=asc] asc|desc
    * @param {string}   [options.skip] L'indice de la 1re valeur à remonter
-   * @param {string}   [options.limit=listeMax] Le nombre max de ressources à remonter
-   * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
+   * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument
    */
   function getListe (visibilite, options, next) {
-    try {
+    flow().seq(function () {
       if (!options) options = {}
       log.debug(`getListe avec visibility=${visibilite} et les options`, options)
       const query = getListeQuery(visibilite, options)
@@ -648,25 +646,20 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         }
         limit = listeMax
       }
+      // skip
       const skip = ensure(options.skip, 'integer', 0)
       log.debug(`getListe démarre ${skip} avec max ${limit} et les options valides`, options)
-
-      // deletedOnly
-      if (optionsSafe.deletedOnly) query = query.onlyDeleted()
-      let nbTotal = 0
-      flow().seq(function () {
-        query.grab({limit, skip}, this)
-      }).seq(function (ressources) {
-        if (ressources.length) cacheAndNext(null, ressources, this)
-        else this(null, [])
-      }).seq(function (ressources) {
-        log.debug('getListe remonte', ressources)
-        next(null, ressources)
-      }).catch(next)
-    } catch (error) {
-      log.error(error)
-      next(error)
-    }
+      // onlyDeleted
+      if (options.onlyDeleted) query.onlyDeleted()
+      // go
+      query.grab({limit, skip}, this)
+    }).seq(function (ressources) {
+      if (ressources.length) cacheAndNext(null, ressources, this)
+      else this(null, [])
+    }).seq(function (ressources) {
+      log.debug('getListe remonte', ressources)
+      next(null, ressources)
+    }).catch(next)
   } // getListe
 
   /**
@@ -813,6 +806,19 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
   } // loadByOrigin
 
   /**
+   * Charge une ressource softDeleted
+   * @param {string} oid
+   * @param {ressourceCallback} next
+   */
+  function loadDeleted (oid, next) {
+    // les deleted sont pas en cache
+    EntityRessource
+      .match('oid').equals(oid)
+      .onlyDeleted()
+      .grabOne(next)
+  }
+
+  /**
    * Met en cache la ressource et le user pour modification ultérieure
    * @param {number} oid
    * @param {function} next
@@ -837,6 +843,17 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       next(error, data)
     }) */
     $cache.get('defer_' + token, next)
+  }
+
+  /**
+   * Restaure une ressource
+   * @param {EntityRessource} ressource
+   * @param {ressourceCallback} next
+   */
+  function restore (ressource, next) {
+    if (!ressource) return next(new Error('Pas de ressource à restaurer'))
+    if (!ressource.isDeleted()) return next(new Error('La ressource à restaurer l’est déjà'))
+    ressource.restore((error, ressource) => cacheAndNext(error, ressource, next))
   }
 
   /**
@@ -957,9 +974,12 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
     loadByAliasAndPid,
     loadByCle,
     loadByOrigin,
+    loadDeleted,
     remove,
+    restore,
     save,
     saveDeferred,
+    softDelete,
     updateParent
   }
 }

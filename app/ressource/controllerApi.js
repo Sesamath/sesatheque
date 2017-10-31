@@ -53,7 +53,7 @@ const myBaseUrl = config.application.baseUrl
 module.exports = function controllersFactory (component) {
   component.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
     /**
-     * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
+     * softDelete une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
      * @private
      * @param {Context} context
      * @param rid ou oid ou origine/idOrigine
@@ -62,21 +62,24 @@ module.exports = function controllersFactory (component) {
       log.debug('dans cb api deleteRessource ' + rid)
       // on charge la ressource pour vérifier les droits
       $ressourceRepository.load(rid, function (error, ressource) {
-        if (error) {
-          $json.send(context, error)
-        } else if (ressource) {
-          $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
-            if (errorMessage) return $json.denied(context, errorMessage)
-            $ressourceRepository.remove(ressource.oid, function (error) {
-              if (error) $json.send(context, error)
-              else $json.sendOk(context, {deleted: rid})
-            })
-          })
-        } else {
+        if (error) return $json.send(context, error)
+        if (!ressource) {
           log.debug(`La ressource ${rid} n’existait pas, on a rien effacé`)
-          // pas de ressource, on vérifie qu'il avait certains droits
-          $json.send(context, new Error(`Aucune ressource d'identifiant ${rid}`))
+          return $json.send(context, new Error(`Aucune ressource d'identifiant ${rid}`))
         }
+        $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
+          if (errorMessage) return $json.denied(context, errorMessage)
+          // hard ou soft ?
+          const result = {
+            deleted: rid,
+            softDelete: !context.request.query.hardDeleted
+          }
+          const deleteMethod = result.softDelete ? $ressourceRepository.softDelete : $ressourceRepository.remove
+          deleteMethod(ressource.oid, function (error) {
+            if (error) return $json.send(context, error)
+            $json.sendOk(context, result)
+          })
+        })
       })
     }
 
@@ -178,6 +181,7 @@ module.exports = function controllersFactory (component) {
       const listeMax = configRessource.limites.listeMax
       const limit = ensure(context.get.limit, 'integer', listeMax)
       const skip = ensure(context.get.skip, 'integer', 0)
+      const onlyDeleted = !!context.get.onlyDeleted
       /**
        * Liste des ressources perso
        * @type {Ressources[]}
@@ -191,6 +195,7 @@ module.exports = function controllersFactory (component) {
         // faut d'abord compter les premières
         const options = {
           filters: [{index: 'auteurs', values: [pid]}],
+          onlyDeleted
         }
         $ressourceRepository.getListeCount(visibility, options, this)
       }).seq(function (nb) {
@@ -200,6 +205,7 @@ module.exports = function controllersFactory (component) {
         const options = {
           filters: [{index: 'auteurs', values: [pid]}],
           limit,
+          onlyDeleted,
           skip
         }
         // les ressources dont on est l'auteur
@@ -212,6 +218,7 @@ module.exports = function controllersFactory (component) {
         const options = {
           filters: [{index: 'contributeurs', values: [pid]}],
           limit: limit - ressources.length,
+          onlyDeleted,
           skip: (skip >= nbOwnRessources) ? skip - nbOwnRessources : 0
         }
         $ressourceRepository.getListe(visibility, options, this)
@@ -1220,35 +1227,6 @@ module.exports = function controllersFactory (component) {
       $json.denied(context, 'droits insuffisant pour effacer cette ressource')
     })
 
-<<<<<<< HEAD
-  /**
-   * Create / update une ressource
-   * Prend un objet ressource, éventuellement incomplète mais oid ou origine/idOrigine sont obligatoires
-   * Si le titre et la catégorie sont manquants, ou que l'on passe ?merge=1 à l'url, ça merge avec la ressource
-   * existante que l'on update, sinon on écrase (ou on créé si elle n'existait pas)
-   *
-   * Retourne {@link reponseRessourceOid} ou {@link Ref} si on le réclame avec ?format=ref
-   * @route POST /api/ressource
-   * @param {object} Les propriétés de la ressource
-   */
-  controller.post('ressource', postRessource)
-  /**
-   * Pour le preflight, ajoute aux headers cors habituels le header
-   *   Access-Control-Allow-Methods:POST OPTIONS
-   * @route OPTIONS /api/ressource
-   */
-
-  /**
-   * Retourne la ressource d'après son oid (si on a les droits de lecture dessus), accepte ?format=(alias|normalized)
-   * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
-   * @Route GET /api/ressource/:oid
-   * @param {Integer} oid
-   */
-  controller.get('ressource/:oid', function (context) {
-    var oid = context.arguments.oid
-    $ressourceRepository.load(oid, function (error, ressource) {
-      sendRessource(context, error, ressource)
-=======
     /**
      * Denied (rerouting interne ressource => public si on a ni session ni token)
      * @internal
@@ -1256,23 +1234,8 @@ module.exports = function controllersFactory (component) {
      */
     controller.delete('public/:oid', function (context) {
       $json.denied(context, 'droits insuffisant pour effacer cette ressource')
->>>>>>> master
     })
 
-<<<<<<< HEAD
-  /**
-   * Retourne la ressource d'après son id d'origine (si on a les droits de lecture dessus), accepte ?format=(alias|normalized)
-   * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
-   * @route GET /api/ressource/:origine/:idOrigine
-   * @param {string} :origine
-   * @param {string} :idOrigine
-   */
-  controller.get('ressource/:origine/:idOrigine', function (context) {
-    var idOrigine = context.arguments.idOrigine
-    var origine = context.arguments.origine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      sendRessource(context, error, ressource)
-=======
     /**
      * Create / update une ressource
      * Prend un objet ressource, éventuellement incomplète mais oid ou origine/idOrigine sont obligatoires
@@ -1301,60 +1264,24 @@ module.exports = function controllersFactory (component) {
       $ressourceRepository.load(oid, function (error, ressource) {
         sendRessource(context, error, ressource)
       })
->>>>>>> master
     })
 
-<<<<<<< HEAD
-  /**
-   * Restaure la ressource d'après son oid (si on a les droits de lecture dessus)
-   * Au format {@link reponseRessource}
-   * @Route PUT /api/restore/ressource/:oid
-   * @param {Integer} oid
-   */
-  controller.put('restore/ressource/:oid', function (context) {
-    var oid = context.arguments.oid
-    EntityRessource
-      .match('oid').equals(oid)
-      .onlyDeleted() // La séquence récupérée a été soft deleted
-      .grabOne(function (error, ressource) {
-        cacheAndNext(error, ressource, function () {
-          log.debug('restore ressource api avec', ressource, 'avirer', {max: 5000})
-          if (error) {
-            $json.send(context, error)
-          } else if (ressource) {
-            if ($accessControl.hasReadPermission(context, ressource)) {
-              ressource.restore(function (restoredRessource) {
-                $json.send(context, null, restoredRessource)
-              })
-            } else {
-              $json.denied(context)
-            }
-          } else {
-            $json.notFound(context, 'Cette ressource n’existe pas.')
-          }
-        })
+    /**
+     * Restaure la ressource d'après son oid (si on a les droits d'update dessus)
+     * Au format {@link reponseRessource}
+     * @Route POST /api/restore/ressource/:oid
+     * @param {Integer} oid
+     */
+    controller.post('restore/ressource/:oid', function (context) {
+      const oid = context.arguments.oid
+      $ressourceRepository.loadDeleted((error, ressource) => {
+        if (error) return $json.send(context, error)
+        if (!ressource) return $json.send(context, `La ressource ${oid} n’existe pas`)
+        if (!$accessControl.hasPermission('update', context, ressource)) return $json.denied(context)
+        $ressourceRepository.restore(ressource, (error, restoredRessource) => $json.send(context, error, restoredRessource))
       })
+    })
 
-  /**
-   * Delete ressource par oid, retourne {@link reponseDeleted}
-   * @route DEL /api/ressource/:oid
-   * @param {Integer} oid
-   */
-  controller.delete('ressource/:oid', function (context) {
-    deleteAndSend(context, context.arguments.oid)
-  })
-  controller.options('ressource/:oid', optionsDeleteOk)
-
-  /**
-   * Delete par id d'origine ou par rid, retourne {@link reponseDeleted}
-   * @route DEL /api/ressource/:origine/:idOrigine
-   * @param {string} :origine ou baseId si c'était un rid
-   * @param {string} :idOrigine ou oid si c'était un rid
-   */
-  controller.delete('ressource/:origine/:idOrigine', function (context) {
-    const rid = context.arguments.origine + '/' + context.arguments.idOrigine
-    deleteAndSend(context, rid)
-=======
     /**
      * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
      * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
@@ -1420,7 +1347,6 @@ module.exports = function controllersFactory (component) {
      * @route POST /api/ressource/externalUpdate
      */
     controller.post('ressource/externalUpdate', postRessourceExternalUpdate)
->>>>>>> master
   })
 }
 
