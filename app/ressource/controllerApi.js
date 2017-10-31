@@ -294,15 +294,15 @@ module.exports = function controllersFactory (component) {
      */
     function postRessource (context) {
       context.timeout = 5000
-      /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+      /* const reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
        log.error(new Error('une trace pour ' +reqHttp)) */
-      var ressourcePostee = context.post
-      var pid = $accessControl.getCurrentUserPid(context)
-      var groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
-      var ressourceOriginale
+      const ressourcePostee = context.post
+      const pid = $accessControl.getCurrentUserPid(context)
+      const groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
+      let ressourceOriginale
 
       if (context.perf) {
-        var msg = 'start-'
+        let msg = 'start-'
         if (ressourcePostee.origine && ressourcePostee.idOrigine) msg += ressourcePostee.origine + '/' + ressourcePostee.idOrigine
         else msg += ressourcePostee.oid
         log.perf(context.response, msg)
@@ -316,7 +316,7 @@ module.exports = function controllersFactory (component) {
       // si y'a pas qqchose pour identifier une ressource existante, faut avoir les droits de création
 
       flow().seq(function () {
-        var next = this
+        const next = this
         // si y'à un rid sans oid on traduit
         if (ressourcePostee.rid) {
           const [baseId, oid] = getRidComponents(ressourcePostee.rid)
@@ -348,16 +348,16 @@ module.exports = function controllersFactory (component) {
         else this(null, ressourceBdd)
       }).seq(function (ressourceBdd) {
         // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
-        var tt = ressourcePostee.type
+        const tt = ressourcePostee.type
         if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
         // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
-        var partial = !!context.get.partial
+        let partial = !!context.get.partial
         if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
           partial = (ressourcePostee.oid || (ressourcePostee.origine && ressourcePostee.idOrigine))
         }
-        if (partial) ressourcePostee = Object.assign({}, ressourceBdd, ressourcePostee)
+        const data = partial ? Object.assign({}, ressourceBdd, ressourcePostee) : ressourcePostee
         ressourceOriginale = ressourceBdd
-        $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
+        $ressourceControl.valideRessourceFromPost(data, this)
       }).seq(function (ressourceNew) {
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
         $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
@@ -385,22 +385,22 @@ module.exports = function controllersFactory (component) {
     function postRessourceAddRelations (context) {
       context.timeout = 5000
       if (context.perf) {
-        var msg = 'start-'
+        let msg = 'start-'
         if (context.post.origine && context.post.idOrigine) msg += context.post.origine + '/' + context.post.idOrigine
         else msg += context.post.oid
         log.perf(context.response, msg)
       }
       log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
-      var relations = context.post.relations
+      const relations = context.post.relations
       if (relations && relations.length) {
-        var id = extractId(context)
+        const id = extractId(context)
 
         if (id) {
           $ressourceRepository.load(id, function (error, ressource) {
             if (error) $json.send(context, error)
             else if (ressource) {
               if ($accessControl.hasPermission('update', context, ressource)) {
-                var errors = $ressourceConverter.addRelations(ressource, relations)
+                const errors = $ressourceConverter.addRelations(ressource, relations)
                 // rien changé
                 if (errors === false) $json.sendOk(context, {oid: ressource.oid})
                 // y'a eu des erreurs lors de l'ajout
@@ -542,7 +542,7 @@ module.exports = function controllersFactory (component) {
      * @param data
      */
     function sendJsonJstreeArray (context, error, data) {
-      var errorMsg
+      let errorMsg
       if (error) {
         errorMsg = (typeof error === 'string') ? error : error.toString()
         $json.send(context, null, {arrayOnly: [{text: 'Erreur : ' + errorMsg}]})
@@ -576,7 +576,7 @@ module.exports = function controllersFactory (component) {
         const format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
           if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
-          var item = (format === 'full') ? ressource : new Ref(ressource)
+          const item = (format === 'full') ? ressource : new Ref(ressource)
           if (ressource.type === 'sequenceModele' && format !== 'full') {
             // on rajoute les parametres pour les sequenceModele
             item.parametres = ressource.parametres
@@ -599,26 +599,19 @@ module.exports = function controllersFactory (component) {
      */
     function sendRessource (context, error, ressource) {
       log.debug('sendRessource api avec', ressource, 'avirer', {max: 5000})
-      if (error) {
-        $json.send(context, error)
-      } else if (ressource) {
-        if ($accessControl.hasReadPermission(context, ressource)) {
-          var format = context.get.format
-          if (format === 'ref') {
-            const ref = new Ref(ressource)
-            // avec ajout des droits
-            ref.$droits = 'R'
-            if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
-            if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
-            $json.send(context, null, ref)
-          } else {
-            $json.send(context, null, ressource)
-          }
-        } else {
-          $json.denied(context)
-        }
+      if (error) return $json.send(context, error)
+      if (!ressource) return $json.notFound(context, 'Cette ressource n’existe pas.')
+      if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context)
+      const format = context.get.format
+      if (format === 'ref') {
+        const ref = new Ref(ressource)
+        // avec ajout des droits
+        ref.$droits = 'R'
+        if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
+        if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
+        $json.send(context, null, ref)
       } else {
-        $json.notFound(context, 'Cette ressource n’existe pas.')
+        $json.send(context, null, ressource)
       }
     }
 
@@ -642,7 +635,7 @@ module.exports = function controllersFactory (component) {
               sendRessource(context, null, ressource)
             } else {
               // on ne renvoie que l'oid et des warnings éventuels
-              var data = {oid: ressource.oid}
+              const data = {oid: ressource.oid}
               if (!_.isEmpty(ressource.$warnings)) {
                 data.warnings = ressource.$warnings
               }
@@ -747,8 +740,8 @@ module.exports = function controllersFactory (component) {
      * @route GET /api/clone/:oid
      */
     controller.get('clone/:oid', function (context) {
-      var oid = context.arguments.oid
-      var pid = $accessControl.getCurrentUserPid(context)
+      const {oid} = context.arguments
+      const pid = $accessControl.getCurrentUserPid(context)
       if (pid) {
         $ressourceRepository.load(oid, function (error, ressource) {
           if (error) return $json.send(context, error)
@@ -812,7 +805,7 @@ module.exports = function controllersFactory (component) {
      * @route GET /api/externalClone/:baseId/:oid
      */
     controller.get('externalClone/:baseId/:oid', function (context) {
-      const oid = context.arguments.oid
+      const {oid} = context.arguments
       const baseIdOrigine = context.arguments.baseId
       const pid = $accessControl.getCurrentUserPid(context)
       flow().seq(function () {
@@ -865,13 +858,13 @@ module.exports = function controllersFactory (component) {
      * @param {string} token   Le token de sesalab qui servira à récupérer le user
      */
     controller.get('connexion', function (context) {
-      var token = context.get.token
-      var origine = context.get.origine
-      var timeout = 5000
+      const token = context.get.token
+      let origine = context.get.origine
+      const timeout = 5000
       if (token && origine) {
         if (origine.substr(-1) !== '/') origine += '/'
         if (config.sesalabsByOrigin[origine]) {
-          var postOptions = {
+          const postOptions = {
             url: origine + 'api/utilisateur/check-token',
             json: true,
             content_type: 'charset=UTF-8',
@@ -881,7 +874,7 @@ module.exports = function controllersFactory (component) {
             }
           }
           // on ne garde que le nom de domaine en origine
-          var domaine = /https?:\/\/([a-z.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
+          const domaine = /https?:\/\/([a-z.0-9]+(:[0-9]+)?)/.exec(origine)[1] // si ça plante fallait pas mettre n'importe quoi en config
           request.post(postOptions, function (error, response, body) {
             if (error) {
               $json.send(context, error)
@@ -895,7 +888,7 @@ module.exports = function controllersFactory (component) {
                 else $json.sendOk(context, {random: +new Date()})
               })
             } else {
-              var msg = 'réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url
+              const msg = 'réponse du sso sesalab incohérente (ko sans erreur) sur ' + postOptions.url
               error = new Error(msg)
               log.error(error)
               log.debug(msg, body)
@@ -969,13 +962,13 @@ module.exports = function controllersFactory (component) {
      * @Route POST /api/deferPost
      */
     controller.post('deferPost', function (context) {
-      var resultat = context.post
+      const resultat = context.post
       log.debug('deferPost appelé avec', resultat)
       if (typeof resultat.deferUrl === 'string') {
-        var url = resultat.deferUrl
+        const url = resultat.deferUrl
         delete resultat.deferUrl
         if (config.sesalabs.some((sesalab) => url.indexOf(sesalab.baseUrl) === 0)) {
-          var postOptions = {
+          const postOptions = {
             url: url,
             json: true,
             content_type: 'charset=UTF-8',
@@ -1023,8 +1016,8 @@ module.exports = function controllersFactory (component) {
     controller.get('jstree', function (context) {
       const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
-      var id = context.get.rid || context.get.aliasOf || context.get.id || context.get.oid
-      var onlyChildren = !!context.get.children
+      const id = context.get.rid || context.get.aliasOf || context.get.id || context.get.oid
+      const onlyChildren = !!context.get.children
       if (id) {
         $ressourceRepository.load(id, function (error, ressource) {
           if (error) {
@@ -1032,10 +1025,9 @@ module.exports = function controllersFactory (component) {
           } else if (ressource && $accessControl.hasReadPermission(context, ressource)) {
             // on ajoute baseId s'il n'y est pas
             if (!ressource.baseId) ressource.baseId = config.application.baseId
-            var jstData
             if (onlyChildren) {
               if (ressource.type === 'arbre') {
-                jstData = getJstreeChildren(ressource)
+                const jstData = getJstreeChildren(ressource)
                 // log.debug('à partir de', ressource, 'avirer', {max: 5000, indent: 2})
                 // log.debug('on récupère les enfants', jstData, 'avirer', {max: 5000, indent: 2})
                 sendJsonJstreeArray(context, null, jstData)
@@ -1043,7 +1035,7 @@ module.exports = function controllersFactory (component) {
                 sendJsonJstreeArray(context, "impossible de réclamer les enfants d'une ressource qui n'est pas un arbre")
               }
             } else {
-              jstData = toJstree(ressource)
+              const jstData = toJstree(ressource)
               sendJsonJstreeArray(context, null, [jstData]) // il veut toujours un Array (liste d'élément), ici le root
             }
           } else {
@@ -1162,7 +1154,7 @@ module.exports = function controllersFactory (component) {
      * @param {Integer} :oid
      */
     controller.get('public/:oid', function (context) {
-      const oid = context.arguments.oid
+      const {oid} = context.arguments
       if (oid === 'getRid') return context.next() // c'est pas pour nous
       $ressourceRepository.load(oid, function (error, ressource) {
         if (error) return $json.send(context, error)
@@ -1180,8 +1172,7 @@ module.exports = function controllersFactory (component) {
      * @param {string} :idOrigine
      */
     controller.get('public/:origine/:idOrigine', function (context) {
-      var origine = context.arguments.origine
-      var idOrigine = context.arguments.idOrigine
+      const {idOrigine, origine} = context.arguments
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) $json.send(context, error)
         else if (ressource && ressource.restriction === 0) sendRessource(context, null, ressource)
@@ -1253,8 +1244,7 @@ module.exports = function controllersFactory (component) {
      * @param {Integer} oid
      */
     controller.get('ressource/:oid', function (context) {
-      var oid = context.arguments.oid
-      $ressourceRepository.load(oid, function (error, ressource) {
+      $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
         sendRessource(context, error, ressource)
       })
     })
@@ -1267,8 +1257,7 @@ module.exports = function controllersFactory (component) {
      * @param {string} :idOrigine
      */
     controller.get('ressource/:origine/:idOrigine', function (context) {
-      var idOrigine = context.arguments.idOrigine
-      var origine = context.arguments.origine
+      const {idOrigine, origine} = context.arguments
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         sendRessource(context, error, ressource)
       })
