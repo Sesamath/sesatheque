@@ -31,27 +31,37 @@
 
 'use strict'
 const anLog = require('an-log')
+const lassi = require('lassi')
 const config = require('./config')
 const sesatheques = require('sesatheque-client/dist/sesatheques')
 const {exists, addSesatheque} = sesatheques
 const log = require('./tools/log.js')
+const {merge} = require('sesajstools/utils/object')
+
 const appName = config.application.name
 const logger = anLog(appName)
 
-module.exports = function boot (beforeBootstrapCb, options) {
+/**
+ * Boot l'application
+ * @param beforeBootstrapCb
+ * @param options
+ */
+function boot (beforeBootstrapCb, options) {
   if (!options) options = {}
   options.root = __dirname
-  // appel du module lassi qui met en global une variable lassi
-  require('lassi')(options)
+  // @todo pas de var globale lassi
+  // options.noGlobalLassi = true
+  const lassiInstance = lassi(options)
+  if (options.config) {
+    merge(config, options.config)
+    // lassi charge en settings ${options.root}/config
+    merge(lassiInstance.settings, options.config)
+  }
 
   global.isProd = !options.cli && config.application.staging === 'prod'
 
   // nos loggers
   logger("Démarrage de l'application avec l'environnement " + config.application.staging)
-
-  // Si on veut passer un préfixe à sesalabSso, ou si d'autres components veulent la config
-  // avant que lassi n'affecte ça et que $settings ne soit dispo, faut le mettre en global dès maintenant
-  global.app = {settings: config}
 
   /**
    * Gestion des traces
@@ -100,24 +110,17 @@ module.exports = function boot (beforeBootstrapCb, options) {
   }
   // Notre appli qui sera mise en global (pour que chacun puisse y ajouter ses controleurs ou services)
   // console.log('au boot', dependancies)
-  var sesatheque = lassi.component('sesatheque', dependancies)
-
-  // utile pour des modules npm qui voudrait ajouter des services sans définir de composants pour autant
-  // avec app.service('$newService', function () {…})
-  // ou app.controller('path', function () {this.get('path', function (context) {…} })
-  global.app = sesatheque
+  var sesatheque = lassiInstance.component('sesatheque', dependancies)
 
   // notre fct de log en global
   global.log = log
 
-  beforeBootstrapCb(lassi, sesatheque, dependancies)
+  beforeBootstrapCb(lassiInstance, sesatheque, dependancies)
 
-  lassi.on('startup', function () {
-    if (options.afterBootCallback) options.afterBootCallback()
-  })
+  if (options.afterBootCallback) lassiInstance.on('startup', options.afterBootCallback)
 
   // et on lance le boot
-  lassi.bootstrap(sesatheque, function (error) {
+  lassiInstance.bootstrap(sesatheque, function (error) {
     if (error) {
       log.error(error)
       process.exit()
@@ -125,3 +128,5 @@ module.exports = function boot (beforeBootstrapCb, options) {
     log('end bootstrap')
   })
 }
+
+module.exports = boot

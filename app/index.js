@@ -52,14 +52,21 @@
 const anLog = require('an-log')
 const boot = require('./boot')
 const sjt = require('sesajstools')
+const {merge} = require('sesajstools/utils/object')
 const config = require('./config')
 const configCheck = require('./configCheck')
 
+/**
+ * Ajoute nos middlewares et listeners, après déclaration des composants mais avant bootstrap
+ * @param {Lassi} lassi L’instance de lassi de cette application
+ * @param {Lassi#Component} mainComponent Le composant principal sur lequel sera lancé bootstrap() (après la fin de l'éxécution de cette fonction)
+ * @param {Lassi#Component[]} allComponents La liste des composants en dépendances
+ */
 function beforeBootsrap (lassi, mainComponent, allComponents) {
   anLog.config(config.lassiLogger)
   const appLog = anLog(config.application.name)
 
-  // une fois les composants chargés on ajoutera memcache et nos listeners
+  // une fois les composants chargés on ajoutera nos listeners lassi
   mainComponent.config(function ($accessControl, $flashMessages, $routes, $settings) {
     // on désactive toujours la compression dust (pas seulement en dev, ça crée trop de pbs en cas de js dans un template)
     // if (!global.isProd && lassi.transports.html.engine.disableWhiteSpaceCompression)
@@ -106,20 +113,38 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
   })
 }
 
-module.exports = function app (afterBootCallback) {
+/**
+ * Démarre l'application Sesathèque
+ * @param options
+ * @param afterBootCallback
+ */
+function app (options, afterBootCallback) {
+  function afterBootCallbackWrapper () {
+    // vérif de config au démarrage
+    configCheck(config)
+    anLog(config.application.name)('Started')
+    if (afterBootCallback) afterBootCallback()
+  }
+
+  if (typeof options === 'function') {
+    afterBootCallback = options
+    options = {}
+  } else if (!options) {
+    options = {}
+  }
   try {
+    if (options.settings) merge(config, options.settings)
     anLog.config(config.lassiLogger)
     anLog(config.application.name)('Starting…')
-    const options = {
-      afterBootCallback: function afterBootCb () {
-        // vérif de config au démarrage
-        configCheck(config)
-        anLog(config.application.name)('Started')
-        if (afterBootCallback) afterBootCallback()
-      }
+    const bootOptions = {
+      afterBootCallback: afterBootCallbackWrapper
     }
-    boot(beforeBootsrap, options)
+    if (options.settings) bootOptions.settings = options.settings
+    if (options.noGlobalLassi) bootOptions.noGlobalLassi = options.noGlobalLassi
+    boot(beforeBootsrap, bootOptions)
   } catch (error) {
     anLog(config.application.name).error(error)
   }
 }
+
+module.exports = app

@@ -42,7 +42,7 @@
 // Ce jeu de test de l'appli est lancé avec les paramètres de _private/test.js
 // (c'est app/config.js qui détecte mocha et utilise ce fichier)
 
-import app from '../app/app'
+import app from '../app'
 import config from '../app/config'
 // import flow from 'an-flow'
 import anLog from 'an-log'
