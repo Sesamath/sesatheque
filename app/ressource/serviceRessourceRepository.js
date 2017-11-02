@@ -626,7 +626,6 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
         next(null, ressources)
       }).catch(next)
     } catch (error) {
-      log.error(error)
       next(error)
     }
   } // getListe

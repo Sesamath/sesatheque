@@ -817,8 +817,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     }).seq(function (ressources) {
       data.$metas.title = 'Résultats de la recherche'
       var nbInit = ressources.length
-      // on filtre d'après les droits en lecture
-      // @todo ajouter le filtrage dans la requete de recherche...
+      // on filtre d'après les droits en lecture (pas le boulot de getListe)
       ressources = ressources.filter(ressource => $accessControl.hasReadPermission(context, ressource))
       if (ressources.length < nbInit) {
         log.error((nbInit - ressources.length) + ' ressources de la liste ont été filtrées par les droits avec ' + context.request.originalUrl)
@@ -833,7 +832,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         data.actions.links.push({html: linkQs($routes.get('search'), 'Résultats suivants', crit)})
       }
       // 'titre' avec le nb de ressources
-      var html = nbTotal + ' ressource'
+      let html = nbTotal + ' ressource'
       if (ressources.length) {
         var last = Math.min(options.skip + options.limit, options.skip + ressources.length)
         html += 's (' + (options.skip + 1) + ' à ' + last + ')'
