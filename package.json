@@ -69,7 +69,7 @@
     "elementtree": "0.1.6",
     "jquery": "3.2.1",
     "jstree": "3.3.4",
-    "lassi": "Sesamath/lassi#2.2.0",
+    "lassi": "Sesamath/lassi#2.2.1",
     "lodash": "4.16.4",
     "memcached": "2.2.2",
     "moment": "2.18.1",
@@ -78,7 +78,7 @@
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#0.1.25",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.15",
     "sesalab-sso": "Sesamath/sesalab-sso#1.0.12",
-    "sesatheque-client": "Sesamath/sesatheque-client#1.2.31"
+    "sesatheque-client": "Sesamath/sesatheque-client#1.2.32"
   },
   "devDependencies": {
     "amdefine": "^1.0.1",
