@@ -6,7 +6,7 @@
   "apps" : [
     {
       "name"             : "sesatheque",
-      "script"           : "app/index.js",
+      "script"           : "app/start.js",
       "log_date_format"  : "YYYY-MM-DD HH:mm:ss",
       "exec_mode"        : "cluster",
       "exec_interpreter" : "node",
@@ -15,9 +15,8 @@
       "watch"            : ["app", "test"],
       "ignore_watch"     : ["app/main/public", "app/ressource/public"],
       "pid_file"         : "sesatheque.pid",
-      "error_file"       : "logs/sesatheque-err.log",
-      "out_file"         : "logs/sesatheque-out.log",
-
+      "error_file"       : "logs/error.log",
+      "out_file"         : "logs/node.log",
       "env": {
         "PORT"  : 3001
       },

@@ -6,16 +6,16 @@
   "apps" : [
     {
       "name"             : "sesatheque",
-      "script"           : "app/index.js",
-      "log_date_format"  : "YYYY-MM-DD HH:mm:ss",
+      "script"           : "app/start.js",
+      "log_date_format"  : "YYYY-MM-DD HH:mm:ss.sss",
       "exec_mode"        : "cluster",
       "exec_interpreter" : "node",
       "node_args"        : [],
       "instances"        : "2",
       "watch"            : false,
       "pid_file"         : "sesatheque.pid",
-      "error_file"       : "logs/sesatheque-err.log",
-      "out_file"         : "logs/sesatheque-out.log",
+      "error_file"       : "logs/error.log",
+      "out_file"         : "logs/node.log",
 
       "env": {
         "PORT"  : 3001
