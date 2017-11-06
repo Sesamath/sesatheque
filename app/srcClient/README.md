@@ -6,29 +6,29 @@ Pour la doc du code serveur, cf [sesatheque](../index.html)
 Chargement en cross-domain
 --------------------------
 
-Pour charger des ressources, une iframe suffit, même pour récupérer des résultats via une api http sur http://monDomain/pathQcq?arg=value
-(il faut préciser la taille de l'iframe en css, cf cet exemple [css](http://stackoverflow.com/a/27853830) ou en [js](http://stackoverflow.com/a/330006), 
+Pour charger des ressources, une iframe suffit, même pour récupérer des résultats via une api http sur https://monDomain/pathQcq?arg=value
+(il faut préciser la taille de l'iframe en css, cf cet exemple [css](https://stackoverflow.com/a/27853830) ou en [js](https://stackoverflow.com/a/330006), 
 on peut aussi utiliser la propiété [calc](https://developer.mozilla.org/en-US/docs/Web/CSS/calc) de css qui passe à partir d'IE9)
 
 ```html
-<iframe src="http://sesathequeDomain/public/voir/XX?urlResultatCallback=http://monDomain/pathQcq%3Farg%3Dvalue" />
+<iframe src="https://sesathequeDomain/public/voir/XX?urlResultatCallback=https://monDomain/pathQcq%3Farg%3Dvalue" />
 ```
 
 Si on veut que la sésatheque ajoute des infos au résultat, par ex le nom qu'on lui a donné (si on en appelle plusieurs)
 
 ```html
-<iframe src="http://sesathequeDomain/public/voir/XX?urlResultatCallback=http://monDomain/pathQcq%3Farg%3Dvalue&sesatheque=leNomQueJeLuiDonne&userOrigine=moi&userId=sonIdChezMoi" />
+<iframe src="https://sesathequeDomain/public/voir/XX?urlResultatCallback=https://monDomain/pathQcq%3Farg%3Dvalue&sesatheque=leNomQueJeLuiDonne&userOrigine=moi&userId=sonIdChezMoi" />
 ```
 
 On peut aussi utiliser les modules js de la sésathèque en cross-domain, pour mettre les ressources dans son dom et interagir dessus.
 
-Il faut alors passer `options.base = "http://sesathequeDomain/"` à `window.stdisplay(ressource, options)` (si on a 
+Il faut alors passer `options.base = "https://sesathequeDomain/"` à `window.stdisplay(ressource, options)` (si on a 
 chargé display.bundle.js)
 
 Si l'on veut récupérer une ressource, il faut charger client.bundle.js puis
 ```
 // le nom bibli est arbitraire, ici la syntaxe permettant d'avoir plusieurs sesatheques sur le même client
-var client = window.stclient({bibli:'http://bibliotheque.sesamath.net'})
+var client = window.stclient({bibli:'https://bibliotheque.sesamath.net'})
 client.getRessource('bibli', 42, "alias", callbackFct)
 ```
 
@@ -38,7 +38,7 @@ Par exemple, si on a déjà la ressource complète
 
 ```html
 <!-- sur foo.domain -->
-<script type="text/javascript" src="http://sesathequeDomain/display.bundle.js"></script>
+<script type="text/javascript" src="https://sesathequeDomain/display.bundle.js"></script>
 
 <!-- code quelconque -->
 
@@ -55,15 +55,15 @@ Par exemple, si on a déjà la ressource complète
   
   // on veut afficher cette ressource
   var ressource = {
-    titre = "…",
-    type = "…",
+    titre: "…",
+    type: "…",
     etc.
   }
   
   // les options à passer
   var options = {
-    base = "http://sesathequeDomain/",
-    container : document.getElementById("laRessource"),
+    base: "https://sesathequeDomain/",
+    container: document.getElementById("laRessource"),
     resultatCallback : saveResultat
   };
   // le module standard display charge le bon plugin et initialise toutes les valeurs par défaut

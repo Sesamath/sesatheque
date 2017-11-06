@@ -46,8 +46,8 @@ import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/di
 chai.use(sinonChai)
 
 const expected = {
-  sesabibli: 'http://bibliotheque.sesamath.net/',
-  sesacommun: 'http://commun.sesamath.net/',
+  sesabibli: 'https://bibliotheque.sesamath.net/',
+  sesacommun: 'https://commun.sesamath.net/',
   sesabiblidev: 'https://bibliotheque.devsesamath.net/',
   sesacommundev: 'https://commun.devsesamath.net/'
 }
