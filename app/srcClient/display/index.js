@@ -42,6 +42,7 @@ const log = require('sesajstools/utils/log')
 const sjt = require('sesajstools')
 const sjtUrl = require('sesajstools/http/url')
 const sesatheques = require('sesatheque-client/dist/sesatheques')
+const xhr = require('sesajstools/http/xhr')
 
 const page = require('../page/index')
 const Resultat = require('../../constructors/Resultat')
@@ -67,7 +68,6 @@ const ajaxTimeout = 10000
  * @param {feedbackCallback} next
  */
 function sendAjax (url, resultat, deferSync, next) {
-  const xhr = require('sesajstools/http/xhr')
   if (!next && typeof deferSync === 'function') next = deferSync
   const xhrOptions = {
     timeout: ajaxTimeout
@@ -183,7 +183,7 @@ module.exports = function display (ressource, options, next) {
     if (retour && retour.error) {
       feedbackKo()
       page.addError(retour.error)
-    } else if (retour && (retour.ok && retour.ok === true) || (retour.success && retour.success === true)) {
+    } else if ((retour && (retour.ok && retour.ok === true)) || (retour.success && retour.success === true)) {
       feedbackOk()
     } else if (retour && (retour.hasOwnProperty('ok') || retour.hasOwnProperty('success'))) {
       feedbackKo()
@@ -264,6 +264,7 @@ module.exports = function display (ressource, options, next) {
   } // load
 
   const debugMode = sjtUrl.getParameter('debug')
+
   // Le conteneur du picto enregistrement
   let divFeedback
   /**
@@ -282,6 +283,25 @@ module.exports = function display (ressource, options, next) {
       return next(error)
     }
   }
+
+  // on veut récupérer les erreurs pour les envoyer dans le log
+  let errors = []
+  // stub console
+  const consoleError = console.error.bind(console)
+  console.error = (...args) => {
+    consoleError(...args)
+    errors = errors.concat(args)
+  }
+  window.addEventListener('error', (error) => errors.push(error))
+  window.addEventListener('unload', () => {
+    if (!errors.length) return
+    const data = {
+      rid: ressource.rid,
+      error: 'Erreurs au chargement',
+      errors
+    }
+    xhr.post('/api/notifyError', data, {sync: true})
+  })
 
   page.init(options, function (error) {
     if (error) return next(error)
