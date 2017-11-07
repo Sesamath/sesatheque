@@ -33,13 +33,13 @@
 const _ = require('lodash')
 const request = require('request')
 const flow = require('an-flow')
-const sjt = require('sesajstools')
+const {parse, stringify} = require('sesajstools')
+const {merge, update} = require('sesajstools/utils/object')
 const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../constructors/Ref')
 const {ensure} = require('../tools')
 const url = require('../tools/url')
-const sjtObj = require('sesajstools/utils/object')
 const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 
 const myBaseId = config.application.baseId
@@ -259,15 +259,15 @@ module.exports = function controllersFactory (component) {
     function grabListe (context, visibility) {
       let args
       if (context.get.json) {
-        args = sjt.parse(context.get.json)
+        args = parse(context.get.json)
       } else {
         args = context.get
         // en get on a des string, faut parser ce qui devrait être un objet
         if (args.filters) {
-          args.filters = sjt.parse(args.filters)
+          args.filters = parse(args.filters)
         }
       }
-      sjtObj.merge(args, context.post)
+      merge(args, context.post)
       log.debug('grabListe ' + visibility, args)
       $ressourceRepository.getListe(visibility, args, function (error, ressources) {
         sendListe(context, error, ressources)
@@ -369,7 +369,7 @@ module.exports = function controllersFactory (component) {
         }
         $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
       }).seq(function (ressourceNew) {
-        if (ressourceOriginale) sjtObj.update(ressourceOriginale, ressourceNew)
+        if (ressourceOriginale) update(ressourceOriginale, ressourceNew)
         else ressourceOriginale = ressourceNew
         writeAndOut(context, ressourceOriginale)
       }).catch(function (error) {
@@ -1001,9 +1001,9 @@ module.exports = function controllersFactory (component) {
      * @Route POST /api/notifyError
      */
     controller.post('notifyError', function (context) {
-      if (context.post.rid) log.dataError('notifyError', context.post)
-      else if (context.post.error) log.error('notifyError', context.post)
-      else log.error('notifyError sans error avec la requête', context.request)
+      if (context.post.rid) log.dataError('notifyError ' + stringify(context.post))
+      else if (context.post.error) log.error('notifyError' + stringify(context.post))
+      else log.error('notifyError sans error avec la requête : ' + stringify(context.request))
       $json.sendOk(context)
     })
 
