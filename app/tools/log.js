@@ -43,6 +43,8 @@ var _ = require('lodash')
 var config = require('../config') // jshint ignore:line
 var sjt = require('sesajstools')
 var applog = require('an-log')(config.application.name)
+// en cli on est chargé avant qu'il puisse configurer anLog
+if (process.argv.some(arg => /cli\.js/.test(arg))) applog.setLogLevel(0)
 
 var _lassi = (typeof global.lassi === 'undefined') ? console : global.lassi
 

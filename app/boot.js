@@ -44,9 +44,10 @@ const logger = anLog(appName)
 /**
  * Boot l'application
  * @param beforeBootstrapCb
- * @param options
+ * @param {object} [options] Options qui seront passées à lassi() (@link Lassi)
+ * @param {simpleCallback} afterBootCb
  */
-function boot (beforeBootstrapCb, options) {
+function boot (beforeBootstrapCb, options, afterBootCb) {
   if (!options) options = {}
   options.root = __dirname
   // @todo pas de var globale lassi
@@ -117,15 +118,16 @@ function boot (beforeBootstrapCb, options) {
 
   beforeBootstrapCb(lassiInstance, sesatheque, dependancies)
 
-  if (options.afterBootCallback) lassiInstance.on('startup', options.afterBootCallback)
+  if (afterBootCb) lassiInstance.on('startup', afterBootCb)
 
   // et on lance le boot
   lassiInstance.bootstrap(sesatheque, function (error) {
     if (error) {
-      log.error(error)
+      logger.error('boot failed')
+      logger.error(error)
       process.exit()
     }
-    log('end bootstrap')
+    logger('end bootstrap')
   })
 
   return lassiInstance

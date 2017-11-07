@@ -78,16 +78,11 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
 }
 
 try {
-  const anLogConfig = {
-    [config.application.name]: {
-      logLevel: anLogLevels.ERROR
-    },
-    $auth: {logLevel: anLogLevels.ERROR}
-  }
-  // console.log('anLog configuré', anLogConfig)
-  anLog.config(anLogConfig)
-  boot(beforeBootsrap, {cli: true}) // cli: true évite de lancer le serveur http
-  lassi.service('$cli').run()
+  ;[config.application.name, '$auth', '$cache', 'EntityDefinition', 'lassi'].forEach(channel => anLog(channel).setLogLevel(anLogLevels.ERROR))
+  // {cli: true} évite de lancer le serveur http et charge les services *.cli
+  boot(beforeBootsrap, {cli: true}, () => {
+    lassi.service('$cli').run()
+  })
 } catch (error) {
   console.error(error)
 }

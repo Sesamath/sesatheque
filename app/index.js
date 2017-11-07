@@ -137,12 +137,10 @@ function app (options, afterBootCallback) {
     if (options.settings) merge(config, options.settings)
     anLog.config(config.lassiLogger)
     anLog(config.application.name)('Starting…')
-    const bootOptions = {
-      afterBootCallback: afterBootCallbackWrapper
-    }
+    const bootOptions = {}
     if (options.settings) bootOptions.settings = options.settings
     if (options.noGlobalLassi) bootOptions.noGlobalLassi = options.noGlobalLassi
-    return boot(beforeBootsrap, bootOptions)
+    return boot(beforeBootsrap, bootOptions, afterBootCallbackWrapper)
   } catch (error) {
     anLog(config.application.name).error(error)
   }

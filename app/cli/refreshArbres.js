@@ -31,6 +31,8 @@
 'use strict'
 const flow = require('an-flow')
 const taskLog = require('an-log')('refreshArbres')
+const Ref = require('../constructors/Ref')
+const configRessource = require('../ressource/config')
 
 function logErrorInDataAndTask (message, obj) {
   taskLog.error(message)
@@ -154,24 +156,38 @@ function refreshArbres (oid, done) {
           return
         }
         // on a une ressource
-        ;
-        ['titre', 'resume', 'description', 'commentaires'].forEach(p => {
-          if (ref[p] !== ressource[p]) {
+        flow().seq(function () {
+          const nextStep = this
+          // on regarde si elle n'est pas obsolète
+          if (!ressource.relations) return nextStep()
+          const replacedByRelation = ressource.relations.find(r => r[0] === configRessource.constantes.relations.estRemplacePar)
+          if (!replacedByRelation) return nextStep()
+          // y'a un remplaçant désigné, on le cherche
+          $ressourceFetch.fetchOriginal(replacedByRelation[1], function (error, ressource) {
+            // si y'a un remplaçant c'est fini
+            if (!error && ressource) return next(null, new Ref(ressource), true)
+            // sinon on continue avec la ressource initiale
+            nextStep()
+          })
+        }).seq(function () {
+          ;['titre', 'resume', 'description', 'commentaires'].forEach(p => {
+            if (ref[p] !== ressource[p]) {
+              hasChanged = true
+              ref[p] = ressource[p]
+            }
+          })
+          // public ?
+          if (ressource.publie && !ressource.restriction && !ref.public) {
+            ref.public = true
             hasChanged = true
-            ref[p] = ressource[p]
           }
-        })
-        // public ?
-        if (ressource.publie && !ressource.restriction && !ref.public) {
-          ref.public = true
-          hasChanged = true
-        }
-        if (ref.type === 'arbre' && ref.enfants && ref.enfants.length) {
-          logErrorInDataAndTask(`item arbre avec aliasOf ${ref.aliasOf} et enfants, on vire les enfants pour rendre le chargement dynamique, dans l’arbre ${currentOid} (${currentTitre})`)
-          hasChanged = true
-          delete ref.enfants
-        }
-        next(null, ref, hasChanged)
+          if (ref.type === 'arbre' && ref.enfants && ref.enfants.length) {
+            logErrorInDataAndTask(`item arbre avec aliasOf ${ref.aliasOf} et enfants, on vire les enfants pour rendre le chargement dynamique, dans l’arbre ${currentOid} (${currentTitre})`)
+            hasChanged = true
+            delete ref.enfants
+          }
+          next(null, ref, hasChanged)
+        }).catch(next)
       })
 
     // error, on fait suivre tel quel
@@ -231,14 +247,7 @@ function refreshArbres (oid, done) {
   let nbArbresModif = 0
   let nbRessources = 0
   let currentOid, currentTitre
-  console.log('avant lassi.service')
   const EntityRessource = lassi.service('EntityRessource')
-  try {
-    EntityRessource.match()
-  } catch (error) {
-    console.error(error)
-  }
-  console.log('après lassi.service')
   const $ressourceRepository = lassi.service('$ressourceRepository')
   const $ressourceFetch = lassi.service('$ressourceFetch')
   if (oid) {
