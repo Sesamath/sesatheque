@@ -80,45 +80,6 @@ function refreshArbres (oid, done) {
           if (enfantsHadChanges) hasChanged = true
           nextEnfant(null, enfantCleaned)
         })
-        /*
-        // une ref externe "normale"
-        if (enfant.aliasOf) {
-          nbRessources++
-          process.nextTick(cleanEnfant, enfant, function (error, enfantCleaned, hasChanged) {
-            if (error) return nextEnfant(error)
-            if (hasChanged) needSave = true
-            nextEnfant(null, enfantCleaned)
-          })
-
-        // cas d'un "dossier" sans aliasOf avec enfants
-        } else if (item.type === 'arbre') {
-          // avec enfants
-          if (item.enfants && item.enfants.length) {
-            flow(item.enfants).seq(function (petitEnfant) {
-              const nextPetitEnfant = this
-              process.nextTick(cleanEnfant, petitEnfant, function (error, petitEnfantCleaned, hasChanged) {
-                if (error) return nextPetitEnfant(error)
-                if (hasChanged) needSave = true
-                nextPetitEnfant(null, petitEnfantCleaned)
-              })
-            }).seq(function (petitsEnfants) {
-              enfant.enfants = petitsEnfants
-              nextEnfant(null, enfant)
-            }).catch(nextEnfant)
-          // dossier vide
-          } else {
-            nextEnfant(null, enfant)
-          }
-
-        // erreur
-        } else if (item.type === 'error') {
-          nextEnfant(null, enfant)
-
-        // cas anormal
-        } else {
-          logErrorInDataAndTask(`item sans aliasOf dans l’arbre ${currentOid} (${currentTitre})`, item)
-          nextEnfant(null, enfant)
-        } /* */
       }).seq(function (enfants) {
         item.enfants = enfants
         next(null, item, hasChanged)

@@ -43,23 +43,23 @@ module.exports = {
   name: name,
   description: description,
   run: function run (next) {
-    function grabUrls (next) {
+    function grab (next) {
       flow().seq(function () {
-        EntityRessource.match('type').equals('url').grab(this)
+        EntityRessource.match('type').in(['coll_doc', 'url']).grab({limit, skip}, this)
       }).seqEach(function (ressource) {
         nb++
-        if (ressource.parametres && /^http:\/\/(ressources|mep-outils|j3p)\.(dev)?sesamath.net/.test(ressource.parametres.adresse)) {
-          const newAdresse = ressource.parametres.adresse.replace(/^http:/, 'https:')
-          updateLog(`${ressource.parametres.adresse} => ${newAdresse}`)
-          ressource.parametres.adresse = newAdresse
-          ressource.store(this)
-        } else {
-          this()
-        }
+        const url = ressource.parametres && (ressource.parametres.adresse || ressource.parametres.url)
+        if (!url) return this()
+        if (!/^https:\/\/(ressources|mep-outils|j3p)\.(dev)?sesamath.net/.test(url)) return this()
+        const newAdresse = url.replace(/^http:/, 'https:')
+        updateLog(`${ressource.parametres.adresse} => ${newAdresse}`)
+        if (ressource.parametres.adresse) ressource.parametres.adresse = newAdresse
+        else ressource.parametres.url = newAdresse
+        ressource.store(this)
       }).seq(function () {
         if (nb === skip + limit) {
           skip += limit
-          grabUrls(next)
+          grab(next)
         } else {
           next()
         }
@@ -77,7 +77,7 @@ module.exports = {
       refreshArbres(this)
     }).seq(function () {
       // on cherche les urls
-      grabUrls(this)
+      grab(this)
     }).empty()
       .done(next)
   } // run
