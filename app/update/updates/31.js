@@ -32,7 +32,7 @@
 
 const flow = require('an-flow')
 
-const name = 'mise à jour des arbres + passage en https de ce qui peut l’être'
+const name = 'passage en https de ce qui peut l’être dans les coll_doc et pages externes'
 const description = ''
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
@@ -50,7 +50,7 @@ module.exports = {
         nb++
         const url = ressource.parametres && (ressource.parametres.adresse || ressource.parametres.url)
         if (!url) return this()
-        if (!/^https:\/\/(ressources|mep-outils|j3p)\.(dev)?sesamath.net/.test(url)) return this()
+        if (!/^http:\/\/(ressources|mep-outils|j3p)\.(dev)?sesamath.net/.test(url)) return this()
         const newAdresse = url.replace(/^http:/, 'https:')
         updateLog(`${ressource.parametres.adresse} => ${newAdresse}`)
         if (ressource.parametres.adresse) ressource.parametres.adresse = newAdresse
@@ -66,19 +66,10 @@ module.exports = {
       }).catch(next)
     }
 
-    // on utilise notre refreshArbres
-    const {refreshArbres} = require('../../cli/refreshArbres')
     const EntityRessource = lassi.service('EntityRessource')
     let skip = 0
     let nb = 0
     const limit = 100
-
-    flow().seq(function () {
-      refreshArbres(this)
-    }).seq(function () {
-      // on cherche les urls
-      grab(this)
-    }).empty()
-      .done(next)
+    grab(next)
   } // run
 }

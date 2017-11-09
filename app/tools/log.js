@@ -315,6 +315,8 @@ log.error = function (message, objectToDump, filter) {
  * @param filter
  */
 log.dataError = function (message, objectToDump, filter) {
+  // on peut être utilisé comme callback
+  if (arguments.length === 0) return
   // pour les dataError, on met un max élevé s'il est pas précisé
   if (!filter) filter = {}
   if (!filter.max) filter.max = 50000
