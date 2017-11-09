@@ -125,14 +125,16 @@ module.exports = {
           // c'est chez nous
           if (/^https:\/\/ressources.sesamath.net\/coll\/lecteur\/voir_iep\.php\?/.test(url)) {
             return replaceByIep(ressource, this)
+          } else if (/^https:\/\/ressources.sesamath.net\/coll_docs\/[^/]+\/[^/]+\/voir_iepv2\.php\?/.test(url)) {
+            return replaceByIep(ressource, this)
           } else if (/^https:\/\/mep-outils.sesamath.net\/manuel_numerique\/diapo\.php\?/.test(url)) {
             return replaceByAto(ressource, this)
-          } else if (/^https:\/\/ressources.sesamath.net\/coll\/lecteur\/voir_tep\.php\?/.test(url)) {
+          } else if (/^https:\/\/mep-outils.sesamath.net\/animations3D/.test(url)) {
+            animations3D++
+          } else if (/^https:\/\/ressources.sesamath.net\/.+\/voir_tep\.php\?/.test(url)) {
             voirTep++
-          } else if (/^https:\/\/ressources.sesamath.net\/.*\/voir_flash\.php\?/.test(url)) {
+          } else if (/^https:\/\/ressources.sesamath.net\/.+\/voir_(flash|swf)\.php\?/.test(url)) {
             voirFlash++
-          } else if (/^https:\/\/ressources.sesamath.net\/.*\/voir_swf\.php\?/.test(url)) {
-            voirSwf++
           } else if (/^https:\/\/ressources.sesamath.net\/matoumatheux\/www\//.test(url)) {
             matoumatheux++
           } else {
@@ -233,11 +235,18 @@ module.exports = {
               } else if (response.statusCode === 200 && data && data.xmlPath) {
                 return nextStep(null, `https://ressources.sesamath.net${data.xmlPath}`)
               } else if (data.error) {
-                updateLog.error(`${options.uri} retourne ${data.error}`)
+                updateLog.error(`${options.uri} retourne ${data.error} pour ${ressource.oid}`)
               }
               nextStep()
             })
             return
+
+          // ancien lecteur iepv2
+          } else if (/coll_docs\/[^/]+\/[^/]+\/voir_iepv2.php/.test(url)) {
+            const dossier = url.replace(/https:\/\/ressources.sesamath.net\/coll_docs\/([^/]+)\/([^/]+)\/voir_iepv2.php.*/, '$1/$2')
+            const script = getParam(url, 'script')
+            if (/^https/.test(dossier)) updateLog.error(`url inattendue ${url} pour ${ressource.oid}`)
+            else return nextStep(null, `https://ressources.sesamath.net/coll_docs/${dossier}/${script}`)
 
           // xml directement dans url
           } else if (url.substr(-4) === '.xml') {
@@ -276,9 +285,9 @@ module.exports = {
     let skip = 0
     let nb = 0
     let iepByUrl = new Map()
+    let animations3D = 0
     let matoumatheux = 0
     let voirFlash = 0
-    let voirSwf = 0
     let voirTep = 0
     const limit = 100
 
@@ -297,7 +306,7 @@ module.exports = {
       nb = 0
       grabUrls(this)
     }).seq(function () {
-      updateLog(`Traité ${nb} ressources url, (trouvé ${voirFlash} voir_flash, ${voirSwf} voir_swf, ${voirTep} voir_tep et ${matoumatheux} matoumatheux), rafraichissement des arbres`)
+      updateLog(`Traité ${nb} ressources url, (trouvé ${voirFlash} voir_flash, ${animations3D} animations3D, ${voirTep} voir_tep et ${matoumatheux} matoumatheux), rafraichissement des arbres`)
       refreshArbres(this)
     }).done(next)
   } // run

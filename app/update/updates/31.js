@@ -52,7 +52,7 @@ module.exports = {
         if (!url) return this()
         if (!/^http:\/\/(ressources|mep-outils|j3p)\.(dev)?sesamath.net/.test(url)) return this()
         const newAdresse = url.replace(/^http:/, 'https:')
-        updateLog(`${ressource.parametres.adresse} => ${newAdresse}`)
+        updateLog(`${ressource.oid} ${url} => ${newAdresse}`)
         if (ressource.parametres.adresse) ressource.parametres.adresse = newAdresse
         else ressource.parametres.url = newAdresse
         ressource.store(this)
