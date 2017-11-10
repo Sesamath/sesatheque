@@ -30,4 +30,4 @@
  */
 'use strict'
 
-module.exports = require('sesatheque-client/dist/constructors/Ref')
+module.exports = require('sesatheque-client/src/constructors/Ref')
