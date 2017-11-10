@@ -117,8 +117,10 @@ module.exports = function ($accessControl) {
       // ce qui concerne l'édition est toujours sur /ressource
       if (['create', 'delete', 'edit'].indexOf(action) > -1) route += 'ressource/'
       else route += isPublic ? 'public/' : 'ressource/'
-      // et on ajoute l'oid éventuel
+      // on ajoute l'oid éventuel
       route += $routes.get(action, id)
+      // et la version en parametre pour le cache du navigateur
+      if (isPublic) route += `?version=${ressource.version}`
     } else {
       log.error(new Error('appel de $routes.getAbs avec une action non gérée : ' + action))
     }

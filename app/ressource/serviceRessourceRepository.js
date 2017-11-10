@@ -573,7 +573,7 @@ module.exports = function (EntityRessource, EntityArchive, EntityExternalRef, $r
       if (nb > 1) next(new Error(`L’effacement de la ressource ${ressourceOid} a provoqué ${nb} suppressions`))
       if (nb === 1) log.debug(`La ressource ${ressourceOid} a été effacée`)
       else log.debug(`La ressource ${ressourceOid} n’existait pas`)
-      purgeVarnish(ressourceOid)
+      purgeVarnish(ressource)
       next()
     })
   }
