@@ -114,9 +114,17 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     return 'Permission à implémenter'
   }
 
+  /**
+   * Helper de checkAccess pour la permission index
+   * @private
+   * @param {Context} context
+   * @returns {string} Le message d'interdiction éventuel (string vide sinon)
+   */
   function getIndexDeniedMessage (context, ressource) {
-    // @todo implémenter getDeleteVersionDeniedMessage
-    return 'Permission à implémenter'
+    const user = $accessControl.getCurrentUser(context)
+    if (!user || !user.permissions) return 'Vous devez être authentifié pour indexer une ressource'
+    if (user.permissions.index) return ''
+    return 'Vous n’avez pas de droits suffisants pour indexer une ressource'
   }
 
   function getPublishDeniedMessage (context, ressource) {

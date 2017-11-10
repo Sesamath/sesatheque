@@ -515,7 +515,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (!ressourceBdd) return print404(context, oid)
       ressource = ressourceBdd
       const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
-      if (deniedMsg) return denied(context, deniedMsg)
+      // faut laisser passer ceux qui ont la permission index
+      if (deniedMsg && $accessControl.getDeniedMessage('index', context, ressource)) return denied(context, deniedMsg)
       // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
       if (ressource.aliasOf) return forkAlias(context, ressource)
       // sinon on peut afficher le form
@@ -561,84 +562,88 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     var ressourceNormee
     var ressourceOriginale
 
-    if ($accessControl.isAuthenticated(context)) {
-      flow().seq(function () {
-        // vérifier le token évite de vérifier de nouveau les droits
-        checkToken(context, oid, this)
-      }).seq(function () {
-        $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
-      }).seq(function (ressource) {
-        // faut la mémoriser pour comparer avec la bdd
-        ressourceNormee = ressource
-        if (_.isEmpty(ressource.$errors)) {
-          if (!_.isEmpty(ressource.$warnings) && ressourcePostee.force !== 'forced') {
-            printForm(context, null, ressource, titrePage)
-          } else {
-            // faut charger l'ancienne pour vérifier groupes et personnes
-            $ressourceRepository.load(oid, this)
-          }
-        } else {
+    if (!$accessControl.isAuthenticated(context)) return denied(context)
+    flow().seq(function () {
+      // vérifier le token, ça évite de vérifier de nouveau les droits
+      checkToken(context, oid, this)
+    }).seq(function () {
+      $ressourceControl.valideRessourceFromPost(ressourcePostee, this)
+    }).seq(function (ressource) {
+      // faut la mémoriser pour comparer avec la bdd
+      ressourceNormee = ressource
+      if (_.isEmpty(ressource.$errors)) {
+        if (!_.isEmpty(ressource.$warnings) && ressourcePostee.force !== 'forced') {
           printForm(context, null, ressource, titrePage)
-        }
-      }).seq(function (ressourceBdd) {
-        if (ressourceBdd) {
-          ressourceOriginale = ressourceBdd
-          // si on modifie un alias, ça fork automatiquement
-          if (ressourceOriginale.aliasOf) delete ressourceOriginale.aliasOf
-          $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
         } else {
-          var error = new Error(`La ressource ${oid} n’existe pas ou plus`)
-          log.error(error)
-          this(error)
+          // faut charger l'ancienne pour vérifier groupes et personnes
+          $ressourceRepository.load(oid, this)
         }
-      }).seq(function (ressource) {
-        // on remet les relations, qui sont pas éditables
-        ressource.relations = ressourceOriginale.relations
-        // faut remettre _auteursAdd et _contributeursAdd virés à la validation (pas des champs de ressource)
-        if (ressourcePostee._auteursAdd) ressource._auteursAdd = ressourcePostee._auteursAdd
-        if (ressourcePostee._contributeursAdd) ressource._contributeursAdd = ressourcePostee._contributeursAdd
-        $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
-      }).seq(function (ressource) {
-        // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
-        Object.assign(ressourceOriginale, ressource)
-        log.debug('ressource avant enregistrement', ressourceOriginale, 'avirer', {max: 10000})
-        $ressourceRepository.save(ressourceOriginale, this)
-      }).seq(function (ressource) {
-        log.debug('ressource enregistrée', ressource)
-        // si on a du closerId=YYY dans l'url, on affiche une page qui envoie un message (Cf sesatheque-client.modifyItem)
-        if (context.get.closerId) {
-          // on apelle le closer mis par sesatheque-client, mais faut ajouter $droits à la ressource
-          ressource.$droits = 'DWR'
-          context.html({
-            $metas: {
-              title: 'Enregistrement réussi, fermeture automatique'
-            },
-            contentBloc: {
-              $view: 'contents',
-              contents: ['Ressource ' + ressource.oid + ' enregistrée']
-            },
-            jsBloc: {
-              $view: 'js',
-              // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
-              jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-                context.get.closerId + '", ressource:' + sjt.stringify(ressource) + '}, "*")'
-            }
-          })
-        } else {
-          // redirection normale
-          var url = '/ressource/' + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
-          if (context.layout === 'iframe') url += '?layout=iframe'
-          log.debug('update ' + ressource.oid + ' ok, on lance le redirect vers ' + url)
-          context.redirect(url)
-        }
-      }).catch(function (error) {
-        log.debug('erreur au post', error)
-        log.debug('avec la ressource', ressourcePostee)
-        printForm(context, error, ressourcePostee, titrePage)
-      })
-    } else {
-      denied(context)
-    }
+      } else {
+        printForm(context, null, ressource, titrePage)
+      }
+    }).seq(function (ressourceBdd) {
+      // faut vérifier ici si on a les pleins droits sur la ressource ou seulement partiels
+      const isOnlyIndex = $accessControl.hasPermission('index', context, ressourceBdd) && !$accessControl.hasPermission('update', context, ressourceBdd)
+      if (!ressourceBdd) {
+        return $ressourcePage.printError(context, new Error('La ressource n’existe pas (peut-être supprimée depuis)'))
+      }
+      ressourceOriginale = ressourceBdd
+      // si on modifie un alias, ça fork automatiquement
+      if (ressourceOriginale.aliasOf) {
+        if (isOnlyIndex) return denied(context, 'Vous avez des droits d’indexation mais pas de modification')
+        delete ressourceOriginale.aliasOf
+      }
+      // ici, on reset d'office tout ce qu'on ne peut pas modifier si on est juste indexateur
+      if (isOnlyIndex) {
+        config.indexFields
+        Object.keys(ressourceOriginale)
+      }
+      $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
+    }).seq(function (ressource) {
+      // on remet les relations, qui sont pas éditables
+      ressource.relations = ressourceOriginale.relations
+      // faut remettre _auteursAdd et _contributeursAdd virés à la validation (pas des champs de ressource)
+      if (ressourcePostee._auteursAdd) ressource._auteursAdd = ressourcePostee._auteursAdd
+      if (ressourcePostee._contributeursAdd) ressource._contributeursAdd = ressourcePostee._contributeursAdd
+      $personneControl.checkPersonnes(context, ressourceOriginale, ressource, this)
+    }).seq(function (ressource) {
+      // faut pas de _.merge qui est récursif sur les propriétés de l'objet parametres (par ex)
+      Object.assign(ressourceOriginale, ressource)
+      log.debug('ressource avant enregistrement', ressourceOriginale, 'avirer', {max: 10000})
+      $ressourceRepository.save(ressourceOriginale, this)
+    }).seq(function (ressource) {
+      log.debug('ressource enregistrée', ressource)
+      // si on a du closerId=YYY dans l'url, on affiche une page qui envoie un message (Cf sesatheque-client.modifyItem)
+      if (context.get.closerId) {
+        // on apelle le closer mis par sesatheque-client, mais faut ajouter $droits à la ressource
+        ressource.$droits = 'DWR'
+        context.html({
+          $metas: {
+            title: 'Enregistrement réussi, fermeture automatique'
+          },
+          contentBloc: {
+            $view: 'contents',
+            contents: ['Ressource ' + ressource.oid + ' enregistrée']
+          },
+          jsBloc: {
+            $view: 'js',
+            // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
+            jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
+              context.get.closerId + '", ressource:' + sjt.stringify(ressource) + '}, "*")'
+          }
+        })
+      } else {
+        // redirection normale
+        var url = '/ressource/' + $routes.get('describe', ressource.oid) // pas getAbs pour ne pas aller vers /public/
+        if (context.layout === 'iframe') url += '?layout=iframe'
+        log.debug('update ' + ressource.oid + ' ok, on lance le redirect vers ' + url)
+        context.redirect(url)
+      }
+    }).catch(function (error) {
+      log.debug('erreur au post', error)
+      log.debug('avec la ressource', ressourcePostee)
+      printForm(context, error, ressourcePostee, titrePage)
+    })
   })
 
   /**

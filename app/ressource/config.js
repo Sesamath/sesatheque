@@ -243,6 +243,18 @@ var ressourceConfig = {
     categories: true
     // 'auteurs'
   },
+  // la liste des champs qu'un indexateur peut modifier
+  indexFields: {
+    titre: true,
+    resume: true,
+    description: true,
+    commentaires: true,
+    niveaux: true,
+    categories: true,
+    typePedagogiques: true,
+    typeDocumentaires: true,
+    relations: true
+  },
 
   /** libellés que l'on affiche pour chaque champ obligatoire (les fonctions qui peuplent les vues bouclent dessus) */
   labels: {

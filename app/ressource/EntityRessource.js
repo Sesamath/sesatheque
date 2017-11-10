@@ -30,10 +30,11 @@
  */
 'use strict'
 const uuid = require('an-uuid')
+const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/dist/sesatheques')
+const {stringify} = require('sesajstools')
 
 const tools = require('../tools')
 const Ressource = require('../constructors/Ressource')
-const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 const {getRidEnfants} = require('../tools/ressource')
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
@@ -230,6 +231,13 @@ module.exports = function (EntityRessource) {
       this.store(next)
     } else {
       next()
+    }
+  })
+
+  // on stocke la ressource telle qu'elle était au chargement, sérialisée pour ne pas avoir de shallow copy
+  EntityRessource.onload(function () {
+    this.$before = {
+      serialized: stringify(this)
     }
   })
 }
