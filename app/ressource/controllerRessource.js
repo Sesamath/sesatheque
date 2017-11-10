@@ -515,7 +515,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (!ressourceBdd) return print404(context, oid)
       ressource = ressourceBdd
       const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
-      if (deniedMsg) return denied(deniedMsg)
+      if (deniedMsg) return denied(context, deniedMsg)
       // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
       if (ressource.aliasOf) return forkAlias(context, ressource)
       // sinon on peut afficher le form
