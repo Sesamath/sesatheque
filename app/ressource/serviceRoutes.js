@@ -120,7 +120,7 @@ module.exports = function ($accessControl) {
       // on ajoute l'oid éventuel
       route += $routes.get(action, id)
       // et la version en parametre pour le cache du navigateur
-      if (isPublic) route += `?version=${ressource.version}`
+      if (isPublic && ressource && ressource.version) route += `?version=${ressource.version}`
     } else {
       log.error(new Error('appel de $routes.getAbs avec une action non gérée : ' + action))
     }
