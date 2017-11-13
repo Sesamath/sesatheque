@@ -33,31 +33,32 @@
 
 var merge = require('sesajstools/utils/object').merge
 
-module.exports = function (EntityArchive) {
-  /**
-   * Idem {@link EntityRessource}, avec dateArchivage en plus et moins d'index
-   * @entity EntityArchive
-   * @extends Ressource
-   * @extends Entity
-   */
-  EntityArchive.construct = function (ressource) {
-    if (!ressource) {
-      log.error("Création d'une entité archive sans ressource fourmie")
-      return
-    }
-    // on garde tout
-    merge(this, ressource)
-    // sauf l'oid
-    delete this.oid
-    // et on ajoute la date d'archivage
-    this.dateArchivage = new Date()
-  }
+module.exports = function (component) {
+  component.entity('EntityArchive', function () {
+    const EntityArchive = this
+    /**
+     * Idem {@link EntityRessource}, avec dateArchivage en plus et moins d'index
+     * @entity EntityArchive
+     * @extends Ressource
+     * @extends Entity
+     */
+    EntityArchive.construct(function (ressource) {
+      if (!ressource) {
+        log.error("Création d'une entité archive sans ressource fourmie")
+        return
+      }
+      // on garde tout
+      merge(this, ressource)
+      // sauf l'oid
+      delete this.oid
+      // et on ajoute la date d'archivage
+      this.dateArchivage = new Date()
+    })
 
-  // @todo inutile avec lassi#mongo, à virer après migration
-  EntityArchive.table = 'archive'
-
-  EntityArchive
-    .defineIndex('rid', 'string')
-    .defineIndex('version', 'integer')
-    .defineIndex('archiveOid', 'string')
+    EntityArchive
+      .defineIndex('rid', 'string')
+      .defineIndex('version', 'integer')
+      .defineIndex('archiveOid', 'string')
+      .defineIndex('dateArchivage', 'date')
+  })
 }
