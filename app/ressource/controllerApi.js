@@ -610,29 +610,22 @@ module.exports = function controllersFactory (component) {
      * @param ressource
      */
     function writeAndOut (context, ressource) {
-      if (_.isEmpty(ressource.$errors)) {
-        $ressourceRepository.save(ressource, function (error, ressource) {
-          log.debug('dans cb api writeAndOut après $ressourceRepository.save', ressource, 'repository', {max: 500})
-          if (error) {
-            $json.send(context, error)
-          } else {
-            log.perf(context.response, 'written')
-            if (context.get.format) {
-              // on veut la ressource formatée, sendRessource le gère
-              sendRessource(context, null, ressource)
-            } else {
-              // on ne renvoie que l'oid et des warnings éventuels
-              const data = {oid: ressource.oid}
-              if (!_.isEmpty(ressource.$warnings)) {
-                data.warnings = ressource.$warnings
-              }
-              $json.send(context, null, data)
-            }
+      if (!_.isEmpty(ressource.$errors)) return $json.send(context, ressource.$errors)
+      $ressourceRepository.save(ressource, function (error, ressource) {
+        if (error) return $json.send(context, error)
+        log.perf(context.response, 'written')
+        if (context.get.format) {
+          // on veut la ressource formatée, sendRessource le gère
+          sendRessource(context, null, ressource)
+        } else {
+          // on ne renvoie que l'oid et des warnings éventuels
+          const data = {oid: ressource.oid}
+          if (!_.isEmpty(ressource.$warnings)) {
+            data.warnings = ressource.$warnings
           }
-        })
-      } else {
-        $json.send(context, ressource.$errors)
-      }
+          $json.send(context, null, data)
+        }
+      })
     }
 
     /**
