@@ -131,15 +131,16 @@ function refreshArbres (oid, done) {
             nextStep()
           })
         }).seq(function () {
-          ;['titre', 'resume', 'description', 'commentaires'].forEach(p => {
+          ['titre', 'resume', 'description', 'commentaires', 'suffix'].forEach(p => {
             if (ref[p] !== ressource[p]) {
               hasChanged = true
               ref[p] = ressource[p]
             }
           })
           // public ?
-          if (ressource.publie && !ressource.restriction && !ref.public) {
-            ref.public = true
+          const isPublic = ressource.publie && !ressource.restriction
+          if (ref.public !== isPublic) {
+            ref.public = isPublic
             hasChanged = true
           }
           if (ref.type === 'arbre' && ref.enfants && ref.enfants.length) {
