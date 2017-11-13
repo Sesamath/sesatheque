@@ -281,6 +281,8 @@ var ressourceConfig = {
 
   // les propriétés dont la modif déclenche un upgrade de version
   versionTriggers: ['origine', 'idOrigine', 'parametres', 'enfants', 'auteurs', 'contributeurs'],
+  // les propriétés supplémentaires dont la modif déclenche l'incrément de publicSuffix sans changer de version
+  suffixTrigger: ['titre', 'resume', 'description', 'commentaires', 'version'],
 
   // ATTENTION, pour les types faut être cohérent avec les filtres du constructeur Ressource
   // les types requis (il faut la même liste de propriétés que labels, et des valeurs * dont _.is* existe)

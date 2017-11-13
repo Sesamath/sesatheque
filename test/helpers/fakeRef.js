@@ -44,7 +44,8 @@ function getOne () {
     resume: faker.lorem.sentence(),
     description: faker.lorem.paragraphs(),
     commentaires: faker.lorem.paragraphs(),
-    public: faker.random.arrayElement([true, true, true, false])
+    public: faker.random.arrayElement([true, true, true, false]),
+    suffix: faker.random.number() // renvoie un entier
   }
   if (!fakeRef.public) fakeRef.cle = faker.random.uuid()
 

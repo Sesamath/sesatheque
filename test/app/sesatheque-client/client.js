@@ -90,12 +90,12 @@ module.exports = function describeClient () {
     const expected = getRandomRessource()
     sesathequeClient.getItem(expected.rid, function (error, item) {
       if (error) return done(error);
-      ['titre', 'rid', 'resume', 'description', 'commentaires', 'type'].forEach(p => {
+      ['titre', 'rid', 'resume', 'description', 'commentaires', 'type', 'suffix'].forEach(p => {
         expect(expected[p]).to.equals(item[p], `Pb avec ${p}`)
       })
       expect(item.public).to.be.true
       expect(JSON.stringify(expected.categories)).to.equals(JSON.stringify(item.categories))
-      expect(item.$displayUrl).to.equals(`${myBaseUrl}public/${configRessource.constantes.routes.display}/${expected.oid}`)
+      expect(item.$displayUrl).to.equals(`${myBaseUrl}public/${configRessource.constantes.routes.display}/${expected.oid}?${item.suffix}`)
       done()
     })
   })

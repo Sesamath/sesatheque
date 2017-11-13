@@ -30,10 +30,11 @@
  */
 'use strict'
 const uuid = require('an-uuid')
+const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/dist/sesatheques')
+const {stringify} = require('sesajstools')
 
 const tools = require('../tools')
 const Ressource = require('../constructors/Ressource')
-const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/dist/sesatheques')
 const {getRidEnfants} = require('../tools/ressource')
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
@@ -193,6 +194,8 @@ module.exports = function (EntityRessource) {
       if (this.restriction && !this.cle) {
         this.cle = uuid()
       }
+      // pas de parametres sur les arbres
+      if (this.type === 'arbre' && this.parametres) delete this.parametres
       // date de création
       if (!this.dateCreation) this.dateCreation = new Date()
       // date de mise à jour
@@ -231,5 +234,10 @@ module.exports = function (EntityRessource) {
     } else {
       next()
     }
+  })
+
+  // attention, c'est aussi déclenché sur un create avec oid
+  EntityRessource.onLoad(function () {
+    if (this.oid) this.$original = stringify(this)
   })
 }

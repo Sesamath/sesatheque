@@ -475,6 +475,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       var token = ressource && ressource.token
       log.debug('dans getFormViewData on lance un create de ressource')
       ressource = EntityRessource.create(ressource)
+      delete ressource.$original
       if (token) ressource.token = token
     }
 
@@ -945,6 +946,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     }
     // les datas pour le form
     var fakeRessource = EntityRessource.create(context.get)
+    delete fakeRessource.$original
     // on ajoute un flag pour getFormViewData (oui c'est crade)
     fakeRessource.search = true
     // log.debug("ressource d'après get', fakeRessource)

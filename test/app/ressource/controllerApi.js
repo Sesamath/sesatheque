@@ -41,9 +41,34 @@
 /* global superTestClient */
 import {expect} from 'chai'
 import fakeRessource from '../../helpers/fakeRessource'
+import ressourceConfig from '../../../app/ressource/config'
 
 const {clone} = require('sesajstools/utils/object')
-const {stringify} = require('sesajstools')
+// const {stringify} = require('sesajstools')
+
+/**
+ * Vérifie qu'un supertestClient ayant envoyé sa requête récupère bien la ressource attendue
+ * @param stc
+ * @param ressExpected
+ * @param done
+ */
+function checkRessource (stc, ressExpected, done) {
+  stc
+    .expect(200)
+    .expect('Content-type', /application\/json/)
+    .end((err, res) => {
+      if (err) return done(err)
+      const ress = res.body
+      expect(ress).to.be.ok
+      expect(ress.oid).to.be.ok
+      expect(ress.error).to.be.not.ok
+      expect(ress.errors).to.be.not.ok
+      Object.keys(ressExpected).forEach(k => {
+        expect(ress[k]).to.deep.equal(ressExpected[k], `propriété ${k}`)
+      })
+      done()
+    })
+}
 
 module.exports = function describeControllerApi () {
   /** {string} l'oid mis par l'appli à l'enregistrement du post */
@@ -53,7 +78,7 @@ module.exports = function describeControllerApi () {
   /** {Ressource} Ressource attendue en retour */
   let ressExpected
   // pour le test via origine/idOrigine
-  let bundleId
+  const bundleId = 'fakeOrigine/42'
   // pour les appels authentifiés via token
   let apiToken
   // une erreur toute prête
@@ -66,18 +91,16 @@ module.exports = function describeControllerApi () {
     ressource = fakeRessource({
       nooid: true,
       norid: true,
-      origine: myBaseId,
-      noidOrigine: true,
-      // on met une baseId connue, mais pas la notre sinon l'api va virer ces users qui n'existent pas
+      origine: 'fakeOrigine',
+      idOrigine: '42',
+      // on met une baseId connue, mais pas la notre sinon l'api va virer ces ressources qui n'existent pas chez elle
       relations: [[1, 'sesabibli/1'], [14, 'sesabibli/2']]
     })
     ressExpected = clone(ressource)
     // ressExpected.relations = [[1, myBaseId + '/1'], [14, myBaseId + '/2']]
-    // on la poste sans oid ni rid
-    delete ressource.oid
-    delete ressource.rid
+    ressExpected.version = 1
+    ressExpected.suffix = 1
 
-    // ce test
     return superTestClient
       .post('/api/ressource')
       .set('Content-Type', 'application/json')
@@ -91,70 +114,84 @@ module.exports = function describeControllerApi () {
         expect(res.body.errors).to.be.not.ok
         expect(res.body.oid).to.be.ok
         oid = res.body.oid // string
-        bundleId = myBaseId + '/' + oid
         expect(res.body).to.deep.equal({ oid: oid }, 'pb sur le body retourné')
         // si ce test est passé on a l'oid que l'on ajoute pour les tests suivants
         ressExpected.oid = oid
-        ressExpected.rid = bundleId
-        ressExpected.idOrigine = '' + oid
+        ressExpected.rid = `${myBaseId}/${oid}`
+        return Promise.resolve()
       })
   })
 
   it('GET /api/ressource/:oid récupère la ressource envoyée précédemment', function (done) {
     if (!oid) return done(errAbort)
-    superTestClient
-      .get(`/api/ressource/${oid}`)
-      .expect(200)
-      .expect('Content-type', /application\/json/)
-      .end((err, res) => {
-        if (err) return done(err)
-        const ress = res.body
-        expect(ress).to.be.ok
-        expect(ress.error).to.be.not.ok
-        expect(ress.errors).to.be.not.ok
-        Object.keys(ressExpected).forEach(k => {
-          expect(JSON.stringify(ress[k])).to.equal(JSON.stringify(ressExpected[k]), `propriété ${k} vaut ${stringify(ress[k])} et pas ${stringify(ressExpected[k])}`)
-        })
-        done()
-      })
-  })
-
-  it('GET /api/public/:oid récupère la ressource envoyée précédemment', function (done) {
-    if (!oid) return done(errAbort)
-    superTestClient
-      .get(`/api/public/${oid}`)
-      .expect(200)
-      .expect('Content-type', /application\/json/)
-      .end((err, res) => {
-        if (err) return done(err)
-        const ress = res.body
-        expect(ress).to.be.ok
-        expect(ress.error).to.be.not.ok
-        expect(ress.errors).to.be.not.ok
-        Object.keys(ressExpected).forEach(k => {
-          expect(ress[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k}`)
-        })
-        done()
-      })
+    const stc = superTestClient.get(`/api/ressource/${oid}`)
+    checkRessource(stc, ressExpected, done)
   })
 
   it('GET /api/ressource/:origine/:idOrigine récupère la ressource envoyée précédemment', function (done) {
     if (!oid) return done(errAbort)
-    superTestClient
-      .get(`/api/ressource/${bundleId}`)
-      .expect(200)
-      .expect('Content-type', /application\/json/)
-      .end((err, res) => {
-        if (err) return done(err)
-        const ress = res.body
-        expect(ress).to.be.ok
-        expect(ress.error).to.be.not.ok
-        expect(ress.errors).to.be.not.ok
-        Object.keys(ressExpected).forEach(k => {
-          expect(ress[ k ]).to.deep.equal(ressExpected[ k ], `propriété ${k}`)
-        })
-        done()
-      })
+    const stc = superTestClient.get(`/api/ressource/${bundleId}`)
+    checkRessource(stc, ressExpected, done)
+  })
+
+  it('GET /api/public/:oid récupère la ressource envoyée précédemment', function (done) {
+    if (!oid) return done(errAbort)
+    const stc = superTestClient.get(`/api/public/${oid}`)
+    checkRessource(stc, ressExpected, done)
+  })
+
+  it('GET /api/public/:origine/:idOrigine récupère la ressource envoyée précédemment', function (done) {
+    if (!oid) return done(errAbort)
+    const stc = superTestClient.get(`/api/public/${bundleId}`)
+    checkRessource(stc, ressExpected, done)
+  })
+
+  it('POST /api/ressource met à jour une ressource et incrémente suffix si modif du résumé', function (done) {
+    if (!oid) return done(errAbort)
+    const ajout = '\nbla bla sup'
+    ressource.resume += ajout
+    ressExpected.resume += ajout
+    ressExpected.suffix++
+    const stc = superTestClient
+      .post(`/api/ressource?format=ressource`)
+      .set('Content-Type', 'application/json')
+      .set('X-ApiToken', apiToken)
+      .send({oid, resume: ressource.resume})
+    checkRessource(stc, ressExpected, done)
+  })
+
+  it('POST /api/ressource met à jour une ressource et incrémente version et suffix si modif des auteurs', function (done) {
+    if (!oid) return done(errAbort)
+    // on reposte un truc qui incrémente la version
+    if (!ressource.auteurs) ressource.auteurs = []
+    ressource.auteurs.push('external/1')
+    // on veut le retrouver
+    ressExpected.auteurs = ressource.auteurs
+    // et ça doit incrémenter version et suffix
+    ressExpected.suffix++
+    ressExpected.version++
+    const stc = superTestClient
+      .post(`/api/ressource?format=ressource`)
+      .set('Content-Type', 'application/json')
+      .set('X-ApiToken', apiToken)
+      .send({oid, auteurs: ressource.auteurs})
+    checkRessource(stc, ressExpected, done)
+  })
+
+  it('POST /api/ressource met à jour une ressource sans incrément si modif typePedagogiques seulement', function (done) {
+    if (!oid) return done(errAbort)
+    // on modifie typePedagogiques
+    if (!ressource.typePedagogiques) ressource.typePedagogiques = []
+    ressource.typePedagogiques.push(ressourceConfig.constantes.typePedagogiques.evaluation)
+    // on veut le retrouver
+    ressExpected.typePedagogiques = ressource.typePedagogiques
+    // et ça doit incrémenter ni version ni suffix
+    const stc = superTestClient
+      .post(`/api/ressource?format=ressource`)
+      .set('Content-Type', 'application/json')
+      .set('X-ApiToken', apiToken)
+      .send({oid, typePedagogiques: ressource.typePedagogiques})
+    checkRessource(stc, ressExpected, done)
   })
 
   it('DELETE prend un 403 si on veut effacer sans token', function (done) {

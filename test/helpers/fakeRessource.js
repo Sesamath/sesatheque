@@ -125,6 +125,7 @@ function getFakeRessource (options) {
     'dateCreation',
     'dateMiseAJour',
     'version',
+    'suffix',
     'indexable',
     'archiveOid',
     '$warnings',
@@ -135,6 +136,8 @@ function getFakeRessource (options) {
     if (fakeRessource.enfants) delete fakeRessource.enfants
     if (fakeRessource.parametres) delete fakeRessource.parametres
   }
+  // si c'est un arbre faut virer les paramètres
+  if (fakeRessource.type === 'arbre') delete fakeRessource.parametres
 
   return fakeRessource
 }

@@ -60,6 +60,7 @@ function getRidEnfants (ressource) {
   // on veut toutes les refs récursivement
   function addRids (enfants) {
     enfants.forEach(enfant => {
+      if (!enfant) return log.dataError('enfant invalide dans', ressource)
       if (enfant.aliasOf) rids.add(enfant.aliasOf)
       if (enfant.enfants && enfant.enfants.length) addRids(enfant.enfants)
     })
