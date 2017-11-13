@@ -392,34 +392,22 @@ module.exports = function controllersFactory (component) {
       }
       log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
       const relations = context.post.relations
-      if (relations && relations.length) {
-        const id = extractId(context)
+      if (!relations || !relations.length) return $json.send(context, new Error('relations manquantes'))
+      const id = extractId(context)
+      if (!id) return $json.send(context, new Error("pas d'identifiant de ressource"))
 
-        if (id) {
-          $ressourceRepository.load(id, function (error, ressource) {
-            if (error) $json.send(context, error)
-            else if (ressource) {
-              if ($accessControl.hasPermission('update', context, ressource)) {
-                const errors = $ressourceConverter.addRelations(ressource, relations)
-                // rien changé
-                if (errors === false) $json.sendOk(context, {oid: ressource.oid})
-                // y'a eu des erreurs lors de l'ajout
-                else if (errors.length) $json.send(context, errors)
-                // ni l'un ni l'autre, faut sauvegarder
-                else writeAndOut(context, ressource)
-              } else {
-                $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
-              }
-            } else {
-              $json.notFound(context, `La ressource ${id} n’existe pas`)
-            }
-          })
-        } else {
-          $json.send(context, new Error("pas d'identifiant de ressource"))
-        }
-      } else {
-        $json.send(context, new Error('relations manquantes'))
-      }
+      $ressourceRepository.load(id, function (error, ressource) {
+        if (error) return $json.send(context, error)
+        if (!ressource) return $json.notFound(context, `La ressource ${id} n’existe pas`)
+        if (!$accessControl.hasPermission('update', context, ressource)) return $json.denied(context, 'Vous n’avez pas les droits suffisants pour modifier cette ressource')
+        const errors = $ressourceConverter.addRelations(ressource, relations)
+        // rien changé
+        if (errors === false) $json.sendOk(context, {oid: ressource.oid})
+        // y'a eu des erreurs lors de l'ajout
+        else if (errors.length) $json.send(context, errors)
+        // ni l'un ni l'autre, faut sauvegarder
+        else writeAndOut(context, ressource)
+      })
     }
 
     /**
@@ -598,7 +586,6 @@ module.exports = function controllersFactory (component) {
      * @param ressource
      */
     function sendRessource (context, error, ressource) {
-      log.debug('sendRessource api avec', ressource, 'avirer', {max: 5000})
       if (error) return $json.send(context, error)
       if (!ressource) return $json.notFound(context, 'Cette ressource n’existe pas.')
       if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context)
@@ -617,7 +604,7 @@ module.exports = function controllersFactory (component) {
 
     /**
      * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels
-     * ou le ?format= demandé (alias ou normalized, le reste donnant la ressource complète)
+     * ou le ?format= demandé (ref ou normalized, le reste donnant la ressource complète)
      * @private
      * @param {Context} context
      * @param ressource
