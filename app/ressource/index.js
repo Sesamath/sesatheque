@@ -42,9 +42,7 @@ ressourceComponent.entity('EntityExternalRef', function () {
   require('./EntityExternalRef')(this)
 })
 
-ressourceComponent.entity('EntityArchive', function () {
-  require('./EntityArchive')(this)
-})
+require('./EntityArchive')(ressourceComponent)
 
 ressourceComponent.entity('EntityRessource', function () {
   require('./EntityRessource')(this)
@@ -62,9 +60,7 @@ ressourceComponent.service('$routes', function ($accessControl) {
   return require('./serviceRoutes')($accessControl)
 })
 
-ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
-  return require('./serviceRessourceRepository')(EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json)
-})
+require('./serviceRessourceRepository')(ressourceComponent)
 
 ressourceComponent.service('$ressourceFetch', function ($ressourceRepository) {
   return require('./serviceRessourceFetch')($ressourceRepository)

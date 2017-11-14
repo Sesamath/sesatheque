@@ -38,6 +38,13 @@ module.exports = {
     }
   },
 
+  // pour redis, prefix obligatoire
+  $cache: {
+    redis: {
+      prefix: 'sesatheque'
+    }
+  },
+
   // connexion mongoDb, pour lassi, à préciser
   $entities: {
     database: {
@@ -54,14 +61,6 @@ module.exports = {
     }
   },
 
-  // ça c'est pour node qui va lancer l'appli, utilisé par lassi
-  $server: {
-    hostname: 'localhost',
-    // port d'écoute de nodeJs, on peut indiquer ici un autre port ici que celui de baseUrl
-    // (si y'a un proxy, ou par ex pour cli.js qui en mettra un autre)
-    port: 3001
-  },
-
   // options pour les middlewares
   $rail: {
     cookie: {
@@ -72,6 +71,14 @@ module.exports = {
       // à préciser avec une chaîne aléatoire complexe
       secret: '' // OBLIGATOIRE
     }
+  },
+
+  // ça c'est pour node qui va lancer l'appli, utilisé par lassi
+  $server: {
+    hostname: 'localhost',
+    // port d'écoute de nodeJs, on peut indiquer ici un autre port ici que celui de baseUrl
+    // (si y'a un proxy, ou par ex pour cli.js qui en mettra un autre)
+    port: 3001
   },
 
   /* pour modifier le comportement par défaut on peut préciser ici qq overrides,

@@ -193,7 +193,6 @@ module.exports = function (EntityRessource) {
    */
   function valideRessourceFromPost (data, next) {
     if (_.isEmpty(data)) return next(new Error('Ressource vide'))
-    // log.debug('data reçues en post', data, 'html', {max:500})
     if (data.ressource) {
       // on nous envoie la ressource en json dans une string
       try {
@@ -202,17 +201,8 @@ module.exports = function (EntityRessource) {
         return next(new Error('json invalide dans la propriété ressource postée'))
       }
     }
-
     // on peut tenter une validation
-    valide(data, function (error, ressource) {
-      if (error) {
-        // en cas de pb de validation on renvoie aussi la ressource à l'origine du pb, éventuellement un peu nettoyée
-        next(error, ressource)
-      } else {
-        // mais sinon on renvoie une vraie entité Ressource
-        next(null, EntityRessource.create(ressource))
-      }
-    })
+    valide(data, next)
   }
 
   /**

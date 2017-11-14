@@ -194,6 +194,8 @@ module.exports = function (EntityRessource) {
       if (this.restriction && !this.cle) {
         this.cle = uuid()
       }
+      // pas de parametres sur les arbres
+      if (this.type === 'arbre' && this.parametres) delete this.parametres
       // date de création
       if (!this.dateCreation) this.dateCreation = new Date()
       // date de mise à jour
@@ -234,10 +236,9 @@ module.exports = function (EntityRessource) {
     }
   })
 
-  // on stocke la ressource telle qu'elle était au chargement, sérialisée pour ne pas avoir de shallow copy
-  EntityRessource.onload(function () {
-    this.$before = {
-      serialized: stringify(this)
-    }
+  // attention, c'est aussi déclenché sur un create avec oid
+  EntityRessource.onLoad(function () {
+    // on stocke la ressource telle qu'elle était au chargement, sérialisée pour ne pas avoir de shallow copy
+    if (this.oid) this.$original = stringify(this)
   })
 }
