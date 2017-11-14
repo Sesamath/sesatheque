@@ -60,13 +60,14 @@ module.exports = function (ressourceComponent) {
     if (!listeMax) throw new Error('ressource.limites.listeMax manquant en configuration')
 
     /**
-     * Applique checkRelations et dropEnfantsAliased avant d'appeler next
+     * Applique checkRelations et dropAliasEnfants avant d'appeler next
      * @private
      * @param {Ressource} ressource
      * @param {ressourceCallback} next
      */
     function beforeSave (ressource, next) {
-      if (ressource.enfants && ressource.enfants.length) dropEnfantsAliased(ressource)
+      // si ressource est un alias, ça va virer les enfants, c'est ce qu'on veut
+      if (ressource.enfants && ressource.enfants.length) dropAliasEnfants(ressource)
       checkRelations(ressource, next)
     }
 
@@ -162,10 +163,10 @@ module.exports = function (ressourceComponent) {
      * @private
      * @param {Ref|Ressource} ref
      */
-    function dropEnfantsAliased (ref) {
+    function dropAliasEnfants (ref) {
       if (ref.enfants) {
         if (ref.aliasOf) delete ref.enfants
-        else if (ref.enfants.length) ref.enfants = ref.enfants.map(dropEnfantsAliased)
+        else if (ref.enfants.length) ref.enfants.forEach(dropAliasEnfants)
       }
     }
 
@@ -771,6 +772,7 @@ module.exports = function (ressourceComponent) {
         }
         this()
       }).seq(function (ressourceBdd) {
+        // si on vient d'aller la chercher, faut écraser le $original inutile mis au create
         if (ressourceBdd) ressourceBdd.$original = stringify(ressourceBdd)
         checkAgainstPrevious(ressource, this)
       }).seq(function (ressource) {

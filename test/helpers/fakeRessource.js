@@ -64,6 +64,8 @@ function getFakeRessource (options) {
   if (!options.nopublie) fakeRessource.publie = options.publie || true
   if (!options.norestriction) fakeRessource.restriction = options.restriction || 0
   if (!options.nolangue) fakeRessource.langue = options.langue || 'fra'
+  if (!options.noversion) fakeRessource.version = options.version || faker.random.number(6)
+  if (!options.nosuffix) fakeRessource.suffix = options.suffix || faker.random.number(6)
 
   // niveaux
   if (options.niveaux) {
@@ -97,7 +99,15 @@ function getFakeRessource (options) {
     if (options.enfants) {
       fakeRessource.enfants = options.enfants
     } else {
-      fakeRessource.enfants = []
+      fakeRessource.enfants = [{
+        // un premier enfant qui est un dossier
+        titre: faker.lorem.words(),
+        type: 'arbre',
+        enfants: [
+          fakeRef(),
+          fakeRef()
+        ]
+      }]
       for (let i = 0; i < faker.random.number(6); i++) {
         fakeRessource.enfants.push(fakeRef())
       }
@@ -124,8 +134,6 @@ function getFakeRessource (options) {
     'groupesAuteurs',
     'dateCreation',
     'dateMiseAJour',
-    'version',
-    'suffix',
     'indexable',
     'archiveOid',
     '$warnings',

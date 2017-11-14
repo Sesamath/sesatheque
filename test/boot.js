@@ -44,38 +44,39 @@
 
 import app from '../app'
 import config from '../app/config'
-// import flow from 'an-flow'
 import anLog from 'an-log'
 import sesatheques from 'sesatheque-client/src/sesatheques'
-import {populate, purge} from './app/populate'
-import boot from './boot'
-
 /**
  * @see https://github.com/visionmedia/supertest
  * @see https://visionmedia.github.io/superagent/
  */
 import supertest from 'supertest'
 
-// les logs de l'appli sont dans le dossier configuré dans _private/test.js
-// possibilité de modifier le logLevel là-bas
-anLog.config(config.lassiLogger)
+let isBooted = false
+const resolvedValue = {}
 
-describe('L’application sesatheque', function () {
-  before(boot)
-  after(purge)
-
-  this.timeout(30000)
-  // le code dans le before sera exécuté avant tout autre it des describe
-  // qui sont dans nos modules requis ensuite, mais pas avant les describe eux-même
-  // d'où ce describe englobant qui ne sert qu'à différer les describe qu'il contient (après le retour du before)
-  require('./app/static.Test')
-  describe('api get 404', require('./app/404.Test'))
-  describe('sesatheques', require('./app/sesatheque-client/sesatheques'))
-  require('./app/ressource/controllerApi')
-  describe('EntityPersonne', require('./app/personne/EntityPersonne'))
-  describe('EntityGroupe', require('./app/personne/EntityGroupe'))
-  describe('Tests avec des datas aléatoires (mais cohérentes)', function (done) {
-    it('Génère les entities en base', populate)
-    describe('sesatheque-client', require('./app/sesatheque-client/client'))
-  })
+const getBootPromise = () => new Promise((resolve, reject) => {
+  try {
+    if (isBooted) return resolve(resolvedValue)
+    // on enregistre notre sesatheque de test
+    sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
+    // on configure an-log pour qu'il mette tout en fichier
+    // les logs de l'appli sont dans le dossier configuré dans _private/test.js
+    // possibilité de modifier le logLevel là-bas
+    anLog.config(config.lassiLogger)
+    // boot
+    app(function afterBootCallback () {
+      anLog.config(config.lassiLogger)
+      // on exporte le client pour tester notre appli express
+      resolvedValue.superTestClient = supertest(lassi.express)
+      // et lassi (pas dispo en global dans un describe)
+      resolvedValue.lassi = lassi
+      isBooted = true
+      resolve(resolvedValue)
+    })
+  } catch (error) {
+    reject(error)
+  }
 })
+
+module.exports = getBootPromise

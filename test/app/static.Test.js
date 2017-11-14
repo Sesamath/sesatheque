@@ -38,12 +38,15 @@
 
 'use strict'
 /* eslint-env mocha */
-// import {expect} from 'chai'
-/* global superTestClient */
-module.exports = function describeStatic () {
-  it('la page d’accueil existe', function () {
-    return superTestClient
-      .get('/')
-      .expect(200)
-  })
-}
+
+import boot from '../boot'
+
+describe('contenus statiques', () => {
+  let _superTestClient
+  before(() => boot().then(function ({superTestClient}) {
+    _superTestClient = superTestClient
+    return Promise.resolve()
+  }))
+  it('la page d’accueil existe', () => _superTestClient.get('/').expect(200))
+  it('ping.html existe', () => _superTestClient.get('/ping.html').expect(200))
+})

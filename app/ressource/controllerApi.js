@@ -298,7 +298,6 @@ module.exports = function controllersFactory (component) {
        log.error(new Error('une trace pour ' +reqHttp)) */
       const ressourcePostee = context.post
       const pid = $accessControl.getCurrentUserPid(context)
-      const groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
       let ressourceOriginale
 
       if (context.perf) {
@@ -344,12 +343,12 @@ module.exports = function controllersFactory (component) {
         const errMsg = ressourceBdd
           ? $accessControl.getDeniedMessage('update', context, ressourceBdd)
           : $accessControl.getDeniedMessage('create', context, ressourcePostee)
-        if (errMsg) $json.denied(context, errMsg)
-        else this(null, ressourceBdd)
-      }).seq(function (ressourceBdd) {
+        if (errMsg) return $json.denied(context, errMsg)
+
         // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
         const tt = ressourcePostee.type
         if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
+
         // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
         let partial = !!context.get.partial
         if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
@@ -360,6 +359,7 @@ module.exports = function controllersFactory (component) {
         $ressourceControl.valideRessourceFromPost(data, this)
       }).seq(function (ressourceNew) {
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
+        const groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
         $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
       }).seq(function (ressourceNew) {
         // on ajoute le user courant pour serie et sequenceModele,
