@@ -338,7 +338,7 @@ module.exports = function (ressourceComponent) {
       const versionNeedIncrement = ressource.versionNeedIncrement || config.versionTriggers.some((prop) => !_.isEqual(ressource[prop], original[prop]))
       // suffix
       const suffixNeedIncrement = versionNeedIncrement || config.suffixTrigger.some(prop => !_.isEqual(ressource[prop], original[prop]))
-      log.debug(`pour ${ressource.oid} on a ${suffixNeedIncrement} et ${versionNeedIncrement} avec avant ${original.resume} et après : ${ressource.resume}`)
+      log.debug(`dans checkAgainstPrevious pour ${ressource.oid} on a suffixNeedIncrement ${suffixNeedIncrement} et versionNeedIncrement ${versionNeedIncrement}`)
       ressource.suffix = original.suffix
       // version
       ressource.version = original.version
@@ -357,8 +357,8 @@ module.exports = function (ressourceComponent) {
           updateParents(ressource)
         })
       } else {
-        next(null, ressource)
         if (suffixNeedIncrement) ressource.suffix++
+        next(null, ressource)
         updateParents(ressource)
       }
     }

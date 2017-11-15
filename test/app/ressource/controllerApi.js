@@ -41,7 +41,7 @@
 import {expect} from 'chai'
 import faker from 'faker/locale/fr'
 // import Ressource from '../../../app/constructors/Ressource'
-import {getRessources, populate, purge} from '../populate'
+import {getRandomPersonne, getRandomRessource, getRessources, populate, purge} from '../populate'
 import boot from '../../boot'
 import fakeRessource from '../../helpers/fakeRessource'
 import ressourceConfig from '../../../app/ressource/config'
@@ -53,13 +53,13 @@ describe('controller api ressource', () => {
   let myBaseId
   // pour les appels authentifiés via token
   let apiToken
-  let _lassi
   let _superTestClient
   let EntityRessource
   let $settings
+  // pour le mettre en argument de .catch()
+  const catcher = Promise.reject.bind(Promise)
+  // const catcher = (error) => Promise.reject(error)
 
-  // une erreur toute prête
-  const errAbort = new Error('pas la peine de tester ça tant que ça plante avant')
   /**
    * Vérifie que ressourceExpected est bien en db
    * @private
@@ -72,9 +72,10 @@ describe('controller api ressource', () => {
     EntityRessource.match('oid').equals(oid).grabOne((error, ressource) => {
       if (error) return reject(error)
       if (!ressource) return reject(new Error(`aucune resssource ${oid} en base`))
-      console.log(`en db on a le suffixe ${ressource.suffix} pour ${ressource.oid}`)
       try {
-        Object.keys(ressourceExpected).forEach(p => expect(ressource[p]).to.deep.equals(ressourceExpected[p], `pb avec ${p} pour ${oid}`))
+        // console.log(`pour ${ressource.oid} version en db ${ressource.version}`)
+        // Object.keys(ressourceExpected).forEach(p => expect(ressource[p]).to.deep.equals(ressourceExpected[p], `pb avec ${p} pour ${oid} : ${JSON.stringify(ressource[p])} ≠ ${JSON.stringify(ressourceExpected[p])}`))
+        Object.keys(ressourceExpected).forEach(p => expect(JSON.stringify(ressource[p])).to.equals(JSON.stringify(ressourceExpected[p]), `pb avec ${p} pour ${oid}`))
         resolve()
       } catch (error) {
         reject(error)
@@ -82,70 +83,81 @@ describe('controller api ressource', () => {
     })
   })
   /**
-   * Appelle url et vérifie qu'on récupère expected
+   * Appelle url en get et vérifie qu'on récupère expected
    * @private
    * @param url
    * @param expected
    * @return {Promise}
    */
-  const checkHttp = (url, expected) => {
-    const stc = _superTestClient.get(url)
-    return checkRessource(stc, expected)
-  }
+  const checkHttp = (url, expected) => checkHttpResult(_superTestClient.get(url), expected)
 
   /**
    * Vérifie qu'un supertestClient ayant envoyé sa requête récupère bien la ressource attendue
    * @private
    * @param stc
-   * @param ressExpected
+   * @param expected
    * @return {Promise}
    */
-  const checkRessource = (stc, ressExpected) => new Promise((resolve, reject) => {
-    stc
-      .expect(200)
-      .expect('Content-type', /application\/json/)
-      .end((err, res) => {
-        if (err) return reject(err)
-        try {
-          const ress = res.body
-          expect(ress).to.be.ok
-          expect(ress.oid).to.be.ok
-          expect(ress.error).to.be.not.ok
-          expect(ress.errors).to.be.not.ok
-          Object.keys(ressExpected).forEach(k => {
-            if (/^\$/.test(k)) return
-            if (ressExpected[k] instanceof Date) expect(ress[k]).to.equals(ressExpected[k].toISOString(), `pb sur propriété ${k}`)
-            else expect(ress[k]).to.deep.equal(ressExpected[k], `pb sur propriété ${k}`)
-          })
-          resolve()
-        } catch (error) {
-          reject(error)
-        }
-      })
-  })
+  const checkHttpResult = (stc, expected) => stc
+    .expect(200)
+    .expect('Content-type', /application\/json/)
+    .then((res) => {
+      try {
+        const ressource = res.body
+        cleanVolatileProperties(expected)
+        expect(ressource).to.have.property('oid', expected.oid)
+        expect(ressource.error).to.be.empty
+        expect(ressource.errors).to.be.empty
+        expect(ressource.warnings).to.be.empty
+        Object.keys(expected).forEach(k => {
+          // if (expected[k] instanceof Date) expect(ressource[k]).to.equals(expected[k].toISOString(), `pb sur propriété ${k}`)
+          // else expect(ressource[k]).to.deep.equal(expected[k], `pb sur propriété ${k}`)
+          expect(JSON.stringify(ressource[k])).to.equal(JSON.stringify(expected[k]), `pb sur propriété ${k}`)
+        })
+        return Promise.resolve()
+      } catch (error) {
+        return Promise.reject(error)
+      }
+    })
+    .catch(catcher)
+
+  // nettoie une entity pour en faire un objet presque plain sans ses propriétés volatiles ($original ou dateMiseAJour)
+  // ou susceptible d'être modifiées par un post (typeDoc & typePeda)
+  const cleanVolatileProperties = (ressource) => {
+    // typeDoc et typePeda peuvent avoir été re-générés par le post, on les vérifie pas
+    delete ressource.typeDocumentaires
+    delete ressource.typePedagogiques
+    // pour dateMiseAJour idem, c'est normal que ça change
+    delete ressource.dateMiseAJour
+    // on vire aussi toutes les méthodes et propriétés $
+    Object.keys(ressource).forEach(p => {
+      if (/^\$/.test(p) || typeof ressource[p] === 'function') delete ressource[p]
+    })
+    return ressource
+  }
 
   // attend un peu…
   // const sleep = (delay = 100, value) => new Promise((resolve) => setTimeout(() => resolve(value), delay))
 
-  // ress publique sans oid ni rid
+  // ressource publique sans oid ni rid
   const getRessPublicAnonymous = () => fakeRessource({
     nooid: true,
     norid: true,
     // on met une baseId connue, mais pas la notre sinon l'api va virer ces ressources qui n'existent pas chez elle
     relations: [[1, 'sesabibli/1'], [14, 'sesabibli/2']]
   })
-  // ress publique sans oid avec rid
+  // ressource publique sans oid avec rid
   const getRessPublicSsOid = () => fakeRessource({
     nooid: true,
     rid: `${myBaseId}/${faker.random.uuid()}`
   })
-  // ress publique avec oid et rid
+  // ressource publique avec oid et rid
   const getRessPublic = () => fakeRessource()
   // idem en fixant le type arbre
   const getArbrePublic = () => fakeRessource({
     type: 'arbre'
   })
-  // ress privée sans oid ni rid
+  // ressource privée sans oid ni rid
   const getRessPrivateAnonymous = () => fakeRessource({
     nooid: true,
     norid: true,
@@ -153,7 +165,7 @@ describe('controller api ressource', () => {
     // on met une baseId connue, mais pas la notre sinon l'api va virer ces ressources qui n'existent pas chez elle
     relations: [[1, 'sesabibli/1'], [14, 'sesabibli/2']]
   })
-  // ress privée sans oid ni rid
+  // ressource privée sans oid ni rid
   const getRessUnpublishedAnonymous = () => fakeRessource({
     nooid: true,
     norid: true,
@@ -172,11 +184,10 @@ describe('controller api ressource', () => {
   ]
 
   // boot + récup des services et config nécessaires à nos tests
-  before(() => boot().then(({superTestClient, _lassi}) => {
+  before(() => boot().then(({superTestClient, lassi}) => {
     if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
     if (!lassi) return Promise.reject(new Error('boot KO lassi'))
     _superTestClient = superTestClient
-    _lassi = lassi
     EntityRessource = lassi.service('EntityRessource')
     $settings = lassi.service('$settings')
     apiToken = $settings.get('apiTokens')[0]
@@ -195,133 +206,162 @@ describe('controller api ressource', () => {
       .send(ressource)
       .expect(200)
       .then(res => {
-        const result = res.body
-        // console.log(`après post de ${ressource.oid} ${ressource.rid} on récupère`, result)
-        // expect(result).to.have.property('success', true, 'pas de success')
-        expect(result).not.to.have.property('error')
-        expect(result).to.have.property('oid')
-        const {oid} = result
-        expect(result).to.deep.equal({oid}, 'pb sur le body retourné')
-        ressource.oid = oid
-        ressource.rid = `${myBaseId}/${oid}`
-        // ressource.suffix++
-        return checkDb(ressource)
-      })
-    return purge().then(() => {
-      Promise.all(getTestRessources().map(getPostPromise))
-    }).then(purge)
+        try {
+          const result = res.body
+          // console.log(`après post de ${ressource.oid} ${ressource.rid} on récupère`, result)
+          // expect(result).to.have.property('success', true, 'pas de success')
+          expect(result).not.to.have.property('error')
+          expect(result).to.have.property('oid')
+          const {oid} = result
+          expect(result).to.deep.equal({oid}, 'pb sur le body retourné')
+          ressource.oid = oid
+          ressource.rid = `${myBaseId}/${oid}`
+          cleanVolatileProperties(ressource)
+          // la ressource n'existait pas donc le suffixe doit être incrémenté, la version aussi
+          // ressource.suffix++
+          delete ressource.suffix
+          delete ressource.version
+          return checkDb(ressource)
+        } catch (error) {
+          return Promise.reject(error)
+        }
+      }).catch(catcher)
+
+    return purge()
+      .then(() => {
+        Promise.all(getTestRessources().map(getPostPromise))
+      }).then(purge)
+      .catch(catcher)
   })
 
   it('POST /api/ressource met à jour une ressource et incrémente suffix si modif du résumé', function () {
     function checkOne (ressource) {
       const {oid} = ressource
-      const expected = {
-        oid,
-        resume: ressource.resume + faker.lorem.words(),
-        suffix: ressource.suffix + 1,
-        version: ressource.version
-      }
+      cleanVolatileProperties(ressource)
+      ressource.resume += faker.lorem.words()
+      ressource.suffix++
       const postData = {
         oid,
-        resume: expected.resume
+        resume: ressource.resume
       }
-      console.log(`en db avant post on a le suffixe ${ressource.suffix} pour ${ressource.oid}`)
       return _superTestClient
         .post(`/api/ressource`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiToken)
         .send(postData)
-        .then(() => checkDb(expected))
+        .then(() => checkDb(ressource))
+        .catch(catcher)
     }
     return populate({ressources: 10, personnes: 6})
+      .then(() => Promise.all(getRessources().map(checkOne)))
+      .then(purge)
+      .catch(catcher)
+  })
+
+  it('POST /api/ressource met à jour une ressource et incrémente version et suffix si modif des auteurs', () => {
+    function checkOne (ressource) {
+      const {oid} = ressource
+      cleanVolatileProperties(ressource)
+      // on ajoute un auteur
+      const existingPids = ressource.auteurs.concat(ressource.contributeurs)
+      ressource.auteurs.push(getRandomPersonne(true, existingPids))
+      ressource.suffix++
+      ressource.version++
+      // on vire ça des propriétés à vérifier car ça va changer
+      delete ressource.archiveOid
+      const postData = {
+        oid,
+        auteurs: ressource.auteurs
+      }
+      return _superTestClient
+        .post(`/api/ressource`)
+        .set('Content-Type', 'application/json')
+        .set('X-ApiToken', apiToken)
+        .send(postData)
+        .then(() => checkDb(ressource))
+        .catch(catcher)
+    }
+    return populate({ressources: 10, personnes: 6})
+      .then(() => Promise.all(getRessources().map(checkOne)))
+      .then(purge)
+      .catch(catcher)
+  })
+
+  it('POST /api/ressource met à jour une ressource sans incrément si modif relations seulement', function () {
+    function checkOne (ressource) {
+      const {oid} = ressource
+      cleanVolatileProperties(ressource)
+      // on ajoute une relation
+      ressource.relations.push([ressourceConfig.constantes.relations.assocA, getRandomRessource(true, [ressource.rid])])
+      const postData = {
+        oid,
+        relations: ressource.relations
+      }
+      return _superTestClient
+        .post(`/api/ressource`)
+        .set('Content-Type', 'application/json')
+        .set('X-ApiToken', apiToken)
+        .send(postData)
+        .then(() => checkDb(ressource))
+        .catch(catcher)
+    }
+    return populate({ressources: 10, personnes: 6})
+      .then(() => Promise.all(getRessources().map(checkOne)))
+      .then(purge)
+      .catch(catcher)
+  })
+
+  it('DELETE prend un 403 si on veut effacer sans token', function () {
+    return populate({ressources: 1, personnes: 1})
       .then(() => {
-        getRessources().forEach(r => console.log(`après populate on a suffix ${r.suffix} pour ${r.oid}`))
-        return Promise.all(getRessources().map(checkOne))
-      }).then(purge)
-  })
-
-  it.skip('POST /api/ressource met à jour une ressource et incrémente version et suffix si modif des auteurs', function (done) {
-    if (!oid) return done(errAbort)
-    // on reposte un truc qui incrémente la version
-    if (!ressource.auteurs) ressource.auteurs = []
-    ressource.auteurs.push('external/1')
-    // on veut le retrouver
-    ressExpected.auteurs = ressource.auteurs
-    // et ça doit incrémenter version et suffix
-    ressExpected.suffix++
-    ressExpected.version++
-    const stc = _superTestClient
-      .post(`/api/ressource?format=ressource`)
-      .set('Content-Type', 'application/json')
-      .set('X-ApiToken', apiToken)
-      .send({oid, auteurs: ressource.auteurs})
-    checkRessource(stc, ressExpected, done)
-  })
-
-  it.skip('POST /api/ressource met à jour une ressource sans incrément si modif typePedagogiques seulement', function (done) {
-    if (!oid) return done(errAbort)
-    // on modifie typePedagogiques
-    if (!ressource.typePedagogiques) ressource.typePedagogiques = []
-    ressource.typePedagogiques.push(ressourceConfig.constantes.typePedagogiques.evaluation)
-    // on veut le retrouver
-    ressExpected.typePedagogiques = ressource.typePedagogiques
-    // et ça doit incrémenter ni version ni suffix
-    const stc = _superTestClient
-      .post(`/api/ressource?format=ressource`)
-      .set('Content-Type', 'application/json')
-      .set('X-ApiToken', apiToken)
-      .send({oid, typePedagogiques: ressource.typePedagogiques})
-    checkRessource(stc, ressExpected, done)
-  })
-
-  it.skip('DELETE prend un 403 si on veut effacer sans token', function (done) {
-    if (!oid) return done(errAbort)
-    _superTestClient
-      .delete(`/api/ressource/${bundleId}`)
-      .expect(403)
-      .expect('Content-type', /application\/json/)
-      .end((err, res) => {
-        if (err) return done(err)
-        const ress = res.body
-        expect(ress).to.be.ok
-        expect(ress.error).to.be.ok
-        done()
+        const ressource = getRandomRessource()
+        return _superTestClient
+          .delete(`/api/ressource/${ressource.oid}`)
+          .expect(403)
+          .expect('Content-type', /application\/json/)
       })
-  })
-
-  it.skip("DELETE vire la ressource que l'on vient d'enregistrer", function (done) {
-    if (!oid) return done(errAbort)
-    const apiToken = _lassi.settings.apiTokens[0]
-    _superTestClient
-      .delete(`/api/ressource/${bundleId}`)
-      .set('X-ApiToken', apiToken)
-      .expect(200)
-      .expect('Content-type', /application\/json/)
-      .end((err, res) => {
-        if (err) return done(err)
-        const ress = res.body
-        expect(ress).to.be.ok
-        expect(ress.error).to.be.not.ok
-        expect('' + ress.deleted).to.equal('' + bundleId)
-        done()
+      .then((res) => {
+        const result = res.body
+        expect(result).to.have.property('success', false, 'Pb sur result.success')
+        expect(result, 'Pb sur result.error').to.have.property('error')
+        expect(Object.keys(result)).to.have.lengthOf(2, 'Pb sur le nb de propriétés de result')
+        return Promise.resolve()
       })
+      .then(purge)
   })
 
-  describe.skip('GET /api/ressource/… sur ressource publique', () => {
-    let ressources = []
+  it('DELETE vire une ressource', function () {
+    let ressource
+    return populate({ressources: 1, personnes: 1})
+      .then(() => {
+        ressource = getRandomRessource()
+        return _superTestClient
+          .delete(`/api/ressource/${ressource.oid}`)
+          .set('X-ApiToken', apiToken)
+          .expect(200)
+          .expect('Content-type', /application\/json/)
+      })
+      .then((res) => {
+        const result = res.body
+        expect(result).to.have.property('success', true, 'Pb sur result.success')
+        expect(result).to.have.property('deleted', ressource.oid, 'Pb sur result.deleted')
+        expect(Object.keys(result)).to.have.lengthOf(2, 'Pb sur le nb de propriétés de result')
+        return Promise.resolve()
+      })
+      .then(purge)
+      .catch(catcher)
+  })
+
+  describe('GET /api/ressource/… sur ressource publique', () => {
+    let ressources
     const getGlobalPromise = (urlConstructor) => Promise.all(ressources.map(r => checkHttp(urlConstructor(r), r)))
 
     before(() => purge()
-      .then(() => populate({ressources: 10, personnes: 6}))
+      .then(() => populate({ressources: 6, personnes: 6}))
       .then(() => {
-        getRessources().forEach(r => {
-          // ces champs peuvent être déduit du reste, on cherche pas à les vérifier
-          delete r.typePedagogiques
-          delete r.typeDocumentaires
-          ressources.push(r)
-        })
+        ressources = getRessources().map(cleanVolatileProperties)
         return Promise.resolve()
-      })
+      }).catch(catcher)
     )
 
     after(purge)

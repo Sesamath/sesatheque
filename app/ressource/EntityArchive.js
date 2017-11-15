@@ -31,8 +31,6 @@
 
 'use strict'
 
-var merge = require('sesajstools/utils/object').merge
-
 module.exports = function (component) {
   component.entity('EntityArchive', function () {
     const EntityArchive = this
@@ -48,7 +46,7 @@ module.exports = function (component) {
         return
       }
       // on garde tout
-      merge(this, ressource)
+      Object.assign(this, ressource)
       // sauf l'oid
       delete this.oid
       // et on ajoute la date d'archivage

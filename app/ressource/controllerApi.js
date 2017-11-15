@@ -298,7 +298,7 @@ module.exports = function controllersFactory (component) {
        log.error(new Error('une trace pour ' +reqHttp)) */
       const ressourcePostee = context.post
       const pid = $accessControl.getCurrentUserPid(context)
-      let ressourceOriginale
+      let ressourceBdd
 
       if (context.perf) {
         let msg = 'start-'
@@ -338,13 +338,14 @@ module.exports = function controllersFactory (component) {
             next()
           }
         }
-      }).seq(function (ressourceBdd) {
+      }).seq(function (_ressourceBdd) {
+        ressourceBdd = _ressourceBdd
         if (log.perf) log.perf(context.response, 'loaded')
         const errMsg = ressourceBdd
           ? $accessControl.getDeniedMessage('update', context, ressourceBdd)
           : $accessControl.getDeniedMessage('create', context, ressourcePostee)
         if (errMsg) return $json.denied(context, errMsg)
-
+        if (ressourceBdd) log.debug(`auteurs venant de la bdd ${ressourceBdd.auteurs.join(' ')}, version ${ressourceBdd.version}`)
         // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
         const tt = ressourcePostee.type
         if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
@@ -355,23 +356,25 @@ module.exports = function controllersFactory (component) {
           partial = (ressourcePostee.oid || (ressourcePostee.origine && ressourcePostee.idOrigine))
         }
         const data = partial ? Object.assign({}, ressourceBdd, ressourcePostee) : ressourcePostee
-        ressourceOriginale = ressourceBdd
         $ressourceControl.valideRessourceFromPost(data, this)
-      }).seq(function (ressourceNew) {
+      }).seq(function (cleanData) {
+        log.debug(`après valide ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
         const groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
-        $personneControl.checkGroupes(context, ressourceOriginale, ressourceNew, groupesSup, this)
-      }).seq(function (ressourceNew) {
+        $personneControl.checkGroupes(context, ressourceBdd, cleanData, groupesSup, this)
+      }).seq(function (cleanData) {
+        log.debug(`après checkGroupes ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // on ajoute le user courant pour serie et sequenceModele,
         // pas encore pour tous les types par crainte d'effets de bords pas prévus…
-        if (pid && (ressourceNew.type === 'serie' || ressourceNew.type === 'sequenceModele')) {
-          ressourceNew.auteurs = [pid]
+        if (pid && (cleanData.type === 'serie' || cleanData.type === 'sequenceModele')) {
+          cleanData.auteurs = [pid]
         }
-        $personneControl.checkPersonnes(context, ressourceOriginale, ressourceNew, this)
-      }).seq(function (ressourceNew) {
-        if (ressourceOriginale) update(ressourceOriginale, ressourceNew)
-        else ressourceOriginale = ressourceNew
-        writeAndOut(context, ressourceOriginale)
+        $personneControl.checkPersonnes(context, ressourceBdd, cleanData, this)
+      }).seq(function (cleanData) {
+        // on màj ressourceBdd par simplicité (ça évitera aussi de recréer une entity en cas d'update)
+        if (ressourceBdd) update(ressourceBdd, cleanData)
+        else ressourceBdd = cleanData
+        writeAndOut(context, ressourceBdd)
       }).catch(function (error) {
         $json.send(context, error)
       })

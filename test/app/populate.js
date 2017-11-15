@@ -47,13 +47,13 @@ import config from '../../app/config'
 
 const myBaseId = config.application.baseId
 // pour nos 1ers tests
-const nbPersonnesDefault = 2
+const nbPersonnesDefault = 10
 const nbRessourcesDefault = 20
 
 const personnes = new Map()
 const ressources = new Map()
-const pOids = []
-const rOids = []
+let pOids = []
+let rOids = []
 
 /**
  * Retourne une des personnes générées au hasard
@@ -100,10 +100,11 @@ export const getPersonnes = () => Array.from(personnes.values())
 export const getRessources = () => Array.from(ressources.values())
 
 /**
- * Génère 200 personnes et 2000 ressources avec des données aléatoires mais cohérentes
+ * Génère des personnes et des ressources avec des données aléatoires mais cohérentes,
+ * et les enregistre en base (via les entités lassi)
  * @param {object} [options]
- * @param {number} [options.personnes] Nb de personnes à générer
- * @param {number} [options.ressources] Nb de ressources à générer
+ * @param {number} [options.nbPersonnes=10] Nb de personnes à générer
+ * @param {number} [options.nbRessources=20] Nb de ressources à générer
  * @param {errorCallback} [done]
  * @return {Promise|undefined} Promise si done n'est pas fourni
  */
@@ -111,10 +112,7 @@ export function populate (options, done) {
   // init avec nos valeurs par défaut
   if (typeof options === 'function') {
     done = options
-    options = {
-      personnes: nbPersonnesDefault,
-      ressources: nbRessourcesDefault
-    }
+    options = {}
   }
   if (!done) {
     return new Promise((resolve, reject) => {
@@ -124,29 +122,28 @@ export function populate (options, done) {
       })
     })
   }
+  const nbPersonnes = options.nbPersonnes || nbPersonnesDefault
+  const nbRessources = options.ressources || nbRessourcesDefault
   // p'tet rien à faire
-  if (!options.hasOwnProperty('personnes')) options.personnes = nbPersonnesDefault
-  if (!options.hasOwnProperty('ressources')) options.ressources = nbRessourcesDefault
-  if (options.personnes <= personnes.size && options.ressources <= ressources.size) return done()
+  if (nbPersonnes <= personnes.size && nbRessources <= ressources.size) return done()
 
-  // faut récupérer lassi
+  // faut booter (si personne l'a fait avant) et récupérer lassi
   boot().then(({lassi}) => {
     const EntityPersonne = lassi.service('EntityPersonne')
     const EntityRessource = lassi.service('EntityRessource')
-    const nbPersonnes = options.personnes
     let i
     // console.log(`start populate`)
     flow(new Array(nbPersonnes)).seqEach(function () {
       const nextPersonne = this
-      EntityPersonne.create(fakePersonne({nooid: true, nopid: true})).store((error, personne) => {
+      EntityPersonne.create(fakePersonne()).store((error, personne) => {
         if (error) return nextPersonne(error)
         personnes.set(personne.oid, personne)
         pOids.push(personne.oid)
         nextPersonne()
       })
     }).seq(function () {
-      // console.log(`génération de ${personnes.size} personnes`)
-      this(null, new Array(options.ressources))
+      // console.log(`${personnes.size} personnes générées`)
+      this(null, new Array(nbRessources))
     }).seqEach(function () {
       const nextRessource = this
       const options = {
@@ -187,7 +184,7 @@ export function populate (options, done) {
         nextRessource()
       })
     }).seq(function () {
-      // console.log(`génération de ${personnes.size} personnes et ${ressources.size} ressources`)
+      // console.log(`${personnes.size} personnes et ${ressources.size} ressources générées`)
       done(null, {personnes, ressources})
     }).catch(done)
   }).catch(done)
@@ -212,8 +209,12 @@ export function purge (done) {
     const EntityRessource = lassi.service('EntityRessource')
     EntityPersonne.match().purge((error) => {
       if (error) return done(error)
+      personnes.clear()
+      pOids = []
       EntityRessource.match().purge((error) => {
         if (error) return done(error)
+        ressources.clear()
+        rOids = []
         done()
       })
     })
