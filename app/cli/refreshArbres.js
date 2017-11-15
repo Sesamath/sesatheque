@@ -30,7 +30,7 @@
  */
 'use strict'
 const flow = require('an-flow')
-const taskLog = require('an-log')('refreshArbres')
+const taskLog = require('an-log')('sesatheque-cli')
 const Ref = require('../constructors/Ref')
 const configRessource = require('../ressource/config')
 

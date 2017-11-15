@@ -70,7 +70,9 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
         // qui doit retourner un objet dont chaque propriété est une commande…
         // C'est lassi qui l'a dit…
         return function () {
-          return {commands: () => commands}
+          return {
+            commands: () => commands
+          }
         }
       })
     }
