@@ -40,10 +40,9 @@
 /* eslint-env mocha */
 
 import {expect} from 'chai'
+import boot from '../../boot'
 
-// const clone = require('sesajstools/utils/object').clone
-
-module.exports = function describeEntityGroupe () {
+describe('EntityGroupe', () => {
   // une erreur toute prête
   // const errAbort = new Error('pas la peine de tester ça tant que ça plante avant')
   const groupeData = {
@@ -53,12 +52,12 @@ module.exports = function describeEntityGroupe () {
     public: true,
     gestionnaires: ['sesabibli/1'] // il en faut un
   }
-  const nomLower = groupeData.nom.toLowerCase()
-  /**
-   * L'entité créée
-   * @type {EntityGroupe}
-   */
-  let groupe, EntityGroupe
+  const nomLower = groupeData.nom.trim().toLowerCase()
+
+  // @todo ajouter les groupes au populate et gérer des tests indépendants, avec une vérif faite par un client mongo
+  // une entity globale,
+  let groupe
+  let EntityGroupe
 
   const checkGroupe = (groupe) => {
     expect(groupe.nom).to.equal(nomLower)
@@ -68,51 +67,79 @@ module.exports = function describeEntityGroupe () {
     expect(groupe.gestionnaires).to.deep.equal(groupeData.gestionnaires)
   }
 
-  const grab = (next) => {
-    EntityGroupe
-      .match('nom').equals(nomLower)
-      .grab(next)
-  }
-
-  before(done => {
-    EntityGroupe = lassi.service('EntityGroupe')
-    done()
+  // boot + récup des services et config nécessaires à nos tests
+  before((done) => {
+    boot().then(({lassi}) => {
+      if (!lassi) return Promise.reject(new Error('boot KO lassi'))
+      EntityGroupe = lassi.service('EntityGroupe')
+      // on démarre sur une base vide
+      EntityGroupe.match().purge((error) => {
+        if (error) return done(error)
+        done()
+      })
+    })
   })
 
   it('create', function () {
-    groupe = EntityGroupe.create(groupeData)
-    checkGroupe(groupe)
+    checkGroupe(EntityGroupe.create(groupeData))
   })
 
   it('store', function (done) {
-    groupe.store(function (error, groupe) {
-      // mocha n'affiche pas les erreurs si on le demande pas !
-      if (error) console.error(error)
-      expect(error).to.be.falsy
+    EntityGroupe.create(groupeData).store((error, _groupe) => {
+      if (error) return done(error)
+      groupe = _groupe
       checkGroupe(groupe)
       done()
     })
   })
 
   it('grab', function (done) {
-    grab(function (error, groupes) {
-      if (error) console.error(error)
-      expect(error).to.be.falsy
-      expect(groupes.length).to.equals(1)
-      checkGroupe(groupes[0])
-      done()
-    })
+    EntityGroupe
+      .match('nom').equals(nomLower)
+      .grab((error, groupes) => {
+        if (error) return done(error)
+        expect(groupes.length).to.equals(1)
+        checkGroupe(groupes[0])
+        done()
+      })
+  })
+
+  it('grabOne', function (done) {
+    EntityGroupe
+      .match('nom').equals(nomLower)
+      .grabOne((error, groupe) => {
+        if (error) return done(error)
+        checkGroupe(groupe)
+        done()
+      })
   })
 
   it('delete', function (done) {
     groupe.delete(function (error) {
-      if (error) console.error(error)
-      expect(error).to.be.falsy
-      grab(function (error, groupes) {
-        expect(error).to.be.falsy
-        expect(groupes).to.have.length(0)
-        done()
+      if (error) return done(error)
+      EntityGroupe
+        .match('nom').equals(nomLower)
+        .grab(function (error, groupes) {
+          if (error) return done(error)
+          expect(groupes).to.have.length(0)
+          done()
+        })
+    })
+  })
+
+  it('purge', function (done) {
+    EntityGroupe.create(groupeData).store((error, groupe) => {
+      if (error) return done(error)
+      checkGroupe(groupe)
+      EntityGroupe.match().purge((error, nb) => {
+        if (error) return done(error)
+        expect(nb).to.equal(1, 'pb de nb d’entities purgées')
+        EntityGroupe.match().grab((error, groupes) => {
+          if (error) return done(error)
+          expect(groupes.length).to.equal(0, 'il reste des groupes')
+          done()
+        })
       })
     })
   })
-}
+})
