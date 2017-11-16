@@ -42,6 +42,7 @@ import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
 import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/dist/sesatheques'
+import boot from '../boot'
 
 chai.use(sinonChai)
 
@@ -52,19 +53,27 @@ const expected = {
   sesacommundev: 'https://commun.devsesamath.net/'
 }
 
-module.exports = function describeSesatheques () {
+describe('sesatheques', () => {
   let consoleErrorSpy
-  beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
-  afterEach(() => console.error.restore())
   const baseId = 'stbidon1'
   const baseUrl = 'http://localhost/'
   const baseUrl2 = 'http://localhost:1234/'
   const baseId3 = 'stbidon3'
   let baseUrl3 = 'http://localhost:3'
+  let $settings
+
+  before(() => boot()
+    .then(({lassi}) => {
+      $settings = lassi.service('$settings')
+      return Promise.resolve()
+    })
+  )
+  beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
+  afterEach(() => console.error.restore())
 
   it('les 4 sesatheques dev & prod existent avec les urls attendues', function (done) {
     Object.keys(expected).forEach((baseId) => {
-      expect(exists(baseId)).to.be.true
+      expect(exists(baseId)).to.be.ok
       expect(getBaseUrl(baseId)).to.equal(expected[baseId])
       expect(getBaseId(expected[baseId])).to.equal(baseId)
     })
@@ -73,7 +82,7 @@ module.exports = function describeSesatheques () {
   })
 
   it('get de notre sesathèque de test mise au boot', function (done) {
-    const {baseId, baseUrl} = lassi.settings.application
+    const {baseId, baseUrl} = $settings.get('application')
     expect(exists(baseId)).to.be.true
     expect(getBaseUrl(baseId)).to.equal(baseUrl)
     expect(getBaseId(baseUrl)).to.equal(baseId)
@@ -129,4 +138,4 @@ module.exports = function describeSesatheques () {
     expect(consoleErrorSpy).to.have.been.calledWithMatch(reMsg)
     done()
   })
-}
+})

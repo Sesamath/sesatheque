@@ -1,7 +1,7 @@
 Test de sesatheque-client
 =========================
 
-Compiler sesatheque-client.js avec
+Compiler sesatheque-client.Test.js avec
 ```
 alias browserify=chemin/vers/node_modules/.bin/browserify
 for f in tests/*.test.js; do dst=tests/build/$(basename $f .test.js).bundle.js; echo -n "$dst "; browserify -o $dst -e $f && echo "ok" || echo "KO"; done

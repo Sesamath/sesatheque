@@ -39,7 +39,7 @@
 'use strict'
 /* eslint-env mocha */
 
-import boot from '../boot'
+import boot from './boot'
 
 describe('contenus statiques', () => {
   let _superTestClient
@@ -48,5 +48,7 @@ describe('contenus statiques', () => {
     return Promise.resolve()
   }))
   it('la page d’accueil existe', () => _superTestClient.get('/').expect(200))
-  it('ping.html existe', () => _superTestClient.get('/ping.html').expect(200))
+  it('/ping.html existe', () => _superTestClient.get('/ping.html').expect(200))
+  it('/favicon.png existe', () => _superTestClient.get('/favicon.png').expect(200))
+  // @todo ajouter ici les styles et js mis par webpack
 })

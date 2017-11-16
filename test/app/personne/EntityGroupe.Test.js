@@ -40,7 +40,7 @@
 /* eslint-env mocha */
 
 import {expect} from 'chai'
-import boot from '../../boot'
+import boot from '../boot'
 
 describe('EntityGroupe', () => {
   // une erreur toute prête

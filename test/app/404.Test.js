@@ -38,24 +38,31 @@
 
 'use strict'
 /* eslint-env mocha */
-/* global superTestClient */
 import {expect} from 'chai'
+import boot from './boot'
 
-module.exports = function describe404 () {
+describe('prend un 404 sur les urls inexistantes', () => {
   const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
+  let _superTestClient
+  before(() => boot()
+    .then(({superTestClient}) => {
+      _superTestClient = superTestClient
+      return Promise.resolve()
+    })
+  )
   paths.forEach(path => {
-    it(`prend un 404 sur ${path}`, function () {
+    it(`404 sur ${path}`, function () {
       // on retourne une promesse plutôt qu'utiliser done
-      return superTestClient
+      return _superTestClient
         .get(path)
         .expect(404, 'not found ' + path)
         .expect('Content-Type', /text\/plain/)
     })
   })
   paths.forEach(path => {
-    it(`prend un 404 sur /api${path}`, function () {
+    it(`404 sur /api${path}`, function () {
       // on retourne une promesse plutôt qu'utiliser done
-      return superTestClient
+      return _superTestClient
         .get('/api' + path)
         .expect(404)
         .expect('Content-Type', /application\/json/)
@@ -66,4 +73,4 @@ module.exports = function describe404 () {
         })
     }) // it
   })
-}
+})

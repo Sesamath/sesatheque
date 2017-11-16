@@ -46,9 +46,10 @@ import log from 'sesajstools/utils/log'
 import getClient from 'sesatheque-client/src'
 import {XMLHttpRequest} from 'xmlhttprequest'
 
+import boot from '../boot'
 import config from '../../../app/config'
 import configRessource from '../../../app/ressource/config'
-import {getRandomRessource, populate} from '../populate'
+import {getRandomRessource, populate, purge} from '../populate'
 
 chai.use(sinonChai)
 
@@ -62,12 +63,15 @@ const sesatheques = [
 
 let sesathequeClient
 
-module.exports = function describeClient () {
-  before(function (done) {
-    log.setLogLevel('error')
-    sesathequeClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
-    populate(done)
-  })
+describe('sesatheque-client', () => {
+  before(() => boot()
+    .then(() => {
+      log.setLogLevel('error')
+      sesathequeClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
+      return populate()
+    })
+  )
+  after(purge)
 
   // let consoleErrorSpy
   // beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
@@ -93,10 +97,10 @@ module.exports = function describeClient () {
       ['titre', 'rid', 'resume', 'description', 'commentaires', 'type', 'suffix'].forEach(p => {
         expect(expected[p]).to.equals(item[p], `Pb avec ${p}`)
       })
-      expect(item.public).to.be.true
-      expect(JSON.stringify(expected.categories)).to.equals(JSON.stringify(item.categories))
-      expect(item.$displayUrl).to.equals(`${myBaseUrl}public/${configRessource.constantes.routes.display}/${expected.oid}?${item.suffix}`)
+      expect(item.public).to.equal(true, 'pb public')
+      expect(item.categories).to.deep.equal(expected.categories, 'pb categories')
+      expect(item.$displayUrl).to.equals(`${myBaseUrl}public/${configRessource.constantes.routes.display}/${expected.oid}?${item.suffix}`, 'pb $displayUrl')
       done()
     })
   })
-}
+})

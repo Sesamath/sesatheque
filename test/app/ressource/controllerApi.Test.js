@@ -42,7 +42,7 @@ import {expect} from 'chai'
 import faker from 'faker/locale/fr'
 // import Ressource from '../../../app/constructors/Ressource'
 import {getRandomPersonne, getRandomRessource, getRessources, populate, purge} from '../populate'
-import boot from '../../boot'
+import boot from '../boot'
 import fakeRessource from '../../helpers/fakeRessource'
 import ressourceConfig from '../../../app/ressource/config'
 

@@ -42,7 +42,7 @@ import fakeRessource from '../helpers/fakeRessource'
 import fakePersonne from '../helpers/fakePersonne'
 import flow from 'an-flow'
 
-import boot from '../boot'
+import boot from './boot'
 import config from '../../app/config'
 
 const myBaseId = config.application.baseId
@@ -122,6 +122,7 @@ export function populate (options, done) {
       })
     })
   }
+  if (!options) options = {}
   const nbPersonnes = options.nbPersonnes || nbPersonnesDefault
   const nbRessources = options.ressources || nbRessourcesDefault
   // p'tet rien à faire
