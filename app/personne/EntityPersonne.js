@@ -68,8 +68,11 @@ module.exports = function (EntityPersonne, $cachePersonne) {
 
   EntityPersonne.construct(function (values) {
     // on impose les permissions d'après les rôles définis en config
-    if (values.roles) values.permissions = getPermissions(values.roles)
-    Personne.call(this, values)
+    // faut copier pour pas modifier values.permissions
+    const data = values
+    if (values.roles) data.permissions = getPermissions(values.roles)
+    // avant d'appeler le constructeur
+    Personne.call(this, data)
   })
 
   EntityPersonne.beforeStore = function (next) {

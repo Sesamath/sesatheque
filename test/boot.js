@@ -54,10 +54,27 @@ import supertest from 'supertest'
 
 let isBooted = false
 const resolvedValue = {}
+let timerId
+const defaultDelay = 3000
+const resetTimer = (delay = defaultDelay) => {
+  if (timerId) clearTimeout(timerId)
+  timerId = setTimeout(resolvedValue.lassi.shutdown, delay)
+}
 
-const getBootPromise = () => new Promise((resolve, reject) => {
+/**
+ * Démarre l'appli
+ * @param {number} [delay=3000] Le nb de ms à attendre après le boot pour éteindre
+ * @return {Promise} qui sera résolue en passant un objet {superTestClient, lassi}
+ */
+const getBootPromise = (delay) => new Promise((resolve, reject) => {
   try {
-    if (isBooted) return resolve(resolvedValue)
+    const finish = () => {
+      // on éteindra après delay ms
+      resetTimer(delay)
+      return resolve(resolvedValue)
+    }
+    if (isBooted) return finish()
+
     // on enregistre notre sesatheque de test
     sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
     // on configure an-log pour qu'il mette tout en fichier
@@ -67,12 +84,14 @@ const getBootPromise = () => new Promise((resolve, reject) => {
     // boot
     app(function afterBootCallback () {
       anLog.config(config.lassiLogger)
-      // on exporte le client pour tester notre appli express
-      resolvedValue.superTestClient = supertest(lassi.express)
-      // et lassi (pas dispo en global dans un describe)
+      // on exporte lassi (pas dispo en global dans un describe) et le client pour tester notre appli express
       resolvedValue.lassi = lassi
+      resolvedValue.superTestClient = supertest(lassi.express)
       isBooted = true
-      resolve(resolvedValue)
+      // en ajoutant --delay dans mocha.opts, on a une fct run en global qui prend une callback
+      // mais si on ajoute cette ligne ça shutdown avant de commencer les tests…
+      // setTimeout(() => run(lassi.shutdown), 500)
+      return finish()
     })
   } catch (error) {
     reject(error)

@@ -2,4 +2,4 @@
 --require babel-core/register
 --recursive
 --reporter spec
---slow 600
+--slow 1500

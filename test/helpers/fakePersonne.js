@@ -51,7 +51,7 @@ function getFakePersonne (options) {
   if (!options.notitre) fakePersonne.nom = options.nom || faker.name.lastName()
   if (!options.noresume) fakePersonne.prenom = options.prenom || faker.name.firstName()
   // cf app/config.js : faker.random.arrayElement(['formateur', 'admin', 'editeur', …])
-  if (!options.nodescription) fakePersonne.roles = options.roles || 'formateur'
+  if (!options.nodescription) fakePersonne.roles = options.roles || {formateur: true}
   if (!options.nocommentaires) fakePersonne.email = options.email || faker.internet.email()
   // @todo ajout groupesMembre et groupesSuivis
 
