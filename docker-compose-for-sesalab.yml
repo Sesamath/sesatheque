@@ -5,26 +5,10 @@ services:
     ports:
       - 3312:27017
 
-  mysql-global:
-    image: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: sesatheque
-      MYSQL_USER: sesatheque
-      MYSQL_PASSWORD: sesatheque
-
   mongo-private:
     image: mongo
     ports:
       - 3313:27017
-
-  mysql-private:
-    image: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: stcommun
-      MYSQL_USER: stcommun
-      MYSQL_PASSWORD: stcommun
 
   app-global:
     build: ./docker/node
@@ -33,9 +17,8 @@ services:
     volumes:
       - .:/app
     links:
-      - mysql-global
       - mongo-global
-      - memcache
+      - redis
     command: npm run start:dev
 
   app-private:
@@ -45,10 +28,9 @@ services:
     volumes:
       - .:/app
     links:
-      - mysql-private
       - mongo-private
-      - memcache
+      - redis
     command: npm run start:devcommun
 
-  memcache:
-    image: memcached
+  redis:
+    image: redis
