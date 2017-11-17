@@ -44,6 +44,13 @@ module.exports = {
     hostname: 'localhost',
     port: 3003
   },
+  $cache: {
+    redis: {
+      host: 'redis',
+      port: 6379,
+      prefix: 'sesatheque-commun'
+    }
+  },
   $rail: {
     cookie: {
       key: 'asNTr!l7Dqtsg' // en mettre un autre dans _private/config !
@@ -57,7 +64,6 @@ module.exports = {
     debugExclusions: ['cache'],
     perf: 'perf.log'
   },
-  memcache: {host: 'memcache', port: 11211},
   // noCache:true,
   // les modules à précharger avant bootstrap
   extraModules: ['sesalab-sso'],
