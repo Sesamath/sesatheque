@@ -34,7 +34,7 @@
 module.exports = function (EntityExternalRef) {
   const config = require('../config')
   const myBaseId = config.application.baseId
-  const {exists, getBaseIdFromRid} = require('sesatheque-client/dist/sesatheques')
+  const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
 
   /**
    * entity EntityExternalRef cf [Entity](lassi/Entity.html)

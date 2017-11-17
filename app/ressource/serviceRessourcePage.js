@@ -41,7 +41,7 @@ const version = require('../../package.json').version
 // car on a l'autocomplétion sur les noms de propriété
 const ressConfig = require('./config')
 const appConfig = require('../config')
-const {getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
+const {getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
 
 module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) {
   /**

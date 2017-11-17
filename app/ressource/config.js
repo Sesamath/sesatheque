@@ -30,7 +30,7 @@
  */
 
 'use strict'
-var commonConfig = require('sesatheque-client/dist/config')
+var commonConfig = require('sesatheque-client/src/config')
 /**
  * Nos listes de types & co, qui changent rarement
  */
@@ -408,24 +408,9 @@ var ressourceConfig = {
       aPourCorrige: 51,
       estLaCorrectionDe: 52
     },
-    restriction: { // l'inverse id => label est dans listes
-      aucune: 0,
-      correction: 1,
-      groupe: 2,
-      prive: 3
-    },
+    restriction: commonConfig.constantes.restriction,
     // des constantes pour nos routes
-    routes: {
-      api: '',
-      display: 'voir',
-      preview: 'apercevoir',
-      create: 'ajouter',
-      edit: 'modifier',
-      describe: 'decrire',
-      delete: 'supprimer',
-      search: 'rechercher',
-      history: 'voirHistorique'
-    }
+    routes: commonConfig.constantes.routes
   }, // fin constantes
   /**
    * Des formats d'affichage

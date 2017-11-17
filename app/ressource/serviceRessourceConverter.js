@@ -42,7 +42,7 @@
 var $ressourceConverter = {}
 
 var flow = require('an-flow')
-const {exists} = require('sesatheque-client/dist/sesatheques')
+const {exists} = require('sesatheque-client/src/sesatheques')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')

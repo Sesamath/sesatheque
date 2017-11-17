@@ -40,7 +40,7 @@ const configRessource = require('./config')
 const Ref = require('../constructors/Ref')
 const {ensure} = require('../tools')
 const url = require('../tools/url')
-const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/dist/sesatheques')
+const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
 
 const myBaseId = config.application.baseId
 const myBaseUrl = config.application.baseUrl
@@ -997,7 +997,7 @@ module.exports = function controllersFactory (component) {
      * @param {string} [children] Passer 1 pour ne récupérer que les enfants
      */
     controller.get('jstree', function (context) {
-      const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
+      const {getJstreeChildren, toJstree} = require('sesatheque-client/src/jstreeConvert')
 
       const id = context.get.rid || context.get.aliasOf || context.get.id || context.get.oid
       const onlyChildren = !!context.get.children

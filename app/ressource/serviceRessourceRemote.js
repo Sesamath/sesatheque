@@ -32,7 +32,7 @@
 'use strict'
 
 const request = require('request')
-const {exists, getBaseIdFromRid, getBaseUrl} = require('sesatheque-client/dist/sesatheques')
+const {exists, getBaseIdFromRid, getBaseUrl} = require('sesatheque-client/src/sesatheques')
 
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId

@@ -69,7 +69,7 @@ var conf = {
       {test: /app\/srcClient\/.*\.html/, loader: 'file'},
       // editgraphe passe par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel'},
-      // idem pour sesatheque-client
+      // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
       {test: /(src|node_modules)\/.*\.css/, loader: extractCssLoader},

@@ -33,7 +33,7 @@
 const anLog = require('an-log')
 const lassi = require('lassi')
 const config = require('./config')
-const sesatheques = require('sesatheque-client/dist/sesatheques')
+const sesatheques = require('sesatheque-client/src/sesatheques')
 const {exists, addSesatheque} = sesatheques
 const log = require('./tools/log.js')
 const {merge} = require('sesajstools/utils/object')

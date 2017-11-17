@@ -44,9 +44,9 @@ import page from '../../page/index'
  * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
  */
 module.exports = function display (ressource, options, next) {
-  require.ensure(['jquery', 'jstree', 'sesatheque-client/dist/jstree'], function (require) {
+  require.ensure(['jquery', 'jstree', 'sesatheque-client/src/jstree'], function (require) {
     const $ = require('jquery')
-    const stJstree = require('sesatheque-client/dist/jstree')
+    const stJstree = require('sesatheque-client/src/jstree')
     require('jstree')
     let error
     try {
