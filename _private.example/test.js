@@ -2,7 +2,7 @@
  * paramètres locaux pour npm test
  */
 const path = require('path')
-const sesatheques = require('sesatheque-client/dist/sesatheques')
+const sesatheques = require('sesatheque-client/src/sesatheques')
 const logDir = path.join(__dirname, '../logsTest')
 const appName = 'testSesatheque'
 const port = 3011

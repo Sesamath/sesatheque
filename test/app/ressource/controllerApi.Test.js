@@ -44,7 +44,7 @@ import faker from 'faker/locale/fr'
 import {getRandomPersonne, getRandomRessource, getRessources, populate, purge} from '../populate'
 import boot from '../boot'
 import fakeRessource from '../../helpers/fakeRessource'
-import ressourceConfig from '../../../app/ressource/config'
+import configRessource from '../../../app/ressource/config'
 
 // const {clone} = require('sesajstools/utils/object')
 // const {stringify} = require('sesajstools')
@@ -217,9 +217,9 @@ describe('controller api ressource', () => {
           ressource.oid = oid
           ressource.rid = `${myBaseId}/${oid}`
           cleanVolatileProperties(ressource)
-          // la ressource n'existait pas donc le suffixe doit être incrémenté, la version aussi
-          // ressource.suffix++
-          delete ressource.suffix
+          // la ressource n'existait pas donc le inc doit être incrémenté, la version aussi
+          // ressource.inc++
+          delete ressource.inc
           delete ressource.version
           return checkDb(ressource)
         } catch (error) {
@@ -234,12 +234,12 @@ describe('controller api ressource', () => {
       .catch(catcher)
   })
 
-  it('POST /api/ressource met à jour une ressource et incrémente suffix si modif du résumé', function () {
+  it('POST /api/ressource met à jour une ressource et incrémente inc si modif du résumé', function () {
     function checkOne (ressource) {
       const {oid} = ressource
       cleanVolatileProperties(ressource)
       ressource.resume += faker.lorem.words()
-      ressource.suffix++
+      ressource.inc++
       const postData = {
         oid,
         resume: ressource.resume
@@ -258,14 +258,14 @@ describe('controller api ressource', () => {
       .catch(catcher)
   })
 
-  it('POST /api/ressource met à jour une ressource et incrémente version et suffix si modif des auteurs', () => {
+  it('POST /api/ressource met à jour une ressource et incrémente version et inc si modif des auteurs', () => {
     function checkOne (ressource) {
       const {oid} = ressource
       cleanVolatileProperties(ressource)
       // on ajoute un auteur
       const existingPids = ressource.auteurs.concat(ressource.contributeurs)
       ressource.auteurs.push(getRandomPersonne(true, existingPids))
-      ressource.suffix++
+      ressource.inc++
       ressource.version++
       // on vire ça des propriétés à vérifier car ça va changer
       delete ressource.archiveOid
@@ -292,7 +292,7 @@ describe('controller api ressource', () => {
       const {oid} = ressource
       cleanVolatileProperties(ressource)
       // on ajoute une relation
-      ressource.relations.push([ressourceConfig.constantes.relations.assocA, getRandomRessource(true, [ressource.rid])])
+      ressource.relations.push([configRessource.constantes.relations.assocA, getRandomRessource(true, [ressource.rid])])
       const postData = {
         oid,
         relations: ressource.relations

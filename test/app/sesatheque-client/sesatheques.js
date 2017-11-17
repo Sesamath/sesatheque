@@ -41,7 +41,7 @@
 import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
-import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/dist/sesatheques'
+import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/src/sesatheques'
 import boot from '../boot'
 
 chai.use(sinonChai)

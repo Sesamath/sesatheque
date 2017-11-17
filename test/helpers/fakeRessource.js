@@ -33,8 +33,10 @@
 import faker from 'faker/locale/fr'
 import fakeRef from './fakeRef'
 import config from '../../app/config'
-import ressourceConfig from '../../app/ressource/config'
+import configRessource from '../../app/ressource/config'
+
 const myBaseId = config.application.baseId
+const types = Object.keys(configRessource.listes.type)
 
 /**
  * Retourne une ressource avec du contenu aléatoire (avec publié, restriction à 0 et sans auteurs ni contributeur si on les impose pas)
@@ -54,7 +56,7 @@ function getFakeRessource (options) {
   } else if (!options.norid && fakeRessource.oid) {
     fakeRessource.rid = myBaseId + '/' + fakeRessource.oid
   }
-  if (!options.notype) fakeRessource.type = options.type || faker.random.arrayElement(['arbre', 'ato', 'em', 'j3p', 'url'])
+  if (!options.notype) fakeRessource.type = options.type || faker.random.arrayElement(types)
   if (!options.noorigine) fakeRessource.origine = options.origine || faker.lorem.word()
   if (!options.noidOrigine) fakeRessource.idOrigine = options.idOrigine || faker.random.uuid()
   if (!options.notitre) fakeRessource.titre = options.titre || faker.lorem.words()
@@ -65,15 +67,15 @@ function getFakeRessource (options) {
   if (!options.norestriction) fakeRessource.restriction = options.restriction || 0
   if (!options.nolangue) fakeRessource.langue = options.langue || 'fra'
   if (!options.noversion) fakeRessource.version = options.version || faker.random.number(6)
-  if (!options.nosuffix) fakeRessource.suffix = options.suffix || faker.random.number(6)
+  if (!options.noinc) fakeRessource.inc = options.inc || faker.random.number(6)
 
   // niveaux
   if (options.niveaux) {
     fakeRessource.niveaux = options.niveaux
   } else if (!options.noniveaux) {
-    const niv1 = faker.random.arrayElement(ressourceConfig.listesOrdonnees.niveaux)
+    const niv1 = faker.random.arrayElement(configRessource.listesOrdonnees.niveaux)
     let niv2 = niv1
-    while (niv2 === niv1) niv2 = faker.random.arrayElement(ressourceConfig.listesOrdonnees.niveaux)
+    while (niv2 === niv1) niv2 = faker.random.arrayElement(configRessource.listesOrdonnees.niveaux)
     fakeRessource.niveaux = [niv1, niv2]
   }
   // catégories
@@ -81,9 +83,9 @@ function getFakeRessource (options) {
     fakeRessource.categories = options.categories
   } else if (!options.nocategories) {
     // on ajoute deux catégories au pif
-    // Object.keys(ressourceConfig.listes.categories) renvoie {string[]} et on veut du number,
+    // Object.keys(configRessource.listes.categories) renvoie {string[]} et on veut du number,
     // faut aller dans constantes.categories
-    const catList = Object.assign({}, ressourceConfig.constantes.categories)
+    const catList = Object.assign({}, configRessource.constantes.categories)
     // on veut pas attribuer "aucune"
     delete catList.aucune
     const cat1 = faker.random.objectElement(catList)

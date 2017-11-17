@@ -107,7 +107,7 @@ elif [ "$isExport" == "Yes" ]; then
   fi
 
 elif [ -n "$jsCode" ]; then
-  eval mongo --eval "$jsCode" $args $db $file
+  eval mongo --eval "\"$jsCode\"" $args $db $file
 
 else
   eval mongo $args $db $file

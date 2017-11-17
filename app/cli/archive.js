@@ -116,10 +116,10 @@ function restore (oid, version, done) {
     const ressourceRestored = {
       oid: ressource.oid,
       version: ressource.version + 1,
-      suffix: ressource.suffix + 1
+      inc: ressource.inc + 1
     }
     Object.keys(archive).forEach(p => {
-      if (['oid', 'archiveOid', 'dateArchivage', 'version', 'suffix'].includes(p)) return
+      if (['oid', 'archiveOid', 'dateArchivage', 'version', 'inc'].includes(p)) return
       if (typeof archive[p] === 'function') return
       ressourceRestored[p] = archive[p]
     })

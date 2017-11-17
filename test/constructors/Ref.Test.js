@@ -36,31 +36,48 @@ import fakeRef from '../helpers/fakeRef'
 import fakeRessource from '../helpers/fakeRessource'
 // cf http://chaijs.com/api/bdd/
 import {expect} from 'chai'
+import configRessource from '../../app/ressource/config'
+
+const types = Object.keys(configRessource.listes.type)
+// vérif que deux objets sont identiques
+const check = (data, expected) => {
+  // malgré des objets qui semblent vraiment égaux, ce truc passe pas
+  // expect(ref).to.deep.equal(refOrig)
+  // mais en prenant les clés une par une ça passe…
+  const keysData = Object.keys(data).sort()
+  const keysExpected = Object.keys(expected).sort()
+  expect(keysData).to.deep.equal(keysExpected, 'liste de propriétés')
+  keysExpected.forEach(k => expect(data[k]).to.deep.equal(expected[k], `propriété ${k}`))
+}
 
 describe('Ref', () => {
-  const ressource = fakeRessource()
   it('Converti une ressource', () => {
-    const ref = new Ref(ressource)
-    expect(ref.type).to.equal(ressource.type, 'Pb type')
-    expect(ref.titre).to.equal(ressource.titre, 'Pb titre')
-    expect(ref.resume).to.equal(ressource.resume, 'Pb resume')
-    expect(ref.commentaires).to.equal(ressource.commentaires, 'Pb commentaires')
-    expect(ref.aliasOf).to.equal(ressource.rid, 'Pb rid => aliasOf')
-    if (ressource.type === 'arbre') {
-      expect(ref.enfants).to.deep.equal(ressource.enfants, 'Pb enfants')
-    }
+    types
+      .map(type => fakeRessource({type}))
+      .forEach(ressource => {
+        const ref = new Ref(ressource)
+        const expectedFields = ['aliasOf', 'type', 'titre', 'resume', 'commentaires', 'description', 'public', 'categories', 'inc']
+        // on a jamais d'enfants sur une ref venant d'une ressource (car y'a un aliasOf)
+        expect(Object.keys(ref).sort()).to.deep.equal(expectedFields.sort(), 'pb sur la liste des champs')
+        expectedFields.forEach(p => {
+          if (p === 'aliasOf') expect(ref[p]).to.equal(ressource.rid, 'Pb rid => aliasOf')
+          else if (p === 'public') expect(ref[p]).to.equal(ressource.publie && !ressource.restriction, 'Pb rid => aliasOf')
+          else expect(ref[p]).to.deep.equal(ressource[p], `Pb ${p}`)
+        })
+      })
   })
 
   it('Laisse inchangé une ref', () => {
     const refOrig = fakeRef()
     const ref = new Ref(refOrig)
-    // console.log('la ref\n', refOrig, '\nest devenue\n', ref)
-    // malgré des objets qui semblent vraiment égaux, ce truc passe pas
-    // expect(ref).to.deep.equal(refOrig)
-    // mais en prenant les clés une par une ça passe…
-    const keysOrig = Object.keys(refOrig).sort()
-    const keys = Object.keys(ref).sort()
-    expect(keys).to.deep.equal(keysOrig, 'liste de propriétés')
-    keys.forEach(k => expect(ref[k]).to.deep.equal(refOrig[k], `propriété ${k}`))
+    check(ref, refOrig)
+  })
+
+  it('conserve les enfants d’une ref de type arbre sans aliasOf (un dossier d’arbre)', () => {
+    const data = fakeRef({type: 'arbre'})
+    data.enfants = [fakeRef()]
+    data.enfants.push(fakeRef())
+    delete data.aliasOf
+    check(new Ref(data), data)
   })
 })

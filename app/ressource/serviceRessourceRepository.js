@@ -308,7 +308,7 @@ module.exports = function (ressourceComponent) {
      * Helper du save, pour
      * - incrémenter le n° de version si la ressource a une propriété versionNeedIncrement
      *   ou si une des propriétés listées dans config.versionTriggers a changée de valeur
-     * - incrémenter aussi le suffix si une des propriétés listées dans config.suffixTriggers a changée de valeur
+     * - incrémenter aussi inc si une des propriétés listées dans config.suffixTriggers a changée de valeur
      * - lancer en tâche de fond, si besoin, l'update des arbres qui utilisent cette ressource, ici et sur toutes
      *   les sésathèques qui référencent cette ressource via un ExternalRef
      * - mettre à jour nos listener si les externalRef de cette ressource ont changé
@@ -336,10 +336,10 @@ module.exports = function (ressourceComponent) {
       // pour la comparaison, deux objets avec la même définition littérale sont vus != en js
       // on utilise https://lodash.com/docs#isEqual
       const versionNeedIncrement = ressource.versionNeedIncrement || config.versionTriggers.some((prop) => !_.isEqual(ressource[prop], original[prop]))
-      // suffix
-      const suffixNeedIncrement = versionNeedIncrement || config.suffixTrigger.some(prop => !_.isEqual(ressource[prop], original[prop]))
-      log.debug(`dans checkAgainstPrevious pour ${ressource.oid} on a suffixNeedIncrement ${suffixNeedIncrement} et versionNeedIncrement ${versionNeedIncrement}`)
-      ressource.suffix = original.suffix
+      // inc
+      const incNeedIncrement = versionNeedIncrement || config.incTrigger.some(prop => !_.isEqual(ressource[prop], original[prop]))
+      log.debug(`dans checkAgainstPrevious pour ${ressource.oid} on a incNeedIncrement ${incNeedIncrement} et versionNeedIncrement ${versionNeedIncrement}`)
+      ressource.inc = original.inc
       // version
       ressource.version = original.version
       if (versionNeedIncrement) {
@@ -351,13 +351,13 @@ module.exports = function (ressourceComponent) {
           if (error) return next(error)
           log.debug('ressource archivée', archive)
           ressource.version++
-          ressource.suffix++
+          ressource.inc++
           ressource.archiveOid = archive.oid
           next(null, ressource)
           updateParents(ressource)
         })
       } else {
-        if (suffixNeedIncrement) ressource.suffix++
+        if (incNeedIncrement) ressource.inc++
         next(null, ressource)
         updateParents(ressource)
       }

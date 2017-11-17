@@ -58,7 +58,12 @@ let timerId
 const defaultDelay = 3000
 const resetTimer = (delay = defaultDelay) => {
   if (timerId) clearTimeout(timerId)
-  timerId = setTimeout(resolvedValue.lassi.shutdown, delay)
+  timerId = setTimeout(shutdown, delay)
+}
+const shutdown = (done) => {
+  if (!resolvedValue.lassi) throw new Error('impossible de fermer l’appli avant de l’avoir démarrée')
+  if (done) resolvedValue.lassi.on('shutdown', done)
+  resolvedValue.lassi.shutdown()
 }
 
 /**
@@ -97,5 +102,16 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
     reject(error)
   }
 })
+// on ajoute ça pour tenter de le mettre dans un after global, mais ça veut pas marcher…
+getBootPromise.shutdown1 = () => new Promise((resolve, reject) => {
+  try {
+    shutdown(resolve)
+  } catch (error) {
+    reject(error)
+  }
+})
+// passer ça en callback de la fct globale run (qui existe si on ajoute --delay dans mocha.opts)
+// marche pas non plus
+getBootPromise.shutdown = shutdown
 
 module.exports = getBootPromise

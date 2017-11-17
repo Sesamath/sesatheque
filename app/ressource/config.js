@@ -30,11 +30,12 @@
  */
 
 'use strict'
-var commonConfig = require('sesatheque-client/src/config')
+import common from 'sesatheque-client/src/config'
+
 /**
  * Nos listes de types & co, qui changent rarement
  */
-var ressourceConfig = {
+const configRessource = {
   langueDefaut: 'fra',
   /**
    * Les listes de choix pour nos propriétés dont on enregistre des ids
@@ -54,7 +55,7 @@ var ressourceConfig = {
       sequenceModele: 'modèle de séquence',
       url: 'page externe'
     },
-    niveaux: commonConfig.niveaux,
+    niveaux: common.niveaux,
     categories: {
       1: 'Activité fixe',
       2: 'Activité animée',
@@ -137,7 +138,7 @@ var ressourceConfig = {
   },
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
   listesOrdonnees: {
-    niveaux: commonConfig.ordre.niveaux,
+    niveaux: common.ordre.niveaux,
     typeDocumentaires: [9, 5, 6, 12, 11, 1, 2],
     typePedagogiques: [3, 9, 91, 92, 191, 7, 2, 81, 82, 13, 141, 151, 21, 22]
   }, // fin des listes
@@ -294,7 +295,7 @@ var ressourceConfig = {
   // les propriétés dont la modif déclenche un upgrade de version
   versionTriggers: ['origine', 'idOrigine', 'parametres', 'enfants', 'auteurs', 'contributeurs'],
   // les propriétés supplémentaires dont la modif déclenche l'incrément de publicSuffix sans changer de version
-  suffixTrigger: ['titre', 'resume', 'description', 'commentaires', 'version'],
+  incTrigger: ['titre', 'resume', 'description', 'commentaires', 'version'],
 
   // ATTENTION, pour les types faut être cohérent avec les filtres du constructeur Ressource
   // les types requis (il faut la même liste de propriétés que labels, et des valeurs * dont _.is* existe)
@@ -362,7 +363,7 @@ var ressourceConfig = {
       liste: 8,
       aucune: 9 // déclenchera un warning dans $ressourceControl.valide
     },
-    niveaux: commonConfig.constantes.niveaux,
+    niveaux: common.constantes.niveaux,
     typePedagogiques: {
       cours: 3,
       exercice: 9,
@@ -408,9 +409,9 @@ var ressourceConfig = {
       aPourCorrige: 51,
       estLaCorrectionDe: 52
     },
-    restriction: commonConfig.constantes.restriction,
+    restriction: common.constantes.restriction,
     // des constantes pour nos routes
-    routes: commonConfig.constantes.routes
+    routes: common.constantes.routes
   }, // fin constantes
   /**
    * Des formats d'affichage
@@ -428,4 +429,4 @@ var ressourceConfig = {
   }
 }
 
-module.exports = ressourceConfig
+module.exports = configRessource

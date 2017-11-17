@@ -80,7 +80,7 @@ if (process.env.SESATHEQUE_CONF && /^[^/]+$/.test(process.env.SESATHEQUE_CONF)) 
 }
 const localConfig = require(path.join.apply(this, privateConfPath))
 // la conf du composant ressource à part
-const ressourceConfig = require('./ressource/config')
+const configRessource = require('./ressource/config')
 
 /** La config */
 const config = {
@@ -177,7 +177,7 @@ const config = {
     sesalabSso: {
       authServers: []
     },
-    ressource: ressourceConfig
+    ressource: configRessource
   },
   // urls absolues des sésathèques que l'on accepte de référencer (pour les alias, par ex quand
   // des sesalab connectés à plusieurs sésathèques mettent des ressources de l'une

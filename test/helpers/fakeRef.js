@@ -35,21 +35,29 @@ import faker from 'faker/locale/fr'
 import config from '../../app/config'
 
 const myBaseId = config.application.baseId
+const configRessource = config.components.ressource
+const types = Object.keys(configRessource.listes.type)
+const categoriesIds = Object.keys(configRessource.listes.categories)
 
-function getOne () {
+function getFakeRef (options) {
+  if (!options) options = {}
   const fakeRef = {
-    aliasOf: myBaseId + '/' + faker.random.uuid(),
-    type: faker.random.arrayElement(['arbre', 'ato', 'em', 'j3p', 'url']),
-    titre: faker.lorem.words(),
-    resume: faker.lorem.sentence(),
-    description: faker.lorem.paragraphs(),
-    commentaires: faker.lorem.paragraphs(),
-    public: faker.random.arrayElement([true, true, true, false]),
-    suffix: faker.random.number() // renvoie un entier
+    aliasOf: options.aliasOf || myBaseId + '/' + faker.random.uuid(),
+    type: options.type || faker.random.arrayElement(types),
+    titre: options.titre || faker.lorem.words(),
+    resume: options.resume || faker.lorem.sentence(),
+    description: options.description || faker.lorem.paragraphs(),
+    commentaires: options.commentaires || faker.lorem.paragraphs(),
+    categories: options.categories || faker.random.arrayElement(types),
+    public: options.public || faker.random.arrayElement([true, true, true, false]),
+    inc: options.inc || faker.random.number() // renvoie un entier
   }
+  // on prend les catégories imposées par le type, ou une au pif
+  fakeRef.categories = config.components.ressource.typeToCategories[fakeRef.type] || [faker.random.arrayElement(categoriesIds)]
+  // pour les ressources privées on génère une clé
   if (!fakeRef.public) fakeRef.cle = faker.random.uuid()
 
   return fakeRef
 }
 
-export default getOne
+export default getFakeRef
