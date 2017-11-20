@@ -30,7 +30,7 @@
  */
 
 'use strict'
-import common from 'sesatheque-client/src/config'
+const common = require('sesatheque-client/src/config')
 
 /**
  * Nos listes de types & co, qui changent rarement

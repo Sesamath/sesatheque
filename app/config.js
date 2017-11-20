@@ -39,6 +39,8 @@ const path = require('path')
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
 const {addSesatheque, reBaseUrl} = require('sesatheque-client/src/sesatheques')
+// la conf du composant ressource à part
+const configRessource = require('./ressource/config')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -79,8 +81,6 @@ if (process.env.SESATHEQUE_CONF && /^[^/]+$/.test(process.env.SESATHEQUE_CONF)) 
   privateConfPath.push('config')
 }
 const localConfig = require(path.join.apply(this, privateConfPath))
-// la conf du composant ressource à part
-const configRessource = require('./ressource/config')
 
 /** La config */
 const config = {
