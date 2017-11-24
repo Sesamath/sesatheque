@@ -55,6 +55,7 @@ const sjt = require('sesajstools')
 const {merge} = require('sesajstools/utils/object')
 const config = require('./config')
 const configCheck = require('./configCheck')
+const addMiddlewares = require('./addMiddlewares')
 
 /**
  * Ajoute nos middlewares et listeners, après déclaration des composants mais avant bootstrap
@@ -87,12 +88,13 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
 
     /**
      * On ajoutera nos middleware après session
+     * (sauf content-type après compression, pour qu'il soit avant body-parser)
      * @param {Object} rail le rail express
      * @param {string} name Le nom du middleware qui vient d'être mis sur le rail
      */
     lassi.on('afterRailUse', function (rail, name) {
       // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
-      if (name === 'session') require('./addMiddlewares')(rail)
+      if (name === 'session') addMiddlewares.afterSession(rail)
     })
 
     // le listener beforeTransport

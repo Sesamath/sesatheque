@@ -52,29 +52,38 @@ if (!homeContent) homeContent = 'Ce site est encore un prototype expérimental.'
  * Controleur du composant main pour les routes "statiques"
  * @Controller controllerMain
  */
-module.exports = function (controller) {
-  // nos ressources statiques génériques
-  const expressOptions = {
-    fsPath: path.join(__dirname, 'public'),
-    maxAge: config.application.staticMaxAge || '7d'
-  }
-  controller.serve('/', expressOptions)
+module.exports = function (mainComponent) {
+  mainComponent.controller(function ($rail) {
+    // l'appli express
+    const app = $rail.get()
+    // nos ressources statiques génériques
+    const expressOptions = {
+      fsPath: path.join(__dirname, 'public'),
+      maxAge: config.application.staticMaxAge || '7d'
+    }
 
-  /**
-   * La home
-   * @route GET /
-   */
-  controller.get('/', function (context) {
-    context.layout = 'page'
-    context.html({
-      $metas: {
-        title: config.application.homeTitle
-      },
-      contentBloc: {
-        $view: 'contents',
-        contents: [homeContent]
-      },
-      version: version
+    this.serve('/', expressOptions)
+
+    /**
+     * La home
+     * @route GET /
+     */
+    this.get('/', function (context) {
+      context.layout = 'page'
+      context.html({
+        $metas: {
+          title: config.application.homeTitle
+        },
+        contentBloc: {
+          $view: 'contents',
+          contents: [homeContent]
+        },
+        version: version
+      })
     })
+
+    // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
+    // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)
+    app.head('/', (req, res) => res.send())
   })
 }

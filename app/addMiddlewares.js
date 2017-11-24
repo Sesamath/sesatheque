@@ -48,7 +48,7 @@ var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les
  * Ajoute sur le rail les requetes en console (en dev), CORS, expires, access.log et perf.log
  * @param {Object} rail le rail express
  */
-module.exports = function afterRailSession (rail) {
+function afterSession (rail) {
   // ajout d'express en global sur lassi
   lassi.express = rail
   /**
@@ -139,9 +139,7 @@ module.exports = function afterRailSession (rail) {
     var logAccessWriteStream = fs.createWriteStream(accessLog, {'flags': 'a'})
     if (logAccessWriteStream) {
       // et la fermeture du log
-      lassi.on('shutdown', function () {
-        logAccessWriteStream.end()
-      })
+      lassi.on('shutdown', () => logAccessWriteStream.end())
       // cf https://www.npmjs.com/package/morgan
       // on met pas la forme réduite "combined", car si on ajoute le :post plus loin ça marche plus
       // et de toute façon on ajoute :response-time (en ms, un seul chiffre après la virgule)
@@ -222,4 +220,8 @@ module.exports = function afterRailSession (rail) {
       next()
     })
   }
+}
+
+module.exports = {
+  afterSession
 }

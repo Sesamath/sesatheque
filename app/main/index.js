@@ -55,9 +55,7 @@ this.application.templateEngines.dust.helper('dump', function (chunk, context, b
   return chunk.write('<pre class='debug'>' + JSON.stringify(params, null, 2) + '</pre>');
 }); /**/
 
-mainComponent.controller(function () {
-  require('./controllerMain')(this)
-})
+require('./controllerMain')(mainComponent)
 
 mainComponent.service('$page', function () {
   return require('./servicePage')()
