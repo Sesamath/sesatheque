@@ -51,7 +51,8 @@ import {XMLHttpRequest} from 'xmlhttprequest'
 import boot from '../boot'
 import config from '../../../app/config'
 import configRessource from '../../../app/ressource/config'
-import {getRandomRessource, populate, purge} from '../populate'
+import {addRessource, getRandomRessource, populate, purge} from '../populate'
+import fakeRessource from '../../helpers/fakeRessource'
 
 chai.use(sinonChai)
 
@@ -63,11 +64,19 @@ const sesatheques = [
   }
 ]
 /**
- * Liste des propriétés toujours présentes sur une Ref
+ * Liste des propriétés communes à Ref & ClientItem (sauf aliasOf|rid, et les props facultatives enfants et parametres)
  * @private
  * @type {string[]}
  */
-const refProperties = Object.keys(new Ref())
+const properties = Object.keys(new Ref())
+/**
+ * Retourne une promesse d'enregistrement d'une ressource en base (avec l'entity passée au resolve)
+ * @param ressource
+ * @return {Promise}
+ */
+const getAdditionPromise = (ressource) => new Promise((resolve, reject) => {
+  addRessource(ressource, (error, entity) => error ? reject(error) : resolve(entity))
+})
 
 describe('sesatheque-client', () => {
   let sesathequeClient
@@ -79,11 +88,11 @@ describe('sesatheque-client', () => {
    * @param {Object} expected
    */
   const checkRefProperties = (item, expected) => {
-    expect(item.aliasOf).to.equal(expected.aliasOf || expected.rid, 'Pb avec aliasOf')
-    if (item.enfants) expect(item.enfants).to.equal(expected.enfants, 'Pb avec enfants')
-    if (item.parametres) expect(item.parametres).to.equal(expected.parametres, 'Pb avec parametres')
-    refProperties.forEach(p => {
+    if (item.enfants) expect(item.enfants).to.deep.equal(expected.enfants, 'Pb avec enfants')
+    if (item.parametres) expect(item.parametres).to.deep.equal(expected.parametres, 'Pb avec parametres')
+    properties.forEach(p => {
       if (p === 'public') {
+        // on traite le cas où expected est une ressource
         if (expected.hasOwnProperty('public')) expect(item[p]).to.equal(expected[p], `Pb avec ${p}`)
         else if (expected.publie === false) expect(item.public).to.equal(false, `Pb avec public (non publie)`)
         else if (expected.restriction) expect(item.public).to.equal(false, `Pb avec public (restreint)`)
@@ -92,7 +101,6 @@ describe('sesatheque-client', () => {
         expect(item[p]).to.deep.equal(expected[p], `Pb avec ${p}`)
       }
     })
-    expect(consoleErrorSpy).to.not.have.been.called
   }
   /**
    * Vérifie que item a bien toutes les propriétés à celles qui existent dans expected (à l'identique)
@@ -101,17 +109,19 @@ describe('sesatheque-client', () => {
    * @param expected
    */
   const checkItem = (item, expected) => {
-    // si expected n'a pas une des propriétés de refProperties on l'ajoute pour la comparaison
+    // si expected n'a pas une des propriétés de properties on l'ajoute pour la comparaison
     const fakeExpected = expected
-    refProperties.forEach(p => {
+    properties.forEach(p => {
+      // item n'a pas d'aliasOf mais un rid
+      if (p === 'aliasOf') p = 'rid'
       // si c'est pas dans expected on veut passer le test de cette propriété
       if (!expected.hasOwnProperty(p)) fakeExpected[p] = item[p]
     })
     checkRefProperties(item, fakeExpected)
     if (expected.enfants && !item.enfants) throw new Error('Pas d’enfants sur l’item')
-    if (expected.parametres && !item.enfants) throw new Error('Pas d’enfants sur l’item')
+    if (expected.parametres && !item.parametres) throw new Error('Pas de parametres sur l’item')
     Object.keys(expected).forEach(p => {
-      if (refProperties.includes(p)) return // déjà testé
+      if (properties.includes(p)) return // déjà testé
       expect(item[p]).to.deep.equal(expected[p], `Pb item avec ${p}`)
     })
   }
@@ -132,13 +142,16 @@ describe('sesatheque-client', () => {
   )
   after(purge)
 
-  beforeEach(() => { consoleErrorSpy = sinon.spy(console, 'error') })
-  afterEach(() => console.error.restore())
+  beforeEach(() => {
+    consoleErrorSpy = sinon.spy(console, 'error')
+  })
+  afterEach(() => {
+    expect(consoleErrorSpy).to.not.have.been.called
+    console.error.restore()
+  })
 
   it('getRessource remonte une ressource', () => {
-    const getCheck = () => new Promise((resolve, reject) => {
-      const consoleErrorSpy = sinon.spy(console, 'error')
-      const expected = getRandomRessource()
+    const getCheckPromise = (expected) => new Promise((resolve, reject) => {
       sesathequeClient.getRessource(expected.rid, (error, ressource) => {
         if (error) return reject(error)
         Object.keys(expected).forEach(p => {
@@ -146,24 +159,50 @@ describe('sesatheque-client', () => {
           if (p.substr(0, 1) === '$') return
           expect(expected[p]).to.deep.equal(ressource[p], `Pb avec ${p} pour la ressource ${ressource.rid}`)
         })
-        expect(consoleErrorSpy).to.not.have.been.called
-        console.error.restore()
         resolve()
       })
     })
-    return Promise.all((new Array(10)).map(getCheck))
+    // on veut tester ça avec certaines ressources d'un type imposé (undefined => random)
+    const types = ['arbre', 'em', 'sequenceModele', undefined, undefined]
+    const ressources = types.map(type => fakeRessource({type}))
+    const promises = ressources.map((ressource) => getAdditionPromise(ressource).then(getCheckPromise))
+    return Promise.all(promises)
   })
 
-  it('getItem remonte un item', function (done) {
-    // toutes publiques
-    const entity = getRandomRessource()
-    entity.$droits = 'R'
-    const expected = ressourceToItem(entity)
-    sesathequeClient.getItem(entity.rid, function (error, item) {
+  it('getItem remonte un item', () => {
+    const getCheckPromise = (entity) => new Promise((resolve, reject) => {
+      sesathequeClient.getItem(entity.rid, (error, item) => {
+        if (error) return reject(error)
+        const expected = ressourceToItem(entity)
+        // on veut juste une égalité booléenne
+        expect(!item.$deletable).to.equal(!expected.$deletable)
+        expected.$deletable = item.$deletable
+        checkItem(item, expected)
+        resolve()
+      })
+    })
+    // on veut tester ça avec certaines ressources d'un type imposé (undefined => random)
+    const types = ['arbre', 'em', 'sequenceModele', undefined, undefined]
+    const ressources = types.map(type => fakeRessource({type}))
+    const promises = ressources.map((ressource) => getAdditionPromise(ressource).then(getCheckPromise))
+    return Promise.all(promises)
+  })
+
+  it('getRessource et getItem throw si rid sur baseId inconnue', () => {
+    const getRessourceFoireux = () => sesathequeClient.getRessource('foo/bar', () => {})
+    const getItemFoireux = () => sesathequeClient.getItem('foo/bar', () => {})
+    expect(getRessourceFoireux).to.throw
+    expect(getItemFoireux).to.throw
+  })
+
+  it('getItem râle en console si on veut une ressource privée sans avoir de token, il tente en public et retourne le résultat', (done) => {
+    const ressource = getRandomRessource()
+    const expected = ressourceToItem(ressource)
+    sesathequeClient.getItem(ressource.rid, false, (error, item) => {
       if (error) return done(error)
-      // on veut juste une égalité booléenne
-      expect(!item.$deletable).to.equal(!expected.$deletable)
-      expected.$deletable = item.$deletable
+      expect(consoleErrorSpy).to.have.been.calledOnce
+      console.error.reset()
+      item.$deletable = false // undefined au retour de getItem
       checkItem(item, expected)
       done()
     })

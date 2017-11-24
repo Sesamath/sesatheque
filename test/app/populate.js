@@ -56,6 +56,17 @@ let pOids = []
 let rOids = []
 
 /**
+ * Ajoute une ressource particulière (et file l'entity à next)
+ * @param ressource
+ * @param next
+ */
+export function addRessource (ressource, next) {
+  boot().then(({lassi}) => {
+    lassi.service('EntityRessource').create(ressource).store(next)
+  }).catch(next)
+}
+
+/**
  * Retourne une des personnes générées au hasard
  * @param {boolean} [pidOnly] passer true pour ne récupérer que le pid
  * @param {string[]} [except] Passer une liste de pid que l'on ne veut pas
