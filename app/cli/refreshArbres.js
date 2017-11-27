@@ -75,13 +75,17 @@ function refreshArbres (oid, done) {
       let hasChanged = false
       flow(item.enfants).seqEach(function (enfant) {
         const nextEnfant = this
+        if (!enfant) {
+          log.dataError(`enfant invalide dans ${item && (item.rid || item.aliasOf || item.titre)}`, item)
+          return this()
+        }
         process.nextTick(cleanEnfant, enfant, function (error, enfantCleaned, enfantsHadChanges) {
           if (error) return nextEnfant(error)
           if (enfantsHadChanges) hasChanged = true
           nextEnfant(null, enfantCleaned)
         })
       }).seq(function (enfants) {
-        item.enfants = enfants
+        item.enfants = enfants.filter(e => e)
         next(null, item, hasChanged)
       }).catch(next)
     } else {
