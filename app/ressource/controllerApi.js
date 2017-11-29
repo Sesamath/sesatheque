@@ -41,7 +41,7 @@ const Ref = require('../constructors/Ref')
 const {ensure} = require('../tools')
 const url = require('../tools/url')
 const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
-const {getJstreeChildren, toJstree} = require('sesatheque-client/src/jstree/convert')
+const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
 const myBaseId = config.application.baseId
 const myBaseUrl = config.application.baseUrl
