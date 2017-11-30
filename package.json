@@ -71,7 +71,7 @@
     "jstree": "3.3.4",
     "lassi": "Sesamath/lassi#2.2.6",
     "lodash": "4.16.4",
-    "moment": "2.18.1",
+    "moment": "2.19.3",
     "morgan": "1.9.0",
     "request": "2.81.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#1.0.2",
