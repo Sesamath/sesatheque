@@ -2,7 +2,10 @@
 
 usage() {
   echo "$0 [file]"
-  echo 'Ouvre un shell mongo ou exécute un script mongo'
+  echo 'Ouvre un shell mongo ou exécute un script mongo.'
+  echo 'Sans argument ça ouvre un shell en chargeant scripts-mongo/mongorc.js au préalable'
+  echo '(qui ajoute plusieurs fonctions utile dans un contexte sesalab, cf source pour le détail)'
+  echo
   echo 'Options :'
   echo '  -c <collection> : indique une collection (pour -i ou -x, si le nom du fichier ne l’indique pas)'
   echo '  -d <dossier> : pour traiter tous les fichiers *.export qu’il contient'
@@ -10,9 +13,10 @@ usage() {
   echo '  -f <fichier> : fichier à utiliser (script ou import ou export)'
   echo '  -g <fichier> : fichier (path absolu) de conf de l’appli (à prendre à la place de _private/config.js)'
   echo '  -h : affiche cette aide'
-  echo '  -i : lance mongoimport sur le fichier (collection déduite si -c absent) ou tous les fichiers de -d (staging dev only)'
+  echo '  -i : lance mongoimport sur le fichier (collection déduite si -c absent) ou tous les fichiers de -d (sauf staging prod)'
   echo '  -p : affiche seulement les arguments mongo'
   echo '  -q : mode --quiet'
+  echo '  -s : ajoute --shell, pour charger un ou des scripts et récupérer un shell ensuite'
   echo '  -u : mode --upsert à la place de --drop pour les imports'
   echo '  -x : avec -c, lance mongoexport vers le fichier (-f), sans exporte toutes les collections vers des fichiers du dossier -d'
   echo
@@ -37,9 +41,10 @@ isExport=No
 isQuiet=No
 isUpstert=No
 justPrint=No
+forceShell=No
 
 # check des options
-while getopts "c:d:e:f:g:hipqx" OPTION
+while getopts "c:d:e:f:g:hipqsx" OPTION
 do
   case $OPTION in
     c) collection=$OPTARG;;
@@ -51,6 +56,7 @@ do
     i) isImport=Yes ;;
     p) justPrint=Yes;;
     q) isQuiet=Yes;;
+    s) forceShell=Yes;;
     u) isUpsert=Yes;;
     x) isExport=Yes ;;
   esac
@@ -69,10 +75,18 @@ read -r staging host port db user pass <<< $(node -e "const c = require('$nodeCo
 args="--host $host --port $port -u $user -p $pass"
 
 [ "$isQuiet" == 'Yes' ] && args="$args --quiet"
+# si on précise pas de fichier et que c'est ni import ni export, ce sera un shell,
+# on ajoute ici nos fonctions par défaut
+if [ "$isImport" == "No" ] && [ "$isExport" == "No" ] && [ -z "$file" ]; then
+  file="$rootDir/scripts-mongo/mongorc.js"
+  forceShell=Yes
+fi
+
+[ "$forceShell" == 'Yes' ] && args="$args --shell"
 [ "$justPrint" == 'Yes' ] && echo "mongo(import|export) $args (--db $db) …" && exit 0
 
 if [ "$isImport" == "Yes" ]; then
-  [ "$staging" != "dev" ] && echo 'Import en production impossible (mettre config.application.staging=dev pour le forcer)'>&2 && usage 1
+  [ "$staging" == "prod" ] && echo 'Import en production impossible (mettre config.application.staging=dev ou preprod pour le forcer)'>&2 && usage 1
   [ "$isUpsert" == "Yes" ] && args="--upsert $args --db $db" || args="--drop $args --db $db"
   # On précise un fichier
   if [ -n "$file" ]; then
