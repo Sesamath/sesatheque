@@ -117,21 +117,15 @@ function afterSession (rail) {
    * @todo le mettre aussi sur le html public (quand le source sera indépendant de la session)
    */
   applog('adding middleware', 'expires')
-  const regExpDisplayRoute = new RegExp(`/public/${config.components.ressource.constantes.routes.display}/`)
-  const isDisplayRoute = (url) => regExpDisplayRoute.test(url)
   rail.use('/', function (req, res, next) {
     // pas de cache sur le display, car coté client élève dans sesalab y'a pas moyen de connaître ressource.inc
     // pour en déduire un $displayUrl fiable (le rid est enregistré dans la séquence)
-    if (isDisplayRoute(req.url)) return next()
-    var ttl
-    if (tools.isStatic(req.url)) ttl = staticTtl
-    else if (tools.isPublic(req.url)) ttl = publicTtl
-    if (ttl) {
+    // idem pour l'api, on laisse express gérer le etag (ça fait du 304 not modified si y'a pas de changement)
+    if (tools.isStatic(req.url)) {
+      const ttl = staticTtl
       // faut mettre ça au format de la RFC 1123
       res.header('Expires', moment().utc().add(ttl, 's').format('ddd, DD MMM YYYY HH:mm:ss') + ' GMT')
       res.header('Cache-Control', 'public, max-age=' + ttl)
-      // @todo regarder If-Modified-Since et répondre 304 Not Modified si c'est le cas
-      // mais c'est vraiment pas très urgent si on a un varnish devant nous il le gère
     }
     next()
   })
