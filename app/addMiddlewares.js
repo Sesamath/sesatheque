@@ -117,7 +117,12 @@ function afterSession (rail) {
    * @todo le mettre aussi sur le html public (quand le source sera indépendant de la session)
    */
   applog('adding middleware', 'expires')
+  const regExpDisplayRoute = new RegExp(`/public/${config.components.ressource.constantes.routes.display}/`)
+  const isDisplayRoute = (url) => regExpDisplayRoute.test(url)
   rail.use('/', function (req, res, next) {
+    // pas de cache sur le display, car coté client élève dans sesalab y'a pas moyen de connaître ressource.inc
+    // pour en déduire un $displayUrl fiable (le rid est enregistré dans la séquence)
+    if (isDisplayRoute(req.url)) return next()
     var ttl
     if (tools.isStatic(req.url)) ttl = staticTtl
     else if (tools.isPublic(req.url)) ttl = publicTtl
