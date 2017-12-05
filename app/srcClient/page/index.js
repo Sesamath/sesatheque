@@ -37,6 +37,7 @@ const sjtUrl = require('sesajstools/http/url')
 
 const autosize = require('./autosize')
 const refreshAuth = require('./refreshAuth')
+require('./bugsnag')
 
 const w = window
 const wd = w.document

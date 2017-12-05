@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="/styles/iframe.css">
+  {! cf servicePage et serviceRessourcePage qui affectent $metas.js !}
   {head|s}
 </head>
 <body class="iframe">
