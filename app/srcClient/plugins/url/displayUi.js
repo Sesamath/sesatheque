@@ -41,7 +41,6 @@ const page = require('../../page/index')
 
 // attention à mettre la même chose que dans display et le css
 const divIframeId = 'page'
-const divIframeSelector = '#page'
 
 /**
  * Retourne une seule fonction qui affectera les comportements de l'interface
@@ -160,19 +159,21 @@ module.exports = function (ressource, options, next) {
         // les fenetres modales
         const informationDialogOptions = {
           autoOpen: false,
-          buttons: {'Vu': () => $information.dialog('close')},
+          // buttons: {'Vu': () => $information.dialog('close')},
           resizable: false,
-          position: {my: 'left top', at: 'left bottom', of: '#entete'},
+          // collision none change rien, ça danse quand on enlève un dialog
+          // collision fit idem
+          position: {my: 'left top+50', at: 'left bottom', of: '#entete'},
           title: 'Information'
         }
         $information.dialog(informationDialogOptions)
 
         const consigneDialogOptions = {
           autoOpen: false,
-          buttons: {'Vu': () => $consigne.dialog('close')},
+          // buttons: {'Vu': () => $consigne.dialog('close')},
           // height: 350,
           // postition: {collision: 'flipfit', within: '#display'},
-          position: {my: 'center top', at: 'center bottom', of: '#entete'},
+          position: {my: 'center top+200', at: 'center bottom', of: '#entete'},
           resizable: true,
           title: 'Consigne',
           width: 450
@@ -185,7 +186,7 @@ module.exports = function (ressource, options, next) {
           // height: hasCkeditor ? 400 : 320,
           // position: [$('body').width() - 30 - 472, 50],
           // postition: {collision: 'flipfit', within: '#display'},
-          position: {my: 'right top+200', at: 'right bottom', of: '#entete'},
+          position: {collision: 'fit', my: 'right bottom', at: 'right bottom', of: '#display'},
           resizable: true,
           title: 'Ta réponse',
           width: hasCkeditor ? 580 : 480
@@ -311,7 +312,7 @@ module.exports = function (ressource, options, next) {
         const {currentIndex} = etapes
         const etape = etapes.liste[currentIndex]
         const titre = etapes.titres[currentIndex]
-        log(`showEtape ${currentIndex} ${titre}`)
+        // log(`showEtape ${currentIndex} ${titre}`)
         let i
         // on cache tout
         information.desactiver()
@@ -320,15 +321,8 @@ module.exports = function (ressource, options, next) {
         iframe.desactiver()
 
         // active les elts de l'etape en cours
-        log(`étape ${etapes.currentIndex} ${titre} avec ${etape.length} elts`, etape)
-        etape.forEach((part, i) => {
-          log(`on active part ${i} ${part.name}`)
-          try {
-            part.activer()
-          } catch (error) {
-            console.error(error)
-          }
-        })
+        log(`étape ${etapes.currentIndex} (${etape.map(e => e.name).join('+')}) ${titre}`)
+        etape.forEach(item => item.activer())
         // cache les boutons close
         $('.ui-dialog-titlebar-close').hide()
 
@@ -378,7 +372,7 @@ module.exports = function (ressource, options, next) {
         log('urlUi avec ', ressource.parametres, options)
         isResultatSent = false
         const params = ressource.parametres
-        const {sendResultat} = options
+        const {container, sendResultat} = options
         hasConsigne = params.question_option !== 'off'
         hasReponse = params.answer_option !== 'off'
         /**
@@ -396,22 +390,26 @@ module.exports = function (ressource, options, next) {
         editor = editorName ? require('../../editors/' + editorName) : null
 
         $page = $(`#${divIframeId}`)
-        // on ajoute tous nos div même si tous ne serviront pas pour simplifier le code
+        // on ajoute tous nos div même si tous ne serviront pas, pour simplifier le code
+        // les liens
         const entete = options.entete
         $lienReponse = $(dom.addElement(entete, 'div', {id: 'lienReponse'}, 'Réponse'))
         $lienConsigne = $(dom.addElement(entete, 'div', {id: 'lienConsigne'}, 'Consigne'))
         $lienInfo = $(dom.addElement(entete, 'div', {id: 'lienInfo'}, 'Information'))
         $filariane = $(dom.addElement(entete, 'div', {id: 'filariane'}))
-        $information = $(dom.addElement(entete, 'div', {id: 'information', 'class': 'invisible'}))
-
-        // gestion consigne
-        divConsigne = dom.addElement(entete, 'div', {id: 'consigne', 'class': 'invisible'})
+        // les dialogs
+        $information = $(dom.addElement(container, 'div', {id: 'information', 'class': 'invisible'}))
+        divConsigne = dom.addElement(container, 'div', {id: 'consigne', 'class': 'invisible'})
         $consigne = $(divConsigne)
-        divReponse = dom.addElement(entete, 'div', {id: 'reponse', 'class': 'invisible'})
+        divReponse = dom.addElement(container, 'div', {id: 'reponse', 'class': 'invisible'})
         $reponse = $(divReponse)
         if (hasConsigne) {
-          if (params.consigne) $(divConsigne).html(params.consigne)
-          else log.error('Pas de consigne alors que question_option vaut ' + params.question_option)
+          if (params.consigne) {
+            $(divConsigne).html(params.consigne)
+          } else {
+            log.error(`Pas de consigne alors que question_option vaut ${params.question_option}`)
+            $(divConsigne).html('Pas de consigne donnée.')
+          }
         }
 
         // gestion réponse
@@ -529,7 +527,7 @@ module.exports = function (ressource, options, next) {
         loadDependencies(function () {
           init()
           setEtapes()
-          log('les etapes', etapes)
+          log(`les etapes : ${etapes.liste.map(etape => etape.map(item => item.name).join('+')).join(' > ')}`, etapes.titres)
           showEtape()
           next()
         })
