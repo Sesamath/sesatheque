@@ -117,9 +117,9 @@ module.exports = function (ressource, options, next) {
           dom.addElement(form, 'p', null, "Réponse attendue mais pas d'envoi possible en prévisualisation")
         } else {
           dom.addElement(form, 'p', { 'class': 'info', style: { margin: '1em;' } },
-            "Aucun enregistrement ne sera effectué (car aucune destination n'a été fournie pour l'envoyer, normal en visualisation seule)")
+            "Aucun enregistrement ne sera effectué (car aucune destination n'a été fournie pour l'envoyer, c'est normal en visualisation seule)")
         }
-      }
+      } // addReponseDialog
 
       /**
        * Envoie la réponse saisie avec le résultat
@@ -182,7 +182,6 @@ module.exports = function (ressource, options, next) {
 
         const reponseDialogOptions = {
           autoOpen: false,
-          buttons: {'Envoyer cette réponse': sendReponse},
           // height: hasCkeditor ? 400 : 320,
           // position: [$('body').width() - 30 - 472, 50],
           // postition: {collision: 'flipfit', within: '#display'},
@@ -372,7 +371,8 @@ module.exports = function (ressource, options, next) {
         log('urlUi avec ', ressource.parametres, options)
         isResultatSent = false
         const params = ressource.parametres
-        const {container, sendResultat} = options
+        const {container} = options
+        sendResultat = options.sendResultat
         hasConsigne = params.question_option !== 'off'
         hasReponse = params.answer_option !== 'off'
         /**

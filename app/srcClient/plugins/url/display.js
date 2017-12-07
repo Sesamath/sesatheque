@@ -51,8 +51,7 @@ module.exports = function urlDisplay (ressource, options, next) {
     /**
      * Ajoute le bouton vu et le listener sur unload quand il n'y a pas de réponse demandée
      */
-    function addDefaultResultat () {
-      if (!options.resultatCallback) return
+    function addDefaultResultatCb () {
       // un listener pour envoyer 'affiché' comme score (i.e. un score de 1 avec une durée)
       options.container.addEventListener('unload', function () {
         if (isLoaded && !isResultatSent) sendResultat(null, true)
@@ -174,10 +173,6 @@ module.exports = function urlDisplay (ressource, options, next) {
      * @param {function} next
      */
     function sendResultat (reponse, deferSync, next) {
-      if (!resultatCallback) {
-        log.error(new Error('sendResultat appelé sans callback disponible'))
-        return
-      }
       const resultat = {
         score: 1
       }
@@ -191,7 +186,7 @@ module.exports = function urlDisplay (ressource, options, next) {
     }
 
     const $ = require('jquery')
-    let resultatCallback
+    const {resultatCallback} = options
     let isLoaded
     // pour éviter de reposter au unload si on a cliqué sur le bouton vu avant
     let isResultatSent = false
@@ -212,8 +207,6 @@ module.exports = function urlDisplay (ressource, options, next) {
       ;['base', 'pluginBase', 'container', 'errorsContainer'].forEach(function (param) {
         if (!options[param]) throw new Error('Paramètre ' + param + ' manquant')
       })
-      // init de nos var globales
-      if (typeof options.resultatCallback === 'function') resultatCallback = options.resultatCallback
       // raccourcis
       const params = ressource.parametres || {}
       const url = params.adresse
@@ -229,7 +222,7 @@ module.exports = function urlDisplay (ressource, options, next) {
       // ni question ni réponse, pas grand chose à faire
       if (isBasic) {
         return addPage(url, params, function () {
-          if (options.resultatCallback) addDefaultResultat()
+          if (resultatCallback) addDefaultResultatCb()
           $(divIframeSelector).show()
           next()
         })
@@ -237,10 +230,11 @@ module.exports = function urlDisplay (ressource, options, next) {
       // sinon, faut charger la gestion des dialog jQueryUi
       require.ensure(['./displayUi'], function (require) {
         const displayUi = require('./displayUi')
+        // on ajoute l'entete avant la page
         const entete = dom.addElement(options.container, 'div', {id: 'entete'})
         addPage(url, params, () => {
           // on ajoute ça pour displayUi
-          if (options.resultatCallback) options.sendResultat = sendResultat
+          if (resultatCallback) options.sendResultat = sendResultat
           options.entete = entete
           displayUi(ressource, options, next)
         })
