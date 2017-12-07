@@ -126,6 +126,7 @@ module.exports = function urlDisplay (ressource, options, next) {
           const p = dom.addElement(divIframe, 'p', {}, 'La page externe demandée ne peut être incorporée ici car elle n’est pas en https. Vous pouvez ')
           dom.addElement(p, 'a', {href: url, target: '_blank'}, 'l’ouvrir dans un nouvel onglet')
           dom.addText(p, '.')
+          next()
         } else {
           // on peut mettre une iframe, le texte sera écrasé à son chargement
           var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +

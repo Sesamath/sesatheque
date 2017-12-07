@@ -69,6 +69,7 @@ module.exports = function (ressource, options, next) {
       function addReponseDialog () {
         const form = dom.addElement(divReponse, 'form', {action: ''})
         const textarea = dom.addElement(form, 'textarea', {id: 'answer', cols: '50', rows: '10'})
+        $textarea = $(textarea)
         if (hasCkeditor) {
           /* global CKEDITOR */
           if (CKEDITOR.env.ie && CKEDITOR.env.version < 9) CKEDITOR.tools.enableHtml5Elements(document)
@@ -110,7 +111,7 @@ module.exports = function (ressource, options, next) {
           $('body').on('unload', function () {
             sendReponse(null, true)
           })
-          $(textarea).change(function () {
+          $textarea.change(function () {
             isResultatSent = false
           })
         } else if (options.preview) {
@@ -129,7 +130,7 @@ module.exports = function (ressource, options, next) {
           log('Résultat déjà envoyé')
           return
         }
-        sendResultat($(textarea).val(), false, function (retour) {
+        sendResultat($textarea.val(), false, function (retour) {
           if (retour && (retour.ok || retour.success)) isResultatSent = true
         })
       }
@@ -358,7 +359,6 @@ module.exports = function (ressource, options, next) {
         params,
         reponse,
         sendResultat,
-        textarea,
         $filariane,
         $consigne,
         $reponse,
@@ -366,7 +366,8 @@ module.exports = function (ressource, options, next) {
         $lienConsigne,
         $lienInfo,
         $lienReponse,
-        $page
+        $page,
+        $textarea
       try {
         log('urlUi avec ', ressource.parametres, options)
         isResultatSent = false
