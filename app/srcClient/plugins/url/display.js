@@ -222,9 +222,12 @@ module.exports = function urlDisplay (ressource, options, next) {
       var isBasic = !hasConsigne && !hasReponse
       // ni question ni réponse, pas grand chose à faire
       if (isBasic) {
-        return addPage(url, params, function () {
+        return addPage(url, params, () => {
           if (resultatCallback) addDefaultResultatCb()
-          $(divIframeSelector).show()
+          // pourquoi show marche pas ici alors que ça fonctionne dans displayUi ???
+          // $(divIframeSelector).show()
+          // on cherche pas à comprendre…
+          $(divIframeSelector).removeClass('invisible')
           next()
         })
       }
