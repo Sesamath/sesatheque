@@ -111,10 +111,10 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
     for (var k = 1; k < that.graphe.length; k++) {
       // et on stocke son nom si c'est la 1re fois qu'il apparait
       if (
-          estDans(that.graphe[k][1], that.listedessections) === false &&
-          that.graphe[k][1] !== 'fin' &&
-          that.graphe[k][1] !== 'Fin' &&
-          that.graphe[k][1] !== 'FIN'
+        estDans(that.graphe[k][1], that.listedessections) === false &&
+        that.graphe[k][1] !== 'fin' &&
+        that.graphe[k][1] !== 'Fin' &&
+        that.graphe[k][1] !== 'FIN'
       ) {
         that.listedessections.push(that.graphe[k][1])
       }
@@ -175,6 +175,7 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
 
   // Définition de la liste des outils nécessaires
   function oncontinue6 () {
+    if (!window.Parcours) throw new Error('Le chargement de j3p a échoué')
     var name, outils
     that.listedesoutils = []
     // les outils ont été déclarées dans les sections, précédemment chargées
@@ -468,10 +469,14 @@ module.exports = {
     // mais faut forcer cet id qui est en dur un peu partout dans le code j3p, on créé un div pour ça
     var j3pConteneur = dom.addElement(eltHtml, 'div', {id: 'Mepact'})
     page.loadAsync(['head'], function () {
-      chargementJ3p.chargement(j3pConteneur)
-      // qqun veut être rappelé ?
-      if (typeof options !== 'undefined' && typeof options.loadCallback === 'function') {
-        options.loadCallback()
+      try {
+        chargementJ3p.chargement(j3pConteneur)
+        // qqun veut être rappelé ?
+        if (typeof options !== 'undefined' && typeof options.loadCallback === 'function') {
+          options.loadCallback()
+        }
+      } catch (error) {
+        page.addError(error)
       }
     })
   } // charge
