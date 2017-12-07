@@ -31,6 +31,7 @@
 'use strict'
 
 const bugsnag = require('bugsnag-js')
+const {isError} = require('sesajstools')
 const {version} = require('../../../package')
 // @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
 const bugsnagClient = bugsnag({
@@ -41,10 +42,18 @@ const bugsnagClient = bugsnag({
 // on ajoute notre client en global pour que le code puisse facilement lui ajouter du contexte,
 // par ex bugsnagClient.user = {…}
 window.bugsnagClient = bugsnagClient
-window.onerror = (messageOrEvent, source, line, col, error) => bugsnagClient.notify(
-  error,
-  {
+window.onerror = (messageOrEvent, source, line, col, error) => {
+  const opts = {
     metaData: {col, messageOrEvent, line, source},
     severity: 'error'
   }
-)
+  if (!error) {
+    if (isError(messageOrEvent)) {
+      error = messageOrEvent
+      delete opts.metaData.messageOrEvent
+    } else {
+      error = new Error('onError called without error')
+    }
+  }
+  bugsnagClient.notify(error, opts)
+}
