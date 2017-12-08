@@ -300,7 +300,17 @@ module.exports = function display (ressource, options, next) {
       error: 'Erreurs au chargement',
       errors
     }
+    // ici pas le choix, si on veut envoyer ça sur du unload faut du xhr sync, qui est deprecated
+    // et que chrome ne fait plus…
+    // on essaie quand même sendBeacon si c'est dispo…
+    // cf https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
+    // sauf qu'il faudrait ajouter un middleware pour décoder une simple string
+    // ou alors utiliser les web workers et FormData, on verra plus tard…
+    // if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    //   navigator.sendBeacon('/api/notifyError', sjt.stringify(data))
+    // } else {
     xhr.post('/api/notifyError', data, {sync: true}, (error) => error && console.error(error))
+    // }
   })
 
   page.init(options, function (error) {
