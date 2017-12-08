@@ -300,7 +300,7 @@ module.exports = function display (ressource, options, next) {
       error: 'Erreurs au chargement',
       errors
     }
-    xhr.post('/api/notifyError', data, {sync: true})
+    xhr.post('/api/notifyError', data, {sync: true}, (error) => error && console.error(error))
   })
 
   page.init(options, function (error) {
