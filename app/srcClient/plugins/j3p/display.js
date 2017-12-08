@@ -70,9 +70,14 @@ module.exports = function display (ressource, options, next) {
               // on regarde si on peut le calculer
               if (resultat.contenu && resultat.contenu.scores && resultat.contenu.scores.length) {
                 const nb = resultat.contenu.scores.length
-                const total = resultat.contenu.scores.reduce((total, score) => total + Number(score), 0)
-                if (Number.isNaN(total)) page.addError('Un score d’un nœud est invalide')
-                else resultat.score = total / nb
+                const reducer = (total, score) => {
+                  const localScore = Number(score)
+                  if (localScore > 1) page.addError('Un score d’un nœud est invalide (> 1)')
+                  else if (localScore > 0) total += localScore
+                  else if (localScore !== 0) page.addError('Un score d’un nœud est invalide (pas un nombre)')
+                }
+                const total = resultat.contenu.scores.reduce(reducer, 0)
+                resultat.score = total / nb
               } else {
                 console.error('j3p renvoie un résultat avec fin mais sans score', resultat)
               }
