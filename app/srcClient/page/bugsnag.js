@@ -51,6 +51,9 @@ window.onerror = (messageOrEvent, source, line, col, error) => {
     if (isError(messageOrEvent)) {
       error = messageOrEvent
       delete opts.metaData.messageOrEvent
+    } else if (typeof messageOrEvent === 'string') {
+      error = new Error(messageOrEvent)
+      delete opts.metaData.messageOrEvent
     } else {
       error = new Error('onError called without error')
     }
