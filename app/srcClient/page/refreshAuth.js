@@ -35,6 +35,8 @@ var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 
 function addLink (parent, link) {
+  if (!parent) return log.error(new Error('addLink sans parent'))
+  if (!link) return log.error(new Error('addLink sans link'))
   var li = dom.getElement('li')
   var aOptions = {}
   if (link.href) aOptions.href = link.href
@@ -108,7 +110,7 @@ module.exports = function refreshAuth () {
           var buttonMyRessources = document.getElementById('buttonMyRessources')
           if (buttonMyRessources && response.pid) {
             // faut ajouter le pid s'il n'y était pas déjà
-            if (buttonMyRessources.href.substr(-8) === 'auteurs=') buttonMyRessources.href += response.pid
+            if (buttonMyRessources.href && buttonMyRessources.href.substr(-8) === 'auteurs=') buttonMyRessources.href += response.pid
             dom.setStyles(buttonMyRessources, {display: 'inline-block'})
           }
         }
@@ -117,7 +119,7 @@ module.exports = function refreshAuth () {
         if (buttonMyGroupes) dom.setStyles(buttonMyRessources, {display: 'inline-block'})
         // url de la recherche
         var buttonSearch = document.getElementById('buttonSearch')
-        if (buttonSearch) buttonSearch.href = buttonSearch.href.replace('public', 'ressource')
+        if (buttonSearch && buttonSearch.href) buttonSearch.href = buttonSearch.href.replace('public', 'ressource')
       }
     })
   }
