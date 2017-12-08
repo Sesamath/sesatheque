@@ -30,6 +30,10 @@
  */
 
 'use strict'
+// On ajoute les babel-polyfill via ce fichier et non directement dans les entries de webpack.
+// C'est le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
+// qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
+require('babel-polyfill')
 
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
