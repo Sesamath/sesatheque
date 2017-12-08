@@ -31,7 +31,6 @@
 'use strict'
 
 const bugsnag = require('bugsnag-js')
-const {isError} = require('sesajstools')
 const {version} = require('../../../package')
 // @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
 const bugsnagClient = bugsnag({
@@ -39,24 +38,26 @@ const bugsnagClient = bugsnag({
   appVersion: version
   // on pourra ajouter endpoint si on veut traiter nous-même les retours
 })
-// on ajoute notre client en global pour que le code puisse facilement lui ajouter du contexte,
-// par ex bugsnagClient.user = {…}
+if (!bugsnagClient.metaData) bugsnagClient.metaData = {}
+if (!bugsnagClient.user) bugsnagClient.user = {}
+// on ajoute notre client en global pour que le code puisse facilement lui ajouter des infos de contexte
+// dans bugsnagClient.metaData
 window.bugsnagClient = bugsnagClient
 window.onerror = (messageOrEvent, source, line, col, error) => {
-  const opts = {
-    metaData: {col, messageOrEvent, line, source},
-    severity: 'error'
-  }
+  Object.assign(bugsnagClient.metaData, {col, line, source})
+  // error n'est pas toujours fourni
   if (!error) {
-    if (isError(messageOrEvent)) {
+    // un isError cheap qui devrait suffire (sinon cf isError de bugsnag-js)
+    if (messageOrEvent && messageOrEvent.hasOwnProperty('stack')) {
       error = messageOrEvent
-      delete opts.metaData.messageOrEvent
     } else if (typeof messageOrEvent === 'string') {
       error = new Error(messageOrEvent)
-      delete opts.metaData.messageOrEvent
     } else {
-      error = new Error('onError called without error')
+      if (messageOrEvent) bugsnagClient.metaData.messageOrEvent = messageOrEvent
+      error = new Error('window.onerror appelé sans error')
     }
+  } else if (messageOrEvent) {
+    bugsnagClient.metaData.messageOrEvent = messageOrEvent
   }
-  bugsnagClient.notify(error, opts)
+  bugsnagClient.notify(error, {severity: 'error'})
 }
