@@ -75,6 +75,7 @@ module.exports = function display (ressource, options, next) {
                   if (localScore > 1) page.addError('Un score d’un nœud est invalide (> 1)')
                   else if (localScore > 0) total += localScore
                   else if (localScore !== 0) page.addError('Un score d’un nœud est invalide (pas un nombre)')
+                  return total
                 }
                 const total = resultat.contenu.scores.reduce(reducer, 0)
                 resultat.score = total / nb
