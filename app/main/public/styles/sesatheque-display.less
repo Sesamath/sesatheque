@@ -119,3 +119,11 @@ html, body {padding: 0; margin: 0;height: 100%;}
     content: '\f05a';
   }
 }
+
+/* Pour j3p faut annuler les css de normalize sur sup / sub, car mathquill fait du positionnement en js */
+#display #Mepact sup {
+  top: 0;
+}
+#display #Mepact sub {
+  bottom: 0;
+}
