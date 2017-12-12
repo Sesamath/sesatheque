@@ -50,12 +50,12 @@
 // require('./start')
 
 const anLog = require('an-log')
-const boot = require('./boot')
 const sjt = require('sesajstools')
 const {merge} = require('sesajstools/utils/object')
+const addMiddlewares = require('./addMiddlewares')
+const boot = require('./boot')
 const config = require('./config')
 const configCheck = require('./configCheck')
-const addMiddlewares = require('./addMiddlewares')
 
 /**
  * Ajoute nos middlewares et listeners, après déclaration des composants mais avant bootstrap
@@ -94,7 +94,8 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
      */
     lassi.on('afterRailUse', function (rail, name) {
       // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
-      if (name === 'session') addMiddlewares.afterSession(rail)
+      if (name === 'cookie') addMiddlewares.afterCookie(rail)
+      else if (name === 'session') addMiddlewares.afterSession(rail)
     })
 
     // le listener beforeTransport
