@@ -57,6 +57,20 @@ const wd = window.document
 const ajaxTimeout = 10000
 
 /**
+ * Envoie une erreur à /api/notifyError
+ * @param {string|object} infos
+ */
+function notifyError (infos) {
+  const type = typeof infos
+  if (type === 'string') infos = {error: infos}
+  else if (typeof infos !== 'object') return console.error(new Error(`paramètre invalide dans notifyError (type ${type}, il faut string ou object)`))
+  // on vérifie ici que ce sera utile en face
+  if (!infos.error && !infos.rid) return console.error(new Error('notifyError sans rid ni error'))
+  // et on envoie
+  xhr.post('/api/notifyError', infos, (error) => error && console.error(error))
+}
+
+/**
  * poste le resultat en ajax vers url puis appellera next avec (error, retour)
  * @private
  * @param {string}   url
@@ -283,6 +297,8 @@ module.exports = function display (ressource, options, next) {
       return next(error)
     }
   }
+  // on ajoute notifyError à options
+  options.notifyError = notifyError
 
   // on veut récupérer les erreurs pour les envoyer dans le log
   let errors = []
@@ -306,11 +322,14 @@ module.exports = function display (ressource, options, next) {
     // cf https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
     // sauf qu'il faudrait ajouter un middleware pour décoder une simple string
     // ou alors utiliser les web workers et FormData, on verra plus tard…
-    // if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-    //   navigator.sendBeacon('/api/notifyError', sjt.stringify(data))
-    // } else {
-    xhr.post('/api/notifyError', data, {sync: true}, (error) => error && console.error(error))
-    // }
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon && typeof Blob !== 'undefined') {
+      // faut préciser le type sinon y'a un pb de preflight avec chrome
+      /* global Blob */
+      const blob = new Blob([sjt.stringify(data)], { type: 'text/plain; charset=UTF-8' })
+      navigator.sendBeacon('/api/notifyError', blob)
+    } else {
+      xhr.post('/api/notifyError', data, {sync: true}, (error) => error && console.error(error))
+    }
   })
 
   page.init(options, function (error) {

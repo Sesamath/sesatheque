@@ -30,15 +30,15 @@
  */
 'use strict'
 
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
+const dom = require('sesajstools/dom')
+const log = require('sesajstools/utils/log')
 
-var page = require('../../page/index')
-var swf = require('../../display/swf')
+const page = require('../../page/index')
+const swf = require('../../display/swf')
 
-var ressId
-var ressType = 'em'
-var isLoaded, lastResult
+let ressId
+const ressType = 'em'
+let isLoaded, lastResult
 
 /**
  * afficher les ressource em (exercices mathenpoche, en flash)
@@ -50,15 +50,19 @@ var isLoaded, lastResult
  */
 module.exports = function display (ressource, options, next) {
   try {
-    var container = options.container
+    let {container, notifyError} = options
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
-    var errorsContainer = options.errorsContainer
+    if (typeof notifyError !== 'function') {
+      console.error(new Error('fn notifyError manquante dans options'))
+      notifyError = console.error
+    }
+    const errorsContainer = options.errorsContainer
     if (!errorsContainer) throw new Error('Il faut passer dans les options un conteneur html pour les erreurs')
 
     /** class utilisée dans notre css */
-    var cssClass = 'mepRess'
-    var params = ressource.parametres
-    var baseMepSwf, idSwf, swfUrl, largeur, hauteur, flashvars
+    const cssClass = 'mepRess'
+    const params = ressource.parametres
+    let baseMepSwf, idSwf, swfUrl, largeur, hauteur, flashvars
 
     // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
     ressId = ressource.oid
@@ -75,7 +79,7 @@ module.exports = function display (ressource, options, next) {
 
     // le message en attendant le chargement
     dom.empty(container)
-    var loadingElt = dom.addElement(container, 'p', {}, 'Chargement de la ressource ' + ressource.oid + ' en cours.')
+    const loadingElt = dom.addElement(container, 'p', {}, 'Chargement de la ressource ' + ressource.oid + ' en cours.')
 
     // notre base
     if (ressource.origine !== 'em' && ressource.baseUrl) baseMepSwf = ressource.baseUrl
@@ -130,7 +134,7 @@ module.exports = function display (ressource, options, next) {
       // et la pour rendre accessible au swf dans son dom
       window.resultatCallback = function (result) {
         log('resultatCallback em reçoit', result)
-        var resultMod = {
+        const resultMod = {
           reponse: result.reponse,
           nbq: result.nbq || params.nbq_defaut,
           ressId: ressId,
@@ -138,16 +142,38 @@ module.exports = function display (ressource, options, next) {
           fin: (result.fin === 'o'),
           original: result
         }
-        // on ajoute des b à reponse si c'est pas la dernière question
-        if (!resultMod.fin && result.nbq && result.reponse && result.reponse.length !== result.nbq) {
-          resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
+        const notif = (error) => notifyError({
+          error,
+          rid: ressource.rid,
+          resultat: resultMod
+        })
+
+        // faudrait chiffrer ça, mais j3p veut pouvoir l'intercepter
+        if (resultMod.nbq) resultMod.score = result.score / resultMod.nbq
+
+        // check fin, ajout des b sinon
+        if (!resultMod.fin) {
+          if (result.nbq && result.reponse) {
+            // on ajoute des b à reponse si c'est pas la dernière question
+            if (result.reponse.length < result.nbq) {
+              resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
+            } else {
+              notif('résultat em incohérent, fin = "o" manquant')
+              resultMod.fin = true
+            }
+          }
         }
-        // le score sera calculé d'après la réponse juste avant enregistrement en bdd
-        // (après déchiffrement coté serveur), mais si c'est j3p qui charge il veut l'intercepter
-        if (resultMod.nbq) {
-          resultMod.score = result.score / resultMod.nbq
+
+        // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
+        if (typeof result.reponse === 'string' && result.reponse) {
+          const reducer = (total, lettre) => total + ((lettre === 'v' || lettre === 'p') ? 1 : 0)
+          const total = Array.from(result.reponse).reduce(reducer, 0)
+          if (total !== resultMod.score) {
+            resultMod.score = total
+            notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
+          }
         } else {
-          resultMod.score = null
+          return notif('résultat em sans propriété reponse (ou mauvais format)')
         }
         lastResult = resultMod
 
@@ -175,7 +201,7 @@ module.exports = function display (ressource, options, next) {
       flashvars.nomFonctionCallback = 'resultatCallback'
     }
 
-    var swfOptions = {
+    const swfOptions = {
       flashvars,
       largeur,
       hauteur,

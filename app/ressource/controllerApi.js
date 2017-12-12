@@ -985,6 +985,8 @@ module.exports = function controllersFactory (component) {
      * @Route POST /api/notifyError
      */
     controller.post('notifyError', function (context) {
+      // on accepte du text/plain (pour le sendBeacon au unload)
+      if (typeof context.post === 'string') context.post = parse(context.post)
       if (context.post.rid) log.dataError('notifyError ' + stringify(context.post))
       else if (context.post.error) log.error('notifyError' + stringify(context.post))
       else log.error('notifyError sans error avec la requête : ' + stringify(context.request))
