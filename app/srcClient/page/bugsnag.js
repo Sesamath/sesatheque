@@ -33,7 +33,7 @@
 const bugsnag = require('bugsnag-js')
 const {version} = require('../../../package')
 // releaseStage devrait être précisé dans _private/config
-const localSettings = require('../_private/config')
+const localSettings = require('../../../_private/config')
 let releaseStage = (localSettings && localSettings.application && localSettings.application.staging) || 'unknown'
 if (releaseStage === 'prod') releaseStage = 'production'
 // @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
