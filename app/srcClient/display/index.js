@@ -183,6 +183,13 @@ module.exports = function display (ressource, options, next) {
           sendMessage(options, resultat)
         })
       }
+    } else if (['all', 'resultat'].includes(sjtUrl.getParameter('debug'))) {
+      log('activation de la récup du résultat pour débug')
+      options.resultatCallback = function resultatCallbackWrapper (result) {
+        formatResult(result, function (resultat) {
+          console.log('[DEBUG] resultat qui aurait été envoyé', resultat)
+        })
+      }
     }
   } // addResultatCallback
 
