@@ -60,9 +60,9 @@ function afterCookie (rail) {
       reviver: (key, value) => (typeof value === 'string' && dateRegExp.exec(value)) ? new Date(value) : value
     }
     if (!bodyParserSettings.limit) bodyParserSettings.limit = '10mb'
-    // ça c'est juste pour urlencoded, on prend en querystring que des string,
-    // à la limite des tableaux…
-    if (!bodyParserSettings.hasOwnProperty('extended')) bodyParserSettings.extended = false
+    // ça c'est juste pour urlencoded, à priori on devrait pouvoir avoir des tableaux avec false
+    // mais ça plante par ex sur un post de form avec `categories[2]: true`
+    if (!bodyParserSettings.hasOwnProperty('extended')) bodyParserSettings.extended = true
     const jsonMiddleware = express.json(bodyParserSettings)
     const urlencodedMiddleware = express.urlencoded(bodyParserSettings)
     const textMiddleware = bodyParser.text(bodyParserSettings)
