@@ -107,6 +107,8 @@ function initCKEditor (next) {
   /* global  CKEDITOR */
   if (typeof CKEDITOR === 'undefined') {
     try {
+      // faut mettre jQuery en global pour ckeditor (son jQuery adapter)
+      window.jQuery = $
       page.loadAsync(['ckeditor'], function () {
         page.loadAsync(['ckeditorJquery'], function () {
           if (typeof CKEDITOR === 'undefined') throw new Error('Problème de chargement CKEditor')
@@ -126,7 +128,9 @@ function initCKEditor (next) {
             {name: 'others'},
             '/',
             {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
-            {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align', 'bidi']},
+            // il faut le plugin pour activer cette ligne
+            // {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+            {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
             {name: 'styles'},
             {name: 'colors'},
             {name: 'about'}

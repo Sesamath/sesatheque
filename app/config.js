@@ -117,7 +117,13 @@ const config = {
     cookie: {
       key: 'asqlSTsrl78lAsg'
     },
-    bodyParser: {limit: '8mb'}, // la limite d'un post (100kb par défaut dans body-parser/index.js)
+    // on veut pas du bodyParser de lassi
+    // (on met les notres pour les limiter là où ils sont utiles)
+    noBodyParser: true,
+    // ça sera pour nos bodyParser
+    bodyParser: {
+      limit: '8mb' // limite d'un post (sinon 100kb par défaut)
+    },
     session: {
       // name: 'mySessName',
       secret: 'asqlSTsrl78lAsg', // en mettre un autre dans _private/config !

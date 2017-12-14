@@ -32,6 +32,11 @@
 'use strict'
 
 var fs = require('fs')
+
+// pour json et urlencode on prend celui inclut dans express,
+// mais y'a pas text-plain, on prend body-parser
+const bodyParser = require('body-parser')
+const express = require('express')
 var _ = require('lodash')
 var morgan = require('morgan')
 var moment = require('moment')
@@ -42,7 +47,34 @@ var config = require('./config')
 var applog = require('an-log')(config.application.name)
 
 var staticTtl = 3600 * 24
-var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
+// var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
+
+/**
+ * Ajoute notre bodyParser après le middleware cookie
+ * @param rail
+ */
+function afterCookie (rail) {
+  if (config.$rail.noBodyParser) {
+    const dateRegExp = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/;
+    const bodyParserSettings = config.$rail.bodyParser || {
+      reviver: (key, value) => (typeof value === 'string' && dateRegExp.exec(value)) ? new Date(value) : value
+    }
+    if (!bodyParserSettings.limit) bodyParserSettings.limit = '10mb'
+    // ça c'est juste pour urlencoded, à priori on devrait pouvoir avoir des tableaux avec false
+    // mais ça plante par ex sur un post de form avec `categories[2]: true`
+    if (!bodyParserSettings.hasOwnProperty('extended')) bodyParserSettings.extended = true
+    const jsonMiddleware = express.json(bodyParserSettings)
+    const urlencodedMiddleware = express.urlencoded(bodyParserSettings)
+    const textMiddleware = bodyParser.text(bodyParserSettings)
+
+    rail.use('/api', jsonMiddleware)
+    rail.use('/ressource', urlencodedMiddleware)
+    // lui doit aussi accepter du plain/text (envoyé par sendBeacon)
+    rail.use('/api/deferPost', textMiddleware)
+  } else {
+    log.error('Il manque le settings $rail.noBodyParser pour mettre nos propres parsers')
+  }
+}
 
 /**
  * Ajoute sur le rail les requetes en console (en dev), CORS, expires, access.log et perf.log
@@ -222,5 +254,6 @@ function afterSession (rail) {
 }
 
 module.exports = {
+  afterCookie,
   afterSession
 }

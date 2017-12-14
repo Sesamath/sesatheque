@@ -45,6 +45,21 @@ const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConv
 
 const myBaseId = config.application.baseId
 const myBaseUrl = config.application.baseUrl
+
+/**
+ * Ajoute une erreur dans les logs
+ * @param {Object} data Si propriété rid ira dans dataError.log (error.log sinon)
+ */
+function notifyError (data) {
+  // on remplace les Error par leur stack avant stringify (pas en profondeur)
+  Object.keys(data).forEach(k => {
+    if (data[k] && data[k].stack) data[k] = data[k].stack
+  })
+  const message = 'notifyError : ' + stringify(data)
+  if (data.rid) log.dataError(message)
+  else log.error(message)
+}
+
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
@@ -942,41 +957,51 @@ module.exports = function controllersFactory (component) {
     })
 
     /**
-     * Forward un post (au unload on ne peut pas poster en crossdomain, on le fait en synchrone ici qui fera suivre)
+     * Forward un post vers un sesalab (au unload on ne peut pas poster en crossdomain,
+     * on le fait en synchrone ici qui fera suivre)
      * @Route POST /api/deferPost
      */
     controller.post('deferPost', function (context) {
-      const resultat = context.post
-      log.debug('deferPost appelé avec', resultat)
-      if (typeof resultat.deferUrl === 'string') {
-        const url = resultat.deferUrl
-        delete resultat.deferUrl
-        if (config.sesalabs.some((sesalab) => url.indexOf(sesalab.baseUrl) === 0)) {
-          const postOptions = {
-            url: url,
-            json: true,
-            content_type: 'charset=UTF-8',
-            timeout: 3000,
-            headers: {
-              'Cookie': context.request.cookies
-            },
-            form: context.post
-          }
-          request.post(postOptions, function (error, response, body) {
-            // pas la peine de répondre personne n'écoute
-            log.debug('deferPost, après envoi vers ' + postOptions.url + ' de ', postOptions.form)
-            log.debug("on récupère l'erreur", error)
-            log.debug('on récupère la réponse', response)
-            log.debug('on récupère et le body', body)
-            // mais si on renvoie rien ça donne une erreur 500 en timeout, context.next() donne une 404 car pas de contenu
-            $json.sendOk(context)
-          })
-        } else {
-          $json.send(context, new Error('deferPost appelé pour faire suivre à ' + resultat.deferUrl + " qui n'est pas dans les sesalab autorisés"))
-        }
-      } else {
-        $json.send(context, new Error('Il faut poster une url via deferUrl'))
+      // on accepte du json en text/plain (pour le sendBeacon au unload)
+      const data = (typeof context.post === 'string') ? parse(context.post) : context.post
+      log.debug('deferPost appelé avec', data)
+      if (typeof data.deferUrl !== 'string') {
+        return $json.send(context, new Error('Il faut poster une url via deferUrl'))
       }
+
+      const url = data.deferUrl
+      delete data.deferUrl
+
+      // on peut nous envoyer en sync des messages pour notifyError
+      if (url === '/api/notifyError') {
+        notifyError(data)
+        return $json.sendOk(context)
+      }
+
+      if (!config.sesalabs.some((sesalab) => url.indexOf(sesalab.baseUrl) === 0)) {
+        const error = new Error(`deferPost appelé pour faire suivre à ${url} qui n’est pas dans les sesalab autorisés`)
+        return $json.send(context, error)
+      }
+
+      const postOptions = {
+        url: url,
+        json: true,
+        content_type: 'charset=UTF-8',
+        timeout: 3000,
+        headers: {
+          'Cookie': context.request.cookies
+        },
+        form: context.post
+      }
+      request.post(postOptions, function (error, response, body) {
+        if (error) return $json.sendError(error)
+        log.debug('deferPost, après envoi vers ' + postOptions.url + ' de ', postOptions.form)
+        log.debug('on récupère la réponse', response)
+        log.debug('on récupère et le body', body)
+        // si on renvoie rien ça donne une erreur 500 en timeout,
+        // context.next() donnerait une 404 car pas de contenu
+        $json.sendOk(context)
+      })
     })
 
     /**
@@ -985,9 +1010,7 @@ module.exports = function controllersFactory (component) {
      * @Route POST /api/notifyError
      */
     controller.post('notifyError', function (context) {
-      if (context.post.rid) log.dataError('notifyError ' + stringify(context.post))
-      else if (context.post.error) log.error('notifyError' + stringify(context.post))
-      else log.error('notifyError sans error avec la requête : ' + stringify(context.request))
+      notifyError(context.post)
       $json.sendOk(context)
     })
 

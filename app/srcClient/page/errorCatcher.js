@@ -30,32 +30,72 @@
  */
 'use strict'
 
-import faker from 'faker/locale/fr'
-import config from '../../app/config'
-const myBaseId = config.application.baseId
+// nos var privées
+let errors = []
+let isRunning
 
-/**
- * Retourne une ressource avec du contenu aléatoire (avec publié, restriction à 0 et sans auteurs ni contributeur si on les impose pas)
- * @param {object} options ajouter des propriétés imposées, noOid, noRid, noOrigin, noIdOrigin
- * @return {Ressource}
- */
-function getFakePersonne (options) {
-  if (typeof options !== 'object') options = {}
-  /**
-   * Un plain object avec les valeurs d'une personne
-   * @type {Personne}
-   */
-  const fakePersonne = {}
-  if (!options.nooid) fakePersonne.oid = options.oid || faker.random.uuid()
-  if (!options.nopid) fakePersonne.pid = options.pid || myBaseId + '/' + fakePersonne.oid
-  if (!options.notitre) fakePersonne.nom = options.nom || faker.name.lastName()
-  if (!options.noresume) fakePersonne.prenom = options.prenom || faker.name.firstName()
-  // cf app/config.js : faker.random.arrayElement(['formateur', 'admin', 'editeur', …])
-  if (!options.nodescription) fakePersonne.roles = options.roles || {formateur: true}
-  if (!options.nocommentaires) fakePersonne.email = options.email || faker.internet.email()
-  // @todo ajout groupesMembre et groupesSuivis
-
-  return fakePersonne
+function errorListener (errorEvent) {
+  // errorEvent a une propriété error avec l'erreur que personne n'a catchée
+  // mais y'a sûrement des navigateurs qui envoient des event bizarres…
+  let error
+  if (errorEvent.error) {
+    if (errorEvent.error.stack) error = errorEvent.error.stack
+    else error = errorEvent.error
+  } else {
+    error = errorEvent
+  }
+  errors.push(error)
 }
 
-export default getFakePersonne
+/**
+ * Démarre le spy (râle en console sans rien faire si c'est déjà le cas)
+ */
+function start () {
+  if (typeof window === 'undefined') return
+  if (isRunning) {
+    console.error(new Error('errorCatcher is already running'))
+    return
+  }
+  isRunning = true
+  window.addEventListener('error', errorListener)
+}
+
+/**
+ * Arrête le spy (râle en console sans rien faire si c'est déjà le cas)
+ * et retourne les erreurs collectées
+ * @return {Error[]}
+ */
+function stop () {
+  if (typeof window === 'undefined') return
+  if (!isRunning) {
+    console.error(new Error('errorCatcher isn’t running'))
+    return
+  }
+  window.removeEventListener('error', errorListener)
+  return flush()
+}
+
+/**
+ * Retourne les erreurs collectées depuis start et reset le tableau d'erreurs
+ * @return {Error[]}
+ */
+function flush () {
+  const tmp = errors
+  errors = []
+  return tmp
+}
+
+/**
+ * Retourne les erreurs collectées depuis start
+ * @return {Error[]}
+ */
+function getErrors () {
+  return errors
+}
+
+module.exports = {
+  flush,
+  getErrors,
+  start,
+  stop
+}

@@ -30,32 +30,63 @@
  */
 'use strict'
 
-import faker from 'faker/locale/fr'
-import config from '../../app/config'
-const myBaseId = config.application.baseId
+// nos var privées
+let errors = []
+let consoleError
 
 /**
- * Retourne une ressource avec du contenu aléatoire (avec publié, restriction à 0 et sans auteurs ni contributeur si on les impose pas)
- * @param {object} options ajouter des propriétés imposées, noOid, noRid, noOrigin, noIdOrigin
- * @return {Ressource}
+ * Démarre le spy (râle en console sans rien faire si c'est déjà le cas)
  */
-function getFakePersonne (options) {
-  if (typeof options !== 'object') options = {}
-  /**
-   * Un plain object avec les valeurs d'une personne
-   * @type {Personne}
-   */
-  const fakePersonne = {}
-  if (!options.nooid) fakePersonne.oid = options.oid || faker.random.uuid()
-  if (!options.nopid) fakePersonne.pid = options.pid || myBaseId + '/' + fakePersonne.oid
-  if (!options.notitre) fakePersonne.nom = options.nom || faker.name.lastName()
-  if (!options.noresume) fakePersonne.prenom = options.prenom || faker.name.firstName()
-  // cf app/config.js : faker.random.arrayElement(['formateur', 'admin', 'editeur', …])
-  if (!options.nodescription) fakePersonne.roles = options.roles || {formateur: true}
-  if (!options.nocommentaires) fakePersonne.email = options.email || faker.internet.email()
-  // @todo ajout groupesMembre et groupesSuivis
-
-  return fakePersonne
+function start () {
+  if (consoleError) {
+    console.error(new Error('consoleErrorSpy is already running'))
+    return
+  }
+  // stub console.error
+  consoleError = console.error
+  console.error = (...args) => {
+    // on affiche quand même les erreurs
+    consoleError.apply(console, args)
+    // et on les stocke
+    errors = errors.concat(args)
+  }
 }
 
-export default getFakePersonne
+/**
+ * Arrête le spy (râle en console sans rien faire si c'est déjà le cas)
+ * @return {Error[]}
+ */
+function stop () {
+  if (!consoleError) {
+    console.error(new Error('consoleErrorSpy isn’t running'))
+    return
+  }
+  console.error = consoleError
+  consoleError = undefined
+  return flush()
+}
+
+/**
+ * Retourne les erreurs collectées depuis start et reset le tableau d'erreurs
+ * @return {Error[]}
+ */
+function flush () {
+  const errorsToSend = errors
+  errors = []
+  return errorsToSend
+}
+
+/**
+ * Retourne les erreurs collectées depuis start
+ * @return {Error[]}
+ */
+function getErrors () {
+  return errors
+}
+
+module.exports = {
+  flush,
+  getErrors,
+  start,
+  stop
+}

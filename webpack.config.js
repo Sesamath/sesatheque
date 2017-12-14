@@ -66,6 +66,7 @@ var conf = {
   module: {
     loaders: [
       {test: /app\/srcClient\/.*\.js/, loader: 'babel'},
+      {test: /_private\/.*\.js/, loader: 'babel'},
       {test: /\.json$/, loader: 'json'},
       {test: /app\/srcClient\/.*\.html/, loader: 'file'},
       // editgraphe passe par babel

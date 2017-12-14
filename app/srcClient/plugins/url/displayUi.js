@@ -387,8 +387,9 @@ module.exports = function (ressource, options, next) {
          */
         const hasCkeditor = (params.answer_editor && params.answer_editor.indexOf('ckeditor') === 0)
         const hasMqEditor = (params.answer_editor === 'mqEditor')
-        const editorName = hasCkeditor ? 'ckeditor' : (hasMqEditor ? 'mqEditor' : '')
-        editor = editorName ? require('../../editors/' + editorName) : null
+        // on les liste explicitement pour aider webpack
+        if (hasCkeditor) editor = require('../../editors/multiEditor')
+        else if (hasMqEditor) editor = require('../../editors/multiEditor')
 
         $page = $(`#${divIframeId}`)
         // on ajoute tous nos div même si tous ne serviront pas, pour simplifier le code
