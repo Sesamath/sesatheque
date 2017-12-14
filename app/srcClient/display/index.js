@@ -59,6 +59,8 @@ const wd = window.document
  */
 const ajaxTimeout = 10000
 
+const debugMode = sjtUrl.getParameter('debug')
+
 /**
  * Ajoute une méthode resultatCallback aux options si besoin
  * @private
@@ -72,6 +74,7 @@ function addResultatCallback (ressource, options) {
       feedback({success: false, error: result.toString()}, divFeedback)
     } else if (result) {
       const resultat = getResultat(result, ressource, options)
+      if (isDebugMode) console.log('resultatCallback va envoyer', resultat)
       resultatListener(resultat)
     } else {
       const error = new Error('callback de résultat appelée sans erreur ni résultat')
@@ -80,6 +83,7 @@ function addResultatCallback (ressource, options) {
     }
   }
   const divFeedback = wd.getElementById('pictoFeedback')
+  const isDebugMode = ['all', 'resultat'].includes(debugMode)
   let resultatListener
 
   // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
@@ -92,7 +96,6 @@ function addResultatCallback (ressource, options) {
       const url = options.urlResultatCallback
       if (resultat.deferSync) {
         delete resultat.deferSync
-        resultat.deferUrl = url
         xhrPostSync(url, resultat, alertIfError)
       } else {
         xhr.post(url, resultat, {timeout: ajaxTimeout}, (error, retour) => {
@@ -108,7 +111,7 @@ function addResultatCallback (ressource, options) {
   } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
     // callback message
     resultatListener = (resultat) => sendMessage(options, resultat)
-  } else if (['all', 'resultat'].includes(sjtUrl.getParameter('debug'))) {
+  } else if (isDebugMode) {
     log('activation de la récup du résultat en console pour débug')
     resultatListener = (resultat) => console.log('[DEBUG] resultat qui aurait été envoyé', resultat)
   }
@@ -297,65 +300,72 @@ module.exports = function display (ressource, options, next) {
     xhr.post('/api/notifyError', infos, logIfError)
   }
 
-  // init params
-  if (typeof options === 'function') {
-    next = options
-    options = {}
-  } else {
-    if (typeof next !== 'function') {
-      if (next) console.error(new Error('paramètre next invalide'), next)
-      next = logIfError
+  if (typeof next !== 'function') {
+    next = (error) => {
+      if (error) page.addError(error)
     }
-    if (!options || typeof options !== 'object') {
-      if (options) console.error(new Error('options invalides'), options)
+  }
+
+  try {
+    // init params
+    if (typeof options === 'function') {
+      next = options
       options = {}
+    } else {
+      if (typeof next !== 'function') {
+        if (next) console.error(new Error('paramètre next invalide'), next)
+        next = logIfError
+      }
+      if (!options || typeof options !== 'object') {
+        if (options) console.error(new Error('options invalides'), options)
+        options = {}
+      }
     }
-  }
 
-  const debugMode = sjtUrl.getParameter('debug')
+    // activation du log en debug
+    if (['all', 'display'].includes(debugMode)) log.enable()
+    // log('options avant page.init', options)
 
-  if (debugMode === 'all' || debugMode === 'display') log.enable()
-  // log('options avant page.init', options)
-
-  // on accepte des baseId dans options.base
-  if (typeof options.base === 'string' && options.base.substr(0, 4) !== 'http') {
-    try {
-      options.base = sesatheques.getBaseUrl(options.base)
-    } catch (error) {
-      return next(error)
+    // on accepte des baseId dans options.base
+    if (typeof options.base === 'string' && options.base.substr(0, 4) !== 'http') {
+      try {
+        options.base = sesatheques.getBaseUrl(options.base)
+      } catch (error) {
+        return next(error)
+      }
     }
-  }
-  // on ajoute notifyError à options
-  options.notifyError = notifyError
+    // on ajoute notifyError à options
+    options.notifyError = notifyError
 
-  // on veut récupérer les erreurs de la console pour les envoyer dans le log au unload
-  consoleErrorSpy.start()
-  // idem pour les autres erreurs
-  errorCatcher.start()
+    // on veut récupérer les erreurs de la console pour les envoyer dans le log au unload
+    consoleErrorSpy.start()
+    // idem pour les autres erreurs
+    errorCatcher.start()
+    // et pour les envoyer au unload si y'en a
+    const unloadListener = () => {
+      // à priori si on est au unload window va être détruit et c'est inutile de faire ça
+      // mais au cas où on a envoyé un alert, pas la peine de boucler…
+      // (ou si un navigateur ne détruisait pas les listener au changement d'url d'une iframe par ex)
+      window.removeEventListener('unload', unloadListener)
+      const errors = consoleErrorSpy.stop().concat(errorCatcher.stop())
+      if (!errors.length) return
 
-  // pour envoyer les erreurs au unload si y'en a
-  const unloadListener = () => {
-    // à priori si on est au unload window va être détruit et c'est inutile de faire ça
-    // mais au cas où on a envoyé un alert, pas la peine de boucler…
-    // (ou si un navigateur ne détruisait pas les listener au changement d'url d'une iframe par ex)
-    window.removeEventListener('unload', unloadListener)
-    const errors = consoleErrorSpy.stop().concat(errorCatcher.stop())
-
-    if (!errors.length) return
-
-    const data = {
-      rid: ressource.rid,
-      error: 'Erreurs du display',
-      errors
+      const data = {
+        rid: ressource.rid,
+        error: 'Erreurs du display',
+        errors
+      }
+      xhrPostSync('/api/notifyError', data, alertIfError)
     }
-    xhrPostSync('/api/notifyError', data, alertIfError)
-  }
-  window.addEventListener('unload', unloadListener)
+    window.addEventListener('unload', unloadListener)
 
-  page.init(options, function (error) {
-    if (error) return next(error)
-    load(ressource, options, next)
-  })
+    page.init(options, function (error) {
+      if (error) return next(error)
+      load(ressource, options, next)
+    })
+  } catch (error) {
+    page.addError(error)
+  }
 }
 
 /* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack

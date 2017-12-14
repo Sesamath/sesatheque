@@ -35,8 +35,16 @@ let errors = []
 let isRunning
 
 function errorListener (errorEvent) {
-  errorEvent.preventDefault()
-  errors.push(errorEvent.data)
+  // errorEvent a une propriété error avec l'erreur que personne n'a catchée
+  // mais y'a sûrement des navigateurs qui envoient des event bizarres…
+  let error
+  if (errorEvent.error) {
+    if (errorEvent.error.stack) error = errorEvent.error.stack
+    else error = errorEvent.error
+  } else {
+    error = errorEvent
+  }
+  errors.push(error)
 }
 
 /**
@@ -49,7 +57,7 @@ function start () {
     return
   }
   isRunning = true
-  window.addEventListener('error', errorListener, true)
+  window.addEventListener('error', errorListener)
 }
 
 /**
