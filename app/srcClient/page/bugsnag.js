@@ -70,5 +70,6 @@ window.onerror = (messageOrEvent, source, line, col, error) => {
       error = new Error('window.onerror appelé sans error')
     }
   }
+  console.error('sending error to bugsnag', error)
   bugsnagClient.notify(error, {severity: 'error'})
 }

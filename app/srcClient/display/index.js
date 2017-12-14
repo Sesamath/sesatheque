@@ -44,7 +44,10 @@ const sjtUrl = require('sesajstools/http/url')
 const sesatheques = require('sesatheque-client/src/sesatheques')
 const xhr = require('sesajstools/http/xhr')
 
-const page = require('../page/index')
+const page = require('../page')
+const consoleErrorSpy = require('../page/consoleErrorSpy')
+const errorCatcher = require('../page/errorCatcher')
+const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
 
 const wd = window.document
@@ -57,42 +60,199 @@ const wd = window.document
 const ajaxTimeout = 10000
 
 /**
- * Envoie une erreur à /api/notifyError
- * @param {string|object} infos
+ * Ajoute une méthode resultatCallback aux options si besoin
+ * @private
+ * @param {Object}   options        L'objet sur lequel on ajoutera la methode resultatCallback
  */
-function notifyError (infos) {
-  const type = typeof infos
-  if (type === 'string') infos = {error: infos}
-  else if (typeof infos !== 'object') return console.error(new Error(`paramètre invalide dans notifyError (type ${type}, il faut string ou object)`))
-  // on vérifie ici que ce sera utile en face
-  if (!infos.error && !infos.rid) return console.error(new Error('notifyError sans rid ni error'))
-  // et on envoie
-  xhr.post('/api/notifyError', infos, (error) => error && console.error(error))
+function addResultatCallback (ressource, options) {
+  // appelle resultatListener avec le résultat formaté (ou rapporte une erreur)
+  function processResult (result, resultatListener) {
+    if (result && result instanceof Error) {
+      log.error(result)
+      feedback({success: false, error: result.toString()}, divFeedback)
+    } else if (result) {
+      const resultat = getResultat(result, ressource, options)
+      resultatListener(resultat)
+    } else {
+      const error = new Error('callback de résultat appelée sans erreur ni résultat')
+      if (window.bugsnagClient) window.bugsnagClient(error)
+      log.error(error)
+    }
+  }
+  const divFeedback = wd.getElementById('pictoFeedback')
+  let resultatListener
+
+  // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
+  // on prend en callback par ordre de priorité resultatCallback, urlResultatCallback, resultatMessageAction+
+  if (options.resultatCallback && sjt.isFunction(options.resultatCallback)) {
+    resultatListener = options.resultatCallback
+  } else if (options.urlResultatCallback && sjt.isUrlAbsolute(options.urlResultatCallback)) {
+    // callback ajax
+    resultatListener = (resultat) => {
+      const url = options.urlResultatCallback
+      if (resultat.deferSync) {
+        delete resultat.deferSync
+        resultat.deferUrl = url
+        xhrPostSync(url, resultat, alertIfError)
+      } else {
+        xhr.post(url, resultat, {timeout: ajaxTimeout}, (error, retour) => {
+          if (!retour) retour = {}
+          if (error) {
+            console.error(error)
+            if (!retour.error) retour.error = error.toString()
+          }
+          feedback(retour, divFeedback)
+        })
+      }
+    }
+  } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
+    // callback message
+    resultatListener = (resultat) => sendMessage(options, resultat)
+  } else if (['all', 'resultat'].includes(sjtUrl.getParameter('debug'))) {
+    log('activation de la récup du résultat en console pour débug')
+    resultatListener = (resultat) => console.log('[DEBUG] resultat qui aurait été envoyé', resultat)
+  }
+
+  // on wrap si qqun écoute
+  if (resultatListener) {
+    options.resultatCallback = (result) => processResult(result, resultatListener)
+  }
+} // addResultatCallback
+
+/**
+ * Callback pour l'envoi au unload
+ * @param {Error} error
+ */
+function alertIfError (error) {
+  if (!error) return
+  console.error(error)
+  /* global bugsnagClient, alert */
+  if (typeof bugsnagClient !== 'undefined') bugsnagClient.notify(error)
+  alert(error)
 }
 
 /**
- * poste le resultat en ajax vers url puis appellera next avec (error, retour)
+ * Gère l'affichage du feedback puis appelle next(retour)
  * @private
- * @param {string}   url
- * @param {Resultat} resultat
- * @param {boolean}  [deferSync] Passer true pour envoyer le résultat en synchrone sur le domaine courant
- *                                 (une sesatheque sinon ça marchera pas)
- *                                 qui fera suivre (pour éviter les pbs de CORS)
- *                                 à n'utiliser que quand on ne peut pas faire autrement (sur un événement unload par ex)
- * @param {feedbackCallback} next
+ * @type feedbackCallback
+ * @param {retour} retour Le retour de l'envoi du résultat
+ * @param {HTMLElement} divFeedback
  */
-function sendAjax (url, resultat, deferSync, next) {
-  if (!next && typeof deferSync === 'function') next = deferSync
-  const xhrOptions = {
-    timeout: ajaxTimeout
+function feedback (retour, divFeedback) {
+  log('feedback', retour)
+  if (retour && retour.error) {
+    feedbackKo(divFeedback)
+    page.addError(retour.error)
+  } else if ((retour && (retour.ok && retour.ok === true)) || (retour.success && retour.success === true)) {
+    feedbackOk(divFeedback)
+  } else if (retour && (retour.hasOwnProperty('ok') || retour.hasOwnProperty('success'))) {
+    feedbackKo(divFeedback)
+    page.addError("Une erreur est survenue dans l'enregistrement du résultat")
+  } else {
+    // else on en sait rien on fait rien
+    log.error(new Error('feedback appellé sans argument intelligible'), retour)
   }
-  if (deferSync === true) {
-    resultat.deferUrl = url
-    url = '/api/deferPost'
-    xhrOptions.sync = true // xhrOptions.timeout sera ignoré
-    log('on passe en synchrone vers ' + url)
+}
+// Éteint le feedback */
+function feedbackOff (divFeedback) {
+  divFeedback.className = 'feedbackOff'
+}
+// Allume le feedback OK pour 4s
+function feedbackOk (divFeedback) {
+  divFeedback.className = 'feedbackOk'
+  setTimeout(feedbackOff, 4000)
+}
+// Allume le feedback KO pour 4s
+function feedbackKo (divFeedback) {
+  divFeedback.className = 'feedbackKo'
+  setTimeout(feedbackOff, 4000)
+}
+
+/**
+ * Retourne l'objet Resultat (ou affiche une erreur en feedback si result en est une)
+ * @private
+ * @param result
+ * @return {Resultat|undefined}
+ */
+function getResultat (result, ressource, options) {
+  const resultat = new Resultat(result)
+  // pour l'envoi au unload on ajoute ça
+  if (options.urlResultatCallback && result.deferSync) resultat.deferSync = result.deferSync
+  // on impose date et durée
+  resultat.date = new Date()
+  // le plugin peut imposer sa mesure, on ne met la durée que s'il ne l'a pas fourni
+  if (!resultat.duree && options.startDate) {
+    resultat.duree = Math.floor(((new Date()).getTime() - options.startDate.getTime()) / 1000)
   }
-  xhr.post(url, resultat, xhrOptions, next)
+  // on impose ça d'après la ressource
+  resultat.ressType = ressource.type
+  resultat.rid = ressource.rid
+  // on regarde si on nous a demandé d'ajouter des propriétés au résultat (via querystring ou options)
+  ;['sesatheque', 'userOrigine', 'userId'].forEach(function (paramName) {
+    const paramValue = sjtUrl.getParameter(paramName) || options[paramName]
+    if (paramValue) resultat[paramName] = paramValue
+  })
+  return resultat
+}
+
+/**
+ * Fait le chargement proprement dit après page.init
+ * @private
+ * @param ressource
+ * @param options
+ * @param next
+ */
+function load (ressource, options, next) {
+  log('display avec la ressource', ressource)
+  log('et les options après page.init', options)
+
+  // le display du plugin
+  const pluginName = ressource.type
+  const pluginDisplay = require('../plugins/' + pluginName + '/display')
+  if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
+
+  try {
+    if (options.container) dom.empty(options.container)
+    else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
+    if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
+    // On vire le titre si on nous le demande via les options ou un param dans l'url
+    if (
+      (options.hasOwnProperty('showTitle') && !options.showTitle) ||
+      /\?.*showTitle=0/.test(wd.URL) ||
+      /\/apercevoir\//.test(wd.URL) ||
+      /\?(.+&)?layout=iframe/.test(wd.URL)
+    ) {
+      page.hideTitle()
+    }
+
+    // on regarde s'il faut ajouter une fct de sauvegarde des résultats
+    addResultatCallback(ressource, options)
+
+    // ajout du chemin du plugin aux options
+    options.pluginBase = options.base + 'plugins/' + pluginName + '/'
+
+    // on peut afficher
+    pluginDisplay(ressource, options, function (error) {
+      options.startDate = new Date()
+      if (error) {
+        log("le display a terminé mais renvoyé l'erreur", error)
+        page.addError(error)
+      } else {
+        log('le display a terminé sans renvoyer d’erreur')
+      }
+      if (next) next(error)
+    })
+  } catch (err) {
+    page.addError(err.toString())
+  }
+} // load
+
+/**
+ * Log en console.error si error
+ * @param {Error} error
+ */
+function logIfError (error) {
+  if (error) console.error(error)
 }
 
 /**
@@ -125,173 +285,34 @@ function sendMessage (options, resultat) {
  */
 module.exports = function display (ressource, options, next) {
   /**
-   * Ajoute une méthode resultatCallback aux options si besoin
-   * @private
-   * @param {Object}   options        L'objet sur lequel on ajoutera la methode resultatCallback
+   * Envoie une erreur à /api/notifyError (ajoute le rid de la ressource courante)
+   * @param {string|object} infos
    */
-  function addResultatCallback (options) {
-    // de toute façon on s'intercale pour formater le résultat
-    function formatResult (result, next) {
-      if (result && result instanceof Error) {
-        log.error(result)
-        feedback({success: false, error: result.toString()})
-      } else if (result) {
-        const resultat = new Resultat(result)
-        // pour l'ajax on ajoute ça
-        if (options.urlResultatCallback && result.deferSync) resultat.deferSync = result.deferSync
-        // on impose date et durée
-        resultat.date = new Date()
-        // le plugin peut imposer sa mesure, on ne met la durée que s'il ne l'a pas fourni
-        if (!resultat.duree && startDate) {
-          resultat.duree = Math.floor(((new Date()).getTime() - startDate.getTime()) / 1000)
-        }
-        // on impose ça d'après la ressource
-        resultat.ressType = ressource.type
-        resultat.rid = ressource.rid
-        // on regarde si on nous a demandé d'ajouter des paramètres utilisateur au résultat
-        ;['sesatheque', 'userOrigine', 'userId'].forEach(function (paramName) {
-          const paramValue = sjtUrl.getParameter(paramName) || options[ paramName ]
-          if (paramValue) resultat[ paramName ] = paramValue
-        })
-        log('display envoie à la callback de résultat', resultat)
-        next(resultat, feedback)
-      } else {
-        log.error(new Error('callback de résultat appelée sans erreur ni résultat'))
-      }
-    }
-
-    // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
-    // on prend en callback par ordre de priorité resultatCallback, urlResultatCallback, resultatMessageAction+
-    if (options.resultatCallback && sjt.isFunction(options.resultatCallback)) {
-      // fct de callback
-      const next = options.resultatCallback
-      options.resultatCallback = function resultatCallbackWrapper (result) {
-        formatResult(result, next)
-      }
-    } else if (options.urlResultatCallback && sjt.isUrlAbsolute(options.urlResultatCallback)) {
-      // callback ajax
-      options.resultatCallback = function resultatCallbackWrapper (result) {
-        const deferSync = !!result.deferSync
-        formatResult(result, function (resultat, next) {
-          sendAjax(options.urlResultatCallback, resultat, deferSync, next)
-        })
-      }
-    } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
-      // callback message
-      options.resultatCallback = function resultatCallbackWrapper (result) {
-        formatResult(result, function (resultat) {
-          sendMessage(options, resultat)
-        })
-      }
-    } else if (['all', 'resultat'].includes(sjtUrl.getParameter('debug'))) {
-      log('activation de la récup du résultat pour débug')
-      options.resultatCallback = function resultatCallbackWrapper (result) {
-        formatResult(result, function (resultat) {
-          console.log('[DEBUG] resultat qui aurait été envoyé', resultat)
-        })
-      }
-    }
-  } // addResultatCallback
-
-  /**
-   * Gère l'affichage du feedback puis appelle next(retour)
-   * @private
-   * @type feedbackCallback
-   * @param {retour} retour Le retour de l'envoi du résultat
-   */
-  function feedback (retour) {
-    log('feedback', retour)
-    if (retour && retour.error) {
-      feedbackKo()
-      page.addError(retour.error)
-    } else if ((retour && (retour.ok && retour.ok === true)) || (retour.success && retour.success === true)) {
-      feedbackOk()
-    } else if (retour && (retour.hasOwnProperty('ok') || retour.hasOwnProperty('success'))) {
-      feedbackKo()
-      page.addError("Une erreur est survenue dans l'enregistrement du résultat")
-    } else {
-      // else on en sait rien on fait rien
-      log.error(new Error('feedback appellé sans argument intelligible'), retour)
-    }
-  }
-  // Éteint le feedback */
-  function feedbackOff () {
-    if (divFeedback) divFeedback.className = 'feedbackOff'
-  }
-  // Allume le feedback OK pour 4s
-  function feedbackOk () {
-    if (divFeedback) {
-      divFeedback.className = 'feedbackOk'
-      setTimeout(feedbackOff, 4000)
-    }
-  }
-  // Allume le feedback KO pour 4s
-  function feedbackKo () {
-    if (divFeedback) {
-      divFeedback.className = 'feedbackKo'
-      setTimeout(feedbackOff, 4000)
-    }
+  function notifyError (infos) {
+    const type = typeof infos
+    if (type === 'string') infos = {error: infos}
+    else if (typeof infos !== 'object') return console.error(new Error(`paramètre invalide dans notifyError (type ${type}, il faut string ou object)`))
+    infos.rid = ressource.rid
+    // et on envoie
+    xhr.post('/api/notifyError', infos, logIfError)
   }
 
-  /**
-   * Fait le chargement proprement dit après page.init
-   * @private
-   * @param ressource
-   * @param options
-   * @param next
-   */
-  function load (ressource, options, next) {
-    log('display avec la ressource', ressource)
-    log('et les options après page.init', options)
-
-    // le display du plugin
-    const pluginName = ressource.type
-    const pluginDisplay = require('../plugins/' + pluginName + '/display')
-    if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
-
-    try {
-      log('plugin ' + pluginName + ' chargé')
-      if (options.container) dom.empty(options.container)
-      else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
-      if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
-      // On vire le titre si on nous le demande via les options ou un param dans l'url
-      if (
-        (options.hasOwnProperty('showTitle') && !options.showTitle) ||
-        /\?.*showTitle=0/.test(wd.URL) ||
-        /\/apercevoir\//.test(wd.URL) ||
-        /\?(.+&)?layout=iframe/.test(wd.URL)
-      ) {
-        page.hideTitle()
-      }
-
-      // on regarde s'il faut ajouter une fct de sauvegarde des résultats
-      addResultatCallback(options)
-
-      options.pluginBase = options.base + 'plugins/' + pluginName + '/'
-      // on peut afficher
-      pluginDisplay(ressource, options, function (error) {
-        startDate = new Date()
-        if (error) {
-          log("le display a terminé mais renvoyé l'erreur", error)
-          page.addError(error)
-        } else {
-          log('le display a terminé sans erreur')
-        }
-        if (next) next(error)
-      })
-    } catch (err) {
-      page.addError(err.toString())
+  // init params
+  if (typeof options === 'function') {
+    next = options
+    options = {}
+  } else {
+    if (typeof next !== 'function') {
+      if (next) console.error(new Error('paramètre next invalide'), next)
+      next = logIfError
     }
-  } // load
+    if (!options || typeof options !== 'object') {
+      if (options) console.error(new Error('options invalides'), options)
+      options = {}
+    }
+  }
 
   const debugMode = sjtUrl.getParameter('debug')
-
-  // Le conteneur du picto enregistrement
-  let divFeedback
-  /**
-   * La date de début d'affichage
-   */
-  let startDate
 
   if (debugMode === 'all' || debugMode === 'display') log.enable()
   // log('options avant page.init', options)
@@ -307,41 +328,32 @@ module.exports = function display (ressource, options, next) {
   // on ajoute notifyError à options
   options.notifyError = notifyError
 
-  // on veut récupérer les erreurs pour les envoyer dans le log
-  let errors = []
-  // stub console
-  const consoleError = console.error.bind(console)
-  console.error = (...args) => {
-    consoleError(...args)
-    errors = errors.concat(args)
-  }
-  window.addEventListener('error', (error) => errors.push(error))
-  window.addEventListener('unload', () => {
+  // on veut récupérer les erreurs de la console pour les envoyer dans le log au unload
+  consoleErrorSpy.start()
+  // idem pour les autres erreurs
+  errorCatcher.start()
+
+  // pour envoyer les erreurs au unload si y'en a
+  const unloadListener = () => {
+    // à priori si on est au unload window va être détruit et c'est inutile de faire ça
+    // mais au cas où on a envoyé un alert, pas la peine de boucler…
+    // (ou si un navigateur ne détruisait pas les listener au changement d'url d'une iframe par ex)
+    window.removeEventListener('unload', unloadListener)
+    const errors = consoleErrorSpy.stop().concat(errorCatcher.stop())
+
     if (!errors.length) return
+
     const data = {
       rid: ressource.rid,
-      error: 'Erreurs au chargement',
+      error: 'Erreurs du display',
       errors
     }
-    // ici pas le choix, si on veut envoyer ça sur du unload faut du xhr sync, qui est deprecated
-    // et que chrome ne fait plus…
-    // on essaie quand même sendBeacon si c'est dispo…
-    // cf https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
-    // sauf qu'il faudrait ajouter un middleware pour décoder une simple string
-    // ou alors utiliser les web workers et FormData, on verra plus tard…
-    if (typeof navigator !== 'undefined' && navigator.sendBeacon && typeof Blob !== 'undefined') {
-      // faut préciser le type sinon y'a un pb de preflight avec chrome
-      /* global Blob */
-      const blob = new Blob([sjt.stringify(data)], { type: 'text/plain; charset=UTF-8' })
-      navigator.sendBeacon('/api/notifyError', blob)
-    } else {
-      xhr.post('/api/notifyError', data, {sync: true}, (error) => error && console.error(error))
-    }
-  })
+    xhrPostSync('/api/notifyError', data, alertIfError)
+  }
+  window.addEventListener('unload', unloadListener)
 
   page.init(options, function (error) {
     if (error) return next(error)
-    divFeedback = wd.getElementById('pictoFeedback')
     load(ressource, options, next)
   })
 }

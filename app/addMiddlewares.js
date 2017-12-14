@@ -70,7 +70,7 @@ function afterCookie (rail) {
     rail.use('/api', jsonMiddleware)
     rail.use('/ressource', urlencodedMiddleware)
     // lui doit aussi accepter du plain/text (envoyé par sendBeacon)
-    rail.use('/api/notifyError', textMiddleware)
+    rail.use('/api/deferPost', textMiddleware)
   } else {
     log.error('Il manque le settings $rail.noBodyParser pour mettre nos propres parsers')
   }

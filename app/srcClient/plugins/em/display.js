@@ -130,55 +130,62 @@ module.exports = function display (ressource, options, next) {
 
     // traitement du résultat éventuel
     if (options.resultatCallback && !options.isFormateur) {
+      // les exos mep modele 2 envoient 2× le dernier résultat
+      let completeResultReceived = 0
       // faut une fonction qui va transformer le résultat au format attendu
       // et la pour rendre accessible au swf dans son dom
       window.resultatCallback = function (result) {
-        log('resultatCallback em reçoit', result)
-        const resultMod = {
-          reponse: result.reponse,
-          nbq: result.nbq || params.nbq_defaut,
-          ressId: ressId,
-          ressType: ressType,
-          fin: (result.fin === 'o'),
-          original: result
-        }
-        const notif = (error) => notifyError({
-          error,
-          rid: ressource.rid,
-          resultat: resultMod
-        })
-
-        // faudrait chiffrer ça, mais j3p veut pouvoir l'intercepter
-        if (resultMod.nbq) resultMod.score = result.score / resultMod.nbq
-
-        // check fin, ajout des b sinon
-        if (!resultMod.fin) {
-          if (result.nbq && result.reponse) {
-            // on ajoute des b à reponse si c'est pas la dernière question
-            if (result.reponse.length < result.nbq) {
-              resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
-            } else {
-              notif('résultat em incohérent, fin = "o" manquant')
-              resultMod.fin = true
+        try {
+          log('resultatCallback em reçoit', result)
+          const resultMod = {
+            reponse: result.reponse,
+            nbq: result.nbq || params.nbq_defaut,
+            fin: (result.fin === 'o'),
+            original: result
+          }
+          const notif = (error) => notifyError({
+            error: error.stack || error,
+            rid: ressource.rid,
+            resultat: resultMod
+          })
+          // faudrait chiffrer ça, mais j3p veut pouvoir l'intercepter
+          if (result.score && resultMod.nbq) resultMod.score = result.score / resultMod.nbq
+          // check fin, ajout des b sinon
+          if (!resultMod.fin) {
+            if (result.nbq && result.reponse) {
+              // on ajoute des b à reponse si c'est pas la dernière question
+              if (result.reponse.length < result.nbq) {
+                resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
+              } else {
+                completeResultReceived++
+                const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
+                if (mepLevel >= completeResultReceived) {
+                  notif('résultat em incohérent, fin = "o" manquant')
+                  resultMod.fin = true
+                }
+              }
             }
           }
-        }
-
-        // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
-        if (typeof result.reponse === 'string' && result.reponse) {
-          const reducer = (total, lettre) => total + ((lettre === 'v' || lettre === 'p') ? 1 : 0)
-          const total = Array.from(result.reponse).reduce(reducer, 0)
-          if (total !== resultMod.score) {
-            resultMod.score = total
-            notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
+          // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
+          if (resultMod.nbq && typeof result.reponse === 'string' && result.reponse) {
+            const reducer = (total, lettre) => total + ((lettre === 'v' || lettre === 'p') ? 1 : 0)
+            const total = Array.from(result.reponse).reduce(reducer, 0)
+            if (total !== result.score) {
+              resultMod.score = total / resultMod.nbq
+              notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
+            }
+          } else {
+            // on arrête là
+            return notif('résultat em sans propriété reponse (ou pas une string)')
           }
-        } else {
-          return notif('résultat em sans propriété reponse (ou mauvais format)')
-        }
-        lastResult = resultMod
+          lastResult = resultMod
 
-        options.resultatCallback(resultMod)
-      }
+          options.resultatCallback(resultMod)
+        } catch (error) {
+          if (next) next(error)
+          else page.addError(error)
+        }
+      } // window.resultatCallback
 
       // on ajoute un envoi au unload si rien n'a été envoyé avant
       window.addEventListener('unload', function () {
