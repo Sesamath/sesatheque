@@ -12,11 +12,11 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with SesaReactComponent (LICENCE.txt).
+ * along with Sesatheque (LICENCE.txt).
  * @see http://www.gnu.org/licenses/agpl.txt
  *
  *
- * Ce fichier fait partie de SesaReactComponent, créée par l'association Sésamath.
+ * Ce fichier fait partie de Sesatheque, créée par l'association Sésamath.
  *
  * Sesatheque est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant
  * les termes de la GNU Affero General Public License version 3 telle que publiée par la
