@@ -48,7 +48,13 @@ function start () {
     // on affiche quand même les erreurs
     consoleError.apply(console, args)
     // et on les stocke
-    errors = errors.concat(args)
+    errors = errors.concat(args.map(arg => {
+      if (arg && typeof arg === 'object') {
+        if (arg.stack) return arg.stack
+        if (arg.message) return arg.message
+      }
+      return arg
+    }))
   }
 }
 

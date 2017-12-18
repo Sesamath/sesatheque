@@ -353,10 +353,10 @@ module.exports = function display (ressource, options, next) {
         rid: ressource.rid,
         type: ressource.type,
         error: 'Erreurs du display',
-        errors: errors.map(error => error.stack || error) // sinon le passage par JSON.stringify les supprime
+        // les Error ont déjà été remplacées par leur stack (pour éviter de se faire dégager
+        // par le stringify du post en JSON)
+        errors
       }
-      // y'en a bcp, on sait pas d'où ils sortent et ajouter une stacktrace maintenant servirait à rien
-      if (sjt.stringify(data.errors) === '[{}]') return
       xhrPostSync('/api/notifyError', data, alertIfError)
     }
     window.addEventListener('unload', unloadListener)

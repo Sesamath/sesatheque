@@ -36,8 +36,21 @@ const {version} = require('../../../package')
 const localSettings = require('../../../_private/config')
 let releaseStage = (localSettings && localSettings.application && localSettings.application.staging) || 'unknown'
 if (releaseStage === 'prod') releaseStage = 'production'
+
+/**
+ * Appelé avant d'envoyer le rapport, pour filtrer
+ * @param report
+ * @return {boolean}
+ */
+function beforeSend (report) {
+  // cf https://docs.bugsnag.com/platforms/browsers/js/customizing-error-reports/
+  const type = report && report.metaData && report.metaData.type
+  if (type === 'em' && /Permission denied to access property/.test(report.errorMessage)) return false
+}
+
 // @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
 const bugsnagClient = bugsnag({
+  beforeSend,
   apiKey: '5269a7241ef3290394720eaff61e90a1',
   appVersion: version,
   releaseStage
