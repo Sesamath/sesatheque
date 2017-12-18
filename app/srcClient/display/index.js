@@ -353,7 +353,7 @@ module.exports = function display (ressource, options, next) {
       const data = {
         rid: ressource.rid,
         error: 'Erreurs du display',
-        errors
+        errors: errors.map(error => error.stack || error) // sinon le passage par JSON les supprime
       }
       xhrPostSync('/api/notifyError', data, alertIfError)
     }
