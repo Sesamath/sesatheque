@@ -347,7 +347,12 @@ module.exports = function display (ressource, options, next) {
       // mais au cas où on a envoyé un alert, pas la peine de boucler…
       // (ou si un navigateur ne détruisait pas les listener au changement d'url d'une iframe par ex)
       window.removeEventListener('unload', unloadListener)
-      const errors = consoleErrorSpy.stop().concat(errorCatcher.stop())
+      // c'est quand même pénible, il reste plein de trucs vides…
+      // (alors que les error devraient toutes avoir été remplacées par leur stack)
+      const errors = consoleErrorSpy.stop().concat(errorCatcher.stop()).filter(e => {
+        const j = sjt.stringify(e)
+        if (j === '{}' || j === '{"isTrusted":true}') return false
+      })
       if (!errors.length) return
       const data = {
         rid: ressource.rid,
