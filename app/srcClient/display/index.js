@@ -349,22 +349,31 @@ module.exports = function display (ressource, options, next) {
       window.removeEventListener('unload', unloadListener)
       const errors = consoleErrorSpy.stop().concat(errorCatcher.stop())
       if (!errors.length) return
-
       const data = {
         rid: ressource.rid,
+        type: ressource.type,
         error: 'Erreurs du display',
-        errors: errors.map(error => error.stack || error) // sinon le passage par JSON les supprime
+        errors: errors.map(error => error.stack || error) // sinon le passage par JSON.stringify les supprime
       }
+      // y'en a bcp, on sait pas d'où ils sortent et ajouter une stacktrace maintenant servirait à rien
+      if (sjt.stringify(data.errors) === '[{}]') return
       xhrPostSync('/api/notifyError', data, alertIfError)
     }
     window.addEventListener('unload', unloadListener)
 
+    // ajout de metadata pour bugsnag
+    if (window.bugsnagClient) {
+      window.bugsnagClient.metaData.rid = ressource.rid
+      window.bugsnagClient.metaData.type = ressource.type
+    }
+
+    // on peut lancer l'init
     page.init(options, function (error) {
       if (error) return next(error)
       load(ressource, options, next)
     })
   } catch (error) {
-    page.addError(error)
+    next(error)
   }
 }
 

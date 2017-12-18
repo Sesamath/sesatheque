@@ -44,7 +44,7 @@ function errorListener (errorEvent) {
   } else {
     error = errorEvent
   }
-  errors.push(error)
+  if (error) errors.push(error)
 }
 
 /**
