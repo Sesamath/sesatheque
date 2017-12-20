@@ -30,12 +30,12 @@
  */
 'use strict'
 
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
+const dom = require('sesajstools/dom')
+const log = require('sesajstools/utils/log')
 
-var page = require('../../page/index')
+const page = require('../../page/index')
 
-var baseCollDoc = 'https://ressources.sesamath.net'
+const baseCollDoc = 'https://ressources.sesamath.net'
 
 /**
  * Affiche la ressource coll_doc (atome de manuel ou cahier)
@@ -46,57 +46,40 @@ var baseCollDoc = 'https://ressources.sesamath.net'
  */
 module.exports = function display (ressource, options, next) {
   try {
-    var container = options.container
+    // les params minimaux
+    if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error('Paramètres manquants')
+    const container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     // on enverra le résultat à la fermeture
     if (options.resultatCallback && container.addEventListener) {
-      container.addEventListener('unload', function () {
-        var resultat = {
-          ressType: 'coll_doc',
-          ressId: ressource.oid,
-          score: 1
-        }
-        if (options.sesatheque) resultat.sesatheque = options.sesatheque
-        options.resultatCallback(resultat)
-      })
+      container.addEventListener('unload', () => options.resultatCallback({score: 1}))
     }
 
     log('start coll_doc display avec la ressource', ressource)
-    // les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres) {
-      throw new Error('Paramètres manquants')
-    }
-    var url
-    try {
-      url = ressource.parametres.url || ressource.parametres.files[0].uri
-    } catch (error) {
-      log.error(error)
-      throw new Error("Il manque l'adresse de cette ressource dans ses paramètres")
-    }
     // On réinitialise le conteneur
     dom.empty(container)
     if (ressource.parametres.url) {
-      // on affiche le lecteur d'origine
-      dom.addElement(container, 'iframe', {src: url, style: 'width:100%;height:100%', onload: next})
-    } else if (url) {
-      // on affiche les lien de téléchargement
-      var msg
-      if (ressource.parametres.files.length > 1) msg = 'Fichiers composant la ressource'
-      else msg = 'Voici le lien pour télécharger la ressource'
-      var ul = dom.addElement(container, 'ul', null, msg)
-      ressource.parametres.files.forEach(function (file) {
-        var li = dom.addElement(ul, 'li')
+      // on affiche le lecteur prévu en iframe
+      dom.addElement(container, 'iframe', {src: ressource.parametres.url, style: 'width:100%;height:100%', onload: next})
+    } else if (ressource.parametres.files && ressource.parametres.files.length) {
+      // on affiche les liens de téléchargement
+      const msg = (ressource.parametres.files.length > 1) ? 'Fichiers composant la ressource' : 'Voici le lien pour télécharger la ressource'
+      const ul = dom.addElement(container, 'ul', null, msg)
+      ressource.parametres.files.forEach((file) => {
+        const li = dom.addElement(ul, 'li')
         if (file.uri) {
-          url = baseCollDoc + file.uri
-          var pos = file.uri.lastIndexOf('/')
-          var name = file.uri.substr(pos + 1)
+          const url = baseCollDoc + file.uri
+          const pos = file.uri.lastIndexOf('/')
+          const name = file.uri.substr(pos + 1)
           dom.addElement(li, 'a', {href: url}, name)
         } else {
           dom.addElement(li, 'span', {class: 'error'}, 'Url manquante')
         }
       })
       next()
+    } else {
+      throw new Error("Il manque l'adresse de cette ressource dans ses paramètres")
     }
   } catch (error) {
     if (next) next(error)
