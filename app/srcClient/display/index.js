@@ -116,8 +116,13 @@ function addResultatCallback (ressource, options) {
     resultatListener = (resultat) => console.log('[DEBUG] resultat qui aurait été envoyé', resultat)
   }
 
-  // on wrap si qqun écoute
+  // on s'occupe des résultats si qqun écoute
   if (resultatListener) {
+    // on ajoute dans options des infos qu'on nous demanderait de mettre dans tous les résultats via l'url
+    ['resultatId', 'tokenId', 'userId'].forEach(function (paramName) {
+      const paramValue = sjtUrl.getParameter(paramName)
+      if (paramValue) options[paramName] = paramValue
+    })
     options.resultatCallback = (result) => processResult(result, resultatListener)
   }
 } // addResultatCallback
@@ -188,12 +193,12 @@ function getResultat (result, ressource, options) {
     resultat.duree = Math.floor(((new Date()).getTime() - options.startDate.getTime()) / 1000)
   }
   // on impose ça d'après la ressource
-  resultat.ressType = ressource.type
+  resultat.type = ressource.type
   resultat.rid = ressource.rid
-  // on regarde si on nous a demandé d'ajouter des propriétés au résultat (via querystring ou options)
-  ;['sesatheque', 'userOrigine', 'userId'].forEach(function (paramName) {
-    const paramValue = sjtUrl.getParameter(paramName) || options[paramName]
-    if (paramValue) resultat[paramName] = paramValue
+  // on regarde si on nous a demandé d'ajouter des propriétés au résultat
+  // (via options, ou querystring qui a été mis dans options à l'init)
+  ;['resultatId', 'tokenId', 'userId'].forEach((p) => {
+    if (options[p]) resultat[p] = options[p]
   })
   return resultat
 }
@@ -243,7 +248,7 @@ function load (ressource, options, next) {
       } else {
         log('le display a terminé sans renvoyer d’erreur')
       }
-      if (next) next(error)
+      next(error)
     })
   } catch (err) {
     page.addError(err.toString())
@@ -256,6 +261,14 @@ function load (ressource, options, next) {
  */
 function logIfError (error) {
   if (error) console.error(error)
+}
+
+/**
+ * page.addError si error (inclue console.error)
+ * @param {Error} error
+ */
+function printIfError (error) {
+  if (error) page.addError(error)
 }
 
 /**
@@ -300,12 +313,6 @@ module.exports = function display (ressource, options, next) {
     xhr.post('/api/notifyError', infos, logIfError)
   }
 
-  if (typeof next !== 'function') {
-    next = (error) => {
-      if (error) page.addError(error)
-    }
-  }
-
   try {
     // init params
     if (typeof options === 'function') {
@@ -314,7 +321,7 @@ module.exports = function display (ressource, options, next) {
     } else {
       if (typeof next !== 'function') {
         if (next) console.error(new Error('paramètre next invalide'), next)
-        next = logIfError
+        next = printIfError
       }
       if (!options || typeof options !== 'object') {
         if (options) console.error(new Error('options invalides'), options)

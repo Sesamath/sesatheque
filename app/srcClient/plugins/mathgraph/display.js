@@ -88,8 +88,6 @@ function displayJava (ressource, options, next) {
       try {
         var newFigure = document[appletName].getScript()
         options.resultatCallback({
-          ressType: 'mathgraph',
-          ressOid: ressource.oid,
           score: 1,
           reponse: newFigure
         })
@@ -109,14 +107,8 @@ function displayJs (ressource, options, next) {
 
   // on enverra un résultat seulement à la fermeture
   if (options.resultatCallback && container.addEventListener) {
-    container.addEventListener('unload', function () {
-      if (isLoaded) {
-        options.resultatCallback({
-          ressType: 'mathgraph',
-          ressOid: ressource.oid,
-          score: 1
-        })
-      }
+    container.addEventListener('unload', () => {
+      if (isLoaded) options.resultatCallback({score: 1})
     })
   }
 

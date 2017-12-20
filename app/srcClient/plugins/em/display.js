@@ -33,11 +33,8 @@
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 
-const page = require('../../page/index')
 const swf = require('../../display/swf')
 
-let ressId
-const ressType = 'em'
 let isLoaded, isResultatSent
 
 function getResultatCallback (ressource, options, next) {
@@ -124,9 +121,6 @@ module.exports = function display (ressource, options, next) {
     const cssClass = 'mepRess'
     const params = ressource.parametres
     let baseMepSwf, idSwf, swfUrl, largeur, hauteur, flashvars
-
-    // l'id du div html que l'on créé, qui sera remplacé par un tag object pour le swf
-    ressId = ressource.oid
 
     log('start display em avec la ressource (+options)', ressource, options)
     // les params minimaux

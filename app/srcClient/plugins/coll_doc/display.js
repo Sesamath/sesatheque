@@ -46,6 +46,8 @@ const baseCollDoc = 'https://ressources.sesamath.net'
  */
 module.exports = function display (ressource, options, next) {
   try {
+    if (!next) next = (error) => { if (error) page.addError(error) }
+    let isLoaded = false
     // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error('Paramètres manquants')
     const container = options.container
@@ -53,7 +55,9 @@ module.exports = function display (ressource, options, next) {
 
     // on enverra le résultat à la fermeture
     if (options.resultatCallback && container.addEventListener) {
-      container.addEventListener('unload', () => options.resultatCallback({score: 1}))
+      container.addEventListener('unload', () => {
+        if (isLoaded) options.resultatCallback({score: 1})
+      })
     }
 
     log('start coll_doc display avec la ressource', ressource)
@@ -61,9 +65,13 @@ module.exports = function display (ressource, options, next) {
     dom.empty(container)
     if (ressource.parametres.url) {
       // on affiche le lecteur prévu en iframe
-      dom.addElement(container, 'iframe', {src: ressource.parametres.url, style: 'width:100%;height:100%', onload: next})
+      const onLoadListener = () => {
+        isLoaded = true
+        next()
+      }
+      dom.addElement(container, 'iframe', {src: ressource.parametres.url, style: 'width:100%;height:100%', onload: onLoadListener})
     } else if (ressource.parametres.files && ressource.parametres.files.length) {
-      // on affiche les liens de téléchargement
+      // on affiche des liens de téléchargement
       const msg = (ressource.parametres.files.length > 1) ? 'Fichiers composant la ressource' : 'Voici le lien pour télécharger la ressource'
       const ul = dom.addElement(container, 'ul', null, msg)
       ressource.parametres.files.forEach((file) => {
@@ -77,12 +85,12 @@ module.exports = function display (ressource, options, next) {
           dom.addElement(li, 'span', {class: 'error'}, 'Url manquante')
         }
       })
+      isLoaded = true
       next()
     } else {
       throw new Error("Il manque l'adresse de cette ressource dans ses paramètres")
     }
   } catch (error) {
-    if (next) next(error)
-    else page.addError(error)
+    next(error)
   }
 }
