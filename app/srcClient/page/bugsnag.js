@@ -45,7 +45,11 @@ if (releaseStage === 'prod') releaseStage = 'production'
 function beforeSend (report) {
   // cf https://docs.bugsnag.com/platforms/browsers/js/customizing-error-reports/
   const type = report && report.metaData && report.metaData.type
-  if (type === 'em' && /Permission denied to access property/.test(report.errorMessage)) return false
+  if (['am', 'em'].includes(type)) {
+    // apparemment le flash tente de lire des trucs sur la fenêtre parente
+    if (/Permission denied to access property/.test(report.errorMessage)) return false
+    if (/Accès refusé/.test(report.errorMessage)) return false
+  }
 }
 
 // @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
@@ -83,5 +87,6 @@ window.onerror = (messageOrEvent, source, line, col, error) => {
       error = new Error('window.onerror appelé sans error')
     }
   }
-  bugsnagClient.notify(error, {severity: 'error'})
+  console.error('bugsnag', error)
+  // bugsnagClient.notify(error, {severity: 'error'})
 }
