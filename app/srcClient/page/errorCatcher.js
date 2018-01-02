@@ -41,6 +41,9 @@ function errorListener (errorEvent) {
   if (errorEvent.error) {
     if (errorEvent.error.stack) error = errorEvent.error.stack
     else error = errorEvent.error
+  } else if (error.hasOwnProperty('isTrusted')) {
+    // c'est un event qui ne laissera que cette propriété après JSON.stringify, on essait de récupérer les autres
+    error = Object.assign({}, error)
   } else {
     error = errorEvent
   }

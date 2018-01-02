@@ -67,6 +67,12 @@ if (!bugsnagClient.user) bugsnagClient.user = {}
 window.onerror = (messageOrEvent, source, line, col, error) => {
   // metadata basiques
   Object.assign(bugsnagClient.metaData, {col, line, source})
+
+  // le stringify des event ne laisse que la propriété isTrusted, on essaie de récupérer les autres
+  if (typeof messageOrEvent === 'object' && messageOrEvent.hasOwnProperty('isTrusted')) {
+    bugsnagClient.metaData.event = Object.assign({}, messageOrEvent)
+  }
+
   // error n'est pas toujours fourni
   if (error) {
     // on ajoute ça si on l'a aussi (pas sûr que ça arrive…)
