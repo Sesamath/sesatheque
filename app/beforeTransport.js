@@ -382,8 +382,21 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       addActions(context, data)
     } // context.layout
 
+    // ajoute les infos pour bugsnag
+    if (busgnagJsCode && getIsHtml(context)) {
+      if (!data.jsBloc) data.jsBloc = {$view: 'js'}
+      if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ''
+      data.jsBloc.jsCode += busgnagJsCode
+    }
+
     // on envoie toutes les réponses dans le log de debug
     if (!global.isProd) debug(context, data)
+  }
+
+  // inutile de refaire ça sur chaque requête
+  let busgnagJsCode
+  if (config.bugsnag && config.bugsnag.apiKey) {
+    busgnagJsCode = `;if (window.bugsnagClient && window.bugsnagClient.setup) window.bugsnagClient.setup(${JSON.stringify(config.bugsnag)});`
   }
 
   return beforeTransport

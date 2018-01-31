@@ -41,6 +41,7 @@ const sjtUrl = require('sesajstools/http/url')
 
 const autosize = require('./autosize')
 const refreshAuth = require('./refreshAuth')
+// lui s'ajoute tout seul à window, suffit de l'appeler
 require('./bugsnag')
 
 const w = window

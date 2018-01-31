@@ -15,7 +15,7 @@
   {blocsFirst|s}
   {contentBloc|s}
   {blocs|s}
-  {jsBloc|s}
 </div>
+{jsBloc|s}
 </body>
 </html>

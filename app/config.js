@@ -41,6 +41,7 @@ const sjtUrl = require('sesajstools/http/url')
 const {addSesatheque, reBaseUrl} = require('sesatheque-client/src/sesatheques')
 // la conf du composant ressource à part
 const configRessource = require('./ressource/config')
+const {version} = require('../package')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -135,6 +136,7 @@ const config = {
     },
     authentication: {}
   },
+
   components: {
     auth: {
       paths: {
@@ -185,18 +187,22 @@ const config = {
     },
     ressource: configRessource
   },
+
   // urls absolues des sésathèques que l'on accepte de référencer (pour les alias, par ex quand
   // des sesalab connectés à plusieurs sésathèques mettent des ressources de l'une
   // dans des arbres de l'autre)
   // sous la forme baseId:baseUrl, ou nomQcq{id: baseId, baseUrl:laBaseHttpAbsolue, apiToken: leToken}
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
   sesatheques: [],
+
   // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences
   // sous la forme {nom, baseId, baseUrl}
   // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
   sesalabs: [],
+
   // une liste d'autres serveurs d'authentification externes, {nom, baseId, baseUrl}
   authServers: [],
+
   // une liste de login / pass admin
   admin: {
     // foo:'passDeFoo'
@@ -223,6 +229,13 @@ const config = {
 // on ajoute nos params locaux (accès à la base et port,
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
 if (localConfig) sjtObj.merge(config, localConfig)
+
+// pour bugsnag (il faudra mettre apiKey en private sinon il sera pas instancié
+if (config.bugsnag && config.bugsnag.apiKey) {
+  config.bugsnag.appVersion = version
+  config.bugsnag.releaseStage = staging
+  // on pourra ajouter endpoint si on veut traiter nous-même les retours
+}
 
 // si lassiLogger n'a pas été défini on l'ajoute maintenant,
 // mais en utilisant logs.dir après override de _private

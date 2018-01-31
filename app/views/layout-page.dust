@@ -44,6 +44,6 @@
   </p>
 </footer>
 
-{#jsBloc}{.|s}{/jsBloc}
+{jsBloc|s}
 </body>
 </html>

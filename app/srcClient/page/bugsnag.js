@@ -31,11 +31,11 @@
 'use strict'
 
 const bugsnag = require('bugsnag-js')
-const {version} = require('../../../package')
-// releaseStage devrait être précisé dans _private/config
-const localSettings = require('../../../_private/config')
-let releaseStage = (localSettings && localSettings.application && localSettings.application.staging) || 'unknown'
-if (releaseStage === 'prod') releaseStage = 'production'
+
+// ce fichier met un objet busgnagClient en global et attend qu'on appelle busgnagClient.setup
+// en lui passant une apiKey (qui devrait être précisé dans _private/config,
+// si c'est le cas c'est beforeTransport qui ajoute l'appel de setup au source html de la page)
+// pour mettre le vrai busgnagClient en global
 
 /**
  * Appelé avant d'envoyer le rapport, pour filtrer
@@ -52,47 +52,65 @@ function beforeSend (report) {
   }
 }
 
-// @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
-const bugsnagClient = bugsnag({
-  beforeSend,
-  apiKey: '5269a7241ef3290394720eaff61e90a1',
-  appVersion: version,
-  releaseStage
-  // on pourra ajouter endpoint si on veut traiter nous-même les retours
-})
-
-// on ajoute notre client en global pour que le code puisse facilement lui ajouter des infos de contexte
-window.bugsnagClient = bugsnagClient
-// via ces objet, dont on s'assure qu'ils existent toujours
-if (!bugsnagClient.metaData) bugsnagClient.metaData = {}
-if (!bugsnagClient.user) bugsnagClient.user = {}
-
-// et le listener
-window.onerror = (messageOrEvent, source, line, col, error) => {
-  // metadata basiques
-  Object.assign(bugsnagClient.metaData, {col, line, source})
-
-  // le stringify des event ne laisse que la propriété isTrusted, on essaie de récupérer les autres
-  if (typeof messageOrEvent === 'object' && messageOrEvent.hasOwnProperty('isTrusted')) {
-    bugsnagClient.metaData.event = Object.assign({}, messageOrEvent)
+function setup (bugsnagConfig) {
+  // @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
+  if (!bugsnagConfig.apiKey) {
+    console.error(new Error('impossible de configurer busgnag sans apiKey'), bugsnagConfig)
+    return
   }
+  // on complète la conf avec ça
+  bugsnagConfig.beforeSend = beforeSend
 
-  // error n'est pas toujours fourni
-  if (error) {
-    // on ajoute ça si on l'a aussi (pas sûr que ça arrive…)
-    if (messageOrEvent) bugsnagClient.metaData.messageOrEvent = messageOrEvent
-  } else {
-    // un isError cheap qui devrait suffire (sinon cf isError de bugsnag-js)
-    if (messageOrEvent && messageOrEvent.hasOwnProperty('stack')) {
-      error = messageOrEvent
-    } else if (typeof messageOrEvent === 'string') {
-      // on aura pas de stacktrace, mais au moins ce sera signalé et bugsnag râlera pas
-      error = new Error(messageOrEvent)
-    } else {
-      if (messageOrEvent) bugsnagClient.metaData.messageOrEvent = messageOrEvent
-      error = new Error('window.onerror appelé sans error')
+  // s'écrase en ajoutant notre client en global
+  window.bugsnagClient = bugsnag(bugsnagConfig)
+  /* global bugsnagClient */
+  // et pour que le code puisse facilement ajouter des infos de contexte
+  // on s'assure que ces objets existent toujours
+  if (!bugsnagClient.metaData) bugsnagClient.metaData = {}
+  if (!bugsnagClient.user) bugsnagClient.user = {}
+
+  // et le listener
+  window.onerror = (messageOrEvent, source, line, col, error) => {
+    // metadata basiques
+    Object.assign(bugsnagClient.metaData, {col, line, source})
+
+    // le stringify des event ne laisse que la propriété isTrusted, on essaie de récupérer les autres
+    if (typeof messageOrEvent === 'object' && messageOrEvent.hasOwnProperty('isTrusted')) {
+      bugsnagClient.metaData.event = Object.assign({}, messageOrEvent)
     }
+
+    // error n'est pas toujours fourni
+    if (error) {
+      // on ajoute ça si on l'a aussi (pas sûr que ça arrive…)
+      if (messageOrEvent) bugsnagClient.metaData.messageOrEvent = messageOrEvent
+    } else {
+      // un isError cheap qui devrait suffire (sinon cf isError de bugsnag-js)
+      if (messageOrEvent && messageOrEvent.hasOwnProperty('stack')) {
+        error = messageOrEvent
+      } else if (typeof messageOrEvent === 'string') {
+        // on aura pas de stacktrace, mais au moins ce sera signalé et bugsnag râlera pas
+        error = new Error(messageOrEvent)
+      } else {
+        if (messageOrEvent) bugsnagClient.metaData.messageOrEvent = messageOrEvent
+        error = new Error('window.onerror appelé sans error')
+      }
+    }
+    console.error('bugsnag', error)
+    // bugsnagClient.notify(error, {severity: 'error'})
   }
-  console.error('bugsnag', error)
-  // bugsnagClient.notify(error, {severity: 'error'})
+}
+
+if (typeof window === 'undefined') {
+  console.error(new Error('pas de busgnag hors d’un navigateur'))
+} else {
+  window.bugsnagClient = {
+    setup,
+    // et pour que ceux qui s'attendent à trouver ça ne plantent pas
+    notify: function fakeNotify () {
+      console.error('bugsnag n’a pas été instancié, mais il reçoit')
+      console.error.apply(console, arguments)
+    },
+    metaData: {},
+    user: {}
+  }
 }
