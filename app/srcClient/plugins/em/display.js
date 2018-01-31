@@ -40,9 +40,6 @@ let isLoaded, isResultatSent
 function getResultatCallback (ressource, options, next) {
   const params = ressource.parametres
   const {notifyError} = options
-  // les exos mep modele 2 envoient 2× le dernier résultat (d'abord sans fin=o
-  // puis après clic sur suite et affichage du message de fin avec fin=o)
-  let completeResultReceived = 0
 
   return function emResultatCallback (result) {
     try {
@@ -67,12 +64,12 @@ function getResultatCallback (ressource, options, next) {
           if (result.reponse.length < result.nbq) {
             resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
           } else {
-            completeResultReceived++
-            const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
-            if (mepLevel >= completeResultReceived) {
-              notif('résultat em incohérent, fin = "o" manquant')
-              resultMod.fin = true
-            }
+            // les exos mep modele 2 envoient 2× le dernier résultat (d'abord sans fin=o
+            // puis après clic sur suite et affichage du message de fin avec fin=o)
+            // On impose toujours fin true sinon ça peut bloquer une séquence ordonnée
+            // si l'élève ne clique pas sur suite.
+            // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
+            resultMod.fin = true
           }
         }
       }
