@@ -40,6 +40,7 @@ let isLoaded, isResultatSent
 function getResultatCallback (ressource, options, next) {
   const params = ressource.parametres
   const {notifyError} = options
+  let completeResultReceived = 0
 
   return function emResultatCallback (result) {
     try {
@@ -58,19 +59,26 @@ function getResultatCallback (ressource, options, next) {
       // faudrait chiffrer ça, mais j3p veut pouvoir l'intercepter
       if (result.score && resultMod.nbq) resultMod.score = result.score / resultMod.nbq
       // check fin, ajout des b sinon
-      if (!resultMod.fin) {
-        if (result.nbq && result.reponse) {
-          // on ajoute des b à reponse si c'est pas la dernière question
-          if (result.reponse.length < result.nbq) {
-            resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
-          } else {
-            // les exos mep modele 2 envoient 2× le dernier résultat (d'abord sans fin=o
-            // puis après clic sur suite et affichage du message de fin avec fin=o)
-            // On impose toujours fin true sinon ça peut bloquer une séquence ordonnée
-            // si l'élève ne clique pas sur suite.
-            // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
-            resultMod.fin = true
+      if (!resultMod.fin && result.nbq && result.reponse) {
+        // on ajoute des b à reponse si c'est pas la dernière question
+        if (result.reponse.length < result.nbq) {
+          resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
+        } else {
+          // les exos mep modele 2 envoient 2× le dernier résultat (d'abord sans fin=o
+          // puis après clic sur suite et affichage du message de fin avec fin=o)
+          // On impose toujours fin true sinon ça peut bloquer une séquence ordonnée
+          // si l'élève ne clique pas sur suite.
+          // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
+          resultMod.fin = true
+          completeResultReceived++
+          const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
+          if (mepLevel >= completeResultReceived) {
+            // donc mep2 à la deuxième réponse complète (envoyée au clic sur suite à la fin)
+            // ou mep1 à la 1re
+            notif(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
           }
+          // pour indiquer à labomep de pas fermer tout de suite
+          if (mepLevel === '2') resultMod.$resetDelay = 30
         }
       }
       // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
