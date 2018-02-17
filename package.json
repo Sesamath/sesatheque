@@ -74,7 +74,7 @@
     "lodash": "4.16.4",
     "moment": "2.19.3",
     "morgan": "1.9.0",
-    "request": "2.81.0",
+    "request": "2.82.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#1.0.3",
     "sesajstools": "git://src.sesamath.net/sesajstools#1.0.21",
     "sesalab-sso": "Sesamath/sesalab-sso#1.0.12",
