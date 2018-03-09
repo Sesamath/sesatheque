@@ -173,8 +173,9 @@ module.exports = function ($accessControl, $ressourcePage) {
             link.value = `login sur ${client.baseId}`
           }
           loginLinks.push(link)
-        } else {
-          log.error(`client ${client.baseId} sans getLoginUrl`, client)
+          // pour le moment labomep2 ne gère pas ça
+          // } else {
+          //   log.error(`client ${client.baseId} sans getLoginUrl`, client)
         }
       })
       if (loginLinks.length > 1) {

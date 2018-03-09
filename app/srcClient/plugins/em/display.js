@@ -87,7 +87,8 @@ function getResultatCallback (ressource, options, next) {
         const total = Array.from(result.reponse).reduce(reducer, 0)
         if (total !== result.score) {
           resultMod.score = total / resultMod.nbq
-          notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
+          // c'est tellement fréquent que ça sert à rien de notifier
+          // notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
         }
       } else {
         // on arrête là

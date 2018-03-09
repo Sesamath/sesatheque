@@ -54,7 +54,8 @@ module.exports = function () {
     }
     const errorMessage = (typeof error === 'string') ? error : error.toString()
     data.errors.errorMessages.push(errorMessage)
-    log.error(error)
+    // si c'est juste une string pas la peine de le loguer
+    if (error && error.stack) log.error(error.stack)
   }
 
   /**
