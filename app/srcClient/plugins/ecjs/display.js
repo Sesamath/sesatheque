@@ -85,9 +85,12 @@ module.exports = function display (ressource, options, next) {
         /* global CLC, $ */
         function envoyerScoreExoJs (event, data) {
           log('résultats reçus du js calculatice', data)
+          if (!options || typeof options.resultatCallback !== 'function') return
           resultatSent = true // même si ça plante, pas la peine de recommencer au unload
           var dataToSend = {
-            fin: true
+            fin: true,
+            // on veut pas laisser affiché le bouton recommencer
+            $resetDelay: 0
           }
           if (data.total > 0) {
             var score = parseInt(data.score, 10) || 0
