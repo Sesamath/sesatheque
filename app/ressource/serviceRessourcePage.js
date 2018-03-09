@@ -812,7 +812,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           // ajout des enfants pour les arbres
           if (ressource.type === 'arbre') {
             // on ajoute la liste des urls des enfants si on les a
-            if (Array.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json c'est une string
+            if (Array.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json enfants est une string
+              const enfants = ressource.enfants.filter(e => e)
+              if (enfants.length < ressource.enfants.length) log.dataError(`La ressource ${ressource.oid} a des enfants invalides`, enfants)
               var enfantsDescribe = []
               ressource.enfants.forEach(function (enfant) {
                 // ça peut être un dossier seul
@@ -860,20 +862,16 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       context.html(data)
     } // termine
 
-    if (error) {
-      $ressourcePage.printError(context, error)
-    } else if (ressource) {
-      log.debug('prepareAndSend pour la vue ' + view + ' avec la ressource', ressource, 'dust', {max: 1000})
-      var data = $ressourcePage.getDefaultData(view)
+    if (error) return $ressourcePage.printError(context, error)
+    if (!ressource) return $ressourcePage.printError(context, 'Cette ressource n’existe pas', 404)
 
-      if (view === 'describe') {
-        // faut ajouter des infos sur les relations et les auteurs/contributeurs en allant les charger
-        enhance(ressource, termine)
-      } else {
-        termine()
-      }
+    log.debug('prepareAndSend pour la vue ' + view + ' avec la ressource', ressource, 'dust', {max: 1000})
+    const data = $ressourcePage.getDefaultData(view)
+    if (view === 'describe') {
+      // faut ajouter des infos sur les relations et les auteurs/contributeurs en allant les charger
+      enhance(ressource, termine)
     } else {
-      $ressourcePage.printError(context, 'Cette ressource n’existe pas', 404)
+      termine()
     }
   } // prepareAndSend
 
