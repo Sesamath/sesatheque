@@ -48,6 +48,4 @@
       {/o.choices}
     </tbody></table>
   </div>
-
-  {?o.new}{>wrapper widget="text" o=o.new /}{/o.new}
 </div>
