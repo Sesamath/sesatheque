@@ -57,12 +57,11 @@ describe('ClientItem', () => {
         const item = new ClientItem(ressource)
         const expectedFields = ['aliasOf', 'type', 'titre', 'resume', 'commentaires', 'description', 'public', 'categories', 'inc']
         expectedFields.forEach(p => {
-          if (p === 'aliasOf') expect(item[p]).to.equal(ressource.rid, 'Pb rid => aliasOf')
-          else if (p === 'public') expect(item[p]).to.equal(ressource.publie && !ressource.restriction, 'Pb rid => aliasOf')
-          else expect(item[p]).to.deep.equal(ressource[p], `Pb ${p}`)
+          if (p === 'public') expect(item.public).to.equal(ressource.publie && !ressource.restriction, `Pb restriction => public\n${JSON.stringify(ressource)}\n=>\n${JSON.stringify(item)}`)
+          else expect(item[p]).to.deep.equal(ressource[p], `Pb ${p}\n${JSON.stringify(ressource)}\n=>\n${JSON.stringify(item)})`)
         })
         // url
-        const suffix = `?${ressource.inc}`
+        const suffix = ressource.inc ? `?inc=${ressource.inc}` : ''
         expect(item.$displayUrl).to.equal(`${myBaseUrl}public/${display}/${ressource.oid}${suffix}`, 'pb $displayUrl')
         expect(item.$describeUrl).to.equal(`${myBaseUrl}public/${describe}/${ressource.oid}${suffix}`, 'pb $describeUrl')
         expect(item.$dataUrl).to.equal(`${myBaseUrl}api/public/${ressource.oid}${suffix}`, 'pb $dataUrl')
@@ -76,12 +75,13 @@ describe('ClientItem', () => {
       .forEach(ref => {
         ref.$droits = 'R'
         const item = new ClientItem(ref)
-        const expectedFields = ['aliasOf', 'type', 'titre', 'resume', 'commentaires', 'description', 'public', 'categories', 'inc']
-        if (!ref.aliasOf && item.type === 'arbre') expectedFields.push('enfants')
+        const expectedFields = ['type', 'titre', 'resume', 'commentaires', 'description', 'public', 'categories', 'inc']
+        expect(item.rid).to.equal(ref.aliasOf, `Pb aliasOf => rid`)
+        if (!ref.aliasOf && ref.type === 'arbre') expectedFields.push('enfants')
         expectedFields.forEach(p => expect(item[p]).to.deep.equal(ref[p], `Pb ${p}`))
         // url
         const oid = ref.aliasOf.substr(myBaseId.length + 1)
-        const suffix = `?${ref.inc}`
+        const suffix = ref.inc ? `?inc=${ref.inc}` : ''
         if (ref.public) {
           expect(item.$displayUrl).to.equal(`${myBaseUrl}public/${display}/${oid}${suffix}`, 'pb $displayUrl')
           expect(item.$describeUrl).to.equal(`${myBaseUrl}public/${describe}/${oid}${suffix}`, 'pb $describeUrl')
