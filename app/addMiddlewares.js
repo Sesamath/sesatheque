@@ -68,7 +68,7 @@ function afterCookie (rail) {
     const textMiddleware = bodyParser.text(bodyParserSettings)
 
     rail.use('/api', jsonMiddleware)
-    rail.use('/ressource', urlencodedMiddleware)
+    rail.use(['/groupe', '/ressource'], urlencodedMiddleware)
     // lui doit aussi accepter du plain/text (envoyé par sendBeacon)
     rail.use('/api/deferPost', textMiddleware)
   } else {
