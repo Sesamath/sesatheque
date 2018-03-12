@@ -424,22 +424,21 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
    */
   controller.post('ajouter', function (context) {
     context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
+    var pid = $accessControl.getCurrentUserPid(context)
+    if (!pid) return $page.denied(context, 'Il faut être authentifié pour créer un groupe')
+    if (!$accessControl.hasGenericPermission('createGroupe', context)) return $page.denied(context, 'Droits insuffisants pour créer un groupe')
     try {
-      // premiers contrôles qui renverront denied
-      var pid = $accessControl.getCurrentUserPid(context)
-      if (!pid) throw new Error('Il faut être authentifié pour créer un groupe')
-      if (!$accessControl.hasGenericPermission('createGroupe', context)) throw new Error('Droits insuffisants pour créer un groupe')
       /**
        * @private
        * @type Groupe
        */
-      var groupe = context.post
-      if (!groupe.nom) throw new Error('Données invalides')
+      const groupe = context.post
+      if (!groupe || !groupe.nom) return $page.printError(context, 'Données invalides')
       // le toLowerCase() sera fait par $groupeRepository, pas à nous controller de gérer cette logique métier
       // mais faut faire attention à mettre à jour cette variable après passage des ≠ services
-      var nom = groupe.nom
+      let nom = groupe.nom
       var groupeBdd
-      // on peut continuer, faut vérifier qu'il n’existe pas
+      // on peut continuer, faut vérifier qu'il n’existe pas déjà
       flow().seq(function () {
         $groupeRepository.load(nom, this)
       }).seq(function (groupeBdd) {
@@ -454,7 +453,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
           nom = groupeBdd.nom
           h.joinGroup(context, nom, this)
         } else {
-          this(new Error("Erreur à l'enregistrement du groupe " + nom))
+          this(new Error(`Erreur à l’enregistrement du groupe ${nom}`))
         }
       }).seq(function () {
         if (context.get.closerId) {
@@ -465,13 +464,12 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
             },
             contentBloc: {
               $view: 'contents',
-              contents: [ 'Groupe ' + nom + ' enregistré' ]
+              contents: [`Groupe ${nom} enregistré`]
             },
             jsBloc: {
               $view: 'js',
               // action:"iframeCloser" est en dur dans sesatheque-client:addCloser
-              jsCode: 'if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"' +
-              context.get.closerId + '", groupe:' + sjt.stringify(groupeBdd) + '}, "*")'
+              jsCode: `if (parent.postMessage) parent.postMessage({action:"iframeCloser", id:"${context.get.closerId}", groupe: ${sjt.stringify(groupeBdd)}}, "*")`
             }
           })
         } else {
@@ -502,7 +500,8 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
         }
       })
     } catch (error) {
-      $page.denied(context, error.toString())
+      log.error(error)
+      $page.printError(context, error.toString())
     }
   })
 
