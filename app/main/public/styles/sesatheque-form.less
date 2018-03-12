@@ -40,6 +40,21 @@
 #formRessource .input-group div, #formRessource .input-group label {font-weight: bold; width: 100%; text-align: center; float: none; }
 /* #form-oid, #form-type {width: 5em;} fait passer le titre à droite.... */
 
+/* on ne veut pas de la règle par défaut qui masque les en-têtes sur les petits écrans * /
+c'est commenté dans _07-responsive.less, avec le bloc sur th qui nous ennuie
+@media (max-width: @tiny-screen) {
+  thead {
+    display: block;
+  }
+}
+/* un min-width et un peu de padding pour le tableau de checkboxesGroupes */
+div.checkboxesGroupes {
+  min-width: 320px;
+}
+div.checkboxesGroupes th, div.checkboxesGroupes td {
+  padding: 0.5em;
+}
+
 #formRessource #srcGroup, #formRessource #dstGroup {
   float: left;
   width: 47%;
