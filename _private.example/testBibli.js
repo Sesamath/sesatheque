@@ -10,7 +10,7 @@ const hostname = 'bibliotheque.local'
 const host = hostname + ':' + port
 
 // on ajoute cette sesatheque
-const baseId = 'sesathequeTest'
+const baseId = 'bibliLocalTest'
 const baseUrl = 'http://' + host + '/'
 sesatheques.addSesatheque(baseId, baseUrl)
 
@@ -33,6 +33,8 @@ module.exports = {
     mail: 'you@example.com',
     staging: 'test'
   },
+
+  // spécifications lassi
   $cache: {
     redis: {
       prefix: appName
@@ -60,7 +62,8 @@ module.exports = {
     hostname: hostname,
     port: port
   },
-  // pour les tests unitaires il faut au moins un token
+
+  // autres params pour notre appli
   apiTokens: [
     'nsXpo736nSG#8sg*2a8/bFp(A'
   ],
@@ -72,10 +75,27 @@ module.exports = {
   // et en dernier
   // suivant extraModules
   extraDependenciesLast: ['sesalab-sso'],
+  // logs
   logs: {
     dir: logDir,
     debugExclusions: ['cache'],
     perf: 'perf.log'
   },
+
+  // urls absolues des autres sésathèques utilisées par nos ressources (pour les alias ou sesalab)
+  sesatheques: {
+    communLocalTest: 'http://commun.local:3013/'
+  },
+  // les sesalab qui nous causent (et propagent ici une authentification)
+  // Attention, toutes les sésathèques qu'ils utilisent doivent être listées dans le module
+  // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
+  // sur ces autres sésathèques
+  sesalabs: [
+    {
+      name: 'Labomep local de test',
+      baseId: 'labomepLocalTest',
+      baseUrl: 'http://labomep.local:3012/'
+    }
+  ],
   lassiLogger
 }

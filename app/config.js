@@ -200,6 +200,9 @@ const config = {
   // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
   sesalabs: [],
 
+  // une liste de tokens utilisables pour appeler l'api avec des droits en écriture
+  apiTokens: [],
+
   // une liste d'autres serveurs d'authentification externes, {nom, baseId, baseUrl}
   authServers: [],
 

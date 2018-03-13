@@ -100,9 +100,6 @@ module.exports = {
     perf: 'perf.log'
   },
 
-  // à renseigner si y'a du memcached (conseillé)
-  memcache: {host: '127.0.0.1', port: 11211},
-
   // noCache:true,
   // les modules à précharger avant bootstrap, ici pour fonctionner avec un sesalab
   extraModules: ['sesalab-sso'],
@@ -144,7 +141,7 @@ module.exports = {
   // vers ces autres sésathèques
   sesalabs: [
     {
-      name: 'mon sesalab local',  // pour d'éventuels affichage d'erreurs sur la page
+      name: 'mon sesalab local', // pour d'éventuels affichage d'erreurs sur la page
       baseId: 'labomepLocal3002', // pas encore pris en compte
       baseUrl: 'https://localhost:3002/'
     }
