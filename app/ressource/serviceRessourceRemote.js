@@ -66,7 +66,7 @@ module.exports = function serviceRessourceRemoteFactory () {
       const baseUrl = getBaseUrl(baseId)
       var options = {
         uri: `${baseUrl}api/ressource/registerListener`,
-        headers: {'X-ApiToken': tokens[baseId]},
+        headers: {'X-ApiToken': encodeURIComponent(tokens[baseId])},
         gzip: true,
         json: true,
         body: {action: action, baseId: myBaseId, rids},
@@ -122,7 +122,7 @@ module.exports = function serviceRessourceRemoteFactory () {
       const baseUrl = getBaseUrl(baseId)
       var options = {
         uri: `${baseUrl}api/ressource/externalUpdate`,
-        headers: {'X-ApiToken': tokens[baseId]},
+        headers: {'X-ApiToken': encodeURIComponent(tokens[baseId])},
         gzip: true,
         json: true,
         body: {ref},

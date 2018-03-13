@@ -52,7 +52,7 @@ import configRessource from '../../../app/ressource/config'
 describe('controller api ressource', () => {
   let myBaseId
   // pour les appels authentifiés via token
-  let apiToken
+  let apiTokenEncoded
   let _superTestClient
   let EntityRessource
   let $settings
@@ -190,8 +190,9 @@ describe('controller api ressource', () => {
     _superTestClient = superTestClient
     EntityRessource = lassi.service('EntityRessource')
     $settings = lassi.service('$settings')
-    apiToken = $settings.get('apiTokens')[0]
+    const apiToken = $settings.get('apiTokens')[0]
     if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
+    apiTokenEncoded = encodeURIComponent(apiToken)
     myBaseId = $settings.get('application.baseId')
     if (!myBaseId) return Promise.reject(new Error('pas trouvé de baseId en configuration'))
     // on démarre sur une base vide
@@ -202,7 +203,7 @@ describe('controller api ressource', () => {
     const getPostPromise = (ressource) => _superTestClient
       .post('/api/ressource')
       .set('Content-Type', 'application/json')
-      .set('X-ApiToken', apiToken)
+      .set('X-ApiToken', apiTokenEncoded)
       .send(ressource)
       .expect(200)
       .then(res => {
@@ -247,7 +248,7 @@ describe('controller api ressource', () => {
       return _superTestClient
         .post(`/api/ressource`)
         .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiToken)
+        .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
         .then(() => checkDb(ressource))
         .catch(catcher)
@@ -276,7 +277,7 @@ describe('controller api ressource', () => {
       return _superTestClient
         .post(`/api/ressource`)
         .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiToken)
+        .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
         .then(() => checkDb(ressource))
         .catch(catcher)
@@ -300,7 +301,7 @@ describe('controller api ressource', () => {
       return _superTestClient
         .post(`/api/ressource`)
         .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiToken)
+        .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
         .then(() => checkDb(ressource))
         .catch(catcher)
@@ -337,7 +338,7 @@ describe('controller api ressource', () => {
         ressource = getRandomRessource()
         return _superTestClient
           .delete(`/api/ressource/${ressource.oid}`)
-          .set('X-ApiToken', apiToken)
+          .set('X-ApiToken', apiTokenEncoded)
           .expect(200)
           .expect('Content-type', /application\/json/)
       })

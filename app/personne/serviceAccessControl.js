@@ -460,7 +460,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.hasAllRights = function (context) {
     if ($accessControl.hasRole('admin', context)) return true
     // sinon faut regarder un peu mieux le contexte
-    var token = context.request.header('X-ApiToken')
+    const token = decodeURIComponent(context.request.header('X-ApiToken') || '')
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
       if ($settings.get('apiTokens', []).indexOf(token) !== -1) {

@@ -17,12 +17,12 @@ var CounterMulti = require('../../app/tools/CounterMulti')
 // conf de l'appli
 var confSesatheque = require('../../_private/config')
 var urlApi = 'http://'
-urlApi += confSesatheque.$server && confSesatheque.$server.hostname || 'localhost'
+urlApi += (confSesatheque.$server && confSesatheque.$server.hostname) || 'localhost'
 urlApi += ':'
-urlApi += confSesatheque.$server && confSesatheque.$server.port || '3000'
+urlApi += (confSesatheque.$server && confSesatheque.$server.port) || '3000'
 urlApi += '/api'
 var urlBibli = urlApi + '/ressource'
-var apiToken = confSesatheque.apiTokens[0]
+var apiTokenEncoded = encodeURIComponent(confSesatheque.apiTokens[0])
 
 // conf ressource
 // conf des ressources
@@ -99,7 +99,7 @@ common.addPersonne = function (personne, next) {
   var options = {
     url: urlBibli.replace('ressource', 'personne') + '/add',
     headers: {
-      'X-ApiToken': apiToken
+      'X-ApiToken': apiTokenEncoded
     },
     json: true,
     body: personne
@@ -134,7 +134,7 @@ function addRessource (ressource, next) {
   var options = {
     url: urlBibli,
     headers: {
-      'X-ApiToken': apiToken
+      'X-ApiToken': apiTokenEncoded
     },
     json: true,
     body: ressource
@@ -162,7 +162,7 @@ function addRessource (ressource, next) {
 }
 common.addRessource = addRessource
 
-    /**
+/**
  * Ajoute une erreur pour cet id
  * @param id
  * @param {string} errorString
@@ -235,10 +235,10 @@ common.checkEnd = function (cb) {
  */
 common.checkListOfInt = function (ids) {
   if (_.isString(ids)) {
-    if (ids != parseInt(ids, 10)) { // eslint-disable-line eqeqeq
+    if (ids !== String(parseInt(ids, 10))) {
       var a = ids.split(',')
       a.forEach(function (elt) {
-        if (elt != parseInt(elt, 10)) throw new Error("L'élément " + elt + " n'est pas un entier") // eslint-disable-line eqeqeq
+        if (elt !== String(parseInt(elt, 10))) throw new Error(`L’élément ${elt} n’est pas un entier`)
       })
     }
   } else {
@@ -428,7 +428,7 @@ common.getListe = function (qsOptions, next) {
     url: urlApi + '/by',
     qs: qsOptions,
     headers: {
-      'X-ApiToken': apiToken
+      'X-ApiToken': apiTokenEncoded
     },
     json: true,
     content_type: 'charset=UTF-8'
@@ -456,7 +456,7 @@ common.getRef = function (origine, idOrigine, next) {
   var options = {
     url: urlBibli + '/' + idComb + '?format=ref',
     headers: {
-      'X-ApiToken': apiToken
+      'X-ApiToken': apiTokenEncoded
     },
     json: true,
     content_type: 'charset=UTF-8'
@@ -492,7 +492,7 @@ common.getRessource = function (origine, idOrigine, next) {
   var options = {
     url: urlBibli + '/' + idComb,
     headers: {
-      'X-ApiToken': apiToken
+      'X-ApiToken': apiTokenEncoded
     },
     json: true,
     content_type: 'charset=UTF-8'
@@ -540,7 +540,7 @@ common.mergeRessource = function (ressourcePartielle, next) {
   var options = {
     url: urlBibli + '?merge=1',
     headers: {
-      'X-ApiToken': apiToken
+      'X-ApiToken': apiTokenEncoded
     },
     json: true,
     body: ressourcePartielle

@@ -7,19 +7,10 @@
  */
 'use strict'
 
-var path = require('path')
-// var _ = require('lodash')
-var request = require('request')
-var moment = require('moment')
-var fs = require('fs')
-
-// conf de l'appli
-var serverConf = require('../_private/config')
-var urlBibli = 'http://'
-urlBibli += serverConf.$server && serverConf.$server.hostname || 'localhost'
-urlBibli += ':'
-urlBibli += serverConf.$server && serverConf.$server.port || '3000'
-var apiToken = serverConf.apiTokens[0]
+const path = require('path')
+const request = require('request')
+const moment = require('moment')
+const fs = require('fs')
 
 /**
  * Écrit en console avec le moment en préfixe
@@ -27,7 +18,7 @@ var apiToken = serverConf.apiTokens[0]
  * @param objToDump
  */
 function log (msg, objToDump) {
-  var prefix = '[' + moment().format('HH:mm:ss.SSS') + '] '
+  const prefix = '[' + moment().format('HH:mm:ss.SSS') + '] '
   console.log(prefix + msg)
   if (objToDump) console.log(objToDump)
 }
@@ -38,10 +29,10 @@ function log (msg, objToDump) {
  * @param obj
  */
 function postJson (url, obj) {
-  var options = {
+  const options = {
     url: url,
     headers: {
-      'X-ApiToken': apiToken
+      'X-ApiToken': apiTokenEncoded
     },
     json: true,
     body: obj
@@ -63,26 +54,33 @@ function usage (exitCode, message) {
  * Main
  */
 
-var argv = process.argv.slice(2)
-var uri
-
+const argv = process.argv.slice(2)
+if (argv.length < 2) usage(1)
+let uri
 switch (argv[0]) {
-  case '--arbre': uri = '/api/arbre'; break
-  case '--arbreFull': uri = '/api/arbre?populate=1'; break
-  case '--ressource': uri = '/api/ressource'; break
-  case '--merge': uri = '/api/ressource?merge=1'; break
+  case '--arbre': uri = 'api/arbre'; break
+  case '--arbreFull': uri = 'api/arbre?populate=1'; break
+  case '--ressource': uri = 'api/ressource'; break
+  case '--merge': uri = 'api/ressource?merge=1'; break
   default : usage(1)
 }
-if (argv.length < 2) usage(1)
-var jsonFile = path.join(__dirname, argv[1])
+
+// conf de l'appli
+const settings = require('../_private/config')
+if (!settings.application.baseUrl) throw new Error('BaseUrl manquante en config')
+if (!settings.apiTokens || !settings.apiTokens.length) throw new Error('apiTokens manquants en config')
+const baseUrl = settings.application.baseUrl
+const apiToken = settings.apiTokens[0]
+const apiTokenEncoded = encodeURIComponent(apiToken)
+const jsonFile = path.join(__dirname, argv[1])
 if (!fs.existsSync(jsonFile)) usage(1, `${jsonFile} n’existe pas`)
 
-var url = urlBibli + uri
+const url = baseUrl + uri
 log('post de ' + jsonFile + ' vers ' + url)
 fs.readFile(jsonFile, function (error, jsonString) {
   try {
     if (error) throw error
-    var objToPost = JSON.parse(jsonString)
+    const objToPost = JSON.parse(jsonString)
     postJson(url, objToPost)
   } catch (error) {
     usage(1, jsonFile + ' ne contient pas de json valide : ' + error.toString())

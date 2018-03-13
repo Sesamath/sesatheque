@@ -78,7 +78,7 @@ module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
       }
       if (tokens[baseId]) {
         options.uri = baseUrl + 'api/ressource/' + id
-        options.headers = {'X-ApiToken': tokens[baseId]}
+        options.headers = {'X-ApiToken': encodeURIComponent(tokens[baseId])}
       }
       request(options, function (error, response, ressource) {
         if (error) return next(error)
