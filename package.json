@@ -125,6 +125,17 @@
     "globals": {
       "lassi": true,
       "log": true
-    }
+    },
+    "overrides": [
+      {
+        "files": "test/**/*.js",
+        "rules": {
+          "no-unused-expressions": "off"
+        },
+        "env": {
+          "mocha": true
+        }
+      }
+    ]
   }
 }
