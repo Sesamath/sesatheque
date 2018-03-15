@@ -49,16 +49,17 @@ let isLoaded, isResultatSent
 
 function getResultatCallback (ressource, options, next) {
   const params = ressource.parametres
-  const {notifyError} = options
   let completeResultReceived = 0
 
   return function emResultatCallback (result) {
     try {
       log('resultatCallback em reçoit', result)
+      // les exos em envoient un 1er résultat quasi vide au chargement, on fait pas suivre
+      if (options.startDate && (new Date()).getTime() - options.startDate.getTime() < 500) return
+
       const resultFixed = fixResult(result)
       // on récupère les anomalies éventuelles
-      const errors = resultFixed.errors
-      delete resultFixed.errors
+      const {errors} = resultFixed.errors
       const resultMod = {
         reponse: resultFixed.reponse,
         fin: (result.fin === 'o'),
@@ -94,17 +95,15 @@ function getResultatCallback (ressource, options, next) {
       isResultatSent = true
       options.resultatCallback(resultMod)
       // on regarde s'il faut notifier une anomalie
-      if (errors.length && !knownWeirds.has(ressource.rid)) {
-        const dataNotif = {
-          rid: ressource.rid,
-          resultat: resultMod
-        }
-        if (errors.length === 1) dataNotif.error = errors[0]
-        else dataNotif.errors = errors
-        notifyError(dataNotif)
+      /* global bugsnagClient */
+      if (errors.length && !knownWeirds.has(ressource.rid) && typeof bugsnagClient !== 'undefined') {
+        bugsnagClient.metaData.resultat = resultMod // rid et type y sont déjà
+        bugsnagClient.metaData.errors = errors
+        const error = new Error(errors[0])
+        bugsnagClient.notify(error)
       }
     } catch (error) {
-      next(error)
+      options.resultatCallback(error) // c'est le display général qui fera le notifyBugsnag + feedback
     }
   }
 } // getResultatCallback

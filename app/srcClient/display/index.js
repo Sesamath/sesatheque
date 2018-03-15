@@ -72,14 +72,13 @@ function addResultatCallback (ressource, options) {
     if (result && result instanceof Error) {
       log.error(result)
       feedback({success: false, error: result.toString()}, divFeedback)
+      notifyBugsnag(result)
     } else if (result) {
       const resultat = getResultat(result, ressource, options)
       if (isDebugMode) console.log('resultatCallback va envoyer', resultat)
       resultatListener(resultat)
     } else {
-      const error = new Error('callback de résultat appelée sans erreur ni résultat')
-      if (window.bugsnagClient) window.bugsnagClient(error)
-      log.error(error)
+      notifyBugsnag(new Error('callback de résultat appelée sans erreur ni résultat'))
     }
   }
   const divFeedback = wd.getElementById('pictoFeedback')
@@ -261,6 +260,15 @@ function load (ressource, options, next) {
  */
 function logIfError (error) {
   if (error) console.error(error)
+}
+
+/**
+ * Notifie busgnag (si on a un client) et sort l'erreur en console
+ * @param {Error} error
+ */
+function notifyBugsnag (error) {
+  console.error(error)
+  if (window.bugsnagClient) window.bugsnagClient.notify(error)
 }
 
 /**

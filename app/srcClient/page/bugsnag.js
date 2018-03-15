@@ -96,13 +96,15 @@ function setup (bugsnagConfig) {
       }
     }
     console.error('bugsnag', error)
-    // bugsnagClient.notify(error, {severity: 'error'})
+    bugsnagClient.notify(error, {severity: 'error'})
   }
+  // on le teste tout de suite
+  throw new Error('erreur bugsnag de test dès l’init')
 }
 
 if (typeof window === 'undefined') {
   console.error(new Error('pas de busgnag hors d’un navigateur'))
-} else {
+} else if (!window.bugsnagClient) { // au cas où on serait requis plusieurs fois
   window.bugsnagClient = {
     setup,
     // et pour que ceux qui s'attendent à trouver ça ne plantent pas

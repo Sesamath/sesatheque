@@ -37,7 +37,8 @@ describe('plugins/em/fixResult', () => {
   it('laisse inchangé un résultat correct', (done) => {
     const result = {
       reponse: 'rvprv',
-      score: 3
+      score: 3,
+      errors: []
     }
     expect(fixResult(result)).to.deep.equals(result)
     result.reponse = 'vrprv'

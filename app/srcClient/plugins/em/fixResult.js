@@ -36,43 +36,56 @@
 module.exports = function fixResult (result) {
   // vérif de base
   if (!result) throw new Error('Aucun résultat à envoyer')
-  if (!result.reponse) throw new Error('Résultat sans réponse')
-  if (!result.score) throw new Error('Résultat sans score')
-  if (typeof result.score !== 'number') throw new Error('score n’est pas un nombre')
-  if (typeof result.reponse !== 'string') throw new Error('réponse invalide')
-  // on peut continuer
-  const cleanResult = result
-  cleanResult.errors = []
+  let {score, reponse} = result
+  const errors = []
+  if (typeof reponse !== 'string') {
+    if (reponse) errors.push('réponse invalide')
+    else errors.push('pas de réponse')
+    reponse = ''
+  }
+  if (typeof score !== 'number') {
+    if (score) {
+      errors.push(`score n’est pas un nombre : ${typeof score}`)
+      score = Math.round(Number(score))
+    } else {
+      score = 0
+    }
+  }
+  if (score < 0 || score > 10) {
+    errors.push(`score invalide : ${score} => 0`)
+    score = 0
+  }
+  const cleanResult = {reponse, score, errors}
   // on calcule un score d'après le nb de v & p
-  const nbRepOk = result.reponse.replace(/[^vp]/g, '').length
+  const nbRepOk = reponse.replace(/[^vp]/g, '').length
   // le j doit être normalement compris comme faux (r), mais ça déconne parfois
-  if (result.reponse.includes('j')) {
-    if (nbRepOk === result.score) {
+  if (reponse.includes('j')) {
+    if (nbRepOk === score) {
       // cas "normal", les j doivent être interprétés comme r
-      if (/j$/.test(result.reponse)) {
+      if (/j$/.test(reponse)) {
         // sauf le dernier si ça se termine par j
-        cleanResult.reponse = result.reponse.substring(0, result.reponse.length - 1) + 'j'
+        cleanResult.reponse = reponse.substring(0, reponse.length - 1).replace(/j/g, 'r') + 'j'
       } else {
-        cleanResult.reponse = result.reponse.replace(/j/g, 'r')
+        cleanResult.reponse = reponse.replace(/j/g, 'r')
       }
     } else {
-      const scoreAvecJ = result.reponse.replace(/[^vpj]/g, '').length
+      const scoreAvecJ = reponse.replace(/[^vpj]/g, '').length
       // on regarde si les j doivent être interprétés comme v
-      if (scoreAvecJ === result.score) {
-        cleanResult.reponse = result.reponse.replace(/j/g, 'v')
+      if (scoreAvecJ === score) {
+        cleanResult.reponse = reponse.replace(/j/g, 'v')
         cleanResult.score = scoreAvecJ
       } else {
         // on en sait rien, on laisse la réponse intacte et on prend le meilleur score
         // entre celui qu'on a calculé et celui renvoyé
-        cleanResult.score = Math.max(nbRepOk, result.score)
+        cleanResult.score = Math.max(nbRepOk, score)
         cleanResult.errors.push('réponse incohérente avec le score')
       }
     }
-  } else if (nbRepOk !== result.score) {
+  } else if (nbRepOk !== score) {
     // pas de j mais réponse incohérente quand même
-    cleanResult.score = Math.max(nbRepOk, result.score)
+    cleanResult.score = Math.max(nbRepOk, score)
     // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
-    cleanResult.errors.push('réponse incohérente avec le score')
+    errors.push('réponse incohérente avec le score')
   }
   return cleanResult
 }
