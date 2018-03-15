@@ -99,7 +99,7 @@ function setup (bugsnagConfig) {
     bugsnagClient.notify(error, {severity: 'error'})
   }
   // on le teste tout de suite
-  throw new Error('erreur bugsnag de test dès l’init')
+  // throw new Error('erreur bugsnag de test dès l’init')
 }
 
 if (typeof window === 'undefined') {

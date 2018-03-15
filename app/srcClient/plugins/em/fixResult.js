@@ -32,6 +32,8 @@
 
 /**
  * Rectifie d'éventuels résultats incohérents pour les exos mathenpoche
+ * @param result
+ * @return {{reponse: string, score: number, errors: string[]}}
  */
 module.exports = function fixResult (result) {
   // vérif de base
