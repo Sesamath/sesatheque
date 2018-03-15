@@ -33,7 +33,17 @@
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 
+const fixResult = require('./fixResult')
 const swf = require('../../display/swf')
+
+/**
+ * Liste de rid dont on sait qu'ils renvoient des scores foireux (faut se fier à la réponse)
+ * @private
+ * @type {Set<string>}
+ */
+const knownWeirds = new Set(
+  'sesabibli/3402'
+)
 
 let isLoaded, isResultatSent
 
@@ -45,19 +55,18 @@ function getResultatCallback (ressource, options, next) {
   return function emResultatCallback (result) {
     try {
       log('resultatCallback em reçoit', result)
+      const resultFixed = fixResult(result)
+      // on récupère les anomalies éventuelles
+      const errors = resultFixed.errors
+      delete resultFixed.errors
       const resultMod = {
-        reponse: result.reponse,
-        nbq: result.nbq || params.nbq_defaut,
+        reponse: resultFixed.reponse,
         fin: (result.fin === 'o'),
         original: result
       }
-      const notif = (error) => notifyError({
-        error: error.stack || error,
-        rid: ressource.rid,
-        resultat: resultMod
-      })
+      const nbq = result.nbq || params.nbq_defaut || 10
       // faudrait chiffrer ça, mais j3p veut pouvoir l'intercepter
-      if (result.score && resultMod.nbq) resultMod.score = result.score / resultMod.nbq
+      resultMod.score = resultFixed.score / nbq
       // check fin, ajout des b sinon
       if (!resultMod.fin && result.nbq && result.reponse) {
         // on ajoute des b à reponse si c'est pas la dernière question
@@ -69,34 +78,31 @@ function getResultatCallback (ressource, options, next) {
           // On impose toujours fin true sinon ça peut bloquer une séquence ordonnée
           // si l'élève ne clique pas sur suite.
           // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
+          // on augmente ce délai pour lui laisser le temps de cliquer sur suite
+          const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
+          if (mepLevel === '2') resultMod.$resetDelay = 30
           resultMod.fin = true
           completeResultReceived++
-          const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
           if (mepLevel >= completeResultReceived) {
             // donc mep2 à la deuxième réponse complète (envoyée au clic sur suite à la fin)
             // ou mep1 à la 1re
-            notif(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
+            errors.push(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
           }
-          // pour indiquer à labomep de pas fermer tout de suite
-          if (mepLevel === '2') resultMod.$resetDelay = 30
         }
       }
-      // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
-      if (resultMod.nbq && typeof result.reponse === 'string' && result.reponse) {
-        const reducer = (total, lettre) => total + ((lettre === 'v' || lettre === 'p') ? 1 : 0)
-        const total = Array.from(result.reponse).reduce(reducer, 0)
-        if (total !== result.score) {
-          resultMod.score = total / resultMod.nbq
-          // c'est tellement fréquent que ça sert à rien de notifier
-          // notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
-        }
-      } else {
-        // on arrête là
-        return notif('résultat em sans propriété reponse (ou pas une string)')
-      }
-      isResultatSent = true
 
+      isResultatSent = true
       options.resultatCallback(resultMod)
+      // on regarde s'il faut notifier une anomalie
+      if (errors.length && !knownWeirds.has(ressource.rid)) {
+        const dataNotif = {
+          rid: ressource.rid,
+          resultat: resultMod
+        }
+        if (errors.length === 1) dataNotif.error = errors[0]
+        else dataNotif.errors = errors
+        notifyError(dataNotif)
+      }
     } catch (error) {
       next(error)
     }
