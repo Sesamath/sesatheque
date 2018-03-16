@@ -167,12 +167,12 @@ function feedbackOff (divFeedback) {
 // Allume le feedback OK pour 4s
 function feedbackOk (divFeedback) {
   divFeedback.className = 'feedbackOk'
-  setTimeout(feedbackOff, 4000)
+  setTimeout(() => feedbackOff(divFeedback), 4000)
 }
 // Allume le feedback KO pour 4s
 function feedbackKo (divFeedback) {
   divFeedback.className = 'feedbackKo'
-  setTimeout(feedbackOff, 4000)
+  setTimeout(() => feedbackOff(divFeedback), 4000)
 }
 
 /**
@@ -243,14 +243,13 @@ function load (ressource, options, next) {
       options.startDate = new Date()
       if (error) {
         log("le display a terminé mais renvoyé l'erreur", error)
-        page.addError(error)
       } else {
         log('le display a terminé sans renvoyer d’erreur')
       }
       next(error)
     })
-  } catch (err) {
-    page.addError(err.toString())
+  } catch (error) {
+    next(error)
   }
 } // load
 

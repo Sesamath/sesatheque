@@ -44,6 +44,7 @@ const bugsnag = require('bugsnag-js')
  */
 function beforeSend (report) {
   // cf https://docs.bugsnag.com/platforms/browsers/js/customizing-error-reports/
+  if (/local/.test(window.location.hostname)) return false
   const type = report && report.metaData && report.metaData.type
   if (['am', 'em'].includes(type)) {
     // apparemment le flash tente de lire des trucs sur la fenêtre parente

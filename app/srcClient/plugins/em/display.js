@@ -59,7 +59,7 @@ function getResultatCallback (ressource, options, next) {
 
       const resultFixed = fixResult(result)
       // on récupère les anomalies éventuelles
-      const {errors} = resultFixed.errors
+      const {errors} = resultFixed
       const resultMod = {
         reponse: resultFixed.reponse,
         fin: (result.fin === 'o'),
