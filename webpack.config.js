@@ -14,22 +14,23 @@ Pour le découpage des chunks
 Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
+const path = require('path')
 
 // passer --debug pour ne pas avoir de minification
-var isProd = process.argv.indexOf('--debug') === -1
-var webpack = require('webpack')
-var ExtractTextPlugin = require('extract-text-webpack-plugin')
-var CopyWebpackPlugin = require('copy-webpack-plugin')
-var extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
-var extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?minimize' : 'css-loader')
+const isProd = process.argv.indexOf('--debug') === -1
+const webpack = require('webpack')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
+const extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?minimize' : 'css-loader')
 
-var appConfig = require('./app/config')
-var baseUrl = appConfig.application.baseUrl
+const appConfig = require('./app/config')
+let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
-var webpackOutput = 'app/ressource/' + (appConfig.application.webpackOutput || 'public') + '/'
+const webpackOutput = 'app/ressource/' + (appConfig.application.webpackOutput || 'public') + '/'
 
 // la conf identique dev/prod
-var conf = {
+const conf = {
   // cf http://webpack.github.io/docs/configuration.html#entry
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
@@ -63,10 +64,20 @@ var conf = {
     stePage: 'page',
     steDisplay: 'display'
   }, */
+  // pour nos loaders perso
+  resolveLoader: {
+    alias: {
+      'config-loader': path.join(__dirname, './webpackConfigLoader.js'),
+      'throw-loader': path.join(__dirname, './webpackThrowLoader.js')
+    }
+  },
   module: {
     loaders: [
       {test: /app\/srcClient\/.*\.js/, loader: 'babel'},
-      {test: /_private\/.*\.js/, loader: 'babel'},
+      // On empêche de require un fichier du répertoire _private dans du code client
+      {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
+      // Pour la config qui contient des données sensibles, on passe par un loader qui filtre
+      {test: /app\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       {test: /\.json$/, loader: 'json'},
       {test: /app\/srcClient\/.*\.html/, loader: 'file'},
       // editgraphe passe par babel

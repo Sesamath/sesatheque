@@ -29,13 +29,11 @@
  * pour une explication en français)
  */
 'use strict'
+// cf https://docs.bugsnag.com/platforms/browsers/js/
+const bugsnagJs = require('bugsnag-js')
+const {bugsnag} = require('../../config')
 
-const bugsnag = require('bugsnag-js')
-
-// ce fichier met un objet busgnagClient en global et attend qu'on appelle busgnagClient.setup
-// en lui passant une apiKey (qui devrait être précisé dans _private/config,
-// si c'est le cas c'est beforeTransport qui ajoute l'appel de setup au source html de la page)
-// pour mettre le vrai busgnagClient en global
+// ce fichier met un objet busgnagClient en global
 
 /**
  * Appelé avant d'envoyer le rapport, pour filtrer
@@ -58,63 +56,21 @@ function beforeSend (report) {
   }
 }
 
-function setup (bugsnagConfig) {
-  // @see https://docs.bugsnag.com/platforms/browsers/configuration-options/#apikey
-  if (!bugsnagConfig.apiKey) {
-    console.error(new Error('impossible de configurer busgnag sans apiKey'), bugsnagConfig)
-    return
-  }
-  // on complète la conf avec ça
-  bugsnagConfig.beforeSend = beforeSend
-
-  // s'écrase en ajoutant notre client en global
-  window.bugsnagClient = bugsnag(bugsnagConfig)
-  /* global bugsnagClient */
-  // et pour que le code puisse facilement ajouter des infos de contexte
-  // on s'assure que ces objets existent toujours
-  if (!bugsnagClient.metaData) bugsnagClient.metaData = {}
-  if (!bugsnagClient.user) bugsnagClient.user = {}
-
-  // et le listener
-  window.onerror = (messageOrEvent, source, line, col, error) => {
-    // metadata basiques
-    Object.assign(bugsnagClient.metaData, {col, line, source})
-
-    // le stringify des event ne laisse que la propriété isTrusted, on essaie de récupérer les autres
-    if (typeof messageOrEvent === 'object' && messageOrEvent.hasOwnProperty('isTrusted')) {
-      bugsnagClient.metaData.event = Object.assign({}, messageOrEvent)
-    }
-
-    // error n'est pas toujours fourni
-    if (error) {
-      // on ajoute ça si on l'a aussi (pas sûr que ça arrive…)
-      if (messageOrEvent) bugsnagClient.metaData.messageOrEvent = messageOrEvent
-    } else {
-      // un isError cheap qui devrait suffire (sinon cf isError de bugsnag-js)
-      if (messageOrEvent && messageOrEvent.hasOwnProperty('stack')) {
-        error = messageOrEvent
-      } else if (typeof messageOrEvent === 'string') {
-        // on aura pas de stacktrace, mais au moins ce sera signalé et bugsnag râlera pas
-        error = new Error(messageOrEvent)
-      } else {
-        if (messageOrEvent) bugsnagClient.metaData.messageOrEvent = messageOrEvent
-        error = new Error('window.onerror appelé sans error')
-      }
-    }
-    console.error('bugsnag', error)
-    bugsnagClient.notify(error, {severity: 'error'})
-  }
-  // on le teste tout de suite
-  // throw new Error('erreur bugsnag de test dès l’init')
-}
-
-module.exports = function addBugsnagToWindow () {
-  if (typeof window === 'undefined') {
-    console.error(new Error('pas de busgnag hors d’un navigateur'))
+if (typeof window === 'undefined') {
+  console.error(new Error('pas de busgnag hors d’un navigateur'))
+} else if (!window.bugsnagClient) {
+  if (bugsnag && bugsnag.apiKey) {
+    window.bugsnagClient = bugsnagJs({
+      apiKey: bugsnag.apiKey,
+      beforeSend
+    })
+    // et on ajoute ça pour que ce soit toujours présent (ça ne l'est pas par défaut)
+    window.bugsnagClient.metaData = {}
+    window.bugsnagClient.user = {}
   } else {
+    console.error('pas d’apiKey pour bugsnag, on crée un fake qui sortira les erreurs en console')
+    // pour que ceux qui s'attendent à trouver ça ne plantent pas
     window.bugsnagClient = {
-      setup,
-      // et pour que ceux qui s'attendent à trouver ça ne plantent pas
       notify: function fakeNotify () {
         console.error('bugsnag n’a pas été instancié, mais il reçoit')
         console.error.apply(console, arguments)
@@ -123,4 +79,6 @@ module.exports = function addBugsnagToWindow () {
       user: {}
     }
   }
+} else {
+  console.log('Un 2e appel du module bugsnag reste sans effet')
 }

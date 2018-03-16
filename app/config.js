@@ -60,6 +60,13 @@ function filterOnBaseUrl (list) {
   }).filter((item) => item)
 }
 
+if (typeof window !== 'undefined') {
+  // Ce fichier contient des infos sensible qu'on ne veut pas dans le code client
+  // Normalement un require depuis du code client devrait passer par notre loader perso qui fait le ménage
+  // mais on laisse ça en sécurité (oubli dans le pattern webpack pour ce config-loader)
+  throw new Error('config.js should never be included in browser source code!')
+}
+
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
  * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
