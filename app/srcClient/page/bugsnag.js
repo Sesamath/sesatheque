@@ -45,11 +45,16 @@ const bugsnag = require('bugsnag-js')
 function beforeSend (report) {
   // cf https://docs.bugsnag.com/platforms/browsers/js/customizing-error-reports/
   if (/local/.test(window.location.hostname)) return false
-  const type = report && report.metaData && report.metaData.type
-  if (['am', 'em'].includes(type)) {
-    // apparemment le flash tente de lire des trucs sur la fenêtre parente
-    if (/Permission denied to access property/.test(report.errorMessage)) return false
-    if (/Accès refusé/.test(report.errorMessage)) return false
+  if (report && report.metaData) {
+    const md = report.metaData
+    const {type} = md
+    if (type && ['am', 'em'].includes(type)) { // si pas de type on teste quand même ce qui suit
+      // apparemment le flash tente de lire des trucs sur la fenêtre parente, et il a pas le droit
+      if (/Permission denied to access property/.test(report.errorMessage)) return false
+      if (/Accès refusé/.test(report.errorMessage)) return false
+    }
+    // on ignore pour le moment les erreurs des js de calculatice, y'en a un peu trop…
+    if (md.source && /\/replication_calculatice\//.test(md.source)) return false
   }
 }
 
