@@ -108,17 +108,19 @@ function setup (bugsnagConfig) {
   // throw new Error('erreur bugsnag de test dès l’init')
 }
 
-if (typeof window === 'undefined') {
-  console.error(new Error('pas de busgnag hors d’un navigateur'))
-} else if (!window.bugsnagClient) { // au cas où on serait requis plusieurs fois
-  window.bugsnagClient = {
-    setup,
-    // et pour que ceux qui s'attendent à trouver ça ne plantent pas
-    notify: function fakeNotify () {
-      console.error('bugsnag n’a pas été instancié, mais il reçoit')
-      console.error.apply(console, arguments)
-    },
-    metaData: {},
-    user: {}
+module.exports = function addBugsnagToWindow () {
+  if (typeof window === 'undefined') {
+    console.error(new Error('pas de busgnag hors d’un navigateur'))
+  } else {
+    window.bugsnagClient = {
+      setup,
+      // et pour que ceux qui s'attendent à trouver ça ne plantent pas
+      notify: function fakeNotify () {
+        console.error('bugsnag n’a pas été instancié, mais il reçoit')
+        console.error.apply(console, arguments)
+      },
+      metaData: {},
+      user: {}
+    }
   }
 }
