@@ -74,6 +74,7 @@ function getResultatCallback (ressource, options, next) {
         if (result.reponse.length < result.nbq) {
           resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
         } else {
+          completeResultReceived++
           // les exos mep modele 2 envoient 2× le dernier résultat (d'abord sans fin=o
           // puis après clic sur suite et affichage du message de fin avec fin=o)
           // On impose toujours fin true sinon ça peut bloquer une séquence ordonnée
@@ -81,13 +82,18 @@ function getResultatCallback (ressource, options, next) {
           // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
           // on augmente ce délai pour lui laisser le temps de cliquer sur suite
           const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
-          if (mepLevel === '2') resultMod.$resetDelay = 30
-          resultMod.fin = true
-          completeResultReceived++
           if (mepLevel >= completeResultReceived) {
             // donc mep2 à la deuxième réponse complète (envoyée au clic sur suite à la fin)
             // ou mep1 à la 1re
-            errors.push(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
+            // "complète" => longueur de la réponse égale à nbq
+            if (!resultMod.fin) {
+              errors.push(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
+              resultMod.fin = true
+            }
+          } else {
+            // modèle 2 à la 1re réponse de longueur nbq
+            resultMod.$resetDelay = 30
+            resultMod.fin = true
           }
         }
       }
