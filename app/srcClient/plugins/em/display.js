@@ -49,6 +49,7 @@ let isLoaded, isResultatSent
 
 function getResultatCallback (ressource, options, next) {
   const params = ressource.parametres
+  const {notifyError} = options
   let completeResultReceived = 0
 
   return function emResultatCallback (result) {
@@ -61,44 +62,57 @@ function getResultatCallback (ressource, options, next) {
       // on récupère les anomalies éventuelles
       const {errors} = resultFixed
       const resultMod = {
-        reponse: resultFixed.reponse,
+        reponse: result.reponse,
+        nbq: result.nbq || params.nbq_defaut,
         fin: (result.fin === 'o'),
         original: result
       }
-      const nbq = result.nbq || params.nbq_defaut || 10
+      resultMod.original.fixed = resultFixed
+      const notif = (error) => notifyError({
+        error: error.stack || error,
+        rid: ressource.rid,
+        resultat: resultMod
+      })
       // faudrait chiffrer ça, mais j3p veut pouvoir l'intercepter
-      resultMod.score = resultFixed.score / nbq
+      if (result.score && resultMod.nbq) resultMod.score = result.score / resultMod.nbq
       // check fin, ajout des b sinon
       if (!resultMod.fin && result.nbq && result.reponse) {
         // on ajoute des b à reponse si c'est pas la dernière question
         if (result.reponse.length < result.nbq) {
           resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
         } else {
-          completeResultReceived++
           // les exos mep modele 2 envoient 2× le dernier résultat (d'abord sans fin=o
           // puis après clic sur suite et affichage du message de fin avec fin=o)
           // On impose toujours fin true sinon ça peut bloquer une séquence ordonnée
           // si l'élève ne clique pas sur suite.
           // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
-          // on augmente ce délai pour lui laisser le temps de cliquer sur suite
+          resultMod.fin = true
+          completeResultReceived++
           const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
           if (mepLevel >= completeResultReceived) {
             // donc mep2 à la deuxième réponse complète (envoyée au clic sur suite à la fin)
             // ou mep1 à la 1re
-            // "complète" => longueur de la réponse égale à nbq
-            if (!resultMod.fin) {
-              errors.push(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
-              resultMod.fin = true
-            }
-          } else {
-            // modèle 2 à la 1re réponse de longueur nbq
-            resultMod.$resetDelay = 30
-            resultMod.fin = true
+            notif(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
           }
+          // pour indiquer à labomep de pas fermer tout de suite
+          if (mepLevel === '2') resultMod.$resetDelay = 30
         }
       }
-
+      // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
+      if (resultMod.nbq && typeof result.reponse === 'string' && result.reponse) {
+        const reducer = (total, lettre) => total + ((lettre === 'v' || lettre === 'p') ? 1 : 0)
+        const total = Array.from(result.reponse).reduce(reducer, 0)
+        if (total !== result.score) {
+          resultMod.score = total / resultMod.nbq
+          // c'est tellement fréquent que ça sert à rien de notifier
+          notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
+        }
+      } else {
+        // on arrête là
+        return notif('résultat em sans propriété reponse (ou pas une string)')
+      }
       isResultatSent = true
+
       options.resultatCallback(resultMod)
       // on regarde s'il faut notifier une anomalie
       /* global bugsnagClient */
@@ -109,7 +123,7 @@ function getResultatCallback (ressource, options, next) {
         bugsnagClient.notify(error)
       }
     } catch (error) {
-      options.resultatCallback(error) // c'est le display général qui fera le notifyBugsnag + feedback
+      next(error)
     }
   }
 } // getResultatCallback
