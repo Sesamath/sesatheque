@@ -62,7 +62,13 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     let errors = []
     let isModif = false
     if (Array.isArray(relations)) {
-      relations.forEach(([relId, relTarget, rest]) => {
+      console.log(relations)
+      relations.forEach(relation => {
+        if (!Array.isArray(relation)) {
+          errors.push(`relation incorrecte : ${JSON.stringify(relation)}`)
+          return
+        }
+        const [relId, relTarget, rest] = relation
         if (rest) {
           errors.push('une relation doit être un tableau à deux éléments [typeRelation, ridRessource]')
         } else if (!config.listes.relations[relId]) {

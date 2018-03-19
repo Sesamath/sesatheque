@@ -403,7 +403,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         $ressourceRepository.load(clonedOid, function (error, ressource) {
           if (error) return $ressourcePage.printError(context, error)
           if (!ressource) return $ressourcePage.printError(context, 'Ressource à dupliquer inexistante ou droits insuffisants pour la lire', 404)
-          $ressourceConverter.addRelations(ressource, [config.constantes.relations.estVersionDe, ressource.rid])
+          $ressourceConverter.addRelations(ressource, [[config.constantes.relations.estVersionDe, ressource.rid]])
+          ressource.titre += ' (copie)'
           delete ressource.oid
           delete ressource.rid
           delete ressource.idOrigine

@@ -409,7 +409,7 @@ module.exports = function controllersFactory (component) {
         else msg += context.post.oid
         log.perf(context.response, msg)
       }
-      log.debug('post /api/ressource/addRelation a reçu', context.post, 'api')
+      log.debug('post /api/ressource/addRelations a reçu', context.post, 'api')
       const relations = context.post.relations
       if (!relations || !relations.length) return $json.send(context, new Error('relations manquantes'))
       const id = extractId(context)
