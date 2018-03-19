@@ -65,7 +65,7 @@ module.exports = {
 
   // autres params pour notre appli
   apiTokens: [
-    'nsXpo736nSG#8sg*2a8/bFp(A'
+    'nsXpo736nSG#8sg*2a8/bFp(A' // pour le sesalab de test
   ],
   // les modules à précharger avant bootstrap, ici pour fonctionner avec un sesalab
   extraModules: ['sesalab-sso'],

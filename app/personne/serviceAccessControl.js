@@ -463,7 +463,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     const token = decodeURIComponent(context.request.header('X-ApiToken') || '')
     if (token && context.request.originalUrl.indexOf('/api/') === 0) {
       // on vérifie déjà le token
-      if ($settings.get('apiTokens', []).indexOf(token) !== -1) {
+      if ($settings.get('apiTokens', []).includes(token)) {
         log.debug('token api ok')
         // token ok donc retour ok si le client a une ip connue
         var ip = getClientIp(context)
