@@ -240,8 +240,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
      */
     function addChoice (label, cbValue) {
       // cbValue est toujours une string (propriété de l'objet)
-      var intValue = parseInt(cbValue, 10)
-      if (intValue == cbValue) cbValue = intValue // eslint-disable-line eqeqeq
+      // on cast en int seulement si typesVarArray[key] vaut Number
+      if (typeWanted === 'Number') cbValue = parseInt(cbValue, 10)
       var choice = {
         value: cbValue
       }
@@ -263,6 +263,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // log.debug('arrayToDust de ' +key, selectedValues)
     var i = 0
     var choices = []
+    const typeWanted = ressConfig.typesVarArray[key]
+    // on comprend que Number ou String, sinon il sera jamais selected…
+    if (!['Number', 'String'].includes(typeWanted)) log.error(new Error(`La clé ${key} a un typesVarArray non géré : ${typeWanted}`))
     if (selectedValues && !Array.isArray(selectedValues)) {
       log.error(new Error('La propriété ' + key + " de la ressource n'est pas un tableau"))
     } else if (ressConfig.listesOrdonnees[key]) {
@@ -421,6 +424,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
    * (remplace parametres par enfants pour les arbres)
    * @private
    * @param {Ressource} ressource
+   * @return {Object} labels Les clés sont les noms des propriétés et la valeur le label
    */
   function getLabels (ressource) {
     var labels = sjtObj.clone(ressConfig.labels)
@@ -487,8 +491,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       labelsArray.push([key, label])
     })
     flow(labelsArray).seqEach(function (labelItem) {
-      var key = labelItem[0]
-      var label = labelItem[1]
+      const [key, label] = labelItem
       var value = ressource[key]
       var isUnique = ressConfig.uniques[key]
       var labelSuivant = this
@@ -503,7 +506,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       if (isUnique) formData[key].unique = true
       if (ressConfig.typesVar[key] === 'Array' || isUnique) {
         // c'est un tableau ou une valeur unique (donc select ou radios)
-        // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource.prop,
+        // pour chaque liste, on a la liste des ids sélectionnés pour cette ressource dans ressource[key],
         // et la liste des possibles dans ressConfig.liste[prop]
         if (isUnique) {
           value = [value] // arrayToDust veut un array
