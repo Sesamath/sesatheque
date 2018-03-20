@@ -60,7 +60,6 @@ function getResultatCallback (ressource, options, next) {
 
       const resultFixed = fixResult(result)
       // on récupère les anomalies éventuelles
-      const {errors} = resultFixed
       const resultMod = {
         reponse: result.reponse,
         nbq: result.nbq || params.nbq_defaut,
@@ -116,9 +115,12 @@ function getResultatCallback (ressource, options, next) {
       options.resultatCallback(resultMod)
       // on regarde s'il faut notifier une anomalie
       /* global bugsnagClient */
+      const {errors} = resultFixed
       if (errors.length && !knownWeirds.has(ressource.rid) && typeof bugsnagClient !== 'undefined') {
-        bugsnagClient.metaData.resultat = resultMod // rid et type y sont déjà
-        bugsnagClient.metaData.errors = errors
+        // rid et type y sont déjà, mais on vérifie quand même
+        if (!bugsnagClient.metaData.exo) bugsnagClient.metaData.exo = {errors: [new Error('bugsnagClient.metaData.exo n’existait pas')]}
+        bugsnagClient.metaData.exo.resultat = resultMod
+        // errors est déjà dans resultat.original.fixed.errors
         const error = new Error(errors[0])
         bugsnagClient.notify(error)
       }

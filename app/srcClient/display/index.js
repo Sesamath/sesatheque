@@ -382,8 +382,10 @@ module.exports = function display (ressource, options, next) {
 
     // ajout de metadata pour bugsnag
     if (window.bugsnagClient) {
-      window.bugsnagClient.metaData.rid = ressource.rid
-      window.bugsnagClient.metaData.type = ressource.type
+      window.bugsnagClient.metaData.exo = {
+        rid: ressource.rid,
+        type: ressource.type
+      }
     }
 
     // on peut lancer l'init
