@@ -31,7 +31,8 @@
 'use strict'
 // cf https://docs.bugsnag.com/platforms/browsers/js/
 const bugsnagJs = require('bugsnag-js')
-const {bugsnag} = require('../../config')
+// on récupère ce que webpackConfigLoader.js nous file
+const {application, bugsnag, version} = require('../../config')
 
 // ce fichier met un objet busgnagClient en global
 
@@ -45,14 +46,23 @@ function beforeSend (report) {
   if (/local/.test(window.location.hostname)) return false
   if (report && report.metaData) {
     const md = report.metaData
-    const {type} = md
-    if (type && ['am', 'em'].includes(type)) { // si pas de type on teste quand même ce qui suit
+    const type = md && md.exo && md.exo.type
+    if (!type || ['am', 'em'].includes(type)) {
+      // si pas de type on teste quand même ce qui suit
       // apparemment le flash tente de lire des trucs sur la fenêtre parente, et il a pas le droit
       if (/Permission denied to access property/.test(report.errorMessage)) return false
       if (/Accès refusé/.test(report.errorMessage)) return false
     }
     // on ignore pour le moment les erreurs des js de calculatice, y'en a un peu trop…
-    if (md.source && /\/replication_calculatice\//.test(md.source)) return false
+    if (md.source && /\/replication_calculatice\//.test(md.source)) {
+      return false
+    } else if (type && type === 'ecjs') {
+      // des erreurs fréquentes sur ecjs qu'on regardera le jour où on aura la main sur le code
+      if (/BigError/.test(report.errorClass)) return false
+      if (/Unable to get property/.test(report.errorMessage)) return false
+      // on vire tous les rapport qui ont du replication_calculatice dans la stacktrace
+      if (report.stacktrace.some(trace => /replication_calculatice/.test(trace.file))) return false
+    }
   }
 }
 
@@ -61,8 +71,14 @@ if (typeof window === 'undefined') {
 } else if (!window.bugsnagClient) {
   if (bugsnag && bugsnag.apiKey) {
     window.bugsnagClient = bugsnagJs({
+      // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#apikey
       apiKey: bugsnag.apiKey,
-      beforeSend
+      // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#appversion
+      appVersion: version,
+      // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#beforesend
+      beforeSend,
+      // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#releasestage
+      releaseStage: application.staging
     })
     // et on ajoute ça pour que ce soit toujours présent (ça ne l'est pas par défaut)
     window.bugsnagClient.metaData = {}

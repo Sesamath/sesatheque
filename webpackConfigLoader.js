@@ -1,10 +1,15 @@
 const config = require('./app/config')
+const version = require('./package').version
 /**
  * ici on n'exporte que des variables non-sensibles et qui peuvent être
  * exposées dans le browser
  */
 const safeConfig = {
-  bugsnag: config.bugsnag
+  bugsnag: config.bugsnag,
+  application: {
+    staging: config.application.staging
+  },
+  version
 }
 
 // Exports un "loader" webpack
