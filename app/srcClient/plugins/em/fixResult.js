@@ -80,14 +80,14 @@ module.exports = function fixResult (result) {
         // on en sait rien, on laisse la réponse intacte et on prend le meilleur score
         // entre celui qu'on a calculé et celui renvoyé
         cleanResult.score = Math.max(nbRepOk, score)
-        cleanResult.errors.push('réponse incohérente avec le score')
+        cleanResult.errors.push('réponse avec j incohérente avec le score')
       }
     }
   } else if (nbRepOk !== score) {
     // pas de j mais réponse incohérente quand même
     cleanResult.score = Math.max(nbRepOk, score)
     // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
-    errors.push('réponse incohérente avec le score')
+    errors.push('réponse sans j incohérente avec le score')
   }
   return cleanResult
 }

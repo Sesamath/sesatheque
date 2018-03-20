@@ -36,20 +36,10 @@ const log = require('sesajstools/utils/log')
 const fixResult = require('./fixResult')
 const swf = require('../../display/swf')
 
-/**
- * Liste de rid dont on sait qu'ils renvoient des scores foireux (faut se fier à la réponse)
- * @private
- * @type {Set<string>}
- */
-const knownWeirds = new Set(
-  'sesabibli/3402'
-)
-
 let isLoaded, isResultatSent
 
 function getResultatCallback (ressource, options, next) {
   const params = ressource.parametres
-  const {notifyError} = options
   let completeResultReceived = 0
 
   return function emResultatCallback (result) {
@@ -58,69 +48,82 @@ function getResultatCallback (ressource, options, next) {
       // les exos em envoient un 1er résultat quasi vide au chargement, on fait pas suivre
       if (options.startDate && (new Date()).getTime() - options.startDate.getTime() < 500) return
 
-      const resultFixed = fixResult(result)
       // on récupère les anomalies éventuelles
+      const resultFixed = fixResult(result)
       const resultMod = {
-        reponse: result.reponse,
+        reponse: resultFixed.reponse,
         nbq: result.nbq || params.nbq_defaut,
         fin: (result.fin === 'o'),
         original: result
       }
-      resultMod.original.fixed = resultFixed
-      const notif = (error) => notifyError({
-        error: error.stack || error,
-        rid: ressource.rid,
-        resultat: resultMod
-      })
-      // faudrait chiffrer ça, mais j3p veut pouvoir l'intercepter
-      if (result.score && resultMod.nbq) resultMod.score = result.score / resultMod.nbq
-      // check fin, ajout des b sinon
-      if (!resultMod.fin && result.nbq && result.reponse) {
-        // on ajoute des b à reponse si c'est pas la dernière question
-        if (result.reponse.length < result.nbq) {
-          resultMod.reponse += 'b'.repeat(result.nbq - result.reponse.length)
-        } else {
+      // on ajoute la version corrigée si ≠
+      if (result.score !== resultFixed.score) resultMod.original.scoreFixed = resultFixed.score
+      if (result.reponse !== resultFixed.reponse) resultMod.original.reponseFixed = resultFixed.reponse
+      // on notifie pas les incohérences, y'en a trop, on passera une commande cli sur les résultats si on les veux
+      if (resultFixed.errors.length) resultMod.original.errors = resultFixed.errors
+
+      // ça c'est pour les erreurs qui seront envoyées à bugsnag
+      const errors = []
+
+      // on regarde quand même si nbq n'est pas foireux
+      if (resultMod.reponse.length > resultMod.nbq) {
+        errors.push(`nbq ${resultMod.nbq} < longueur de ${resultMod.reponse} (${resultMod.reponse.length})`)
+        resultMod.nbq = resultMod.reponse.length
+      }
+
+      // raccourcis
+      const nbq = resultMod.nbq
+      const nbr = result.reponse.length
+
+      // calcul du score, faudrait chiffrer (avec réponse), mais j3p veut pouvoir l'intercepter
+      const score = Math.max(result.score, resultFixed.score)
+      if (score >= 0 && score < 11) resultMod.score = score / nbq
+
+      // check fin
+      if (!resultMod.fin) {
+        if (nbr < nbq) {
+          // on ajoute des b à reponse si c'est pas la dernière question
+          resultMod.reponse += 'b'.repeat(nbq - result.reponse.length)
+        } else if (resultFixed.reponse.substr(-1) !== 'j') {
+          // pas fin, mais pourtant la réponse contient le nb de questions et la dernière n'est pas j
+
           // les exos mep modele 2 envoient 2× le dernier résultat (d'abord sans fin=o
-          // puis après clic sur suite et affichage du message de fin avec fin=o)
+          // puis après clic sur suite et affichage du message de fin, avec fin=o)
           // On impose toujours fin true sinon ça peut bloquer une séquence ordonnée
           // si l'élève ne clique pas sur suite.
-          // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
           resultMod.fin = true
+          // Invonvénient, ça zappe l'affichage du score 4s après le 1er envoi…
+          // pour indiquer à labomep de pas fermer tout de suite et laisser le temps de lire le bilan ou cliquer sur suite
+          resultMod.$resetDelay = 30
           completeResultReceived++
           const mepLevel = ressource.parametres.mep_modele.substr(2, 1)
           if (mepLevel >= completeResultReceived) {
             // donc mep2 à la deuxième réponse complète (envoyée au clic sur suite à la fin)
-            // ou mep1 à la 1re
-            notif(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
+            // ou mep1 à la 1re réponse complète
+            errors.push(`résultat em incohérent, fin = "o" manquant avec la réponse ${result.reponse} pour ${result.nbq} questions (${ressource.rid} ${ressource.parametres.mep_modele})`)
           }
-          // pour indiquer à labomep de pas fermer tout de suite
-          if (mepLevel === '2') resultMod.$resetDelay = 30
         }
+        // sinon, si la réponse est complète, sans fin, et que la dernière réponse est j,
+        // on sait pas quoi faire => on fait rien (l'élève devra changer d'exo tout seul,
+        // mais s'il clique pas sur suite en ayant un j en dernier (faux à la dernière question
+        // qui ne prenait qu'un essai), il pourra jamais passer à l'exo suivant si la séquence est ordonnée.
       }
-      // y'a des swf qui filent des score incohérents avec la réponse ! (sesabibli/3402)
-      if (resultMod.nbq && typeof result.reponse === 'string' && result.reponse) {
-        const reducer = (total, lettre) => total + ((lettre === 'v' || lettre === 'p') ? 1 : 0)
-        const total = Array.from(result.reponse).reduce(reducer, 0)
-        if (total !== result.score) {
-          resultMod.score = total / resultMod.nbq
-          // c'est tellement fréquent que ça sert à rien de notifier
-          notif(`score em incohérent avec la réponse : ${resultMod.reponse} => ${total} mais on a eu ${result.score} / ${resultMod.nbq}`)
-        }
-      } else {
-        // on arrête là
-        return notif('résultat em sans propriété reponse (ou pas une string)')
-      }
+
       isResultatSent = true
 
       options.resultatCallback(resultMod)
       // on regarde s'il faut notifier une anomalie
       /* global bugsnagClient */
-      const {errors} = resultFixed
-      if (errors.length && !knownWeirds.has(ressource.rid) && typeof bugsnagClient !== 'undefined') {
+      if (errors.length && typeof bugsnagClient !== 'undefined') {
         // rid et type y sont déjà, mais on vérifie quand même
-        if (!bugsnagClient.metaData.exo) bugsnagClient.metaData.exo = {errors: [new Error('bugsnagClient.metaData.exo n’existait pas')]}
+        if (!bugsnagClient.metaData.exo) {
+          bugsnagClient.metaData.exo = {}
+          const message = 'bugsnagClient.metaData.exo n’existait pas'
+          console.error(new Error(message))
+          errors.push(message)
+        }
         bugsnagClient.metaData.exo.resultat = resultMod
-        // errors est déjà dans resultat.original.fixed.errors
+        bugsnagClient.metaData.exo.errors = errors
         const error = new Error(errors[0])
         bugsnagClient.notify(error)
       }
@@ -140,13 +143,8 @@ function getResultatCallback (ressource, options, next) {
  */
 module.exports = function display (ressource, options, next) {
   try {
-    let {container, notifyError} = options
+    let {container} = options
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
-    if (typeof notifyError !== 'function') {
-      console.error(new Error('fn notifyError manquante dans options'))
-      notifyError = console.error
-      options.notifyError = console.error
-    }
     const errorsContainer = options.errorsContainer
     if (!errorsContainer) throw new Error('Il faut passer dans les options un conteneur html pour les erreurs')
 
