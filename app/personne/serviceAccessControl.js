@@ -31,6 +31,7 @@
 
 'use strict'
 var dns = require('dns')
+var ip = require('ip')
 // var _ = require('lodash')
 var sjtObj = require('sesajstools/utils/object')
 
@@ -249,17 +250,6 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
     if (ressource.aliasOf) throw new Error('Modifier les groupes d’un alias n’a pas de sens')
     // pour le moment idem update
     return getUpdateDeniedMessage(context, ressource)
-  }
-
-  /**
-   * Retourne true si l'ip est locale
-   * @private
-   * @param ip
-   * @returns {boolean}
-   */
-  function isOnLan (ip) {
-    // avec pm2 on a du bind ipv6
-    return (/^(::ffff:)?(127\.0|192\.168)/.test(ip) || /^::1/.test(ip))
   }
 
   // ######################
@@ -646,7 +636,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.isLanClient = function (context) {
     var ipClient = getClientIp(context)
     // log.debug("isLanClient analyse l'ip " + ipClient)
-    return isOnLan(ipClient)
+    return ip.isPrivate(ipClient)
   }
 
   /**
