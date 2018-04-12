@@ -24,7 +24,7 @@ module.exports = {
     // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici (ça permet de vérifier)
     // sert aussi pour les urls des composants statiques, ou pour construire des urls qu'on passe à l'extérieur
     // (sso par ex)
-    baseUrl: 'https://localhost:3001/', // OBLIGATOIRE
+    baseUrl: 'http://localhost:3001/', // OBLIGATOIRE
     // pour les envois de notification (du système)
     mail: '', // OBLIGATOIRE
     // utilisé par le SSO (sesasso-bibli et sesalab-sso), prod|dev

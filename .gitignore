@@ -1,26 +1,25 @@
-node_modules
-npm-debug.log
+# conf éditeurs
+.vim
 .idea
+
+# dépendances
+node_modules
+
+# logs
+*.log
+logs*/*
+
+# la conf locale
 _private
-logs/*
-logsCommun/*
-logsTest/*
-documentation/*
-*.pid
-*.map
-# compil webpack
-app/ressource/public/*.bundle.js
-# les css, tous construits par webpack ou less
-app/ressource/public/*.css
-# les js editgraphe (copié par webpack)
-app/ressource/public/editGraphe.js
-app/ressource/public/showParcours.js
-# webpack construit ses fichiers avec 32 caractères, mais on a pas le droit au regex façon
-# app/ressource/public/[a-f0-9]{32}.*
-app/ressource/public/????????????????????????????????.*
-# pour la compil wepback de commun en override
-app/ressource/publicCommun
-# les éventuels dumps qui traînent à la racine
-*.sql
+
 # évenutelle surcharge locale pour npm
 package.local-extras.json
+
+# fichiers générés
+documentation
+build
+
+# trucs qui peuvent traîner à la racine (pm2 qui tourne, dumps, etc.)
+*.pid
+*.map
+*.sql

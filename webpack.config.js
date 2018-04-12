@@ -27,11 +27,11 @@ const extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader
 const appConfig = require('./app/config')
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
-const webpackOutput = 'app/ressource/' + (appConfig.application.webpackOutput || 'public') + '/'
+const baseId = appConfig.application.baseId
 
 // la conf identique dev/prod
 const conf = {
-  // cf http://webpack.github.io/docs/configuration.html#entry
+  // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
@@ -47,14 +47,15 @@ const conf = {
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
-    path: webpackOutput,
+    path: 'build/',
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
-    filename: '[name].bundle.js',
-    // cf https://webpack.github.io/docs/configuration.html#output-library
+    filename: '[name].js',
+    // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     library: 'st[name]',
-    // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library, ici var => globale
+    // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library,
+    // ici var => globale
     libraryTarget: 'var',
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
@@ -85,13 +86,11 @@ const conf = {
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
-      {test: /(src|node_modules)\/.*\.css/, loader: extractCssLoader},
-      {test: /\.otf(\?\S*)?$/, loader: 'url-loader?limit=10000'},
-      {test: /\.eot(\?\S*)?$/, loader: 'url-loader?limit=10000'},
+      {test: /.*\.css(\?.*)?$/, loader: extractCssLoader},
+      {test: /\.(jpe?g|png|gif|otf|eot)$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
-      {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'},
-      {test: /\.(jpe?g|png|gif)$/, loader: 'url-loader?limit=10000'}
+      {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'}
     ]
   },
   plugins: [
@@ -103,18 +102,28 @@ const conf = {
       minChunks: 2,
       chunks: ['page', 'display', 'edit']
     }),
-    new CopyWebpackPlugin([{from: './node_modules/sesaeditgraphe/dist'}]),
+    new CopyWebpackPlugin([
+      {from: './node_modules/sesaeditgraphe/dist'},
+      {from: 'app/srcClient/plugins', to: 'plugins/', ignore: ['*.js']}
+    ]),
     extractCss
   ],
   stats: {
     // Nice colored output
     colors: true
   }
-  // Create Sourcemaps for the bundle
-} /* */
-
+} /* * /
 if (isProd) {
   conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
-}
+} /* */
+if (process.env.ABSOLUTE_PATH) {
+  console.log(`Compilation avec urls absolues pour ${baseId}`)
+  // faut compiler avec un chemin absolu, pour pouvoir être chargé depuis un autre domaine
+  conf.output.publicPath = baseUrl
+  // On reste dans le même dossier (pour pas dupliquer tout le statique qui ne dépend pas de baseId)
+  // mais faut changer le nom
+  conf.output.filename = `[name].${baseId}.js`
+}h
 
+console.log(conf)
 module.exports = conf

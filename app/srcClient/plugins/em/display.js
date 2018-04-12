@@ -160,7 +160,7 @@ module.exports = function display (ressource, options, next) {
     }
 
     // Ajout css
-    if (options.baseUrl) dom.addCss(options.baseUrl + 'mep.css') // si on a pas tant pis pour le css
+    if (options.baseUrl) dom.addCss(`${options.pluginBase}mep.css`) // si on a pas tant pis pour le css
     container.className = cssClass
 
     // le message en attendant le chargement

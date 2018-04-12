@@ -58,7 +58,7 @@ module.exports = function (mainComponent) {
     const app = $rail.get()
     // nos ressources statiques génériques
     const expressOptions = {
-      fsPath: path.join(__dirname, 'public'),
+      fsPath: path.join(__dirname, '..', 'build'),
       maxAge: config.application.staticMaxAge || '7d'
     }
 

@@ -164,7 +164,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $personn
       }
 
       // pids foireux
-      if (pids404.length) {
+      if (pids404 && pids404.length) {
         const pl = pids404.length > 1 ? 's' : ''
         $flashMessages.add(context, `Le${pl} gestionnaire${pl} d'identifiant${pl} ${pids404.join(', ')} n’existe${(pl ? 'nt' : '')} pas`)
       }

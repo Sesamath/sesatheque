@@ -77,7 +77,7 @@ module.exports = function (ressource, options, next) {
           CKEDITOR.config.width = 'auto'
           if (params.answer_editor === 'ckeditorTex') {
             CKEDITOR.config.extraPlugins = 'mathjax'
-            CKEDITOR.config.mathJaxLib = '/vendor/mathjax/2.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+            CKEDITOR.config.mathJaxLib = `${options.baseUrl}vendor/mathjax/2.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML`
           }
           CKEDITOR.replace('answer', {
             toolbarGroups: [

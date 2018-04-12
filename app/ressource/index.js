@@ -78,16 +78,6 @@ ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressour
   return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) // jshint ignore:line
 })
 
-// nos ressources statiques, si override en config des js webpack ils passent avant
-if (appConfig.application.staging === 'dev' && appConfig.application.webpackOutput) {
-  ressourceComponent.controller(function () {
-    this.serve('/', {maxAge, fsPath: path.join(__dirname, appConfig.application.webpackOutput)})
-  })
-}
-ressourceComponent.controller(function () {
-  this.serve('/', {maxAge, fsPath: path.join(__dirname, 'public')})
-})
-
 // les pages html de consultation / modification
 ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) { // jshint ignore:line
   require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) // jshint ignore:line
