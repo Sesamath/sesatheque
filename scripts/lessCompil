@@ -10,8 +10,7 @@ function fin() {
 
 function usage() {
   local exitCode=${1:-0}
-  echo "Compile notre css à partir de app/main/public/styles/page.less"
-  echo "en allant chercher les imports dans app/main/public/styles et app/main/public/vendors/knacss/less"
+  echo "Compile notre css à partir de app/staticStylesSrc/page.less"
   exit $exitCode
 }
 
@@ -20,7 +19,7 @@ trap fin EXIT
 
 cd $(dirname $0)/../
 dirApp=$PWD
-cd "app/main/public/styles"
+cd "app/staticStylesSrc"
 
 # sans options on lance en dev
 #lessc --clean-css="--s1 --advanced --compatibility=ie8" --include-path="app/main/public/styles:app/main/public/vendors/knacss/less" app/main/public/styles/page.less app/main/public/styles/page.css \
