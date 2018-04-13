@@ -50,7 +50,7 @@ import {XMLHttpRequest} from 'xmlhttprequest'
 
 import boot from '../boot'
 import config from '../../../app/server/config'
-import configRessource from '../../../app/ressource/config'
+import configRessource from '../../../app/server/ressource/config'
 import {addRessource, getRandomRessource, populate, purge} from '../populate'
 import fakeRessource from '../../helpers/fakeRessource'
 

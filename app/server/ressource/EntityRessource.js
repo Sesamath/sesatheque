@@ -34,7 +34,7 @@ const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesa
 const {stringify} = require('sesajstools')
 
 const tools = require('../tools')
-const Ressource = require('../constructors/Ressource')
+const Ressource = require('../../constructors/Ressource')
 const {getRidEnfants} = require('../tools/ressource')
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion

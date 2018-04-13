@@ -26,7 +26,7 @@ var apiTokenEncoded = encodeURIComponent(confSesatheque.apiTokens[0])
 
 // conf ressource
 // conf des ressources
-var confRessource = require('../../app/ressource/config')
+var confRessource = require('../../app/server/ressource/config')
 // constantes
 var tdCode = confRessource.constantes.typeDocumentaires
 var tpCode = confRessource.constantes.typePedagogiques

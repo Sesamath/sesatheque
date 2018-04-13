@@ -38,7 +38,7 @@ var config = require('./config')
 var arbreCateg = config.constantes.categories.liste
 var sjtObj = require('sesajstools/utils/object')
 
-var Ref = require('../constructors/Ref')
+var Ref = require('../../constructors/Ref')
 
 var xmls = ['cp', 'ce1', 'ce2', 'cm1', 'cm2', '6eme']
 

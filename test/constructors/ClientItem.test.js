@@ -38,7 +38,7 @@ import fakeRessource from '../helpers/fakeRessource'
 // cf http://chaijs.com/api/bdd/
 import {expect} from 'chai'
 import config from '../../app/server/config'
-import configRessource from '../../app/ressource/config'
+import configRessource from '../../app/server/ressource/config'
 
 const myBaseId = config.application.baseId
 const myBaseUrl = config.application.baseUrl

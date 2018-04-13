@@ -38,7 +38,7 @@ const rTools = require('../tools/ressource')
 const config = require('./config')
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId
-const Ressource = require('../constructors/Ressource')
+const Ressource = require('../../constructors/Ressource')
 
 /**
  * Ajoute les propriétés qui peuvent être déduites (deductions définies dans la configuration)

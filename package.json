@@ -22,7 +22,7 @@
     "cli": "app/cli.js -h",
     "doc": "./scripts/doc -a",
     "localInstall": "node scripts/npmi.js",
-    "lint": "eslint --ignore-path .gitignore --ignore-pattern app/main/public --ignore-pattern app/ressource/public  --ignore-pattern jsdoc .",
+    "lint": "eslint --ignore-path .gitignore --ignore-pattern jsdoc .",
     "maj": "git pull && npm install && npm run build",
     "mongo": "./scripts/mongoApp",
     "start": "node app/server/start.js",

@@ -33,7 +33,7 @@
 import faker from 'faker/locale/fr'
 import fakeRef from './fakeRef'
 import config from '../../app/server/config'
-import configRessource from '../../app/ressource/config'
+import configRessource from '../../app/server/ressource/config'
 
 const myBaseId = config.application.baseId
 const types = Object.keys(configRessource.listes.type)

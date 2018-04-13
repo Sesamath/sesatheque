@@ -61,7 +61,7 @@ var urls = {
  var htmlparser = require('htmlparser')
  */
 var elementtree = require('elementtree')
-var ressConf = require('../app/ressource/config')
+var ressConf = require('../app/server/ressource/config')
 var arbreCateg = ressConf.constantes.categories.liste
 
 /**

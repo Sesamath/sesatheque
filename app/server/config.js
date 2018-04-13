@@ -74,7 +74,7 @@ if (typeof window !== 'undefined') {
 const staging = (process.env.NODE_ENV === 'production') ? 'prod' : (process.argv[1].indexOf('mocha') !== -1) ? 'test' : 'dev'
 
 /** La racine du projet */
-const root = path.resolve(__dirname, '..')
+const root = path.resolve(__dirname, '..', '..')
 const logDir = process.env.LOGS || root + '/logs'
 
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
@@ -102,7 +102,7 @@ const config = {
     // la référence pour valider des baseId, toutes les sesatheques enregistrées chez un registrar
     // peuvent référencer des items d'une autre du même registrar
     baseIdRegistrar: 'sesabibli',
-    defaultViewsPath: 'app/views',
+    defaultViewsPath: 'app/server/views',
     // mis dans _private/config.js car dépendant de l'instance
     baseId: 'notConfigured', // l'id de cette sésathèque
     baseUrl: 'notConfigured',

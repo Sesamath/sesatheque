@@ -36,7 +36,7 @@ import fakeRef from '../helpers/fakeRef'
 import fakeRessource from '../helpers/fakeRessource'
 // cf http://chaijs.com/api/bdd/
 import {expect} from 'chai'
-import configRessource from '../../app/ressource/config'
+import configRessource from '../../app/server/ressource/config'
 
 const types = Object.keys(configRessource.listes.type)
 // vérif que deux objets sont identiques

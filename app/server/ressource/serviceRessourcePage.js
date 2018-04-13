@@ -36,7 +36,7 @@ const sjt = require('sesajstools')
 const sjtObj = require('sesajstools/utils/object')
 const flow = require('an-flow')
 const moment = require('moment')
-const version = require('../../package.json').version
+const version = require('../../../package.json').version
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet (plutôt que via $setting())
 // car on a l'autocomplétion sur les noms de propriété
 const ressConfig = require('./config')

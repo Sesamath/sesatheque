@@ -38,14 +38,14 @@ const _ = require('lodash')
 const request = require('request')
 const {parse, stringify} = require('sesajstools')
 const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
-const Ref = require('../constructors/Ref')
+const Ref = require('../../constructors/Ref')
 const {ensure} = require('../tools')
 const {getRidEnfants} = require('../tools/ressource')
 
 const config = require('./config')
 const appConfig = require('../config')
 
-const j3pGraphe2json = require('../../tasks/modules/j3pGraphe2json')
+const j3pGraphe2json = require('../../../tasks/modules/j3pGraphe2json')
 
 const myBaseId = appConfig.application.baseId
 
