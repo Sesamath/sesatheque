@@ -1,4 +1,4 @@
-const config = require('./app/config')
+const config = require('./app/server/config')
 const version = require('./package').version
 /**
  * ici on n'exporte que des variables non-sensibles et qui peuvent être

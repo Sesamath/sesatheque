@@ -12,7 +12,7 @@ var flow = require('an-flow')
 
 var sjtObj = require('sesajstools/utils/object')
 var sjt = require('sesajstools')
-var CounterMulti = require('../../app/tools/CounterMulti')
+var CounterMulti = require('../../app/server/tools/CounterMulti')
 
 // conf de l'appli
 var confSesatheque = require('../../_private/config')

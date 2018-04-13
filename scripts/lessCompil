@@ -19,12 +19,11 @@ trap fin EXIT
 
 cd $(dirname $0)/../
 dirApp=$PWD
-cd "app/staticStylesSrc"
+LESSC="$dirApp/node_modules/less/bin/lessc"
+cd "$dirApp/app/server/src/styles"
 
 # sans options on lance en dev
-#lessc --clean-css="--s1 --advanced --compatibility=ie8" --include-path="app/main/public/styles:app/main/public/vendors/knacss/less" app/main/public/styles/page.less app/main/public/styles/page.css \
-#./node_modules/.bin/lessc --clean-css="--compatibility=ie8" --include-path="app/main/public/styles:app/main/public/vendors/knacss/less" --source-map=app/main/public/styles/page.map app/main/public/styles/page.less app/main/public/styles/page.css \
-$dirApp/node_modules/less/bin/lessc --clean-css="--compatibility=ie8" --source-map=page.map page.less page.css \
-  && $dirApp/node_modules/less/bin/lessc --clean-css="--compatibility=ie8" --source-map=iframe.map iframe.less iframe.css \
+$LESSC --clean-css="--compatibility=ie8" --source-map=page.map page.less page.css \
+  && $LESSC --clean-css="--compatibility=ie8" --source-map=iframe.map iframe.less iframe.css \
   && echo "OK" \
   || echo "KO"

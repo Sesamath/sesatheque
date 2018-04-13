@@ -24,7 +24,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
 const extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?minimize' : 'css-loader')
 
-const appConfig = require('./app/config')
+const appConfig = require('./app/server/config')
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
 const baseId = appConfig.application.baseId

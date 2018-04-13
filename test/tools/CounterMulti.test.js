@@ -34,7 +34,7 @@
 /* global describe,it */
 
 var assert = require('assert')
-var CounterMulti = require('../../app/tools/CounterMulti')
+var CounterMulti = require('../../app/server/tools/CounterMulti')
 
 describe('CounterMulti', function () {
   var cm = new CounterMulti()

@@ -32,7 +32,7 @@
 
 import faker from 'faker/locale/fr'
 import fakeRef from './fakeRef'
-import config from '../../app/config'
+import config from '../../app/server/config'
 import configRessource from '../../app/ressource/config'
 
 const myBaseId = config.application.baseId

@@ -22,7 +22,7 @@ var knex = require('knex')
 // var moment = require('moment')
 var flow = require('an-flow')
 
-var tools = require('../app/tools')
+var tools = require('../app/server/tools')
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
