@@ -32,7 +32,7 @@
 // cf https://docs.bugsnag.com/platforms/browsers/js/
 const bugsnagJs = require('bugsnag-js')
 // on récupère ce que webpackConfigLoader.js nous file
-const {application, bugsnag, version} = require('../../config')
+const {application, bugsnag, version} = require('../../server/config')
 
 // ce fichier met un objet busgnagClient en global
 

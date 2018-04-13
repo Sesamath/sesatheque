@@ -83,11 +83,11 @@ function boot (beforeBootstrapCb, options, afterBootCb) {
     logger('pas d’autre sesatheque connue mise en configuration')
   }
   // les déclarations de nos components
-  require('./main')
-  require('./personne')
+  require('./main/index')
+  require('./personne/index')
   require('./ressource')
-  require('./update')
-  require('./auth')
+  require('../update/index')
+  require('./auth/index')
   var dependancies = ['main', 'personne', 'ressource', 'update', 'auth']
 
   // des modules sup à charger

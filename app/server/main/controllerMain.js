@@ -34,7 +34,7 @@ const fs = require('fs')
 const path = require('path')
 
 const config = require('../config')
-const version = require('../../package.json').version
+const version = require('../../../package.json').version
 
 let homeContent
 const homeContentFile = path.join(__dirname, '../../_private/home.inc.html')

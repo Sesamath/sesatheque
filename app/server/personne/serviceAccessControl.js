@@ -36,7 +36,7 @@ var ip = require('ip')
 var sjtObj = require('sesajstools/utils/object')
 
 var config = require('../config')
-var configRessource = require('../ressource/config')
+var configRessource = require('../../ressource/config')
 
 module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
   /**

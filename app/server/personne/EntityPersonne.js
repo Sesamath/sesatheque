@@ -31,7 +31,7 @@
 
 'use strict'
 
-const Personne = require('../constructors/Personne')
+const Personne = require('../../constructors/Personne')
 const sjtObj = require('sesajstools/utils/object')
 
 /**

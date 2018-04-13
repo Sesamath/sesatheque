@@ -34,7 +34,7 @@
 // var crypto = require('crypto')
 var flow = require('an-flow')
 var _ = require('lodash')
-var tools = require('../tools')
+var tools = require('../tools/index')
 
 /**
  * Retourne la clé de cache d'un groupe (memcache est pénible, tools.sanitizeHashKey suffit pas)

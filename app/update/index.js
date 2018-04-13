@@ -34,7 +34,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const config = require('../config')
+const config = require('../server/config')
 const applog = require('an-log')(config.application.name)
 
 // Composant de gestion des updates

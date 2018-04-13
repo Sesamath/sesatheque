@@ -42,7 +42,7 @@ var morgan = require('morgan')
 var moment = require('moment')
 var sjt = require('sesajstools')
 
-var tools = require('./tools')
+var tools = require('./tools/index')
 var config = require('./config')
 var applog = require('an-log')(config.application.name)
 

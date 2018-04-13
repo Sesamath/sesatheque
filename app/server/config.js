@@ -41,7 +41,7 @@ const sjtUrl = require('sesajstools/http/url')
 const {addSesatheque, reBaseUrl} = require('sesatheque-client/src/sesatheques')
 // la conf du composant ressource à part
 const configRessource = require('./ressource/config')
-const {version} = require('../package')
+const {version} = require('../../package')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide

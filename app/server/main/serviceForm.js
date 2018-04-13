@@ -32,7 +32,7 @@
 'use strict'
 
 var sjt = require('sesajstools')
-var Form = require('../constructors/Form')
+var Form = require('../../constructors/Form')
 
 module.exports = function ($page) {
   /**

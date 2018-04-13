@@ -32,7 +32,7 @@
 'use strict'
 
 const sjtObj = require('sesajstools/utils/object')
-const version = require('../../package.json').version
+const version = require('../../../package.json').version
 
 module.exports = function () {
   /**

@@ -36,7 +36,7 @@ const name = 'passage en https de ce qui peut l’être dans les coll_doc et pag
 const description = ''
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
-const config = require('../../config')
+const config = require('../../server/config')
 const updateLog = require('an-log')(`${config.application.name} update${updateNum}`)
 
 module.exports = {
