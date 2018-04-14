@@ -56,12 +56,14 @@ module.exports = function (mainComponent) {
   mainComponent.controller(function ($rail) {
     // l'appli express
     const app = $rail.get()
-    // nos ressources statiques génériques
+    // nos ressources statiques générées par webpack
     const expressOptions = {
-      fsPath: path.join(__dirname, '..', 'build'),
+      fsPath: path.join(__dirname, '..', '..', 'build'),
       maxAge: config.application.staticMaxAge || '7d'
     }
-
+    this.serve('/', expressOptions)
+    // et les ressources statiques qui bougent pas (CopyWebpackPlugin arrive pas à les copier, y'en a trop)
+    expressOptions.fsPath = path.join(__dirname, '..', 'static')
     this.serve('/', expressOptions)
 
     /**

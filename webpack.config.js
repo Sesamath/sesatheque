@@ -36,14 +36,14 @@ const conf = {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
-    // apiClient: './app/srcClient/apiClient.js',
+    // apiClient: './app/client/apiClient.js',
     client: ['sesatheque-client'],
     // faut un array, sinon il râle dans les fichiers ayant du require(page) en disant
     // Error: a dependency to an entry point is not allowed
-    page: ['./app/srcClient/page/index.js'],
-    display: './app/srcClient/display/index.js',
-    edit: './app/srcClient/edit/index.js',
-    import: './app/srcClient/edit/import.js'
+    page: ['./app/client/page/index.js'],
+    display: './app/client/display/index.js',
+    edit: './app/client/edit/index.js',
+    import: './app/client/edit/import.js'
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
@@ -74,13 +74,13 @@ const conf = {
   },
   module: {
     loaders: [
-      {test: /app\/srcClient\/.*\.js/, loader: 'babel'},
+      {test: /app\/client\/.*\.js/, loader: 'babel'},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour la config qui contient des données sensibles, on passe par un loader qui filtre
-      {test: /app\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
+      {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       {test: /\.json$/, loader: 'json'},
-      {test: /app\/srcClient\/.*\.html/, loader: 'file'},
+      {test: /app\/client\/.*\.html/, loader: 'file'},
       // editgraphe passe par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
@@ -104,7 +104,7 @@ const conf = {
     }),
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
-      {from: 'app/srcClient/plugins', to: 'plugins/', ignore: ['*.js']}
+      {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']}
     ]),
     extractCss
   ],
@@ -123,7 +123,6 @@ if (process.env.ABSOLUTE_PATH) {
   // On reste dans le même dossier (pour pas dupliquer tout le statique qui ne dépend pas de baseId)
   // mais faut changer le nom
   conf.output.filename = `[name].${baseId}.js`
-}h
+}
 
-console.log(conf)
 module.exports = conf

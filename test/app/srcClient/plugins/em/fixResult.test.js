@@ -31,7 +31,7 @@
 'use strict'
 
 import {expect} from 'chai'
-import fixResult from '../../../../../app/srcClient/plugins/em/fixResult'
+import fixResult from '../../../../../app/client/plugins/em/fixResult'
 
 describe('plugins/em/fixResult', () => {
   it('laisse inchangé un résultat correct', (done) => {
