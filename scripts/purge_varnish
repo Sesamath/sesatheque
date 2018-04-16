@@ -2,8 +2,8 @@
 set -u
 
 # relatif à dirApp
-LAST_FILE=../_private/purge_varnish.last
-CONFIG=../_private/config.js
+LAST_FILE=_private/purge_varnish.last
+CONFIG=_private/config.js
 
 dirInitial="$PWD"
 dirRoot=$(dirname $0)/../
