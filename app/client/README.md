@@ -7,7 +7,7 @@ Chargement en cross-domain
 --------------------------
 
 Pour charger des ressources, une iframe suffit, même pour récupérer des résultats via une api http sur https://monDomain/pathQcq?arg=value
-(il faut préciser la taille de l'iframe en css, cf cet exemple [css](https://stackoverflow.com/a/27853830) ou en [js](https://stackoverflow.com/a/330006), 
+(il faut préciser la taille de l'iframe en css, cf cet exemple [css](https://stackoverflow.com/a/27853830) ou en [js](https://stackoverflow.com/a/330006),
 on peut aussi utiliser la propiété [calc](https://developer.mozilla.org/en-US/docs/Web/CSS/calc) de css qui passe à partir d'IE9)
 
 ```html
@@ -22,10 +22,10 @@ Si on veut que la sésatheque ajoute des infos au résultat, par ex le nom qu'on
 
 On peut aussi utiliser les modules js de la sésathèque en cross-domain, pour mettre les ressources dans son dom et interagir dessus.
 
-Il faut alors passer `options.base = "https://sesathequeDomain/"` à `window.stdisplay(ressource, options)` (si on a 
-chargé display.bundle.js)
+Il faut alors passer `options.base = "https://sesathequeDomain/"` à `window.stdisplay(ressource, options)` (si on a
+chargé display.js)
 
-Si l'on veut récupérer une ressource, il faut charger client.bundle.js puis
+Si l'on veut récupérer une ressource, il faut charger client.js puis
 ```
 // le nom bibli est arbitraire, ici la syntaxe permettant d'avoir plusieurs sesatheques sur le même client
 var client = window.stclient({bibli:'https://bibliotheque.sesamath.net'})
@@ -38,7 +38,7 @@ Par exemple, si on a déjà la ressource complète
 
 ```html
 <!-- sur foo.domain -->
-<script type="text/javascript" src="https://sesathequeDomain/display.bundle.js"></script>
+<script type="text/javascript" src="https://sesathequeDomain/display.$baseId.js"></script>
 
 <!-- code quelconque -->
 
@@ -52,14 +52,14 @@ Par exemple, si on a déjà la ressource complète
     // on a reçu un résultat que l'on va enregistrer ici
     console.log(resultat);
   }
-  
+
   // on veut afficher cette ressource
   var ressource = {
     titre: "…",
     type: "…",
     etc.
   }
-  
+
   // les options à passer
   var options = {
     base: "https://sesathequeDomain/",
@@ -80,11 +80,11 @@ Plugins de ressources
 
 Cf [global](./global.html) pour la liste des méthodes globales accessibles depuis un plugin.
 
-Tous les plugins doivent exporter un module display (display.js dans le dossier du module) et un module edit (edit.js) 
+Tous les plugins doivent exporter un module display (display.js dans le dossier du module) et un module edit (edit.js)
 
 ```javascript
 // Tout le code est privé, spécifique à ce plugin sans collision possible avec le DOM de la page courante
-// que ce soit dans la fonction exportée ou en dehors (en général on déclare les modules en dépendance en premier 
+// que ce soit dans la fonction exportée ou en dehors (en général on déclare les modules en dépendance en premier
 // mais ils pourraient être dans la fonction)
 var log = require('../../tools/log')
 function display(ressource, options) {
@@ -93,7 +93,7 @@ function display(ressource, options) {
 module.exports = display
 ```
 
-Pour passer une fonction de sauvegarde à une ressource chargée en iframe, il faut appeler l'url avec un paramètre 
+Pour passer une fonction de sauvegarde à une ressource chargée en iframe, il faut appeler l'url avec un paramètre
 * resultCallbackUrl : url qui sera appelée en ajax (post) avec un objet Résultat.
 Cette url devra répondre
 {"ok":true} ou {"success":true} ou bien {"ok":false, "error":"Un message d'erreur"}
@@ -109,6 +109,6 @@ Ex, avec resultatMessageAction=saveResultat, la ressource en iframe fera un send
 
 Le résultat est au format du constructeur {@link Resultat}
 
-Pour que la ressource puisse charger son dernier résultat, il faut lui passer un 
+Pour que la ressource puisse charger son dernier résultat, il faut lui passer un
 lastResultUrl, url que la ressource appelera en ajax pour récupérer le dernier résultat si elle le gère.
 

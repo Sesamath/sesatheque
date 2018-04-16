@@ -80,7 +80,7 @@ module.exports = function () {
   $page.getDefaultData = function getDefaultData (context, titre, contentBloc) {
     const data = {
       $metas: {
-        js: [`/page.bundle.js?${version}`]
+        js: [`/page.js?${version}`]
       },
       version
     }

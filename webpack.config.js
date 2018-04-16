@@ -52,7 +52,8 @@ const conf = {
     // faut un array, sinon il râle dans les fichiers ayant du require(page) en disant
     // Error: a dependency to an entry point is not allowed
     page: ['./app/client/page/index.js'],
-    iframe: ['./app/server/src/styles/iframe.less'],
+    // juste pour compiler iframe.css
+    iframe: ['./app/srcStyles/iframe.less'],
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js'

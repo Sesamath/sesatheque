@@ -4,9 +4,8 @@
     "allowUnknownTags": true
   },
   "source"   : {
-    "include":["./app", "./doc_src", "./README.md"],
-    "includePattern": ".+\\.js$",
-    "excludePattern": "(node_modules|sesalab-admin|public|srcClient|.+\\.bak\\.js|.+\\.bundle\\.js)"
+    "include":["./app/server", "./doc_src", "./README.md"],
+    "includePattern": ".+\\.js$"
   },
   "plugins"  : [
     "plugins/markdown",

@@ -66,7 +66,7 @@ module.exports = function (mainComponent) {
     }
     this.serve('/', expressOptions)
     // et les ressources statiques qui bougent pas (CopyWebpackPlugin arrive pas à les copier, y'en a trop)
-    expressOptions.fsPath = path.join(__dirname, '..', 'static')
+    expressOptions.fsPath = path.join(root, 'app', 'assets')
     this.serve('/', expressOptions)
 
     /**

@@ -665,7 +665,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         },
         jsBloc: {
           $view: 'js',
-          jsFiles: ['/import.bundle.js'],
+          jsFiles: ['/import.js'],
           jsCode: 'stimport()'
         }
       }
