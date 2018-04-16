@@ -6,7 +6,8 @@ LAST_FILE=../_private/purge_varnish.last
 CONFIG=../_private/config.js
 
 dirInitial="$PWD"
-dirApp=$(dirname $0)/../app
+dirRoot=$(dirname $0)/../
+version=''
 
 function fin() {
   cd "$dirInitial"
@@ -16,6 +17,17 @@ function usage() {
   echo "Purge toutes les urls des fichiers modifiés depuis la date du fichier $LAST_FILE"
   echo "en prenant le nom de host trouvé dans la propriété baseUrl de $CONFIG"
   exit 0
+}
+
+function purge_one() {
+  local url=$1
+  echo -n "$url : "
+  curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
+  if [ -n "$version" ]; then
+    echo -n " ?$version : "
+    curl -s -X PURGE $url?$version |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
+  fi
+  echo
 }
 
 function purge_varnish() {
@@ -34,16 +46,12 @@ function purge_varnish() {
   then
     echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
   else
-    # on est dans app
     version=$(sed -nre 's/.*"version"[ \t]*:[ \t]*"([0-9\.]+)".*/\1/p' ../package.json)
-    find */public -type f $findOpt | while read file
-    do
-      url=$baseUrl${file#*public} # on démarre au / qui suit public
-      echo -n "$url : "
-      curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
-      echo -n " ?$version : "
-      curl -s -X PURGE $url?$version |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
-      echo
+    find build -type f $findOpt | while read file; do
+      purge_one $baseUrl${file#*build} # on démarre au / qui suit build
+    done
+    find app/assets -type f $findOpt | while read file; do
+      purge_one $baseUrl${file#*app/assets} # on démarre au / qui suit assets
     done
   fi
   touch "$LAST_FILE"
@@ -61,6 +69,6 @@ do
   esac
 done
 
-cd "$dirApp"
+cd "$dirRoot"
 purge_varnish
 cd "$dirInitial" 2>/dev/null

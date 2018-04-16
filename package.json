@@ -26,7 +26,7 @@
     "maj": "git pull && npm install && npm run build",
     "mongo": "./scripts/mongoApp",
     "start": "node app/server/start.js",
-    "start:commun": "env SESATHEQUE_CONF=commun node app/start.js",
+    "start:commun": "env SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm start & npm run start:commun",
     "start:dev": "node_modules/nodemon/bin/nodemon.js -e js --legacy-watch --watch app --watch _private app/start.js --ignore app/main/public/vendor",
     "start:devcommun": "env SESATHEQUE_CONF=commun node_modules/nodemon/bin/nodemon.js -e js --legacy-watch --watch app --watch _private app/start.js --ignore app/main/public/vendor",
