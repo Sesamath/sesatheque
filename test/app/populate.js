@@ -43,7 +43,7 @@ import fakePersonne from '../helpers/fakePersonne'
 import flow from 'an-flow'
 
 import boot from './boot'
-import config from '../../app/config'
+import config from '../../app/server/config'
 
 const myBaseId = config.application.baseId
 // pour nos 1ers tests

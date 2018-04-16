@@ -22,39 +22,53 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
-const extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?minimize' : 'css-loader')
+const cssLoader = isProd ? 'css-loader?minimize' : 'css-loader'
+const extractCssLoader = extractCss.extract('style-loader', cssLoader)
+const extractLessLoader = extractCss.extract('style-loader', cssLoader + '!less-loader')
 
-const appConfig = require('./app/config')
+const appConfig = require('./app/server/config')
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
-const webpackOutput = 'app/ressource/' + (appConfig.application.webpackOutput || 'public') + '/'
+const baseId = appConfig.application.baseId
+
+// pour pouvoir compiler pour d'autres baseId
+let absBaseId = process.env.ABSOLUTE_BASE_ID
+if (absBaseId && absBaseId !== baseId) {
+  // on veut compiler js et css pour un autre domaine (par ex pour compiler la prod en préprod)
+  const sesatheques = require('sesatheque-client/src/sesatheques')
+  baseUrl = sesatheques.getBaseUrl(absBaseId, false)
+  if (!baseUrl) absBaseId = null
+}
 
 // la conf identique dev/prod
 const conf = {
-  // cf http://webpack.github.io/docs/configuration.html#entry
+  // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
-    // apiClient: './app/srcClient/apiClient.js',
+    // apiClient: './app/client/apiClient.js',
     client: ['sesatheque-client'],
     // faut un array, sinon il râle dans les fichiers ayant du require(page) en disant
     // Error: a dependency to an entry point is not allowed
-    page: ['./app/srcClient/page/index.js'],
-    display: './app/srcClient/display/index.js',
-    edit: './app/srcClient/edit/index.js',
-    import: './app/srcClient/edit/import.js'
+    page: ['./app/client/page/index.js'],
+    // juste pour compiler iframe.css
+    iframe: ['./app/srcStyles/iframe.less'],
+    display: './app/client/display/index.js',
+    edit: './app/client/edit/index.js',
+    import: './app/client/edit/import.js'
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
-    path: webpackOutput,
+    path: 'build/',
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
-    filename: '[name].bundle.js',
-    // cf https://webpack.github.io/docs/configuration.html#output-library
+    filename: '[name].js',
+    // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     library: 'st[name]',
-    // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library, ici var => globale
+    // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library,
+    // ici var => globale
     libraryTarget: 'var',
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
@@ -73,25 +87,24 @@ const conf = {
   },
   module: {
     loaders: [
-      {test: /app\/srcClient\/.*\.js/, loader: 'babel'},
+      {test: /app\/client\/.*\.js/, loader: 'babel'},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour la config qui contient des données sensibles, on passe par un loader qui filtre
-      {test: /app\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
+      {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       {test: /\.json$/, loader: 'json'},
-      {test: /app\/srcClient\/.*\.html/, loader: 'file'},
+      {test: /app\/client\/.*\.html/, loader: 'file'},
       // editgraphe passe par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
-      {test: /(src|node_modules)\/.*\.css/, loader: extractCssLoader},
-      {test: /\.otf(\?\S*)?$/, loader: 'url-loader?limit=10000'},
-      {test: /\.eot(\?\S*)?$/, loader: 'url-loader?limit=10000'},
+      {test: /.*\.css(\?.*)?$/, loader: extractCssLoader},
+      {test: /.*\.less(\?.*)?$/, loader: extractLessLoader},
+      {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
-      {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'},
-      {test: /\.(jpe?g|png|gif)$/, loader: 'url-loader?limit=10000'}
+      {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'}
     ]
   },
   plugins: [
@@ -103,18 +116,26 @@ const conf = {
       minChunks: 2,
       chunks: ['page', 'display', 'edit']
     }),
-    new CopyWebpackPlugin([{from: './node_modules/sesaeditgraphe/dist'}]),
+    new CopyWebpackPlugin([
+      {from: './node_modules/sesaeditgraphe/dist'},
+      {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']}
+    ]),
     extractCss
   ],
   stats: {
     // Nice colored output
     colors: true
   }
-  // Create Sourcemaps for the bundle
-} /* */
-
+} /* * /
 if (isProd) {
   conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
+} /* */
+if (absBaseId) {
+  console.log(`Compilation avec urls absolues pour ${absBaseId}`)
+  // faut compiler avec un chemin absolu, pour pouvoir être chargé depuis un autre domaine
+  conf.output.publicPath = baseUrl
+  // On reste dans le même dossier mais faut changer le nom
+  conf.output.filename = `[name].${absBaseId}.js`
 }
 
 module.exports = conf

@@ -22,12 +22,12 @@ var knex = require('knex')
 // var moment = require('moment')
 var flow = require('an-flow')
 
-var tools = require('../app/tools')
+var tools = require('../app/server/tools')
 var common = require('./modules/common')
 var log = common.log // jshint ignore:line
 
 // constantes
-var confRessource = require('../app/ressource/config')
+var confRessource = require('../app/server/ressource/config')
 var tdCode = confRessource.constantes.typeDocumentaires
 var tpCode = confRessource.constantes.typePedagogiques
 var catCode = confRessource.constantes.categories

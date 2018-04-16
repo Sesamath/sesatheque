@@ -31,7 +31,7 @@
 'use strict'
 
 import faker from 'faker/locale/fr'
-import config from '../../app/config'
+import config from '../../app/server/config'
 const myBaseId = config.application.baseId
 
 /**

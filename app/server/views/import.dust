@@ -1,0 +1,8 @@
+<div class="block edit ressource">
+  <div id="errors">
+    {#errors}<p class="error">{.}</p>{/errors}
+  </div>
+  <div id="display">Chargement en cours… (si ce message ne disparait pas aussitôt, c'est que javascript n'est pas
+    activé)
+  </div>
+</div>

@@ -28,7 +28,7 @@ function build() {
   [ ! -d "$baseSrc/build" ] && echo "Le dossier $baseSrc/build n'existe pas" >&2 && exit 1
   for f in $baseSrc/tests/*.test.js
   do
-    dst=$base/build/$(basename $f .test.js).bundle.js
+    dst=$base/build/$(basename $f .test.js).js
     echo -n "$dst "
     node_modules/.bin/browserify -o $dst -e $f && echo "ok" || echo "KO"
   done

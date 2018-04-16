@@ -42,8 +42,8 @@
 // Ce jeu de test de l'appli est lancé avec les paramètres de _private/test.js
 // (c'est app/config.js qui détecte mocha et utilise ce fichier)
 
-import app from '../../app/index'
-import config from '../../app/config'
+import app from '../../app/server/index'
+import config from '../../app/server/config'
 import anLog from 'an-log'
 import sesatheques from 'sesatheque-client/src/sesatheques'
 /**

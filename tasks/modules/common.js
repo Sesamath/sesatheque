@@ -12,7 +12,7 @@ var flow = require('an-flow')
 
 var sjtObj = require('sesajstools/utils/object')
 var sjt = require('sesajstools')
-var CounterMulti = require('../../app/tools/CounterMulti')
+var CounterMulti = require('../../app/server/tools/CounterMulti')
 
 // conf de l'appli
 var confSesatheque = require('../../_private/config')
@@ -26,7 +26,7 @@ var apiTokenEncoded = encodeURIComponent(confSesatheque.apiTokens[0])
 
 // conf ressource
 // conf des ressources
-var confRessource = require('../../app/ressource/config')
+var confRessource = require('../../app/server/ressource/config')
 // constantes
 var tdCode = confRessource.constantes.typeDocumentaires
 var tpCode = confRessource.constantes.typePedagogiques
