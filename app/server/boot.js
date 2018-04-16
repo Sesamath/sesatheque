@@ -86,7 +86,7 @@ function boot (beforeBootstrapCb, options, afterBootCb) {
   require('./main/index')
   require('./personne/index')
   require('./ressource')
-  require('../update/index')
+  require('./update/index')
   require('./auth/index')
   var dependancies = ['main', 'personne', 'ressource', 'update', 'auth']
 

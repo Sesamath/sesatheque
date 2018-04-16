@@ -37,7 +37,10 @@ const config = require('../config')
 const version = require('../../../package.json').version
 
 let homeContent
-const homeContentFile = path.join(__dirname, '../../_private/home.inc.html')
+
+const root = path.resolve(__dirname, '..', '..', '..')
+
+const homeContentFile = path.join(root, '_private', 'home.inc.html')
 if (fs.existsSync(homeContentFile)) {
   homeContent = fs.readFileSync(homeContentFile)
   if (homeContent) {
@@ -46,7 +49,7 @@ if (fs.existsSync(homeContentFile)) {
     log.error(`${homeContentFile} existe mais sans contenu`)
   }
 }
-if (!homeContent) homeContent = 'Ce site est encore un prototype expérimental.'
+if (!homeContent) homeContent = 'Site en construction.'
 
 /**
  * Controleur du composant main pour les routes "statiques"
@@ -58,7 +61,7 @@ module.exports = function (mainComponent) {
     const app = $rail.get()
     // nos ressources statiques générées par webpack
     const expressOptions = {
-      fsPath: path.join(__dirname, '..', '..', 'build'),
+      fsPath: path.join(root, 'build'),
       maxAge: config.application.staticMaxAge || '7d'
     }
     this.serve('/', expressOptions)

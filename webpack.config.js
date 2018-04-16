@@ -22,12 +22,23 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
-const extractCssLoader = extractCss.extract('style-loader', isProd ? 'css-loader?minimize' : 'css-loader')
+const cssLoader = isProd ? 'css-loader?minimize' : 'css-loader'
+const extractCssLoader = extractCss.extract('style-loader', cssLoader)
+const extractLessLoader = extractCss.extract('style-loader', cssLoader + '!less-loader')
 
 const appConfig = require('./app/server/config')
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
 const baseId = appConfig.application.baseId
+
+// pour pouvoir compiler pour d'autres baseId
+let absBaseId = process.env.ABSOLUTE_BASE_ID
+if (absBaseId && absBaseId !== baseId) {
+  // on veut compiler js et css pour un autre domaine (par ex pour compiler la prod en préprod)
+  const sesatheques = require('sesatheque-client/src/sesatheques')
+  baseUrl = sesatheques.getBaseUrl(absBaseId, false)
+  if (!baseUrl) absBaseId = null
+}
 
 // la conf identique dev/prod
 const conf = {
@@ -41,6 +52,7 @@ const conf = {
     // faut un array, sinon il râle dans les fichiers ayant du require(page) en disant
     // Error: a dependency to an entry point is not allowed
     page: ['./app/client/page/index.js'],
+    iframe: ['./app/server/src/styles/iframe.less'],
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js'
@@ -87,7 +99,8 @@ const conf = {
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
       {test: /.*\.css(\?.*)?$/, loader: extractCssLoader},
-      {test: /\.(jpe?g|png|gif|otf|eot)$/, loader: 'url-loader?limit=10000'},
+      {test: /.*\.less(\?.*)?$/, loader: extractLessLoader},
+      {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
       {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'}
@@ -116,13 +129,12 @@ const conf = {
 if (isProd) {
   conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
 } /* */
-if (process.env.ABSOLUTE_PATH) {
-  console.log(`Compilation avec urls absolues pour ${baseId}`)
+if (absBaseId) {
+  console.log(`Compilation avec urls absolues pour ${absBaseId}`)
   // faut compiler avec un chemin absolu, pour pouvoir être chargé depuis un autre domaine
   conf.output.publicPath = baseUrl
-  // On reste dans le même dossier (pour pas dupliquer tout le statique qui ne dépend pas de baseId)
-  // mais faut changer le nom
-  conf.output.filename = `[name].${baseId}.js`
+  // On reste dans le même dossier mais faut changer le nom
+  conf.output.filename = `[name].${absBaseId}.js`
 }
 
 module.exports = conf

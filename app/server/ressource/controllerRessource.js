@@ -40,6 +40,7 @@ const config = require('./config')
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId
 const request = require('request')
+
 /**
  * Controleur /ressource/ pour les utilisateurs authentifiés.
  *

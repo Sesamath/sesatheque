@@ -19,11 +19,12 @@ trap fin EXIT
 
 cd $(dirname $0)/../
 dirApp=$PWD
+dirBuild="$dirApp/build"
 LESSC="$dirApp/node_modules/less/bin/lessc"
-cd "$dirApp/app/server/src/styles"
+dirSrc="$dirApp/app/server/src/styles"
 
 # sans options on lance en dev
-$LESSC --clean-css="--compatibility=ie8" --source-map=page.map page.less page.css \
-  && $LESSC --clean-css="--compatibility=ie8" --source-map=iframe.map iframe.less iframe.css \
+$LESSC --clean-css="--compatibility=ie8" --source-map=$dirBuild/page.map $dirSrc/page.less $dirBuild/page.css \
+  && $LESSC --clean-css="--compatibility=ie8" --source-map=$dirBuild/iframe.map $dirSrc/iframe.less $dirBuild/iframe.css \
   && echo "OK" \
   || echo "KO"

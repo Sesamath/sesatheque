@@ -31,7 +31,7 @@
 
 'use strict'
 
-var tools = require('../server/tools')
+var tools = require('../tools')
 
 module.exports = function (EntityUpdate) {
   /**

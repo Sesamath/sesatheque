@@ -5,7 +5,7 @@
     <meta name="description" content="Médiathèque de ressources pour l'éducation">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" sizes="16x16" href="/favicon.png?{version}">
-    <link rel="stylesheet" href="/styles/page.css?{version}">
+    <link rel="stylesheet" href="/page.css?{version}">
     {head|s}
 </head>
 <body>

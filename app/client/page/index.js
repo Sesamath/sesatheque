@@ -44,6 +44,9 @@ const refreshAuth = require('./refreshAuth')
 // lui s'ajoute tout seul à window, suffit de le charger
 require('./bugsnag')
 
+// pour la compilation de page.css
+require('../../server/src/styles/page.less')
+
 const w = window
 const wd = w.document
 
