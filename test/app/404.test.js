@@ -44,25 +44,25 @@ import boot from './boot'
 describe('prend un 404 sur les urls inexistantes', () => {
   const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
   let _superTestClient
-  before(() => boot()
-    .then(({superTestClient}) => {
-      _superTestClient = superTestClient
-      return Promise.resolve()
-    })
-  )
+  const setClient = ({superTestClient}) => {
+    if (!superTestClient) return Promise.reject(new Error('pas de client express après le boot'))
+    _superTestClient = superTestClient
+    return Promise.resolve()
+  }
+  before(() => boot().then(setClient))
+
   paths.forEach(path => {
-    it(`404 sur ${path}`, function () {
-      // on retourne une promesse plutôt qu'utiliser done
-      return _superTestClient
+    // on retourne une promesse
+    it(`404 sur ${path}`, () =>
+      _superTestClient
         .get(path)
         .expect(404, 'not found ' + path)
         .expect('Content-Type', /text\/plain/)
-    })
+    )
   })
   paths.forEach(path => {
-    it(`404 sur /api${path}`, function () {
-      // on retourne une promesse plutôt qu'utiliser done
-      return _superTestClient
+    it(`404 sur /api${path}`, () =>
+      _superTestClient
         .get('/api' + path)
         .expect(404)
         .expect('Content-Type', /application\/json/)
@@ -71,6 +71,6 @@ describe('prend un 404 sur les urls inexistantes', () => {
           expect(res.body.error).to.be.ok
           expect(res.body.error).to.contain('n’existe pas')
         })
-    }) // it
+    )
   })
 })

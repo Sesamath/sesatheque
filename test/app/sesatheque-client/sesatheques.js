@@ -63,7 +63,8 @@ describe('sesatheques', () => {
   let $settings
 
   before(() => boot()
-    .then(({lassi}) => {
+    .then(({lassi, testsDone}) => {
+      after(testsDone)
       $settings = lassi.service('$settings')
       return Promise.resolve()
     })

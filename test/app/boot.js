@@ -53,9 +53,19 @@ import sesatheques from 'sesatheque-client/src/sesatheques'
 import supertest from 'supertest'
 
 let isBooted = false
+// pour que mocha rende la main, il faut shutdown lassi
+// on gère ça avec un timeout après chaque boot, et un
+// testsDone qui raccourci ce timeout (qui sera réinitialisé
+// si un autre describe appelle boot juste après)
+/**
+ * Objet de la promesse résolue après le boot
+ * Chaque describe devra appeler le boot en before et testsDone en after
+ * @type {{lassi, superTestClient, testsDone}}
+ */
 const resolvedValue = {}
 let timerId
-const defaultDelay = 3000
+// un delay par défaut de 10s pour chaque describe qui appelle boot dans son before
+const defaultDelay = 10000
 const resetTimer = (delay = defaultDelay) => {
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(shutdown, delay)
@@ -67,14 +77,14 @@ const shutdown = (done) => {
 }
 
 /**
- * Démarre l'appli
+ * Démarre l'appli et résoud avec un objet {lassi, superTestClient, testsDone}
  * @param {number} [delay=3000] Le nb de ms à attendre après le boot pour éteindre
  * @return {Promise} qui sera résolue en passant un objet {superTestClient, lassi}
  */
 const getBootPromise = (delay) => new Promise((resolve, reject) => {
   try {
     const finish = () => {
-      // on éteindra après delay ms
+      // on éteindra après delay ms (rappeller boot reset le timer)
       resetTimer(delay)
       return resolve(resolvedValue)
     }
@@ -89,29 +99,18 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
     // boot
     app(function afterBootCallback () {
       anLog.config(config.lassiLogger)
-      // on exporte lassi (pas dispo en global dans un describe) et le client pour tester notre appli express
+      // on garde une ref sur lassi (pas dispo en global dans un describe)
+      // et le client pour tester notre appli express
       resolvedValue.lassi = lassi
       resolvedValue.superTestClient = supertest(lassi.express)
+      resolvedValue.testsDone = () => resetTimer(100)
       isBooted = true
-      // en ajoutant --delay dans mocha.opts, on a une fct run en global qui prend une callback
-      // mais si on ajoute cette ligne ça shutdown avant de commencer les tests…
-      // setTimeout(() => run(lassi.shutdown), 500)
+      // en ajoutant --delay dans mocha.opts, on a une fct run en global (qui prend une callback à exécuter)
       return finish()
     })
   } catch (error) {
     reject(error)
   }
 })
-// on ajoute ça pour tenter de le mettre dans un after global, mais ça veut pas marcher…
-getBootPromise.shutdown1 = () => new Promise((resolve, reject) => {
-  try {
-    shutdown(resolve)
-  } catch (error) {
-    reject(error)
-  }
-})
-// passer ça en callback de la fct globale run (qui existe si on ajoute --delay dans mocha.opts)
-// marche pas non plus
-getBootPromise.shutdown = shutdown
 
 module.exports = getBootPromise

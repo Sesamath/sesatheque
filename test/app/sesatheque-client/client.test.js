@@ -134,13 +134,14 @@ describe('sesatheque-client', () => {
   // on populate une fois au début, et on purge à la fin
   // inutile ici de le faire à chaque test, c'est le client qu'on teste
   before(() => boot()
-    .then(() => {
+    .then(({testsDone}) => {
+      after(purge)
+      after(testsDone)
       log.setLogLevel('error')
       sesathequeClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
       return populate()
     })
   )
-  after(purge)
 
   beforeEach(() => {
     consoleErrorSpy = sinon.spy(console, 'error')

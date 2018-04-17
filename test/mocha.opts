@@ -1,5 +1,4 @@
 --colors
 --require babel-core/register
---recursive
 --reporter spec
 --slow 1500

@@ -43,8 +43,9 @@ import boot from './boot'
 
 describe('contenus statiques', () => {
   let _superTestClient
-  before(() => boot().then(function ({superTestClient}) {
+  before(() => boot().then(function ({superTestClient, testsDone}) {
     _superTestClient = superTestClient
+    after(testsDone)
     return Promise.resolve()
   }))
   it('la page d’accueil existe', () => _superTestClient.get('/').expect(200))
