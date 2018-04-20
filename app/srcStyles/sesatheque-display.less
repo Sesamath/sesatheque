@@ -60,7 +60,13 @@ html, body {padding: 0; margin: 0;height: 100%;}
 .feedbackKo { background-image: url("/medias/saveKo.png"); visibility: visible; }
 .feedbackOff { background-image: none; visibility: hidden; }
 
-#boutonVu { float: right; display: none; }
+#boutonVu { 
+  position: absolute; 
+  top: 0; 
+  right: 0; 
+  display: none;
+  z-index: 11; /* #display possède un z-index à 10 */
+}
 
 /* le layout-iframe n'inclue pas ce qui est défini dans les sesatheque-* hors display mais il a besoin de ça */
 /**
