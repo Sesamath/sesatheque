@@ -75,7 +75,7 @@ mainComponent.service('$json', function () {
 
 // pour la doc
 mainComponent.controller(function () {
-  this.serve('doc', path.resolve(__dirname, '../../documentation'))
+  this.serve('doc', path.resolve(__dirname, '../../../documentation'))
 })
 /**
  * En dev on ajoute des routes de debug
