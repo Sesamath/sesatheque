@@ -117,7 +117,7 @@ function addBoutonVu (sendResultat) {
     const boutonVu = wd.getElementById('boutonVu')
     if (boutonVu) {
       boutonVu.addEventListener('click', sendResultat)
-      dom.setStyles(boutonVu, {display: 'inline-block', 'z-index': 999})
+      dom.setStyles(boutonVu, {display: 'block'})
     }
     return boutonVu
   } catch (e) {
