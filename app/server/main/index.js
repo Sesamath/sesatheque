@@ -56,6 +56,8 @@ this.application.templateEngines.dust.helper('dump', function (chunk, context, b
 }); /**/
 
 require('./controllerMain')(mainComponent)
+// pour /api/checkSesalabConfig
+require('./controllerApi')(mainComponent)
 
 mainComponent.service('$page', function () {
   return require('./servicePage')()
