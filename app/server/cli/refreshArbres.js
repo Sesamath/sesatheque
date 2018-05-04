@@ -32,7 +32,7 @@
 const flow = require('an-flow')
 const taskLog = require('an-log')('sesatheque-cli')
 const Ref = require('../../constructors/Ref')
-const configRessource = require('../../ressource/config')
+const configRessource = require('../ressource/config')
 
 function logErrorInDataAndTask (message, obj) {
   taskLog.error(message)
