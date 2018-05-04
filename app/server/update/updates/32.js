@@ -32,14 +32,14 @@
 
 const flow = require('an-flow')
 const request = require('request')
-const {getAllParams, getParam} = require('../../server/tools/url')
-const {refreshArbres} = require('../../server/cli/refreshArbres')
+const {getAllParams, getParam} = require('../../tools/url')
+const {refreshArbres} = require('../../cli/refreshArbres')
 
 const name = 'Essaie de remplacer les pages externes vers une visionneuse par la ressource quand elle existe (puis màj arbres)'
 const description = ''
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
-const config = require('../../server/config')
+const config = require('../../config')
 const updateLog = require('an-log')(`${config.application.name} update${updateNum}`)
 
 const myBaseId = config.application.baseId

@@ -33,8 +33,8 @@
 const flow = require('an-flow')
 const {getRidComponents} = require('sesatheque-client/src/sesatheques')
 
-const config = require('../../server/config')
-const Ref = require('../../constructors/Ref')
+const config = require('../../config')
+const Ref = require('../../../constructors/Ref')
 const myBaseId = config.application.baseId
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
