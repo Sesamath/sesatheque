@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# Commande pour tagger le dépôt git courant (master only)
+
+set -u
+
+# couleurs
+if [ -t 1 ]; then
+  VERT='\e[0;32m'
+  ROUGE='\e[0;31m'
+  NORM='\e[0;00m'
+else
+  VERT=''
+  ROUGE=''
+  NORM=''
+fi
+
+OK=0
+KO=1
+
+# affiche un texte en rouge (sur stderr)
+function avert() {
+  echo -e "$ROUGE$@$NORM">&2
+}
+# affiche un texte en vert
+function notice() {
+  echo -e "$VERT$@$NORM"
+}
+
+# affiche les infos d'usage et sort (avec le code d'erreur $1 si fourni ou 0 sinon)
+function usage() {
+  echo "Commit le dépôt courant, le tag de nouveau et push le tout"
+  echo "Seul -t accepte de fonctionner sur une branche (master only pour le reste)"
+  echo "  -i : incrémente le tag (sa dernière partie)"
+  echo "  -m : message de commit à ajouter à 'retag xxx')"
+  echo "  -t <tag> : met le tag <tag> (et ignore -i)"
+  exit ${1-0}
+}
+
+inc="no"
+TAG=""
+ME=$(basename $0)
+commitMessage=""
+while getopts "him:t:" OPTION
+do
+  case $OPTION in
+    h) usage;;
+    i) inc="yes";;
+    m) commitMessage="$OPTARG";;
+    t) TAG=$OPTARG;;
+    *) usage $KO;;
+  esac
+done
+
+[ ! -f package.json ] && avert "pas de package.json dans le dossier courant" && usage $KO
+[ -z "$TAG" ] && [ "$(git rev-parse --abbrev-ref HEAD)" != "master" ] && avert "Ce script est prévu pour être utilisé sur master (sauf avec -t)" && usage $KO
+NAME=$(node -e "try { var tmp = require('./package.json'); console.log(tmp.name); } catch(e) {}")
+
+# pour certains projets on fait d'office un build avant
+case $NAME in
+  sesaeditgraphe|sesatheque-client)
+    notice "Pour $NAME on fait un rebuild avant commit et push"
+    npm run build
+  ;;
+esac
+
+# si on a fourni un tag on ignore -i
+[ -n "$TAG" ] && inc="no" || TAG=$(node -e "try { var tmp = require('./package.json'); console.log(tmp.version); } catch(e) {}")
+[ -z "$TAG" ] && avert "Pas de tag trouvé" && exit $KO
+
+if [ "$inc" == "yes" ]; then
+  startTag=${TAG%.*}
+  # pour le dernier on veut un entier, donc endTag=${TAG##*.} est pas fiable, on passe par sed
+  endTag=$(echo $TAG|sed -Ee 's/^.*\.([0-9]+)$/\1/')
+  [ -z "$endTag" ] && avert "Le tag $TAG trouvé dans ./package.json n'est pas de la forme *.NN où NN est un entier, incrément impossible" && exit $KO
+  oldTAG=$TAG
+  # on échappe d'éventuel slashes
+  TAG="${startTag//\//\\/}.$((endTag + 1))"
+  notice "On passe de $oldTAG à $TAG dans ./package.json"
+  sed -i -e "/version/ s/$oldTAG/$TAG/" ./package.json
+else
+  # on efface le tag (--no-verify ici, c'est le push du code qui lancera les tests de prepush)
+  git tag -d $TAG && git push --no-verify origin :refs/tags/$TAG
+fi
+
+# on commit
+[ -n "$commitMessage" ] && commitMessage="retag $TAG | $commitMessage" || commitMessage="retag $TAG"
+git commit -am "$commitMessage"
+# push
+git push
+
+# et retag
+git tag $TAG
+# que l'on envoie aussi, le push précédent est passé, plus besoin de relancer les tests => --no-verify
+git push --no-verify --tags
