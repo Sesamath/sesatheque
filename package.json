@@ -73,7 +73,7 @@
     "elementtree": "0.1.6",
     "express": "^4.16.2",
     "ip": "^1.1.5",
-    "lassi": "Sesamath/lassi#2.2.16",
+    "lassi": "Sesamath/lassi#2.3.1",
     "lodash": "4.17.5",
     "moment": "2.19.3",
     "morgan": "1.9.0",
