@@ -263,8 +263,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     // log.debug('arrayToDust de ' +key, selectedValues)
     var i = 0
     var choices = []
-    const typeWanted = ressConfig.typesVarArray[key]
-    // on comprend que Number ou String, sinon il sera jamais selected…
+    // on vérifie la cohérence de la config, car on ne gère que Number ou String,
+    // sinon il sera jamais selected…
+    const typeWanted = ressConfig.typesVar[key] === 'Array' ? ressConfig.typesVarArray[key] : ressConfig.typesVar[key]
     if (!['Number', 'String'].includes(typeWanted)) log.error(new Error(`La clé ${key} a un typesVarArray non géré : ${typeWanted}`))
     if (selectedValues && !Array.isArray(selectedValues)) {
       log.error(new Error('La propriété ' + key + " de la ressource n'est pas un tableau"))
