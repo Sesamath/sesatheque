@@ -55,7 +55,7 @@ var staticTtl = 3600 * 24
  */
 function afterCookie (rail) {
   if (config.$rail.noBodyParser) {
-    const dateRegExp = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/;
+    const dateRegExp = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
     const bodyParserSettings = config.$rail.bodyParser || {
       reviver: (key, value) => (typeof value === 'string' && dateRegExp.exec(value)) ? new Date(value) : value
     }

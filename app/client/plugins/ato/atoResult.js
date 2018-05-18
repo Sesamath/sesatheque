@@ -29,12 +29,12 @@
  * pour une explication en français)
  */
 
-/*global window*/
+/* global window */
 (function () {
   'use strict'
   // vérif minimale du contexte
-  if (typeof window === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
-  if (typeof window.document === "undefined") throw new Error("Ce script ne fonctionne que dans un dom html")
+  if (typeof window === 'undefined') throw new Error('Ce script ne fonctionne que dans un dom html')
+  if (typeof window.document === 'undefined') throw new Error('Ce script ne fonctionne que dans un dom html')
 
   // Raccourci pour window.document
   var wd = window.document
@@ -52,14 +52,14 @@
    * @returns {string} Le code html
    */
   atoResult.getHtmlReponse = function (resultat) {
-    var output = ""
+    var output = ''
     // pour url on a pas de resultat.reponse, seule la durée peut servir
     if (resultat.duree > 0) {
-      output = "affiché pendant "
+      output = 'affiché pendant '
       if (resultat.duree > 59) {
         output += Math.floor(resultat.duree / 60) + ' minutes '
       }
-      output += resultat.duree % 60 +' s'
+      output += resultat.duree % 60 + ' s'
     } else {
       output = "pas de durée d'affichage connue"
     }
@@ -74,7 +74,7 @@
    * @returns {string} Le code html
    */
   atoResult.getHtmlScore = function () {
-    return "affiché"
+    return 'affiché'
   }
 
   /**
@@ -90,7 +90,7 @@
 
   // suivant ce qui est dispo, on exporte pour requireJs, en module amd (pour node ou browserify) ou dans le dom global
   if (typeof define === 'function') {
-    define(atoResult); // jshint ignore:line
+    define(atoResult) // eslint-disable-line no-undef
   } else if (typeof module === 'object' && module.exports) {
     module.exports = atoResult
   }

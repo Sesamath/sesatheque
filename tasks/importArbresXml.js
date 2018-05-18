@@ -84,7 +84,7 @@ function needToSplit (xmlName) {
     // /^tous_les_manuels(\.part[0-9]+)?$/
 
     // lui a différents suffixes possibles
-    /^animations_interactives$/,  // on a des enfants de niveau 1 sans niveau 2
+    /^animations_interactives$/, // on a des enfants de niveau 1 sans niveau 2
     /^exercices_interactifs(\.part[0-9]+)?$/,
     /^exercices_non(\.part[0-9]+)?$/
   ]

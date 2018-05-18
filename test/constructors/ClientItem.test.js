@@ -47,7 +47,7 @@ const types = Object.keys(configRessource.listes.type)
 describe('ClientItem', () => {
   const getRessourcesCollection = () => types.map(type => fakeRessource({type}))
   const getRefCollection = () => types.map(type => fakeRef({type}))
-  const {describe, display, edit} = configRessource.constantes.routes
+  const {describe, display} = configRessource.constantes.routes
 
   it('Converti une ressource', () => {
     // ressource publiques

@@ -221,7 +221,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $personneRepository, $g
     const pid = $accessControl.getCurrentUserPid(context)
     // les cas où on a rien à faire
     if (
-        ressourceOriginale &&
+      ressourceOriginale &&
         _.isEqual(ressourceNew.auteurs, ressourceOriginale.auteurs) &&
         _.isEqual(ressourceNew.contributeurs, ressourceOriginale.contributeurs) &&
         !ressourceNew._auteursAdd &&

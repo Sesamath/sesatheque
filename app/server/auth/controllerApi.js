@@ -77,7 +77,7 @@ module.exports = function (controller, $auth, $accessControl, $ressourceReposito
   controller.get('api/auth/getRoles', function (context) {
     const currentUser = $accessControl.getCurrentUser(context)
     const isLogged = !!currentUser
-    const roles = currentUser && currentUser.roles || []
+    const roles = (currentUser && currentUser.roles) || []
     return {
       isLogged,
       roles

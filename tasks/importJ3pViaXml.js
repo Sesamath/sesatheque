@@ -99,7 +99,7 @@ function parseIds (idsFound) {
               if (checkOldBibli) {
                 if (!row.bib_descriptif || !row.bib_commentaire) {
                   kOldBibli.raw('SELECT description, commentaires FROM Ressource WHERE id = ' + id).exec(function (error,
-                                                                                                                   rows) {
+                    rows) {
                     var result
                     if (error) throw error
                     if (rows[ 0 ]) {
@@ -211,27 +211,27 @@ function purgeJ3pAndExit () {
   }
   var kBibli = knex(confKnex)
   flow()
-      .seq(function () {
-        log('on va lancer la requete de purge')
-        var next = this
-        kBibli
-            .raw(query)
-            .exec(function (error, rows) {
-              if (error) throw error
-              // la suite est jamais affichée :-/
-              else {
-                log('retour', rows)
-                next()
-              }
-            })
-      })
-      .seq(function () {
-        log('Ressources j3p purgées')
-        process.exit(0)
-      })
-      .catch(function (error) {
-        log('Erreur dans la purge j3p :', error)
-      })
+    .seq(function () {
+      log('on va lancer la requete de purge')
+      var next = this
+      kBibli
+        .raw(query)
+        .exec(function (error, rows) {
+          if (error) throw error
+          // la suite est jamais affichée :-/
+          else {
+            log('retour', rows)
+            next()
+          }
+        })
+    })
+    .seq(function () {
+      log('Ressources j3p purgées')
+      process.exit(0)
+    })
+    .catch(function (error) {
+      log('Erreur dans la purge j3p :', error)
+    })
 }
 
 // les 3 premiers args sont node, nomDeLaTache

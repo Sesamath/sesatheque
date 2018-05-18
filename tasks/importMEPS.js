@@ -194,18 +194,18 @@ function importMEPS (ids, next) {
   // query += ' LIMIT 50'
   log('la requete sql ', query)
   kmepcol
-      .raw(query)
-      .then(function (rows) {
-        var ressources = rows[0]
-        ressources.forEach(function (row) {
-          ressourceCourante = initRessourceMep(row)
-          common.pushRessource(ressourceCourante)
-        })
+    .raw(query)
+    .then(function (rows) {
+      var ressources = rows[0]
+      ressources.forEach(function (row) {
+        ressourceCourante = initRessourceMep(row)
+        common.pushRessource(ressourceCourante)
       })
-      .catch(function (e) {
-        log(e.stack)
-        next()
-      })
+    })
+    .catch(function (e) {
+      log(e.stack)
+      next()
+    })
   log('Select importMEPS lancé')
 }
 
@@ -234,19 +234,19 @@ function importAIDES (ids, next) {
   log('la requete sql AIDES', query)
 
   kmepcol
-      .raw(query)
-      .then(function (rows) {
-        var ressources = rows[0]
-        log(query + '\nremonte ' + ressources.length + ' résultats')
-        ressources.forEach(function (row) {
-          ressourceCourante = initRessourceAm(row)
-          common.pushRessource(ressourceCourante)
-        })
+    .raw(query)
+    .then(function (rows) {
+      var ressources = rows[0]
+      log(query + '\nremonte ' + ressources.length + ' résultats')
+      ressources.forEach(function (row) {
+        ressourceCourante = initRessourceAm(row)
+        common.pushRessource(ressourceCourante)
       })
-      .catch(function (e) {
-        log(e.stack)
-        next()
-      })
+    })
+    .catch(function (e) {
+      log(e.stack)
+      next()
+    })
 
   log('Select importAIDES lancé\n' + query)
 }

@@ -257,7 +257,7 @@ try {
           // on regarde si y'a des espaces hors de balises \text{}
           var contenuSsTxt = $textarea.val().replace(/\\text{[^}]*}/g, '')
           if (
-              contenuSsTxt.indexOf(' ') === -1 ||
+            contenuSsTxt.indexOf(' ') === -1 ||
               window.confirm("Attention, l'éditeur d'équation supprime les espaces (hors commande \text{}), annuler pour revenir à l'éditeur simple")
           ) {
             init()

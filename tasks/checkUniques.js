@@ -112,22 +112,22 @@ module.exports = function () {
   }
 
   flow()
-      .seq(function () {
-        checkId(this)
-      })
-      .seq(function () {
-        dumpDup(this)
-      })
-      .seq(function () {
-        if (!dumpAsked && duplicates.length) {
-          // on suggère de le réclamer
-          log('Pour voir le détail des doublons trouvés, vous pouvez relancer la commande en ajoutant en option')
-          console.log('--dump ' + duplicates.join(','))
-        }
-        log('END')
-        process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
-      })
-      .catch(function (error) {
-        console.error('Erreur dans le flow : \n' + error.stack)
-      })
+    .seq(function () {
+      checkId(this)
+    })
+    .seq(function () {
+      dumpDup(this)
+    })
+    .seq(function () {
+      if (!dumpAsked && duplicates.length) {
+        // on suggère de le réclamer
+        log('Pour voir le détail des doublons trouvés, vous pouvez relancer la commande en ajoutant en option')
+        console.log('--dump ' + duplicates.join(','))
+      }
+      log('END')
+      process.exit() // gulp sort pas tout seul s'il reste qq callback dans le vent
+    })
+    .catch(function (error) {
+      console.error('Erreur dans le flow : \n' + error.stack)
+    })
 }

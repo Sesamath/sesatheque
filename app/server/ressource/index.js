@@ -31,10 +31,6 @@
 
 'use strict'
 
-var path = require('path')
-var appConfig = require('../config')
-const maxAge = appConfig.application.staticMaxAge || '7d'
-
 // Composant de gestion des ressources
 var ressourceComponent = lassi.component('ressource')
 

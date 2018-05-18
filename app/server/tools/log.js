@@ -153,7 +153,7 @@ function out (message, objectToDump, filter, stream, options) {
       } else {
         var dump = sjt.stringify(objectToDump, options.indent)
         if (dump) {
-          var max = options && options.max || 200
+          var max = (options && options.max) || 200
           if (dump.length > max) dump = dump.substr(0, max) + '…'
           msg += '\n' + dump + '\n'
         } else {

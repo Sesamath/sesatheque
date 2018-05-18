@@ -602,6 +602,7 @@ module.exports = function (ressourceComponent) {
     /**
      * Récupère une liste de ressource complète (no limit) d'après critères ATTENTION à ne pas l'utiliser n'importe où !
      * Il y a quand même une limite, 50 × listeMax
+     * @todo à virer car personne ne s'en sert
      * @memberOf $ressourceRepository
      * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
      * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
@@ -610,14 +611,14 @@ module.exports = function (ressourceComponent) {
      * @param {string}   [options.order=asc] asc|desc
      * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
      */
-    function getListeFull (visibilite, options, next) {
+    function getListeFull (visibilite, options = {}, next) {
       function fetch () {
         getListe(visibilite, options, function (error, ressources) {
           if (error) return next(error)
           nbCalls++
           allRessources = allRessources.concat(ressources)
           if (ressources.length === listeMax && nbCalls < 50) {
-            skip += listeMax
+            options.skip += listeMax
             fetch()
           } else {
             if (nbCalls === 50) log.error(`getListeFull remonte ${nbCalls * listeMax} ressources et il en reste, on arrête là`)
@@ -627,7 +628,7 @@ module.exports = function (ressourceComponent) {
       }
 
       let nbCalls = 0
-      let skip = 0
+      options.skip = 0
       let allRessources = []
       fetch()
     }

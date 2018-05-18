@@ -104,7 +104,7 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
     // si $sesalabSsoClient existe, faut l'ajouter en client d'authentification
     // on lui passe les infos dont il a besoin
     if (allComponents.indexOf('sesalab-sso') !== -1) {
-      const authName = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].name || 'Sesalab'
+      const authName = (config.sesalabs && config.sesalabs[0] && config.sesalabs[0].name) || 'Sesalab'
       const authBaseId = config.sesalabs && config.sesalabs[0] && config.sesalabs[0].baseId
       if (!authBaseId) throw new Error('sesalab sans baseId en configuration')
       require('./auth/authClientSesalabSso')(authName, authBaseId)

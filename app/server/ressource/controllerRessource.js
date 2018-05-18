@@ -597,8 +597,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       }
       // ici, on reset d'office tout ce qu'on ne peut pas modifier si on est juste indexateur
       if (isOnlyIndex) {
-        config.indexFields
-        Object.keys(ressourceOriginale)
+        // @todo finir ce bout de truc commencé ? config.indexFields
+        // Object.keys(ressourceOriginale)
       }
       $personneControl.checkGroupes(context, ressourceOriginale, ressourceNormee, groupesSup, this)
     }).seq(function (ressource) {

@@ -309,7 +309,7 @@ module.exports = function (EntityPersonne, EntityGroupe, $settings, $personneRep
   $accessControl.checkPermission = function (permission, context, ressource, next) {
     if (
       // pas la peine de continuer si c'est pour voir une ressource publique
-      permission === 'read' && ressource.restriction === 0 ||
+      (permission === 'read' && ressource.restriction === 0) ||
       // ni si c'est l'api appelée par un de nos serveurs ou qqun ayant tous les droits
       hasAllRights(context) ||
       // ni si l'utilisateur a les droits génériques

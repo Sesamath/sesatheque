@@ -179,7 +179,7 @@ FormField.prototype.addChoice = function addChoice (choice) {
   if (this.id && !choice.id) choice.id = this.id + i
   // et on ajoute les selected s'il y en a (comparaison avec cast en string)
   if (
-      choice.hasOwnProperty('value') &&
+    choice.hasOwnProperty('value') &&
       this.selectedValues &&
       this.selectedValues.length &&
       _.includes(this.selectedValues, String(choice.value))

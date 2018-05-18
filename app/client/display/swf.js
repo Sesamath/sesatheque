@@ -143,4 +143,3 @@ module.exports = {load}
  * @param {Integer} [hauteur=400] La hauteur d'affichage imposée au swf
  * @param {Integer} [largeur=400] La largeur d'affichage imposée au swf
  */
-

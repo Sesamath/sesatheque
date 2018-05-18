@@ -1,7 +1,8 @@
 // ce contenu peut être copié dans un ~/.mongorc
 // il est utilisé pour précharger ces fonctions utiles lorsque l'on ouvre un shell
 // avec ./scripts/mongoApp
-
+/* eslint-disable no-unused-vars */
+/* global print */
 let aide = '\nCe shell ajoute plusieurs fonctions utiles pour sesalab: '
 /* global db, printjson */
 /**

@@ -33,9 +33,9 @@
  * @file Édite les paramètres d'une ressource ecjs
  */
 try {
-  define(["tools/formEditor", "jquery", "https://www.java.com/js/deployJava.js"], function (formEditor, $) {
-    /*global deployJava*/
-    /* jshint jquery:true */
+  /* global define */
+  // on ne sait pas trop d'où sort ce code mais il doit pas marcher avec du define…
+  define(['tools/formEditor', 'jquery', 'https://www.java.com/js/deployJava.js'], function (formEditor, $) {
     'use strict'
 
     /**
@@ -51,59 +51,59 @@ try {
 
     return {
       init: function (ressource) {
-        S.log("edit mathgraph avec ST", ST)
-        if (!ressource || !ressource.parametres) throw new Error("Il faut passer une ressource à éditer")
+        S.log('edit mathgraph avec ST', ST)
+        if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
         var parametres = ressource.parametres
         var groupParametres = wd.getElementById('groupParametres')
-        if (!groupParametres) throw new Error("Pas de conteneur #groupParametres trouvé dans cette page")
+        if (!groupParametres) throw new Error('Pas de conteneur #groupParametres trouvé dans cette page')
         var width = parametres.width || 500
         var height = parametres.height || 500
         formEditor.addInputText(
           groupParametres,
-          {name:"parametres[width]", size:5, value:width, placeholder:"largeur"},
-          {label:"largeur", remarque:"(en pixels)"}
+          {name: 'parametres[width]', size: 5, value: width, placeholder: 'largeur'},
+          {label: 'largeur', remarque: '(en pixels)'}
         )
         formEditor.addInputText(
-            groupParametres,
-            {name:"parametres[height]", size:5, value:height, placeholder:"hauteur", class:"center"},
-            {label:"hauteur", remarque:"(en pixels)"}
+          groupParametres,
+          {name: 'parametres[height]', size: 5, value: height, placeholder: 'hauteur', class: 'center'},
+          {label: 'hauteur', remarque: '(en pixels)'}
         )
         // ajout applet
         var dataContainer = formEditor.addFormGroup(groupParametres.parentNode)
         var figureData = formEditor.addTextarea(
-            dataContainer,
-            {id:"figure", name:"parametres[figure]"},
-            {label: "Figure (encodée en base64)", content: ressource.parametres.figure || ""}
+          dataContainer,
+          {id: 'figure', name: 'parametres[figure]'},
+          {label: 'Figure (encodée en base64)', content: ressource.parametres.figure || ''}
         )
         $(dataContainer).hide()
         var appletContainer = formEditor.addFormGroup(groupParametres.parentNode)
-        var appletDiv = S.addElement(appletContainer, 'div', {id:"mtgApplet"})
+        var appletDiv = S.addElement(appletContainer, 'div', {id: 'mtgApplet'})
         var attributes = {
-          id:"mtgApplet",
-          code:'mathgraph32.MtgFrame.class',
-          archive: ST.base +'plugins/mathgraph/MathGraph32Applet.jar',
-          width :Math.max(appletDiv.offsetWidth || 0, 800),
-          height:height
+          id: 'mtgApplet',
+          code: 'mathgraph32.MtgFrame.class',
+          archive: ST.base + 'plugins/mathgraph/MathGraph32Applet.jar',
+          width: Math.max(appletDiv.offsetWidth || 0, 800),
+          height: height
         }
         var parameters = {
-          permissions:'sandbox', // déclenche une alerte de sécurité, puis un plantage java quand on accepte
-          initialFigure : "orthonormalFrame",
-          allowLeftToolbar:true,
-          allowTopToolbar:true,
-          allowRightToolbar:true,
-          allowToolsChoice:true,
-          allowMenuBar:true,
-          allowFileMenu:true,
-          allowOptionsMenu:true,
-          language:true,
-          level:3,
+          permissions: 'sandbox', // déclenche une alerte de sécurité, puis un plantage java quand on accepte
+          initialFigure: 'orthonormalFrame',
+          allowLeftToolbar: true,
+          allowTopToolbar: true,
+          allowRightToolbar: true,
+          allowToolsChoice: true,
+          allowMenuBar: true,
+          allowFileMenu: true,
+          allowOptionsMenu: true,
+          language: true,
+          level: 3
         }
-        var version = "1.5"
-        //deployJava.runApplet(attributes, parameters, version)
-        S.log("runApplet", attributes, parameters, version)
+        var version = '1.5'
+        // deployJava.runApplet(attributes, parameters, version)
+        S.log('runApplet', attributes, parameters, version)
 
         var isSubmitChecked = false
-        var $form = $("form#formRessource")
+        var $form = $('form#formRessource')
         $form.submit(function () {
           var retour = false
           if (isSubmitChecked) {
@@ -111,7 +111,7 @@ try {
           } else {
             try {
               var newFigure = document.mtgApplet.getScript()
-              S.log("on récupère " + newFigure)
+              S.log('on récupère ' + newFigure)
               // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
               if (newFigure) {
                 setTimeout(function () {
@@ -128,14 +128,14 @@ try {
             }
           }
 
-          return false
+          return retour
         })
       }
     }
   })
 } catch (error) {
   if (typeof console !== 'undefined' && console.error) {
-    console.error("Il fallait probablement appeler init avant ce module")
+    console.error('Il fallait probablement appeler init avant ce module')
     console.error(error)
   }
 }

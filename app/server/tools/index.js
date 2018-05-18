@@ -64,7 +64,7 @@ function encadre (int, min, max, label) {
  * @return {*}
  */
 function ensure (value, type, defaultValue) {
-  const needToCast = typeof value !== type
+  const needToCast = typeof value !== type // eslint-disable-line valid-typeof
   if (needToCast) {
     switch (type) {
       case 'string':

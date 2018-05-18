@@ -44,7 +44,6 @@ var formEditor = require('../../edit/formEditor')
  */
 module.exports = function mathgraphEdit (ressource) {
   require.ensure(['jquery'], function (require) {
-
     function addApplet (isFullSize) {
       if (isFullSize) {
         width = Math.max(appletContainer.offsetWidth || 0, width)
@@ -357,4 +356,3 @@ module.exports = function mathgraphEdit (ressource) {
     }
   })
 }
-
