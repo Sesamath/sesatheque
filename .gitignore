@@ -2,7 +2,8 @@
 .vim
 .idea
 
-# dépendances
+# on utilise yarn, npm possible mais son lock restera local
+package-lock.json
 node_modules
 
 # logs
