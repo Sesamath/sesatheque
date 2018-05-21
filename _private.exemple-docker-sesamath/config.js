@@ -5,8 +5,8 @@
 module.exports = {
   application: {
     name: 'sesatheque', // utilisé en préfixe des message de log et dans qq message
-    baseId: 'localhost3001', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
-    baseIdRegistrar: 'localhost3001', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
+    baseId: 'biblilocal3001', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
+    baseIdRegistrar: 'biblilocal3001', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
     baseUrl: 'http://bibliotheque.local:3001/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
     mail: 'me@example.com',
     staging: 'dev' // prod ou dev
@@ -21,18 +21,9 @@ module.exports = {
   },
   $entities: {
     database: {
-      host: 'mongo-global',
+      host: 'mongo-global', // container mongo
       port: '27017',
-      name: 'sesatheque',
-      connectTimeout: 1000,
-      trace: true, // true par défaut, mettre false en prod ?
-      // cf https://github.com/felixge/node-mysql/#pool-options
-      connectionLimit: 50,
-      waitForConnections: true, // avec true, si les 50 sont occupées on met en queue jusqu'à queueLimit
-      acquireTimeout: 1000,
-      queueLimit: 100,
-      debug: false // mysql2 distingue pas, et c'est très verbeux de mettre à true
-      // debug: ['ComQueryPacket', 'ErrorPacket'] // Cf node_modules/mysql/lib/protocol/packets/ pour la liste
+      name: 'stcommun'
     }
   },
   $server: {
@@ -90,7 +81,7 @@ module.exports = {
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle est toujours ajoutée à la liste au boot
   sesatheques: [
     {
-      baseId: 'localhost3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
+      baseId: 'communlocal3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
       baseUrl: 'http://commun.local:3003/',
       // un token à utiliser pour son api
       apiTokens: 'VRYm7GT1h8L7&BJE§Uul!dWX/CCqmSZEpad'

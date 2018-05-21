@@ -1,56 +1,44 @@
 Installation
 ============
 
-Si vous avez des droits sur le dépôt (vous avez communiqué votre clé publique), 
-dans le dossier parent dans lequel vous voulez créer un dossier sesatheque 
+Si vous avez des droits sur le dépôt (vous avez communiqué votre clé publique),
+dans le dossier parent dans lequel vous voulez créer un dossier sesatheque
 (pour lui donner un autre nom localement ajouter votre nom à la fin de la commande clone)
 
-```bash
-git clone git@src.sesamath.net:sesatheque
-```
-
-sinon
-
-```bash
-# dans le dossier parent dans lequel vous voulez créer un dossier sesatheque
-git clone git://src.sesamath.net/sesatheque
-```
-
-Ensuite
-
+- récupérer le projet depuis Github
 - installer les modules npm avec le classique `npm install`
 - créer une base mysql et un user pouvant écrire dedans
 - copier app/_private.example en app/_private
-- modifier app/_private/config.js pour mettre à minima les accès mysql 
+- modifier app/_private/config.js pour mettre à minima les accès mysql
   (mais vous pouvez surcharger n'importe quel paramètre de configuration de app/config.js)
-- si vous utilisez pm2, modifier éventuellement app/_private/pm2App.json5 pour le chemin des logs pm2 
+- si vous utilisez pm2, modifier éventuellement app/_private/pm2App.json5 pour le chemin des logs pm2
 -   lancer l'appli avec au choix
     - `node app/index.js`
     - `npm start` (lancera l'appli avec pm2 s'il est installé)
     - `./script/run` (ajouter -h pour voir les options)
-    
+
 Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et `./scripts`, en ajoutant par ex
 `PATH="$PATH:./node_modules/.bin:./scripts"` à votre ~/.bashrc
 
 
 Installation rapide avec Docker, pour sesalab
 ============
-- git clone `git@src.sesamath.net:sesatheque && cd sesatheque`
-
 - `mkdir app/logs`
 
-- `cp _private.exemple-docker-sesamath/ _.private`
+- installer les modules npm avec le classique `npm install`
 
-- editer `/etc/hosts` et ajouter les deux lignes 
+- `cp -R _private.exemple-docker-sesamath/ _private`
+
+- editer `/etc/hosts` et ajouter les deux lignes
 
 ```
 127.0.0.1       bibliotheque.local
-127.0.0.1       commun.local 
+127.0.0.1       commun.local
 ```
 
 - récupérer votre adresse réseau en faisant `ifconfig`, en général de la forme `192.168.1.x` (cela permettra au container sesatheque de communiquer directement avec le container sesalab)
 
-- dans *sesamath* `_private/config.js` 
+- dans *sesamath* `_private/config.js`
    - utiliser l'adresse réseau pour le baseUrl de l'application, ex: `baseUrl: 'http://192.168.1.187:3002'``
    - définir les bibliothèques locales :
 
@@ -65,7 +53,7 @@ Installation rapide avec Docker, pour sesalab
 
 - pour importer les bases MySQL il peut être utile d'exposer les containers MySQL sur le localhost en ajoutant un paramètre de ce type sur `mysql-private` et `mysql-global` dans docker-compose-for-sesalab.yml, ex:
 
-``` 
+```
 mysql-global:
     image: mysql
     ports:
