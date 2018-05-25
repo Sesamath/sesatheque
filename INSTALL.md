@@ -20,8 +20,42 @@ dans le dossier parent dans lequel vous voulez créer un dossier sesatheque
 Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et `./scripts`, en ajoutant par ex
 `PATH="$PATH:./node_modules/.bin:./scripts"` à votre ~/.bashrc
 
+Installation avec Docker (sans sésalab)
+============
 
-Installation rapide avec Docker, pour sesalab
+- installer les modules npm avec le classique `npm install`
+
+- `cp -R _private/ _private`
+
+- modifier le fichier de configuration afin d'être compatible avec votre environnement de développement :
+    - spécifier l'email à utiliser
+    - modifier l'accès à Redis et Mongo
+  ```
+    $entities: {
+      database: {
+        host: 'mongo',
+        port: '27017',
+        name: 'sesatheque'
+      }
+    },
+
+    $cache: {
+      redis: {
+        host: 'redis',
+        port: 6379,
+        prefix: 'sesatheque'
+      }
+    },
+  ```
+
+- démarrer le container de la sesatheque
+```
+docker-compose up
+```
+
+- se rendre à l'adresse http://localhost:3001
+
+Installation avec Docker, pour sesalab
 ============
 - `mkdir app/logs`
 
