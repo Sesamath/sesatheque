@@ -1,9 +1,12 @@
 import React from 'react'
+import {Provider} from 'react-redux'
+import MetaForm from './components/MetaForm'
+import store from './store'
 
 const App = () => (
-  <div>
-    <h1>Hello, world!</h1>
-  </div>
+  <Provider store={store}>
+    <MetaForm />
+  </Provider>
 )
 
 export default App
