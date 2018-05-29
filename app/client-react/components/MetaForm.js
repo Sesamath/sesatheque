@@ -1,7 +1,10 @@
 import React from 'react'
+import {flowRight} from 'lodash'
 import {Field, reduxForm} from 'redux-form'
 import {categories, niveaux, typePedagogiques, typeDocumentaires} from '../constantes'
+import resourceLoader from './resourceLoader'
 import CheckboxGroup from './CheckboxGroup'
+import IEP_Editor from './IEP_Editor'
 
 const MetaForm = props => {
   const {handleSubmit, pristine, reset, submitting} = props
@@ -133,6 +136,7 @@ const MetaForm = props => {
           <Field name="commentaires" component="textarea" />
         </div>
       </div>
+      <IEP_Editor />
       <div>
         <button type="submit" disabled={pristine || submitting}>Enregister</button>
       </div>
@@ -140,6 +144,9 @@ const MetaForm = props => {
   )
 }
 
-export default reduxForm({
-  form: 'meta',
-})(MetaForm)
+export default flowRight([
+  resourceLoader,
+  reduxForm({
+    form: 'meta',
+  })
+])(MetaForm)
