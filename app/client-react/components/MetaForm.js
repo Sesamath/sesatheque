@@ -164,6 +164,7 @@ const MetaForm = props => {
           </div>
         </div>
       </fieldset>
+      <IEP_Editor />
       <div>
         <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregister</button>
       </div>
