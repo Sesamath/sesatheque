@@ -4,6 +4,7 @@ import {Field, reduxForm} from 'redux-form'
 import CheckboxGroup from './CheckboxGroup'
 import {listes} from '../../server/ressource/config'
 import IEP_Editor from './IEP_Editor'
+import resourceLoader from './resourceLoader'
 
 const MetaForm = props => {
   const {handleSubmit, pristine, reset, submitting} = props
