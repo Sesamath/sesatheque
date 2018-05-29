@@ -1,16 +1,16 @@
 Installation
 ============
 
-Si vous avez des droits sur le dépôt (vous avez communiqué votre clé publique),
-dans le dossier parent dans lequel vous voulez créer un dossier sesatheque
-(pour lui donner un autre nom localement ajouter votre nom à la fin de la commande clone)
+Après avoir récupéré le [projet](https://github.com/Sesamath/sesalab) depuis Github,
+choisissez le cas correspondant à votre environnement :
 
-- récupérer le projet depuis Github
-- installer les modules npm avec le classique `npm install`
-- créer une base mysql et un user pouvant écrire dedans
+Installation sans Docker
+------------------------
+
+- créer une base mongo (et un user pouvant écrire dedans si vous ne voulez pas laisser la base accessible en écriture à tout le monde)
+- avoir un redis joignable
 - copier app/_private.example en app/_private
-- modifier app/_private/config.js pour mettre à minima les accès mysql
-  (mais vous pouvez surcharger n'importe quel paramètre de configuration de app/config.js)
+- modifier app/_private/config.js pour mettre les accès mongo (si open bar la config de base doit suffire). Vous pouvez surcharger n'importe quel paramètre de configuration de app/config.js
 - si vous utilisez pm2, modifier éventuellement app/_private/pm2App.json5 pour le chemin des logs pm2
 -   lancer l'appli avec au choix
     - `node app/index.js`
@@ -20,8 +20,9 @@ dans le dossier parent dans lequel vous voulez créer un dossier sesatheque
 Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et `./scripts`, en ajoutant par ex
 `PATH="$PATH:./node_modules/.bin:./scripts"` à votre ~/.bashrc
 
+
 Installation avec Docker (sans sésalab)
-============
+---------------------------------------
 
 - installer les modules npm avec le classique `npm install`
 
@@ -56,7 +57,8 @@ docker-compose up
 - se rendre à l'adresse http://localhost:3001
 
 Installation avec Docker, pour sesalab
-============
+--------------------------------------
+
 - `mkdir app/logs`
 
 - installer les modules npm avec le classique `npm install`
@@ -84,15 +86,6 @@ Installation avec Docker, pour sesalab
 ```
 
 - dans *sesatheque* `_private/commun.js` et  `_private/config.js`  définir la baseUrl de sesalab avec l'adresse réseau, ex: `baseUrl: 'http://192.168.1.187:3002/'``
-
-- pour importer les bases MySQL il peut être utile d'exposer les containers MySQL sur le localhost en ajoutant un paramètre de ce type sur `mysql-private` et `mysql-global` dans docker-compose-for-sesalab.yml, ex:
-
-```
-mysql-global:
-    image: mysql
-    ports:
-      - 12345:3306
-```
 
 - démarrer le docker sesatheque (et sesalab par ailleurs)
 
