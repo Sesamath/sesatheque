@@ -1,0 +1,16 @@
+/**
+ * gère la compilation de iframe.css (pour les pages prévues pour être en iframe)
+ */
+/*! Ne pas modifier le fichier css compilé par less mais la source iframe.scss */
+/*!
+ * www.KNACSS.com V4.3.2 (8 juillet 2015) $author: Raphael Goetter, Alsacreations
+ * Licence WTFPL http://www.wtfpl.net/
+ */
+@import "_00-roboto"; /* police roboto */
+
+@import "_00-config-sesatheque"; /* Nos polices couleurs et tailles */
+
+@import "~knacss";
+
+@import "sesatheque-form"; // pour le create en iframe
+@import "sesatheque-display";

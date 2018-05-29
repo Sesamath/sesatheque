@@ -4,14 +4,14 @@
 body {min-width: 300px;}
 
 // responsive, .gt-medium-only pour les écrans à partir de medium et lt-medium-only pour les plus petits seulement
-@media (max-width: (@medium-screen)) { // tiny et small
+@media (max-width: ($medium-screen)) { // tiny et small
   .gt-medium-only,
   #header a span,
   #ressActions span
     { display: none; }
   .lt-medium-only { display: block; }
 }
-@media (min-width: (@medium-screen + 1)) { // medium, large et au delà
+@media (min-width: ($medium-screen + 1)) { // medium, large et au delà
   .gt-medium-only { display: block;}
   #header a span,
   #ressActions span
@@ -29,16 +29,16 @@ body {min-width: 300px;}
 // Les messages flash ont une de ces classes error|warning|info, mais aussi une classe flash, que l'on utilise pas pour le moment
 
 .cartouche { /* texte secondary sur fond foncé primary */
-  background-color: @primary-color;
-  color: @secondary-color-light;
-  a { color: @secondary-color-light}
+  background-color: $primary-color;
+  color: $secondary-color-light;
+  a { color: $secondary-color-light}
   a:hover {
-    color: @secondary-color-link;
+    color: $secondary-color-link;
   };
 }
 
 .border-tab {
-  border: @border-primary;
+  border: $border-primary;
   .selected {
     border-bottom: none;
   }
@@ -51,25 +51,25 @@ body {min-width: 300px;}
 #auth {float: right;}
 
 #header {
-  .cartouche();
-  .line();
-  .pas();
+  @include cartouche();
+  @include line();
+  @include pas();
   nav {
     z-index: 15;
     a {
-      .btn();
+      @include btn();
       padding: 0.5rem 1rem;
       margin: 0 1rem;
-      background-color: @primary-color-ligth;
+      background-color: $primary-color-ligth;
       text-align: center;
       text-decoration: none;
     };
     a.selected, a:hover {
-      background-color: @primary-color-ligther;
-      color: @secondary-color-link;
+      background-color: $primary-color-ligther;
+      color: $secondary-color-link;
     }
     a:hover {
-      color: @secondary-color-link-hover;
+      color: $secondary-color-link-hover;
     }
     a .fa {margin-right: 1rem;}
     // avec une exception
@@ -87,7 +87,7 @@ body {min-width: 300px;}
     div {
       padding: 0.2rem;
       text-align: center;
-      background-color: @primary-color;
+      background-color: $primary-color;
     }
     ul {
       padding: 0.5rem;
@@ -96,11 +96,11 @@ body {min-width: 300px;}
       width: 100%;
       padding: 0.5rem;
       margin: 0;
-      background-color: @primary-color;
+      background-color: $primary-color;
     }
     li a {
       width: 100%;
-      margin-right: @tiny-value;
+      margin-right: $tiny-value;
       text-align: left;
     }
   }
@@ -110,37 +110,37 @@ body {min-width: 300px;}
 }
 
 #main, #content {
-  .pam();
+  @include pam();
 }
 #main > h1 {margin-bottom: 0;}
 
 #actions ul {
   float: right;
-  font-size: @h4-size;
-  line-height: @h1-size;
+  font-size: $h4-size;
+  line-height: $h1-size;
   padding: 0 ;
   text-align: center;
   list-style: none;
   margin: 0 0 0 1rem;
   li {
     float: right;
-    .border-tab();
-    padding: @tiny-value @small-value;
+    @include border-tab();
+    padding: $tiny-value $small-value;
     margin-right: -1px;
   }
   li.selected {
-    border-bottom: thin solid @base-background;
+    border-bottom: thin solid $base-background;
   }
   li.tab-spacer {
     border-top: none;
     border-bottom: none;
-    width: @medium-value;
+    width: $medium-value;
     z-index: 2;
   }
 }
 
 #actions div.clearfix {
-  border-bottom: @border-primary;
+  border-bottom: $border-primary;
   position: relative;
   bottom: 1px;
   z-index: -1;
@@ -153,26 +153,26 @@ body {min-width: 300px;}
 }
 
 #footer {
-  .cartouche();
-  .line();
-  padding-right: @small-value;
+  @include cartouche();
+  @include line();
+  padding-right: $small-value;
   ul {
     list-style: none;
-    .ma0();
-    .pa0();
+    @include ma0();
+    @include pa0();
   }
   li {
-    .mas();
-    .fl();
+    @include mas();
+    @include fl();
   }
   a:hover {
-    color: @secondary-color-link-hover;
+    color: $secondary-color-link-hover;
     text-decoration: underline;
   }
 }
 
 .waiting {
-  .info();
+  @include info();
   position: absolute;
   top: 10px;
   left: 10px;

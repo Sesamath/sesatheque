@@ -1,6 +1,6 @@
 /**
  * règles css pour page et iframe,
- * attention à vérifier que les variables utilisées ici sont bien importées par page.less et iframe.less
+ * attention à vérifier que les variables utilisées ici sont bien importées par page.scss et iframe.scss
  * (elles devraient toutes être dans _00-config-sesatheque)
  */
 
@@ -84,7 +84,7 @@ html, body {padding: 0; margin: 0;height: 100%;}
 
 /* Couleurs */
 .avert {
-  background-color: @base-background;
+  background-color: $base-background;
   margin: 1rem;
   padding: 1rem;
   border: thin solid;
@@ -99,32 +99,32 @@ html, body {padding: 0; margin: 0;height: 100%;}
 #errors {
   margin: 0;
   padding: 0;
-  color: @error-color;
-  background-color: @base-background;
+  color: $error-color;
+  background-color: $base-background;
   text-align: center;
   font-size: 1.2em;
   font-family: Verdana, sans-serif;
 }
 .error {
-  .avert();
-  color: @error-color;
-  border-color: @error-color;
+  @include avert();
+  color: $error-color;
+  border-color: $error-color;
   &::before { /* merci http://stackoverflow.com/a/11919684 */
     content: "\f071";
   }
 }
 .warning {
-  .avert();
-  color: @warning-color;
-  border-color: @warning-color;
+  @include avert();
+  color: $warning-color;
+  border-color: $warning-color;
   &::before {
     content: '\f12a';
   }
 }
 .info {
-  .avert();
-  color: @info-color;
-  border-color: @info-color;
+  @include avert();
+  color: $info-color;
+  border-color: $info-color;
   &::before {
     content: '\f05a';
   }

@@ -66,6 +66,7 @@
     ]
   },
   "dependencies": {
+    "@fortawesome/fontawesome": "^1.1.8",
     "an-ansi": "git://src.sesamath.net/an-ansi#369cba2",
     "an-flow": "git://src.sesamath.net/an-flow#3aa74ba",
     "an-format-date": "git://src.sesamath.net/an-format-date#a76218a",
@@ -75,6 +76,7 @@
     "elementtree": "0.1.6",
     "express": "^4.16.2",
     "ip": "^1.1.5",
+    "knacss": "^7.0.5",
     "lassi": "Sesamath/lassi#2.3.2",
     "lodash": "4.17.5",
     "moment": "2.19.3",
@@ -115,17 +117,16 @@
     "jsdoc": "^3.5.5",
     "json-loader": "^0.5.7",
     "jstree": "3.3.4",
-    "less": "2.7.2",
-    "less-loader": "2.2.3",
-    "less-plugin-clean-css": "1.5.1",
     "mocha": "^5.1.0",
+    "node-sass": "^4.9.0",
     "nodemon": "^1.12.4",
+    "sass-loader": "^7.0.1",
     "sinon": "^4.5.0",
     "sinon-chai": "^3.0.0",
     "style-loader": "0.13.2",
     "supertest": "^3.0.0",
     "url-loader": "0.5.7",
-    "webpack": "1.15.0",
+    "webpack": "^1.15.0",
     "xml2js": "0.4.17",
     "xmlhttprequest": "1.8.0"
   },
@@ -162,7 +163,6 @@
     "doc_src",
     "documentation"
   ],
-
   "pre-push": [
     "test",
     "lint"
