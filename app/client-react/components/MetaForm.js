@@ -1,10 +1,34 @@
-import React from 'react'
+import React, {Fragment} from 'react'
 import {Field, reduxForm} from 'redux-form'
-import {categories, niveaux, typePedagogiques, typeDocumentaires} from '../constantes'
 import CheckboxGroup from './CheckboxGroup'
+import {listes} from '../../server/ressource/config'
 
 const MetaForm = props => {
   const {handleSubmit, pristine, reset, submitting} = props
+
+  const categories = {
+    name: 'categories',
+    title: 'Catégories',
+    values: Object.values(listes.categories)
+  }
+
+  const niveaux = {
+    name: 'niveaux',
+    title: 'Niveaux',
+    values: Object.values(listes.niveaux)
+  }
+
+  const typePedagogiques = {
+    name: 'typePedagogiques',
+    title: 'Type pédagogique',
+    values: Object.values(listes.typePedagogiques)
+  }
+
+  const typeDocumentaires = {
+    name: 'typeDocumentaires',
+    title: 'Type documentaire',
+    values: Object.values(listes.typeDocumentaires)
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -21,24 +45,26 @@ const MetaForm = props => {
           </div>
         </div>
         <div>
-          <label htmlFor="input-type">Type technique</label>
+          <label htmlFor="select-type">Type technique</label>
           <div>
-            <Field
-              id="input-type"
-              name="type"
-              component="input"
-              type="text"
-            />
+            <Field id="select-type" name="type" component="select">
+              {Object.keys(listes.type).map(key => (
+                <Fragment key={key.toString()}>
+                  <option value={key}>{listes.type[key]}</option>
+                </Fragment>
+              ))}
+            </Field>
           </div>
         </div>
         <div>
           <label htmlFor="select-restriction">Restriction</label>
           <div>
             <Field id="select-restriction" name="restriction" component="select">
-              <option value="0">Aucune</option>
-              <option value="1">Corrigé</option>
-              <option value="2">Groupe</option>
-              <option value="3">Privé</option>
+              {Object.keys(listes.restriction).map(key => (
+                <Fragment key={key.toString()}>
+                  <option value={key}>{listes.restriction[key]}</option>
+                </Fragment>
+              ))}
             </Field>
           </div>
         </div>
@@ -46,16 +72,11 @@ const MetaForm = props => {
           <label htmlFor="select-langue">Langue</label>
           <div>
             <Field id="select-langue" name="langue" component="select">
-              <option value="deu">Allemand</option>
-              <option value="eng">Anglais</option>
-              <option value="ara">Arabe</option>
-              <option value="eus">Basque</option>
-              <option value="bre">Breton</option>
-              <option value="cat">Catalan</option>
-              <option value="spa">Espagnol</option>
-              <option value="fra">Français</option>
-              <option value="ita">Italien</option>
-              <option value="por">Portugais</option>
+              {Object.keys(listes.langue).map(key => (
+                <Fragment key={key.toString()}>
+                  <option value={key}>{listes.langue[key]}</option>
+                </Fragment>
+              ))}
             </Field>
           </div>
         </div>
