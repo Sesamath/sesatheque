@@ -13,6 +13,7 @@ const CheckboxGroup = ({name, title, values}) => (
             id={`categories[${index}]`}
             component="input"
             type="checkbox"
+            className="checkbox"
           />
         </div>
       </Fragment>
