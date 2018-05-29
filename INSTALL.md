@@ -1,7 +1,7 @@
 Installation
 ============
 
-Après avoir récupéré le [projet](https://github.com/Sesamath/sesalab) depuis Github,
+Après avoir récupéré le [projet](https://github.com/Sesamath/sesatheque) depuis Github,
 choisissez le cas correspondant à votre environnement :
 
 Installation sans Docker
@@ -24,9 +24,9 @@ Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et 
 Installation avec Docker (sans sésalab)
 ---------------------------------------
 
-- installer les modules npm avec le classique `npm install`
+- installer les modules npm dans le container avec `docker-compose run --rm --no-deps app npm install`
 
-- `cp -R _private/ _private`
+- `cp -R _private.example _private`
 
 - modifier le fichier de configuration afin d'être compatible avec votre environnement de développement :
     - spécifier l'email à utiliser
