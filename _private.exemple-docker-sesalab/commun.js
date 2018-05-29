@@ -1,40 +1,37 @@
+var path = require('path')
+
 /**
- * Config de sesathequePrivate pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
- * Fichier à copier dans _private/config.js
+ * Config de sesathequeGlobal pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
+ * Fichier à copier dans _private/commun.js
  */
 module.exports = {
   application: {
-    name: 'sesatheque', // utilisé en préfixe des message de log et dans qq message
-    baseId: 'biblilocal3001', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
-    baseIdRegistrar: 'biblilocal3001', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
-    baseUrl: 'http://bibliotheque.local:3001/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
+    name: 'sesathequePrivate', // utilisé en préfixe des message de log et dans qq message
+    baseId: 'communlocal3003', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
+    baseIdRegistrar: 'communlocal3003', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
+    baseUrl: 'http://commun.local:3003/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
     mail: 'me@example.com',
+    // pour que cette sesathèque ait ses propres js (webpack les compile en mettant baseUrl
+    // en dur dedans pour le chargement async), il faut un override ici
+    webpackOutput: 'publicCommun',
     staging: 'dev' // prod ou dev
-  },
-  // TODO: ce setting sert uniquement pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
-  databaseMysql: {
-    host: 'mysql-global',
-    port: '3306',
-    user: 'sesatheque',
-    password: 'sesatheque',
-    database: 'sesatheque'
   },
   $entities: {
     database: {
-      host: 'mongo-global', // container mongo
+      host: 'mongo-private', // container mongo
       port: '27017',
       name: 'stcommun'
     }
   },
   $server: {
-    hostname: 'memcache',
-    port: 3001
+    hostname: 'commun.local',
+    port: 3003
   },
   $cache: {
     redis: {
       host: 'redis',
       port: 6379,
-      prefix: 'sesatheque'
+      prefix: 'sesatheque-commun'
     }
   },
   $rail: {
@@ -45,20 +42,11 @@ module.exports = {
       secret: 'ap68!&nVGq§ot' // en mettre un autre dans _private/config !
     }
   },
-  /* pour modifier le comportement par défaut on peut préciser ici qq overrides,
-  cf app/config.js pour les valeurs par défaut
-  par ex pour empêcher un formateur de créer des groupes ou des ressources ici */
-  components: {
-    personne: {
-      roles: {
-        formateur: {create: false, createGroupe: false}
-      }
-    }
-  },
   logs: {
+    dir: path.join(__dirname, '../logs_commun'),
     debugExclusions: ['cache'],
     perf: 'perf.log'
-  }, /* */
+  },
   // noCache:true,
   // les modules à précharger avant bootstrap
   extraModules: ['sesalab-sso'],
@@ -67,7 +55,9 @@ module.exports = {
   // et en dernier
   extraDependenciesLast: ['sesalab-sso'],
   apiTokens: [
-    // mettre ici d'éventuels tokens utilisables pour poster sur l'api (sans session préalable)
+    // mettre ici d'éventuels tokens utilisables pour poster sur notre api (sans session préalable)
+    // ici celui de sesathequeGlobal
+    'VRYm7GT1h8L7&BJE§Uul!dWX/CCqmSZEpad'
   ],
   apiIpsAllowed: [
     // une éventuelle liste d'ip hors lan autorisées à utiliser les tokens
@@ -81,10 +71,9 @@ module.exports = {
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle est toujours ajoutée à la liste au boot
   sesatheques: [
     {
-      baseId: 'communlocal3003', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
-      baseUrl: 'http://commun.local:3003/',
-      // un token à utiliser pour son api
-      apiTokens: 'VRYm7GT1h8L7&BJE§Uul!dWX/CCqmSZEpad'
+      baseId: 'biblilocal3001', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
+      baseUrl: 'http://bibliotheque.local:3001/'
+      // apiTokens: un token à utiliser pour son api
     }
     // on pourrait en mettre d'autres…
   ],
