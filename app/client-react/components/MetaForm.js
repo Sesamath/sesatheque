@@ -36,136 +36,151 @@ const MetaForm = props => {
   return (
     <form onSubmit={handleSubmit}>
       <fieldset>
-        <div>
-          <label htmlFor="input-titre">Titre</label>
-          <div>
+        <div className="grid-3">
+          <label>
+            Titre
             <Field
-              id="input-titre"
               name="titre"
               component="input"
               type="text"
             />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="select-type">Type technique</label>
-          <div>
-            <Field id="select-type" name="type" component="select">
-              {Object.keys(listes.type).map(key => (
-                <Fragment key={key.toString()}>
-                  <option value={key}>{listes.type[key]}</option>
-                </Fragment>
-              ))}
+          </label>
+          <label>
+            Type technique
+            <Field name="type" component="select">
+                {Object.keys(listes.type).map(key => (
+                  <Fragment key={key.toString()}>
+                    <option value={key}>{listes.type[key]}</option>
+                  </Fragment>
+                ))}
             </Field>
-          </div>
-        </div>
-        <div>
-          <label htmlFor="select-restriction">Restriction</label>
-          <div>
-            <Field id="select-restriction" name="restriction" component="select">
-              {Object.keys(listes.restriction).map(key => (
-                <Fragment key={key.toString()}>
-                  <option value={key}>{listes.restriction[key]}</option>
-                </Fragment>
-              ))}
-            </Field>
-          </div>
-        </div>
-        <div>
-          <label htmlFor="select-langue">Langue</label>
-          <div>
-            <Field id="select-langue" name="langue" component="select">
+          </label>
+          <label>
+            Langue
+            <Field name="langue" component="select">
               {Object.keys(listes.langue).map(key => (
                 <Fragment key={key.toString()}>
                   <option value={key}>{listes.langue[key]}</option>
                 </Fragment>
               ))}
             </Field>
-          </div>
+          </label>
         </div>
-        <div>
-          <label htmlFor="checkbox-publie">Publié</label>
-          <div>
+        <div className="grid-3">
+          <label>
+            Résumé
             <Field
-              name="publie"
-              id="checkbox-publie"
-              component="input"
-              type="checkbox"
-              className="checkbox"
-            />
-          </div>
+              name="resume"
+              component="textarea" />
+          </label>
+          <label>
+            Description
+            <Field
+              name="description"
+              component="textarea" />
+          </label>
+          <label>
+            Commentaires (réservés au formateur)
+            <Field
+              name="commentaires"
+              component="textarea" />
+          </label>
         </div>
-        <div>
-          <label htmlFor="input-identifiant">Identifiant</label>
-          <div>
+      </fieldset>
+      <hr />
+      <fieldset>
+        <div className="grid-4">
+          <CheckboxGroup {...categories} />
+          <CheckboxGroup {...niveaux} />
+          <CheckboxGroup {...typePedagogiques} />
+          <CheckboxGroup {...typeDocumentaires} />
+        </div>
+      </fieldset>
+      <hr />
+      <fieldset>
+        <div className="grid-3">
+          <label>
+            Identifiant
             <Field
-              id="input-identifiant"
-              name="identifiant"
+              name="oid"
               component="input"
               type="text"
               props={{ disabled: true }}
             />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-origine">Origine</label>
-          <div>
+          </label>
+          <label>
+            Origine
             <Field
-              id="input-origine"
               name="origine"
               component="input"
               type="text"
               props={{ disabled: true }}
             />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-idOrigine">Identifiant d'origine</label>
-          <div>
+          </label>
+          <label>
+            Identifiant d'origine
             <Field
-              id="input-idOrigine"
               name="idOrigine"
               component="input"
               type="text"
               props={{ disabled: true }}
             />
-          </div>
+          </label>
         </div>
-      </fieldset>
-      <fieldset>
-        <CheckboxGroup {...categories} />
-        <CheckboxGroup {...niveaux} />
-        <CheckboxGroup {...typePedagogiques} />
-        <CheckboxGroup {...typeDocumentaires} />
-      </fieldset>
-      <fieldset>
-        <div>
-          <label htmlFor="input-resume">Résumé</label>
-          <div>
+        <div className="grid-3">
+          <label>
+            Version
             <Field
-              id="input-resume"
-              name="resume"
-              component="textarea" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-description">Description</label>
-          <div>
+              name="version"
+              component="input"
+              type="number"
+              props={{ disabled: true }}
+            />
+          </label>
+          <label>
+            Date de création
             <Field
-              id="input-description"
-              name="description"
-              component="textarea" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-commentaires">Commentaires (réservés au formateur)</label>
-          <div>
-            <Field name="commentaires" component="textarea" />
-          </div>
+              name="dateCreation"
+              component="input"
+              type="text"
+              props={{ disabled: true }}
+            />
+          </label>
+          <label>
+            Date de mise à jour
+            <Field
+              name="dateMiseAJour"
+              component="input"
+              type="text"
+              props={{ disabled: true }}
+            />
+          </label>
+          <label>
+            Restriction
+            <Field name="restriction" component="select">
+              {Object.keys(listes.restriction).map(key => (
+                <Fragment key={key.toString()}>
+                  <option value={key}>{listes.restriction[key]}</option>
+                </Fragment>
+              ))}
+            </Field>
+          </label>
+          <label>
+            Publié
+            <Field
+              name="publie"
+              component="input"
+              type="checkbox"
+              className="checkbox"
+            />
+          </label>
         </div>
       </fieldset>
-      <IEP_Editor />
-      <div>
+      <hr />
+      <fieldset>
+        <IEP_Editor />
+      </fieldset>
+      <div className="buttons-area">
         <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregister</button>
       </div>
     </form>

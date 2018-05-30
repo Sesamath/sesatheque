@@ -2,20 +2,19 @@ import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 
 const CheckboxGroup = ({name, title, values}) => (
-  <div>
+  <div className="checkbox-group">
     <h3>{title}</h3>
     {values.map((value, index) => (
       <Fragment key={index.toString()}>
-        <label htmlFor={`categories[${index}]`}>{value}</label>
-        <div>
+        <label>
           <Field
-            name={`categories[${index}]`}
-            id={`categories[${index}]`}
+            name={`${name}[${index}]`}
             component="input"
             type="checkbox"
             className="checkbox"
           />
-        </div>
+          {value}
+        </label>
       </Fragment>
     ))}
   </div>
