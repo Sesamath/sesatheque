@@ -13,7 +13,8 @@ const ResourceForm = props => {
     <form onSubmit={handleSubmit}>
       <MetaForm />
       <IEP_Editor change={change} />
-      <div>
+      <hr />
+      <div className="buttons-area">
         <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
       </div>
     </form>

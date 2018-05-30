@@ -30,54 +30,54 @@ class IEP_Editor extends Component {
 
   render() {
     return (
-      <div className="grid-3">
-        <label htmlFor="iep-editor-width">largeur (en pixel)</label>
-        <div>
-          <Field
-            id="iep-editor-width"
-            name="parametres[width]"
-            component="input"
-            type="number"
-          />
-        </div>
-        <label htmlFor="iep-editor-height">hauteur (en pixel)</label>
-        <div>
-          <Field
-            id="iep-editor-height"
-            name="parametres[height]"
-            component="input"
-            type="number"
-          />
-        </div>
-        <label htmlFor="parametres-url">url (ira lire le script de cette url à chaque affichage si le champ xml est vide)</label>
-        <div>
-          <Field
-            id="parametres-url"
-            name="parametres[url]"
-            component="input"
-            type="url"
-          />
+      <fieldset>
+        <div className="grid-3">
+          <label>largeur (en pixel)
+            <Field
+              name="parametres[width]"
+              component="input"
+              type="number"
+            />
+          </label>
+          <label>hauteur (en pixel)
+            <Field
+              name="parametres[height]"
+              component="input"
+              type="number"
+            />
+          </label>
+          <label>url (ira lire le script de cette url à chaque affichage si le champ xml est vide)
+            <Field
+              id="parametres-url"
+              name="parametres[url]"
+              component="input"
+              type="url"
+            />
+          </label>
         </div>
         <div>
-          <button type="button" onClick={this.importScript}>importer le script</button>(une fois pour toute, si la source change ou disparait cette ressource restera identique)
+          <button type="button" onClick={this.importScript}>importer le script</button>
+          <span>(une fois pour toute, si la source change ou disparait cette ressource restera identique)</span>
+
+          {this.state.error ? (
+            <div className="error">
+              {this.state.error.toString()}
+            </div>
+          ): null
+          }
         </div>
-        {this.state.error ? (
-          <div className="error">
-            {this.state.error.toString()}
-          </div>
-        ): null
-        }
-        <label htmlFor="parametres-xml">Script instrumenpoche</label>
         <div>
-          <Field
-            id="parametres-xml"
-            name="parametres[xml]"
-            component="textarea"
-            cols="80"
-            rows="20"
-          />
+          <label>Script instrumenpoche
+            <Field
+              id="parametres-xml"
+              name="parametres[xml]"
+              component="textarea"
+              cols="80"
+              rows="20"
+            />
+          </label>
         </div>
-      </div>
+      </fieldset>
     )
   }
 }
