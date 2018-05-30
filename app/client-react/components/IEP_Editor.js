@@ -30,7 +30,7 @@ class IEP_Editor extends Component {
 
   render() {
     return (
-      <div>
+      <div className="grid-3">
         <label htmlFor="iep-editor-width">largeur (en pixel)</label>
         <div>
           <Field
