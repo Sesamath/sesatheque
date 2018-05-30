@@ -10,7 +10,10 @@ const resourceLoader = (WrappedComponent) => {
       this.state = {
         ressource: null
       }
-      this.onSubmit = (body) => POST(`/api/ressource`, {body})
+    }
+
+    onSubmit(body) {
+      return POST(`/api/ressource`, {body})
     }
 
     componentDidMount() {
