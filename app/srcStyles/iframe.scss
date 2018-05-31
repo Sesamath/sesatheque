@@ -10,7 +10,15 @@
 
 @import "_00-config-sesatheque"; /* Nos polices couleurs et tailles */
 
-@import "~knacss";
+// Knacss
+@import "~knacss/sass/_vendor/reboot";
+@import "~knacss/sass/_config/mixins";
+@import "~knacss/sass/_library/base";         // basic styles
+@import "~knacss/sass/_library/print";        // print quick reset
+
+$fa-font-path: "~@fortawesome/fontawesome-free-webfonts/webfonts";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fa-solid";
 
 @import "sesatheque-form"; // pour le create en iframe
 @import "sesatheque-display";

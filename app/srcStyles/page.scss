@@ -12,13 +12,27 @@
 */
 @import "_00-roboto"; /* police roboto */
 @import "_00-config-sesatheque"; /* Nos polices couleurs et tailles */
-@import "~knacss";
+
+// Knacss
+@import "~knacss/sass/_vendor/reboot";
+@import "~knacss/sass/_config/mixins";
+@import "~knacss/sass/_library/base";         // basic styles
+@import "~knacss/sass/_library/print";        // print quick reset
+@import "~knacss/sass/_library/layout";       // alignment, modules, positionning
+@import "~knacss/sass/_library/utilities";    // width and spacer helpers
+@import "~knacss/sass/_library/responsive";   // Responsive Web Design helpers
+@import "~knacss/sass/_library/grillade-grid"; // grid system with Grid Layout
+@import "~knacss/sass/_library/_utilities"; // grid system with Grid Layout
+
+// Components
+@import "~knacss/sass/components/_buttons";
 
 /* ----------------------------- */
 /* ==own stylesheet              */
 /* ----------------------------- */
-
-@import "font-awesome/less/font-awesome";
+$fa-font-path: "~@fortawesome/fontawesome-free-webfonts/webfonts";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fa-solid";
 @import "sesatheque";
 @import "sesatheque-form";
 @import "sesatheque-display";

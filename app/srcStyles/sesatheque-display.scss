@@ -83,51 +83,41 @@ html, body {padding: 0; margin: 0;height: 100%;}
 }
 
 /* Couleurs */
-.avert {
-  background-color: $base-background;
+@mixin avert($icon) {
+  @include fa-icon;
+  @extend .fa;
+  background-color: $background-base;
   margin: 1rem;
   padding: 1rem;
   border: thin solid;
-  &::before { /* merci http://stackoverflow.com/a/11919684 */
+  &:before {
     margin-right: 1rem;
-    font-family: FontAwesome;
-    font-weight: normal;
-    font-style: normal;
-    display: inline-block;
+    content: fa-content($icon);
   }
 }
 #errors {
   margin: 0;
   padding: 0;
-  color: $error-color;
-  background-color: $base-background;
+  color: $color-danger;
+  background-color: $background-base;
   text-align: center;
   font-size: 1.2em;
   font-family: Verdana, sans-serif;
 }
 .error {
-  @include avert();
-  color: $error-color;
-  border-color: $error-color;
-  &::before { /* merci http://stackoverflow.com/a/11919684 */
-    content: "\f071";
-  }
+  @include avert($fa-var-exclamation-triangle);
+  color: $color-danger;
+  border-color: $color-danger;
 }
 .warning {
-  @include avert();
-  color: $warning-color;
-  border-color: $warning-color;
-  &::before {
-    content: '\f12a';
-  }
+  @include avert($fa-var-exclamation);
+  color: $color-warning;
+  border-color: $color-warning;
 }
 .info {
-  @include avert();
-  color: $info-color;
-  border-color: $info-color;
-  &::before {
-    content: '\f05a';
-  }
+  @include avert($fa-var-info-circle);
+  color: $color-info;
+  border-color: $color-info;
 }
 
 /* Pour j3p faut annuler les css de normalize sur sup / sub, car mathquill fait du positionnement en js */

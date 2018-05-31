@@ -66,7 +66,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
         links.push({
           href: $routes.getAbs('describe', ressource, context),
           value: 'Description',
-          icon: 'file-text-o', // material icons description
+          icon: 'file-alt', // material icons description
           iconTextClass: 'gt-medium-only',
           selected: (context.tab === 'describe')
         })
@@ -158,7 +158,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       id: 'buttonMyRessources',
       href: $routes.getAbs('search', null, context) + '?auteurs=' + myPid,
       value: 'Mes ressources',
-      icon: 'bookmark-o',
+      icon: 'bookmark',
       hidden: !canCreate
     })
     // mes groupes
@@ -166,7 +166,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       id: 'buttonMyGroupes',
       href: '/groupe/perso',
       value: 'Mes groupes',
-      icon: 'group',
+      icon: 'users',
       hidden: !myPid
     })
     // on peut tout ajouter

@@ -19,8 +19,8 @@ $font-family-base      : Roboto, Helvetica, Arial, sans-serif; // system font st
 $font-family-headings  : Roboto, Helvetica, Arial, sans-serif; // font for h1, h2.. h6
 $font-family-monospace : Consolas, "DejaVu Sans Mono", Courier, monospace; // font for code and samples
 
-// Font sizes (1.6rem value is "16px" equivalent)
-$font-size-base : 14px !default;
+// Font sizes (1.0rem value is "16px" equivalent)
+$font-size-base : 1.4rem !default;
 
 $font-sizes: (
   base: (
@@ -216,3 +216,11 @@ $burger-hover-background  : transparent;
 $burger-size              : 2.6rem;
 $burger-weight            : 5px; // size of stripes
 $burger-padding           : 0;
+
+// Customs
+$secondary-color-light : #f17045;
+$primary-color-light : #2a4095;
+$primary-color-lighter : #3047a7;
+$secondary-color-link: #f17045;
+$secondary-color-link-hover: #f17045;
+$border-primary: #2a4095;
