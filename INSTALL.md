@@ -12,6 +12,7 @@ Installation sans Docker
 - copier app/_private.example en app/_private
 - modifier app/_private/config.js pour mettre les accès mongo (si open bar la config de base doit suffire). Vous pouvez surcharger n'importe quel paramètre de configuration de app/config.js
 - si vous utilisez pm2, modifier éventuellement app/_private/pm2App.json5 pour le chemin des logs pm2
+- installer les dépendances (avec `npm install` ou `yarn install`)
 -   lancer l'appli avec au choix
     - `node app/index.js`
     - `npm start` (lancera l'appli avec pm2 s'il est installé)
@@ -24,71 +25,14 @@ Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et 
 Installation avec Docker (sans sésalab)
 ---------------------------------------
 
-- installer les modules npm dans le container avec `docker-compose run --rm --no-deps app npm install`
+- `mkdir _private; cp -R _private.example/config.docker.minimale.js _private/config.js`
+- modifier le fichier de configuration pour les valeurs obligatoires, mails et clés (cookie et session)
+- build docker `npm run docker:build`
+- start avec `docker-compose up`
+- une fois que la compil webpack est terminée se rendre à l'adresse http://localhost:3001
 
-- `cp -R _private.example _private`
-
-- modifier le fichier de configuration afin d'être compatible avec votre environnement de développement :
-    - spécifier l'email à utiliser
-    - modifier l'accès à Redis et Mongo
-  ```
-    $entities: {
-      database: {
-        host: 'mongo',
-        port: '27017',
-        name: 'sesatheque'
-      }
-    },
-
-    $cache: {
-      redis: {
-        host: 'redis',
-        port: 6379,
-        prefix: 'sesatheque'
-      }
-    },
-  ```
-
-- démarrer le container de la sesatheque
-```
-docker-compose up
-```
-
-- se rendre à l'adresse http://localhost:3001
-
-Installation avec Docker, pour sesalab
+Installation avec Docker, avec sesalab
 --------------------------------------
 
-- `mkdir app/logs`
-
-- installer les modules npm avec le classique `npm install`
-
-- `cp -R _private.exemple-docker-sesamath/ _private`
-
-- editer `/etc/hosts` et ajouter les deux lignes
-
-```
-127.0.0.1       sesatheque.local
-127.0.0.1       commun.local
-```
-
-- récupérer votre adresse réseau en faisant `ifconfig`, en général de la forme `192.168.1.x` (cela permettra au container sesatheque de communiquer directement avec le container sesalab)
-
-- dans *sesamath* `_private/config.js`
-   - utiliser l'adresse réseau pour le baseUrl de l'application, ex: `baseUrl: 'http://192.168.1.187:3002'``
-   - définir les bibliothèques locales :
-
-```
-    sesatheques : [
-      {baseId: 'biblilocal3001', baseUrl: 'http://sesatheque.local:3001/'},
-      {baseId: 'communlocal3003', baseUrl: 'http://commun.local:3003/'}
-    ],
-```
-
-- dans *sesatheque* `_private/commun.js` et  `_private/config.js`  définir la baseUrl de sesalab avec l'adresse réseau, ex: `baseUrl: 'http://192.168.1.187:3002/'``
-
-- démarrer le docker sesatheque (et sesalab par ailleurs)
-
-```
-docker-compose -f docker-compose-for-sesalab.yml up
-```
+@todo créer un docker-compose.sesalab.yml avec un docker/sesalab/Dockerfile
+(et rédiger la doc ci-dessous)
