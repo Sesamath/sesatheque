@@ -1,4 +1,5 @@
-import React from 'react'
+// on s'en sert pas encore…
+// import React from 'react'
 
 const App = () => (
   <div>

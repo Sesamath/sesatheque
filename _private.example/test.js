@@ -77,5 +77,5 @@ module.exports = {
   // extraDependenciesFirst : ['sesasso-bibli'],
   // et en dernier
   // suivant extraModules
-  extraDependenciesLast: ['sesalab-sso'],
+  extraDependenciesLast: ['sesalab-sso']
 }
