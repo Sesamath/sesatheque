@@ -37,6 +37,9 @@ const uuid = require('an-uuid')
  * copié dans l'instance docker dans _privateLocal par le Dockerfile,
  * avec nos sésathèques, ainsi que la surcharge des hosts mongo & redis pour coller aux noms
  * du docker-compose
+ *
+ * CAS AVEC SESALAB
+ *
  * @module
  */
 // Les chemins sont relatifs au répertoire dans lequel ce fichier sera copié dans le container
@@ -57,15 +60,13 @@ if (fs.existsSync(configFile)) {
 }
 
 try {
-  // on doit avoir le bon port
-  if (!config.$server) config.$server = {}
-  config.$server.port = 3001
-  // aussi dans baseUrl
-  config.application.baseUrl = 'http://localhost:3001/'
-  // avec un baseId qui colle
-  config.application.baseId = 'localhost3001'
-  // et nous-même en registrar
-  config.application.baseIdRegistrar = 'localhost3001'
+  config.$server = {
+    host: 'bibliotheque.local',
+    port: 3001
+  }
+  config.application.baseUrl = 'http://bibliotheque.local:3001/'
+  config.application.baseId = 'biblilocal3001'
+  config.application.baseIdRegistrar = 'biblilocal3001'
 
   // les noms des hosts imposés par le docker-compose
   // c'est pas obligatoire de déclarer ça en _private, on vérifie
@@ -87,12 +88,37 @@ try {
     port: 27017,
     name
   }
+
   // clés pour session et cookie
   if (!config.$rail) config.$rail = {}
   if (!config.$rail.cookie) config.$rail.cookie = {}
   if (!config.$rail.cookie.key) config.$rail.key = uuid()
   if (!config.$rail.session) config.$rail.session = {}
   if (!config.$rail.session.secret) config.$rail.session.secret = uuid()
+  // sesatheque commun
+  config.sesatheques = [{
+    baseId: 'communlocal3002',
+    baseUrl: 'http://commun.local:3002/',
+    // un token à utiliser pour son api
+    apiToken: 'dockerBibliTokenForCommun'
+  }]
+  config.sesalabs = [ {
+    name: 'dockerSesalab',
+    baseId: 'sesalablocal3000',
+    baseUrl: 'http://sesalab.local:3000/'
+  }]
+  // tokens
+  config.apiTokens = [
+    // ne pas laisser ces exemples en dehors d'un usage de dev ou test local !
+    'dockerSesalabTokenForBibli', // celui de dockerSesalab
+    'dockerCommunTokenForBibli' // celui de dockerCommun
+  ]
+  // module pour le sso sesalab
+  if (!config.extraModules) config.extraModules = []
+  if (!config.extraModules.includes('sesalab-sso')) config.extraModules.push('sesalab-sso')
+  if (!config.extraDependenciesLast) config.extraDependenciesLast = []
+  if (!config.extraDependenciesLast.includes('sesalab-sso')) config.extraDependenciesLast.push('sesalab-sso')
+  // on a tout…
 } catch (error) {
   error.message = `_private/config.js incomplet (${error.message})`
   throw error

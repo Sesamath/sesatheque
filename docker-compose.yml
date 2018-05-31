@@ -5,7 +5,7 @@ services:
   redis:
     image: redis
 
-  sesatheque.local:
+  sesatheque:
     build: ./docker/sesatheque
     ports:
       - 3001:3001

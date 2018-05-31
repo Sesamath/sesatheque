@@ -1,18 +1,3 @@
-var path = require('path')
-
-/**
- * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git,
- * dans un fichier js (et pas json) pour pouvoir mettre des commentaires
- *
- * Il contient toutes les clés utilisées ou utilisables, certaines sont initialisées ici
- * avec leur valeur par défaut. Les clés obligatoires sont mentionnées
- *
- * Ce fichier devrait pouvoir être copié tel quel dans _private et fonctionner avec docker-compose.yml
- * (après avoir complété les champs obligatoires)
- *
- * Pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
- * prendre les js de _private.exemple-docker-sesamath
- */
 module.exports = {
   application: {
     mail: 'xxx', // OBLIGATOIRE
