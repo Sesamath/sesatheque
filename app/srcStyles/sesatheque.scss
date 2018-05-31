@@ -195,21 +195,27 @@ body {min-width: 300px;}
   font-weight: normal;
   font-style: italic;
 }
-.liste .links {
-  margin-top: .75em;
-  margin: 0 0 0.2em 2em;
-  font-size: 0.8em;
+.liste {
+  margin-top: 15px;
+
+  .links {
+    margin: 0 0 0.2em 2em;
+    font-size: 0.8em;
+  }
 }
 
 /* css bien crade en attendant de mieux gérer ce form d'édition de groupe */
-#main form #validModif {
-  float: left;
-  margin: 0;
+#main form {
+  #validModif {
+    float: left;
+    margin: 0;
+  }
+  #cancelModif {
+    float: left;
+    margin: -1.5em 1em;
+  }
 }
-#main form #cancelModif {
-  float: left;
-  margin: -1.5em 1em;
-}
+
 /* On écrase ces valeurs de knacss qui nous plaisent pas */
 label {cursor: inherit;}
 /* pour les pointillés que firefox ajoute sur les button

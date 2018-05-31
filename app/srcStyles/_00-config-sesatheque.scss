@@ -4,6 +4,14 @@
 // Breakpoints zone
 // ----------------
 
+// Customs
+$secondary-color-light : #f17045;
+$primary-color-light : #2a4095;
+$primary-color-lighter : #3047a7;
+$secondary-color-link: #f17045;
+$secondary-color-link-hover: #f17045;
+$border-primary: #2a4095;
+
 // Warning: you should use your own values, regardless of the devices
 // Best practice is Mobile First: (min-width: $breakpoint)
 $tiny        : 480px !default; // or 'em' if you prefer, of course
@@ -153,7 +161,7 @@ $forms-color     : $gray-800;
 // ---------------
 
 // Component: links
-$link-color            : $gray-800;
+$link-color            : $primary-color-light;
 $link-color-hover      : darken($link-color, 15%);
 $link-decoration       : underline;
 $link-decoration-hover : underline;
@@ -216,11 +224,3 @@ $burger-hover-background  : transparent;
 $burger-size              : 2.6rem;
 $burger-weight            : 5px; // size of stripes
 $burger-padding           : 0;
-
-// Customs
-$secondary-color-light : #f17045;
-$primary-color-light : #2a4095;
-$primary-color-lighter : #3047a7;
-$secondary-color-link: #f17045;
-$secondary-color-link-hover: #f17045;
-$border-primary: #2a4095;

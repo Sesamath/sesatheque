@@ -101,7 +101,7 @@ const conf = {
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
       {test: /.*\.css(\?.*)?$/, loader: extractCssLoader},
-      {test: /\.scss$/, loaders: ['style-loader', 'css-loader', 'sass-loader']},
+      {test: /\.scss$/, loaders: [extractCssLoader, 'css-loader', 'sass-loader']},
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
