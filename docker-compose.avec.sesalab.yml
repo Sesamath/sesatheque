@@ -1,5 +1,8 @@
 version: '2'
 services:
+  # sesalab a besoin d'envoyer des mails
+  mailhog:
+    image: mailhog/mailhog
   mongo:
     image: mongo
   redis:
@@ -67,6 +70,7 @@ services:
     ports:
       - 3000:3000
     links:
+      - mailhog
       - mongo
       - redis
       - bibliotheque.local

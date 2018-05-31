@@ -79,5 +79,11 @@ module.exports = {
   $server: {
     host: 'sesalab.local',
     port: 3000
+  },
+
+  // le smtp docker
+  smtp: {
+    host: 'mailhog',
+    port: 1025
   }
 }
