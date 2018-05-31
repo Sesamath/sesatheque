@@ -4,14 +4,13 @@
 const path = require('path')
 const sesatheques = require('sesatheque-client/src/sesatheques')
 const logDir = path.join(__dirname, '../logsTest')
+// sert de préfixe de log, dbName et redisPrefix
 const appName = 'testSesatheque'
-const port = 3011
-const hostname = 'sesatheque.local'
-const host = hostname + ':' + port
-
-// on ajoute cette sesatheque
 const baseId = 'sesathequeTest'
-const baseUrl = 'http://' + host + '/'
+const hostname = 'localhost'
+const port = 3011
+const host = `${hostname}:${port}`
+const baseUrl = `http://${host}/`
 sesatheques.addSesatheque(baseId, baseUrl)
 
 const getLoggerConf = suffix => ({
@@ -28,9 +27,9 @@ module.exports = {
   application: {
     name: appName,
     baseId,
-    baseIdRegistrar: baseId,
     baseUrl,
-    mail: 'you@example.com',
+    baseIdRegistrar: baseId,
+    mail: 'sesatheque@example.com',
     staging: 'test'
   },
   $cache: {
@@ -50,10 +49,10 @@ module.exports = {
   },
   $rail: {
     cookie: {
-      key: 'a23G6!C0#zsB3gxba43g'
+      key: 'xxx' // à changer obligatoirement
     },
     session: {
-      secret: 'C0#zsB3gxba43!gy3i5xo' // OBLIGATOIRE
+      secret: 'xxx' // à changer obligatoirement
     }
   },
   $server: {
@@ -64,6 +63,13 @@ module.exports = {
   apiTokens: [
     'nsXpo736nSG#8sg*2a8/bFp(A'
   ],
+  logs: {
+    dir: logDir,
+    debugExclusions: ['cache'],
+    perf: 'perf.log'
+  },
+  lassiLogger,
+  // pour tester le sso avec un sesalab, il faut ajouter ça
   // les modules à précharger avant bootstrap, ici pour fonctionner avec un sesalab
   extraModules: ['sesalab-sso'],
 
@@ -72,10 +78,4 @@ module.exports = {
   // et en dernier
   // suivant extraModules
   extraDependenciesLast: ['sesalab-sso'],
-  logs: {
-    dir: logDir,
-    debugExclusions: ['cache'],
-    perf: 'perf.log'
-  },
-  lassiLogger
 }

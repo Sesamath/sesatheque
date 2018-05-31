@@ -34,6 +34,7 @@
     "start:both": "npm run start:commun & npm start",
     "start:dev": "npm run build:watch & npm start",
     "start:devcommun": "env SESATHEQUE_CONF=commun webpack -d --watch & env SESATHEQUE_CONF=commun npm start",
+    "start:test": "npm run start:testBibli",
     "start:testBoth": "npm run start:testBibli & npm run start:testCommun",
     "start:testBibli": "env SESATHEQUE_CONF=testBibli node app/start.js",
     "start:testCommun": "env SESATHEQUE_CONF=testCommun node app/start.js",
