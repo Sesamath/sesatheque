@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.1.28",
+  "version": "1.1.29",
   "engines": {
     "node": ">6"
   },
@@ -86,7 +86,7 @@
     "redux": "^4.0.0",
     "redux-form": "^7.3.0",
     "request": "2.82.0",
-    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#5092a93",
+    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#f1d4d4b",
     "sesajstools": "Sesamath/sesajstools",
     "sesalab-sso": "Sesamath/sesalab-sso#1.0.12",
     "sesatheque-client": "Sesamath/sesatheque-client#1.2.47"
