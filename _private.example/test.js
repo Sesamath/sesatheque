@@ -6,7 +6,7 @@ const sesatheques = require('sesatheque-client/src/sesatheques')
 const logDir = path.join(__dirname, '../logsTest')
 const appName = 'testSesatheque'
 const port = 3011
-const hostname = 'bibliotheque.local'
+const hostname = 'sesatheque.local'
 const host = hostname + ':' + port
 
 // on ajoute cette sesatheque

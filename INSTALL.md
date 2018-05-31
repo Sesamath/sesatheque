@@ -68,7 +68,7 @@ Installation avec Docker, pour sesalab
 - editer `/etc/hosts` et ajouter les deux lignes
 
 ```
-127.0.0.1       bibliotheque.local
+127.0.0.1       sesatheque.local
 127.0.0.1       commun.local
 ```
 
@@ -80,7 +80,7 @@ Installation avec Docker, pour sesalab
 
 ```
     sesatheques : [
-      {baseId: 'biblilocal3001', baseUrl: 'http://bibliotheque.local:3001/'},
+      {baseId: 'biblilocal3001', baseUrl: 'http://sesatheque.local:3001/'},
       {baseId: 'communlocal3003', baseUrl: 'http://commun.local:3003/'}
     ],
 ```

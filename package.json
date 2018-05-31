@@ -20,6 +20,11 @@
     "deploy:dev": "pm2 _private/pm2Deploy.json5 dev",
     "cli": "app/server/cli.js -h",
     "doc": "./scripts/doc -a",
+    "docker:build": "docker-compose build",
+    "docker:dev": "docker-compose up",
+    "docker:start": "docker-compose start",
+    "docker:_start": "yarn install && yarn run start:dev",
+    "docker:stop": "docker-compose stop",
     "localInstall": "node scripts/npmi.js",
     "lint": "eslint .",
     "maj": "git pull && npm install && npm run build",
@@ -27,9 +32,8 @@
     "start": "node app/server/start.js",
     "start:commun": "env SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm run start:commun & npm start",
-    "start:dev": "npm start & webpack -d --watch",
-    "start:devcommun": "env SESATHEQUE_CONF=commun npm start & webpack -d --watch",
-    "startClient": "hjs-dev-server",
+    "start:dev": "npm run build:watch & npm start",
+    "start:devcommun": "env SESATHEQUE_CONF=commun webpack -d --watch & env SESATHEQUE_CONF=commun npm start",
     "start:testBoth": "npm run start:testBibli & npm run start:testCommun",
     "start:testBibli": "env SESATHEQUE_CONF=testBibli node app/start.js",
     "start:testCommun": "env SESATHEQUE_CONF=testCommun node app/start.js",
@@ -89,7 +93,7 @@
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#f1d4d4b",
     "sesajstools": "Sesamath/sesajstools",
     "sesalab-sso": "Sesamath/sesalab-sso#1.0.12",
-    "sesatheque-client": "Sesamath/sesatheque-client#1.2.47"
+    "sesatheque-client": "Sesamath/sesatheque-client#1.2.48"
   },
   "devDependencies": {
     "amdefine": "^1.0.1",
