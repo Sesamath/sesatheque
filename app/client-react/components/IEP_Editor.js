@@ -1,12 +1,14 @@
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
-import {handleErrors} from '../utils/httpMethods'
+import ShowError from './ShowError'
+
+const importErrorMessage = 'Une erreur s\'est produite durant l\'importation du script'
 
 class IEP_Editor extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      error: null
+      importError: null
     }
     this.importScript = this.importScriptInner.bind(this)
   }
@@ -14,15 +16,22 @@ class IEP_Editor extends Component {
   importScriptInner() {
     const {url, change} = this.props
     fetch(url)
-      .then(handleErrors)
-      .then((response) => response.text())
-      .then((content) => change('parametres[xml]', content))
-      .catch((error) => {
+      .then(response => {
+        if (!response.ok) {
+          throw Error(reponse.statusText)
+        }
+
+        return response.text()
+      })
+      .then(content => change('parametres[xml]', content))
+      .catch(error => {
+        const importError = Error(`${importErrorMessage} (${error.message})`)
+
         this.setState({
-          error
+          importError
         }, () => {
           setTimeout(() => this.setState({
-            error: null
+            importError: null
           }), 5000)
         })
       })
@@ -58,13 +67,7 @@ class IEP_Editor extends Component {
         <div>
           <button type="button" onClick={this.importScript}>importer le script</button>
           <span>(une fois pour toute, si la source change ou disparait cette ressource restera identique)</span>
-
-          {this.state.error ? (
-            <div className="error">
-              {this.state.error.toString()}
-            </div>
-          ): null
-          }
+          <ShowError error={this.state.importError} />
         </div>
         <div>
           <label>Script instrumenpoche

@@ -8,17 +8,27 @@ const resourceLoader = (WrappedComponent) => {
       const {match: {params: {ressourceOid}}} = props
       this.ressourceOid = ressourceOid
       this.state = {
-        ressource: null
+        ressource: null,
+        saveError: null
       }
+      this.onSubmit = this.onSubmitInner.bind(this)
     }
 
-    onSubmit(body) {
+    onSubmitInner(body) {
       return POST(`/api/ressource`, {body})
+        .catch(saveError => {
+          this.setState({
+            saveError
+          }, () => {
+            setTimeout(() => this.setState({
+              saveError: null
+            }), 5000)
+          })
+        })
     }
 
     componentDidMount() {
       GET(`/api/ressource/${this.ressourceOid}`)
-        .then((response) => response.json())
         .then((ressource) => {
           this.setState({
             ressource
@@ -34,6 +44,7 @@ const resourceLoader = (WrappedComponent) => {
           initialValues={this.state.ressource}
           onSubmit={this.onSubmit}
           {...this.props}
+          saveError={this.state.saveError}
         />
       )
     }
