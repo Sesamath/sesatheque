@@ -112,7 +112,7 @@ const MetaForm = () => (
           />
         </label>
         <label>
-          Identifiant d'origine
+          Identifiant d&apos;origine
           <Field
             name="idOrigine"
             component="input"
