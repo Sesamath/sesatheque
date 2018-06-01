@@ -1,0 +1,84 @@
+version: '2'
+services:
+  # sesalab a besoin d'envoyer des mails
+  mailhog:
+    image: mailhog/mailhog
+  mongo:
+    image: mongo
+  redis:
+    image: redis
+
+  bibliotheque.local:
+    build: ./docker/sesatheque
+    environment:
+      - SESATHEQUE_CONF=bibli
+    ports:
+      - 3001:3001
+    volumes:
+      # on pourrait exporter toute la racine sauf des dossier à lister dans .dockerignore
+      # mais on veut _private sous le nom _privateLocal, et lister ce qu'on prend
+      # est pas plus long que de lister ce que l'on exclu…
+
+      # on exporte notre _private sous un autre nom
+      - ./_private:/sesatheque/_privateLocal
+      # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
+      - ./docker/sesatheque/_private:/sesatheque/_private
+      # le reste dont l'appli a besoin
+      - ./app:/sesatheque/app
+      - ./logs:/sesatheque/logs
+      - ./package.json:/sesatheque/package.json
+      - ./scripts:/sesatheque/scripts
+      - ./tasks:/sesatheque/tasks
+      - ./webpack.config.js:/sesatheque/webpack.config.js
+      - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
+      - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
+      - ./yarn.lock:/sesatheque/yarn.lock
+      - ./node_modules:/sesatheque/node_modules
+
+    links:
+      - mongo
+      - redis
+    command: "./scripts/wait-for-it.sh mongo:27017 -t 30 --strict -- yarn run docker:_start"
+
+  commun.local:
+    build: ./docker/sesatheque
+    environment:
+      - SESATHEQUE_CONF=commun
+    ports:
+      - 3002:3002
+    links:
+      - mongo
+      - redis
+      - bibliotheque.local
+    volumes:
+      - ./_private:/sesatheque/_privateLocal
+      - ./docker/sesatheque/_private:/sesatheque/_private
+      - ./app:/sesatheque/app
+      - ./logs:/sesatheque/logs
+      - ./package.json:/sesatheque/package.json
+      - ./scripts:/sesatheque/scripts
+      - ./tasks:/sesatheque/tasks
+      - ./webpack.config.js:/sesatheque/webpack.config.js
+      - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
+      - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
+      - ./yarn.lock:/sesatheque/yarn.lock
+      - ./node_modules:/sesatheque/node_modules
+
+    # on met un délai assez long, faut que la bibli puisse faire install + build
+    command: "./scripts/wait-for-it.sh bibliotheque.local:3001 -t 300 --strict -- yarn run docker:_start"
+
+  sesalab.local:
+    build: ./docker/sesalab
+    ports:
+      - 3000:3000
+    links:
+      - mailhog
+      - mongo
+      - redis
+      - bibliotheque.local
+      - commun.local
+    volumes:
+      - ./docker/sesalab/_private:/sesalab/_private
+
+    # encore plus long, y'en a 2 avant
+    command: "./scripts/wait-for-it.sh commun.local:3002 -t 600 --strict -- yarn run docker:initAndStart"

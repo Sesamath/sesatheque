@@ -141,7 +141,7 @@ module.exports = function (controller) {
   controller.get('extUp', function (context) {
     // pour poster sur bibli
     var options = {
-      uri: 'http://bibliotheque.local:3001/api/ressource/externalUpdate',
+      uri: 'http://sesatheque.local:3001/api/ressource/externalUpdate',
       headers: {'X-ApiToken': 'cniC6cyMOZB2p73P9kPTa.puCxKabwDeIu/zF8BFxeEQY22PE'},
       gzip: true,
       json: true,
