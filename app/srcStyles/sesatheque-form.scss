@@ -1,0 +1,80 @@
+#formRessource .form-group {
+  clear: left;
+  margin: 1em;
+}
+
+/* propriété flottante dans son groupe */
+#formRessource .control-group {
+  float: left;
+  margin: 0.5em; }
+
+/* titres centrés */
+#formRessource .control-group > label {
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+}
+
+/* checkboxes, alignés à droite dans son div */
+#formRessource .checkboxes {
+  position: relative; }
+
+#formRessource .checkboxes input {
+  margin: 0.2em 0 0.1em 0.5em; }
+
+/* */
+#formRessource .checkboxes label {
+  float: right;
+  clear: right;
+  font-weight: normal;
+  margin: 0.1em 0; }
+
+/*
+#formRessource .form-group div.input-group {}
+
+#formRessource .checkboxes { margin: 1em; }
+#formRessource .checkboxes br.clear { clear: both; }
+#formRessource .checkboxes label { float: right; }
+
+/* titres centrés * /
+#formRessource .input-group div, #formRessource .input-group label {font-weight: bold; width: 100%; text-align: center; float: none; }
+/* #form-oid, #form-type {width: 5em;} fait passer le titre à droite.... */
+
+/* on ne veut pas de la règle par défaut qui masque les en-têtes sur les petits écrans * /
+c'est commenté dans _07-responsive.scss, avec le bloc sur th qui nous ennuie
+@media (max-width: $tiny-screen) {
+  thead {
+    display: block;
+  }
+}
+/* un min-width et un peu de padding pour le tableau de checkboxesGroupes */
+div.checkboxesGroupes {
+  min-width: 320px;
+}
+div.checkboxesGroupes th, div.checkboxesGroupes td {
+  padding: 0.5em;
+}
+
+#formRessource #srcGroup, #formRessource #dstGroup {
+  float: left;
+  width: 47%;
+}
+
+#formRessource #submit {width: 10rem; margin: 0 auto;}
+#formRessource .rmq {
+  display: block;
+  font-size: 75%;
+  max-width: 20rem;
+}
+
+/**
+ * pour override du user agent stylesheet de chrome qui ajoute du
+ * ul {-webkit-margin-before: 1em}
+ */
+#formRessource ul.jstree-children {
+  margin: 0;
+}
+
+#formRessource input:read-only {
+  background-color: #bbb;
+}

@@ -24,7 +24,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
 const cssLoader = isProd ? 'css-loader?minimize' : 'css-loader'
 const extractCssLoader = extractCss.extract('style-loader', cssLoader)
-const extractLessLoader = extractCss.extract('style-loader', cssLoader + '!less-loader')
 
 const appConfig = require('./app/server/config')
 let baseUrl = appConfig.application.baseUrl
@@ -53,7 +52,7 @@ const conf = {
     // Error: a dependency to an entry point is not allowed
     page: ['./app/client/page/index.js'],
     // juste pour compiler iframe.css
-    iframe: ['./app/srcStyles/iframe.less'],
+    iframe: ['./app/srcStyles/iframe.scss'],
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js',
@@ -102,7 +101,7 @@ const conf = {
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
       {test: /.*\.css(\?.*)?$/, loader: extractCssLoader},
-      {test: /.*\.less(\?.*)?$/, loader: extractLessLoader},
+      {test: /\.scss$/, loaders: [extractCssLoader, 'css-loader', 'sass-loader']},
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},

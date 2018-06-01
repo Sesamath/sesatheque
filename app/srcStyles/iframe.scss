@@ -1,0 +1,24 @@
+/**
+ * gère la compilation de iframe.css (pour les pages prévues pour être en iframe)
+ */
+/*! Ne pas modifier le fichier css compilé par sass mais la source iframe.scss */
+/*!
+ * www.KNACSS.com V4.3.2 (8 juillet 2015) $author: Raphael Goetter, Alsacreations
+ * Licence WTFPL http://www.wtfpl.net/
+ */
+@import "_00-roboto"; /* police roboto */
+
+@import "_00-config-sesatheque"; /* Nos polices couleurs et tailles */
+
+// Knacss
+@import "~knacss/sass/_vendor/reboot";
+@import "~knacss/sass/_config/mixins";
+@import "~knacss/sass/_library/base";         // basic styles
+@import "~knacss/sass/_library/print";        // print quick reset
+
+$fa-font-path: "~@fortawesome/fontawesome-free-webfonts/webfonts";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fa-solid";
+
+@import "sesatheque-form"; // pour le create en iframe
+@import "sesatheque-display";
