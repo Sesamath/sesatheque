@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
 
@@ -17,5 +18,11 @@ const CheckboxGroup = ({name, title, values}) => (
     ))}
   </div>
 )
+
+CheckboxGroup.propTypes = {
+  name: PropTypes.string,
+  title: PropTypes.string,
+  values: PropTypes.array
+}
 
 export default CheckboxGroup

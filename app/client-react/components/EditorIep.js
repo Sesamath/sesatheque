@@ -1,11 +1,12 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
 import ShowError from './ShowError'
 
 const importErrorMessage = 'Une erreur s\'est produite durant l\'importation du script'
 
-class IEP_Editor extends Component {
-  constructor(props) {
+class EditorIep extends Component {
+  constructor (props) {
     super(props)
     this.state = {
       importError: null
@@ -13,12 +14,12 @@ class IEP_Editor extends Component {
     this.importScript = this.importScriptInner.bind(this)
   }
 
-  importScriptInner() {
+  importScriptInner () {
     const {url, change} = this.props
     fetch(url)
       .then(response => {
         if (!response.ok) {
-          throw Error(reponse.statusText)
+          throw Error(response.statusText)
         }
 
         return response.text()
@@ -37,25 +38,27 @@ class IEP_Editor extends Component {
       })
   }
 
-  render() {
+  render () {
     return (
       <fieldset>
         <div className="grid-3">
-          <label>largeur (en pixel)
+          <label>Largeur <i>(en pixel)</i>
             <Field
               name="parametres[width]"
               component="input"
               type="number"
             />
           </label>
-          <label>hauteur (en pixel)
+          <label>Hauteur <i>(en pixel)</i>
             <Field
               name="parametres[height]"
               component="input"
               type="number"
             />
           </label>
-          <label>url (ira lire le script de cette url à chaque affichage si le champ xml est vide)
+        </div>
+        <div className="grid-3">
+          <label>Url <i>(ira lire le script de cette url le champ xml est vide)</i>
             <Field
               id="parametres-url"
               name="parametres[url]"
@@ -63,12 +66,12 @@ class IEP_Editor extends Component {
               type="url"
             />
           </label>
+          <label>
+            <br />
+            <button type="button" onClick={this.importScript}>Importer le script</button>
+          </label>
         </div>
-        <div>
-          <button type="button" onClick={this.importScript}>importer le script</button>
-          <span>(une fois pour toute, si la source change ou disparait cette ressource restera identique)</span>
-          <ShowError error={this.state.importError} />
-        </div>
+        <ShowError error={this.state.importError} />
         <div>
           <label>Script instrumenpoche
             <Field
@@ -85,4 +88,9 @@ class IEP_Editor extends Component {
   }
 }
 
-export default formValues({url: 'parametres[url]'})(IEP_Editor)
+EditorIep.propTypes = {
+  url: PropTypes.string,
+  change: PropTypes.func
+}
+
+export default formValues({url: 'parametres[url]'})(EditorIep)

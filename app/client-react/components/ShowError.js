@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 
 const ShowError = ({error}) => {
@@ -8,6 +9,10 @@ const ShowError = ({error}) => {
       {error.message}
     </div>
   )
+}
+
+ShowError.propTypes = {
+  error: PropTypes.object
 }
 
 export default ShowError

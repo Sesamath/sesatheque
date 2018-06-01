@@ -89,7 +89,7 @@ const conf = {
   module: {
     loaders: [
       {test: /app\/client\/.*\.js/, loader: 'babel'},
-      {test: /app\/client-react\/.*\.jsx?/, loader: 'babel-loader', query: { presets: ['react'] } },
+      {test: /app\/client-react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour la config qui contient des données sensibles, on passe par un loader qui filtre
@@ -125,7 +125,7 @@ const conf = {
     extractCss
   ],
   watchOptions: {
-    ignored: ["/node_modules/", "app/assets", "app/srcStyles", "app/client/plugins"],
+    ignored: ['/node_modules/', 'app/assets', 'app/srcStyles', 'app/client/plugins']
   },
   stats: {
     // Nice colored output

@@ -1,29 +1,29 @@
 import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 import CheckboxGroup from './CheckboxGroup'
-import {listes} from '../../server/ressource/config'
+import {listes, labels} from '../../server/ressource/config'
 
 const categories = {
   name: 'categories',
-  title: 'Catégories',
+  title: labels.categories,
   values: Object.values(listes.categories)
 }
 
 const niveaux = {
   name: 'niveaux',
-  title: 'Niveaux',
+  title: labels.niveaux,
   values: Object.values(listes.niveaux)
 }
 
 const typePedagogiques = {
   name: 'typePedagogiques',
-  title: 'Type pédagogique',
+  title: labels.typePedagogiques,
   values: Object.values(listes.typePedagogiques)
 }
 
 const typeDocumentaires = {
   name: 'typeDocumentaires',
-  title: 'Type documentaire',
+  title: labels.typeDocumentaires,
   values: Object.values(listes.typeDocumentaires)
 }
 
@@ -32,7 +32,7 @@ const MetaForm = () => (
     <fieldset>
       <div className="grid-3">
         <label>
-          Titre
+          {labels.titre}
           <Field
             name="titre"
             component="input"
@@ -40,17 +40,17 @@ const MetaForm = () => (
           />
         </label>
         <label>
-          Type technique
-          <Field name="type" component="select">
-              {Object.keys(listes.type).map(key => (
-                <Fragment key={key.toString()}>
-                  <option value={key}>{listes.type[key]}</option>
-                </Fragment>
-              ))}
+          {labels.type}
+          <Field name="type" component="select" props={{ disabled: true }}>
+            {Object.keys(listes.type).map(key => (
+              <Fragment key={key.toString()}>
+                <option value={key}>{listes.type[key]}</option>
+              </Fragment>
+            ))}
           </Field>
         </label>
         <label>
-          Langue
+          {labels.langue}
           <Field name="langue" component="select">
             {Object.keys(listes.langue).map(key => (
               <Fragment key={key.toString()}>
@@ -62,19 +62,19 @@ const MetaForm = () => (
       </div>
       <div className="grid-3">
         <label>
-          Résumé
+          {labels.resume}
           <Field
             name="resume"
             component="textarea" />
         </label>
         <label>
-          Description
+          {labels.description}
           <Field
             name="description"
             component="textarea" />
         </label>
         <label>
-          Commentaires (réservés au formateur)
+          {labels.commentaires}
           <Field
             name="commentaires"
             component="textarea" />
@@ -94,7 +94,7 @@ const MetaForm = () => (
     <fieldset>
       <div className="grid-3">
         <label>
-          Identifiant
+          {labels.oid}
           <Field
             name="oid"
             component="input"
@@ -103,7 +103,7 @@ const MetaForm = () => (
           />
         </label>
         <label>
-          Origine
+          {labels.origine}
           <Field
             name="origine"
             component="input"
@@ -112,7 +112,7 @@ const MetaForm = () => (
           />
         </label>
         <label>
-          Identifiant d&apos;origine
+          {labels.idOrigine}
           <Field
             name="idOrigine"
             component="input"
@@ -123,7 +123,7 @@ const MetaForm = () => (
       </div>
       <div className="grid-3">
         <label>
-          Version
+          {labels.version}
           <Field
             name="version"
             component="input"
@@ -132,7 +132,7 @@ const MetaForm = () => (
           />
         </label>
         <label>
-          Date de création
+          {labels.dateCreation}
           <Field
             name="dateCreation"
             component="input"
@@ -141,7 +141,7 @@ const MetaForm = () => (
           />
         </label>
         <label>
-          Date de mise à jour
+          {labels.dateMiseAJour}
           <Field
             name="dateMiseAJour"
             component="input"
@@ -150,7 +150,7 @@ const MetaForm = () => (
           />
         </label>
         <label>
-          Restriction
+          {labels.restriction}
           <Field name="restriction" component="select">
             {Object.keys(listes.restriction).map(key => (
               <Fragment key={key.toString()}>
@@ -160,7 +160,7 @@ const MetaForm = () => (
           </Field>
         </label>
         <label>
-          Publié
+          {labels.publie}
           <Field
             name="publie"
             component="input"

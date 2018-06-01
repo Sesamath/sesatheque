@@ -1,9 +1,10 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {GET, POST} from '../utils/httpMethods'
 
 const resourceLoader = (WrappedComponent) => {
-  return class extends Component {
-    constructor(props) {
+  class ResourceLoader extends Component {
+    constructor (props) {
       super(props)
       const {match: {params: {ressourceOid}}} = props
       this.ressourceOid = ressourceOid
@@ -14,7 +15,7 @@ const resourceLoader = (WrappedComponent) => {
       this.onSubmit = this.onSubmitInner.bind(this)
     }
 
-    onSubmitInner(body) {
+    onSubmitInner (body) {
       return POST(`/api/ressource`, {body})
         .catch(saveError => {
           this.setState({
@@ -27,7 +28,7 @@ const resourceLoader = (WrappedComponent) => {
         })
     }
 
-    componentDidMount() {
+    componentDidMount () {
       GET(`/api/ressource/${this.ressourceOid}`)
         .then((ressource) => {
           this.setState({
@@ -36,7 +37,7 @@ const resourceLoader = (WrappedComponent) => {
         })
     }
 
-    render() {
+    render () {
       if (this.state.ressource === null) return null
 
       return (
@@ -49,6 +50,16 @@ const resourceLoader = (WrappedComponent) => {
       )
     }
   }
+
+  ResourceLoader.propTypes = {
+    match: PropTypes.shape({
+      params: PropTypes.shape({
+        ressourceOid: PropTypes.string
+      })
+    })
+  }
+
+  return ResourceLoader
 }
 
 export default resourceLoader

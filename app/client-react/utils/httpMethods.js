@@ -14,18 +14,18 @@ const handleErrors = (response) => {
 }
 
 const headers = {
-  'Content-type': 'application/json',
+  'Content-type': 'application/json'
 }
 
 const factory = (method) => {
   const defaultOptions = {
     credentials: 'include',
-    method,
+    method
   }
 
   return (url, data = {}) => {
     const options = {
-      ...defaultOptions,
+      ...defaultOptions
     }
 
     if (data.body) {
