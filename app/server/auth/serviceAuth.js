@@ -152,7 +152,7 @@ module.exports = function ($accessControl, $ressourcePage) {
       // lien de logout
       authBloc.logoutLink = {
         href: (client && client.getLogoutUrl && client.getLogoutUrl(context)) || '/deconnexion?redirect=' + encodeURIComponent(urlRetour),
-        icon: 'sign-out',
+        icon: 'sign-out-alt',
         value: 'Déconnexion'
       }
     } else {

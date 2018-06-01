@@ -16,15 +16,15 @@ var path = require('path')
 module.exports = {
   application: {
     // utilisé en préfixe des message de log et dans qq messages
-    name: 'sesatheque', // OBLIGATOIRE
+    name: 'sesatheque commune', // OBLIGATOIRE
     // identifiant de cette sésathèque, utilisé pour les rid des ressources créées ici
-    baseId: 'localhost3001', // OBLIGATOIRE
+    baseId: 'localhost3002', // OBLIGATOIRE
     // sesatheque de référence pour les baseId avec lesquels on partage des ressources
-    baseIdRegistrar: 'localhost3001', // OBLIGATOIRE
+    baseIdRegistrar: 'localhost3002', // OBLIGATOIRE
     // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici (ça permet de vérifier)
     // sert aussi pour les urls des composants statiques, ou pour construire des urls qu'on passe à l'extérieur
     // (sso par ex)
-    baseUrl: 'http://localhost:3001/', // OBLIGATOIRE
+    baseUrl: 'http://localhost:3002/', // OBLIGATOIRE
     // pour les envois de notification (du système)
     mail: '', // OBLIGATOIRE
     // utilisé par le SSO (sesasso-bibli et sesalab-sso), prod|dev
@@ -41,7 +41,7 @@ module.exports = {
   // pour redis, prefix obligatoire
   $cache: {
     redis: {
-      prefix: 'sesatheque'
+      prefix: 'commun'
     }
   },
 
@@ -50,7 +50,7 @@ module.exports = {
     database: {
       host: 'localhost',
       port: '27017',
-      name: 'sesatheque',
+      name: 'commun',
       user: '',
       password: '',
       // cf http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect
@@ -78,7 +78,7 @@ module.exports = {
     hostname: 'localhost',
     // port d'écoute de nodeJs, on peut indiquer ici un autre port ici que celui de baseUrl
     // (si y'a un proxy, ou par ex pour cli.js qui en mettra un autre)
-    port: 3001
+    port: 3002
   },
 
   /* pour modifier le comportement par défaut on peut préciser ici qq overrides,
@@ -126,8 +126,8 @@ module.exports = {
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle est toujours ajoutée à la liste au boot
   sesatheques: [
     {
-      baseId: 'localhost3002', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
-      baseUrl: 'http://localhost:3002/'
+      baseId: 'localhost3001', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
+      baseUrl: 'http://localhost:3001/'
       // apiToken: un token à utiliser par cette sesathèque pour lire des ressources restreintes chez elle
       // (à priori pour créer des alias vers ces ressources)
       // ce token devra être mis dans sa conf dans la liste des apiTokens

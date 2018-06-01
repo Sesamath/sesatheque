@@ -1,0 +1,239 @@
+// feuille de style pour les pages "non iframe" (donc avec header & footer)
+
+// en dessous en ajoute du scroll horizontal, faut pas pousser…
+body {min-width: 300px;}
+
+// responsive, .gt-medium-only pour les écrans à partir de medium et lt-medium-only pour les plus petits seulement
+@media (max-width: ($medium)) { // tiny et small
+  .gt-medium-only,
+  #header a span,
+  #ressActions span
+    { display: none; }
+  .lt-medium-only { display: block; }
+}
+@media (min-width: ($medium + 1)) { // medium, large et au delà
+  .gt-medium-only { display: block;}
+  #header a span,
+  #ressActions span
+    { display: inline;}
+  .lt-medium-only { display: none; }
+}
+
+/* cf http://stackoverflow.com/a/1633170 */
+.floatContainer::after {
+  content:"";
+  display:block;
+  clear:both;
+}
+
+// Les messages flash ont une de ces classes error|warning|info, mais aussi une classe flash, que l'on utilise pas pour le moment
+
+@mixin cartouche() { /* texte secondary sur fond foncé primary */
+  background-color: $color-primary;
+  color: $secondary-color-light;
+  a { color: $secondary-color-light}
+  a:hover {
+    color: $secondary-color-link;
+  };
+}
+
+@mixin border-tab() {
+  border: $border-primary;
+  border-style: solid;
+  border-width: 1px;
+  .selected {
+    border-bottom: none;
+  }
+}
+
+
+/**
+ * layout
+ */
+#auth {float: right;}
+
+#header {
+  @include cartouche();
+  padding: 10px;
+  nav {
+    z-index: 15;
+    a {
+      @extend .btn;
+      padding: 0.5rem 1rem;
+      margin: 0 1rem;
+      background-color: $primary-color-light;
+      text-align: center;
+      text-decoration: none;
+      color: $secondary-color-link;
+      line-height: 21px;
+    };
+    a.selected, a:hover {
+      background-color: $primary-color-lighter;
+      color: darken( $secondary-color-link, 10% );
+    }
+    a .fa {margin-right: 0;}
+
+    @media (min-width: $medium)  {
+        a .fa {margin-right: 1rem;}
+    }
+  }
+}
+#auth {
+  ul {
+    display: none;
+    position: absolute; // pour qu'il n'agrandisse pas le header quand il s'ouvre
+    top: 3rem; // pour démarrer à ras des boutons
+    right: 0;
+    padding-top: 2rem;
+    list-style: none;
+    div {
+      padding: 0.2rem;
+      text-align: center;
+      background-color: $color-primary;
+    }
+    ul {
+      padding: 0.5rem;
+    }
+    li {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0;
+      background-color: $color-primary;
+    }
+    li a {
+      width: 100%;
+      margin-right: $spacer-tiny;
+      text-align: left;
+    }
+  }
+}
+#auth:hover ul {
+  display: block;
+}
+
+#main, #content {
+  @extend .pam;
+}
+#main > h1 {margin-bottom: 0; color: $primary-color-light;}
+
+#actions ul {
+  float: right;
+  padding: 0 ;
+  text-align: center;
+  list-style: none;
+  margin: 0 0 0 1rem;
+  li {
+    float: right;
+    @include border-tab();
+    padding: $spacer-tiny $spacer-small;
+    margin-right: -1px;
+  }
+  li.selected {
+    border-bottom: thin solid $background-base;
+  }
+  li.tab-spacer {
+    border-top: none;
+    border-bottom: none;
+    width: $spacer-medium;
+    z-index: 2;
+  }
+}
+
+#actions div.clearfix {
+  border-bottom: 1px solid $border-primary;
+  position: relative;
+  bottom: 4px;
+  z-index: -1;
+}
+
+#previewIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+#footer {
+  @include cartouche();
+  @extend .clearfix;
+  padding-right: $spacer-small;
+  ul {
+    list-style: none;
+    @extend .ma0;
+    @extend .pa0;
+  }
+  li {
+    @extend .mas;
+    @extend .fl;
+  }
+  a:hover {
+    color: $secondary-color-link-hover;
+    text-decoration: underline;
+  }
+  p {
+    margin-top: .75em;
+  }
+}
+
+.waiting {
+  // @extend info;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  margin: 5px;
+}
+
+/**
+ * réglages de pages particulières
+ */
+/* description */
+.ressource span.publie, .ressource span.restriction {
+  display: block;
+  float: right;
+  margin: 0.5em;
+}
+.ressource p, .ressource ul {
+  margin: 1em;
+}
+.remarque {
+  margin-left: 0.5em;
+  font-size: 0.8em;
+  font-weight: normal;
+  font-style: italic;
+}
+.liste {
+  margin-top: 15px;
+
+  .links {
+    margin: 0 0 0.2em 2em;
+    font-size: 0.8em;
+  }
+}
+
+/* css bien crade en attendant de mieux gérer ce form d'édition de groupe */
+#main form {
+  #validModif {
+    float: left;
+    margin: 0;
+  }
+  #cancelModif {
+    float: left;
+    margin: -1.5em 1em;
+  }
+}
+
+/* On écrase ces valeurs de knacss qui nous plaisent pas */
+label {cursor: inherit;}
+/* pour les pointillés que firefox ajoute sur les button
+cf http://stackoverflow.com/questions/5517744/remove-extra-button-spacing-padding-in-firefox
+(mais pour iep les boutons de zoom restent rectangles et moches) */
+button::-moz-focus-inner {
+  padding: 0;
+  margin:0;
+  border: 0;
+}
+
+/* les pictos des listes de ressource */
+ul.liste li {
+  list-style: none;
+  img { margin: 0 0.3em 0 0; }
+}

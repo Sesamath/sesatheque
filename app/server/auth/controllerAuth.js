@@ -99,17 +99,13 @@ module.exports = function (controller, $auth, $accessControl, $ressourcePage, $f
      * @route GET /*
      */
     controller.get('*', function (context) {
-      // log.debug('controlleur auth avec ' +context.layout)
-      if (context.layout === 'page') {
-        var data = {
-          authBloc: $auth.getAuthBloc(context)
-        }
-        data.authBloc.$view = 'auth'
-        context.next(null, data)
-      } else {
-        // Pas concerné
-        context.next()
+      // si on est pas concerné on passe au suivant sans rien faire
+      if (context.layout !== 'page') return context.next()
+      const data = {
+        authBloc: $auth.getAuthBloc(context)
       }
+      data.authBloc.$view = 'auth'
+      context.next(null, data)
     })
-  }) // defer
+  }) // deferController
 }
