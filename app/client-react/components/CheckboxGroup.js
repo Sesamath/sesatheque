@@ -11,7 +11,6 @@ const CheckboxGroup = ({name, title, values}) => (
           name={`${name}[${index}]`}
           component="input"
           type="checkbox"
-          className="checkbox"
         />
         {value}
       </label>

@@ -69,6 +69,7 @@ class EditorIep extends Component {
           <label>
             <br />
             <button type="button" onClick={this.importScript}>Importer le script</button>
+            <span className="note">(Si la source change ou disparait cette ressource restera identique)</span>
           </label>
         </div>
         <ShowError error={this.state.importError} />
