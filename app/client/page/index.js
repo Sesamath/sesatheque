@@ -45,7 +45,7 @@ const refreshAuth = require('./refreshAuth')
 require('./bugsnag')
 
 // pour la compilation de page.css
-require('../../srcStyles/page.less')
+require('../../srcStyles/page.scss')
 
 const w = window
 const wd = w.document

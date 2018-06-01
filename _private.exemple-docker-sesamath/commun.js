@@ -7,8 +7,8 @@ var path = require('path')
 module.exports = {
   application: {
     name: 'sesathequePrivate', // utilisé en préfixe des message de log et dans qq message
-    baseId: 'localhost3003', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
-    baseIdRegistrar: 'localhost3003', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
+    baseId: 'communlocal3003', // identifiant de cette sésathèque, qui devrait être connu de sesatheque-client
+    baseIdRegistrar: 'communlocal3003', // sesatheque de référence qui groupe les baseId avec lesquels on partage des ressources
     baseUrl: 'http://commun.local:3003/', // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici
     mail: 'me@example.com',
     // pour que cette sesathèque ait ses propres js (webpack les compile en mettant baseUrl
@@ -18,7 +18,7 @@ module.exports = {
   },
   // TODO: ce setting sert uniquement pour la migration MySQL => MongoDB, il pourra être supprimé par la suite.
   databaseMysql: {
-    host: 'mysql-private',
+    host: 'mysql-private', // container mongo
     port: '3306',
     user: 'stcommun',
     password: 'stcommun',
@@ -26,18 +26,9 @@ module.exports = {
   },
   $entities: {
     database: {
-      host: 'mongo-private',
+      host: 'mongo-private', // container mongo
       port: '27017',
-      name: 'stcommun',
-      connectTimeout: 1000,
-      trace: true, // true par défaut, mettre false en prod ?
-      // cf https://github.com/felixge/node-mysql/#pool-options
-      connectionLimit: 50,
-      waitForConnections: true, // avec true, si les 50 sont occupées on met en queue jusqu'à queueLimit
-      acquireTimeout: 1000,
-      queueLimit: 100,
-      debug: false // mysql2 distingue pas, et c'est très verbeux de mettre à true
-      // debug: ['ComQueryPacket', 'ErrorPacket'] // Cf node_modules/mysql/lib/protocol/packets/ pour la liste
+      name: 'stcommun'
     }
   },
   $server: {
@@ -88,8 +79,8 @@ module.exports = {
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle est toujours ajoutée à la liste au boot
   sesatheques: [
     {
-      baseId: 'localhost3001', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
-      baseUrl: 'http://localhost:3001/'
+      baseId: 'biblilocal3001', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
+      baseUrl: 'http://bibliotheque.local:3001/'
       // apiTokens: un token à utiliser pour son api
     }
     // on pourrait en mettre d'autres…
