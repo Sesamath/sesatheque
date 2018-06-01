@@ -71,9 +71,11 @@ body {min-width: 300px;}
       background-color: $primary-color-lighter;
       color: darken( $secondary-color-link, 10% );
     }
-    a .fa {margin-right: 1rem;}
-    // avec une exception
-    a .fa-user {margin-right:0; margin-left: 1rem;}
+    a .fa {margin-right: 0;}
+
+    @media (min-width: $medium)  {
+        a .fa {margin-right: 1rem;}
+    }
   }
 }
 #auth {
@@ -166,6 +168,9 @@ body {min-width: 300px;}
   a:hover {
     color: $secondary-color-link-hover;
     text-decoration: underline;
+  }
+  p {
+    margin-top: .75em;
   }
 }
 

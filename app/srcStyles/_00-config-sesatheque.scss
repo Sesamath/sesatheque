@@ -14,11 +14,11 @@ $border-primary: #2a4095;
 
 // Warning: you should use your own values, regardless of the devices
 // Best practice is Mobile First: (min-width: $breakpoint)
-$tiny        : 480px !default; // or 'em' if you prefer, of course
-$small       : 576px !default;
-$medium      : 768px !default;
-$large       : 992px !default;
-$extra-large : 1200px !default;
+$tiny        : 480px; // or 'em' if you prefer, of course
+$small       : 768px;
+$medium      : 1024px;
+$large       : 1280px;
+$extra-large : 1600px;
 
 // ----------
 // Fonts zone
