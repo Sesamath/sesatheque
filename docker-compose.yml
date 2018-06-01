@@ -28,7 +28,6 @@ services:
       - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
       - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
       - ./yarn.lock:/sesatheque/yarn.lock
-      - ./node_modules:/sesatheque/node_modules
 
     links:
       - mongo
