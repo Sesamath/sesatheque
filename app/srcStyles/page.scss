@@ -26,6 +26,7 @@
 
 // Components
 @import "~knacss/sass/components/_buttons";
+@import "~knacss/sass/components/_checkbox";
 
 /* ----------------------------- */
 /* ==own stylesheet              */
@@ -36,3 +37,4 @@ $fa-font-path: "~@fortawesome/fontawesome-free-webfonts/webfonts";
 @import "sesatheque";
 @import "sesatheque-form";
 @import "sesatheque-display";
+@import "resource-editor";

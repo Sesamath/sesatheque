@@ -1,18 +1,14 @@
-input:disabled, select:disabled {
-  background-color: #eee !important;
-}
-
 label {
   font-weight: bold;
   display: block;
   font-size: 10pt;
+  margin: 10px;
+  position:relative;
 
   button {
     margin-top: 6px;
   }
-}
 
-label {
   input:not([type='checkbox']), select, textarea {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -27,15 +23,55 @@ label {
     font-size: 11pt;
   }
 
+  &.select::after {
+    content: '';
+    position: absolute;
+    z-index:2;
+    right:8px;
+    top:50%;
+    margin-top: 8px;
+    height:0;
+    width:0;
+    border-top:6px solid #777;
+    border-left:6px solid transparent;
+    border-right:6px solid transparent;
+    pointer-events:none;
+  }
+
+  textarea {
+    min-height: 100px;
+  }
+
   input[type='checkbox'] {
     display: block;
     margin-right: 5px;
     margin-top: 15px;
   }
 
+  input.switch {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
   i {
     color: #888;
     font-weight: normal;
+  }
+
+  input:disabled, select:disabled {
+    background-color: #eee !important;
+  }
+
+  .note {
+    text-align: center;
+    position: absolute;
+    left: 141px;
+    top: 23px;
+    font-weight: normal;
+    color: #666;
+    font-style: italic;
+    font-size: 9pt;
   }
 }
 
@@ -60,4 +96,3 @@ hr {
   width: 60%;
   text-align: center;
 }
-

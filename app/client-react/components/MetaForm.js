@@ -39,7 +39,7 @@ const MetaForm = () => (
             type="text"
           />
         </label>
-        <label>
+        <label className="select">
           {labels.type}
           <Field name="type" component="select" props={{ disabled: true }}>
             {Object.keys(listes.type).map(key => (
@@ -49,7 +49,7 @@ const MetaForm = () => (
             ))}
           </Field>
         </label>
-        <label>
+        <label className="select">
           {labels.langue}
           <Field name="langue" component="select">
             {Object.keys(listes.langue).map(key => (
@@ -149,7 +149,7 @@ const MetaForm = () => (
             props={{ disabled: true }}
           />
         </label>
-        <label>
+        <label className="select">
           {labels.restriction}
           <Field name="restriction" component="select">
             {Object.keys(listes.restriction).map(key => (
@@ -165,7 +165,7 @@ const MetaForm = () => (
             name="publie"
             component="input"
             type="checkbox"
-            className="checkbox"
+            className="switch"
           />
         </label>
       </div>
