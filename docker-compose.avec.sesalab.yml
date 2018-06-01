@@ -33,6 +33,7 @@ services:
       - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
       - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
       - ./yarn.lock:/sesatheque/yarn.lock
+      - ./node_modules:/sesatheque/node_modules
 
     links:
       - mongo
@@ -61,6 +62,7 @@ services:
       - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
       - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
       - ./yarn.lock:/sesatheque/yarn.lock
+      - ./node_modules:/sesatheque/node_modules
 
     # on met un délai assez long, faut que la bibli puisse faire install + build
     command: "./scripts/wait-for-it.sh bibliotheque.local:3001 -t 300 --strict -- yarn run docker:_start"
