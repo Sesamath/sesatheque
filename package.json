@@ -140,12 +140,22 @@
     "extends": [
       "standard"
     ],
-    "globals": {
-      "lassi": true,
-      "log": true
-    },
     "overrides": [
       {
+        "files": "app/client*/**/*.js",
+        "env": {
+          "browser": true
+        }
+      }, {
+        "files": "app/server/**/*.js",
+        "env": {
+          "node": true
+        },
+        "globals": {
+          "lassi": true,
+          "log": true
+        }
+      }, {
         "files": "test/**/*.js",
         "rules": {
           "no-unused-expressions": "off"
