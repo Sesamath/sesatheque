@@ -1,0 +1,63 @@
+input:disabled, select:disabled {
+  background-color: #eee !important;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  font-size: 10pt;
+
+  button {
+    margin-top: 6px;
+  }
+}
+
+label {
+  input:not([type='checkbox']), select, textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    background-color: #f8f9fb;
+    border: 1px solid #eaeaec;
+    border-radius: 3px;
+    padding: 10px;
+    font-weight: normal;
+    font-size: 11pt;
+  }
+
+  input[type='checkbox'] {
+    display: block;
+    margin-right: 5px;
+    margin-top: 15px;
+  }
+
+  i {
+    color: #888;
+    font-weight: normal;
+  }
+}
+
+hr {
+  clear: both;
+  border-top: 3px solid #fbfbfb;
+  margin: 10px 0;
+}
+
+.checkbox-group {
+  label {
+    input[type='checkbox']  {
+      display: inline;
+      margin-right: 5px;
+      margin-top: 0;
+    }
+  }
+}
+
+.buttons-area {
+  margin: 10px auto;
+  width: 60%;
+  text-align: center;
+}
+

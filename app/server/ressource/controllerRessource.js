@@ -525,7 +525,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       addToken(context, ressource)
       if (ressource.type === 'iep') {
         let data = {
-          titre: 'Test react',
+          titre: 'Modifier une ressource',
           contentBloc: {
             $view: 'ressource-editor'
           },

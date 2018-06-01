@@ -1,152 +1,176 @@
-import React from 'react'
-import {Field, reduxForm} from 'redux-form'
-import {categories, niveaux, typePedagogiques, typeDocumentaires} from '../constantes'
+import React, {Fragment} from 'react'
+import {Field} from 'redux-form'
 import CheckboxGroup from './CheckboxGroup'
+import {listes, labels} from '../../server/ressource/config'
 
-const MetaForm = props => {
-  const {handleSubmit, pristine, reset, submitting} = props
+const categories = {
+  name: 'categories',
+  title: labels.categories,
+  values: Object.values(listes.categories)
+}
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <fieldset>
-        <div>
-          <label htmlFor="input-titre">Titre</label>
-          <div>
-            <Field
-              id="input-titre"
-              name="titre"
-              component="input"
-              type="text"
-            />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-type">Type technique</label>
-          <div>
-            <Field
-              id="input-type"
-              name="type"
-              component="input"
-              type="text"
-            />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="select-restriction">Restriction</label>
-          <div>
-            <Field id="select-restriction" name="restriction" component="select">
-              <option value="0">Aucune</option>
-              <option value="1">Corrigé</option>
-              <option value="2">Groupe</option>
-              <option value="3">Privé</option>
-            </Field>
-          </div>
-        </div>
-        <div>
-          <label htmlFor="select-langue">Langue</label>
-          <div>
-            <Field id="select-langue" name="langue" component="select">
-              <option value="deu">Allemand</option>
-              <option value="eng">Anglais</option>
-              <option value="ara">Arabe</option>
-              <option value="eus">Basque</option>
-              <option value="bre">Breton</option>
-              <option value="cat">Catalan</option>
-              <option value="spa">Espagnol</option>
-              <option value="fra">Français</option>
-              <option value="ita">Italien</option>
-              <option value="por">Portugais</option>
-            </Field>
-          </div>
-        </div>
-        <div>
-          <label htmlFor="checkbox-publie">Publié</label>
-          <div>
-            <Field
-              name="publie"
-              id="checkbox-publie"
-              component="input"
-              type="checkbox"
-              className="checkbox"
-            />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-identifiant">Identifiant</label>
-          <div>
-            <Field
-              id="input-identifiant"
-              name="identifiant"
-              component="input"
-              type="text"
-              props={{ disabled: true }}
-            />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-origine">Origine</label>
-          <div>
-            <Field
-              id="input-origine"
-              name="origine"
-              component="input"
-              type="text"
-              props={{ disabled: true }}
-            />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-idOrigine">Identifiant d'origine</label>
-          <div>
-            <Field
-              id="input-idOrigine"
-              name="idOrigine"
-              component="input"
-              type="text"
-              props={{ disabled: true }}
-            />
-          </div>
-        </div>
-      </fieldset>
-      <fieldset>
+const niveaux = {
+  name: 'niveaux',
+  title: labels.niveaux,
+  values: Object.values(listes.niveaux)
+}
+
+const typePedagogiques = {
+  name: 'typePedagogiques',
+  title: labels.typePedagogiques,
+  values: Object.values(listes.typePedagogiques)
+}
+
+const typeDocumentaires = {
+  name: 'typeDocumentaires',
+  title: labels.typeDocumentaires,
+  values: Object.values(listes.typeDocumentaires)
+}
+
+const MetaForm = () => (
+  <Fragment>
+    <fieldset>
+      <div className="grid-3">
+        <label>
+          {labels.titre}
+          <Field
+            name="titre"
+            component="input"
+            type="text"
+          />
+        </label>
+        <label>
+          {labels.type}
+          <Field name="type" component="select" props={{ disabled: true }}>
+            {Object.keys(listes.type).map(key => (
+              <Fragment key={key.toString()}>
+                <option value={key}>{listes.type[key]}</option>
+              </Fragment>
+            ))}
+          </Field>
+        </label>
+        <label>
+          {labels.langue}
+          <Field name="langue" component="select">
+            {Object.keys(listes.langue).map(key => (
+              <Fragment key={key.toString()}>
+                <option value={key}>{listes.langue[key]}</option>
+              </Fragment>
+            ))}
+          </Field>
+        </label>
+      </div>
+      <div className="grid-3">
+        <label>
+          {labels.resume}
+          <Field
+            name="resume"
+            component="textarea" />
+        </label>
+        <label>
+          {labels.description}
+          <Field
+            name="description"
+            component="textarea" />
+        </label>
+        <label>
+          {labels.commentaires}
+          <Field
+            name="commentaires"
+            component="textarea" />
+        </label>
+      </div>
+    </fieldset>
+    <hr />
+    <fieldset>
+      <div className="grid-4">
         <CheckboxGroup {...categories} />
         <CheckboxGroup {...niveaux} />
         <CheckboxGroup {...typePedagogiques} />
         <CheckboxGroup {...typeDocumentaires} />
-      </fieldset>
-      <fieldset>
-        <div>
-          <label htmlFor="input-resume">Résumé</label>
-          <div>
-            <Field
-              id="input-resume"
-              name="resume"
-              component="textarea" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-description">Description</label>
-          <div>
-            <Field
-              id="input-description"
-              name="description"
-              component="textarea" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="input-commentaires">Commentaires (réservés au formateur)</label>
-          <div>
-            <Field name="commentaires" component="textarea" />
-          </div>
-        </div>
-      </fieldset>
-      <div>
-        <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregister</button>
       </div>
-    </form>
-  )
-}
+    </fieldset>
+    <hr />
+    <fieldset>
+      <div className="grid-3">
+        <label>
+          {labels.oid}
+          <Field
+            name="oid"
+            component="input"
+            type="text"
+            props={{ disabled: true }}
+          />
+        </label>
+        <label>
+          {labels.origine}
+          <Field
+            name="origine"
+            component="input"
+            type="text"
+            props={{ disabled: true }}
+          />
+        </label>
+        <label>
+          {labels.idOrigine}
+          <Field
+            name="idOrigine"
+            component="input"
+            type="text"
+            props={{ disabled: true }}
+          />
+        </label>
+      </div>
+      <div className="grid-3">
+        <label>
+          {labels.version}
+          <Field
+            name="version"
+            component="input"
+            type="number"
+            props={{ disabled: true }}
+          />
+        </label>
+        <label>
+          {labels.dateCreation}
+          <Field
+            name="dateCreation"
+            component="input"
+            type="text"
+            props={{ disabled: true }}
+          />
+        </label>
+        <label>
+          {labels.dateMiseAJour}
+          <Field
+            name="dateMiseAJour"
+            component="input"
+            type="text"
+            props={{ disabled: true }}
+          />
+        </label>
+        <label>
+          {labels.restriction}
+          <Field name="restriction" component="select">
+            {Object.keys(listes.restriction).map(key => (
+              <Fragment key={key.toString()}>
+                <option value={key}>{listes.restriction[key]}</option>
+              </Fragment>
+            ))}
+          </Field>
+        </label>
+        <label>
+          {labels.publie}
+          <Field
+            name="publie"
+            component="input"
+            type="checkbox"
+            className="checkbox"
+          />
+        </label>
+      </div>
+    </fieldset>
+  </Fragment>
+)
 
-export default reduxForm({
-  form: 'meta',
-})(MetaForm)
+export default MetaForm
