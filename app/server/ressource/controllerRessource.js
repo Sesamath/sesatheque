@@ -523,7 +523,21 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (ressource.aliasOf) return forkAlias(context, ressource)
       // sinon on peut afficher le form
       addToken(context, ressource)
-      $ressourcePage.printForm(context, null, ressource)
+      if (ressource.type === 'iep') {
+        let data = {
+          titre: 'Modifier une ressource',
+          contentBloc: {
+            $view: 'ressource-editor'
+          },
+          jsBloc: {
+            $view: 'js',
+            jsFiles: ['/react.js']
+          }
+        }
+        context.html(data)
+      } else {
+        $ressourcePage.printForm(context, null, ressource)
+      }
     }).catch(function (error) {
       log.error(error)
       $ressourcePage.printError(context, error)
@@ -912,10 +926,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     <all-permissions/>
   </security>
   <resources>
-    <j2se version="1.7+"/>  
+    <j2se version="1.7+"/>
     <jar href="MathGraph32.jar" main="true" version ="5.2.0"/>
     <property name="jnlp.versionEnabled" value="true"/>
-  </resources> 
+  </resources>
   <application-desc name="MathGraph32" main-class="mathgraph32.Main" width="800" height="600">
     <argument>online</argument>
     <argument>${url}</argument>

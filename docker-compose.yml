@@ -1,20 +1,35 @@
-version: '3'
+version: '2'
 services:
   mongo:
     image: mongo
-    ports:
-      - 3312:27017
+  redis:
+    image: redis
 
-  app:
-    build: ./docker/node
+  sesatheque:
+    build: ./docker/sesatheque
     ports:
       - 3001:3001
     volumes:
-      - .:/app
+      # on pourrait exporter toute la racine sauf des dossier à lister dans .dockerignore
+      # mais on veut _private sous le nom _privateLocal, et lister ce qu'on prend
+      # est pas plus long que de lister ce que l'on exclu…
+
+      # on exporte notre _private sous un autre nom
+      - ./_private:/sesatheque/_privateLocal
+      # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
+      - ./docker/sesatheque/_private:/sesatheque/_private
+      # le reste dont l'appli a besoin
+      - ./app:/sesatheque/app
+      - ./logs:/sesatheque/logs
+      - ./package.json:/sesatheque/package.json
+      - ./scripts:/sesatheque/scripts
+      - ./tasks:/sesatheque/tasks
+      - ./webpack.config.js:/sesatheque/webpack.config.js
+      - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
+      - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
+      - ./yarn.lock:/sesatheque/yarn.lock
+
     links:
       - mongo
       - redis
-    command: npm run start:dev
-
-  redis:
-    image: redis
+    command: "./scripts/wait-for-it.sh mongo:27017 -t 30 --strict -- yarn run docker:_start"

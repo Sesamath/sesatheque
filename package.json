@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.1.29",
+  "version": "1.1.30",
   "engines": {
     "node": ">6"
   },
@@ -20,18 +20,24 @@
     "deploy:dev": "pm2 _private/pm2Deploy.json5 dev",
     "cli": "app/server/cli.js -h",
     "doc": "./scripts/doc -a",
+    "docker:build": "docker-compose build",
+    "docker:buildFull": "docker-compose -f docker-compose.avec.sesalab.yml build",
+    "docker:dev": "docker-compose up",
+    "docker:devFull": "docker-compose -f docker-compose.avec.sesalab.yml up",
+    "docker:start": "docker-compose start",
+    "docker:_start": "yarn install && yarn run start:dev",
+    "docker:stop": "docker-compose stop",
     "localInstall": "node scripts/npmi.js",
     "lint": "eslint .",
     "maj": "git pull && npm install && npm run build",
     "mongo": "./scripts/mongoApp",
     "start": "node app/server/start.js",
     "start:commun": "env SESATHEQUE_CONF=commun node app/server/start.js",
-    "start:both": "npm start & npm run start:commun",
-    "start:dev": "node_modules/nodemon/bin/nodemon.js -e js --legacy-watch --watch app --watch _private app/start.js --ignore app/main/public/vendor",
-    "start:devcommun": "env SESATHEQUE_CONF=commun node_modules/nodemon/bin/nodemon.js -e js --legacy-watch --watch app --watch _private app/start.js --ignore app/main/public/vendor",
-    "startClient": "hjs-dev-server",
-    "start:testBoth": "npm run start:testBibli & npm run start:testCommun",
-    "start:testBibli": "env SESATHEQUE_CONF=testBibli node app/start.js",
+    "start:both": "npm run start:commun & npm start",
+    "start:dev": "npm run build:watch & npm start",
+    "start:devcommun": "env SESATHEQUE_CONF=commun webpack -d --watch & env SESATHEQUE_CONF=commun npm start",
+    "start:test": "env SESATHEQUE_CONF=test node app/start.js",
+    "start:testBoth": "npm run start:test & npm run start:testCommun",
     "start:testCommun": "env SESATHEQUE_CONF=testCommun node app/start.js",
     "test": "mocha 'test/**/*.test.js'",
     "test:app": "mocha 'test/app/**/*.test.js'",
@@ -66,37 +72,56 @@
     ]
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free-webfonts": "^1.0.9",
+    "an-ansi": "git://src.sesamath.net/an-ansi#369cba2",
     "an-flow": "git://src.sesamath.net/an-flow#3aa74ba",
+    "an-format-date": "git://src.sesamath.net/an-format-date#a76218a",
     "an-log": "git://src.sesamath.net/an-log#55ea104",
     "an-uuid": "git://src.sesamath.net/an-uuid#4ba4304",
     "body-parser": "^1.18.2",
     "elementtree": "0.1.6",
     "express": "^4.16.2",
     "ip": "^1.1.5",
+    "knacss": "^7.0.5",
     "lassi": "Sesamath/lassi#2.3.2",
     "lodash": "4.17.5",
     "moment": "2.19.3",
     "morgan": "1.9.0",
     "pre-push": "^0.1.1",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "^4.2.2",
+    "redux": "^4.0.0",
+    "redux-form": "^7.3.0",
     "request": "2.82.0",
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#f1d4d4b",
     "sesajstools": "Sesamath/sesajstools",
     "sesalab-sso": "Sesamath/sesalab-sso#1.0.12",
-    "sesatheque-client": "Sesamath/sesatheque-client#1.2.47"
+    "sesatheque-client": "Sesamath/sesatheque-client#1.2.48"
   },
   "devDependencies": {
     "amdefine": "^1.0.1",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "6.4.1",
     "babel-plugin-transform-object-assign": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
     "bugsnag-js": "^4.4.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "copy-webpack-plugin": "4.0.1",
     "css-loader": "0.26.1",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-react": "^7.8.2",
+    "eslint-plugin-standard": "^3.1.0",
     "extract-text-webpack-plugin": "1.0.1",
     "faker": "^3.1.0",
     "file-loader": "0.10.1",
@@ -106,33 +131,50 @@
     "jsdoc": "^3.5.5",
     "json-loader": "^0.5.7",
     "jstree": "3.3.4",
-    "less": "2.7.2",
-    "less-loader": "2.2.3",
-    "less-plugin-clean-css": "1.5.1",
     "mocha": "^5.1.0",
+    "node-sass": "^4.9.0",
     "nodemon": "^1.12.4",
+    "sass-loader": "^7.0.1",
     "sinon": "^4.5.0",
     "sinon-chai": "^3.0.0",
     "style-loader": "0.13.2",
     "supertest": "^3.0.0",
     "url-loader": "0.5.7",
-    "webpack": "1.15.0",
+    "webpack": "^1.15.0",
     "xml2js": "0.4.17",
     "xmlhttprequest": "1.8.0"
   },
   "eslintConfig": {
-    "extends": [
-      "standard"
-    ],
-    "globals": {
-      "lassi": true,
-      "log": true
+    "env": {
+      "browser": true
     },
+    "extends": [
+      "standard",
+      "plugin:react/recommended"
+    ],
     "overrides": [
+      {
+        "files": "app/client*/**/*.js",
+        "env": {
+          "browser": true
+        }
+      },
+      {
+        "files": "app/server/**/*.js",
+        "env": {
+          "node": true
+        },
+        "globals": {
+          "lassi": true,
+          "log": true
+        }
+      },
       {
         "files": "test/**/*.js",
         "rules": {
-          "no-unused-expressions": "off"
+          "no-unused-expressions": "off",
+          "react/jsx-uses-react": "error",
+          "react/jsx-uses-vars": "error"
         },
         "env": {
           "mocha": true
@@ -153,7 +195,6 @@
     "doc_src",
     "documentation"
   ],
-
   "pre-push": [
     "test",
     "lint"
