@@ -88,22 +88,22 @@ const MetaForm = () => (
       <div className="grid-4">
         <Field
           parseValue={parseInteger}
+          component={CheckboxGroup}
           {...categories}
-          component={CheckboxGroup}
         />
         <Field
+          component={CheckboxGroup}
           {...niveaux}
-          component={CheckboxGroup}
         />
         <Field
           parseValue={parseInteger}
+          component={CheckboxGroup}
           {...typePedagogiques}
-          component={CheckboxGroup}
         />
         <Field
           parseValue={parseInteger}
-          {...typeDocumentaires}
           component={CheckboxGroup}
+          {...typeDocumentaires}
         />
       </div>
     </fieldset>
