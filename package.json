@@ -178,6 +178,9 @@
         },
         "env": {
           "mocha": true
+        },
+        "globals": {
+          "lassi": true
         }
       }
     ]
