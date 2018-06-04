@@ -109,6 +109,7 @@ body {min-width: 300px;}
 }
 #auth:hover ul {
   display: block;
+  z-index: 10;
 }
 
 #main, #content {
