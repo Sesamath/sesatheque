@@ -10,7 +10,8 @@ const CheckboxGroup = ({
     name,
     value: inputValue,
     onChange
-}}) => (
+  }
+}) => (
   <div className="checkbox-group">
     <h3>{title}</h3>
     {
@@ -32,7 +33,7 @@ const CheckboxGroup = ({
               if (checked) {
                 vals.push(parsedValue)
               } else {
-                vals.splice(vals.indexOf(parsedValue), 1);
+                vals.splice(vals.indexOf(parsedValue), 1)
               }
               onChange(vals)
             }}

@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 import CheckboxGroup from './CheckboxGroup'
-import {listes, labels, constantes} from '../../server/ressource/config'
+import {listes, labels} from '../../server/ressource/config'
 
 const categories = {
   name: 'categories',
