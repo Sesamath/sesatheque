@@ -824,15 +824,13 @@ module.exports = function controllersFactory (component) {
         aliasData.auteurs = [pid]
         aliasData.origine = config.application.baseId
         aliasData.dateCreation = new Date()
-        // important sinon une ressource non restreinte mais pas publiée se retrouverait publique,
-        // et à la consultation (de l'original) ça plante
+        // important sinon une ressource non restreinte mais pas publiée se retrouverait avec un alias public,
+        // et ça afficherait des pbs de droits à la consultation
         aliasData.publie = ressource.publie
-        // si la ressource était publique on le laisse sur l'alias (pour la lecture),
-        // pour l'écriture ça changera rien
-        if (ressource.restriction === configRessource.constantes.restriction.aucune) aliasData.restriction = configRessource.constantes.restriction.aucune
-        else aliasData.restriction = configRessource.constantes.restriction.prive
-        // la relation ne sera ajoutée que lors de l'édition de cette ressource, inutile pour un alias
-        // mais on conserve l'ancienne
+        aliasData.restriction = ressource.restriction
+        // la relation vers l'original est inutile pour un alias,
+        // elle sera ajoutée lors de l'édition de cette alias (qui deviendra une ressource),
+        // mais on doit conserver les autres relations
         if (ressource.relations && ressource.relations.length) aliasData.relations = ressource.relations
         $ressourceRepository.save(aliasData, this)
       }).seq(function (ressAlias) {
