@@ -112,6 +112,12 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
  * @return {Promise<Lassi>}
  */
 function app (options, afterBootCallback) {
+  // after boot est facultatif, et on veut un message dans le log
+  function afterBootCallbackWrapper () {
+    if (afterBootCallback) afterBootCallback()
+    log(`${config.application.name} started`)
+  }
+
   if (typeof options === 'function') {
     afterBootCallback = options
     options = {}
@@ -126,25 +132,24 @@ function app (options, afterBootCallback) {
   // cette option noGlobalLassi n'est pas encore gérée correctement dans lassi
   if (options.noGlobalLassi) bootOptions.noGlobalLassi = options.noGlobalLassi
 
-  // on ajoute notre check sur les sesathèques distantes avant de lancer le boot
-  // (les callbacks beforeBoot et afterBoot sont sync, notre vérif async)
+  // Rq : les callbacks beforeBoot et afterBoot sont sync, notre vérif async
+
+  // le notre check sur les sesathèques distantes est plus simple avant de lancer le boot
+  // mais si on en lance 2 en même temps chacune attend l'autre jusqu'au timeout
+  // on le passe donc après, quitte à arrêter l'appli en cas de pb
+  const lassiInstance = boot(beforeBootsrap, bootOptions, afterBootCallbackWrapper)
+
   return checkLocalOnRemote().then((result) => {
     // si c'est résolu avec des erreurs, on les affiche sans bloquer la suite
     if (result && result.errors) result.errors.forEach(log.error)
-    // le boot
-    return new Promise((resolve, reject) => {
-      function afterBootCallbackWrapper (error) {
-        if (error) return reject(error)
-        if (afterBootCallback) afterBootCallback()
-        log(`${config.application.name} started`)
-        resolve(lassiInstance)
-      }
-      // on pourrait déclarer et affecter sur la même ligne car boot rend la main
-      // avant que afterBootCallbackWrapper ne soit appelé (et s'il plante la cb ne sera pas appelée)
-      const lassiInstance = boot(beforeBootsrap, bootOptions, afterBootCallbackWrapper)
-    })
+    // et on résoud avec l'instance lassi
+    return Promise.resolve(lassiInstance)
+  }).catch((error) => {
+    log.error(error)
+    log.error(`${config.application.name} ABORTING`)
+    lassiInstance.shutdown()
+    // on ne retourne rien le shutdown fera un process.exit
   })
-  // on retourne une promesse, c'est l'appelant qui gèrera le catch
 }
 
 module.exports = app
