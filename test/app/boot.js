@@ -59,6 +59,7 @@ import supertest from 'supertest'
 log.setLogLevel('error')
 
 let isBooted = false
+
 // pour que mocha rende la main, il faut shutdown lassi
 // on gère ça avec un timeout après chaque boot, et un
 // testsDone qui raccourci ce timeout (qui sera réinitialisé
@@ -94,19 +95,21 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
       resetTimer(delay)
       return resolve(resolvedValue)
     }
+    // sera appelé sur l'événement startup de lassi
     const afterBootCallback = () => {
-      anLog.config(config.lassiLogger)
-      // on garde une ref sur lassi (pas dispo en global dans un describe)
-      // et le client pour tester notre appli express
-      /* global lassi */
-      resolvedValue.lassi = lassi
-      resolvedValue.superTestClient = supertest(lassi.express)
+      if (!resolvedValue.lassi) throw new Error('Il y a eu un pb dans la méthode boot, lassi n’est pas disponible')
+      resolvedValue.superTestClient = supertest(resolvedValue.lassi.express)
       resolvedValue.testsDone = () => resetTimer(100)
       isBooted = true
-      // en ajoutant --delay dans mocha.opts, on a une fct run en global (qui prend une callback à exécuter)
-      return finish()
+      finish()
     }
     if (isBooted) return finish()
+    if (resolvedValue.lassi) {
+      // le boot a démarré mais l'événement startup n'est pas encore arrivé
+      log('waiting for boot')
+      resolvedValue.lassi.on('startup', finish)
+      return
+    }
 
     // on enregistre notre sesatheque de test
     sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
@@ -115,7 +118,12 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
     // possibilité de modifier le logLevel là-bas
     anLog.config(config.lassiLogger)
     // boot
-    app(afterBootCallback).then(finish)
+    app(afterBootCallback).then((lassiInstance) => {
+      // on est dans le then mais afterBootCallback n'a pas encore été appelée (à priori)
+      anLog.config(config.lassiLogger)
+      resolvedValue.lassi = lassiInstance
+      // finish sera appelé dans afterBootCallback
+    }).catch(log.error)
   } catch (error) {
     reject(error)
   }

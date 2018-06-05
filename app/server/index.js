@@ -49,6 +49,8 @@ const boot = require('./boot')
 const config = require('./config')
 const {checkLocalOnRemote} = require('./configCheck')
 
+let lassiInstance
+
 /**
  * Ajoute nos middlewares et listeners, après déclaration des composants mais avant bootstrap
  * @param {Lassi} lassi L’instance de lassi de cette application
@@ -118,6 +120,8 @@ function app (options, afterBootCallback) {
     log(`${config.application.name} started`)
   }
 
+  if (lassiInstance) return Promise.resolve(lassiInstance)
+
   if (typeof options === 'function') {
     afterBootCallback = options
     options = {}
@@ -137,7 +141,7 @@ function app (options, afterBootCallback) {
   // le notre check sur les sesathèques distantes est plus simple avant de lancer le boot
   // mais si on en lance 2 en même temps chacune attend l'autre jusqu'au timeout
   // on le passe donc après, quitte à arrêter l'appli en cas de pb
-  const lassiInstance = boot(beforeBootsrap, bootOptions, afterBootCallbackWrapper)
+  lassiInstance = boot(beforeBootsrap, bootOptions, afterBootCallbackWrapper)
 
   return checkLocalOnRemote().then((result) => {
     // si c'est résolu avec des erreurs, on les affiche sans bloquer la suite

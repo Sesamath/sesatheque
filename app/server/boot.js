@@ -35,6 +35,8 @@ const config = require('./config')
 const log = require('./tools/log.js')
 const {merge} = require('sesajstools/utils/object')
 
+let lassiInstance
+
 /**
  * Appelé après déclaration des composants mais avant bootstrap
  * @callback beforeBootstrapCallback
@@ -49,11 +51,16 @@ const {merge} = require('sesajstools/utils/object')
  * @param {simpleCallback} afterBootCb
  */
 function boot (beforeBootstrapCb, options, afterBootCb) {
+  if (lassiInstance) {
+    log.error(new Error('boot déjà appelé, beforeBootstrapCb et options ignorés'))
+    if (afterBootCb) afterBootCb()
+    return lassiInstance
+  }
   if (!options) options = {}
   options.root = __dirname
   // @todo pas de var globale lassi
   // options.noGlobalLassi = true
-  const lassiInstance = lassi(options)
+  lassiInstance = lassi(options)
   if (options.config) {
     merge(config, options.config)
     // lassi charge en settings ${options.root}/config
