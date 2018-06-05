@@ -98,7 +98,7 @@
     "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#f1d4d4b",
     "sesajstools": "Sesamath/sesajstools",
     "sesalab-sso": "Sesamath/sesalab-sso#1.0.12",
-    "sesatheque-client": "Sesamath/sesatheque-client#1.2.48"
+    "sesatheque-client": "Sesamath/sesatheque-client#1.2.49"
   },
   "devDependencies": {
     "amdefine": "^1.0.1",

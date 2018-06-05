@@ -45,12 +45,18 @@
 import app from '../../app/server/index'
 import config from '../../app/server/config'
 import anLog from 'an-log'
-import sesatheques from 'sesatheque-client/src/sesatheques'
+// si on a pas de link vers le module on peut pas aller dans src
+// import sesatheques from 'sesatheque-client/src/sesatheques'
+import sesatheques from 'sesatheque-client/dist/sesatheques'
+import log from 'sesajstools/utils/log'
+
 /**
  * @see https://github.com/visionmedia/supertest
  * @see https://visionmedia.github.io/superagent/
  */
 import supertest from 'supertest'
+
+log.setLogLevel('error')
 
 let isBooted = false
 // pour que mocha rende la main, il faut shutdown lassi
@@ -88,26 +94,28 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
       resetTimer(delay)
       return resolve(resolvedValue)
     }
-    if (isBooted) return finish()
-
-    // on enregistre notre sesatheque de test
-    sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
-    // on configure an-log pour qu'il mette tout en fichier
-    // les logs de l'appli sont dans le dossier configuré dans _private/test.js
-    // possibilité de modifier le logLevel là-bas
-    anLog.config(config.lassiLogger)
-    // boot
-    app(function afterBootCallback () {
+    const afterBootCallback = () => {
       anLog.config(config.lassiLogger)
       // on garde une ref sur lassi (pas dispo en global dans un describe)
       // et le client pour tester notre appli express
+      /* global lassi */
       resolvedValue.lassi = lassi
       resolvedValue.superTestClient = supertest(lassi.express)
       resolvedValue.testsDone = () => resetTimer(100)
       isBooted = true
       // en ajoutant --delay dans mocha.opts, on a une fct run en global (qui prend une callback à exécuter)
       return finish()
-    })
+    }
+    if (isBooted) return finish()
+
+    // on enregistre notre sesatheque de test
+    sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
+    // on configure an-log d'après la conf
+    // les logs de l'appli sont dans le dossier configuré dans _private/test.js
+    // possibilité de modifier le logLevel là-bas
+    anLog.config(config.lassiLogger)
+    // boot
+    app(afterBootCallback).then(finish)
   } catch (error) {
     reject(error)
   }

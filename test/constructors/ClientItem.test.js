@@ -31,7 +31,9 @@
 'use strict'
 /* global describe, it */
 import Ref from 'sesatheque-client/src/constructors/Ref'
-import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
+// si on a pas de link vers le module on peut pas aller dans src
+// import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
+import ClientItem from 'sesatheque-client/dist/ClientItem'
 
 import fakeRef from '../helpers/fakeRef'
 import fakeRessource from '../helpers/fakeRessource'

@@ -5451,9 +5451,9 @@ sesalab-sso@Sesamath/sesalab-sso#1.0.12:
     request "2.82.0"
     sesajstools Sesamath/sesajstools
 
-sesatheque-client@Sesamath/sesatheque-client#1.2.48:
-  version "1.2.48"
-  resolved "https://codeload.github.com/Sesamath/sesatheque-client/tar.gz/2263baa34c59a401454acc3a60eae580db4356b5"
+sesatheque-client@Sesamath/sesatheque-client#1.2.49:
+  version "1.2.49"
+  resolved "https://codeload.github.com/Sesamath/sesatheque-client/tar.gz/27309cf6dacbaf798e00148762228882751be9ba"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
