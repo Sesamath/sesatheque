@@ -40,7 +40,7 @@ const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
 const {ensure} = require('../tools')
 const url = require('../tools/url')
-const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
+const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
 const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
 const myBaseId = config.application.baseId
@@ -723,17 +723,6 @@ module.exports = function controllersFactory (component) {
     })
 
     /**
-     * Retourne l'url d'une baseId
-     * @route GET /api/baseId/:id
-     */
-    controller.get('baseId/:id', function (context) {
-      const baseId = context.arguments.id
-      const baseUrl = getBaseUrl(baseId, false)
-      if (baseUrl) $json.sendOk(context, {baseUrl})
-      else $json.sendError(context, `Sésathèque ${baseId} inconnue sur ${config.application.baseUrl}`)
-    })
-
-    /**
      * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
      * Retourne {@link reponseRessourceOid}
      * @route GET /api/clone/:oid
@@ -797,24 +786,26 @@ module.exports = function controllersFactory (component) {
     })
 
     /**
-     * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant en auteur
-     * (sinon il pourra pas la supprimer), avec publié et privé
+     * Crée un alias de ressource en mettant l'utilisateur courant en auteur (de l'alias)
+     * (sinon il pourra pas le supprimer)
+     * Ne deviendra une vraie ressource clonée que si on l'édite
      * Retourne {@link Ref}
      * Utiliser la méthode sesatheque-client:cloneItem
      * @route GET /api/externalClone/:baseId/:oid
      */
     controller.get('externalClone/:baseId/:oid', function (context) {
-      const {oid} = context.arguments
-      const baseIdOrigine = context.arguments.baseId
+      const {baseIdOrigine, oid} = context.arguments
+      const rid = `${baseIdOrigine}/${oid}`
+      const myBaseId = config.application.baseId
       const pid = $accessControl.getCurrentUserPid(context)
       flow().seq(function () {
         if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
-        const baseUrl = getBaseUrl(baseIdOrigine)
-        // si on est là c'est une baseId connue de sesatheque-client,
-        // mais ça suffit pas pour qu'on la référence
-        if (!config.sesathequesById[baseIdOrigine]) return this(new Error(`Sésathèque ${baseIdOrigine} connue (${baseUrl}) mais pas déclarée comme source possible de cette sésathèque`))
-        // on peut aller chercher la ressource
-        $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, this)
+        // on accepte de cloner une ressource locale
+        if (baseIdOrigine === myBaseId || config.sesatheques.some(({baseId}) => baseId === baseIdOrigine)) {
+          $ressourceFetch.fetchOriginal(rid, this)
+        } else {
+          this(new Error(`La sésathèque ${baseIdOrigine} n'est pas déclarée comme source possible de cette sésathèque`))
+        }
       }).seq(function (ressource) {
         log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
         // on passe par Ref pour filtrer ce qu'on garde (pour un alias, seulement ce que ref utilise)

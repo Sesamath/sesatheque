@@ -30,20 +30,21 @@
  */
 
 'use strict'
-const anLog = require('an-log')
 const lassi = require('lassi')
 const config = require('./config')
-const sesatheques = require('sesatheque-client/src/sesatheques')
-const {exists, addSesatheque} = sesatheques
 const log = require('./tools/log.js')
 const {merge} = require('sesajstools/utils/object')
 
-const appName = config.application.name
-const logger = anLog(appName)
-
+/**
+ * Appelé après déclaration des composants mais avant bootstrap
+ * @callback beforeBootstrapCallback
+ * @param {Lassi} L'instance lassi
+ * @param {Component} sesatheque Notre appli
+ * @param {string[]} La liste des dépendances de notre appli
+ */
 /**
  * Boot l'application
- * @param beforeBootstrapCb
+ * @param {beforeBootstrapCallback} beforeBootstrapCb
  * @param {object} [options] Options qui seront passées à lassi() (@link Lassi)
  * @param {simpleCallback} afterBootCb
  */
@@ -58,11 +59,13 @@ function boot (beforeBootstrapCb, options, afterBootCb) {
     // lassi charge en settings ${options.root}/config
     merge(lassiInstance.settings, options.config)
   }
+  const confApp = config.application
+  log(`Démarrage de l’application ${confApp.name} avec l'environnement ${confApp.staging}`)
 
-  global.isProd = !options.cli && config.application.staging === 'prod'
-
-  // nos loggers
-  logger("Démarrage de l'application avec l'environnement " + config.application.staging)
+  // notre fct de log en global
+  global.log = log
+  // et ce flag bien pratique aussi
+  global.isProd = !options.cli && confApp.staging === 'prod'
 
   /**
    * Gestion des traces
@@ -73,48 +76,30 @@ function boot (beforeBootstrapCb, options, afterBootCb) {
    * --stack_trace_limit=100 --stack-size=2048
    */
 
-  // on s'ajoute à la liste si on n'y est pas
-  const myBaseId = config.application.baseId
-  if (!exists(myBaseId)) addSesatheque(myBaseId, config.application.baseUrl)
-  if (config.sesatheques) {
-    if (Array.isArray(config.sesatheques)) config.sesatheques.forEach(({baseId, baseUrl}) => addSesatheque(baseId, baseUrl))
-    else logger.error('config.sesatheques non-conforme (doit être un tableau de {baseId, baseUrl})')
-  } else {
-    logger('pas d’autre sesatheque connue mise en configuration')
-  }
   // les déclarations de nos components
-  require('./main/index')
-  require('./personne/index')
-  require('./ressource')
-  require('./update/index')
-  require('./auth/index')
-  var dependancies = ['main', 'personne', 'ressource', 'update', 'auth']
-
+  const dependancies = ['main', 'personne', 'ressource', 'update', 'auth']
+  // on charge ces composants
+  dependancies.forEach(dep => require(`./${dep}`))
   // des modules sup à charger
   if (config.extraModules) {
     config.extraModules.forEach(function (module) {
-      logger('ajout du module supplémentaire ' + module)
+      log(`ajout du module supplémentaire ${module}`)
       require(module)
     })
   }
   if (config.extraDependenciesFirst) {
     config.extraDependenciesFirst.forEach(function (dependency) {
-      logger('ajout en premier de la dépendance supplémentaire ' + dependency)
+      log(`ajout en premier de la dépendance supplémentaire ${dependency}`)
       dependancies.unshift(dependency)
     })
   }
   if (config.extraDependenciesLast) {
     config.extraDependenciesLast.forEach(function (dependency) {
-      logger('ajout en dernier de la dépendance supplémentaire ' + dependency)
+      log(`ajout en dernier de la dépendance supplémentaire ${dependency}`)
       dependancies.push(dependency)
     })
   }
-  // Notre appli qui sera mise en global (pour que chacun puisse y ajouter ses controleurs ou services)
-  // console.log('au boot', dependancies)
-  var sesatheque = lassiInstance.component('sesatheque', dependancies)
-
-  // notre fct de log en global
-  global.log = log
+  const sesatheque = lassiInstance.component('sesatheque', dependancies)
 
   beforeBootstrapCb(lassiInstance, sesatheque, dependancies)
 
@@ -123,11 +108,11 @@ function boot (beforeBootstrapCb, options, afterBootCb) {
   // et on lance le boot
   lassiInstance.bootstrap(sesatheque, function (error) {
     if (error) {
-      logger.error('boot failed')
-      logger.error(error)
+      log.error('boot failed')
+      log.error(error)
       process.exit()
     }
-    logger('end bootstrap')
+    log('end bootstrap')
   })
 
   return lassiInstance

@@ -66,7 +66,6 @@ try {
   }
   config.application.baseUrl = 'http://bibliotheque.local:3001/'
   config.application.baseId = 'biblilocal3001'
-  config.application.baseIdRegistrar = 'biblilocal3001'
 
   // les noms des hosts imposés par le docker-compose
   // c'est pas obligatoire de déclarer ça en _private, on vérifie

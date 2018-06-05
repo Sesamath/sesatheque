@@ -34,14 +34,16 @@
  * Configuration de l'application
  */
 const path = require('path')
-// const anLog = require('an-log')
 
+const log = require('sesajstools/utils/log')
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
+
 const {addSesatheque, reBaseUrl} = require('sesatheque-client/src/sesatheques')
 // la conf du composant ressource à part
 const configRessource = require('./ressource/config')
 const {version} = require('../../package')
+const configCheckSesatheques = require('./configCheckSesatheques')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -99,9 +101,7 @@ const config = {
     title: 'Sésathèque',
     // h1 de la page d'accueil
     homeTitle: 'Bienvenue sur cette Sésathèque',
-    // la référence pour valider des baseId, toutes les sesatheques enregistrées chez un registrar
-    // peuvent référencer des items d'une autre du même registrar
-    baseIdRegistrar: 'sesabibli',
+    // le chemin par défaut des fichiers dust
     defaultViewsPath: 'app/server/views',
     // mis dans _private/config.js car dépendant de l'instance
     baseId: 'notConfigured', // l'id de cette sésathèque
@@ -262,29 +262,34 @@ if (!config.lassiLogger) {
 /**
  * À partir le là on a la conf locale, on vérifie et normalise un peu (autant signaler une erreur dès le boot)
  */
-
-// on enlève le debug mysql en prod
-if (config.application.staging === 'prod' && config.$entities.database.debug) {
-  delete config.$entities.database.debug
-}
+if (!config.application.baseId) throw new Error('config.application.baseId manquant')
+if (!config.application.baseUrl) throw new Error('config.application.baseUrl manquant')
 // on ajoute toujours un slash de fin à baseUrl
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
 
-// on ajoute notre sesatheque (si le client la connait déjà ça renvoie false mais ne gêne pas)
+// on ajoute notre sesatheque au registrar local, si elle est déjà connue :
+// - avec cette baseUrl ça renvoie false mais ne gêne pas
+// - avec une autre baseUrl ça throw
 addSesatheque(config.application.baseId, config.application.baseUrl)
 
-// idem pour les sesatheques, mais on ajoute un objet byId, plus simple à tester
-config.sesathequesById = {}
-if (Array.isArray(config.sesatheques) && config.sesatheques.length) {
-  // check baseUrl valides
-  config.sesatheques = filterOnBaseUrl(config.sesatheques)
-  config.sesatheques.forEach(s => {
-    const {baseId, baseUrl} = s
-    addSesatheque(baseId, baseUrl)
-    config.sesathequesById[baseId] = s
-  })
-} else {
+// on garanti que sesatheques est un tableau
+if (!config.sesatheques) config.sesatheques = []
+if (!Array.isArray(config.sesatheques)) {
+  console.error(new Error('config.sesatheques doit être un Array'))
   config.sesatheques = []
+}
+// s'il y a du contenu il doit être conforme
+if (config.sesatheques.length) {
+  // check baseUrl valides (avec ajout slash de fin s'il manque)
+  config.sesatheques = filterOnBaseUrl(config.sesatheques)
+  const errors = configCheckSesatheques(config.sesatheques, true)
+  // en cas d'erreur on throw pour arrêter le boot
+  if (errors.length) {
+    errors.forEach(console.error)
+    throw new Error('config.sesatheques contient des erreurs')
+  } else {
+    log(`config.sesatheques OK (${config.sesatheques.map(({baseId, baseUrl}) => `${baseId} : ${baseUrl}`).join(', ')})`)
+  }
 }
 
 /**
@@ -292,21 +297,27 @@ if (Array.isArray(config.sesatheques) && config.sesatheques.length) {
  * (dans ce cas on est obligatoirement client sso de ces sesalab,
  * ce qui n'empêcherait pas d'être client sso d'autres sesatheques qui implémenteraient un $sesalabSsoServer)
  */
-if (Array.isArray(config.sesalabs) && config.sesalabs.length) config.sesalabs = filterOnBaseUrl(config.sesalabs)
-else config.sesalabs = []
-// pour valider du CORS
+if (!config.sesalabs) config.sesalabs = []
+if (!Array.isArray(config.sesalabs)) {
+  console.error(new Error('config.sesalabs doit être un Array'))
+  config.sesalabs = []
+}
+if (config.sesalabs.length) config.sesalabs = filterOnBaseUrl(config.sesalabs)
+
+// pour valider du CORS, les baseUrl sans slash de fin
 config.sesalabsByOrigin = {}
-config.sesalabs.forEach(s => {
-  const origin = s.baseUrl.substr(0, s.baseUrl.length - 1)
+config.sesalabs.forEach(({baseUrl}) => {
+  const origin = baseUrl.substr(0, baseUrl.length - 1)
   config.sesalabsByOrigin[origin] = true
 })
 if (!config.components) config.components = {}
+
+// s'il y a des sesalab on génère la config du component sesalab-sso
 if (config.sesalabs.length) {
-  // s'il y a des sesalab, il faut une config du component sesalabSso
-  // on la crée d'après les infos des sesalabs
   if (!config.components.sesalabSso) config.components.sesalabSso = {}
   const confSso = config.components.sesalabSso
-  confSso.authServers = Array.isArray(confSso.authServers && confSso.authServers.length) ? filterOnBaseUrl(confSso.authServers) : []
+  const hasLocalConf = Array.isArray(confSso.authServers) && confSso.authServers.length
+  confSso.authServers = hasLocalConf ? filterOnBaseUrl(confSso.authServers) : []
   // et on ajoute un authServer pour chaque sesalab
   config.sesalabs.forEach(function (sesalab) {
     const authServer = {
@@ -348,10 +359,11 @@ if (config.sesalabs.length) {
     next()
   }
   // et on ajoute le component sesalab-sso en dépendances
+  const name = 'sesalab-sso'
   if (!config.extraModules) config.extraModules = []
-  config.extraModules.push('sesalab-sso')
+  if (!config.extraModules.includes(name)) config.extraModules.push(name)
   if (!config.extraDependenciesLast) config.extraDependenciesLast = []
-  config.extraDependenciesLast.push('sesalab-sso')
+  if (!config.extraDependenciesLast.includes(name)) config.extraDependenciesLast.push(name)
 }
 
 module.exports = config
