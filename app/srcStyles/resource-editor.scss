@@ -75,6 +75,13 @@ label {
   }
 }
 
+iframe {
+  border: none;
+  padding: 10px;
+  width: 100%;
+  min-height: 350px;
+}
+
 hr {
   clear: both;
   border-top: 3px solid #fbfbfb;

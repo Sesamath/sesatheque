@@ -1,3 +1,4 @@
+import {Field} from 'redux-form'
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import config from '../../server/config'
@@ -10,14 +11,15 @@ class Iframe extends Component {
     super(props)
     this.iframe = React.createRef()
     this.name = 'sesatheque-iframe'
+    this.state = { manualEdition: false }
   }
 
   componentDidMount () {
-    this.registerMessageListener()
+    window.addEventListener(CHANNEL, this.messageHandler.bind(this), false)
   }
 
   componentWillUnmount () {
-    this.unregisterMessageListener()
+    window.removeEventListener(CHANNEL, this.messageHandler.bind(this))
   }
 
   emit (message) {
@@ -29,42 +31,54 @@ class Iframe extends Component {
   }
 
   messageHandler (event) {
+    // Mise à jour du textarea
     let {action, data} = event
-    this.props.onMessage(action, data)
-  }
+    this.props.change('parametres', data.toString())
 
-  registerMessageListener () {
-    if (window.addEventListener) {
-      window.addEventListener(CHANNEL, this.messageHandler.bind(this), false)
-    } else {
-      window.attachEvent(CHANNEL, this.messageHandler.bind(this))
+    // Notifie le composant parent
+    if (this.props.onMessage) {
+      this.props.onMessage(action, data)
     }
   }
 
-  unregisterMessageListener () {
-    if (window.addEventListener) {
-      window.removeEventListener(CHANNEL, this.messageHandler.bind(this))
-    } else {
-      window.detachEvent(CHANNEL, this.messageHandler.bind(this))
-    }
+  onLoad () {
+    if (!this.props.onLoad) return
+    this.props.onLoad()
+  }
+
+  toggleManualEditor () {
+    this.setState({manualEdition: !this.state.manualEdition})
   }
 
   render () {
     return (
       <fieldset>
-        <div>
-          <iframe ref={this.iframe} src={this.props.src}>
-            <p>Votre navigateur semble ne pas supporter les iframes</p>
-          </iframe>
+        <button onClick={this.toggleManualEditor.bind(this)}>Basculer en mode manuel</button>
+        <div style={{display: this.state.manualEdition ? 'block' : 'none'}}>
+          <label style={{display: this.props.allowManualEdition ? 'block' : 'none'}}>Script
+            <Field
+              name="parametres"
+              component="textarea"
+              cols="80"
+              rows="20"
+            />
+          </label>
         </div>
+        <iframe onLoad={this.onLoad.bind(this)} ref={this.iframe} src={this.props.src} style={{display: !this.state.manualEdition ? 'block' : 'none'}}>
+          <p>Votre navigateur semble ne pas supporter les iframes</p>
+        </iframe>
       </fieldset>
     )
   }
 }
 
 Iframe.propTypes = {
+  allowManualEdition: PropTypes.bool,
   onMessage: PropTypes.func,
-  src: PropTypes.string
+  src: PropTypes.string,
+  change: PropTypes.func,
+  onLoad: PropTypes.func,
+  parametres: PropTypes.object
 }
 
 export default Iframe
