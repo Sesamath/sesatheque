@@ -43,7 +43,7 @@ const {addSesatheque, reBaseUrl} = require('sesatheque-client/src/sesatheques')
 // la conf du composant ressource à part
 const configRessource = require('./ressource/config')
 const {version} = require('../../package')
-const configCheckSesatheques = require('./configCheckSesatheques')
+const checkConfigSesatheques = require('./checkConfigSesatheques')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -282,7 +282,7 @@ if (!Array.isArray(config.sesatheques)) {
 if (config.sesatheques.length) {
   // check baseUrl valides (avec ajout slash de fin s'il manque)
   config.sesatheques = filterOnBaseUrl(config.sesatheques)
-  const errors = configCheckSesatheques(config.sesatheques, true)
+  const errors = checkConfigSesatheques(config.sesatheques, true)
   // en cas d'erreur on throw pour arrêter le boot
   if (errors.length) {
     errors.forEach(console.error)

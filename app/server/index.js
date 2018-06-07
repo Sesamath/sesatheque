@@ -47,7 +47,7 @@ const log = require('sesajstools/utils/log')
 const addMiddlewares = require('./addMiddlewares')
 const boot = require('./boot')
 const config = require('./config')
-const {checkLocalOnRemote} = require('./configCheck')
+const {checkLocalOnRemote} = require('./checkConfig')
 
 let lassiInstance
 

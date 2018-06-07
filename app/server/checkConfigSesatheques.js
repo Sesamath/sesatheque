@@ -31,7 +31,8 @@
 'use strict'
 
 const {addSesatheque, getBaseUrl} = require('sesatheque-client/src/sesatheques')
-// Cette fonction ne peut pas être dans checkConfig car il requiert config qui a besoin de cette fct
+// Cette fonction ne peut pas être dans le module checkConfig, ça causerait des dépendances cycliques
+// checkConfig => config => checkConfigSesatheques (ce module)
 
 /**
  * Vérifie les couples baseId/baseUrl fournis et retourne une liste d'erreurs (vide si y'en a pas)
@@ -39,7 +40,7 @@ const {addSesatheque, getBaseUrl} = require('sesatheque-client/src/sesatheques')
  * @return {string[]} la liste des erreurs
  * @private
  */
-module.exports = function configCheckSesatheques (sesatheques, addIfUnknown = false) {
+module.exports = function checkConfigSesatheques (sesatheques, addIfUnknown = false) {
   const errors = []
   if (!Array.isArray(sesatheques)) throw new Error('sesatheques doit être un Array')
   if (!sesatheques.length) throw new Error('sesatheques est vide')

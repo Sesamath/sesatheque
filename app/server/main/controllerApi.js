@@ -31,13 +31,13 @@
 'use strict'
 const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const config = require('../config')
-const {checkSesalab} = require('../configCheck')
-const configCheckSesatheques = require('../configCheckSesatheques')
+const {checkSesalab, checkSesatheque} = require('../checkConfig')
 
 module.exports = function controllerFactory (component) {
-  component.controller(function apiCheckSesalabConfigController () {
+  component.controller(function mainApiController () {
     /**
-     * Retourne la baseUrl d'une baseId
+     * Retourne la baseUrl d'une baseId de sesatheque
+     * (connue par configuration ou déclarée ici par un client)
      * @route GET /api/baseId/:id
      */
     this.get('/api/baseId/:id', function (context) {
@@ -51,42 +51,23 @@ module.exports = function controllerFactory (component) {
      * Valide la configuration d'un sesalab
      * Si tout est bon, retournera {success: true, baseId: 'laBaseId assignée au sesalab appelant'}
      * sinon un {success: false, errors: ['error 1', …]}
-     * @route POST /api/checkSesalabConfig
+     * @route POST /api/checkSesalab
      */
-    this.post('/api/checkSesalabConfig', function (context) {
+    this.post('/api/checkSesalab', function (context) {
       const {baseUrl, sesatheques} = context.post
-      const {baseId, errors} = checkSesalab(baseUrl, sesatheques)
-      if (errors.length) return context.restKo({errors})
-      context.rest({baseId})
+      const {baseId, errors, warnings} = checkSesalab(baseUrl, sesatheques)
+      if (errors.length) return context.restKo({errors, warnings})
+      context.rest({message: 'Configuration sesalab OK', baseId, warnings})
     })
 
     /**
      * Valide la configuration d'une sésatheque (qui nous envoie ses sesatheques et sesalabs)
-     * @route POST /api/checkSesatheques
+     * @route POST /api/checkSesatheque
      */
-    this.post('/api/checkSesatheques', function (context) {
-      const {sesalabs, sesatheques} = context.post
-      const errors = configCheckSesatheques(sesatheques)
-      // pour les sesalab, on vérifie juste que si on en a en commun ils ont la même baseUrl
-      if (Array.isArray(sesalabs)) {
-        const mySesalabsById = {}
-        const mySesalabsByUrl = {}
-        config.sesalabs.forEach(({baseId, baseUrl}) => {
-          mySesalabsById[baseId] = baseUrl
-          mySesalabsByUrl[baseUrl] = baseId
-        })
-        sesalabs.forEach(({baseId, baseUrl}) => {
-          const myUrl = mySesalabsById[baseId]
-          const myId = mySesalabsByUrl[baseUrl]
-          if (myUrl && myUrl !== baseUrl) errors.push(`Le sesalab ${baseId} est connu ici avec ${myUrl} et pas ${baseUrl}`)
-          if (myId && myId !== baseId) errors.push(`Le sesalab ${baseUrl} est connu ici sous ${myId} et pas ${baseId}`)
-        })
-      } else {
-        errors.push('paramètres incorrects, sesalabs doit être un Array')
-      }
-
-      if (errors.length) return context.restKo({errors})
-      context.rest({message: 'Configuration OK'})
+    this.post('/api/checkSesatheque', function (context) {
+      const {errors, warnings} = checkSesatheque(context.post)
+      if (errors.length) context.restKo({errors, warnings})
+      else context.rest({message: 'Configuration sésathèque OK', warnings})
     })
   })
 }
