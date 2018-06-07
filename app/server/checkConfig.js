@@ -86,7 +86,7 @@ function checkLocalOnRemote () {
   // On vérifie pendant 10 min (en cas d'update bloquant sur une autre sesathèque)
   const maxWait = 10 * 60 * 1000
   // attente avant l'essai suivant (ms)
-  const retryDelay = 30 * 1000
+  const retryDelay = 5000
   // pas la peine d'attendre une réponse plus longtemps (ms)
   const timeout = 30 * 1000
   const toCheck = {
