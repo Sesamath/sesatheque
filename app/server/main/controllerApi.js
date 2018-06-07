@@ -31,7 +31,7 @@
 'use strict'
 const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const config = require('../config')
-const {checkRemoteSesalab} = require('../configCheck')
+const {checkSesalab} = require('../configCheck')
 const configCheckSesatheques = require('../configCheckSesatheques')
 
 module.exports = function controllerFactory (component) {
@@ -55,7 +55,7 @@ module.exports = function controllerFactory (component) {
      */
     this.post('/api/checkSesalabConfig', function (context) {
       const {baseUrl, sesatheques} = context.post
-      const {baseId, errors} = checkRemoteSesalab(baseUrl, sesatheques)
+      const {baseId, errors} = checkSesalab(baseUrl, sesatheques)
       if (errors.length) return context.restKo({errors})
       context.rest({baseId})
     })
