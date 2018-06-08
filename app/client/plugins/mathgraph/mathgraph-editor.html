@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=9">
+  <title>${title}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <style type="text/css">
+    #errors {color: red;}
+    svg {
+      -webkit-user-select: none; /* Chrome all / Safari all */
+      -moz-user-select: none; /* Firefox all */
+      -ms-user-select: none; /* IE 10+ */
+      -webkit-tap-highlight-color: transparent; /*Nécessaire sur ipad pour ne pas avoir de rectanle gris sélectionné lors des touch events */
+    }
+  </style>
+  <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [["$","$"],["\\(","\\)"]]
+        },
+        SVG:{mtextFontInherit: false},
+        jax: ["input/TeX","output/SVG"],
+        TeX: {extensions: ["color.js"]},
+        messageStyle:'none'
+      });
+    </script>
+<script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full"></script>
+  <link rel="stylesheet" href="https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.css"/>
+  <script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js"></script>
+</head>
+<body>
+<div id="errors"></div>
+<div id="main"></div>
+<script type="application/javascript">
+  function load (ressource, loadCb) {
+    const parametres = ressource.parametres
+    /* glob mtgLoader */
+    // pour le fonctionnement, cf le dépôt
+    // git@src.sesamath.net:mathgraph_js
+    // fichier src/mtgLoader.js
+    // ou documentation/index.html
+    if (typeof mtgLoader === 'function') {
+      var mtgApp
+      var figure = parametres.fig || {type:"unity", grad:"simple", unity:"deg"}
+      var svgOptions = {
+        // faut imposer ça à cause de notre css #svg plus haut
+        svgId: 'svg',
+        // la taille doit être fixée à l'avance (à cause de la gestion du svg),
+        // on peut le faire en fonction de la taille d'affichage disponible (avec un minimum)
+        width: 900,
+        height: 600
+      }
+      const isEditor = true
+      var mtgOptions = {
+        // le level sert pour ouvrir mathgraph avec une figure vierge.
+        // 0 : école
+        // 1 : collège
+        // 2 : lycée sans les nombres complexes
+        // 3 : lycée avec les nombres complexes
+        // Si la figure est fournie, en édition il faut fournir le level le plus élevé
+        // pour que le prof puisse activer tous les outils qu'il voudrait ajouter
+        level : 3,
+        // ce paramètre à true sert à afficher la figure avec des traits plus gros,
+        // des lettres plus espacées, etc.
+        // Il n'est pas contenu dans la figure
+        dys: false,
+        // open: {isEditor}, // bouton pour ouvrir une figure, l'info est dans la figure
+        // options: pour autoriser à changer les options de la figure, true par défaut
+        options: {isEditor}, // true si édition par le prof, false en consultation de ressource
+        // save: true si on veut que l'outil permettant d'enregistrer une figure soit présent
+        // onSaveCallback n'a de sens que si `figureOptions.save === true`, sinon on peut récupérer figure et résultat avec mtgApp.getResult qui renvoie {fig, score}
+        callBackAfterReady: function() {
+          loadCb(null, mtgApp.getResult.bind(mtgApp))
+        }
+      }
+      mtgApp = mtgLoader('main', figure, svgOptions, mtgOptions)
+    } else {
+      alert('mathgraph n’est pas chargé correctement')
+    }
+  }
+</script>
+</body>
+</html>

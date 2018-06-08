@@ -523,7 +523,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (ressource.aliasOf) return forkAlias(context, ressource)
       // sinon on peut afficher le form
       addToken(context, ressource)
-      if (['iep', 'j3p'].includes(ressource.type)) {
+      if (['iep', 'j3p', 'mathgraph'].includes(ressource.type)) {
         let data = {
           titre: 'Modifier la ressource',
           $metas: {title: 'Modifier la ressource'},

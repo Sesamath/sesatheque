@@ -5,12 +5,14 @@ import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
+import EditorMathGraph from './EditorMathGraph'
 import resourceLoader from './resourceLoader'
 import ShowError from './ShowError'
 
 const typeToComponent = {
   iep: EditorIep,
-  j3p: EditorJ3p
+  j3p: EditorJ3p,
+  mathgraph: EditorMathGraph
 }
 
 const ResourceForm = ({
