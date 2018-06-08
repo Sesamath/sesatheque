@@ -33,7 +33,7 @@ class Iframe extends Component {
   messageHandler (event) {
     // Mise à jour du textarea
     let {action, data} = event
-    this.props.change('parametres', data.toString())
+    this.props.change('parametres', JSON.stringify(data))
 
     // Notifie le composant parent
     if (this.props.onMessage) {
