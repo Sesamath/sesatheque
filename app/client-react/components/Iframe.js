@@ -97,8 +97,7 @@ Iframe.propTypes = {
   src: PropTypes.string,
   change: PropTypes.func,
   onLoad: PropTypes.func,
-  onToggle: PropTypes.func,
-  parametres: PropTypes.object
+  onToggle: PropTypes.func
 }
 
-export default formValues({parametres: 'parametres[parametres]'})(Iframe)
+export default Iframe
