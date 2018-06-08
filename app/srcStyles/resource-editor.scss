@@ -79,7 +79,7 @@ iframe {
   border: none;
   padding: 10px;
   width: 100%;
-  min-height: 350px;
+  min-height: 600px;
 }
 
 hr {
@@ -102,4 +102,12 @@ hr {
   margin: 10px auto;
   width: 60%;
   text-align: center;
+}
+
+.tabs-menu {
+  text-align:center;
+
+  button.inactive {
+    background-color: #aeb4c2;
+  }
 }

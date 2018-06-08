@@ -1,6 +1,6 @@
-import {Field} from 'redux-form'
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
+import {formValues, Field} from 'redux-form'
 import config from '../../server/config'
 
 const CHANNEL = 'message'
@@ -43,17 +43,28 @@ class Iframe extends Component {
 
   onLoad () {
     if (!this.props.onLoad) return
-    this.props.onLoad()
+    this.props.onLoad(this.iframe)
   }
 
-  toggleManualEditor () {
-    this.setState({manualEdition: !this.state.manualEdition})
+  toggleManualEditor (state) {
+    if (this.props.onToggle) this.props.onToggle(state)
+    this.setState({manualEdition: state})
   }
 
   render () {
     return (
       <fieldset>
-        <button onClick={this.toggleManualEditor.bind(this)}>Basculer en mode manuel</button>
+        <nav className="tabs-menu" style={{display: this.props.allowManualEdition ? 'block' : 'none'}}>
+          <button
+            type="button"
+            onClick={this.toggleManualEditor.bind(this, true)}
+            className={!this.state.manualEdition ? 'inactive' : ''}>Mode manuel</button>
+          <button
+            type="button"
+            onClick={this.toggleManualEditor.bind(this, false)}
+            className={this.state.manualEdition ? 'inactive' : ''}>Éditeur</button>
+        </nav>
+
         <div style={{display: this.state.manualEdition ? 'block' : 'none'}}>
           <label style={{display: this.props.allowManualEdition ? 'block' : 'none'}}>Script
             <Field
@@ -61,10 +72,18 @@ class Iframe extends Component {
               component="textarea"
               cols="80"
               rows="20"
+              format={(value) => {
+                if (typeof value === 'string') return value
+                return JSON.stringify(value, null, 2)
+              }}
             />
           </label>
         </div>
-        <iframe onLoad={this.onLoad.bind(this)} ref={this.iframe} src={this.props.src} style={{display: !this.state.manualEdition ? 'block' : 'none'}}>
+        <iframe
+          onLoad={this.onLoad.bind(this)}
+          ref={this.iframe}
+          src={this.props.src}
+          style={{display: !this.state.manualEdition ? 'block' : 'none'}}>
           <p>Votre navigateur semble ne pas supporter les iframes</p>
         </iframe>
       </fieldset>
@@ -78,7 +97,8 @@ Iframe.propTypes = {
   src: PropTypes.string,
   change: PropTypes.func,
   onLoad: PropTypes.func,
+  onToggle: PropTypes.func,
   parametres: PropTypes.object
 }
 
-export default Iframe
+export default formValues({parametres: 'parametres[parametres]'})(Iframe)
