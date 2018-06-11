@@ -528,7 +528,12 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           titre: 'Modifier la ressource',
           $metas: {title: 'Modifier la ressource'},
           contentBloc: {
-            $view: 'ressource-editor'
+            $view: 'ressource-editor',
+            verbose: (appConfig.application.staging !== 'prod'),
+            isDev: (appConfig.application.staging !== 'prod'),
+            baseId: appConfig.application.baseId,
+            sesatheques: appConfig.sesatheques,
+            ressource: ressource ? sjt.stringify(ressource) : ''
           },
           jsBloc: {
             $view: 'js',

@@ -56,7 +56,9 @@ const conf = {
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js',
-    react: './app/client-react/index.js'
+    react: './app/client-react/index.js',
+    // arbre passe par babel
+    arbre: './app/client/plugins/arbre/edit.js'
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
@@ -97,8 +99,6 @@ const conf = {
       {test: /app\/client\/.*\.html/, loader: 'file'},
       // editgraphe passe par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel'},
-      // arbre passe par babel
-      {test: /app\/client\/plugins\/arbre\/edit.js/, loader: 'babel'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
       // le statique
