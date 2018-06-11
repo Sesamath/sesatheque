@@ -37,6 +37,7 @@ const ResourceForm = ({
 }
 
 ResourceForm.propTypes = {
+  initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
   pristine: PropTypes.bool,
   change: PropTypes.func,
