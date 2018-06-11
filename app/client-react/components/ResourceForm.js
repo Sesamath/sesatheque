@@ -3,7 +3,7 @@ import React from 'react'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
-import EditorJ3p from './EditorJ3p'
+import EditorArbre from './EditorArbre'
 import resourceLoader from './resourceLoader'
 import ShowError from './ShowError'
 
@@ -17,7 +17,7 @@ const ResourceForm = ({
   <form onSubmit={handleSubmit}>
     <MetaForm />
     <hr />
-    <EditorJ3p change={change} />
+    <EditorArbre change={change} />
     <div className="buttons-area">
       <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
     </div>
