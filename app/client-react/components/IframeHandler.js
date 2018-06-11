@@ -1,17 +1,35 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {formValues, Field} from 'redux-form'
+import {Field} from 'redux-form'
 import config from '../../server/config'
 
 const CHANNEL = 'message'
 const SOURCE = (config.application && config.application.baseUrl) || 'http://localhost:3001'
 
-class Iframe extends Component {
+class IframeHandler extends Component {
   constructor (props) {
     super(props)
+
+    /**
+     * Référence React vers l'iframe
+     * @type {React.Ref}
+     * @see https://reactjs.org/docs/refs-and-the-dom.html
+     */
     this.iframe = React.createRef()
+
+    /**
+     * Nom/identifiant de l'iframe
+     * @type {string}
+     */
     this.name = 'sesatheque-iframe'
-    this.state = { manualEdition: false }
+
+    /**
+     * Rassemble les attributs du composant
+     * @type {object}
+     */
+    this.state = {
+      manualEdition: false
+    }
   }
 
   componentDidMount () {
@@ -22,6 +40,10 @@ class Iframe extends Component {
     window.removeEventListener(CHANNEL, this.messageHandler.bind(this))
   }
 
+  /**
+   * Transmet un mesasge à l'iframe
+   * @param {object} message Message à transmettre à l'iframe
+   */
   emit (message) {
     message.from = this.name
     message.source = SOURCE
@@ -30,25 +52,57 @@ class Iframe extends Component {
     iframeWindow.postMessage(message, SOURCE)
   }
 
-  messageHandler (event) {
-    // Mise à jour du textarea
-    let {action, data} = event
-    this.props.change('parametres', data.toString())
+  /**
+   * Formate le contenu du textarea
+   *
+   * @param {object} value Un objet JSON
+   * @return {string} Une chaine de caractères
+   */
+  formatTextarea (value) {
+    if (typeof value === 'string') return value
 
-    // Notifie le composant parent
-    if (this.props.onMessage) {
-      this.props.onMessage(action, data)
+    try {
+      return JSON.stringify(value, null, 2)
+    } catch (error) {
+      console.error(error)
+      return ''
     }
   }
 
+  /**
+   * Appelé par l'iframe lors d'un postMessage.
+   *
+   * @param {MessageEvent} event Event lié au postMessage
+   */
+  messageHandler (event) {
+    try {
+      const dataStringified = JSON.stringify(event.data)
+      this.props.change('parametres', dataStringified)
+
+      // Notifie le composant parent
+      if (this.props.onMessage) {
+        this.props.onMessage(event.data)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  /**
+   * Callback appelé au chargement de l'iframe
+   */
   onLoad () {
     if (!this.props.onLoad) return
     this.props.onLoad(this.iframe)
   }
 
-  toggleManualEditor (state) {
-    if (this.props.onToggle) this.props.onToggle(state)
-    this.setState({manualEdition: state})
+  /**
+   * Change le mode d'édition
+   * @param {bool} manualEdition True pour passer en mode édition
+   */
+  toggleManualEditor (manualEdition) {
+    if (this.props.onToggle) this.props.onToggle(manualEdition)
+    this.setState({manualEdition})
   }
 
   render () {
@@ -72,10 +126,7 @@ class Iframe extends Component {
               component="textarea"
               cols="80"
               rows="20"
-              format={(value) => {
-                if (typeof value === 'string') return value
-                return JSON.stringify(value, null, 2)
-              }}
+              format={this.formatTextarea}
             />
           </label>
         </div>
@@ -91,7 +142,7 @@ class Iframe extends Component {
   }
 }
 
-Iframe.propTypes = {
+IframeHandler.propTypes = {
   allowManualEdition: PropTypes.bool,
   onMessage: PropTypes.func,
   src: PropTypes.string,
@@ -100,4 +151,4 @@ Iframe.propTypes = {
   onToggle: PropTypes.func
 }
 
-export default Iframe
+export default IframeHandler
