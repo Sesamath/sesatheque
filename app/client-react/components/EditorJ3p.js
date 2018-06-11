@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
-import Iframe from './Iframe'
+import IframeHandler from './IframeHandler'
 
 class EditorJ3p extends Component {
   constructor (props) {
@@ -80,7 +80,7 @@ class EditorJ3p extends Component {
   render () {
     return (
       <fieldset>
-        <Iframe
+        <IframeHandler
           allowManualEdition
           change={this.props.change}
           onLoad={this.onIframeLoaded.bind(this)}

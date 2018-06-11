@@ -6,7 +6,7 @@ import config from '../../server/config'
 const CHANNEL = 'message'
 const SOURCE = (config.application && config.application.baseUrl) || 'http://localhost:3001'
 
-class Iframe extends Component {
+class IframeHandler extends Component {
   constructor (props) {
     super(props)
 
@@ -142,7 +142,7 @@ class Iframe extends Component {
   }
 }
 
-Iframe.propTypes = {
+IframeHandler.propTypes = {
   allowManualEdition: PropTypes.bool,
   onMessage: PropTypes.func,
   src: PropTypes.string,
@@ -151,4 +151,4 @@ Iframe.propTypes = {
   onToggle: PropTypes.func
 }
 
-export default Iframe
+export default IframeHandler
