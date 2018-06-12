@@ -115,19 +115,20 @@ body {min-width: 300px;}
 #main, #content {
   @extend .pam;
 }
-#main > h1 {margin-bottom: 0; color: $primary-color-light;}
+#main > h1, #root > h1 {margin-bottom: 0; color: $primary-color-light;}
 
 #actions ul {
   float: right;
   padding: 0 ;
   text-align: center;
   list-style: none;
-  margin: 0 0 0 1rem;
+  margin: 0 0 1rem 1rem;
   li {
     float: right;
-    @include border-tab();
-    padding: $spacer-tiny $spacer-small;
-    margin-right: -1px;
+    padding: $spacer-tiny $spacer-tiny;
+    a.selected {
+      background-color: #999;
+    }
   }
   li.selected {
     border-bottom: thin solid $background-base;
