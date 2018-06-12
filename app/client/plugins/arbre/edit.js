@@ -54,7 +54,7 @@ import { addNode, build, getEnfants } from 'sesatheque-client/src/jstree'
 const edit = function (arbre, options) {
   if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
   if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
-  const myBaseId = options.baseId;
+  const myBaseId = options.baseId
   // nos fcts internes
   /**
    * Ajoute le lien aperçu aux links
