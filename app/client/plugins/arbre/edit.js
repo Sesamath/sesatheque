@@ -32,7 +32,6 @@
 'use strict'
 
 import dom from 'sesajstools/dom'
-import sjtUrl from 'sesajstools/http/url'
 import log from 'sesajstools/utils/log'
 import $ from 'jquery'
 import 'jstree'
@@ -50,8 +49,9 @@ import { addNode, build, getEnfants } from 'sesatheque-client/src/jstree'
  * @service plugins/arbre/edit
  * @param arbre
  * @param options
+ * @param saveCallback
  */
-const edit = function (arbre, options) {
+const edit = function (arbre, options, saveCallback) {
   if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
   if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
   const myBaseId = options.baseId
@@ -64,12 +64,11 @@ const edit = function (arbre, options) {
   function addLinkApercu (links, node) {
     const url = node.a_attr && node.a_attr[ 'data-displayurl' ]
     // Apercu sur tous les éléments dont on a une ref
-    if (url) {
-      links.apercu = {
-        label: 'Aperçu',
-        action: function () {
-          iframeApercu.src = url
-        }
+    if (!url) return
+    links.apercu = {
+      label: 'Aperçu',
+      action: function () {
+        iframeApercu.src = url
       }
     }
   }
@@ -123,7 +122,7 @@ const edit = function (arbre, options) {
    * Crée un json de la liste des enfants de l'arbre destination et le met dans le textarea
    * @private
    */
-  function dstTreeToTextarea () {
+  function getJSON () {
     let enfants
     let enfantsStr = ''
     try {
@@ -140,7 +139,8 @@ const edit = function (arbre, options) {
       log.error('Le parsing json a planté', error, enfants)
       return addTreeError('Erreur interne, impossible de récupérer les enfants')
     }
-    $textarea.val(enfantsStr)
+
+    return enfantsStr
   }
 
   /**
@@ -154,28 +154,6 @@ const edit = function (arbre, options) {
     dom.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css')
     // nos éléments html
     container = window.document.getElementById('display')
-    $container = $(container)
-    const blocTexte = window.document.getElementById('groupEnfants') // le textarea et son titre
-    // faut ajouter nos eléments en first child
-    // ancre
-    dom.addElementFirstChild(blocTexte, 'a', { name: 'enfants' })
-    // lien et comportement pour repasser en graphique
-    const linkShowGraphic = dom.addElementFirstChild(blocTexte, 'a', {
-      href: '#enfants',
-      style: { float: 'left' }
-    }, 'passer en mode graphique')
-    $linkShowGraphic = $(linkShowGraphic)
-    $linkShowGraphic.click(showGraphic)
-
-    // lien et comportement pour passer en mode texte
-    const linkShowTxt = dom.addElementFirstChild(blocTexte, 'a', {
-      href: '#enfants',
-      style: { float: 'left' }
-    }, 'passer en mode texte')
-    $linkShowTxt = $(linkShowTxt)
-    $linkShowTxt.click(showTxt)
-    // dom.addElement(blocTexte, 'br')
-    // dom.addElement(blocTexte, 'a', {href:'?editor=texte'}, 'passer en mode texte sans sauvegarder')
   }
 
   /**
@@ -404,18 +382,6 @@ const edit = function (arbre, options) {
   } // loadSrc
 
   /**
-   * Récupère l'arbre jstree et complète le champ enfants avec
-   * @private
-   */
-  function saveDst () {
-    if (!isTextMode) {
-      dstTreeToTextarea()
-    }
-
-    return true
-  }
-
-  /**
    * Affiche l'arbre en src
    * @param error
    * @param {Ref} arbre
@@ -489,41 +455,17 @@ const edit = function (arbre, options) {
   } // showSrc
 
   /**
-   * Passe en mode texte
-   * @private
-   */
-  function showTxt () {
-    $linkShowTxt.hide()
-    $container.hide()
-    dstTreeToTextarea()
-    $textarea.show()
-    $linkShowGraphic.show()
-    isTextMode = true
-  }
-
-  /**
    * passe en mode graphique
    * @private
    */
-  function showGraphic () {
+  function showGraphic (parametres) {
     if (!$dstTree) initDomGraphic()
-    const enfantsStr = $textarea.val()
-    console.log(`#${enfantsStr}#`)
     try {
-      if (enfantsStr) {
-        dstTree.enfants = JSON.parse($textarea.val())
-      } else {
-        dstTree.enfants = []
-      }
-      $linkShowGraphic.hide()
-      $textarea.hide()
+      dstTree.enfants = parametres || []
       log('On va charger en dst', dstTree)
       loadDst(dstTree)
-      $container.show()
-      $linkShowTxt.show()
-      isTextMode = false
     } catch (error) {
-      addTreeError('json enfants invalide : \n' + enfantsStr)
+      addTreeError('json enfants invalide : \n' + JSON.stringify(parametres, null, 2))
       log.error(error)
     }
   }
@@ -544,34 +486,17 @@ const edit = function (arbre, options) {
   // les containers (variables locales au module), qui seront affectés par initDom()
   let iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree
   // quasi les mêmes jquerifiée
-  let $container, $inputRef, $treeError, $srcTree, $dstTree, $saveButton, $textarea, $linkShowTxt, $linkShowGraphic
-  let isTextMode = true
+  let $inputRef, $treeError, $srcTree, $dstTree
   let isDstModified = false
-  // le textarea enfants
-  $textarea = $('#enfants')
-  if (!$textarea) throw new Error('Champ de sauvegarde des enfants non trouvé dans le formulaire')
-  // var globale pour $.jstree qui n'existe plus dans les callbacks
-  $saveButton = $('#saveButton')
-  if (!$saveButton) throw new Error('Bouton de sauvegarde non trouvé dans la page')
-
-  const editor = sjtUrl.getParameter('editor') || 'graphic'
 
   initDom(options)
   dstTree = arbre
-  if (editor === 'graphic') {
-    initDomGraphic()
-    log("edit de l'arbre", arbre)
-    log('$dstTree', $dstTree)
+  initDomGraphic()
 
-    // on charge l'arbre à éditer
-    loadDst(arbre)
-    showGraphic()
-  } else {
-    $linkShowTxt.hide()
-    $textarea.val(JSON.stringify(arbre.enfants, null, 2))
-  }
-  // comportement au save
-  $saveButton.click(saveDst)
+  // on charge l'arbre à éditer
+  loadDst(arbre)
+  showGraphic(arbre.parametres, null, 2)
+  saveCallback(null, getJSON)
 }
 
 export default edit
