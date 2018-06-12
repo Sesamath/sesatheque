@@ -9,9 +9,15 @@ import resourceLoader from './resourceLoader'
 import ShowError from './ShowError'
 import NavMenu from './NavMenu'
 
-const typeToComponent = {
-  iep: EditorIep,
-  j3p: EditorJ3p
+const typeToData = {
+  iep: {
+    Editor: EditorIep,
+    name: 'IEP'
+  },
+  j3p: {
+    Editor: EditorJ3p,
+    name: 'j3p'
+  }
 }
 
 const ResourceForm = ({
@@ -20,24 +26,23 @@ const ResourceForm = ({
   pristine,
   change,
   submitting,
-  saveError,
   saveError
 }) => {
-  const Editor = typeToComponent[type]
+  const {Editor, name} = typeToData[type]
 
   return (
     <Fragment>
-      <h1 className="fl">Modifier la ressource IEP</h1>
+      <h1 className="fl">Modifier la ressource {name}</h1>
       <NavMenu ressourceOid={ressourceOid} />
-    <form onSubmit={handleSubmit}>
-      <MetaForm />
-      <hr />
-      <Editor change={change} />
-      <div className="buttons-area">
-        <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
-      </div>
-      <ShowError error={saveError} />
-    </form>
+      <form onSubmit={handleSubmit}>
+        <MetaForm />
+        <hr />
+        <Editor change={change} />
+        <div className="buttons-area">
+          <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
+        </div>
+        <ShowError error={saveError} />
+      </form>
     </Fragment>
   )
 }
