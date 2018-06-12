@@ -4,28 +4,40 @@ import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
 import EditorIep from './EditorIep'
+import EditorJ3p from './EditorJ3p'
 import resourceLoader from './resourceLoader'
 import ShowError from './ShowError'
 
+const typeToComponent = {
+  iep: EditorIep,
+  j3p: EditorJ3p
+}
+
 const ResourceForm = ({
+  initialValues: {type},
   handleSubmit,
   pristine,
   change,
   submitting,
   saveError
-}) => (
-  <form onSubmit={handleSubmit}>
-    <MetaForm />
-    <hr />
-    <EditorIep change={change} />
-    <div className="buttons-area">
-      <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
-    </div>
-    <ShowError error={saveError} />
-  </form>
-)
+}) => {
+  const Editor = typeToComponent[type]
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <MetaForm />
+      <hr />
+      <Editor change={change} />
+      <div className="buttons-area">
+        <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
+      </div>
+      <ShowError error={saveError} />
+    </form>
+  )
+}
 
 ResourceForm.propTypes = {
+  initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
   pristine: PropTypes.bool,
   change: PropTypes.func,
