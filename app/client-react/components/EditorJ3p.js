@@ -8,10 +8,10 @@ class EditorJ3p extends Component {
     super(props)
 
     /**
-     * Callback d'export des données J3P
+     * Retourne les données J3P à mettre dans ressources.parametres (un objet)
      * @type {function}
      */
-    this.getParameters = null
+    this.getParametres = null
 
     /**
      * Référence React vers l'iframe
@@ -21,41 +21,48 @@ class EditorJ3p extends Component {
     this.iframe = null
 
     /**
-     * Page contenant l'éditeur de graphe J3P
+     * Url de la page contenant l'éditeur de graphe J3P
      * @type {string}
      */
     this.iframeSrc = require('../../client/plugins/j3p/editgraphe.html')
   }
 
   /**
-   * Exporte le contenu de l'éditeur
+   * Exporte le contenu de l'éditeur graphique vers la prop parametres
    */
-  exportToJson () {
-    const j3pExport = this.getParameters()
-    if (!j3pExport) {
+  exportParametresToProp () {
+    let parametres = this.getParametres()
+    if (!parametres) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
       console.error(new Error('sesaeditgraphe ne remonte aucune info'))
       return
     }
-
-    this.props.change('parametres', j3pExport)
+    if (typeof parametres === 'string') {
+      try {
+        parametres = JSON.parse(parametres)
+      } catch (error) {
+        console.error(new Error('sesaeditgraphe remonte des paramètres invalides'))
+        // ajout feedback `Erreur interne, l’éditeur remonte des paramètres invalides`
+        return
+      }
+    }
+    this.props.change('parametres', parametres)
   }
 
   /**
    * Charge une ressource
-   *
-   * @param {Ressource} Une Ressource
+   * @param {Ressource} ressource La Ressource à charger (seule la propriété parametres est utilisée)
    */
-  loadRessource (resource) {
-    this.iframe.current.contentWindow.load(resource, (error, getParametres) => {
+  loadRessource (ressource) {
+    // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
+    this.iframe.current.contentWindow.load(ressource, (error, getParametres) => {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
-      this.getParameters = getParametres
+      this.getParametres = getParametres
     })
   }
 
   /**
-   * Appelée au chargement de l'iframe
-   *
+   * Appelée par le onLoad de l'iframe
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
   onIframeLoaded (iframe) {
@@ -65,13 +72,12 @@ class EditorJ3p extends Component {
   }
 
   /**
-   * Appelée lorsque l'éditeur passe du mode manuel au mode édition
-   *
-   * @param {bool} exitIframe True si l'éditeur sort de son mode édition
+   * Appelée lors d'une bascule de l'éditeur (manuel / graphique)
+   * @param {bool} toManual vaut true lors d'une transition graphique => manuel
    */
-  onManualEditorToggle (exitIframe) {
-    if (exitIframe) {
-      this.exportToJson()
+  onManualEditorToggle (toManual) {
+    if (toManual) {
+      this.exportParametresToProp()
     } else {
       this.iframe.current.src = this.iframeSrc // Recharge la page
     }
