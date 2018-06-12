@@ -5,13 +5,17 @@
   <title>Éditeur d'arbre</title>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div class="form-group" id="groupEnfants"></div>
+    <div id="display"></div>
+  </div>
   <script type="application/javascript">
     function load (ressource, options) {
       function onLoad () {
         script.removeEventListener('load', onLoad)
         var root = document.getElementById('root')
-        starbre(ressource, options)
+        // todo: use ES6 import to load edit.js?
+        starbre.default(ressource, options)
       }
 
       var head = window.document.getElementsByTagName('head')[0]
@@ -19,7 +23,7 @@
       script.type = 'application/javascript'
       document.body.appendChild(script)
       script.addEventListener('load', onLoad)
-      script.src = './arbre.js'
+      script.src = '/arbre.js'
     }
   </script>
   </body>
