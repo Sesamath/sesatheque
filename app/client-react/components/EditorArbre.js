@@ -62,9 +62,10 @@ class EditorArbre extends Component {
     this.iframe = iframe
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
     this.loadRessource({
+      alias: this.props.aliasOf,
       parametres,
       rid: this.props.rid,
-      alias: this.props.aliasOf,
+      titre: this.props.titre,
       type: 'arbre'
     })
   }
@@ -98,14 +99,16 @@ class EditorArbre extends Component {
 }
 
 EditorArbre.propTypes = {
+  aliasOf: PropTypes.string,
   change: PropTypes.func,
   parametres: PropTypes.object,
   rid: PropTypes.string,
-  aliasOf: PropTypes.string
+  titre: PropTypes.string
 }
 
 export default formValues({
+  aliasOf: 'aliasOf',
   parametres: 'parametres',
   rid: 'rid',
-  aliasOf: 'aliasOf'
+  titre: 'titre'
 })(EditorArbre)
