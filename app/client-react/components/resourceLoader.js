@@ -13,9 +13,17 @@ const resourceLoader = (WrappedComponent) => {
         saveError: null
       }
       this.onSubmit = this.onSubmitInner.bind(this)
+      this.beforeSaveRegister = this.beforeSaveRegisterInner.bind(this)
+    }
+
+    beforeSaveRegisterInner (getParametres) {
+      this.getParametres = getParametres
     }
 
     onSubmitInner (body) {
+      if (this.getParametres) {
+        body.parametres = this.getParametres()
+      }
       return POST(`/api/ressource`, {body})
         .catch(saveError => {
           this.setState({
@@ -46,6 +54,7 @@ const resourceLoader = (WrappedComponent) => {
           onSubmit={this.onSubmit}
           {...this.props}
           saveError={this.state.saveError}
+          beforeSaveRegister={this.beforeSaveRegister}
         />
       )
     }
