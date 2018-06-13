@@ -28,7 +28,6 @@ module.exports = {
     name: appName,
     baseId,
     baseUrl,
-    baseIdRegistrar: baseId,
     mail: 'sesatheque@example.com',
     staging: 'test'
   },

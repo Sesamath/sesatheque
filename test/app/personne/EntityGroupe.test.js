@@ -77,7 +77,7 @@ describe('EntityGroupe', () => {
         if (error) return done(error)
         done()
       })
-    })
+    }).catch(done)
   })
 
   it('create', function () {

@@ -42,10 +42,16 @@ import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
 import log from 'sesajstools/utils/log'
-// on se sert dans src pour avoir les bonnes lignes dans les éventuelles erreurs
-import getClient from 'sesatheque-client/src'
+// pour sesatheque-client on se sert dans src pour avoir les bonnes lignes dans les éventuelles erreurs
+// mais ça marche pas avec mocha, sauf si le module est linké (car y'a plus node_modules dans son path)
+// faudrait dire à babel-register de traiter les node_modules/sesatheque-client/src
+// mais pas réussi (cf test/initMocha.js)
+// import getClient from 'sesatheque-client/src'
+import getClient from 'sesatheque-client'
 import Ref from 'sesatheque-client/src/constructors/Ref'
-import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
+// import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
+import ClientItem from 'sesatheque-client/dist/ClientItem'
+
 import {XMLHttpRequest} from 'xmlhttprequest'
 
 import boot from '../boot'
@@ -69,6 +75,7 @@ const sesatheques = [
  * @type {string[]}
  */
 const properties = Object.keys(new Ref())
+
 /**
  * Retourne une promesse d'enregistrement d'une ressource en base (avec l'entity passée au resolve)
  * @param ressource
@@ -88,7 +95,15 @@ describe('sesatheque-client', () => {
    * @param {Object} expected
    */
   const checkRefProperties = (item, expected) => {
-    if (item.enfants) expect(item.enfants).to.deep.equal(expected.enfants, 'Pb avec enfants')
+    if (item.enfants) {
+      // on passe par des strings, passe plus sinon :-/
+      item.enfants.forEach((e, i) => {
+        const itemString = JSON.stringify(e, null, 2)
+        const expectedString = JSON.stringify(expected.enfants[i], null, 2)
+        const errorMessage = `Pb avec enfant n° ${i} :\n${itemString} \n est différent de ce qu'on attendait\n${expectedString}\n`
+        expect(itemString).to.equal(expectedString, errorMessage)
+      })
+    }
     if (item.parametres) expect(item.parametres).to.deep.equal(expected.parametres, 'Pb avec parametres')
     properties.forEach(p => {
       if (p === 'public') {
@@ -105,8 +120,8 @@ describe('sesatheque-client', () => {
   /**
    * Vérifie que item a bien toutes les propriétés à celles qui existent dans expected (à l'identique)
    * @private
-   * @param item
-   * @param expected
+   * @param {ClientItem} item
+   * @param {ClientItem|Object} expected
    */
   const checkItem = (item, expected) => {
     // si expected n'a pas une des propriétés de properties on l'ajoute pour la comparaison
@@ -120,10 +135,11 @@ describe('sesatheque-client', () => {
     checkRefProperties(item, fakeExpected)
     if (expected.enfants && !item.enfants) throw new Error('Pas d’enfants sur l’item')
     if (expected.parametres && !item.parametres) throw new Error('Pas de parametres sur l’item')
-    Object.keys(expected).forEach(p => {
-      if (properties.includes(p)) return // déjà testé
-      expect(item[p]).to.deep.equal(expected[p], `Pb item avec ${p}`)
-    })
+    // on ne regarde que les props pas encore testées
+    const propsChecked = ['enfants', 'parametres'].concat(properties)
+    Object.keys(expected)
+      .filter(p => !propsChecked.includes(p))
+      .forEach(p => expect(item[p]).to.deep.equal(expected[p], `Pb item avec ${p}`))
   }
   const ressourceToItem = (ressource) => {
     const data = ressource

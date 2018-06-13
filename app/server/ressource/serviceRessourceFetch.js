@@ -49,9 +49,7 @@ appConfig.sesatheques.forEach(({baseId, apiToken}) => {
 
 module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
   /**
-   * Renvoie une ressource récupérée ailleurs ou ici
-   * (Avec oid, attention à ne pas la sauvegarder localement si elle vient d'ailleurs !)
-   * Renvoie toujours une ressource ou une erreur (`Aucune ressource xxx` si 404)
+   * Renvoie une ressource récupérée ailleurs ou ici (ça peut être un alias)
    * @memberOf $ressourceFetch
    * @param {string} rid (une string baseId/origine/idOrigine marche aussi)
    * @param {ressourceCallback} next (renvoie une EntityRessource si c'est local et ses propriétés sinon)
@@ -129,8 +127,9 @@ module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
   }
 
   /**
-   * Renvoie une ressource originale récupérée ici ou ailleurs.
-   * Fait une 2e requête si aliasOf est lui-même un alias mais passe une erreur si la 2e est encore un alias
+   * Renvoie une ressource récupérée ici ou ailleurs, en allant chercher l'original si rid remonte un alias.
+   * Passe une erreur si la 2e ressource récupérée est encore un alias
+   * (un alias d'alias ne devrait pas exister)
    * @memberOf $ressourceFetch
    * @param {string} aliasOf
    * @param {ressourceCallback} next

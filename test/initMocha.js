@@ -29,16 +29,31 @@
  * pour une explication en français)
  */
 'use strict'
+/* eslint-env mocha */
 
-// pour utiliser babel avant node en gardant la possibilité d'utiliser pm2 en cluster,
-// il faut décommenter ces requires
-// cf http://stackoverflow.com/questions/35436266/how-can-i-use-babel-6-with-pm2-1-0
-// et https://babeljs.io/docs/usage/require/ qui indique qu'il faut ajouter babel-polyfill
-//
-// require('babel-register')
-// require('babel-polyfill')
+// on peut mettre dans mocha.opts un
+// --require babel-core/register
+// mais il faut lui passer des options, on le fait ici et remplace la ligne précédente par
+// --require ./initMocha
 
-const app = require('./index')
-app().catch((error) => {
-  console.error('Boot KO', error)
+// on veut exclure les node_modules sauf sesatheque-client/src
+const babelIgnoreFilter = (file) => {
+  if (/\/node_modules\//.test(file)) {
+    return /\/sesatheque-client\/src\//.test(file)
+  }
+  return true
+}
+require('babel-core/register')({
+  // faut pas qu'il lise les preset du package.json, sinon ça donne du
+  // Error: Options {"loose":true} passed to  /home/sesamath/projets/git/sesatheque/node_modules/babel-preset-env/lib/index.js which does not accept options. (While processing preset: …
+  babelrc: false,
+  // notre filtre sur les fichiers à traiter
+  ignore: babelIgnoreFilter,
+  // et les plugins qu'il doit utiliser pour que mocha soit content
+  plugins: [
+    'transform-es2015-modules-commonjs',
+    'transform-object-rest-spread',
+    'transform-object-assign'
+  ]
+  // mais ça plante toujours…
 })

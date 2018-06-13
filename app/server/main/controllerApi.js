@@ -29,60 +29,45 @@
  * pour une explication en français)
  */
 'use strict'
-
+const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const config = require('../config')
+const {checkSesalab, checkSesatheque} = require('../checkConfig')
 
 module.exports = function controllerFactory (component) {
-  component.controller(function apiCheckSesalabConfigController () {
+  component.controller(function mainApiController () {
+    /**
+     * Retourne la baseUrl d'une baseId de sesatheque
+     * (connue par configuration ou déclarée ici par un client)
+     * @route GET /api/baseId/:id
+     */
+    this.get('/api/baseId/:id', function (context) {
+      const baseId = context.arguments.id
+      const baseUrl = getBaseUrl(baseId, false)
+      if (baseUrl) context.rest({baseUrl})
+      else context.restKo({error: `Sésathèque ${baseId} inconnue sur ${config.application.baseUrl}`})
+    })
+
     /**
      * Valide la configuration d'un sesalab
      * Si tout est bon, retournera {success: true, baseId: 'laBaseId assignée au sesalab appelant'}
      * sinon un {success: false, errors: ['error 1', …]}
-     * @route POST /api/checkSesalabConfig
+     * @route POST /api/checkSesalab
      */
-    this.post('/api/checkSesalabConfig', function (context) {
+    this.post('/api/checkSesalab', function (context) {
       const {baseUrl, sesatheques} = context.post
-      // la baseId du sesalab qu'on lui renverra
-      let baseId
-      const errors = []
-      // vérif contenu du post
-      if (!baseUrl) errors.push('Requête invalide, baseUrl manquante')
-      if (typeof baseUrl !== 'string') errors.push(`baseUrl invalide (${typeof baseUrl})`)
-      if (!Array.isArray(sesatheques) || !sesatheques.length) errors.push('Requête invalide, sesatheques manquantes')
-      else if (!sesatheques.every(st => st.baseId && st.baseUrl)) errors.push('Requête invalide, chaque sesatheque doit avoir baseId et baseUrl')
-      if (errors.length) return context.restKo({errors})
-      // vérif que le sesalab annoncé est connu
-      config.sesalabs.some(knownSesalab => {
-        if (knownSesalab.baseUrl === baseUrl) {
-          baseId = knownSesalab.baseId
-          return true
-        }
-      })
-      if (!baseId) {
-        errors.push(`${baseUrl} n'est pas dans les sesalabs connus de la sesathèque ${config.baseUrl} (${config.baseId})`)
-      }
+      const {baseId, errors, warnings} = checkSesalab(baseUrl, sesatheques)
+      if (errors.length) return context.restKo({errors, warnings})
+      context.rest({message: 'Configuration sesalab OK', baseId, warnings})
+    })
 
-      // vérif que la première sésathèque est la notre
-      const myBaseId = config.application.baseId
-      const myBaseUrl = config.application.baseUrl
-      if (sesatheques[0].baseId !== myBaseId) errors.push(`La première Sésathèque n’a pas la baseId attendue ${sesatheques[0].baseId} ≠ ${myBaseId}`)
-      if (sesatheques[0].baseUrl !== myBaseUrl) errors.push(`La première Sésathèque n’a pas la baseUrl attendue ${sesatheques[0].baseUrl} ≠ ${myBaseUrl}`)
-      // si y'en a une 2e, vérifier qu'on la connaît
-      if (sesatheques[1]) {
-        const stBis = sesatheques[1]
-        config.sesatheques.some(st => {
-          if (stBis.baseId === st.baseId) {
-            if (stBis.baseUrl === st.baseUrl) return true
-            errors.push(`La sésathèque ${stBis.baseId} est connue mais son url est incorrecte (${stBis.baseUrl} ≠ ${st.baseUrl})`)
-          } else if (stBis.baseUrl === st.baseUrl) {
-            errors.push(`La sésathèque ${stBis.baseUrl} est connue mais sous une autre baseId (${stBis.baseId} ≠ ${st.baseId})`)
-          }
-        })
-      }
-
-      // on a fini nos vérifications, si y'a pas d'erreurs on renvoie au sesalab son baseId
-      if (errors.length) return context.restKo({errors})
-      context.rest({baseId})
+    /**
+     * Valide la configuration d'une sésatheque (qui nous envoie ses sesatheques et sesalabs)
+     * @route POST /api/checkSesatheque
+     */
+    this.post('/api/checkSesatheque', function (context) {
+      const {errors, warnings} = checkSesatheque(context.post)
+      if (errors.length) context.restKo({errors, warnings})
+      else context.rest({message: 'Configuration sésathèque OK', warnings})
     })
   })
 }
