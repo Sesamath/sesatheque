@@ -3,12 +3,12 @@ import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 
-class EditorJ3p extends Component {
+class EditorMathGraph extends Component {
   constructor (props) {
     super(props)
 
     /**
-     * Retourne les données J3P à mettre dans ressources.parametres (un objet)
+     * Retourne les données mathgraph à mettre dans ressources.parametres (un objet)
      * @type {function}
      */
     this.getParametres = null
@@ -21,10 +21,10 @@ class EditorJ3p extends Component {
     this.iframe = null
 
     /**
-     * Url de la page contenant l'éditeur de graphe J3P
+     * Url de la page contenant l'éditeur de mathgraph
      * @type {string}
      */
-    this.iframeSrc = require('../../client/plugins/j3p/editgraphe.html')
+    this.iframeSrc = require('../../client/plugins/mathgraph/mathgraph-editor.html')
   }
 
   /**
@@ -34,14 +34,14 @@ class EditorJ3p extends Component {
     let parametres = this.getParametres()
     if (!parametres) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
-      console.error(new Error('sesaeditgraphe ne remonte aucune info'))
+      console.error(new Error('mathgraph ne remonte aucune info'))
       return
     }
     if (typeof parametres === 'string') {
       try {
         parametres = JSON.parse(parametres)
       } catch (error) {
-        console.error(new Error('sesaeditgraphe remonte des paramètres invalides'))
+        console.error(new Error('mathgraph remonte des paramètres invalides'))
         // ajout feedback `Erreur interne, l’éditeur remonte des paramètres invalides`
         return
       }
@@ -87,7 +87,6 @@ class EditorJ3p extends Component {
     return (
       <fieldset>
         <IframeHandler
-          allowManualEdition
           change={this.props.change}
           onLoad={this.onIframeLoaded.bind(this)}
           onToggle={this.onManualEditorToggle.bind(this)}
@@ -98,9 +97,9 @@ class EditorJ3p extends Component {
   }
 }
 
-EditorJ3p.propTypes = {
+EditorMathGraph.propTypes = {
   change: PropTypes.func,
   parametres: PropTypes.object
 }
 
-export default formValues({parametres: 'parametres'})(EditorJ3p)
+export default formValues({parametres: 'parametres'})(EditorMathGraph)

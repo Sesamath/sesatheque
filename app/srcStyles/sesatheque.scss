@@ -122,7 +122,7 @@ body {min-width: 300px;}
 #main, #content {
   @extend .pam;
 }
-#main > h1 {margin-bottom: 0; color: $primary-color-light;}
+#main > h1, #root > h1 {margin-bottom: 0; color: $primary-color-light;}
 
 #actions ul {
   float: right;
@@ -147,11 +147,26 @@ body {min-width: 300px;}
   }
 }
 
+#root #actions ul {
+  margin: 0 0 1rem 1rem;
+  li {
+    border: 0;
+    padding: $spacer-tiny $spacer-tiny;
+    a.selected {
+      background-color: #999;
+    }
+  }
+}
+
 #actions div.clearfix {
   border-bottom: 1px solid $border-primary;
   position: relative;
-  bottom: 4px;
   z-index: -1;
+  bottom: 1px;
+}
+
+#root #actions div.clearfix {
+  bottom: 4px;
 }
 
 #previewIframe {
