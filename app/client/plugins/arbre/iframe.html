@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur d'arbre</title>
+  <link rel="stylesheet" type="text/css" href="/page.css">
+</head>
+<body>
+  <div id="formRessource">
+      <div id="root">
+        <div id="display"></div>
+      </div>
+  </div>
+  <script src="/arbre.js"></script>
+  <script type="application/javascript">
+    function load (ressource, options, saveCallback) {
+      starbre.default(ressource, options, saveCallback)
+    }
+  </script>
+  </body>
+</html>

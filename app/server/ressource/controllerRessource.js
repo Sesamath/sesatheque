@@ -523,10 +523,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (ressource.aliasOf) return forkAlias(context, ressource)
       // sinon on peut afficher le form
       addToken(context, ressource)
-      if (['iep', 'j3p', 'mathgraph'].includes(ressource.type)) {
+      if (['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
         let data = {
           contentBloc: {
-            $view: 'ressource-editor'
+            $view: 'ressource-editor',
+            verbose: (appConfig.application.staging !== 'prod'),
+            isDev: (appConfig.application.staging !== 'prod'),
+            baseId: appConfig.application.baseId,
+            sesatheques: appConfig.sesatheques,
+            ressource: ressource ? sjt.stringify(ressource) : ''
           },
           jsBloc: {
             $view: 'js',

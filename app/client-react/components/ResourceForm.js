@@ -3,6 +3,7 @@ import React, {Fragment} from 'react'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
+import EditorArbre from './EditorArbre'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
@@ -22,6 +23,10 @@ const typeToData = {
   mathgraph: {
     Editor: EditorMathGraph,
     name: 'mathGraph'
+  },
+  arbre: {
+    Editor: EditorArbre,
+    name: 'arbre'
   }
 }
 
