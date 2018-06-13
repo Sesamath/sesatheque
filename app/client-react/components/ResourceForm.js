@@ -12,7 +12,7 @@ import NavMenu from './NavMenu'
 const typeToData = {
   iep: {
     Editor: EditorIep,
-    name: 'IEP'
+    name: 'iep'
   },
   j3p: {
     Editor: EditorJ3p,
