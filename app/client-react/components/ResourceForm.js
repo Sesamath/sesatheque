@@ -18,7 +18,6 @@ const typeToComponent = {
 const ResourceForm = ({
   initialValues: {type},
   handleSubmit,
-  pristine,
   change,
   submitting,
   saveError
@@ -31,7 +30,7 @@ const ResourceForm = ({
       <hr />
       <Editor change={change} />
       <div className="buttons-area">
-        <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
+        <button type="submit" className="btn--primary" disabled={submitting}>Enregistrer</button>
       </div>
       <ShowError error={saveError} />
     </form>
@@ -41,7 +40,6 @@ const ResourceForm = ({
 ResourceForm.propTypes = {
   initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  pristine: PropTypes.bool,
   change: PropTypes.func,
   submitting: PropTypes.bool,
   saveError: PropTypes.func

@@ -87,7 +87,6 @@ class EditorMathGraph extends Component {
     return (
       <fieldset>
         <IframeHandler
-          allowManualEdition
           change={this.props.change}
           onLoad={this.onIframeLoaded.bind(this)}
           onToggle={this.onManualEditorToggle.bind(this)}

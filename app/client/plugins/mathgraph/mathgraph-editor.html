@@ -47,8 +47,8 @@
         svgId: 'svg',
         // la taille doit être fixée à l'avance (à cause de la gestion du svg),
         // on peut le faire en fonction de la taille d'affichage disponible (avec un minimum)
-        width: 900,
-        height: 600
+        width: document.body.clientWidth,
+        height: document.body.clientHeight
       }
       const isEditor = true
       var mtgOptions = {
