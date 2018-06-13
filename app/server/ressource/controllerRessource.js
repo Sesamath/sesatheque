@@ -525,8 +525,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       addToken(context, ressource)
       if (['iep', 'j3p', 'mathgraph'].includes(ressource.type)) {
         let data = {
-          titre: 'Modifier la ressource',
-          $metas: {title: 'Modifier la ressource'},
           contentBloc: {
             $view: 'ressource-editor'
           },
