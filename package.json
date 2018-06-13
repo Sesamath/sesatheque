@@ -83,7 +83,7 @@
     "express": "^4.16.2",
     "ip": "^1.1.5",
     "knacss": "^7.0.5",
-    "lassi": "Sesamath/lassi#2.3.2",
+    "lassi": "git+ssh://framagit.org:Sesamath/lassi.git#2.3.2",
     "lodash": "4.17.5",
     "moment": "2.19.3",
     "morgan": "1.9.0",
@@ -94,10 +94,10 @@
     "redux": "^4.0.0",
     "redux-form": "^7.3.0",
     "request": "2.82.0",
-    "sesaeditgraphe": "git://src.sesamath.net/sesaeditgraphe#f1d4d4b",
-    "sesajstools": "Sesamath/sesajstools",
-    "sesalab-sso": "Sesamath/sesalab-sso#1.0.12",
-    "sesatheque-client": "Sesamath/sesatheque-client#1.2.48"
+    "sesaeditgraphe": "git+ssh://git@framagit.org:Sesamath/sesaeditgraphe.git",
+    "sesajstools": "git+ssh://git@framagit.org:Sesamath/sesajstools.git",
+    "sesalab-sso": "git+ssh://git@framagit.org:Sesamath/sesalab-sso.git#1.0.12",
+    "sesatheque-client": "git+ssh://git@framagit.org:Sesamath/sesatheque-client.git#1.2.48"
   },
   "devDependencies": {
     "amdefine": "^1.0.1",

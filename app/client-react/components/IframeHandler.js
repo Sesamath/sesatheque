@@ -3,8 +3,8 @@ import React, {Component} from 'react'
 import {Field} from 'redux-form'
 import config from '../../server/config'
 
-const CHANNEL = 'message'
-const SOURCE = (config.application && config.application.baseUrl) || 'http://localhost:3001'
+const MESSAGE_CHANNEL = 'message'
+const SOURCE = config.application && config.application.baseUrl
 
 class IframeHandler extends Component {
   constructor (props) {
@@ -33,15 +33,15 @@ class IframeHandler extends Component {
   }
 
   componentDidMount () {
-    window.addEventListener(CHANNEL, this.messageHandler.bind(this), false)
+    window.addEventListener(MESSAGE_CHANNEL, this.messageHandler.bind(this), false)
   }
 
   componentWillUnmount () {
-    window.removeEventListener(CHANNEL, this.messageHandler.bind(this))
+    window.removeEventListener(MESSAGE_CHANNEL, this.messageHandler.bind(this))
   }
 
   /**
-   * Transmet un mesasge à l'iframe
+   * Transmet un message à l'iframe
    * @param {object} message Message à transmettre à l'iframe
    */
   emit (message) {
@@ -53,10 +53,9 @@ class IframeHandler extends Component {
   }
 
   /**
-   * Formate le contenu du textarea
-   *
-   * @param {object} value Un objet JSON
-   * @return {string} Une chaine de caractères
+   * Formate un objet en string json (pretty)
+   * @param {object|string} value Un objet (si string elle sera retournée telle quelle)
+   * @return {string} La chaîne de caractères formattée en "pretty" json ({} si value n'était pas un objet stringifiable)
    */
   formatTextarea (value) {
     if (typeof value === 'string') return value
@@ -65,27 +64,23 @@ class IframeHandler extends Component {
       return JSON.stringify(value, null, 2)
     } catch (error) {
       console.error(error)
-      return ''
+      return '{}'
     }
   }
 
   /**
-   * Appelé par l'iframe lors d'un postMessage.
-   *
-   * @param {MessageEvent} event Event lié au postMessage
+   * Listener de message (sera appelé par l'iframe lors d'un postMessage)
+   * @param {MessageEvent} event Event lié au message (de postMessage)
    */
   messageHandler (event) {
-    try {
-      const dataStringified = JSON.stringify(event.data)
-      this.props.change('parametres', dataStringified)
-
-      // Notifie le composant parent
-      if (this.props.onMessage) {
-        this.props.onMessage(event.data)
-      }
-    } catch (error) {
-      console.error(error)
-    }
+    if (!event || !event.data) return console.error(new Error('messageHandler appelé sans MessageEvent'))
+    if (event.data.action !== 'setParametres') return // pas pour nous
+    // @todo pour les erreurs qui suivent, ajouter un feedback utilisateur `Message incohérent, impossible de mettre à jour la ressource` + bugsnag
+    if (!event.data.parametres) return console.error(new Error('message avec action setParametres sans parametres'))
+    if (typeof event.data.parametres !== 'object') return console.error(new Error('parametres doit être un objet (pour l’action setParametres)'))
+    this.props.change('parametres', event.data.parametres)
+    // Pourquoi notifier le composant parent ? Il mettra un écouteur sur message s'il veut être au courant (ça lui permettra de sélectionner les messages qui l'intéresse)
+    // if (this.props.onMessage) this.props.onMessage(event.data)
   }
 
   /**
@@ -135,7 +130,7 @@ class IframeHandler extends Component {
           ref={this.iframe}
           src={this.props.src}
           style={{display: !this.state.manualEdition ? 'block' : 'none'}}>
-          <p>Votre navigateur semble ne pas supporter les iframes</p>
+          <p>Votre navigateur ne semble pas gérer les iframes</p>
         </iframe>
       </fieldset>
     )
@@ -144,7 +139,7 @@ class IframeHandler extends Component {
 
 IframeHandler.propTypes = {
   allowManualEdition: PropTypes.bool,
-  onMessage: PropTypes.func,
+  // onMessage: PropTypes.func,
   src: PropTypes.string,
   change: PropTypes.func,
   onLoad: PropTypes.func,
