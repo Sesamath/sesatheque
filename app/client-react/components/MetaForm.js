@@ -6,26 +6,28 @@ import {listes, labels} from '../../server/ressource/config'
 const categories = {
   name: 'categories',
   title: labels.categories,
-  values: Object.values(listes.categories)
+  values: Object.entries(listes.categories)
 }
 
 const niveaux = {
   name: 'niveaux',
   title: labels.niveaux,
-  values: Object.values(listes.niveaux)
+  values: Object.entries(listes.niveaux)
 }
 
 const typePedagogiques = {
   name: 'typePedagogiques',
   title: labels.typePedagogiques,
-  values: Object.values(listes.typePedagogiques)
+  values: Object.entries(listes.typePedagogiques)
 }
 
 const typeDocumentaires = {
   name: 'typeDocumentaires',
   title: labels.typeDocumentaires,
-  values: Object.values(listes.typeDocumentaires)
+  values: Object.entries(listes.typeDocumentaires)
 }
+
+const parseInteger = (string) => parseInt(string, 10)
 
 const MetaForm = () => (
   <Fragment>
@@ -84,10 +86,25 @@ const MetaForm = () => (
     <hr />
     <fieldset>
       <div className="grid-4">
-        <CheckboxGroup {...categories} />
-        <CheckboxGroup {...niveaux} />
-        <CheckboxGroup {...typePedagogiques} />
-        <CheckboxGroup {...typeDocumentaires} />
+        <Field
+          parseValue={parseInteger}
+          component={CheckboxGroup}
+          {...categories}
+        />
+        <Field
+          component={CheckboxGroup}
+          {...niveaux}
+        />
+        <Field
+          parseValue={parseInteger}
+          component={CheckboxGroup}
+          {...typePedagogiques}
+        />
+        <Field
+          parseValue={parseInteger}
+          component={CheckboxGroup}
+          {...typeDocumentaires}
+        />
       </div>
     </fieldset>
     <hr />

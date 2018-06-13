@@ -14,7 +14,12 @@
 @import "~knacss/sass/_vendor/reboot";
 @import "~knacss/sass/_config/mixins";
 @import "~knacss/sass/_library/base";         // basic styles
-@import "~knacss/sass/_library/print";        // print quick reset
+@import "~knacss/sass/_library/layout";       // alignment, modules, positionning
+@import "~knacss/sass/_library/grillade-grid"; // grid system with Grid Layout
+@import "~knacss/sass/_library/_utilities"; // grid system with Grid Layout
+// Components
+@import "~knacss/sass/components/_buttons";
+@import "~knacss/sass/components/_checkbox";
 
 $fa-font-path: "~@fortawesome/fontawesome-free-webfonts/webfonts";
 @import "~@fortawesome/fontawesome-free-webfonts/scss/fontawesome";
@@ -22,3 +27,4 @@ $fa-font-path: "~@fortawesome/fontawesome-free-webfonts/webfonts";
 
 @import "sesatheque-form"; // pour le create en iframe
 @import "sesatheque-display";
+@import "resource-editor";
