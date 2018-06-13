@@ -5,6 +5,7 @@ import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
+import EditorMathGraph from './EditorMathGraph'
 import resourceLoader from './resourceLoader'
 import ShowError from './ShowError'
 import NavMenu from './NavMenu'
@@ -17,13 +18,16 @@ const typeToData = {
   j3p: {
     Editor: EditorJ3p,
     name: 'j3p'
+  },
+  mathgraph: {
+    Editor: EditorMathGraph,
+    name: 'mathGraph'
   }
 }
 
 const ResourceForm = ({
   initialValues: {type, oid: ressourceOid},
   handleSubmit,
-  pristine,
   change,
   submitting,
   saveError
@@ -39,7 +43,7 @@ const ResourceForm = ({
         <hr />
         <Editor change={change} />
         <div className="buttons-area">
-          <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
+          <button type="submit" className="btn--primary" disabled={submitting}>Enregistrer</button>
         </div>
         <ShowError error={saveError} />
       </form>
@@ -50,7 +54,6 @@ const ResourceForm = ({
 ResourceForm.propTypes = {
   initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  pristine: PropTypes.bool,
   change: PropTypes.func,
   submitting: PropTypes.bool,
   saveError: PropTypes.func
