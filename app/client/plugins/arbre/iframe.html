@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Éditeur d'arbre</title>
+  <link rel="stylesheet" type="text/css" href="/page.css">
 </head>
 <body>
   <div id="formRessource">
@@ -10,27 +11,10 @@
         <div id="display"></div>
       </div>
   </div>
+  <script src="/arbre.js"></script>
   <script type="application/javascript">
     function load (ressource, options, saveCallback) {
-      function onLoad () {
-        script.removeEventListener('load', onLoad)
-        var root = document.getElementById('root')
-        starbre.default(ressource, options, saveCallback)
-
-        // Load main style
-        var head = window.document.getElementsByTagName('head')[0]
-        style = document.createElement('link')
-        style.rel = 'stylesheet'
-        style.type = 'text/css'
-        style.href = '/page.css'
-        head.appendChild(style)
-      }
-
-      var script = window.document.createElement('script')
-      script.type = 'application/javascript'
-      document.body.appendChild(script)
-      script.addEventListener('load', onLoad)
-      script.src = '/arbre.js'
+      starbre.default(ressource, options, saveCallback)
     }
   </script>
   </body>

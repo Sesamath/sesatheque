@@ -456,16 +456,17 @@ const edit = function (arbre, options, saveCallback) {
 
   /**
    * passe en mode graphique
+   * @param enfants Un tableau de noeuds enfants
    * @private
    */
-  function showGraphic (parametres) {
+  function showGraphic (enfants) {
     if (!$dstTree) initDomGraphic()
     try {
-      dstTree.enfants = parametres || []
+      dstTree.enfants = enfants || []
       log('On va charger en dst', dstTree)
       loadDst(dstTree)
     } catch (error) {
-      addTreeError('json enfants invalide : \n' + JSON.stringify(parametres, null, 2))
+      addTreeError('json enfants invalide : \n' + JSON.stringify(enfants, null, 2))
       log.error(error)
     }
   }
@@ -495,7 +496,7 @@ const edit = function (arbre, options, saveCallback) {
 
   // on charge l'arbre à éditer
   loadDst(arbre)
-  showGraphic(arbre.parametres, null, 2)
+  showGraphic(arbre.enfants, null, 2)
   saveCallback(null, getJSON)
 }
 

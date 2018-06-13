@@ -12,7 +12,7 @@ class EditorArbre extends Component {
      * @todo Utiliser les postMessage
      * @type {function}
      */
-    this.getParametres = null
+    this.getEnfants = null
 
     /**
      * Référence React vers l'iframe
@@ -32,12 +32,13 @@ class EditorArbre extends Component {
    * Exporte le contenu de l'éditeur
    */
   exportToJson () {
-    const arbreExport = this.getParametres()
+    const arbreExport = this.getEnfants()
     if (!arbreExport) {
       console.error(new Error('le plugin ne remonte aucune info'))
       return
     }
 
+    this.props.change('enfants', arbreExport)
     this.props.change('parametres', arbreExport)
   }
 
@@ -47,9 +48,9 @@ class EditorArbre extends Component {
    * @param {Ressource} resource Une Ressource
    */
   loadRessource (resource) {
-    this.iframe.current.contentWindow.load(resource, window.options, (error, getParametres) => {
+    this.iframe.current.contentWindow.load(resource, window.options, (error, getEnfants) => {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
-      this.getParametres = getParametres
+      this.getEnfants = getEnfants
     })
   }
 
@@ -60,10 +61,10 @@ class EditorArbre extends Component {
    */
   onIframeLoaded (iframe) {
     this.iframe = iframe
-    const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
+
     this.loadRessource({
       alias: this.props.aliasOf,
-      parametres,
+      enfants: this.props.enfants,
       rid: this.props.rid,
       titre: this.props.titre,
       type: 'arbre'
@@ -79,6 +80,16 @@ class EditorArbre extends Component {
     if (exitIframe) {
       this.exportToJson()
     } else {
+      // Transfère le contenu du textarea vers l'attribut "enfants" afin d'avoir une iframe à jour
+      let enfants
+      try {
+        enfants = JSON.parse(this.props.parametres)
+      } catch (error) {
+        console.error(new Error('mathgraph remonte des paramètres invalides'))
+        return
+      }
+
+      this.props.change('enfants', enfants)
       this.iframe.current.src = this.iframeSrc // Recharge la page
     }
   }
@@ -101,13 +112,15 @@ class EditorArbre extends Component {
 EditorArbre.propTypes = {
   aliasOf: PropTypes.string,
   change: PropTypes.func,
-  parametres: PropTypes.object,
+  enfants: PropTypes.array,
+  parametres: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   rid: PropTypes.string,
   titre: PropTypes.string
 }
 
 export default formValues({
   aliasOf: 'aliasOf',
+  enfants: 'enfants',
   parametres: 'parametres',
   rid: 'rid',
   titre: 'titre'
