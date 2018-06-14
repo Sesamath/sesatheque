@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 import CheckboxGroup from './CheckboxGroup'
-import {listes, labels} from '../../server/ressource/config'
+import {listes, listesOrdonnees, labels} from '../../server/ressource/config'
 
 const categories = {
   name: 'categories',
@@ -12,19 +12,19 @@ const categories = {
 const niveaux = {
   name: 'niveaux',
   title: labels.niveaux,
-  values: Object.entries(listes.niveaux)
+  values: listesOrdonnees.niveaux.map(n => [n, listes.niveaux[n]])
 }
 
 const typePedagogiques = {
   name: 'typePedagogiques',
   title: labels.typePedagogiques,
-  values: Object.entries(listes.typePedagogiques)
+  values: listesOrdonnees.typePedagogiques.map(n => [n, listes.typePedagogiques[n]])
 }
 
 const typeDocumentaires = {
   name: 'typeDocumentaires',
   title: labels.typeDocumentaires,
-  values: Object.entries(listes.typeDocumentaires)
+  values: listesOrdonnees.typeDocumentaires.map(n => [n, listes.typeDocumentaires[n]])
 }
 
 const parseInteger = (string) => parseInt(string, 10)
