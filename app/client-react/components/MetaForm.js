@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 import CheckboxGroup from './CheckboxGroup'
-import {listes, labels} from '../../server/ressource/config'
+import {editable, listes, labels} from '../../server/ressource/config'
 
 const categories = {
   name: 'categories',
@@ -27,6 +27,11 @@ const typeDocumentaires = {
   values: Object.entries(listes.typeDocumentaires)
 }
 
+const types = {}
+Object.keys(editable).forEach(k => {
+  if (editable[k]) types[k] = listes.type[k]
+})
+
 const parseInteger = (string) => parseInt(string, 10)
 
 const MetaForm = () => (
@@ -44,9 +49,9 @@ const MetaForm = () => (
         <label className="select">
           {labels.type}
           <Field name="type" component="select" props={{ disabled: true }}>
-            {Object.keys(listes.type).map(key => (
+            {Object.keys(types).map(key => (
               <Fragment key={key.toString()}>
-                <option value={key}>{listes.type[key]}</option>
+                <option value={key}>{types[key]}</option>
               </Fragment>
             ))}
           </Field>
