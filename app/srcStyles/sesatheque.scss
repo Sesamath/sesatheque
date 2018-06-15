@@ -264,3 +264,29 @@ ul.liste li {
 .checkboxes input[type='checkbox'] {
   display: inline;
 }
+
+.notifications {
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  .notification {
+    pointer-events: auto;
+    cursor: pointer;
+    border-radius: 10px;
+
+    .fa-times {
+      float: right;
+    }
+    p {
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+  }
+}
+
+@media (max-width: $tiny) {
+  .notifications {
+    width: 90%;
+  }
+}

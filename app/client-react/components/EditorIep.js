@@ -1,7 +1,8 @@
+import {flowRight} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
-import ShowError from './ShowError'
+import addNotifyToProps from '../utils/addNotifyToProps'
 
 const importErrorMessage = 'Une erreur s\'est produite durant l\'importation du script'
 
@@ -15,7 +16,7 @@ class EditorIep extends Component {
   }
 
   importScriptInner () {
-    const {url, change} = this.props
+    const {url, change, notify} = this.props
     fetch(url)
       .then(response => {
         if (!response.ok) {
@@ -25,15 +26,16 @@ class EditorIep extends Component {
         return response.text()
       })
       .then(content => change('parametres[xml]', content))
+      .then(() => {
+        notify({
+          level: 'info',
+          message: 'Le script a été correctement importé'
+        })
+      })
       .catch(error => {
-        const importError = Error(`${importErrorMessage} (${error.message})`)
-
-        this.setState({
-          importError
-        }, () => {
-          setTimeout(() => this.setState({
-            importError: null
-          }), 5000)
+        notify({
+          level: 'error',
+          message: `${importErrorMessage}: ${error.message}`
         })
       })
   }
@@ -72,7 +74,6 @@ class EditorIep extends Component {
             <span className="note">(Si la source change ou disparait cette ressource restera identique)</span>
           </label>
         </div>
-        <ShowError error={this.state.importError} />
         <div>
           <label>Script instrumenpoche
             <Field
@@ -91,7 +92,11 @@ class EditorIep extends Component {
 
 EditorIep.propTypes = {
   url: PropTypes.string,
-  change: PropTypes.func
+  change: PropTypes.func,
+  notify: PropTypes.func
 }
 
-export default formValues({url: 'parametres[url]'})(EditorIep)
+export default flowRight([
+  addNotifyToProps,
+  formValues({url: 'parametres[url]'})
+])(EditorIep)
