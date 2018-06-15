@@ -27,7 +27,10 @@ const typeDocumentaires = {
   values: Object.entries(listes.typeDocumentaires)
 }
 
-const types = Object.keys(editable).reduce((results, key) => ({...results, [key]: listes.type[key]}), {})
+const types = {}
+Object.keys(editable).forEach(k => {
+  if (editable[k]) types[k] = listes.type[k]
+})
 
 const parseInteger = (string) => parseInt(string, 10)
 
