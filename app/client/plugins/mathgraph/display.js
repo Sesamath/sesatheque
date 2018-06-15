@@ -30,137 +30,10 @@
  */
 'use strict'
 
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
-var sjtUrl = require('sesajstools/http/url')
+const dom = require('sesajstools/dom')
+const log = require('sesajstools/utils/log')
 
-var page = require('../../page/index')
-
-function displayJava (ressource, options, next) {
-  var params = ressource.parametres
-  var container = options.container
-  var width = params.width || container.offsetWidth || 800
-  if (width > 1024) width = 1024
-  if (width < 300) width = 300
-  var height = params.height || Math.round(width * 0.75)
-  if (height > 1024) height = 1024
-  if (height < 200) height = 200
-  var appletName = 'mtgApplet'
-  // faut d'abord créer un élément html complet avant de le mettre dans le dom,
-  // sinon il peut lancer le jar avant d'avoir tous les params
-  var applet = dom.getElement(
-    'applet',
-    {
-      id: appletName,
-      // name: appletName +'name',
-      code: 'mathgraph32.MtgFrame.class',
-      archive: 'https://www.mathgraph32.org/ftp/webstart/MathGraph32Applet.jar',
-      width: width,
-      height: height,
-      style: 'border:#000 solid 1px;'
-    }
-  )
-  var allowFull = ['MenuBar', 'LeftToolbar', 'TopToolbar', 'RightToolbar', 'IndicationArea', 'ToolsChoice', 'FileMenu', 'OptionsMenu']
-  var allowEleve = params.allowEleve || allowFull
-  allowFull.forEach(function (allow) {
-    dom.addElement(applet, 'param', {name: 'allow' + allow, value: (allowEleve.indexOf(allow) > -1) ? 'true' : 'false'})
-  })
-  dom.addElement(applet, 'param', {name: 'language', value: 'true'})
-  dom.addElement(applet, 'param', {name: 'level', value: params.level})
-  if (params.figure) dom.addElement(applet, 'param', {name: 'figureData', value: params.figure})
-  else dom.addElement(applet, 'param', {name: 'initialFigure', value: 'orthonormalFrame'})
-  dom.addText(applet, 'Ceci est une appliquette MathGraph32. Il semble que Java ne soit pas installé sur votre ordinateur. Aller sur ')
-  dom.addElement(applet, 'a', {href: 'https://www.java.com'}, 'java.com')
-  dom.addText(applet, ' pour installer java.')
-  var p = dom.addElement(applet, 'p', {}, 'Sinon, visualiser cette page avec le ')
-  dom.addElement(p, 'a', {href: '?js=1'}, 'lecteur javascript')
-  dom.addText(p, " (mais l'enregistrement de la figure ne sera pas possible).")
-  // on peut la mettre dans le dom
-  dom.empty(container)
-  container.appendChild(applet)
-
-  if (options.resultatCallback && container.addEventListener) {
-    // et on ajoute un bouton pour envoyer
-    p = dom.addElement(container, 'p')
-    var button = dom.addElement(p, 'button', {}, 'Envoyer la figure')
-    button.addEventListener('click', function () {
-      log('envoi de la figure')
-      try {
-        var newFigure = document[appletName].getScript()
-        options.resultatCallback({
-          score: 1,
-          reponse: newFigure
-        })
-      } catch (error) {
-        log.error(error)
-        page.addError("Impossible de récupérer la figure de l'applet java")
-      }
-    })
-  }
-
-  // cb si présente
-  if (next) next()
-}
-
-function displayJs (ressource, options, next) {
-  var container = options.container
-
-  // on enverra un résultat seulement à la fermeture
-  if (options.resultatCallback && container.addEventListener) {
-    container.addEventListener('unload', () => {
-      if (isLoaded) options.resultatCallback({score: 1})
-    })
-  }
-
-  // on affiche un avertissement si on force
-  if (ressource.parametres.levelEleve > 0 && sjtUrl.getParameter('js')) {
-    dom.addElement(container, 'p', {'class': 'warning'}, "Vous avez imposé le lecteur javascript, l'envoi de la figure n'est pas possible")
-  }
-
-  var dependencies = [
-    'https://www.mathgraph32.org/js/mtg32jsmin.js',
-    'https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js'
-  ]
-  page.loadAsync(dependencies, function () {
-    /* global MathJax, mtg32 */
-    if (typeof MathJax === 'undefined') throw new Error("Mathjax n'est pas chargé")
-    if (typeof mtg32 === 'undefined') throw new Error("Mathgraph32 n'est pas chargé")
-    var width = ressource.parametres.width || container.offsetWidth || 800
-    if (width > 1024) width = 1024
-    if (width < 300) width = 300
-    var height = ressource.parametres.height || Math.round(width * 0.75)
-    if (height > 1024) height = 1024
-    if (height < 200) height = 200
-    var svgId = 'mtg32svg'
-    // la consigne éventuelle
-    if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
-    // pour créer le svg, ceci marche pas (il reste à 0 de hauteur), faut passer par createElementNS
-    // var svg = dom.addElement(container, 'svg', {id:'svg', width:'800px', height:'500px', xmlns:'http://www.w3.org/2000/svg'})
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.setAttribute('id', svgId)
-    svg.setAttribute('width', width)
-    svg.setAttribute('height', height)
-    svg.style.display = 'block'
-    container.appendChild(svg)
-    MathJax.Hub.Config({
-      tex2jax: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']]
-      },
-      jax: ['input/TeX', 'output/SVG'],
-      TeX: {extensions: ['color.js']},
-      messageStyle: 'none'
-    })
-    MathJax.Hub.Queue(function () {
-      var mtg32App = new mtg32.mtg32App() // eslint-disable-line new-cap
-      mtg32App.addDoc(svgId, ressource.parametres.figure, true)
-      mtg32App.calculateAndDisplayAll()
-      isLoaded = true
-      if (next) next()
-    })
-  })
-}
-
-var isLoaded
+const page = require('../../page/index')
 
 /**
  * Affiche une ressource mathgraph, avec l'applet java ou le lecteur js (suivant paramétrage de la ressource)
@@ -172,21 +45,129 @@ var isLoaded
  * @param {errorCallback}  next       La fct à appeler quand l'mathgraph sera chargé (sans argument ou avec une erreur)
  */
 module.exports = function display (ressource, options, next) {
+  function isSameResultat (resultat) {
+    if (!resultat) throw new Error('Erreur interne')
+    if (!lastResultatSent) return false
+    return resultat.score === lastResultatSent.score &&
+      resultat.contenu && lastResultatSent.contenu &&
+      resultat.contenu.fig === lastResultatSent.contenu.fig
+  }
+
+  let isLoaded = false
+  let lastResultatSent
+  const {container, resultatCallback} = options
+
   try {
-    var container = options.container
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
 
     log('start mathgraph display avec la ressource', ressource)
     // les params minimaux
-    if (!ressource.oid || !ressource.titre || !ressource.parametres) {
-      throw new Error('Paramètres manquants')
+    if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error('Ressource incomplète')
+    // du temps de l'applet java, ou du chargement js qui géait le svg, on avait parametres.figure
+    // mais maintenant mathgraph renvoie fig
+    if (!ressource.parametres.fig && ressource.parametres.figure) {
+      ressource.parametres.fig = ressource.parametres.figure
+      delete ressource.parametres.figure
     }
-    if (!ressource.parametres.figure) {
-      throw new Error('Pas de figure mathgraph en paramètre')
-    }
-    // on utilise java seulement si levelEleve est positif dans les paramètres (et que l'on impose pas js dans l'url)
-    if (ressource.parametres.levelEleve > 0 && !sjtUrl.getParameter('js')) displayJava(ressource, options, next)
-    else displayJs(ressource, options, next)
+    if (!ressource.parametres.fig) throw new Error('Pas de figure mathgraph en paramètre')
+
+    const dependencies = [
+      'https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js',
+      'https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js'
+    ]
+    page.loadAsync(dependencies, function () {
+      /* global MathJax, mtgLoader */
+      if (typeof MathJax === 'undefined') throw new Error('Mathjax n’est pas chargé')
+      if (typeof mtgLoader !== 'function') throw new Error('Mathgraph32 n’est pas chargé')
+      dom.addCss('https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.css')
+
+      // hauteur et largeur
+      let width = ressource.parametres.width || container.offsetWidth || 800
+      if (width > 1024) width = 1024
+      if (width < 300) width = 300
+      let height = ressource.parametres.height || Math.round(width * 0.75)
+      if (height > 1024) height = 1024
+      if (height < 200) height = 200
+
+      // la consigne éventuelle
+      if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
+
+      // init Mathjax
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        SVG: {mtextFontInherit: false},
+        jax: ['input/TeX', 'output/SVG'],
+        TeX: {extensions: ['color.js']},
+        messageStyle: 'none'
+      })
+      MathJax.Hub.Queue(function () {
+        // sauvegarde la figure courante
+        function save (needDefer) {
+          const {fig, score} = mtgApp.getResult()
+          const resultat = {
+            contenu: {
+              fig,
+              // un booléen pour signaler que le score vient de mtg, ça servira pour analyser le score
+              // (si c'est false un score de 1 signifie "vu", sinon ça signifie "construction réussie")
+              isScored: score !== undefined
+            },
+            score
+          }
+          if (!isSameResultat(resultat)) {
+            if (needDefer) resultat.deferSync = true
+            resultatCallback(resultat)
+            lastResultatSent = resultat
+          }
+        }
+        const parametres = ressource.parametres
+        /* glob mtgLoader */
+        // pour le fonctionnement, cf le dépôt
+        // git@src.sesamath.net:mathgraph_js
+        // fichier src/mtgLoader.js
+        // ou documentation/index.html
+        // à la création on démarre avec une interface collège (le prof pourra changer ensuite dans l'éditeur
+        // et getParametres nous renverra la bonne valeur)
+        const level = parametres.hasOwnProperty('level') ? parametres.level : 1
+        const svgOptions = {
+          // faut imposer ça à cause de notre css #svg plus haut
+          svgId: 'svg',
+          // la taille doit être fixée à l'avance (à cause de la gestion du svg),
+          // on peut le faire en fonction de la taille d'affichage disponible (avec un minimum)
+          width,
+          height
+        }
+        const mtgOptions = {
+          level,
+          // ce paramètre à true sert à afficher la figure avec des traits plus gros,
+          // des lettres plus espacées, etc.
+          // Il n'est pas contenu dans la figure
+          dys: parametres.hasOwnProperty('dys') ? parametres.dys : false,
+          open: false,
+          // options: pour autoriser à changer les options de la figure, true par défaut
+          options: false, // true si édition par le prof, false en consultation de ressource
+          save: true, // pour que l'outil permettant d'enregistrer une figure soit présent
+          callBackAfterReady: function () {
+            isLoaded = true
+            if (next) next()
+          }
+        }
+
+        // on ajoute une cb si qq veut le résultat
+        if (resultatCallback) {
+          // cb sur le bouton save
+          mtgOptions.onSaveCallback = save.bind(null, false)
+          // + listener unload
+          if (container.addEventListener) {
+            container.addEventListener('unload', () => { if (isLoaded) save(true) })
+          }
+        }
+
+        // go
+        const mtgApp = mtgLoader('main', parametres.fig, svgOptions, mtgOptions)
+      })
+    })
   } catch (error) {
     if (next) next(error)
     else page.addError(error)
