@@ -1,28 +1,23 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { formValues, Field } from 'redux-form'
 import GroupPublicationEditor from './GroupPublicationEditor'
-import {Field} from 'redux-form'
+import { addGroupes } from '../actions/personne'
 
 class GroupContainer extends Component {
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
 
     // Temp
-    let personneAPI = {
-      groupesMembre: ['sesamath indexation', 'groupe de test'],
-      groupesSuivis: ['test', 'groupe de test']
-    }
-    const groupes = [...personneAPI.groupesMembre, ...personneAPI.groupesSuivis]
+    const user = this.props.user || { groupesMembre: [], groupesSuivis: [] }
+    const groupes = [...user.groupesMembre, ...user.groupesSuivis]
     const uniqueGroupes = groupes.filter((v, i, a) => a.indexOf(v) === i)
     // TEMP
 
     this.state = {
-      ...personneAPI,
+      ...user,
       groupes: uniqueGroupes
     }
-  }
-
-  addGroup () {
-    // ToDo
   }
 
   render () {
@@ -56,7 +51,7 @@ class GroupContainer extends Component {
           <label>
             Nouveaux groupes à créer (à séparer par des virgules)
             <Field
-              name="createGroup"
+              name="groupNames"
               component="input"
               type="text"
             />
@@ -66,7 +61,7 @@ class GroupContainer extends Component {
             <button
               type="button"
               className="btn--success"
-              onClick={this.addGroup.bind(this)}>Créer les groupes</button>
+              onClick={() => this.props.addGroupes(this.props.groupNames)}>Créer les groupes</button>
           </label>
         </div>
       </fieldset>
@@ -74,4 +69,15 @@ class GroupContainer extends Component {
   }
 }
 
-export default GroupContainer
+const mapStateToProps = (state) => ({
+  user: state.personne
+})
+
+GroupContainer = connect(
+  mapStateToProps,
+  { addGroupes }
+)(GroupContainer)
+
+export default formValues({
+  groupNames: 'groupNames'
+})(GroupContainer)
