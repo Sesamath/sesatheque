@@ -30,15 +30,30 @@
  */
 'use strict'
 
-// pour utiliser babel avant node en gardant la possibilité d'utiliser pm2 en cluster,
-// il faut décommenter ces requires
-// cf http://stackoverflow.com/questions/35436266/how-can-i-use-babel-6-with-pm2-1-0
-// et https://babeljs.io/docs/usage/require/ qui indique qu'il faut ajouter babel-polyfill
-//
-// require('babel-register')
-// require('babel-polyfill')
+const {addSesatheque, getBaseUrl} = require('sesatheque-client/src/sesatheques')
+// Cette fonction ne peut pas être dans le module checkConfig, ça causerait des dépendances cycliques
+// checkConfig => config => checkConfigSesatheques (ce module)
 
-const app = require('./index')
-app().catch((error) => {
-  console.error('Boot KO', error)
-})
+/**
+ * Vérifie les couples baseId/baseUrl fournis et retourne une liste d'erreurs (vide si y'en a pas)
+ * @param {Object[]} sesatheques
+ * @return {string[]} la liste des erreurs
+ * @private
+ */
+module.exports = function checkConfigSesatheques (sesatheques, addIfUnknown = false) {
+  const errors = []
+  if (!Array.isArray(sesatheques)) throw new Error('sesatheques doit être un Array')
+  if (!sesatheques.length) throw new Error('sesatheques est vide')
+  sesatheques.forEach(({baseId, baseUrl}, index) => {
+    if (!baseId) errors.push(`La sésathèque ${index} n’a pas de baseId`)
+    if (!baseUrl) errors.push(`La sésathèque ${index} n’a pas de baseUrl`)
+    const knownBaseUrl = getBaseUrl(baseId, false)
+    if (knownBaseUrl) {
+      if (baseUrl !== knownBaseUrl) errors.push(`La sésathèque ${baseId} a la baseUrl ${baseUrl} mais devrait avoir ${knownBaseUrl}`)
+    } else {
+      if (addIfUnknown) addSesatheque(baseId, baseUrl)
+      else errors.push(`La sésathèque ${baseId} est inconnue`)
+    }
+  })
+  return errors
+}

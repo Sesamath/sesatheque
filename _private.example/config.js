@@ -19,11 +19,6 @@ module.exports = {
     name: 'sesatheque', // OBLIGATOIRE
     // identifiant de cette sésathèque, utilisé pour les rid des ressources créées ici
     baseId: 'localhost3001', // OBLIGATOIRE
-    // sesatheque de référence pour les baseId avec lesquels on partage des ressources
-    baseIdRegistrar: 'localhost3001', // OBLIGATOIRE
-    // si baseIdRegistrar connait baseId, faut mettre la valeur correspondante ici (ça permet de vérifier)
-    // sert aussi pour les urls des composants statiques, ou pour construire des urls qu'on passe à l'extérieur
-    // (sso par ex)
     baseUrl: 'http://localhost:3001/', // OBLIGATOIRE
     // pour les envois de notification (du système)
     mail: '', // OBLIGATOIRE

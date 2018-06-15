@@ -1,36 +1,69 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, {Fragment} from 'react'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
+import EditorArbre from './EditorArbre'
 import EditorIep from './EditorIep'
+import EditorJ3p from './EditorJ3p'
+import EditorMathGraph from './EditorMathGraph'
 import resourceLoader from './resourceLoader'
 import ShowError from './ShowError'
+import NavMenu from './NavMenu'
+
+const typeToData = {
+  iep: {
+    Editor: EditorIep,
+    name: 'iep'
+  },
+  j3p: {
+    Editor: EditorJ3p,
+    name: 'j3p'
+  },
+  mathgraph: {
+    Editor: EditorMathGraph,
+    name: 'mathGraph'
+  },
+  arbre: {
+    Editor: EditorArbre,
+    name: 'arbre'
+  }
+}
 
 const ResourceForm = ({
+  initialValues: {type, oid: ressourceOid},
   handleSubmit,
-  pristine,
   change,
   submitting,
-  saveError
-}) => (
-  <form onSubmit={handleSubmit}>
-    <MetaForm />
-    <hr />
-    <EditorIep change={change} />
-    <div className="buttons-area">
-      <button type="submit" className="btn--primary" disabled={pristine || submitting}>Enregistrer</button>
-    </div>
-    <ShowError error={saveError} />
-  </form>
-)
+  saveError,
+  beforeSaveRegister
+}) => {
+  const {Editor, name} = typeToData[type]
+
+  return (
+    <Fragment>
+      <h1 className="fl">Modifier la ressource {name}</h1>
+      <NavMenu ressourceOid={ressourceOid} />
+      <form onSubmit={handleSubmit}>
+        <MetaForm />
+        <hr />
+        <Editor change={change} beforeSaveRegister={beforeSaveRegister}/>
+        <div className="buttons-area">
+          <button type="submit" className="btn--primary" disabled={submitting}>Enregistrer</button>
+        </div>
+        <ShowError error={saveError} />
+      </form>
+    </Fragment>
+  )
+}
 
 ResourceForm.propTypes = {
+  initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  pristine: PropTypes.bool,
   change: PropTypes.func,
   submitting: PropTypes.bool,
-  saveError: PropTypes.func
+  saveError: PropTypes.func,
+  beforeSaveRegister: PropTypes.func
 }
 
 export default flowRight([

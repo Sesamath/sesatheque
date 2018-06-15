@@ -182,7 +182,7 @@ module.exports = function ($accessControl, $ressourcePage) {
         // y'en a plusieurs, un bouton pour ouvrir le menu
         authBloc.loginLink = {
           href: '#',
-          icon: 'sign-in',
+          icon: 'sign-in-alt',
           value: 'Connexion'
         }
         // et les liens
@@ -191,7 +191,7 @@ module.exports = function ($accessControl, $ressourcePage) {
         // y'en a qu'un, un seul bouton
         authBloc.loginLink = {
           href: loginLinks[0].href,
-          icon: 'sign-in',
+          icon: 'sign-in-alt',
           value: 'Connexion'
         }
       }

@@ -45,14 +45,21 @@
 import app from '../../app/server/index'
 import config from '../../app/server/config'
 import anLog from 'an-log'
-import sesatheques from 'sesatheque-client/src/sesatheques'
+// si on a pas de link vers le module on peut pas aller dans src
+// import sesatheques from 'sesatheque-client/src/sesatheques'
+import sesatheques from 'sesatheque-client/dist/sesatheques'
+import log from 'sesajstools/utils/log'
+
 /**
  * @see https://github.com/visionmedia/supertest
  * @see https://visionmedia.github.io/superagent/
  */
 import supertest from 'supertest'
 
+log.setLogLevel('error')
+
 let isBooted = false
+
 // pour que mocha rende la main, il faut shutdown lassi
 // on gère ça avec un timeout après chaque boot, et un
 // testsDone qui raccourci ce timeout (qui sera réinitialisé
@@ -88,26 +95,35 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
       resetTimer(delay)
       return resolve(resolvedValue)
     }
+    // sera appelé sur l'événement startup de lassi
+    const afterBootCallback = () => {
+      if (!resolvedValue.lassi) throw new Error('Il y a eu un pb dans la méthode boot, lassi n’est pas disponible')
+      resolvedValue.superTestClient = supertest(resolvedValue.lassi.express)
+      resolvedValue.testsDone = () => resetTimer(100)
+      isBooted = true
+      finish()
+    }
     if (isBooted) return finish()
+    if (resolvedValue.lassi) {
+      // le boot a démarré mais l'événement startup n'est pas encore arrivé
+      log('waiting for boot')
+      resolvedValue.lassi.on('startup', finish)
+      return
+    }
 
     // on enregistre notre sesatheque de test
     sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
-    // on configure an-log pour qu'il mette tout en fichier
+    // on configure an-log d'après la conf
     // les logs de l'appli sont dans le dossier configuré dans _private/test.js
     // possibilité de modifier le logLevel là-bas
     anLog.config(config.lassiLogger)
     // boot
-    app(function afterBootCallback () {
+    app(afterBootCallback).then((lassiInstance) => {
+      // on est dans le then mais afterBootCallback n'a pas encore été appelée (à priori)
       anLog.config(config.lassiLogger)
-      // on garde une ref sur lassi (pas dispo en global dans un describe)
-      // et le client pour tester notre appli express
-      resolvedValue.lassi = lassi
-      resolvedValue.superTestClient = supertest(lassi.express)
-      resolvedValue.testsDone = () => resetTimer(100)
-      isBooted = true
-      // en ajoutant --delay dans mocha.opts, on a une fct run en global (qui prend une callback à exécuter)
-      return finish()
-    })
+      resolvedValue.lassi = lassiInstance
+      // finish sera appelé dans afterBootCallback
+    }).catch(log.error)
   } catch (error) {
     reject(error)
   }

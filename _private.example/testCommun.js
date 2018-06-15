@@ -28,7 +28,6 @@ module.exports = {
   application: {
     name: appName,
     baseId,
-    baseIdRegistrar: baseId,
     baseUrl,
     mail: 'you@example.com',
     staging: 'test'

@@ -41,7 +41,9 @@
 import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
-import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/src/sesatheques'
+// si on a pas de link vers le module on peut pas aller dans src (mocha aime pas les import que babel ne traite pas because node_modules)
+// import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/src/sesatheques'
+import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/dist/sesatheques'
 import boot from '../boot'
 
 chai.use(sinonChai)

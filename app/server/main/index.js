@@ -55,8 +55,10 @@ this.application.templateEngines.dust.helper('dump', function (chunk, context, b
   return chunk.write('<pre class='debug'>' + JSON.stringify(params, null, 2) + '</pre>');
 }); /**/
 
+// pour le statique
 require('./controllerMain')(mainComponent)
-// pour /api/checkSesalabConfig
+
+// pour /api/checkSesalab et /api/checkSesatheque
 require('./controllerApi')(mainComponent)
 
 mainComponent.service('$page', function () {

@@ -64,8 +64,6 @@ try {
   config.application.baseUrl = 'http://localhost:3001/'
   // avec un baseId qui colle
   config.application.baseId = 'localhost3001'
-  // et nous-même en registrar
-  config.application.baseIdRegistrar = 'localhost3001'
 
   // les noms des hosts imposés par le docker-compose
   // c'est pas obligatoire de déclarer ça en _private, on vérifie

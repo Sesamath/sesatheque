@@ -40,7 +40,7 @@ const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
 const {ensure} = require('../tools')
 const url = require('../tools/url')
-const {getBaseId, getBaseIdFromRid, getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
+const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
 const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
 const myBaseId = config.application.baseId
@@ -723,17 +723,6 @@ module.exports = function controllersFactory (component) {
     })
 
     /**
-     * Retourne l'url d'une baseId
-     * @route GET /api/baseId/:id
-     */
-    controller.get('baseId/:id', function (context) {
-      const baseId = context.arguments.id
-      const baseUrl = getBaseUrl(baseId, false)
-      if (baseUrl) $json.sendOk(context, {baseUrl})
-      else $json.sendError(context, `Sésathèque ${baseId} inconnue sur ${config.application.baseUrl}`)
-    })
-
-    /**
      * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
      * Retourne {@link reponseRessourceOid}
      * @route GET /api/clone/:oid
@@ -797,24 +786,26 @@ module.exports = function controllersFactory (component) {
     })
 
     /**
-     * Clone une ressource d'une autre sesatheque en mettant l'utilisateur courant en auteur
-     * (sinon il pourra pas la supprimer), avec publié et privé
+     * Crée un alias de ressource en mettant l'utilisateur courant en auteur (de l'alias)
+     * (sinon il pourra pas le supprimer)
+     * Ne deviendra une vraie ressource clonée que si on l'édite
      * Retourne {@link Ref}
      * Utiliser la méthode sesatheque-client:cloneItem
      * @route GET /api/externalClone/:baseId/:oid
      */
     controller.get('externalClone/:baseId/:oid', function (context) {
-      const {oid} = context.arguments
-      const baseIdOrigine = context.arguments.baseId
+      const {baseIdOrigine, oid} = context.arguments
+      const rid = `${baseIdOrigine}/${oid}`
+      const myBaseId = config.application.baseId
       const pid = $accessControl.getCurrentUserPid(context)
       flow().seq(function () {
         if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
-        const baseUrl = getBaseUrl(baseIdOrigine)
-        // si on est là c'est une baseId connue de sesatheque-client,
-        // mais ça suffit pas pour qu'on la référence
-        if (!config.sesathequesById[baseIdOrigine]) return this(new Error(`Sésathèque ${baseIdOrigine} connue (${baseUrl}) mais pas déclarée comme source possible de cette sésathèque`))
-        // on peut aller chercher la ressource
-        $ressourceFetch.fetchOriginal(baseIdOrigine + '/' + oid, this)
+        // on accepte de cloner une ressource locale
+        if (baseIdOrigine === myBaseId || config.sesatheques.some(({baseId}) => baseId === baseIdOrigine)) {
+          $ressourceFetch.fetchOriginal(rid, this)
+        } else {
+          this(new Error(`La sésathèque ${baseIdOrigine} n'est pas déclarée comme source possible de cette sésathèque`))
+        }
       }).seq(function (ressource) {
         log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
         // on passe par Ref pour filtrer ce qu'on garde (pour un alias, seulement ce que ref utilise)
@@ -824,15 +815,13 @@ module.exports = function controllersFactory (component) {
         aliasData.auteurs = [pid]
         aliasData.origine = config.application.baseId
         aliasData.dateCreation = new Date()
-        // important sinon une ressource non restreinte mais pas publiée se retrouverait publique,
-        // et à la consultation (de l'original) ça plante
+        // important sinon une ressource non restreinte mais pas publiée se retrouverait avec un alias public,
+        // et ça afficherait des pbs de droits à la consultation
         aliasData.publie = ressource.publie
-        // si la ressource était publique on le laisse sur l'alias (pour la lecture),
-        // pour l'écriture ça changera rien
-        if (ressource.restriction === configRessource.constantes.restriction.aucune) aliasData.restriction = configRessource.constantes.restriction.aucune
-        else aliasData.restriction = configRessource.constantes.restriction.prive
-        // la relation ne sera ajoutée que lors de l'édition de cette ressource, inutile pour un alias
-        // mais on conserve l'ancienne
+        aliasData.restriction = ressource.restriction
+        // la relation vers l'original est inutile pour un alias,
+        // elle sera ajoutée lors de l'édition de cette alias (qui deviendra une ressource),
+        // mais on doit conserver les autres relations
         if (ressource.relations && ressource.relations.length) aliasData.relations = ressource.relations
         $ressourceRepository.save(aliasData, this)
       }).seq(function (ressAlias) {

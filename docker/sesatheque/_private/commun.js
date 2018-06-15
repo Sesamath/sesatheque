@@ -72,7 +72,6 @@ config.$server = {
 }
 config.application.baseUrl = 'http://commun.local:3002/'
 config.application.baseId = 'communlocal3002'
-config.application.baseIdRegistrar = 'biblilocal3001'
 
 // les noms des hosts imposés par le docker-compose
 // c'est pas obligatoire de déclarer ça en _private, on vérifie

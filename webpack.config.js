@@ -56,7 +56,9 @@ const conf = {
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js',
-    react: './app/client-react/index.js'
+    react: './app/client-react/index.js',
+    // arbre passe par babel
+    arbre: ['./app/client/plugins/arbre/edit.js']
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
