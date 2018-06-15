@@ -55,8 +55,10 @@ class EditorMathGraph extends Component {
    */
   loadRessource (ressource) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
+    const {beforeSaveRegister} = this.props
     this.iframe.current.contentWindow.load(ressource, (error, getParametres) => {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
+      beforeSaveRegister(getParametres)
       this.getParametres = getParametres
     })
   }
@@ -99,7 +101,8 @@ class EditorMathGraph extends Component {
 
 EditorMathGraph.propTypes = {
   change: PropTypes.func,
-  parametres: PropTypes.object
+  parametres: PropTypes.object,
+  beforeSaveRegister: PropTypes.func
 }
 
 export default formValues({parametres: 'parametres'})(EditorMathGraph)

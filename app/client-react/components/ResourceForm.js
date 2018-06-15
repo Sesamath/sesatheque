@@ -35,7 +35,8 @@ const ResourceForm = ({
   handleSubmit,
   change,
   submitting,
-  saveError
+  saveError,
+  beforeSaveRegister
 }) => {
   const {Editor, name} = typeToData[type]
 
@@ -46,7 +47,7 @@ const ResourceForm = ({
       <form onSubmit={handleSubmit}>
         <MetaForm />
         <hr />
-        <Editor change={change} />
+        <Editor change={change} beforeSaveRegister={beforeSaveRegister}/>
         <div className="buttons-area">
           <button type="submit" className="btn--primary" disabled={submitting}>Enregistrer</button>
         </div>
@@ -61,7 +62,8 @@ ResourceForm.propTypes = {
   handleSubmit: PropTypes.func,
   change: PropTypes.func,
   submitting: PropTypes.bool,
-  saveError: PropTypes.func
+  saveError: PropTypes.func,
+  beforeSaveRegister: PropTypes.func
 }
 
 export default flowRight([
