@@ -47,13 +47,11 @@
 
     var mtgApp
 
-    // hauteur et largeur
-    let width = ressource.parametres.width || document.body.clientWidth || 800
-    if (width > 1024) width = 1024
-    if (width < 300) width = 300
-    let height = ressource.parametres.height || Math.round(width * 0.75)
-    if (height > 1024) height = 1024
-    if (height < 200) height = 200
+    // hauteur et largeur (copié de display.js, à maintenir sync)
+    let width = ressource.parametres.width || document.body.clientWidth || 1024
+    if (!Number.isInteger(width) || width < 300) width = 300
+    let height = ressource.parametres.height || document.body.clientHeight
+    if (!Number.isInteger(height) || height < 200) height = Math.round(width * 0.66)
     // qu'on met dans svgOptions
     var svgOptions = {
       // faullait imposer ça à cause de notre css #svg plus haut, mais il n'y est plus...

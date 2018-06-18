@@ -81,13 +81,11 @@ module.exports = function display (ressource, options, next) {
       if (typeof mtgLoader !== 'function') throw new Error('Mathgraph32 n’est pas chargé')
       dom.addCss('https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.css')
 
-      // hauteur et largeur
-      let width = ressource.parametres.width || container.offsetWidth || 800
-      if (width > 1024) width = 1024
-      if (width < 300) width = 300
-      let height = ressource.parametres.height || Math.round(width * 0.75)
-      if (height > 1024) height = 1024
-      if (height < 200) height = 200
+      // hauteur et largeur (si ça change, attention à modifier aussi dans mathgraph-editor.html)
+      let width = ressource.parametres.width || container.clientWidth || 1024
+      if (!Number.isInteger(width) || width < 300) width = 300
+      let height = ressource.parametres.height || container.clientHeight
+      if (!Number.isInteger(height) || height < 200) height = Math.round(width * 0.66)
 
       // la consigne éventuelle
       if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
