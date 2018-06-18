@@ -46,19 +46,28 @@
     if (typeof mtgLoader !== 'function') return alert('mathgraph n’est pas chargé correctement')
 
     var mtgApp
-    var figure = parametres.fig || {type: 'unity', grad: 'simple', unity: 'deg'}
-    // à la création on démarre avec une interface collège (le prof pourra changer ensuite dans l'éditeur
-    // et getParametres nous renverra la bonne valeur)
-    var level = parametres.hasOwnProperty('level') ? parametres.level : 1
+
+    // hauteur et largeur
+    let width = ressource.parametres.width || document.body.clientWidth || 800
+    if (width > 1024) width = 1024
+    if (width < 300) width = 300
+    let height = ressource.parametres.height || Math.round(width * 0.75)
+    if (height > 1024) height = 1024
+    if (height < 200) height = 200
+    // qu'on met dans svgOptions
     var svgOptions = {
       // faullait imposer ça à cause de notre css #svg plus haut, mais il n'y est plus...
       svgId: 'svg',
-      // la taille doit être fixée à l'avance (à cause de la gestion du svg),
-      // on peut le faire en fonction de la taille d'affichage disponible (avec un minimum)
-      // @todo mutualiser les règles avec le display pour fixer min & max
-      width: document.body.clientWidth,
-      height: document.body.clientHeight
+      width,
+      height
     }
+
+    // à la création on démarre avec une interface collège
+    // (le prof pourra changer ensuite dans l'éditeur
+    // et getParametres nous renverra la valeur modifiée)
+    var level = parametres.hasOwnProperty('level') ? parametres.level : 1
+    // à la création on démarre avec ça par défaut (sans repère, juste vecteur unité)
+    var figure = parametres.fig || {type: 'unity', grad: 'simple', unity: 'deg'}
     var mtgOptions = {
       // le level sert pour ouvrir mathgraph avec une figure vierge, ou pour limiter les outils disponibles
       // il peut être mdifié dans l'interface mtg si mtgOptions.options === true
