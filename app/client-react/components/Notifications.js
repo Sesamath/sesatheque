@@ -9,6 +9,12 @@ const levelToClass = {
   error: 'danger'
 }
 
+const levelToIcon = {
+  info: 'info-circle',
+  warning: 'exclamation-circle',
+  error: 'exclamation-triangle'
+}
+
 const Notifications = ({notifications, clear}) => (
   <div className="notifications">
     {notifications.map(({
@@ -17,7 +23,8 @@ const Notifications = ({notifications, clear}) => (
       id
     }) => (
       <div onClick={() => clear(id)} key={id.toString()} className={`notification alert--${levelToClass[level]}`}>
-        <i className="fa fa-times" />
+        <i className={`left fa fa-${levelToIcon[level]}`} />
+        <i className="right fa fa-times" />
         <p>{message}</p>
       </div>
     ))}

@@ -274,9 +274,11 @@ ul.liste li {
     pointer-events: auto;
     cursor: pointer;
     border-radius: 10px;
-
-    .fa-times {
+    .right {
       float: right;
+    }
+    .left {
+      float: left;
     }
     p {
       margin-left: 20px;
