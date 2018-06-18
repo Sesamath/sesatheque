@@ -134,8 +134,6 @@ if (process.env.SESATHEQUE_CONF) {
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
   conf.output.path = `build/${process.env.SESATHEQUE_CONF}/`
-  // avec un autre publicPath
-  conf.output.publicPath = baseUrl
 }
 
 // on crée le dossier de build s'il n'existe pas encore
