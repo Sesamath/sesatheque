@@ -81,9 +81,11 @@ const logDir = process.env.LOGS || root + '/logs'
 
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
 const privateConfPath = [root, '_private']
-if (process.env.SESATHEQUE_CONF && /^[^/]+$/.test(process.env.SESATHEQUE_CONF)) {
+if (process.env.SESATHEQUE_CONF) {
   // on peut préciser un autre fichier de conf via l'environnement
   // (utile pour faire tourner plusieurs instances de l'appli)
+  // on vérifie ici que y'a pas de slash dedans, pour signifier une erreur et arrêter là
+  if (!/^[a-zA-Z0-9_-]+$/.test(process.env.SESATHEQUE_CONF)) throw new Error(`variable d’environnement SESATHEQUE_CONF invalide (${process.env.SESATHEQUE_CONF})`)
   privateConfPath.push(process.env.SESATHEQUE_CONF)
 } else if (staging === 'test') {
   privateConfPath.push('test')
