@@ -30,6 +30,7 @@
   <script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js"></script>
 </head>
 <body>
+<div id="spinner">Chargement en cours… <img src="/plugins/mathgraph/spinner.gif" alt="" /></div>
 <div id="errors"></div>
 <div id="main"></div>
 <script type="application/javascript">
@@ -41,6 +42,7 @@
     // git@src.sesamath.net:mathgraph_js
     // fichier src/mtgLoader.js
     // ou documentation/index.html
+
     if (typeof mtgLoader !== 'function') return alert('mathgraph n’est pas chargé correctement')
 
     var mtgApp
@@ -57,7 +59,6 @@
       width: document.body.clientWidth,
       height: document.body.clientHeight
     }
-    var isEditor = true
     var mtgOptions = {
       // le level sert pour ouvrir mathgraph avec une figure vierge, ou pour limiter les outils disponibles
       // il peut être mdifié dans l'interface mtg si mtgOptions.options === true
@@ -72,9 +73,9 @@
       // des lettres plus espacées, etc.
       // Il n'est pas contenu dans la figure
       dys: parametres.hasOwnProperty('dys') ? parametres.dys : false,
-      // open: {isEditor}, // bouton pour ouvrir une figure, l'info est dans la figure
+      open: true, // bouton pour ouvrir une figure, l'info est dans la figure
       // options: pour autoriser à changer les options de la figure, true par défaut
-      options: {isEditor}, // true si édition par le prof, false en consultation de ressource
+      options: true, // true si édition par le prof, false en consultation de ressource
       // on veut que l'outil permettant d'enregistrer une figure soit présent,
       // pour qu'il puisse enregistrer en local
       // si ça perturbe on mettra false...
@@ -85,7 +86,8 @@
       callBackAfterReady: function () {
         function getParametres () {
           // faut transformer le result en parametres, on override seulement ces 2 props
-          // ça mute l'objet parametres reçu mais c'est pas plus mal
+          // ça mute l'objet parametres reçu au départ mais c'est pas très grave,
+          // l'appelant devrait le remplacer par ce qu'on renvoie ici
           var result = mtgApp.getResult()
           parametres.fig = result.fig
           parametres.level = result.level
@@ -93,6 +95,10 @@
           parametres.isExercise = mtgApp.isExercise()
           return parametres
         }
+        // on vire le spinner
+        const spinner = document.getElementById('spinner')
+        while (spinner.firstChild) spinner.removeChild(spinner.firstChild)
+        // et on passe getParametres au parent
         loadCb(null, getParametres)
       }
     }
