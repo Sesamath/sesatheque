@@ -93,6 +93,7 @@
     "react-router-dom": "^4.2.2",
     "redux": "^4.0.0",
     "redux-form": "^7.3.0",
+    "redux-thunk": "^2.3.0",
     "request": "2.82.0",
     "sesaeditgraphe": "git+https://framagit.org/Sesamath/sesaeditgraphe.git",
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
