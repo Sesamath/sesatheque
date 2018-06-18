@@ -14,6 +14,7 @@ Pour le découpage des chunks
 Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
+const fs = require('fs')
 const path = require('path')
 
 // passer --debug pour ne pas avoir de minification
@@ -28,16 +29,8 @@ const extractCssLoader = extractCss.extract('style-loader', cssLoader)
 const appConfig = require('./app/server/config')
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
-const baseId = appConfig.application.baseId
 
-// pour pouvoir compiler pour d'autres baseId
-let absBaseId = process.env.ABSOLUTE_BASE_ID
-if (absBaseId && absBaseId !== baseId) {
-  // on veut compiler js et css pour un autre domaine (par ex pour compiler la prod en préprod)
-  const sesatheques = require('sesatheque-client/src/sesatheques')
-  baseUrl = sesatheques.getBaseUrl(absBaseId, false)
-  if (!baseUrl) absBaseId = null
-}
+// pour pouvoir compiler les js de plusieurs baseId dans le même dossier root de sésathèque
 
 // la conf identique dev/prod
 const conf = {
@@ -136,12 +129,25 @@ const conf = {
 if (isProd) {
   conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
 } /* */
-if (absBaseId) {
-  console.log(`Compilation avec urls absolues pour ${absBaseId}`)
-  // faut compiler avec un chemin absolu, pour pouvoir être chargé depuis un autre domaine
+if (process.env.SESATHEQUE_CONF) {
+  console.log(`Compilation avec urls absolues pour ${process.env.SESATHEQUE_CONF}`)
+  // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
+  // si on lui passe le même environnement)
+  conf.output.path = `build/${process.env.SESATHEQUE_CONF}/`
+  // avec un autre publicPath
   conf.output.publicPath = baseUrl
-  // On reste dans le même dossier mais faut changer le nom
-  conf.output.filename = `[name].${absBaseId}.js`
+}
+
+// on crée le dossier de build s'il n'existe pas encore
+const buildDir = path.resolve(__dirname, conf.output.path)
+try {
+  if (!fs.existsSync(buildDir)) fs.mkdirSync(buildDir, 0o775)
+  // on vérifie, au cas où ça existait sans être un dossier
+  const stats = fs.statSync(buildDir)
+  if (!stats.isDirectory()) throw new Error(`${buildDir} existe mais n’est pas un dossier`)
+} catch (error) {
+  console.error(`Impossible de créer le dossier ${buildDir}, ABANDON`, error)
+  process.exit(1)
 }
 
 module.exports = conf
