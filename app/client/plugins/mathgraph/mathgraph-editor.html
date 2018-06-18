@@ -89,6 +89,8 @@
           var result = mtgApp.getResult()
           parametres.fig = result.fig
           parametres.level = result.level
+          // on ajoute ça pour savoir si c'est un exo qui renvoie un score calculé par mtg
+          parametres.isExercise = mtgApp.isExercise()
           return parametres
         }
         loadCb(null, getParametres)
