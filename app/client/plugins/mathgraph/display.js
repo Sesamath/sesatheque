@@ -144,6 +144,7 @@ module.exports = function display (ressource, options, next) {
           // des lettres plus espacées, etc.
           // Il n'est pas contenu dans la figure
           dys: parametres.hasOwnProperty('dys') ? parametres.dys : false,
+          newFig: false, // en consultation on ne peut pas ouvrir une nouvelle figure
           open: false,
           // options: pour autoriser à changer les options de la figure, true par défaut
           options: false, // true si édition par le prof, false en consultation de ressource
