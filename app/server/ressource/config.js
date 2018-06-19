@@ -270,7 +270,7 @@ const configRessource = {
     description: 'Description',
     commentaires: 'Commentaires (réservés au formateur)',
     parametres: 'Paramètres',
-    niveaux: 'Niveau',
+    niveaux: 'Niveaux',
     categories: 'Catégories',
     typePedagogiques: 'Type pédagogique',
     typeDocumentaires: 'Type documentaire',
