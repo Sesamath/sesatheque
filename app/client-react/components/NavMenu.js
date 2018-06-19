@@ -9,7 +9,6 @@ const NavMenu = ({ressourceOid}) => (
         to={`/ressource/decrire/${ressourceOid}`}
         title="Description"
         icon="file-alt"
-        target="_self"
       />
       <NavMenuItem
         to={`/ressource/apercevoir/${ressourceOid}`}
