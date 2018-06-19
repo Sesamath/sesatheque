@@ -54,6 +54,12 @@
         </ul>
     {/relations.value}
 
+    {?groupesAuteurs.value}
+      <ul class="groupes">{groupesAuteurs.title}
+        {#groupesAuteurs.value}<li>{.}</li>{/groupesAuteurs.value}
+      </ul>
+    {/groupesAuteurs.value}
+
     {?groupes.value}
       <ul class="groupes">{groupes.title}
         {#groupes.value}<li>{.}</li>{/groupes.value}

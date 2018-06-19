@@ -140,26 +140,21 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
   /**
    * Ajoute des infos à la ressource pour résoudre les refs externes, pour la vue describe
    * (nom des auteurs, des ressources liées, etc)
-   * $auteurs : string[] avec les noms
-   * $contributeurs : idem
+   * _auteurs : string[] avec les noms
+   * _contributeurs : idem
    * _enfants : Array de {titre, [oid], [url]}
-   * $relations : Array de {predicat, lien, url, titre, rid, type} (tous des strings, lien est le tag a complet)
+   * _relations : Array de {predicat, lien, url, titre, rid, type} (tous des strings, lien est le tag a complet)
    * @param {Ressource} ressource
    * @param next
    */
   $ressourceConverter.enhance = function enhance (ressource, next) {
-    ressource.$relations = []
-    ressource.$auteurs = []
-    ressource.$contributeurs = []
-    ressource.$historyUrl = ''
-
     flow().seq(function () {
       // enfants éventuels, sync
       if (isArrayNotEmpty(ressource.enfants)) {
         const enfants = ressource.enfants.filter(e => e)
         if (enfants.length < ressource.enfants.length) log.dataError(`La ressource ${ressource.oid} a des enfants invalides`, enfants)
         ressource._enfants = []
-        ressource.enfants.forEach(function (enfant) {
+        enfants.forEach(function (enfant) {
           // ça peut être un dossier seul
           if (!enfant.aliasOf) return ressource._enfants.push({titre: enfant.titre})
           // sinon on veut le lien
@@ -179,93 +174,85 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
 
       // history, sync
       if (ressource.version > 1) {
-        ressource.$historyUrl = $routes.getAbs('history', ressource.oid)
+        ressource._historyUrl = $routes.getAbs('history', ressource.oid)
       }
 
       // étape relations
       const nextStep = this
-      if (isEmpty(ressource.relations)) {
+      if (!isArrayNotEmpty(ressource.relations)) {
         log.debug('pas de relations')
-        nextStep()
-      } else {
-        log.debug('faut ajouter des titres de relations', ressource.relations)
-        flow(ressource.relations).seqEach(function ([relationId, relationTarget]) {
-          const nextRelation = this
-          $ressourceFetch.fetch(relationTarget, function (error, ressourceLiee) {
-            if (error) {
-              log.error(error)
-            } else if (ressourceLiee) {
-              const [baseId, oid] = getRidComponents(ressourceLiee.rid)
-              ressource.$relations.push({
-                predicat: config.listes.relations[relationId],
-                // pour le template html
-                lien: $routes.getTagA('describe', ressourceLiee),
-                // pour l'api
-                url: getBaseUrl(baseId) + $routes.getAbs('describe', oid).substr(1),
-                titre: ressourceLiee.titre,
-                rid: ressourceLiee.rid,
-                type: ressourceLiee.type
-              })
-            } else {
-              log.dataError(`la ressource ${ressource.oid} est liée à ${relationTarget} qui n’existe pas`)
-            }
-            nextRelation()
-          })
-        }).seq(function () {
-          // log.debug('on a ajouté les titres des relations', ressource.$relations)
-          nextStep()
-        }).catch(function (e) {
-          log.error(e)
-          nextStep()
-        })
+        return nextStep()
       }
+      log.debug('faut ajouter des titres de relations', ressource.relations)
+      ressource._relations = []
+      flow(ressource.relations).seqEach(function ([relationId, relationTarget]) {
+        const nextRelation = this
+        $ressourceFetch.fetch(relationTarget, function (error, ressourceLiee) {
+          if (error) {
+            log.error(error)
+          } else if (ressourceLiee) {
+            const [baseId, oid] = getRidComponents(ressourceLiee.rid)
+            ressource._relations.push({
+              predicat: config.listes.relations[relationId],
+              // pour le template html
+              lien: $routes.getTagA('describe', ressourceLiee),
+              // pour l'api
+              url: getBaseUrl(baseId) + $routes.getAbs('describe', oid).substr(1),
+              titre: ressourceLiee.titre,
+              rid: ressourceLiee.rid,
+              type: ressourceLiee.type
+            })
+          } else {
+            log.dataError(`la ressource ${ressource.oid} est liée à ${relationTarget} qui n’existe pas`)
+          }
+          nextRelation()
+        })
+      }).seq(function () {
+        // log.debug('on a ajouté les titres des relations', ressource._relations)
+        nextStep()
+      }).catch(function (e) {
+        log.error(e)
+        nextStep()
+      })
     }).seq(function () {
       // auteurs
       const nextStep = this
-      // on traite d'abord les groupesAuteurs, sync
-      if (isArrayNotEmpty(ressource.groupesAuteurs)) {
-        ressource.$auteurs = ressource.groupesAuteurs.map(groupeNom => `Tous les membres du groupe ${groupeNom}`)
-      }
-      if (isEmpty(ressource.auteurs)) {
-        nextStep()
-      } else {
-        flow(ressource.auteurs).seqEach(function (pid) {
-          const nextAuteur = this
-          $personneRepository.load(pid, function (error, personne) {
-            if (error) log.error(error)
-            else if (personne) ressource.$auteurs.push(`${personne.prenom} ${personne.nom}`)
-            else ressource.$auteurs.push(`auteur ${pid} inconnu`)
-            nextAuteur()
-          })
-        }).seq(function () {
-          nextStep()
-        }).catch(function (error) {
-          log.error('erreur dans le flux auteurs de la ressource ' + ressource.oid, error)
-          nextStep()
+      if (!isArrayNotEmpty(ressource.auteurs)) return nextStep()
+      // y'a des auteurs
+      ressource._auteurs = []
+      flow(ressource.auteurs).seqEach(function (pid) {
+        const nextAuteur = this
+        $personneRepository.load(pid, function (error, personne) {
+          if (error) log.error(error)
+          else if (personne) ressource._auteurs.push(`${personne.prenom} ${personne.nom}`)
+          else ressource._auteurs.push(`auteur ${pid} inconnu`)
+          nextAuteur()
         })
-      }
+      }).seq(function () {
+        nextStep()
+      }).catch(function (error) {
+        log.error('erreur dans le flux auteurs de la ressource ' + ressource.oid, error)
+        nextStep()
+      })
     }).seq(function () {
       // contributeurs
       const nextStep = this
-      if (isEmpty(ressource.contributeurs)) {
-        nextStep()
-      } else {
-        log.debug('av parSeq', ressource.contributeurs)
-        flow(ressource.contributeurs).seqEach(function (contributeurId) {
-          const nextContributeur = this
-          $personneRepository.load(contributeurId, function (error, personne) {
-            if (error) log.error(error)
-            else if (personne) ressource.$contributeurs.push(`${personne.prenom} ${personne.nom}`)
-            else ressource.$contributeurs.push(`contributeur ${contributeurId} inconnu`)
-            nextContributeur()
-          })
-        }).seq(function () {
-          nextStep()
-        }).catch(function (error) {
-          log.error('erreur dans le flux contributeurs de la ressource ' + ressource.oid, error)
-          nextStep()
+      if (!isArrayNotEmpty(ressource.contributeurs)) return nextStep()
+      ressource._contributeurs = []
+      flow(ressource.contributeurs).seqEach(function (pid) {
+        const nextContributeur = this
+        $personneRepository.load(pid, function (error, personne) {
+          if (error) log.error(error)
+          else if (personne) ressource._contributeurs.push(`${personne.prenom} ${personne.nom}`)
+          else ressource._contributeurs.push(`contributeur ${pid} inconnu`)
+          nextContributeur()
         })
-      }
+      }).seq(function () {
+        nextStep()
+      }).catch(function (error) {
+        log.error('erreur dans le flux contributeurs de la ressource ' + ressource.oid, error)
+        nextStep()
+      })
     }).seq(function () {
       // on a tout, on peut envoyer
       next(null, ressource)

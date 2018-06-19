@@ -557,7 +557,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
   }
 
   /**
-   * Retourne un objet pour dust à partir d'une entité ressource
+   * Retourne un objet pour dust (hors form) à partir d'une entité ressource
    * @private
    * @param {Error}     error     Erreur éventuelle (passer null ou undefined sinon)
    * @param {Ressource} ressource La ressource qui sort d'un load
@@ -578,25 +578,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       }
       // on traite chaque type de contenu, Array|Date|le reste
       if (ressConfig.typesVar[key] === 'Array') {
-        if (key === 'relations') {
-          // même sans relations on veut pas passer dans le if ressConfig.listes[key] plus loin,
-          // d'où le if imbriqué
-          if (ressource.$relations) viewData.relations.value = ressource.$relations
-        } else if (key === 'groupesAuteurs') {
-          // rien, c'est mis dans $auteurs pour describe (par enhance),
-          // et les autres vues n'ont pas besoin de groupesAuteurs
-        } else if (ressConfig.listes[key]) {
+        if (ressConfig.listes[key]) {
           // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
-          buffer = []
-          _.each(value, function (id) {
-            if (ressConfig.listes[key][id]) buffer.push(ressConfig.listes[key][id])
-            else log.error(`La ressource ${ressource.oid} a une valeur ${id} pour la propriété ${key} qui n’est pas dans la liste prédéfinie en configuration`)
-          })
-          viewData[key].value = buffer.join(', ')
+          // sauf relations…
+          if (key === 'relations') {
+            viewData[key].value = ressource[`_${key}`] // peut être undefined
+          } else {
+            buffer = []
+            _.each(value, function (id) {
+              if (ressConfig.listes[key][id]) buffer.push(ressConfig.listes[key][id])
+              else log.error(`La ressource ${ressource.oid} a une valeur ${id} pour la propriété ${key} qui n’est pas dans la liste prédéfinie en configuration`)
+            })
+            viewData[key].value = buffer.join(', ')
+          }
         } else {
-          // @todo vérifier s'il reste des propriétés préfixées par _
-          // un tableau qui n'est pas une liste d'ids on regarde si on a la propriété préfixée par _ ou on laisse tel quel
-          viewData[key].value = ressource['_' + key] || value
+          // un tableau qui n'est pas une liste d'ids listés en config,
+          // on regarde si on a une propriété préfixée par _ ou on laisse tel quel
+          viewData[key].value = ressource.hasOwnProperty(`_${key}`) ? ressource[`_${key}`] : value
         }
       } else if (ressConfig.typesVar[key] === 'Date') {
         viewData[key].value = value ? moment(value).format(ressConfig.formats.jour) : value
@@ -613,8 +611,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     if (ressource.$warnings && ressource.$warnings.length) viewData.warnings = ressource.$warnings
     if (ressource.$errors && ressource.$errors.length) viewData.errors = ressource.$errors
     if (view) viewData.$view = view
-
-    log.debug('viewData', viewData, 'aVirer', {max: 10000})
 
     return viewData
   }
@@ -684,11 +680,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
           $view: 'iframe',
           url: $routes.getAbs('display', ressource, context)
         }
+        // faut ajouter ce code js pour autosize
         if (!data.jsBloc) data.jsBloc = {$view: 'js'}
         if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ''
         data.jsBloc.jsCode += 'stpage.autosize("main", null, null, {minHeight:500, minWidth:600});'
       } else {
-        // et la ressource (ou erreur)
         data.contentBloc = getViewData(error, ressource, view)
 
         // pour display faut ajouter les variables js (preview utilise aussi la vue display, seul le layout change)
@@ -698,10 +694,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
 
         // pour describe il faut ajouter la résolution des refs externes (faite par enhance)
         } else if (view === 'describe' && ressource) {
-          // ajout des enfants éventuels
-          if (isArrayNotEmpty(ressource.$enfants)) data.contentBloc.$enfants = ressource.$enfants
+          ;['_auteurs', '_contributeurs', '_enfants', '_relations'].forEach(p => {
+            if (isArrayNotEmpty(ressource[p])) data.contentBloc[p] = ressource[p]
+          })
           // ajout du lien vers l'historique, pas encore géré (faut faire la page qui liste les versions)
-          if (ressource.$historyUrl) data.contentBloc.$historyUrl = ressource.$historyUrl
+          if (ressource._historyUrl) data.contentBloc._historyUrl = ressource._historyUrl
 
           // ajout du lien pour le json
           data.contentBloc.dataUrl = $routes.getAbs('api', ressource)
