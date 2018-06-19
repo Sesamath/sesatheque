@@ -30,13 +30,11 @@
     <p>{description.title} : {description.value|nl2br}</p>
     <p>{commentaires.title} : {commentaires.value|nl2br}</p>
 
-    {?enfants}
-      {! on ajoute une liste de liens vers chaque enfant !}
-      <ul>Liens vers les enfants :
-        {#enfantsDescribe}<li><a href="{url}">{titre}</a></li>{/enfantsDescribe}
+    {?enfants.value}
+      <ul>{enfants.title} :
+        {#enfants.value}<li>{?url}<a href="{url}">{titre}</a>{:else}{titre}{/url}</li>{/enfants.value}
       </ul>
-      <p>{enfants.title} : <pre>{enfants.value|jsd}</pre></p>
-    {/enfants}
+    {/enfants.value}
 
     {?auteurs.value}
       <ul>{auteurs.title} :

@@ -30,6 +30,10 @@
  */
 
 'use strict'
+const {isEmpty} = require('lodash')
+const flow = require('an-flow')
+const {isArrayNotEmpty} = require('sesajstools')
+const {exists, getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
 
 /**
  * Service qui regroupe les fonctions de transformation de données sur des ressources
@@ -41,15 +45,12 @@
  */
 var $ressourceConverter = {}
 
-var flow = require('an-flow')
-const {exists} = require('sesatheque-client/src/sesatheques')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 var config = require('./config')
 
-var sTools = require('sesajstools')
 
-module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl) {
+module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl, $ressourceFetch, $personneRepository) {
   /**
    * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
    * dont le 1er est un id de relation valide
@@ -136,6 +137,145 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     })
   }
 
+  /**
+   * Ajoute des infos à la ressource pour résoudre les refs externes, pour la vue describe
+   * (nom des auteurs, des ressources liées, etc)
+   * $auteurs : string[] avec les noms
+   * $contributeurs : idem
+   * _enfants : Array de {titre, [oid], [url]}
+   * $relations : Array de {predicat, lien, url, titre, rid, type} (tous des strings, lien est le tag a complet)
+   * @param {Ressource} ressource
+   * @param next
+   */
+  $ressourceConverter.enhance = function enhance (ressource, next) {
+    ressource.$relations = []
+    ressource.$auteurs = []
+    ressource.$contributeurs = []
+    ressource.$historyUrl = ''
+
+    flow().seq(function () {
+      // enfants éventuels, sync
+      if (isArrayNotEmpty(ressource.enfants)) {
+        const enfants = ressource.enfants.filter(e => e)
+        if (enfants.length < ressource.enfants.length) log.dataError(`La ressource ${ressource.oid} a des enfants invalides`, enfants)
+        ressource._enfants = []
+        ressource.enfants.forEach(function (enfant) {
+          // ça peut être un dossier seul
+          if (!enfant.aliasOf) return ressource._enfants.push({titre: enfant.titre})
+          // sinon on veut le lien
+          try {
+            const [baseId, oid] = getRidComponents(enfant.aliasOf)
+            const url = getBaseUrl(baseId) + $routes.getAbs('describe', oid).substr(1)
+            ressource._enfants.push({
+              oid,
+              titre: enfant.titre,
+              url
+            })
+          } catch (error) {
+            log.dataError(`enfant de ${ressource.oid} avec un rid non conforme`, enfant)
+          }
+        })
+      }
+
+      // history, sync
+      if (ressource.version > 1) {
+        ressource.$historyUrl = $routes.getAbs('history', ressource.oid)
+      }
+
+      // étape relations
+      const nextStep = this
+      if (isEmpty(ressource.relations)) {
+        log.debug('pas de relations')
+        nextStep()
+      } else {
+        log.debug('faut ajouter des titres de relations', ressource.relations)
+        flow(ressource.relations).seqEach(function ([relationId, relationTarget]) {
+          const nextRelation = this
+          $ressourceFetch.fetch(relationTarget, function (error, ressourceLiee) {
+            if (error) {
+              log.error(error)
+            } else if (ressourceLiee) {
+              const [baseId, oid] = getRidComponents(ressourceLiee.rid)
+              ressource.$relations.push({
+                predicat: config.listes.relations[relationId],
+                // pour le template html
+                lien: $routes.getTagA('describe', ressourceLiee),
+                // pour l'api
+                url: getBaseUrl(baseId) + $routes.getAbs('describe', oid).substr(1),
+                titre: ressourceLiee.titre,
+                rid: ressourceLiee.rid,
+                type: ressourceLiee.type
+              })
+            } else {
+              log.dataError(`la ressource ${ressource.oid} est liée à ${relationTarget} qui n’existe pas`)
+            }
+            nextRelation()
+          })
+        }).seq(function () {
+          // log.debug('on a ajouté les titres des relations', ressource.$relations)
+          nextStep()
+        }).catch(function (e) {
+          log.error(e)
+          nextStep()
+        })
+      }
+    }).seq(function () {
+      // auteurs
+      const nextStep = this
+      // on traite d'abord les groupesAuteurs, sync
+      if (isArrayNotEmpty(ressource.groupesAuteurs)) {
+        ressource.$auteurs = ressource.groupesAuteurs.map(groupeNom => `Tous les membres du groupe ${groupeNom}`)
+      }
+      if (isEmpty(ressource.auteurs)) {
+        nextStep()
+      } else {
+        flow(ressource.auteurs).seqEach(function (pid) {
+          const nextAuteur = this
+          $personneRepository.load(pid, function (error, personne) {
+            if (error) log.error(error)
+            else if (personne) ressource.$auteurs.push(`${personne.prenom} ${personne.nom}`)
+            else ressource.$auteurs.push(`auteur ${pid} inconnu`)
+            nextAuteur()
+          })
+        }).seq(function () {
+          nextStep()
+        }).catch(function (error) {
+          log.error('erreur dans le flux auteurs de la ressource ' + ressource.oid, error)
+          nextStep()
+        })
+      }
+    }).seq(function () {
+      // contributeurs
+      const nextStep = this
+      if (isEmpty(ressource.contributeurs)) {
+        nextStep()
+      } else {
+        log.debug('av parSeq', ressource.contributeurs)
+        flow(ressource.contributeurs).seqEach(function (contributeurId) {
+          const nextContributeur = this
+          $personneRepository.load(contributeurId, function (error, personne) {
+            if (error) log.error(error)
+            else if (personne) ressource.$contributeurs.push(`${personne.prenom} ${personne.nom}`)
+            else ressource.$contributeurs.push(`contributeur ${contributeurId} inconnu`)
+            nextContributeur()
+          })
+        }).seq(function () {
+          nextStep()
+        }).catch(function (error) {
+          log.error('erreur dans le flux contributeurs de la ressource ' + ressource.oid, error)
+          nextStep()
+        })
+      }
+    }).seq(function () {
+      // on a tout, on peut envoyer
+      next(null, ressource)
+    }).catch(function (error) {
+      // en cas d'erreur dans le flux on envoie quand même la ressource en l'état
+      log.error(`erreur dans la recherche des références externes de la ressource ${ressource.oid}`, error)
+      next(error, ressource)
+    })
+  }
+
   // noinspection FunctionWithMoreThanThreeNegationsJS
   /**
    * Peuple les enfants d'un arbre en allant les chercher en bdd
@@ -217,7 +357,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
     // checks
     if (ressource.type !== 'arbre') {
       next(new Error('Méthode réservée au type arbre'))
-    } else if (!sTools.isArrayNotEmpty(ressource.enfants)) {
+    } else if (!isArrayNotEmpty(ressource.enfants)) {
       log.debug('arbre vide', ressource)
       next(new Error('Impossible de peupler un arbre vide'))
     } else {

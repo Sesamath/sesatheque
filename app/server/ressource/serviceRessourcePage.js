@@ -32,7 +32,7 @@
 'use strict'
 
 const _ = require('lodash')
-const sjt = require('sesajstools')
+const {isArrayNotEmpty, isInArray, stringify} = require('sesajstools')
 const sjtObj = require('sesajstools/utils/object')
 const flow = require('an-flow')
 const moment = require('moment')
@@ -43,7 +43,7 @@ const ressConfig = require('./config')
 const appConfig = require('../config')
 const {getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
 
-module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) {
+module.exports = function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page) {
   /**
    * Un service helper des contrôleurs html pour manipuler les datas avant de les envoyer aux vues
    * @service $ressourcePage
@@ -90,8 +90,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             formData.errors.push(error.toString())
           } else if (groupe) {
             var myIndex = myGroupes.indexOf(groupe.nom)
-            var isInGroupe = (sjt.isInArray(groupes, groupe.nom))
-            var isInGroupeAuteur = groupesAuteurs && sjt.isInArray(groupesAuteurs, groupe.nom)
+            var isInGroupe = (isInArray(groupes, groupe.nom))
+            var isInGroupeAuteur = groupesAuteurs && isInArray(groupesAuteurs, groupe.nom)
             if (myIndex === -1) {
               // groupe existant sur cette ressource mais on en est pas membre (donc readonly)
               choices.push({
@@ -218,7 +218,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     data.contentBloc.sesatheques = appConfig.sesatheques
     if (ressource) {
       // une string pour que dust le mette dans le source
-      data.contentBloc.ressource = sjt.stringify(ressource)
+      data.contentBloc.ressource = stringify(ressource)
     }
   }
 
@@ -305,119 +305,6 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     }
 
     return choices
-  }
-
-  /**
-   * Ajoute des infos à la ressource sur ses relations (titre & co)
-   * @private
-   * @param ressource
-   * @param next
-   */
-  function enhance (ressource, next) {
-    // faut aller chercher en asynchrone les infos complémentaires pour la vue describe
-    // (éventuels titres de ressources liées, auteurs ou groupes)
-    // on ajoute ces valeurs enrichies dans un champ préfixé par _ que termine utilisera
-    var fluxComplements = flow()
-
-    // étape relations
-    ressource._relations = []
-    fluxComplements.seq(function () {
-      var nextComplement = this
-      if (_.isEmpty(ressource.relations)) {
-        log.debug('pas de relations')
-        nextComplement()
-      } else {
-        log.debug('faut ajouter des titres de relations', ressource.relations)
-        flow(ressource.relations).seqEach(function ([relationId, relationTarget]) {
-          const nextRelation = this
-          $ressourceFetch.fetch(relationTarget, function (error, ressourceLiee) {
-            if (error) {
-              log.error(error)
-            } else if (ressourceLiee) {
-              ressource._relations.push({
-                predicat: ressConfig.listes.relations[relationId],
-                lien: $routes.getTagA('describe', ressourceLiee),
-                rid: ressourceLiee.rid,
-                type: ressourceLiee.type
-              })
-            } else {
-              log.dataError(`la ressource ${ressource.oid} est liée à ${relationTarget} qui n’existe pas`)
-            }
-            nextRelation()
-          })
-        }).seq(function () {
-          // log.debug('on a ajouté les titres des relations', ressource._relations)
-          nextComplement()
-        }).catch(function (e) {
-          log.error(e)
-          nextComplement()
-        })
-      }
-    })
-
-    // étape auteurs, on ajoute le champ _auteurs pour avoir des objets {nom, prenom} plutôt que des ids
-    ressource._auteurs = []
-    fluxComplements.seq(function () {
-      var nextComplement = this
-      if (_.isEmpty(ressource.auteurs)) {
-        nextComplement()
-      } else {
-        var fluxAuteurs = flow(ressource.auteurs)
-        fluxAuteurs.seqEach(function (pid) {
-          var nextAuteur = this
-          $personneRepository.load(pid, function (error, personne) {
-            if (error) log.error(error)
-            else if (personne) ressource._auteurs.push({nom: personne.prenom + ' ' + personne.nom})
-            else ressource._auteurs.push({nom: 'auteur ' + pid + ' inconnu'})
-            nextAuteur()
-          })
-        })
-        fluxAuteurs.seq(function () {
-          nextComplement()
-        })
-        fluxAuteurs.catch(function (error) {
-          log.error('erreur dans le flux auteurs de la ressource ' + ressource.oid, error)
-          nextComplement()
-        })
-      }
-    })
-
-    // étape contributeurs
-    ressource._contributeurs = []
-    fluxComplements.seq(function () {
-      var nextComplement = this
-      if (_.isEmpty(ressource.contributeurs)) {
-        nextComplement()
-      } else {
-        log.debug('av parSeq', ressource.contributeurs)
-        var fluxContributeurs = flow(ressource.contributeurs)
-        fluxContributeurs.seqEach(function (contributeurId) {
-          var nextContributeur = this
-          $personneRepository.load(contributeurId, function (error, personne) {
-            if (error) log.error(error)
-            else if (personne) ressource._contributeurs.push({nom: personne.prenom + ' ' + personne.nom})
-            else ressource._contributeurs.push({nom: 'contributeur ' + contributeurId + ' inconnu'})
-            nextContributeur()
-          })
-        })
-        fluxContributeurs.seq(function () {
-          nextComplement()
-        })
-        fluxContributeurs.catch(function (error) {
-          log.error('erreur dans le flux contributeurs de la ressource ' + ressource.oid, error)
-          nextComplement()
-        })
-      }
-    })
-    // on a tout, on peut envoyer
-    fluxComplements.seq(function () {
-      next(null, ressource)
-    })
-    // en cas d'erreur dans seq on envoie quand même
-    fluxComplements.catch(function (error) {
-      log.error("erreur dans la recherche de compléments d'une ressource", error)
-      next(error, ressource)
-    })
   }
 
   /**
@@ -692,30 +579,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       // on traite chaque type de contenu, Array|Date|le reste
       if (ressConfig.typesVar[key] === 'Array') {
         if (key === 'relations') {
-          // on veut pas passer dans le if ressConfig.listes[key]
-          if (ressource._relations) viewData.relations.value = ressource._relations
+          // même sans relations on veut pas passer dans le if ressConfig.listes[key] plus loin,
+          // d'où le if imbriqué
+          if (ressource.$relations) viewData.relations.value = ressource.$relations
         } else if (key === 'groupesAuteurs') {
-          if (value.length && view === 'describe') {
-            // en describe on ajoute les groupes d'auteurs dans le champ auteurs
-            if (viewData.auteurs && viewData.auteurs.value) {
-              _.each(value, function (groupeNom) {
-                viewData.auteurs.value.push({ nom: 'Tous les membres du groupe ' + groupeNom })
-              })
-            } else {
-              log.error(new Error('Pas de champ auteurs'))
-            }
-          } // les autres vues n'ont pas besoin de groupesAuteurs
+          // rien, c'est mis dans $auteurs pour describe (par enhance),
+          // et les autres vues n'ont pas besoin de groupesAuteurs
         } else if (ressConfig.listes[key]) {
           // c'est une liste d'id déclarés en conf, faut remplacer les ids par leur label
           buffer = []
           _.each(value, function (id) {
             if (ressConfig.listes[key][id]) buffer.push(ressConfig.listes[key][id])
-            else log.error('La ressource ' + ressource.oid + ' a une valeur ' + id + ' pour la propriété ' + key + " qui n'est pas dans la liste prédéfinie dans la configuration")
+            else log.error(`La ressource ${ressource.oid} a une valeur ${id} pour la propriété ${key} qui n’est pas dans la liste prédéfinie en configuration`)
           })
           viewData[key].value = buffer.join(', ')
         } else {
+          // @todo vérifier s'il reste des propriétés préfixées par _
           // un tableau qui n'est pas une liste d'ids on regarde si on a la propriété préfixée par _ ou on laisse tel quel
-          // (auteurs & co ou des propriétés supplémentaires)
           viewData[key].value = ressource['_' + key] || value
         }
       } else if (ressConfig.typesVar[key] === 'Date') {
@@ -733,6 +613,8 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     if (ressource.$warnings && ressource.$warnings.length) viewData.warnings = ressource.$warnings
     if (ressource.$errors && ressource.$errors.length) viewData.errors = ressource.$errors
     if (view) viewData.$view = view
+
+    log.debug('viewData', viewData, 'aVirer', {max: 10000})
 
     return viewData
   }
@@ -808,46 +690,23 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
       } else {
         // et la ressource (ou erreur)
         data.contentBloc = getViewData(error, ressource, view)
+
         // pour display faut ajouter les variables js (preview utilise aussi la vue display, seul le layout change)
         if (view === 'display') {
           addJsVars(data, ressource)
           data.contentBloc.isFormateur = $accessControl.hasRole('acces_correction', context)
+
+        // pour describe il faut ajouter la résolution des refs externes (faite par enhance)
         } else if (view === 'describe' && ressource) {
-          // ajout des enfants pour les arbres
-          if (ressource.type === 'arbre') {
-            // on ajoute la liste des urls des enfants si on les a
-            if (Array.isArray(ressource.enfants) && ressource.enfants.length) { // en cas d'erreur json enfants est une string
-              const enfants = ressource.enfants.filter(e => e)
-              if (enfants.length < ressource.enfants.length) log.dataError(`La ressource ${ressource.oid} a des enfants invalides`, enfants)
-              var enfantsDescribe = []
-              ressource.enfants.forEach(function (enfant) {
-                // ça peut être un dossier seul
-                if (!enfant.aliasOf) return enfantsDescribe.push({titre: enfant.titre})
-                // sinon on veut le lien
-                try {
-                  const [ baseId, id ] = getRidComponents(enfant.aliasOf)
-                  const url = getBaseUrl(baseId) + $routes.getAbs('describe', id)
-                  enfantsDescribe.push({
-                    oid: id,
-                    titre: enfant.titre,
-                    url: url
-                  })
-                } catch (error) {
-                  log.dataError(`enfant de ${ressource.oid} avec un rid non conforme`, enfant)
-                }
-              })
-              data.contentBloc.enfantsDescribe = enfantsDescribe
-            }
-          }
-          // ajout du lien vers l'historique
-          if (ressource.version > 1) {
-            data.contentBloc.history = {
-              url: $routes.getAbs('history', ressource.oid)
-            }
-          }
+          // ajout des enfants éventuels
+          if (isArrayNotEmpty(ressource.$enfants)) data.contentBloc.$enfants = ressource.$enfants
+          // ajout du lien vers l'historique, pas encore géré (faut faire la page qui liste les versions)
+          if (ressource.$historyUrl) data.contentBloc.$historyUrl = ressource.$historyUrl
+
           // ajout du lien pour le json
           data.contentBloc.dataUrl = $routes.getAbs('api', ressource)
         }
+
         // pour les boutons d'actions (ajoutés dans beforeTransport) on ajoute la ressource au context
         if (context.layout === 'page' && ressource) context.ressource = ressource
         // le titre s'il n'est pas fourni en options
@@ -859,6 +718,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
             data.$metas.title = 'Pas de ressource à afficher'
           }
         }
+
         // éventuels overrides
         if (options) sjtObj.merge(data, options)
       }
@@ -873,7 +733,7 @@ module.exports = function (EntityRessource, $ressourceRepository, $personneRepos
     const data = $ressourcePage.getDefaultData(view)
     if (view === 'describe') {
       // faut ajouter des infos sur les relations et les auteurs/contributeurs en allant les charger
-      enhance(ressource, termine)
+      $ressourceConverter.enhance(ressource, termine)
     } else {
       termine()
     }
