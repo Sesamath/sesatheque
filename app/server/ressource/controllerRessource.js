@@ -306,7 +306,8 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     redirectPublicOrContinue(context, function () {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
-        if (['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
+        if (!error && ressource && ['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
+          // version react
           let data = {
             contentBloc: {
               $view: 'ressource-editor',
