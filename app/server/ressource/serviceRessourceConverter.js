@@ -30,10 +30,12 @@
  */
 
 'use strict'
-const {isEmpty} = require('lodash')
 const flow = require('an-flow')
 const {isArrayNotEmpty} = require('sesajstools')
 const {exists, getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
+// pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
+// car on a l'autocomplétion sur les noms de propriété
+const config = require('./config')
 
 /**
  * Service qui regroupe les fonctions de transformation de données sur des ressources
@@ -43,12 +45,7 @@ const {exists, getBaseUrl, getRidComponents} = require('sesatheque-client/src/se
  * @requires $routes
  * @requires $accessControl
  */
-var $ressourceConverter = {}
-
-// pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
-// car on a l'autocomplétion sur les noms de propriété
-var config = require('./config')
-
+const $ressourceConverter = {}
 
 module.exports = function (EntityRessource, $ressourceRepository, $routes, $accessControl, $ressourceFetch, $personneRepository) {
   /**
@@ -288,9 +285,9 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
        * @param next
        */
       function updateEnfant (enfantIndex, ressourceBdd, next) {
-        var enfant = parent.enfants[enfantIndex]
+        const enfant = parent.enfants[enfantIndex]
         if (ressourceBdd) {
-          var newEnfant = {
+          const newEnfant = {
             oid: ressourceBdd.oid,
             titre: ressourceBdd.titre,
             type: ressourceBdd.type
@@ -309,11 +306,11 @@ module.exports = function (EntityRessource, $ressourceRepository, $routes, $acce
 
       if (parent.enfants && parent.enfants.length) {
         flow(parent.enfants).seqEach(function (enfant, enfantIndex) {
-          var finEach = this
+          const finEach = this
           // pour permettre de récupérer des objets d'après leur ref d'origine, on accepte aussi id et idOrigine (à la place de ref)
           if (enfant.origine && enfant.idOrigine) {
             // on le cherche en db
-            // var logSuffix = enfant.idOrigine + ' - ' + enfant.id
+            // const logSuffix = enfant.idOrigine + ' - ' + enfant.id
             // log('load ' + logSuffix)
             $ressourceRepository.loadByOrigin(enfant.origine, enfant.idOrigine, function (error, ressource) {
               if (error) log.error(error)

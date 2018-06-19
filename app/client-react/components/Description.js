@@ -1,12 +1,11 @@
 import moment from 'moment'
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {flowRight} from 'lodash'
 import resourceLoader from './resourceLoader'
 import NavMenu from './NavMenu'
 
 const Description = ({
-  initialValues: {
+  initialValues: { // eslint-disable-line react/prop-types
     titre,
     oid,
     publie,
@@ -14,7 +13,6 @@ const Description = ({
     dateMiseAJour
   }
 }) => {
-
   return (
     <Fragment>
       <h1 className="fl">{titre}</h1>
@@ -31,6 +29,4 @@ const Description = ({
   )
 }
 
-export default flowRight([
-  resourceLoader,
-])(Description)
+export default resourceLoader(Description)
