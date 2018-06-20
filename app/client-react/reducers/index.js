@@ -1,8 +1,12 @@
 import { combineReducers } from 'redux'
+import { reducer as form } from 'redux-form'
+import notifications from './notifications'
 import personne from './personne'
-import {reducer as reduxFormReducer} from 'redux-form'
 
-export default combineReducers({
-  form: reduxFormReducer,
+const reducer = combineReducers({
+  form,
+  notifications,
   personne
 })
+
+export default reducer

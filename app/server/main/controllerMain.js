@@ -64,6 +64,7 @@ module.exports = function (mainComponent) {
       fsPath: path.join(root, 'build'),
       maxAge: config.application.staticMaxAge || '7d'
     }
+    if (process.env.SESATHEQUE_CONF) expressOptions.fsPath = path.join(expressOptions.fsPath, process.env.SESATHEQUE_CONF)
     this.serve('/', expressOptions)
     // et les ressources statiques qui bougent pas (CopyWebpackPlugin arrive pas à les copier, y'en a trop)
     expressOptions.fsPath = path.join(root, 'app', 'assets')
