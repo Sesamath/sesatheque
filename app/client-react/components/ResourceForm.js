@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {renameProp} from 'recompose'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
@@ -8,6 +9,7 @@ import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
 import resourceLoader from './resourceLoader'
+import resourceSaver from './resourceSaver'
 import NavMenu from './NavMenu'
 
 const typeToData = {
@@ -34,7 +36,9 @@ const ResourceForm = ({
   handleSubmit,
   change,
   submitting,
-  beforeSaveRegister
+  syncFormStore,
+  syncFormStoreRegister,
+  saveRessource
 }) => {
   const {Editor, name} = typeToData[type]
 
@@ -42,12 +46,26 @@ const ResourceForm = ({
     <Fragment>
       <h1 className="fl">Modifier la ressource {name}</h1>
       <NavMenu ressourceOid={ressourceOid} />
-      <form onSubmit={handleSubmit}>
+      <form>
         <MetaForm />
         <hr />
-        <Editor change={change} beforeSaveRegister={beforeSaveRegister}/>
+        <Editor
+          change={change}
+          syncFormStoreRegister={syncFormStoreRegister}
+        />
         <div className="buttons-area">
-          <button type="submit" className="btn--primary" disabled={submitting}>Enregistrer</button>
+          <button
+            type="button"
+            className="btn--primary"
+            disabled={submitting}
+            onClick={(e) => {
+              e.persist()
+              return Promise.resolve(syncFormStore())
+                .then(() => handleSubmit(saveRessource)(e))
+            }}
+          >
+            Enregistrer
+          </button>
         </div>
       </form>
     </Fragment>
@@ -64,5 +82,7 @@ ResourceForm.propTypes = {
 
 export default flowRight([
   resourceLoader,
-  reduxForm({form: 'meta'})
+  resourceSaver,
+  renameProp('ressource', 'initialValues'),
+  reduxForm({form: 'ressource'})
 ])(ResourceForm)

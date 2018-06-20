@@ -1,11 +1,10 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {loadRessource, saveRessource} from '../actions/ressource'
+import {loadRessource} from '../actions/ressource'
 
 const mapDispatchToProps = {
-  loadRessource,
-  saveRessource
+  loadRessource
 }
 
 const mapStateToProps = ({ressource}) => ({ressource})
@@ -14,20 +13,6 @@ const resourceLoader = (WrappedComponent) => {
   class ResourceLoader extends Component {
     constructor (props) {
       super(props)
-      this.onSubmit = this.onSubmitInner.bind(this)
-      this.beforeSaveRegister = this.beforeSaveRegisterInner.bind(this)
-    }
-
-    beforeSaveRegisterInner (getParametres) {
-      this.getParametres = getParametres
-    }
-
-    onSubmitInner (body) {
-      if (this.getParametres) {
-        body.parametres = this.getParametres()
-      }
-
-      return this.props.saveRessource(body)
     }
 
     componentDidMount () {
@@ -39,12 +24,7 @@ const resourceLoader = (WrappedComponent) => {
       if (this.props.ressource === null) return null
 
       return (
-        <WrappedComponent
-          initialValues={this.props.ressource}
-          onSubmit={this.onSubmit}
-          beforeSaveRegister={this.beforeSaveRegister}
-          {...this.props}
-        />
+        <WrappedComponent {...this.props} />
       )
     }
   }

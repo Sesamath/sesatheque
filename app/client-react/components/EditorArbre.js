@@ -26,12 +26,16 @@ class EditorArbre extends Component {
      * @type {string}
      */
     this.iframeSrc = require('../../client/plugins/arbre/iframe.html')
+
+    this.state = {
+      manualEdition: false
+    }
   }
 
   /**
    * Exporte le contenu de l'éditeur
    */
-  exportToJson () {
+  exportParametresToProp () {
     const arbreExport = this.getEnfants()
     if (!arbreExport) {
       console.error(new Error('le plugin ne remonte aucune info'))
@@ -42,15 +46,23 @@ class EditorArbre extends Component {
     this.props.change('parametres', arbreExport)
   }
 
+  syncFormStore() {
+    if (!this.state.manualEdition) {
+      this.exportParametresToProp()
+    }
+  }
+
   /**
    * Charge une ressource
    *
    * @param {Ressource} resource Une Ressource
    */
   loadRessource (resource) {
+    const {syncFormStoreRegister} = this.props
     this.iframe.current.contentWindow.load(resource, window.options, (error, getEnfants) => {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
       this.getEnfants = getEnfants
+      syncFormStoreRegister(this.syncFormStore.bind(this))
     })
   }
 
@@ -77,8 +89,14 @@ class EditorArbre extends Component {
    * @param {bool} exitIframe True si l'éditeur sort de son mode édition
    */
   onManualEditorToggle (exitIframe) {
+    if (this.state.manualEdition === exitIframe) return
+
+    this.setState({
+      manualEdition: exitIframe
+    })
+
     if (exitIframe) {
-      this.exportToJson()
+      this.exportParametresToProp()
     } else {
       // Transfère le contenu du textarea vers l'attribut "enfants" afin d'avoir une iframe à jour
       let enfants
@@ -90,7 +108,6 @@ class EditorArbre extends Component {
       }
 
       this.props.change('enfants', enfants)
-      this.iframe.current.src = this.iframeSrc // Recharge la page
     }
   }
 
@@ -103,6 +120,7 @@ class EditorArbre extends Component {
           onLoad={this.onIframeLoaded.bind(this)}
           onToggle={this.onManualEditorToggle.bind(this)}
           src={this.iframeSrc}
+          manualEdition={this.state.manualEdition}
         />
       </fieldset>
     )
@@ -112,10 +130,17 @@ class EditorArbre extends Component {
 EditorArbre.propTypes = {
   aliasOf: PropTypes.string,
   change: PropTypes.func,
-  enfants: PropTypes.array,
-  parametres: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  enfants: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.string
+  ]),
+  parametres: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.string
+  ]),
   rid: PropTypes.string,
-  titre: PropTypes.string
+  titre: PropTypes.string,
+  syncFormStoreRegister: PropTypes.func
 }
 
 export default formValues({

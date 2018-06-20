@@ -33,9 +33,8 @@ export const loadRessource = (oid) => (dispatch, getState) => {
   const currentRessource = getState().ressource
   if (currentRessource && currentRessource.oid === oid) return;
 
-  dispatch(clearRessource())
-
-  return GET(`/api/ressource/${oid}`)
+  return Promise.resolve(dispatch(clearRessource()))
+    .then(() => GET(`/api/ressource/${oid}`))
     .then((ressource) =>
       dispatch(setRessource(ressource)))
 }

@@ -32,6 +32,7 @@ class EditorMathGraph extends Component {
    */
   exportParametresToProp () {
     let parametres = this.getParametres()
+    // delete parametres.level
     if (!parametres) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
       console.error(new Error('mathgraph ne remonte aucune info'))
@@ -55,11 +56,12 @@ class EditorMathGraph extends Component {
    */
   loadRessource (ressource) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
-    const {beforeSaveRegister} = this.props
+    const {syncFormStoreRegister} = this.props
     this.iframe.current.contentWindow.load(ressource, (error, getParametres) => {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
-      beforeSaveRegister(getParametres)
       this.getParametres = getParametres
+      syncFormStoreRegister(this.exportParametresToProp.bind(this))
+
     })
   }
 
@@ -73,25 +75,12 @@ class EditorMathGraph extends Component {
     this.loadRessource({parametres})
   }
 
-  /**
-   * Appelée lors d'une bascule de l'éditeur (manuel / graphique)
-   * @param {bool} toManual vaut true lors d'une transition graphique => manuel
-   */
-  onManualEditorToggle (toManual) {
-    if (toManual) {
-      this.exportParametresToProp()
-    } else {
-      this.iframe.current.src = this.iframeSrc // Recharge la page
-    }
-  }
-
   render () {
     return (
       <fieldset>
         <IframeHandler
           change={this.props.change}
           onLoad={this.onIframeLoaded.bind(this)}
-          onToggle={this.onManualEditorToggle.bind(this)}
           src={this.iframeSrc}
         />
       </fieldset>
@@ -102,7 +91,7 @@ class EditorMathGraph extends Component {
 EditorMathGraph.propTypes = {
   change: PropTypes.func,
   parametres: PropTypes.object,
-  beforeSaveRegister: PropTypes.func
+  syncFormStoreRegister: PropTypes.func
 }
 
 export default formValues({parametres: 'parametres'})(EditorMathGraph)
