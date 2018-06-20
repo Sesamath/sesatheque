@@ -37,7 +37,7 @@ const resourceLoader = (WrappedComponent) => {
     }
 
     componentDidMount () {
-      GET(`/api/ressource/${this.ressourceOid}`)
+      GET(`/api/ressource/${this.ressourceOid}?format=full`)
         .then((ressource) => {
           this.setState({
             ressource

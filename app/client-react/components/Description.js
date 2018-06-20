@@ -25,7 +25,7 @@ const restrictionToString = {
 }
 
 const getRestriction = (restriction) => {
-  if (restriction == null || restriction === 0) return 'Public'
+  if (restriction == null || restriction === 0) return restrictionToString[0]
 
   return `${labels.restriction} : ${restrictionToString[restriction] || 'inconnue'}`
 }
@@ -52,10 +52,10 @@ const Description = ({
     type,
     version,
     dataUrl,
-    enfants = [],
-    auteurs,
-    contributeurs,
-    relations,
+    _enfants = [],
+    _auteurs = [],
+    _contributeurs = [],
+    _relations = [],
     groupes
   }
 }) => (
@@ -106,38 +106,55 @@ const Description = ({
       <p>{labels.resume} : {nl2br(resume)}</p>
       <p>{labels.description} : {nl2br(description)}</p>
       <p>{labels.commentaires} : {nl2br(commentaires)}</p>
-      {enfants.length ? (
+      {_enfants.length ? (
         <div>
           <ul>Liens vers les enfants :
-            {enfants.map(({url, titre}, index) => (
+            {_enfants.map(({url, titre}, index) => (
               <li key={index.toString()}>
-                <a href={url}>{titre}</a>
+                {url ? (
+                  <NavLink
+                    to={url}
+                    target="_blank"
+                  >
+                    {titre}
+                  </NavLink>
+                ) : titre}
               </li>
             ))}
           </ul>
           <p>{labels.enfants} :
-            <pre>{JSON.stringify(enfants)}</pre>
+            <pre>{JSON.stringify(_enfants)}</pre>
           </p>
         </div>
       ) : null}
-      {auteurs.length ? (
+      {_auteurs.length ? (
         <ul>{labels.auteurs} :
-          {auteurs.map(auteur => (
+          {_auteurs.map(auteur => (
             <li key={auteur}>{auteur}</li>
           ))}
         </ul>
       ) : null}
-      {contributeurs.length ? (
+      {_contributeurs.length ? (
         <ul>{labels.contributeurs} :
-          {contributeurs.map(contributeur => (
+          {_contributeurs.map(contributeur => (
             <li key={contributeur}>{contributeur}</li>
           ))}
         </ul>
       ) : null}
-      {relations.length ? (
+      {_relations.length ? (
         <ul className="relations">{labels.relations}
-          {relations.map(({predicat, lien, rid}) => (
-            <li key={rid}>{predicat} {lien} ({rid})</li>
+          {_relations.map(({predicat, rid, titre, type, url}) => (
+            <li key={rid}>
+              <img src={`/plugins/${type}/${type}.gif`} />
+              {predicat}
+              <NavLink
+                to={url}
+                target="_blank"
+              >
+                {titre}
+              </NavLink>
+              ({rid})
+            </li>
           ))}
         </ul>
       ) : null}
