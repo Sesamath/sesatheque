@@ -16,12 +16,10 @@ class EditorIep extends Component {
 
   importScriptInner () {
     const {url, change} = this.props
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw Error(response.statusText)
-        }
 
+    fetch(`/public/httpsUrlProxy/${encodeURIComponent(url)}`)
+      .then(response => {
+        if (!response.ok)  throw Error(response.statusText)
         return response.text()
       })
       .then(content => change('parametres[xml]', content))
@@ -36,6 +34,14 @@ class EditorIep extends Component {
           }), 5000)
         })
       })
+  }
+
+  onUrlChange () {
+    const {url} = this.props
+    if (!url || !url.length) return
+
+    if (url.indexOf('https://') !== 0) return this.setState({httpsError: null})
+    this.setState({httpsError: new Error(`Impossible de charger dynamiquement un script http sur un site https, vous devez l'importer pour que cela fonctionne`)})
   }
 
   render () {
@@ -64,6 +70,7 @@ class EditorIep extends Component {
               name="parametres[url]"
               component="input"
               type="url"
+              onKeyUp={this.onUrlChange.bind(this)}
             />
           </label>
           <label>
@@ -73,6 +80,7 @@ class EditorIep extends Component {
           </label>
         </div>
         <ShowError error={this.state.importError} />
+        <ShowError error={this.state.httpsError} />
         <div>
           <label>Script instrumenpoche
             <Field

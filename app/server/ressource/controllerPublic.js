@@ -229,56 +229,75 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /public/recherche
    */
   controller.get($routes.get('search'), search)
+
   /**
-   * Un proxy pour les pages externes en http (mais pas https)
-   * @route GET /public/urlProxy/:oid
+   * Récupère une donnée exterieur au site depuis une URL
+   * @param url {string}
+   * @param cacheKey {string}
+   * @param context {Context}
    */
-  controller.get('urlProxy/:oid', function (context) {
+  function fetchURL (url, cacheKey, context) {
+    const options = {
+      url,
+      timeout: 5000,
+      gzip: true
+    }
+
     function sendRawHtml (body, contentType) {
-      var options = {
+      context.raw(body, {
         headers: {
           'Content-Type': contentType
         }
-      }
-      context.raw(body, options)
+      })
     }
 
+    const page = $cache.get(cacheKey)
+    if (page && page.body) {
+      return sendRawHtml(page.body, page.contentType)
+    }
+
+    request(options, (error, response, body) => {
+      if (error || response.statusCode !== 200) {
+        console.log('error', error)
+        return context.plain('Impossible de récupérer la page ' + url)
+      }
+
+      // on met ça en cache pendant 10min
+      const page = {
+        body: body,
+        contentType: response.headers['content-type'] || 'text/html'
+      }
+      $cache.set(cacheKey, page, 600, logIfError)
+
+      sendRawHtml(page.body, page.contentType)
+    })
+  }
+
+  /**
+   * Un proxy pour les pages externes en https
+   * @route POST /public/httpsUrlProxy
+   */
+  controller.get('httpsUrlProxy/:url', function (context) {
+    const url = context.arguments.url
+    return fetchURL(url, `urlHttpsProxy${url}`, context)
+  })
+  /**
+   * Un proxy pour les pages externes en http à partir d'un identifiant de ressource
+   * @route GET /public/urlProxy/:oid
+   */
+  controller.get('urlProxy/:oid', function (context) {
     var oid = context.arguments.oid
 
-    $ressourceRepository.load(oid, function (error, ressource) {
+    $ressourceRepository.load(oid, (error, ressource) => {
       if (error) {
         log.error(error)
         context.plain(error.toString())
       } else if (ressource && ressource.type === 'url') {
-        var url = ressource && ressource.parametres && ressource.parametres.adresse
+        const url = ressource && ressource.parametres && ressource.parametres.adresse
         if (url && url.substr(0, 7) === 'http://') {
-          var cacheKey = 'urlProxy' + oid
-          var page = $cache.get(cacheKey)
-          if (page && page.body) {
-            sendRawHtml(page.body, page.contentType)
-          } else {
-            // faut aller le chercher
-            var options = {
-              url: url,
-              timeout: 5000,
-              gzip: true
-            }
-            request(options, function (error, response, body) {
-              if (!error && response.statusCode === 200) {
-                // on met ça en cache pendant 10min
-                var page = {
-                  body: body,
-                  contentType: response.headers['content-type'] || 'text/html'
-                }
-                $cache.set('urlProxy' + oid, page, 600, logIfError)
-                sendRawHtml(page.body, page.contentType)
-              } else {
-                context.plain('Impossible de récupérer la page ' + url)
-              }
-            })
-          }
+          fetchURL(url, `urlProxy${oid}`, context)
         } else {
-          var msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
+          const msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
           log.error(msg)
           context.plain(msg)
         }
