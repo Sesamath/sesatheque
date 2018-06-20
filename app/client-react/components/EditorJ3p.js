@@ -53,7 +53,11 @@ class EditorJ3p extends Component {
     this.props.change('parametres', parametres)
   }
 
-  syncFormStore() {
+  /**
+   * Exporte le contenu de l'éditeur vers le store
+   * redux-form si on est en mode graphique
+   */
+  syncFormStore () {
     if (!this.state.manualEdition) {
       this.exportParametresToProp()
     }

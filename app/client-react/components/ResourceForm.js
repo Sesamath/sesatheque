@@ -77,7 +77,9 @@ ResourceForm.propTypes = {
   handleSubmit: PropTypes.func,
   change: PropTypes.func,
   submitting: PropTypes.bool,
-  beforeSaveRegister: PropTypes.func
+  syncFormStore: PropTypes.func,
+  syncFormStoreRegister: PropTypes.func,
+  saveRessource: PropTypes.func
 }
 
 export default flowRight([

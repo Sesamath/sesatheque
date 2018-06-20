@@ -33,6 +33,10 @@ const resourceSaver = (WrappedComponent) => {
     }
   }
 
+  ResourceSaver.propTypes = {
+    saveRessource: PropTypes.func
+  }
+
   return connect(
     null,
     mapDispatchToProps

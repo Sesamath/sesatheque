@@ -61,7 +61,6 @@ class EditorMathGraph extends Component {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
       this.getParametres = getParametres
       syncFormStoreRegister(this.exportParametresToProp.bind(this))
-
     })
   }
 

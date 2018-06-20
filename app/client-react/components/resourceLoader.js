@@ -11,10 +11,6 @@ const mapStateToProps = ({ressource}) => ({ressource})
 
 const resourceLoader = (WrappedComponent) => {
   class ResourceLoader extends Component {
-    constructor (props) {
-      super(props)
-    }
-
     componentDidMount () {
       const {match: {params: {ressourceOid}}} = this.props
       this.props.loadRessource(ressourceOid)
@@ -34,7 +30,9 @@ const resourceLoader = (WrappedComponent) => {
       params: PropTypes.shape({
         ressourceOid: PropTypes.string
       })
-    })
+    }),
+    loadRessource: PropTypes.func,
+    ressource: PropTypes.shape({})
   }
 
   return connect(

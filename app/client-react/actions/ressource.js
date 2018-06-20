@@ -31,7 +31,7 @@ export const saveRessource = (body) => (dispatch) => {
 
 export const loadRessource = (oid) => (dispatch, getState) => {
   const currentRessource = getState().ressource
-  if (currentRessource && currentRessource.oid === oid) return;
+  if (currentRessource && currentRessource.oid === oid) return
 
   return Promise.resolve(dispatch(clearRessource()))
     .then(() => GET(`/api/ressource/${oid}`))
