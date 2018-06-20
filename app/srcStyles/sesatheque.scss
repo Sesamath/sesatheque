@@ -289,16 +289,16 @@ ul.liste li {
         position: absolute;
         transform: translateY(-50%);
       }
+      .right {
+        position: absolute;
+        top: -2px;
+        right: 0px;
+      }
       p {
         margin-left: 25px;
         margin-right: 20px;
         margin-bottom: 0;
       }
-    }
-    .right {
-      position: absolute;
-      top: 20px;
-      right: 10px;
     }
   }
 }
