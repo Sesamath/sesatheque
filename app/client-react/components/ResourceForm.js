@@ -7,6 +7,7 @@ import EditorArbre from './EditorArbre'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
+import GroupContainer from './GroupContainer'
 import resourceLoader from './resourceLoader'
 import NavMenu from './NavMenu'
 
@@ -44,6 +45,8 @@ const ResourceForm = ({
       <NavMenu ressourceOid={ressourceOid} />
       <form onSubmit={handleSubmit}>
         <MetaForm />
+        <hr />
+        <GroupContainer />
         <hr />
         <Editor change={change} beforeSaveRegister={beforeSaveRegister}/>
         <div className="buttons-area">

@@ -3,7 +3,10 @@ import {Provider} from 'react-redux'
 import {Route, BrowserRouter, Switch} from 'react-router-dom'
 import ResourceForm from './components/ResourceForm'
 import Notifications from './components/Notifications'
+import {getCurrentUser} from './actions/personne'
 import store from './store'
+
+store.dispatch(getCurrentUser())
 
 const App = () => (
   <Provider store={store}>
