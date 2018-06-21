@@ -22,14 +22,6 @@ class IframeHandler extends Component {
      * @type {string}
      */
     this.name = 'sesatheque-iframe'
-
-    /**
-     * Rassemble les attributs du composant
-     * @type {object}
-     */
-    this.state = {
-      manualEdition: false
-    }
   }
 
   componentDidMount () {
@@ -97,7 +89,6 @@ class IframeHandler extends Component {
    */
   toggleManualEditor (manualEdition) {
     if (this.props.onToggle) this.props.onToggle(manualEdition)
-    this.setState({manualEdition})
   }
 
   render () {
@@ -107,31 +98,33 @@ class IframeHandler extends Component {
           <button
             type="button"
             onClick={this.toggleManualEditor.bind(this, true)}
-            className={!this.state.manualEdition ? 'inactive' : ''}>Mode manuel</button>
+            className={!this.props.manualEdition ? 'inactive' : ''}>Mode manuel</button>
           <button
             type="button"
             onClick={this.toggleManualEditor.bind(this, false)}
-            className={this.state.manualEdition ? 'inactive' : ''}>Éditeur</button>
+            className={this.props.manualEdition ? 'inactive' : ''}>Éditeur</button>
         </nav>
-
-        <div style={{display: this.state.manualEdition ? 'block' : 'none'}}>
-          <label style={{display: this.props.allowManualEdition ? 'block' : 'none'}}>Script
-            <Field
-              name="parametres"
-              component="textarea"
-              cols="80"
-              rows="20"
-              format={this.formatTextarea}
-            />
-          </label>
-        </div>
-        <iframe
-          onLoad={this.onLoad.bind(this)}
-          ref={this.iframe}
-          src={this.props.src}
-          style={{display: !this.state.manualEdition ? 'block' : 'none'}}>
-          <p>Votre navigateur ne semble pas gérer les iframes</p>
-        </iframe>
+        {this.props.manualEdition ? (
+          <div>
+            <label style={{display: this.props.allowManualEdition ? 'block' : 'none'}}>Script
+              <Field
+                name="parametres"
+                component="textarea"
+                cols="80"
+                rows="20"
+                format={this.formatTextarea}
+              />
+            </label>
+          </div>
+        ) : (
+          <iframe
+            onLoad={this.onLoad.bind(this)}
+            ref={this.iframe}
+            src={this.props.src}
+          >
+            <p>Votre navigateur ne semble pas gérer les iframes</p>
+          </iframe>
+        )}
       </fieldset>
     )
   }
@@ -143,7 +136,8 @@ IframeHandler.propTypes = {
   src: PropTypes.string,
   change: PropTypes.func,
   onLoad: PropTypes.func,
-  onToggle: PropTypes.func
+  onToggle: PropTypes.func,
+  manualEdition: PropTypes.bool
 }
 
 export default IframeHandler

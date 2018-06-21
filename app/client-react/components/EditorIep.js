@@ -6,15 +6,7 @@ import addNotifyToProps from '../utils/addNotifyToProps'
 const importErrorMessage = 'Une erreur s’est produite durant l’importation du script'
 
 class EditorIep extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      importError: null
-    }
-    this.importScript = this.importScriptInner.bind(this)
-  }
-
-  importScriptInner () {
+  importScript () {
     const {url, change, notify} = this.props
     fetch(url)
       .then(response => {
@@ -69,7 +61,7 @@ class EditorIep extends Component {
           </label>
           <label>
             <br />
-            <button type="button" onClick={this.importScript}>Importer le script</button>
+            <button type="button" onClick={this.importScript.bind(this)}>Importer le script</button>
             <span className="note">(Si la source change ou disparait cette ressource restera identique)</span>
           </label>
         </div>

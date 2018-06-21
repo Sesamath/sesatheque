@@ -25,6 +25,10 @@ class EditorJ3p extends Component {
      * @type {string}
      */
     this.iframeSrc = require('../../client/plugins/j3p/editgraphe.html')
+
+    this.state = {
+      manualEdition: false
+    }
   }
 
   /**
@@ -50,14 +54,26 @@ class EditorJ3p extends Component {
   }
 
   /**
+   * Exporte le contenu de l'éditeur vers le store
+   * redux-form si on est en mode graphique
+   */
+  syncFormStore () {
+    if (!this.state.manualEdition) {
+      this.exportParametresToProp()
+    }
+  }
+
+  /**
    * Charge une ressource
    * @param {Ressource} ressource La Ressource à charger (seule la propriété parametres est utilisée)
    */
   loadRessource (ressource) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
+    const {syncFormStoreRegister} = this.props
     this.iframe.current.contentWindow.load(ressource, (error, getParametres) => {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
       this.getParametres = getParametres
+      syncFormStoreRegister(this.syncFormStore.bind(this))
     })
   }
 
@@ -76,10 +92,14 @@ class EditorJ3p extends Component {
    * @param {bool} toManual vaut true lors d'une transition graphique => manuel
    */
   onManualEditorToggle (toManual) {
+    if (this.state.manualEdition === toManual) return
+
+    this.setState({
+      manualEdition: toManual
+    })
+
     if (toManual) {
       this.exportParametresToProp()
-    } else {
-      this.iframe.current.src = this.iframeSrc // Recharge la page
     }
   }
 
@@ -92,6 +112,7 @@ class EditorJ3p extends Component {
           onLoad={this.onIframeLoaded.bind(this)}
           onToggle={this.onManualEditorToggle.bind(this)}
           src={this.iframeSrc}
+          manualEdition={this.state.manualEdition}
         />
       </fieldset>
     )
@@ -100,7 +121,11 @@ class EditorJ3p extends Component {
 
 EditorJ3p.propTypes = {
   change: PropTypes.func,
-  parametres: PropTypes.object
+  parametres: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.string
+  ]),
+  syncFormStoreRegister: PropTypes.func
 }
 
 export default formValues({parametres: 'parametres'})(EditorJ3p)
