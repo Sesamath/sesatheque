@@ -10,16 +10,22 @@ class EditorIep extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      importError: null
+      httpsError: null
     }
+    // on teste l'objet window car ce composant pourrait être utilisé pour du rendu coté serveur
+    this.isOnHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
+    // un raccourci binded
     this.importScript = this.importScriptInner.bind(this)
   }
 
   importScriptInner () {
     const {url, change, notify} = this.props
-    fetch(`/ressource/urlProxy/${encodeURIComponent(url)}`)
+    // si c'est du https on fetch direct, sinon dans le doute on passe par notre proxy
+    let urlToFetch = url
+    if (this.isOnHttps && !/^https:\/\//.test(url)) urlToFetch = `/ressource/urlProxy/${encodeURIComponent(url)}`
+    fetch(urlToFetch)
       .then(response => {
-        if (!response.ok)  throw Error(response.statusText)
+        if (!response.ok) throw Error(response.statusText)
         return response.text()
       })
       .then(content => change('parametres[xml]', content))
@@ -39,10 +45,12 @@ class EditorIep extends Component {
 
   onUrlChange () {
     const {url} = this.props
-    if (!url || !url.length) return
-
-    if (url.indexOf('https://') !== 0) return this.setState({httpsError: null})
-    this.setState({httpsError: new Error(`Impossible de charger dynamiquement un script http sur un site https, vous devez l'importer pour que cela fonctionne`)})
+    const isHttpsUrl = (url.indexOf('https://') === 0)
+    if (url && this.isOnHttps && !isHttpsUrl) {
+      this.setState({httpsError: Error(`Impossible de charger dynamiquement un script http sur un site https, vous devez l'importer pour que cela fonctionne`)})
+    } else {
+      this.setState({httpsError: null})
+    }
   }
 
   render () {
