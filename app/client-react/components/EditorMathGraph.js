@@ -67,7 +67,10 @@ class EditorMathGraph extends Component {
    */
   onIframeLoaded (iframe) {
     this.iframe = iframe
+    // on est laxiste
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
+    // mais récupérer une string n'est pas normal
+    if (typeof this.props.parametres === 'string') console.error(new Error('props.parametres est une string'))
     this.loadRessource({parametres})
   }
 
