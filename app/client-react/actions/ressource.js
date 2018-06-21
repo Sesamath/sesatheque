@@ -61,7 +61,7 @@ export const loadRessource = (oid) => (dispatch, getState) => {
   // (au cas où le load plante)
   // Si le dispatch throw (à cause d'un reducer qui plante) ça remontera (sans renvoyer de promesse)
   return Promise.resolve(dispatch(clearRessource()))
-    .then(() => GET(`/api/ressource/${oid}`))
+    .then(() => GET(`/api/ressource/${oid}?format=full`))
     .then((ressource) => dispatch(setRessource(ressource)))
     .catch((error) => {
       console.error(error)

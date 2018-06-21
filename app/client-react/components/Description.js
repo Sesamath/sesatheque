@@ -31,7 +31,7 @@ const getRestriction = (restriction) => {
 }
 
 const Description = ({
-  initialValues: {
+  ressource: {
     titre,
     oid,
     publie,
@@ -214,7 +214,7 @@ const Description = ({
 )
 
 Description.propTypes = {
-  initialValues: PropTypes.shape({})
+  ressource: PropTypes.shape({})
 }
 
 export default resourceLoader(Description)
