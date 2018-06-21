@@ -41,7 +41,7 @@
 import {expect} from 'chai'
 import boot from './boot'
 
-describe('prend un 404 sur les urls inexistantes', () => {
+describe('prend un 404 sur les urls inexistantes', function () {
   const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
   let _superTestClient
   const setClient = ({superTestClient}) => {
@@ -49,6 +49,7 @@ describe('prend un 404 sur les urls inexistantes', () => {
     _superTestClient = superTestClient
     return Promise.resolve()
   }
+  this.timeout(60000)
   before(() => boot().then(setClient))
 
   paths.forEach(path => {

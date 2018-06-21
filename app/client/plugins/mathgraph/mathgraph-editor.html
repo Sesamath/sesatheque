@@ -6,6 +6,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <style type="text/css">
     #errors {color: red;}
+    /* ça devrait être dans mtgLoader.css */
     svg {
       -webkit-user-select: none; /* Chrome all / Safari all */
       -moz-user-select: none; /* Firefox all */
@@ -14,69 +15,106 @@
     }
   </style>
   <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [["$","$"],["\\(","\\)"]]
-        },
-        SVG:{mtextFontInherit: false},
-        jax: ["input/TeX","output/SVG"],
-        TeX: {extensions: ["color.js"]},
-        messageStyle:'none'
-      });
-    </script>
-<script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full"></script>
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [["$","$"],["\\(","\\)"]]
+      },
+      SVG:{mtextFontInherit: false},
+      jax: ["input/TeX","output/SVG"],
+      TeX: {extensions: ["color.js"]},
+      messageStyle:'none'
+    });
+  </script>
+  <script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full"></script>
   <link rel="stylesheet" href="https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.css"/>
   <script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js"></script>
 </head>
 <body>
+<div id="spinner">Chargement en cours… <img src="/plugins/mathgraph/spinner.gif" alt="" /></div>
 <div id="errors"></div>
 <div id="main"></div>
 <script type="application/javascript">
+  // ATTENTION, le code ci-dessous doit être de l'es5 car il ne passe pas par babel
   function load (ressource, loadCb) {
-    const parametres = ressource.parametres
+    var parametres = ressource.parametres
     /* glob mtgLoader */
     // pour le fonctionnement, cf le dépôt
     // git@src.sesamath.net:mathgraph_js
     // fichier src/mtgLoader.js
     // ou documentation/index.html
-    if (typeof mtgLoader === 'function') {
-      var mtgApp
-      var figure = parametres.fig || {type:"unity", grad:"simple", unity:"deg"}
-      var svgOptions = {
-        // faut imposer ça à cause de notre css #svg plus haut
-        svgId: 'svg',
-        // la taille doit être fixée à l'avance (à cause de la gestion du svg),
-        // on peut le faire en fonction de la taille d'affichage disponible (avec un minimum)
-        width: document.body.clientWidth,
-        height: document.body.clientHeight
-      }
-      const isEditor = true
-      var mtgOptions = {
-        // le level sert pour ouvrir mathgraph avec une figure vierge.
-        // 0 : école
-        // 1 : collège
-        // 2 : lycée sans les nombres complexes
-        // 3 : lycée avec les nombres complexes
-        // Si la figure est fournie, en édition il faut fournir le level le plus élevé
-        // pour que le prof puisse activer tous les outils qu'il voudrait ajouter
-        level : 3,
-        // ce paramètre à true sert à afficher la figure avec des traits plus gros,
-        // des lettres plus espacées, etc.
-        // Il n'est pas contenu dans la figure
-        dys: false,
-        // open: {isEditor}, // bouton pour ouvrir une figure, l'info est dans la figure
-        // options: pour autoriser à changer les options de la figure, true par défaut
-        options: {isEditor}, // true si édition par le prof, false en consultation de ressource
-        // save: true si on veut que l'outil permettant d'enregistrer une figure soit présent
-        // onSaveCallback n'a de sens que si `figureOptions.save === true`, sinon on peut récupérer figure et résultat avec mtgApp.getResult qui renvoie {fig, score}
-        callBackAfterReady: function() {
-          loadCb(null, mtgApp.getResult.bind(mtgApp))
-        }
-      }
-      mtgApp = mtgLoader('main', figure, svgOptions, mtgOptions)
-    } else {
-      alert('mathgraph n’est pas chargé correctement')
+
+    if (typeof mtgLoader !== 'function') return alert('mathgraph n’est pas chargé correctement')
+
+    var mtgApp
+
+    // hauteur et largeur (copié de display.js, à maintenir sync)
+    let width = ressource.parametres.width || document.body.clientWidth || 1024
+    if (!Number.isInteger(width) || width < 300) width = 300
+    let height = ressource.parametres.height || document.body.clientHeight
+    if (!Number.isInteger(height) || height < 200) height = Math.round(width * 0.66)
+    // qu'on met dans svgOptions
+    var svgOptions = {
+      // faullait imposer ça à cause de notre css #svg plus haut, mais il n'y est plus...
+      svgId: 'svg',
+      width,
+      height
     }
+
+    // à la création on démarre avec une interface collège
+    // (le prof pourra changer ensuite dans l'éditeur
+    // et getParametres nous renverra la valeur modifiée)
+    var level = parametres.hasOwnProperty('level') ? parametres.level : 1
+    // à la création on démarre avec ça par défaut (sans repère, juste vecteur unité)
+    var figure = parametres.fig || {type: 'unity', grad: 'simple', unity: 'deg'}
+    var mtgOptions = {
+      // le level sert pour ouvrir mathgraph avec une figure vierge, ou pour limiter les outils disponibles
+      // il peut être mdifié dans l'interface mtg si mtgOptions.options === true
+      // 0 : école
+      // 1 : collège
+      // 2 : lycée sans les nombres complexes
+      // 3 : lycée avec les nombres complexes
+      // Si la figure est fournie, en édition il faut fournir le level le plus élevé
+      // pour que le prof puisse activer tous les outils qu'il voudrait ajouter
+      level,
+      // ce paramètre à true sert à afficher la figure avec des traits plus gros,
+      // des lettres plus espacées, etc.
+      // Il n'est pas contenu dans la figure
+      dys: parametres.hasOwnProperty('dys') ? parametres.dys : false,
+      open: true, // bouton pour ouvrir une figure, l'info est dans la figure
+      // options: pour autoriser à changer les options de la figure, true par défaut
+      options: true, // true si édition par le prof, false en consultation de ressource
+      // on veut que l'outil permettant d'enregistrer une figure soit présent,
+      // pour qu'il puisse enregistrer en local
+      // si ça perturbe on mettra false...
+      save: true,
+      // onSaveCallback n'a de sens que si `figureOptions.save === true`,
+      // ici on laisse le comportement par défaut sur l'enregistrement (en local et pas dans la sesatheque)
+      // car on récupère la figure au clic sur enregistrer de la ressource
+      callBackAfterReady: function () {
+        function getParametres () {
+          // faut transformer le result en parametres, on override seulement ces 2 props
+          // ça mute l'objet parametres reçu au départ mais c'est pas très grave,
+          // l'appelant devrait le remplacer par ce qu'on renvoie ici
+          var result = mtgApp.getResult()
+          // On retire (temporairement?) le sous-objet
+          // qui contient des références circulaires
+          // pour que la sauvegarde ne plante pas au POST
+          delete result.level.listePr
+
+          parametres.fig = result.fig
+          parametres.level = result.level
+          // on ajoute ça pour savoir si c'est un exo qui renvoie un score calculé par mtg
+          parametres.isExercise = mtgApp.isExercise()
+          return parametres
+        }
+        // on vire le spinner
+        const spinner = document.getElementById('spinner')
+        while (spinner.firstChild) spinner.removeChild(spinner.firstChild)
+        // et on passe getParametres au parent
+        loadCb(null, getParametres)
+      }
+    }
+    mtgApp = mtgLoader('main', figure, svgOptions, mtgOptions)
   }
 </script>
 </body>
