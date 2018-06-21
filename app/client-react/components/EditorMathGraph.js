@@ -37,14 +37,10 @@ class EditorMathGraph extends Component {
       console.error(new Error('mathgraph ne remonte aucune info'))
       return
     }
-    if (typeof parametres === 'string') {
-      try {
-        parametres = JSON.parse(parametres)
-      } catch (error) {
-        console.error(new Error('mathgraph remonte des paramètres invalides'))
-        // ajout feedback `Erreur interne, l’éditeur remonte des paramètres invalides`
-        return
-      }
+    if (typeof parametres !== 'object' || !parametres.fig) {
+      console.error(new Error('mathgraph remonte des paramètres invalides'))
+      // ajout feedback `Erreur interne, l’éditeur remonte des paramètres invalides`
+      return
     }
     this.props.change('parametres', parametres)
   }
@@ -69,7 +65,10 @@ class EditorMathGraph extends Component {
    */
   onIframeLoaded (iframe) {
     this.iframe = iframe
+    // on est laxiste
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
+    // mais récupérer une string n'est pas normal
+    if (typeof this.props.parametres === 'string') console.error(new Error('props.parametres est une string'))
     this.loadRessource({parametres})
   }
 
