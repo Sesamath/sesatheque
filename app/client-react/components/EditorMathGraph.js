@@ -32,6 +32,7 @@ class EditorMathGraph extends Component {
    */
   exportParametresToProp () {
     let parametres = this.getParametres()
+    console.log('parametres reçus', parametres)
     if (!parametres) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
       console.error(new Error('mathgraph ne remonte aucune info'))
@@ -49,12 +50,12 @@ class EditorMathGraph extends Component {
     // y'a apparemment parfois un souci avec level
     if (typeof parametres.level !== 'number') {
       parametres.level = Number(parametres.level)
-      if (Number.isNan(parametres.level)) {
+      if (Number.isNaN(parametres.level)) {
         // décidément mathgraph renvoie n'importe quoi
-        console.error(new Error('level n’est pas du tout un nombre'))
+        console.error(new Error('level n’est pas du tout un nombre, on le vire'))
         delete parametres.level
       } else {
-        console.error(new Error(`level n’était pas un nombre, on a casté (${parametres.level})`))
+        console.error(new Error(`level n’était pas un nombre (cast en ${parametres.level})`))
       }
     }
 
