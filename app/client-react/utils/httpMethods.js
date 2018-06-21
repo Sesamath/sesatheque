@@ -1,8 +1,8 @@
 const handleErrors = (response) => {
   if (!response.ok) {
     return response.json()
-      .then(({error: message, success}) => {
-        const error = Error(message)
+      .then(({error: errorMessage, success}) => {
+        const error = new Error(errorMessage)
         error.status = response.status
         error.success = success
 
@@ -13,7 +13,7 @@ const handleErrors = (response) => {
   return response.json()
 }
 
-const headers = {
+const jsonHeaders = {
   'Content-type': 'application/json'
 }
 
@@ -24,16 +24,18 @@ const factory = (method) => {
   }
 
   return (url, data = {}) => {
-    const options = {
-      ...defaultOptions
-    }
+    // on clone car modif plus loin
+    const options = {...defaultOptions}
 
     if (data.body) {
       if (data.body instanceof FormData) {
+        // on envoie un form classique, faudrait ajouter le header pour le rendre explicite
+        // (mais sans header c'est comme ça que c'est interprété)
         options.body = data.body
       } else {
+        // json
         options.body = JSON.stringify(data.body)
-        options.headers = headers
+        options.headers = jsonHeaders
       }
     }
 
