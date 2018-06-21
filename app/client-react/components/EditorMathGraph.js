@@ -31,22 +31,20 @@ class EditorMathGraph extends Component {
    * Exporte le contenu de l'éditeur graphique vers la prop parametres
    */
   exportParametresToProp () {
+    // getParametres correspond au mtgApp.getResult()
     let parametres = this.getParametres()
-    if (!parametres) {
-      // @todo Ajouter un gestionnaire d'erreur avec feedback
-      console.error(new Error('mathgraph ne remonte aucune info'))
-      return
+    // console.log('retour de mtgApp.getResult()', parametres)
+    if (!parametres) throw new Error('mathgraph ne remonte aucune info')
+    let {fig, level} = parametres
+    if (!fig || typeof fig !== 'string') throw new Error('mathgraph ne renvoie pas la figure')
+    if (!level || typeof level !== 'number' || !Number.isInteger(level) || level < 0) {
+      console.error(new Error('level n’est pas un entier positif ou nul (on le fixe à 3)'))
+      // en attendant que ce soit réglé on le fixe arbitrairement à 3
+      level = 3
     }
-    if (typeof parametres === 'string') {
-      try {
-        parametres = JSON.parse(parametres)
-      } catch (error) {
-        console.error(new Error('mathgraph remonte des paramètres invalides'))
-        // ajout feedback `Erreur interne, l’éditeur remonte des paramètres invalides`
-        return
-      }
-    }
-    this.props.change('parametres', parametres)
+    // on teste pas la propriété score inutilisée ici
+
+    this.props.change('parametres', {fig, level})
   }
 
   /**
@@ -55,11 +53,11 @@ class EditorMathGraph extends Component {
    */
   loadRessource (ressource) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
-    const {beforeSaveRegister} = this.props
+    const {syncFormStoreRegister} = this.props
     this.iframe.current.contentWindow.load(ressource, (error, getParametres) => {
       if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
-      beforeSaveRegister(getParametres)
       this.getParametres = getParametres
+      syncFormStoreRegister(this.exportParametresToProp.bind(this))
     })
   }
 
@@ -69,20 +67,11 @@ class EditorMathGraph extends Component {
    */
   onIframeLoaded (iframe) {
     this.iframe = iframe
+    // on est laxiste
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
+    // mais récupérer une string n'est pas normal
+    if (typeof this.props.parametres === 'string') console.error(new Error('props.parametres est une string'))
     this.loadRessource({parametres})
-  }
-
-  /**
-   * Appelée lors d'une bascule de l'éditeur (manuel / graphique)
-   * @param {bool} toManual vaut true lors d'une transition graphique => manuel
-   */
-  onManualEditorToggle (toManual) {
-    if (toManual) {
-      this.exportParametresToProp()
-    } else {
-      this.iframe.current.src = this.iframeSrc // Recharge la page
-    }
   }
 
   render () {
@@ -91,7 +80,6 @@ class EditorMathGraph extends Component {
         <IframeHandler
           change={this.props.change}
           onLoad={this.onIframeLoaded.bind(this)}
-          onToggle={this.onManualEditorToggle.bind(this)}
           src={this.iframeSrc}
         />
       </fieldset>
@@ -102,7 +90,7 @@ class EditorMathGraph extends Component {
 EditorMathGraph.propTypes = {
   change: PropTypes.func,
   parametres: PropTypes.object,
-  beforeSaveRegister: PropTypes.func
+  syncFormStoreRegister: PropTypes.func
 }
 
 export default formValues({parametres: 'parametres'})(EditorMathGraph)
