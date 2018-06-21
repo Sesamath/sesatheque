@@ -96,6 +96,11 @@
           // ça mute l'objet parametres reçu au départ mais c'est pas très grave,
           // l'appelant devrait le remplacer par ce qu'on renvoie ici
           var result = mtgApp.getResult()
+          // On retire (temporairement?) le sous-objet
+          // qui contient des références circulaires
+          // pour que la sauvegarde ne plante pas au POST
+          delete result.level.listePr
+
           parametres.fig = result.fig
           parametres.level = result.level
           // on ajoute ça pour savoir si c'est un exo qui renvoie un score calculé par mtg
