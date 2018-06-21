@@ -31,35 +31,19 @@ class EditorMathGraph extends Component {
    * Exporte le contenu de l'éditeur graphique vers la prop parametres
    */
   exportParametresToProp () {
+    // getParametres correspond au mtgApp.getResult()
     let parametres = this.getParametres()
-    console.log('parametres reçus', parametres)
-    if (!parametres) {
-      // @todo Ajouter un gestionnaire d'erreur avec feedback
-      console.error(new Error('mathgraph ne remonte aucune info'))
-      return
+    if (!parametres) throw new Error('mathgraph ne remonte aucune info')
+    let {fig, level} = parametres
+    if (!fig || typeof fig !== 'string') throw new Error('mathgraph ne renvoie pas la figure')
+    if (!level || typeof level !== 'number' || !Number.isInteger(level) || level < 0) {
+      console.error(new Error('level n’est pas un entier positif (on le fixe à 3)'))
+      // en attendant que ce soit réglé on le fixe arbitrairement à 3
+      level = 3
     }
-    if (typeof parametres === 'string') {
-      try {
-        parametres = JSON.parse(parametres)
-      } catch (error) {
-        console.error(new Error('mathgraph remonte des paramètres invalides'))
-        // ajout feedback `Erreur interne, l’éditeur remonte des paramètres invalides`
-        return
-      }
-    }
-    // y'a apparemment parfois un souci avec level
-    if (typeof parametres.level !== 'number') {
-      parametres.level = Number(parametres.level)
-      if (Number.isNaN(parametres.level)) {
-        // décidément mathgraph renvoie n'importe quoi
-        console.error(new Error('level n’est pas du tout un nombre, on le vire'))
-        delete parametres.level
-      } else {
-        console.error(new Error(`level n’était pas un nombre (cast en ${parametres.level})`))
-      }
-    }
+    // on teste pas la propriété score inutilisée ici
 
-    this.props.change('parametres', parametres)
+    this.props.change('parametres', {fig, level})
   }
 
   /**
