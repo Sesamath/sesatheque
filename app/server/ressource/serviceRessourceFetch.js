@@ -47,7 +47,7 @@ appConfig.sesatheques.forEach(({baseId, apiToken}) => {
  * @requires $ressourceRepository
  */
 
-module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
+module.exports = function serviceRessourceRemoteFetch ($cache, $ressourceRepository) {
   /**
    * Renvoie une ressource récupérée ailleurs ou ici (ça peut être un alias)
    * @memberOf $ressourceFetch
@@ -151,9 +151,55 @@ module.exports = function serviceRessourceRemoteFactory ($ressourceRepository) {
     })
   }
 
+  /**
+   * Récupère une donnée exterieur au site depuis une URL
+   * @param url {string}
+   * @param cacheKey {string}
+   * @param context {Context}
+   */
+  function fetchURL (url, cacheKey, context) {
+    const options = {
+      url,
+      timeout: 5000,
+      gzip: true
+    }
+
+    function sendRawHtml (body, contentType) {
+      context.raw(body, {
+        headers: {
+          'Content-Type': contentType
+        }
+      })
+    }
+
+    const page = $cache.get(cacheKey)
+    if (page && page.body) {
+      return sendRawHtml(page.body, page.contentType)
+    }
+
+    request(options, (error, response, body) => {
+      if (error || response.statusCode !== 200) {
+        console.log('error', error)
+        return context.plain('Impossible de récupérer la page ' + url)
+      }
+
+      // on met ça en cache pendant 10min
+      const page = {
+        body: body,
+        contentType: response.headers['content-type'] || 'text/html'
+      }
+      $cache.set(cacheKey, page, 600, (error) => {
+        if (error) log.error(error)
+      })
+
+      sendRawHtml(page.body, page.contentType)
+    })
+  }
+
   return {
     fetch,
     fetchOriginal,
-    fetchRid
+    fetchRid,
+    fetchURL
   }
 }

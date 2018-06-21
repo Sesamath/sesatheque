@@ -17,7 +17,7 @@ class EditorIep extends Component {
 
   importScriptInner () {
     const {url, change, notify} = this.props
-    fetch(`/public/httpsUrlProxy/${encodeURIComponent(url)}`)
+    fetch(`/ressource/urlProxy/${encodeURIComponent(url)}`)
       .then(response => {
         if (!response.ok)  throw Error(response.statusText)
         return response.text()

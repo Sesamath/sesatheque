@@ -51,7 +51,7 @@ function logIfError (error) {
  * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
  * @controller controllerPublic
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $accessControl, $ressourceFetch) {
   /**
    * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
    * @private
@@ -231,57 +231,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('search'), search)
 
   /**
-   * Récupère une donnée exterieur au site depuis une URL
-   * @param url {string}
-   * @param cacheKey {string}
-   * @param context {Context}
-   */
-  function fetchURL (url, cacheKey, context) {
-    const options = {
-      url,
-      timeout: 5000,
-      gzip: true
-    }
-
-    function sendRawHtml (body, contentType) {
-      context.raw(body, {
-        headers: {
-          'Content-Type': contentType
-        }
-      })
-    }
-
-    const page = $cache.get(cacheKey)
-    if (page && page.body) {
-      return sendRawHtml(page.body, page.contentType)
-    }
-
-    request(options, (error, response, body) => {
-      if (error || response.statusCode !== 200) {
-        console.log('error', error)
-        return context.plain('Impossible de récupérer la page ' + url)
-      }
-
-      // on met ça en cache pendant 10min
-      const page = {
-        body: body,
-        contentType: response.headers['content-type'] || 'text/html'
-      }
-      $cache.set(cacheKey, page, 600, logIfError)
-
-      sendRawHtml(page.body, page.contentType)
-    })
-  }
-
-  /**
-   * Un proxy pour les pages externes en https
-   * @route POST /public/httpsUrlProxy
-   */
-  controller.get('httpsUrlProxy/:url', function (context) {
-    const url = context.arguments.url
-    return fetchURL(url, `urlHttpsProxy${url}`, context)
-  })
-  /**
    * Un proxy pour les pages externes en http à partir d'un identifiant de ressource
    * @route GET /public/urlProxy/:oid
    */
@@ -295,7 +244,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       } else if (ressource && ressource.type === 'url') {
         const url = ressource && ressource.parametres && ressource.parametres.adresse
         if (url && url.substr(0, 7) === 'http://') {
-          fetchURL(url, `urlProxy${oid}`, context)
+          $ressourceFetch.fetchURL(url, `urlProxy${oid}`, context)
         } else {
           const msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
           log.error(msg)

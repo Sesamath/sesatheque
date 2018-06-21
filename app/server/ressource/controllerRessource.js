@@ -893,6 +893,15 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   controller.get($routes.get('search'), search)
 
   /**
+   * Un proxy pour les pages externes en https
+   * @route POST /ressource/urlProxy
+   */
+  controller.get('urlProxy/:url', function (context) {
+    const url = context.arguments.url
+    return $ressourceFetch.fetchURL(url, `urlProxy${url}`, context)
+  })
+
+  /**
    * Récupère un jnlp pour lancer la version desktop de mathgraph sur cette ressource
    * et l'enregistrer plus tard (depuis mathgraph) par un post sur /api/deferredAction
    * @route GET /ressource/jnlp/mathgraph/:oid
