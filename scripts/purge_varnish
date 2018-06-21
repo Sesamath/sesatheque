@@ -49,9 +49,11 @@ function purge_varnish() {
     version=$(sed -nre 's/.*"version"[ \t]*:[ \t]*"([0-9\.]+)".*/\1/p' package.json)
     find build -type f $findOpt | while read file; do
       purge_one $baseUrl${file#*build} # on démarre au / qui suit build
+      purge_one $baseUrl${file#*build}?$version
     done
     find app/assets -type f $findOpt | while read file; do
       purge_one $baseUrl${file#*app/assets} # on démarre au / qui suit assets
+      purge_one $baseUrl${file#*app/assets}?version
     done
   fi
   touch "$LAST_FILE"

@@ -23,9 +23,11 @@ const Notifications = ({notifications, clear}) => (
       id
     }) => (
       <div onClick={() => clear(id)} key={id.toString()} className={`notification alert--${levelToClass[level]}`}>
-        <i className={`left fa fa-${levelToIcon[level]}`} />
-        <i className="right fa fa-times" />
-        <p>{message}</p>
+        <div>
+          <i className="right fa fa-times" />
+          <i className={`left fa fa-${levelToIcon[level]}`} />
+          <p>{message}</p>
+        </div>
       </div>
     ))}
   </div>

@@ -1,10 +1,9 @@
-import {flowRight} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
 import addNotifyToProps from '../utils/addNotifyToProps'
 
-const importErrorMessage = 'Une erreur s\'est produite durant l\'importation du script'
+const importErrorMessage = 'Une erreur s’est produite durant l’importation du script'
 
 class EditorIep extends Component {
   importScript () {
@@ -88,7 +87,6 @@ EditorIep.propTypes = {
   notify: PropTypes.func
 }
 
-export default flowRight([
-  addNotifyToProps,
-  formValues({url: 'parametres[url]'})
-])(EditorIep)
+// on wrap dans reduxForm puis addNotify
+const formComponent = formValues({url: 'parametres[url]'})(EditorIep)
+export default addNotifyToProps(formComponent)

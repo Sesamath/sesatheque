@@ -270,19 +270,35 @@ ul.liste li {
   top: 0;
   z-index: 1000;
   pointer-events: none;
+  max-width: 500px;
+
   .notification {
     pointer-events: auto;
     cursor: pointer;
     border-radius: 10px;
-    .right {
-      float: right;
+
+    $backgroundcolor: #D9534F;
+    &:hover {
+      background-color: darken($backgroundcolor, 5%);
     }
-    .left {
-      float: left;
-    }
-    p {
-      margin-left: 20px;
-      margin-right: 20px;
+
+    div {
+      position: relative;
+      .left {
+        top: 50%;
+        position: absolute;
+        transform: translateY(-50%);
+      }
+      .right {
+        position: absolute;
+        top: -2px;
+        right: 0px;
+      }
+      p {
+        margin-left: 25px;
+        margin-right: 20px;
+        margin-bottom: 0;
+      }
     }
   }
 }
