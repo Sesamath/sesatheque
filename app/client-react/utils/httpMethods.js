@@ -1,17 +1,17 @@
-const handleErrors = (response) => {
-  if (!response.ok) {
-    return response.json()
-      .then(({error: errorMessage, success}) => {
-        const error = new Error(errorMessage)
-        error.status = response.status
-        error.success = success
+const handleErrors = (response) => response.json()
+  .then((json) => {
+    const {success} = json
+    if (success === false) {
+      const {error: errorMessage} = json
+      const error = new Error(errorMessage)
+      error.status = response.status
+      error.success = success
 
-        throw error
-      })
-  }
+      throw error
+    }
 
-  return response.json()
-}
+    return json
+  })
 
 const jsonHeaders = {
   'Content-type': 'application/json'
