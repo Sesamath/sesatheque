@@ -894,9 +894,10 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
 
   /**
    * Un proxy pour les pages externes en https
-   * @route POST /ressource/urlProxy
+   * @route GET /ressource/urlProxy
    */
   controller.get('urlProxy/:url', function (context) {
+    // decodeURIComponent est déjà passé sur les arguments
     const url = context.arguments.url
     return $ressourceFetch.fetchURL(url, `urlProxy${url}`, context)
   })
