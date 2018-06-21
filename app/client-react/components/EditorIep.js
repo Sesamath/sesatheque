@@ -10,7 +10,7 @@ class EditorIep extends Component {
   constructor (props) {
     super(props)
     // on teste l'objet window car ce composant pourrait être utilisé pour du rendu coté serveur
-    this.isOnHttps = true || typeof window !== 'undefined' && window.location.protocol === 'https:'
+    this.isOnHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
     // un timer pour debounce le onUrlChange
     this.urlChangeTimer = null
     // un raccourci binded
