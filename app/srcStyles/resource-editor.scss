@@ -116,4 +116,24 @@ hr {
   table {
     margin: 10px;
   }
+
+  .ressource span.publie, .ressource span.restriction {
+    margin-top: -3px;
+  }
+
+  .ressource {
+    margin-top: 10px;
+
+    section {
+      grid-gap: 0.8rem !important;
+
+      ul {
+        margin: 0;
+      }
+
+      .txtright {
+        font-weight: bold;
+      }
+    }
+  }
 }

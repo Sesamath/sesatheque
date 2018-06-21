@@ -66,13 +66,8 @@ ressourceComponent.service('$ressourceControl', function (EntityRessource) {
   return require('./serviceRessourceControl')(EntityRessource)
 })
 
-ressourceComponent.service('$ressourceConverter', function (EntityRessource, $ressourceRepository, $routes, $accessControl) {
-  return require('./serviceRessourceConverter')(EntityRessource, $ressourceRepository, $routes, $accessControl)
-})
-
-ressourceComponent.service('$ressourcePage', function (EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) { // jshint ignore:line
-  return require('./serviceRessourcePage')(EntityRessource, $ressourceRepository, $personneRepository, $groupeRepository, $ressourceConverter, $accessControl, $routes, $page, $ressourceFetch) // jshint ignore:line
-})
+require('./serviceRessourceConverter')(ressourceComponent)
+require('./serviceRessourcePage')(ressourceComponent)
 
 // les pages html de consultation / modification
 ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) { // jshint ignore:line

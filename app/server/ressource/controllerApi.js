@@ -616,6 +616,12 @@ module.exports = function controllersFactory (component) {
         if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
         if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
         $json.send(context, null, ref)
+      } else if (format === 'full') {
+        $ressourceConverter.enhance(ressource, (error, ressource) => {
+          if (error) return $json.send(context, error)
+          log.debug('ressource full', ressource, 'aVirer', {max: 10000})
+          $json.send(context, null, ressource)
+        })
       } else {
         $json.send(context, null, ressource)
       }

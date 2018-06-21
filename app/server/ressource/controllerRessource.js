@@ -306,7 +306,26 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
     redirectPublicOrContinue(context, function () {
       var oid = context.arguments.oid
       $ressourceRepository.load(oid, function (error, ressource) {
-        send(context, error, ressource, 'describe')
+        if (!error && ressource && ['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
+          // version react
+          let data = {
+            contentBloc: {
+              $view: 'ressource-editor',
+              verbose: (appConfig.application.staging !== 'prod'),
+              isDev: (appConfig.application.staging !== 'prod'),
+              baseId: appConfig.application.baseId,
+              sesatheques: appConfig.sesatheques,
+              ressource: ressource ? sjt.stringify(ressource) : ''
+            },
+            jsBloc: {
+              $view: 'js',
+              jsFiles: ['/react.js']
+            }
+          }
+          context.html(data)
+        } else {
+          send(context, error, ressource, 'describe')
+        }
       })
     })
   })
