@@ -32,8 +32,7 @@ const clearRessource = () => ({
  * @return {promisedThunk} qui va faire le post puis dispatch de setRessource & addNotification
  */
 export const saveRessource = (ressource) => (dispatch) => {
-  // on
-  return POST(`/api/ressource`, {ressource})
+  return POST(`/api/ressource`, {body: ressource})
     .then(() => {
       return dispatch(setRessource(ressource))
     })
