@@ -1,6 +1,7 @@
 import {identity} from 'lodash'
 import PropTypes from 'prop-types'
 import React from 'react'
+import SingleCheckboxForGroups from './SingleCheckboxForGroups'
 
 const CheckboxGroup = ({
   parseValue = identity,
@@ -17,26 +18,11 @@ const CheckboxGroup = ({
     {
       values.map(([value, label]) => (
         <label key={value}>
-          <input
-            name={name}
+          <SingleCheckboxForGroups
             value={value}
-            checked={inputValue.indexOf(parseValue(value)) > -1}
-            type="checkbox"
-            onChange={({
-              target: {
-                checked,
-                value: targetValue
-              }
-            }) => {
-              const parsedValue = parseValue(targetValue)
-              const vals = [...inputValue]
-              if (checked) {
-                vals.push(parsedValue)
-              } else {
-                vals.splice(vals.indexOf(parsedValue), 1)
-              }
-              onChange(vals)
-            }}
+            inputValue={inputValue}
+            onChange={onChange}
+            parseValue={parseValue}
           />
           {label}
         </label>

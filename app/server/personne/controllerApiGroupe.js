@@ -66,7 +66,7 @@ module.exports = function (controller, EntityGroupe, $groupeRepository, $accessC
         if (error) {
           $json.sendError(context, new Error('Erreur interne (impossible de vérifier l’existence préalable du groupe)'))
         } else if (groupeBdd) {
-          $json.sendError(context, 'Le groupe ' + nom + 'existait déjà')
+          $json.sendError(context, 'Le groupe ' + nom + ' existe déjà')
         } else {
           // par défaut fermé et public
           var groupe = EntityGroupe.create({

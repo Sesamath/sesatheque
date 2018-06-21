@@ -7,8 +7,8 @@ import EditorArbre from './EditorArbre'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
+import GroupContainer from './GroupContainer'
 import resourceLoader from './resourceLoader'
-import ShowError from './ShowError'
 import NavMenu from './NavMenu'
 
 const typeToData = {
@@ -35,7 +35,6 @@ const ResourceForm = ({
   handleSubmit,
   change,
   submitting,
-  saveError,
   beforeSaveRegister
 }) => {
   const {Editor, name} = typeToData[type]
@@ -47,11 +46,12 @@ const ResourceForm = ({
       <form onSubmit={handleSubmit}>
         <MetaForm />
         <hr />
+        <GroupContainer />
+        <hr />
         <Editor change={change} beforeSaveRegister={beforeSaveRegister}/>
         <div className="buttons-area">
           <button type="submit" className="btn--primary" disabled={submitting}>Enregistrer</button>
         </div>
-        <ShowError error={saveError} />
       </form>
     </Fragment>
   )
@@ -62,13 +62,10 @@ ResourceForm.propTypes = {
   handleSubmit: PropTypes.func,
   change: PropTypes.func,
   submitting: PropTypes.bool,
-  saveError: PropTypes.func,
   beforeSaveRegister: PropTypes.func
 }
 
 export default flowRight([
   resourceLoader,
-  reduxForm({
-    form: 'meta'
-  })
+  reduxForm({form: 'meta'})
 ])(ResourceForm)

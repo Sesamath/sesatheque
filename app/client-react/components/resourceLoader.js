@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {GET, POST} from '../utils/httpMethods'
+import addNotifyToProps from '../utils/addNotifyToProps'
 
 const resourceLoader = (WrappedComponent) => {
   class ResourceLoader extends Component {
@@ -9,8 +10,7 @@ const resourceLoader = (WrappedComponent) => {
       const {match: {params: {ressourceOid}}} = props
       this.ressourceOid = ressourceOid
       this.state = {
-        ressource: null,
-        saveError: null
+        ressource: null
       }
       this.onSubmit = this.onSubmitInner.bind(this)
       this.beforeSaveRegister = this.beforeSaveRegisterInner.bind(this)
@@ -25,13 +25,16 @@ const resourceLoader = (WrappedComponent) => {
         body.parametres = this.getParametres()
       }
       return POST(`/api/ressource`, {body})
+        .then(() => {
+          this.props.notify({
+            level: 'info',
+            message: 'La ressource a été sauvegardée'
+          })
+        })
         .catch(saveError => {
-          this.setState({
-            saveError
-          }, () => {
-            setTimeout(() => this.setState({
-              saveError: null
-            }), 5000)
+          this.props.notify({
+            level: 'error',
+            message: `La sauvegarde a échouée: ${saveError.message}`
           })
         })
     }
@@ -53,7 +56,6 @@ const resourceLoader = (WrappedComponent) => {
           initialValues={this.state.ressource}
           onSubmit={this.onSubmit}
           {...this.props}
-          saveError={this.state.saveError}
           beforeSaveRegister={this.beforeSaveRegister}
         />
       )
@@ -65,10 +67,11 @@ const resourceLoader = (WrappedComponent) => {
       params: PropTypes.shape({
         ressourceOid: PropTypes.string
       })
-    })
+    }),
+    notify: PropTypes.func
   }
 
-  return ResourceLoader
+  return addNotifyToProps(ResourceLoader)
 }
 
 export default resourceLoader

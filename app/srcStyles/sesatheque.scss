@@ -264,3 +264,49 @@ ul.liste li {
 .checkboxes input[type='checkbox'] {
   display: inline;
 }
+
+.notifications {
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: 500px;
+
+  .notification {
+    pointer-events: auto;
+    cursor: pointer;
+    border-radius: 10px;
+
+    &.alert--danger:hover {
+      background-color: darken(#D9534F, 5%);
+    }
+    &.alert--info:hover {
+      background-color: darken(#5BC0DE, 5%);
+    }
+
+    div {
+      position: relative;
+      .left {
+        top: 50%;
+        position: absolute;
+        transform: translateY(-50%);
+      }
+      .right {
+        position: absolute;
+        top: -2px;
+        right: 0px;
+      }
+      p {
+        margin-left: 25px;
+        margin-right: 20px;
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: $tiny) {
+  .notifications {
+    width: 90%;
+  }
+}
