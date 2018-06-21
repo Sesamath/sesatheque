@@ -33,11 +33,12 @@ class EditorMathGraph extends Component {
   exportParametresToProp () {
     // getParametres correspond au mtgApp.getResult()
     let parametres = this.getParametres()
+    // console.log('retour de mtgApp.getResult()', parametres)
     if (!parametres) throw new Error('mathgraph ne remonte aucune info')
     let {fig, level} = parametres
     if (!fig || typeof fig !== 'string') throw new Error('mathgraph ne renvoie pas la figure')
     if (!level || typeof level !== 'number' || !Number.isInteger(level) || level < 0) {
-      console.error(new Error('level n’est pas un entier positif (on le fixe à 3)'))
+      console.error(new Error('level n’est pas un entier positif ou nul (on le fixe à 3)'))
       // en attendant que ce soit réglé on le fixe arbitrairement à 3
       level = 3
     }
