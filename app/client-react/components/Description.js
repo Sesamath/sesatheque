@@ -70,13 +70,13 @@ const Description = ({
         <div className="txtright">Oid :</div>
         <div className="col-4">
           {oid} <i>({origine}{ idOrigine ? `/${idOrigine}` : null},&nbsp;
-          {labels.type} {type},&nbsp;{labels.version} {version}
-          {dataUrl ? (
-            <NavLink
-              to={dataUrl}
-              target="_blank"
-            >json</NavLink>
-          ) : null})</i>
+            {labels.type} {type},&nbsp;{labels.version} {version}
+            {dataUrl ? (
+              <NavLink
+                to={dataUrl}
+                target="_blank"
+              >json</NavLink>
+            ) : null})</i>
         </div>
 
         {aliasOf && aliasOf.url ? (
