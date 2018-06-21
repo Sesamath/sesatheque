@@ -82,7 +82,7 @@ class EditorIep extends Component {
           </label>
           <label>
             <br />
-            <button type="button" onClick={this.importScript}>Importer le script</button>
+            <button type="button" onClick={this.importScript.bind(this)}>Importer le script</button>
             <span className="note">(Si la source change ou disparait cette ressource restera identique)</span>
           </label>
         </div>
