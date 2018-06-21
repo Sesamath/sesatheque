@@ -9,11 +9,10 @@ const importErrorMessage = 'Une erreur s’est produite durant l’importation d
 class EditorIep extends Component {
   constructor (props) {
     super(props)
-    this.state = {
-      httpsError: null
-    }
     // on teste l'objet window car ce composant pourrait être utilisé pour du rendu coté serveur
-    this.isOnHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
+    this.isOnHttps = true || typeof window !== 'undefined' && window.location.protocol === 'https:'
+    // un timer pour debounce le onUrlChange
+    this.urlChangeTimer = null
     // un raccourci binded
     this.importScript = this.importScriptInner.bind(this)
   }
@@ -43,17 +42,17 @@ class EditorIep extends Component {
       })
   }
 
-  onUrlChange () {
+  getHttpsAvert () {
     const {url} = this.props
-    const isHttpsUrl = (url.indexOf('https://') === 0)
-    if (url && this.isOnHttps && !isHttpsUrl) {
-      this.setState({httpsError: Error(`Impossible de charger dynamiquement un script http sur un site https, vous devez l'importer pour que cela fonctionne`)})
-    } else {
-      this.setState({httpsError: null})
+    if (url) {
+      const isHttpsUrl = (url.indexOf('https://') === 0)
+      if (this.isOnHttps && !isHttpsUrl) return Error(`Impossible de charger dynamiquement un script http sur un site https, vous devez l'importer pour que cela fonctionne`)
     }
+    return null
   }
 
   render () {
+    const httpsError = this.getHttpsAvert()
     return (
       <fieldset>
         <div className="grid-3">
@@ -79,7 +78,6 @@ class EditorIep extends Component {
               name="parametres[url]"
               component="input"
               type="url"
-              onKeyUp={this.onUrlChange.bind(this)}
             />
           </label>
           <label>
@@ -88,7 +86,7 @@ class EditorIep extends Component {
             <span className="note">(Si la source change ou disparait cette ressource restera identique)</span>
           </label>
         </div>
-        <ShowError error={this.state.httpsError} />
+        <ShowError error={httpsError} />
         <div>
           <label>Script instrumenpoche
             <Field
