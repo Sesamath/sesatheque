@@ -1,12 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
+import { withRouter } from 'react-router-dom'
+
 import {deleteRessource, cloneRessource} from '../actions/ressource'
 
 import NavMenuItem from './NavMenuItem'
 import NavButton from './NavButton'
 
-const NavMenu = ({ressourceOid, askClone, askDelete}) => (
+const NavMenu = ({ressourceOid, askClone, askDelete, history}) => (
   <div id="actions">
     <ul>
       <NavMenuItem
@@ -32,13 +34,13 @@ const NavMenu = ({ressourceOid, askClone, askDelete}) => (
         id="buttonEdit"
       />
       <NavButton
-        onClick={askClone.bind(null, ressourceOid)}
+        onClick={askClone.bind(null, ressourceOid, history)}
         title="Dupliquer"
         icon="copy"
         id="buttonDuplicate"
       />
       <NavButton
-        onClick={askDelete.bind(null, ressourceOid)}
+        onClick={askDelete.bind(null, ressourceOid, history)}
         title="Supprimer"
         icon="trash"
         id="buttonDelete"
@@ -55,16 +57,19 @@ NavMenu.propTypes = {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  askDelete: (oid) => {
+  askDelete: (oid, history) => {
     if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
-      dispatch(deleteRessource(oid))
+      dispatch(deleteRessource(oid, history))
     }
   },
-  askClone: (oid) => {
+  askClone: (oid, history) => {
     if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource')) {
-      dispatch(cloneRessource(oid))
+      dispatch(cloneRessource(oid, history))
     }
   }
 })
 
-export default connect(null, mapDispatchToProps)(NavMenu)
+// withRouter d'après https://reacttraining.com/react-router/web/guides/redux-integration
+// ça fonctionne, on récupère history, mais pas sûr que ce soit la bonne méthode car cette doc renvoie vers le deprecated
+// https://github.com/reacttraining/react-router/tree/master/packages/react-router-redux
+export default withRouter(connect(null, mapDispatchToProps)(NavMenu))

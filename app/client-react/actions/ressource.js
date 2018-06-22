@@ -24,7 +24,7 @@ const clearRessource = () => ({
  * @param {string} oid
  * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
  */
-export const cloneRessource = (oid) => (dispatch) => {
+export const cloneRessource = (oid, history) => (dispatch) => {
   let clonedOid
   // ça c'est une anomalie du controleur, ça devrait être /ressource/clone/:oid, vu que les routes risquent de changer on laisse
   return GET(`/api/clone/${oid}`)
@@ -36,12 +36,16 @@ export const cloneRessource = (oid) => (dispatch) => {
     .then(() => {
       return dispatch(addNotification({
         level: 'info',
-        message: 'La ressource a été dupliquée (redirection vers son édition dans 1s)'
+        message: 'La ressource a été dupliquée'
       }))
     })
     .then(() => {
-      // @todo conment on récupère ce #!¡© de history ici ?
-      setTimeout(() => { window.location = `/ressource/modifier/${clonedOid}` }, 1000)
+      history.push(`/ressource/modifier/${clonedOid}`)
+      // si on était sur une page d'édition, il faut lancer cette action pour modifier le state,
+      // sinon le changement d'url ne provoque pas le rechargement
+      // si on clone depuis une page de description ce return provoque un appel en double de l'api pour charger la ressource
+      // FIXME coté ResourceForm
+      return dispatch(loadRessource(clonedOid))
     })
     .catch((error) => dispatch(addNotification({
       level: 'error',
@@ -54,7 +58,7 @@ export const cloneRessource = (oid) => (dispatch) => {
  * @param {string} oid
  * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
  */
-export const deleteRessource = (oid) => (dispatch) => {
+export const deleteRessource = (oid, history) => (dispatch) => {
   return DELETE(`/api/ressource/${oid}`)
     .then(() => {
       return dispatch(clearRessource())
@@ -62,11 +66,13 @@ export const deleteRessource = (oid) => (dispatch) => {
     .then(() => {
       return dispatch(addNotification({
         level: 'info',
-        message: 'La ressource a été supprimée'
+        message: 'La ressource a été supprimée (redirection dans 1s)'
       }))
     })
     .then(() => {
+      // @todo virer cette attente pour remplacer par du history.push dès que la home est gérée par react
       setTimeout(() => { window.location = '/' }, 1000)
+      // history.push('/')
     })
     .catch((error) => dispatch(addNotification({
       level: 'error',
