@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types'
-import React, {Component, Fragment} from 'react'
+import React, {Fragment, Component} from 'react'
 import {formValues, Field} from 'redux-form'
 import IframeHandler from './IframeHandler'
+import iframeHelper from './iframeHelper'
 import IntegerField from './IntegerField'
-import addNotifyToProps from '../utils/addNotifyToProps'
+
 /**
  * Url de la page contenant l'éditeur de mathgraph
  * @type {string}
@@ -13,13 +14,6 @@ const iframeSrc = require('../../client/plugins/mathgraph/mathgraph-editor.html'
 class EditorMathGraph extends Component {
   constructor (props) {
     super(props)
-
-    /**
-     * Retourne les données mathGraph à mettre dans ressources.parametres (un objet)
-     * @type {function}
-     */
-    this.getParametres = null
-
     this.state = {
       showReloadMessage: false
     }
@@ -42,7 +36,7 @@ class EditorMathGraph extends Component {
    */
   syncFormStore () {
     // getParametres correspond au mtgApp.getResult()
-    let parametres = this.getParametres()
+    let parametres = this.props.getParametres()
     // console.log('retour de mtgApp.getResult()', parametres)
     if (!parametres) throw new Error('mathgraph ne remonte aucune info')
     let {fig, level, isExercice} = parametres
@@ -67,17 +61,7 @@ class EditorMathGraph extends Component {
   onIframeLoaded (iframe) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
     const {parametres} = this.props
-    const {syncFormStoreRegister} = this.props
-    iframe.current.contentWindow.load({parametres}, (error, getParametres) => {
-      if (error) {
-        return this.props.notify({
-          level: 'error',
-          message: `Une erreur s’est produite pendant le chargement de l’éditeur: ${error.message}`
-        })
-      }
-      this.getParametres = getParametres
-      syncFormStoreRegister(this.syncFormStore.bind(this))
-    })
+    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.syncFormStore.bind(this)))
   }
 
   render () {
@@ -133,8 +117,9 @@ class EditorMathGraph extends Component {
 EditorMathGraph.propTypes = {
   change: PropTypes.func,
   parametres: PropTypes.object,
-  syncFormStoreRegister: PropTypes.func,
-  notify: PropTypes.func
+  onLoadCb: PropTypes.func,
+  getParametres: PropTypes.func,
+  syncFormStoreRegister: PropTypes.func
 }
 
-export default addNotifyToProps(formValues({parametres: 'parametres'})(EditorMathGraph))
+export default iframeHelper(formValues({parametres: 'parametres'})(EditorMathGraph))

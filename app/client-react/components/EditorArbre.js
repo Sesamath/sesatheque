@@ -2,31 +2,20 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
-import addNotifyToProps from '../utils/addNotifyToProps'
+import iframeHelper from './iframeHelper'
 
 /**
- * Page contenant l'éditeur de graphe J3P
+ * Page contenant l'éditeur d'arbres
  * @type {string}
  */
 const iframeSrc = require('../../client/plugins/arbre/iframe.html')
 
 class EditorArbre extends Component {
-  constructor (props) {
-    super(props)
-
-    /**
-     * Callback d'export des données de l'arbre
-     * @todo Utiliser les postMessage
-     * @type {function}
-     */
-    this.getEnfants = null
-  }
-
   /**
    * Synchronise le contenu de l'éditeur graphique avec redux-form
    */
   syncFormStore () {
-    const arbreExport = this.getEnfants()
+    const arbreExport = this.props.getParametres()
     if (!arbreExport) {
       console.error(new Error('le plugin ne remonte aucune info'))
       return
@@ -51,17 +40,7 @@ class EditorArbre extends Component {
       type: 'arbre'
     }
 
-    const {syncFormStoreRegister} = this.props
-    iframe.current.contentWindow.load(ressource, window.options, (error, getEnfants) => {
-      if (error) {
-        return this.props.notify({
-          level: 'error',
-          message: `Une erreur s’est produite pendant le chargement de l’éditeur: ${error.message}`
-        })
-      }
-      this.getEnfants = getEnfants
-      syncFormStoreRegister(this.syncFormStore.bind(this))
-    })
+    iframe.current.contentWindow.load(ressource, window.options, this.props.onLoadCb(this.syncFormStore.bind(this)))
   }
 
   render () {
@@ -89,11 +68,12 @@ EditorArbre.propTypes = {
   ]),
   rid: PropTypes.string,
   titre: PropTypes.string,
-  syncFormStoreRegister: PropTypes.func,
-  notify: PropTypes.func
+  onLoadCb: PropTypes.func,
+  getParametres: PropTypes.func,
+  syncFormStoreRegister: PropTypes.func
 }
 
-export default addNotifyToProps(formValues({
+export default iframeHelper(formValues({
   aliasOf: 'aliasOf',
   enfants: 'enfants',
   rid: 'rid',
