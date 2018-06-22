@@ -45,7 +45,7 @@ export const cloneRessource = (oid, history) => (dispatch) => {
       // sinon le changement d'url ne provoque pas le rechargement
       // si on clone depuis une page de description ce return provoque un appel en double de l'api pour charger la ressource
       // FIXME coté ResourceForm
-      return dispatch(loadRessource(clonedOid))
+      // return dispatch(loadRessource(clonedOid))
     })
     .catch((error) => dispatch(addNotification({
       level: 'error',

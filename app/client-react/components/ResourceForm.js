@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {withRouter} from 'react-router-dom'
 import {renameProp} from 'recompose'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
@@ -86,6 +87,7 @@ ResourceForm.propTypes = {
 }
 
 export default flowRight([
+  withRouter,
   resourceLoader,
   resourceSaver,
   renameProp('ressource', 'initialValues'),
