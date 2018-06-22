@@ -1,23 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {connect} from 'react-redux'
+import {deleteRessource, cloneRessource} from '../actions/ressource'
+
 import NavMenuItem from './NavMenuItem'
 import NavButton from './NavButton'
 
-function deleteRessource (oid) {
-  if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
-    alert('on supprime')
-    // ici faut lancer l'action deleteRessource qui redirigera vers la home
-    window.location = '/'
-  }
-}
-
-function cloneRessource (oid) {
-  if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource')) {
-    alert('on duplique')
-    // ici faut lancer l'action cloneRessource qui redirigera vers l'édition du clone
-  }
-}
-const NavMenu = ({ressourceOid}) => (
+const NavMenu = ({ressourceOid, askClone, askDelete}) => (
   <div id="actions">
     <ul>
       <NavMenuItem
@@ -43,13 +32,13 @@ const NavMenu = ({ressourceOid}) => (
         id="buttonEdit"
       />
       <NavButton
-        onClick={cloneRessource.bind(null, ressourceOid)}
+        onClick={askClone.bind(null, ressourceOid)}
         title="Dupliquer"
         icon="copy"
         id="buttonDuplicate"
       />
       <NavButton
-        onClick={deleteRessource.bind(null, ressourceOid)}
+        onClick={askDelete.bind(null, ressourceOid)}
         title="Supprimer"
         icon="trash"
         id="buttonDelete"
@@ -60,7 +49,22 @@ const NavMenu = ({ressourceOid}) => (
 )
 
 NavMenu.propTypes = {
+  askClone: PropTypes.func,
+  askDelete: PropTypes.func,
   ressourceOid: PropTypes.string
 }
 
-export default NavMenu
+const mapDispatchToProps = (dispatch) => ({
+  askDelete: (oid) => {
+    if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
+      dispatch(deleteRessource(oid))
+    }
+  },
+  askClone: (oid) => {
+    if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource')) {
+      dispatch(cloneRessource(oid))
+    }
+  }
+})
+
+export default connect(null, mapDispatchToProps)(NavMenu)

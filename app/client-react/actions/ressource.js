@@ -26,20 +26,22 @@ const clearRessource = () => ({
  */
 export const cloneRessource = (oid) => (dispatch) => {
   let clonedOid
-  return GET(`/api/ressource/clone/${oid}`)
+  // ça c'est une anomalie du controleur, ça devrait être /ressource/clone/:oid, vu que les routes risquent de changer on laisse
+  return GET(`/api/clone/${oid}`)
     .then(({oid}) => {
+      if (!oid) throw Error('La réponse n’est pas au format attendu')
       clonedOid = oid
       return dispatch(clearRessource())
     })
     .then(() => {
       return dispatch(addNotification({
         level: 'info',
-        message: 'La ressource a été dupliquée'
+        message: 'La ressource a été dupliquée (redirection vers son édition dans 1s)'
       }))
     })
     .then(() => {
-      // @todo utiliser le routeur react
-      window.location = `/ressource/modifier/${clonedOid}`
+      // @todo conment on récupère ce #!¡© de history ici ?
+      setTimeout(() => { window.location = `/ressource/modifier/${clonedOid}` }, 1000)
     })
     .catch((error) => dispatch(addNotification({
       level: 'error',
@@ -64,7 +66,7 @@ export const deleteRessource = (oid) => (dispatch) => {
       }))
     })
     .then(() => {
-      window.location = '/'
+      setTimeout(() => { window.location = '/' }, 1000)
     })
     .catch((error) => dispatch(addNotification({
       level: 'error',
