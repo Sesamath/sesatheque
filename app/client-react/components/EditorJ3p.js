@@ -2,6 +2,13 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
+import addNotifyToProps from '../utils/addNotifyToProps'
+
+/**
+ * Url de la page contenant l'éditeur de graphe J3P
+ * @type {string}
+ */
+const iframeSrc = require('../../client/plugins/j3p/editgraphe.html')
 
 class EditorJ3p extends Component {
   constructor (props) {
@@ -12,69 +19,20 @@ class EditorJ3p extends Component {
      * @type {function}
      */
     this.getParametres = null
-
-    /**
-     * Référence React vers l'iframe
-     * @type {React.Ref}
-     * @see https://reactjs.org/docs/refs-and-the-dom.html
-     */
-    this.iframe = null
-
-    /**
-     * Url de la page contenant l'éditeur de graphe J3P
-     * @type {string}
-     */
-    this.iframeSrc = require('../../client/plugins/j3p/editgraphe.html')
-
-    this.state = {
-      manualEdition: false
-    }
   }
 
   /**
-   * Exporte le contenu de l'éditeur graphique vers la prop parametres
+   * Synchronise le contenu de l'éditeur graphique avec redux-form
    */
-  exportParametresToProp () {
+  syncFormStore () {
     let parametres = this.getParametres()
     if (!parametres) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
       console.error(new Error('sesaeditgraphe ne remonte aucune info'))
       return
     }
-    if (typeof parametres === 'string') {
-      try {
-        parametres = JSON.parse(parametres)
-      } catch (error) {
-        console.error(new Error('sesaeditgraphe remonte des paramètres invalides'))
-        // ajout feedback `Erreur interne, l’éditeur remonte des paramètres invalides`
-        return
-      }
-    }
+
     this.props.change('parametres', parametres)
-  }
-
-  /**
-   * Exporte le contenu de l'éditeur vers le store
-   * redux-form si on est en mode graphique
-   */
-  syncFormStore () {
-    if (!this.state.manualEdition) {
-      this.exportParametresToProp()
-    }
-  }
-
-  /**
-   * Charge une ressource
-   * @param {Ressource} ressource La Ressource à charger (seule la propriété parametres est utilisée)
-   */
-  loadRessource (ressource) {
-    // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
-    const {syncFormStoreRegister} = this.props
-    this.iframe.current.contentWindow.load(ressource, (error, getParametres) => {
-      if (error) return // todo: afficher "Une erreur s'est produite pendant le chargement de l'éditeur"
-      this.getParametres = getParametres
-      syncFormStoreRegister(this.syncFormStore.bind(this))
-    })
   }
 
   /**
@@ -82,25 +40,18 @@ class EditorJ3p extends Component {
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
   onIframeLoaded (iframe) {
-    this.iframe = iframe
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
-    this.loadRessource({parametres})
-  }
-
-  /**
-   * Appelée lors d'une bascule de l'éditeur (manuel / graphique)
-   * @param {bool} toManual vaut true lors d'une transition graphique => manuel
-   */
-  onManualEditorToggle (toManual) {
-    if (this.state.manualEdition === toManual) return
-
-    this.setState({
-      manualEdition: toManual
+    const {syncFormStoreRegister} = this.props
+    iframe.current.contentWindow.load({parametres}, (error, getParametres) => {
+      if (error) {
+        return this.props.notify({
+          level: 'error',
+          message: `Une erreur s’est produite pendant le chargement de l’éditeur: ${error.message}`
+        })
+      }
+      this.getParametres = getParametres
+      syncFormStoreRegister(this.syncFormStore.bind(this))
     })
-
-    if (toManual) {
-      this.exportParametresToProp()
-    }
   }
 
   render () {
@@ -108,11 +59,10 @@ class EditorJ3p extends Component {
       <fieldset>
         <IframeHandler
           allowManualEdition
-          change={this.props.change}
           onLoad={this.onIframeLoaded.bind(this)}
-          onToggle={this.onManualEditorToggle.bind(this)}
-          src={this.iframeSrc}
-          manualEdition={this.state.manualEdition}
+          src={iframeSrc}
+          syncFormStore={this.syncFormStore.bind(this)}
+          syncFormStoreRegister={this.props.syncFormStoreRegister}
         />
       </fieldset>
     )
@@ -125,7 +75,8 @@ EditorJ3p.propTypes = {
     PropTypes.object,
     PropTypes.string
   ]),
-  syncFormStoreRegister: PropTypes.func
+  syncFormStoreRegister: PropTypes.func,
+  notify: PropTypes.func
 }
 
-export default formValues({parametres: 'parametres'})(EditorJ3p)
+export default addNotifyToProps(formValues({parametres: 'parametres'})(EditorJ3p))
