@@ -1,4 +1,4 @@
-import {GET, POST} from '../utils/httpMethods'
+import {DELETE, GET, POST} from '../utils/httpMethods'
 import {addNotification} from './notifications'
 
 /**
@@ -18,6 +18,59 @@ const setRessource = (ressource) => ({
 const clearRessource = () => ({
   type: 'CLEAR_RESSOURCE'
 })
+
+/**
+ * Retourne l'actionCreator qui supprime la ressource
+ * @param {string} oid
+ * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
+ */
+export const cloneRessource = (oid) => (dispatch) => {
+  let clonedOid
+  return GET(`/api/ressource/clone/${oid}`)
+    .then(({oid}) => {
+      clonedOid = oid
+      return dispatch(clearRessource())
+    })
+    .then(() => {
+      return dispatch(addNotification({
+        level: 'info',
+        message: 'La ressource a été dupliquée'
+      }))
+    })
+    .then(() => {
+      // @todo utiliser le routeur react
+      window.location = `/ressource/modifier/${clonedOid}`
+    })
+    .catch((error) => dispatch(addNotification({
+      level: 'error',
+      message: `La duplication a échouée : ${error.message}`
+    })))
+}
+
+/**
+ * Retourne l'actionCreator qui supprime la ressource
+ * @param {string} oid
+ * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
+ */
+export const deleteRessource = (oid) => (dispatch) => {
+  return DELETE(`/api/ressource/${oid}`)
+    .then(() => {
+      return dispatch(clearRessource())
+    })
+    .then(() => {
+      return dispatch(addNotification({
+        level: 'info',
+        message: 'La ressource a été supprimée'
+      }))
+    })
+    .then(() => {
+      window.location = '/'
+    })
+    .catch((error) => dispatch(addNotification({
+      level: 'error',
+      message: `La suppression a échouée : ${error.message}`
+    })))
+}
 
 /**
  * @callback promisedThunk

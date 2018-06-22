@@ -1,7 +1,22 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import NavMenuItem from './NavMenuItem'
+import NavButton from './NavButton'
 
+function deleteRessource (oid) {
+  if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
+    alert('on supprime')
+    // ici faut lancer l'action deleteRessource qui redirigera vers la home
+    window.location = '/'
+  }
+}
+
+function cloneRessource (oid) {
+  if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource')) {
+    alert('on duplique')
+    // ici faut lancer l'action cloneRessource qui redirigera vers l'édition du clone
+  }
+}
 const NavMenu = ({ressourceOid}) => (
   <div id="actions">
     <ul>
@@ -27,14 +42,14 @@ const NavMenu = ({ressourceOid}) => (
         icon="edit"
         id="buttonEdit"
       />
-      <NavMenuItem
-        to={`/ressource/ajouter?clone=${ressourceOid}`}
+      <NavButton
+        onClick={cloneRessource.bind(null, ressourceOid)}
         title="Dupliquer"
         icon="copy"
         id="buttonDuplicate"
       />
-      <NavMenuItem
-        to={`/ressource/supprimer/${ressourceOid}`}
+      <NavButton
+        onClick={deleteRessource.bind(null, ressourceOid)}
         title="Supprimer"
         icon="trash"
         id="buttonDelete"

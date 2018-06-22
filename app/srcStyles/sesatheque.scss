@@ -57,7 +57,7 @@ body {min-width: 300px;}
   padding: 10px;
   nav {
     z-index: 15;
-    a {
+    button, a {
       @extend .btn;
       padding: 0.5rem 1rem;
       margin: 0 1rem;
