@@ -73,7 +73,9 @@ module.exports = function display (ressource, options, next) {
 
     const dependencies = [
       'https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js',
-      'https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js'
+      // 'https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js'
+      'https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.max.js'
+      // 'http://bibliotheque.local:3001/mathgraph/mtgLoader.min.js'
     ]
     page.loadAsync(dependencies, function () {
       /* global MathJax, mtgLoader */
