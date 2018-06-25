@@ -88,8 +88,8 @@ ResourceForm.propTypes = {
 
 export default flowRight([
   resourceLoader,
-  resourceSaver,
   resourceForker,
+  resourceSaver,
   renameProp('ressource', 'initialValues'),
   reduxForm({form: 'ressource'})
 ])(ResourceForm)
