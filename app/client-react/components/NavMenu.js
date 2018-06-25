@@ -57,6 +57,7 @@ NavMenu.propTypes = {
   ressourceOid: PropTypes.string
 }
 
+// les props sont passées en 2e argument
 const mapDispatchToProps = (dispatch, {history}) => ({
   askDelete: (oid) => {
     if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
