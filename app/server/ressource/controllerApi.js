@@ -800,17 +800,17 @@ module.exports = function controllersFactory (component) {
      * @route GET /api/externalClone/:baseId/:oid
      */
     controller.get('externalClone/:baseId/:oid', function (context) {
-      const {baseIdOrigine, oid} = context.arguments
-      const rid = `${baseIdOrigine}/${oid}`
+      const {baseId, oid} = context.arguments
+      const rid = `${baseId}/${oid}`
       const myBaseId = config.application.baseId
       const pid = $accessControl.getCurrentUserPid(context)
       flow().seq(function () {
         if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
         // on accepte de cloner une ressource locale
-        if (baseIdOrigine === myBaseId || config.sesatheques.some(({baseId}) => baseId === baseIdOrigine)) {
+        if (baseId === myBaseId || config.sesatheques.some(({id}) => id === baseId)) {
           $ressourceFetch.fetchOriginal(rid, this)
         } else {
-          this(new Error(`La sésathèque ${baseIdOrigine} n'est pas déclarée comme source possible de cette sésathèque`))
+          this(new Error(`La sésathèque ${baseId} n'est pas déclarée comme source possible de cette sésathèque`))
         }
       }).seq(function (ressource) {
         log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
@@ -1247,6 +1247,38 @@ module.exports = function controllersFactory (component) {
       $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
         sendRessource(context, error, ressource)
       })
+    })
+
+    /**
+     * Fork une ressource et la retourne
+     * @route GET /api/ressource/:oid/fork
+     */
+    controller.get('ressources/:oid/fork', function (context) {
+      if (!$accessControl.isAuthenticated(context)) return $json.denied(context, `Vous n'avez pas les droits suffisants pour accéder à cette route`)
+      const myPid = $accessControl.getCurrentUserPid(context)
+      if (!myPid) return $json.denied(context, `Vous n'avez pas les droits suffisants pour accéder à cette ressource`)
+
+      flow()
+        .seq(function () {
+          $ressourceRepository.load(context.arguments.oid, this)
+        })
+        .seq(function (ressource) {
+          if (!ressource) return $json.notFound(context, `La ressource n'existe pas`)
+          ressource.aliasOf = ressource.rid
+          if (!ressource.aliasOf) throw new Error(`La ressource ne possède pas d'alias`)
+          if ($accessControl.getDeniedMessage('index', context, ressource)) return $json.denied(context, `Vous n'avez pas les droits suffisants pour forker cette ressource`)
+
+          $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
+            if (error) return $json.sendError(context, `Aucune ressource d'identifiant ${ressource.rid}`)
+            if (!forkedRessource) return $json.sendError(context, `Une erreur s'est produite pendant le fork`)
+
+            sendRessource(context, error, forkedRessource)
+          })
+        })
+        .catch(function (error) {
+          log.error(error)
+          $json.sendError(context, error)
+        })
     })
 
     /**

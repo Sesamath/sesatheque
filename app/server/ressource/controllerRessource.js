@@ -108,67 +108,6 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
   }
 
   /**
-   * Helper de GET /ressource/modifier/:oid quand on veut éditer un alias
-   * @param context
-   * @param ressource
-   */
-  function forkAlias (context, ressource) {
-    const myPid = $accessControl.getCurrentUserPid(context)
-    flow().seq(function () {
-      if (!ressource.aliasOf) throw new Error('Impossible de dupliquer un alias qui n’en est pas un')
-      if (!config.editable[ressource.type]) throw new Error(`Le type de ressource ${ressource.type} n’est pas modifiable`)
-      // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
-      // en faire une vraie ressource (un fork de l'original)
-      $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
-    }).seq(function (ressourceOriginale) {
-      if (!ressourceOriginale) {
-        // ce cas devrait être exclu, juste une assurance
-        log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
-        return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
-      }
-      // on peut forker en partant sur la base de l'alias
-      const fork = {
-        oid: ressource.oid,
-        rid: ressource.rid,
-        origine: myBaseId,
-        idOrigine: ressource.oid,
-        auteurs: [myPid]
-      }
-      // prop où on écrase simplement
-      ;['titre', 'type', 'resume', 'commentaire'].forEach((p) => { fork[p] = ressourceOriginale[p] })
-      // auteursParents on passe par un Set pour dedup
-      const auteursParents = new Set()
-      if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
-      if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
-      else log.dataError('ressource sans auteurs')
-      fork.auteursParents = Array.from(auteursParents)
-      // enfants
-      if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) fork.enfants = ressourceOriginale.enfants
-      // parametres
-      fork.parametres = ressourceOriginale.parametres || {}
-      // sauvegarde de qq infos de l'original dans la copie
-      fork.parametres.original = {
-        rid: ressourceOriginale.rid,
-        origine: ressourceOriginale.origine,
-        idOrigine: ressourceOriginale.idOrigine,
-        version: ressourceOriginale.version
-      }
-      // relations
-      fork.relations = ressourceOriginale.relations || []
-      fork.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
-      // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
-      $ressourceRepository.save(fork, this)
-    }).seq(function (ressourceSaved) {
-      let route = $routes.getAbs('edit', ressourceSaved.oid)
-      if (context.get.layout === 'iframe') route = $routes.addParam(route, 'layout', 'iframe')
-      if (context.get.closerId) route = $routes.addParam(route, 'closerId', context.get.closerId)
-      context.redirect(route)
-    }).catch(function (error) {
-      log.error(error)
-      $ressourcePage.printError(context, error)
-    })
-  }
-  /**
    * Affiche le message existe pas avec un 404
    * @private
    * @param {Context} context
@@ -538,8 +477,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
       // faut laisser passer ceux qui ont la permission index
       if (deniedMsg && $accessControl.getDeniedMessage('index', context, ressource)) return denied(context, deniedMsg)
-      // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
-      if (ressource.aliasOf) return forkAlias(context, ressource)
+
       // sinon on peut afficher le form
       addToken(context, ressource)
       if (['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
@@ -559,6 +497,19 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         }
         context.html(data)
       } else {
+        // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
+        if (ressource.aliasOf) {
+          return $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
+            if (error) return $ressourcePage.printError(context, error)
+            if (!forkedRessource) return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
+
+            let route = $routes.getAbs('edit', forkedRessource.oid)
+            if (context.get.layout === 'iframe') route = $routes.addParam(route, 'layout', 'iframe')
+            if (context.get.closerId) route = $routes.addParam(route, 'closerId', context.get.closerId)
+            context.redirect(route)
+          })
+        }
+
         $ressourcePage.printForm(context, null, ressource)
       }
     }).catch(function (error) {

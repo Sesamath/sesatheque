@@ -9,6 +9,7 @@ import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
 import GroupContainer from './GroupContainer'
+import resourceForker from './resourceForker'
 import resourceLoader from './resourceLoader'
 import resourceSaver from './resourceSaver'
 import NavMenu from './NavMenu'
@@ -88,6 +89,7 @@ ResourceForm.propTypes = {
 export default flowRight([
   resourceLoader,
   resourceSaver,
+  resourceForker,
   renameProp('ressource', 'initialValues'),
   reduxForm({form: 'ressource'})
 ])(ResourceForm)

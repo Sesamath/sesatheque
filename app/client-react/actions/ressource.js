@@ -27,6 +27,24 @@ const clearRessource = () => ({
  */
 
 /**
+ * Retourne l'actionCreator qui va forker la ressource via un GET sur l'api
+ * @param oid
+ * @return {function(*, *): Promise<any>}
+ */
+export const forkRessource = (oid) => (dispatch, getState) => {
+  return Promise.resolve(dispatch(clearRessource()))
+    .then(() => GET(`/api/ressources/${oid}/fork`))
+    .then((ressource) => dispatch(setRessource(ressource)))
+    .catch((error) => {
+      console.error(error)
+      dispatch(addNotification({
+        level: 'error',
+        message: `Impossible de forker la ressource : ${error.message}`
+      }))
+    })
+}
+
+/**
  * Retourne l'actionCreator qui va sauvegarder la ressource via un POST sur l'api
  * @param {Ressource} ressource
  * @return {promisedThunk} qui va faire le post puis dispatch de setRessource & addNotification

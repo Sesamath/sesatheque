@@ -36,6 +36,8 @@ const {exists, getBaseUrl, getRidComponents} = require('sesatheque-client/src/se
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 const config = require('./config')
+const appConfig = require('../config')
+const myBaseId = appConfig.application.baseId
 
 /**
  * Service qui regroupe les fonctions de transformation de données sur des ressources
@@ -48,7 +50,7 @@ const config = require('./config')
 const $ressourceConverter = {}
 
 module.exports = function (component) {
-  component.service('$ressourceConverter', function (EntityRessource, $ressourceRepository, $routes, $accessControl, $ressourceFetch, $personneRepository) {
+  component.service('$ressourceConverter', function ($ressourceRepository, $routes, $accessControl, $ressourceFetch, $personneRepository) {
     /**
      * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
      * dont le 1er est un id de relation valide
@@ -258,6 +260,67 @@ module.exports = function (component) {
         // en cas d'erreur dans le flux on envoie quand même la ressource en l'état
         log.error(`erreur dans la recherche des références externes de la ressource ${ressource.oid}`, error)
         next(error, ressource)
+      })
+    }
+
+    /**
+     * Helper de GET /ressource/modifier/:oid quand on veut éditer un alias
+     * @param context
+     * @param ressource
+     */
+    $ressourceConverter.forkAlias = function(myPid, ressource, callback) {
+      flow()
+      .seq(function () {
+        if (!ressource.aliasOf) throw new Error('Impossible de dupliquer un alias qui n’en est pas un')
+        if (!config.editable[ressource.type]) throw new Error(`Le type de ressource ${ressource.type} n’est pas modifiable`)
+        // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
+        // en faire une vraie ressource (un fork de l'original)
+        $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
+      }).seq(function (ressourceOriginale) {
+        if (!ressourceOriginale) {
+          // ce cas devrait être exclu, juste une assurance
+          log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
+          return callback(null)
+        }
+
+        // on peut forker en partant sur la base de l'alias
+        const fork = {
+          oid: ressource.oid,
+          rid: ressource.rid,
+          origine: myBaseId,
+          idOrigine: ressource.oid,
+          auteurs: [myPid]
+        }
+        // prop où on écrase simplement
+        ;['titre', 'type', 'resume', 'commentaire'].forEach((p) => { fork[p] = ressourceOriginale[p] })
+        // auteursParents on passe par un Set pour dedup
+        const auteursParents = new Set()
+        if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
+        if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
+        else log.dataError('ressource sans auteurs')
+
+        fork.auteursParents = Array.from(auteursParents)
+        // enfants
+        if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) fork.enfants = ressourceOriginale.enfants
+        // parametres
+        fork.parametres = ressourceOriginale.parametres || {}
+        // sauvegarde de qq infos de l'original dans la copie
+        fork.parametres.original = {
+          rid: ressourceOriginale.rid,
+          origine: ressourceOriginale.origine,
+          idOrigine: ressourceOriginale.idOrigine,
+          version: ressourceOriginale.version
+        }
+        // relations
+        fork.relations = ressourceOriginale.relations || []
+        fork.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
+        // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
+        $ressourceRepository.save(fork, this)
+      })
+      .seq((forkedRessource) => callback(null, forkedRessource))
+      .catch(function (error) {
+        log.error(error)
+        callback(error)
       })
     }
 
