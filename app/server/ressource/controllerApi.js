@@ -72,27 +72,21 @@ module.exports = function controllersFactory (component) {
      * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
      * @private
      * @param {Context} context
-     * @param rid ou oid ou origine/idOrigine
+     * @param id ou oid ou origine/idOrigine
      */
-    function deleteAndSend (context, rid) {
-      log.debug('dans cb api deleteRessource ' + rid)
-      // on charge la ressource pour vérifier les droits
-      $ressourceRepository.load(rid, function (error, ressource) {
-        if (error) {
-          $json.send(context, error)
-        } else if (ressource) {
-          $accessControl.checkPermission('delete', context, ressource, function (errorMessage) {
-            if (errorMessage) return $json.denied(context, errorMessage)
-            $ressourceRepository.remove(ressource.oid, function (error) {
-              if (error) $json.send(context, error)
-              else $json.sendOk(context, {deleted: rid})
-            })
-          })
-        } else {
-          log.debug(`La ressource ${rid} n’existait pas, on a rien effacé`)
-          // pas de ressource, on vérifie qu'il avait certains droits
-          $json.send(context, new Error(`Aucune ressource d'identifiant ${rid}`))
-        }
+    function deleteAndSend (context, id) {
+      log.debug('dans cb api deleteRessource ' + id)
+      const pid = $accessControl.getCurrentUserPid(context)
+      if (!pid) return $json.denied(context, 'Vous devez être authentifié pour supprimer une ressource')
+      // faut charger la ressource pour vérifier les droits (elle est probablement en cache)
+      $ressourceRepository.load(id, function (error, ressource) {
+        if (error) return $json.sendError(context, error)
+        if (!ressource) return $json.notFound(context, `La ressource ${id} n’existe pas`)
+        if (!$accessControl.hasPermission('delete', context, ressource)) return $json.denied(context, `Vous n’avez pas de droits suffisants pour supprimer cette ressource`)
+        $ressourceRepository.remove(ressource.oid, function (error) {
+          if (error) return $json.sendError(context, error)
+          $json.sendOk(context, {deleted: ressource.oid})
+        })
       })
     }
 
@@ -731,64 +725,59 @@ module.exports = function controllersFactory (component) {
     /**
      * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
      * Retourne {@link reponseRessourceOid}
+     * La route devrait être /api/ressource/clone/:oid, mais c'est comme ça depuis un moment…
      * @route GET /api/clone/:oid
      */
     controller.get('clone/:oid', function (context) {
       const {oid} = context.arguments
       const pid = $accessControl.getCurrentUserPid(context)
-      if (pid) {
-        $ressourceRepository.load(oid, function (error, ressource) {
-          if (error) return $json.send(context, error)
-          if (ressource) {
-            if ($accessControl.hasReadPermission(context, ressource)) {
-              if (configRessource.editable[ressource.type]) {
-                // editable on duplique
-                delete ressource.oid
-                delete ressource.idOrigine
-                ressource.origine = config.application.baseId
-                // faut mettre le user en auteur sinon il aura pas le droit de supprimer
-                if (ressource.auteurs.indexOf(pid) < 0) ressource.auteurs.push(pid)
-                ressource.publie = true
-                ressource.restriction = configRessource.constantes.restriction.prive
-                if (!ressource.relations) ressource.relations = []
-                ressource.relations.push([configRessource.constantes.relations.estVersionDe, ressource.rid])
-                delete ressource.rid
-                $ressourceRepository.save(ressource, function (error, ressource) {
-                  if (error) $json.send(context, error)
-                  else if (ressource && ressource.oid) $json.sendOk(context, {oid: ressource.oid})
-                  else $json.send(context, new Error("L'enregistrement de la ressource a échoué"))
-                })
-              } else {
-                // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource et ce user
-                $ressourceRepository.loadByAliasAndPid(myBaseId + '/' + oid, pid, function (error, alias) {
-                  if (error) return $json.sendError(context, error.toString())
-                  if (alias) return $json.sendOk(context, {oid: alias.oid})
-                  // faut le créer
-                  const data = {}
-                  ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => {
-                    data[p] = ressource[p]
-                  })
-                  data.aliasOf = myBaseId + '/' + ressource.oid
-                  data.auteursParents = ressource.auteurs
-                  data.auteurs = [pid]
-                  alias = EntityRessource.create(data)
-                  alias.store(function (error, ressAlias) {
-                    if (error) return $json.sendError(context, error)
-                    if (ressAlias) return $json.sendOk(context, {oid: ressAlias.oid})
-                    $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
-                  })
-                })
-              }
-            } else {
-              $json.denied(context, `Vous n’avez pas les droits suffisant pour lire la ressource ${oid}`)
-            }
-          } else {
-            $json.notFound(context, `La ressource ${oid} n’existe pas`)
-          }
-        })
-      } else {
-        $json.denied(context, 'Vous devez être authentifié pour cloner une ressource')
-      }
+      if (!pid) return $json.denied(context, 'Vous devez être authentifié pour cloner une ressource')
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (error) return $json.send(context, error)
+        if (!ressource) return $json.notFound(context, `La ressource ${oid} n’existe pas`)
+        if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context, `Vous n’avez pas les droits suffisant pour lire la ressource ${oid}`)
+        // droits ok, 2 cas suivant editable ou pas
+        if (configRessource.editable[ressource.type]) {
+          // editable on duplique
+          delete ressource.oid
+          delete ressource.rid
+          delete ressource.idOrigine
+          ressource.origine = config.application.baseId
+          // faut mettre le user en auteur sinon il aura pas le droit de supprimer
+          if (ressource.auteurs.indexOf(pid) < 0) ressource.auteurs.push(pid)
+          // on laisse publie et restriction à l'identique
+          // modif du titre
+          ressource.titre += ' (copie)'
+          // ajout de la relation avec la ressource originale
+          if (!ressource.relations) ressource.relations = []
+          ressource.relations.push([configRessource.constantes.relations.estVersionDe, ressource.rid])
+          $ressourceRepository.save(ressource, function (error, ressource) {
+            if (error) return $json.sendError(context, error)
+            if (!ressource || !ressource.oid) return $json.send(context, new Error('L’enregistrement de la ressource a échoué'))
+            $json.sendOk(context, {oid: ressource.oid})
+          })
+        } else {
+          // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource et ce user
+          $ressourceRepository.loadByAliasAndPid(myBaseId + '/' + oid, pid, function (error, alias) {
+            if (error) return $json.sendError(context, error.toString())
+            if (alias) return $json.sendOk(context, {oid: alias.oid})
+            // faut le créer
+            const data = {}
+            ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => {
+              data[p] = ressource[p]
+            })
+            data.aliasOf = myBaseId + '/' + ressource.oid
+            data.auteursParents = ressource.auteurs
+            data.auteurs = [pid]
+            alias = EntityRessource.create(data)
+            alias.store(function (error, ressAlias) {
+              if (error) return $json.sendError(context, error)
+              if (!ressAlias || !ressAlias.oid) return $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
+              $json.sendOk(context, {oid: ressAlias.oid})
+            })
+          })
+        }
+      })
     })
 
     /**
