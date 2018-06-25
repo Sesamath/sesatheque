@@ -58,8 +58,8 @@ ressourceComponent.service('$routes', function ($accessControl) {
 
 require('./serviceRessourceRepository')(ressourceComponent)
 
-ressourceComponent.service('$ressourceFetch', function ($ressourceRepository) {
-  return require('./serviceRessourceFetch')($ressourceRepository)
+ressourceComponent.service('$ressourceFetch', function ($cache, $ressourceRepository) {
+  return require('./serviceRessourceFetch')($cache, $ressourceRepository)
 })
 
 ressourceComponent.service('$ressourceControl', function (EntityRessource) {

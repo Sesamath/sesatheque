@@ -2,18 +2,29 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
 import addNotifyToProps from '../utils/addNotifyToProps'
+import ShowError from './ShowError.js'
 
 const importErrorMessage = 'Une erreur s’est produite durant l’importation du script'
 
 class EditorIep extends Component {
-  importScript () {
-    const {url, change, notify} = this.props
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw Error(response.statusText)
-        }
+  constructor (props) {
+    super(props)
+    // on teste l'objet window car ce composant pourrait être utilisé pour du rendu coté serveur
+    this.isOnHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
+    // un timer pour debounce le onUrlChange
+    this.urlChangeTimer = null
+    // un raccourci binded
+    this.importScript = this.importScriptInner.bind(this)
+  }
 
+  importScriptInner () {
+    const {url, change, notify} = this.props
+    // si c'est du https on fetch direct, sinon dans le doute on passe par notre proxy
+    let urlToFetch = url
+    if (this.isOnHttps && !/^https:\/\//.test(url)) urlToFetch = `/ressource/urlProxy/${encodeURIComponent(url)}`
+    fetch(urlToFetch)
+      .then(response => {
+        if (!response.ok) throw Error(response.statusText)
         return response.text()
       })
       .then(content => change('parametres[xml]', content))
@@ -31,7 +42,17 @@ class EditorIep extends Component {
       })
   }
 
+  getHttpsAvert () {
+    const {url} = this.props
+    if (url) {
+      const isHttpsUrl = (url.indexOf('https://') === 0)
+      if (this.isOnHttps && !isHttpsUrl) return Error(`Impossible de charger dynamiquement un script http sur un site https, vous devez l'importer pour que cela fonctionne`)
+    }
+    return null
+  }
+
   render () {
+    const httpsError = this.getHttpsAvert()
     return (
       <fieldset>
         <div className="grid-3">
@@ -65,6 +86,7 @@ class EditorIep extends Component {
             <span className="note">(Si la source change ou disparait cette ressource restera identique)</span>
           </label>
         </div>
+        <ShowError error={httpsError} />
         <div>
           <label>Script instrumenpoche
             <Field
