@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {withRouter} from 'react-router-dom'
 import {renameProp} from 'recompose'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
@@ -40,14 +39,18 @@ const ResourceForm = ({
   submitting,
   syncFormStore,
   syncFormStoreRegister,
-  saveRessource
+  saveRessource,
+  history
 }) => {
   const {Editor, name} = typeToData[type]
 
   return (
     <Fragment>
       <h1 className="fl">Modifier la ressource {name}</h1>
-      <NavMenu ressourceOid={ressourceOid} />
+      <NavMenu
+        history={history}
+        ressourceOid={ressourceOid}
+      />
       <form>
         <MetaForm />
         <hr />
@@ -83,11 +86,11 @@ ResourceForm.propTypes = {
   submitting: PropTypes.bool,
   syncFormStore: PropTypes.func,
   syncFormStoreRegister: PropTypes.func,
-  saveRessource: PropTypes.func
+  saveRessource: PropTypes.func,
+  history: PropTypes.object
 }
 
 export default flowRight([
-  withRouter,
   resourceLoader,
   resourceSaver,
   renameProp('ressource', 'initialValues'),

@@ -1,14 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
-import {withRouter} from 'react-router-dom'
-
 import {deleteRessource, cloneRessource} from '../actions/ressource'
-
 import NavMenuItem from './NavMenuItem'
 import NavButton from './NavButton'
 
-const NavMenu = ({ressourceOid, askClone, askDelete, history}) => (
+const NavMenu = ({
+  ressourceOid,
+  askClone,
+  askDelete
+}) => (
   <div id="actions">
     <ul>
       <NavMenuItem
@@ -34,13 +35,13 @@ const NavMenu = ({ressourceOid, askClone, askDelete, history}) => (
         id="buttonEdit"
       />
       <NavButton
-        onClick={askClone.bind(null, ressourceOid, history)}
+        onClick={askClone.bind(null, ressourceOid)}
         title="Dupliquer"
         icon="copy"
         id="buttonDuplicate"
       />
       <NavButton
-        onClick={askDelete.bind(null, ressourceOid, history)}
+        onClick={askDelete.bind(null, ressourceOid)}
         title="Supprimer"
         icon="trash"
         id="buttonDelete"
@@ -56,20 +57,27 @@ NavMenu.propTypes = {
   ressourceOid: PropTypes.string
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  askDelete: (oid, history) => {
+const mapDispatchToProps = (dispatch, {history}) => ({
+  askDelete: (oid) => {
     if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
-      dispatch(deleteRessource(oid, history))
+      const success = () => {
+        // @todo virer cette attente pour remplacer par du history.push dès que la home est gérée par react
+        setTimeout(() => { window.location = '/' }, 1000)
+        // history.push('/')
+      }
+
+      dispatch(deleteRessource(oid, success))
     }
   },
-  askClone: (oid, history) => {
+  askClone: (oid) => {
     if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource')) {
-      dispatch(cloneRessource(oid, history))
+      const success = (clonedOid) => {
+        return history.push(`/ressource/modifier/${clonedOid}`)
+      }
+
+      return dispatch(cloneRessource(oid, success))
     }
   }
 })
 
-// withRouter d'après https://reacttraining.com/react-router/web/guides/redux-integration
-// ça fonctionne, on récupère history, mais pas sûr que ce soit la bonne méthode car cette doc renvoie vers le deprecated
-// https://github.com/reacttraining/react-router/tree/master/packages/react-router-redux
-export default withRouter(connect(null, mapDispatchToProps)(NavMenu))
+export default connect(null, mapDispatchToProps)(NavMenu)

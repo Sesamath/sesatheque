@@ -16,6 +16,17 @@ const resourceLoader = (WrappedComponent) => {
       this.props.loadRessource(ressourceOid)
     }
 
+    componentDidUpdate (prevProps) {
+      const {match: {params: {ressourceOid}}} = this.props
+      const {match: {params: {ressourceOid: prevRessourceOid}}} = prevProps
+      if (ressourceOid !== prevRessourceOid) {
+        this.props.loadRessource(ressourceOid)
+      }
+      // todo: clarify/simplify loading code
+      // to cleanly avoid double fetches on
+      // same oid
+    }
+
     render () {
       if (this.props.ressource === null) return null
 
