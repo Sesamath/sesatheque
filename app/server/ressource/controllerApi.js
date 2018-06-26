@@ -76,8 +76,6 @@ module.exports = function controllersFactory (component) {
      */
     function deleteAndSend (context, id) {
       log.debug('dans cb api deleteRessource ' + id)
-      const pid = $accessControl.getCurrentUserPid(context)
-      if (!pid) return $json.denied(context, 'Vous devez être authentifié pour supprimer une ressource')
       // faut charger la ressource pour vérifier les droits (elle est probablement en cache)
       $ressourceRepository.load(id, function (error, ressource) {
         if (error) return $json.sendError(context, error)
@@ -1285,7 +1283,7 @@ module.exports = function controllersFactory (component) {
 
     /**
      * Delete ressource par oid, retourne {@link reponseDeleted}
-     * @route DEL /api/ressource/:oid
+     * @route DELETE /api/ressource/:oid
      * @param {Integer} oid
      */
     controller.delete('ressource/:oid', function (context) {
