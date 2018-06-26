@@ -2,7 +2,7 @@ import moment from 'moment'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {NavLink} from 'react-router-dom'
-import resourceLoader from './resourceLoader'
+import resourceLoader from '../hoc/resourceLoader'
 import NavMenu from './NavMenu'
 import {formats, listes, labels} from '../../server/ressource/config'
 

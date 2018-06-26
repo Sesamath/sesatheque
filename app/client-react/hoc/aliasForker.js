@@ -9,7 +9,12 @@ const mapDispatchToProps = {
 
 const mapStateToProps = ({ressource}) => ({ressource})
 
-const aliasForker = (WrappedComponent) => {
+/**
+ * High Order Component pour déclencher automatiquement un fork si on édite un alias
+ * @param {ResourceForm} ResourceForm
+ * @return {Component}
+ */
+const aliasForker = (ResourceForm) => {
   class AliasForker extends Component {
     componentDidMount () {
       this.ensuresIsForked()
@@ -27,9 +32,13 @@ const aliasForker = (WrappedComponent) => {
 
     render () {
       if (this.props.ressource === null) return null
+      // si on édite un alias, ensuresIsForked appelle forkAlias qui dispatch un clearRessource,
+      // donc WrappedComponent ne devrait pas avoir le temps d'être rendu (ou aussitôt effacé)
+      // mais autant ne rien rendre
+      if (this.props.ressource.aliasOf) return null
 
       return (
-        <WrappedComponent {...this.props} />
+        <ResourceForm {...this.props} />
       )
     }
   }

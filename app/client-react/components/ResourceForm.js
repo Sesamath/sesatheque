@@ -9,9 +9,9 @@ import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
 import GroupContainer from './GroupContainer'
-import aliasForker from './aliasForker'
-import resourceLoader from './resourceLoader'
-import resourceSaver from './resourceSaver'
+import aliasForker from '../hoc/aliasForker'
+import resourceLoader from '../hoc/resourceLoader'
+import resourceSaver from '../hoc/resourceSaver'
 import NavMenu from './NavMenu'
 
 const typeToData = {
