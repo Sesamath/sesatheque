@@ -1,4 +1,4 @@
-import {GET, POST} from '../utils/httpMethods'
+import {DELETE, GET, POST} from '../utils/httpMethods'
 import {addNotification} from './notifications'
 
 /**
@@ -18,6 +18,53 @@ const setRessource = (ressource) => ({
 const clearRessource = () => ({
   type: 'CLEAR_RESSOURCE'
 })
+
+/**
+ * Retourne l'actionCreator qui supprime la ressource
+ * @param {string} oid
+ * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
+ */
+export const cloneRessource = (oid, success) => (dispatch) => {
+  // ça c'est une anomalie du controleur, ça devrait être /ressource/clone/:oid, vu que les routes risquent de changer on laisse
+  return GET(`/api/clone/${oid}`)
+    .then(({oid}) => {
+      if (!oid) throw Error('La réponse n’est pas au format attendu')
+
+      dispatch(addNotification({
+        level: 'info',
+        message: 'La ressource a été dupliquée'
+      }))
+      return oid
+    })
+    .then(success)
+    .catch((error) => dispatch(addNotification({
+      level: 'error',
+      message: `La duplication a échouée : ${error.message}`
+    })))
+}
+
+/**
+ * Retourne l'actionCreator qui supprime la ressource
+ * @param {string} oid
+ * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
+ */
+export const deleteRessource = (oid, success) => (dispatch) => {
+  return DELETE(`/api/ressource/${oid}`)
+    .then(() => {
+      return dispatch(clearRessource())
+    })
+    .then(() => {
+      return dispatch(addNotification({
+        level: 'info',
+        message: 'La ressource a été supprimée (redirection dans 1s)'
+      }))
+    })
+    .then(success)
+    .catch((error) => dispatch(addNotification({
+      level: 'error',
+      message: `La suppression a échouée : ${error.message}`
+    })))
+}
 
 /**
  * @callback promisedThunk

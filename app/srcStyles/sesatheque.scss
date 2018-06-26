@@ -57,7 +57,7 @@ body {min-width: 300px;}
   padding: 10px;
   nav {
     z-index: 15;
-    a {
+    button, a {
       @extend .btn;
       padding: 0.5rem 1rem;
       margin: 0 1rem;
@@ -277,9 +277,11 @@ ul.liste li {
     cursor: pointer;
     border-radius: 10px;
 
-    $backgroundcolor: #D9534F;
-    &:hover {
-      background-color: darken($backgroundcolor, 5%);
+    &.alert--danger:hover {
+      background-color: darken(#D9534F, 5%);
+    }
+    &.alert--info:hover {
+      background-color: darken(#5BC0DE, 5%);
     }
 
     div {

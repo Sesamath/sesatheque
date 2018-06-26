@@ -1,8 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {connect} from 'react-redux'
+import {deleteRessource, cloneRessource} from '../actions/ressource'
 import NavMenuItem from './NavMenuItem'
+import NavButton from './NavButton'
 
-const NavMenu = ({ressourceOid}) => (
+const NavMenu = ({
+  ressourceOid,
+  askClone,
+  askDelete
+}) => (
   <div id="actions">
     <ul>
       <NavMenuItem
@@ -27,14 +34,14 @@ const NavMenu = ({ressourceOid}) => (
         icon="edit"
         id="buttonEdit"
       />
-      <NavMenuItem
-        to={`/ressource/ajouter?clone=${ressourceOid}`}
+      <NavButton
+        onClick={askClone.bind(null, ressourceOid)}
         title="Dupliquer"
         icon="copy"
         id="buttonDuplicate"
       />
-      <NavMenuItem
-        to={`/ressource/supprimer/${ressourceOid}`}
+      <NavButton
+        onClick={askDelete.bind(null, ressourceOid)}
         title="Supprimer"
         icon="trash"
         id="buttonDelete"
@@ -45,7 +52,33 @@ const NavMenu = ({ressourceOid}) => (
 )
 
 NavMenu.propTypes = {
+  askClone: PropTypes.func,
+  askDelete: PropTypes.func,
   ressourceOid: PropTypes.string
 }
 
-export default NavMenu
+// les props sont passées en 2e argument
+const mapDispatchToProps = (dispatch, {history}) => ({
+  askDelete: (oid) => {
+    if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
+      const success = () => {
+        // @todo virer cette attente pour remplacer par du history.push dès que la home est gérée par react
+        setTimeout(() => { window.location = '/' }, 1000)
+        // history.push('/')
+      }
+
+      dispatch(deleteRessource(oid, success))
+    }
+  },
+  askClone: (oid) => {
+    if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource')) {
+      const success = (clonedOid) => {
+        return history.push(`/ressource/modifier/${clonedOid}`)
+      }
+
+      return dispatch(cloneRessource(oid, success))
+    }
+  }
+})
+
+export default connect(null, mapDispatchToProps)(NavMenu)
