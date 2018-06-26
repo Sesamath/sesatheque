@@ -284,37 +284,26 @@ module.exports = function (component) {
         }
 
         // on peut forker en partant sur la base de l'alias
-        const fork = {
+        const forcedProps = {
           oid: ressource.oid,
           rid: ressource.rid,
           origine: myBaseId,
           idOrigine: ressource.oid,
-          auteurs: [myPid]
+          auteurs: [myPid],
+          version: 1
         }
-        // prop où on écrase simplement
-        ;['titre', 'type', 'resume', 'commentaire'].forEach((p) => { fork[p] = ressourceOriginale[p] })
-        // auteursParents on passe par un Set pour dedup
-        const auteursParents = new Set()
-        if (ressourceOriginale.auteursParents) ressourceOriginale.auteursParents.forEach(pid => auteursParents.add(pid))
-        if (ressourceOriginale.auteurs) ressourceOriginale.auteurs.forEach(pid => auteursParents.add(pid))
-        else log.dataError('ressource sans auteurs')
-
-        fork.auteursParents = Array.from(auteursParents)
-        // enfants
-        if (ressourceOriginale.enfants && ressourceOriginale.enfants.length) fork.enfants = ressourceOriginale.enfants
-        // parametres
-        fork.parametres = ressourceOriginale.parametres || {}
-        // sauvegarde de qq infos de l'original dans la copie
-        fork.parametres.original = {
-          rid: ressourceOriginale.rid,
-          origine: ressourceOriginale.origine,
-          idOrigine: ressourceOriginale.idOrigine,
-          version: ressourceOriginale.version
+        const fork = Object.assign({}, ressourceOriginale, forcedProps)
+        if (ressourceOriginale.auteurs) {
+          if (!fork.auteursParents) fork.auteursParents = []
+          ressourceOriginale.auteurs.forEach(pid => fork.auteursParents.push(pid))
+        } else {
+          log.dataError('ressource sans auteurs')
         }
-        // relations
-        fork.relations = ressourceOriginale.relations || []
+        // c'est plus un alias…
+        delete fork.aliasOf
+        // … mais une ressource liée
+        if (!fork.relations) fork.relations = []
         fork.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
-        // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
         $ressourceRepository.save(fork, this)
       }).seq(function (forkedRessource) {
         callback(null, forkedRessource)
