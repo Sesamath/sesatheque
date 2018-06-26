@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
+import IntegerField from './IntegerField'
 import addNotifyToProps from '../utils/addNotifyToProps'
 import ShowError from './ShowError.js'
 
@@ -57,17 +58,13 @@ class EditorIep extends Component {
       <fieldset>
         <div className="grid-3">
           <label>Largeur <i>(en pixel)</i>
-            <Field
+            <IntegerField
               name="parametres[width]"
-              component="input"
-              type="number"
             />
           </label>
           <label>Hauteur <i>(en pixel)</i>
-            <Field
+            <IntegerField
               name="parametres[height]"
-              component="input"
-              type="number"
             />
           </label>
         </div>

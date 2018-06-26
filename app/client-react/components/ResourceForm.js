@@ -37,8 +37,8 @@ const ResourceForm = ({
   handleSubmit,
   change,
   submitting,
-  syncFormStore,
-  syncFormStoreRegister,
+  updateStoreFromEditor,
+  setUpdateStoreFromEditor,
   saveRessource,
   history
 }) => {
@@ -58,7 +58,7 @@ const ResourceForm = ({
         <hr />
         <Editor
           change={change}
-          syncFormStoreRegister={syncFormStoreRegister}
+          setUpdateStoreFromEditor={setUpdateStoreFromEditor}
         />
         <div className="buttons-area">
           <button
@@ -67,7 +67,7 @@ const ResourceForm = ({
             disabled={submitting}
             onClick={(e) => {
               e.persist()
-              return Promise.resolve(syncFormStore())
+              return Promise.resolve(updateStoreFromEditor())
                 .then(() => handleSubmit(saveRessource)(e))
             }}
           >
@@ -84,8 +84,8 @@ ResourceForm.propTypes = {
   handleSubmit: PropTypes.func,
   change: PropTypes.func,
   submitting: PropTypes.bool,
-  syncFormStore: PropTypes.func,
-  syncFormStoreRegister: PropTypes.func,
+  updateStoreFromEditor: PropTypes.func,
+  setUpdateStoreFromEditor: PropTypes.func,
   saveRessource: PropTypes.func,
   history: PropTypes.object
 }
