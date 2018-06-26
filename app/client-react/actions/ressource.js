@@ -74,6 +74,24 @@ export const deleteRessource = (oid, success) => (dispatch) => {
  */
 
 /**
+ * Retourne l'actionCreator qui va forker l'alias via un GET sur l'api
+ * @param {string} oid
+ * @return {promisedThunk}
+ */
+export const forkAlias = (oid) => (dispatch, getState) => {
+  return Promise.resolve(dispatch(clearRessource()))
+    .then(() => GET(`/api/forkAlias/${oid}`))
+    .then((ressource) => dispatch(setRessource(ressource)))
+    .catch((error) => {
+      console.error(error)
+      dispatch(addNotification({
+        level: 'error',
+        message: `Impossible d'éditer cette ressource : ${error.message}`
+      }))
+    })
+}
+
+/**
  * Retourne l'actionCreator qui va sauvegarder la ressource via un POST sur l'api
  * @param {Ressource} ressource
  * @return {promisedThunk} qui va faire le post puis dispatch de setRessource & addNotification

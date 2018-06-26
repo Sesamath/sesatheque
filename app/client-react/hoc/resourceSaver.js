@@ -7,6 +7,13 @@ const mapDispatchToProps = {
   saveRessource
 }
 
+/**
+ * High Order Component qui fournit updateStoreFromEditor et setUpdateStoreFromEditor à
+ * WrappedComponent (ResourceEditor éventuellement wrappé par un autre hoc)
+ * Son state stocke la fct updateStoreFromEditor pour la ressource en cours d'édition
+ * @param WrappedComponent
+ * @return {*}
+ */
 const resourceSaver = (WrappedComponent) => {
   class ResourceSaver extends Component {
     constructor (props) {

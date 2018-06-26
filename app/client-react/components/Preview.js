@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import NavMenu from './NavMenu'
-import resourceLoader from './resourceLoader'
+import resourceLoader from '../hoc/resourceLoader'
 
 const Preview = ({
   ressource: {oid: ressourceOid, titre}

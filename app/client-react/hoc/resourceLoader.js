@@ -9,6 +9,12 @@ const mapDispatchToProps = {
 
 const mapStateToProps = ({ressource}) => ({ressource})
 
+/**
+ * High Order Component qui charge une ressource avant de la passer à WrappedComponent
+ * (si on l'avait pas déjà dans le state)
+ * @param {Component} WrappedComponent
+ * @return {Component} Le composant enrichi
+ */
 const resourceLoader = (WrappedComponent) => {
   class ResourceLoader extends Component {
     // lors du 1er mount du component on charge la ressource

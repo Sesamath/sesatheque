@@ -36,6 +36,8 @@ const {exists, getBaseUrl, getRidComponents} = require('sesatheque-client/src/se
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 const config = require('./config')
+const appConfig = require('../config')
+const myBaseId = appConfig.application.baseId
 
 /**
  * Service qui regroupe les fonctions de transformation de données sur des ressources
@@ -48,7 +50,7 @@ const config = require('./config')
 const $ressourceConverter = {}
 
 module.exports = function (component) {
-  component.service('$ressourceConverter', function (EntityRessource, $ressourceRepository, $routes, $accessControl, $ressourceFetch, $personneRepository) {
+  component.service('$ressourceConverter', function ($ressourceRepository, $routes, $accessControl, $ressourceFetch, $personneRepository) {
     /**
      * Ajoute des relations à une ressource en vérifiant que ce sont des tableau de 2 éléments
      * dont le 1er est un id de relation valide
@@ -258,6 +260,56 @@ module.exports = function (component) {
         // en cas d'erreur dans le flux on envoie quand même la ressource en l'état
         log.error(`erreur dans la recherche des références externes de la ressource ${ressource.oid}`, error)
         next(error, ressource)
+      })
+    }
+
+    /**
+     * Helper de GET /ressource/modifier/:oid et /api/ressource/:oid/forkAlias
+     * pour transformer un alias en ressource autonome (quand on édite cet alias)
+     * @param {Context} context
+     * @param {Ressource} ressource
+     */
+    $ressourceConverter.forkAlias = function (myPid, ressource, callback) {
+      flow().seq(function () {
+        if (!ressource.aliasOf) throw new Error('Impossible de dupliquer un alias qui n’en est pas un')
+        if (!config.editable[ressource.type]) throw new Error(`Le type de ressource ${ressource.type} n’est pas modifiable`)
+        // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
+        // en faire une vraie ressource (un fork de l'original)
+        $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
+      }).seq(function (ressourceOriginale) {
+        if (!ressourceOriginale) {
+          // ce cas devrait être exclu, juste une assurance
+          log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
+          return callback(null)
+        }
+
+        // on peut forker en partant sur la base de l'alias
+        const forcedProps = {
+          oid: ressource.oid,
+          rid: ressource.rid,
+          origine: myBaseId,
+          idOrigine: ressource.oid,
+          auteurs: [myPid],
+          version: 1
+        }
+        const fork = Object.assign({}, ressourceOriginale, forcedProps)
+        if (ressourceOriginale.auteurs) {
+          if (!fork.auteursParents) fork.auteursParents = []
+          ressourceOriginale.auteurs.forEach(pid => fork.auteursParents.push(pid))
+        } else {
+          log.dataError('ressource sans auteurs')
+        }
+        // c'est plus un alias…
+        delete fork.aliasOf
+        // … mais une ressource liée
+        if (!fork.relations) fork.relations = []
+        fork.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
+        $ressourceRepository.save(fork, this)
+      }).seq(function (forkedRessource) {
+        callback(null, forkedRessource)
+      }).catch(function (error) {
+        log.error(error)
+        callback(error)
       })
     }
 

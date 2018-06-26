@@ -76,8 +76,6 @@ module.exports = function controllersFactory (component) {
      */
     function deleteAndSend (context, id) {
       log.debug('dans cb api deleteRessource ' + id)
-      const pid = $accessControl.getCurrentUserPid(context)
-      if (!pid) return $json.denied(context, 'Vous devez être authentifié pour supprimer une ressource')
       // faut charger la ressource pour vérifier les droits (elle est probablement en cache)
       $ressourceRepository.load(id, function (error, ressource) {
         if (error) return $json.sendError(context, error)
@@ -725,7 +723,9 @@ module.exports = function controllersFactory (component) {
     /**
      * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
      * Retourne {@link reponseRessourceOid}
-     * La route devrait être /api/ressource/clone/:oid, mais c'est comme ça depuis un moment…
+     * La route devrait être /api/ressource/clone/:oid, mais on a déjà une route
+     * qui match 2 arguments après ressource (ressource/:origine/:idOrigine)
+     * donc on utilise l'action en premier
      * @route GET /api/clone/:oid
      */
     controller.get('clone/:oid', function (context) {
@@ -789,17 +789,17 @@ module.exports = function controllersFactory (component) {
      * @route GET /api/externalClone/:baseId/:oid
      */
     controller.get('externalClone/:baseId/:oid', function (context) {
-      const {baseIdOrigine, oid} = context.arguments
-      const rid = `${baseIdOrigine}/${oid}`
+      const {baseId, oid} = context.arguments
+      const rid = `${baseId}/${oid}`
       const myBaseId = config.application.baseId
       const pid = $accessControl.getCurrentUserPid(context)
       flow().seq(function () {
         if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
-        // on accepte de cloner une ressource locale
-        if (baseIdOrigine === myBaseId || config.sesatheques.some(({baseId}) => baseId === baseIdOrigine)) {
+        // on accepte de cloner une ressource locale ou d'une sésathèque connue
+        if (baseId === myBaseId || config.sesatheques.some(({baseId: id}) => id === baseId)) {
           $ressourceFetch.fetchOriginal(rid, this)
         } else {
-          this(new Error(`La sésathèque ${baseIdOrigine} n'est pas déclarée comme source possible de cette sésathèque`))
+          this(new Error(`La sésathèque ${baseId} n'est pas déclarée comme source possible de cette sésathèque`))
         }
       }).seq(function (ressource) {
         log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
@@ -1239,6 +1239,35 @@ module.exports = function controllersFactory (component) {
     })
 
     /**
+     * Fork un alias et retourne la ressource créée (qui conserve l'oid de l'alias)
+     * @route GET /api/forkAlias/:oid
+     */
+    controller.get('forkAlias/:oid', function (context) {
+      const myPid = $accessControl.getCurrentUserPid(context)
+      if (!myPid) return $json.denied(context, 'Vous devez être authentifié pour dupliquer un alias')
+
+      flow()
+        .seq(function () {
+          $ressourceRepository.load(context.arguments.oid, this)
+        })
+        .seq(function (ressource) {
+          if (!ressource) return $json.notFound(context, `La ressource n'existe pas`)
+          if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context, 'Vous n’avez pas de droits suffisants pour dupliquer cette ressource')
+          if (!ressource.aliasOf) $json.sendError(context, 'Cette ressource n’est pas un alias')
+
+          $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
+            if (error) return $json.sendError(context, error)
+            if (!forkedRessource) throw new Error('Une erreur s’est produite pendant la duplication de cet alias (forkAlias ne remonte ni erreur ni ressource')
+            sendRessource(context, null, forkedRessource)
+          })
+        })
+        .catch(function (error) {
+          log.error(error)
+          $json.sendError(context, error)
+        })
+    })
+
+    /**
      * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
      * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
      * @route GET /api/ressource/:origine/:idOrigine
@@ -1254,7 +1283,7 @@ module.exports = function controllersFactory (component) {
 
     /**
      * Delete ressource par oid, retourne {@link reponseDeleted}
-     * @route DEL /api/ressource/:oid
+     * @route DELETE /api/ressource/:oid
      * @param {Integer} oid
      */
     controller.delete('ressource/:oid', function (context) {
