@@ -19,7 +19,8 @@
   </nav>
 </header>
 
-<div id="main" role="document">
+<div id="root" role="document"></div>
+<div>
   {!titre flottant seulement si on a des actions, qui devront alors gérer le clearfix!}
   {?titre}<h1 {?actions}class="fl"{/actions}>{titre}</h1>{/titre}
   {actions|s}
