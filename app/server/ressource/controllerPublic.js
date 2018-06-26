@@ -32,17 +32,8 @@
 'use strict'
 
 const _ = require('lodash')
-const request = require('request')
 const {ensure, linkQs} = require('../tools')
 const config = require('./config')
-
-/**
- * Une callback qui ne fait rien sinon logguer une éventuelle erreur
- * @private
- */
-function logIfError (error) {
-  if (error) log.error(error)
-}
 
 /**
  * Le controleur html des routes /public/ (pages sans authentification)
