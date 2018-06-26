@@ -32,66 +32,35 @@
 'use strict'
 
 // Composant de gestion des ressources
-var ressourceComponent = lassi.component('ressource')
+const ressourceComponent = lassi.component('ressource')
 
-ressourceComponent.entity('EntityExternalRef', function () {
-  require('./EntityExternalRef')(this)
-})
-
+require('./EntityExternalRef')(ressourceComponent)
 require('./EntityArchive')(ressourceComponent)
+require('./EntityRessource')(ressourceComponent)
 
-ressourceComponent.entity('EntityRessource', function () {
-  require('./EntityRessource')(this)
-})
-
-ressourceComponent.service('$cacheRessource', function ($cache, $settings, EntityRessource) {
-  return require('./serviceCacheRessource')($cache, $settings, EntityRessource)
-})
-
-ressourceComponent.service('$ressourceRemote', function () {
-  return require('./serviceRessourceRemote')()
-})
-
-ressourceComponent.service('$routes', function ($accessControl) {
-  return require('./serviceRoutes')($accessControl)
-})
-
+require('./serviceCacheRessource')(ressourceComponent)
+require('./serviceRessourceRemote')(ressourceComponent)
+require('./serviceRoutes')(ressourceComponent)
 require('./serviceRessourceRepository')(ressourceComponent)
-
-ressourceComponent.service('$ressourceFetch', function ($cache, $ressourceRepository) {
-  return require('./serviceRessourceFetch')($cache, $ressourceRepository)
-})
-
-ressourceComponent.service('$ressourceControl', function (EntityRessource) {
-  return require('./serviceRessourceControl')(EntityRessource)
-})
+require('./serviceRessourceFetch')(ressourceComponent)
+require('./serviceRessourceControl')(ressourceComponent)
 
 require('./serviceRessourceConverter')(ressourceComponent)
 require('./serviceRessourcePage')(ressourceComponent)
 
 // les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) { // jshint ignore:line
-  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) // jshint ignore:line
-})
-
+require('./controllerRessource')(ressourceComponent)
 // un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl) {
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl)
-})
-
+require('./controllerPublic')(ressourceComponent)
 // l'api json
 require('./controllerApi')(ressourceComponent)
 
 // import calculatice
-ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) { // jshint ignore:line
-  require('./controllerImportEc')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes)
-})
+require('./controllerImportEc')(ressourceComponent)
 
 // En dev on ajoute des routes de debug
 if (!global.isProd) {
-  ressourceComponent.controller('debug/ressource', function ($ressourceRepository, EntityRessource) {
-    require('./controllerDebug')(this, $ressourceRepository, EntityRessource)
-  })
+  require('./controllerDebug')(ressourceComponent)
 }
 
 // settings
