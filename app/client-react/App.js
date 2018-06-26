@@ -2,6 +2,7 @@ import React, {Fragment} from 'react'
 import {Provider} from 'react-redux'
 import {Route, BrowserRouter, Switch} from 'react-router-dom'
 import Header from './components/Header'
+import Footer from './components/Footer'
 import Description from './components/Description'
 import Preview from './components/Preview'
 import ResourceForm from './components/ResourceForm'
@@ -24,6 +25,7 @@ const App = () => (
             <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />
           </Switch>
         </div>
+        <Footer />
       </Fragment>
     </BrowserRouter>
   </Provider>
