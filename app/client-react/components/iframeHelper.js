@@ -11,7 +11,7 @@ const iframeHelper = (WrappedComponent) => {
       }
     }
 
-    onLoadCb (syncFormStore) {
+    onLoadCb (updateStoreFromEditor) {
       return (error, getParametres) => {
         if (error) {
           return this.props.notify({
@@ -22,7 +22,7 @@ const iframeHelper = (WrappedComponent) => {
         this.setState({
           getParametres
         })
-        this.props.syncFormStoreRegister(syncFormStore)
+        this.props.setUpdateStoreFromEditor(updateStoreFromEditor)
       }
     }
 
@@ -39,7 +39,7 @@ const iframeHelper = (WrappedComponent) => {
 
   IframeHelper.propTypes = {
     notify: PropTypes.func,
-    syncFormStoreRegister: PropTypes.func
+    setUpdateStoreFromEditor: PropTypes.func
   }
 
   return addNotifyToProps(IframeHelper)

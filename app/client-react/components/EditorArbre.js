@@ -14,7 +14,7 @@ class EditorArbre extends Component {
   /**
    * Synchronise le contenu de l'éditeur graphique avec redux-form
    */
-  syncFormStore () {
+  updateStoreFromEditor () {
     const arbreExport = this.props.getParametres()
     if (!arbreExport) {
       console.error(new Error('le plugin ne remonte aucune info'))
@@ -40,7 +40,7 @@ class EditorArbre extends Component {
       type: 'arbre'
     }
 
-    iframe.current.contentWindow.load(ressource, window.options, this.props.onLoadCb(this.syncFormStore.bind(this)))
+    iframe.current.contentWindow.load(ressource, window.options, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
   render () {
@@ -50,8 +50,8 @@ class EditorArbre extends Component {
           allowManualEdition
           onLoad={this.onIframeLoaded.bind(this)}
           src={iframeSrc}
-          syncFormStore={this.syncFormStore.bind(this)}
-          syncFormStoreRegister={this.props.syncFormStoreRegister}
+          updateStoreFromEditor={this.updateStoreFromEditor.bind(this)}
+          setUpdateStoreFromEditor={this.props.setUpdateStoreFromEditor}
           name="enfants"
         />
       </fieldset>
@@ -70,7 +70,7 @@ EditorArbre.propTypes = {
   titre: PropTypes.string,
   onLoadCb: PropTypes.func,
   getParametres: PropTypes.func,
-  syncFormStoreRegister: PropTypes.func
+  setUpdateStoreFromEditor: PropTypes.func
 }
 
 export default iframeHelper(formValues({

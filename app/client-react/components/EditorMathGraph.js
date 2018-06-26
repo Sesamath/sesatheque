@@ -34,7 +34,7 @@ class EditorMathGraph extends Component {
   /**
    * Synchronise le contenu de l'éditeur graphique avec redux-form
    */
-  syncFormStore () {
+  updateStoreFromEditor () {
     // getParametres correspond au mtgApp.getResult()
     let parametres = this.props.getParametres()
     // console.log('retour de mtgApp.getResult()', parametres)
@@ -61,7 +61,7 @@ class EditorMathGraph extends Component {
   onIframeLoaded (iframe) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
     const {parametres} = this.props
-    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.syncFormStore.bind(this)))
+    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
   render () {
@@ -119,7 +119,7 @@ EditorMathGraph.propTypes = {
   parametres: PropTypes.object,
   onLoadCb: PropTypes.func,
   getParametres: PropTypes.func,
-  syncFormStoreRegister: PropTypes.func
+  setUpdateStoreFromEditor: PropTypes.func
 }
 
 export default iframeHelper(formValues({parametres: 'parametres'})(EditorMathGraph))

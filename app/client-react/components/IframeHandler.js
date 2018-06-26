@@ -53,8 +53,8 @@ class IframeHandler extends Component {
     })
 
     if (toManual) {
-      this.props.syncFormStore()
-      this.props.syncFormStoreRegister(() => {})
+      this.props.updateStoreFromEditor()
+      this.props.setUpdateStoreFromEditor(() => {})
     }
   }
 
@@ -102,8 +102,8 @@ IframeHandler.propTypes = {
   allowManualEdition: PropTypes.bool,
   src: PropTypes.string,
   onLoad: PropTypes.func,
-  syncFormStoreRegister: PropTypes.func,
-  syncFormStore: PropTypes.func,
+  setUpdateStoreFromEditor: PropTypes.func,
+  updateStoreFromEditor: PropTypes.func,
   name: PropTypes.string
 }
 

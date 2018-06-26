@@ -12,21 +12,27 @@ const resourceSaver = (WrappedComponent) => {
     constructor (props) {
       super(props)
       this.state = {
-        syncFormStore: () => {}
+        updateStoreFromEditor: () => {}
       }
     }
 
-    syncFormStoreRegister (syncFormStore) {
+    /**
+     * Au chargement d'un éditeur en iframe, on lui passe cette fonction
+     * pour qu'il nous donne une fonction à rappeler quand on voudra récupérer ses valeurs.
+     * On met cette fonction dans notre state
+     * @param {function} updateStoreFromEditor
+     */
+    setUpdateStoreFromEditor (updateStoreFromEditor) {
       this.setState({
-        syncFormStore
+        updateStoreFromEditor
       })
     }
 
     render () {
       return (
         <WrappedComponent
-          syncFormStoreRegister={this.syncFormStoreRegister.bind(this)}
-          syncFormStore={this.state.syncFormStore}
+          setUpdateStoreFromEditor={this.setUpdateStoreFromEditor.bind(this)}
+          updateStoreFromEditor={this.state.updateStoreFromEditor}
           {...this.props}
         />
       )

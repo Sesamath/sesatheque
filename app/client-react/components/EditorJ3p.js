@@ -14,7 +14,7 @@ class EditorJ3p extends Component {
   /**
    * Synchronise le contenu de l'éditeur graphique avec redux-form
    */
-  syncFormStore () {
+  updateStoreFromEditor () {
     let parametres = this.props.getParametres()
     if (!parametres) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
@@ -31,7 +31,7 @@ class EditorJ3p extends Component {
    */
   onIframeLoaded (iframe) {
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
-    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.syncFormStore.bind(this)))
+    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
   render () {
@@ -41,8 +41,8 @@ class EditorJ3p extends Component {
           allowManualEdition
           onLoad={this.onIframeLoaded.bind(this)}
           src={iframeSrc}
-          syncFormStore={this.syncFormStore.bind(this)}
-          syncFormStoreRegister={this.props.syncFormStoreRegister}
+          updateStoreFromEditor={this.updateStoreFromEditor.bind(this)}
+          setUpdateStoreFromEditor={this.props.setUpdateStoreFromEditor}
         />
       </fieldset>
     )
@@ -57,7 +57,7 @@ EditorJ3p.propTypes = {
   ]),
   onLoadCb: PropTypes.func,
   getParametres: PropTypes.func,
-  syncFormStoreRegister: PropTypes.func
+  setUpdateStoreFromEditor: PropTypes.func
 }
 
 export default iframeHelper(formValues({parametres: 'parametres'})(EditorJ3p))
