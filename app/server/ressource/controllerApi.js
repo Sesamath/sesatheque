@@ -806,8 +806,8 @@ module.exports = function controllersFactory (component) {
       const pid = $accessControl.getCurrentUserPid(context)
       flow().seq(function () {
         if (!pid) return this(new Error('Vous devez être authentifié pour créer une ressource'))
-        // on accepte de cloner une ressource locale
-        if (baseId === myBaseId || config.sesatheques.some(({id}) => id === baseId)) {
+        // on accepte de cloner une ressource locale ou d'une sésathèque connue
+        if (baseId === myBaseId || config.sesatheques.some(({baseId: id}) => id === baseId)) {
           $ressourceFetch.fetchOriginal(rid, this)
         } else {
           this(new Error(`La sésathèque ${baseId} n'est pas déclarée comme source possible de cette sésathèque`))
