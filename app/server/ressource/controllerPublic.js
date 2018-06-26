@@ -51,7 +51,7 @@ function logIfError (error) {
  * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
  * @controller controllerPublic
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl) {
+module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $accessControl, $ressourceFetch) {
   /**
    * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
    * @private
@@ -229,56 +229,24 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
    * @route GET /public/recherche
    */
   controller.get($routes.get('search'), search)
+
   /**
-   * Un proxy pour les pages externes en http (mais pas https)
+   * Un proxy pour les pages externes en http à partir d'un identifiant de ressource
    * @route GET /public/urlProxy/:oid
    */
   controller.get('urlProxy/:oid', function (context) {
-    function sendRawHtml (body, contentType) {
-      var options = {
-        headers: {
-          'Content-Type': contentType
-        }
-      }
-      context.raw(body, options)
-    }
-
     var oid = context.arguments.oid
 
-    $ressourceRepository.load(oid, function (error, ressource) {
+    $ressourceRepository.load(oid, (error, ressource) => {
       if (error) {
         log.error(error)
         context.plain(error.toString())
       } else if (ressource && ressource.type === 'url') {
-        var url = ressource && ressource.parametres && ressource.parametres.adresse
+        const url = ressource && ressource.parametres && ressource.parametres.adresse
         if (url && url.substr(0, 7) === 'http://') {
-          var cacheKey = 'urlProxy' + oid
-          var page = $cache.get(cacheKey)
-          if (page && page.body) {
-            sendRawHtml(page.body, page.contentType)
-          } else {
-            // faut aller le chercher
-            var options = {
-              url: url,
-              timeout: 5000,
-              gzip: true
-            }
-            request(options, function (error, response, body) {
-              if (!error && response.statusCode === 200) {
-                // on met ça en cache pendant 10min
-                var page = {
-                  body: body,
-                  contentType: response.headers['content-type'] || 'text/html'
-                }
-                $cache.set('urlProxy' + oid, page, 600, logIfError)
-                sendRawHtml(page.body, page.contentType)
-              } else {
-                context.plain('Impossible de récupérer la page ' + url)
-              }
-            })
-          }
+          $ressourceFetch.fetchURL(url, `urlProxy${oid}`, context)
         } else {
-          var msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
+          const msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
           log.error(msg)
           context.plain(msg)
         }

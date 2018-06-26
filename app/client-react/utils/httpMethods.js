@@ -43,6 +43,7 @@ const factory = (method) => {
   }
 }
 
+export const DELETE = factory('DELETE')
 export const GET = factory('GET')
 export const PATCH = factory('PATCH')
 export const POST = factory('POST')
