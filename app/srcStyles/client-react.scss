@@ -1,0 +1,51 @@
+$footer-link-color: #f17045;
+
+#root {
+  table {
+    margin: 10px;
+  }
+
+  .ressource span {
+    &.publie {
+      margin-top: -3px;
+
+    }
+
+    &.restriction {
+      margin-top: -3px;
+    }
+  }
+
+  .ressource {
+    margin-top: 10px;
+
+    section {
+      grid-gap: 0.8rem !important;
+
+      ul {
+        margin: 0;
+      }
+
+      .txtright {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+footer {
+  background-color: #237;
+
+  li {
+    margin: 10px;
+    color: $footer-link-color;
+
+    a {
+      color: $footer-link-color;
+
+      &:hover {
+        color: lighten($footer-link-color, 5%);
+      }
+    }
+  }
+}
