@@ -80,13 +80,13 @@ export const deleteRessource = (oid, success) => (dispatch) => {
  */
 export const forkAlias = (oid) => (dispatch, getState) => {
   return Promise.resolve(dispatch(clearRessource()))
-    .then(() => GET(`/api/ressource/${oid}/forkAlias`))
+    .then(() => GET(`/api/forkAlias/${oid}`))
     .then((ressource) => dispatch(setRessource(ressource)))
     .catch((error) => {
       console.error(error)
       dispatch(addNotification({
         level: 'error',
-        message: `Impossible de forker la ressource : ${error.message}`
+        message: `Impossible d'éditer cette ressource : ${error.message}`
       }))
     })
 }

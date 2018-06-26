@@ -725,7 +725,9 @@ module.exports = function controllersFactory (component) {
     /**
      * Clone une ressource de la bibli courante en mettant l'utilisateur courant contributeur, avec publié et privé
      * Retourne {@link reponseRessourceOid}
-     * La route devrait être /api/ressource/clone/:oid, mais c'est comme ça depuis un moment…
+     * La route devrait être /api/ressource/clone/:oid, mais on a déjà une route
+     * qui match 2 arguments après ressource (ressource/:origine/:idOrigine)
+     * donc on utilise l'action en premier
      * @route GET /api/clone/:oid
      */
     controller.get('clone/:oid', function (context) {
@@ -1240,9 +1242,9 @@ module.exports = function controllersFactory (component) {
 
     /**
      * Fork un alias et retourne la ressource créée (qui conserve l'oid de l'alias)
-     * @route GET /api/ressource/:oid/forkAlias
+     * @route GET /api/forkAlias/:oid
      */
-    controller.get('ressource/:oid/forkAlias', function (context) {
+    controller.get('forkAlias/:oid', function (context) {
       const myPid = $accessControl.getCurrentUserPid(context)
       if (!myPid) return $json.denied(context, 'Vous devez être authentifié pour dupliquer un alias')
 
