@@ -67,6 +67,10 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
     }
   }
 
+  // service $auth qu'on ne peut pas mettre en dépendance car le component auth
+  // est chargé après ce component personne (il utilise ses services)
+  let $auth
+
   /**
    * Create / update une personne (poster un objet ayant les propriétés de {@link Personne})
    * @route POST /api/personne/add
@@ -104,5 +108,31 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
    */
   controller.get('me', function (context) {
     sendJson(context, null, context.session.user)
+  })
+
+  /**
+   * Renvoie le user courant et les liens pour le SSO
+   * Retourne un objet
+   * {
+   *   user: {pid, nom, prenom},
+   *   ssoLinks: link[], // si le sso propose des liens pour gérer son compte ou autre
+   *   logoutUrl: string, // si on est authentifié
+   *   loginLinks: link[]
+   * }
+   * un link est de la forme {href: string, icon: string, value: string}
+   * @route GET /api/personne/current
+   */
+  controller.get('current', function (context) {
+    if (!$auth) $auth = lassi.service('$auth')
+    const response = {}
+    if ($accessControl.isAuthenticated(context)) {
+      const {pid, nom, prenom} = $accessControl.getCurrentUser(context)
+      response.user = {pid, nom, prenom}
+      response.logoutUrl = $auth.getLogoutUrl
+    } else {
+      response.user = null
+      response.loginLinks = $auth.getLoginLinks(context)
+    }
+    sendJson(context, null, response)
   })
 }
