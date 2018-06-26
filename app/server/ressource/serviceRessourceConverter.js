@@ -264,13 +264,13 @@ module.exports = function (component) {
     }
 
     /**
-     * Helper de GET /ressource/modifier/:oid quand on veut éditer un alias
-     * @param context
-     * @param ressource
+     * Helper de GET /ressource/modifier/:oid et /api/ressource/:oid/forkAlias
+     * pour transformer un alias en ressource autonome (quand on édite cet alias)
+     * @param {Context} context
+     * @param {Ressource} ressource
      */
-    $ressourceConverter.forkAlias = function(myPid, ressource, callback) {
-      flow()
-      .seq(function () {
+    $ressourceConverter.forkAlias = function (myPid, ressource, callback) {
+      flow().seq(function () {
         if (!ressource.aliasOf) throw new Error('Impossible de dupliquer un alias qui n’en est pas un')
         if (!config.editable[ressource.type]) throw new Error(`Le type de ressource ${ressource.type} n’est pas modifiable`)
         // on édite un alias, faut récupérer l'ensemble des datas de l'original pour
@@ -316,9 +316,9 @@ module.exports = function (component) {
         fork.relations.push([config.constantes.relations.estVersionDe, ressourceOriginale.rid])
         // @todo mettre auteursParents et ressource.parametres.original de coté pour vérifier au post que ça n'a pas changé
         $ressourceRepository.save(fork, this)
-      })
-      .seq((forkedRessource) => callback(null, forkedRessource))
-      .catch(function (error) {
+      }).seq(function (forkedRessource) {
+        callback(null, forkedRessource)
+      }).catch(function (error) {
         log.error(error)
         callback(error)
       })

@@ -1,16 +1,16 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {forkRessource} from '../actions/ressource'
+import {forkAlias} from '../actions/ressource'
 
 const mapDispatchToProps = {
-  forkRessource
+  forkAlias
 }
 
 const mapStateToProps = ({ressource}) => ({ressource})
 
-const resourceForker = (WrappedComponent) => {
-  class ResourceForker extends Component {
+const aliasForker = (WrappedComponent) => {
+  class AliasForker extends Component {
     componentDidMount () {
       this.ensuresIsForked()
     }
@@ -21,7 +21,7 @@ const resourceForker = (WrappedComponent) => {
 
     ensuresIsForked () {
       if (this.props.ressource.aliasOf) {
-        this.props.forkRessource(this.props.ressource.oid)
+        this.props.forkAlias(this.props.ressource.oid)
       }
     }
 
@@ -34,20 +34,23 @@ const resourceForker = (WrappedComponent) => {
     }
   }
 
-  ResourceForker.propTypes = {
+  AliasForker.propTypes = {
     match: PropTypes.shape({
       params: PropTypes.shape({
         ressourceOid: PropTypes.string
       })
     }),
-    forkRessource: PropTypes.func,
-    ressource: PropTypes.shape({})
+    forkAlias: PropTypes.func,
+    ressource: PropTypes.shape({
+      aliasOf: PropTypes.string,
+      oid: PropTypes.string
+    })
   }
 
   return connect(
     mapStateToProps,
     mapDispatchToProps
-  )(ResourceForker)
+  )(AliasForker)
 }
 
-export default resourceForker
+export default aliasForker

@@ -497,7 +497,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
         }
         context.html(data)
       } else {
-        // si c'est un fork, forkAlias redirigera vers l'édition de la nouvelle ressource
+        // si c'est un alias, on utilise forkAlias et redirige vers l'édition de la nouvelle ressource
         if (ressource.aliasOf) {
           return $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
             if (error) return $ressourcePage.printError(context, error)

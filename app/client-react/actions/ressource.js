@@ -27,13 +27,13 @@ const clearRessource = () => ({
  */
 
 /**
- * Retourne l'actionCreator qui va forker la ressource via un GET sur l'api
- * @param oid
- * @return {function(*, *): Promise<any>}
+ * Retourne l'actionCreator qui va forker l'alias via un GET sur l'api
+ * @param {string} oid
+ * @return {promisedThunk}
  */
-export const forkRessource = (oid) => (dispatch, getState) => {
+export const forkAlias = (oid) => (dispatch, getState) => {
   return Promise.resolve(dispatch(clearRessource()))
-    .then(() => GET(`/api/ressources/${oid}/fork`))
+    .then(() => GET(`/api/ressource/${oid}/forkAlias`))
     .then((ressource) => dispatch(setRessource(ressource)))
     .catch((error) => {
       console.error(error)

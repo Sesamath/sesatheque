@@ -1250,13 +1250,12 @@ module.exports = function controllersFactory (component) {
     })
 
     /**
-     * Fork une ressource et la retourne
-     * @route GET /api/ressource/:oid/fork
+     * Fork un alias et retourne la ressource créée (qui conserve l'oid de l'alias)
+     * @route GET /api/ressource/:oid/forkAlias
      */
-    controller.get('ressources/:oid/fork', function (context) {
-      if (!$accessControl.isAuthenticated(context)) return $json.denied(context, `Vous n'avez pas les droits suffisants pour accéder à cette route`)
+    controller.get('ressource/:oid/forkAlias', function (context) {
       const myPid = $accessControl.getCurrentUserPid(context)
-      if (!myPid) return $json.denied(context, `Vous n'avez pas les droits suffisants pour accéder à cette ressource`)
+      if (!myPid) return $json.denied(context, 'Vous devez être authentifié pour dupliquer un alias')
 
       flow()
         .seq(function () {
@@ -1264,15 +1263,13 @@ module.exports = function controllersFactory (component) {
         })
         .seq(function (ressource) {
           if (!ressource) return $json.notFound(context, `La ressource n'existe pas`)
-          ressource.aliasOf = ressource.rid
-          if (!ressource.aliasOf) throw new Error(`La ressource ne possède pas d'alias`)
-          if ($accessControl.getDeniedMessage('index', context, ressource)) return $json.denied(context, `Vous n'avez pas les droits suffisants pour forker cette ressource`)
+          if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context, 'Vous n’avez pas de droits suffisants pour dupliquer cette ressource')
+          if (!ressource.aliasOf) $json.sendError(context, 'Cette ressource n’est pas un alias')
 
           $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
-            if (error) return $json.sendError(context, `Aucune ressource d'identifiant ${ressource.rid}`)
-            if (!forkedRessource) return $json.sendError(context, `Une erreur s'est produite pendant le fork`)
-
-            sendRessource(context, error, forkedRessource)
+            if (error) return $json.sendError(context, error)
+            if (!forkedRessource) throw new Error('Une erreur s’est produite pendant la duplication de cet alias (forkAlias ne remonte ni erreur ni ressource')
+            sendRessource(context, null, forkedRessource)
           })
         })
         .catch(function (error) {
