@@ -46,15 +46,19 @@ footer {
   @include cartouche();
   background-color: #237;
 
-  li {
-    margin: 10px;
-    color: $footer-link-color;
+  ul {
+    margin: 0;
 
-    a {
+    li {
+      margin: 10px;
       color: $footer-link-color;
 
-      &:hover {
-        color: lighten($footer-link-color, 5%);
+      a {
+        color: $footer-link-color;
+
+        &:hover {
+          color: lighten($footer-link-color, 5%);
+        }
       }
     }
   }
