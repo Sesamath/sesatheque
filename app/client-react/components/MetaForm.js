@@ -2,11 +2,11 @@ import React, {Fragment} from 'react'
 import Classification from './Classification'
 import {Field} from 'redux-form'
 import {listes, labels} from '../../server/ressource/config'
-import InputField from './InputField'
-import ResourceTypesField from './ResourceTypesField'
-import SelectField from './SelectField'
-import SwitchField from './SwitchField'
-import TextareaField from './TextareaField'
+import InputField from './fields/InputField'
+import ResourceTypesField from './fields/ResourceTypesField'
+import SelectField from './fields/SelectField'
+import SwitchField from './fields/SwitchField'
+import TextareaField from './fields/TextareaField'
 
 const MetaForm = () => (
   <Fragment>

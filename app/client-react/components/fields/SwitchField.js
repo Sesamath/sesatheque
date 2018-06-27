@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 
@@ -13,5 +14,10 @@ const SwitchField = ({label, name}) => (
     </label>
   </Fragment>
 )
+
+SwitchField.propTypes = {
+  label: PropTypes.string,
+  name: PropTypes.string
+}
 
 export default SwitchField

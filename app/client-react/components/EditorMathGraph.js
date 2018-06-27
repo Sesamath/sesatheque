@@ -3,7 +3,7 @@ import React, {Fragment, Component} from 'react'
 import {formValues, Field} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from './iframeHelper'
-import IntegerField from './IntegerField'
+import IntegerField from './fields/IntegerField'
 
 /**
  * Url de la page contenant l'éditeur de mathgraph
