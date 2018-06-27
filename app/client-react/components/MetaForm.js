@@ -46,15 +46,14 @@ const MetaForm = () => (
             type="text"
           />
         </label>
-        <label className="select">
+        <label>
           {labels.type}
-          <Field name="type" component="select" props={{ disabled: true }}>
-            {Object.keys(types).map(key => (
-              <Fragment key={key.toString()}>
-                <option value={key}>{types[key]}</option>
-              </Fragment>
-            ))}
-          </Field>
+          <Field
+            name="type"
+            component="input"
+            type="text"
+            props={{ disabled: true }}
+          />
         </label>
         <label className="select">
           {labels.langue}
