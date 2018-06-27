@@ -51,6 +51,4 @@ const mapStateToProps = (state) => ({
   groupesList: (state.personne && state.personne.groupesMembre) || []
 })
 
-export default connect(
-  mapStateToProps
-)(GroupesSelector)
+export default connect(mapStateToProps)(GroupesSelector)
