@@ -70,7 +70,6 @@ const Header = ({
   <header role="banner">
     <NavLink
       to="/"
-      target="_self"
     >
       <img src={logoUrl} width="250" height="48" alt="logo" />
     </NavLink>
