@@ -476,42 +476,25 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       ressource = ressourceBdd
       const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
       // faut laisser passer ceux qui ont la permission index
-      if (deniedMsg && $accessControl.getDeniedMessage('index', context, ressource)) return denied(context, deniedMsg)
+      if (deniedMsg && !$accessControl.hasPermission('index', context, ressource)) return denied(context, deniedMsg)
 
       // sinon on peut afficher le form
       addToken(context, ressource)
-      if (['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
-        let data = {
-          contentBloc: {
-            $view: 'ressource-editor',
-            verbose: (appConfig.application.staging !== 'prod'),
-            isDev: (appConfig.application.staging !== 'prod'),
-            baseId: appConfig.application.baseId,
-            sesatheques: appConfig.sesatheques,
-            ressource: ressource ? sjt.stringify(ressource) : ''
-          },
-          jsBloc: {
-            $view: 'js',
-            jsFiles: ['/react.js']
-          }
+      const data = {
+        contentBloc: {
+          $view: 'ressource-editor',
+          verbose: (appConfig.application.staging !== 'prod'),
+          isDev: (appConfig.application.staging !== 'prod'),
+          baseId: appConfig.application.baseId,
+          sesatheques: appConfig.sesatheques,
+          ressource: ressource ? sjt.stringify(ressource) : ''
+        },
+        jsBloc: {
+          $view: 'js',
+          jsFiles: ['/react.js']
         }
-        context.html(data)
-      } else {
-        // si c'est un alias, on utilise forkAlias et redirige vers l'édition de la nouvelle ressource
-        if (ressource.aliasOf) {
-          return $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
-            if (error) return $ressourcePage.printError(context, error)
-            if (!forkedRessource) return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
-
-            let route = $routes.getAbs('edit', forkedRessource.oid)
-            if (context.get.layout === 'iframe') route = $routes.addParam(route, 'layout', 'iframe')
-            if (context.get.closerId) route = $routes.addParam(route, 'closerId', context.get.closerId)
-            context.redirect(route)
-          })
-        }
-
-        $ressourcePage.printForm(context, null, ressource)
       }
+      context.html(data)
     }).catch(function (error) {
       log.error(error)
       $ressourcePage.printError(context, error)
