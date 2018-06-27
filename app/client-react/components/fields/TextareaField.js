@@ -1,16 +1,14 @@
 import PropTypes from 'prop-types'
-import React, {Fragment} from 'react'
+import React from 'react'
 import {Field} from 'redux-form'
 
 const TextareaField = ({label, name}) => (
-  <Fragment>
-    <label>
-      {label}
-      <Field
-        name={name}
-        component="textarea" />
-    </label>
-  </Fragment>
+  <label>
+    {label}
+    <Field
+      name={name}
+      component="textarea" />
+  </label>
 )
 
 TextareaField.propTypes = {

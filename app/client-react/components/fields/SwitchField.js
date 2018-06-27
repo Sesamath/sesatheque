@@ -1,18 +1,17 @@
 import PropTypes from 'prop-types'
-import React, {Fragment} from 'react'
+import React from 'react'
 import {Field} from 'redux-form'
 
 const SwitchField = ({label, name}) => (
-  <Fragment>
-    <label>
-      {label}
-      <Field
-        name={name}
-        component="input"
-        type="checkbox"
-        className="switch" />
-    </label>
-  </Fragment>
+  <label>
+    {label}
+    <Field
+      name={name}
+      component="input"
+      type="checkbox"
+      className="switch"
+    />
+  </label>
 )
 
 SwitchField.propTypes = {

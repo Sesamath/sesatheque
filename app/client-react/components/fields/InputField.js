@@ -1,19 +1,17 @@
 import PropTypes from 'prop-types'
-import React, {Fragment} from 'react'
+import React from 'react'
 import {Field} from 'redux-form'
 
 const InputField = ({label, name, disabled}) => (
-  <Fragment>
-    <label>
-      {label}
-      <Field
-        name={name}
-        component="input"
-        type="text"
-        props={{ disabled: Boolean(disabled) }}
-        />
-    </label>
-  </Fragment>
+  <label>
+    {label}
+    <Field
+      name={name}
+      component="input"
+      type="text"
+      disabled={disabled}
+    />
+  </label>
 )
 
 InputField.propTypes = {

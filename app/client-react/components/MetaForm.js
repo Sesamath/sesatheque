@@ -1,12 +1,13 @@
 import React, {Fragment} from 'react'
 import Classification from './Classification'
-import {Field} from 'redux-form'
 import {listes, labels} from '../../server/ressource/config'
-import InputField from './fields/InputField'
-import ResourceTypesField from './fields/ResourceTypesField'
-import SelectField from './fields/SelectField'
-import SwitchField from './fields/SwitchField'
-import TextareaField from './fields/TextareaField'
+import {
+  InputField,
+  ResourceTypesField,
+  SelectField,
+  SwitchField,
+  TextareaField
+} from './fields'
 
 const MetaForm = () => (
   <Fragment>
@@ -45,7 +46,7 @@ const MetaForm = () => (
           label={labels.origine}
           name="origine"
           disabled />
-         <InputField
+        <InputField
           label={labels.idOrigine}
           name="idOrigine"
           disabled />
