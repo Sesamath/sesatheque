@@ -34,7 +34,6 @@ const fs = require('fs')
 const path = require('path')
 
 const config = require('../config')
-const version = require('../../../package.json').version
 
 let homeContent
 
