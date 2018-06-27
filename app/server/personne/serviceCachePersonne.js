@@ -31,62 +31,64 @@
 
 'use strict'
 
-module.exports = function ($cache, $settings) {
-  /**
-   * Une callback qui ne fait rien sinon logguer une éventuelle erreur
-   * @private
-   */
-  function logIfError (error) {
-    if (error) log.error(error)
-  }
+module.exports = function (component) {
+  component.service('$cachePersonne', function ($cache, $settings) {
+    /**
+     * Une callback qui ne fait rien sinon logguer une éventuelle erreur
+     * @private
+     */
+    function logIfError (error) {
+      if (error) log.error(error)
+    }
 
-  var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
+    var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
 
-  /**
-   * Service de gestion du cache des personnes, helper de $personneRepository
-   * @service $cachePersonne
-   */
-  var $cachePersonne = {}
+    /**
+     * Service de gestion du cache des personnes, helper de $personneRepository
+     * @service $cachePersonne
+     */
+    var $cachePersonne = {}
 
-  /**
-   * Récupère une personne du cache d'après son id (oid ou pid)
-   * @param {string}          id pid ou oid
-   * @param {personneCallback} next
-   * @memberOf $cachePersonne
-   */
-  $cachePersonne.get = function (id, next) {
-    $cache.get('personne_' + id, next)
-  }
+    /**
+     * Récupère une personne du cache d'après son id (oid ou pid)
+     * @param {string}          id pid ou oid
+     * @param {personneCallback} next
+     * @memberOf $cachePersonne
+     */
+    $cachePersonne.get = function (id, next) {
+      $cache.get('personne_' + id, next)
+    }
 
-  /**
-   * Met un objet personne en cache
-   * @param {Personne}      personne
-   * @param {errorCallback} [next]
-   * @memberOf $cachePersonne
-   */
-  $cachePersonne.set = function (personne, next = logIfError) {
-    // by pid
-    $cache.set('personne_' + personne.pid, personne, ttl, logIfError)
-    // by oid
-    $cache.set('personne_' + personne.oid, personne, ttl, next)
-  }
+    /**
+     * Met un objet personne en cache
+     * @param {Personne}      personne
+     * @param {errorCallback} [next]
+     * @memberOf $cachePersonne
+     */
+    $cachePersonne.set = function (personne, next = logIfError) {
+      // by pid
+      $cache.set('personne_' + personne.pid, personne, ttl, logIfError)
+      // by oid
+      $cache.set('personne_' + personne.oid, personne, ttl, next)
+    }
 
-  /**
-   * Efface un objet personne du cache
-   * @param {Integer}       oid
-   * @param {errorCallback} [next]
-   * @memberOf $cachePersonne
-   */
-  $cachePersonne.delete = function (oid, next = logIfError) {
-    // on efface pas l'oid par origine, le get par origine renverra undefined quand même
-    $cache.delete('personne_' + oid, next)
-  }
+    /**
+     * Efface un objet personne du cache
+     * @param {Integer}       oid
+     * @param {errorCallback} [next]
+     * @memberOf $cachePersonne
+     */
+    $cachePersonne.delete = function (oid, next = logIfError) {
+      // on efface pas l'oid par origine, le get par origine renverra undefined quand même
+      $cache.delete('personne_' + oid, next)
+    }
 
-  // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
-  if ($settings.get('noCache', false)) {
-    log('$cacheRessource désactivé')
-    $cachePersonne.get = function (oid, next) { next() }
-  }
+    // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
+    if ($settings.get('noCache', false)) {
+      log('$cacheRessource désactivé')
+      $cachePersonne.get = function (oid, next) { next() }
+    }
 
-  return $cachePersonne
+    return $cachePersonne
+  })
 }

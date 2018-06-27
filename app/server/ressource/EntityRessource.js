@@ -41,7 +41,7 @@ const config = require('../config')
 const configRessource = require('./config')
 const myBaseId = config.application.baseId
 
-module.exports = function entityRessourceFactory (component) {
+module.exports = function (component) {
   component.entity('EntityRessource', function () {
     const EntityRessource = this
     /**
