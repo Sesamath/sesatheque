@@ -8,16 +8,18 @@ Object.keys(editable).forEach(k => {
   if (editable[k]) types[k] = listes.type[k]
 })
 
-const ResourceTypesField = ({label, disabled = false}) => (
+const ResourceTypesField = ({label, disabled = false, optional = false}) => (
   <SelectField
     label={label}
     values={types}
-    disabled={disabled} />
+    disabled={disabled}
+    optional={optional} />
 )
 
 ResourceTypesField.propTypes = {
   label: PropTypes.string,
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  optional: PropTypes.bool
 }
 
 export default ResourceTypesField
