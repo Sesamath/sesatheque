@@ -32,6 +32,8 @@ Object.keys(editable).forEach(k => {
   if (editable[k]) types[k] = listes.type[k]
 })
 
+const typeToLabel = (type) => listes.type[type]
+
 const parseInteger = (string) => parseInt(string, 10)
 
 const MetaForm = () => (
@@ -53,6 +55,7 @@ const MetaForm = () => (
             component="input"
             type="text"
             props={{ disabled: true }}
+            format={typeToLabel}
           />
         </label>
         <label className="select">
