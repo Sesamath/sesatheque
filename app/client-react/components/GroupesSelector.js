@@ -3,7 +3,7 @@ import React from 'react'
 import SingleCheckboxForGroups from './SingleCheckboxForGroups'
 
 const GroupesSelector = ({
-  groupes,
+  groupesList,
   names,
   ...fields
 }) => (
@@ -18,7 +18,7 @@ const GroupesSelector = ({
         </tr>
       </thead>
       <tbody>
-        {groupes.map((groupeName, index) => (
+        {groupesList.map((groupeName, index) => (
           <tr key={groupeName}>
             <td>{groupeName}</td>
             {names.map((name, index) => {
@@ -41,7 +41,7 @@ const GroupesSelector = ({
 )
 
 GroupesSelector.propTypes = {
-  groupes: PropTypes.arrayOf(PropTypes.string),
+  groupesList: PropTypes.arrayOf(PropTypes.string),
   names: PropTypes.arrayOf(PropTypes.string),
   fields: PropTypes.object
 }

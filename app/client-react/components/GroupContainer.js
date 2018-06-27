@@ -5,13 +5,13 @@ import {Fields} from 'redux-form'
 import AddGroup from './AddGroup'
 import GroupesSelector from './GroupesSelector'
 
-let GroupContainer = ({groupes}) => (
+let GroupContainer = ({groupesList}) => (
   <fieldset>
-    {groupes.length ? (
+    {groupesList.length ? (
       <Fields
         names={['groupes', 'groupesAuteurs']}
         component={GroupesSelector}
-        groupes={groupes}
+        groupesList={groupesList}
       />
     ) : (
       <p>Vous n’êtes membre d’aucun groupe (pour y publier cette ressource ou déléguer des droits de modification)</p>
@@ -21,11 +21,11 @@ let GroupContainer = ({groupes}) => (
 )
 
 GroupContainer.propTypes = {
-  groupes: PropTypes.arrayOf(PropTypes.string)
+  groupesList: PropTypes.arrayOf(PropTypes.string)
 }
 
 const mapStateToProps = (state) => ({
-  groupes: (state.personne && state.personne.groupesMembre) || []
+  groupesList: (state.personne && state.personne.groupesMembre) || []
 })
 
 export default connect(mapStateToProps)(GroupContainer)
