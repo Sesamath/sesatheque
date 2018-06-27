@@ -76,16 +76,20 @@ module.exports = function (mainComponent) {
      */
     this.get('/', function (context) {
       context.layout = 'page'
-      context.html({
-        $metas: {
-          title: config.application.homeTitle
-        },
+      let data = {
         contentBloc: {
-          $view: 'contents',
-          contents: [homeContent]
+          $view: 'ressource-editor',
+          verbose: (config.application.staging !== 'prod'),
+          isDev: (config.application.staging !== 'prod'),
+          baseId: config.application.baseId,
+          sesatheques: config.sesatheques
         },
-        version: version
-      })
+        jsBloc: {
+          $view: 'js',
+          jsFiles: ['/react.js']
+        }
+      }
+      context.html(data)
     })
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,

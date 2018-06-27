@@ -6,7 +6,7 @@ const receiveCurrentUser = personne => ({
 })
 
 export const getCurrentUser = () => dispatch =>
-  GET('/api/personne/me')
+  GET('/api/personne/current')
     .then((user) => {
       dispatch(receiveCurrentUser(user))
     })

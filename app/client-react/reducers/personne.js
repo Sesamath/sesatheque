@@ -2,13 +2,17 @@
 const personneReducer = (state = null, {type, ...payload}) => {
   switch (type) {
     case 'ADD_GROUPES':
-      if (state === null) return state
-      const { groupe } = payload
+      if (state === null || state.user === undefined) return state
+      const {groupe} = payload
+      const {user} = state
 
       return {
         ...state,
-        groupesMembre: [...state.groupesMembre, groupe],
-        groupesSuivis: [...state.groupesSuivis, groupe]
+        user: {
+          ...user,
+          groupesMembre: [...user.groupesMembre, groupe],
+          groupesSuivis: [...user.groupesSuivis, groupe]
+        }
       }
     case 'RECEIVE_CURRENT_USER':
       return payload.personne

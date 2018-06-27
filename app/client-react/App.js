@@ -2,6 +2,7 @@ import React, {Fragment} from 'react'
 import {Provider} from 'react-redux'
 import {Route, BrowserRouter, Switch} from 'react-router-dom'
 import Header from './components/Header'
+import Home from './components/Home'
 import Footer from './components/Footer'
 import Description from './components/Description'
 import Preview from './components/Preview'
@@ -20,6 +21,7 @@ const App = () => (
         <div id="main">
           <Notifications />
           <Switch>
+            <Route exact path="/" component={Home} />
             <Route exact path="/ressource/modifier/:ressourceOid" component={ResourceForm} />
             <Route exact path="/ressource/apercevoir/:ressourceOid" component={Preview} />
             <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />

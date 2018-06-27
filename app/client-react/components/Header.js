@@ -1,9 +1,29 @@
+import queryString from 'query-string'
 import React, {Fragment} from 'react'
 import PropTypes from 'prop-types'
 import {NavLink} from 'react-router-dom'
 import {connect} from 'react-redux'
+import {version} from '../../../package'
 
-const getButtons = (personne) => {
+const logoUrl = `/images/sesatheque.png?${version}`
+
+const setRedirect = (str) => {
+  // redirect to first loaded page
+  // should be improved to use current page
+  const url = new URL(str)
+  const parsedQuery = queryString.parse(url.search)
+  parsedQuery.redirect = document.location.href
+  const url_application = new URL(parsedQuery.url_application)
+  url_application.search = queryString.stringify({
+    redirect: document.location.href
+  })
+  parsedQuery.url_application = url_application.href
+  url.search = queryString.stringify(parsedQuery)
+
+  return url.href
+}
+
+const getButtons = (user) => {
   const buttonSearch = {
     id: 'buttonSearch',
     title: 'Recherche',
@@ -11,7 +31,7 @@ const getButtons = (personne) => {
     icon: 'search',
     target: '_self'
   }
-  if (personne === null) {
+  if (user === null) {
     return [buttonSearch]
   }
 
@@ -27,7 +47,7 @@ const getButtons = (personne) => {
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
-      to: `/ressource/rechercher?auteurs=${personne.pid}`,
+      to: `/ressource/rechercher?auteurs=${user.pid}`,
       icon: 'bookmark',
       target: '_self'
     },
@@ -42,20 +62,24 @@ const getButtons = (personne) => {
 }
 
 const Header = ({
-  personne
+  user,
+  loginLink,
+  logoutUrl,
+  ssoLinks,
+  ...others
 }) => (
   <header id="header" role="banner">
     <NavLink
       to="/"
       target="_self"
     >
-      <img src="/images/sesatheque.png?1.1.31" width="250" height="48" alt="logo" />
+      <img src={logoUrl} width="250" height="48" alt="logo" />
     </NavLink>
     <nav
       className="navigation fr"
       role="navigation"
     >
-      {getButtons(personne).map(({
+      {getButtons(user).map(({
         icon,
         title,
         to,
@@ -72,13 +96,13 @@ const Header = ({
         </NavLink>
       ))}
       <div id="auth">
-        {personne === null ? (
-          <a href="https://ssl.devsesamath.net/sesamath/pages/identification.php?statut_requis=Authentifie&amp;motif=identification_requise&amp;url_application=http%3A%2F%2Flocalhost%3A3001%2Fsesasso%2Fvalidate%3Fredirect%3Dhttp%253A%252F%252Flocalhost%253A3001%252F&amp;url_deconnexion=http%3A%2F%2Flocalhost%3A3001%2Fsesasso%2Fapi%2Flogout&amp;redirect=%2F" title="Connexion">
-
-            <i className="fa fa-sign-in-alt"></i>
-            <span>Connexion</span>
-
-          </a>
+        {user === null ? (
+          loginLink ? (
+            <a href={setRedirect(loginLink.href)} title="Connexion">
+              <i className="fa fa-sign-in-alt"></i>
+              <span>Connexion</span>
+            </a>
+          ) : null
         ) : (
           <Fragment>
             <a href="#">
@@ -86,22 +110,21 @@ const Header = ({
               <i className="fa fa-ellipsis-v"></i>
             </a>
             <ul>
-              <div>{`${personne.prenom} ${personne.nom} (${personne.pid})`}</div>
+              <div>{`${user.prenom} ${user.nom} (${user.pid})`}</div>
+              {ssoLinks ? ssoLinks.map(({
+                href,
+                icon,
+                value
+              }) => (
+                <li key={href}>
+                  <a href={href} title={value}>
+                    <i className={`fa fa-${icon}`}></i>
+                    <span>{value}</span>
+                  </a>
+                </li>
+              )) : null}
               <li>
-                <a href="http://sesaprof.devsesamath.net/pages/prof_gestion_accueil.php" title=" Mon espace Sésamath">
-                  <i className="fa fa-home"></i> <span> Mon espace Sésamath</span>
-                </a>
-              </li>
-              <li>
-                <a href="https://ssl.devsesamath.net/sesamath/pages/prof_gestion_donnees_personnelles.php" title="Informations personnelles">
-
-                  <i className="fa fa-user-secret"></i>
-                  <span>Informations personnelles</span>
-
-                </a>
-              </li>
-              <li>
-                <a href="https://ssl.devsesamath.net/sesamath/pages/identification_deconnexion.php" title="Déconnexion">
+                <a href={logoutUrl} title="Déconnexion">
                   <i className="fa fa-sign-out-alt"></i>
                   <span>Déconnexion</span>
                 </a>
@@ -114,6 +137,13 @@ const Header = ({
   </header>
 )
 
-const mapStateToProps = ({personne}) => ({personne})
+const mapStateToProps = ({personne}) => ({
+  user: personne && personne.user,
+  logoutUrl: personne && personne.logoutUrl,
+  // we suppose that loginLinks is a singleton
+  // todo: add support for several links
+  loginLink: personne && personne.loginLinks && personne.loginLinks[0],
+  ssoLinks: personne && personne.ssoLinks
+})
 
 export default connect(mapStateToProps, null)(Header)

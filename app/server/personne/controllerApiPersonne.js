@@ -126,9 +126,22 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
     if (!$auth) $auth = lassi.service('$auth')
     const response = {}
     if ($accessControl.isAuthenticated(context)) {
-      const {pid, nom, prenom} = $accessControl.getCurrentUser(context)
-      response.user = {pid, nom, prenom}
-      response.logoutUrl = $auth.getLogoutUrl
+      const {
+        pid,
+        nom,
+        prenom,
+        groupesMembre,
+        groupesSuivis
+      } = $accessControl.getCurrentUser(context)
+      response.user = {
+        pid,
+        nom,
+        prenom,
+        groupesMembre,
+        groupesSuivis
+      }
+      response.logoutUrl = $auth.getLogoutUrl(context)
+      response.ssoLinks = $auth.getSsoLinks(context)
     } else {
       response.user = null
       response.loginLinks = $auth.getLoginLinks(context)

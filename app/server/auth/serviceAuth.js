@@ -212,6 +212,8 @@ module.exports = function ($accessControl, $ressourcePage) {
         //   log.error(`client ${client.baseId} sans getLoginUrl`, client)
       }
     })
+
+    return loginLinks
   }
 
   /**
@@ -301,6 +303,7 @@ module.exports = function ($accessControl, $ressourcePage) {
     addClient,
     deferController,
     getAuthBloc,
+    getLogoutUrl,
     getLoginLinks,
     getSsoLinks,
     login,
