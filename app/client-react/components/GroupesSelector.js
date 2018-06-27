@@ -1,10 +1,9 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {connect} from 'react-redux'
 import SingleCheckboxForGroups from './SingleCheckboxForGroups'
 
 const GroupesSelector = ({
-  groupesList,
+  groupes,
   names,
   ...fields
 }) => (
@@ -19,7 +18,7 @@ const GroupesSelector = ({
         </tr>
       </thead>
       <tbody>
-        {groupesList.map((groupeName, index) => (
+        {groupes.map((groupeName, index) => (
           <tr key={groupeName}>
             <td>{groupeName}</td>
             {names.map((name, index) => {
@@ -42,13 +41,9 @@ const GroupesSelector = ({
 )
 
 GroupesSelector.propTypes = {
-  groupesList: PropTypes.arrayOf(PropTypes.string),
+  groupes: PropTypes.arrayOf(PropTypes.string),
   names: PropTypes.arrayOf(PropTypes.string),
   fields: PropTypes.object
 }
 
-const mapStateToProps = (state) => ({
-  groupesList: (state.personne && state.personne.groupesMembre) || []
-})
-
-export default connect(mapStateToProps)(GroupesSelector)
+export default GroupesSelector

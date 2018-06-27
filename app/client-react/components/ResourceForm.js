@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {connect} from 'react-redux'
 import {renameProp} from 'recompose'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
@@ -37,7 +36,6 @@ const typeToData = {
 const ResourceForm = ({
   initialValues: {type, oid: ressourceOid},
   handleSubmit,
-  hasGroups,
   change,
   submitting,
   updateStoreFromEditor,
@@ -57,7 +55,7 @@ const ResourceForm = ({
       <form>
         <MetaForm />
         <hr />
-        {(hasGroups && (<GroupContainer />)) || (<p>Vous n’êtes membre d’aucun groupe (pour y publier cette ressource ou déléguer des droits de modification)</p>)}
+        <GroupContainer />
         <hr />
         <Editor
           change={change}
@@ -85,7 +83,6 @@ const ResourceForm = ({
 ResourceForm.propTypes = {
   initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  hasGroups: PropTypes.bool,
   change: PropTypes.func,
   submitting: PropTypes.bool,
   updateStoreFromEditor: PropTypes.func,
@@ -94,15 +91,10 @@ ResourceForm.propTypes = {
   history: PropTypes.object
 }
 
-const mapStateToProps = (state) => ({
-  hasGroups: state.personne && state.personne.groupesMembre && state.personne.groupesMembre.length
-})
-
 export default flowRight([
   resourceLoader,
   aliasForker,
   resourceSaver,
   renameProp('ressource', 'initialValues'),
-  reduxForm({form: 'ressource'}),
-  connect(mapStateToProps)
+  reduxForm({form: 'ressource'})
 ])(ResourceForm)
