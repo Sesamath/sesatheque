@@ -42,15 +42,10 @@ const display = require('./display')
 module.exports = function edit (ressource, options) {
   if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
   if (!ressource.parametres.fichierjs) throw new Error('Il faut choisir un type d’exercice avant de l’éditer')
-  // on ajoute la cb pour récupérer les options de l'exo calculatice
-  options.loadOptionsCb = function (optionsClc) {
-    ressource.parametres.options = optionsClc
-  }
   // on lance un display ordinaire (c'est lui qui cliquera sur le bouton des options de l'exo
   // s'il a un optionsClcCallback)
   display(ressource, options, function (error) {
     if (error) page.addError(error)
-    const getParametres = () => ressource.parametres
-    if (options.loadEditCb) options.loadEditCb(null, getParametres)
+    // c'est lui qui filera getParametres à onLoadEditorCb
   })
 }
