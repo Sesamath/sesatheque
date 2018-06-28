@@ -168,59 +168,93 @@ module.exports = function display (ressource, options, next) {
             exoLoaded = true
             next()
           }
-          // si l'utilisateur veut récupérer les paramètres, on les lui affiche directement
-          if (typeof options.optionsClcCallback === 'function') {
-            exercice.on('validationOption', null, function (event, optionsClc) {
-              options.optionsClcCallback(optionsClc)
-            })
+          // si l'utilisateur veut récupérer les paramètres, on les affiche directement
+          // (en cliquant sur le bouton de paramétrage à sa place)
+          // et on lui file une fonction pour récupérer une promesse de récupération de ces options
+          if (typeof options.loadOptionsCb === 'function') {
             $exoClc.ready(function () {
               // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
-              let i = 0
+              const maxIterations = 300
+              const delayMs = 10
+              const maxWait = maxIterations * delayMs / 1000
 
-              function delayOptions () {
-                if (i++ < 300) {
-                  setTimeout(function () {
+              new Promise((resolve, reject) => {
+                // clique sur le bouton paramétrage (la roue crantée)
+                function tryClicOptions () {
+                  if (i < maxIterations) {
                     var $button = $('button.parametrer')
                     if ($button.length > 0) {
                       if ($button.length > 1) {
                         log.error("On a plusieurs boutons qui répondent au sélecteur 'button .bouton.parametrer'")
                         $button = $button.first()
                       }
-                      log('on a trouvé le bouton après ' + i * 10 + "ms d'attente")
+                      log(`on a trouvé le bouton options après ${i * delayMs}ms d’attente`)
                       $button.click()
-                      i = 0
-                      delayOptionsValidate()
+                      resolve()
                     } else {
-                      delayOptions()
+                      i++
+                      setTimeout(tryClicOptions, delayMs)
                     }
-                  }, 10)
-                } else {
-                  log.error('Pas trouvé le bouton paramétrer après 5s', $exoClc.html())
+                  } else {
+                    reject(Error(`Pas trouvé le bouton paramétrer après ${maxWait}s`))
+                  }
                 }
-              }
-
-              function delayOptionsValidate () {
-                if (i++ < 300) {
-                  setTimeout(function () {
-                    var $button = $('button.tester-parametre')
+                let i = 0
+                tryClicOptions()
+              }).then(() => new Promise((resolve, reject) => {
+                // récupère puis cache le bouton valider
+                function clicValidate () {
+                  if (i < maxIterations) {
+                    let $button = $('button.tester-parametre')
                     if ($button.length > 0) {
                       if ($button.length > 1) {
                         log.error("On a plusieurs boutons qui répondent au sélecteur 'button.tester-parametre'")
                         $button = $button.first()
                       }
-                      log('on a trouvé le bouton valider après ' + i * 10 + "ms d'attente")
+                      log(`on a trouvé le bouton valider après ${i * delayMs}ms d’attente`)
                       $button.hide()
+                      resolve($button)
                     } else {
-                      delayOptionsValidate()
+                      i++
+                      setTimeout(clicValidate, 10)
                     }
-                  }, 10)
-                } else {
-                  log.error('Pas trouvé le bouton paramétrer après 5s', $exoClc.html())
+                  } else {
+                    reject(Error(`Pas trouvé le bouton Valider après ${maxWait}s`))
+                  }
                 }
-                // $('button.tester-parametre').hide()
-              }
-
-              delayOptions()
+                let i = 0
+                clicValidate()
+              })).then(($buttonValidate) => {
+                // clc a un event pour la validation des options, mais
+                // on veut pas ajouter un nouveau listener à chaque fois qu'on nous demande
+                // les paramètres, donc on en met un seul avec une liste d'attente
+                const listeners = []
+                exercice.on('validationOption', null, function (event, options) {
+                  if (options) {
+                    ressource.parametres.options = options
+                    // si y'a des listener on les appelle (et les vire)
+                    while (listeners.length) listeners.pop()(ressource.parametres)
+                  } else {
+                    options.loadOptionsCb(Error('La validation des options calcul@tice ne renvoie rien'))
+                  }
+                })
+                // on crée une fct pour récupérer ces paramètres
+                const getParametres = () => new Promise((resolve, reject) => {
+                  const timerId = setTimeout(
+                    () => reject(Error('Impossible de récupérer les options de cet exercice calcul@tice')),
+                    1000
+                  )
+                  // on ajoute un listener
+                  listeners.push((parametres) => {
+                    clearTimeout(timerId)
+                    resolve(parametres)
+                  })
+                  // et on réclame
+                  $buttonValidate.click()
+                })
+                // que l'on file à celui qui la voulait
+                options.loadOptionsCb(null, getParametres)
+              }).catch(options.loadOptionsCb)
             })
           }
         })
@@ -231,7 +265,7 @@ module.exports = function display (ressource, options, next) {
   try {
     // vérifs de base
     if (!options.container) throw new Error('Paramétrage manquant (conteneur)')
-    if (!ressource.parametres.fichierjs) throw new Error("Paramétrage manquant (nom de l'exercice à lancer)")
+    if (!ressource.parametres.fichierjs) throw new Error('Paramétrage manquant (type d’exercice à lancer)')
     if (typeof head !== 'undefined' && head.js) displayEcjs()
     else page.loadAsync('head', displayEcjs)
   } catch (error) {

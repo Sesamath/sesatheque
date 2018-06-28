@@ -1,28 +1,107 @@
 import PropTypes from 'prop-types'
-import React, {Component} from 'react'
-import {formValues} from 'redux-form'
+import React, {Component, Fragment} from 'react'
+import {Field, formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from './iframeHelper'
 
 /**
- * Url de la page contenant l'éditeur de graphe J3P
+ * Url de la page contenant l'éditeur ecjs
  * @type {string}
  */
 const iframeSrc = require('../../client/plugins/ecjs/edit.html')
 
+// récupérer cette liste avec (sur le site ressources)
+// ls -1 replication_calculatice/javascript/exercices/|sed -re "/complement|lang/d; s/(.*)/'\1',/"
+const typesEcjs = [
+  'addiclic',
+  'approximationsomme',
+  'araignee',
+  'balance',
+  'balanceadd',
+  'basketmath',
+  'basketmath2p',
+  'basketmath3p',
+  'bocal',
+  'bouleetboule',
+  'bouleetbouledecimaux',
+  'calculakartC3_4',
+  'calculakartCE1',
+  'calculakartCP',
+  'calculdiffere',
+  'carre',
+  'cartes',
+  'cartesCE2',
+  'cartesCM1',
+  'cartesCM2',
+  'chateaufort',
+  'chocolat1',
+  'chocolat2',
+  'chutedenombres',
+  'chutedenombresmulti',
+  'cibles',
+  'croupier',
+  'decollage',
+  'decoupage',
+  'diviclic',
+  'elephants',
+  'estimation',
+  'fleurs',
+  'frise',
+  'grenouille',
+  'grue',
+  'horloge',
+  'jackpot',
+  'lacaisse',
+  'lebanquier',
+  'lesbornes',
+  'marathon',
+  'marathonCE1',
+  'mbrique',
+  'memory',
+  'mistral',
+  'multiclic',
+  'nombresympathique',
+  'numbercrushdecimaux',
+  'oiseauaddition',
+  'oiseaumultiplication',
+  'operationsatrous',
+  'pacman',
+  'planeteaddition',
+  'pokeplus',
+  'quadricalc',
+  'quadricalcinv',
+  'recette',
+  'rectangle',
+  'sommeenligne',
+  'supermarche',
+  'surfacebleue',
+  'tableattaque',
+  'tapis',
+  'tapisdecarte',
+  'ticketdecaisse',
+  'toise',
+  'train',
+  'viaduc'
+]
+
 class EditorEcjs extends Component {
   /**
    * Synchronise le contenu de l'éditeur graphique avec redux-form
+   * (appel du getParametres de l'éditeur puis props.change)
    */
   updateStoreFromEditor () {
-    let parametres = this.props.getParametres()
-    if (!parametres) {
+    let parametresPending = this.props.getParametres()
+    if (!parametresPending) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
       console.error(new Error('sesaeditgraphe ne remonte aucune info'))
       return
     }
-
-    this.props.change('parametres', parametres)
+    // avec ecjs c'est une Promise
+    parametresPending.then((parametres) => {
+      this.props.change('parametres', parametres)
+    }).catch((error) => {
+      console.error(error)
+    })
   }
 
   /**
@@ -36,6 +115,22 @@ class EditorEcjs extends Component {
   }
 
   render () {
+    // si on a rien, faut d'abord choisir le type d'exo
+    if (!this.props.parametres.fichierjs) {
+      return (
+        <label className="select">
+          Type d’exercice
+          <Field name="parametres[fichierjs]" component="select">
+            {typesEcjs.map(typeEcjs => (
+              <Fragment key={typeEcjs}>
+                <option value={typeEcjs}>{typeEcjs}</option>
+              </Fragment>
+            ))}
+          </Field>
+        </label>
+      )
+    }
+    // si y'a un type d'exo on peut afficher les options calculatice dans l'iframe
     return (
       <fieldset>
         <IframeHandler

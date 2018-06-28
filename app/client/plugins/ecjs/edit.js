@@ -30,62 +30,8 @@
  */
 'use strict'
 
-const dom = require('sesajstools/dom')
-
-const page = require('../../page/index')
+const page = require('../../page')
 const display = require('./display')
-
-// récupérer cette liste avec (sur le site ressources)
-// ls -1 replication_calculatice/javascript/exercices/|tr '\n' ','|sed -e 's/,/', '/g'
-// et virer complement et lang
-const typesEc = ['addiclic',
-  'approximationsomme',
-  'balance',
-  'balanceadd',
-  'basketmath',
-  'basketmath2p',
-  'basketmath3p',
-  'bocal',
-  'bouleetboule',
-  'bouleetbouledecimaux',
-  'calculdiffere',
-  'carre',
-  'chocolat1',
-  'chocolat2',
-  'cibles',
-  'complement',
-  'croupier',
-  'decollage',
-  'diviclic',
-  'elephants',
-  'estimation',
-  'frise',
-  'grenouille',
-  'lacaisse',
-  'lebanquier',
-  'lesbornes',
-  'mbrique',
-  'memory',
-  'mistral',
-  'multiclic',
-  'nombresympathique',
-  'numbercrushdecimaux',
-  'oiseauaddition',
-  'oiseaumultiplication',
-  'operationsatrous',
-  'planeteaddition',
-  'quadricalc',
-  'quadricalcinv',
-  'recette',
-  'rectangle',
-  'sommeenligne',
-  'supermarche',
-  'surfacebleue',
-  'tableattaque',
-  'tapisdecarte',
-  'train',
-  'viaduc'
-]
 
 /**
  * Édite une ressource ecjs
@@ -94,50 +40,17 @@ const typesEc = ['addiclic',
  * @param options
  */
 module.exports = function edit (ressource, options) {
-  require.ensure(['jquery'], function (require) {
-    // ajoute le select dans le dom
-    function addSelect (ressource, options) {
-      // on ajoute select et un nouveau container
-      const select = dom.addElement(options.container, 'select')
-      dom.addElement(select, 'option', {id: 'selectFichier', value: 0}, "Choisir un type d'exercice")
-      typesEc.forEach(function (typeEc) {
-        dom.addElement(select, 'option', {value: typeEc}, typeEc)
-      })
-      const $select = $(select)
-      $select.on('change', function () {
-        const sExo = $select.val()
-        if (sExo) {
-          if (!ressource.parametres) ressource.parametres = {}
-          ressource.parametres.fichierjs = sExo
-          $select.hide()
-          displayEcOptions(ressource, options)
-        }
-      })
-      // et le nouveau container après ce select
-      const divClc = dom.addElement(options.container, 'div')
-      options.container = divClc
-    }
-
-    // affiche calculatice en mode paramétrage
-    function displayEcOptions (ressource, options) {
-      options.optionsClcCallback = function (optionsClc) {
-        ressource.parametres.options = optionsClc
-      }
-      // on lance un display ordinaire (c'est lui qui clique sur le bouton des options de l'exo
-      // s'il a un optionsClcCallback
-      display(ressource, options, function (error) {
-        if (error) page.addError(error)
-        const getParametres = () => ressource.parametres
-        if (options.loadEditCb) options.loadEditCb(null, getParametres)
-      })
-    }
-
-    const $ = require('jquery')
-    if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
-    if (ressource.parametres.fichierjs) {
-      displayEcOptions(ressource, options)
-    } else {
-      addSelect(ressource, options)
-    }
+  if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
+  if (!ressource.parametres.fichierjs) throw new Error('Il faut choisir un type d’exercice avant de l’éditer')
+  // on ajoute la cb pour récupérer les options de l'exo calculatice
+  options.loadOptionsCb = function (optionsClc) {
+    ressource.parametres.options = optionsClc
+  }
+  // on lance un display ordinaire (c'est lui qui cliquera sur le bouton des options de l'exo
+  // s'il a un optionsClcCallback)
+  display(ressource, options, function (error) {
+    if (error) page.addError(error)
+    const getParametres = () => ressource.parametres
+    if (options.loadEditCb) options.loadEditCb(null, getParametres)
   })
 }

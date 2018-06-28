@@ -2,6 +2,11 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import addNotifyToProps from '../utils/addNotifyToProps'
 
+/**
+ * hoc qui ajoute les props onLoadCb et getParametres à WrappedComponent
+ * (avec )
+ * @param WrappedComponent
+ */
 const iframeHelper = (WrappedComponent) => {
   class IframeHelper extends Component {
     constructor (props) {
@@ -11,6 +16,11 @@ const iframeHelper = (WrappedComponent) => {
       }
     }
 
+    /**
+     * Callback appelée par
+     * @param updateStoreFromEditor
+     * @return {Function}
+     */
     onLoadCb (updateStoreFromEditor) {
       return (error, getParametres) => {
         if (error) {
